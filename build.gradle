@@ -1,0 +1,52 @@
+ext.buildSystemDir = file("${System.env.BUILD_SYSTEM_ROOT}/${buildSystemVersion}")
+ext.gradleScriptDir =  new File(ext.buildSystemDir, 'gradle')
+apply from: "${gradleScriptDir}/project.gradle"
+apply from: "${gradleScriptDir}/release.gradle"
+apply from: "${gradleScriptDir}/jacoco.gradle"
+
+def testProjectPostfix = '-tests'
+def nonTestSubprojects = subprojects.findAll { !it.name.endsWith(testProjectPostfix) }
+
+configure(subprojects.findAll { it.name.endsWith(testProjectPostfix) }) {
+    apply from: "${buildSystemDir}/vividus-test-subproject.gradle"
+}
+
+configure(nonTestSubprojects) {
+    apply from: "${buildSystemDir}/vividus-library-subproject.gradle"
+}
+
+task jacocoAggregatedReport(type: JacocoReport) {
+    nonTestSubprojects.each {
+      executionData it.tasks.withType(Test)
+   }
+    sourceDirectories.from(subprojects.sourceSets.main.java.sourceDirectories)
+    classDirectories.from(subprojects.sourceSets.main.output)
+}
+
+project.description = 'Vividus'
+
+ext {
+    versions = [
+        allure:                 '2.12.1',
+        aspectj:                '1.9.4',
+        commonsIo:              '2.6',
+        commonsLang3:           '3.9',
+        commonsText:            '1.6',
+        commonsCollections4:    '4.3',
+        groovy:                 '2.5.7',
+        guava:                  '28.0-jre',
+        hamcrest:               '2.1',
+        httpclient:             '4.5.9',
+        javaxInject:            '1',
+        junit4:                 '4.12',
+        slf4j:                  '2.0.0-alpha0',
+        spring:                 '5.1.9.RELEASE',
+        tika:                   '1.21',
+
+        junit:                  '5.5.1',
+        junit4Dataprovider:     '2.4',
+        mockito:                '3.0.0',
+        powermock:              '2.0.2',
+        slf4jTest:              '2.1.1'
+    ]
+}

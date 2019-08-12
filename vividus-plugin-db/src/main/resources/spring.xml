@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+       default-lazy-init="true">
+
+    <bean id="databaseSteps" class="org.vividus.bdd.steps.db.DatabaseSteps">
+        <property name="dataSources">
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="db.connection." />
+                <constructor-arg value="org.springframework.jdbc.datasource.DriverManagerDataSource" />
+            </bean>
+        </property>
+        <property name="dbQueryTimeout" value="${db.query-timeout}" />
+        <property name="hashFunction">
+            <bean class="com.google.common.hash.Hashing" factory-method="murmur3_128"/>
+        </property>
+        <property name="rowsCollector" value="${db.rows-collector}" />
+        <property name="diffLimit" value="${db.diff-limit}" />
+    </bean>
+
+    <util:list id="stepBeanNames-DB">
+        <value>databaseSteps</value>
+    </util:list>
+</beans>

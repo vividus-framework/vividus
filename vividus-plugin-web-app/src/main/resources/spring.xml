@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+        default-lazy-init="true" profile="web">
+
+    <context:component-scan base-package="org.vividus.bdd.variable.ui.web"/>
+    <context:component-scan base-package="org.vividus.jackson.databind.ui.web"/>
+    <context:component-scan base-package="org.vividus.bdd.converter.ui.web" />
+
+    <bean id="siteMapParser" class="org.vividus.sitemap.SiteMapParser">
+        <property name="httpClient">
+            <bean class="org.vividus.http.client.HttpClient"
+                  factory-bean="httpClientFactory"
+                  factory-method="buildHttpClient">
+                <constructor-arg>
+                    <bean parent="httpClientConfig">
+                        <property name="headersMap">
+                            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByFamily">
+                                <constructor-arg value="sitemap.parser.http.header" />
+                            </bean>
+                        </property>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="siteUrl" value="${sitemap.parser.site-url}" />
+        <property name="baseUrl" value="${sitemap.parser.base-url}" />
+        <property name="followRedirects" value="${sitemap.parser.follow-redirects}" />
+    </bean>
+
+    <bean id="proxy" class="org.vividus.proxy.ThreadedProxy" />
+
+    <bean id="proxyServerFactory" class="org.vividus.proxy.ProxyServerFactory">
+        <property name="trustAllServers" value="${proxy.trust-all-servers}" />
+        <property name="advancedHostResolver">
+            <bean class="org.vividus.proxy.dns.HostNameResolver">
+                <property name="dnsMappingStorage" ref="localDnsStorage" />
+            </bean>
+        </property>
+        <property name="captureTypes" value="${proxy.capture-types}"/>
+    </bean>
+
+    <bean id="timeoutConfigurer" class="org.vividus.selenium.TimeoutConfigurer">
+        <property name="pageLoadTimeout" value="${selenium.timeout.page-load-timeout}" />
+        <property name="pageLoadTimeoutTimeUnit" value="${selenium.timeout.page-load-timeout-unit}" />
+        <property name="asyncScriptTimeout" value="${selenium.timeout.async-script-timeout}" />
+        <property name="asyncScriptTimeoutTimeUnit" value="${selenium.timeout.async-script-timeout-unit}" />
+    </bean>
+
+    <bean id="webDriverFactory" class="org.vividus.selenium.WebDriverFactory">
+        <property name="webDriverType" value="${selenium.browser}" />
+        <property name="remoteDriverUrl" value="${selenium.grid.url}" />
+        <property name="jsonUtils" ref="jsonUtils-LowerCamelCase" />
+    </bean>
+
+    <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory" />
+
+    <bean id="screenshotFileNameGenerator" class="org.vividus.selenium.screenshot.ScreenshotFileNameGenerator" />
+
+    <bean id="screenshotTaker" class="org.vividus.selenium.screenshot.ScreenshotTaker">
+        <property name="screenshotDirectory">
+            <bean class="java.io.File">
+                <constructor-arg value="${selenium.screenshot.directory}" />
+            </bean>
+        </property>
+        <property name="fullPageScreenshots" value="${selenium.screenshot.full-page}" />
+        <property name="indent" value="${selenium.screenshot.indent}" />
+        <property name="highlighterType" value="${selenium.screenshot.highlighter}" />
+        <property name="shootingStrategy" value="${selenium.screenshot.shooting-strategy}" />
+        <property name="ashotConfigurations">
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="selenium.screenshot.strategy." />
+                <constructor-arg value="org.vividus.selenium.screenshot.ScreenshotConfiguration"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="screenshotDebugger" class="org.vividus.selenium.screenshot.FilesystemScreenshotDebugger">
+        <property name="debugScreenshotsLocation" value="${selenium.screenshot.debug-directory}" />
+    </bean>
+
+    <bean id="ashotFactory" class="org.vividus.selenium.screenshot.AshotFactory" init-method="init">
+        <property name="screenshotShootingStrategy" value="${selenium.screenshot.strategy}" />
+    </bean>
+
+    <bean id="scrollbarHandler" class="org.vividus.selenium.screenshot.ScrollbarHandler">
+        <property name="webDriverManager" ref="webDriverManager" />
+        <property name="webDriverProvider" ref="webDriverProvider" />
+    </bean>
+
+    <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager">
+        <property name="nativeApp" value="${mobile-native-app}" />
+        <property name="devicePixelRatio" value="${selenium.device-pixel-ratio}" />
+    </bean>
+
+    <bean id="clickActions" class="org.vividus.ui.web.action.ClickActions">
+        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
+    </bean>
+
+    <bean id="fieldActions" class="org.vividus.ui.web.action.FieldActions" />
+    <bean id="javascriptActions" class="org.vividus.ui.web.action.JavascriptActions" />
+    <bean id="mouseActions" class="org.vividus.ui.web.action.MouseActions" />
+    <bean id="navigateActions" class="org.vividus.ui.web.action.NavigateActions" />
+    <bean id="videoPlayerActions" class="org.vividus.ui.web.action.VideoPlayerActions" />
+    <bean id="webElementActions" class="org.vividus.ui.web.action.WebElementActions" />
+    <bean id="windowsActions" class="org.vividus.ui.web.action.WindowsActions" />
+
+    <bean id="waitActions" class="org.vividus.ui.web.action.WaitActions">
+        <property name="pageOpenTimeout"  value="${web.wait.page-open-timeout}" />
+        <property name="windowOpenTimeout"  value="${web.wait.window-open-timeout}" />
+        <property name="pageStartsToLoadTimeout" value="${web.wait.page-starts-to-load-timeout}" />
+    </bean>
+
+    <bean id="alertActions" class="org.vividus.ui.web.action.AlertActions">
+        <property name="waitForAlertTimeout" value="${web.alert.wait-for-alert-timeout}" />
+    </bean>
+
+    <bean id="waitFactory" class="org.vividus.ui.web.action.WaitFactory">
+        <property name="timeout" value="${web.wait.timeout}" />
+        <property name="pollingPeriod" value="${web.wait.polling-period}" />
+    </bean>
+
+    <bean id="cookieManager" class="org.vividus.ui.web.action.CookieManager" />
+
+    <bean id="webApplicationConfiguration" class="org.vividus.ui.web.configuration.WebApplicationConfiguration">
+        <constructor-arg value="${web-application.main-page-url}" />
+        <constructor-arg value="${web-application.authentication-mode}" />
+        <property name="mobileScreenResolutionWidthThreshold" value="${web-application.phone-resolution-width-threshold}" />
+        <property name="tabletScreenResolutionWidthThreshold" value="${web-application.tablet-resolution-width-threshold}" />
+        <property name="applicationEnvironmentType" value="${web-application.environment-type}" />
+        <property name="javascriptActions" ref="javascriptActions" />
+    </bean>
+
+    <bean id="runtimeEnvironment" class="org.vividus.ui.web.RuntimeEnvironment" />
+    <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
+
+    <bean id="searchActions" class="org.vividus.ui.web.action.SearchActions">
+        <property name="elementActions" ref="elementActions" />
+    </bean>
+
+    <bean id="localStorageProvider" class="org.vividus.ui.web.action.storage.LocalStorageProvider" />
+    <bean id="localStorageManager" class="org.vividus.ui.web.action.storage.LocalStorageManager" />
+
+    <bean id="elementActions" class="org.springframework.beans.factory.config.MapFactoryBean">
+        <property name="sourceMap">
+            <map key-type="org.vividus.ui.web.action.search.IActionAttributeType"
+                 value-type="org.vividus.ui.web.action.search.IElementAction">
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).LINK_TEXT}"
+                       value-ref="linkTextSearch" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).LINK_URL_PART}"
+                       value-ref="linkUrlPartSearch" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).LINK_URL}"
+                       value-ref="linkUrlSearch" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).CASE_SENSITIVE_TEXT}"
+                       value-ref="caseSensitiveTextSearch" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).TOOLTIP}"
+                       value-ref="tooltipFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).DEFAULT}"
+                       value-ref="defaultSearch" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).STATE}"
+                       value-ref="stateFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).BUTTON_NAME}"
+                       value-ref="buttonNameSearch" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).TEXT_PART}"
+                       value-ref="textPartFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).PLACEHOLDER}"
+                       value-ref="placeholderFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).VALIDATION_ICON_SOURCE}"
+                       value-ref="validationIconSourceFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).IMAGE_SRC_PART}"
+                       value-ref="imageWithSourcePartFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).RELATIVE_TO_PARENT_WIDTH}"
+                       value-ref="relativeToParentWidthFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).CLASS_ATTRIBUTE_PART}"
+                       value-ref="classAttributePartFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).CHECKBOX_NAME}"
+                       value-ref="checkboxNameSearch" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).FIELD_TEXT}"
+                       value-ref="fieldTextFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).FIELD_TEXT_PART}"
+                       value-ref="fieldTextPartFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).DROP_DOWN_STATE}"
+                       value-ref="dropDownStateFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).DROP_DOWN_TEXT}"
+                       value-ref="dropDownTextFilter" />
+                <entry key="#{T(org.vividus.ui.web.action.search.ActionAttributeType).ELEMENT_NAME}"
+                       value-ref="elementNameSearch" />
+            </map>
+        </property>
+    </bean>
+
+    <bean id="abstractElementSearchAction" class="org.vividus.ui.web.action.search.AbstractElementSearchAction"
+          abstract="true">
+        <property name="waitForElementTimeout" value="${web.search.wait-for-element-timeout}" />
+    </bean>
+
+    <bean id="abstractStateFilter" class="org.vividus.ui.web.action.search.AbstractStateFilter"
+          abstract="true" />
+
+    <bean id="linkTextSearch" class="org.vividus.ui.web.action.search.LinkTextSearch"
+          parent="abstractElementSearchAction" />
+    <bean id="linkUrlPartSearch" class="org.vividus.ui.web.action.search.LinkUrlPartSearch"
+          parent="abstractElementSearchAction">
+        <property name="caseSensitiveSearch" value="${web.search.link-url.case-sensitive}" />
+    </bean>
+
+    <bean id="caseSensitiveTextSearch" class="org.vividus.ui.web.action.search.CaseSensitiveTextSearch"
+          parent="abstractElementSearchAction" />
+    <bean id="tooltipFilter" class="org.vividus.ui.web.action.search.TooltipFilter"
+          parent="abstractElementSearchAction" />
+    <bean id="defaultSearch" class="org.vividus.ui.web.action.search.DefaultSearch"
+          parent="abstractElementSearchAction" />
+    <bean id="stateFilter" class="org.vividus.ui.web.action.search.StateFilter"
+          parent="abstractStateFilter" />
+    <bean id="relativeToParentWidthFilter" class="org.vividus.ui.web.action.search.RelativeToParentWidthFilter"
+          parent="abstractElementSearchAction"/>
+    <bean id="textPartFilter" class="org.vividus.ui.web.action.search.TextPartFilter"
+          parent="abstractElementSearchAction" />
+    <bean id="validationIconSourceFilter" class="org.vividus.ui.web.action.search.ValidationIconSourceFilter"
+          parent="abstractElementSearchAction" />
+    <bean id="placeholderFilter" class="org.vividus.ui.web.action.search.PlaceholderFilter"
+          parent="abstractElementSearchAction" />
+    <bean id="buttonNameSearch" class="org.vividus.ui.web.action.search.ButtonNameSearch"
+          parent="abstractElementSearchAction" />
+    <bean id="checkboxNameSearch" class="org.vividus.ui.web.action.search.CheckboxNameSearch"
+          parent="abstractElementSearchAction" />
+    <bean id="classAttributePartFilter" class="org.vividus.ui.web.action.search.ClassAttributePartFilter"
+          parent="abstractElementSearchAction" />
+    <bean id="imageWithSourcePartFilter" class="org.vividus.ui.web.action.search.ImageWithSourcePartFilter"
+          parent="abstractElementSearchAction" />
+    <bean id="fieldTextFilter" class="org.vividus.ui.web.action.search.FieldTextFilter"
+          parent="abstractElementSearchAction" />
+    <bean id="fieldTextPartFilter" class="org.vividus.ui.web.action.search.FieldTextPartFilter"
+          parent="abstractElementSearchAction" />
+    <bean id="dropDownStateFilter" class="org.vividus.ui.web.action.search.DropDownStateFilter"
+          parent="abstractStateFilter" />
+    <bean id="dropDownTextFilter" class="org.vividus.ui.web.action.search.DropDownTextFilter"
+          parent="abstractElementSearchAction" />
+    <bean id="elementNameSearch" class="org.vividus.ui.web.action.search.ElementNameSearch"
+          parent="abstractElementSearchAction" />
+    <bean id="linkUrlSearch" class="org.vividus.ui.web.action.search.LinkUrlSearch"
+          parent="abstractElementSearchAction">
+        <property name="caseSensitiveSearch" value="${web.search.link-url.case-sensitive}" />
+    </bean>
+
+    <bean id="expectedSearchActionsConditions" class="org.vividus.ui.web.action.ExpectedSearchActionsConditions" />
+    <bean id="expectedSearchContextConditions" class="org.vividus.ui.web.action.ExpectedSearchContextConditions" />
+
+    <bean id="webUiContext" class="org.vividus.ui.web.context.WebUiContext">
+        <property name="testContext" ref="testContext" />
+    </bean>
+
+    <bean id="webElementHighlighter" class="org.vividus.selenium.screenshot.WebElementHighlighter" />
+
+    <bean id="webApplicationListener" class="org.vividus.ui.web.listener.DelegatingWebApplicationListener">
+        <property name="webApplicationListeners" ref="delegatingWebApplicationListener-WebApplicationListeners" />
+    </bean>
+
+    <bean id="highlightingSoftAssert" class="org.vividus.bdd.steps.ui.web.validation.HighlightingSoftAssert" />
+
+    <bean id="descriptiveSoftAssert" class="org.vividus.bdd.steps.ui.web.validation.DescriptiveSoftAssert"
+        parent="softAssert" />
+
+    <bean id="baseValidations" class="org.vividus.bdd.steps.ui.web.validation.BaseValidations" />
+    <bean id="elementValidations" class="org.vividus.bdd.steps.ui.web.validation.ElementValidations" />
+    <bean id="linkValidations" class="org.vividus.bdd.steps.ui.web.validation.LinkValidations" />
+    <bean id="focusValidations" class="org.vividus.bdd.steps.ui.web.validation.FocusValidations" />
+
+    <bean id="alertSteps" class="org.vividus.bdd.steps.ui.web.AlertSteps" />
+    <bean id="buttonSteps" class="org.vividus.bdd.steps.ui.web.ButtonSteps" />
+    <bean id="codeSteps" class="org.vividus.bdd.steps.ui.web.CodeSteps" />
+
+    <bean id="cookieSteps" class="org.vividus.bdd.steps.ui.web.CookieSteps">
+        <property name="jsonUtils" ref="jsonUtils-LowerCamelCase"/>
+    </bean>
+
+    <bean id="checkboxSteps" class="org.vividus.bdd.steps.ui.web.CheckboxSteps" />
+    <bean id="dropdownSteps" class="org.vividus.bdd.steps.ui.web.DropdownSteps" />
+    <bean id="elementSteps" class="org.vividus.bdd.steps.ui.web.ElementSteps" />
+    <bean id="fieldSteps" class="org.vividus.bdd.steps.ui.web.FieldSteps" />
+    <bean id="focusSteps" class="org.vividus.bdd.steps.ui.web.FocusSteps" />
+    <bean id="imageSteps" class="org.vividus.bdd.steps.ui.web.ImageSteps" />
+
+    <bean id="jsValidationSteps" class="org.vividus.bdd.steps.ui.web.JsValidationSteps">
+        <property name="includeBrowserExtensionLogEntries" value="${web.steps.js.include-browser-extension-log-entries}" />
+    </bean>
+
+    <bean id="keyboardSteps" class="org.vividus.bdd.steps.ui.web.KeyboardSteps" />
+    <bean id="linkSteps" class="org.vividus.bdd.steps.ui.web.LinkSteps" />
+    <bean id="localStorageSteps" class="org.vividus.bdd.steps.ui.web.LocalStorageSteps" />
+    <bean id="nestedSteps" class="org.vividus.bdd.steps.ui.web.NestedSteps" />
+
+    <bean id="pageSteps" class="org.vividus.bdd.steps.ui.web.PageSteps">
+        <property name="httpClient" ref="httpClient" />
+        <property name="keepUserInfoForProtocolRedirects" value="${web.steps.page.keep-user-info-for-protocol-redirects}" />
+    </bean>
+
+    <bean id="setContextSteps" class="org.vividus.bdd.steps.ui.web.SetContextSteps" />
+    <bean id="sliderSteps" class="org.vividus.bdd.steps.ui.web.SliderSteps" />
+    <bean id="scriptSteps" class="org.vividus.bdd.steps.ui.web.ScriptSteps" />
+    <bean id="setVariableSteps" class="org.vividus.bdd.steps.ui.web.SetVariableSteps" />
+    <bean id="videoPlayerSteps" class="org.vividus.bdd.steps.ui.web.VideoPlayerSteps" />
+    <bean id="waitSteps" class="org.vividus.bdd.steps.ui.web.WaitSteps" />
+    <bean id="webElementsSteps" class="org.vividus.bdd.steps.ui.web.WebElementsSteps" />
+
+    <bean id="parameterizedThenSteps" class="org.vividus.bdd.steps.ui.web.generic.steps.ParameterizedThenSteps">
+        <property name="webUiContext" ref="webUiContext" />
+        <property name="searchActions" ref="searchActions" />
+        <property name="descriptiveSoftAssert" ref="descriptiveSoftAssert" />
+        <property name="parameterizedValidations" ref="parameterizedValidations" />
+        <property name="parameterizedChecks" ref="parameterizedChecks" />
+        <property name="parameterizedSearchActions" ref="parameterizedSearchActions" />
+        <property name="checkboxSteps" ref="checkboxSteps" />
+    </bean>
+
+    <bean id="actionSteps" class="org.vividus.bdd.steps.ui.web.ActionSteps" />
+
+    <bean id="vividusWebDriverSetupSteps" class="org.vividus.bdd.steps.VividusWebDriverSetupSteps" />
+
+    <bean id="webUiVividusSetupSteps" class="org.vividus.bdd.steps.WebUiVividusSetupSteps"
+          parent="vividusWebDriverSetupSteps">
+        <property name="windowsStrategy" value="${selenium.windows-strategy}" />
+    </bean>
+
+    <bean id="screenshotTakingSteps" class="org.vividus.bdd.steps.ui.ScreenshotTakingSteps" />
+
+    <bean id="proxySteps" class="org.vividus.proxy.steps.ProxySteps" />
+
+    <bean id="parameterizedValidations" class="org.vividus.bdd.steps.ui.web.generic.steps.ParameterizedValidations" />
+
+    <bean id="parameterizedChecks" class="org.vividus.bdd.steps.ui.web.generic.steps.ParameterizedChecks" />
+
+    <bean id="parameterizedSearchActions" class="org.vividus.bdd.steps.ui.web.generic.steps.ParameterizedSearchActions">
+        <property name="linkFilterAction" ref="linkUrlSearch" />
+    </bean>
+
+    <bean class="org.vividus.bdd.monitor.ScreenshotOnFailureMonitor" />
+
+    <bean id="browserWindowSizeProvider" class="org.vividus.selenium.BrowserWindowSizeProvider" >
+        <property name="remoteScreenResolution" value="${selenium.grid.screen-resolution}" />
+    </bean>
+
+    <bean id="browserWindowSizeListener" class="org.vividus.selenium.BrowserWindowSizeListener"
+          lazy-init="false">
+        <property name="webDriverManager" ref="webDriverManager" />
+        <property name="webDriverProvider" ref="webDriverProvider" />
+        <property name="browserWindowSizeProvider" ref="browserWindowSizeProvider" />
+    </bean>
+
+    <bean id="webDriverProvider" class="org.vividus.selenium.WebDriverProvider"
+          destroy-method="destroy">
+        <property name="vividusWebDriverFactory">
+            <bean class="org.vividus.selenium.VividusWebDriverFactory">
+                <property name="remoteExecution" value="${selenium.grid.enabled}" />
+                <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
+            </bean>
+        </property>
+        <property name="testContext" ref="testContext" />
+    </bean>
+
+    <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" />
+
+    <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
+        <property name="next">
+            <bean class="org.vividus.bdd.ProxyAgentStoryReporter">
+                <property name="proxyEnabled" value="${proxy.enabled}" />
+                <property name="proxyRecordingEnabled" value="${proxy.recording.enabled}" />
+                <property name="next" ref="allureStoryReporter" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="delegatingWebApplicationListener-WebApplicationListeners" class="org.vividus.spring.ListMergerFactoryBean">
+        <property name="lists">
+            <list>
+                <ref bean="delegatingWebApplicationListener-CustomWebApplicationListeners" />
+            </list>
+        </property>
+    </bean>
+    <util:list id="delegatingWebApplicationListener-CustomWebApplicationListeners" />
+
+
+    <bean id="webDriverEventListener-EventHandlers" class="org.vividus.spring.ListMergerFactoryBean">
+        <property name="lists">
+            <list>
+                <ref bean="webDriverEventListener-CustomEventHandlers" />
+                <list>
+                    <bean class="org.vividus.ui.web.listener.AlertHandlingPageLoadListener" lazy-init="false">
+                        <property name="alertHandlingOptions" value="${selenium.alert-strategy}" />
+                    </bean>
+                    <bean class="org.vividus.ui.web.listener.WebUiContextListener" lazy-init="false">
+                        <property name="webUiContext" ref="webUiContext" />
+                    </bean>
+                    <bean class="org.vividus.ui.web.listener.WindowSwitchListener" />
+                </list>
+            </list>
+        </property>
+    </bean>
+    <util:list id="webDriverEventListener-CustomEventHandlers" />
+
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="org.vividus.spring.StringToSeleniumLocatorSetConverter" />
+                <bean class="org.vividus.spring.StringToSeleniumLocatorConverter" />
+                <bean class="org.vividus.spring.StringToSearchAttributesConverter" />
+                <bean class="org.vividus.spring.StringToSearchAttributesSetConverter" />
+                <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
+                <bean class="org.vividus.spring.StringToLocaleConverter"/>
+            </set>
+        </property>
+    </bean>
+
+    <util:map id="knownIssueChecker-WebUiKnownIssueDataProviders">
+        <entry key="currentPageUrl">
+            <bean class="org.vividus.bdd.issue.CurrentPageUrlKnownIssueDataProvider" />
+        </entry>
+    </util:map>
+
+    <bean id="browserLogCleanningListener" class="org.vividus.bdd.steps.ui.web.listener.BrowserLogCleanningListener" />
+
+    <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+        <property name="customEditors">
+            <map>
+                <entry key="org.vividus.selenium.WebDriverType" value="org.vividus.ui.web.spring.WebDriverTypeEditor"/>
+            </map>
+        </property>
+    </bean>
+
+    <util:list id="stepBeanNames-WebUi" value-type="java.lang.String">
+        <value>parameterizedThenSteps</value>
+        <value>alertSteps</value>
+        <value>cookieSteps</value>
+        <value>scriptSteps</value>
+        <value>codeSteps</value>
+        <value>waitSteps</value>
+        <value>setVariableSteps</value>
+        <value>setContextSteps</value>
+        <value>buttonSteps</value>
+        <value>checkboxSteps</value>
+        <value>dropdownSteps</value>
+        <value>elementSteps</value>
+        <value>fieldSteps</value>
+        <value>imageSteps</value>
+        <value>linkSteps</value>
+        <value>pageSteps</value>
+        <value>webElementsSteps</value>
+        <value>jsValidationSteps</value>
+        <value>focusSteps</value>
+        <value>keyboardSteps</value>
+        <value>sliderSteps</value>
+        <value>videoPlayerSteps</value>
+        <value>nestedSteps</value>
+        <value>actionSteps</value>
+        <value>webUiVividusSetupSteps</value>
+        <value>screenshotTakingSteps</value>
+        <value>localStorageSteps</value>
+        <value>proxySteps</value>
+    </util:list>
+ </beans>

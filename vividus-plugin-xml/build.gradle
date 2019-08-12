@@ -1,0 +1,15 @@
+project.description = 'Vividus plugin for XML testing'
+ext.sonarProjectName = 'Vividus Plugin - XML'
+
+dependencies {
+    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-util')
+    implementation(group: 'org.xmlunit', name: 'xmlunit-core', version: '2.6.2')
+    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+}

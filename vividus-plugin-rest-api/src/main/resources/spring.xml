@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"
+    default-lazy-init="true">
+
+    <bean id="apiTestContext" class="org.vividus.api.ApiTestContext">
+        <property name="testContext" ref="testContext"/>
+    </bean>
+
+    <aop:config>
+        <aop:aspect id="savingResponseHttpClientAspect" ref="apiTestContext">
+            <aop:after-returning method="putResponse" returning="response"
+                pointcut="execution(org.vividus.http.client.HttpResponse org.vividus.http.client.IHttpClient.*(..))" />
+        </aop:aspect>
+    </aop:config>
+
+    <bean name="FROM_JSON" class="org.vividus.bdd.transformer.JsonRestApiTableTransfomer">
+        <property name="httpClient" ref="httpClient-RestApi"/>
+    </bean>
+
+    <bean class="org.vividus.bdd.expression.RemoveWrappingDoubleQuotesExpressionProcessor" />
+
+    <bean id="jsonSoftAssert" class="org.vividus.bdd.validator.JsonSoftAssert" parent="softAssert" />
+
+    <bean id="apiSteps" class="org.vividus.bdd.steps.api.ApiSteps">
+        <property name="httpClient" ref="httpClient-RestApi"/>
+        <property name="apiEndpoint" value="${rest-api.http.endpoint}"/>
+    </bean>
+
+    <bean id="connectionValidationSteps" class="org.vividus.bdd.steps.api.ConnectionValidationSteps" />
+    <bean id="httpResponseValidationSteps" class="org.vividus.bdd.steps.api.HttpResponseValidationSteps" />
+
+    <bean id="jsonResponseValidationSteps" class="org.vividus.bdd.steps.api.JsonResponseValidationSteps">
+        <property name="softAssert" ref="jsonSoftAssert" />
+        <property name="jsonUtils" ref="jsonUtils-LowerCamelCase"/>
+    </bean>
+
+    <bean id="dateValidationSteps" class="org.vividus.bdd.steps.DateValidationSteps">
+        <property name="softAssert" ref="jsonSoftAssert" />
+    </bean>
+
+    <bean id="httpResponseSteps" class="org.vividus.bdd.steps.api.HttpResponseSteps"/>
+
+    <bean id="httpClient-RestApi" class="org.vividus.http.client.HttpClient"
+        factory-bean="httpClientFactory"
+        factory-method="buildHttpClient">
+        <constructor-arg>
+            <bean parent="httpClientConfig">
+                <property name="headersMap">
+                    <bean factory-bean="propertyParser" factory-method="getPropertyValuesByFamily">
+                        <constructor-arg value="rest-api.http.header" />
+                    </bean>
+                </property>
+                <property name="lastRequestInterceptor" ref="httpClientInterceptor" />
+                <property name="lastResponseInterceptor">
+                    <bean class="org.vividus.api.SavingConnectionDetailsHttpResponseInterceptor">
+                        <property name="apiTestContext" ref="apiTestContext" />
+                    </bean>
+                </property>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="httpRedirectsProvider" class="org.vividus.http.HttpRedirectsProvider">
+        <property name="httpClient">
+            <bean class="org.vividus.http.client.HttpClient"
+                  factory-bean="httpClientFactory"
+                  factory-method="buildHttpClient">
+                <constructor-arg>
+                    <bean parent="httpClientConfig">
+                        <property name="circularRedirectsAllowed" value="${http.redirects-provider.circular-redirects-allowed}" />
+                        <property name="credentials" value="${http.redirects-provider.credentials}" />
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <util:list id="stepBeanNames-Api" value-type="java.lang.String">
+        <value>apiSteps</value>
+        <value>connectionValidationSteps</value>
+        <value>httpResponseValidationSteps</value>
+        <value>httpResponseSteps</value>
+        <value>jsonResponseValidationSteps</value>
+        <value>dateValidationSteps</value>
+    </util:list>
+</beans>

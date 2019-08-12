@@ -1,0 +1,24 @@
+project.description = 'Vividus plugin for SSH operations'
+ext.sonarProjectName = 'Vividus Plugin - SSH'
+
+dependencies {
+    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-reporter')
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-util')
+    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'com.jcraft', name: 'jsch', version: '0.1.55')
+    implementation(group: 'com.jcraft', name: 'jsch.agentproxy.jsch', version: '0.0.9')
+    implementation(group: 'com.jcraft', name: 'jsch.agentproxy.connector-factory', version: '0.0.9')
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
+    testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}

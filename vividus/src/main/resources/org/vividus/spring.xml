@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config />
+    <context:component-scan base-package="org.vividus.bdd.variable">
+        <context:exclude-filter type="regex" expression="org\.vividus\.bdd\.variable\..*\..*"/>
+    </context:component-scan>
+    <context:component-scan base-package="org.vividus.bdd.transformer" />
+    <context:component-scan base-package="org.vividus.bdd.converter" >
+        <context:exclude-filter type="regex" expression="org\.vividus\.bdd\.converter\..*\..*"/>
+    </context:component-scan>
+    <context:component-scan base-package="org.vividus.jackson.databind" >
+        <context:exclude-filter type="regex" expression="org\.vividus\.jackson\.databind\..*\..*"/>
+    </context:component-scan>
+
+    <import resource="classpath:/org/vividus/bdd/spring.xml"/>
+    <import resource="classpath:/org/vividus/reporter/spring.xml"/>
+    <import resource="classpath:/org/vividus/bdd/report/allure/spring.xml"/>
+    <import resource="classpath:/org/vividus/softassert/spring.xml"/>
+    <import resource="classpath:/org/vividus/testcontext/spring.xml"/>
+    <import resource="classpath:/org/vividus/http/client/spring.xml"/>
+    <import resource="classpath:/org/vividus/util/spring.xml"/>
+    <import resource="spring-configuration.xml"/>
+    <import resource="spring-steps.xml"/>
+    <import resource="spring-vividus.xml"/>
+
+</beans>

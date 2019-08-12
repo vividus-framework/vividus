@@ -1,0 +1,11 @@
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/1.0">
+<url><loc>https://www.vividus.site/</loc><lastmod>2018-11-23 10:12:28</lastmod><changefreq>always</changefreq><priority>1.0</priority></url>
+<url><loc>https://www.vividus.site/java</loc><lastmod>2019-01-02 12:02:27</lastmod><changefreq>always</changefreq><priority>1.0</priority></url>
+<url><loc>https://www.vividus.site/kotlin</loc><lastmod>2019-02-05 09:06:21</lastmod><changefreq>always</changefreq><priority>1.0</priority></url>
+<url><loc>https://www.vividus.site/scala</loc><lastmod>2019-01-02 12:02:27</lastmod><changefreq>always</changefreq><priority>1.0</priority></url>
+<url><loc>http://www.vividus.site/java</loc><lastmod>2018-04-28 10:13:57</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+<url><loc>http://www.vividus.site/scala</loc><lastmod>2018-11-14 11:12:44</lastmod><changefreq>always</changefreq><priority>1.0</priority></url>
+<url><loc>http://www.vividus.site/groovy</loc><lastmod>2018-09-20 11:06:11</lastmod><changefreq>always</changefreq><priority>1.0</priority></url>
+<url><loc>https://www.vividus.site/kotlin</loc><lastmod>2018-10-23 09:33:12</lastmod><changefreq>always</changefreq><priority>1.0</priority></url>
+<url><loc>https://www.vividus.site/java</loc><lastmod>2018-10-23 09:32:11</lastmod><changefreq>always</changefreq><priority>1.0</priority></url>
+</urlset>

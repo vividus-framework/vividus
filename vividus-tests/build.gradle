@@ -1,0 +1,16 @@
+project.description = 'Vivuds tests'
+ext.sonarProjectName = 'Vividus - Tests'
+
+tasks.artifactoryPublish.enabled = false
+tasks.publish.enabled = false
+
+dependencies {
+    implementation project(':vividus')
+    implementation project(':vividus-plugin-csv')
+    implementation project(':vividus-plugin-html')
+    implementation project(':vividus-plugin-rest-api')
+    implementation project(':vividus-plugin-ssh')
+    implementation project(':vividus-plugin-web-app')
+    implementation project(':vividus-plugin-xml')
+    implementation project(':vividus-plugin-visual')
+}

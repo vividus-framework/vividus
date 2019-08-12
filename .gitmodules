@@ -1,0 +1,3 @@
+[submodule "vividus-build-system"]
+	path = vividus-build-system
+	url = https://github.com/vividus-framework/vividus-build-system.git

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<!--
+    This configuration file was written by the eclipse-cs plugin configuration editor
+-->
+<module name="Checker">
+  <property name="severity" value="error"/>
+  <module name="TreeWalker">
+    <property name="tabWidth" value="4"/>
+    <module name="AvoidStarImport"/>
+    <module name="ConstantName"/>
+    <module name="EmptyBlock"/>
+    <module name="EmptyForIteratorPad"/>
+    <module name="EqualsHashCode"/>
+    <module name="OneStatementPerLine"/>
+    <module name="IllegalImport"/>
+    <module name="IllegalInstantiation"/>
+    <module name="InnerAssignment"/>
+    <module name="LeftCurly">
+      <property name="option" value="nl"/>
+      <property name="tokens" value="INTERFACE_DEF,CLASS_DEF,ANNOTATION_DEF,ENUM_DEF,CTOR_DEF,METHOD_DEF,ENUM_CONSTANT_DEF,LITERAL_WHILE,LITERAL_TRY,LITERAL_CATCH,LITERAL_FINALLY,LITERAL_SYNCHRONIZED,LITERAL_SWITCH,LITERAL_DO,LITERAL_IF,LITERAL_ELSE,LITERAL_FOR"/>
+    </module>
+    <module name="OuterTypeNumber"/>
+    <module name="LineLength">
+      <property name="ignorePattern" value="^ *\* *[^ ]+$"/>
+      <property name="max" value="120"/>
+    </module>
+    <module name="MethodCount">
+      <property name="maxTotal" value="35"/>
+    </module>
+    <module name="LocalFinalVariableName"/>
+    <module name="LocalVariableName"/>
+    <module name="MemberName"/>
+    <module name="MethodLength"/>
+    <module name="MethodName"/>
+    <module name="ModifierOrder"/>
+    <module name="NeedBraces"/>
+    <module name="NoWhitespaceBefore"/>
+    <module name="OperatorWrap"/>
+    <module name="PackageName"/>
+    <module name="ParameterName"/>
+    <module name="ParameterNumber">
+      <property name="id" value="paramNum"/>
+      <property name="max" value="9"/>
+    </module>
+    <module name="ParenPad"/>
+    <module name="TypecastParenPad"/>
+    <module name="RedundantImport"/>
+    <module name="RedundantModifier"/>
+    <module name="RightCurly">
+      <property name="option" value="alone"/>
+    </module>
+    <module name="SimplifyBooleanExpression"/>
+    <module name="SimplifyBooleanReturn"/>
+    <module name="TypeName"/>
+    <module name="UnusedImports"/>
+    <module name="UpperEll"/>
+    <module name="VisibilityModifier"/>
+    <module name="WhitespaceAfter"/>
+    <module name="WhitespaceAround"/>
+    <module name="GenericWhitespace"/>
+    <module name="FinalClass"/>
+    <module name="MissingSwitchDefault"/>
+    <module name="MagicNumber"/>
+    <module name="Indentation">
+      <property name="arrayInitIndent" value="8"/>
+    </module>
+    <module name="EqualsAvoidNull"/>
+    <module name="ParameterAssignment"/>
+    <module name="CyclomaticComplexity">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
+    <module name="NestedForDepth">
+      <property name="max" value="2"/>
+    </module>
+    <module name="NestedIfDepth">
+      <property name="max" value="3"/>
+    </module>
+    <module name="NestedTryDepth"/>
+    <module name="ExplicitInitialization"/>
+    <module name="AnnotationUseStyle"/>
+    <module name="MissingDeprecated"/>
+    <module name="MissingOverride">
+      <property name="javaFiveCompatibility" value="true"/>
+    </module>
+    <module name="PackageAnnotation"/>
+    <module name="SuppressWarnings"/>
+    <module name="OuterTypeFilename"/>
+    <module name="HideUtilityClassConstructor"/>
+    <!-- Make the @SuppressWarnings annotations available to Checkstyle -->
+    <module name="SuppressWarningsHolder"/>
+    <module name="com.github.sevntu.checkstyle.checks.naming.EnumValueNameCheck">
+      <property name="format" value="^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
+    </module>
+    <module name="com.github.sevntu.checkstyle.checks.coding.DiamondOperatorForVariableDefinitionCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.ReturnNullInsteadOfBooleanCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.ReturnBooleanFromTernaryCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.MultipleVariableDeclarationsExtendedCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.MultipleStringLiteralsExtendedCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.NameConventionForJunit4TestClassesCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.UnnecessaryParenthesesExtendedCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.UselessSingleCatchCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.UselessSuperCtorCallCheck"/>
+    <module name="AnnotationLocation"/>
+    <module name="ClassTypeParameterName"/>
+    <module name="MethodTypeParameterName"/>
+    <module name="InterfaceTypeParameterName"/>
+    <module name="EmptyCatchBlock"/>
+    <module name="DeclarationOrder"/>
+    <module name="EmptyStatement"/>
+    <module name="IllegalThrows">
+      <property name="ignoredMethodNames" value="finalize, main"/>
+    </module>
+    <module name="StaticVariableName"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.AvoidHidingCauseExceptionCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.AvoidNotShortCircuitOperatorsForBooleanCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.EmptyPublicCtorInClassCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.ForbidInstantiationCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.ForbidReturnInFinallyBlockCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.ForbidThrowAnonymousExceptionsCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.IllegalCatchExtendedCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.MapIterationInForEachLoopCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.TernaryPerExpressionCountCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.NoNullForCollectionReturnCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.OverridableMethodInConstructorCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.EitherLogOrThrowCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.RedundantReturnCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.coding.SimpleAccessorNameNotationCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.design.NestedSwitchCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.design.AvoidConditionInversionCheck"/>
+    <module name="com.github.sevntu.checkstyle.checks.design.NoMainMethodInAbstractClassCheck"/>
+    <module name="SeparatorWrap">
+      <property name="tokens" value="COMMA"/>
+    </module>
+    <module name="AvoidNestedBlocks"/>
+    <module name="CovariantEquals"/>
+    <module name="DefaultComesLast"/>
+    <module name="ModifiedControlVariable"/>
+    <module name="MultipleStringLiterals"/>
+    <module name="MultipleVariableDeclarations"/>
+    <module name="PackageDeclaration"/>
+    <module name="StringLiteralEquality"/>
+    <module name="SuperClone"/>
+    <module name="UnnecessaryParentheses"/>
+    <module name="VariableDeclarationUsageDistance">
+      <property name="allowedDistance" value="5"/>
+    </module>
+    <module name="InnerTypeLast"/>
+    <module name="NPathComplexity"/>
+    <module name="AvoidEscapedUnicodeCharacters"/>
+    <module name="EmptyLineSeparator">
+      <property name="tokens" value="PACKAGE_DEF,IMPORT,CLASS_DEF,ENUM_DEF,INTERFACE_DEF,CTOR_DEF,METHOD_DEF,STATIC_INIT,INSTANCE_INIT"/>
+      <property name="allowNoEmptyLineBetweenFields" value="true"/>
+    </module>
+    <module name="NoWhitespaceAfter">
+      <property name="tokens" value="BNOT,DEC,DOT,INC,LNOT,UNARY_MINUS,UNARY_PLUS"/>
+    </module>
+    <module name="MethodParamPad"/>
+    <module name="CustomImportOrder">
+      <property name="customImportOrderRules" value="STATIC###STANDARD_JAVA_PACKAGE###SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE"/>
+      <property name="standardPackageRegExp" value="^(javax|java)\."/>
+      <property name="specialImportsRegExp" value="^(org|com)\."/>
+      <property name="separateLineBetweenGroups" value="true"/>
+      <property name="sortImportsInGroupAlphabetically" value="true"/>
+    </module>
+    <module name="SuppressionCommentFilter"/>
+  </module>
+  <module name="FileTabCharacter"/>
+  <module name="FileLength">
+    <property name="fileExtensions" value="java"/>
+  </module>
+  <module name="NewlineAtEndOfFile">
+    <property name="lineSeparator" value="lf_cr_crlf"/>
+  </module>
+  <module name="RegexpSingleline">
+    <property name="format" value="\s+$"/>
+  </module>
+  <module name="RegexpSingleline">
+        <property name="format" value="^\s*\*\s*@author"/>
+  </module>
+
+  <!-- Filter out Checkstyle warnings that have been suppressed with the @SuppressWarnings annotation -->
+  <module name="SuppressWarningsFilter"/>
+  <module name="SuppressWithPlainTextCommentFilter">
+    <property name="offCommentFormat" value="CHECKSTYLE\:OFF.*"/>
+    <property name="onCommentFormat" value="CHECKSTYLE\:ON.*"/>
+  </module>
+  <module name="SuppressionFilter">
+    <property name="file" value="${config_loc}/suppressions.xml"/>
+    <property name="optional" value="false"/>
+  </module>
+
+  <module name="UniqueProperties"/>
+</module>

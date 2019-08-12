@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config />
+
+    <bean class="org.vividus.bdd.steps.SpringStepFactoryBeanPostProcessor" />
+
+    <bean id="stepFactory" class="org.vividus.bdd.steps.SpringStepFactory">
+        <constructor-arg index="0">
+            <bean class="org.vividus.bdd.spring.Configuration" />
+        </constructor-arg>
+    </bean>
+
+    <bean class="org.jbehave.core.steps.ParameterConverters.FluentEnumConverter" />
+
+    <bean name="SORTING" class="org.vividus.bdd.transformer.SortingTableTransformer" />
+
+    <bean class="org.vividus.bdd.log.LoggingStepMonitor" />
+
+    <util:list id="stepBeanNames-CustomSuperSteps">
+        <value>SuperSteps</value>
+    </util:list>
+
+    <util:list id="stepBeanNames-Default">
+        <value>DefaultSteps</value>
+    </util:list>
+
+    <util:list id="stepBeanNames.ShouldNotAppearsSteps">
+        <value>ShouldNotAppearsSteps</value>
+    </util:list>
+
+    <bean id="SuperSteps" class="org.vividus.bdd.steps.SpringStepFactoryTest$SuperSteps" />
+    <bean id="DefaultSteps" class="org.vividus.bdd.steps.SpringStepFactoryTest$DefaultSteps" />
+    <bean id="ShouldNotAppearSteps" class="org.vividus.bdd.steps.SpringStepFactoryTest$ShouldNotAppearSteps" />
+
+</beans>

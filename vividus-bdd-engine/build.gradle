@@ -1,0 +1,33 @@
+project.description = 'Vividus BDD engine'
+ext.sonarProjectName = 'Vividus - BDD Engine'
+
+ext {
+    jbehaveVersion = '4.5.2-alpha.2'
+}
+
+dependencies {
+    api project(':vividus-test-context')
+    api(group: 'org.vividus', name: 'jbehave-core', version: jbehaveVersion)
+
+    implementation project(':vividus-util')
+    implementation(group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText)
+    implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.1')
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+    implementation(group: 'org.springframework', name: 'spring-beans', version: versions.spring)
+    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
+    implementation(group: 'com.github.javafaker', name: 'javafaker', version: '0.18')
+    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+    runtimeOnly(group: 'org.vividus', name: 'jbehave-spring', version: jbehaveVersion) {
+        exclude group: 'org.springframework', module: 'spring-test'
+    }
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
+    testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}

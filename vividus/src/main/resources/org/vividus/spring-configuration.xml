@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="properties" class="org.vividus.configuration.StringEncryptor" factory-method="decryptProperties">
+        <constructor-arg ref="standardPBEStringEncryptor"/>
+        <constructor-arg>
+            <bean factory-bean="configurationResolver" factory-method="getProperties"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="propertyParser" class="org.vividus.util.property.PropertyParser">
+        <property name="properties" ref="properties" />
+    </bean>
+
+    <bean id="propertyMapper" class="org.vividus.util.property.PropertyMapper" init-method="init">
+        <property name="propertyParser" ref="propertyParser" />
+    </bean>
+
+    <bean id="configurationResolver" class="org.vividus.configuration.ConfigurationResolver"
+        factory-method="getInstance" />
+
+    <bean class="org.jasypt.spring31.properties.EncryptablePropertyPlaceholderConfigurer">
+        <constructor-arg ref="standardPBEStringEncryptor"/>
+        <property name="systemPropertiesMode" value="#{T(org.springframework.beans.factory.config.PropertyPlaceholderConfigurer).SYSTEM_PROPERTIES_MODE_OVERRIDE}" />
+        <property name="valueSeparator" value="=" />
+        <property name="nullValue" value="" />
+        <property name="properties" ref="properties" />
+    </bean>
+
+    <bean id ="standardPBEStringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+        <property name="config">
+            <bean class="org.jasypt.encryption.pbe.config.SimplePBEConfig">
+                <property name="algorithm" value="PBEWithMD5AndDES"/>
+                <property name="password" value="#{systemProperties['vividus.encryptor.password']?:'82=thuMUH@'}"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+        <property name="scopes">
+            <map>
+                <entry key="thread">
+                    <bean class="org.springframework.context.support.SimpleThreadScope"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
+                <bean class="org.vividus.spring.StringToLocaleConverter"/>
+            </set>
+        </property>
+    </bean>
+
+</beans>

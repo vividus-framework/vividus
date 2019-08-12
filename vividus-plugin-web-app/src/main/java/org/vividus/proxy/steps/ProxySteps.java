@@ -1,0 +1,196 @@
+/*
+ * Copyright 2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.vividus.proxy.steps;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.http.HttpStatus;
+import org.jbehave.core.annotations.Then;
+import org.jbehave.core.annotations.When;
+import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.steps.ComparisonRule;
+import org.vividus.bdd.variable.VariableScope;
+import org.vividus.http.HttpMethod;
+import org.vividus.proxy.IProxy;
+import org.vividus.proxy.ProxyLog;
+import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.web.action.IWaitActions;
+
+import net.lightbody.bmp.core.har.Har;
+import net.lightbody.bmp.core.har.HarEntry;
+import net.lightbody.bmp.core.har.HarNameValuePair;
+
+public class ProxySteps
+{
+    @Inject private IProxy proxy;
+    @Inject private ISoftAssert softAssert;
+    @Inject private IAttachmentPublisher attachmentPublisher;
+    @Inject private IBddVariableContext bddVariableContext;
+    @Inject private IWaitActions waitActions;
+
+    private final ThreadLocal<Optional<ProxyLog>> externalProxyLog = ThreadLocal.withInitial(Optional::empty);
+
+    /**
+     * Clears the proxy log
+     */
+    @When("I clear proxy log")
+    public void clearProxyLog()
+    {
+        proxy.getLog().clear();
+    }
+
+    /**
+     * Checks if the number of requests with given URL-pattern exist.
+     * <p>
+     * This step requires proxy to be turned on.
+     * It can be done via setting properties or switching on <b>@proxy</b> metatag.
+     * Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
+     * If URLs are the same, there were calls with given URL-pattern, otherwise - weren't.
+     * If there weren't any calls matching requirements, HAR file with all calls will be attached to report.
+     * If response contains status code 302 - corresponding request will be filtered out.
+     * </p>
+     * @param httpMethod HTTP method to filter by
+     * @param urlPattern the string value of URL-pattern to filter by
+     * @param comparisonRule The rule to compare values
+     * (<i>Possible values:<b> LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
+     * EQUAL_TO</b></i>)
+     * @param number The number to compare with
+     * @throws IOException If any error happens during operation
+     * @return Filtered HAR entries
+     */
+    @Then("number of HTTP $httpMethod requests with URL pattern `$urlPattern` is $comparisonRule `$number`")
+    public List<HarEntry> checkNumberOfRequests(HttpMethod httpMethod, String urlPattern,
+            ComparisonRule comparisonRule, long number) throws IOException
+    {
+        List<HarEntry> harEntries = getHarEntries(httpMethod, urlPattern);
+        assertSize(String.format("Number of HTTP %s requests matching URL pattern '%s'", httpMethod, urlPattern),
+                harEntries, comparisonRule, number);
+        return harEntries;
+    }
+
+    private List<HarEntry> getHarEntries(HttpMethod httpMethod, String urlPattern)
+    {
+        return getProxyLog().getLogEntries(httpMethod, urlPattern)
+                .stream()
+                .filter(h -> h.getResponse().getStatus() != HttpStatus.SC_MOVED_TEMPORARILY)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Saves the query string from request with given URL-pattern into the variable
+     * with specified name and scopes.
+     * <p>
+     * This step requires proxy to be turned on.
+     * It can be done via setting properties or switching on <b>@proxy</b> metatag inside the story file.
+     * Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
+     * If there is one entry, it saves the query string from request as Map of keys and values
+     * into the variable with specified name and scopes.
+     * If there weren't any calls or more than one matching requirements, HAR file with all
+     * calls will be attached to report.
+     * </p>
+     * @param httpMethod HTTP method to filter by
+     * @param urlPattern The string value of URL-pattern to filter by
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName A variable name
+     * @throws IOException If any error happens during operation
+     */
+    @When("I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL query to $scopes "
+            + "variable `$variableName`")
+    public void captureRequestAndSaveURLQuery(HttpMethod httpMethod, String urlPattern, Set<VariableScope> scopes,
+            String variableName) throws IOException
+    {
+        List<HarEntry> harEntries = checkNumberOfRequests(httpMethod, urlPattern, ComparisonRule.EQUAL_TO, 1);
+        if (harEntries.size() == 1)
+        {
+            HarEntry harEntry = harEntries.get(0);
+            Map<String, String> queryMap = harEntry.getRequest().getQueryString()
+                    .stream()
+                    .collect(Collectors.toMap(HarNameValuePair::getName, HarNameValuePair::getValue));
+            bddVariableContext.putVariable(scopes, variableName, queryMap);
+        }
+    }
+
+    /**
+     * Waits for appearance of HTTP request matched <b>httpMethod</b> and <b>urlPattern</b> in proxy log
+     * @param httpMethod HTTP method to filter by
+     * @param urlPattern The string value of URL-pattern to filter by
+     */
+    @When("I wait until HTTP $httpMethod request with URL pattern `$urlPattern` exists in proxy log")
+    public void waitRequestInProxyLog(HttpMethod httpMethod, String urlPattern)
+    {
+        waitActions.wait(urlPattern, new Function<>()
+        {
+            @Override
+            public Boolean apply(String urlPattern)
+            {
+                List<HarEntry> entries = getHarEntries(httpMethod, urlPattern);
+                return !entries.isEmpty();
+            }
+
+            @Override
+            public String toString()
+            {
+                return String.format("waiting for HTTP %s request with URL pattern %s", httpMethod, urlPattern);
+            }
+        });
+    }
+
+    private boolean assertSize(String assertionDescription, Collection<?> collection, ComparisonRule comparisonRule,
+            long expectedSize) throws IOException
+    {
+        boolean assertionPassed = softAssert.assertThat(assertionDescription, (long) collection.size(),
+                comparisonRule.getComparisonRule(expectedSize));
+        if (!assertionPassed)
+        {
+            publishHar();
+        }
+        return assertionPassed;
+    }
+
+    private void publishHar() throws IOException
+    {
+        Har har = proxy.getProxyServer().getHar();
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream())
+        {
+            har.writeTo(byteArrayOutputStream);
+            attachmentPublisher.publishAttachment(byteArrayOutputStream.toByteArray(), "har.har");
+        }
+    }
+
+    private ProxyLog getProxyLog()
+    {
+        return externalProxyLog.get().orElse(proxy.getLog());
+    }
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-lazy-init="true">
+
+    <bean id="keyStoreFactory" class="org.vividus.http.keystore.KeyStoreFactory" >
+        <property name="keyStorePath" value="${http.key-store.path=#{null}}" />
+        <property name="keyStorePassword" value="${http.key-store.password=#{null}}" />
+        <property name="keyStoreType" value="JKS" />
+    </bean>
+
+    <bean id="sslContextFactory" class="org.vividus.http.client.SslContextFactory" >
+        <property name="keyStoreFactory" ref="keyStoreFactory" />
+        <property name="privateKeyPassword" value="${http.ssl.private-key-password=#{null}}" />
+    </bean>
+
+    <bean id="httpClientFactory" class="org.vividus.http.client.HttpClientFactory">
+        <property name="sslContextFactory" ref="sslContextFactory" />
+    </bean>
+
+    <bean id="httpClient" class="org.vividus.http.client.HttpClient"
+        factory-bean="httpClientFactory" factory-method="buildHttpClient">
+        <constructor-arg ref="httpClientConfig" />
+    </bean>
+
+    <bean id="httpClientConfig" class="org.vividus.http.client.HttpClientConfig">
+        <property name="sslCertificateCheckEnabled" value="${http.ssl.check-certificate}" />
+        <property name="sslHostnameVerificationEnabled" value="${http.ssl.verify-hostname}" />
+        <property name="circularRedirectsAllowed" value="${http.circular-redirects-allowed}" />
+        <property name="socketTimeout" value="${http.socket-timeout}" />
+        <property name="cookieSpec" value="${http.cookie-spec}" />
+        <property name="httpRequestRetryHandler" ref="idempotentMethodsRetryHandler" />
+        <property name="dnsResolver">
+            <bean class="org.vividus.http.dns.LocalDnsResolver" >
+                <property name="dnsMappingStorage" ref="localDnsStorage" />
+                <property name="fallbackDnsResolver" >
+                    <util:constant static-field="org.apache.http.impl.conn.SystemDefaultDnsResolver.INSTANCE"/>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="localDnsStorage" factory-bean="propertyParser"
+        factory-method="getPropertyValuesByFamily">
+        <constructor-arg value="http.local-dns-storage" />
+    </bean>
+
+
+    <bean id="idempotentMethodsRetryHandler" class="org.vividus.http.handler.IdempotentMethodsRetryHandler" >
+        <property name="idempotentMethodsSendingRequestBody" value="${http.idempotent-methods-sending-request-body}" />
+    </bean>
+</beans>

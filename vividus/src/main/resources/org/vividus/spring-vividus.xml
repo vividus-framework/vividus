@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-lazy-init="true">
+
+    <bean id="contextStartedEventListener" class="org.vividus.bdd.ContextStartedEventListener" />
+
+    <bean id="eventBus" class="com.google.common.eventbus.EventBus" />
+
+    <bean id="issueStateProvider" class="org.vividus.bdd.issue.IssueStateProvider" />
+
+    <bean id="testInfoProvider" class="org.vividus.bdd.issue.TestInfoProvider">
+        <property name="bddRunContext" ref="bddRunContext" />
+    </bean>
+
+    <bean id="knownIssueProvider" class="org.vividus.bdd.issue.KnownIssueProvider"
+          init-method="init">
+        <property name="fileName" value="${known-issue-provider.fileName}" />
+        <property name="knownIssueIdentifiers" ref="knownIssues" />
+        <property name="propertyParser" ref="propertyParser" />
+    </bean>
+
+    <bean class="org.vividus.spring.SubscriberRegisteringBeanPostProcessor" />
+    <bean class="org.vividus.bdd.issue.KnownIssueCheckerBeanPostProcessor" />
+
+    <util:map id="knownIssues" />
+
+    <bean id="startContextListener" class="org.vividus.spring.StartContextListener"
+          lazy-init="false">
+        <property name="cleanableDirectories" value="${start-context-listener.cleanable-directories}" />
+    </bean>
+
+    <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
+        <property name="next" ref="allureStoryReporter" />
+    </bean>
+
+    <bean id="allureStoryReporter" parent="abstractAllureStoryReporter">
+        <property name="next" ref="bddVariableStoryReporter" />
+    </bean>
+
+    <bean id="bddVariableStoryReporter" class="org.vividus.bdd.BddVariableStoryReporter">
+        <property name="bddVariableContext" ref="bddVariableContext" />
+        <property name="next" ref="statusStoryReporter" />
+    </bean>
+
+    <bean id="statusStoryReporter" class="org.vividus.bdd.StatusStoryReporter">
+        <property name="next">
+            <bean class="org.vividus.bdd.log.LoggingStoryReporter" />
+        </property>
+    </bean>
+
+</beans>

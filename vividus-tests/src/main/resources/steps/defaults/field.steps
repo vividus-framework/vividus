@@ -1,0 +1,3 @@
+Composite: Then field value is `$expected`
+When I perform javascript 'return document.querySelector('#textInput').value' and save result to the 'Scenario' variable 'fieldValue'
+Then `${fieldValue}` is equal to `<expected>`

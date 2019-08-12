@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="softAssert" class="org.vividus.softassert.SoftAssert"
+          init-method="init">
+        <property name="testContext" ref="testContext" />
+        <property name="formatter" ref="assertionFormatter" />
+        <property name="knownIssueChecker" ref="knownIssueChecker" />
+        <property name="eventBus" ref="eventBus" />
+    </bean>
+
+    <bean id="assertionFormatter" class="org.vividus.softassert.formatter.AssertionFormatter">
+        <property name="stackTraceFilter">
+            <bean class="org.vividus.softassert.util.StackTraceFilter">
+                <property name="enabled" value="${soft-assert.stack-trace-filter.enabled}" />
+                <property name="inclusions" value="${soft-assert.stack-trace-filter.inclusions}" />
+                <property name="exclusions" value="${soft-assert.stack-trace-filter.exclusions}" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="knownIssueChecker" class="org.vividus.softassert.issue.KnownIssueChecker">
+        <property name="issueStateProvider" ref="issueStateProvider" />
+        <property name="testInfoProvider" ref="testInfoProvider" />
+        <property name="knownIssueProvider" ref="knownIssueProvider" />
+    </bean>
+</beans>

@@ -1,0 +1,19 @@
+project.description = 'Vividus plugin for Visual Testing'
+ext.sonarProjectName = 'Vividus Plugin - Visual Testing'
+
+dependencies {
+    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-plugin-web-app')
+    implementation project(':vividus-reporter')
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-util')
+
+    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+
+    testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugs.toolVersion)
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}

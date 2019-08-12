@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+        default-lazy-init="true" profile="web">
+
+    <bean id="httpRequestSteps" class="org.vividus.bdd.steps.integration.HttpRequestSteps" />
+
+    <bean id="abstractFetchingUrlsTableTransformer"
+          class="org.vividus.transformer.AbstractFetchingUrlsTableTransformer"
+          abstract="true">
+        <property name="webApplicationConfiguration" ref="webApplicationConfiguration" />
+        <property name="httpRedirectsProvider" ref="httpRedirectsProvider" />
+    </bean>
+
+    <bean name="FROM_SITEMAP" class="org.vividus.transformer.SiteMapTableTransformer"
+          parent="abstractFetchingUrlsTableTransformer">
+        <property name="siteMapParser" ref="siteMapParser" />
+        <property name="ignoreErrors" value="${bdd.transformer.sitemap.ignore-errors}" />
+        <property name="filterRedirects" value="${bdd.transformer.sitemap.filter-redirects}" />
+    </bean>
+
+    <bean name="FROM_HEADLESS_CRAWLING" class="org.vividus.transformer.HeadlessCrawlerTableTransformer"
+          parent="abstractFetchingUrlsTableTransformer">
+        <property name="crawlControllerFactory">
+            <bean class="org.vividus.crawler.CrawlControllerFactory">
+                <property name="crawlStorageFolder" value="${output.directory}/headless-crawler-storage" />
+            </bean>
+        </property>
+        <property name="filterRedirects" value="${bdd.transformer.headless.filter-redirects}" />
+        <property name="seedRelativeUrls" value="${bdd.transformer.headless.seed-relative-urls}" />
+    </bean>
+
+    <util:list id="stepBeanNames-WebAppToRestApi" value-type="java.lang.String">
+        <value>httpRequestSteps</value>
+    </util:list>
+ </beans>

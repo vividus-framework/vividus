@@ -1,0 +1,33 @@
+project.description = 'Vividus plugin for REST API testing'
+ext.sonarProjectName = 'Vividus Plugin - REST API'
+
+dependencies {
+    api project(':vividus-bdd-engine')
+    implementation project(':vividus-http-client')
+    implementation project(':vividus-reporter')
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-test-context')
+    implementation project(':vividus-util')
+
+    implementation(group: 'org.apache.httpcomponents', name: 'httpmime', version: versions.httpclient)
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
+    implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: '2.4.0') {
+        exclude group: 'net.minidev', module: 'json-smart'
+    }
+    implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '2.8.0')
+    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
+    implementation(group: 'org.apache.tika', name: 'tika-core', version: versions.tika)
+    implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
+    implementation(group: 'io.qameta.allure', name: 'allure-jsonunit', version: versions.allure) {
+        exclude (group: 'io.qameta.allure')
+    }
+    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
+    testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}

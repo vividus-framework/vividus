@@ -1,0 +1,6 @@
+{
+    "ISSUE-123": {
+        "type": "Automation",
+        "assertionPattern": "(Link has correct URL \\[Expected: <.*> Actual: <.*>\\])"
+    }
+}

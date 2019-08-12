@@ -1,0 +1,29 @@
+project.description = 'Vividus utilities'
+ext.sonarProjectName = 'Vividus - Utilities'
+
+dependencies {
+    api(group: 'org.apache.commons', name: 'commons-pool2', version: '2.6.2')
+    api(group: 'org.freemarker', name: 'freemarker', version: '2.3.28')
+    api platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.9.9')
+    api(group: 'com.fasterxml.jackson.core', name: 'jackson-core')
+    api(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9.1')
+    api(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8')
+
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'commons-io', name: 'commons-io', version: versions.commonsIo)
+    implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
+    implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0') {
+        exclude group: 'net.minidev', module: 'json-smart'
+    }
+    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
+    testCompileOnly(group: 'junit', name: 'junit', version: versions.junit4)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
+    testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
+    testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
+}

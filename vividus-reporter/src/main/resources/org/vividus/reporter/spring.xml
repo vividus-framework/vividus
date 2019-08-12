@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
+    default-lazy-init="true">
+
+    <bean id="attachmentPublisher" class="org.vividus.reporter.event.AttachmentPublisher">
+        <property name="eventBus" ref="eventBus" />
+        <property name="freemarkerProcessor">
+            <bean class="org.vividus.util.freemarker.FreemarkerProcessor">
+                <constructor-arg value="org.vividus.reporter.event.AttachmentPublisher" />
+                <constructor-arg value="/" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="environmentConfigurer" class="org.vividus.reporter.environment.EnvironmentConfigurer"
+        lazy-init="false" init-method="init">
+        <property name="propertyMapper" ref="propertyMapper" />
+        <property name="propertyParser" ref="propertyParser" />
+    </bean>
+
+</beans>

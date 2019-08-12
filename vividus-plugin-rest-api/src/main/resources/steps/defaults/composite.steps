@@ -1,0 +1,5 @@
+Composite: Then a JSON element by the JSON path '$jsonPath' exists
+Then the number of JSON elements by the JSON path '<jsonPath>' is > 0
+
+Composite: When I save a JSON element from response by JSON path '$jsonPath' to $scopes variable '$variableName'
+When I save a JSON element from '${response}' by JSON path '<jsonPath>' to <scopes> variable '<variableName>'

@@ -1,0 +1,105 @@
+/*
+ * Copyright 2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.vividus.bdd.steps.ui.web;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.search.ActionAttributeType;
+import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.web.context.WebUiContext;
+import org.vividus.ui.web.util.LocatorUtil;
+
+@ExtendWith(MockitoExtension.class)
+class SliderStepsTests
+{
+    private static final String XPATH = ".//xpath";
+    private static final String VALUE = "1";
+
+    @Mock
+    private IJavascriptActions javascriptAcrions;
+
+    @Mock
+    private WebUiContext webUiContext;
+
+    @Mock
+    private SearchContext searchContext;
+
+    @Mock
+    private IBaseValidations baseValidations;
+
+    @Mock
+    private ISoftAssert softAssert;
+
+    @InjectMocks
+    private SliderSteps sliderSteps;
+
+    @Test
+    void setSliderValueNoSliderTest()
+    {
+        sliderSteps.setSliderValue(VALUE, XPATH);
+        verifyZeroInteractions(javascriptAcrions);
+    }
+
+    @Test
+    void setSliderValueTest()
+    {
+        WebElement webElement = mock(WebElement.class);
+        mockBaseValidations("Slider to select value in", webElement);
+        sliderSteps.setSliderValue(VALUE, XPATH);
+        verify(javascriptAcrions).executeScript("arguments[0].value=arguments[1]", webElement, VALUE);
+    }
+
+    @Test
+    void verifySliderValueTestNoSlider()
+    {
+        sliderSteps.verifySliderValue(VALUE, XPATH);
+        verifyZeroInteractions(softAssert);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void verifySliderValueTest()
+    {
+        WebElement webElement = mock(WebElement.class);
+        mockBaseValidations("Slider to verify value in", webElement);
+        when(webElement.getAttribute("value")).thenReturn(VALUE);
+        sliderSteps.verifySliderValue(VALUE, XPATH);
+        verify(softAssert).assertThat(eq("Slider value"), eq(VALUE), any(IsEqual.class));
+    }
+
+    private void mockBaseValidations(String businessDescription, WebElement foundElement)
+    {
+        when(baseValidations.assertIfElementExists(businessDescription, new SearchAttributes(ActionAttributeType.XPATH,
+                LocatorUtil.getXPath(XPATH)))).thenReturn(foundElement);
+    }
+}

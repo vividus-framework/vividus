@@ -1,0 +1,96 @@
+project.description = 'Vividus - Test automation framework'
+ext.sonarProjectName = 'Vividus - Test Automation Framework'
+
+sourceSets {
+    integrationTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += compileClasspath
+    }
+}
+
+configurations.integrationTestImplementation.extendsFrom configurations.implementation
+
+task integrationTest(type: Test) {
+    description = 'Runs Integration Tests'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+check.dependsOn integrationTest
+integrationTest.mustRunAfter test
+
+eclipse.classpath.file.whenMerged {
+    tinkerEclipseTestClasspath(entries, 'integrationTest')
+}
+
+configurations.all {
+    exclude group: 'commons-logging'
+    exclude group: 'org.springframework', module: 'spring-jcl'
+}
+
+configurations.testCompile {
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j18-impl'
+}
+
+dependencies {
+    api project(':vividus-bdd-engine')
+    api project(':vividus-http-client')
+    api project(':vividus-reporter')
+
+    implementation project(':vividus-allure-adaptor')
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-util')
+
+
+    // Logging SLF4J + Log4j2
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.12.0')
+    implementation(group: 'org.apache.logging.log4j', name: 'log4j-api')
+    implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
+    implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl')
+    // Replace commons-logging with slf4j
+    implementation(group: 'org.slf4j', name: 'jcl-over-slf4j', version: versions.slf4j)
+    // JUL to slf4j bridge
+    implementation(group: 'org.slf4j', name: 'jul-to-slf4j', version: versions.slf4j)
+
+    implementation(group: 'com.github.valfirst', name: 'jbehave-junit-runner', version: '2.3.0')
+
+    // Meta filters based on Groovy
+    implementation(group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy, classifier: 'indy')
+
+    // Spring
+    implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
+    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.4')
+    // jasypt
+    implementation(group: 'org.jasypt', name: 'jasypt-spring31', version: '1.9.2')
+
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
+    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
+    implementation(group: 'org.aspectj', name: 'aspectjweaver', version: versions.aspectj)
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
+    testCompileOnly(group: 'junit', name: 'junit', version: versions.junit4)
+    testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
+    testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+    testImplementation(group: 'org.springframework', name: 'spring-test', version: versions.spring)
+
+    integrationTestImplementation project(':vividus-plugin-csv')
+    integrationTestImplementation project(':vividus-plugin-excel')
+    integrationTestImplementation project(':vividus-plugin-html')
+    integrationTestImplementation project(':vividus-plugin-rest-api')
+    integrationTestImplementation project(':vividus-plugin-ssh')
+    integrationTestImplementation project(':vividus-plugin-visual')
+    integrationTestImplementation project(':vividus-plugin-web-app-to-rest-api')
+    integrationTestImplementation project(':vividus-plugin-web-app')
+    integrationTestImplementation project(':vividus-plugin-xml')
+    integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+}

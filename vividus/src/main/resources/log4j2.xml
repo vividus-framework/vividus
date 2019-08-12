@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" packages="org.vividus.bdd.log">
+    <Appenders>
+        <Console name="console">
+            <PatternLayout pattern="%d [%t] %-5p %c - %m%n" />
+        </Console>
+        <RollingFile name="file" fileName="output/logs/log4.log" filePattern="output/logs/log4j.%i.log">
+            <PatternLayout pattern="%d [%t] %-5p %c - %m%n" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1 MB" />
+            </Policies>
+        </RollingFile>
+        <AllureLogAppender name="AllureLogAppender">
+            <PatternLayout pattern="%m%n" />
+        </AllureLogAppender>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.springframework" level="WARN" />
+        <Logger name="org.springframework.context.support.SimpleThreadScope" level="ERROR" />
+        <Logger name="org.vividus.bdd.log" level="INFO" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="file" />
+        </Logger>
+        <Logger name="org.vividus.softassert.SoftAssert" level="DEBUG" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="file" />
+            <AppenderRef ref="AllureLogAppender" />
+        </Logger>
+        <Logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="INFO" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="file" />
+        </Logger>
+        <Logger name="org.vividus.bdd.steps.SetupSteps" level="DEBUG" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="file" />
+            <AppenderRef ref="AllureLogAppender" />
+        </Logger>
+        <Logger name="org.vividus.runner.GenericRunner" level="DEBUG" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="file" />
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="file" />
+            <AppenderRef ref="AllureLogAppender" />
+        </Root>
+    </Loggers>
+</Configuration>

@@ -1,0 +1,15 @@
+project.description = 'Vividus reporter'
+ext.sonarProjectName = 'Vividus - Reporter'
+
+dependencies {
+    implementation project(':vividus-util')
+    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}
