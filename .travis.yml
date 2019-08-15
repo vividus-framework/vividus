@@ -1,0 +1,29 @@
+language: java
+
+jdk:
+  - openjdk12
+
+# only build commits/PRs targeted to the master branch
+# this avoids duplicate builds for push + PR
+# https://github.com/travis-ci/travis-ci/issues/1147
+branches:
+  only:
+    - master
+
+jobs:
+  include:
+    - stage: Build
+      script: ./gradlew build
+    - stage: "Integration tests"
+      script: ./gradlew :vividus-tests:runStories
+    - stage: Publish
+      if: branch = master AND type IN (push)
+      script: ./gradlew artifactoryPublish -x sonarqube -Dartifactory.publish.contextUrl=http://oss.jfrog.org -Dartifactory.publish.repoKey=oss-snapshot-local -Dartifactory.publish.username=$BINTRAY_USER -Dartifactory.publish.password=$BINTRAY_KEY -Dartifactory.publish.buildInfo=false
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
