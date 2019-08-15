@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
-    implementation(group: 'org.xmlunit', name: 'xmlunit-core', version: '2.6.2')
+    implementation(group: 'org.xmlunit', name: 'xmlunit-core', version: '2.6.3')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
