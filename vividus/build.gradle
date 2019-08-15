@@ -64,7 +64,7 @@ dependencies {
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
     implementation(group: 'commons-cli', name: 'commons-cli', version: '1.4')
     // jasypt
-    implementation(group: 'org.jasypt', name: 'jasypt-spring31', version: '1.9.2')
+    implementation(group: 'org.jasypt', name: 'jasypt-spring31', version: '1.9.3')
 
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
