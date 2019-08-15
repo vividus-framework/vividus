@@ -43,10 +43,10 @@ class CsvTableTransformerTest
     @Test
     void testTransform()
     {
-        String expectedValue = "|Country|Akey|ID|Capital|\n"
-                + "|Belarus|11|1|Minsk|\n"
-                + "|USA|22|2|Washington|\n"
-                + "|Armenia|33|3|Yerevan|";
+        String expectedValue = "|Country|ID|Capital|Akey|\n"
+                + "|Belarus|1|Minsk|11|\n"
+                + "|USA|2|Washington|22|\n"
+                + "|Armenia|3|Yerevan|33|";
         Properties properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, CSV_FILE_NAME);
         assertEquals(expectedValue,
