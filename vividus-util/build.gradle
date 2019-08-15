@@ -6,7 +6,7 @@ dependencies {
     api(group: 'org.freemarker', name: 'freemarker', version: '2.3.28')
     api platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.9.9')
     api(group: 'com.fasterxml.jackson.core', name: 'jackson-core')
-    api(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9.1')
+    api(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.0.pr1')
     api(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8')
 
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
