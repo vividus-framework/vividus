@@ -4,7 +4,7 @@ ext.sonarProjectName = 'Vividus Plugin - CSV'
 dependencies {
     api project(':vividus-bdd-engine')
     implementation project(':vividus-util')
-    implementation(group: 'org.apache.commons', name: 'commons-csv', version: '1.6')
+    implementation(group: 'org.apache.commons', name: 'commons-csv', version: '1.7')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
