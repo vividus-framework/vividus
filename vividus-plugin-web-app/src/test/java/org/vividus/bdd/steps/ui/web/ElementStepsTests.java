@@ -616,11 +616,11 @@ public class ElementStepsTests
     }
 
     @Test
-    public void clickElementByXpath()
+    public void clickElementByLocator()
     {
-        when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK,  new SearchAttributes(ActionAttributeType.XPATH,
-                XPATH))).thenReturn(webElement);
-        elementSteps.clickElementByXpath(XPATH);
+        SearchAttributes elementAttributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH);
+        when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, elementAttributes)).thenReturn(webElement);
+        elementSteps.clickElementByLocator(elementAttributes);
         verify(clickActions).click(webElement);
     }
 

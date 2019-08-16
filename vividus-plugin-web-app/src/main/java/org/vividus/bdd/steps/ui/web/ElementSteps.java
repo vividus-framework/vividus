@@ -127,16 +127,15 @@ public class ElementSteps implements ResourceLoaderAware
      * Clicks on an element by the xpath
      * <p>Actions performed at this step:</p>
      * <ul>
-     * <li>Finds the element by the given xpath;</li>
+     * <li>Finds the element by the given locator;</li>
      * <li>Clicks on it.</li>
      * </ul>
-     * @param xpath Xpath selector of the element
+     * @param locator SearchAttribute locator of the element
     */
-    @When("I click on an element by the xpath '$xpath'")
-    public void clickElementByXpath(String xpath)
+    @When("I click on an element by '$locator'")
+    public void clickElementByLocator(SearchAttributes locator)
     {
-        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, new SearchAttributes(
-                ActionAttributeType.XPATH, xpath));
+        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator);
         clickActions.click(element);
     }
 
