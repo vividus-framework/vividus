@@ -1,0 +1,2 @@
+Composite: When I click on an element by the xpath '$xpath'
+When I click on an element by 'By.xpath(<xpath>)'
