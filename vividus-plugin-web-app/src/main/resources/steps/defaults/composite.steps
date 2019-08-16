@@ -98,3 +98,78 @@ When I enter `<text>` in field located `By.xpath(<xpath>)`
 
 Composite: When I select '$text' from a drop down by the xpath '$xpath'
 When I select `$text` from drop down located `By.xpath(<xpath>)`
+
+Composite: Then an element with the name '$elementName' containing text '$text' exists
+Then element located `By.fieldName(<elementName>):a->filter.fieldTextPart(<text>)` exists
+
+Composite: Then an element with the name '$elementName' and text '$text' exists
+Then element located `By.fieldName(<elementName>)->filter.fieldText(<text>)` exists
+
+Composite: Then a [$state] element with the name '$elementName' and text '$text' exists
+Then element located `By.fieldName(<elementName>)->filter.fieldText(<text>).state(<state>)` exists
+
+Composite: Then an element with the name '$elementName' exists
+Then element located `By.fieldName(<elementName>)` exists
+
+Composite: Then an element with the name '$elementName' does not exist
+Then element located `By.fieldName(<elementName>)` does not exist
+
+Composite: Then a [$state] element with the name '$elementName' exists
+Then element located `By.fieldName(<elementName>):a->filter.state(<state>)` exists
+
+Composite: Then an element with the tag '$elementTag' and text '$text' exists
+Then element located `By.tagName(<elementTag>)->filter.fieldText(<text>)` exists
+
+Composite: Then a [$state] element with the tag '$elementTag' does not exist
+Then element located `By.tagName(<elementTag>)->filter.state(<state>)` does not exist
+
+Composite: Then a [$state] element with the tag '$elementTag' exists
+Then element located `By.tagName(<elementTag>)->filter.state(<state>)` exists
+
+Composite: When I click on an element by the xpath '$xpath'
+When I click on element located `By.xpath(<xpath>)`
+
+Composite: When I click on an element with the attribute '$attributeType'='$attributeValue'
+When I click on element located `By.xpath(//*[@<attributeType>='<attributeValue>'])`
+
+Composite: When I click on an element with the text '$text'
+When I click on element located `By.xpath((//*[text()='<text>']))`
+
+Composite: When I click on all elements by xpath '$xpath'
+When I click on all elements located `By.xpath(<xpath>)`
+
+Composite: Then an element with the attribute '$attributeType'='$attributeValue' exists
+Then element located `By.xpath(//*[@<attributeType>='<attributeValue>'])` exists
+
+Composite: Then a [$state] element with the attribute '$attributeType'='$attributeValue' exists
+Then element located `By.xpath(//*[@<attributeType>='<attributeValue>'])->filter.state(<state>)` exists
+
+Composite: Then an element with the tag '$elementTag' and attribute '$attributeType'='$attributeValue' exists
+Then element located `By.xpath(//<elementTag>[@<attributeType>='<attributeValue>'])` exists
+
+Composite: Then an element with the attribute '$attributeType' containing '$attributeValue' exists
+Then element located `By.xpath(//*[contains(@<attributeType>, '<attributeValue>')])` exists
+
+Composite: Then each element by the xpath '$xpath' has the same '$dimension'
+Then each element located `By.xpath(<xpath>)` has the same `<dimension>`
+
+Composite: Then each element with the xpath '$elementXpath' has '$number' child elements with the xpath '$childXpath'
+Then each element with locator `By.xpath(<elementXpath>)` has `<number>` child elements with locator `By.xpath(<childXpath>)`
+
+Composite: Then at least one element by the xpath '$xpath' exists
+Then at least one element with locator `By.xpath(<xpath>)` exists
+
+Composite: Then at least one element with the attribute '$attributeType'='$attributeValue' exists
+Then at least one element with locator `By.xpath(//*[@<attributeType>='<attributeValue>'])` exists
+
+Composite: Then an element by the xpath '$xpath' exists
+Then element located `By.xpath(<xpath>)` exists
+
+Composite: Then an element by the cssSelector '$cssSelector' exists
+Then element located `By.CSSselector(<cssSelector>)` exists
+
+Composite: When I hover a mouse over an element with the xpath '$xpath'
+When I hover mouse over element with locator `By.xpath(<xpath>)`
+
+Composite: When I perform right click on an element by the xpath '$xpath'
+When I perform right click on element located `By.xpath(<xpath>)`
