@@ -21,7 +21,7 @@
     <bean id="configurationResolver" class="org.vividus.configuration.ConfigurationResolver"
         factory-method="getInstance" />
 
-    <bean class="org.jasypt.spring31.properties.EncryptablePropertyPlaceholderConfigurer">
+    <bean class="org.jasypt.spring4.properties.EncryptablePropertyPlaceholderConfigurer">
         <constructor-arg ref="standardPBEStringEncryptor"/>
         <property name="systemPropertiesMode" value="#{T(org.springframework.beans.factory.config.PropertyPlaceholderConfigurer).SYSTEM_PROPERTIES_MODE_OVERRIDE}" />
         <property name="valueSeparator" value="=" />
