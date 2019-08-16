@@ -22,7 +22,7 @@ if [ -f "$GRADLEW_PATH" ] ; then
 else
     die "ERROR: Neither environment variable "BUILD_SYSTEM_ROOT" is set nor embedded build system is synced
 Please check Build System guide:
-https://Vividus-BuildSystem
+https://github.com/vividus-framework/vividus-build-system
 or
 clone this repo recursively: git clone --recursive <git-repository-url>"
 fi
