@@ -32,7 +32,7 @@ echo ERROR: Couldn't find %GRADLEW_PATH%
 echo Check BUILD_SYSTEM_ROOT and buildSystemVersion set correctly
 echo.
 echo Please check Build System guide:
-echo https://Vividus-BuildSystem
+echo https://github.com/vividus-framework/vividus-build-system
 echo or
 echo clone this repo recursively: git clone --recursive <git-repository-url>
 exit /b 1
