@@ -47,7 +47,8 @@ class HttpMethodTests
                 Arguments.of(HttpMethod.DELETE, HttpDelete.class),
                 Arguments.of(HttpMethod.OPTIONS, HttpOptions.class),
                 Arguments.of(HttpMethod.TRACE, HttpTrace.class),
-                Arguments.of(HttpMethod.PUT, HttpPutWithoutBody.class)
+                Arguments.of(HttpMethod.PUT, HttpPutWithoutBody.class),
+                Arguments.of(HttpMethod.DEBUG, HttpDebug.class)
         );
     }
 
@@ -85,7 +86,7 @@ class HttpMethodTests
     }
 
     @ParameterizedTest
-    @EnumSource(value = HttpMethod.class, names = { "GET", "HEAD", "OPTIONS", "TRACE" })
+    @EnumSource(value = HttpMethod.class, names = { "GET", "HEAD", "OPTIONS", "TRACE", "DEBUG" })
     void testFailedEmptyEnclosingEntityRequestCreation(HttpMethod httpMethod)
     {
         assertThrows(IllegalStateException.class, httpMethod::createEmptyEnclosingEntityRequest,
