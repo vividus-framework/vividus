@@ -14,6 +14,7 @@ jobs:
   include:
     - stage: Build
       script: ./gradlew build
+      after_success: bash <(curl -s https://codecov.io/bash)
     - stage: "Integration tests"
       script: ./gradlew :vividus-tests:runStories
     - stage: Publish
