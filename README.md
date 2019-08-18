@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/vividus-framework/vividus.svg?branch=master)](https://travis-ci.org/vividus-framework/vividus)
+[![codecov](https://codecov.io/gh/vividus-framework/vividus/branch/master/graph/badge.svg)](https://codecov.io/gh/vividus-framework/vividus)
 
 ## Prerequisites
 #### Java
