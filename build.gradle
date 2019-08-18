@@ -18,7 +18,8 @@ configure(nonTestSubprojects) {
 task jacocoAggregatedReport(type: JacocoReport) {
     nonTestSubprojects.each {
       executionData it.tasks.withType(Test)
-   }
+    }
+    dependsOn nonTestSubprojects.collect { it.tasks.withType(Test) }
     sourceDirectories.from(subprojects.sourceSets.main.java.sourceDirectories)
     classDirectories.from(subprojects.sourceSets.main.output)
 }
