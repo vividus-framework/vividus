@@ -104,6 +104,14 @@ public enum HttpMethod
         {
             return new HttpTrace();
         }
+    },
+    DEBUG
+    {
+        @Override
+        public HttpRequestBase createEmptyRequest()
+        {
+            return new HttpDebug();
+        }
     };
 
     public HttpRequestBase createEmptyRequest()
