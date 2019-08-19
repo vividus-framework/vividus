@@ -98,3 +98,81 @@ When I enter `<text>` in field located `By.xpath(<xpath>)`
 
 Composite: When I select '$text' from a drop down by the xpath '$xpath'
 When I select `$text` from drop down located `By.xpath(<xpath>)`
+
+Composite: Then an element with the name '$elementName' containing text '$text' exists
+Then number of elements found by `By.elementName(<elementName>)->filter.textPart(<text>)` is equal to `1`
+
+Composite: Then an element with the name '$elementName' and text '$text' exists
+Then number of elements found by `By.elementName(<elementName>)->filter.caseSensitiveText(<text>)` is equal to `1`
+
+Composite: Then a [$state] element with the name '$elementName' and text '$text' exists
+Then number of elements found by `By.elementName(<elementName>)->filter.caseSensitiveText(<text>).state(<state>)` is equal to `1`
+
+Composite: Then an element with the name '$elementName' exists
+Then number of elements found by `By.elementName(<elementName>)` is equal to `1`
+
+Composite: Then an element with the name '$elementName' does not exist
+Then number of elements found by `By.elementName(<elementName>)` is equal to `0`
+
+Composite: Then an element by the xpath '$xpath' does not exist
+Then number of elements found by `By.xpath(<xpath>)` is equal to `0`
+
+Composite: Then a [$state] element with the name '$elementName' exists
+Then number of elements found by `By.elementName(<elementName>)->filter.state(<state>)` is equal to `1`
+
+Composite: Then an element with the tag '$elementTag' and text '$text' exists
+Then number of elements found by `By.tagName(<elementTag>)->filter.caseSensitiveText(<text>)` is equal to `1`
+
+Composite: Then a [$state] element with the tag '$elementTag' does not exist
+Then number of elements found by `By.tagName(<elementTag>)->filter.state(<state>)` is equal to `0`
+
+Composite: Then a [$state] element with the tag '$elementTag' exists
+Then number of elements found by `By.tagName(<elementTag>)->filter.state(<state>)` is equal to `1`
+
+Composite: When I click on an element by the xpath '$xpath'
+When I click on element located `By.xpath(<xpath>)`
+
+Composite: When I click on an element with the attribute '$attributeType'='$attributeValue'
+When I click on element located `By.xpath(.//*[@<attributeType>='<attributeValue>'])`
+
+Composite: When I click on an element with the text '$text'
+When I click on element located `By.caseSensitiveText(<text>)`
+
+Composite: When I click on all elements by xpath '$xpath'
+When I click on all elements located `By.xpath(<xpath>)`
+
+Composite: Then an element with the attribute '$attributeType'='$attributeValue' exists
+Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])` is equal to `1`
+
+Composite: Then a [$state] element with the attribute '$attributeType'='$attributeValue' exists
+Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])->filter.state(<state>)` is equal to `1`
+
+Composite: Then an element with the tag '$elementTag' and attribute '$attributeType'='$attributeValue' exists
+Then number of elements found by `By.xpath(.//<elementTag>[@<attributeType>='<attributeValue>'])` is equal to `1`
+
+Composite: Then an element with the attribute '$attributeType' containing '$attributeValue' exists
+Then number of elements found by `By.xpath(.//*[contains(@<attributeType>, '<attributeValue>')])` is equal to `1`
+
+Composite: Then each element by the xpath '$xpath' has same '$dimension'
+Then each element located `By.xpath(<xpath>)` has same `<dimension>`
+
+Composite: Then each element by the xpath '$elementXpath' has '$number' child elements by the xpath '$childXpath'
+Then each element with locator `By.xpath(<elementXpath>)` has `<number>` child elements with locator `By.xpath(<childXpath>)`
+
+Composite: Then at least one element by the xpath '$xpath' exists
+Then number of elements found by `By.xpath(<xpath>)` is greater than or equal to `1`
+
+Composite: Then at least one element with the attribute '$attributeType'='$attributeValue' exists
+Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])` is greater than or equal to `1`
+
+Composite: Then an element by the xpath '$xpath' exists
+Then number of elements found by `By.xpath(<xpath>)` is equal to `1`
+
+Composite: Then an element by the cssSelector '$cssSelector' exists
+Then number of elements found by `By.cssSelector(<cssSelector>)` is equal to `1`
+
+Composite: When I hover a mouse over an element with the xpath '$xpath'
+When I hover mouse over element located `By.xpath(<xpath>)`
+
+Composite: When I perform right click on an element by the xpath '$xpath'
+When I perform right click on element located `By.xpath(<xpath>)`
