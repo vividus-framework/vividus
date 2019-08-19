@@ -5,15 +5,25 @@ die () {
     exit 1
 }
 
+getValue () {
+    local value=$(grep "$1" $file | cut -d '=' -f2)
+    if [[ -z $value ]] ;
+    then
+        die "Unable to find $1 in $file"
+    else
+        echo $value
+    fi
+}
+
 file="./gradle.properties"
 if [ -f "$file" ] ; then
-    export $(cat $file | grep buildSystemVersion)
+    export buildSystemVersion=$(getValue 'buildSystemVersion')
 else
     die "$file not found."
 fi
 
 if [ -z "$BUILD_SYSTEM_ROOT" ] ; then
-    export BUILD_SYSTEM_ROOT=vividus-build-system
+    export BUILD_SYSTEM_ROOT=$(getValue 'buildSystemRootDir')
 fi
 
 GRADLEW_PATH=$BUILD_SYSTEM_ROOT/$buildSystemVersion/gradlew

@@ -1,4 +1,4 @@
-ext.buildSystemDir = file("${System.env.BUILD_SYSTEM_ROOT}/${buildSystemVersion}")
+ext.buildSystemDir = file("${System.env.BUILD_SYSTEM_ROOT?:buildSystemRootDir}/${buildSystemVersion}")
 ext.gradleScriptDir =  new File(ext.buildSystemDir, 'gradle')
 apply from: "${gradleScriptDir}/project.gradle"
 apply from: "${gradleScriptDir}/release.gradle"
@@ -18,7 +18,8 @@ configure(nonTestSubprojects) {
 task jacocoAggregatedReport(type: JacocoReport) {
     nonTestSubprojects.each {
       executionData it.tasks.withType(Test)
-   }
+    }
+    dependsOn nonTestSubprojects.collect { it.tasks.withType(Test) }
     sourceDirectories.from(subprojects.sourceSets.main.java.sourceDirectories)
     classDirectories.from(subprojects.sourceSets.main.output)
 }
