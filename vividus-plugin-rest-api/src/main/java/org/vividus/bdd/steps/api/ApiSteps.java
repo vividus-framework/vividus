@@ -39,9 +39,9 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.api.IApiTestContext;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
+import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.exception.HttpRequestBuildException;
@@ -57,7 +57,7 @@ public class ApiSteps
     private String apiEndpoint;
 
     private IHttpClient httpClient;
-    @Inject private IApiTestContext apiTestContext;
+    @Inject private HttpTestContext httpTestContext;
     @Inject private ISoftAssert softAssert;
 
     /**
@@ -67,7 +67,7 @@ public class ApiSteps
     @Given("request body: $content")
     public void request(String content)
     {
-        apiTestContext.putRequestEntity(new StringEntity(content, StandardCharsets.UTF_8));
+        httpTestContext.putRequestEntity(new StringEntity(content, StandardCharsets.UTF_8));
     }
 
     /**
@@ -100,7 +100,7 @@ public class ApiSteps
             RequestPartType requestPartType = row.valueAs("type", RequestPartType.class);
             requestPartType.addPart(multipartEntityBuilder, name, value, Optional.ofNullable(contentType));
         }
-        apiTestContext.putRequestEntity(multipartEntityBuilder.build());
+        httpTestContext.putRequestEntity(multipartEntityBuilder.build());
     }
 
     /**
@@ -114,7 +114,7 @@ public class ApiSteps
         List<Header> requestHeaders = headers.getRowsAsParameters(true).stream()
                 .map(row -> new BasicHeader(row.valueAs(NAME, String.class), row.valueAs(VALUE, String.class)))
                 .collect(toList());
-        apiTestContext.putRequestHeaders(requestHeaders);
+        httpTestContext.putRequestHeaders(requestHeaders);
     }
 
     /**
@@ -225,7 +225,7 @@ public class ApiSteps
             field.setAccessible(true);
             field.set(requestConfigBuilder, castType(field.getType().getName(), entry.getValue()));
         }
-        apiTestContext.putRequestConfig(requestConfigBuilder.build());
+        httpTestContext.putRequestConfig(requestConfigBuilder.build());
     }
 
     private static Object castType(String typeName, String value)
@@ -244,8 +244,8 @@ public class ApiSteps
     private HttpRequestBuilder prepareHttpRequestBuilder(HttpMethod httpMethod, String endpoint)
     {
         HttpRequestBuilder httpRequestBuilder = HttpRequestBuilder.create().withHttpMethod(httpMethod)
-                .withEndpoint(endpoint).withHeaders(apiTestContext.pullRequestHeaders());
-        apiTestContext.pullRequestEntity().ifPresent(httpRequestBuilder::withContent);
+                .withEndpoint(endpoint).withHeaders(httpTestContext.pullRequestHeaders());
+        httpTestContext.pullRequestEntity().ifPresent(httpRequestBuilder::withContent);
         return httpRequestBuilder;
     }
 
@@ -254,8 +254,8 @@ public class ApiSteps
         try
         {
             HttpClientContext httpClientContext = new HttpClientContext();
-            apiTestContext.getCookieStore().ifPresent(httpClientContext::setCookieStore);
-            apiTestContext.getRequestConfig().ifPresent(httpClientContext::setRequestConfig);
+            httpTestContext.getCookieStore().ifPresent(httpClientContext::setCookieStore);
+            httpTestContext.getRequestConfig().ifPresent(httpClientContext::setRequestConfig);
 
             HttpResponse httpResponse = httpClient.execute(builder.build(), httpClientContext);
             LOGGER.info("Response time: {} ms", httpResponse.getResponseTimeInMs());

@@ -52,13 +52,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.api.IApiTestContext;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ISubStepExecutor;
 import org.vividus.bdd.steps.ISubStepExecutorFactory;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.HttpMethod;
+import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.json.IJsonUtils;
@@ -104,7 +104,7 @@ class JsonResponseValidationStepsTests
     private IBddVariableContext bddVariableContext;
 
     @Mock
-    private IApiTestContext apiTestContext;
+    private HttpTestContext httpTestContext;
 
     @Mock
     private ISoftAssert softAssert;
@@ -155,7 +155,7 @@ class JsonResponseValidationStepsTests
     @MethodSource("defaultDataProvider")
     void testIsDataByJsonPathEqual(String jsonPath, String expectedData)
     {
-        when(apiTestContext.getJsonContext()).thenReturn(JSON);
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
         testIsDataByJsonPathEqual(jsonPath, expectedData, expectedData, Options.empty());
     }
 
@@ -170,7 +170,7 @@ class JsonResponseValidationStepsTests
     @Test
     void testIsDataByJsonPathEqualIgnoringArrayOrder()
     {
-        when(apiTestContext.getJsonContext()).thenReturn(JSON);
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
         testIsDataByJsonPathEqual(ARRAY_PATH, "[2,1]", ARRAY_PATH_RESULT,
                 new Options(Option.IGNORING_ARRAY_ORDER));
     }
@@ -178,7 +178,7 @@ class JsonResponseValidationStepsTests
     @Test
     void testIsDataByJsonPathEqualIgnoringArrayOrderAndExtraArrayItems()
     {
-        when(apiTestContext.getJsonContext()).thenReturn(JSON);
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
         testIsDataByJsonPathEqual(ARRAY_PATH, "[2]", ARRAY_PATH_RESULT,
                 new Options(Option.IGNORING_ARRAY_ORDER, Option.IGNORING_EXTRA_ARRAY_ITEMS));
     }
@@ -199,7 +199,7 @@ class JsonResponseValidationStepsTests
     @Test
     void testIsDataByJsonPathEqualWithPathNotFoundException()
     {
-        when(apiTestContext.getJsonContext()).thenReturn(JSON);
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
         String nonExistingPath = NON_EXISTING_PATH;
         jsonResponseValidationSteps.isDataByJsonPathEqual(nonExistingPath, STRING_PATH_RESULT,
                 Options.empty());
@@ -210,7 +210,7 @@ class JsonResponseValidationStepsTests
     @MethodSource("checkJsonElementsNumberDataProvider")
     void testDoesJsonPathElementsMatchRule(String jsonPath, int elementsNumber)
     {
-        when(apiTestContext.getJsonContext()).thenReturn(JSON);
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
         jsonResponseValidationSteps.doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.EQUAL_TO, elementsNumber);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(elementsNumber),
                 verifyMatcher(TypeSafeMatcher.class, elementsNumber));
@@ -231,7 +231,7 @@ class JsonResponseValidationStepsTests
     void testSaveElementsNumberByJsonPath(String jsonPath, int elementsNumber)
     {
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        when(apiTestContext.getJsonContext()).thenReturn(JSON);
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
         jsonResponseValidationSteps.saveElementsNumberByJsonPath(jsonPath, scopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(scopes, VARIABLE_NAME, elementsNumber);
     }
@@ -239,7 +239,7 @@ class JsonResponseValidationStepsTests
     @Test
     void testSaveJsonFromContextElementToVariable()
     {
-        when(apiTestContext.getJsonContext()).thenReturn(JSON);
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         String variableName = VARIABLE_NAME;
         JsonResponseValidationSteps spy = Mockito.spy(jsonResponseValidationSteps);
@@ -282,21 +282,21 @@ class JsonResponseValidationStepsTests
         jsonResponseValidationSteps.performAllStepsForProvidedJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO,
                 number, json, jsonPath, stepsAsTable);
         verify(subStepExecutor, times(number)).execute(Optional.empty());
-        verify(apiTestContext).getJsonContext();
-        verify(apiTestContext).putJsonContext(null);
+        verify(httpTestContext).getJsonContext();
+        verify(httpTestContext).putJsonContext(null);
     }
 
     @Test
     void testPerformAllStepsForJsonIfFound()
     {
-        when(apiTestContext.getJsonContext()).thenReturn(JSON);
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
         ExamplesTable stepsAsTable = mock(ExamplesTable.class);
         when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + JSON_PATH), eq(0),
                 verifyMatcher(TypeSafeMatcher.class, 3))).thenReturn(false);
         jsonResponseValidationSteps.performAllStepsForJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 0,
                 JSON_PATH, stepsAsTable);
         verifyZeroInteractions(stepsAsTable, subStepExecutorFactory);
-        verify(apiTestContext, times(0)).putJsonContext(any());
+        verify(httpTestContext, times(0)).putJsonContext(any());
     }
 
     @Test
@@ -319,7 +319,7 @@ class JsonResponseValidationStepsTests
     private void testWaitForJsonFieldAppears(String body, int elementsFound) throws IOException
     {
         mockResponse(body);
-        when(apiTestContext.getJsonContext()).thenReturn(body);
+        when(httpTestContext.getJsonContext()).thenReturn(body);
         jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT2S"));
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH),
                 eq(elementsFound), verifyMatcher(TypeSafeMatcher.class, 1));
@@ -332,7 +332,7 @@ class JsonResponseValidationStepsTests
     })
     void testJsonPathElementsMatchRuleEmptyData(String jsonPath, int number)
     {
-        when(apiTestContext.getJsonContext()).thenReturn(RESPONSE_NULL);
+        when(httpTestContext.getJsonContext()).thenReturn(RESPONSE_NULL);
         jsonResponseValidationSteps.doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.EQUAL_TO, number);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(number),
                 verifyMatcher(TypeSafeMatcher.class, number));
@@ -358,7 +358,7 @@ class JsonResponseValidationStepsTests
     {
         HttpResponse response = new HttpResponse();
         response.setResponseBody(body.getBytes(StandardCharsets.UTF_8));
-        when(apiTestContext.getResponse()).thenReturn(response);
+        when(httpTestContext.getResponse()).thenReturn(response);
     }
 
     private void verifyPathNotFoundExceptionRecording(String nonExistingJsonPath)

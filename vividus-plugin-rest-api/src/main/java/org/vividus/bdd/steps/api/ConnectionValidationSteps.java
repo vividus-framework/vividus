@@ -19,13 +19,13 @@ package org.vividus.bdd.steps.api;
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.Then;
-import org.vividus.api.ConnectionDetails;
-import org.vividus.api.IApiTestContext;
+import org.vividus.http.ConnectionDetails;
+import org.vividus.http.HttpTestContext;
 import org.vividus.softassert.ISoftAssert;
 
 public class ConnectionValidationSteps
 {
-    @Inject private IApiTestContext apiTestContext;
+    @Inject private HttpTestContext httpTestContext;
     @Inject private ISoftAssert softAssert;
 
     /**
@@ -36,7 +36,7 @@ public class ConnectionValidationSteps
     @Then("the connection is secured using $securityProtocol protocol")
     public void isConnectionSecured(String securityProtocol)
     {
-        ConnectionDetails connectionDetails = apiTestContext.getConnectionDetails();
+        ConnectionDetails connectionDetails = httpTestContext.getConnectionDetails();
         if (softAssert.assertTrue("Connection is secure", connectionDetails.isSecure()))
         {
             softAssert.assertEquals("Security protocol", securityProtocol,

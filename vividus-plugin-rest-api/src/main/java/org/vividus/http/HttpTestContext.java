@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.api;
+package org.vividus.http;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,57 +27,54 @@ import org.apache.http.client.config.RequestConfig;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.testcontext.TestContext;
 
-public class ApiTestContext implements IApiTestContext
+public class HttpTestContext
 {
-    private static final Object KEY = ApiTestContextData.class;
+    private static final Object KEY = HttpTestContextData.class;
 
-    private TestContext testContext;
+    private final TestContext testContext;
 
-    @Override
+    public HttpTestContext(TestContext testContext)
+    {
+        this.testContext = testContext;
+    }
+
     public void putRequestEntity(HttpEntity requestEntity)
     {
         getData().requestEntity = requestEntity;
     }
 
-    @Override
     public void putRequestHeaders(List<Header> requestHeaders)
     {
         getData().requestHeaders = requestHeaders;
     }
 
-    @Override
     public void putCookieStore(CookieStore cookieStore)
     {
         getData().cookieStore = cookieStore;
     }
 
-    @Override
     public void putConnectionDetails(ConnectionDetails connectionDetails)
     {
         getData().connectionDetails = connectionDetails;
     }
 
-    @Override
     public void putResponse(HttpResponse response)
     {
-        ApiTestContextData data = getData();
+        HttpTestContextData data = getData();
         data.response = response;
         data.jsonElement = Optional.empty();
     }
 
-    @Override
     public void putJsonContext(String jsonElement)
     {
         getData().jsonElement = Optional.ofNullable(jsonElement);
     }
 
-    @Override
     public void putRequestConfig(RequestConfig requestConfig)
     {
         getData().requestConfig = requestConfig;
     }
 
-    @Override
     public Optional<HttpEntity> pullRequestEntity()
     {
         HttpEntity requestEntity = getData().requestEntity;
@@ -85,7 +82,6 @@ public class ApiTestContext implements IApiTestContext
         return Optional.ofNullable(requestEntity);
     }
 
-    @Override
     public List<Header> pullRequestHeaders()
     {
         List<Header> requestHeaders = getData().requestHeaders;
@@ -93,47 +89,37 @@ public class ApiTestContext implements IApiTestContext
         return requestHeaders;
     }
 
-    @Override
     public ConnectionDetails getConnectionDetails()
     {
         return getData().connectionDetails;
     }
 
-    @Override
     public HttpResponse getResponse()
     {
         return getData().response;
     }
 
-    @Override
     public String getJsonContext()
     {
         return getData().jsonElement.orElse(getResponse() == null ? null : getResponse().getResponseBodyAsString());
     }
 
-    @Override
     public Optional<CookieStore> getCookieStore()
     {
         return Optional.ofNullable(getData().cookieStore);
     }
 
-    @Override
     public Optional<RequestConfig> getRequestConfig()
     {
         return Optional.ofNullable(getData().requestConfig);
     }
 
-    public void setTestContext(TestContext testContext)
+    private HttpTestContextData getData()
     {
-        this.testContext = testContext;
+        return testContext.get(KEY, HttpTestContextData::new);
     }
 
-    private ApiTestContextData getData()
-    {
-        return testContext.get(KEY, ApiTestContextData::new);
-    }
-
-    private static class ApiTestContextData
+    private static class HttpTestContextData
     {
         private HttpEntity requestEntity;
         private List<Header> requestHeaders = new ArrayList<>();
