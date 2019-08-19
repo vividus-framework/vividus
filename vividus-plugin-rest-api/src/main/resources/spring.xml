@@ -9,12 +9,10 @@
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"
     default-lazy-init="true">
 
-    <bean id="apiTestContext" class="org.vividus.api.ApiTestContext">
-        <property name="testContext" ref="testContext"/>
-    </bean>
+    <bean id="httpTestContext" class="org.vividus.http.HttpTestContext" />
 
     <aop:config>
-        <aop:aspect id="savingResponseHttpClientAspect" ref="apiTestContext">
+        <aop:aspect id="savingResponseHttpClientAspect" ref="httpTestContext">
             <aop:after-returning method="putResponse" returning="response"
                 pointcut="execution(org.vividus.http.client.HttpResponse org.vividus.http.client.IHttpClient.*(..))" />
         </aop:aspect>
@@ -59,8 +57,8 @@
                 </property>
                 <property name="lastRequestInterceptor" ref="httpClientInterceptor" />
                 <property name="lastResponseInterceptor">
-                    <bean class="org.vividus.api.SavingConnectionDetailsHttpResponseInterceptor">
-                        <property name="apiTestContext" ref="apiTestContext" />
+                    <bean class="org.vividus.http.SavingConnectionDetailsHttpResponseInterceptor">
+                        <property name="httpTestContext" ref="httpTestContext" />
                     </bean>
                 </property>
             </bean>

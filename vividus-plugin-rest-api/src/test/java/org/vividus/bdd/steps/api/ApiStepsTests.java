@@ -56,8 +56,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.api.IApiTestContext;
 import org.vividus.http.HttpMethod;
+import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.exception.HttpRequestBuildException;
@@ -79,7 +79,7 @@ class ApiStepsTests
     private IHttpClient mockedHttpClient;
 
     @Mock
-    private IApiTestContext apiTestContext;
+    private HttpTestContext httpTestContext;
 
     @Mock
     private ISoftAssert softAssert;
@@ -113,7 +113,7 @@ class ApiStepsTests
     {
         ExamplesTable requestParts = new ExamplesTable(tableAsString);
         apiSteps.putMultipartRequest(requestParts);
-        verify(apiTestContext).putRequestEntity(argThat(entity ->
+        verify(httpTestContext).putRequestEntity(argThat(entity ->
         {
             try
             {
@@ -134,7 +134,7 @@ class ApiStepsTests
     {
         ExamplesTable headers = new ExamplesTable("|name|value|\n|name1|value1|");
         apiSteps.setUpRequestHeaders(headers);
-        verify(apiTestContext).putRequestHeaders(argThat(actual ->
+        verify(httpTestContext).putRequestHeaders(argThat(actual ->
         {
             if (actual.size() == 1)
             {
@@ -160,7 +160,7 @@ class ApiStepsTests
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setResponseTimeInMs(RESPONSE_TIME_IN_MS);
         CookieStore cookieStore = mock(CookieStore.class);
-        when(apiTestContext.getCookieStore()).thenReturn(Optional.of(cookieStore));
+        when(httpTestContext.getCookieStore()).thenReturn(Optional.of(cookieStore));
         when(mockedHttpClient.execute(argThat(e -> e instanceof HttpGet && URL.equals(e.getURI().toString())),
                 argThat(context -> ((HttpClientContext) context).getCookieStore() == cookieStore)))
                         .thenReturn(httpResponse);
@@ -255,7 +255,7 @@ class ApiStepsTests
         ExamplesTable configItems = new ExamplesTable("|redirectsEnabled|connectionRequestTimeout|cookieSpec|"
                 + "\n|false|2|superCookie|");
         apiSteps.setCustomRequestConfig(configItems);
-        verify(apiTestContext).putRequestConfig(argThat(config -> !config.isRedirectsEnabled()));
+        verify(httpTestContext).putRequestConfig(argThat(config -> !config.isRedirectsEnabled()));
     }
 
     @Test
@@ -273,7 +273,7 @@ class ApiStepsTests
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setResponseTimeInMs(RESPONSE_TIME_IN_MS);
         RequestConfig requestConfig = mock(RequestConfig.class);
-        when(apiTestContext.getRequestConfig()).thenReturn(Optional.of(requestConfig));
+        when(httpTestContext.getRequestConfig()).thenReturn(Optional.of(requestConfig));
         when(mockedHttpClient.execute(argThat(e -> e instanceof HttpGet && URL.equals(e.getURI().toString())),
                 argThat(context -> ((HttpClientContext) context).getRequestConfig() == requestConfig)))
                         .thenReturn(httpResponse);
@@ -283,7 +283,7 @@ class ApiStepsTests
 
     private void mockPullRequestEntity()
     {
-        when(apiTestContext.pullRequestEntity())
+        when(httpTestContext.pullRequestEntity())
                 .thenReturn(Optional.of(new StringEntity(CONTENT, (ContentType) null)));
     }
 
@@ -297,7 +297,7 @@ class ApiStepsTests
 
     private void verifyPutRequestEntity(String expectedContent)
     {
-        verify(apiTestContext).putRequestEntity(argThat(entity ->
+        verify(httpTestContext).putRequestEntity(argThat(entity ->
         {
             try
             {

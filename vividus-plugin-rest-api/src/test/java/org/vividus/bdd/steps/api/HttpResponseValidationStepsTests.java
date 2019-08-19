@@ -42,12 +42,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.api.IApiTestContext;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ByteArrayValidationRule;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
@@ -65,7 +65,7 @@ class HttpResponseValidationStepsTests
     private static final String  HTTP_RESPONSE_IS_NOT_NULL = "HTTP response is not null";
 
     @Mock
-    private IApiTestContext apiTestContext;
+    private HttpTestContext httpTestContext;
 
     @Mock
     private ISoftAssert softAssert;
@@ -351,7 +351,7 @@ class HttpResponseValidationStepsTests
 
     private void mockHttpResponse()
     {
-        when(apiTestContext.getResponse()).thenReturn(httpResponse);
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
         when(softAssert.assertNotNull(HTTP_RESPONSE_IS_NOT_NULL, httpResponse)).thenReturn(true);
     }
 

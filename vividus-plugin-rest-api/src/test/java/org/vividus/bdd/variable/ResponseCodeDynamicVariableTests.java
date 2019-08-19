@@ -24,14 +24,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.api.IApiTestContext;
+import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ResponseCodeDynamicVariableTests
 {
     @Mock
-    private IApiTestContext apiTestContext;
+    private HttpTestContext httpTestContext;
 
     @InjectMocks
     private ResponseCodeDynamicVariable responseCodeDynamicVariable;
@@ -41,14 +41,14 @@ class ResponseCodeDynamicVariableTests
     {
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setStatusCode(200);
-        when(apiTestContext.getResponse()).thenReturn(httpResponse);
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
         assertEquals("200", responseCodeDynamicVariable.getValue());
     }
 
     @Test
     void shouldReturnResponseCodeAsNullStringWhenNoResponsePresent()
     {
-        when(apiTestContext.getResponse()).thenReturn(null);
+        when(httpTestContext.getResponse()).thenReturn(null);
         assertEquals("null", responseCodeDynamicVariable.getValue());
     }
 }
