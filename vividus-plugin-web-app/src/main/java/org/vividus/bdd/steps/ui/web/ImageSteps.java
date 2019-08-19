@@ -344,6 +344,6 @@ public class ImageSteps
     {
         return baseValidations.assertIfElementExists(String.format("An image with the tooltip '%s'", tooltipImage),
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPath(ElementPattern.LINK_IMAGE_TOOLTIP_PATTERN, tooltipImage)));
+                        LocatorUtil.getXPath(".//img[@alt=%1$s or @title=%1$s]", tooltipImage)));
     }
 }

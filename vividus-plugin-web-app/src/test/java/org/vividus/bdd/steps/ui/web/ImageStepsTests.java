@@ -56,6 +56,7 @@ class ImageStepsTests
     private static final String TOOLTIP = "tooltip";
     private static final String TOOLTIP_IMAGE = "tooltipImage";
     private static final String IMAGE_NAME = "imageName";
+    private static final String IMAGE_TOOLTIP_PATTERN = ".//img[@alt=%1$s or @title=%1$s]";
 
     @Mock
     private WebElement webElement;
@@ -178,7 +179,7 @@ class ImageStepsTests
         imageSteps.ifImageWithTooltipExists(TOOLTIP_IMAGE);
         verify(baseValidations).assertIfElementExists(AN_IMAGE_WITH_THE_TOOLTIP_TOOLTIP_IMAGE,
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPath(ElementPattern.LINK_IMAGE_TOOLTIP_PATTERN, TOOLTIP_IMAGE)));
+                        LocatorUtil.getXPath(IMAGE_TOOLTIP_PATTERN, TOOLTIP_IMAGE)));
     }
 
     @Test
@@ -186,7 +187,7 @@ class ImageStepsTests
     {
         when(baseValidations.assertIfElementExists(AN_IMAGE_WITH_THE_TOOLTIP_TOOLTIP_IMAGE,
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPath(ElementPattern.LINK_IMAGE_TOOLTIP_PATTERN, TOOLTIP_IMAGE))))
+                        LocatorUtil.getXPath(IMAGE_TOOLTIP_PATTERN, TOOLTIP_IMAGE))))
                             .thenReturn(webElement);
 
         imageSteps.ifImageWithTooltipExists(State.ENABLED, TOOLTIP_IMAGE);
@@ -280,7 +281,7 @@ class ImageStepsTests
     {
         when(baseValidations.assertIfElementExists(AN_IMAGE_WITH_THE_TOOLTIP_TOOLTIP_IMAGE,
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPath(ElementPattern.LINK_IMAGE_TOOLTIP_PATTERN, TOOLTIP_IMAGE))))
+                        LocatorUtil.getXPath(IMAGE_TOOLTIP_PATTERN, TOOLTIP_IMAGE))))
                             .thenReturn(webElement);
 
         imageSteps.mouseOverLinkImageTooltip(TOOLTIP_IMAGE);
