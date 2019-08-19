@@ -22,11 +22,15 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vividus.bdd.expression.IExpressionProcessor;
 
 public class ExpressionAdaptor
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionAdaptor.class);
+
     private static final Pattern GREEDY_EXPRESSION_PATTERN = Pattern.compile("#\\{((?:(?!#\\{|\\$\\{).)*)}",
             Pattern.DOTALL);
     private static final Pattern RELUCTANT_EXPRESSION_PATTERN = Pattern.compile(
@@ -38,7 +42,16 @@ public class ExpressionAdaptor
 
     public String process(String value)
     {
-        return processExpression(value, List.of(RELUCTANT_EXPRESSION_PATTERN, GREEDY_EXPRESSION_PATTERN).iterator());
+        try
+        {
+            return processExpression(value,
+                    List.of(RELUCTANT_EXPRESSION_PATTERN, GREEDY_EXPRESSION_PATTERN).iterator());
+        }
+        catch (RuntimeException e)
+        {
+            LOGGER.error("Unable to process expression '{}'", value);
+            throw e;
+        }
     }
 
     private String processExpression(String value, Iterator<Pattern> expressionPatterns)
