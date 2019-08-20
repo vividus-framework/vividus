@@ -36,14 +36,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.api.IApiTestContext;
+import org.vividus.http.HttpTestContext;
 import org.vividus.ui.web.action.ICookieManager;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
 class HttpRequestStepsTests
 {
     @Mock
-    private IApiTestContext apiTesingContext;
+    private HttpTestContext httpTestContext;
 
     @Mock
     private ICookieManager cookieManager;
@@ -62,7 +62,7 @@ class HttpRequestStepsTests
         BasicClientCookie cookie2 = new BasicClientCookie("key1", "vale1");
         when(cookieStore.getCookies()).thenReturn(List.of(cookie1, cookie2));
         httpRequestSteps.executeRequestUsingBrowserCookies();
-        verify(apiTesingContext).putCookieStore(cookieStore);
+        verify(httpTestContext).putCookieStore(cookieStore);
         assertThat(logger.getLoggingEvents(),
                 is(List.of(debug("Setting cookies into API context: {}",
                         "[version: 0][name: key][value: vale][domain: null][path: null][expiry: null];\n"

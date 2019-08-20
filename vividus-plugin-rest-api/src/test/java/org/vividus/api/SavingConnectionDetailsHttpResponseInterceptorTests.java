@@ -32,12 +32,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.http.HttpTestContext;
+import org.vividus.http.SavingConnectionDetailsHttpResponseInterceptor;
 
 @ExtendWith(MockitoExtension.class)
 class SavingConnectionDetailsHttpResponseInterceptorTests
 {
     @Mock
-    private IApiTestContext apiTestContext;
+    private HttpTestContext httpTestContext;
 
     @InjectMocks
     private SavingConnectionDetailsHttpResponseInterceptor interceptor;
@@ -49,7 +51,7 @@ class SavingConnectionDetailsHttpResponseInterceptorTests
         SSLSession sslSession = mock(SSLSession.class);
         when(sslSession.getProtocol()).thenReturn(protocol);
         interceptor.process(null, mockHttpContextWithNonStaledConnection(sslSession));
-        verify(apiTestContext).putConnectionDetails(argThat(connectionDetails -> connectionDetails.isSecure()
+        verify(httpTestContext).putConnectionDetails(argThat(connectionDetails -> connectionDetails.isSecure()
                 && protocol.equals(connectionDetails.getSecurityProtocol())));
     }
 
@@ -57,7 +59,7 @@ class SavingConnectionDetailsHttpResponseInterceptorTests
     void shouldSaveConnectionDetailsForNonSecuredConnection()
     {
         interceptor.process(null, mockHttpContextWithNonStaledConnection(null));
-        verify(apiTestContext).putConnectionDetails(argThat(
+        verify(httpTestContext).putConnectionDetails(argThat(
             connectionDetails -> !connectionDetails.isSecure() && connectionDetails.getSecurityProtocol() == null));
     }
 
@@ -67,7 +69,7 @@ class SavingConnectionDetailsHttpResponseInterceptorTests
         HttpContext context = mock(HttpContext.class);
         mockHttpConnection(Boolean.TRUE, context);
         interceptor.process(null, context);
-        verifyZeroInteractions(apiTestContext);
+        verifyZeroInteractions(httpTestContext);
     }
 
     private static HttpContext mockHttpContextWithNonStaledConnection(SSLSession sslSession)

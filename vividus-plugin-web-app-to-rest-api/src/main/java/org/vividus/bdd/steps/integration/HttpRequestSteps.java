@@ -17,7 +17,6 @@
 package org.vividus.bdd.steps.integration;
 
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.apache.http.client.CookieStore;
@@ -25,14 +24,14 @@ import org.apache.http.cookie.Cookie;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.api.IApiTestContext;
+import org.vividus.http.HttpTestContext;
 import org.vividus.ui.web.action.ICookieManager;
 
 public class HttpRequestSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequestSteps.class);
     @Inject private ICookieManager cookieManager;
-    @Inject private IApiTestContext apiTestContext;
+    @Inject private HttpTestContext httpTestContext;
 
     /**
      * Step implemented to reuse browser cookies for HTTP client executed requests.
@@ -47,6 +46,6 @@ public class HttpRequestSteps
                 cookieStore.getCookies().stream()
                                         .map(Cookie::toString)
                                         .collect(Collectors.joining(";\n")));
-        apiTestContext.putCookieStore(cookieStore);
+        httpTestContext.putCookieStore(cookieStore);
     }
 }

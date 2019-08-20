@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.api;
+package org.vividus.http;
 
 import javax.net.ssl.SSLSession;
 
@@ -26,7 +26,7 @@ import org.apache.http.protocol.HttpCoreContext;
 
 public class SavingConnectionDetailsHttpResponseInterceptor implements HttpResponseInterceptor
 {
-    private IApiTestContext apiTestContext;
+    private HttpTestContext httpTestContext;
 
     @Override
     public void process(HttpResponse response, HttpContext context)
@@ -44,13 +44,13 @@ public class SavingConnectionDetailsHttpResponseInterceptor implements HttpRespo
             {
                 connectionDetails.setSecurityProtocol(sslSession.getProtocol());
             }
-            apiTestContext.putConnectionDetails(connectionDetails);
+            httpTestContext.putConnectionDetails(connectionDetails);
         }
     }
 
-    public void setApiTestContext(IApiTestContext apiTestContext)
+    public void setHttpTestContext(HttpTestContext httpTestContext)
     {
-        this.apiTestContext = apiTestContext;
+        this.httpTestContext = httpTestContext;
     }
 
 }

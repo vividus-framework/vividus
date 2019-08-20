@@ -26,14 +26,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.api.IApiTestContext;
+import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ResponseDynamicVariableTests
 {
     @Mock
-    private IApiTestContext apiTestContext;
+    private HttpTestContext httpTestContext;
 
     @InjectMocks
     private ResponseDynamicVariable responseDynamicVariable;
@@ -44,7 +44,7 @@ class ResponseDynamicVariableTests
         String responseBody = "response";
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setResponseBody(responseBody.getBytes(StandardCharsets.UTF_8));
-        when(apiTestContext.getResponse()).thenReturn(httpResponse);
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
         assertEquals(responseBody, responseDynamicVariable.getValue());
     }
 }
