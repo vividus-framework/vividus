@@ -285,7 +285,6 @@
     <bean id="elementSteps" class="org.vividus.bdd.steps.ui.web.ElementSteps" />
     <bean id="fieldSteps" class="org.vividus.bdd.steps.ui.web.FieldSteps" />
     <bean id="focusSteps" class="org.vividus.bdd.steps.ui.web.FocusSteps" />
-    <bean id="imageSteps" class="org.vividus.bdd.steps.ui.web.ImageSteps" />
     <bean id="dragAndDropSteps" class="org.vividus.bdd.steps.ui.web.DragAndDropSteps" />
 
     <bean id="jsValidationSteps" class="org.vividus.bdd.steps.ui.web.JsValidationSteps">
@@ -448,7 +447,6 @@
         <value>dropdownSteps</value>
         <value>elementSteps</value>
         <value>fieldSteps</value>
-        <value>imageSteps</value>
         <value>linkSteps</value>
         <value>pageSteps</value>
         <value>webElementsSteps</value>
