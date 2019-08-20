@@ -23,21 +23,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.vividus.api.IApiTestContext;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.model.ArchiveVariable;
 import org.vividus.bdd.model.NamedEntry;
+import org.vividus.http.HttpTestContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.zip.ZipUtils;
 
 public class HttpResponseSteps
 {
-    @Inject private IApiTestContext apiTestContext;
+    @Inject private HttpTestContext httpTestContext;
     @Inject private ISoftAssert softAssert;
     @Inject private IBddVariableContext bddVariableContext;
 
@@ -93,6 +92,6 @@ public class HttpResponseSteps
 
     private byte[] getResponseBody()
     {
-        return apiTestContext.getResponse().getResponseBody();
+        return httpTestContext.getResponse().getResponseBody();
     }
 }

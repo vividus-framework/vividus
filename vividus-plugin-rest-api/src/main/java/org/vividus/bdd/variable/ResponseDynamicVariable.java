@@ -19,16 +19,16 @@ package org.vividus.bdd.variable;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.vividus.api.IApiTestContext;
+import org.vividus.http.HttpTestContext;
 
 @Named("response")
 public class ResponseDynamicVariable implements DynamicVariable
 {
-    @Inject private IApiTestContext apiTestContext;
+    @Inject private HttpTestContext httpTestContext;
 
     @Override
     public String getValue()
     {
-        return apiTestContext.getResponse().getResponseBodyAsString();
+        return httpTestContext.getResponse().getResponseBodyAsString();
     }
 }

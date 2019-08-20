@@ -25,8 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.api.ConnectionDetails;
-import org.vividus.api.IApiTestContext;
+import org.vividus.http.ConnectionDetails;
+import org.vividus.http.HttpTestContext;
 import org.vividus.softassert.ISoftAssert;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +36,7 @@ class ConnectionValidationStepsTests
     private static final String CONNECTION_SECURE_ASSERTION = "Connection is secure";
 
     @Mock
-    private IApiTestContext apiTestContext;
+    private HttpTestContext httpTestContext;
 
     @Mock
     private ISoftAssert softAssert;
@@ -53,7 +53,7 @@ class ConnectionValidationStepsTests
         connectionDetails.setSecure(secure);
         connectionDetails.setSecurityProtocol(actualProtocol);
 
-        when(apiTestContext.getConnectionDetails()).thenReturn(connectionDetails);
+        when(httpTestContext.getConnectionDetails()).thenReturn(connectionDetails);
         when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.TRUE);
         steps.isConnectionSecured(TLS_V1_2);
         verify(softAssert).assertEquals("Security protocol", TLS_V1_2, actualProtocol);
@@ -66,7 +66,7 @@ class ConnectionValidationStepsTests
         ConnectionDetails connectionDetails = new ConnectionDetails();
         connectionDetails.setSecure(secure);
 
-        when(apiTestContext.getConnectionDetails()).thenReturn(connectionDetails);
+        when(httpTestContext.getConnectionDetails()).thenReturn(connectionDetails);
         when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.FALSE);
         steps.isConnectionSecured(TLS_V1_2);
         verifyNoMoreInteractions(softAssert);

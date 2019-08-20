@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -38,12 +37,12 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
-import org.vividus.api.IApiTestContext;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ByteArrayValidationRule;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
@@ -54,7 +53,7 @@ public class HttpResponseValidationSteps
 {
     private static final Tika TIKA = new Tika();
 
-    @Inject private IApiTestContext apiTestContext;
+    @Inject private HttpTestContext httpTestContext;
     @Inject private ISoftAssert softAssert;
     @Inject private IBddVariableContext bddVariableContext;
 
@@ -284,7 +283,7 @@ public class HttpResponseValidationSteps
 
     private HttpResponse getResponse()
     {
-        return apiTestContext.getResponse();
+        return httpTestContext.getResponse();
     }
 
     private boolean isJson(byte[] responseBody)

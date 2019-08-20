@@ -14,21 +14,30 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.converter;
+package org.vividus.http;
 
-import java.lang.reflect.Type;
-import java.time.Duration;
-
-import javax.inject.Named;
-
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
-
-@Named
-public class DurationConverter extends AbstractParameterConverter<Duration>
+public class ConnectionDetails
 {
-    @Override
-    public Duration convertValue(String value, Type type)
+    private boolean secure;
+    private String securityProtocol;
+
+    public boolean isSecure()
     {
-        return Duration.parse(value);
+        return secure;
+    }
+
+    public String getSecurityProtocol()
+    {
+        return securityProtocol;
+    }
+
+    public void setSecure(boolean secure)
+    {
+        this.secure = secure;
+    }
+
+    public void setSecurityProtocol(String securityProtocol)
+    {
+        this.securityProtocol = securityProtocol;
     }
 }

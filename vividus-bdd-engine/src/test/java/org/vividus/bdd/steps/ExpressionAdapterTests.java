@@ -16,15 +16,25 @@
 
 package org.vividus.bdd.steps;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.error;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,10 +44,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.expression.FormatDateExpressionProcessor;
 import org.vividus.bdd.expression.IExpressionProcessor;
 import org.vividus.bdd.expression.StringsExpressionProcessor;
+import org.vividus.util.DateUtils;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ExpressionAdapterTests
 {
     private static final String EXPRESSION_FORMAT = "#{%s}";
@@ -52,6 +64,8 @@ class ExpressionAdapterTests
 
     private static final String UNSUPPORTED_EXPRESSION = String.format(EXPRESSION_FORMAT,
             UNSUPPORTED_EXPRESSION_KEYWORD);
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(ExpressionAdaptor.class);
 
     @Mock
     private IExpressionProcessor mockedTargetProcessor;
@@ -177,5 +191,17 @@ class ExpressionAdapterTests
         String expectedTable = "|value1|value2|\n|target result with \\ and $|${variable}|";
         String actualTable = expressionAdaptor.process(inputTable);
         assertEquals(expectedTable, actualTable);
+    }
+
+    @Test
+    void testExpressionProcessingError()
+    {
+        String input = "#{formatDate(01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSS)}";
+        FormatDateExpressionProcessor processor = new FormatDateExpressionProcessor(
+                new DateUtils(ZoneId.systemDefault()));
+        expressionAdaptor.setProcessors(List.of(processor));
+        assertThrows(DateTimeParseException.class, () -> expressionAdaptor.process(input));
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(error("Unable to process expression '{}'", input))));
     }
 }

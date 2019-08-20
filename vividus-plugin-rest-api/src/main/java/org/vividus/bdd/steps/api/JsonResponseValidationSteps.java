@@ -33,7 +33,6 @@ import com.jayway.jsonpath.PathNotFoundException;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
-import org.vividus.api.IApiTestContext;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.diff.JsonDiffMatcher;
 import org.vividus.bdd.steps.ComparisonRule;
@@ -41,6 +40,7 @@ import org.vividus.bdd.steps.ISubStepExecutor;
 import org.vividus.bdd.steps.ISubStepExecutorFactory;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.HttpMethod;
+import org.vividus.http.HttpTestContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.Sleeper;
@@ -52,7 +52,7 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 public class JsonResponseValidationSteps
 {
     private static final int DURATION_DIVIDER = 10;
-    @Inject private IApiTestContext apiTestContext;
+    @Inject private HttpTestContext httpTestContext;
     @Inject private IBddVariableContext bddVariableContext;
     @Inject private ApiSteps apiSteps;
     @Inject private ISubStepExecutorFactory subStepExecutorFactory;
@@ -230,7 +230,7 @@ public class JsonResponseValidationSteps
         do
         {
             apiSteps.whenIDoHttpRequest(HttpMethod.GET, resourceUrl);
-            if (getElementsNumber(apiTestContext.getResponse().getResponseBodyAsString(), jsonPath) > 0)
+            if (getElementsNumber(httpTestContext.getResponse().getResponseBodyAsString(), jsonPath) > 0)
             {
                 break;
             }
@@ -308,10 +308,10 @@ public class JsonResponseValidationSteps
             ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
             jsonElements.get().stream().map(jsonUtils::toJson).forEach(jsonElement ->
             {
-                apiTestContext.putJsonContext(jsonElement);
+                httpTestContext.putJsonContext(jsonElement);
                 subStepExecutor.execute(Optional.empty());
             });
-            apiTestContext.putJsonContext(jsonContext);
+            httpTestContext.putJsonContext(jsonContext);
         }
     }
 
@@ -390,7 +390,7 @@ public class JsonResponseValidationSteps
 
     private String getActualJson()
     {
-        return apiTestContext.getJsonContext();
+        return httpTestContext.getJsonContext();
     }
 
     public void setSoftAssert(ISoftAssert softAssert)

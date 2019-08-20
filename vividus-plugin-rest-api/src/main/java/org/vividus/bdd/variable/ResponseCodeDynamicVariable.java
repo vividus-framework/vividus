@@ -20,18 +20,18 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.vividus.api.IApiTestContext;
+import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 
 @Named("responseCode")
 public class ResponseCodeDynamicVariable implements DynamicVariable
 {
-    @Inject private IApiTestContext apiTestContext;
+    @Inject private HttpTestContext httpTestContext;
 
     @Override
     public String getValue()
     {
-        Integer statusCode = Optional.ofNullable(apiTestContext.getResponse()).map(HttpResponse::getStatusCode).orElse(
+        Integer statusCode = Optional.ofNullable(httpTestContext.getResponse()).map(HttpResponse::getStatusCode).orElse(
                 null);
         return String.valueOf(statusCode);
     }

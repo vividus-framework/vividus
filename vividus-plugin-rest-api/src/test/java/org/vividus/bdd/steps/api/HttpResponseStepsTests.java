@@ -32,12 +32,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.api.IApiTestContext;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.model.ArchiveVariable;
 import org.vividus.bdd.model.NamedEntry;
 import org.vividus.bdd.model.OutputFormat;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
@@ -49,7 +49,7 @@ class HttpResponseStepsTests
     private static final String IMAGE_PNG = "images/image.png";
 
     @Mock
-    private IApiTestContext apiTestContext;
+    private HttpTestContext httpTestContext;
 
     @Mock
     private ISoftAssert softAssert;
@@ -126,7 +126,7 @@ class HttpResponseStepsTests
     {
         byte[] data = ResourceUtils.loadResourceAsByteArray(getClass(), "/org/vividus/bdd/steps/api/archive.zip");
         HttpResponse response = mock(HttpResponse.class);
-        when(apiTestContext.getResponse()).thenReturn(response);
+        when(httpTestContext.getResponse()).thenReturn(response);
         when(response.getResponseBody()).thenReturn(data);
     }
 
