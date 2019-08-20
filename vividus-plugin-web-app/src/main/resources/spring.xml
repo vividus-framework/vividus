@@ -286,6 +286,7 @@
     <bean id="fieldSteps" class="org.vividus.bdd.steps.ui.web.FieldSteps" />
     <bean id="focusSteps" class="org.vividus.bdd.steps.ui.web.FocusSteps" />
     <bean id="imageSteps" class="org.vividus.bdd.steps.ui.web.ImageSteps" />
+    <bean id="dragAndDropSteps" class="org.vividus.bdd.steps.ui.web.DragAndDropSteps" />
 
     <bean id="jsValidationSteps" class="org.vividus.bdd.steps.ui.web.JsValidationSteps">
         <property name="includeBrowserExtensionLogEntries" value="${web.steps.js.include-browser-extension-log-entries}" />
@@ -462,5 +463,6 @@
         <value>screenshotTakingSteps</value>
         <value>localStorageSteps</value>
         <value>proxySteps</value>
+        <value>dragAndDropSteps</value>
     </util:list>
  </beans>
