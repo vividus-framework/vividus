@@ -92,11 +92,13 @@ public class NestedSteps
             {
                 webUiContext.putSearchContext(elements.get(0), () -> { });
                 subStepExecutor.execute(Optional.empty());
-
-                IntStream.range(1, cssSelectors.size()).forEach(i -> {
-                    WebElement element = baseValidations
-                            .assertIfElementExists("An element for iteration " + (i + 1),
-                                    new SearchAttributes(ActionAttributeType.CSS_SELECTOR, cssSelectors.get(i)));
+            });
+            IntStream.range(1, cssSelectors.size()).forEach(i -> {
+                WebElement element = baseValidations
+                        .assertIfElementExists("An element for iteration " + (i + 1),
+                                new SearchAttributes(ActionAttributeType.CSS_SELECTOR, cssSelectors.get(i)));
+                runStepsWithContextReset(() ->
+                {
                     webUiContext.putSearchContext(element, () -> { });
                     subStepExecutor.execute(Optional.empty());
                 });

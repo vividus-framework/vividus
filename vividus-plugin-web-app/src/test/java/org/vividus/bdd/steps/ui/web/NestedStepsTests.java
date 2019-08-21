@@ -102,7 +102,7 @@ class NestedStepsTests
         nestedSteps.performAllStepsForElementIfFound(ComparisonRule.EQUAL_TO, 1, searchAttributes, stepsAsTable);
         verify(webUiContext).putSearchContext(eq(first), any(SearchContextSetter.class));
         verify(webUiContext).putSearchContext(eq(second), any(SearchContextSetter.class));
-        verify(searchContextSetter).setSearchContext();
+        verify(searchContextSetter, times(2)).setSearchContext();
     }
 
     @Test
