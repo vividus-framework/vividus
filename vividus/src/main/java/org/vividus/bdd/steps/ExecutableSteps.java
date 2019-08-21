@@ -19,14 +19,20 @@ package org.vividus.bdd.steps;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Preconditions;
+
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.variable.VariableScope;
 
 public class ExecutableSteps
 {
@@ -98,5 +104,57 @@ public class ExecutableSteps
             "Please, specify executions number in the range from %s to %s", minimum, EXECUTIONS_NUMBER_THRESHOLD);
         ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
         IntStream.range(0, number).forEach(i -> subStepExecutor.execute(Optional.empty()));
+    }
+
+    /**
+     * Step is designed to perform <b>stepsToExecute</b> while counter matches <b>comparisonRule</b>. The limit for the
+     * counter is set by <b>limit</b> variable. On each iteration the counter is increased on <b>increment</b> value,
+     * which is allowed to be either positive or negative. The <b>seed</b> value is used as a starting point for
+     * iteration. Current iteration index is available within <b>stepsToExecute</b> as <code>${iterationVariable}
+     * </code>.
+     * <br>
+     * Step fails if iteration counter reaches maximum iteration limit which is <i>50</i>.
+     * <br>
+     * Example:
+     * <br>
+     * <code>
+     * When I execute steps while counter is not equal to `10` with increment `2` starting from `0`
+     * <br>
+     * |step|
+     * <br>
+     * |Then `${iterationVariable}` matches `\\d+`|
+     * </code>
+     * @param comparisonRule comparison rule to match counter against
+     * @param limit counter limit
+     * @param increment number to add to the counter on each iteration
+     * @param seed initial counter value
+     * @param stepsToExecute steps to execute
+     */
+    @When("I execute steps while counter is $comparisonRule `$limit` with increment `$increment` starting from `$seed`"
+            + ":$stepsToExecute")
+    public void executeStepsWhileConditionIsTrueWithStep(ComparisonRule comparisonRule, int limit, int increment,
+            int seed, ExamplesTable stepsToExecute)
+    {
+        Matcher<Integer> limitMatcher = comparisonRule.getComparisonRule(limit);
+        checkForLimit(seed, limitMatcher, increment);
+        ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        iterate(seed, limitMatcher, increment, iterationVariable ->
+        {
+            bddVariableContext.putVariable(VariableScope.STEP, "iterationVariable", iterationVariable);
+            subStepExecutor.execute(Optional.empty());
+        });
+    }
+
+    private static void checkForLimit(int seed, Matcher<Integer> limitMatcher, int increment)
+    {
+        MutableInt iterationsCounter = new MutableInt();
+        iterate(seed, limitMatcher, increment,
+            index -> Preconditions.checkArgument(iterationsCounter.incrementAndGet() < EXECUTIONS_NUMBER_THRESHOLD,
+                    "Number of iterations has exceeded allowable limit " + EXECUTIONS_NUMBER_THRESHOLD));
+    }
+
+    private static void iterate(int seed, Matcher<Integer> limitMatcher, int increment, Consumer<Integer> body)
+    {
+        IntStream.iterate(seed, limitMatcher::matches, index -> index + increment).forEach(body::accept);
     }
 }
