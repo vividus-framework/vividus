@@ -16,10 +16,30 @@
 
 package org.vividus.ui.web.action;
 
+import java.util.Optional;
+
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WrapsElement;
+import org.vividus.ui.web.action.AlertActions.Action;
 
 public interface IMouseActions
 {
+    ClickResult click(WebElement element);
+
+    ClickResult click(WrapsElement element);
+
+    void moveToAndClick(WebElement element);
+
+    ClickResult clickViaJavascript(WebElement element);
+
+    /**
+     * Clicks on element and process alert with specified action if it occurs
+     * @param element web element to click on
+     * @param defaultAlertAction action to process alert by default
+     * @return ClickResult
+     */
+    ClickResult click(WebElement element, Optional<Action> defaultAlertAction);
+
     void moveToElement(WebElement element);
 
     void contextClick(WebElement element);

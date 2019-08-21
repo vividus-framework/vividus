@@ -28,7 +28,6 @@ import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
 import org.vividus.ui.web.State;
-import org.vividus.ui.web.action.IClickActions;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.ISearchActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
@@ -43,10 +42,9 @@ public class ButtonSteps
 
     @Inject private IWebUiContext webUiContext;
     @Inject private ISearchActions searchActions;
-    @Inject private IClickActions clickActions;
+    @Inject private IMouseActions mouseActions;
     @Inject private IBaseValidations baseValidations;
     @Inject private IElementValidations elementValidations;
-    @Inject private IMouseActions mouseActions;
 
     /**
      * Sets a cursor on the <b>button</b> specified by the 'name' attribute
@@ -86,7 +84,7 @@ public class ButtonSteps
     public void clickButtonWithName(String buttonName)
     {
         WebElement button = ifButtonWithNameExists(buttonName);
-        clickActions.click(button);
+        mouseActions.click(button);
     }
 
     /**
@@ -104,7 +102,7 @@ public class ButtonSteps
     public void clickButtonWithImageSrc(String imageSrc)
     {
         WebElement button = isButtonWithImageSrcFound(imageSrc);
-        clickActions.click(button);
+        mouseActions.click(button);
     }
 
     /**
@@ -260,7 +258,7 @@ public class ButtonSteps
     public void  checkRadioOption(String radioOption)
     {
         WebElement element = ifRadioOptionExists(radioOption);
-        clickActions.click(element);
+        mouseActions.click(element);
     }
 
     /**

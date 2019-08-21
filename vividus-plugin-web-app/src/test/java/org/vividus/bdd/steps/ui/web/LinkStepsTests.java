@@ -36,7 +36,6 @@ import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.validation.ILinkValidations;
 import org.vividus.ui.web.State;
-import org.vividus.ui.web.action.IClickActions;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
@@ -71,13 +70,10 @@ class LinkStepsTests
     private IBaseValidations baseValidations;
 
     @Mock
-    private IClickActions clickActions;
+    private IMouseActions mouseActions;
 
     @Mock
     private WebElement webElement;
-
-    @Mock
-    private IMouseActions mouseActions;
 
     @InjectMocks
     private LinkSteps webUiLinkSteps;
@@ -90,7 +86,7 @@ class LinkStepsTests
                 URL);
         when(linkValidations.assertIfLinkExists(webElement, attributes)).thenReturn(webElement);
         webUiLinkSteps.clickLinkWithTextAndURL(LINK_TEXT, URL);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
@@ -101,7 +97,7 @@ class LinkStepsTests
                 URL);
         when(linkValidations.assertIfLinkExists(webElement, attributes)).thenReturn(null);
         webUiLinkSteps.clickLinkWithTextAndURL(LINK_TEXT, URL);
-        verify(clickActions, never()).click(webElement);
+        verify(mouseActions, never()).click(webElement);
     }
 
     @Test
@@ -110,7 +106,7 @@ class LinkStepsTests
         when(webUiContext.getSearchContext()).thenReturn(webElement);
         when(linkValidations.assertIfLinkWithTextExists(webElement, LINK_TEXT)).thenReturn(webElement);
         webUiLinkSteps.clickLinkWithText(LINK_TEXT);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
@@ -119,7 +115,7 @@ class LinkStepsTests
         when(webUiContext.getSearchContext()).thenReturn(webElement);
         when(linkValidations.assertIfLinkWithTextExists(webElement, LINK_TEXT)).thenReturn(null);
         webUiLinkSteps.clickLinkWithText(LINK_TEXT);
-        verify(clickActions, never()).click(webElement);
+        verify(mouseActions, never()).click(webElement);
     }
 
     @Test
@@ -129,7 +125,7 @@ class LinkStepsTests
         SearchAttributes searchAttributes = new SearchAttributes(LINK_URL, URL);
         when(linkValidations.assertIfLinkExists(webElement, searchAttributes)).thenReturn(webElement);
         webUiLinkSteps.clickLinkWithUrl(URL);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
@@ -139,7 +135,7 @@ class LinkStepsTests
         when(spy.assertLinkExists(new SearchAttributes(LINK_URL_PART, URL_PART)))
                 .thenReturn(webElement);
         spy.clickLinkWithUrlPart(URL_PART);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
@@ -150,7 +146,7 @@ class LinkStepsTests
                 .addFilter(LINK_URL_PART, URL_PART);
         when(linkValidations.assertIfLinkExists(webElement, searchAttributes)).thenReturn(webElement);
         webUiLinkSteps.clickLinkWithPartUrlAndText(URL_PART, LINK_TEXT);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
@@ -479,7 +475,7 @@ class LinkStepsTests
         SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.CSS_SELECTOR, TEXT);
         when(linkValidations.assertIfLinkExists(webElement, searchAttributes)).thenReturn(webElement);
         webUiLinkSteps.clickLinkByCss(TEXT);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
@@ -488,7 +484,7 @@ class LinkStepsTests
         when(webUiContext.getSearchContext()).thenReturn(webElement);
         when(linkValidations.assertIfLinkExists(eq(webElement), any(SearchAttributes.class))).thenReturn(webElement);
         webUiLinkSteps.clickLinkImageTooltip(TOOLTIP);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test

@@ -99,13 +99,11 @@
         <property name="devicePixelRatio" value="${selenium.device-pixel-ratio}" />
     </bean>
 
-    <bean id="clickActions" class="org.vividus.ui.web.action.ClickActions">
-        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
-    </bean>
-
     <bean id="fieldActions" class="org.vividus.ui.web.action.FieldActions" />
     <bean id="javascriptActions" class="org.vividus.ui.web.action.JavascriptActions" />
-    <bean id="mouseActions" class="org.vividus.ui.web.action.MouseActions" />
+    <bean id="mouseActions" class="org.vividus.ui.web.action.MouseActions">
+        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
+    </bean>
     <bean id="navigateActions" class="org.vividus.ui.web.action.NavigateActions" />
     <bean id="videoPlayerActions" class="org.vividus.ui.web.action.VideoPlayerActions" />
     <bean id="webElementActions" class="org.vividus.ui.web.action.WebElementActions" />

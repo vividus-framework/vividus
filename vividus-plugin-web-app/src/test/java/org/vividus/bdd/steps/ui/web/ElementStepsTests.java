@@ -65,7 +65,6 @@ import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
 import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
-import org.vividus.ui.web.action.ClickActions;
 import org.vividus.ui.web.action.ClickResult;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.WebElementActions;
@@ -125,7 +124,7 @@ public class ElementStepsTests
     private IBaseValidations baseValidations;
 
     @Mock
-    private ClickActions clickActions;
+    private IMouseActions mouseActions;
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -147,9 +146,6 @@ public class ElementStepsTests
 
     @Mock
     private WebDriver webDriver;
-
-    @Mock
-    private IMouseActions mouseActions;
 
     @Mock
     private SearchContext searchContext;
@@ -188,7 +184,7 @@ public class ElementStepsTests
                 .assertIfElementsExist("The elements to click", new SearchAttributes(ActionAttributeType.XPATH, XPATH)))
                 .thenReturn(Arrays.asList(webElement, webElement));
         elementSteps.clickEachElementByXpath(XPATH);
-        verify(clickActions, times(2)).click(webElement);
+        verify(mouseActions, times(2)).click(webElement);
     }
 
     @Test
@@ -197,7 +193,7 @@ public class ElementStepsTests
         when(baseValidations.assertIfElementsExist("Elements to click",
                 new SearchAttributes(ActionAttributeType.XPATH, XPATH))).thenReturn(List.of());
         elementSteps.clickEachElementByXpath(XPATH);
-        verifyZeroInteractions(clickActions);
+        verifyZeroInteractions(mouseActions);
     }
 
     @Test
@@ -490,7 +486,7 @@ public class ElementStepsTests
         SearchAttributes attributes = new SearchAttributes(CASE_SENSITIVE_TEXT, text);
         when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, attributes)).thenReturn(webElement);
         elementSteps.clickElementByText(text);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
@@ -507,7 +503,7 @@ public class ElementStepsTests
         clickResult.setNewPageLoaded(false);
         SearchAttributes attributes = new SearchAttributes(CASE_SENSITIVE_TEXT, TEXT);
         when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, attributes)).thenReturn(webElement);
-        when(clickActions.click(webElement)).thenReturn(clickResult);
+        when(mouseActions.click(webElement)).thenReturn(clickResult);
         elementSteps.clickElementPageNotRefresh(attributes);
         verify(softAssert).assertTrue(eq("Page has not been refreshed after clicking on the element located by "
                 + "Case sensitive text: 'text'; Visibility: VISIBLE;"), eq(!clickResult.isNewPageLoaded()));
@@ -621,7 +617,7 @@ public class ElementStepsTests
         when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK,  new SearchAttributes(ActionAttributeType.XPATH,
                 XPATH))).thenReturn(webElement);
         elementSteps.clickElementByXpath(XPATH);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
@@ -630,7 +626,7 @@ public class ElementStepsTests
         when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, new SearchAttributes(ActionAttributeType.XPATH,
                         LOCATOR_BY_ATTRIBUTE))).thenReturn(webElement);
         elementSteps.clickElementWithCertanAttribute(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test

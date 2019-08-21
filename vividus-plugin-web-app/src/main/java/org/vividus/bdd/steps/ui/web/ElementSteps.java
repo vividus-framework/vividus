@@ -43,7 +43,6 @@ import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.ClickResult;
-import org.vividus.ui.web.action.IClickActions;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
@@ -69,7 +68,6 @@ public class ElementSteps implements ResourceLoaderAware
     @Inject private IBaseValidations baseValidations;
     @Inject private IWebUiContext webUiContext;
     @Inject private IElementValidations elementValidations;
-    @Inject private IClickActions clickActions;
     @Inject private IMouseActions mouseActions;
     private ResourceLoader resourceLoader;
 
@@ -137,7 +135,7 @@ public class ElementSteps implements ResourceLoaderAware
     {
         WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, new SearchAttributes(
                 ActionAttributeType.XPATH, xpath));
-        clickActions.click(element);
+        mouseActions.click(element);
     }
 
     /**
@@ -154,7 +152,7 @@ public class ElementSteps implements ResourceLoaderAware
     public void clickEachElementByXpath(String xpath)
     {
         baseValidations.assertIfElementsExist("The elements to click", new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(xpath))).forEach(e -> clickActions.click(e));
+                LocatorUtil.getXPath(xpath))).forEach(mouseActions::click);
     }
 
     /**
@@ -171,7 +169,7 @@ public class ElementSteps implements ResourceLoaderAware
     {
         SearchAttributes attributes = new SearchAttributes(ActionAttributeType.CASE_SENSITIVE_TEXT, text);
         WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, attributes);
-        clickActions.click(element);
+        mouseActions.click(element);
     }
 
     /**
@@ -190,7 +188,7 @@ public class ElementSteps implements ResourceLoaderAware
         WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK,
                 new SearchAttributes(ActionAttributeType.XPATH,
                         LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-        clickActions.click(element);
+        mouseActions.click(element);
     }
 
     /**
@@ -207,7 +205,7 @@ public class ElementSteps implements ResourceLoaderAware
     public void clickElementPageNotRefresh(SearchAttributes searchAttributes)
     {
         WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, searchAttributes);
-        ClickResult clickResult = clickActions.click(element);
+        ClickResult clickResult = mouseActions.click(element);
         highlightingSoftAssert.assertTrue(
                 "Page has not been refreshed after clicking on the element located by" + searchAttributes,
                 !clickResult.isNewPageLoaded());

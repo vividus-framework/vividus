@@ -39,7 +39,7 @@ import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.element.Checkbox;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.CheckboxAction;
-import org.vividus.ui.web.action.IClickActions;
+import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.SearchParameters;
@@ -72,7 +72,7 @@ class CheckboxStepsTests
     private WebElement webElement;
 
     @Mock
-    private IClickActions clickActions;
+    private IMouseActions mouseActions;
 
     @InjectMocks
     private CheckboxSteps checkboxSteps;
@@ -85,7 +85,7 @@ class CheckboxStepsTests
         when(webElement.isSelected()).thenReturn(false);
         when(webElement.isDisplayed()).thenReturn(true);
         checkboxSteps.checkCheckBox();
-        verify(clickActions).click(argThatCheckbox());
+        verify(mouseActions).click(argThatCheckbox());
     }
 
     @Test
@@ -94,7 +94,7 @@ class CheckboxStepsTests
         Mockito.lenient().when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(
                 ActionAttributeType.XPATH, CHECKBOX_LOCATOR))).thenReturn(webElement);
         checkboxSteps.checkCheckBox();
-        verify(clickActions, never()).click(argThatCheckbox());
+        verify(mouseActions, never()).click(argThatCheckbox());
     }
 
     @Test
@@ -103,7 +103,7 @@ class CheckboxStepsTests
         Mockito.lenient().when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(
                 ActionAttributeType.XPATH, CHECKBOX_LOCATOR))).thenReturn(null);
         checkboxSteps.checkCheckBox();
-        Mockito.verifyZeroInteractions(clickActions);
+        Mockito.verifyZeroInteractions(mouseActions);
     }
 
     @Test
@@ -114,7 +114,7 @@ class CheckboxStepsTests
                         .thenReturn(Arrays.asList(webElement, webElement));
         when(webElement.isDisplayed()).thenReturn(true);
         checkboxSteps.checkAllCheckboxes();
-        verify(clickActions, times(2)).click(argThatCheckbox());
+        verify(mouseActions, times(2)).click(argThatCheckbox());
     }
 
     @Test
@@ -124,7 +124,7 @@ class CheckboxStepsTests
                 new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(CHECKBOX_LOCATOR))))
                         .thenReturn(List.of());
         checkboxSteps.checkAllCheckboxes();
-        verify(clickActions, never()).click(argThatCheckbox());
+        verify(mouseActions, never()).click(argThatCheckbox());
     }
 
     @Test
@@ -133,7 +133,7 @@ class CheckboxStepsTests
         when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(ActionAttributeType.XPATH,
                 LocatorUtil.getXPath(CHECKBOX_LOCATOR)))).thenReturn(null);
         checkboxSteps.checkCheckBox();
-        verify(clickActions, never()).click(argThatCheckbox());
+        verify(mouseActions, never()).click(argThatCheckbox());
     }
 
     @Test
@@ -144,7 +144,7 @@ class CheckboxStepsTests
         when(webElement.isSelected()).thenReturn(true);
         when(webElement.isDisplayed()).thenReturn(true);
         checkboxSteps.processCheckboxByXpath(CheckboxAction.UNCHECK, XPATH);
-        verify(clickActions).click(argThatCheckbox());
+        verify(mouseActions).click(argThatCheckbox());
     }
 
     @Test
@@ -156,7 +156,7 @@ class CheckboxStepsTests
         when(webElement.isSelected()).thenReturn(true);
         when(webElement.isDisplayed()).thenReturn(true);
         checkboxSteps.processCheckboxItem(CheckboxAction.UNCHECK, CHECKBOX_NAME);
-        verify(clickActions).click(argThatCheckbox());
+        verify(mouseActions).click(argThatCheckbox());
     }
 
     @Test
@@ -167,7 +167,7 @@ class CheckboxStepsTests
         when(webElement.isSelected()).thenReturn(true);
         when(webElement.isDisplayed()).thenReturn(true);
         checkboxSteps.uncheckCheckboxItem("type", "value");
-        verify(clickActions).click(argThatCheckbox());
+        verify(mouseActions).click(argThatCheckbox());
     }
 
     @Test
@@ -224,7 +224,7 @@ class CheckboxStepsTests
                 LocatorUtil.getXPath(XPATH)))).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
         checkboxSteps.processCheckboxByXpath(CheckboxAction.CHECK, XPATH);
-        verify(clickActions).click(argThatCheckbox());
+        verify(mouseActions).click(argThatCheckbox());
     }
 
     @Test
@@ -235,7 +235,7 @@ class CheckboxStepsTests
                         .thenReturn(new Checkbox(webElement));
         when(webElement.isDisplayed()).thenReturn(true);
         checkboxSteps.processCheckboxItem(CheckboxAction.CHECK, CHECKBOX_NAME);
-        verify(clickActions).click(argThatCheckbox());
+        verify(mouseActions).click(argThatCheckbox());
     }
 
     @Test
@@ -247,7 +247,7 @@ class CheckboxStepsTests
                         .thenReturn(new Checkbox(webElement, labelElement));
         when(webElement.isDisplayed()).thenReturn(false);
         checkboxSteps.processCheckboxItem(CheckboxAction.CHECK, CHECKBOX_NAME);
-        verify(clickActions).click(labelElement);
+        verify(mouseActions).click(labelElement);
     }
 
     @Test
@@ -258,7 +258,7 @@ class CheckboxStepsTests
                 LocatorUtil.getXPath(xpath)))).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
         checkboxSteps.processCheckboxByXpath(CheckboxAction.CHECK, xpath);
-        verify(clickActions).click(argThatCheckbox());
+        verify(mouseActions).click(argThatCheckbox());
     }
 
     @Test
@@ -268,7 +268,7 @@ class CheckboxStepsTests
                 CHECKBOX_XPATH))).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
         checkboxSteps.checkCheckboxItem(CHECKBOX_ATTRIBUTE_TYPE, CHECKBOX_ATTRIBUTE_VALUE);
-        verify(clickActions).click(argThatCheckbox());
+        verify(mouseActions).click(argThatCheckbox());
     }
 
     @Test
