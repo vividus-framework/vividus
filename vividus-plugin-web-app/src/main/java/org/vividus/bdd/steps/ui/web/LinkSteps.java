@@ -31,7 +31,6 @@ import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.validation.ILinkValidations;
 import org.vividus.ui.web.State;
-import org.vividus.ui.web.action.IClickActions;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
@@ -50,7 +49,6 @@ public class LinkSteps
     @Inject private ILinkValidations linkValidations;
     @Inject private IWebUiContext webUiContext;
     @Inject private IBaseValidations baseValidations;
-    @Inject private IClickActions clickActions;
     @Inject private IMouseActions mouseActions;
 
     /**
@@ -118,7 +116,7 @@ public class LinkSteps
     {
         WebElement element = linkValidations.assertIfLinkExists(getSearchContext(),
                 new SearchAttributes(ActionAttributeType.CSS_SELECTOR, cssSelector));
-        clickActions.click(element);
+        mouseActions.click(element);
     }
 
     /**
@@ -141,7 +139,7 @@ public class LinkSteps
     public void clickLinkWithPartUrlAndText(String urlPart, String text)
     {
         WebElement link = ifLinkWithTextAndUrlPartExists(text, urlPart);
-        clickActions.click(link);
+        mouseActions.click(link);
     }
 
     /**
@@ -162,7 +160,7 @@ public class LinkSteps
     public void clickLinkWithTextAndURL(String linkText, String url)
     {
         WebElement linkElement = ifLinkWithTextAndUrlExists(linkText, url);
-        clickActions.click(linkElement);
+        mouseActions.click(linkElement);
     }
 
     /**
@@ -180,7 +178,7 @@ public class LinkSteps
     public void clickLinkWithText(String text)
     {
         WebElement link = ifLinkWithTextExists(text);
-        clickActions.click(link);
+        mouseActions.click(link);
     }
 
     /**
@@ -194,7 +192,7 @@ public class LinkSteps
     public void clickLinkWithUrl(String url)
     {
         WebElement link = assertLinkExists(new SearchAttributes(LINK_URL, url));
-        clickActions.click(link);
+        mouseActions.click(link);
     }
 
     /**
@@ -208,7 +206,7 @@ public class LinkSteps
     public void clickLinkWithUrlPart(String urlPart)
     {
         WebElement link = assertLinkExists(new SearchAttributes(LINK_URL_PART, urlPart));
-        clickActions.click(link);
+        mouseActions.click(link);
     }
 
     /**
@@ -231,7 +229,7 @@ public class LinkSteps
         String imageXpath = LocatorUtil.getXPath(ElementPattern.LINK_IMAGE_TOOLTIP_PATTERN, tooltipImage);
         WebElement imageLink = linkValidations.assertIfLinkExists(getSearchContext(),
                 new SearchAttributes(ActionAttributeType.XPATH, imageXpath));
-        clickActions.click(imageLink);
+        mouseActions.click(imageLink);
     }
 
     /**

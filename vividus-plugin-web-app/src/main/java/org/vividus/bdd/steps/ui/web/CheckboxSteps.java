@@ -28,7 +28,7 @@ import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.element.Checkbox;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.CheckboxAction;
-import org.vividus.ui.web.action.IClickActions;
+import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.SearchParameters;
@@ -44,7 +44,7 @@ public class CheckboxSteps
     private static final String CHECKBOX_WITH_ATTRIBUTE = "Checkbox with the attribute '%1$s'='%2$s'";
 
     @Inject private IBaseValidations baseValidations;
-    @Inject private IClickActions clickActions;
+    @Inject private IMouseActions mouseActions;
 
     /**
      * Checks checkbox within the context
@@ -279,7 +279,7 @@ public class CheckboxSteps
         if (checkbox != null && checkbox.getWrappedElement() != null && checkbox.isSelected() != selected)
         {
             WebElement elementToClick = checkbox.isDisplayed() ? checkbox : checkbox.getLabelElement();
-            clickActions.click(elementToClick);
+            mouseActions.click(elementToClick);
         }
     }
 

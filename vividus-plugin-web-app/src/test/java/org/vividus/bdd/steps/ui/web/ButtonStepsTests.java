@@ -35,7 +35,6 @@ import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
 import org.vividus.ui.web.State;
-import org.vividus.ui.web.action.ClickActions;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.SearchActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
@@ -74,16 +73,13 @@ class ButtonStepsTests
     private IElementValidations elementValidations;
 
     @Mock
-    private ClickActions clickActions;
+    private IMouseActions mouseActions;
 
     @Mock
     private SearchActions searchActions;
 
     @Mock
     private IWebUiContext webUiContext;
-
-    @Mock
-    private IMouseActions mouseActions;
 
     @InjectMocks
     private ButtonSteps buttonSteps;
@@ -220,7 +216,7 @@ class ButtonStepsTests
         when(baseValidations.assertIfElementExists(A_BUTTON_WITH_THE_NAME, BUSINESS_DESCRIPTION, elements))
                 .thenReturn(webElement);
         buttonSteps.clickButtonWithName(BUTTON_NAME);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
@@ -229,14 +225,14 @@ class ButtonStepsTests
         when(baseValidations.assertIfElementExists(A_BUTTON_WITH_IMAGE, BUTTON_IMAGE_ATTRIBUTES))
                 .thenReturn(webElement);
         buttonSteps.clickButtonWithImageSrc(IMAGE_SRC);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     @Test
     void testClickNullButtonWithImageSrc()
     {
         buttonSteps.clickButtonWithImageSrc(IMAGE_SRC);
-        verify(clickActions).click((WebElement) null);
+        verify(mouseActions).click((WebElement) null);
     }
 
     @Test
@@ -256,7 +252,7 @@ class ButtonStepsTests
         when(baseValidations.assertIfElementExists(RADIO_BUTTON, new SearchAttributes(ActionAttributeType.XPATH,
             LocatorUtil.getXPath(ElementPattern.RADIO_OPTION_INPUT_PATTERN, VALUE)))).thenReturn(webElement);
         buttonSteps.checkRadioOption(RADIO_OPTION);
-        verify(clickActions).click(webElement);
+        verify(mouseActions).click(webElement);
     }
 
     private void stubFindRadiOption()
