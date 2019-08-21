@@ -16,39 +16,35 @@
 
 package org.vividus.aws.s3.steps;
 
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.util.ResourceUtils;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ S3BucketSteps.class, ObjectMetadata.class, IOUtils.class, ResourceUtils.class,
-        ByteArrayInputStream.class })
-@PowerMockIgnore("javax.management.*")
-public class S3BucketStepsTests
+@ExtendWith(MockitoExtension.class)
+class S3BucketStepsTests
 {
     private static final String CSV_FILE_PATH = "/test.csv";
     private static final String S3_BUCKET_NAME = "bucketName";
@@ -64,50 +60,47 @@ public class S3BucketStepsTests
     private S3BucketSteps steps;
 
     @Test
-    public void uploadFileTest() throws Exception
+    void uploadFileTest()
     {
+        byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
         String contentType = "contentType";
-        byte[] resource = "string".getBytes(StandardCharsets.UTF_8);
-
-        ObjectMetadata objectMetadata = Mockito.mock(ObjectMetadata.class);
-        ByteArrayInputStream inputStream = Mockito.mock(ByteArrayInputStream.class);
-        PowerMockito.mockStatic(ResourceUtils.class);
-        PowerMockito.when(ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH)).thenReturn(resource);
-        PowerMockito.whenNew(ObjectMetadata.class).withNoArguments().thenReturn(objectMetadata);
-        PowerMockito.whenNew(ByteArrayInputStream.class).withArguments(resource).thenReturn(inputStream);
 
         steps.uploadResource(CSV_FILE_PATH, S3_OBJECT_KEY, contentType, S3_BUCKET_NAME);
-        verify(objectMetadata).setContentType(contentType);
-        verify(objectMetadata).setContentLength(resource.length);
-        verify(amazonS3Client).putObject(S3_BUCKET_NAME, S3_OBJECT_KEY, new ByteArrayInputStream(resource),
-                objectMetadata);
+        verify(amazonS3Client).putObject(eq(S3_BUCKET_NAME), eq(S3_OBJECT_KEY), argThat(bais -> {
+            try
+            {
+                byte[] actual = IOUtils.toByteArray(bais);
+                bais.reset();
+                return Arrays.equals(csv, actual);
+            }
+            catch (IOException e)
+            {
+                return false;
+            }
+        }), argThat(metadata -> metadata.getContentLength() == csv.length && contentType
+                .equals(metadata.getContentType())));
     }
 
     @Test
-    public void fetchCsvFileTest() throws IOException
+    void fetchCsvFileTest() throws IOException
     {
         String objectKey = S3_OBJECT_KEY + ".csv";
+        byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
+
+        S3Object s3Object = mock(S3Object.class);
+        S3ObjectInputStream s3ObjectInputStream = new S3ObjectInputStream(new ByteArrayInputStream(csv), null);
+        when(s3Object.getObjectContent()).thenReturn(s3ObjectInputStream);
+        when(amazonS3Client.getObject(S3_BUCKET_NAME, objectKey)).thenReturn(s3Object);
+
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         String variableName = "varName";
-
-        S3Object s3Object = Mockito.mock(S3Object.class);
-        S3ObjectInputStream s3ObjectInputStream = Mockito.mock(S3ObjectInputStream.class);
-        String csvString = ResourceUtils.loadResource(this.getClass(), CSV_FILE_PATH);
-
-        PowerMockito.mockStatic(IOUtils.class);
-        PowerMockito.when(IOUtils.toString(s3ObjectInputStream, StandardCharsets.UTF_8)).thenReturn(csvString);
-        Mockito.when(amazonS3Client.getObject(S3_BUCKET_NAME, objectKey)).thenReturn(s3Object);
-        Mockito.when(s3Object.getObjectContent()).thenReturn(s3ObjectInputStream);
-
-        List<Map<String, String>> expectedCsv = List.of(Map.of("id", "1"));
-
         steps.fetchCsvObject(objectKey, S3_BUCKET_NAME, scopes, variableName);
         verify(amazonS3Client).getObject(S3_BUCKET_NAME, objectKey);
-        verify(bddVariableContext).putVariable(scopes, variableName, expectedCsv);
+        verify(bddVariableContext).putVariable(scopes, variableName, List.of(Map.of("id", "1")));
     }
 
     @Test
-    public void deleteFileTest()
+    void deleteFileTest()
     {
         steps.deleteObject(S3_OBJECT_KEY, S3_BUCKET_NAME);
         verify(amazonS3Client).deleteObject(S3_BUCKET_NAME, S3_OBJECT_KEY);
