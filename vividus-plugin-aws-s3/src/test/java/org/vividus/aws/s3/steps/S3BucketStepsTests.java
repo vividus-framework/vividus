@@ -46,6 +46,7 @@ import org.vividus.util.ResourceUtils;
 @ExtendWith(MockitoExtension.class)
 class S3BucketStepsTests
 {
+    private static final String CONTENT_TYPE = "contentType";
     private static final String CSV_FILE_PATH = "/test.csv";
     private static final String S3_BUCKET_NAME = "bucketName";
     private static final String S3_OBJECT_KEY = "objectKey";
@@ -60,12 +61,24 @@ class S3BucketStepsTests
     private S3BucketSteps steps;
 
     @Test
-    void uploadFileTest()
+    void uploadResourceTest()
     {
         byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
-        String contentType = "contentType";
+        steps.uploadResource(CSV_FILE_PATH, S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME);
+        verifyContentUploaded(csv, CONTENT_TYPE);
+    }
 
-        steps.uploadResource(CSV_FILE_PATH, S3_OBJECT_KEY, contentType, S3_BUCKET_NAME);
+    @Test
+    void uploadFileTest() throws IOException
+    {
+        byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
+        steps.uploadFile(ResourceUtils.loadFile(getClass(), CSV_FILE_PATH),
+                S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME);
+        verifyContentUploaded(csv, CONTENT_TYPE);
+    }
+
+    private void verifyContentUploaded(byte[] csv, String contentType)
+    {
         verify(amazonS3Client).putObject(eq(S3_BUCKET_NAME), eq(S3_OBJECT_KEY), argThat(bais -> {
             try
             {

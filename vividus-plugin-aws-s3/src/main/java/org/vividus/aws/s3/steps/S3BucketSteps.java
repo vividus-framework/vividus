@@ -17,6 +17,7 @@
 package org.vividus.aws.s3.steps;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +30,7 @@ import javax.inject.Inject;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.When;
@@ -45,7 +47,7 @@ public class S3BucketSteps
     private IBddVariableContext bddVariableContext;
 
     /**
-     * Uploads <b>file</b> into S3 given bucket by the <b>objectKey</b>
+     * Uploads <b>resource</b> into S3 given bucket by the <b>objectKey</b>
      * <br>
      * Usage example:
      * <code><br>When I upload `/story/test.csv` with key `folder/name.csv`
@@ -55,14 +57,39 @@ public class S3BucketSteps
      * @param contentType Mime type of object for upload (see <a href="https://en.wikipedia.org/wiki/MIME">MIME</a>)
      * @param bucketName S3 bucket to upload
      */
-    @When("I upload `$resourcePath` with key `$objectKey` and content type `$contentType` to S3 bucket `$bucketName`")
+    @When("I upload resource `$resourcePath` with key `$objectKey` and content type `$contentType`"
+            + " to S3 bucket `$bucketName`")
     public void uploadResource(String resourcePath, String objectKey, String contentType, String bucketName)
     {
         byte[] resource = ResourceUtils.loadResourceAsByteArray(resourcePath);
+        uploadContent(bucketName, objectKey, resource, contentType);
+    }
+
+    /**
+     * Uploads <b>file</b> into S3 given bucket by the <b>objectKey</b>
+     * <br>
+     * Usage example:
+     * <code><br>When I upload file`C:/Users/user/Temp/test.csv` with key `folder/name.csv`
+     *  and content type `text/csv` to S3 bucket `testBucket`</code>
+     * @param file File for upload
+     * @param objectKey Key on which the content is added to S3 bucket
+     * @param contentType Mime type of object for upload (see <a href="https://en.wikipedia.org/wiki/MIME">MIME</a>)
+     * @param bucketName S3 bucket to upload
+     * @throws IOException in case of error on file reading
+     */
+    @When("I upload `$file` with key `$objectKey` and content type `$contentType` to S3 bucket `$bucketName`")
+    public void uploadFile(File file, String objectKey, String contentType, String bucketName) throws IOException
+    {
+        byte[] content = FileUtils.readFileToByteArray(file);
+        uploadContent(bucketName, objectKey, content, contentType);
+    }
+
+    private void uploadContent(String bucketName, String objectKey, byte[] content, String contentType)
+    {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(contentType);
-        objectMetadata.setContentLength(resource.length);
-        InputStream inputStream = new ByteArrayInputStream(resource);
+        objectMetadata.setContentLength(content.length);
+        InputStream inputStream = new ByteArrayInputStream(content);
         amazonS3Client.putObject(bucketName, objectKey, inputStream, objectMetadata);
     }
 
