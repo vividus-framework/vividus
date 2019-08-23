@@ -19,7 +19,7 @@ jobs:
       script: ./gradlew :vividus-tests:runStories
     - stage: Publish
       if: branch = master AND type IN (push)
-      script: ./gradlew artifactoryPublish -x sonarqube -Dartifactory.publish.contextUrl=http://oss.jfrog.org -Dartifactory.publish.repoKey=oss-snapshot-local -Dartifactory.publish.username=$BINTRAY_USER -Dartifactory.publish.password=$BINTRAY_KEY -Dartifactory.publish.buildInfo=false
+      script: ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=http://oss.jfrog.org -Dartifactory.publish.repoKey=oss-snapshot-local -Dartifactory.publish.username=$BINTRAY_USER -Dartifactory.publish.password=$BINTRAY_KEY -Dartifactory.publish.buildInfo=false
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
