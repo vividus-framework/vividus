@@ -29,14 +29,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hamcrest.Matcher;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.openqa.selenium.Capabilities;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
@@ -47,6 +46,7 @@ import org.openqa.selenium.WebDriver.Window;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 
+@ExtendWith(MockitoExtension.class)
 class WindowsActionsTests
 {
     private static final String WINDOW3 = "window3";
@@ -61,20 +61,10 @@ class WindowsActionsTests
     private WebDriver webDriver;
 
     @Mock
-    private Capabilities capabilities;
-
-    @Mock
     private IWebDriverManager webDriverManager;
 
     @InjectMocks
     private WindowsActions windowsActions;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        MockitoAnnotations.initMocks(this);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-    }
 
     @Test
     void testCloseAllWindowsExceptOneOneWindow()
@@ -88,7 +78,7 @@ class WindowsActionsTests
     @Test
     void testCloseAllWindowsExceptOneNotMobile()
     {
-        when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilities);
+        when(webDriverProvider.get()).thenReturn(webDriver);
         Set<String> windows = new HashSet<>();
         windows.add(WINDOW1);
         windows.add(WINDOW2);
@@ -126,6 +116,7 @@ class WindowsActionsTests
     @Test
     void testSwitchToNewWindow()
     {
+        when(webDriverProvider.get()).thenReturn(webDriver);
         TargetLocator targetLocator = mock(TargetLocator.class);
         mockWindowHandles(WINDOW1, WINDOW2);
         when(webDriver.switchTo()).thenReturn(targetLocator);
@@ -137,9 +128,9 @@ class WindowsActionsTests
     @Test
     void testSwitchToNewWindowNoNewWindow()
     {
+        when(webDriverProvider.get()).thenReturn(webDriver);
         TargetLocator targetLocator = mock(TargetLocator.class);
         mockWindowHandles(WINDOW1);
-        when(webDriver.switchTo()).thenReturn(targetLocator);
 
         assertEquals(WINDOW1, windowsActions.switchToNewWindow(WINDOW1));
         Mockito.verifyZeroInteractions(targetLocator);
@@ -151,6 +142,7 @@ class WindowsActionsTests
         @SuppressWarnings("unchecked")
         Matcher<String> matcher = mock(Matcher.class);
         TargetLocator targetLocator = mock(TargetLocator.class);
+        when(webDriverProvider.get()).thenReturn(webDriver);
         mockWindowHandles(WINDOW3, WINDOW2, WINDOW1);
         when(webDriver.switchTo()).thenReturn(targetLocator).thenReturn(targetLocator);
         when(webDriver.getTitle()).thenReturn(WINDOW3).thenReturn(WINDOW2).thenReturn(WINDOW1);
@@ -171,6 +163,7 @@ class WindowsActionsTests
         @SuppressWarnings("unchecked")
         Matcher<String> matcher = mock(Matcher.class);
         TargetLocator targetLocator = mock(TargetLocator.class);
+        when(webDriverProvider.get()).thenReturn(webDriver);
         mockWindowHandles(WINDOW3, WINDOW2, WINDOW1);
         when(webDriver.switchTo()).thenReturn(targetLocator).thenReturn(targetLocator);
         when(webDriver.getTitle()).thenReturn(WINDOW3).thenReturn(WINDOW2).thenReturn(WINDOW1);
@@ -188,6 +181,7 @@ class WindowsActionsTests
     @Test
     void testSwitchToPreviousWindow()
     {
+        when(webDriverProvider.get()).thenReturn(webDriver);
         TargetLocator targetLocator = mock(TargetLocator.class);
         when(webDriverManager.getWindowHandles()).thenReturn(Collections.singleton(WINDOW1));
         when(webDriver.switchTo()).thenReturn(targetLocator).thenReturn(targetLocator);
