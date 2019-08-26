@@ -45,6 +45,7 @@ public final class ConfigurationResolver
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationResolver.class);
 
+    private static final String ENVIRONMENT_VARIABLES = "bdd.variables";
     private static final String SYSTEM_PROPERTIES_PREFIX = "system.";
     private static final String VIVIDUS_SYSTEM_PROPERTY_FAMILY = "vividus.";
     private static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
@@ -113,7 +114,14 @@ public final class ConfigurationResolver
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
             deprecatedPropertiesHandler.warnIfDeprecated(key, value);
-            entry.setValue(propertyPlaceholderHelper.replacePlaceholders(value, properties::getProperty));
+            if (key.startsWith(ENVIRONMENT_VARIABLES))
+            {
+                processEnvironmentVariable(entry, value);
+            }
+            else
+            {
+                entry.setValue(propertyPlaceholderHelper.replacePlaceholders(value, properties::getProperty));
+            }
         }
         deprecatedPropertiesHandler.removeDeprecated(properties);
         resolveSpelExpressions(properties);
@@ -207,6 +215,23 @@ public final class ConfigurationResolver
                 iterator.remove();
             }
         }
+    }
+
+    private static void processEnvironmentVariable(Entry<Object, Object> entry, String value)
+    {
+        String[] placeholders = StringUtils.substringsBetween(value, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
+        String updatedValue = value;
+        if (null != placeholders)
+        {
+            for (int i = 0; i < placeholders.length; i++)
+            {
+                String environmentVar = null == System.getenv(placeholders[i]) ? placeholders[i]
+                        : System.getenv(placeholders[i]);
+                updatedValue = StringUtils.replace(updatedValue, PLACEHOLDER_PREFIX + placeholders[i]
+                        + PLACEHOLDER_SUFFIX, environmentVar);
+            }
+        }
+        entry.setValue(updatedValue);
     }
 
     public static void reset()
