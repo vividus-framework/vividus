@@ -41,7 +41,6 @@ import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
 import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.ClickResult;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.IWebElementActions;
@@ -57,8 +56,7 @@ import org.vividus.ui.web.util.LocatorUtil;
 public class ElementSteps implements ResourceLoaderAware
 {
     private static final String AN_ELEMENT_TO_CLICK = "An element to click";
-    private static final String THE_FOUND_ELEMENT_IS = "The found element is ";
-    private static final String AN_ELEMENT_WITH_THE_NAME = "An element with the name '%1$s'";
+    private static final String AN_ELEMENT_WITH_ATTRIBUTES = "An element with attributes%1$s";
     private static final String AN_ELEMENT = "An element";
     private static final String THE_NUMBER_OF_FOUND_ELEMENTS = "The number of found elements";
 
@@ -122,76 +120,6 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Clicks on an element by the xpath
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Finds the element by the given xpath;</li>
-     * <li>Clicks on it.</li>
-     * </ul>
-     * @param xpath Xpath selector of the element
-    */
-    @When("I click on an element by the xpath '$xpath'")
-    public void clickElementByXpath(String xpath)
-    {
-        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, new SearchAttributes(
-                ActionAttributeType.XPATH, xpath));
-        mouseActions.click(element);
-    }
-
-    /**
-     * Clicks on all elements by the xpath.
-     * Click on any of elements by xpath shouldn't lead to current page changing.
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Finds the element by the given xpath;</li>
-     * <li>Clicks on found elements.</li>
-     * </ul>
-     * @param xpath selector of the elements to click
-    */
-    @When("I click on all elements by xpath '$xpath'")
-    public void clickEachElementByXpath(String xpath)
-    {
-        baseValidations.assertIfElementsExist("The elements to click", new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(xpath))).forEach(mouseActions::click);
-    }
-
-    /**
-     * Clicks on any item with the corresponding text.
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Finds the element;</li>
-     * <li>Clicks on it.</li>
-     * </ul>
-     * @param text A text value of the element
-     */
-    @When("I click on an element with the text '$text'")
-    public void clickElementByText(String text)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.CASE_SENSITIVE_TEXT, text);
-        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, attributes);
-        mouseActions.click(element);
-    }
-
-    /**
-     * Clicks on the element with a desired attribute
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Finds an element on the page;</li>
-     * <li>Clicks on the element.</li>
-     * </ul>
-     * @param attributeType A type of the attribute (for ex. 'name', 'id')
-     * @param attributeValue A value of the attribute
-     */
-    @When("I click on an element with the attribute '$attributeType'='$attributeValue'")
-    public void clickElementWithCertanAttribute(String attributeType, String attributeValue)
-    {
-        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK,
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-        mouseActions.click(element);
-    }
-
-    /**
      * Clicks on the element with the provided search attributes and verify that page has not been reloaded
      * <p>Actions performed at this step:</p>
      * <ul>
@@ -212,127 +140,31 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Performs right click on an element by the xpath
+     * Performs right click on an element by locator
      * <p>Actions performed at this step:</p>
      * <ul>
-     * <li>Finds the element by the given xpath;</li>
+     * <li>Finds the element by the given locator;</li>
      * <li>Performs context click on the element.</li>
      * </ul>
-     * @param xpath Xpath selector of the element
+     * @param locator to locate the element
      */
-    @When("I perform right click on an element by the xpath '$xpath'")
-    public void contextClickElementByXpath(String xpath)
+    @When("I perform right click on element located `$locator`")
+    public void contextClickElementByLocator(SearchAttributes locator)
     {
-        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK,
-                new SearchAttributes(ActionAttributeType.XPATH, xpath));
+        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator);
         mouseActions.contextClick(element);
     }
 
     /**
-     * Sets a cursor on the <b>element</b> specified by the 'xpath' value
-     * @param xpath that specified the element
+     * Sets a cursor on the <b>element</b> specified by locator
+     * @param locator to locate the element
      */
-    @When("I hover a mouse over an element with the xpath '$xpath'")
-    public void hoverMouseOverAnElementByXpaht(String xpath)
+    @When("I hover mouse over element located `$locator`")
+    public void hoverMouseOverElement(SearchAttributes locator)
     {
-        WebElement element = doesElementByXpathExist(xpath);
+        WebElement element = baseValidations.assertIfElementExists(
+                String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator), locator);
         mouseActions.moveToElement(element);
-    }
-
-    /**
-     * Checks that an <b>element</b> with the specified <b>name</b> exists in the context
-     * @param elementName Any attribute or text value of the element
-     * @return <b>WebElement</b> An element matching the requirements,
-     * <b> null</b> - if there are no desired elements
-     */
-    @Then("an element with the name '$elementName' exists")
-    public WebElement ifElementWithNameExists(String elementName)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        return baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_THE_NAME, elementName),
-                attributes);
-    }
-
-    /**
-     * Checks that an <b>element</b> with the specified <b>name</b> exists in the context
-     * and it has expected <b>state</b>
-     * @param state A state value of the element
-     * (<i>Possible values:</i> <b>ENABLED, DISABLED, SELECTED, NOT_SELECTED, VISIBLE, NOT_VISIBLE</b>)
-     * @param elementName Any attribute or text value of the element
-     */
-    @Then("a [$state] element with the name '$elementName' exists")
-    public void ifElementWithNameExists(State state, String elementName)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        attributes.addFilter(ActionAttributeType.STATE, state.toString());
-        baseValidations.assertIfElementExists(String.format("A %s element with the name '%s", state, elementName),
-                attributes);
-    }
-
-    /**
-     * Checks that a visible <b>element</b> specified by any attribute or text
-     * value does not exist in the context
-     * @param elementName Any attribute or <b>text value</b> of the element
-     */
-    @Then("an element with the name '$elementName' does not exist")
-    public void doesNotContainElementExist(String elementName)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        baseValidations.assertIfElementDoesNotExist(String.format(AN_ELEMENT_WITH_THE_NAME, elementName), attributes);
-    }
-
-    /**
-     * Checks, that there is <b>at least one</b> element with a certain attribute in the context
-     * @param attributeType A type of the attribute (for ex. <i>'name', 'id'</i>)
-     * @param attributeValue A value of the attribute
-     * @return <b>WebElement</b> - a <i>first</i> element that has an expected attribute,
-     * <b> null</b> - if there are no expected elements.
-     */
-    @Then("at least one element with the attribute '$attributeType'='$attributeValue' exists")
-    public WebElement atLeastOneElementWithAttributeExists(String attributeType, String attributeValue)
-    {
-        return baseValidations.assertIfAtLeastOneElementExists(
-                String.format("The number of elements with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-    }
-
-    /**
-     * Checks that the <b>page</b> contains an <b>element</b> specified by <b>XPath</b>
-     * @param xpath A XPath locator for an expected element
-     * @return <b>WebElement</b> An element matching the requirements,
-     * <b> null</b> - if there are no desired elements
-    */
-    @Then("an element by the xpath '$xpath' exists")
-    public WebElement doesElementByXpathExist(String xpath)
-    {
-        return baseValidations.assertIfElementExists(String.format("An element with the locator '%1$s'", xpath),
-                new SearchAttributes(ActionAttributeType.XPATH, xpath));
-    }
-
-    /**
-     * Checks that the <b>page</b> contains an <b>element</b> specified by <b>CSS selector</b>
-     * @param cssSelector A CSS selector for an expected element
-     * @return <b>WebElement</b> An element matching the requirements,
-     * <b> null</b> - if there are no desired elements
-    */
-    @Then("an element by the cssSelector '$cssSelector' exists")
-    public WebElement doesElementByCssSelectorExist(String cssSelector)
-    {
-        return baseValidations.assertIfElementExists(String.format("An element with the selector '%1$s'", cssSelector),
-                new SearchAttributes(ActionAttributeType.CSS_SELECTOR, cssSelector));
-    }
-
-    /**
-     * Checks that the <b>page</b> contains at least 1 <b>element</b> specified by <b>XPath</b>
-     * @param xpath A XPath locator for an expected element
-    */
-    @Then("at least one element by the xpath '$xpath' exists")
-    public void doesAtLeastOneELementByXpathExist(String xpath)
-    {
-        baseValidations.assertIfAtLeastOneElementExists(
-                String.format("The number of elemants by the xpath: '%1$s'", xpath),
-                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(xpath)));
     }
 
     /**
@@ -343,21 +175,20 @@ public class ElementSteps implements ResourceLoaderAware
      * <li>Finds all parent elements matching the 'elementXpath'
      * <li>Finds in each patent element all child element matching the 'childXpath' an verifies their amount
      * </ul>
-     * @param elementXpath A XPath locator for the parent element
+     * @param elementLocator locator for the parent element
      * @param number An amount of child elements (Every positive integer from 0)
-     * @param childXpath A XPath locator for the child element (e.g div[@class='className'])
+     * @param childLocator locator for the child element
     */
-    @Then("each element with the xpath '$elementXpath' has '$number' child elements with the xpath '$childXpath'")
-    public void doesEachElementByXpathHasChildWithTheXpath(String elementXpath, int number, String childXpath)
+    @Then("each element with locator `$elementLocator` has `$number` child elements with locator `$childLocator`")
+    public void doesEachElementByLocatorHaveChildWithLocator(SearchAttributes elementLocator, int number,
+            SearchAttributes childLocator)
     {
         List<WebElement> elements = baseValidations.assertIfElementsExist("The number of parent elements",
-                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(elementXpath)));
+                elementLocator);
         for (WebElement element : elements)
         {
-            SearchAttributes childSearchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
-                    LocatorUtil.getXPath(childXpath));
             baseValidations.assertIfExactNumberOfElementsFound("Parent element has number of child elements which",
-                    element, childSearchAttributes, number);
+                    element, childLocator, number);
         }
     }
 
@@ -400,7 +231,7 @@ public class ElementSteps implements ResourceLoaderAware
      * @param quantity desired amount of elements
      */
     @Then("number of elements found by `$locator` is $comparisonRule `$quantity`")
-    public void thePageContainsQuatityElements(SearchAttributes searchAttributes, ComparisonRule comparisonRule,
+    public void thePageContainsQuantityElements(SearchAttributes searchAttributes, ComparisonRule comparisonRule,
             int quantity)
     {
         baseValidations.assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS, searchAttributes, quantity,
@@ -408,7 +239,7 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Checks that all elements found on the page by the given <b>xpath expression</b> have the same <i>dimension</i>:
+     * Checks that all elements found on the page by the given <b>locator</b> have the same <i>dimension</i>:
      * <b>width / height.</b>
      * <p>
      * Elements' dimension is measured in <b>pixels</b> and means the size that given element occupies on the web-page
@@ -416,88 +247,27 @@ public class ElementSteps implements ResourceLoaderAware
      * scripts running on the page.</p>
      * <p>Actions performed at this step:</p>
      * <ul>
-     * <li>Checks if there are at least 2 visible elements with the specified xpath on the page. If less than 2 elements
-     * found, step will produce failed assertion;
+     * <li>Checks if there are at least 2 visible elements with the specified locator on the page. If less than 2
+     * elements found, step will produce failed assertion;
      * <li>Reads specified dimension (width / height) for each found element;
      * <li>Compares dimensions of 2nd, 3rd etc. elements with the dimension of the first element. So, first element is
      * taken as an sample;
      * <li>Asserts and logs each comparison.
      * </ul>
-     * @param xpath Valid xPath expression
+     * @param locator to locate element
      * @param dimension Elements dimension to compare. <i>Possible values:</i> <b>width, height</b>.
-     * <p><b>Example:</b> <i>Then each element by the xpath '//div[@class='main-menu']//input[@class='menu']'
+     * <p><b>Example:</b> <i>Then each element located 'By.xpath(//div[@class='main-menu']//input[@class='menu'])'
      *  has the same 'width'</i></p>
      * @return True if all elements have the same dimension, otherwise false
      */
-    @Then("each element by the xpath '$xpath' has the same '$dimension'")
-    public boolean doesEachElementByXpathHaveSameDimension(String xpath, Dimension dimension)
+    @Then("each element located `$locator` has same `$dimension`")
+    public boolean doesEachElementByLocatorHaveSameDimension(SearchAttributes locator, Dimension dimension)
     {
         int minimalElementsQuantity = 2;
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, xpath);
         List<WebElement> elements = baseValidations.assertIfAtLeastNumberOfElementsExist(THE_NUMBER_OF_FOUND_ELEMENTS,
-                searchAttributes, minimalElementsQuantity);
+                locator, minimalElementsQuantity);
         return elements.size() >= minimalElementsQuantity
                 && elementValidations.assertAllWebElementsHaveEqualDimension(elements, dimension);
-    }
-
-    /**
-     * Checks, if there is element with desired tag and partial value of the attribute
-     * in the context
-     * @param attributeType Type of tag attribute (for ex. 'name', 'id')
-     * @param attributeValue Partial value of the attribute
-     * @return <b>WebElement</b> An element matching the requirements,
-     * <b> null</b> - if there are no desired elements
-     */
-    @Then("an element with the attribute '$attributeType' containing '$attributeValue' exists")
-    public WebElement isElemenWithPartialAttributetFound(String attributeType, String attributeValue)
-    {
-        return baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(String.format(".//*[contains(@%s,%%s)]", attributeType), attributeValue)));
-    }
-
-    /**
-     * Checks, that there is <b>exactly one</b> element with certain <b>tag</b> and attribute in the context
-     * @param elementTag Type of html tag (for ex. <i>'div', 'img', 'span'</i>)
-     * @param attributeType Type of attribute (for ex. <i>'name', 'id', 'title'</i>)
-     * @param attributeValue Value of the attribute
-     * @return <b>WebElement</b> An element matching the requirements,
-     * <b> null</b> - if there are no desired elements
-     */
-    @Then(value = "an element with the tag '$elementTag' and attribute '$attributeType'='$attributeValue' exists",
-            priority = 1)
-    public WebElement isCertainElementFound(String elementTag, String attributeType, String attributeValue)
-    {
-        return baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue)));
-    }
-
-    /**
-     * Checks that there is exactly one <b>element</b> with an expected <b>attribute value</b>
-     * within the search context
-     * @param attributeType A type of the element's attribute
-     * @param attributeValue A value of the element's attribute
-     * @return <b>WebElement</b> An element matching the requirements,
-     * <b> null</b> - if there are no desired elements
-    */
-    @Then("an element with the attribute '$attributeType'='$attributeValue' exists")
-    public WebElement isElementWithCertainAttributeFound(String attributeType, String attributeValue)
-    {
-        return baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-    }
-
-    /**
-     * Checks that there is exactly one <b>element</b> with an expected <b>attribute value</b>
-     * within the search context
-     * @param state Enabled or Disabled
-     * @param attributeType attributeType A type of the element's attribute
-     * @param attributeValue attributeValue A value of the element's attribute
-     */
-    @Then("a [$state] element with the attribute '$attributeType'='$attributeValue' exists")
-    public void isElementWithCertainAttributeAndStateFound(State state, String attributeType, String attributeValue)
-    {
-        WebElement webElement = isElementWithCertainAttributeFound(attributeType, attributeValue);
-        baseValidations.assertElementState(THE_FOUND_ELEMENT_IS + state, state, webElement);
     }
 
     /**
@@ -564,23 +334,6 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Checks that an element with the expected <b>tag</b> and <b>text</b> exists
-     * <p>
-     * @param elementTag Name of element's tag
-     * @param text Expected text of the element
-     * @return <b>WebElement</b> An element matching the requirements,
-     * <b> null</b> - if there are no desired elements
-     */
-    @Then("an element with the tag '$elementTag' and text '$text' exists")
-    public WebElement isElementWithTagAndTextFound(String elementTag, String text)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.TAG_NAME, elementTag);
-        attributes.addFilter(ActionAttributeType.CASE_SENSITIVE_TEXT, text);
-        return baseValidations.assertIfElementExists(
-                String.format("An element with the tag '%1$s' and text '%2$s'", elementTag, text), attributes);
-    }
-
-    /**
      * Checks, if the context element has specified width in percentage
      * @param width Expected element with in percentage
      */
@@ -594,71 +347,26 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Checks that an <b>element</b> with the specified <b>name</b> and <b>text</b> exists in the context
-     * and has desired <b>state</b>
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Verifies that there is <b>exactly one</b> element a with desired attributes
-     * </ul>
-     * @param state A state value of the element
-     * (<i>Possible values:</i> <b>ENABLED, DISABLED, SELECTED, NOT_SELECTED, VISIBLE, NOT_VISIBLE</b>)
-     * @param elementName Value of any attribute of a tag
-     * @param text Expected text of the element
-     * @return <b>WebElement</b> An element (field) matching the requirements,
-     * <b> null</b> - if there are no desired elements
+     * Clicks on <b>element</b> located by <b>locator</b>
+     * @param locator to locate element
      */
-    @Then(value = "a [$state] element with the name '$elementName' and text '$text' exists", priority = 1)
-    public WebElement isElementWithNameAndTextFound(State state, String elementName, String text)
+    @When("I click on element located `$locator`")
+    public void clickOnElement(SearchAttributes locator)
     {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        attributes.addFilter(ActionAttributeType.STATE, state.toString());
-        attributes.addFilter(ActionAttributeType.CASE_SENSITIVE_TEXT, text);
-        return baseValidations.assertIfElementExists(
-                String.format("A %1$s element with the name '%2$s' and text '%3$s'", state, elementName, text),
-                attributes);
+        WebElement webElement =
+                baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator), locator);
+        mouseActions.click(webElement);
     }
 
     /**
-     * Checks that an <b>element</b> with the specified <b>name</b> and <b>text</b> exists in the context
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Verifies that there is <b>exactly one</b> desired element a with desired attributes
-     * </ul>
-     * <p>
-     * @param elementName Value of any attribute of a tag
-     * @param text Expected text of the field
-     * @return <b>WebElement</b> An element (field) matching the requirements,
-     * <b> null</b> - if there are no desired elements
+     * Clicks on <b>elements</b> located by <b>locator</b>
+     * @param locator to locate elements
      */
-    @Then(value = "an element with the name '$elementName' and text '$text' exists", priority = 1)
-    public WebElement isElementWithNameAndTextFound(String elementName, String text)
+    @When("I click on all elements located `$locator`")
+    public void clickOnAllElements(SearchAttributes locator)
     {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        attributes.addFilter(ActionAttributeType.CASE_SENSITIVE_TEXT, text);
-        return baseValidations.assertIfElementExists(
-                String.format("An element with the name '%1$s' and text '%2$s'", elementName, text), attributes);
-    }
-
-    /**
-     * Checks that an <b>element</b> with the specified <b>name</b> containing  <b>text</b> exists in the context
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Verifies that there is <b>exactly one</b> element with desired attributes</li>
-     * </ul>
-     * @param elementName Any attribute or text(exact) value
-     * @param text part that is contained in element
-     * @return <b>WebElement</b> An element (field) matching the requirements,
-     * <b> null</b> - if there are no desired elements
-     */
-    @Then(value = "an element with the name '$elementName' containing text '$text' exists", priority = 1)
-    public WebElement doesElementWithNameContainingTextExist(String elementName, String text)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        attributes.addFilter(ActionAttributeType.TEXT_PART, text);
-        return baseValidations.assertIfElementExists(
-                String.format("An element with the name '%1$s' containing text '%2$s'", elementName, text),
-                attributes);
+        baseValidations.assertIfElementsExist("The elements to click", locator)
+                .forEach(e -> mouseActions.click(e));
     }
 
     @Override
