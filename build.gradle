@@ -5,7 +5,6 @@ plugins {
 ext.buildSystemDir = file("${System.env.BUILD_SYSTEM_ROOT?:buildSystemRootDir}/${buildSystemVersion}")
 ext.gradleScriptDir =  new File(ext.buildSystemDir, 'gradle')
 apply from: "${gradleScriptDir}/project.gradle"
-apply from: "${gradleScriptDir}/release.gradle"
 apply from: "${gradleScriptDir}/jacoco.gradle"
 
 def testProjectPostfix = '-tests'
