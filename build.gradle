@@ -1,3 +1,7 @@
+plugins {
+  id 'org.sonarqube' version '2.7.1'
+}
+
 ext.buildSystemDir = file("${System.env.BUILD_SYSTEM_ROOT?:buildSystemRootDir}/${buildSystemVersion}")
 ext.gradleScriptDir =  new File(ext.buildSystemDir, 'gradle')
 apply from: "${gradleScriptDir}/project.gradle"
@@ -25,6 +29,13 @@ task jacocoAggregatedReport(type: JacocoReport) {
 }
 
 project.description = 'Vividus'
+
+apply plugin: 'org.sonarqube'
+sonarqube {
+    properties {
+        property 'sonar.projectKey', 'vividus-framework_vividus'
+    }
+}
 
 ext {
     versions = [
