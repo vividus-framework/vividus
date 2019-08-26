@@ -16,10 +16,12 @@ branches:
   only:
     - master
 
+install: skip
+
 jobs:
   include:
     - stage: Build
-      script: ./gradlew build sonarqube
+      script: ./gradlew clean build sonarqube
       after_success: bash <(curl -s https://codecov.io/bash)
     - stage: "Integration tests"
       script: ./gradlew :vividus-tests:runStories
