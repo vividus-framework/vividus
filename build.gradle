@@ -17,6 +17,12 @@ configure(subprojects.findAll { it.name.endsWith(testProjectPostfix) }) {
 
 configure(nonTestSubprojects) {
     apply from: "${buildSystemDir}/vividus-library-subproject.gradle"
+
+    sonarqube {
+        properties {
+            property 'sonar.moduleKey', project.group + ':' + project.name
+        }
+    }
 }
 
 task jacocoAggregatedReport(type: JacocoReport) {
