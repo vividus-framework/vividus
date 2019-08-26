@@ -1,5 +1,4 @@
 project.description = 'Vividus plugin for HTML testing'
-ext.sonarProjectName = 'Vividus Plugin - HTML'
 
 dependencies {
     implementation project(':vividus-bdd-engine')

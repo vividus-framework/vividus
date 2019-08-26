@@ -1,5 +1,4 @@
 project.description = 'Vividus BDD engine'
-ext.sonarProjectName = 'Vividus - BDD Engine'
 
 ext {
     jbehaveVersion = '4.5.2-alpha.2'

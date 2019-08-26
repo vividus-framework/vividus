@@ -1,5 +1,4 @@
 project.description = 'Vividus utilities'
-ext.sonarProjectName = 'Vividus - Utilities'
 
 dependencies {
     api(group: 'org.apache.commons', name: 'commons-pool2', version: '2.7.0')

@@ -1,5 +1,4 @@
 project.description = 'Vividus - Test automation framework'
-ext.sonarProjectName = 'Vividus - Test Automation Framework'
 
 sourceSets {
     integrationTest {

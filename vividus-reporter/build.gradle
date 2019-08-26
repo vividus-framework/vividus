@@ -1,5 +1,4 @@
 project.description = 'Vividus reporter'
-ext.sonarProjectName = 'Vividus - Reporter'
 
 dependencies {
     implementation project(':vividus-util')

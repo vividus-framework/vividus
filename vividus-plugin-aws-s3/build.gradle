@@ -1,5 +1,4 @@
 project.description = 'Vividus plugin for Amazion S3'
-ext.sonarProjectName = 'Vividus Plugin - Amazion S3'
 
 dependencies {
     api project(':vividus-bdd-engine')

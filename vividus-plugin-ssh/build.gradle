@@ -1,5 +1,4 @@
 project.description = 'Vividus plugin for SSH operations'
-ext.sonarProjectName = 'Vividus Plugin - SSH'
 
 dependencies {
     implementation project(':vividus-bdd-engine')

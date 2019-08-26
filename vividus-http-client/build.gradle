@@ -1,5 +1,4 @@
 project.description = 'Vividus HTTP client'
-ext.sonarProjectName = 'Vividus - HTTP Client'
 
 dependencies {
     api(group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpclient)

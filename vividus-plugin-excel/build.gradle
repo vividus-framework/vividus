@@ -1,5 +1,4 @@
 project.description = 'Vividus plugin for work with excel'
-ext.sonarProjectName = 'Vividus Plugin - Excel'
 
 dependencies {
     api project(':vividus-bdd-engine')

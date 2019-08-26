@@ -1,5 +1,4 @@
 project.description = 'Vividus soft assert'
-ext.sonarProjectName = 'Vividus - Soft Assert'
 
 dependencies {
     api(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)

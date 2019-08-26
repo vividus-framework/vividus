@@ -1,5 +1,4 @@
 project.description = 'Vividus test context'
-ext.sonarProjectName = 'Vividus - Test Context'
 
 dependencies {
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)

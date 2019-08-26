@@ -1,5 +1,4 @@
 project.description = 'Vivuds tests'
-ext.sonarProjectName = 'Vividus - Tests'
 
 tasks.artifactoryPublish.enabled = false
 tasks.publish.enabled = false

@@ -1,5 +1,4 @@
 project.description = 'Vividus plugin for Web App and Rest API plugins integration'
-ext.sonarProjectName = 'Vividus Plugin - Web App to API'
 
 dependencies {
     implementation project(':vividus-plugin-web-app')

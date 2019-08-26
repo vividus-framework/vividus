@@ -1,5 +1,4 @@
 project.description = 'Vividus plugin for DB testing'
-ext.sonarProjectName = 'Vividus Plugin - DB'
 
 dependencies {
     api project(':vividus-bdd-engine')

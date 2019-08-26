@@ -1,5 +1,4 @@
 project.description = 'Vividus plugin for CSV'
-ext.sonarProjectName = 'Vividus Plugin - CSV'
 
 dependencies {
     api project(':vividus-bdd-engine')

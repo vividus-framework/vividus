@@ -1,5 +1,4 @@
 project.description = 'Vividus plugin for testing web applications'
-ext.sonarProjectName = 'Vividus Plugin - Web Applications'
 
 ext {
     seleniumVersion = '4.0.0-alpha-2'
