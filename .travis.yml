@@ -21,7 +21,7 @@ install: skip
 jobs:
   include:
     - stage: Build
-      script: ./gradlew clean build sonarqube
+      script: ./gradlew clean build sonarqube -Dsonar.host.url=https://sonarcloud.io
       after_success: bash <(curl -s https://codecov.io/bash)
     - stage: "Integration tests"
       script: ./gradlew :vividus-tests:runStories
