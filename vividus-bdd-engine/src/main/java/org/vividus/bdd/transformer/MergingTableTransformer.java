@@ -41,7 +41,7 @@ public class MergingTableTransformer implements ExtendedTableTransformer
         MergeMode mergeMode = getMandatoryEnumProperty(properties, "mergeMode", MergeMode.class);
 
         List<String> tables = Arrays.stream(properties.getProperties().getProperty("tables").split("(?<!\\\\);"))
-                .map(t -> t.replaceAll("\\\\;", ";").trim())
+                .map(t -> t.replace("\\;", ";").trim())
                 .distinct()
                 .collect(Collectors.toList());
         checkArgument(tables.size() > 1, "Please, specify more than one unique table paths");

@@ -59,7 +59,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
                 : lineBreakReplacementPropertyValue;
             result = extractData(excelSheetParser, properties)
                     .stream()
-                    .map(e -> e.replaceAll("\\n", lineBreakReplacement))
+                    .map(e -> e.replace("\n", lineBreakReplacement))
                     .collect(Collectors.toList());
         }
         catch (WorkbookParsingException e)

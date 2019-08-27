@@ -81,7 +81,7 @@ public enum JoinMode
             return Optional.ofNullable(properties.getProperties().getProperty("columnsToJoin"))
                     .map(columnsToJoin ->
                             Stream.of(columnsToJoin.split("(?<!\\\\);"))
-                                    .map(column -> column.replaceAll("\\\\;", ";"))
+                                    .map(column -> column.replace("\\;", ";"))
                                     .map(String::trim))
                     .orElseGet(() -> table.getHeaders().stream())
                     .collect(Collectors.toCollection(LinkedHashSet::new));

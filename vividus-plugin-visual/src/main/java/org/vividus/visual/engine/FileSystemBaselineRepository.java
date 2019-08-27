@@ -44,7 +44,7 @@ public class FileSystemBaselineRepository implements IBaselineRepository
         {
             String replacement = "/";
             baselinesFolder = ResourceUtils.loadFile(FileSystemBaselineRepository.class,
-                            StringUtils.removePrefix(baselinesFolder.toString(), ".").replaceAll("\\\\", replacement));
+                            StringUtils.removePrefix(baselinesFolder.toString(), ".").replace("\\", replacement));
         }
     }
 
