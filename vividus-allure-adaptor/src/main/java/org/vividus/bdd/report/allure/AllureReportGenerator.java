@@ -128,16 +128,16 @@ public class AllureReportGenerator implements ApplicationContextAware, IAllureRe
         String cssString = FileUtils.readFileToString(cssFile, StandardCharsets.UTF_8);
 
         javascriptString = javascriptString
-                .replaceAll("unknown:\"Unknown\"", "unknown:\"Known\"")
-                .replaceAll("\"failed\",\"broken\",\"passed\",\"skipped\",\"unknown\"",
+                .replace("unknown:\"Unknown\"", "unknown:\"Known\"")
+                .replace("\"failed\",\"broken\",\"passed\",\"skipped\",\"unknown\"",
                         "\"passed\",\"unknown\",\"failed\",\"broken\",\"skipped\"");
         cssString = cssString
-                .replaceAll("#ffd050", "#d35ebf")
-                .replaceAll("#d35ebe", "#ffd051")
-                .replaceAll("#fffae6", "#faebf8")
-                .replaceAll("#faebf7", "#fffae7")
-                .replaceAll("#ffeca0", "#ecb7e3")
-                .replaceAll("#ecb7e2", "#ffeca1");
+                .replace("#ffd050", "#d35ebf")
+                .replace("#d35ebe", "#ffd051")
+                .replace("#fffae6", "#faebf8")
+                .replace("#faebf7", "#fffae7")
+                .replace("#ffeca0", "#ecb7e3")
+                .replace("#ecb7e2", "#ffeca1");
 
         FileUtils.writeStringToFile(javascriptFile, javascriptString, StandardCharsets.UTF_8);
         FileUtils.writeStringToFile(cssFile, cssString, StandardCharsets.UTF_8);
