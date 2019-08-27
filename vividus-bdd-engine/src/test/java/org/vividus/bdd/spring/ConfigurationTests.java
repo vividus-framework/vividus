@@ -37,7 +37,6 @@ import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.ExamplesTableProperties;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
-import org.jbehave.core.parsers.RegexCompositeParser;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.steps.DelegatingStepMonitor;
 import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
@@ -96,12 +95,10 @@ public class ConfigurationTests
         Keywords keywords = mock(Keywords.class);
         PowerMockito.whenNew(Keywords.class).withArguments(Keywords.defaultKeywords()).thenReturn(keywords);
         ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
-        PowerMockito.whenNew(ExamplesTableFactory.class).withArguments(spy).thenReturn(examplesTableFactory);
+        when(spy.examplesTableFactory()).thenReturn(examplesTableFactory);
         RegexStoryParser regexStoryParser = mock(RegexStoryParser.class);
         PowerMockito.whenNew(RegexStoryParser.class).withArguments(keywords, examplesTableFactory)
                 .thenReturn(regexStoryParser);
-        RegexCompositeParser regexCompositeParser = mock(RegexCompositeParser.class);
-        PowerMockito.whenNew(RegexCompositeParser.class).withArguments(keywords).thenReturn(regexCompositeParser);
         ParameterConvertersDecorator parameterConverters = mock(ParameterConvertersDecorator.class);
         PowerMockito.whenNew(ParameterConvertersDecorator.class).withArguments(spy, parameterAdaptor, expressionAdaptor)
                 .thenReturn(parameterConverters);
@@ -118,7 +115,6 @@ public class ConfigurationTests
         verify(spy).useKeywords(keywords);
         verify(spy).useCompositePaths(new HashSet<>(compositePaths));
         verify(spy).useStoryParser(regexStoryParser);
-        verify(spy).useCompositeParser(regexCompositeParser);
         verify(spy).useParameterConverters(parameterConverters);
         verify(spy).useStoryControls(storyControls);
         verifyStepMonitor(spy, stepMonitors.get(0));

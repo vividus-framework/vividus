@@ -26,10 +26,8 @@ import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.io.StoryLoader;
-import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
-import org.jbehave.core.parsers.RegexCompositeParser;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.DelegatingStepMonitor;
@@ -53,7 +51,6 @@ public class Configuration extends MostUsefulConfiguration
     private Map<String, TableTransformer> customTableTransformers;
     private String compositePaths;
     private StoryControls storyControls;
-    private ExamplesTableFactory examplesTableFactory;
     private String examplesTableHeaderSeparator;
     private String examplesTableValueSeparator;
 
@@ -61,9 +58,7 @@ public class Configuration extends MostUsefulConfiguration
     {
         initKeywords();
         initCompositePaths();
-        examplesTableFactory = new ExamplesTableFactory(this);
-        useStoryParser(new RegexStoryParser(this.keywords, examplesTableFactory));
-        useCompositeParser(new RegexCompositeParser(keywords()));
+        useStoryParser(new RegexStoryParser(keywords(), examplesTableFactory()));
         useParameterConverters(new ParameterConvertersDecorator(this, parameterAdaptor, expressionAdaptor)
                 .addConverters(customConverters));
         TableTransformers transformers = tableTransformers();
@@ -87,11 +82,6 @@ public class Configuration extends MostUsefulConfiguration
         compositeStepsBatch.setResourceIncludePatterns(compositePaths);
         compositeStepsBatch.setResourceExcludePatterns(null);
         useCompositePaths(new HashSet<>(pathFinder.findPaths(compositeStepsBatch)));
-    }
-
-    public ExamplesTableFactory getExamplesTableFactory()
-    {
-        return examplesTableFactory;
     }
 
     public void setPathFinder(IPathFinder pathFinder)

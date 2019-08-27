@@ -1,7 +1,7 @@
 project.description = 'Vividus BDD engine'
 
 ext {
-    jbehaveVersion = '4.5.2-alpha.2'
+    jbehaveVersion = '4.5.2-alpha.3'
 }
 
 dependencies {
