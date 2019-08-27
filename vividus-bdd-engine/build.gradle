@@ -9,7 +9,7 @@ dependencies {
     api(group: 'org.vividus', name: 'jbehave-core', version: jbehaveVersion)
 
     implementation project(':vividus-util')
-    implementation(group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText)
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
     implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.1')
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.3')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
