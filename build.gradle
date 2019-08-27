@@ -49,7 +49,6 @@ ext {
         commonsIo:              '2.6',
         commonsLang3:           '3.9',
         commonsText:            '1.6',
-        commonsCollections4:    '4.3',
         groovy:                 '2.5.7',
         guava:                  '28.0-jre',
         hamcrest:               '2.1',

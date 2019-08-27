@@ -9,7 +9,6 @@ dependencies {
     implementation project(':vividus-util')
 
     implementation(group: 'org.apache.httpcomponents', name: 'httpmime', version: versions.httpclient)
-    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
     implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: '2.4.0') {
         exclude group: 'net.minidev', module: 'json-smart'
     }
