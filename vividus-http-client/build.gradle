@@ -4,7 +4,6 @@ dependencies {
     api(group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpclient)
     implementation project(':vividus-util')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
-    implementation(group: 'commons-io', name: 'commons-io', version: versions.commonsIo)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
@@ -16,4 +15,5 @@ dependencies {
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
     testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
+    testImplementation(group: 'commons-io', name: 'commons-io', version: versions.commonsIo)
 }
