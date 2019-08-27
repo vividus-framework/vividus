@@ -19,6 +19,9 @@ package org.vividus.ui.web.action.search;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +62,7 @@ class SearchAttributesTests
     void testAddFilter()
     {
         searchAttributes.addFilter(ActionAttributeType.CASE_SENSITIVE_TEXT, TEST_NAME);
-        assertEquals(searchAttributes.getFilterAttributes().size(), 1);
+        assertEquals(1, searchAttributes.getFilterAttributes().size());
     }
 
     @Test
@@ -67,7 +70,7 @@ class SearchAttributesTests
     {
         searchAttributes.addFilter(ActionAttributeType.PLACEHOLDER, TEST_TEXT);
         searchAttributes.addFilter(ActionAttributeType.STATE, TEST_STATE);
-        assertEquals(searchAttributes.getFilterAttributes().size(), 2);
+        assertEquals(2, searchAttributes.getFilterAttributes().size());
     }
 
     @Test
@@ -75,7 +78,7 @@ class SearchAttributesTests
     {
         searchAttributes.addFilter(ActionAttributeType.TEXT_PART, TEST_TEXT);
         searchAttributes.addFilter(ActionAttributeType.STATE, TEST_STATE);
-        assertEquals(searchAttributes.getFilterAttributes().size(), 2);
+        assertEquals(2, searchAttributes.getFilterAttributes().size());
     }
 
     @Test
@@ -91,10 +94,9 @@ class SearchAttributesTests
     {
         searchAttributes.addFilter(ActionAttributeType.CASE_SENSITIVE_TEXT, TEST_TEXT);
         searchAttributes.addFilter(ActionAttributeType.CASE_SENSITIVE_TEXT, TEST_TEXT);
-        assertEquals(searchAttributes.getFilterAttributes().size(), 1);
-        assertEquals(searchAttributes.getFilterAttributes().get(ActionAttributeType.CASE_SENSITIVE_TEXT).get(0),
-                TEST_TEXT);
-        assertEquals(searchAttributes.getFilterAttributes().get(ActionAttributeType.CASE_SENSITIVE_TEXT).get(1),
-                TEST_TEXT);
+        Map<IActionAttributeType, List<String>> filterAttributes = searchAttributes.getFilterAttributes();
+        assertEquals(1, filterAttributes.size());
+        assertEquals(TEST_TEXT, filterAttributes.get(ActionAttributeType.CASE_SENSITIVE_TEXT).get(0));
+        assertEquals(TEST_TEXT, filterAttributes.get(ActionAttributeType.CASE_SENSITIVE_TEXT).get(1));
     }
 }

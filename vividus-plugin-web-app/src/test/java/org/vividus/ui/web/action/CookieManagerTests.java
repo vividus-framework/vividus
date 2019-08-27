@@ -149,7 +149,7 @@ class CookieManagerTests
         mockGetCookies(seleniumCookie);
         CookieStore cookieStore = cookieManager.getCookiesAsHttpCookieStore();
         List<org.apache.http.cookie.Cookie> resultCookies = cookieStore.getCookies();
-        assertEquals(resultCookies.size(), 1);
+        assertEquals(1, resultCookies.size());
         org.apache.http.cookie.Cookie httpCookie = resultCookies.get(0);
         assertEquals(seleniumCookie.getDomain(), httpCookie.getDomain());
         assertEquals(seleniumCookie.getExpiry(), httpCookie.getExpiryDate());

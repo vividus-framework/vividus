@@ -76,7 +76,7 @@ class ThreadedTestContextTests
         runContext.copyAllTo(runContextData);
         assertTrue(runContextData.containsKey(KEY));
         assertEquals(runContextData.get(KEY), initObject);
-        assertEquals(runContextData.size(), 1);
+        assertEquals(1, runContextData.size());
     }
 
     @Test
@@ -90,6 +90,6 @@ class ThreadedTestContextTests
         runContext.copyAllTo(runContextData);
         assertTrue(runContextData.containsKey(KEY));
         assertEquals(runContextData.get(KEY), object);
-        assertEquals(runContextData.size(), 1);
+        assertEquals(1, runContextData.size());
     }
 }

@@ -70,8 +70,8 @@ class AssertionFormatterTests
     {
         when(knownIssue.getStatus()).thenReturn(TEXT);
         when(knownIssue.getResolution()).thenReturn(TEXT);
-        assertEquals(assertionFormatter.getMessage(TEXT, knownIssue),
-                "Known issue: null (Type: null. Status: text. Resolution: text). text");
+        assertEquals("Known issue: null (Type: null. Status: text. Resolution: text). text",
+                assertionFormatter.getMessage(TEXT, knownIssue));
     }
 
     @Test
@@ -79,7 +79,7 @@ class AssertionFormatterTests
     {
         when(knownIssue.getStatus()).thenReturn(null);
         when(knownIssue.getResolution()).thenReturn(null);
-        assertEquals(assertionFormatter.getMessage(TEXT, knownIssue), "Known issue: null (Type: null.). text");
+        assertEquals("Known issue: null (Type: null.). text", assertionFormatter.getMessage(TEXT, knownIssue));
     }
 
     @Test
@@ -114,8 +114,8 @@ class AssertionFormatterTests
     void testGetFailedVerificationMessageIfKnownIssueIsNul()
     {
         when(softAssertionError.getKnownIssue()).thenReturn(null);
-        assertEquals(assertionFormatter.getFailedVerificationMessage(softAssertionErrors, ASSERTION_COUNT),
-                "Failed verification: 1 of 1 assertions failed. Known issues are not found.");
+        assertEquals("Failed verification: 1 of 1 assertions failed. Known issues are not found.",
+                assertionFormatter.getFailedVerificationMessage(softAssertionErrors, ASSERTION_COUNT));
     }
 
     @Test
@@ -124,8 +124,8 @@ class AssertionFormatterTests
         when(softAssertionError.getKnownIssue()).thenReturn(knownIssue);
         when(knownIssue.isPotentiallyKnown()).thenReturn(Boolean.FALSE);
         when(knownIssue.getIdentifier()).thenReturn(TEXT);
-        assertEquals(assertionFormatter.getFailedVerificationMessage(softAssertionErrors, ASSERTION_COUNT),
-                "Failed verification: 1 of 1 assertions failed. Known issues: [text].");
+        assertEquals("Failed verification: 1 of 1 assertions failed. Known issues: [text].",
+                assertionFormatter.getFailedVerificationMessage(softAssertionErrors, ASSERTION_COUNT));
     }
 
     @Test
@@ -134,15 +134,15 @@ class AssertionFormatterTests
         when(softAssertionError.getKnownIssue()).thenReturn(knownIssue);
         when(knownIssue.isPotentiallyKnown()).thenReturn(Boolean.TRUE);
         when(knownIssue.getIdentifier()).thenReturn(TEXT);
-        assertEquals(assertionFormatter.getFailedVerificationMessage(softAssertionErrors, ASSERTION_COUNT),
-                "Failed verification: 1 of 1 assertions failed. Known issues "
-                + "are not found. Potentially known issues: [text].");
+        assertEquals("Failed verification: 1 of 1 assertions failed. Known issues are not found. Potentially "
+                        + "known issues: [text].",
+                assertionFormatter.getFailedVerificationMessage(softAssertionErrors, ASSERTION_COUNT));
     }
 
     @Test
     void testGetPassedVerificationMessage()
     {
-        assertEquals(assertionFormatter.getPassedVerificationMessage(ASSERTION_COUNT),
-                "Passed verification: 1 of 1 assertions passed.");
+        assertEquals("Passed verification: 1 of 1 assertions passed.",
+                assertionFormatter.getPassedVerificationMessage(ASSERTION_COUNT));
     }
 }

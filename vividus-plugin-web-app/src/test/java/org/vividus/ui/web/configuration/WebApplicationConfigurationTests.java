@@ -89,7 +89,7 @@ class WebApplicationConfigurationTests
     {
         WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(MAIN_APP_URL,
                 AuthenticationMode.URL);
-        assertEquals(webApplicationConfiguration.getHost(), "test.vividus.org");
+        assertEquals("test.vividus.org", webApplicationConfiguration.getHost());
     }
 
     @Test

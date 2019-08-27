@@ -20,7 +20,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -235,7 +235,7 @@ class WebDriverManagerTests
         Window window = mock(Window.class);
         when(mockOptions(mobileDriver).window()).thenReturn(window);
         when(window.getSize()).thenReturn(mock(Dimension.class));
-        assertNotEquals(spy.getSize(), null);
+        assertNotNull(spy.getSize());
     }
 
     @Test

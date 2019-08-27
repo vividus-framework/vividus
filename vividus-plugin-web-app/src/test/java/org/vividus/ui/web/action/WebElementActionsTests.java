@@ -263,14 +263,14 @@ class WebElementActionsTests
     void testGetElementText()
     {
         when(javascriptActions.getElementText(webElement)).thenReturn(TEXT);
-        assertEquals(webElementActions.getElementText(webElement), TEXT);
+        assertEquals(TEXT, webElementActions.getElementText(webElement));
     }
 
     @Test
     void testGetElementTextSelenium()
     {
         when(webElement.getText()).thenReturn(TEXT);
-        assertEquals(webElementActions.getElementText(webElement), TEXT);
+        assertEquals(TEXT, webElementActions.getElementText(webElement));
     }
 
     @Test
@@ -278,7 +278,7 @@ class WebElementActionsTests
     {
         when(webElement.getText()).thenReturn("");
         when(javascriptActions.getElementText(webElement)).thenReturn(TEXT);
-        assertEquals(webElementActions.getElementText(webElement), TEXT);
+        assertEquals(TEXT, webElementActions.getElementText(webElement));
     }
 
     @Test
@@ -299,7 +299,7 @@ class WebElementActionsTests
     void testGetPageText()
     {
         when(javascriptActions.getPageText()).thenReturn(TEXT);
-        assertEquals(webElementActions.getPageText(), TEXT);
+        assertEquals(TEXT, webElementActions.getPageText());
     }
 
     @Test

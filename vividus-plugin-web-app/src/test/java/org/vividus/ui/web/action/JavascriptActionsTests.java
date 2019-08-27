@@ -185,7 +185,7 @@ class JavascriptActionsTests
         mockIsFirefox(true);
         when(((JavascriptExecutor) webDriver).executeScript("return document.body.textContent")).thenReturn(TEXT);
         javascriptActions.getPageText();
-        assertEquals(javascriptActions.getPageText(), TEXT);
+        assertEquals(TEXT, javascriptActions.getPageText());
     }
 
     @Test
@@ -193,7 +193,7 @@ class JavascriptActionsTests
     {
         mockIsFirefox(false);
         when(((JavascriptExecutor) webDriver).executeScript(BODY_INNER_TEXT)).thenReturn(TEXT);
-        assertEquals(javascriptActions.getPageText(), TEXT);
+        assertEquals(TEXT, javascriptActions.getPageText());
     }
 
     @Test
@@ -201,7 +201,7 @@ class JavascriptActionsTests
     {
         mockIsFirefox(false);
         when(((JavascriptExecutor) webDriver).executeScript(ELEMENT_INNER_TEXT, mockedWebElement)).thenReturn(TEXT);
-        assertEquals(javascriptActions.getElementText(mockedWebElement), TEXT);
+        assertEquals(TEXT, javascriptActions.getElementText(mockedWebElement));
     }
 
     @Test
@@ -209,15 +209,14 @@ class JavascriptActionsTests
     {
         when(((JavascriptExecutor) webDriver).executeScript("return arguments[0].value", mockedWebElement))
                 .thenReturn(TEXT);
-        assertEquals(javascriptActions.getElementValue(mockedWebElement), TEXT);
+        assertEquals(TEXT, javascriptActions.getElementValue(mockedWebElement));
     }
 
     @Test
     void testGetUserAgent()
     {
-        when(((JavascriptExecutor) webDriver).executeScript("return navigator.userAgent"))
-                .thenReturn(USER_AGENT);
-        assertEquals(javascriptActions.getUserAgent(), USER_AGENT);
+        when(((JavascriptExecutor) webDriver).executeScript("return navigator.userAgent")).thenReturn(USER_AGENT);
+        assertEquals(USER_AGENT, javascriptActions.getUserAgent());
     }
 
     @Test

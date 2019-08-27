@@ -81,8 +81,8 @@ class RenamedParametersTests
         replacementMap.put("oldName1", NEW_NAME1);
         replacementMap.put("oldName2", NEW_NAME2);
         Parameters actualParameters = new RenamedParameters(initialParameters).updateParameterNames(replacementMap);
-        assertEquals(actualParameters.valueAs(NEW_NAME1, String.class, null), "value1");
-        assertEquals(actualParameters.valueAs(NEW_NAME2, String.class, null), "value2");
+        assertEquals("value1", actualParameters.valueAs(NEW_NAME1, String.class, null));
+        assertEquals("value2", actualParameters.valueAs(NEW_NAME2, String.class, null));
     }
 
     @Test
