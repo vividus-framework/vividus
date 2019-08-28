@@ -68,7 +68,7 @@ class JoiningTableTransformerTests
     void testTransformInColumnsModeWithoutColumnName()
     {
         Properties properties = createProperties(COLUMNS);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         verifyIllegalArgumentException(properties, "'" + JOINED_COLUMN + "' is not set in ExamplesTable properties");
     }
 
@@ -78,7 +78,7 @@ class JoiningTableTransformerTests
         Properties properties = createProperties(COLUMNS);
         properties.setProperty(COLUMNS_TO_JOIN, "var8");
         properties.setProperty(JOINED_COLUMN, "var9");
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH, "|var7|var8|\n|z|t|\n|y|e|");
         assertJoin(PATH, properties, "|var7|var9|\n|z|t|\n|y|e|");
     }
@@ -128,7 +128,7 @@ class JoiningTableTransformerTests
 
     private void assertJoin(String table, Properties properties, String expected)
     {
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         ExamplesTableProperties examplesTableProperties = new ExamplesTableProperties(properties);
         assertEquals(expected, joiningTableTransformer.transform(table, examplesTableProperties));
     }

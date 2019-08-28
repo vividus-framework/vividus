@@ -47,7 +47,7 @@ public class MergingTableTransformer implements ExtendedTableTransformer
         checkArgument(tables.size() > 1, "Please, specify more than one unique table paths");
 
         List<ExamplesTable> examplesTables = tables.stream()
-                .map(p -> configuration.getExamplesTableFactory().createExamplesTable(p))
+                .map(p -> configuration.examplesTableFactory().createExamplesTable(p))
                 .collect(Collectors.toCollection(LinkedList::new));
         String fillerValue = properties.getProperties().getProperty("fillerValue");
         return mergeMode.merge(examplesTables, properties, Optional.ofNullable(fillerValue));

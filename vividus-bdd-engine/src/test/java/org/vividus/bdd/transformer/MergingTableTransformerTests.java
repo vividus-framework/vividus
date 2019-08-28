@@ -84,7 +84,7 @@ class MergingTableTransformerTests
     void testRowsModeDifferentTableKeys()
     {
         Properties properties = createProperties(ROWS, TWO_PATHS);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH_ONE, "|var1|var2|\n|a|b|");
         mockCreateExamplesTable(PATH_TWO, "|var1|var3|\n|c|d|");
         verifyIllegalArgumentException(properties, "Please, specify tables with the same sets of headers");
@@ -94,7 +94,7 @@ class MergingTableTransformerTests
     void testColumnsModeDifferentRowsNumber()
     {
         Properties properties = createProperties(COLUMNS, TWO_PATHS);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH_ONE, "|var1|var2|\n|a|b|\n|c|d|");
         mockCreateExamplesTable(PATH_TWO, "|var3|var4|\n|e|f|");
         verifyIllegalArgumentException(properties, "Please, specify tables with the same number of rows");
@@ -104,7 +104,7 @@ class MergingTableTransformerTests
     void testColumnsModeNotUniqueKeySets()
     {
         Properties properties = createProperties(COLUMNS, TWO_PATHS);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH_ONE, "|var2|var1|\n|b|a|");
         mockCreateExamplesTable(PATH_TWO, "|var2|var3|\n|c|d|");
         verifyIllegalArgumentException(properties, "Please, specify tables with the unique sets of headers");
@@ -114,7 +114,7 @@ class MergingTableTransformerTests
     void testTransformInRowsMode()
     {
         Properties properties = createProperties(ROWS, THREE_PATHS);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH_ONE, "|var2|var1|\n|b|a|\n|d|c|");
         mockCreateExamplesTable(PATH_TWO, "|var1|var2|\n|e|f|\n|g|h|");
         mockCreateExamplesTable(PATH_THREE, "|var1|var2|\n|i|j|\n|a|b|");
@@ -125,7 +125,7 @@ class MergingTableTransformerTests
     void testTransformsInColumnsMode()
     {
         Properties properties = createProperties(COLUMNS, THREE_PATHS);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH_ONE, "|var6|var5|\n|b|a|\n|d|c|");
         mockCreateExamplesTable(PATH_TWO, "|var3|var4|\n|e|f|\n|g|h|");
         mockCreateExamplesTable(PATH_THREE, "|var1|var2|\n|j|i|\n|l|k|");
@@ -137,7 +137,7 @@ class MergingTableTransformerTests
     {
         Properties properties = createProperties(COLUMNS,
                 TRANSFORMER_ONE + TABLES_DELIMITER + TRANSFORMER_TWO);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(TRANSFORMER_ONE, "|country|\n|Belarus|\n|USA|\n|Armenia|");
         mockCreateExamplesTable(TRANSFORMER_TWO, "|capital|\n|Minsk|\n|Washington|\n|Yerevan|");
         assertMerge(properties, "|capital|country|\n|Minsk|Belarus|\n|Washington|USA|\n|Yerevan|Armenia|");
@@ -148,7 +148,7 @@ class MergingTableTransformerTests
     {
         Properties properties = createProperties(COLUMNS, TRANSFORMER + "addresses=A2\\;A4, column=country}"
                 + TABLES_DELIMITER + TRANSFORMER + "addresses=B2\\;B4, column=capital}");
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(TRANSFORMER + "addresses=A2;A4, column=country}", "|country|\n|Belarus|\n|Armenia|");
         mockCreateExamplesTable(TRANSFORMER + "addresses=B2;B4, column=capital}", "|capital|\n|Minsk|\n|Yerevan|");
         assertMerge(properties, "|capital|country|\n|Minsk|Belarus|\n|Yerevan|Armenia|");
@@ -159,7 +159,7 @@ class MergingTableTransformerTests
     {
         Properties properties = createProperties(COLUMNS, THREE_PATHS);
         properties.setProperty(FILLER_VALUE_PARAMETER_NAME, FILLER_VALUE_PARAMETER_VALUE);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH_ONE, "|var1|var2|\n|a|b|\n|c|d|\n|e|f|");
         mockCreateExamplesTable(PATH_TWO, "|var5|\n|i|\n|j|");
         mockCreateExamplesTable(PATH_THREE, "|var3|var4|\n|g|h|");
@@ -172,7 +172,7 @@ class MergingTableTransformerTests
     {
         Properties properties = createProperties(ROWS, THREE_PATHS);
         properties.setProperty(FILLER_VALUE_PARAMETER_NAME, FILLER_VALUE_PARAMETER_VALUE);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH_ONE, "|var1|var3|\n|e|f|");
         mockCreateExamplesTable(PATH_TWO, "|var1|var2|\n|b|a|\n|d|c|");
         mockCreateExamplesTable(PATH_THREE, "|var1|var2|var3|\n|r|g|h|");
@@ -186,7 +186,7 @@ class MergingTableTransformerTests
         properties.setProperty(FILLER_VALUE_PARAMETER_NAME, FILLER_VALUE_PARAMETER_VALUE);
         properties.setProperty(HEADER_SEPARATOR, SEPARATOR);
         properties.setProperty(VALUE_SEPARATOR, SEPARATOR);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH_ONE, "{headerSeparator=!,valueSeparator=!}\n!var1!var2!\n!A!B|C!");
         mockCreateExamplesTable(PATH_TWO, "{headerSeparator=!,valueSeparator=!}\n!var1!\n!D|E!");
         assertMerge(properties, "!var1!var2!\n!A!B|C!\n!D|E!value!");
@@ -199,7 +199,7 @@ class MergingTableTransformerTests
         properties.setProperty(FILLER_VALUE_PARAMETER_NAME, FILLER_VALUE_PARAMETER_VALUE);
         properties.setProperty(HEADER_SEPARATOR, SEPARATOR);
         properties.setProperty(VALUE_SEPARATOR, SEPARATOR);
-        when(configuration.getExamplesTableFactory()).thenReturn(factory);
+        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH_ONE, "{headerSeparator=!,valueSeparator=!}\n!var1!var3!\n!B!A|E!");
         mockCreateExamplesTable(PATH_TWO, "{headerSeparator=!,valueSeparator=!}\n!var2!\r\n!D|E!\n!F!");
         assertMerge(properties, "!var1!var2!var3!\n!B!D|E!A|E!\n!value!F!value!");
