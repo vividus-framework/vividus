@@ -45,7 +45,6 @@ public final class ConfigurationResolver
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationResolver.class);
 
-    private static final String ENVIRONMENT_VARIABLES = "bdd.variables";
     private static final String SYSTEM_PROPERTIES_PREFIX = "system.";
     private static final String VIVIDUS_SYSTEM_PROPERTY_FAMILY = "vividus.";
     private static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
@@ -114,13 +113,13 @@ public final class ConfigurationResolver
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
             deprecatedPropertiesHandler.warnIfDeprecated(key, value);
-            if (key.startsWith(ENVIRONMENT_VARIABLES))
-            {
-                processEnvironmentVariable(entry, value);
-            }
-            else
+            try
             {
                 entry.setValue(propertyPlaceholderHelper.replacePlaceholders(value, properties::getProperty));
+            }
+            catch (IllegalArgumentException e)
+            {
+                processEnvironmentVariable(entry, value);
             }
         }
         deprecatedPropertiesHandler.removeDeprecated(properties);
