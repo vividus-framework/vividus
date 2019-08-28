@@ -19,7 +19,7 @@ package org.vividus.bdd.steps;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
@@ -153,8 +153,8 @@ public class ExecutableSteps
                     "Number of iterations has exceeded allowable limit " + EXECUTIONS_NUMBER_THRESHOLD));
     }
 
-    private static void iterate(int seed, Matcher<Integer> limitMatcher, int increment, Consumer<Integer> body)
+    private static void iterate(int seed, Matcher<Integer> limitMatcher, int increment, IntConsumer body)
     {
-        IntStream.iterate(seed, limitMatcher::matches, index -> index + increment).forEach(body::accept);
+        IntStream.iterate(seed, limitMatcher::matches, index -> index + increment).forEach(body);
     }
 }

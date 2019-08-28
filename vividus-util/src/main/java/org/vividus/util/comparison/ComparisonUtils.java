@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,11 +72,11 @@ public final class ComparisonUtils
         return !list.isEmpty();
     }
 
-    private static void compareTables(Supplier<Boolean> condition, List<Map<?, ?>> table1, List<Map<?, ?>> table2,
+    private static void compareTables(BooleanSupplier condition, List<Map<?, ?>> table1, List<Map<?, ?>> table2,
             List<List<EntryComparisonResult>> results, Function<List<Map<?, ?>>, Map<?, ?>> tableRowProvider1,
             Function<List<Map<?, ?>>, Map<?, ?>> tableRowProvider2)
     {
-        while (condition.get())
+        while (condition.getAsBoolean())
         {
             results.add(compareMaps(tableRowProvider1.apply(table1), tableRowProvider2.apply(table2)));
         }
