@@ -41,7 +41,7 @@ public class DescribingElementNumberMatcher extends ElementNumberMatcher
         mismatchDescription.appendValue(item.size());
         // Workaround for passed cases:
         // SoftAssert uses "describeMismatch" to generate successful assertion description
-        if (item.size() > 0 && !matchesSafely(item))
+        if (!item.isEmpty() && !matchesSafely(item))
         {
             mismatchDescription.appendText(".\nFound elements" + elementsDescriptionProvider.apply(item) + "\n");
         }

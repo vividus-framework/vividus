@@ -85,7 +85,7 @@ public class NestedSteps
         ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
         List<WebElement> elements = baseValidations
                 .assertIfNumberOfElementsFound("Elements to iterate with steps", locator, number, comparisonRule);
-        if (elements.size() > 0)
+        if (!elements.isEmpty())
         {
             List<String> cssSelectors = cssSelectorFactory.getCssSelectors(elements).collect(Collectors.toList());
             runStepsWithContextReset(() ->
