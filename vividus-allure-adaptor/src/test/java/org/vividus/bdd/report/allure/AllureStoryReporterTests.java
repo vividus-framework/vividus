@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -59,6 +58,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -67,7 +67,9 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.BddRunContext;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
@@ -84,7 +86,6 @@ import org.vividus.softassert.model.KnownIssue;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
-import io.qameta.allure.Allure;
 import io.qameta.allure.AllureLifecycle;
 import io.qameta.allure.entity.LabelName;
 import io.qameta.allure.model.Label;
@@ -94,6 +95,7 @@ import io.qameta.allure.model.StepResult;
 import io.qameta.allure.model.TestResult;
 
 @SuppressWarnings("MethodCount")
+@ExtendWith(MockitoExtension.class)
 class AllureStoryReporterTests
 {
     private static final String STORY_TIMEOUT_MESSAGE = "Story timed out after 0s";
@@ -101,7 +103,7 @@ class AllureStoryReporterTests
     private static final String DASH = "-";
     private static final String SCENARIO = "Scenario";
     private static final String GIVEN_STEP = "Given step";
-    private static final String SCENARIO_UID_PSTTERN = "%s[%d]";
+    private static final String SCENARIO_UID_PATTERN = "%s[%d]";
     private static final String SCENARIO_UID = "scenarioUid";
     private static final long THREAD_ID = Thread.currentThread().getId();
     private static final String STEP_UID = SCENARIO_UID + DASH + THREAD_ID;
@@ -142,7 +144,9 @@ class AllureStoryReporterTests
     @Mock
     private StoryReporter next;
 
+    @Mock
     private AllureLifecycle allureLifecycle;
+
     private LinkedQueueItem<String> linkedQueueItem;
     private String scenarioUid;
 
@@ -171,11 +175,10 @@ class AllureStoryReporterTests
     }
 
     @BeforeEach
-    void beforeEach()
+    void beforeEach() throws NoSuchFieldException
     {
-        allureLifecycle = mock(AllureLifecycle.class);
-        Allure.setLifecycle(allureLifecycle);
-        MockitoAnnotations.initMocks(this);
+        FieldSetter.setField(allureStoryReporter, allureStoryReporter.getClass().
+                getDeclaredField("lifecycle"), allureLifecycle);
         linkedQueueItem = new LinkedQueueItem<>(SCENARIO_UID);
         allureStoryReporter.setNext(next);
     }
@@ -253,8 +256,6 @@ class AllureStoryReporterTests
         when(bddRunContext.isDryRun()).thenReturn(true);
         Story story = mockRunningStory(false, true);
         story.namedAs("");
-        mockStoryLabels();
-        mockScenarioUid(false);
         allureStoryReporter.beforeStory(story, true);
         verify(next).beforeStory(story, true);
         verifyZeroInteractions(allureReportGenerator);
@@ -378,8 +379,6 @@ class AllureStoryReporterTests
     @Test
     void testBeforeScenarioStoriesWithSameNamesGivenStory()
     {
-        List<RunningStory> runningStories = startStoriesWithSameName(new ArrayList<>(), new ArrayList<>());
-        when(bddRunContext.getRootRunningStory()).thenReturn(runningStories.get(1));
         Story story = mockRunningStory(false, true);
         story.namedAs("given.story");
         List<Label> givenStoryLabels = List.of(
@@ -395,14 +394,12 @@ class AllureStoryReporterTests
     void testBeforeScenarioGivenStoriesHasAnchors()
     {
         GivenStories givenStories = mock(GivenStories.class);
-        when(givenStories.requireParameters()).thenReturn(true);
         Scenario scenario = new Scenario(SCENARIO, new Meta(getScenarioMeta(true)), givenStories, ExamplesTable.EMPTY,
                 List.of());
         RunningScenario runningScenario = getRunningScenario(scenario, 0);
         Story story = new Story(null, null, new Meta(getStoryMeta()), null, List.of(scenario));
         RunningStory runningStory = getRunningStory(story, runningScenario);
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
-        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
         mockStoryLabels();
         mockScenarioUid(true);
         allureStoryReporter.beforeScenario(scenario);
@@ -723,7 +720,6 @@ class AllureStoryReporterTests
         linkedQueueItem = linkedQueueItem.attachItem(STEP_UID);
         when(testContext.get(CURRENT_STEP_KEY)).thenReturn(linkedQueueItem).thenReturn(linkedQueueItem)
                 .thenReturn(linkedQueueItem).thenReturn(new LinkedQueueItem<>(SCENARIO_UID));
-        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
         Story story = mockRunningStory(false, true);
         StoryDuration storyDuration = new StoryDuration(0);
         allureStoryReporter.storyCancelled(story, storyDuration);
@@ -760,7 +756,6 @@ class AllureStoryReporterTests
     void testComment()
     {
         String step = "!-- Comment";
-        when(allureRunContext.getScenarioExecutionStage()).thenReturn(ScenarioExecutionStage.IN_PROGRESS);
         mockStepUid();
         allureStoryReporter.comment(step);
         verify(testContext, never()).get(ScenarioExecutionStage.class, ScenarioExecutionStage.class);
@@ -929,12 +924,12 @@ class AllureStoryReporterTests
     {
         mockStepUid();
         StepResult stepResult = mock(StepResult.class);
-        doNothing().when(allureLifecycle).updateStep(eq(STEP_UID), argThat(update ->
+        Mockito.lenient().doNothing().when(allureLifecycle).updateStep(eq(STEP_UID), argThat(update ->
         {
             update.accept(stepResult);
             return true;
         }));
-        when(stepResult.getStatus()).thenReturn(initialStepStatus);
+        Mockito.lenient().when(stepResult.getStatus()).thenReturn(initialStepStatus);
         allureStoryReporter.updateStepStatus(statusUpdate);
         verify(stepResult, times(updatedTimes)).setStatus(statusUpdate);
     }
@@ -960,7 +955,7 @@ class AllureStoryReporterTests
     private Story mockRunningStory(Properties storyMeta, Properties scenarioMeta, List<String> steps)
     {
         RunningStory runningStory = createRunningStory(storyMeta, scenarioMeta, steps, null);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        Mockito.lenient().when(bddRunContext.getRunningStory()).thenReturn(runningStory);
         return runningStory.getStory();
     }
 
@@ -999,7 +994,7 @@ class AllureStoryReporterTests
         RunningScenario runningScenario = new RunningScenario();
         runningScenario.setScenario(scenario);
         runningScenario.setIndex(scenarioRowIndex);
-        scenarioUid = String.format(SCENARIO_UID_PSTTERN, runningScenario.getUuid(), scenarioRowIndex);
+        scenarioUid = String.format(SCENARIO_UID_PATTERN, runningScenario.getUuid(), scenarioRowIndex);
         return runningScenario;
     }
 
@@ -1019,9 +1014,9 @@ class AllureStoryReporterTests
         return meta;
     }
 
-    private void mockScenarioUid(boolean nullOnfirstAccess)
+    private void mockScenarioUid(boolean nullOnFirstAccess)
     {
-        if (nullOnfirstAccess)
+        if (nullOnFirstAccess)
         {
             when(testContext.get(CURRENT_STEP_KEY)).thenReturn(null).thenReturn(null).thenReturn(linkedQueueItem);
         }
@@ -1029,7 +1024,8 @@ class AllureStoryReporterTests
         {
             when(testContext.get(CURRENT_STEP_KEY)).thenReturn(linkedQueueItem);
         }
-        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
+        Mockito.lenient().when(allureRunContext.getStoryExecutionStage())
+                .thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
     }
 
     private void mockStepUid()
@@ -1040,7 +1036,7 @@ class AllureStoryReporterTests
 
     private void mockStoryLabels()
     {
-        when(allureRunContext.getCurrentStoryLabels()).thenReturn(new ArrayList<>());
+        Mockito.lenient().when(allureRunContext.getCurrentStoryLabels()).thenReturn(new ArrayList<>());
     }
 
     private void testExampleHandling(int scenarioRowIndex)
@@ -1048,7 +1044,7 @@ class AllureStoryReporterTests
         Properties scenarioMeta = getScenarioMeta(true);
         Scenario scenario = new Scenario(SCENARIO, new Meta(scenarioMeta));
         RunningScenario runningScenario = getRunningScenario(scenario, scenarioRowIndex);
-        scenarioUid = String.format(SCENARIO_UID_PSTTERN, runningScenario.getUuid(), scenarioRowIndex);
+        scenarioUid = String.format(SCENARIO_UID_PATTERN, runningScenario.getUuid(), scenarioRowIndex);
         Properties storyMeta = getStoryMeta();
         Story story = new Story(null, null, new Meta(storyMeta), null, List.of(scenario));
         RunningStory runningStory = getRunningStory(story, runningScenario);
@@ -1061,7 +1057,6 @@ class AllureStoryReporterTests
         tableRow.putAll(Maps.fromProperties(storyMeta));
 
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
-        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS);
         allureStoryReporter.beforeStory(story, false);
         allureStoryReporter.example(tableRow, scenarioRowIndex);
         verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
