@@ -27,7 +27,6 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -232,7 +231,7 @@ public final class ConfigurationResolver
     private static final class PropertiesLoader
     {
         private static final String ROOT_LOCATION = "classpath*:/properties/";
-        private static final char DELIMETER = '/';
+        private static final String DELIMETER = "/";
 
         private final ResourcePatternResolver resourcePatternResolver;
 
@@ -266,7 +265,7 @@ public final class ConfigurationResolver
 
         Properties loadFromResourceTreeRecursively(String... resourcePathParts) throws IOException
         {
-            String resourcePath = Joiner.on(DELIMETER).join(resourcePathParts);
+            String resourcePath = String.join(DELIMETER, resourcePathParts);
             List<Resource> propertyResources = collectResourcesRecursively(resourcePatternResolver, resourcePath);
             LOGGER.info("Loading properties from /{}", resourcePath);
             Properties loadedProperties = loadProperties(propertyResources.toArray(new Resource[0]));
