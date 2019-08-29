@@ -231,7 +231,7 @@ public final class ConfigurationResolver
     private static final class PropertiesLoader
     {
         private static final String ROOT_LOCATION = "classpath*:/properties/";
-        private static final String DELIMETER = "/";
+        private static final String DELIMITER = "/";
 
         private final ResourcePatternResolver resourcePatternResolver;
 
@@ -265,7 +265,7 @@ public final class ConfigurationResolver
 
         Properties loadFromResourceTreeRecursively(String... resourcePathParts) throws IOException
         {
-            String resourcePath = String.join(DELIMETER, resourcePathParts);
+            String resourcePath = String.join(DELIMITER, resourcePathParts);
             List<Resource> propertyResources = collectResourcesRecursively(resourcePatternResolver, resourcePath);
             LOGGER.info("Loading properties from /{}", resourcePath);
             Properties loadedProperties = loadProperties(propertyResources.toArray(new Resource[0]));
@@ -279,7 +279,7 @@ public final class ConfigurationResolver
             List<Resource> propertyResources = new LinkedList<>();
             StringBuilder path = new StringBuilder(ROOT_LOCATION);
             String[] locationParts = resourcePath.isEmpty() ? new String[] { resourcePath }
-                    : StringUtils.split(resourcePath, DELIMETER);
+                    : StringUtils.split(resourcePath, DELIMITER);
             for (int i = 0; i < locationParts.length; i++)
             {
                 boolean deepestLevel = i + 1 == locationParts.length;
@@ -287,7 +287,7 @@ public final class ConfigurationResolver
                 path.append(locationPart);
                 if (!locationPart.isEmpty())
                 {
-                    path.append(DELIMETER);
+                    path.append(DELIMITER);
                 }
                 String resourceLocation = path.toString() + "*.properties";
                 Resource[] resources = resourcePatternResolver.getResources(resourceLocation);
