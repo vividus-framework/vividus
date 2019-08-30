@@ -99,6 +99,7 @@ public final class ConfigurationResolver
 
         Properties overridingAndSystemProperties = new Properties();
         overridingAndSystemProperties.putAll(overridingProperties);
+        overridingAndSystemProperties.putAll(System.getenv());
         overridingAndSystemProperties.putAll(loadFilteredSystemProperties());
 
         deprecatedPropertiesHandler.replaceDeprecated(overridingAndSystemProperties, properties);
@@ -113,14 +114,7 @@ public final class ConfigurationResolver
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
             deprecatedPropertiesHandler.warnIfDeprecated(key, value);
-            try
-            {
-                entry.setValue(propertyPlaceholderHelper.replacePlaceholders(value, properties::getProperty));
-            }
-            catch (IllegalArgumentException e)
-            {
-                processEnvironmentVariable(entry, value);
-            }
+            entry.setValue(propertyPlaceholderHelper.replacePlaceholders(value, properties::getProperty));
         }
         deprecatedPropertiesHandler.removeDeprecated(properties);
         resolveSpelExpressions(properties);
@@ -214,23 +208,6 @@ public final class ConfigurationResolver
                 iterator.remove();
             }
         }
-    }
-
-    private static void processEnvironmentVariable(Entry<Object, Object> entry, String value)
-    {
-        String[] placeholders = StringUtils.substringsBetween(value, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
-        String updatedValue = value;
-        if (null != placeholders)
-        {
-            for (int i = 0; i < placeholders.length; i++)
-            {
-                String environmentVar = null == System.getenv(placeholders[i]) ? placeholders[i]
-                        : System.getenv(placeholders[i]);
-                updatedValue = StringUtils.replace(updatedValue, PLACEHOLDER_PREFIX + placeholders[i]
-                        + PLACEHOLDER_SUFFIX, environmentVar);
-            }
-        }
-        entry.setValue(updatedValue);
     }
 
     public static void reset()
