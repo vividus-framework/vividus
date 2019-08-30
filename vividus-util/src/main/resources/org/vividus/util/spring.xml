@@ -20,10 +20,10 @@
     </bean>
 
     <bean id="locationProvider" class="org.vividus.util.LocationProvider">
-        <property name="locale" value="${location.locale=#{T(java.util.Locale).getDefault()}}" />
+        <property name="locale" value="${location.locale:#{T(java.util.Locale).getDefault()}}" />
     </bean>
 
     <bean id="dateUtils" class="org.vividus.util.DateUtils">
-        <constructor-arg value="${location.zone-id=#{T(java.time.ZoneId).systemDefault()}}" />
+        <constructor-arg value="${location.zone-id:#{T(java.time.ZoneId).systemDefault()}}" />
     </bean>
 </beans>
