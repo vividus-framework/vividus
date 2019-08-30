@@ -18,22 +18,25 @@ package org.vividus.proxy.deserializer;
 
 import java.io.IOException;
 
+import com.browserup.harreader.model.HarCreatorBrowser;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import net.lightbody.bmp.core.har.HarNameVersion;
-
-public class HarNameVersionDeserializer extends JsonDeserializer<HarNameVersion>
+public class HarNameVersionDeserializer extends JsonDeserializer<HarCreatorBrowser>
 {
     @Override
-    public HarNameVersion deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
+    public HarCreatorBrowser deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
             throws IOException
     {
         JsonNode jsonNode = jsonParser.getCodec().readTree(jsonParser);
         String name = jsonNode.get("name").asText();
         String version = jsonNode.get("version").asText();
-        return new HarNameVersion(name, version);
+        HarCreatorBrowser harCreatorBrowser = new HarCreatorBrowser();
+        harCreatorBrowser.setName(name);
+        harCreatorBrowser.setVersion(version);
+        return harCreatorBrowser;
     }
 }

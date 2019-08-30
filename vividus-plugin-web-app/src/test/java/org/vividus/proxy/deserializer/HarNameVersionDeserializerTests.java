@@ -22,13 +22,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import com.browserup.harreader.model.HarCreatorBrowser;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.junit.jupiter.api.Test;
-
-import net.lightbody.bmp.core.har.HarNameVersion;
 
 class HarNameVersionDeserializerTests
 {
@@ -47,7 +47,7 @@ class HarNameVersionDeserializerTests
         when(jsonNode.get(VERSION)).thenReturn(jsonNode);
         when(jsonNode.asText()).thenReturn(NAME).thenReturn(VERSION);
         HarNameVersionDeserializer deserializer = new HarNameVersionDeserializer();
-        HarNameVersion actual = deserializer.deserialize(jsonParser, null);
+        HarCreatorBrowser actual = deserializer.deserialize(jsonParser, null);
         assertEquals(NAME, actual.getName());
         assertEquals(VERSION, actual.getVersion());
     }

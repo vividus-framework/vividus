@@ -23,6 +23,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.browserup.bup.client.ClientUtil;
+
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -39,8 +41,6 @@ import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
-
-import net.lightbody.bmp.client.ClientUtil;
 
 public class VividusWebDriverFactory implements IVividusWebDriverFactory
 {

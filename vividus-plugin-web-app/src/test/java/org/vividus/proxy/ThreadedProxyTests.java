@@ -18,6 +18,8 @@ package org.vividus.proxy;
 
 import static org.mockito.Mockito.verify;
 
+import com.browserup.bup.filters.RequestFilter;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,8 +29,6 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import net.lightbody.bmp.filters.RequestFilter;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(fullyQualifiedNames = "org.vividus.proxy.*")

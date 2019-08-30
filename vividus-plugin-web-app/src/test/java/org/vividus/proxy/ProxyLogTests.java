@@ -25,21 +25,21 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
+import com.browserup.harreader.model.Har;
+import com.browserup.harreader.model.HarContent;
+import com.browserup.harreader.model.HarCreatorBrowser;
+import com.browserup.harreader.model.HarEntry;
+import com.browserup.harreader.model.HarLog;
+import com.browserup.harreader.model.HarRequest;
+import com.browserup.harreader.model.HarResponse;
+import com.browserup.harreader.model.HttpMethod;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.http.HttpMethod;
-
-import net.lightbody.bmp.core.har.Har;
-import net.lightbody.bmp.core.har.HarContent;
-import net.lightbody.bmp.core.har.HarEntry;
-import net.lightbody.bmp.core.har.HarLog;
-import net.lightbody.bmp.core.har.HarNameVersion;
-import net.lightbody.bmp.core.har.HarRequest;
-import net.lightbody.bmp.core.har.HarResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyLogTests
@@ -56,8 +56,11 @@ class ProxyLogTests
     @Test
     void testClear()
     {
-        HarNameVersion creator = new HarNameVersion("name", "version");
-        HarLog oldHarLog = new HarLog(creator);
+        HarCreatorBrowser creator = new HarCreatorBrowser();
+        creator.setName("name");
+        creator.setVersion("version");
+        HarLog oldHarLog = new HarLog();
+        oldHarLog.setCreator(creator);
         Har har = new Har();
         har.setLog(oldHarLog);
         ProxyLog proxyLog = new ProxyLog(har);
@@ -111,7 +114,7 @@ class ProxyLogTests
     {
         HttpMethod httpMethod = HttpMethod.POST;
         HarEntry harEntry = mockHarLog(getRequest(), null);
-        harEntry.getRequest().setMethod(httpMethod.toString());
+        harEntry.getRequest().setMethod(httpMethod);
         List<HarEntry> actualHarEntries = proxyLog.getLogEntries(httpMethod, URL);
         assertEquals(Collections.singletonList(harEntry), actualHarEntries);
     }
@@ -129,7 +132,7 @@ class ProxyLogTests
     void testGetLogEntriesNonMatchingHttpMethodButMatchingUrl()
     {
         HarEntry harEntry = mockHarLog(getRequest(), null);
-        harEntry.getRequest().setMethod(HttpMethod.GET.toString());
+        harEntry.getRequest().setMethod(HttpMethod.GET);
         List<HarEntry> actualHarEntries = proxyLog.getLogEntries(HttpMethod.POST, URL);
         assertTrue(actualHarEntries.isEmpty());
     }
@@ -139,7 +142,7 @@ class ProxyLogTests
     {
         HttpMethod httpMethod = HttpMethod.POST;
         HarEntry harEntry = mockHarLog(getRequest(), null);
-        harEntry.getRequest().setMethod(httpMethod.toString());
+        harEntry.getRequest().setMethod(httpMethod);
         List<HarEntry> actualHarEntries = proxyLog.getLogEntries(httpMethod, TEXT);
         assertTrue(actualHarEntries.isEmpty());
     }
@@ -219,7 +222,7 @@ class ProxyLogTests
         harEntry.setRequest(request);
         harEntry.setResponse(response);
         HarLog harLog = new HarLog();
-        harLog.addEntry(harEntry);
+        harLog.setEntries(Collections.singletonList(harEntry));
         when(har.getLog()).thenReturn(harLog);
         return harEntry;
     }

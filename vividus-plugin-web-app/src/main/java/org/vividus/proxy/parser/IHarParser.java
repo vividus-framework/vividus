@@ -19,7 +19,7 @@ package org.vividus.proxy.parser;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.lightbody.bmp.core.har.Har;
+import com.browserup.harreader.model.Har;
 
 public interface IHarParser
 {

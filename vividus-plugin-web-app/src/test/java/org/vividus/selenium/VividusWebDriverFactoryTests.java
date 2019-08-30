@@ -28,6 +28,9 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Properties;
 
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.client.ClientUtil;
+
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -56,9 +59,6 @@ import org.vividus.bdd.model.RunningStory;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
-
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.client.ClientUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ClientUtil.class, InetAddress.class, VividusWebDriverFactory.class })
@@ -90,7 +90,7 @@ public class VividusWebDriverFactoryTests
     private WebDriver driver;
 
     @Mock
-    private BrowserMobProxy browserMobProxy;
+    private BrowserUpProxy browserMobProxy;
 
     @Mock
     private Proxy seleniumProxy;

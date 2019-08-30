@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import com.browserup.harreader.model.Har;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 
@@ -35,8 +37,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.vividus.util.ResourceUtils;
-
-import net.lightbody.bmp.core.har.Har;
 
 @RunWith(PowerMockRunner.class)
 public class HarParserTests

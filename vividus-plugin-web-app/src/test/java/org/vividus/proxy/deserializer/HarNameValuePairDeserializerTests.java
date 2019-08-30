@@ -22,13 +22,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import com.browserup.harreader.model.HarQueryParam;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.junit.jupiter.api.Test;
-
-import net.lightbody.bmp.core.har.HarNameValuePair;
 
 class HarNameValuePairDeserializerTests
 {
@@ -47,6 +47,9 @@ class HarNameValuePairDeserializerTests
         when(jsonNode.get(VALUE)).thenReturn(jsonNode);
         when(jsonNode.asText()).thenReturn(NAME).thenReturn(VALUE);
         HarNameValuePairDeserializer deserializer = new HarNameValuePairDeserializer();
-        assertEquals(new HarNameValuePair(NAME, VALUE), deserializer.deserialize(jsonParser, null));
+        HarQueryParam harQueryParam = new HarQueryParam();
+        harQueryParam.setName(NAME);
+        harQueryParam.setValue(VALUE);
+        assertEquals(harQueryParam, deserializer.deserialize(jsonParser, null));
     }
 }

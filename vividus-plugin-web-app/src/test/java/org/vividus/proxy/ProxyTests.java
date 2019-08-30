@@ -31,19 +31,19 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.BrowserUpProxyServer;
+import com.browserup.bup.filters.RequestFilter;
+import com.browserup.bup.filters.RequestFilterAdapter;
+import com.browserup.bup.filters.ResponseFilter;
+import com.browserup.bup.filters.ResponseFilterAdapter;
+import com.browserup.harreader.model.Har;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.littleshoot.proxy.HttpFiltersSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.BrowserMobProxyServer;
-import net.lightbody.bmp.core.har.Har;
-import net.lightbody.bmp.filters.RequestFilter;
-import net.lightbody.bmp.filters.RequestFilterAdapter;
-import net.lightbody.bmp.filters.ResponseFilter;
-import net.lightbody.bmp.filters.ResponseFilterAdapter;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyTests
@@ -56,7 +56,7 @@ class ProxyTests
     private IProxyServerFactory proxyServerFactory;
 
     @Mock
-    private BrowserMobProxy browserMobProxy;
+    private BrowserUpProxy browserMobProxy;
 
     @Test
     void testIfNotStartedAfterCreation()
@@ -202,7 +202,7 @@ class ProxyTests
     void testClearRequestFilters()
     {
         configureProxy();
-        BrowserMobProxyServer browserMobProxyServer = mock(BrowserMobProxyServer.class);
+        BrowserUpProxyServer browserMobProxyServer = mock(BrowserUpProxyServer.class);
         ResponseFilter responseFilter = mock(ResponseFilter.class);
         RequestFilter requestFilter = mock(RequestFilter.class);
         ResponseFilterAdapter.FilterSource fsResponse = new ResponseFilterAdapter.FilterSource(responseFilter);

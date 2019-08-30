@@ -20,16 +20,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import com.browserup.harreader.model.Har;
+import com.browserup.harreader.model.HarCreatorBrowser;
+import com.browserup.harreader.model.HarQueryParam;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.vividus.proxy.deserializer.HarNameValuePairDeserializer;
 import org.vividus.proxy.deserializer.HarNameVersionDeserializer;
-
-import net.lightbody.bmp.core.har.Har;
-import net.lightbody.bmp.core.har.HarNameValuePair;
-import net.lightbody.bmp.core.har.HarNameVersion;
 
 public class HarParser implements IHarParser
 {
@@ -38,8 +38,8 @@ public class HarParser implements IHarParser
     public HarParser(List<DeserializationProblemHandler> deserializationProblemHandlers)
     {
         SimpleModule module = new SimpleModule();
-        module.addDeserializer(HarNameValuePair.class, new HarNameValuePairDeserializer());
-        module.addDeserializer(HarNameVersion.class, new HarNameVersionDeserializer());
+        module.addDeserializer(HarQueryParam.class, new HarNameValuePairDeserializer());
+        module.addDeserializer(HarCreatorBrowser.class, new HarNameVersionDeserializer());
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(module);
         deserializationProblemHandlers.forEach(objectMapper::addHandler);

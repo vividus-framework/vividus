@@ -19,19 +19,19 @@ package org.vividus.proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.littleshoot.proxy.HttpFiltersSource;
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.BrowserUpProxyServer;
+import com.browserup.bup.filters.RequestFilter;
+import com.browserup.bup.filters.RequestFilterAdapter.FilterSource;
 
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.BrowserMobProxyServer;
-import net.lightbody.bmp.filters.RequestFilter;
-import net.lightbody.bmp.filters.RequestFilterAdapter.FilterSource;
+import org.littleshoot.proxy.HttpFiltersSource;
 
 public class Proxy implements IProxy
 {
     private static final String PROXY_NOT_STARTED = "Proxy is not started";
 
     private IProxyServerFactory proxyServerFactory;
-    private BrowserMobProxy proxyServer;
+    private BrowserUpProxy proxyServer;
 
     @Override
     public void start()
@@ -89,7 +89,7 @@ public class Proxy implements IProxy
     }
 
     @Override
-    public BrowserMobProxy getProxyServer()
+    public BrowserUpProxy getProxyServer()
     {
         return proxyServer;
     }
@@ -114,14 +114,14 @@ public class Proxy implements IProxy
     public void clearRequestFilters()
     {
         List<HttpFiltersSource> toRemove = new ArrayList<>();
-        for (HttpFiltersSource source : ((BrowserMobProxyServer) proxyServer).getFilterFactories())
+        for (HttpFiltersSource source : ((BrowserUpProxyServer) proxyServer).getFilterFactories())
         {
             if (source instanceof FilterSource)
             {
                 toRemove.add(source);
             }
         }
-        ((BrowserMobProxyServer) proxyServer).getFilterFactories().removeAll(toRemove);
+        ((BrowserUpProxyServer) proxyServer).getFilterFactories().removeAll(toRemove);
     }
 
     public void setProxyServerFactory(IProxyServerFactory proxyServerFactory)

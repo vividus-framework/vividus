@@ -24,6 +24,10 @@ import static org.mockito.Mockito.verify;
 import java.util.EnumSet;
 import java.util.Set;
 
+import com.browserup.bup.BrowserUpProxyServer;
+import com.browserup.bup.proxy.CaptureType;
+import com.browserup.bup.proxy.dns.AdvancedHostResolver;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.littleshoot.proxy.impl.ThreadPoolConfiguration;
@@ -31,10 +35,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import net.lightbody.bmp.BrowserMobProxyServer;
-import net.lightbody.bmp.proxy.CaptureType;
-import net.lightbody.bmp.proxy.dns.AdvancedHostResolver;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.net.ssl.*")
@@ -53,12 +53,12 @@ public class ProxyServerFactoryTests
     }
 
     @Test
-    @PrepareForTest({BrowserMobProxyServer.class, ThreadPoolConfiguration.class, ProxyServerFactory.class})
+    @PrepareForTest({BrowserUpProxyServer.class, ThreadPoolConfiguration.class, ProxyServerFactory.class})
     public void testCreateProxyServerConfig() throws Exception
     {
         AdvancedHostResolver hostNameResolver = mock(AdvancedHostResolver.class);
-        BrowserMobProxyServer mockedServer = mock(BrowserMobProxyServer.class);
-        PowerMockito.whenNew(BrowserMobProxyServer.class).withNoArguments().thenReturn(mockedServer);
+        BrowserUpProxyServer mockedServer = mock(BrowserUpProxyServer.class);
+        PowerMockito.whenNew(BrowserUpProxyServer.class).withNoArguments().thenReturn(mockedServer);
         ThreadPoolConfiguration mockedConfig = mock(ThreadPoolConfiguration.class);
         PowerMockito.whenNew(ThreadPoolConfiguration.class).withNoArguments().thenReturn(mockedConfig);
 

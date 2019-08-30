@@ -18,8 +18,8 @@ package org.vividus.proxy;
 
 import javax.inject.Inject;
 
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.filters.RequestFilter;
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.filters.RequestFilter;
 
 public class ThreadedProxy implements IProxy
 {
@@ -63,7 +63,7 @@ public class ThreadedProxy implements IProxy
     }
 
     @Override
-    public BrowserMobProxy getProxyServer()
+    public BrowserUpProxy getProxyServer()
     {
         return proxy.get().getProxyServer();
     }

@@ -32,6 +32,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.harreader.model.Har;
+import com.browserup.harreader.model.HarCreatorBrowser;
+import com.browserup.harreader.model.HarEntry;
+import com.browserup.harreader.model.HarLog;
+import com.browserup.harreader.model.HarQueryParam;
+import com.browserup.harreader.model.HarRequest;
+import com.browserup.harreader.model.HarResponse;
+import com.browserup.harreader.model.HttpMethod;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,25 +53,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
-import org.vividus.http.HttpMethod;
 import org.vividus.proxy.IProxy;
 import org.vividus.proxy.ProxyLog;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWaitActions;
 
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.core.har.Har;
-import net.lightbody.bmp.core.har.HarEntry;
-import net.lightbody.bmp.core.har.HarLog;
-import net.lightbody.bmp.core.har.HarNameValuePair;
-import net.lightbody.bmp.core.har.HarNameVersion;
-import net.lightbody.bmp.core.har.HarRequest;
-import net.lightbody.bmp.core.har.HarResponse;
-
 @ExtendWith(MockitoExtension.class)
 class ProxyStepsTests
 {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String URL_PATTERN = "www.test.com";
     private static final String REQUESTS_MATCHING_URL_ASSERTION_PATTERN = "Number of HTTP %s requests matching URL "
             + "pattern '%s'";
@@ -146,8 +148,14 @@ class ProxyStepsTests
         String value1 = "value1";
         String key2 = "key2";
         String value2 = "value2";
+        HarQueryParam firstPair = new HarQueryParam();
+        firstPair.setName(key1);
+        firstPair.setValue(value1);
+        HarQueryParam secondPair = new HarQueryParam();
+        secondPair.setName(key2);
+        secondPair.setValue(value2);
         when(harRequest.getQueryString())
-                .thenReturn(List.of(new HarNameValuePair(key1, value1), new HarNameValuePair(key2, value2)));
+                .thenReturn(List.of(firstPair, secondPair));
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         spy.captureRequestAndSaveURLQuery(httpMethod, URL_PATTERN, variableScopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value ->
@@ -183,17 +191,19 @@ class ProxyStepsTests
 
     private byte[] mockProxyLog() throws IOException
     {
-        HarNameVersion browser = new HarNameVersion("chrome", "66");
+        HarCreatorBrowser browser = new HarCreatorBrowser();
+        browser.setName("chrome");
+        browser.setVersion("66");
         HarLog harLog = new HarLog();
         Har har = new Har();
-        BrowserMobProxy mockBrowserMobProxy = mock(BrowserMobProxy.class);
+        BrowserUpProxy mockBrowserUpProxy = mock(BrowserUpProxy.class);
         harLog.setBrowser(browser);
         harLog.setCreator(browser);
         har.setLog(harLog);
-        when(mockBrowserMobProxy.getHar()).thenReturn(har);
-        when(proxy.getProxyServer()).thenReturn(mockBrowserMobProxy);
+        when(mockBrowserUpProxy.getHar()).thenReturn(har);
+        when(proxy.getProxyServer()).thenReturn(mockBrowserUpProxy);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        har.writeTo(byteArrayOutputStream);
+        OBJECT_MAPPER.writeValue(byteArrayOutputStream, har);
         return byteArrayOutputStream.toByteArray();
     }
 

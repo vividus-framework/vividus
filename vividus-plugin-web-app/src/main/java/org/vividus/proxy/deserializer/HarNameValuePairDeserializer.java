@@ -18,22 +18,25 @@ package org.vividus.proxy.deserializer;
 
 import java.io.IOException;
 
+import com.browserup.harreader.model.HarQueryParam;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import net.lightbody.bmp.core.har.HarNameValuePair;
-
-public class HarNameValuePairDeserializer extends JsonDeserializer<HarNameValuePair>
+public class HarNameValuePairDeserializer extends JsonDeserializer<HarQueryParam>
 {
     @Override
-    public HarNameValuePair deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
+    public HarQueryParam deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
             throws IOException
     {
         JsonNode jsonNode = jsonParser.getCodec().readTree(jsonParser);
         String name = jsonNode.get("name").asText();
         String value = jsonNode.get("value").asText();
-        return new HarNameValuePair(name, value);
+        HarQueryParam harQueryParam = new HarQueryParam();
+        harQueryParam.setName(name);
+        harQueryParam.setValue(value);
+        return harQueryParam;
     }
 }
