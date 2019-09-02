@@ -3,7 +3,7 @@ project.description = 'Vividus utilities'
 dependencies {
     api(group: 'org.apache.commons', name: 'commons-pool2', version: '2.7.0')
     api(group: 'org.freemarker', name: 'freemarker', version: '2.3.29')
-    api platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.9.9')
+    api platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.10.0.pr2')
     api(group: 'com.fasterxml.jackson.core', name: 'jackson-core')
     api(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9.1')
     api(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8')
