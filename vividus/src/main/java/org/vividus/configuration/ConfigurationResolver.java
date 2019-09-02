@@ -99,6 +99,7 @@ public final class ConfigurationResolver
 
         Properties overridingAndSystemProperties = new Properties();
         overridingAndSystemProperties.putAll(overridingProperties);
+        overridingAndSystemProperties.putAll(System.getenv());
         overridingAndSystemProperties.putAll(loadFilteredSystemProperties());
 
         deprecatedPropertiesHandler.replaceDeprecated(overridingAndSystemProperties, properties);
