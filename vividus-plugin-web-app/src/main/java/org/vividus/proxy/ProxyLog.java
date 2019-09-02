@@ -114,9 +114,8 @@ public class ProxyLog
      */
     public List<HarEntry> getLogEntries(HttpMethod httpMethod, String urlPattern)
     {
-        String httpMethodStr = httpMethod.toString();
         return getFilteredHarEntriesStream(urlPattern)
-                .filter(entry -> httpMethodStr.equals(entry.getRequest().getMethod().toString()))
+                .filter(entry -> httpMethod.equals(entry.getRequest().getMethod()))
                     .collect(toList());
     }
 
