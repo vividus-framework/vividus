@@ -41,6 +41,7 @@ import org.vividus.bdd.steps.ISubStepExecutor;
 import org.vividus.bdd.steps.ISubStepExecutorFactory;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.HttpMethod;
+import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
@@ -53,13 +54,15 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 public class JsonResponseValidationSteps
 {
     private static final int DURATION_DIVIDER = 10;
-    @Inject private HttpTestContext httpTestContext;
-    @Inject private IBddVariableContext bddVariableContext;
-    @Inject private ApiSteps apiSteps;
-    @Inject private ISubStepExecutorFactory subStepExecutorFactory;
-    @Inject private IAttachmentPublisher attachmentPublisher;
+
     private ISoftAssert softAssert;
     private IJsonUtils jsonUtils;
+
+    @Inject private HttpTestContext httpTestContext;
+    @Inject private IBddVariableContext bddVariableContext;
+    @Inject private ISubStepExecutorFactory subStepExecutorFactory;
+    @Inject private IAttachmentPublisher attachmentPublisher;
+    @Inject private HttpRequestExecutor httpRequestExecutor;
 
     /**
      * Checks if JSON contains the expected data by given JSON path
@@ -228,17 +231,19 @@ public class JsonResponseValidationSteps
         long durationInMillis = duration.toMillis();
         long expectedTime = System.currentTimeMillis() + durationInMillis;
         long pollingTimeoutMillis = durationInMillis / DURATION_DIVIDER;
-        do
+        httpRequestExecutor.executeHttpRequest(HttpMethod.GET, resourceUrl, Optional.empty(), response ->
         {
-            apiSteps.whenIDoHttpRequest(HttpMethod.GET, resourceUrl);
-            if (getElementsNumber(httpTestContext.getResponse().getResponseBodyAsString(), jsonPath) > 0)
+            if (response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0)
             {
-                break;
+                return false;
             }
             Sleeper.sleep(pollingTimeoutMillis, TimeUnit.MILLISECONDS);
+            return System.currentTimeMillis() <= expectedTime;
+        });
+        if (httpTestContext.getResponse() != null)
+        {
+            doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.GREATER_THAN, 0);
         }
-        while (System.currentTimeMillis() <= expectedTime);
-        doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.GREATER_THAN, 0);
     }
 
      /**

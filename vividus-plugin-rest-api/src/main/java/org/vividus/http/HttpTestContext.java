@@ -75,18 +75,14 @@ public class HttpTestContext
         getData().requestConfig = requestConfig;
     }
 
-    public Optional<HttpEntity> pullRequestEntity()
+    Optional<HttpEntity> getRequestEntity()
     {
-        HttpEntity requestEntity = getData().requestEntity;
-        putRequestEntity(null);
-        return Optional.ofNullable(requestEntity);
+        return Optional.ofNullable(getData().requestEntity);
     }
 
-    public List<Header> pullRequestHeaders()
+    List<Header> getRequestHeaders()
     {
-        List<Header> requestHeaders = getData().requestHeaders;
-        putRequestHeaders(new ArrayList<>());
-        return requestHeaders;
+        return getData().requestHeaders;
     }
 
     public ConnectionDetails getConnectionDetails()
@@ -112,6 +108,12 @@ public class HttpTestContext
     public Optional<RequestConfig> getRequestConfig()
     {
         return Optional.ofNullable(getData().requestConfig);
+    }
+
+    void releaseRequestData()
+    {
+        putRequestEntity(null);
+        putRequestHeaders(new ArrayList<>());
     }
 
     private HttpTestContextData getData()

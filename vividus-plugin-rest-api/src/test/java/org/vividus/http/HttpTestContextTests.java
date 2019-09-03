@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.api;
+package org.vividus.http;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -31,13 +31,12 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.junit.jupiter.api.Test;
-import org.vividus.http.ConnectionDetails;
-import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.testcontext.SimpleTestContext;
 
 class HttpTestContextTests
 {
+    private static final String SOME_REQUEST = "some request";
     private static final String JSON = "{\"name\":\"value\"}";
 
     private final HttpTestContext httpTestContext = new HttpTestContext(new SimpleTestContext());
@@ -45,16 +44,15 @@ class HttpTestContextTests
     @Test
     void testGetDefaultRequest()
     {
-        assertEquals(Optional.empty(), httpTestContext.pullRequestEntity());
+        assertEquals(Optional.empty(), httpTestContext.getRequestEntity());
     }
 
     @Test
     void testPutAndGetRequest()
     {
-        HttpEntity requestEntity = new StringEntity("some request", (ContentType) null);
+        HttpEntity requestEntity = new StringEntity(SOME_REQUEST, (ContentType) null);
         httpTestContext.putRequestEntity(requestEntity);
-        assertEquals(Optional.of(requestEntity), httpTestContext.pullRequestEntity());
-        assertEquals(Optional.empty(), httpTestContext.pullRequestEntity(), "Request is cleared");
+        assertEquals(Optional.of(requestEntity), httpTestContext.getRequestEntity());
     }
 
     @Test
@@ -92,9 +90,9 @@ class HttpTestContextTests
     }
 
     @Test
-    void testPullDefaultRequestHeaders()
+    void testGetDefaultRequestHeaders()
     {
-        assertThat(httpTestContext.pullRequestHeaders(), empty());
+        assertThat(httpTestContext.getRequestHeaders(), empty());
     }
 
     @Test
@@ -102,8 +100,7 @@ class HttpTestContextTests
     {
         List<Header> headers = List.of(mock(Header.class));
         httpTestContext.putRequestHeaders(headers);
-        assertEquals(headers, httpTestContext.pullRequestHeaders());
-        assertThat(httpTestContext.pullRequestHeaders(), empty());
+        assertEquals(headers, httpTestContext.getRequestHeaders());
     }
 
     @Test
@@ -124,5 +121,17 @@ class HttpTestContextTests
         response.setResponseBody(responseBody.getBytes(StandardCharsets.UTF_8));
         httpTestContext.putResponse(response);
         assertEquals(responseBody, httpTestContext.getJsonContext());
+    }
+
+    @Test
+    void testReleaseRequestData()
+    {
+        List<Header> headers = List.of(mock(Header.class));
+        httpTestContext.putRequestHeaders(headers);
+        HttpEntity requestEntity = new StringEntity(SOME_REQUEST, (ContentType) null);
+        httpTestContext.putRequestEntity(requestEntity);
+        httpTestContext.releaseRequestData();
+        assertThat(httpTestContext.getRequestHeaders(), empty());
+        assertEquals(Optional.empty(), httpTestContext.getRequestEntity());
     }
 }

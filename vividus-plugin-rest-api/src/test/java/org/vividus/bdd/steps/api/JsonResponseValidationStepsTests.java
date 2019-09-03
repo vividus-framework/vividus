@@ -22,13 +22,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
@@ -38,6 +40,9 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.jayway.jsonpath.PathNotFoundException;
 
+import org.apache.http.ConnectionClosedException;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jbehave.core.model.ExamplesTable;
@@ -57,9 +62,10 @@ import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ISubStepExecutor;
 import org.vividus.bdd.steps.ISubStepExecutorFactory;
 import org.vividus.bdd.variable.VariableScope;
-import org.vividus.http.HttpMethod;
+import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.http.client.IHttpClient;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.json.IJsonUtils;
 import org.vividus.util.json.JsonPathUtils;
@@ -71,6 +77,8 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 @ExtendWith(MockitoExtension.class)
 class JsonResponseValidationStepsTests
 {
+    private static final String HTTP_REQUEST_EXECUTOR_FIELD = "httpRequestExecutor";
+    private static final String GET = "GET";
     private static final String SOME_PATH = "$.some";
     private static final String RESPONSE_PATH = "$.response";
     private static final String RESPONSE_NULL = "{\"response\": null}";
@@ -104,16 +112,16 @@ class JsonResponseValidationStepsTests
     private IBddVariableContext bddVariableContext;
 
     @Mock
-    private HttpTestContext httpTestContext;
-
-    @Mock
     private ISoftAssert softAssert;
 
     @Mock
-    private ApiSteps apiSteps;
+    private ISubStepExecutorFactory subStepExecutorFactory;
 
     @Mock
-    private ISubStepExecutorFactory subStepExecutorFactory;
+    private HttpTestContext httpTestContext;
+
+    @Mock
+    private IHttpClient httpClient;
 
     @InjectMocks
     private JsonResponseValidationSteps jsonResponseValidationSteps;
@@ -300,29 +308,72 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testWaitForJsonFieldAppearsWithoutPolling() throws IOException
+    void testWaitForJsonFieldAppearsWithoutPolling() throws IOException, IllegalArgumentException,
+            IllegalAccessException, NoSuchFieldException, SecurityException
     {
         mockResponse(JSON);
-        testWaitForJsonFieldAppears(JSON, 1);
-        verify(apiSteps).whenIDoHttpRequest(HttpMethod.GET, URL);
+        testWaitForJsonFieldAppears(1);
+        verify(httpClient).execute(argThat(base -> base instanceof HttpRequestBase
+                && ((HttpRequestBase) base).getMethod().equals(GET)
+                && ((HttpRequestBase) base).getURI().equals(URI.create(URL))),
+                argThat(context -> context instanceof HttpClientContext));
     }
 
     @Test
-    void testWaitForJsonFieldAppearsWithPolling() throws IOException
+    void testWaitForJsonFieldAppearsWithPolling() throws IOException, IllegalArgumentException,
+            IllegalAccessException, NoSuchFieldException, SecurityException
     {
         String body = "{\"key\":\"value\"}";
-        testWaitForJsonFieldAppears(body, 0);
-        verify(apiSteps, atLeast(6)).whenIDoHttpRequest(HttpMethod.GET, URL);
-        verify(apiSteps, atMost(10)).whenIDoHttpRequest(HttpMethod.GET, URL);
+        mockResponse(body);
+        testWaitForJsonFieldAppears(0);
+        verify(httpClient, atLeast(6)).execute(argThat(base -> base instanceof HttpRequestBase
+                && ((HttpRequestBase) base).getMethod().equals(GET)
+                && ((HttpRequestBase) base).getURI().equals(URI.create(URL))),
+                argThat(context -> context instanceof HttpClientContext));
+        verify(httpClient, atMost(10)).execute(argThat(base -> base instanceof HttpRequestBase),
+                argThat(context -> context instanceof HttpClientContext));
     }
 
-    private void testWaitForJsonFieldAppears(String body, int elementsFound) throws IOException
+    @Test
+    void testWaitForJsonFieldAppearsHandledException() throws IOException, IllegalArgumentException,
+            IllegalAccessException, NoSuchFieldException, SecurityException
     {
-        mockResponse(body);
-        when(httpTestContext.getJsonContext()).thenReturn(body);
+        when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase
+                && ((HttpRequestBase) base).getMethod().equals(GET)
+                && ((HttpRequestBase) base).getURI().equals(URI.create(URL))),
+                argThat(context -> context instanceof HttpClientContext)))
+            .thenThrow(new ConnectionClosedException());
+        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
+        Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
+        executorField.setAccessible(true);
+        executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
+        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT1S"));
+        verify(softAssert).recordFailedAssertion(
+                (Exception) argThat(arg -> ConnectionClosedException.class.isInstance(arg)
+                        && "Connection is closed".equals(((Exception) arg).getMessage())));
+    }
+
+    private void testWaitForJsonFieldAppears(int elementsFound) throws IllegalArgumentException,
+            IllegalAccessException, NoSuchFieldException, SecurityException, IOException
+    {
+        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
+        Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
+        executorField.setAccessible(true);
+        executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
         jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT2S"));
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH),
                 eq(elementsFound), verifyMatcher(TypeSafeMatcher.class, 1));
+    }
+
+    private void mockResponse(String body) throws IOException
+    {
+        HttpResponse response = new HttpResponse();
+        response.setResponseTimeInMs(0);
+        response.setResponseBody(body != null ? body.getBytes(StandardCharsets.UTF_8) : null);
+        when(httpTestContext.getResponse()).thenReturn(response);
+        when(httpTestContext.getJsonContext()).thenReturn(body);
+        when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
+                argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
     }
 
     @ParameterizedTest
@@ -352,13 +403,6 @@ class JsonResponseValidationStepsTests
         jsonResponseValidationSteps.saveJsonElementToVariable(RESPONSE_NULL, SOME_PATH, Set.of(VariableScope.STORY),
                 VARIABLE_NAME);
         verifyPathNotFoundExceptionRecording(NON_EXISTING_SOME_PATH);
-    }
-
-    private void mockResponse(String body)
-    {
-        HttpResponse response = new HttpResponse();
-        response.setResponseBody(body.getBytes(StandardCharsets.UTF_8));
-        when(httpTestContext.getResponse()).thenReturn(response);
     }
 
     private void verifyPathNotFoundExceptionRecording(String nonExistingJsonPath)
