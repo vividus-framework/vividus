@@ -5,5 +5,12 @@
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
     default-lazy-init="true">
 
-    <bean class="org.vividus.bdd.expression.ConvertCsvToParquetFileExpressionProcessor"/>
+    <bean class="org.vividus.bdd.expression.ConvertCsvToParquetFileExpressionProcessor">
+        <constructor-arg>
+            <bean class="org.vividus.csv.CsvReader">
+                <constructor-arg
+                value="#{T(org.apache.commons.csv.CSVFormat).${expression.csv-to-parquet.csv-format}}" />
+            </bean>
+        </constructor-arg>
+    </bean>
 </beans>

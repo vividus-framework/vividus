@@ -45,7 +45,12 @@ public class ConvertCsvToParquetFileExpressionProcessor implements IExpressionPr
     private static final int CSV_PATH_GROUP = 1;
     private static final int SCHEMA_PATH_GROUP = 2;
 
-    private final CsvReader csvReader = new CsvReader();
+    private final CsvReader csvReader;
+
+    public ConvertCsvToParquetFileExpressionProcessor(CsvReader csvReader)
+    {
+        this.csvReader = csvReader;
+    }
 
     @Override
     public Optional<String> execute(String expression)
