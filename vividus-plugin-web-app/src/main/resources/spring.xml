@@ -267,7 +267,6 @@
 
     <bean id="baseValidations" class="org.vividus.bdd.steps.ui.web.validation.BaseValidations" />
     <bean id="elementValidations" class="org.vividus.bdd.steps.ui.web.validation.ElementValidations" />
-    <bean id="linkValidations" class="org.vividus.bdd.steps.ui.web.validation.LinkValidations" />
     <bean id="focusValidations" class="org.vividus.bdd.steps.ui.web.validation.FocusValidations" />
 
     <bean id="alertSteps" class="org.vividus.bdd.steps.ui.web.AlertSteps" />

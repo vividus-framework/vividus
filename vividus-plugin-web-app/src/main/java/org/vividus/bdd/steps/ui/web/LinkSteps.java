@@ -23,22 +23,17 @@ import javax.inject.Inject;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
-import org.openqa.selenium.SearchContext;
-import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.ILinkValidations;
+import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.context.IWebUiContext;
 
-@SuppressWarnings("checkstyle:methodcount")
 @TakeScreenshotOnFailure
 public class LinkSteps
 {
     private static final String TEXT = "text";
 
-    @Inject private ILinkValidations linkValidations;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IBaseValidations baseValidations;
 
     /**
      * Checks that searchContext contains <b>linkItems</b> with expected text and url
@@ -74,7 +69,11 @@ public class LinkSteps
     {
         for (Parameters row : expectedLinkItems.getRowsAsParameters(true))
         {
-            ifLinkWithTextAndUrlExists(row.valueAs(TEXT, String.class), row.valueAs("link", String.class));
+            String text = row.valueAs(TEXT, String.class);
+            String url = row.valueAs("link", String.class);
+            SearchAttributes attributes = new SearchAttributes(ActionAttributeType.LINK_TEXT, text).addFilter(
+                    LINK_URL, url);
+            baseValidations.assertIfElementExists("Link with attributes: " + attributes, attributes);
         }
     }
 
@@ -91,21 +90,11 @@ public class LinkSteps
      * Example:
      * <table border="1" style="width:10%">
      * <caption>A table of links</caption>
-     * <thead>
-     * <tr>
-     * <td>
-     * <h1>text</h1></td>
-     * </tr>
-     * </thead> <tbody>
-     * <tr>
-     * <td>linkItem1</td>
-     * </tr>
-     * <tr>
-     * <td>linkItem2</td>
-     * </tr>
-     * <tr>
-     * <td>linkItem3</td>
-     * </tr>
+     * <thead><tr><td><h1>text</h1></td></tr></thead>
+     * <tbody>
+     * <tr><td>linkItem1</td></tr>
+     * <tr><td>linkItem2</td></tr>
+     * <tr><td>linkItem3</td></tr>
      * </tbody>
      * </table>
      * @param expectedLinkItems A table of expected <b>link</b> items (<b>text</b> values):
@@ -113,24 +102,11 @@ public class LinkSteps
     @Then("context contains list of link items with the text: $expectedLinkItems")
     public void ifLinkItemsWithTextExists(ExamplesTable expectedLinkItems)
     {
-        expectedLinkItems.getRowsAsParameters(true)
-                    .forEach(row -> ifLinkWithTextExists(row.valueAs(TEXT, String.class)));
-    }
-
-    public WebElement ifLinkWithTextExists(String text)
-    {
-        return linkValidations.assertIfLinkWithTextExists(getSearchContext(), text);
-    }
-
-    public WebElement ifLinkWithTextAndUrlExists(String text, String url)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.LINK_TEXT, text).addFilter(LINK_URL,
-                    url);
-        return linkValidations.assertIfLinkExists(getSearchContext(), attributes);
-    }
-
-    protected SearchContext getSearchContext()
-    {
-        return webUiContext.getSearchContext();
+        expectedLinkItems.getRowsAsParameters(true).stream()
+                .<String>map(row -> row.valueAs(TEXT, String.class))
+                .forEach(text -> {
+                    SearchAttributes attributes = new SearchAttributes(ActionAttributeType.LINK_TEXT, text);
+                    baseValidations.assertIfElementExists(String.format("Link with text '%s'", text), attributes);
+                });
     }
 }
