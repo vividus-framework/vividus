@@ -30,11 +30,6 @@
             <AppenderRef ref="console" />
             <AppenderRef ref="file" />
         </Logger>
-        <Logger name="org.vividus.bdd.steps.SetupSteps" level="DEBUG" additivity="false">
-            <AppenderRef ref="console" />
-            <AppenderRef ref="file" />
-            <AppenderRef ref="AllureLogAppender" />
-        </Logger>
         <Logger name="org.vividus.runner.GenericRunner" level="DEBUG" additivity="false">
             <AppenderRef ref="console" />
             <AppenderRef ref="file" />
