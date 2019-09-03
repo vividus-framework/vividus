@@ -89,29 +89,29 @@ class ControllingMetaTagTests
     @Test
     void testIsContainedInImpl()
     {
-        when(metaWrapper.getOptionalPropertyValue(VERSION)).thenReturn(Optional.of(VERSION_NUMBER));
-        assertTrue(ControllingMetaTag.VERSION.isContainedInImpl(metaWrapper));
+        when(meta.getProperty(VERSION)).thenReturn(VERSION_NUMBER);
+        assertTrue(ControllingMetaTag.VERSION.isContainedInImpl(meta));
     }
 
     @Test
     void testIsContainedInImplPropertyNotPresented()
     {
-        when(metaWrapper.getOptionalPropertyValue(anyString())).thenReturn(Optional.empty());
-        assertFalse(ControllingMetaTag.VERSION.isContainedInImpl(metaWrapper));
+        when(meta.getProperty(anyString())).thenReturn("");
+        assertFalse(ControllingMetaTag.VERSION.isContainedInImpl(meta));
     }
 
     @Test
     void testProxyIsContainedInImpl()
     {
-        when(metaWrapper.hasProperty(PROXY)).thenReturn(true);
-        assertTrue(ControllingMetaTag.PROXY.isContainedInImpl(metaWrapper));
+        when(meta.hasProperty(PROXY)).thenReturn(true);
+        assertTrue(ControllingMetaTag.PROXY.isContainedInImpl(meta));
     }
 
     @Test
     void testProxyIsContainedInImplPropertyNotPresented()
     {
-        when(metaWrapper.hasProperty(PROXY)).thenReturn(false);
-        assertFalse(ControllingMetaTag.PROXY.isContainedInImpl(metaWrapper));
+        when(meta.hasProperty(PROXY)).thenReturn(false);
+        assertFalse(ControllingMetaTag.PROXY.isContainedInImpl(meta));
     }
 
     @Test

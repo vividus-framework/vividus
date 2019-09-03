@@ -16,6 +16,8 @@
 
 package org.vividus.selenium;
 
+import java.util.stream.Stream;
+
 import org.jbehave.core.model.Meta;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -36,9 +38,9 @@ public enum ControllingMetaTag
     PROXY(CapabilityType.PROXY)
     {
         @Override
-        protected boolean isContainedInImpl(MetaWrapper metaWrapper)
+        protected boolean isContainedInImpl(Meta meta)
         {
-            return metaWrapper.hasProperty(getMetaTagName());
+            return meta.hasProperty(getMetaTagName());
         }
 
         @Override
@@ -60,21 +62,14 @@ public enum ControllingMetaTag
         return metaTagName;
     }
 
-    protected boolean isContainedInImpl(MetaWrapper metaWrapper)
+    protected boolean isContainedInImpl(Meta meta)
     {
-        return metaWrapper.getOptionalPropertyValue(getMetaTagName()).isPresent();
+        return new MetaWrapper(meta).getOptionalPropertyValue(getMetaTagName()).isPresent();
     }
 
     public boolean isContainedIn(Meta... metas)
     {
-        for (Meta meta : metas)
-        {
-            if (isContainedInImpl(new MetaWrapper(meta)))
-            {
-                return true;
-            }
-        }
-        return false;
+        return Stream.of(metas).anyMatch(this::isContainedInImpl);
     }
 
     protected void setCapability(DesiredCapabilities capabilities, MetaWrapper meta)
@@ -86,14 +81,7 @@ public enum ControllingMetaTag
 
     public static boolean isAnyContainedIn(Meta meta)
     {
-        for (ControllingMetaTag controllingMetaTag : values())
-        {
-            if (controllingMetaTag.isContainedIn(meta))
-            {
-                return true;
-            }
-        }
-        return false;
+        return Stream.of(values()).anyMatch(controllingMetaTag -> controllingMetaTag.isContainedIn(meta));
     }
 
     public static void setDesiredCapabilitiesFromMeta(DesiredCapabilities capabilities, MetaWrapper meta)
