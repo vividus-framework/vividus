@@ -22,10 +22,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.browserup.bup.proxy.dns.NativeResolver;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.lightbody.bmp.proxy.dns.NativeResolver;
 
 public class HostNameResolver extends NativeResolver
 {

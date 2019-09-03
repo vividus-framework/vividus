@@ -16,8 +16,8 @@
 
 package org.vividus.proxy;
 
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.filters.RequestFilter;
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.filters.RequestFilter;
 
 public interface IProxy
 {
@@ -31,7 +31,7 @@ public interface IProxy
 
     boolean isStarted();
 
-    BrowserMobProxy getProxyServer();
+    BrowserUpProxy getProxyServer();
 
     ProxyLog getLog();
 

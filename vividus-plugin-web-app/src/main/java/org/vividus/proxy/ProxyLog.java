@@ -23,14 +23,13 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.vividus.http.HttpMethod;
-
-import net.lightbody.bmp.core.har.Har;
-import net.lightbody.bmp.core.har.HarContent;
-import net.lightbody.bmp.core.har.HarEntry;
-import net.lightbody.bmp.core.har.HarLog;
-import net.lightbody.bmp.core.har.HarNameVersion;
-import net.lightbody.bmp.core.har.HarRequest;
+import com.browserup.harreader.model.Har;
+import com.browserup.harreader.model.HarContent;
+import com.browserup.harreader.model.HarCreatorBrowser;
+import com.browserup.harreader.model.HarEntry;
+import com.browserup.harreader.model.HarLog;
+import com.browserup.harreader.model.HarRequest;
+import com.browserup.harreader.model.HttpMethod;
 
 public class ProxyLog
 {
@@ -48,8 +47,10 @@ public class ProxyLog
      */
     public void clear()
     {
-        HarNameVersion creator = har.getLog().getCreator();
-        har.setLog(new HarLog(creator));
+        HarCreatorBrowser creator = new HarCreatorBrowser();
+        HarLog harLog = new HarLog();
+        harLog.setCreator(creator);
+        har.setLog(harLog);
     }
 
     /**
@@ -113,9 +114,9 @@ public class ProxyLog
      */
     public List<HarEntry> getLogEntries(HttpMethod httpMethod, String urlPattern)
     {
-        String httpMethodStr = httpMethod.toString();
         return getFilteredHarEntriesStream(urlPattern)
-                .filter(entry -> httpMethodStr.equals(entry.getRequest().getMethod())).collect(toList());
+                .filter(entry -> httpMethod.equals(entry.getRequest().getMethod()))
+                    .collect(toList());
     }
 
     /**

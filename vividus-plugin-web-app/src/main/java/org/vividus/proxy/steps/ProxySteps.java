@@ -28,25 +28,28 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.browserup.harreader.model.Har;
+import com.browserup.harreader.model.HarEntry;
+import com.browserup.harreader.model.HarQueryParam;
+import com.browserup.harreader.model.HttpMethod;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.http.HttpStatus;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
-import org.vividus.http.HttpMethod;
 import org.vividus.proxy.IProxy;
 import org.vividus.proxy.ProxyLog;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWaitActions;
 
-import net.lightbody.bmp.core.har.Har;
-import net.lightbody.bmp.core.har.HarEntry;
-import net.lightbody.bmp.core.har.HarNameValuePair;
-
 public class ProxySteps
 {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @Inject private IProxy proxy;
     @Inject private ISoftAssert softAssert;
     @Inject private IAttachmentPublisher attachmentPublisher;
@@ -137,7 +140,7 @@ public class ProxySteps
             HarEntry harEntry = harEntries.get(0);
             Map<String, String> queryMap = harEntry.getRequest().getQueryString()
                     .stream()
-                    .collect(Collectors.toMap(HarNameValuePair::getName, HarNameValuePair::getValue));
+                    .collect(Collectors.toMap(HarQueryParam::getName, HarQueryParam::getValue));
             bddVariableContext.putVariable(scopes, variableName, queryMap);
         }
     }
@@ -184,7 +187,7 @@ public class ProxySteps
         Har har = proxy.getProxyServer().getHar();
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream())
         {
-            har.writeTo(byteArrayOutputStream);
+            OBJECT_MAPPER.writeValue(byteArrayOutputStream, har);
             attachmentPublisher.publishAttachment(byteArrayOutputStream.toByteArray(), "har.har");
         }
     }

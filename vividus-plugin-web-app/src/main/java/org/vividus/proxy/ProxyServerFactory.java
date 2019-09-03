@@ -18,12 +18,12 @@ package org.vividus.proxy;
 
 import java.util.Set;
 
-import org.littleshoot.proxy.impl.ThreadPoolConfiguration;
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.BrowserUpProxyServer;
+import com.browserup.bup.proxy.CaptureType;
+import com.browserup.bup.proxy.dns.AdvancedHostResolver;
 
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.BrowserMobProxyServer;
-import net.lightbody.bmp.proxy.CaptureType;
-import net.lightbody.bmp.proxy.dns.AdvancedHostResolver;
+import org.littleshoot.proxy.impl.ThreadPoolConfiguration;
 
 public class ProxyServerFactory implements IProxyServerFactory
 {
@@ -33,9 +33,9 @@ public class ProxyServerFactory implements IProxyServerFactory
     private Set<CaptureType> captureTypes;
 
     @Override
-    public BrowserMobProxy createProxyServer()
+    public BrowserUpProxy createProxyServer()
     {
-        BrowserMobProxyServer proxyServer = new BrowserMobProxyServer();
+        BrowserUpProxyServer proxyServer = new BrowserUpProxyServer();
         proxyServer.setHostNameResolver(advancedHostResolver);
         proxyServer.setTrustAllServers(trustAllServers);
         proxyServer.enableHarCaptureTypes(captureTypes);
