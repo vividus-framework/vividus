@@ -22,7 +22,6 @@ import java.util.Optional;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.element.Link;
 import org.vividus.ui.web.action.search.SearchAttributes;
 
 public interface ISearchActions
@@ -34,10 +33,6 @@ public interface ISearchActions
     List<WebElement> findElements(SearchContext searchContext, SearchAttributes searchAttributes);
 
     List<WebElement> findElements(SearchAttributes searchAttributes);
-
-    List<Link> findAllLinks(SearchContext searchContext, boolean displayedOnly);
-
-    List<Link> findAllLinks(boolean displayedOnly);
 
     Optional<WebElement> findElement(SearchAttributes searchAttributes);
 }

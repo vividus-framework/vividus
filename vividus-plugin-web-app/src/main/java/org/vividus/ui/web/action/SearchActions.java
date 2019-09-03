@@ -21,14 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.element.Link;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.DefaultSearch;
 import org.vividus.ui.web.action.search.IActionAttributeType;
@@ -42,8 +39,8 @@ import org.vividus.ui.web.context.IWebUiContext;
 
 public class SearchActions implements ISearchActions
 {
-    private static final String LINK_TAG_NAME = "a";
     private static final String EXCEPTION_MESSAGE = "There is no mapped search action for attribute: ";
+
     @Inject private IWebUiContext webUiContext;
 
     private Map<IActionAttributeType, IElementAction> elementActions;
@@ -112,21 +109,6 @@ public class SearchActions implements ISearchActions
             }
         }
         return foundElements;
-    }
-
-    @Override
-    public List<Link> findAllLinks(SearchContext searchContext, boolean displayedOnly)
-    {
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.TAG_NAME, LINK_TAG_NAME);
-        searchAttributes.getSearchParameters().setDisplayedOnly(displayedOnly);
-        return findElements(searchContext, searchAttributes).stream().filter(link -> link.getSize().getWidth() > 0)
-                .map(Link::new).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Link> findAllLinks(boolean displayedOnly)
-    {
-        return findAllLinks(webUiContext.getSearchContext(), displayedOnly);
     }
 
     @Override

@@ -19,7 +19,6 @@ package org.vividus.ui.web.action;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,15 +32,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.SearchContext;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.element.Link;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.ButtonNameSearch;
 import org.vividus.ui.web.action.search.CaseSensitiveTextSearch;
@@ -52,7 +46,6 @@ import org.vividus.ui.web.action.search.IElementFilterAction;
 import org.vividus.ui.web.action.search.IElementSearchAction;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.action.search.Visibility;
 import org.vividus.ui.web.context.IWebUiContext;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,16 +56,9 @@ class SearchActionsTests
     private static final String LINK_TEXT = "linkText";
     private static final String TEXT_UPPER = "Text";
     private static final By ELEMENT_BY_TEXT_LOCATOR = By.xpath(".//*[contains(normalize-space(text()), 'Text')]");
-    private static final String TAG_NAME_A = "a";
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
 
     @Mock
     private WebElement webElement;
-
-    @Mock
-    private WebDriver webDriver;
 
     @Mock
     private SearchContext searchContext;
@@ -94,44 +80,6 @@ class SearchActionsTests
 
     @InjectMocks
     private SearchActions searchActions;
-
-    @Test
-    void testFindAllLinksWidthGreaterThanZero()
-    {
-        SearchActions spy = Mockito.spy(searchActions);
-        when(webElement.getSize()).thenReturn(new Dimension(1, 0));
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.TAG_NAME, TAG_NAME_A);
-        searchAttributes.getSearchParameters().setVisibility(Visibility.VISIBLE);
-        doReturn(List.of(webElement)).when(spy).findElements(searchContext, searchAttributes);
-        List<Link> links = spy.findAllLinks(searchContext, true);
-        assertEquals(1, links.size());
-        assertEquals(webElement, links.get(0).getWrappedElement());
-    }
-
-    @Test
-    void shouldFindLinksUsingWebUiContext()
-    {
-        SearchActions spy = Mockito.spy(searchActions);
-        when(webElement.getSize()).thenReturn(new Dimension(1, 0));
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.TAG_NAME, TAG_NAME_A);
-        searchAttributes.getSearchParameters().setVisibility(Visibility.VISIBLE);
-        doReturn(List.of(webElement)).when(spy).findElements(searchContext, searchAttributes);
-        List<Link> links = spy.findAllLinks(true);
-        assertEquals(1, links.size());
-        assertEquals(webElement, links.get(0).getWrappedElement());
-    }
-
-    @Test
-    void testFindAllLinksWidthEqualZero()
-    {
-        SearchActions spy = Mockito.spy(searchActions);
-        when(webElement.getSize()).thenReturn(new Dimension(0, 0));
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.TAG_NAME, TAG_NAME_A);
-        searchAttributes.getSearchParameters().setVisibility(Visibility.VISIBLE);
-        doReturn(List.of(webElement)).when(spy).findElements(searchContext, searchAttributes);
-        assertEquals(0, spy.findAllLinks(searchContext, true).size());
-    }
 
     @Test
     void testFindElementsBySearchAttributesSingleAttribute()
