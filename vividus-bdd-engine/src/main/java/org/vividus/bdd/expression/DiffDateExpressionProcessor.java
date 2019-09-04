@@ -23,9 +23,12 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Named;
+
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
+@Named
 public class DiffDateExpressionProcessor implements IExpressionProcessor
 {
     private static final Pattern DIFF_DATE_PATTERN = Pattern

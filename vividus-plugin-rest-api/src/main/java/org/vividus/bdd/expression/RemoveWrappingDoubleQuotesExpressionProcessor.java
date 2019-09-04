@@ -16,6 +16,9 @@
 
 package org.vividus.bdd.expression;
 
+import javax.inject.Named;
+
+@Named
 public class RemoveWrappingDoubleQuotesExpressionProcessor extends UnaryExpressionProcessor
 {
     private static final char DOUBLE_QUOTE = '"';
