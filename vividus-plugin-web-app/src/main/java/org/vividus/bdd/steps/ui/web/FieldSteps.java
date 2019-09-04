@@ -120,8 +120,7 @@ public class FieldSteps
     @When("I enter `$text` in field located `$locator`")
     public void enterTextInField(String text, SearchAttributes locator)
     {
-        WebElement field = findFieldBy(locator);
-        webElementActions.typeText(field, text);
+        webElementActions.typeText(locator, text);
     }
 
     /**

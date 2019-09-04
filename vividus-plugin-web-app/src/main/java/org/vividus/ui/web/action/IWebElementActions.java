@@ -19,6 +19,7 @@ package org.vividus.ui.web.action;
 import java.util.List;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.web.action.search.SearchAttributes;
 
 public interface IWebElementActions
 {
@@ -39,10 +40,10 @@ public interface IWebElementActions
 
     /**
      * Enters text in any element
-     * @param element Any element to type
+     * @param locator to locate element
      * @param text Text to type
      */
-    void typeText(WebElement element, String text);
+    void typeText(SearchAttributes locator, String text);
 
     /**
      * Enters text in any element without clearing its previous content

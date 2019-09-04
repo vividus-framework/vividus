@@ -82,10 +82,8 @@ class FieldStepsTests
     void testEnterTextInFieldWithName()
     {
         SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.FIELD_NAME, FIELD_NAME);
-        when(baseValidations.assertIfElementExists(A_FIELD_WITH_NAME_FIELD_NAME,
-                searchAttributes)).thenReturn(webElement);
         fieldSteps.enterTextInField(TEXT, searchAttributes);
-        verify(webElementActions).typeText(webElement, TEXT);
+        verify(webElementActions).typeText(searchAttributes, TEXT);
     }
 
     @Test

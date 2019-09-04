@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -42,15 +43,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.util.FormatUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +77,7 @@ class WebElementActionsTests
     private static final String QUOTE = "'";
     private static final String TEXT = "text";
     private static final String GET_ELEMENT_VALUE_JS = "return arguments[0].value;";
+    private static final String ATTRIBUTES = "An element with attributessearchAttributes";
 
     @Mock
     private IJavascriptActions javascriptActions;
@@ -93,6 +99,12 @@ class WebElementActionsTests
 
     @Mock
     private IWebDriverManager webDriverManager;
+
+    @Mock
+    private SearchAttributes searchAttributes;
+
+    @Mock
+    private IBaseValidations baseValidations;
 
     @InjectMocks
     private WebElementActions webElementActions;
@@ -152,7 +164,8 @@ class WebElementActionsTests
     void testTypeTextNotSafari()
     {
         when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(false);
-        webElementActions.typeText(webElement, TEXT);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES, searchAttributes)).thenReturn(webElement);
+        webElementActions.typeText(searchAttributes, TEXT);
         verify(webElement).clear();
         verify(webElement).sendKeys(TEXT);
     }
@@ -162,7 +175,8 @@ class WebElementActionsTests
     {
         Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
         mockRequireWindowFocusOption(false);
-        webElementActions.typeText(webElement, TEXT);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES, searchAttributes)).thenReturn(webElement);
+        webElementActions.typeText(searchAttributes, TEXT);
         InOrder inOrder = inOrder(webElement);
         inOrder.verify(webElement).clear();
         inOrder.verify(webElement).sendKeys(TEXT);
@@ -173,8 +187,9 @@ class WebElementActionsTests
     {
         Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
         mockRequireWindowFocusOption(true);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES, searchAttributes)).thenReturn(webElement);
         when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(TEXT);
-        webElementActions.typeText(webElement, TEXT);
+        webElementActions.typeText(searchAttributes, TEXT);
         InOrder inOrder = inOrder(webElement);
         inOrder.verify(webElement).clear();
         inOrder.verify(webElement).sendKeys(TEXT);
@@ -186,7 +201,8 @@ class WebElementActionsTests
         Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
         mockRequireWindowFocusOption(true);
         when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY, TEXT);
-        webElementActions.typeText(webElement, TEXT);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES, searchAttributes)).thenReturn(webElement);
+        webElementActions.typeText(searchAttributes, TEXT);
         verify(webElement, times(2)).clear();
         verify(webElement, times(2)).sendKeys(TEXT);
     }
@@ -197,7 +213,8 @@ class WebElementActionsTests
         Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
         mockRequireWindowFocusOption(true);
         when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY);
-        webElementActions.typeText(webElement, TEXT);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES, searchAttributes)).thenReturn(webElement);
+        webElementActions.typeText(searchAttributes, TEXT);
         verify(webElement, times(6)).clear();
         verify(webElement, times(6)).sendKeys(TEXT);
         verify(softAssert).recordFailedAssertion("The element is not filled correctly after 6 typing attempt(s)");
@@ -210,7 +227,8 @@ class WebElementActionsTests
         mockRequireWindowFocusOption(true);
         when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, TEXT);
-        webElementActions.typeText(webElement, TEXT);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES, searchAttributes)).thenReturn(webElement);
+        webElementActions.typeText(searchAttributes, TEXT);
         verify(webElement, times(6)).clear();
         verify(webElement, times(6)).sendKeys(TEXT);
         verifyZeroInteractions(softAssert);
@@ -221,7 +239,8 @@ class WebElementActionsTests
     {
         when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(TRUE);
         when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(true);
-        webElementActions.typeText(webElement, TEXT);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES, searchAttributes)).thenReturn(webElement);
+        webElementActions.typeText(searchAttributes, TEXT);
         verify(webElement).clear();
         verify(javascriptActions).executeScript("var element = arguments[0];element.innerHTML = arguments[1];",
                 webElement, TEXT);
@@ -233,7 +252,8 @@ class WebElementActionsTests
     {
         when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(null);
         when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(true);
-        webElementActions.typeText(webElement, TEXT);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES, searchAttributes)).thenReturn(webElement);
+        webElementActions.typeText(searchAttributes, TEXT);
         verify(webElement).clear();
         verify(webElement).sendKeys(TEXT);
     }
@@ -242,6 +262,17 @@ class WebElementActionsTests
     void testTypeTextInNullElement()
     {
         webElementActions.typeText(null, TEXT);
+    }
+
+    @Test
+    void testTypeTextInStaleElement()
+    {
+        Mockito.doReturn(false).when(webDriverManager).isTypeAnyOf(WebDriverType.SAFARI);
+        Mockito.doReturn(webElement).when(baseValidations).assertIfElementExists(eq(ATTRIBUTES), eq(searchAttributes));
+        Mockito.doThrow(StaleElementReferenceException.class).doNothing().when(webElement).sendKeys(TEXT);
+        webElementActions.typeText(searchAttributes, TEXT);
+        verify(webElement).clear();
+        verify(webElement, times(2)).sendKeys(TEXT);
     }
 
     @Test

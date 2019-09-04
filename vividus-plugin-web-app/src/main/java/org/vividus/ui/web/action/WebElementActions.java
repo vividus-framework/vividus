@@ -23,12 +23,16 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
+
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.util.FormatUtil;
 
 public class WebElementActions implements IWebElementActions
@@ -37,7 +41,9 @@ public class WebElementActions implements IWebElementActions
     private static final char APOSTROPHE = '\'';
     private static final char QUOTE = '"';
     private static final int TEXT_TYPING_ATTEMPTS_LIMIT = 5;
+    private static final String AN_ELEMENT_WITH_ATTRIBUTES = "An element with attributes%1$s";
 
+    @Inject private IBaseValidations baseValidations;
     @Inject private IJavascriptActions javascriptActions;
     @Inject private IWebDriverManager webDriverManager;
     @Inject private ISoftAssert softAssert;
@@ -70,8 +76,9 @@ public class WebElementActions implements IWebElementActions
 
     @SuppressWarnings("unchecked")
     @Override
-    public void typeText(WebElement element, String text)
+    public void typeText(SearchAttributes locator, String text)
     {
+        WebElement element = findElement(locator);
         if (element != null)
         {
             String normalizedText = FormatUtil.normalizeLineEndings(text);
@@ -83,7 +90,16 @@ public class WebElementActions implements IWebElementActions
                         normalizedText);
                 return;
             }
-            element.sendKeys(normalizedText);
+            try
+            {
+                element.sendKeys(normalizedText);
+            }
+            catch (StaleElementReferenceException e)
+            {
+                LOGGER.info("An element is stale. One more attempt to type text into it");
+                element = findElement(locator);
+                element.sendKeys(normalizedText);
+            }
             // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
             if (webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE) && Boolean.TRUE.equals(
                     ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(WebDriverType.IE_OPTIONS))
@@ -147,6 +163,11 @@ public class WebElementActions implements IWebElementActions
                 + "if (valueAfter != '' && valueAfter != undefined)" + "{contentList[contentList.length] = valueAfter;}"
                 + "}return contentList;";
         return javascriptActions.executeScript(script);
+    }
+
+    private WebElement findElement(SearchAttributes locator)
+    {
+        return baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator), locator);
     }
 
     @Override
