@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import com.github.javafaker.Faker;
 
@@ -31,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.ILocationProvider;
 import org.vividus.util.ResourceUtils;
 
+@Named
 public class StringsExpressionProcessor implements IExpressionProcessor
 {
     private static final String COMMA = ",";

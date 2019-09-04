@@ -22,9 +22,12 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Named;
+
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
+@Named
 public class ShiftDateExpressionProcessor implements IExpressionProcessor
 {
     private static final Pattern SHIFT_DATE_PATTERN = Pattern.compile(

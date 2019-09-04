@@ -18,6 +18,7 @@
     <context:component-scan base-package="org.vividus.jackson.databind" >
         <context:exclude-filter type="regex" expression="org\.vividus\.jackson\.databind\..*\..*"/>
     </context:component-scan>
+    <context:component-scan base-package="org.vividus.bdd.expression"/>
 
     <import resource="classpath:/org/vividus/bdd/spring.xml"/>
     <import resource="classpath:/org/vividus/reporter/spring.xml"/>

@@ -23,8 +23,11 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Named;
+
 import org.vividus.util.DateUtils;
 
+@Named
 public class FormatDateExpressionProcessor implements IExpressionProcessor
 {
     private static final Pattern FORMAT_PATTERN = Pattern

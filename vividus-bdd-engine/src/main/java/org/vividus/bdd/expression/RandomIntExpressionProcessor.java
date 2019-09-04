@@ -21,6 +21,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Named;
+
+@Named
 public class RandomIntExpressionProcessor implements IExpressionProcessor
 {
     private static final String INT_NUMBER_REGEX = "(-?[1-9]\\d*|0)";

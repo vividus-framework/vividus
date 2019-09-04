@@ -107,19 +107,10 @@
 
     <bean class="org.jbehave.core.steps.ParameterConverters.FluentEnumConverter"/>
 
-    <bean class="org.vividus.bdd.expression.RandomIntExpressionProcessor"/>
     <bean class="org.vividus.bdd.expression.DateExpressionProcessor">
         <property name="locale" value="${bdd.date-expression-processor.locale}">
         </property>
     </bean>
-    <bean class="org.vividus.bdd.expression.StringsExpressionProcessor" />
-    <bean class="org.vividus.bdd.expression.RoundExpressionProcessor"/>
-    <bean class="org.vividus.bdd.expression.FormatDateExpressionProcessor" />
-    <bean class="org.vividus.bdd.expression.FormatDateToExpressionProcessor" />
-    <bean class="org.vividus.bdd.expression.ShiftDateExpressionProcessor" />
-    <bean class="org.vividus.bdd.expression.DiffDateExpressionProcessor" />
-    <bean class="org.vividus.bdd.expression.ReplaceByRegExpProcessor" />
-    <bean class="org.vividus.bdd.expression.EvalExpressionProcessor" />
 
     <bean id="stepFactory" class="org.vividus.bdd.steps.SpringStepFactory">
         <constructor-arg index="0" ref="configuration" />

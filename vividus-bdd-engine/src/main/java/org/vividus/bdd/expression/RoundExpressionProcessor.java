@@ -22,8 +22,11 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Named;
+
 import org.apache.commons.lang3.math.NumberUtils;
 
+@Named
 public class RoundExpressionProcessor implements IExpressionProcessor
 {
     private static final Pattern ROUND_EXPRESSION_PATTERN = Pattern.compile(

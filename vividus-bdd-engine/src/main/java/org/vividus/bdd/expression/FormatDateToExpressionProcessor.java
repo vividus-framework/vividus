@@ -22,9 +22,12 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Named;
+
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
+@Named
 public class FormatDateToExpressionProcessor implements IExpressionProcessor
 {
     private static final Pattern FORMAT_TO_PATTERN = Pattern

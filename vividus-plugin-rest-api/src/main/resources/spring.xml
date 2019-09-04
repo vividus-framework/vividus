@@ -22,8 +22,6 @@
         <property name="httpClient" ref="httpClient-RestApi"/>
     </bean>
 
-    <bean class="org.vividus.bdd.expression.RemoveWrappingDoubleQuotesExpressionProcessor" />
-
     <bean id="jsonSoftAssert" class="org.vividus.bdd.validator.JsonSoftAssert" parent="softAssert" />
 
     <bean id="apiSteps" class="org.vividus.bdd.steps.api.ApiSteps">
