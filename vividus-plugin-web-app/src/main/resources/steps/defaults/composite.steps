@@ -176,3 +176,27 @@ When I hover mouse over element located `By.xpath(<xpath>)`
 
 Composite: When I perform right click on an element by the xpath '$xpath'
 When I perform right click on element located `By.xpath(<xpath>)`
+
+Composite: When I hover a mouse over a button with the name '$buttonName'
+When I hover mouse over element located `By.buttonName(<buttonName>)`
+
+Composite: When I click on a button with the name '$buttonName'
+When I click on element located `By.buttonName(<buttonName>)`
+
+Composite: When I click on a button with the image src '$imageSrc'
+When I click on element located `By.xpath(.//button[./img[@src='<imageSrc>']])`
+
+Composite: Then a [$state] button with the name '$buttonName' exists
+Then number of elements found by `By.buttonName(<buttonName>)->filter.state(<state>)` is equal to `1`
+
+Composite: Then a button with the name '$buttonName' exists
+Then number of elements found by `By.buttonName(<buttonName>)` is equal to `1`
+
+Composite: Then a button with the name '$buttonName' does not exist
+Then number of elements found by `By.buttonName(<buttonName>)` is equal to `0`
+
+Composite: Then a button with image with the src '$imageSrc' exists
+Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>']])` is equal to `1`
+
+Composite: Then a button with the tooltip '$tooltip' and image with the src '$imageSrc' exists
+Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>'] and @title='<tooltip>'])` is equal to `1`
