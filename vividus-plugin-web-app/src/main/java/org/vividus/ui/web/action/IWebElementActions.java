@@ -24,10 +24,10 @@ import org.vividus.ui.web.action.search.SearchAttributes;
 public interface IWebElementActions
 {
     /**
-     * Gets css value and removes all occuarence of quotes and apostrophes
+     * Gets css value and removes all occurrences of quotes and apostrophes
      * @param element WebElement to get value from
      * @param propertyName Desired css property
-     * @return css property value without quotes and qpostrophes
+     * @return css property value without quotes and apostrophes
      */
     String getCssValue(WebElement element, String propertyName);
 
