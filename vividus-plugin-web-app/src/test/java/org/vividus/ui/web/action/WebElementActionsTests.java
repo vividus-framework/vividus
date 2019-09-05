@@ -49,9 +49,7 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
@@ -83,16 +81,10 @@ class WebElementActionsTests
     private IJavascriptActions javascriptActions;
 
     @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
     private ISoftAssert softAssert;
 
     @Mock
     private WebElement webElement;
-
-    @Mock
-    private RemoteWebDriver webDriver;
 
     @Mock
     private Point point;
