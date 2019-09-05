@@ -721,4 +721,3 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         }
     }
 }
-

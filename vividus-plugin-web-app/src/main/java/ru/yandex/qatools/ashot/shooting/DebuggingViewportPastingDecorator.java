@@ -143,4 +143,3 @@ public class DebuggingViewportPastingDecorator extends ShootingDecorator {
     }
 }
 //CHECKSTYLE:ON
-

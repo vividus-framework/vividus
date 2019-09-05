@@ -223,4 +223,3 @@ class ProxyTests
         ((Proxy) proxy).setProxyServerFactory(proxyServerFactory);
     }
 }
-

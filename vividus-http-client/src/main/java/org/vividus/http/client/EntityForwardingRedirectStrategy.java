@@ -45,4 +45,3 @@ public class EntityForwardingRedirectStrategy extends LaxRedirectStrategy
         return redirect;
     }
 }
-
