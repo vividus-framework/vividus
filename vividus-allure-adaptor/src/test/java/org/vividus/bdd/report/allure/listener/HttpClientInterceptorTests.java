@@ -220,7 +220,7 @@ class HttpClientInterceptorTests
     private ArgumentCaptor<Map<String, Integer>> verifyPublishAttachment(String title)
     {
         @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Integer>> argumentCaptor =  ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Map<String, Integer>> argumentCaptor = ArgumentCaptor.forClass(Map.class);
         verify(attachmentPublisher).publishAttachment(eq(API_MESSAGE_FTL), argumentCaptor.capture(), eq(title));
         return argumentCaptor;
     }

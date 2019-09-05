@@ -62,7 +62,7 @@ class HttpResponseValidationStepsTests
     private static final String VARIABLE_NAME = "variableName";
     private static final String NUMBER_RESPONSE_HEADERS_WITH_NAME =
             "The number of the response headers with the name '%s'";
-    private static final String  HTTP_RESPONSE_IS_NOT_NULL = "HTTP response is not null";
+    private static final String HTTP_RESPONSE_IS_NOT_NULL = "HTTP response is not null";
 
     @Mock
     private HttpTestContext httpTestContext;

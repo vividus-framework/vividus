@@ -38,7 +38,7 @@ public class RemoveWrappingDoubleQuotesExpressionProcessor extends UnaryExpressi
         if (inputData.length() > 1 && inputData.charAt(0) == DOUBLE_QUOTE
                 && inputData.charAt(inputData.length() - 1) == DOUBLE_QUOTE)
         {
-            return  inputData.substring(1, inputData.length() - 1);
+            return inputData.substring(1, inputData.length() - 1);
         }
         return inputData;
     }

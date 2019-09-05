@@ -208,7 +208,7 @@ public class ApiSteps
      *  - determines the timeout in milliseconds until a connection is established</li>
      * <li>socketTimeout (int, default:{@code -1})
      *  - defines the socket timeout ({@code SO_TIMEOUT}) in milliseconds,
-     * which is the timeout for waiting for data  or, put differently,
+     * which is the timeout for waiting for data or, put differently,
      * a maximum period inactivity between two consecutive data packets</li>
      * <li>cookieSpec (String, default:{@code null})
      *  - determines the name of the cookie specification to be used for HTTP state management</li>

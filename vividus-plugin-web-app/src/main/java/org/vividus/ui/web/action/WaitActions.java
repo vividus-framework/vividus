@@ -246,7 +246,7 @@ public class WaitActions implements IWaitActions
     }
 
     @Override
-    public  WaitResult<Boolean> waitForWindowToClose(WebDriver webDriver, String windowHandleToClose)
+    public WaitResult<Boolean> waitForWindowToClose(WebDriver webDriver, String windowHandleToClose)
     {
         return wait(webDriver, new Function<>()
         {

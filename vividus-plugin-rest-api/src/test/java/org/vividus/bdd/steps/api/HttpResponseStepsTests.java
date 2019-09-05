@@ -111,7 +111,7 @@ class HttpResponseStepsTests
         verify(softAssert).assertThat(eq(message + IMAGE_PNG), eq(archiveEntries),
                 argThat(e -> e.matches(archiveEntries)));
         verify(softAssert).assertThat(eq(message + dummy), eq(archiveEntries),
-                argThat(e ->  !e.matches(archiveEntries)));
+                argThat(e -> !e.matches(archiveEntries)));
         verifyNoMoreInteractions(softAssert);
     }
 

@@ -61,7 +61,7 @@ public class WebDriverProvider implements IWebDriverProvider
     }
 
     @Override
-    public <T> T  getUnwrapped(Class<T> clazz)
+    public <T> T getUnwrapped(Class<T> clazz)
     {
         return WebDriverUtil.unwrap(get(), clazz);
     }

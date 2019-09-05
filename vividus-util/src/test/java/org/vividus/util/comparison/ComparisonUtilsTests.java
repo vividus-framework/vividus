@@ -51,10 +51,10 @@ class ComparisonUtilsTests
                 .stream()
                 .sorted(Comparator.comparing(e -> e.getKey().toString(), Comparator.naturalOrder()))
                 .collect(Collectors.toList());
-        EntryComparisonResult  result1 = results.get(0);
-        EntryComparisonResult  result2 = results.get(1);
-        EntryComparisonResult  result3 = results.get(2);
-        EntryComparisonResult  result4 = results.get(3);
+        EntryComparisonResult result1 = results.get(0);
+        EntryComparisonResult result2 = results.get(1);
+        EntryComparisonResult result3 = results.get(2);
+        EntryComparisonResult result4 = results.get(3);
         BigDecimal expected = new BigDecimal(ONE);
         Assertions.assertAll(COMPARISON_RESULT,
             () -> Assertions.assertTrue(result1.isPassed()),
@@ -84,10 +84,10 @@ class ComparisonUtilsTests
                 .stream()
                 .sorted(Comparator.comparing(e -> e.getKey().toString(), Comparator.naturalOrder()))
                 .collect(Collectors.toList());
-        EntryComparisonResult  result1 = results.get(0);
-        EntryComparisonResult  result2 = results.get(1);
-        EntryComparisonResult  result3 = results.get(2);
-        EntryComparisonResult  result4 = results.get(3);
+        EntryComparisonResult result1 = results.get(0);
+        EntryComparisonResult result2 = results.get(1);
+        EntryComparisonResult result3 = results.get(2);
+        EntryComparisonResult result4 = results.get(3);
         BigDecimal expected = new BigDecimal(ONE);
         Assertions.assertAll(COMPARISON_RESULT,
             () -> Assertions.assertTrue(result1.isPassed()),
@@ -113,7 +113,7 @@ class ComparisonUtilsTests
     {
         List<EntryComparisonResult> results = ComparisonUtils.compareMaps(mapOf(FIRST_COLUMN, null),
                 mapOf(FIRST_COLUMN, 1));
-        EntryComparisonResult  result = results.get(0);
+        EntryComparisonResult result = results.get(0);
         Assertions.assertAll(COMPARISON_RESULT,
             () -> Assertions.assertFalse(result.isPassed()),
             () -> Assertions.assertEquals(FIRST_COLUMN, result.getKey()),
@@ -128,7 +128,7 @@ class ComparisonUtilsTests
     {
         List<EntryComparisonResult> results = ComparisonUtils.compareMaps(mapOf(FIRST_COLUMN, null),
                 mapOf(FIRST_COLUMN, null));
-        EntryComparisonResult  result = results.get(0);
+        EntryComparisonResult result = results.get(0);
         Assertions.assertAll(COMPARISON_RESULT,
             () -> Assertions.assertTrue(result.isPassed()),
             () -> Assertions.assertEquals(FIRST_COLUMN, result.getKey()),
@@ -150,8 +150,8 @@ class ComparisonUtilsTests
         List<List<EntryComparisonResult>> result = ComparisonUtils.compareListsOfMaps(List.of(Map.of(FIRST_COLUMN, 1)),
                 List.of(Map.of(SECOND_COLUMN, 1)));
         List<EntryComparisonResult> firstRowResult = result.get(0);
-        EntryComparisonResult  result1 = firstRowResult.get(0);
-        EntryComparisonResult  result2 = firstRowResult.get(1);
+        EntryComparisonResult result1 = firstRowResult.get(0);
+        EntryComparisonResult result2 = firstRowResult.get(1);
         Assertions.assertAll(COMPARISON_RESULT,
             () -> Assertions.assertFalse(result1.isPassed()),
             () -> Assertions.assertEquals(FIRST_COLUMN, result1.getKey()),

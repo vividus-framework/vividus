@@ -38,7 +38,7 @@ public final class InternetUtils
      * <li>for URI: "https://www.by.example.com" and levels = 2 method will return example.com</li>
      * <li>for URI: "https://www.by.example.com" and levels = 5 method will return www.by.example.com</li>
      * </ul>
-     * @param uri  Uri to process
+     * @param uri Uri to process
      * @param domainLevels desired domain levels
      * @return processed domain with desired levels
      */

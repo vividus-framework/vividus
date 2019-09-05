@@ -22,7 +22,7 @@ public interface IWebDriverProvider
 {
     WebDriver get();
 
-    <T> T  getUnwrapped(Class<T> clazz);
+    <T> T getUnwrapped(Class<T> clazz);
 
     boolean isRemoteExecution();
 
