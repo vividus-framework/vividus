@@ -39,7 +39,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.jbehave.core.model.ExamplesTable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,23 +71,17 @@ import org.vividus.ui.web.action.search.Visibility;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.util.LocatorUtil;
 
-@SuppressWarnings("checkstyle:methodcount")
 @RunWith(PowerMockRunner.class)
 public class ElementStepsTests
 {
     private static final String PARENT_ELEMENT_HAS_CHILD = "Parent element has number of child elements which";
     private static final String AN_ELEMENT_TO_CLICK = "An element to click";
-    private static final String RADIO_BUTTON = "Radio button";
-    private static final String A_RADIO_BUTTON_LABEL_WITH_TEXT_VALUE_1 = "A radio button label with text 'value 1'";
     private static final String AN_ELEMENT_WITH_THE_ATTRIBUTES =
             "An element with attributes Element name: 'elementName'; Visibility: VISIBLE;";
     private static final String AN_ELEMENT = "An element";
     private static final String FILE_FILE_PATH_EXISTS = "File filePath exists";
     private static final String ELEMENT_HAS_CORRECT_CSS_PROPERTY_VALUE = "Element has correct css property value";
     private static final String CSS_PROPERTY_VALUE_PART_IS_CORRECT = "Css property value part is correct";
-    private static final String PATTERN_RADIO_XPATH = "input[@type='radio' and @id='%s']";
-    private static final String TABLE = "|radioOption|\n |value 1|";
-    private static final String LABEL_VALUE = "value 1";
     private static final String CSS_PART_VALUE = "Value";
     private static final String CSS_VALUE = "cssValue";
     private static final String CSS_NAME = "cssName";
@@ -205,33 +198,6 @@ public class ElementStepsTests
                         new SearchParameters("//body").setVisibility(Visibility.ALL)))).thenReturn(bodyElement);
         elementSteps.isElementHasRightWidth(widthInPerc);
         verify(elementValidations).assertIfElementHasWidthInPerc(bodyElement, webElement, widthInPerc);
-    }
-
-    @Test
-    public void testDoesElementContainRadioOptions()
-    {
-        when(baseValidations.assertIfElementExists(A_RADIO_BUTTON_LABEL_WITH_TEXT_VALUE_1, new SearchAttributes(
-                ActionAttributeType.XPATH, LocatorUtil.getXPath(ElementPattern.LABEL_PATTERN, LABEL_VALUE))))
-                    .thenReturn(webElement);
-        when(webElement.getAttribute("for")).thenReturn(LABEL_VALUE);
-        ExamplesTable radioOptions = new ExamplesTable(TABLE);
-        elementSteps.doesElementContainRadioOptions(radioOptions);
-        verify(baseValidations).assertIfElementExists(RADIO_BUTTON, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(ElementPattern.RADIO_OPTION_INPUT_PATTERN,
-                        LABEL_VALUE)));
-    }
-
-    @Test
-    public void testElementDoesNotContainRadioOptions()
-    {
-        when(baseValidations.assertIfElementExists(A_RADIO_BUTTON_LABEL_WITH_TEXT_VALUE_1,
-                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(ElementPattern.LABEL_PATTERN,
-                        LABEL_VALUE)))).thenReturn(null);
-        ExamplesTable radioOptions = new ExamplesTable(TABLE);
-        elementSteps.doesElementContainRadioOptions(radioOptions);
-        verify(baseValidations, never()).assertIfElementExists(RADIO_BUTTON,
-                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(PATTERN_RADIO_XPATH,
-                LABEL_VALUE)));
     }
 
     @Test

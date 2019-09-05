@@ -270,7 +270,7 @@
     <bean id="focusValidations" class="org.vividus.bdd.steps.ui.web.validation.FocusValidations" />
 
     <bean id="alertSteps" class="org.vividus.bdd.steps.ui.web.AlertSteps" />
-    <bean id="buttonSteps" class="org.vividus.bdd.steps.ui.web.ButtonSteps" />
+    <bean id="buttonSteps" class="org.vividus.bdd.steps.ui.web.RadioButtonSteps" />
     <bean id="codeSteps" class="org.vividus.bdd.steps.ui.web.CodeSteps" />
 
     <bean id="cookieSteps" class="org.vividus.bdd.steps.ui.web.CookieSteps">

@@ -26,8 +26,6 @@ import javax.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -51,7 +49,6 @@ import org.vividus.ui.web.action.search.Visibility;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.util.LocatorUtil;
 
-@SuppressWarnings("checkstyle:methodcount")
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
@@ -268,54 +265,6 @@ public class ElementSteps implements ResourceLoaderAware
                 locator, minimalElementsQuantity);
         return elements.size() >= minimalElementsQuantity
                 && elementValidations.assertAllWebElementsHaveEqualDimension(elements, dimension);
-    }
-
-    /**
-     * Checks that <b>radio buttons</b> specified by the <b>name</b> exists in the context
-     * <p>
-     * A <b>radio button</b> is an <i>&lt;input&gt;</i> element with an attribute 'type' = 'radio' and a <b>name</b>
-     * for it is a 'text' or any 'attribute value' of it's <i>&lt;label&gt;</i> element (<i>&lt;label&gt;</i>
-     * with an attribute 'for' = radio button id).</p>
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Finds the <b>label of the radio button</b>
-     * <li>Check that this label exists
-     * <li>Check that the <b>radio button</b> exists
-     * </ul>
-     * @param radioOptions Table of items: text of the radioOptions:
-     * <pre>
-     * |radioOption |
-     * |$option     |
-     * |$option     |
-     * |$option     |
-     * </pre>
-     * <b>Example:</b>
-     * <pre>
-     * &lt;div&gt;
-     *      &lt;div&gt;
-     *          &lt;input id="radioButtonId" type="radio" /&gt;
-     *          &lt;label for="radioButtonId"&gt;<b>'radioOption'</b>&lt;/label&gt;
-     *      &lt;/div&gt;
-     * &lt;/div&gt;
-     * </pre>
-     */
-    @Then("an element contains the radio buttons: $radioOptions")
-    public void doesElementContainRadioOptions(ExamplesTable radioOptions)
-    {
-        for (Parameters row : radioOptions.getRowsAsParameters(true))
-        {
-            String text = row.valueAs("radioOption", String.class);
-            WebElement radioButtonLabel = baseValidations.assertIfElementExists(
-                    String.format("A radio button label with text '%1$s'", text),
-                    new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(ElementPattern.LABEL_PATTERN,
-                            text)));
-            if (radioButtonLabel != null)
-            {
-                baseValidations.assertIfElementExists("Radio button", new SearchAttributes(ActionAttributeType.XPATH,
-                    LocatorUtil.getXPath(ElementPattern.RADIO_OPTION_INPUT_PATTERN,
-                            radioButtonLabel.getAttribute("for"))));
-            }
-        }
     }
 
     /**

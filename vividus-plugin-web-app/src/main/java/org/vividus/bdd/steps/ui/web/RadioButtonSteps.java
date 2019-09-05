@@ -16,11 +16,16 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import static org.vividus.bdd.steps.ui.web.ElementPattern.LABEL_PATTERN;
+import static org.vividus.bdd.steps.ui.web.ElementPattern.RADIO_OPTION_INPUT_PATTERN;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
@@ -31,7 +36,7 @@ import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
-public class ButtonSteps
+public class RadioButtonSteps
 {
     private static final String RADIO_BUTTON = "Radio button";
 
@@ -62,12 +67,25 @@ public class ButtonSteps
      *          <label for="radioButtonId">}<b>'radioOption'</b>{@code </label>
      *      </div>
      * </div>}</pre>
-
-     *      */
+     */
     @Then("a radio button with the name '$radioOption' exists")
-    public WebElement ifRadioOptionExists(String radioOption)
+    public WebElement assertIfRadioOptionExists(String radioOption)
     {
-        return assertIfRadioOptionExists(radioOption);
+        WebElement radioButtonLabel = baseValidations.assertIfElementExists(
+                String.format("A radio button label with text '%s'", radioOption),
+                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(LABEL_PATTERN, radioOption)));
+        if (radioButtonLabel == null)
+        {
+            return null;
+        }
+        String labelForAtr = radioButtonLabel.getAttribute("for");
+        if (StringUtils.isNotEmpty(labelForAtr))
+        {
+            return baseValidations.assertIfElementExists(RADIO_BUTTON, new SearchAttributes(ActionAttributeType.XPATH,
+                    LocatorUtil.getXPath(RADIO_OPTION_INPUT_PATTERN, labelForAtr)));
+        }
+        return baseValidations.assertIfElementExists(RADIO_BUTTON, radioButtonLabel,
+                new SearchAttributes(ActionAttributeType.XPATH, "input[@type='radio']"));
     }
 
     /**
@@ -100,9 +118,9 @@ public class ButtonSteps
      * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I select a radio button with the name '$radioOption'")
-    public void  checkRadioOption(String radioOption)
+    public void checkRadioOption(String radioOption)
     {
-        WebElement element = ifRadioOptionExists(radioOption);
+        WebElement element = assertIfRadioOptionExists(radioOption);
         mouseActions.click(element);
     }
 
@@ -133,32 +151,47 @@ public class ButtonSteps
      * </div>}</pre>
      */
     @Then("a [$state] radio button with the name '$radioOption' exists")
-    public void ifRadioOptionExists(State state, String radioOption)
+    public void assertIfRadioOptionExists(State state, String radioOption)
     {
-        WebElement radioButton = ifRadioOptionExists(radioOption);
+        WebElement radioButton = assertIfRadioOptionExists(radioOption);
         baseValidations.assertElementState("The found radio button is " + state, state, radioButton);
     }
 
-    private WebElement assertIfRadioOptionLabelExists(String radioOption)
+    /**
+     * Checks that <b>radio buttons</b> specified by the <b>name</b> exists in the context
+     * <p>
+     * A <b>radio button</b> is an <i>&lt;input&gt;</i> element with an attribute 'type' = 'radio' and a <b>name</b>
+     * for it is a 'text' or any 'attribute value' of it's <i>&lt;label&gt;</i> element (<i>&lt;label&gt;</i>
+     * with an attribute 'for' = radio button id).</p>
+     * <p>Actions performed at this step:</p>
+     * <ul>
+     * <li>Finds the <b>label of the radio button</b>
+     * <li>Check that this label exists
+     * <li>Check that the <b>radio button</b> exists
+     * </ul>
+     * @param radioOptions Table of items: text of the radioOptions:
+     * <pre>
+     * |radioOption |
+     * |$option     |
+     * |$option     |
+     * |$option     |
+     * </pre>
+     * <b>Example:</b>
+     * <pre>
+     * &lt;div&gt;
+     *      &lt;div&gt;
+     *          &lt;input id="radioButtonId" type="radio" /&gt;
+     *          &lt;label for="radioButtonId"&gt;<b>'radioOption'</b>&lt;/label&gt;
+     *      &lt;/div&gt;
+     * &lt;/div&gt;
+     * </pre>
+     */
+    @Then("an element contains the radio buttons: $radioOptions")
+    public void doesElementContainRadioOptions(ExamplesTable radioOptions)
     {
-        return baseValidations.assertIfElementExists(String.format("A radio button label with text '%s'", radioOption),
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPath(ElementPattern.LABEL_PATTERN, radioOption)));
-    }
-
-    private WebElement assertIfRadioOptionExists(String radioOption)
-    {
-        WebElement labelElement = assertIfRadioOptionLabelExists(radioOption);
-        if (labelElement != null)
+        for (Parameters row : radioOptions.getRowsAsParameters(true))
         {
-            String labelForAtr = labelElement.getAttribute("for");
-            return StringUtils.isNotEmpty(labelForAtr)
-                    ? baseValidations.assertIfElementExists(RADIO_BUTTON, new SearchAttributes(
-                            ActionAttributeType.XPATH, LocatorUtil.getXPath(ElementPattern.RADIO_OPTION_INPUT_PATTERN,
-                                    labelForAtr)))
-                    : baseValidations.assertIfElementExists(RADIO_BUTTON, labelElement,
-                            new SearchAttributes(ActionAttributeType.XPATH, "input[@type='radio']"));
+            assertIfRadioOptionExists(row.valueAs("radioOption", String.class));
         }
-        return null;
     }
 }
