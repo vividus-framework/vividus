@@ -35,11 +35,12 @@ import org.apache.parquet.hadoop.util.HadoopInputFile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.vividus.csv.CsvReader;
 
 class ConvertCsvToParquetFileExpressionProcessorTests
 {
     private final ConvertCsvToParquetFileExpressionProcessor processor =
-            new ConvertCsvToParquetFileExpressionProcessor();
+            new ConvertCsvToParquetFileExpressionProcessor(new CsvReader());
 
     @ParameterizedTest
     @ValueSource(strings = {
