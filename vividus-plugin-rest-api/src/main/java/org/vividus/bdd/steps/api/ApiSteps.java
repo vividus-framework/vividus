@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.http.ConnectionClosedException;

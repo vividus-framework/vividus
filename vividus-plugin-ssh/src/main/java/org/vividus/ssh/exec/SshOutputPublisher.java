@@ -17,6 +17,7 @@
 package org.vividus.ssh.exec;
 
 import java.nio.charset.StandardCharsets;
+
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;

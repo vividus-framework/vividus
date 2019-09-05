@@ -17,6 +17,7 @@
 package org.vividus.bdd.variable;
 
 import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 

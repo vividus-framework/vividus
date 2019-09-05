@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.browserup.harreader.model.Har;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 

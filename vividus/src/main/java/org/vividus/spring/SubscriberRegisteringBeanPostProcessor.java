@@ -17,6 +17,7 @@
 package org.vividus.spring;
 
 import java.util.stream.Stream;
+
 import javax.inject.Inject;
 
 import com.google.common.eventbus.EventBus;

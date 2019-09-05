@@ -18,6 +18,7 @@ package org.vividus.softassert;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+
 import org.vividus.softassert.event.AssertionFailedEvent;
 
 public class AssertionManager

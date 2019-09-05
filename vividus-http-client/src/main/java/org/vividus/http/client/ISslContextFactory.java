@@ -17,6 +17,7 @@
 package org.vividus.http.client;
 
 import java.util.Optional;
+
 import javax.net.ssl.SSLContext;
 
 public interface ISslContextFactory

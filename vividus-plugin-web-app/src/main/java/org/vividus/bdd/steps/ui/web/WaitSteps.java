@@ -26,6 +26,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.titleIs;
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
+
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.Then;

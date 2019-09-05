@@ -24,6 +24,7 @@ import static org.vividus.ui.validation.matcher.WebElementMatchers.elementNumber
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Inject;
 
 import org.hamcrest.Matcher;

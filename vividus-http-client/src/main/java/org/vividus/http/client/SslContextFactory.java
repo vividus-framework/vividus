@@ -19,6 +19,7 @@ package org.vividus.http.client;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Optional;
+
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.conn.ssl.TrustAllStrategy;
