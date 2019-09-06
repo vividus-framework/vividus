@@ -20,6 +20,7 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -36,6 +38,9 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -56,18 +61,25 @@ class LinkUrlSearchTests
 {
     private static final String HREF = "href";
     private static final String URL_PATH = "/urlPath";
-    private static final String SIMPLE_URL = "https://example.com";
+    private static final String SIMPLE_URL = "http://example.com";
     private static final String URL = SIMPLE_URL + URL_PATH;
     private static final By LOCATOR = By.xpath(".//a[normalize-space(@href)=\"" + URL + "\"]");
     private static final String URL_WITH_SLASH = SIMPLE_URL + "/";
     private static final String URL_WITH_QUERY = SIMPLE_URL + "/?q=uri";
     private static final String URL_OPAQUE = "tel:1234567";
+    private static final String SOME_URL = "/someUrl";
+    private static final String PORT = ":8080";
+    private static final String SIMPLE_URL_WITH_PATH = SIMPLE_URL + SOME_URL;
+    private static final String PART = "#part";
     private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is equal to {}";
     private static final By LINK_URL_LOCATOR_CASE_INSENSITIVE = By.xpath(".//a[normalize-space(translate(@href,"
             + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=\"" + URL.toLowerCase() + "\"" + "]");
     private static final Duration TIMEOUT = Duration.ofSeconds(0);
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementSearchAction.class);
+
+    @Mock
+    private WebDriver webDriver;
 
     @Mock
     private WebElement webElement;
@@ -86,6 +98,33 @@ class LinkUrlSearchTests
 
     @InjectMocks
     private LinkUrlSearch search;
+
+    static Stream<Arguments> hrefProvider()
+    {
+        //CHECKSTYLE:OFF
+        return Stream.of(
+                Arguments.of(SOME_URL,             SIMPLE_URL_WITH_PATH,      SIMPLE_URL            ),
+                Arguments.of(SIMPLE_URL_WITH_PATH, SIMPLE_URL_WITH_PATH,      SIMPLE_URL + PORT     ),
+                Arguments.of(PART,                 "http://example.com#part", SIMPLE_URL            ),
+                Arguments.of(SIMPLE_URL_WITH_PATH, SIMPLE_URL_WITH_PATH,      SIMPLE_URL            ),
+                Arguments.of("someUrl",            SIMPLE_URL_WITH_PATH,      "http://example.com/" ),
+                Arguments.of(SIMPLE_URL_WITH_PATH, SIMPLE_URL_WITH_PATH,      "https://example.com/")
+        );
+        //CHECKSTYLE:ON
+    }
+
+    @ParameterizedTest
+    @MethodSource("hrefProvider")
+    void testGetCurrentHrefDifferentScheme(String expected, String href, String currentUrl)
+    {
+        when(webElement.getAttribute(HREF)).thenReturn(href);
+        search.setCaseSensitiveSearch(true);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.getCurrentUrl()).thenReturn(currentUrl);
+        List<WebElement> webElements = List.of(webElement);
+        List<WebElement> foundElements = search.filter(webElements, expected);
+        assertEquals(webElements, foundElements);
+    }
 
     @Test
     void testFindLinksByTextByLinkTextHeightWidthPositive()
@@ -133,14 +172,35 @@ class LinkUrlSearchTests
     }
 
     @Test
-    void testFilterLinksByUrl()
+    void testFilterLinksNullHrefAttribute()
     {
-        when(webElement.getAttribute(HREF)).thenReturn(URL);
-        search.setCaseSensitiveSearch(true);
+        when(webElement.getAttribute(HREF)).thenReturn(null);
         mockGetCurrentUrl();
         List<WebElement> webElements = List.of(webElement);
         List<WebElement> foundElements = search.filter(webElements, URL_PATH);
-        assertEquals(webElements, foundElements);
+        assertEquals(List.of(), foundElements);
+    }
+
+    @Test
+    void testFilterLinksByHttpsUrl()
+    {
+        when(webElement.getAttribute(HREF)).thenReturn(SIMPLE_URL_WITH_PATH);
+        search.setCaseSensitiveSearch(true);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.getCurrentUrl()).thenReturn(SIMPLE_URL);
+        List<WebElement> webElements = List.of(webElement);
+        List<WebElement> foundElements = search.filter(webElements, "https://example.com/someUrl");
+        assertEquals(List.of(), foundElements);
+    }
+
+    @Test
+    void testGetCurrentHrefMalformedUrl()
+    {
+        when(webElement.getAttribute(HREF)).thenReturn(URL);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.getCurrentUrl()).thenReturn("data,;");
+        List<WebElement> webElements = List.of(webElement);
+        assertThrows(IllegalStateException.class, () -> search.filter(webElements, URL_PATH));
     }
 
     @Test
@@ -242,7 +302,6 @@ class LinkUrlSearchTests
 
     private void mockGetCurrentUrl()
     {
-        WebDriver webDriver = mock(WebDriver.class);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getCurrentUrl()).thenReturn(SIMPLE_URL);
     }
