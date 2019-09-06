@@ -21,19 +21,19 @@ import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Rule;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -41,15 +41,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.vividus.util.ResourceUtils;
 
 @RunWith(PowerMockRunner.class)
-class ZipUtilsTests
+public class ZipUtilsTests
 {
     private static final String ZIP = "archive.zip";
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Test
-    void testReadArchiveEntriesFromBytes()
+    public void testReadArchiveEntriesFromBytes()
     {
         ZipUtils.readZipEntriesFromBytes(ResourceUtils.loadResourceAsByteArray(getClass(), ZIP)).forEach(
             (name, content) -> Assertions.assertAll(
@@ -60,7 +57,7 @@ class ZipUtilsTests
     }
 
     @Test
-    void testReadArchiveEntryNamesFromBytes() throws IOException
+    public void testReadArchiveEntryNamesFromBytes() throws IOException
     {
         File file = FileUtils.toFile(ResourceUtils.findResource(getClass(), ZIP));
         Set<String> names = ZipUtils.readZipEntryNamesFromBytes(FileUtils.readFileToByteArray(file));
@@ -68,7 +65,7 @@ class ZipUtilsTests
     }
 
     @Test
-    void testReadArchiveEntriesFromBytesFilter() throws IOException
+    public void testReadArchiveEntriesFromBytesFilter() throws IOException
     {
         File file = FileUtils.toFile(ResourceUtils.findResource(getClass(), ZIP));
         Map<String, byte[]> zipEntries = ZipUtils.readZipEntriesFromBytes(FileUtils.readFileToByteArray(file),
@@ -78,7 +75,7 @@ class ZipUtilsTests
 
     @Test
     @PrepareForTest({ ZipUtils.class, ZipInputStream.class, ByteArrayInputStream.class })
-    void testReadArchiveEntriesFromBytesException() throws Exception
+    public void testReadArchiveEntriesFromBytesException() throws Exception
     {
         PowerMockito.mockStatic(ZipInputStream.class);
         PowerMockito.mockStatic(ByteArrayInputStream.class);
@@ -87,7 +84,6 @@ class ZipUtilsTests
         PowerMockito.whenNew(ByteArrayInputStream.class).withArguments(file).thenReturn(byteArrayInputStream);
         PowerMockito.whenNew(ZipInputStream.class).withArguments(byteArrayInputStream).thenThrow(IOException.class);
 
-        expectedException.expect(IllegalStateException.class);
-        ZipUtils.readZipEntriesFromBytes(file);
+        assertThrows(UncheckedIOException.class, () -> ZipUtils.readZipEntriesFromBytes(file));
     }
 }

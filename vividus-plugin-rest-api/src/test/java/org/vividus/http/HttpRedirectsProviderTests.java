@@ -17,6 +17,7 @@
 package org.vividus.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -28,9 +29,7 @@ import org.apache.http.client.CircularRedirectException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,9 +45,6 @@ import org.vividus.http.client.HttpResponse;
 public class HttpRedirectsProviderTests
 {
     private static final URI URI_EXAMPLES = URI.create("http://examples.com");
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private HttpClientContext httpClientContext;
@@ -73,10 +69,10 @@ public class HttpRedirectsProviderTests
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setStatusCode(HttpStatus.SC_BAD_GATEWAY);
         when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenReturn(httpResponse);
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Service returned response with unexpected status code: [502]. Expected"
-                + " code from range [200 - 207]");
-        redirectsProvider.getRedirects(URI_EXAMPLES);
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+            () -> redirectsProvider.getRedirects(URI_EXAMPLES));
+        assertEquals("Service returned response with unexpected status code: [502]. Expected code from range "
+                + "[200 - 207]", illegalStateException.getMessage());
     }
 
     @Test
@@ -86,10 +82,11 @@ public class HttpRedirectsProviderTests
         ClientProtocolException clientProtocolException = new ClientProtocolException(
                 new CircularRedirectException("Circular reference"));
         when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenThrow(clientProtocolException);
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Circular reference Circular redirects are forbidden by default. "
-                + "To allow them, please set property 'http.redirects-provider.circular-redirects-allowed=true'");
-        redirectsProvider.getRedirects(URI_EXAMPLES);
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+            () -> redirectsProvider.getRedirects(URI_EXAMPLES));
+        assertEquals("Circular reference Circular redirects are forbidden by default. To allow them, please set "
+                        + "property 'http.redirects-provider.circular-redirects-allowed=true'",
+                illegalStateException.getMessage());
     }
 
     @Test
