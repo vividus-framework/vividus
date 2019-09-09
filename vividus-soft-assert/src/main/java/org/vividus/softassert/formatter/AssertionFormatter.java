@@ -102,7 +102,7 @@ public class AssertionFormatter implements IAssertionFormatter
     public String getFailedVerificationMessage(List<SoftAssertionError> errors, int assertionsCount)
     {
         StringBuilder stringBuilder = new StringBuilder("Failed verification: ")
-                .append(getAssertionInfo(errors, assertionsCount));
+                .append(getAssertionInfo(errors.size(), assertionsCount));
         Set<String> knownIssues = new LinkedHashSet<>();
         Set<String> potentiallyKnownIssues = new LinkedHashSet<>();
         for (SoftAssertionError error : errors)
@@ -132,14 +132,16 @@ public class AssertionFormatter implements IAssertionFormatter
 
     /**
      * Returns current assertion info: "X of Y assertions failed"
+     *
+     * @param failedAssertionsCount Number of failed assertions
+     * @param assertionsCount       Total number of assertions
      * @return String "X of Y assertions failed"
      */
-    private static String getAssertionInfo(List<SoftAssertionError> errors, int assertionsCount)
+    private static String getAssertionInfo(int failedAssertionsCount, int assertionsCount)
     {
-        int failedAssertionCount = errors.size();
-        String format = failedAssertionCount != 0 ? "%1$d of %2$d assertions failed."
+        String format = failedAssertionsCount != 0 ? "%1$d of %2$d assertions failed."
                 : "%2$d of %2$d assertions passed.";
-        return String.format(format, failedAssertionCount, assertionsCount);
+        return String.format(format, failedAssertionsCount, assertionsCount);
     }
 
     public void setStackTraceFilter(StackTraceFilter stackTraceFilter)
