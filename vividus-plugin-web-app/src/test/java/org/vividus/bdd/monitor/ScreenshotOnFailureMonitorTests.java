@@ -107,7 +107,6 @@ class ScreenshotOnFailureMonitorTests
                             dynamicTest("afterPerformingProcessesStepWithAnnotation",
                                 () -> monitor.afterPerforming(I_DO_ACTION, false, method))
                             );
-
                 }).flatMap(Function.identity());
     }
 

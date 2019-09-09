@@ -220,7 +220,6 @@ public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, Takes
             return;
         }
         throw new UnsupportedOperationException(ADVANCED_INTERACTION_NOT_SUPPORTED);
-
     }
 
     @Override
@@ -232,6 +231,5 @@ public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, Takes
             return;
         }
         throw new UnsupportedOperationException(ADVANCED_INTERACTION_NOT_SUPPORTED);
-
     }
 }

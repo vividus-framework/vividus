@@ -200,5 +200,4 @@ class AshotFactoryTests
     {
         return Whitebox.getInternalState(hasShootingStrategy, SHOOTING_STRATEGY);
     }
-
 }

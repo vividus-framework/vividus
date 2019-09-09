@@ -82,7 +82,6 @@ class StringsExpressionProcessorTests
     void testExecute(String expression, String expected)
     {
         assertEquals(expected, processor.execute(expression).get());
-
     }
 
     @Test

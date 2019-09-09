@@ -79,7 +79,6 @@ public class PropertyMapper implements IPropertyMapper
     {
         Type type = ((ParameterizedType) deserializer.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         return (Class<?>) (type instanceof ParameterizedType ? ((ParameterizedType) type).getRawType() : type);
-
     }
 
     private static Set<String> getKeys(Set<String> propertyNames, String propertyPrefix)

@@ -51,5 +51,4 @@ class RowsCollectorTests
             () -> ROWS.stream().collect(RowsCollector.NOOP.get()));
         assertThat(exception.getMessage(), containsString("Duplicate key"));
     }
-
 }

@@ -81,5 +81,4 @@ public final class BrowserLogManager
             return logEntryLevel >= levelValue && logEntryLevel <= levelValue;
         });
     }
-
 }

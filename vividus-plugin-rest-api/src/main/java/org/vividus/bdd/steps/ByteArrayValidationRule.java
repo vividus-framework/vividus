@@ -44,7 +44,6 @@ public enum ByteArrayValidationRule
                             break;
                         }
                     }
-
                 }
             }
         }

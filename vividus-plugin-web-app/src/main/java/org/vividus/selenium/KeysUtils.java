@@ -25,7 +25,6 @@ public final class KeysUtils
 {
     private KeysUtils()
     {
-
     }
 
     public static CharSequence[] keysToCharSequenceArray(List<String> keys)

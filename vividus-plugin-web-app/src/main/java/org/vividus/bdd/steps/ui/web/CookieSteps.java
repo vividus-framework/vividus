@@ -119,7 +119,6 @@ public class CookieSteps
     {
         thenCookieWithNameIsSet(name).map(Cookie::getValue)
                 .ifPresent(v -> bddVariableContext.putVariable(scopes, variableName, v));
-
     }
 
     /**

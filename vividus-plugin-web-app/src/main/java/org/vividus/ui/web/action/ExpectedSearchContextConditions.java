@@ -24,7 +24,6 @@ import org.openqa.selenium.WebElement;
 
 public final class ExpectedSearchContextConditions extends AbstractExpectedConditions<By>
 {
-
     @Override
     protected List<WebElement> findElements(SearchContext searchContext, By by)
     {

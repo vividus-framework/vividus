@@ -96,7 +96,6 @@ class StepExamplesTableParserTests
         List<Step> steps = List.of(step);
         when(mockStepCollector().collectScenarioSteps(eq(mockCandidateSteps()), argThat(matcher), eq(Map.of()),
                 any(MatchingStepMonitor.class))).thenReturn(steps);
-
     }
 
     private ExamplesTable newStepExamplesTable(String stepAsString)

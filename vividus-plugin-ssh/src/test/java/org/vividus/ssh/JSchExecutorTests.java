@@ -116,7 +116,6 @@ public class JSchExecutorTests
                 protected SshOutput executeCommand(ServerConfiguration serverConfig, Commands commands,
                         ChannelExec channel) throws JSchException
                 {
-
                     throw jSchException;
                 }
             }.execute(server, COMMANDS));

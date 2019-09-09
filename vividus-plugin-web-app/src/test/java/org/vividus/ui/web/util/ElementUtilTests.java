@@ -55,5 +55,4 @@ class ElementUtilTests
         when(parent.getSize()).thenReturn(new Dimension(25, 0));
         assertEquals(40, ElementUtil.getElementWidthInPerc(parent, child));
     }
-
 }

@@ -117,7 +117,6 @@ class SetVariableStepsTests
         when(webDriver.getCurrentUrl()).thenReturn("http://testurl.com/testvalue");
         setVariableSteps.gettingValueFromUrl(VARIABLE_SCOPE, VARIABLE);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE, "testvalue");
-
     }
 
     @Test

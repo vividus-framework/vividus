@@ -136,5 +136,4 @@ class FieldStepsTests
         fieldSteps.clearFieldLocatedByUsingKeyboard(mock(SearchAttributes.class));
         verify(webElement, never()).sendKeys(Keys.chord(Keys.CONTROL, "a") + Keys.BACK_SPACE);
     }
-
 }

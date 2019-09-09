@@ -103,6 +103,5 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
         List<String> columnData = Boolean.parseBoolean(joinValues) ? List.of(String.join(" ", data)) : data;
         return ExamplesTableProcessor.buildExamplesTableFromColumns(List.of(columnName),
                 List.of(columnData), properties);
-
     }
 }

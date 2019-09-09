@@ -22,12 +22,10 @@ import org.junit.jupiter.api.Test;
 
 class StringUtilsTests
 {
-
     @Test
     void shouldReplaceLineFeedsWithPlatformOnes()
     {
         assertEquals("tick" + System.lineSeparator() + "tack" + System.lineSeparator() + "toe",
                 StringUtils.normalizeLineFeeds("tick\ntack\r\ntoe"));
     }
-
 }

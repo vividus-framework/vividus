@@ -29,5 +29,4 @@ public class ExternalServiceException extends RuntimeException
     {
         super(message, throwable);
     }
-
 }

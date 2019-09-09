@@ -357,7 +357,6 @@ class ExpectedSearchActionsConditionsTests
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void verifyNot(Object expectedCondition, Object mockedCondition)
     {
-
         IExpectedSearchContextCondition condition = mock(IExpectedSearchContextCondition.class);
         when(condition.apply(searchContext)).thenReturn(mockedCondition);
         IExpectedSearchContextCondition notCondition = expectedSearchActionsConditions.not(condition);

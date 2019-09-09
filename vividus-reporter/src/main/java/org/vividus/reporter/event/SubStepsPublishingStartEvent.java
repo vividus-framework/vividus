@@ -18,5 +18,4 @@ package org.vividus.reporter.event;
 
 public class SubStepsPublishingStartEvent
 {
-
 }

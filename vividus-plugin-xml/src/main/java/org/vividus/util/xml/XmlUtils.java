@@ -88,7 +88,6 @@ public final class XmlUtils
                 return new DefaultPooledObject<>(obj);
             }
         });
-
     }
 
     private XmlUtils()

@@ -76,5 +76,4 @@ public class ScrollbarHandler implements IScrollbarHandler
     {
         this.webDriverManager = webDriverManager;
     }
-
 }

@@ -52,5 +52,4 @@ public class SavingConnectionDetailsHttpResponseInterceptor implements HttpRespo
     {
         this.httpTestContext = httpTestContext;
     }
-
 }

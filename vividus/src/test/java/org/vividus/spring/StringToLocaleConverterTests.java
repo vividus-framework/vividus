@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 
 class StringToLocaleConverterTests
 {
-
     private final StringToLocaleConverter stringToLocaleConverter = new StringToLocaleConverter();
 
     @Test
@@ -39,6 +38,5 @@ class StringToLocaleConverterTests
     {
         assertThrows(IllegalArgumentException.class,
             () ->  stringToLocaleConverter.convert("invalid"));
-
     }
 }

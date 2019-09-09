@@ -164,7 +164,6 @@ public final class UriUtils
             String path = StringUtils.repeat(SLASH, indexOfFirstNonSlashChar - 1) + parsedRelativeUrl.getPath();
             return new URI(url.getScheme(), url.getAuthority(), path, parsedRelativeUrl.getQuery(),
                     parsedRelativeUrl.getFragment());
-
         }
         catch (URISyntaxException e)
         {
