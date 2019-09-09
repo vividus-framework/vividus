@@ -44,7 +44,7 @@ sonarqube {
 
 ext {
     versions = [
-        allure:                 '2.12.1',
+        allure:                 '2.13.0',
         aspectj:                '1.9.4',
         commonsIo:              '2.6',
         commonsLang3:           '3.9',
