@@ -50,7 +50,7 @@ public class FieldSteps
      * </ul>
      * @param locator to locate field
      * @return WebElement An element that was cleared
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I clear field located `$locator`")
     public WebElement clearFieldLocatedBy(SearchAttributes locator)
@@ -78,7 +78,7 @@ public class FieldSteps
      * </ul>
      * @param locator to locate element
      * @return WebElement An element that was cleared
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I clear field located `$locator` using keyboard")
     public WebElement clearFieldLocatedByUsingKeyboard(SearchAttributes locator)
@@ -102,7 +102,7 @@ public class FieldSteps
      * </ul>
      * @param locator to locate element
      * @param text A text to type into the <b>element</b>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I add `$text` to field located `$locator`")
     public void addTextToField(String text, SearchAttributes locator)
@@ -115,7 +115,7 @@ public class FieldSteps
      * Enters text in the field located by locator
      * @param locator to locate element
      * @param text A text to type into the <b>element</b>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I enter `$text` in field located `$locator`")
     public void enterTextInField(String text, SearchAttributes locator)

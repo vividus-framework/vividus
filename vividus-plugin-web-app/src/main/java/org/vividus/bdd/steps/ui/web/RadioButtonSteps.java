@@ -115,7 +115,7 @@ public class RadioButtonSteps
      *          <label for="radioButtonId">}<b>'radioOption'</b>{@code </label>
      *      </div>
      * </div>}</pre>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I select a radio button with the name '$radioOption'")
     public void checkRadioOption(String radioOption)

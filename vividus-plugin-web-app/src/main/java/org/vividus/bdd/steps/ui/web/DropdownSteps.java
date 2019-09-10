@@ -214,7 +214,7 @@ public class DropdownSteps
      * </ul>
      * @param text A visible text value of the <b>option</b> in the <b>drop-down list</b>
      * @param dropDownListName A name attribute of the <b>drop-down list</b>
-     * @see <a href="http://www.w3schools.com/tags/tag_select.asp"><i>HTML &lt;select&gt; Tag</i></a>
+     * @see <a href="https://www.w3schools.com/tags/tag_select.asp"><i>HTML &lt;select&gt; Tag</i></a>
      */
     @When("I select '$text' from a drop down with the name '$dropDownListName'")
     public void selectItemInDDL(String text, String dropDownListName)

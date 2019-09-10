@@ -226,7 +226,7 @@ public class SetContextSteps
      * <li>If frame is found, switches focus to it.
      * </ul>
      * @see <a href="https://en.wikipedia.org/wiki/HTML_element#Frames"><i>Frames</i></a>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      * @param attributeType attribute type of {@code <iframe>} tag
      * @param attributeValue attribute value of the specified attributeType
      * <p>
@@ -260,7 +260,7 @@ public class SetContextSteps
      * <li>If frame is found, switches focus to it.
      * </ul>
      * @see <a href="https://en.wikipedia.org/wiki/HTML_element#Frames"><i>Frames</i></a>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      * @param numberValue index of the frame, starts from 1. So if there are two frames found the second one will have
      * numberValue = 2
      * @param attributeType attribute type of {@code <iframe>} tag
@@ -317,7 +317,7 @@ public class SetContextSteps
      * <li>If frame is found, switches focus to it.
      * </ul>
      * @see <a href="https://en.wikipedia.org/wiki/HTML_element#Frames"><i>Frames</i></a>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      * @param xpathExpression 'xpath' expression to locate frame element
      * <p>
      * <b>Example:</b>
@@ -375,7 +375,7 @@ public class SetContextSteps
      * </ul>
      * @param windowName Value of the {@code <title>} tag of a desired window
      * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I switch to a window with the name '$windowName'")
     public void switchingToWindow(String windowName)
@@ -400,7 +400,7 @@ public class SetContextSteps
      * </ul>
      * @param windowPartName Any part of the value of the {@code <title>} tag of a desired window
      * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I switch to a window with the name containing '$windowPartName'")
     public void switchingToWindowPartName(String windowPartName)

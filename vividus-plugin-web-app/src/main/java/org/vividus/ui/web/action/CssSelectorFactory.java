@@ -26,7 +26,7 @@ import javax.inject.Inject;
 import org.openqa.selenium.WebElement;
 
 /**
- * <a href="http://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> factory
+ * <a href="https://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> factory
  */
 public class CssSelectorFactory implements ICssSelectorFactory
 {

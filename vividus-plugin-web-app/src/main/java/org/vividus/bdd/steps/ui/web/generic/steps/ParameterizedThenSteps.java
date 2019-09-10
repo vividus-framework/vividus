@@ -558,7 +558,7 @@ public class ParameterizedThenSteps
      * </tr>
      * </tbody>
      * </table>
-     * @see <a href="http://www.w3schools.com/tags/tag_select.asp">
+     * @see <a href="https://www.w3schools.com/tags/tag_select.asp">
      * <i>HTML &lt;select&gt; Tag</i></a>
      */
     @Then("the number of drop downs with parameters is $comparisonRule '$number': $expectedParameters")

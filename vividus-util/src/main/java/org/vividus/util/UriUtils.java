@@ -178,9 +178,9 @@ public final class UriUtils
      * <br>
      * Examples:
      * <pre>
-     * buildNewRelativeUrl(new URI("http://example.com/path"), "/test")  --&gt; http://example.com/test
-     * buildNewRelativeUrl(new URI("http://example.com/path/"), "/test") --&gt; http://example.com/test
-     * buildNewRelativeUrl(new URI("http://example.com/path"), "test")   --&gt; http://example.com/path/test
+     * buildNewRelativeUrl(new URI("https://example.com/path"), "/test")  --&gt; https://example.com/test
+     * buildNewRelativeUrl(new URI("https://example.com/path/"), "/test") --&gt; https://example.com/test
+     * buildNewRelativeUrl(new URI("https://example.com/path"), "test")   --&gt; https://example.com/path/test
      * </pre>
      * @param baseUri Base URL
      * @param relativeUrl A string value of the relative URL

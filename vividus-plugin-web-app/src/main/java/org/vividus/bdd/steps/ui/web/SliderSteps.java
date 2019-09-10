@@ -43,7 +43,7 @@ public class SliderSteps
      * using javascript script.
      * @param value A value to set
      * @param xpath Xpath to slider
-     * @see <a href="http://www.w3schools.com/jsref/dom_obj_range.asp"> <i>more about sliders</i></a>
+     * @see <a href="https://www.w3schools.com/jsref/dom_obj_range.asp"> <i>more about sliders</i></a>
      */
     @When("I select the value '$value' in a slider by the xpath '$xpath'")
     public void setSliderValue(String value, String xpath)
@@ -60,7 +60,7 @@ public class SliderSteps
      * Step checks value of slider (input element with type = "range")
      * @param value A value to check
      * @param xpath Xpath to slider
-     * @see <a href="http://www.w3schools.com/jsref/dom_obj_range.asp"> <i>more about sliders</i></a>
+     * @see <a href="https://www.w3schools.com/jsref/dom_obj_range.asp"> <i>more about sliders</i></a>
      */
     @Then("the value '$value' is selected in a slider by the xpath '$xpath'")
     public void verifySliderValue(String value, String xpath)

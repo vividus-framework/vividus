@@ -365,7 +365,7 @@ public class PageSteps
      * <li>Switches back to the window from which rederection to current window was performed
      * </ul>
      * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I close the current window")
     public void closeCurrentWindow()

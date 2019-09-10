@@ -22,19 +22,19 @@ import java.util.stream.Stream;
 import org.openqa.selenium.WebElement;
 
 /**
- * <a href="http://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> factory
+ * <a href="https://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> factory
  */
 public interface ICssSelectorFactory
 {
     /**
-     * Creates <a href="http://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> for a given WebElement
+     * Creates <a href="https://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> for a given WebElement
      * @param element WebElement to create CSS selector for
      * @return CSS selector
      */
     String getCssSelector(WebElement element);
 
     /**
-     * Creates a single <a href="http://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> for a given
+     * Creates a single <a href="https://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> for a given
      * collection of WebElement-s
      * @param elements collection of WebElement-s to create CSS selector for
      * @return CSS selector
@@ -42,7 +42,7 @@ public interface ICssSelectorFactory
     String getCssSelector(Collection<WebElement> elements);
 
     /**
-     * Creates a stream of <a href="http://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> for a given
+     * Creates a stream of <a href="https://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> for a given
      * collection of WebElement-s
      * @param elements collection of WebElement-s to create CSS selector for
      * @return CSS selectors of elements

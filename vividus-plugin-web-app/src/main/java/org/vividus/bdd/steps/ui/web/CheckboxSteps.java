@@ -121,9 +121,9 @@ public class CheckboxSteps
      * {@code <input }<b>'attributeType'</b>=<b>'attributeValue'</b> {@code type="checkbox" />
      * }
      * </pre>
-     * @see <a href="http://www.w3schools.com/tags/att_input_checked.asp"><i>HTML </i>&lt;input&gt;<i> checked
+     * @see <a href="https://www.w3schools.com/tags/att_input_checked.asp"><i>HTML </i>&lt;input&gt;<i> checked
      * Attribute</i></a>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I uncheck a checkbox with the attribute '$attributeType'='$attributeValue'")
     public void uncheckCheckboxItem(String attributeType, String attributeValue)
@@ -253,9 +253,9 @@ public class CheckboxSteps
      * <pre>
      * {@code <input }<b>'attributeType'</b>=<b>'attributeValue'</b> {@code type="checkbox">
      * }</pre>
-     * @see <a href="http://www.w3schools.com/tags/att_input_checked.asp"><i>HTML </i>&lt;input&gt;<i> checked
+     * @see <a href="https://www.w3schools.com/tags/att_input_checked.asp"><i>HTML </i>&lt;input&gt;<i> checked
      * Attribute</i></a>
-     * @see <a href="http://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I check a checkbox with the attribute '$attributeType'='$attributeValue'")
     public void checkCheckboxItem(String attributeType, String attributeValue)
