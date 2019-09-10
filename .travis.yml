@@ -24,7 +24,6 @@ jobs:
       script:
         - ./gradlew build
         - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then git fetch --unshallow && ./gradlew sonarqube; fi
-      after_success: bash <(curl -s https://codecov.io/bash)
     - stage: "Integration tests"
       script: ./gradlew :vividus-tests:runStories
     - stage: Publish
