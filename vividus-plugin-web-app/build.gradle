@@ -28,7 +28,7 @@ dependencies {
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-ie-driver', version: seleniumVersion)
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-safari-driver', version: seleniumVersion)
     implementation(group: 'junit', name: 'junit', version: versions.junit4)
-    implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '3.6.2')
+    implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '3.7.0')
     implementation(group: 'com.browserup', name: 'browserup-proxy-core', version: '2.0.1')
     implementation(group: 'xyz.rogfam', name : 'littleproxy', version : '2.0.0-beta-5')
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
