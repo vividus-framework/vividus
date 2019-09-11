@@ -1,0 +1,30 @@
+{
+  "path": "file:\/Users\/username\/repository\/api-tests\/bin\/main\/story\/smoke\/SmokeTest.story",
+  "title": "",
+  "scenarios": [{
+    "keyword": "Scenario:",
+    "title": "Get sample by ID",
+    "steps": [{
+      "outcome": "successful",
+      "value": "When I send HTTP ((GET)) to the relative URL '\/sample\/4050'"
+    }, {
+      "outcome": "successful",
+      "value": "Then the response code is ((equal to)) '200'"
+    }]
+  }, {
+    "keyword": "Scenario:",
+    "title": "Check invalid endpoint",
+    "meta": [{
+      "keyword": "@",
+      "name": "testCaseId",
+      "value": "HSM-4321"
+    }],
+    "steps": [{
+      "outcome": "successful",
+      "value": "When I send HTTP ((GET)) to the relative URL '\/test\/4050'"
+    }, {
+      "outcome": "successful",
+      "value": "Then the response code is ((equal to)) '404'"
+    }]
+  }]
+}

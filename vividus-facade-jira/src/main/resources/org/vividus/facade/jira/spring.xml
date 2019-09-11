@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-lazy-init="true">
+
+    <bean id="jiraFacade" class="org.vividus.facade.jira.JiraFacade">
+        <property name="client" ref="jiraClient" />
+        <property name="jiraConfigurationProvider" ref="jiraConfigurationProvider" />
+    </bean>
+
+    <bean id="jiraClient" class="org.vividus.facade.jira.client.JiraClient">
+        <property name="httpClient" ref="httpClient-Jira" />
+    </bean>
+
+    <bean id="httpClient-Jira" class="org.vividus.http.client.HttpClient"
+        factory-bean="httpClientFactory" factory-method="buildHttpClient">
+        <constructor-arg>
+            <bean class="org.vividus.http.client.HttpClientConfig">
+                <property name="connectionManager">
+                    <bean class="org.vividus.http.client.SocketFactoryPoolingHttpClientConnectionManager">
+                        <constructor-arg ref="sslContextFactory" />
+                        <constructor-arg value="${http.ssl.check-certificate}" />
+                        <constructor-arg value="${http.ssl.verify-hostname}" />
+                        <property name="maxTotal" value="10" />
+                        <property name="defaultMaxPerRoute" value="2" />
+                    </bean>
+                </property>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="jiraConfigurationProvider" class="org.vividus.facade.jira.JiraConfigurationProvider">
+        <property name="jiraConfigurationMap">
+            <bean factory-bean="propertyMappedDataProvider-JiraConfigurationProvider" factory-method="getData" />
+        </property>
+    </bean>
+
+    <bean id="propertyMappedDataProvider-JiraConfigurationProvider" class="org.vividus.util.property.PropertyMappedDataProvider">
+        <constructor-arg ref="propertyMapper" />
+        <constructor-arg value="org.vividus.facade.jira.model.JiraConfiguration." />
+        <constructor-arg value="org.vividus.facade.jira.model.JiraConfiguration" />
+    </bean>
+</beans>

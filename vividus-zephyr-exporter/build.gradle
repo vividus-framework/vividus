@@ -1,0 +1,26 @@
+apply from: "spring-boot-library.gradle"
+
+project.description = 'Vividus ZEPHYR exporter'
+
+dependencies {
+    implementation project(':vividus-util')
+    implementation project(':vividus-facade-jira')
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
+    implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jackson)
+    implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson)
+    implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson)
+    implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties', version: versions.jackson)
+    implementation(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jackson)
+    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'commons-io', name: 'commons-io', version: versions.commonsIo)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+        exclude group: 'junit', module: 'junit'
+    }
+}
