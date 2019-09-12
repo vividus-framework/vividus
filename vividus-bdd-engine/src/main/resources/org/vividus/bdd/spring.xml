@@ -107,11 +107,6 @@
 
     <bean class="org.jbehave.core.steps.ParameterConverters.FluentEnumConverter"/>
 
-    <bean class="org.vividus.bdd.expression.DateExpressionProcessor">
-        <property name="locale" value="${bdd.date-expression-processor.locale}">
-        </property>
-    </bean>
-
     <bean id="stepFactory" class="org.vividus.bdd.steps.SpringStepFactory">
         <constructor-arg index="0" ref="configuration" />
     </bean>

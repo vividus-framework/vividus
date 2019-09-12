@@ -37,10 +37,6 @@
         <property name="jsonUtils" ref="jsonUtils-LowerCamelCase"/>
     </bean>
 
-    <bean id="dateValidationSteps" class="org.vividus.bdd.steps.DateValidationSteps">
-        <property name="softAssert" ref="jsonSoftAssert" />
-    </bean>
-
     <bean id="httpResponseSteps" class="org.vividus.bdd.steps.api.HttpResponseSteps"/>
 
     <bean id="httpClient-RestApi" class="org.vividus.http.client.HttpClient"
@@ -84,6 +80,5 @@
         <value>httpResponseValidationSteps</value>
         <value>httpResponseSteps</value>
         <value>jsonResponseValidationSteps</value>
-        <value>dateValidationSteps</value>
     </util:list>
 </beans>
