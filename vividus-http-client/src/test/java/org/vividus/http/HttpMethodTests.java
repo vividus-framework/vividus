@@ -21,9 +21,12 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
@@ -32,6 +35,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
+import org.apache.http.entity.StringEntity;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -39,6 +43,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class HttpMethodTests
 {
+    private static final URI URI_EXAMPLE = URI.create("https://any.example");
+    private static final String HTTP_METHOD = "HTTP ";
+
     static Stream<Arguments> successfulEmptyRequestCreation()
     {
         return Stream.of(
@@ -66,15 +73,18 @@ class HttpMethodTests
     @MethodSource("successfulEmptyRequestCreation")
     void testSuccessfulEmptyRequestCreation(HttpMethod httpMethod, Class<? extends HttpRequestBase> requestClass)
     {
-        assertThat(httpMethod.createEmptyRequest(), instanceOf(requestClass));
+        HttpRequestBase request = httpMethod.createRequest(URI_EXAMPLE);
+        assertThat(request, instanceOf(requestClass));
+        assertEquals(URI_EXAMPLE, request.getURI());
     }
 
     @ParameterizedTest
     @EnumSource(value = HttpMethod.class, names = { "PATCH", "POST" })
     void testFailedEmptyRequestCreation(HttpMethod httpMethod)
     {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, httpMethod::createEmptyRequest);
-        assertEquals(createExceptionMessage(httpMethod, "must"), exception.getMessage());
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> httpMethod.createRequest(URI_EXAMPLE));
+        assertEquals(HTTP_METHOD + httpMethod + " request must include body", exception.getMessage());
     }
 
     @ParameterizedTest
@@ -82,19 +92,19 @@ class HttpMethodTests
     void testSuccessfulEmptyEnclosingEntityRequestCreation(HttpMethod httpMethod,
             Class<? extends HttpRequestBase> requestClass)
     {
-        assertThat(httpMethod.createEmptyEnclosingEntityRequest(), instanceOf(requestClass));
+        StringEntity entity = new StringEntity("body", StandardCharsets.UTF_8);
+        HttpEntityEnclosingRequestBase request = httpMethod.createEntityEnclosingRequest(URI_EXAMPLE, entity);
+        assertThat(request, instanceOf(requestClass));
+        assertEquals(URI_EXAMPLE, request.getURI());
+        assertEquals(entity, request.getEntity());
     }
 
     @ParameterizedTest
     @EnumSource(value = HttpMethod.class, names = { "GET", "HEAD", "OPTIONS", "TRACE", "DEBUG" })
     void testFailedEmptyEnclosingEntityRequestCreation(HttpMethod httpMethod)
     {
-        assertThrows(IllegalStateException.class, httpMethod::createEmptyEnclosingEntityRequest,
-                createExceptionMessage(httpMethod, "can't"));
-    }
-
-    private static String createExceptionMessage(HttpMethod httpMethod, String verb)
-    {
-        return "HTTP " + httpMethod + " request " + verb + " include body";
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> httpMethod.createEntityEnclosingRequest(URI_EXAMPLE));
+        assertEquals(HTTP_METHOD + httpMethod + " request can't include body", exception.getMessage());
     }
 }

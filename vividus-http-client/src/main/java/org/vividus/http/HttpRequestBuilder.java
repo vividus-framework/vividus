@@ -16,13 +16,13 @@
 
 package org.vividus.http;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -91,8 +91,9 @@ public final class HttpRequestBuilder
         HttpRequestBase request;
         try
         {
-            request = createHttpRequest();
-            setUrl(request);
+            URI uri = getUrl();
+            request = requestEntity != null ? httpMethod.createEntityEnclosingRequest(uri, requestEntity)
+                    : httpMethod.createRequest(uri);
         }
         catch (IllegalArgumentException | IllegalStateException e)
         {
@@ -102,24 +103,13 @@ public final class HttpRequestBuilder
         return request;
     }
 
-    private void setUrl(HttpRequestBase request)
+    private URI getUrl()
     {
         String url = endpoint;
         if (relativeUrl != null)
         {
             url = url.concat(relativeUrl);
         }
-        request.setURI(UriUtils.createUri(url).normalize());
-    }
-
-    private HttpRequestBase createHttpRequest()
-    {
-        if (requestEntity == null)
-        {
-            return httpMethod.createEmptyRequest();
-        }
-        HttpEntityEnclosingRequestBase request = httpMethod.createEmptyEnclosingEntityRequest();
-        request.setEntity(requestEntity);
-        return request;
+        return UriUtils.createUri(url).normalize();
     }
 }

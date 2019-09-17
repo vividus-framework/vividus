@@ -16,6 +16,9 @@
 
 package org.vividus.http;
 
+import java.net.URI;
+
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -32,96 +35,103 @@ public enum HttpMethod
     GET
     {
         @Override
-        public HttpRequestBase createEmptyRequest()
+        public HttpRequestBase createRequest(URI uri)
         {
-            return new HttpGet();
+            return new HttpGet(uri);
         }
     },
     HEAD
     {
         @Override
-        public HttpRequestBase createEmptyRequest()
+        public HttpRequestBase createRequest(URI uri)
         {
-            return new HttpHead();
+            return new HttpHead(uri);
         }
     },
     DELETE
     {
         @Override
-        public HttpRequestBase createEmptyRequest()
+        public HttpRequestBase createRequest(URI uri)
         {
-            return new HttpDelete();
+            return new HttpDelete(uri);
         }
 
         @Override
-        public HttpEntityEnclosingRequestBase createEmptyEnclosingEntityRequest()
+        HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
         {
-            return new HttpDeleteWithBody();
+            return new HttpDeleteWithBody(uri);
         }
     },
     OPTIONS
     {
         @Override
-        public HttpRequestBase createEmptyRequest()
+        public HttpRequestBase createRequest(URI uri)
         {
-            return new HttpOptions();
+            return new HttpOptions(uri);
         }
     },
     PATCH
     {
         @Override
-        public HttpEntityEnclosingRequestBase createEmptyEnclosingEntityRequest()
+        HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
         {
-            return new HttpPatch();
+            return new HttpPatch(uri);
         }
     },
     POST
     {
         @Override
-        public HttpEntityEnclosingRequestBase createEmptyEnclosingEntityRequest()
+        HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
         {
-            return new HttpPost();
+            return new HttpPost(uri);
         }
     },
     PUT
     {
         @Override
-        public HttpEntityEnclosingRequestBase createEmptyEnclosingEntityRequest()
+        HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
         {
-            return new HttpPut();
+            return new HttpPut(uri);
         }
 
         @Override
-        public HttpRequestBase createEmptyRequest()
+        public HttpRequestBase createRequest(URI uri)
         {
-            return new HttpPutWithoutBody();
+            return new HttpPutWithoutBody(uri);
         }
     },
     TRACE
     {
         @Override
-        public HttpRequestBase createEmptyRequest()
+        public HttpRequestBase createRequest(URI uri)
         {
-            return new HttpTrace();
+            return new HttpTrace(uri);
         }
     },
     DEBUG
     {
         @Override
-        public HttpRequestBase createEmptyRequest()
+        public HttpRequestBase createRequest(URI uri)
         {
-            return new HttpDebug();
+            return new HttpDebug(uri);
         }
     };
 
-    public HttpRequestBase createEmptyRequest()
+    public HttpRequestBase createRequest(URI uri)
     {
         throw new IllegalStateException(generateExceptionMessage("must"));
     }
 
-    public HttpEntityEnclosingRequestBase createEmptyEnclosingEntityRequest()
+    HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
     {
         throw new IllegalStateException(generateExceptionMessage("can't"));
+    }
+
+    public HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri, HttpEntity httpEntity)
+    {
+        HttpEntityEnclosingRequestBase request = createEntityEnclosingRequest(uri);
+        request.setEntity(httpEntity);
+        return request;
     }
 
     private String generateExceptionMessage(String verb)
