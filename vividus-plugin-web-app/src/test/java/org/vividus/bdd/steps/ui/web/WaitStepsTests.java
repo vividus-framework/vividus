@@ -17,7 +17,6 @@
 package org.vividus.bdd.steps.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -38,7 +37,6 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
@@ -60,17 +58,11 @@ class WaitStepsTests
     private static final String INVISIBILITY_OF = "invisibility of ";
     private static final String THERE_IS_NO_ELEMENT_PRESENT_WITH_THE_TAG = "There is no element present "
             + "with the tag '%s' and attribute '%s'='%s'";
-    private static final String THERE_IS_NO_ELEMENT_PRESENT_WITH_THE_NAME =
-            "There is no element present with the name '%s'";
-    private static final String THERE_IS_NO_ELEMENT_PRESENT_BY_XPATH = "There is no element present by xpath '%s'";
-    private static final String THERE_IS_NO_ELEMENT_PRESENT_WITH_THE_TEXT =
-            "There is no element present with the text '%s'";
     private static final String ATTRIBUTE_VALUE = "attributeValue";
     private static final String ATTRIBUTE_TYPE = "attributeType";
     private static final String ELEMENT_TAG = "elementTag";
     private static final String NAME = "name";
     private static final String TEXT = "text";
-    private static final String CONTAINS_STYLE_WIDTH_100 = "//*[contains(@style, 'width: 100%')]";
     private static final String XPATH = "xpath";
     private static final Duration TIMEOUT = Duration.ofSeconds(1L);
     private static final String ELEMENT_WITH_TAG = ".//elementTag[normalize-space(@attributeType)=\"attributeValue\"]";
@@ -129,7 +121,7 @@ class WaitStepsTests
         IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
         when(expectedSearchActionsConditions.invisibilityOfElement(attributes)).thenReturn(condition);
         when(waitActions.wait(webElement, TIMEOUT, condition)).thenReturn(waitResult);
-        waitSteps.elementDisappears(NAME, TIMEOUT.toSecondsPart());
+        waitSteps.waitForElementDisappearance(attributes, TIMEOUT);
         verify(waitResult).isWaitPassed();
     }
 
@@ -159,7 +151,7 @@ class WaitStepsTests
         IExpectedSearchContextCondition<WebElement> condition = mock(IExpectedSearchContextCondition.class);
         when(expectedSearchActionsConditions.visibilityOfElement(attributes)).thenReturn(condition);
         when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
-        waitSteps.waitTillElementAppears(NAME);
+        waitSteps.waitForElementAppearance(attributes);
         verify(waitResult).isWaitPassed();
     }
 
@@ -183,7 +175,7 @@ class WaitStepsTests
         SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, NAME);
         IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
         when(expectedSearchActionsConditions.textToBePresentInElementLocated(attributes, TEXT)).thenReturn(condition);
-        waitSteps.waitTillElementContainsText(NAME, TEXT);
+        waitSteps.waitTillElementContainsText(attributes, TEXT);
         verify(waitActions).wait(webElement, condition);
     }
 
@@ -191,22 +183,13 @@ class WaitStepsTests
     void testWaitTillElementDisappears()
     {
         when(webUiContext.getSearchContext()).thenReturn(webElement);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        List<WebElement> elements = List.of(webElement);
+        WaitResult<Boolean> waitResult = mock(WaitResult.class);
         SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, NAME);
-        when(searchActions.findElements(webElement, attributes)).thenReturn(elements);
-        waitSteps.waitTillElementDisappears(NAME);
-        verify(waitActions).wait(eq(webDriver),
-                argThat(condition -> condition.toString().equals(INVISIBILITY_OF + webElement)));
-        verifyZeroInteractions(softAssert);
-    }
-
-    @Test
-    void testWaitTillElementDisappearsElementIsNotPresent()
-    {
-        waitSteps.waitTillElementDisappears(NAME);
-        verifyZeroInteractions(waitActions);
-        verify(softAssert).recordPassedAssertion(String.format(THERE_IS_NO_ELEMENT_PRESENT_WITH_THE_NAME, NAME));
+        IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
+        when(expectedSearchActionsConditions.invisibilityOfElement(attributes)).thenReturn(condition);
+        when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
+        waitSteps.waitForElementDisappearance(attributes);
+        verify(waitResult).isWaitPassed();
     }
 
     @Test
@@ -239,7 +222,7 @@ class WaitStepsTests
         SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, NAME);
         IExpectedSearchContextCondition<WebElement> expectedCondition = mock(IExpectedSearchContextCondition.class);
         when(expectedSearchActionsConditions.elementToBeClickable(attributes)).thenReturn(expectedCondition);
-        waitSteps.waitTillElementIsSelected(NAME, State.ENABLED);
+        waitSteps.waitTillElementIsSelected(attributes, State.ENABLED);
         verify(waitActions).wait(webElement, expectedCondition);
     }
 
@@ -248,9 +231,9 @@ class WaitStepsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, NAME);
-        when(baseValidations.assertIfElementExists("Element with the name: " + NAME, attributes))
+        when(baseValidations.assertIfElementExists("Required element", attributes))
                 .thenReturn(webElement);
-        waitSteps.waitTillElementIsStale(NAME);
+        waitSteps.waitTillElementIsStale(attributes);
         verify(waitActions).wait(eq(webDriver), argThat(condition ->
                         condition.toString().equals(String.format("element (%s) to become stale", webElement))));
     }
@@ -266,102 +249,6 @@ class WaitStepsTests
         when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
         waitSteps.waitTillElementsAreVisible(NAME);
         verify(waitResult).isWaitPassed();
-    }
-
-    @Test
-    void testWaitTillElementWithTextAppears()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(webElement);
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.CASE_SENSITIVE_TEXT, TEXT);
-        IExpectedSearchContextCondition<WebElement> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchActionsConditions.visibilityOfElement(attributes)).thenReturn(condition);
-        WaitResult<WebElement> waitResult = mock(WaitResult.class);
-        when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
-        waitSteps.waitTillElementWithTextAppears(TEXT);
-        verify(waitResult).isWaitPassed();
-    }
-
-    @Test
-    void testWaitTillElementWithTextDisappears()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(webElement);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        List<WebElement> elements = List.of(webElement);
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.CASE_SENSITIVE_TEXT, TEXT);
-        when(searchActions.findElements(webElement, attributes)).thenReturn(elements);
-        waitSteps.waitTillElementWithTextDisappears(TEXT);
-        verify(waitActions).wait(eq(webDriver),
-                argThat(condition -> condition.toString().equals(INVISIBILITY_OF + webElement)));
-        verifyZeroInteractions(softAssert);
-    }
-
-    @Test
-    void testWaitTillElementWithTextDisappearsElementIsNotPresent()
-    {
-        waitSteps.waitTillElementWithTextDisappears(TEXT);
-        verifyZeroInteractions(waitActions);
-        verify(softAssert).recordPassedAssertion(String.format(THERE_IS_NO_ELEMENT_PRESENT_WITH_THE_TEXT, TEXT));
-    }
-
-    @Test
-    void testWaitTillElementWithXpathAppears()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(webElement);
-        By by = By.xpath(XPATH);
-        WaitResult<List<WebElement>> waitResult = mock(WaitResult.class);
-        IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchContextConditions.visibilityOfAllElementsLocatedBy(by)).thenReturn(condition);
-        when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
-        waitSteps.waitTillElementWithXpathAppears(XPATH);
-        verify(waitResult).isWaitPassed();
-    }
-
-    @Test
-    void testWaitTillElementWithXpathAppears2()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(webElement);
-        By by = By.xpath("//*[contains(normalize-space(@style), 'width: 100%')]");
-        WaitResult<List<WebElement>> waitResult = mock(WaitResult.class);
-        IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchContextConditions.visibilityOfAllElementsLocatedBy(by)).thenReturn(condition);
-        when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
-        waitSteps.waitTillElementWithXpathAppears(CONTAINS_STYLE_WIDTH_100);
-        verify(waitResult).isWaitPassed();
-    }
-
-    @Test
-    void testWaitTillElementWithXpathDisappears()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(webElement);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        List<WebElement> elements = List.of(webElement);
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH);
-        when(searchActions.findElements(webElement, attributes)).thenReturn(elements);
-        waitSteps.waitTillElementWithXpathDisappeares(XPATH);
-        verify(waitActions).wait(eq(webDriver), any(ExpectedCondition.class));
-        verifyZeroInteractions(softAssert);
-    }
-
-    @Test
-    void testWaitTillElementWithXpathDisappearsElementIsNotPresent()
-    {
-        waitSteps.waitTillElementWithXpathDisappeares(XPATH);
-        verifyZeroInteractions(waitActions);
-        verify(softAssert).recordPassedAssertion(String.format(THERE_IS_NO_ELEMENT_PRESENT_BY_XPATH, XPATH));
-    }
-
-    @Test
-    void testWaitTillElementWithXpathDisappears2()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(webElement);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        List<WebElement> elements = List.of(webElement);
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.XPATH, CONTAINS_STYLE_WIDTH_100);
-        when(searchActions.findElements(webElement, attributes)).thenReturn(elements);
-        waitSteps.waitTillElementWithXpathDisappeares(CONTAINS_STYLE_WIDTH_100);
-        verify(waitActions).wait(eq(webDriver),
-                argThat(condition -> condition.toString().equals(INVISIBILITY_OF + webElement)));
-        verifyZeroInteractions(softAssert);
     }
 
     @Test
@@ -488,30 +375,6 @@ class WaitStepsTests
         when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
         waitResult.setWaitPassed(true);
         assertTrue(waitSteps.waitForElementDisappearance(webElement, by));
-    }
-
-    @Test
-    void testWaitForElementDisappearanceWithAttributes()
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, NAME);
-        IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchActionsConditions.invisibilityOfElement(attributes)).thenReturn(condition);
-        WaitResult<Boolean> waitResult = new WaitResult<>();
-        when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
-        waitResult.setWaitPassed(true);
-        assertTrue(waitSteps.waitForElementDisappearance(webElement, attributes));
-    }
-
-    @Test
-    void testWaitForElementDisappearanceWithDuration()
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, NAME);
-        IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchActionsConditions.invisibilityOfElement(attributes)).thenReturn(condition);
-        WaitResult<Boolean> waitResult = new WaitResult<>();
-        when(waitActions.wait(webElement, TIMEOUT, condition)).thenReturn(waitResult);
-        waitResult.setWaitPassed(true);
-        assertTrue(waitSteps.waitForElementDisappearance(webElement, attributes, TIMEOUT));
     }
 
     @Test
