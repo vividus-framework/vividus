@@ -14,7 +14,7 @@ dependencies {
     }
     implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '2.8.0')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-    implementation(group: 'org.apache.tika', name: 'tika-core', version: '1.21')
+    implementation(group: 'org.apache.tika', name: 'tika-core', version: '1.22')
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     implementation(group: 'io.qameta.allure', name: 'allure-jsonunit', version: versions.allure) {
         exclude (group: 'io.qameta.allure')
