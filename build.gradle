@@ -56,7 +56,6 @@ ext {
         junit4:                 '4.12',
         slf4j:                  '2.0.0-alpha0',
         spring:                 '5.1.9.RELEASE',
-        tika:                   '1.21',
 
         junit:                  '5.5.2',
         junit4Dataprovider:     '2.4',
