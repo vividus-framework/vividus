@@ -25,12 +25,7 @@
 
     <bean id="allureReportGenerator" class="org.vividus.bdd.report.allure.AllureReportGenerator"
         destroy-method="end">
-        <property name="reportDirectory">
-            <bean class="java.nio.file.Paths" factory-method="get">
-                <constructor-arg value="${allure.report-directory}" />
-                <constructor-arg><array /></constructor-arg>
-            </bean>
-        </property>
+        <property name="reportDirectory" value="${allure.report-directory}" />
     </bean>
 
     <bean class="org.vividus.bdd.report.allure.listener.AllureAssertionFailureListener"
