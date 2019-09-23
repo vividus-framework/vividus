@@ -67,72 +67,6 @@ public class WaitSteps
     @Inject private IExpectedConditions<SearchAttributes> expectedSearchActionsConditions;
     @Inject private IBaseValidations baseValidations;
 
-    /**
-     * Waits for <b><i>an element</i></b> with the specified <b>name</b> disappearance
-     * in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><b>Searches</b> for an element with the <b>specified name</b> within search context</li>
-     * <li><i>If there are <b>no elements</b> with the specified name</i>, step provides passed assertion and
-     * don't check disappearance of an element</li>
-     * <li><i>If <b>there are elements</b> with the specified name, </i><b>waits</b> until this element becomes
-     * not visible</li>
-     * </ul>
-     * @param elementName Any attribute value or text value of the element
-     */
-    @When("I wait until an element with the name '$elementName' disappears")
-    public void waitTillElementDisappears(String elementName)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        String assertionDescription = "with the name '%s'";
-        waitForElementDisappearance(attributes, assertionDescription, elementName);
-    }
-
-    /**
-     * Waits for <b><i>an element</i></b> with the specified <b>name</b> appearance
-     * in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><i>Finds</i> an element with the <b>specified name</b> within search context
-     * <li><i>Waits</i> until this element becomes visible
-     * </ul>
-     * @param elementName Any attribute value or text value of the element
-     */
-    @When("I wait until an element with the name '$elementName' appears")
-    public void waitTillElementAppears(String elementName)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        waitForElementAppearance(getSearchContext(), attributes);
-    }
-
-    /**
-     * Waits for <b><i>an element</i></b> with the specified <b>text</b> value disappearance
-     * in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><b>Searches</b> for an element with the <b>specified text value</b> within search context</li>
-     * <li><i>If there are <b>no elements</b> with the specified text value</i>, step provides passed assertion and
-     * don't check disappearance of an
-     * element</li>
-     * <li><i>If <b>there are elements</b> with the specified text value, </i><b>waits</b> until this element becomes
-     * not visible</li>
-     * </ul>
-     * @param text Any text or attribute value of the element
-     */
-    @When("I wait until an element with the text '$text' disappears")
-    public void waitTillElementWithTextDisappears(String text)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.CASE_SENSITIVE_TEXT, text);
-        String assertionDescription = "with the text '%s'";
-        waitForElementDisappearance(attributes, assertionDescription, text);
-    }
-
     public boolean waitTillElementWithTextDisappearsPageRefresh(String text, Duration timeout)
     {
         WebDriver driver = webDriverProvider.get();
@@ -140,76 +74,11 @@ public class WaitSteps
                 getFunction(false, text, "Waiting disappearance of all elements with text: ")).isWaitPassed();
     }
 
-    /**
-     * Waits for <b><i>an element</i></b> with the specified <b>text</b> value appearance
-     * in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><i>Finds</i> an element with the <b>specified text value</b> within search context
-     * <li><i>Waits</i> until this element becomes visible
-     * </ul>
-     * @param text Any text or attribute value of the element
-     */
-    @When("I wait until an element with the text '$text' appears")
-    public void waitTillElementWithTextAppears(String text)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.CASE_SENSITIVE_TEXT, text);
-        waitForElementAppearance(getSearchContext(), attributes);
-    }
-
     public boolean waitTillElementWithTextAppearsPageRefresh(String text, Duration timeout)
     {
         WebDriver driver = webDriverProvider.get();
         return waitActions.wait(driver, timeout,
                 getFunction(true, text, "Waiting presence of any element with text: ")).isWaitPassed();
-    }
-
-    /**
-     * Waits for <b><i>an element</i></b> with the specified <b>XPath locator</b> appearance
-     * in the specified search context
-     * <p>
-     * <b>XPath locator</b> uses the path expressions to select nodes or node-sets in an XML document.
-     * </p>
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><i>Finds</i> an element with the <b>specified XPath locator</b> within search context
-     * <li><i>Waits</i> until this element becomes visible
-     * </ul>
-     * @param elementXpath XPath value of the element
-     */
-    @When("I wait until an element with the xpath '$elementXpath' appears")
-    public void waitTillElementWithXpathAppears(String elementXpath)
-    {
-        waitForElementAppearance(getSearchContext(), LocatorUtil.getXPathLocator(elementXpath));
-    }
-
-    /**
-     * Waits for <b><i>an element</i></b> with the specified <b>XPath locator</b> disappearance
-     * in the specified search context
-     * <p>
-     * <b>XPath locator</b> is the path consists of tags of the document and delimiters
-     * </p>
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><b>Searches</b> for an element with the <b>specified XPath locator</b> within search context</li>
-     * <li><i>If there are <b>no elements</b> by given xpath</i>, step provides passed assertion and don't check
-     * disappearance of an element</li>
-     * <li><i>If <b>there are elements</b> by given xpath, </i><b>waits</b> until this element becomes not visible</li>
-     * </ul>
-     * @param elementXpath XPath value of the element
-     */
-    @When("I wait until an element with the xpath '$elementXpath' disappeares")
-    public void waitTillElementWithXpathDisappeares(String elementXpath)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.XPATH, elementXpath);
-        String assertionDescription = "by xpath '%s'";
-        waitForElementDisappearance(attributes, assertionDescription, elementXpath);
     }
 
     /**
@@ -311,25 +180,23 @@ public class WaitSteps
     }
 
     /**
-     * Waits for <b><i>an element</i></b> with the specified <b>name</b> to take a certain <b>state</b>
+     * Waits for <b><i>an element</i></b> with the specified <b>locator</b> to take a certain <b>state</b>
      * in the specified search context
      * <p>
      * Actions performed at this step:
      * </p>
      * <ul>
-     * <li><i>Finds</i> an element with the <b>specified name</b> within search context
+     * <li><i>Finds</i> an element with the <b>specified locator</b> within search context
      * <li><i>Waits</i> until this element takes a certain state value
      * </ul>
-     * @param elementName Any attribute value or text value of the element
+     * @param locator to locate element
      * @param state State value of the element
      * (<i>Possible values:</i> <b>ENABLED, DISABLED, SELECTED, NOT_SELECTED, VISIBLE, NOT_VISIBLE</b>)
      */
-    @When("I wait until the state of an element with the name '$elementName' becomes [$state]")
-    public void waitTillElementIsSelected(String elementName, State state)
+    @When("I wait until state of element located `$locator` is $state")
+    public void waitTillElementIsSelected(SearchAttributes locator, State state)
     {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        waitActions.wait(getSearchContext(),
-                state.getExpectedCondition(expectedSearchActionsConditions, attributes));
+        waitActions.wait(getSearchContext(), state.getExpectedCondition(expectedSearchActionsConditions, locator));
     }
 
     /**
@@ -354,7 +221,7 @@ public class WaitSteps
     }
 
     /**
-     * Waits for <b><i>an element</i></b> with specified <b>name</b>
+     * Waits for <b><i>an element</i></b> with specified <b>locator</b>
      * in the specified search context becomes stale
      * <p>
      * When an element becomes <b>stale</b>:
@@ -367,39 +234,36 @@ public class WaitSteps
      * Actions performed at this step:
      * </p>
      * <ul>
-     * <li><i>Finds</i> an element with the <b>specified name</b> within search context
+     * <li><i>Finds</i> an element with the <b>specified locator</b> within search context
      * <li><i>Waits</i> until this element becomes stale
      * </ul>
-     * @param elementName Any attribute value or text value of the element
+     * @param locator to locate element
      */
-    @When("I wait until an element with the name '$elementName' is stale")
-    public void waitTillElementIsStale(String elementName)
+    @When("I wait until element located `$locator` is stale")
+    public void waitTillElementIsStale(SearchAttributes locator)
     {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        WebElement element = baseValidations.assertIfElementExists("Element with the name: " + elementName, attributes);
+        WebElement element = baseValidations.assertIfElementExists("Required element", locator);
         waitActions.wait(getWebDriver(), stalenessOf(element));
     }
 
     /**
-     * Waits for <b><i>an element</i></b> with specified <b>name</b> in the specified search context
+     * Waits for <b><i>an element</i></b> with specified <b>locator</b> in the specified search context
      * contains the certain <b>text</b>
      * <p>
      * Actions performed at this step:
      * </p>
      * <ul>
-     * <li><i>Finds</i> an element <b>with the specified name</b> within search context
+     * <li><i>Finds</i> an element <b>with the specified locator</b> within search context
      * <li><i>Waits</i> until <b>the text</b> in this element becomes visible
      * </ul>
-     * @param elementName Any attribute value or text value of the element
+     * @param locator to locate element
      * @param text Desired text to be present in the element
      */
-    @When("I wait until an element with the name '$elementName' contains the text '$text'")
-    public void waitTillElementContainsText(String elementName, String text)
+    @When("I wait until element located `$locator` contains text '$text'")
+    public void waitTillElementContainsText(SearchAttributes locator, String text)
     {
-        SearchContext searchContext = getSearchContext();
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        waitActions.wait(searchContext,
-                expectedSearchActionsConditions.textToBePresentInElementLocated(attributes, text));
+        waitActions.wait(getSearchContext(),
+              expectedSearchActionsConditions.textToBePresentInElementLocated(locator, text));
     }
 
     /**
@@ -444,7 +308,7 @@ public class WaitSteps
     public void waitTillElementsAreVisible(String elementName)
     {
         SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        waitForElementAppearance(getSearchContext(), attributes);
+        waitForElementAppearance(attributes);
     }
 
     /**
@@ -480,19 +344,6 @@ public class WaitSteps
         By locator = By.xpath(LocatorUtil.getXPathByAttribute("id", id));
         waitActions.wait(getSearchContext(),
                 State.NOT_VISIBLE.getExpectedCondition(expectedSearchContextConditions, locator));
-    }
-
-    /**
-     * Waits for <b><i>an element</i></b> with the specified <b>name</b> disappearance from the specified search context
-     * with the certain <b>timeout</b>
-     * @param elementName Any attribute value or text value of element
-     * @param timeoutInSecs Timeout in seconds
-     */
-    @Then("an element with the name '$elementName' disappears in '$timeout' seconds")
-    public void elementDisappears(String elementName, int timeoutInSecs)
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
-        waitForElementDisappearance(getSearchContext(), attributes, Duration.ofSeconds(timeoutInSecs));
     }
 
     /**
@@ -533,18 +384,6 @@ public class WaitSteps
     }
 
     /**
-     * Waits for element disappearance with timeout
-     * @param searchContext Search context
-     * @param attributes The locating mechanism to use
-     * @return true if element disappeared, false otherwise
-     */
-    public boolean waitForElementDisappearance(SearchContext searchContext, SearchAttributes attributes)
-    {
-        return waitActions.wait(searchContext, expectedSearchActionsConditions.invisibilityOfElement(attributes))
-                .isWaitPassed();
-    }
-
-    /**
      * Waits for element disappearance with desired timeout in seconds
      * @param searchContext Search context
      * @param by The locating mechanism to use
@@ -559,16 +398,15 @@ public class WaitSteps
 
     /**
      * Waits for element disappearance with desired timeout in seconds
-     * @param searchContext Search context
-     * @param attributes The locating mechanism to use
+     * @param locator The locating mechanism to use
      * @param timeout Desired timeout
      * @return true if element disappeared, false otherwise
      */
-    public boolean waitForElementDisappearance(SearchContext searchContext, SearchAttributes attributes,
-            Duration timeout)
+    @Then("element located '$locator' disappears in '$timeout'")
+    public boolean waitForElementDisappearance(SearchAttributes locator, Duration timeout)
     {
-        return waitActions.wait(searchContext, timeout,
-                expectedSearchActionsConditions.invisibilityOfElement(attributes)).isWaitPassed();
+        return waitActions.wait(getSearchContext(), timeout,
+                expectedSearchActionsConditions.invisibilityOfElement(locator)).isWaitPassed();
     }
 
     public boolean waitForElementAppearance(SearchContext searchContext, By by)
@@ -577,10 +415,36 @@ public class WaitSteps
                 expectedSearchContextConditions.visibilityOfAllElementsLocatedBy(by)).isWaitPassed();
     }
 
-    public boolean waitForElementAppearance(SearchContext searchContext, SearchAttributes attributes)
+    /**
+     * Waits for <b><i>an element</i></b> with the specified <b>locator</b> appearance
+     * in the specified search context
+     * <p>
+     * Actions performed at this step:
+     * </p>
+     * <ul>
+     * <li><i>Finds</i> an element with the <b>specified locator</b> within search context
+     * <li><i>Waits</i> until this element becomes visible
+     * </ul>
+     * @param locator to locate element
+     * @return true if element appeared, false otherwise
+     */
+    @When("I wait until element located `$locator` appears")
+    public boolean waitForElementAppearance(SearchAttributes locator)
     {
-        return waitActions.wait(searchContext,
-                expectedSearchActionsConditions.visibilityOfElement(attributes)).isWaitPassed();
+        return waitActions.wait(getSearchContext(),
+                expectedSearchActionsConditions.visibilityOfElement(locator)).isWaitPassed();
+    }
+
+    /**
+     * Waits for element disappearance with timeout
+     * @param locator The locating mechanism to use
+     * @return true if element disappeared, false otherwise
+     */
+    @When("I wait until element located `$locator` disappears")
+    public boolean waitForElementDisappearance(SearchAttributes locator)
+    {
+        return waitActions.wait(getSearchContext(), expectedSearchActionsConditions.invisibilityOfElement(locator))
+                .isWaitPassed();
     }
 
     /**

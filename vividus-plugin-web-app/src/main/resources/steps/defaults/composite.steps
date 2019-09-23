@@ -200,3 +200,33 @@ Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>']])`
 
 Composite: Then a button with the tooltip '$tooltip' and image with the src '$imageSrc' exists
 Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>'] and @title='<tooltip>'])` is equal to `1`
+
+Composite: When I wait until an element with the text '$text' appears
+When I wait until element located `By.caseSensitiveText(<text>)` appears
+
+Composite: When I wait until an element with the text '$text' disappears
+When I wait until element located `By.caseSensitiveText(<text>)` disappears
+
+Composite: When I wait until an element with the name '$elementName' disappears
+When I wait until element located `By.elementName(<elementName>)` disappears
+
+Composite: When I wait until an element with the name '$elementName' appears
+When I wait until element located `By.elementName(<elementName>)` appears
+
+Composite: When I wait until an element with the xpath '$xpath' appears
+When I wait until element located `By.xpath(<xpath>)` appears
+
+Composite: When I wait until an element with the xpath '$xpath' disappeares
+When I wait until element located `By.xpath(<xpath>)` disappears
+
+Composite: When I wait until the state of an element with the name '$elementName' becomes [$state]
+When I wait until state of element located `By.elementName(<elementName>)` is $state
+
+Composite: When I wait until an element with the name '$elementName' is stale
+When I wait until element located `By.elementName(<elementName>)` is stale
+
+Composite: When I wait until an element with the name '$elementName' contains the text '$text'
+When I wait until element located `By.elementName(<elementName>)` contains text '$text'
+
+Composite: Then an element with the name '$elementName' disappears in '$timeout' seconds
+Then element located `By.elementName(<elementName>)` disappears in '$timeout'
