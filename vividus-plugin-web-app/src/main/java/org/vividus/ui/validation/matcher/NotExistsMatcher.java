@@ -19,7 +19,6 @@ package org.vividus.ui.validation.matcher;
 import java.util.List;
 
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.TypeSafeMatcher;
 import org.openqa.selenium.WebElement;
 
@@ -43,7 +42,6 @@ public class NotExistsMatcher extends TypeSafeMatcher<List<WebElement>>
         mismatchDescription.appendText("exists");
     }
 
-    @Factory
     public static NotExistsMatcher notExists()
     {
         return new NotExistsMatcher();

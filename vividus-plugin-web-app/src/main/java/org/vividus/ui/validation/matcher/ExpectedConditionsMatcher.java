@@ -17,7 +17,6 @@
 package org.vividus.ui.validation.matcher;
 
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.TypeSafeMatcher;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -57,7 +56,6 @@ public class ExpectedConditionsMatcher extends TypeSafeMatcher<WebDriver>
         return result != null;
     }
 
-    @Factory
     public static ExpectedConditionsMatcher expectedCondition(ExpectedCondition<?> expectedCondition)
     {
         return new ExpectedConditionsMatcher(expectedCondition);

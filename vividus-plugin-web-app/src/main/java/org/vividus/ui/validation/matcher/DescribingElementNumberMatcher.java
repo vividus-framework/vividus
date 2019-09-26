@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.openqa.selenium.WebElement;
 
@@ -47,7 +46,6 @@ public class DescribingElementNumberMatcher extends ElementNumberMatcher
         }
     }
 
-    @Factory
     public static DescribingElementNumberMatcher elementNumber(Matcher<? super Integer> matcher,
             Function<List<? extends WebElement>, String> elementsDescriptionProvider)
     {

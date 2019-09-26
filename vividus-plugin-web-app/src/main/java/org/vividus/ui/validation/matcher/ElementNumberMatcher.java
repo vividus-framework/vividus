@@ -19,7 +19,6 @@ package org.vividus.ui.validation.matcher;
 import java.util.List;
 
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.openqa.selenium.WebElement;
@@ -51,7 +50,6 @@ public class ElementNumberMatcher extends TypeSafeMatcher<List<? extends WebElem
         return matcher.matches(item.size());
     }
 
-    @Factory
     public static ElementNumberMatcher elementNumber(Matcher<? super Integer> matcher)
     {
         return new ElementNumberMatcher(matcher);
