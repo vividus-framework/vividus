@@ -301,19 +301,29 @@ class BddVariableStepsTests
         verifyNoInteractions(attachmentPublisher);
     }
 
-    @Test
-    void testInitVariableUsingTemplate() throws IOException, TemplateException
+    private static Stream<Arguments> mapProvider()
+    {
+        final String header = "header";
+        final String parameters = "parameters";
+        final String data = "data";
+        final List<String> dataList = List.of(data);
+        return Stream.of(
+            Arguments.of(Map.of(header, data),     Map.of(header, dataList, parameters, Map.of(header, dataList))),
+            Arguments.of(Map.of(parameters, data), Map.of(parameters, Map.of(parameters, dataList)))
+            );
+    }
+
+    @ParameterizedTest
+    @MethodSource("mapProvider")
+    void testInitVariableUsingTemplate(Map<String, String> dataModel, Map<String, ?> resultMap)
+        throws IOException, TemplateException
     {
         String templatePath = "/templatePath";
-        String header = "header";
-        String data = "data";
-        Map<String, ?> dataModel = Map.of(header, List.of(data));
-        when(freemarkerProcessor.process(templatePath, Map.of("parameters", dataModel), StandardCharsets.UTF_8))
-                .thenReturn(VALUE);
+        when(freemarkerProcessor.process(templatePath, resultMap, StandardCharsets.UTF_8)).thenReturn(VALUE);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         String variableName = "variableName";
         bddVariableSteps.initVariableUsingTemplate(scopes, variableName, templatePath,
-                new ExamplesTable("").withRows(List.of(Map.of(header, data))));
+                new ExamplesTable("").withRows(List.of(dataModel)));
         verify(bddVariableContext).putVariable(scopes, variableName, VALUE);
     }
 

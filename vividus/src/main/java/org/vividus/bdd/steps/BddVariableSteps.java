@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,9 +97,15 @@ public class BddVariableSteps
     public void initVariableUsingTemplate(Set<VariableScope> scopes, String variableName, String templatePath,
             ExamplesTable templateParameters) throws IOException, TemplateException
     {
-        Map<String, ?> dataModel = MapUtils.convertExamplesTableToMap(templateParameters);
-        String value = freemarkerProcessor.process(templatePath, Map.of("parameters", dataModel),
-                StandardCharsets.UTF_8);
+        Map<String, List<String>> dataModel = MapUtils.convertExamplesTableToMap(templateParameters);
+        Map<String, Object> parameters = new HashMap<>();
+        String parametersKey = "parameters";
+        parameters.put(parametersKey, dataModel);
+        if (!dataModel.containsKey(parametersKey))
+        {
+            parameters.putAll(dataModel);
+        }
+        String value = freemarkerProcessor.process(templatePath, parameters, StandardCharsets.UTF_8);
         bddVariableContext.putVariable(scopes, variableName, value);
     }
 
