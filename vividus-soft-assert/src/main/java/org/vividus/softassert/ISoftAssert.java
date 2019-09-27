@@ -184,7 +184,7 @@ public interface ISoftAssert
      * @param exception Cause of the error
      * @return Always returns false value indicating failed assertion
      */
-    boolean recordFailedAssertion(Exception exception);
+    boolean recordFailedAssertion(Throwable exception);
 
     /**
      * Adds assertion error to the collection and returns false.
@@ -193,7 +193,7 @@ public interface ISoftAssert
      * @param exception Cause of the error
      * @return Always returns false value indicating failed assertion
      */
-    boolean recordFailedAssertion(String description, Exception exception);
+    boolean recordFailedAssertion(String description, Throwable exception);
 
     /**
      * Verifies if there is any assertion error. Throws exception if assertion error exists

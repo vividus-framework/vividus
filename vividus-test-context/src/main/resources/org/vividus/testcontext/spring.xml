@@ -4,5 +4,5 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="testContext" class="org.vividus.testcontext.ThreadedTestContext" />
-
+    <bean id="contextCopyingExecutor" class="org.vividus.testcontext.ContextCopyingExecutor" />
 </beans>

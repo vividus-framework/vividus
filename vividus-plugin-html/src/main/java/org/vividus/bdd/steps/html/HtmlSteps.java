@@ -24,13 +24,12 @@ import javax.inject.Inject;
 import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.HtmlUtils;
 
 public class HtmlSteps
 {
@@ -48,8 +47,7 @@ public class HtmlSteps
     @Then("HTML `$html` contains element by CSS selector `$cssSelector`")
     public Optional<Element> doesElementByCssSelectorExist(String html, String cssSelector)
     {
-        Document document = Jsoup.parse(html);
-        Elements elements = document.select(cssSelector);
+        Elements elements = HtmlUtils.getElements(html, cssSelector);
         if (softAssert.assertThat(String.format("Number of elements found by css selector '%s'", cssSelector),
                 elements.size(), Matchers.equalTo(1)))
         {

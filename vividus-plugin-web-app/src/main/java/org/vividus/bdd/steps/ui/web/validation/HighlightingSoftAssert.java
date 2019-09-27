@@ -191,7 +191,7 @@ public class HighlightingSoftAssert implements IHighlightingSoftAssert
     }
 
     @Override
-    public boolean recordFailedAssertion(Exception exception)
+    public boolean recordFailedAssertion(Throwable exception)
     {
         boolean result = descriptiveSoftAssert.recordFailedAssertion(exception);
         clearAssertingWebElements();
@@ -199,7 +199,7 @@ public class HighlightingSoftAssert implements IHighlightingSoftAssert
     }
 
     @Override
-    public boolean recordFailedAssertion(String description, Exception exception)
+    public boolean recordFailedAssertion(String description, Throwable exception)
     {
         boolean result = descriptiveSoftAssert.recordFailedAssertion(description, exception);
         clearAssertingWebElements();
