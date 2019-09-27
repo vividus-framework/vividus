@@ -30,6 +30,10 @@
         <property name="sslCertificateCheckEnabled" value="${http.ssl.check-certificate}" />
         <property name="sslHostnameVerificationEnabled" value="${http.ssl.verify-hostname}" />
         <property name="circularRedirectsAllowed" value="${http.circular-redirects-allowed}" />
+        <property name="connectionRequestTimeout" value="${http.connection-request-timeout}" />
+        <property name="connectTimeout" value="${http.connect-timeout}" />
+        <property name="maxTotalConnections" value="${http.max-total-connections}" />
+        <property name="maxConnectionsPerRoute" value="${http.max-connections-per-route}" />
         <property name="socketTimeout" value="${http.socket-timeout}" />
         <property name="cookieSpec" value="${http.cookie-spec}" />
         <property name="httpRequestRetryHandler" ref="idempotentMethodsRetryHandler" />

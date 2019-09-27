@@ -1,9 +1,12 @@
 project.description = 'Vividus plugin for Web App and Rest API plugins integration'
 
 dependencies {
+    implementation project(':vividus-http-client')
     implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-plugin-rest-api')
-    implementation project(':vividus-http-client')
+    implementation project(':vividus-plugin-html')
+    implementation project(':vividus-reporter')
+    implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)

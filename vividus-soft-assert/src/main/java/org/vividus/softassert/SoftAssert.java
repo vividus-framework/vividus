@@ -242,14 +242,14 @@ public class SoftAssert implements ISoftAssert
     }
 
     @Override
-    public boolean recordFailedAssertion(Exception exception)
+    public boolean recordFailedAssertion(Throwable exception)
     {
         String message = exception.getMessage();
         return recordAssertion(message != null ? message : exception.toString(), false, exception);
     }
 
     @Override
-    public boolean recordFailedAssertion(String description, Exception exception)
+    public boolean recordFailedAssertion(String description, Throwable exception)
     {
         return recordAssertion(description, false, exception);
     }

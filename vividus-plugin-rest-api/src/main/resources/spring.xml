@@ -47,20 +47,22 @@
         factory-bean="httpClientFactory"
         factory-method="buildHttpClient">
         <constructor-arg>
-            <bean parent="httpClientConfig">
-                <property name="headersMap">
-                    <bean factory-bean="propertyParser" factory-method="getPropertyValuesByFamily">
-                        <constructor-arg value="rest-api.http.header" />
-                    </bean>
-                </property>
-                <property name="lastRequestInterceptor" ref="httpClientInterceptor" />
-                <property name="lastResponseInterceptor">
-                    <bean class="org.vividus.http.SavingConnectionDetailsHttpResponseInterceptor">
-                        <property name="httpTestContext" ref="httpTestContext" />
-                    </bean>
-                </property>
-            </bean>
+            <ref bean="restApiHttpClientConfig" />
         </constructor-arg>
+    </bean>
+
+    <bean id="restApiHttpClientConfig" parent="httpClientConfig">
+        <property name="headersMap">
+            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByFamily">
+                <constructor-arg value="rest-api.http.header" />
+            </bean>
+        </property>
+        <property name="lastRequestInterceptor" ref="httpClientInterceptor" />
+        <property name="lastResponseInterceptor">
+            <bean class="org.vividus.http.SavingConnectionDetailsHttpResponseInterceptor">
+                <property name="httpTestContext" ref="httpTestContext" />
+            </bean>
+        </property>
     </bean>
 
     <bean id="httpRedirectsProvider" class="org.vividus.http.HttpRedirectsProvider">
