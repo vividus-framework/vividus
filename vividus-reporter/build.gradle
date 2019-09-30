@@ -4,6 +4,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)

@@ -63,6 +63,7 @@ ext {
         aspectj:                '1.9.4',
         commonsIo:              '2.6',
         commonsLang3:           '3.9',
+        commonsText:            '1.8',
         groovy:                 '2.5.8',
         guava:                  '28.1-jre',
         hamcrest:               '2.1',
