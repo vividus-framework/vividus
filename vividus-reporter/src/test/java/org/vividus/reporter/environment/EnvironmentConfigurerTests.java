@@ -38,7 +38,8 @@ import org.vividus.util.property.IPropertyParser;
 class EnvironmentConfigurerTests
 {
     private static final String PREFIX = "environment-configurer.";
-    private static final String DYNAMIC_PROPERTY_PREFIX = PREFIX + "dynamic.";
+    private static final String DYNAMIC = "dynamic";
+    private static final String DYNAMIC_PROPERTY_PREFIX = PREFIX + DYNAMIC + ".";
     private static final String VALUE = "value";
 
     @Mock
@@ -68,14 +69,13 @@ class EnvironmentConfigurerTests
         PropertyCategory category = PropertyCategory.VIVIDUS;
         doReturn(Map.of()).when(propertyMapper).readValues(DYNAMIC_PROPERTY_PREFIX,
                 DynamicEnvironmentConfigurationProperty.class);
-        doReturn(Map.of(PropertyCategory.VIVIDUS.toString(), Map.of("some_key", VALUE))).when(propertyMapper)
-                .readValues(PREFIX, Map.class);
+        doReturn(Map.of(
+                PropertyCategory.VIVIDUS.toString(), Map.of("some-key", VALUE),
+                DYNAMIC, Map.of(DYNAMIC, VALUE)
+        )).when(propertyMapper).readValues(PREFIX, Map.class);
         environmentConfigurer.init();
         Map<String, String> vividusProps = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(category);
-        assertEquals(1, vividusProps.size());
-        Entry<String, String> entry = vividusProps.entrySet().iterator().next();
-        assertEquals("some key", entry.getKey());
-        assertEquals(VALUE, entry.getValue());
+        assertEquals(Map.of("Some Key", VALUE), vividusProps);
     }
 
     @Test

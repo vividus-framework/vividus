@@ -16,18 +16,23 @@
 
 package org.vividus.reporter.environment;
 
-import org.apache.commons.text.WordUtils;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public enum PropertyCategory
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+class PropertyCategoryTests
 {
-    CONFIGURATION,
-    PROFILE,
-    SUITE,
-    ENVIRONMENT,
-    VIVIDUS;
-
-    public String getCategoryName()
+    @ParameterizedTest
+    @CsvSource({
+            "CONFIGURATION, Configuration",
+            "PROFILE,       Profile",
+            "SUITE,         Suite",
+            "ENVIRONMENT,   Environment",
+            "VIVIDUS,       Vividus"
+    })
+    void shouldReturnHumanReadableCategoryName(PropertyCategory propertyCategory, String expectedCategoryName)
     {
-        return WordUtils.capitalize(name().toLowerCase());
+        assertEquals(expectedCategoryName, propertyCategory.getCategoryName());
     }
 }

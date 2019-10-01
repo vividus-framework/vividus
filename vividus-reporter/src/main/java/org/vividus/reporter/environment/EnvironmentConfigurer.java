@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.apache.commons.text.WordUtils;
 import org.vividus.reporter.ModuleVersionProvider;
 import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.IPropertyParser;
@@ -74,9 +75,10 @@ public class EnvironmentConfigurer
         {
             if (!DYNAMIC.equals(category))
             {
-                PropertyCategory propertyCategory = PropertyCategory.valueOf(category);
+                PropertyCategory propertyCategory = PropertyCategory.valueOf(category.toUpperCase());
                 Map<String, String> currentProperties = ENVIRONMENT_CONFIGURATION.get(propertyCategory);
-                properties.forEach((k, v) -> currentProperties.put(((String) k).replaceAll("_+", " "), (String) v));
+                properties.forEach((k, v) -> currentProperties
+                        .put(WordUtils.capitalize(((String) k).replace('-', ' ')), (String) v));
             }
         });
     }
