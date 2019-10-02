@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -80,7 +80,7 @@ class DescribingElementNumberMatcherTests
     {
         locatingElementNumberMatcher.describeMismatchSafely(List.of(), description);
         verify(description).appendValue(0);
-        verifyZeroInteractions(elementLocationProvider);
+        verifyNoInteractions(elementLocationProvider);
         verify(description, never()).appendText(anyString());
     }
 
@@ -90,7 +90,7 @@ class DescribingElementNumberMatcherTests
         when(matcher.matches(1)).thenReturn(true);
         locatingElementNumberMatcher.describeMismatchSafely(item, description);
         verify(description).appendValue(1);
-        verifyZeroInteractions(elementLocationProvider);
+        verifyNoInteractions(elementLocationProvider);
         verify(description, never()).appendText(anyString());
     }
 

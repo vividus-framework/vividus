@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -131,7 +131,7 @@ class MouseActionsTests
         }
         else
         {
-            verifyZeroInteractions(eventBus);
+            verifyNoInteractions(eventBus);
         }
     }
 
@@ -165,7 +165,7 @@ class MouseActionsTests
         mockBodySearch();
         when(alertActions.waitForAlert(webDriver)).thenReturn(Boolean.TRUE);
         testClick(false, false);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -175,15 +175,15 @@ class MouseActionsTests
         mockBodySearch();
         when(alertActions.isAlertPresent()).thenReturn(alertPresent);
         testClick(alertPresent, false);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
     void clickElementNull()
     {
         mouseActions.click((WebElement) null);
-        verifyZeroInteractions(webDriverProvider);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webDriverProvider);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -203,8 +203,8 @@ class MouseActionsTests
     void clickWrapsElementNull()
     {
         mouseActions.click((WrapsElement) null);
-        verifyZeroInteractions(webDriverProvider);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webDriverProvider);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -213,7 +213,7 @@ class MouseActionsTests
         mockBodySearch();
         testClick(false, false);
         verify(alertActions).waitForAlert(webDriver);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -231,7 +231,7 @@ class MouseActionsTests
         assertFalse(result.isNewPageLoaded());
         verify(softAssert).recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + e2);
         verify(alertActions, never()).waitForAlert(webDriver);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -245,7 +245,7 @@ class MouseActionsTests
         mouseActions.click(webElement);
         verify(webElement, never()).sendKeys("");
         verify(alertActions, never()).waitForAlert(webDriver);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -255,7 +255,7 @@ class MouseActionsTests
         WebDriverException e = new WebDriverException("Timed out waiting for page to load");
         doThrow(e).doThrow(e).when(webElement).click();
         assertTrue(mouseActions.click(webElement).isClicked());
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -266,7 +266,7 @@ class MouseActionsTests
         doThrow(new WebDriverException(exceptionMessage)).when(webElement).click();
         WebDriverException exception = assertThrows(WebDriverException.class, () ->  mouseActions.click(webElement));
         assertThat(exception.getMessage(), containsString(exceptionMessage));
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -283,7 +283,7 @@ class MouseActionsTests
         verify(webElement, never()).sendKeys("");
         assertFalse(result.isNewPageLoaded());
         verify(alertActions).waitForAlert(webDriver);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -299,7 +299,7 @@ class MouseActionsTests
         mouseActionsSpy.click(webElement);
         verify(softAssert).recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + e2);
         verify(alertActions, never()).waitForAlert(webDriver);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -331,7 +331,7 @@ class MouseActionsTests
         assertFalse(result.isNewPageLoaded());
         verify(alertActions).waitForAlert(webDriver);
         verify(eventBus).post(any(PageLoadEndEvent.class));
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -344,11 +344,11 @@ class MouseActionsTests
         doThrow(e).doNothing().when(webElement).click();
         MouseActions mouseActionsSpy = mockMoveToElement();
         ClickResult result = mouseActionsSpy.click(webElement);
-        verifyZeroInteractions(javascriptActions);
+        verifyNoInteractions(javascriptActions);
         assertFalse(result.isNewPageLoaded());
         verify(alertActions).waitForAlert(webDriver);
         verify(eventBus).post(any(PageLoadEndEvent.class));
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -364,7 +364,7 @@ class MouseActionsTests
         assertFalse(result.isNewPageLoaded());
         verify(alertActions).waitForAlert(webDriver);
         verify(eventBus).post(any(PageLoadEndEvent.class));
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -383,7 +383,7 @@ class MouseActionsTests
         assertFalse(result.isNewPageLoaded());
         verify(alertActions).waitForAlert(webDriver);
         verify(eventBus).post(any(PageLoadEndEvent.class));
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -393,7 +393,7 @@ class MouseActionsTests
         assertFalse(result.isClicked());
         verify(alertActions, never()).waitForAlert(webDriver);
         verify(eventBus, never()).post(any(PageLoadEndEvent.class));
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -405,7 +405,7 @@ class MouseActionsTests
         MouseActions mouseActionsSpy = mockMoveToElement();
         ClickResult result = mouseActionsSpy.click(webElement, Optional.of(Action.ACCEPT));
         verifyWebElement(mouseActionsSpy, alertPresent, false, result);
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     private WebElement mockBodySearch()
@@ -420,7 +420,7 @@ class MouseActionsTests
     void clickInvisibleElementIsNull()
     {
         mouseActions.moveToAndClick(null);
-        verifyZeroInteractions(mouse);
+        verifyNoInteractions(mouse);
     }
 
     @Test
@@ -450,7 +450,7 @@ class MouseActionsTests
     void testContextClickWebElementIsNull()
     {
         mouseActions.contextClick(null);
-        verifyZeroInteractions(mouse);
+        verifyNoInteractions(mouse);
     }
 
     @Test
@@ -468,9 +468,9 @@ class MouseActionsTests
     void testMoveToNullElement()
     {
         mouseActions.moveToElement(null);
-        verifyZeroInteractions(webDriverProvider);
-        verifyZeroInteractions(javascriptActions);
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(webDriverProvider);
+        verifyNoInteractions(javascriptActions);
+        verifyNoInteractions(softAssert);
     }
 
     @Test

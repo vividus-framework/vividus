@@ -24,7 +24,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -216,7 +217,7 @@ class VisualStepsTests
             visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, table));
         assertEquals("Only one row of locators to ignore supported, actual: 2", exception.getMessage());
         verify(table, never()).getRowAsParameters(0);
-        verifyZeroInteractions(softAssert, visualTestingEngine, attachmentPublisher);
+        verifyNoInteractions(softAssert, visualTestingEngine, attachmentPublisher);
     }
 
     private static void mockRow(Parameters row, Set<By> elementIgnore, Set<By> areaIgnore)
@@ -241,7 +242,7 @@ class VisualStepsTests
         VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.ESTABLISH);
         when(visualTestingEngine.establish(visualCheck)).thenReturn(visualCheckResult);
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
         verifyCheckResultPublish();
         assertEquals(Map.of(), visualCheck.getElementsToIgnore());
     }
@@ -250,7 +251,7 @@ class VisualStepsTests
     void shouldNotPerformVisualCheckIfSearchContextIsNull()
     {
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
-        verifyZeroInteractions(visualCheckFactory, visualTestingEngine, attachmentPublisher, softAssert);
+        verifyNoInteractions(visualCheckFactory, visualTestingEngine, attachmentPublisher, softAssert);
     }
 
     static Stream<Arguments> exceptionsToCatch()
@@ -272,7 +273,8 @@ class VisualStepsTests
         when(visualTestingEngine.establish(visualCheck)).thenThrow(exception);
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
         verify(softAssert).recordFailedAssertion(exception);
-        verifyZeroInteractions(softAssert, attachmentPublisher);
+        verifyNoInteractions(attachmentPublisher);
+        verifyNoMoreInteractions(softAssert);
     }
 
     private void verifyCheckResultPublish()

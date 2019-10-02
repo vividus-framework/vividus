@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.jcraft.jsch.ChannelSftp;
@@ -69,7 +69,7 @@ class SftpExecutorTests
         ordered.verify(channel).cd("~");
         ordered.verify(channel).pwd();
         ordered.verifyNoMoreInteractions();
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
     }
 
     @Test

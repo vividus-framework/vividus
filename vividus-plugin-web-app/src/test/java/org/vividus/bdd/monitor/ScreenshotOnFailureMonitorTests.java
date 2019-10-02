@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -126,7 +126,7 @@ class ScreenshotOnFailureMonitorTests
     void shouldNotTakeScreenshotIfItIsNotEnabled()
     {
         monitor.onAssertionFailure(new AssertionFailedEvent());
-        verifyZeroInteractions(webDriverProvider, webUiContext, screenshotTaker);
+        verifyNoInteractions(webDriverProvider, webUiContext, screenshotTaker);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -135,7 +135,7 @@ class ScreenshotOnFailureMonitorTests
     {
         enableScreenshotPublishing(false);
         monitor.onAssertionFailure(new AssertionFailedEvent());
-        verifyZeroInteractions(webUiContext, screenshotTaker);
+        verifyNoInteractions(webUiContext, screenshotTaker);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -169,7 +169,7 @@ class ScreenshotOnFailureMonitorTests
         when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, assertedWebElements)).thenReturn(
                 Optional.empty());
         monitor.onAssertionFailure(new AssertionFailedEvent());
-        verifyZeroInteractions(eventBus);
+        verifyNoInteractions(eventBus);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -183,7 +183,7 @@ class ScreenshotOnFailureMonitorTests
         when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, List.of(searchContext))).thenThrow(
                 exception);
         monitor.onAssertionFailure(new AssertionFailedEvent());
-        verifyZeroInteractions(eventBus);
+        verifyNoInteractions(eventBus);
         assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception, "Unable to take a screenshot"))));
     }
 

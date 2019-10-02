@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -279,7 +279,7 @@ class SetContextStepsTests
         setContextSteps.switchingToWindowPartName(NEW_TITLE);
         verify(softAssert).assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
                 eq(TITLE), argThat(matcher -> matcher.toString().contains(CONTAINING_MATCHER)));
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -305,7 +305,7 @@ class SetContextStepsTests
 
         verify(softAssert).assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
                 eq(TITLE), argThat(matcher -> matcher.toString().equals(EQUALS_MATCHER)));
-        verifyZeroInteractions(webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test

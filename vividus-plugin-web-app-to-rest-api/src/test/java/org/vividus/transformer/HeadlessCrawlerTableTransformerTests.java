@@ -28,8 +28,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
@@ -123,7 +123,7 @@ class HeadlessCrawlerTableTransformerTests
         transformer.setSeedRelativeUrls(seedRelativeUrlsProperty);
         Set<String> urls = testFetchUrls(mainAppPageRelativeUrl, expectedSeedRelativeUrls);
         assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
-        verifyZeroInteractions(redirectsProvider);
+        verifyNoInteractions(redirectsProvider);
     }
 
     @Test
@@ -172,7 +172,7 @@ class HeadlessCrawlerTableTransformerTests
         Set<String> urls2 = transformer.fetchUrls(examplesTableProperties);
         verifyNoMoreInteractions(crawlControllerFactory);
         assertSame(urls, urls2);
-        verifyZeroInteractions(redirectsProvider);
+        verifyNoInteractions(redirectsProvider);
     }
 
     @Test
@@ -191,7 +191,7 @@ class HeadlessCrawlerTableTransformerTests
         verifyNoMoreInteractions(crawlControllerFactory, crawlController);
         assertThat(urls2, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
         assertSame(urls, urls2);
-        verifyZeroInteractions(redirectsProvider);
+        verifyNoInteractions(redirectsProvider);
     }
 
     @Test
@@ -201,7 +201,7 @@ class HeadlessCrawlerTableTransformerTests
         transformer.setSeedRelativeUrls(Set.of(seedRelativeUrl));
         Set<String> urls = testFetchUrls(DEFAULT_RELATIVE_URL, List.of(seedRelativeUrl));
         assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
-        verifyZeroInteractions(redirectsProvider);
+        verifyNoInteractions(redirectsProvider);
     }
 
     private Set<String> testFetchUrls(String mainAppPageRelativeUrl, List<String> expectedSeedRelativeUrls)

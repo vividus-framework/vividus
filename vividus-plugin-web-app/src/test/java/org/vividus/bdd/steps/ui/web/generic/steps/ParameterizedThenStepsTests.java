@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -157,7 +157,7 @@ class ParameterizedThenStepsTests
         parameters = new ExamplesTable("|name|state|");
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isRadioButtonWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(descriptiveSoftAssert);
+        verifyNoInteractions(descriptiveSoftAssert);
     }
 
     @Test
@@ -166,7 +166,7 @@ class ParameterizedThenStepsTests
         parameters = new ExamplesTable("|name|state|\n ||VISIBLE|");
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isRadioButtonWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(descriptiveSoftAssert);
+        verifyNoInteractions(descriptiveSoftAssert);
     }
 
     @Test
@@ -174,7 +174,7 @@ class ParameterizedThenStepsTests
     {
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isElementWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(parameterizedValidations);
+        verifyNoInteractions(parameterizedValidations);
     }
 
     @ParameterizedTest
@@ -246,7 +246,7 @@ class ParameterizedThenStepsTests
         parameters = new ExamplesTable("");
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isButtonWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(descriptiveSoftAssert);
+        verifyNoInteractions(descriptiveSoftAssert);
     }
 
     @Test
@@ -255,7 +255,7 @@ class ParameterizedThenStepsTests
         ExamplesTable table = new ExamplesTable("|state|tooltip|\n|enabled|value3|");
         when(parameterizedChecks.checkIfParametersAreSet(table)).thenReturn(true);
         parameterizedThenSteps.isButtonWithParametersFound(EQUAL_TO, 1, table);
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(searchActions);
         verify(descriptiveSoftAssert).recordFailedAssertion("Both name and imageSrc were not specified");
     }
 
@@ -285,8 +285,8 @@ class ParameterizedThenStepsTests
         ExamplesTable parameters = new ExamplesTable("|fieldName|state|\n|testName||");
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isFieldsWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(descriptiveSoftAssert);
-        verifyZeroInteractions(parameterizedValidations);
+        verifyNoInteractions(descriptiveSoftAssert);
+        verifyNoInteractions(parameterizedValidations);
     }
 
     @Test
@@ -335,7 +335,7 @@ class ParameterizedThenStepsTests
         parameters = new ExamplesTable("");
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isImageWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(descriptiveSoftAssert);
+        verifyNoInteractions(descriptiveSoftAssert);
     }
 
     @Test
@@ -344,8 +344,8 @@ class ParameterizedThenStepsTests
         parameters = new ExamplesTable("|imageSrc|\n||");
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isImageWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(descriptiveSoftAssert);
-        verifyZeroInteractions(parameterizedValidations);
+        verifyNoInteractions(descriptiveSoftAssert);
+        verifyNoInteractions(parameterizedValidations);
     }
 
     private void verifyAssert(String elementName, List<WebElement> elementsList)
@@ -383,8 +383,8 @@ class ParameterizedThenStepsTests
         parameters = new ExamplesTable("");
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isFrameWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(descriptiveSoftAssert);
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(descriptiveSoftAssert);
+        verifyNoInteractions(searchActions);
     }
 
     @Test
@@ -396,7 +396,7 @@ class ParameterizedThenStepsTests
         parameterizedThenSteps.isFrameWithParametersFound(EQUAL_TO, 1, parameters);
         verify(descriptiveSoftAssert)
                 .recordFailedAssertion(String.format(INVALID_PARAMETERS, TEST_ATTRIBUTE_NAME, NULL));
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(searchActions);
     }
 
     @Test
@@ -408,7 +408,7 @@ class ParameterizedThenStepsTests
         parameterizedThenSteps.isFrameWithParametersFound(EQUAL_TO, 1, parameters);
         verify(descriptiveSoftAssert)
                 .recordFailedAssertion(String.format(INVALID_PARAMETERS, NULL, TEST_ATTRIBUTE_VALUE));
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(searchActions);
     }
 
     @Test
@@ -418,7 +418,7 @@ class ParameterizedThenStepsTests
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(true);
         parameterizedThenSteps.isFrameWithParametersFound(EQUAL_TO, 1, parameters);
         verify(descriptiveSoftAssert).recordFailedAssertion(String.format(INVALID_PARAMETERS, NULL, NULL));
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(searchActions);
     }
 
     @Test
@@ -479,8 +479,8 @@ class ParameterizedThenStepsTests
         ExamplesTable parameters = new ExamplesTable("|dropDownName|selectedText1|\n|||");
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isDropDownWithParametrsFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(descriptiveSoftAssert);
-        verifyZeroInteractions(parameterizedValidations);
+        verifyNoInteractions(descriptiveSoftAssert);
+        verifyNoInteractions(parameterizedValidations);
     }
 
     @Test
@@ -489,8 +489,8 @@ class ParameterizedThenStepsTests
         parameters = new ExamplesTable("|srcPart|\n ||");
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isJSFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(descriptiveSoftAssert);
-        verifyZeroInteractions(parameterizedValidations);
+        verifyNoInteractions(descriptiveSoftAssert);
+        verifyNoInteractions(parameterizedValidations);
     }
 
     @Test
@@ -525,7 +525,7 @@ class ParameterizedThenStepsTests
     {
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isLinksWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(searchActions);
     }
 
     @Test
@@ -591,7 +591,7 @@ class ParameterizedThenStepsTests
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(true);
         parameterizedThenSteps.isCheckboxWithParametersFound(EQUAL_TO, 1, parameters);
         verify(descriptiveSoftAssert).recordFailedAssertion(anyString());
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(searchActions);
     }
 
     @Test
@@ -603,7 +603,7 @@ class ParameterizedThenStepsTests
         String noSearchParamsProvided = "No search parameters provided: either name or both attributeType "
                 + "with attributeValue should be specified";
         verify(descriptiveSoftAssert).recordFailedAssertion(noSearchParamsProvided);
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(searchActions);
     }
 
     @Test
@@ -611,7 +611,7 @@ class ParameterizedThenStepsTests
     {
         when(parameterizedChecks.checkIfParametersAreSet(parameters)).thenReturn(false);
         parameterizedThenSteps.isCheckboxWithParametersFound(EQUAL_TO, 1, parameters);
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(searchActions);
     }
 
     @Test

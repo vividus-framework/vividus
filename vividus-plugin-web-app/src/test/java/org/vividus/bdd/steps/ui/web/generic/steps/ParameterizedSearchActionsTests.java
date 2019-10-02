@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -117,7 +117,7 @@ class ParameterizedSearchActionsTests
     {
         SearchInputData searchInputData = new SearchInputData(createParameters("||\n||"), ActionAttributeType.XPATH);
         List<WebElement> actual = parameterizedSearchActions.findElements(searchContext, searchInputData);
-        verifyZeroInteractions(searchActions);
+        verifyNoInteractions(searchActions);
         assertEquals(List.of(), actual);
     }
 

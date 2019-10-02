@@ -29,8 +29,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -212,7 +212,7 @@ class AllureStoryReporterTests
     void testBeforeStoryDefault()
     {
         testBeforeStory("", false, false);
-        verifyZeroInteractions(allureReportGenerator);
+        verifyNoInteractions(allureReportGenerator);
     }
 
     @Test
@@ -220,21 +220,21 @@ class AllureStoryReporterTests
     {
         when(bddRunContext.isDryRun()).thenReturn(true);
         testBeforeStory("", false, false);
-        verifyZeroInteractions(allureReportGenerator);
+        verifyNoInteractions(allureReportGenerator);
     }
 
     @Test
     void testBeforeStoryDefaultGroup()
     {
         testBeforeStory("", false, true);
-        verifyZeroInteractions(allureReportGenerator);
+        verifyNoInteractions(allureReportGenerator);
     }
 
     @Test
     void testBeforeStoryDefaultGivenStory()
     {
         testBeforeStory("", true, false);
-        verifyZeroInteractions(allureReportGenerator);
+        verifyNoInteractions(allureReportGenerator);
     }
 
     @Test
@@ -246,7 +246,7 @@ class AllureStoryReporterTests
         mockScenarioUid(false);
         allureStoryReporter.beforeStory(story, true);
         verify(next).beforeStory(story, true);
-        verifyZeroInteractions(allureReportGenerator);
+        verifyNoInteractions(allureReportGenerator);
         verify(allureLifecycle).startStep(eq(SCENARIO_UID), eq(STEP_UID), any(StepResult.class));
     }
 
@@ -258,7 +258,7 @@ class AllureStoryReporterTests
         story.namedAs("");
         allureStoryReporter.beforeStory(story, true);
         verify(next).beforeStory(story, true);
-        verifyZeroInteractions(allureReportGenerator);
+        verifyNoInteractions(allureReportGenerator);
     }
 
     @Test
@@ -269,7 +269,7 @@ class AllureStoryReporterTests
         mockRunningStory(false);
         allureStoryReporter.beforeStory(story, givenStory);
         verify(next).beforeStory(story, givenStory);
-        verifyZeroInteractions(allureReportGenerator, allureRunContext, allureLifecycle);
+        verifyNoInteractions(allureReportGenerator, allureRunContext, allureLifecycle);
     }
 
     @Test
@@ -551,7 +551,7 @@ class AllureStoryReporterTests
         InOrder ordered = inOrder(next, allureRunContext);
         ordered.verify(next).afterStory(givenStory);
         ordered.verify(allureRunContext).resetCurrentStoryLabels(givenStory);
-        verifyZeroInteractions(allureLifecycle);
+        verifyNoInteractions(allureLifecycle);
     }
 
     @Test
@@ -561,7 +561,7 @@ class AllureStoryReporterTests
         mockRunningStory(false);
         allureStoryReporter.afterStory(givenStory);
         verify(next).afterStory(givenStory);
-        verifyZeroInteractions(allureRunContext, allureLifecycle);
+        verifyNoInteractions(allureRunContext, allureLifecycle);
     }
 
     @Test
@@ -680,7 +680,7 @@ class AllureStoryReporterTests
         mockScenarioUid(true);
         mockAddLogStep(ScenarioExecutionStage.IN_PROGRESS);
         verify(testContext, never()).put(ScenarioExecutionStage.class, ScenarioExecutionStage.IN_PROGRESS);
-        verifyZeroInteractions(allureLifecycle);
+        verifyNoInteractions(allureLifecycle);
     }
 
     @Test

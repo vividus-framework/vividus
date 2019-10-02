@@ -18,7 +18,7 @@ package org.vividus.bdd;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.jbehave.core.reporters.StoryReporter;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +63,7 @@ class BddVariableStoryReporterTests
     {
         bddVariableStoryReporter.onSubStepsPublishingStart(null);
         bddVariableStoryReporter.successful(STEP);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
@@ -80,7 +80,7 @@ class BddVariableStoryReporterTests
     {
         bddVariableStoryReporter.beforeSubSteps();
         bddVariableStoryReporter.successful(STEP);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test

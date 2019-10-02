@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
@@ -176,7 +176,7 @@ public class ScreenshotTakerTests
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(Boolean.FALSE);
         Optional<Screenshot> screen = screenshotTaker.takeScreenshot(SCREENSHOT_NAME);
-        verifyZeroInteractions(webElementHighlighter);
+        verifyNoInteractions(webElementHighlighter);
         assertEquals(Optional.empty(), screen);
     }
 

@@ -20,7 +20,7 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -90,7 +90,7 @@ class AttachmentPublisherTests
         IOException exception = new IOException("Template not found");
         when(freemarkerProcessor.process(templateName, dataModel)).thenThrow(exception);
         attachmentPublisher.publishAttachment(templateName, dataModel, TITLE);
-        verifyZeroInteractions(eventBus);
+        verifyNoInteractions(eventBus);
         assertEquals(List.of(error(exception, "Unable to generate attachment")), logger.getLoggingEvents());
     }
 

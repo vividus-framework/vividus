@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -99,7 +99,7 @@ public class DragAndDropStepsTests
     {
         mockFindElements(origin, target);
         dragAndDropSteps.dragAndDropToTargetAtLocation(searchAttributes, Location.TOP, searchAttributes);
-        verifyZeroInteractions(webDriverProvider);
+        verifyNoInteractions(webDriverProvider);
     }
 
     void mockFindElements(WebElement origin, WebElement target)

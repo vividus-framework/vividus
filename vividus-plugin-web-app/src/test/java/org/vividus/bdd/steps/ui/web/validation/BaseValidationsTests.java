@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -145,7 +145,7 @@ class BaseValidationsTests
         when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(webElements);
         assertFalse(spy.assertIfElementDoesNotExist(BUSINESS_DESCRIPTION, attributes, false));
         assertFalse(searchParameters.isWaitForElement());
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
     }
 
     @Test
@@ -174,7 +174,7 @@ class BaseValidationsTests
         when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(webElements);
         assertFalse(spy.assertIfElementDoesNotExist(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, attributes, false));
         assertFalse(searchParameters.isWaitForElement());
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
     }
 
     @Test
@@ -199,7 +199,7 @@ class BaseValidationsTests
     {
         State state = mock(State.class);
         boolean result = baseValidations.assertElementState(BUSINESS_DESCRIPTION, state, (WebElement) null);
-        verifyZeroInteractions(state);
+        verifyNoInteractions(state);
         assertFalse(result);
     }
 
@@ -221,7 +221,7 @@ class BaseValidationsTests
     {
         State state = mock(State.class);
         boolean result = baseValidations.assertElementState(BUSINESS_DESCRIPTION, state, (WrapsElement) null);
-        verifyZeroInteractions(state);
+        verifyNoInteractions(state);
         assertFalse(result);
     }
 
@@ -232,7 +232,7 @@ class BaseValidationsTests
         when(wrapsElement.getWrappedElement()).thenReturn(null);
         State state = mock(State.class);
         boolean result = baseValidations.assertElementState(BUSINESS_DESCRIPTION, state, wrapsElement);
-        verifyZeroInteractions(state);
+        verifyNoInteractions(state);
         assertFalse(result);
     }
 

@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Optional;
@@ -68,7 +68,7 @@ class ExecutableStepsTests
     void testFalse()
     {
         executableSteps.performAllStepsIfConditionIsTrue(false, examplesTable);
-        verifyZeroInteractions(subStepExecutorFactory);
+        verifyNoInteractions(subStepExecutorFactory);
     }
 
     @Test
@@ -84,7 +84,7 @@ class ExecutableStepsTests
     {
         when(bddVariableContext.getVariable(KEY)).thenReturn("value");
         executableSteps.ifVariableNotSetPerformSteps(KEY, examplesTable);
-        verifyZeroInteractions(subStepExecutorFactory);
+        verifyNoInteractions(subStepExecutorFactory);
     }
 
     @Test
@@ -121,7 +121,7 @@ class ExecutableStepsTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> executableSteps
                 .executeStepsWhileConditionIsTrueWithStep(ComparisonRule.LESS_THAN, 5, -2, 1, examplesTable));
         assertEquals("Number of iterations has exceeded allowable limit 50", exception.getMessage());
-        verifyZeroInteractions(bddVariableContext, examplesTable, subStepExecutorFactory);
+        verifyNoInteractions(bddVariableContext, examplesTable, subStepExecutorFactory);
     }
 
     private ISubStepExecutor mockSubStepExecutor(ExamplesTable table)

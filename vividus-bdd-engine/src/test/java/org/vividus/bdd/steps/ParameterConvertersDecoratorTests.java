@@ -18,7 +18,7 @@ package org.vividus.bdd.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
@@ -87,7 +87,7 @@ class ParameterConvertersDecoratorTests
         when(parameterAdaptor.convert(value)).thenReturn(value);
         List<Integer> actual = (List<Integer>) parameterConverters.convert(value, type);
         assertEquals(convertedValue, actual);
-        verifyZeroInteractions(stepMonitor);
+        verifyNoInteractions(stepMonitor);
     }
 
     @Test
@@ -100,7 +100,7 @@ class ParameterConvertersDecoratorTests
         when(parameterAdaptor.convert(value)).thenReturn(value);
         Optional<Integer> actual = (Optional<Integer>) parameterConverters.convert(value, type);
         assertEquals(convertedValue, actual);
-        verifyZeroInteractions(stepMonitor);
+        verifyNoInteractions(stepMonitor);
     }
 
     @Test
@@ -135,7 +135,7 @@ class ParameterConvertersDecoratorTests
         Type type = Integer.class;
         Object actual = parameterConverters.convert(VALUE, type);
         assertEquals(number, actual);
-        verifyZeroInteractions(expressionAdaptor);
+        verifyNoInteractions(expressionAdaptor);
     }
 
     @Test
@@ -166,6 +166,6 @@ class ParameterConvertersDecoratorTests
         List<Map<Object, Object>> adaptedValue = List.of(Map.of());
         when(parameterAdaptor.convert(VALUE)).thenReturn(adaptedValue);
         assertEquals(adaptedValue, parameterConverters.convert(VALUE, type));
-        verifyZeroInteractions(expressionAdaptor);
+        verifyNoInteractions(expressionAdaptor);
     }
 }

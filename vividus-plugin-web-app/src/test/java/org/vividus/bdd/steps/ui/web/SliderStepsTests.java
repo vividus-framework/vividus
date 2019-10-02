@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.hamcrest.core.IsEqual;
@@ -67,7 +67,7 @@ class SliderStepsTests
     void setSliderValueNoSliderTest()
     {
         sliderSteps.setSliderValue(VALUE, XPATH);
-        verifyZeroInteractions(javascriptAcrions);
+        verifyNoInteractions(javascriptAcrions);
     }
 
     @Test
@@ -83,7 +83,7 @@ class SliderStepsTests
     void verifySliderValueTestNoSlider()
     {
         sliderSteps.verifySliderValue(VALUE, XPATH);
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
     }
 
     @SuppressWarnings("unchecked")

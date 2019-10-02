@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -298,7 +298,7 @@ class BddVariableStepsTests
     void shouldFallBackToStringsComparisonIfOneVariableIsNotMapTable(Object var1, ComparisonRule rule, Object var2)
     {
         assertFalse(bddVariableSteps.compareVariables(var1, rule, var2));
-        verifyZeroInteractions(attachmentPublisher);
+        verifyNoInteractions(attachmentPublisher);
     }
 
     @Test

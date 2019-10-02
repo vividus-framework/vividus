@@ -23,8 +23,8 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
@@ -295,7 +295,7 @@ class JsonResponseValidationStepsTests
                 verifyMatcher(TypeSafeMatcher.class, 3))).thenReturn(false);
         jsonResponseValidationSteps.performAllStepsForJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 0,
                 JSON_PATH, stepsAsTable);
-        verifyZeroInteractions(stepsAsTable, subStepExecutorFactory);
+        verifyNoInteractions(stepsAsTable, subStepExecutorFactory);
         verify(httpTestContext, times(0)).putJsonContext(any());
     }
 

@@ -18,7 +18,7 @@ package org.vividus.selenium.screenshot;
 
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ class HighlighterTypeTests
     void testDefault()
     {
         HighlighterType.DEFAULT.addIndentFilter(indentCropper);
-        verifyZeroInteractions(indentCropper);
+        verifyNoInteractions(indentCropper);
     }
 
     @Test

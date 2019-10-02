@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.Collections;
 
@@ -89,7 +89,7 @@ class SimpleTestContextTests
         Object value = mock(Object.class);
         simpleTestContext.put(KEY, value);
         simpleTestContext.clear();
-        verifyZeroInteractions(value);
+        verifyNoInteractions(value);
         assertEquals(0, simpleTestContext.size());
     }
 }

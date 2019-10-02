@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -203,14 +203,14 @@ class WaitStepsTests
         waitSteps.waitTillElementDisappears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verify(waitActions).wait(eq(webDriver),
                 argThat(condition -> condition.toString().equals(INVISIBILITY_OF + webElement)));
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
     }
 
     @Test
     void testWaitTillElementWithTagAndAttributeDisappearsElementIsNotPresent()
     {
         waitSteps.waitTillElementDisappears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verifyZeroInteractions(waitActions);
+        verifyNoInteractions(waitActions);
         verify(softAssert).recordPassedAssertion(String.format(THERE_IS_NO_ELEMENT_PRESENT_WITH_THE_TAG, ELEMENT_TAG,
                         ATTRIBUTE_TYPE, ATTRIBUTE_VALUE));
     }

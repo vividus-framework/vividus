@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -100,7 +100,7 @@ class BddVariableContextTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> bddVariableContext.putVariable(variableScope, VARIABLE_KEY, VARIABLE_VALUE));
         assertEquals("Setting of GLOBAL variables is forbidden", exception.getMessage());
-        verifyZeroInteractions(variablesFactory);
+        verifyNoInteractions(variablesFactory);
     }
 
     @Test

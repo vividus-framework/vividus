@@ -31,7 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
@@ -364,7 +364,7 @@ class DatabaseStepsTests
         when(dataSources.get(DB_KEY)).thenReturn(mock(DriverManagerDataSource.class));
         assertThrows(TimeoutException.class,
             () -> databaseSteps.compareData(QUERY, DB_KEY, QUERY, DB_KEY, Set.of(COL1)));
-        verifyZeroInteractions(attachmentPublisher, softAssert);
+        verifyNoInteractions(attachmentPublisher, softAssert);
     }
 
     @Test

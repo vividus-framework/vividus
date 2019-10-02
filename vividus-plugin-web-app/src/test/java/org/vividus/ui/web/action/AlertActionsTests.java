@@ -30,7 +30,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -113,7 +113,7 @@ class AlertActionsTests
         when(alert.getText()).thenReturn("");
         Action action = mock(Action.class);
         alertActions.processAlert(matcher, action);
-        verifyZeroInteractions(action);
+        verifyNoInteractions(action);
         assertEquals(List.of(), logger.getLoggingEvents());
     }
 

@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -147,6 +147,6 @@ class CaseSensitiveTextSearchTests
         List<WebElement> webElements = List.of(webElement);
         List<WebElement> filteredText = caseSensitiveTextSearch.filter(webElements, text);
         assertEquals(filteredText, webElements);
-        verifyZeroInteractions(webElementActions);
+        verifyNoInteractions(webElementActions);
     }
 }

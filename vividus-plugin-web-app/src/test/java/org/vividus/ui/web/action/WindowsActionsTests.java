@@ -133,7 +133,7 @@ class WindowsActionsTests
         mockWindowHandles(WINDOW1);
 
         assertEquals(WINDOW1, windowsActions.switchToNewWindow(WINDOW1));
-        Mockito.verifyZeroInteractions(targetLocator);
+        Mockito.verifyNoInteractions(targetLocator);
     }
 
     @Test

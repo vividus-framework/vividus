@@ -35,7 +35,7 @@ class WindowsStrategyTests
     {
         return Stream.of(
                 Arguments.of(WindowsStrategy.CLOSE_ALL_EXCEPT_ONE, (Consumer<IWindowsActions>) wa -> verify(wa).closeAllWindowsExceptOne()),
-                Arguments.of(WindowsStrategy.DO_NOTHING,           (Consumer<IWindowsActions>) Mockito::verifyZeroInteractions)
+                Arguments.of(WindowsStrategy.DO_NOTHING,           (Consumer<IWindowsActions>) Mockito::verifyNoInteractions)
                 );
     }
     // CHECKSTYLE:ON

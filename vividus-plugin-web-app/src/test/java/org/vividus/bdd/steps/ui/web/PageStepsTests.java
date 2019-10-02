@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -307,7 +307,7 @@ class PageStepsTests
         when(driver.getCurrentUrl()).thenReturn(URL);
         when(webDriverManager.isIOS()).thenReturn(false);
         pageSteps.iGoTo(RELATIVE_URL);
-        verifyZeroInteractions(waitActions);
+        verifyNoInteractions(waitActions);
     }
 
     @Test

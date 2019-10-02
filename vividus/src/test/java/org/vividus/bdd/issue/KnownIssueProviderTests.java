@@ -24,7 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -146,7 +146,7 @@ class KnownIssueProviderTests
 
         knownIssueProvider.init();
 
-        verifyZeroInteractions(propertyParser);
+        verifyNoInteractions(propertyParser);
         assertThat(logger.getLoggingEvents(), is(List.of(warn(
                 "Known issue functionality is not available. No resource is found by location pattern: {}",
                 LOCATION_PATTERN))));
@@ -199,7 +199,7 @@ class KnownIssueProviderTests
 
         knownIssueProvider.init();
 
-        verifyZeroInteractions(propertyParser);
+        verifyNoInteractions(propertyParser);
         assertThat(logger.getLoggingEvents(), is(List.of(error(ioe, "Unable to load known issue identifiers"))));
     }
 }

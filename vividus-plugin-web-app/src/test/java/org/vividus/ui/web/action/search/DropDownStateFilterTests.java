@@ -18,7 +18,7 @@ package org.vividus.ui.web.action.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -68,13 +68,13 @@ class DropDownStateFilterTests
     void testStateFilterNull()
     {
         filter.filter(List.of(webElement), null);
-        verifyZeroInteractions(webDriver);
+        verifyNoInteractions(webDriver);
     }
 
     @Test
     void testStateFilterEmpty()
     {
         filter.filter(List.of(webElement), "");
-        verifyZeroInteractions(webDriver);
+        verifyNoInteractions(webDriver);
     }
 }

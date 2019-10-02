@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
@@ -68,7 +68,7 @@ class ScrollbarHandlerTests
     {
         when(webDriverManager.isMobile()).thenReturn(true);
         scrollbarHandler.performActionWithHiddenScrollbars(action);
-        verifyZeroInteractions(webDriver);
+        verifyNoInteractions(webDriver);
     }
 
     @Test

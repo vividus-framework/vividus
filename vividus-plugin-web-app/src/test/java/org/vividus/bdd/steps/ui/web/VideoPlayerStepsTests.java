@@ -18,7 +18,7 @@ package org.vividus.bdd.steps.ui.web;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -63,7 +63,7 @@ class VideoPlayerStepsTests
     {
         when(baseValidations.assertIfElementExists(VIDEO_PLAYER, SEARCH_ATTRIBUTE)).thenReturn(null);
         videoPlayerSteps.rewindTimeInVideoPlayer(1, VIDEO_PLAYER_NAME);
-        verifyZeroInteractions(videoPlayerActions);
+        verifyNoInteractions(videoPlayerActions);
     }
 
     @Test

@@ -103,7 +103,7 @@ class CheckboxStepsTests
         Mockito.lenient().when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(
                 ActionAttributeType.XPATH, CHECKBOX_LOCATOR))).thenReturn(null);
         checkboxSteps.checkCheckBox();
-        Mockito.verifyZeroInteractions(mouseActions);
+        Mockito.verifyNoInteractions(mouseActions);
     }
 
     @Test

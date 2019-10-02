@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -137,7 +137,7 @@ class WaitActionsTests
     {
         SearchContext searchContext = null;
         waitActions.wait(searchContext, isTrue);
-        verifyZeroInteractions(waitFactory);
+        verifyNoInteractions(waitFactory);
         verify(softAssert).assertNotNull("The input value to pass to the wait condition", searchContext);
     }
 
@@ -157,7 +157,7 @@ class WaitActionsTests
         when(waitFactory.createWait(searchContext, TIMEOUT_SECONDS)).thenReturn(wait);
         mockException(TimeoutException.class);
         waitActions.wait(searchContext, TIMEOUT_SECONDS, isTrue, false);
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
     }
 
     @Test
@@ -166,7 +166,7 @@ class WaitActionsTests
         when(waitFactory.createWait(searchContext, TIMEOUT_SECONDS, TIMEOUT_MILLIS)).thenReturn(wait);
         mockException(TimeoutException.class);
         waitActions.wait(searchContext, TIMEOUT_SECONDS, TIMEOUT_MILLIS, isTrue, false);
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
     }
 
     @Test
@@ -184,7 +184,7 @@ class WaitActionsTests
     {
         when(alertActions.isAlertPresent(webDriver)).thenReturn(Boolean.TRUE);
         waitActions.waitForPageLoad(webDriver);
-        verifyZeroInteractions(javascriptActions);
+        verifyNoInteractions(javascriptActions);
     }
 
     @Test
@@ -201,7 +201,7 @@ class WaitActionsTests
         when(alertActions.isAlertPresent(webDriver)).thenReturn(false).thenReturn(true);
         mockDescriptiveWait(ChronoUnit.DAYS);
         waitActions.waitForPageLoad(webDriver);
-        verifyZeroInteractions(javascriptActions);
+        verifyNoInteractions(javascriptActions);
     }
 
     @Test

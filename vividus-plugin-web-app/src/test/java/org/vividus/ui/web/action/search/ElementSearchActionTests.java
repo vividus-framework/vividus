@@ -27,7 +27,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -240,7 +240,7 @@ class ElementSearchActionTests
         List<WebElement> foundElements = elementSearchAction.findElementsByText(null, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(List.of(), foundElements);
-        verifyZeroInteractions(waitActions);
+        verifyNoInteractions(waitActions);
         assertThat(logger.getLoggingEvents(), equalTo(List.of()));
     }
 
@@ -379,7 +379,7 @@ class ElementSearchActionTests
                 new SearchParameters().setWaitForElement(false));
         assertEquals(0, foundElements.size());
         verify(element, Mockito.never()).getSize();
-        verifyZeroInteractions(waitActions);
+        verifyNoInteractions(waitActions);
         assertThat(logger.getLoggingEvents().get(0), equalTo(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 1)));
     }
 

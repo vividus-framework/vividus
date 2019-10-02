@@ -26,8 +26,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -222,7 +222,7 @@ class WebElementActionsTests
         webElementActions.typeText(searchAttributes, TEXT);
         verify(webElement, times(6)).clear();
         verify(webElement, times(6)).sendKeys(TEXT);
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
     }
 
     @Test
@@ -365,7 +365,7 @@ class WebElementActionsTests
         webElementActions.addText(webElement, TEXT);
         InOrder inOrder = verifyWebElementInOrderInvocation();
         inOrder.verify(webElement).sendKeys(TEXT);
-        verifyZeroInteractions(javascriptActions);
+        verifyNoInteractions(javascriptActions);
     }
 
     @Test
@@ -376,7 +376,7 @@ class WebElementActionsTests
         webElementActions.addText(webElement, TEXT);
         InOrder inOrder = verifyWebElementInOrderInvocation();
         inOrder.verify(webElement).sendKeys(TEXT);
-        verifyZeroInteractions(javascriptActions);
+        verifyNoInteractions(javascriptActions);
     }
 
     @Test
@@ -384,7 +384,7 @@ class WebElementActionsTests
     {
         Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(false);
         webElementActions.addText(webElement, TEXT);
-        verifyZeroInteractions(javascriptActions);
+        verifyNoInteractions(javascriptActions);
         verify(webElement).sendKeys(TEXT);
         verifyNoMoreInteractions(webElement);
     }

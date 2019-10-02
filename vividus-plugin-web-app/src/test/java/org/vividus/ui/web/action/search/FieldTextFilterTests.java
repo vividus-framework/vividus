@@ -18,7 +18,7 @@ package org.vividus.ui.web.action.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -88,6 +88,6 @@ class FieldTextFilterTests
     {
         List<WebElement> filteredText = fieldTextFilter.filter(webElements, text);
         assertEquals(filteredText, webElements);
-        verifyZeroInteractions(javascriptActions);
+        verifyNoInteractions(javascriptActions);
     }
 }

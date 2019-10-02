@@ -22,8 +22,8 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
@@ -271,7 +271,7 @@ class HttpResponseValidationStepsTests
         httpResponseValidationSteps.saveHeaderValue(SET_COOKIES_HEADER_NAME, Set.of(VariableScope.SCENARIO),
                 VARIABLE_NAME);
         verify(softAssert).assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, false);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test

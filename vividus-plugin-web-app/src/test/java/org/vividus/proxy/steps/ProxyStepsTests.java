@@ -22,7 +22,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
@@ -114,7 +114,7 @@ class ProxyStepsTests
         mockSizeAssertion(message, callsNumber, rule, callsNumber);
         proxySteps.checkNumberOfRequests(httpMethod, URL_PATTERN, rule, callsNumber);
         verifySizeAssertion(message, callsNumber, rule, callsNumber);
-        verifyZeroInteractions(attachmentPublisher);
+        verifyNoInteractions(attachmentPublisher);
     }
 
     @Test
@@ -176,7 +176,7 @@ class ProxyStepsTests
         ProxySteps spy = spy(proxySteps);
         Mockito.lenient().doReturn(List.of(mock(HarEntry.class), mock(HarEntry.class))).when(spy)
                 .checkNumberOfRequests(httpMethod, URL_PATTERN, ComparisonRule.EQUAL_TO, 1);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test

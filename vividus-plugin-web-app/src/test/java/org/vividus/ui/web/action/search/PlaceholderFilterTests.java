@@ -18,7 +18,7 @@ package org.vividus.ui.web.action.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -69,7 +69,7 @@ class PlaceholderFilterTests
     void testPlaceholderFilterNull()
     {
         List<WebElement> foundElements = filter.filter(webElements, null);
-        verifyZeroInteractions(webElement);
+        verifyNoInteractions(webElement);
         assertEquals(webElements, foundElements);
     }
 
@@ -77,7 +77,7 @@ class PlaceholderFilterTests
     void testPlaceholderFilterEmpty()
     {
         List<WebElement> foundElements = filter.filter(webElements, "");
-        verifyZeroInteractions(webElement);
+        verifyNoInteractions(webElement);
         assertEquals(webElements, foundElements);
     }
 }

@@ -23,9 +23,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
-import static org.powermock.api.mockito.PowerMockito.verifyZeroInteractions;
 import static org.vividus.ui.web.action.search.ActionAttributeType.CASE_SENSITIVE_TEXT;
 
 import java.io.ByteArrayInputStream;
@@ -185,7 +185,7 @@ public class ElementStepsTests
         when(baseValidations.assertIfElementsExist("Elements to click",
                 searchAttributes)).thenReturn(List.of());
         elementSteps.clickOnAllElements(searchAttributes);
-        verifyZeroInteractions(mouseActions);
+        verifyNoInteractions(mouseActions);
     }
 
     @Test

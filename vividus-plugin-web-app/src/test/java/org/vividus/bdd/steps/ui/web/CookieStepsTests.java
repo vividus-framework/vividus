@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -105,7 +105,7 @@ class CookieStepsTests
     void shouldNotSaveNotExistingCookieAndRecordAssertion()
     {
         cookieSteps.saveCookieIntoVariable(NAME, Set.of(VariableScope.SCENARIO), NAME);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
         verifyCookieAssertion(null);
     }
 
@@ -141,7 +141,7 @@ class CookieStepsTests
     void shouldNotConvertNorSaveIfNoCookieReturnedByCookieManager()
     {
         cookieSteps.saveCookieAsJson(NAME, Set.of(VariableScope.STEP), NAME);
-        verifyZeroInteractions(jsonUtils, bddVariableContext);
+        verifyNoInteractions(jsonUtils, bddVariableContext);
     }
 
     @Test

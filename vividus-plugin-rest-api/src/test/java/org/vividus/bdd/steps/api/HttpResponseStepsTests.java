@@ -20,8 +20,8 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -77,7 +77,7 @@ class HttpResponseStepsTests
         verify(bddVariableContext).putVariable(scopes, image, base64);
         verify(bddVariableContext).putVariable(scopes, json,
                 "{\"plugin\": \"vividus-plugin-rest-api\"}\n");
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
         verifyNoMoreInteractions(bddVariableContext);
     }
 
@@ -90,7 +90,7 @@ class HttpResponseStepsTests
         httpResponseSteps.saveFilesContentToVariables(List.of(createVariable(path, path, OutputFormat.BASE64)));
         verify(softAssert)
                 .recordFailedAssertion(String.format("Unable to find entry by name %s in response archive", path));
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
         verifyNoMoreInteractions(softAssert);
     }
 

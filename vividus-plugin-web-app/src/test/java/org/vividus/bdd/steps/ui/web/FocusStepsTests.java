@@ -19,7 +19,7 @@ package org.vividus.bdd.steps.ui.web;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ class FocusStepsTests
     {
         when(webUiContext.getSearchContext(WebElement.class)).thenReturn(null);
         focusSteps.setFocus();
-        verifyZeroInteractions(javaScriptActions);
+        verifyNoInteractions(javaScriptActions);
     }
 
     @Test

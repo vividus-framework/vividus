@@ -29,7 +29,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -245,7 +245,7 @@ class WebDriverManagerTests
         when(webDriverProvider.get()).thenReturn(webDriverConfigured);
         WebDriverManager spy = spyIsMobile(false);
         spy.performActionInNativeContext(webDriver -> EXPECTED_RESULT);
-        verifyZeroInteractions(webDriverConfigured);
+        verifyNoInteractions(webDriverConfigured);
     }
 
     @Test
@@ -622,7 +622,7 @@ class WebDriverManagerTests
         when(webDriverManagerContext.getParameter(WebDriverManagerParameter.ORIENTATION))
                 .thenReturn(ScreenOrientation.PORTRAIT);
         assertTrue(webDriverManager.isOrientation(ScreenOrientation.PORTRAIT));
-        verifyZeroInteractions(mobileDriver);
+        verifyNoInteractions(mobileDriver);
     }
 
     @Test

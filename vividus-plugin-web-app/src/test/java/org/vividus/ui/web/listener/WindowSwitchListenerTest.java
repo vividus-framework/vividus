@@ -18,7 +18,7 @@ package org.vividus.ui.web.listener;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -57,7 +57,7 @@ class WindowSwitchListenerTest
     {
         windowSwitchListener.beforeSwitchToWindow(WINDOW_NAME1, webDriver);
 
-        verifyZeroInteractions(webDriverManager, webUiContext);
+        verifyNoInteractions(webDriverManager, webUiContext);
     }
 
     @Test
@@ -66,7 +66,7 @@ class WindowSwitchListenerTest
         windowSwitchListener.afterSwitchToWindow(WINDOW_NAME1, webDriver);
         mockWindowHandles(WINDOW_NAME1, WINDOW_NAME2);
         windowSwitchListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
-        verifyZeroInteractions(webUiContext, webDriver);
+        verifyNoInteractions(webUiContext, webDriver);
     }
 
     @Test

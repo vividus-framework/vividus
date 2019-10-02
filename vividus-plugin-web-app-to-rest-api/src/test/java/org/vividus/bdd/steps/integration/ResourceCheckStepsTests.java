@@ -27,7 +27,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -218,7 +218,7 @@ class ResourceCheckStepsTests
                 () -> assertEquals(FIRST_PAGE_URL, resourceValdiation.getPageURL()));
             return true;
         }), eq(REPORT_NAME));
-        verifyZeroInteractions(httpTestContext);
+        verifyNoInteractions(httpTestContext);
         verify(softAssert).recordFailedAssertion(
                 "Unable to get page with URL: https://first.page", ioException);
     }
@@ -266,7 +266,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE_TABLE);
         verify(softAssert).recordFailedAssertion("Exception occured in thread with name: Interrupted-0",
                 interruptedException);
-        verifyZeroInteractions(httpTestContext, attachmentPublisher, resourceValidator);
+        verifyNoInteractions(httpTestContext, attachmentPublisher, resourceValidator);
     }
 
     private void mockWebApplicationConfiguration()

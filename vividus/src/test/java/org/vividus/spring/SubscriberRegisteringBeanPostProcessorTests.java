@@ -17,7 +17,7 @@
 package org.vividus.spring;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -49,7 +49,7 @@ class SubscriberRegisteringBeanPostProcessorTests
     void testProcessingNonSubscriberObject()
     {
         beanPostProcessor.postProcessAfterInitialization(new NonSubscriber(), null);
-        verifyZeroInteractions(eventBus);
+        verifyNoInteractions(eventBus);
     }
 
     private static class Subscriber

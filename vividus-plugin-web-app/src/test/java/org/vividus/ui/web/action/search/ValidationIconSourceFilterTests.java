@@ -18,7 +18,7 @@ package org.vividus.ui.web.action.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -75,7 +75,7 @@ class ValidationIconSourceFilterTests
     void testValidationIconSourceFilterNull()
     {
         List<WebElement> foundElements = filter.filter(webElements, null);
-        verifyZeroInteractions(webElementActions);
+        verifyNoInteractions(webElementActions);
         assertEquals(webElements, foundElements);
     }
 
@@ -83,7 +83,7 @@ class ValidationIconSourceFilterTests
     void testValidationIconSourceFilterEmpty()
     {
         List<WebElement> foundElements = filter.filter(webElements, "");
-        verifyZeroInteractions(webElementActions);
+        verifyNoInteractions(webElementActions);
         assertEquals(webElements, foundElements);
     }
 }

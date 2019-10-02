@@ -18,7 +18,7 @@ package org.vividus.bdd;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.jbehave.core.embedder.PerformableTree.RunContext;
@@ -99,7 +99,7 @@ class BatchedPerformableTreeTests
     private void testPerformBeforeOrAfterStoriesPerformNone(Stage stage)
     {
         batchedPerformableTree.performBeforeOrAfterStories(runContext, stage);
-        verifyZeroInteractions(runContext);
+        verifyNoInteractions(runContext);
     }
 
     private void mockRunContext()

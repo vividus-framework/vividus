@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
@@ -145,7 +145,7 @@ class DescriptiveSoftAssertTests
     void testAssertTrueNullKnownIssue()
     {
         descriptiveSoftAssert.assertTrue(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, false);
-        verifyZeroInteractions(formatter);
+        verifyNoInteractions(formatter);
     }
 
     @Test
@@ -154,6 +154,6 @@ class DescriptiveSoftAssertTests
         DescriptiveSoftAssert spy = Mockito.spy(descriptiveSoftAssert);
         spy.setKnownIssueChecker(null);
         spy.assertTrue(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, false);
-        verifyZeroInteractions(formatter);
+        verifyNoInteractions(formatter);
     }
 }

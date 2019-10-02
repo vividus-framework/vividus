@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -140,7 +140,7 @@ class CodeStepsTests
     void testFaviconDoesntExist()
     {
         codeSteps.ifFaviconWithSrcExists(FAVICON_IMG_PNG);
-        verifyZeroInteractions(softAssert);
+        verifyNoInteractions(softAssert);
         verify(mockedBaseValidations).assertIfElementExists(FAVICON, new SearchAttributes(ActionAttributeType.XPATH,
                 new SearchParameters(LocatorUtil.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG))
                         .setVisibility(Visibility.ALL)));

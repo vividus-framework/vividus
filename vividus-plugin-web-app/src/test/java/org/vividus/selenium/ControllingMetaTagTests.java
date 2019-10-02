@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -76,14 +76,14 @@ class ControllingMetaTagTests
         when(metaWrapper.getOptionalPropertyValue(VERSION)).thenReturn(Optional.empty());
         ControllingMetaTag.VERSION.setCapability(desiredCapabilities, metaWrapper);
         verify(metaWrapper).getOptionalPropertyValue(VERSION);
-        verifyZeroInteractions(desiredCapabilities);
+        verifyNoInteractions(desiredCapabilities);
     }
 
     @Test
     void testProxySetCapability()
     {
         ControllingMetaTag.PROXY.setCapability(desiredCapabilities, metaWrapper);
-        verifyZeroInteractions(desiredCapabilities, metaWrapper);
+        verifyNoInteractions(desiredCapabilities, metaWrapper);
     }
 
     @Test
@@ -163,6 +163,6 @@ class ControllingMetaTagTests
         when(metaWrapper.getOptionalPropertyValue(anyString())).thenReturn(Optional.empty());
         ControllingMetaTag.setDesiredCapabilitiesFromMeta(desiredCapabilities, metaWrapper);
         verify(metaWrapper).getOptionalPropertyValue(VERSION);
-        verifyZeroInteractions(desiredCapabilities);
+        verifyNoInteractions(desiredCapabilities);
     }
 }

@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -137,7 +137,7 @@ class SetVariableStepsTests
         when(webDriver.getCurrentUrl()).thenReturn(url);
         setVariableSteps.gettingValueFromUrl(VARIABLE_SCOPE, VARIABLE);
         verify(softAssert).recordFailedAssertion("Any appropriate value wasn't found in the URL: " + url);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
@@ -156,14 +156,14 @@ class SetVariableStepsTests
     void testGetNullUrlValueOfVideoWithNumber()
     {
         setVariableSteps.getUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
     void testGetUrlValueOfNullVideoWithNumber()
     {
         setVariableSteps.getUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
@@ -190,7 +190,7 @@ class SetVariableStepsTests
         when(baseValidations.assertIfAtLeastNumberOfElementsExist(NUMBER_FOUND_VIDEO_MESSAGE, VIDEO_IFRAME_SEARCH, 1))
                 .thenReturn(List.of());
         setVariableSteps.getUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
@@ -207,7 +207,7 @@ class SetVariableStepsTests
         when(mockedTargetLocator.frame(videoFrame)).thenReturn(webDriver);
         setVariableSteps.getUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
         verify(softAssert).recordFailedAssertion("A video with the " + NAME + " 'name' was not found");
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
@@ -319,7 +319,7 @@ class SetVariableStepsTests
     {
         setVariableSteps.gettingValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
@@ -336,7 +336,7 @@ class SetVariableStepsTests
     {
         setVariableSteps.gettingValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
@@ -360,7 +360,7 @@ class SetVariableStepsTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> setVariableSteps.savePathFromUrl(VARIABLE_SCOPE, VARIABLE_NAME));
         assertEquals("Scheme is missing in URL: " + url, exception.getMessage());
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test

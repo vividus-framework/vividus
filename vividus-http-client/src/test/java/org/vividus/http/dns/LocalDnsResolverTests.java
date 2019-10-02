@@ -19,7 +19,7 @@ package org.vividus.http.dns;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
@@ -62,7 +62,7 @@ public class LocalDnsResolverTests
         PowerMockito.mockStatic(InetAddress.class);
         when(InetAddress.getByName(IP_ADDRESS)).thenReturn(inetAddress);
         assertArrayEquals(new InetAddress[] { inetAddress }, localDnsResolver.resolve(HOST));
-        verifyZeroInteractions(fallbackDnsResolver);
+        verifyNoInteractions(fallbackDnsResolver);
     }
 
     @Test

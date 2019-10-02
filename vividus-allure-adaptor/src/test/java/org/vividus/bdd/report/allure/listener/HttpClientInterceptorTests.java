@@ -24,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -190,7 +191,7 @@ class HttpClientInterceptorTests
         HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(allRequestHeaders, httpEntity);
         httpClientInterceptor.process(httpRequest, httpContext);
         verifyPublishAttachment(REQUEST);
-        verifyZeroInteractions(httpContext);
+        verifyNoInteractions(httpContext);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -210,10 +211,10 @@ class HttpClientInterceptorTests
             Matcher<Collection<? extends LoggingEvent>> loggingEventsMatcher)
     {
         HttpContext httpContext = mock(HttpContext.class);
-        verifyZeroInteractions(httpContext);
+        verifyNoInteractions(httpContext);
         httpClientInterceptor.process(httpRequest, httpContext);
         verifyPublishAttachment(REQUEST);
-        verifyZeroInteractions(attachmentPublisher);
+        verifyNoMoreInteractions(attachmentPublisher);
         assertThat(logger.getLoggingEvents(), loggingEventsMatcher);
     }
 

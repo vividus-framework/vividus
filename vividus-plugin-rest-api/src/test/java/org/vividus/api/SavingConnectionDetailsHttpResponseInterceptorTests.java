@@ -19,7 +19,7 @@ package org.vividus.api;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import javax.net.ssl.SSLSession;
@@ -69,7 +69,7 @@ class SavingConnectionDetailsHttpResponseInterceptorTests
         HttpContext context = mock(HttpContext.class);
         mockHttpConnection(Boolean.TRUE, context);
         interceptor.process(null, context);
-        verifyZeroInteractions(httpTestContext);
+        verifyNoInteractions(httpTestContext);
     }
 
     private static HttpContext mockHttpContextWithNonStaledConnection(SSLSession sslSession)

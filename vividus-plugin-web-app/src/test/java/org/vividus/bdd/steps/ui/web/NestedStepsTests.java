@@ -27,7 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -114,9 +114,9 @@ class NestedStepsTests
                 ComparisonRule.GREATER_THAN_OR_EQUAL_TO)).thenReturn(List.of());
         nestedSteps.performAllStepsForElementIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 0,
                 searchAttributes, stepsAsTable);
-        verifyZeroInteractions(cssSelectorFactory);
-        verifyZeroInteractions(webUiContext);
-        verifyZeroInteractions(subStepExecutor);
+        verifyNoInteractions(cssSelectorFactory);
+        verifyNoInteractions(webUiContext);
+        verifyNoInteractions(subStepExecutor);
     }
 
     @Test
@@ -203,7 +203,7 @@ class NestedStepsTests
 
         nestedSteps.performAllStepsWhileElementsExist(ComparisonRule.EQUAL_TO, 1, searchAttributes, -1, stepsAsTable);
 
-        verifyZeroInteractions(webUiContext, softAssert, subStepExecutor, searchActions);
+        verifyNoInteractions(webUiContext, softAssert, subStepExecutor, searchActions);
     }
 
     @Test
@@ -217,7 +217,7 @@ class NestedStepsTests
 
         nestedSteps.performAllStepsWhileElementsExist(ComparisonRule.EQUAL_TO, 2, searchAttributes, 5, stepsAsTable);
 
-        verifyZeroInteractions(subStepExecutor);
+        verifyNoInteractions(subStepExecutor);
         verify(searchActions, times(1)).findElements(searchContext, searchAttributes);
         verify(softAssert).assertThat(eq(ELEMENTS_NUMBER), eq(1), argThat(m ->
             ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));

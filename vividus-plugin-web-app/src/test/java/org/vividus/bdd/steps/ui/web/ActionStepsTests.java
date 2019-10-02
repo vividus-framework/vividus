@@ -19,7 +19,7 @@ package org.vividus.bdd.steps.ui.web;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -91,7 +91,7 @@ class ActionStepsTests
     {
         List<Action> actions = createActionsList(null);
         actionSteps.executeActionsSequence(actions);
-        verifyZeroInteractions(baseValidations);
+        verifyNoInteractions(baseValidations);
     }
 
     @Test

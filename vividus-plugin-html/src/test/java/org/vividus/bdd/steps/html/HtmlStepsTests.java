@@ -20,8 +20,8 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.Set;
 
@@ -112,7 +112,7 @@ class HtmlStepsTests
         htmlSteps.saveAttributeValueOfElementByCssSelector(HTML_CONTENT, HREF, selector,
                 Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
         verifyFoundElements(selector, 0);
-        verifyZeroInteractions(bddVariableContext);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
