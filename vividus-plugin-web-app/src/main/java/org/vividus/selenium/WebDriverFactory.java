@@ -18,7 +18,6 @@ package org.vividus.selenium;
 
 import java.net.URL;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,25 +114,8 @@ public class WebDriverFactory implements IWebDriverFactory
                 configuration.getExperimentalOptions().forEach(chromeOptions::setExperimentalOption);
                 capabilities = chromeOptions.merge(mergedDesiredCapabilities);
             }
-            if (webDriverType.isUseW3C())
-            {
-                capabilities = asW3CCapabilities(webDriverType, capabilities);
-            }
         }
         return createWebDriver(remoteWebDriverFactory.getRemoteWebDriver(remoteDriverUrl, capabilities));
-    }
-
-    private static Capabilities asW3CCapabilities(WebDriverType webDriverType, Capabilities capabilities)
-    {
-        Set<String> genericCapabilities = Stream.concat(GENERIC_CAPABILITIES.stream(),
-                webDriverType.getDriverSpecificCapabilities().stream()).collect(Collectors.toSet());
-        DesiredCapabilities mergedCapabilities = new DesiredCapabilities();
-        Map<String, Object> gridSpecificOptions = capabilities.asMap().entrySet().stream()
-                .filter(e -> !genericCapabilities.contains(e.getKey()))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-        mergedCapabilities.setCapability("sauce:options", gridSpecificOptions);
-        genericCapabilities.forEach(opt -> mergedCapabilities.setCapability(opt, capabilities.getCapability(opt)));
-        return mergedCapabilities;
     }
 
     private WebDriver createWebDriver(WebDriver webDriver)
