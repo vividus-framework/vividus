@@ -49,8 +49,23 @@
 
     <bean id="statusStoryReporter" class="org.vividus.bdd.StatusStoryReporter">
         <property name="next">
-            <bean class="org.vividus.bdd.log.LoggingStoryReporter" />
+            <bean class="org.jbehave.core.reporters.DelegatingStoryReporter">
+                <constructor-arg>
+                    <bean class="org.vividus.spring.ListMergerFactoryBean">
+                        <property name="lists">
+                            <list>
+                                <ref bean="storyReporters" />
+                                <list>
+                                    <bean class="org.vividus.bdd.log.LoggingStoryReporter" />
+                                </list>
+                            </list>
+                        </property>
+                    </bean>
+                </constructor-arg>
+            </bean>
         </property>
     </bean>
+
+    <util:list id="storyReporters" />
 
 </beans>
