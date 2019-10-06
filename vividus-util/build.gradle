@@ -8,6 +8,7 @@ dependencies {
     api(group: 'com.fasterxml.jackson.core', name: 'jackson-databind')
     api(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8')
 
+    implementation(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
     implementation(group: 'commons-io', name: 'commons-io', version: versions.commonsIo)
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
