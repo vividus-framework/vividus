@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -53,7 +52,7 @@ public class PropertyMapper implements IPropertyMapper
         SimpleModule module = new SimpleModule();
         deserializers.forEach(deserializer -> module.addDeserializer(getType(deserializer), deserializer));
         PROPS_MAPPER.registerModule(module);
-        PROPS_MAPPER.registerModule(new Jdk8Module());
+        PROPS_MAPPER.findAndRegisterModules();
     }
 
     @Override
