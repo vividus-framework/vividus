@@ -43,43 +43,61 @@ public class BatchedEmbedder extends ExtendedEmbedder
         processSystemProperties();
         int batchesSize = storyPathsBatches.size();
         Iterator<Entry<String, List<String>>> iterator = storyPathsBatches.entrySet().iterator();
-        for (int i = 1; iterator.hasNext(); i++)
+        generateViewAfterExecution(() ->
         {
-            reportBeforeStories = i == 1;
-            reportAfterStories = i == batchesSize;
-
-            Entry<String, List<String>> storyPathsBatch = iterator.next();
-            batch = storyPathsBatch.getKey();
-
-            EmbedderControls embedderControls = embedderControls();
-            embedderMonitor.usingControls(embedderControls);
-
-            List<String> storyPaths = storyPathsBatch.getValue();
-            if (embedderControls.skip())
+            for (int i = 1; iterator.hasNext(); i++)
             {
-                embedderMonitor.storiesSkipped(storyPaths);
-                continue;
-            }
+                reportBeforeStories = i == 1;
+                reportAfterStories = i == batchesSize;
 
-            try
-            {
-                bddRunContext.putRunningBatch(batch);
-                StoryManager storyManager = storyManager();
-                MetaFilter filter = metaFilter();
-                BatchFailures failures = new BatchFailures(embedderControls.verboseFailures());
+                Entry<String, List<String>> storyPathsBatch = iterator.next();
+                batch = storyPathsBatch.getKey();
 
-                storyManager.runStoriesAsPaths(storyPaths, filter, failures);
+                EmbedderControls embedderControls = embedderControls();
+                embedderMonitor.usingControls(embedderControls);
 
-                handleFailures(failures);
-                if (!ignoreFailureInBatches && !failures.isEmpty())
+                List<String> storyPaths = storyPathsBatch.getValue();
+                if (embedderControls.skip())
                 {
-                    break;
+                    embedderMonitor.storiesSkipped(storyPaths);
+                    continue;
+                }
+
+                try
+                {
+                    bddRunContext.putRunningBatch(batch);
+                    StoryManager storyManager = storyManager();
+                    MetaFilter filter = metaFilter();
+                    BatchFailures failures = new BatchFailures(embedderControls.verboseFailures());
+
+                    storyManager.runStoriesAsPaths(storyPaths, filter, failures);
+
+                    handleFailures(failures);
+                    if (!ignoreFailureInBatches && !failures.isEmpty())
+                    {
+                        break;
+                    }
+                }
+                finally
+                {
+                    bddRunContext.removeRunningBatch();
+                    shutdownExecutorService();
                 }
             }
-            finally
+        });
+    }
+
+    private void generateViewAfterExecution(Runnable runnable)
+    {
+        try
+        {
+            runnable.run();
+        }
+        finally
+        {
+            if (getEmbedderControlsProvider().isGenerateViewAfterBatches())
             {
-                bddRunContext.removeRunningBatch();
-                shutdownExecutorService();
+                generateReportsView();
             }
         }
     }

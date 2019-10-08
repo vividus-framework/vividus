@@ -18,6 +18,7 @@ package org.vividus.bdd.spring;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -38,6 +39,7 @@ import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.ExamplesTableProperties;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
+import org.jbehave.core.reporters.ViewGenerator;
 import org.jbehave.core.steps.DelegatingStepMonitor;
 import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
@@ -160,5 +162,13 @@ public class ConfigurationTests
         configuration.setStoryControls(storyControls);
         configuration.init();
         assertTrue(configuration.storyControls().dryRun());
+    }
+
+    @Test
+    public void testSetViewGenerator()
+    {
+        ViewGenerator viewGenerator = mock(ViewGenerator.class);
+        configuration.setViewGenerator(viewGenerator);
+        assertEquals(viewGenerator, configuration.viewGenerator());
     }
 }

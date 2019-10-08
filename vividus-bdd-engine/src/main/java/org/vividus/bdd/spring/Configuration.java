@@ -30,6 +30,7 @@ import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.StoryReporterBuilder;
+import org.jbehave.core.reporters.ViewGenerator;
 import org.jbehave.core.steps.DelegatingStepMonitor;
 import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
@@ -97,6 +98,12 @@ public class Configuration extends MostUsefulConfiguration
     public void setStoryReporterBuilder(StoryReporterBuilder storyReporterBuilder)
     {
         useStoryReporterBuilder(storyReporterBuilder);
+    }
+
+    @Autowired(required = false)
+    public void setViewGenerator(ViewGenerator viewGenerator)
+    {
+        useViewGenerator(viewGenerator);
     }
 
     @Autowired

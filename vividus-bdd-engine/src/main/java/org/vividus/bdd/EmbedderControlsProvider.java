@@ -32,7 +32,7 @@ public class EmbedderControlsProvider implements IEmbedderControlsProvider
     private final Map<String, Integer> threads = new HashMap<>();
     private String storyExecutionTimeout;
     private boolean ignoreFailureInStories;
-    private boolean generateViewAfterStories;
+    private boolean generateViewAfterBatches;
 
     private final Map<String, EmbedderControls> batchedControls = new HashMap<>();
 
@@ -58,7 +58,7 @@ public class EmbedderControlsProvider implements IEmbedderControlsProvider
         }
         controls.useStoryTimeouts(storyExecutionTimeout);
         controls.doIgnoreFailureInStories(ignoreFailureInStories);
-        controls.doGenerateViewAfterStories(generateViewAfterStories);
+        controls.doGenerateViewAfterStories(generateViewAfterBatches);
         batchedControls.put(batch, controls);
         return controls;
     }
@@ -67,6 +67,12 @@ public class EmbedderControlsProvider implements IEmbedderControlsProvider
     public EmbedderControls getDefault()
     {
         return get(DEFAULT_BATCH);
+    }
+
+    @Override
+    public boolean isGenerateViewAfterBatches()
+    {
+        return generateViewAfterBatches;
     }
 
     public void setStoryExecutionTimeout(String storyExecutionTimeout)
@@ -79,9 +85,9 @@ public class EmbedderControlsProvider implements IEmbedderControlsProvider
         this.ignoreFailureInStories = ignoreFailureInStories;
     }
 
-    public void setGenerateViewAfterStories(boolean generateViewAfterStories)
+    public void setGenerateViewAfterBatches(boolean generateViewAfterBatches)
     {
-        this.generateViewAfterStories = generateViewAfterStories;
+        this.generateViewAfterBatches = generateViewAfterBatches;
     }
 
     public void setPropertyMapper(IPropertyMapper propertyMapper)
