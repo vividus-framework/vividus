@@ -17,6 +17,8 @@
 package org.vividus.bdd;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -48,7 +50,7 @@ class EmbedderControlsProviderTests
         when(propertyMapper.readValues("bdd.batch-", Map.class))
                 .thenReturn(Map.of("1", Map.of("threads", "2")));
         embedderControlsProvider.setStoryExecutionTimeout(STORY_EXECUTION_TIMEOUT);
-        embedderControlsProvider.setGenerateViewAfterStories(true);
+        embedderControlsProvider.setGenerateViewAfterBatches(true);
         embedderControlsProvider.setIgnoreFailureInStories(true);
         embedderControlsProvider.init();
         assertEmbedderControls(2, true, true, embedderControlsProvider.get(BATCH));
@@ -65,6 +67,14 @@ class EmbedderControlsProviderTests
     void testGetAgain()
     {
         assertEquals(embedderControlsProvider.getDefault(), embedderControlsProvider.get(BATCH));
+    }
+
+    @Test
+    void testGenerateViewAfterBatches()
+    {
+        assertFalse(embedderControlsProvider.isGenerateViewAfterBatches());
+        embedderControlsProvider.setGenerateViewAfterBatches(true);
+        assertTrue(embedderControlsProvider.isGenerateViewAfterBatches());
     }
 
     private void assertEmbedderControls(int expectedThreads, boolean expectedGenerateViewAfterStories,

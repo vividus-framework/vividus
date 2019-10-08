@@ -23,4 +23,6 @@ public interface IEmbedderControlsProvider
     EmbedderControls get(String batch);
 
     EmbedderControls getDefault();
+
+    boolean isGenerateViewAfterBatches();
 }

@@ -69,7 +69,7 @@
         <property name="propertyMapper" ref="propertyMapper" />
         <property name="storyExecutionTimeout" value="${bdd.story-execution-timeout}" />
         <property name="ignoreFailureInStories" value="true" />
-        <property name="generateViewAfterStories" value="false" />
+        <property name="generateViewAfterBatches" value="${bdd.generate-view-after-batches}" />
     </bean>
 
     <bean id="storyReporterBuilder" class="org.vividus.bdd.ExtendedStoryReporterBuilder">

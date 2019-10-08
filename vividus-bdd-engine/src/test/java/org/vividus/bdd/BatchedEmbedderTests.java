@@ -76,6 +76,7 @@ class BatchedEmbedderTests
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
         when(mockedEmbedderControls.ignoreFailureInStories()).thenReturn(true);
         when(mockedEmbedderControls.threads()).thenReturn(1);
+        when(embedderControlsProvider.isGenerateViewAfterBatches()).thenReturn(false);
         StoryManager storyManager = mock(StoryManager.class);
         doReturn(storyManager).when(spy).storyManager();
         MetaFilter mockedFilter = mock(MetaFilter.class);
@@ -103,6 +104,7 @@ class BatchedEmbedderTests
             failures -> failures.size() == 1 && failures.containsKey(key) && failures.containsValue(throwable)));
         inOrder.verify(bddRunContext).removeRunningBatch();
         inOrder.verify(executorService).shutdownNow();
+        inOrder.verify(spy).getEmbedderControlsProvider();
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -113,6 +115,8 @@ class BatchedEmbedderTests
         BatchedEmbedder spy = Mockito.spy(embedder);
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
         when(mockedEmbedderControls.threads()).thenReturn(1);
+        when(embedderControlsProvider.isGenerateViewAfterBatches()).thenReturn(true);
+        doNothing().when(spy).generateReportsView();
         StoryManager storyManager = mock(StoryManager.class);
         doReturn(storyManager).when(spy).storyManager();
         MetaFilter mockedFilter = mock(MetaFilter.class);
@@ -129,6 +133,9 @@ class BatchedEmbedderTests
         inOrder.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), any(BatchFailures.class));
         inOrder.verify(bddRunContext).removeRunningBatch();
         inOrder.verify(executorService).shutdownNow();
+        inOrder.verify(spy).getEmbedderControlsProvider();
+        inOrder.verify(spy).generateReportsView();
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
