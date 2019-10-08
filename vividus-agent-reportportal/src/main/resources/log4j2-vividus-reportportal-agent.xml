@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <Property name="pattern">%d [%t] %-5p %c - %m%n</Property>
+    </Properties>
+    <Appenders>
+        <ReportPortalLog4j2Appender name="ReportPortalAppender">
+            <PatternLayout pattern="${pattern}" />
+        </ReportPortalLog4j2Appender>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="ReportPortalAppender" />
+        </Root>
+    </Loggers>
+</Configuration>
