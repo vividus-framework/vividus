@@ -52,6 +52,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.web.action.ICssSelectorFactory;
 import org.vividus.ui.web.action.IExpectedConditions;
 import org.vividus.ui.web.action.IExpectedSearchContextCondition;
 import org.vividus.ui.web.action.IJavascriptActions;
@@ -72,6 +73,10 @@ class ElementSearchActionTests
     private static final By ELEMENT_BY_TEXT_LOCATOR = By.xpath(".//*[contains(normalize-space(text()), 'Text')]");
     private static final String EXCEPTION = "exception";
     private static final Duration TIMEOUT = Duration.ofSeconds(0);
+    private static final String VISIBILITY_SCRIPT = "return document.querySelector('html').offsetWidth > "
+            + "document.querySelector('%s').getBoundingClientRect().x";
+    private static final String SELECTOR1 = "selector1";
+    private static final String SELECTOR2 = "selector2";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementSearchAction.class);
 
@@ -108,6 +113,9 @@ class ElementSearchActionTests
 
     @Mock
     private IExpectedConditions<By> expectedConditions;
+
+    @Mock
+    private ICssSelectorFactory cssSelectorFactory;
 
     @InjectMocks
     private AbstractElementSearchAction elementSearchAction = new AbstractElementSearchAction() { };
@@ -215,6 +223,8 @@ class ElementSearchActionTests
         IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
         when(expectedConditions.presenceOfAllElementsLocatedBy(any(By.class))).thenReturn(condition);
         when(result.getData()).thenReturn(elements);
+        when(cssSelectorFactory.getCssSelector(element1)).thenReturn(SELECTOR1);
+        when(javascriptActions.executeScript(String.format(VISIBILITY_SCRIPT, SELECTOR1))).thenReturn(true);
         when(element1.isDisplayed()).thenAnswer(new Answer<Boolean>()
         {
             private int count;
@@ -315,6 +325,8 @@ class ElementSearchActionTests
         WebElement element2 = mock(WebElement.class);
         List<WebElement> elementsList = List.of(element1, element2);
         when(searchContext.findElements(locator)).thenReturn(elementsList);
+        when(cssSelectorFactory.getCssSelector(element2)).thenReturn(SELECTOR2);
+        when(javascriptActions.executeScript(String.format(VISIBILITY_SCRIPT, SELECTOR2))).thenReturn(true);
         when(element1.isDisplayed()).thenReturn(Boolean.TRUE);
         when(element2.isDisplayed()).thenReturn(Boolean.FALSE);
         List<WebElement> foundElements = elementSearchAction.findElements(searchContext, locator,
@@ -357,6 +369,8 @@ class ElementSearchActionTests
         when(result.getData()).thenReturn(elements);
         when(element1.isDisplayed()).thenReturn(Boolean.TRUE);
         when(element2.isDisplayed()).thenReturn(Boolean.FALSE);
+        when(cssSelectorFactory.getCssSelector(element2)).thenReturn(SELECTOR2);
+        when(javascriptActions.executeScript(String.format(VISIBILITY_SCRIPT, SELECTOR2))).thenReturn(false);
         IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
         when(expectedConditions.presenceOfAllElementsLocatedBy(any(By.class))).thenReturn(condition);
         List<WebElement> foundElements = elementSearchAction.findElements(searchContext, locator,

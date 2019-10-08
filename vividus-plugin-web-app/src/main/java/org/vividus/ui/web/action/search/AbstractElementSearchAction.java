@@ -30,6 +30,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.ui.web.action.ICssSelectorFactory;
 import org.vividus.ui.web.action.IExpectedConditions;
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.IWaitActions;
@@ -44,12 +45,15 @@ public abstract class AbstractElementSearchAction
     private static final String ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE = "[text()["
             + TRANSLATE_TO_LOWER_CASE_FORMATTED + "=%1$s] or @*[" + TRANSLATE_TO_LOWER_CASE_FORMATTED + "=%1$s] or *["
             + TRANSLATE_TO_LOWER_CASE_FORMATTED + "=%1$s]]";
+    private static final String VISIBILITY_SCRIPT = "return document.querySelector('html').offsetWidth > "
+            + "document.querySelector('%s').getBoundingClientRect().x";
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElementSearchAction.class);
 
     @Inject private IWebElementActions webElementActions;
     @Inject private IJavascriptActions javascriptActions;
     @Inject private IWaitActions waitActions;
     @Inject private IExpectedConditions<By> expectedConditions;
+    @Inject private ICssSelectorFactory cssSelectorFactory;
     private Duration waitForElementTimeout;
 
     public List<WebElement> findElements(SearchContext searchContext, By locator, SearchParameters parameters)
@@ -90,7 +94,9 @@ public abstract class AbstractElementSearchAction
     {
         if (!element.isDisplayed())
         {
-            if (!scrolled)
+            String cssSelector = cssSelectorFactory.getCssSelector(element);
+            boolean isVisible = javascriptActions.executeScript(String.format(VISIBILITY_SCRIPT, cssSelector));
+            if (!scrolled && isVisible)
             {
                 javascriptActions.scrollIntoView(element, true);
                 return isElementVisible(element, true);
