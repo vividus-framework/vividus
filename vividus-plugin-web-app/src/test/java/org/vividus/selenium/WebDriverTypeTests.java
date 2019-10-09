@@ -44,6 +44,8 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerDriverService;
 import org.openqa.selenium.ie.InternetExplorerOptions;
+import org.openqa.selenium.opera.OperaDriver;
+import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
@@ -60,6 +62,10 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 @PowerMockIgnore("io.github.lukehutch.fastclasspathscanner.classpath.*")
 public class WebDriverTypeTests
 {
+    private static final String OPTION_VALUE = "iPhone 8";
+    private static final String OPTION_KEY = "deviceName";
+    private static final String MOBILE_EMULATION = "mobileEmulation";
+    private static final String ARGUMENT = "allow-external-pages";
     private static final String PATH = "path";
 
     @SuppressWarnings("unchecked")
@@ -169,17 +175,15 @@ public class WebDriverTypeTests
     @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$3")
     public void testGetChromeWebDriverWithAdditionalOptions() throws Exception
     {
-        String argument = "allow-external-pages";
-        String experimentalOptionKey = "mobileEmulation";
-        Map<String, String> experimentalOptionValue = singletonMap("deviceName", "iPhone 8");
+        Map<String, String> experimentalOptionValue = singletonMap(OPTION_KEY, OPTION_VALUE);
         WebDriverConfiguration configuration = new WebDriverConfiguration();
         configuration.setBinaryPath(Optional.of(PATH));
-        configuration.setCommandLineArguments(Optional.of(argument));
-        configuration.setExperimentalOptions(singletonMap(experimentalOptionKey, experimentalOptionValue));
+        configuration.setCommandLineArguments(Optional.of(ARGUMENT));
+        configuration.setExperimentalOptions(singletonMap(MOBILE_EMULATION, experimentalOptionValue));
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.setBinary(PATH);
-        chromeOptions.addArguments(argument);
-        chromeOptions.setExperimentalOption(experimentalOptionKey, experimentalOptionValue);
+        chromeOptions.addArguments(ARGUMENT);
+        chromeOptions.setExperimentalOption(MOBILE_EMULATION, experimentalOptionValue);
         testGetChromeWebDriver(configuration, chromeOptions);
     }
 
@@ -209,12 +213,47 @@ public class WebDriverTypeTests
     }
 
     @Test
+    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$6")
+    public void testGetOperaWebDriver() throws Exception
+    {
+        testGetOperaWebDriver(new WebDriverConfiguration(), new OperaOptions());
+    }
+
+    private static void testGetOperaWebDriver(WebDriverConfiguration configuration, OperaOptions operaOptions)
+            throws Exception
+    {
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        OperaDriver expected = mock(OperaDriver.class);
+        whenNew(OperaDriver.class).withParameterTypes(OperaOptions.class).withArguments(operaOptions)
+                .thenReturn(expected);
+        WebDriver actual = WebDriverType.OPERA.getWebDriver(desiredCapabilities, configuration);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$6")
+    public void testGetOperaWebDriverWithAdditionalOptions() throws Exception
+    {
+        Map<String, String> experimentalOptionValue = singletonMap(OPTION_KEY, OPTION_VALUE);
+        WebDriverConfiguration configuration = new WebDriverConfiguration();
+        configuration.setBinaryPath(Optional.of(PATH));
+        configuration.setCommandLineArguments(Optional.of(ARGUMENT));
+        configuration.setExperimentalOptions(singletonMap(MOBILE_EMULATION, experimentalOptionValue));
+        OperaOptions operaOptions = new OperaOptions();
+        operaOptions.setBinary(PATH);
+        operaOptions.addArguments(ARGUMENT);
+        operaOptions.setExperimentalOption(MOBILE_EMULATION, experimentalOptionValue);
+        testGetOperaWebDriver(configuration, operaOptions);
+    }
+
+    @Test
     @DataProvider({
         "FIREFOX,   true",
         "IEXPLORE,  false",
         "CHROME,    true",
         "SAFARI,    false",
-        "EDGE,      false"
+        "EDGE,      false",
+        "OPERA,     true"
         })
     public void testIsBinaryPathSupported(WebDriverType type, boolean binaryPathSupported)
     {
@@ -227,7 +266,8 @@ public class WebDriverTypeTests
         "IEXPLORE,  true",
         "CHROME,    true",
         "SAFARI,    false",
-        "EDGE,      false"
+        "EDGE,      false",
+        "OPERA,     true"
         })
     public void testIsCommandLineArgumentsSupported(WebDriverType type, boolean commandLineArgumentsSupported)
     {
@@ -240,7 +280,8 @@ public class WebDriverTypeTests
             "IEXPLORE,  true",
             "CHROME,    false",
             "SAFARI,    false",
-            "EDGE,      false"
+            "EDGE,      false",
+            "OPERA,     false"
     })
     public void testIsUseW3C(WebDriverType type, boolean useW3C)
     {
@@ -253,7 +294,8 @@ public class WebDriverTypeTests
             "IEXPLORE,  false",
             "CHROME,    false",
             "SAFARI,    false",
-            "EDGE,      true"
+            "EDGE,      true",
+            "OPERA,     false"
     })
     public void testGetDriverSpecificCapabilities(WebDriverType type, boolean empty)
     {
@@ -265,7 +307,8 @@ public class WebDriverTypeTests
         "FIREFOX,   webdriver.gecko.driver",
         "IEXPLORE,  webdriver.ie.driver",
         "CHROME,    webdriver.chrome.driver",
-        "EDGE,      webdriver.edge.driver"
+        "EDGE,      webdriver.edge.driver",
+        "OPERA,     webdriver.opera.driver"
         })
     public void testSetDriverExecutablePath(WebDriverType type, String propertyName)
     {
@@ -306,6 +349,13 @@ public class WebDriverTypeTests
     public void testSetChromeDriverExecutablePathViaAutomaticManager()
     {
         testSetDriverExecutablePathViaAutomaticManager(WebDriverType.CHROME, WebDriverManager::chromedriver);
+    }
+
+    @Test
+    @PrepareForTest(value = WebDriverManager.class, fullyQualifiedNames = "org.vividus.selenium.WebDriverType$6")
+    public void testSetOperaDriverExecutablePathViaAutomaticManager()
+    {
+        testSetDriverExecutablePathViaAutomaticManager(WebDriverType.OPERA, WebDriverManager::operadriver);
     }
 
     @Test
