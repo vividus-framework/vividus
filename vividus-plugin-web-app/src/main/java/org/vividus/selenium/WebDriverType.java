@@ -34,6 +34,9 @@ import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerDriverService;
 import org.openqa.selenium.ie.InternetExplorerOptions;
+import org.openqa.selenium.opera.OperaDriver;
+import org.openqa.selenium.opera.OperaDriverService;
+import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
@@ -144,6 +147,26 @@ public enum WebDriverType
         {
             setDriverExecutablePathImpl(driverExecutablePath, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
                     WebDriverManager::edgedriver);
+        }
+    },
+    OPERA(true, true, false, Set.of(OperaOptions.CAPABILITY), BrowserType.OPERA_BLINK)
+    {
+        @Override
+        public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
+        {
+            OperaOptions operaOptions = new OperaOptions();
+            configuration.getBinaryPath().ifPresent(operaOptions::setBinary);
+            configuration.getCommandLineArguments().ifPresent(operaOptions::addArguments);
+            configuration.getExperimentalOptions().forEach(operaOptions::setExperimentalOption);
+            operaOptions.merge(desiredCapabilities);
+            return new OperaDriver(operaOptions);
+        }
+
+        @Override
+        void setDriverExecutablePath(Optional<String> driverExecutablePath)
+        {
+            setDriverExecutablePathImpl(driverExecutablePath, OperaDriverService.OPERA_DRIVER_EXE_PROPERTY,
+                    WebDriverManager::operadriver);
         }
     };
 
