@@ -121,8 +121,9 @@ public class ResourceCheckSteps
     private Stream<ResourceValidation> createResourceValidations(Stream<Element> elements,
             Function<Pair<URI, String>, ResourceValidation> resourceValidationFactory)
     {
-        return elements.map(e -> Pair.of(
-                createUri(Optional.ofNullable(e.attr("href")).orElseGet(() -> e.attr("src")).trim()), e.cssSelector()))
+        return elements.map(e ->
+            Pair.of(createUri(getElementAttribute(e, "href").orElseGet(() ->
+                e.attr("src")).trim()), e.cssSelector()))
                        .map(resourceValidationFactory)
                        .map(rv -> {
                            URI toCheck = rv.getUri();
@@ -136,6 +137,11 @@ public class ResourceCheckSteps
                            }
                            return rv;
                        });
+    }
+
+    private Optional<String> getElementAttribute(Element element, String attributeKey)
+    {
+        return element.hasAttr(attributeKey) ? Optional.of(element.attr(attributeKey)) : Optional.empty();
     }
 
     private URI createUri(String uri)
