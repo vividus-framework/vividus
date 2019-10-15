@@ -1,12 +1,8 @@
 project.description = 'Vividus BDD engine'
 
-ext {
-    jbehaveVersion = '4.6.1-alpha'
-}
-
 dependencies {
     api project(':vividus-test-context')
-    api(group: 'org.vividus', name: 'jbehave-core', version: jbehaveVersion)
+    api(group: 'org.vividus', name: 'jbehave-core', version: versions.jbehave)
 
     implementation project(':vividus-util')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
@@ -17,7 +13,7 @@ dependencies {
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'com.github.javafaker', name: 'javafaker', version: '1.0.1')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
-    runtimeOnly(group: 'org.vividus', name: 'jbehave-spring', version: jbehaveVersion)
+    runtimeOnly(group: 'org.vividus', name: 'jbehave-spring', version: versions.jbehave)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')

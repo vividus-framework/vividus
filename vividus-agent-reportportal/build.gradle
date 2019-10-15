@@ -7,7 +7,10 @@ dependencies {
 
     // ReportPortal
     implementation(group: 'com.epam.reportportal', name: 'logger-java-log4j', version: '4.0.1')
-    implementation(group: 'com.github.reportportal', name: 'agent-java-jbehave', version: 'c3303855e1')
+    implementation(group: 'com.github.reportportal', name: 'agent-java-jbehave', version: 'c3303855e1') {
+        exclude module: 'jbehave-core'
+    }
+    implementation(group: 'org.vividus', name: 'jbehave-core', version: versions.jbehave)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
