@@ -312,7 +312,7 @@ class JsonResponseValidationStepsTests
     {
         String body = "{\"key\":\"value\"}";
         testWaitForJsonFieldAppears(body, 0);
-        verify(apiSteps, atLeast(7)).whenIDoHttpRequest(HttpMethod.GET, URL);
+        verify(apiSteps, atLeast(6)).whenIDoHttpRequest(HttpMethod.GET, URL);
         verify(apiSteps, atMost(10)).whenIDoHttpRequest(HttpMethod.GET, URL);
     }
 
