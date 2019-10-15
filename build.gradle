@@ -24,16 +24,9 @@ configure(nonTestSubprojects) {
     }
 
     dependencies {
-        def message = "Use latest hamcrest version"
         modules {
-            module("org.hamcrest:hamcrest-integration") {
-                replacedBy("org.hamcrest:hamcrest", message)
-            }
-            module("org.hamcrest:hamcrest-core") {
-                replacedBy("org.hamcrest:hamcrest", message)
-            }
-            module("org.hamcrest:hamcrest-library") {
-                replacedBy("org.hamcrest:hamcrest", message)
+            module('org.hamcrest:hamcrest-core') {
+                replacedBy('org.hamcrest:hamcrest', 'Use latest hamcrest version')
             }
         }
     }
