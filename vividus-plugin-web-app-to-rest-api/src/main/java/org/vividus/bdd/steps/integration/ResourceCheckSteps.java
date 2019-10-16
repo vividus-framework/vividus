@@ -34,6 +34,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Selector.SelectorParseException;
 import org.vividus.bdd.steps.api.ApiSteps;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpTestContext;
@@ -122,8 +123,7 @@ public class ResourceCheckSteps
             Function<Pair<URI, String>, ResourceValidation> resourceValidationFactory)
     {
         return elements.map(e ->
-            Pair.of(createUri(getElementAttribute(e, "href").orElseGet(() ->
-                e.attr("src")).trim()), e.cssSelector()))
+            Pair.of(createUri(getElementAttribute(e, "href").orElseGet(() -> e.attr("src")).trim()), getSelector(e)))
                        .map(resourceValidationFactory)
                        .map(rv -> {
                            URI toCheck = rv.getUri();
@@ -137,6 +137,18 @@ public class ResourceCheckSteps
                            }
                            return rv;
                        });
+    }
+
+    private String getSelector(Element element)
+    {
+        try
+        {
+            return element.cssSelector();
+        }
+        catch (SelectorParseException exception)
+        {
+            return "N/A";
+        }
     }
 
     private Optional<String> getElementAttribute(Element element, String attributeKey)

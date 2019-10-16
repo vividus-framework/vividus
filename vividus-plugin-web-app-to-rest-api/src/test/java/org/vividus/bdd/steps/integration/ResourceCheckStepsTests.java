@@ -102,6 +102,7 @@ class ResourceCheckStepsTests
         + "  <a id='http' href='http://www.thucydides.info'>Just ignore it</a>\n"
         + "  <a id='ftp' href='ftp://all-the-date.here'>Not supported scheme</a>\n"
         + "  <img id='image' src='https://avatars0.githubusercontent.com/u/48793437?s=200&v=4'/>\n"
+        + "  <img class='image (gif)' src='https://github.githubassets.com/images/spinners/octocat-spinner-32.gif'/>\n"
         + "  <iframe src='https://selenide.org'/>"
         + "</body>\n</html>";
 
@@ -143,16 +144,18 @@ class ResourceCheckStepsTests
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
         URI imageUri = URI.create("https://avatars0.githubusercontent.com/u/48793437?s=200&v=4");
+        URI gifImageUri = URI.create("https://github.githubassets.com/images/spinners/octocat-spinner-32.gif");
 
         resourceCheckSteps.checkResources("a, img", FIRST_PAGE);
 
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings("unchecked")
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
-            assertThat(validationsToReport, hasSize(8));
+            assertThat(validationsToReport, hasSize(9));
             Iterator<ResourceValidation> resourceValdiations = validationsToReport.iterator();
             validate(resourceValdiations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
             validate(resourceValdiations, imageUri, "#image", CheckStatus.PASSED, N_A);
+            validate(resourceValdiations, gifImageUri, N_A, CheckStatus.PASSED, N_A);
             validate(resourceValdiations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
             validate(resourceValdiations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
             validate(resourceValdiations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
