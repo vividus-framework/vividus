@@ -3,31 +3,19 @@ Meta:
 
 Scenario: Step verification Then context contains list of link items with the text: $expectedLinkItems
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link'
-When I change context to an element by By.xpath(.//ul[@class='tags tags-small'])
+When I change context to an element by By.cssSelector(.standard-table)
 Then context contains list of link items with the text:
-|text            |
-|Draft           |
-|HTTP            |
-|HTTP Header     |
-|Link            |
-|NeedsCompatTable|
-|NeedsContent    |
-|NeedsSyntax     |
-|Reference       |
+|text                                                    |
+|RFC 8288, section 3: Link Serialisation in HTTP Headers |
+|RFC 5988, section 5: The Link Header Field              |
 
 Scenario: Step verification Then context contains list of link items with the text and link: $expectedLinkItems
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link'
-When I change context to an element by By.xpath(.//ul[@class='tags tags-small'])
+When I change context to an element by By.cssSelector(.standard-table)
 Then context contains list of link items with the text and link:
-|text            |link                            |
-|Draft           |/en-US/docs/tag/Draft           |
-|HTTP            |/en-US/docs/tag/HTTP            |
-|HTTP Header     |/en-US/docs/tag/HTTP%20Header   |
-|Link            |/en-US/docs/tag/Link            |
-|NeedsCompatTable|/en-US/docs/tag/NeedsCompatTable|
-|NeedsContent    |/en-US/docs/tag/NeedsContent    |
-|NeedsSyntax     |/en-US/docs/tag/NeedsSyntax     |
-|Reference       |/en-US/docs/tag/Reference       |
+|text                                                    |link                                         |
+|RFC 8288, section 3: Link Serialisation in HTTP Headers |https://tools.ietf.org/html/rfc8288#section-3|
+|RFC 5988, section 5: The Link Header Field              |https://tools.ietf.org/html/rfc5988#section-5|
 
 !-- Composites down there
 
@@ -38,7 +26,7 @@ Then number of elements found by `By.cssSelector(body > a:hover)` is equal to `1
 
 Scenario: Step verification When I click on a link with the CSS selector '$cssSelector'
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
-When I click on element located `By.cssSelector(#main-header > a)`
+When I click on element located `By.cssSelector(.page-header > a.logo)`
 Then the page with the URL 'https://developer.mozilla.org/en-US/' is loaded
 
 Scenario: Step verification When I hover a mouse over a link with the URL '$URL'
@@ -78,13 +66,15 @@ Then the page with the URL 'https://developer.mozilla.org/en-US/docs/MDN/About#C
 
 Scenario: Step verification Then a link with the text '$text' does not exist
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
-When I click on element located `By.cssSelector(#main-header > a)`
-Then a link with the text 'Try hovering over me!' does not exist
+Then a link with the text 'CSS: Cascading Style Sheets' exists
+When I change context to an element by By.cssSelector(.page-header)
+Then a link with the text 'CSS: Cascading Style Sheets' does not exist
 
 Scenario: Step verification Then a link with the text '$text' and URL '$URL' does not exist
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
-When I click on element located `By.cssSelector(#main-header > a)`
-Then a link with the text 'Try hovering over me!' and URL '#' does not exist
+Then a link with the text 'CSS: Cascading Style Sheets' and URL '/en-US/docs/Web/CSS' exists
+When I change context to an element by By.cssSelector(.page-header)
+Then a link with the text 'CSS: Cascading Style Sheets' and URL '/en-US/docs/Web/CSS' does not exist
 
 Scenario: Step verification Then a link with the URL '$URL' and tooltip '$tooltip' does not exist
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP'
