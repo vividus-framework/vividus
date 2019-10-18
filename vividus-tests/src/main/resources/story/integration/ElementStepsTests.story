@@ -9,7 +9,6 @@ Examples:
 |textAreaURL         |https://mdn.mozillademos.org/en-US/docs/Web/HTML/Element/textarea$samples/Basic_example                           |
 |buttonURL           |https://mdn.mozillademos.org/en-US/docs/Web/API/MouseEvent/button$samples/Example                                 |
 |rightClickButtonURL |http://demo.guru99.com/test/simple_context_menu.html                                                              |
-|dropdownURL         |https://www.jetbrains.com/                                                                                        |
 |radioButtonsURL     |https://mdn.mozillademos.org/en-US/docs/Web/HTML/Element/input/radio$samples/Data_representation_of_a_radio_group?|
 
 Scenario: Step verification When I click on element located `$locator`
@@ -39,10 +38,11 @@ Given I am on a page with the URL '<radioButtonsURL>'
 Then each element with locator `By.xpath(.//form)` has `2` child elements with locator `By.xpath(.//div)`
 
 Scenario: Step verification When I hover a mouse over an element located '$locator'
-Given I am on a page with the URL '<dropdownURL>'
-Then number of elements found by `By.xpath(.//*[@data-popover-group-content-id='header-navigation-languages'])` is equal to `0`
-When I hover mouse over element located `By.xpath(.//a[@data-popover-group-button-id='header-navigation-languages'])`
-Then number of elements found by `By.xpath(.//*[@data-popover-group-content-id='header-navigation-languages'])` is equal to `1`
+Given I am on a page with the URL 'https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_over_enter'
+When I switch to a frame with the attribute 'id'='iframeResult'
+When I change context to an element by By.xpath(//div[contains(., 'onmouseover: Mouse over me!')])
+When I hover mouse over element located `By.xpath(self::*)`
+Then the text 'onmouseover: 1' exists
 
 Scenario: Step verification When I click on an element '$searchAttributes' then the page does not refresh
 Given I am on a page with the URL '<radioButtonsURL>'
@@ -63,12 +63,12 @@ Then number of elements found by `By.xpath(.//*[@class='context-menu-item contex
 Scenario: Step verification Then the context element has the CSS property '$cssName'='$cssValue'
 Given I am on a page with the URL '<radioButtonsURL>'
 When I change context to an element with the attribute 'type'='submit'
-Then the context element has the CSS property 'height'='21px'
+Then the context element has the CSS property 'height'='18px'
 
 Scenario: Step verification Then the context element has the CSS property '$cssName' containing '$cssValue'
 Given I am on a page with the URL '<radioButtonsURL>'
 When I change context to an element with the attribute 'type'='submit'
-Then the context element has the CSS property 'height' containing '21px'
+Then the context element has the CSS property 'height' containing '18px'
 
 !-- Composites down there
 
@@ -167,10 +167,11 @@ When I click on an element by the xpath './/button'
 Then a [ENABLED] element with the tag 'p' exists
 
 Scenario: Step verification When I hover a mouse over an element with the xpath '$xpath'
-Given I am on a page with the URL '<dropdownURL>'
-Then an element by the xpath './/*[@data-popover-group-content-id='header-navigation-languages']' does not exist
-When I hover a mouse over an element with the xpath './/a[@data-popover-group-button-id='header-navigation-languages']'
-Then an element by the xpath './/*[@data-popover-group-content-id='header-navigation-languages']' exists
+Given I am on a page with the URL 'https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_over_enter'
+When I switch to a frame with the attribute 'id'='iframeResult'
+When I change context to an element by By.xpath(//div[contains(., 'onmouseover: Mouse over me!')])
+When I hover a mouse over an element with the xpath 'self::*'
+Then the text 'onmouseover: 1' exists
 
 Scenario: Step verification When I perform right click on an element by the xpath '$xpath'
 Given I am on a page with the URL '<rightClickButtonURL>'
