@@ -63,12 +63,12 @@ Then number of elements found by `By.xpath(.//*[@class='context-menu-item contex
 Scenario: Step verification Then the context element has the CSS property '$cssName'='$cssValue'
 Given I am on a page with the URL '<radioButtonsURL>'
 When I change context to an element with the attribute 'type'='submit'
-Then the context element has the CSS property 'height'='18px'
+Then the context element has the CSS property 'color'='rgba(0, 0, 0, 1)'
 
 Scenario: Step verification Then the context element has the CSS property '$cssName' containing '$cssValue'
 Given I am on a page with the URL '<radioButtonsURL>'
 When I change context to an element with the attribute 'type'='submit'
-Then the context element has the CSS property 'height' containing '18px'
+Then the context element has the CSS property 'color' containing '(0, 0, 0, 1)'
 
 !-- Composites down there
 
