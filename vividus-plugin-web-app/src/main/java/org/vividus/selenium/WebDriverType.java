@@ -51,9 +51,9 @@ public enum WebDriverType
         @Override
         public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
         {
-            FirefoxOptions firefoxOptions = new FirefoxOptions();
-            firefoxOptions.addPreference("startup.homepage_welcome_url.additional", "about:blank");
-            desiredCapabilities.setCapability(FirefoxOptions.FIREFOX_OPTIONS, firefoxOptions);
+            FirefoxOptions options = new FirefoxOptions();
+            options.addPreference("startup.homepage_welcome_url.additional", "about:blank");
+            desiredCapabilities.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
         }
 
         @Override
@@ -62,9 +62,9 @@ public enum WebDriverType
             prepareCapabilities(desiredCapabilities);
             configuration.getBinaryPath()
                     .ifPresent(binaryPath -> desiredCapabilities.setCapability(FirefoxDriver.BINARY, binaryPath));
-            FirefoxOptions firefoxOptions = new FirefoxOptions(desiredCapabilities);
-            configuration.getCommandLineArguments().ifPresent(firefoxOptions::addArguments);
-            return new FirefoxDriver(firefoxOptions);
+            FirefoxOptions options = new FirefoxOptions(desiredCapabilities);
+            options.addArguments(configuration.getCommandLineArguments());
+            return new FirefoxDriver(options);
         }
 
         @Override
@@ -88,12 +88,14 @@ public enum WebDriverType
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
             prepareCapabilities(desiredCapabilities);
-            configuration.getCommandLineArguments().ifPresent(arguments ->
+            InternetExplorerOptions options = new InternetExplorerOptions(desiredCapabilities);
+            String[] switches = configuration.getCommandLineArguments();
+            options.addCommandSwitches(switches);
+            if (switches.length > 0)
             {
-                desiredCapabilities.setCapability(InternetExplorerDriver.FORCE_CREATE_PROCESS, true);
-                desiredCapabilities.setCapability(InternetExplorerDriver.IE_SWITCHES, arguments);
-            });
-            return new InternetExplorerDriver(null, new InternetExplorerOptions(desiredCapabilities));
+                options.useCreateProcessApiToLaunchIe();
+            }
+            return new InternetExplorerDriver(options);
         }
 
         @Override
@@ -108,12 +110,12 @@ public enum WebDriverType
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            ChromeOptions chromeOptions = new ChromeOptions();
-            configuration.getBinaryPath().ifPresent(chromeOptions::setBinary);
-            configuration.getCommandLineArguments().ifPresent(chromeOptions::addArguments);
-            configuration.getExperimentalOptions().forEach(chromeOptions::setExperimentalOption);
-            chromeOptions.merge(desiredCapabilities);
-            return new ChromeDriver(chromeOptions);
+            ChromeOptions options = new ChromeOptions();
+            configuration.getBinaryPath().ifPresent(options::setBinary);
+            options.addArguments(configuration.getCommandLineArguments());
+            configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
+            options.merge(desiredCapabilities);
+            return new ChromeDriver(options);
         }
 
         @Override
@@ -154,12 +156,12 @@ public enum WebDriverType
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            OperaOptions operaOptions = new OperaOptions();
-            configuration.getBinaryPath().ifPresent(operaOptions::setBinary);
-            configuration.getCommandLineArguments().ifPresent(operaOptions::addArguments);
-            configuration.getExperimentalOptions().forEach(operaOptions::setExperimentalOption);
-            operaOptions.merge(desiredCapabilities);
-            return new OperaDriver(operaOptions);
+            OperaOptions options = new OperaOptions();
+            configuration.getBinaryPath().ifPresent(options::setBinary);
+            options.addArguments(configuration.getCommandLineArguments());
+            configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
+            options.merge(desiredCapabilities);
+            return new OperaDriver(options);
         }
 
         @Override
