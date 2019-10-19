@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,7 +66,9 @@ class WebDriverFactoryTests
     private static final String EXPERIMENTAL_OPTIONS_PROPERTY_FORMAT = "web.driver.%s.experimental-options";
     private static final URI URL = URI.create("http://test");
     private static final String PATH = "testPath";
-    private static final String ARG = "arg";
+    private static final String ARG_1 = "--arg1";
+    private static final String ARG_2 = "--arg2";
+    private static final String ARGS = ARG_1 + " " + ARG_2;
 
     @Mock
     private WebDriver driver;
@@ -159,10 +162,11 @@ class WebDriverFactoryTests
                 .thenReturn(null);
         lenient().when(
                 propertyParser.getPropertyValue(String.format(COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT, webDriverType)))
-                .thenReturn(ARG);
+                .thenReturn(ARGS);
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         when(webDriverType.getWebDriver(eq(desiredCapabilities),
-                argThat(config -> Optional.of(ARG).equals(config.getCommandLineArguments())))).thenReturn(driver);
+                argThat(config -> Arrays.equals(new String[] { ARG_1, ARG_2 }, config.getCommandLineArguments()))))
+                .thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
         assertEquals(driver,
                 ((WrapsDriver) webDriverFactory.getWebDriver(webDriverType, desiredCapabilities)).getWrappedDriver());
@@ -209,7 +213,7 @@ class WebDriverFactoryTests
                 .thenReturn(null);
         lenient().when(
                 propertyParser.getPropertyValue(String.format(COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT, webDriverType)))
-                .thenReturn(ARG);
+                .thenReturn(ARG_1);
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
             () -> webDriverFactory.getWebDriver(webDriverType, null));
         assertEquals("Configuring of command-line-arguments is not supported for " + webDriverType,

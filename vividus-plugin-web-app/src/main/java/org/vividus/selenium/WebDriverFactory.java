@@ -29,6 +29,7 @@ import javax.inject.Inject;
 
 import com.google.common.base.Suppliers;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -109,8 +110,7 @@ public class WebDriverFactory implements IWebDriverFactory
             {
                 WebDriverConfiguration configuration = getWebDriverConfiguration(webDriverType, false);
                 ChromeOptions chromeOptions = new ChromeOptions();
-                // Workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=435547
-                configuration.getCommandLineArguments().ifPresent(chromeOptions::addArguments);
+                chromeOptions.addArguments(configuration.getCommandLineArguments());
                 configuration.getExperimentalOptions().forEach(chromeOptions::setExperimentalOption);
                 capabilities = chromeOptions.merge(mergedDesiredCapabilities);
             }
@@ -157,7 +157,8 @@ public class WebDriverFactory implements IWebDriverFactory
         WebDriverConfiguration configuration = new WebDriverConfiguration();
         configuration.setDriverExecutablePath(getPropertyValue("driver-executable-path", webDriverType));
         configuration.setBinaryPath(binaryPath);
-        configuration.setCommandLineArguments(commandLineArguments);
+        configuration.setCommandLineArguments(
+                commandLineArguments.map(args -> StringUtils.split(args, ' ')).orElseGet(() -> new String[0]));
         getPropertyValue("experimental-options", webDriverType)
                 .map(options -> jsonUtils.toObject(options, Map.class))
                 .ifPresent(configuration::setExperimentalOptions);

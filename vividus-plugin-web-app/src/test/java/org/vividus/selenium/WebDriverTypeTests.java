@@ -42,7 +42,6 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.ie.InternetExplorerDriverService;
 import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.opera.OperaOptions;
@@ -67,6 +66,7 @@ public class WebDriverTypeTests
     private static final String MOBILE_EMULATION = "mobileEmulation";
     private static final String ARGUMENT = "allow-external-pages";
     private static final String PATH = "path";
+    private static final String IE_OPTIONS = "se:ieOptions";
 
     @SuppressWarnings("unchecked")
     private static DesiredCapabilities testGetFirefoxWebDriver(WebDriverConfiguration configuration) throws Exception
@@ -96,11 +96,12 @@ public class WebDriverTypeTests
         whenNew(InternetExplorerOptions.class).withNoArguments().thenReturn(internetExplorerOptions);
         InternetExplorerDriver expected = mock(InternetExplorerDriver.class);
         whenNew(InternetExplorerDriver.class)
-                .withParameterTypes(InternetExplorerDriverService.class, InternetExplorerOptions.class)
-                .withArguments(null, internetExplorerOptions).thenReturn(expected);
+                .withParameterTypes(InternetExplorerOptions.class)
+                .withArguments(internetExplorerOptions)
+                .thenReturn(expected);
         WebDriver actual = WebDriverType.IEXPLORE.getWebDriver(desiredCapabilities, configuration);
         assertEquals(expected, actual);
-        Map<String, Object> options = (Map<String, Object>) desiredCapabilities.getCapability("se:ieOptions");
+        Map<String, Object> options = (Map<String, Object>) desiredCapabilities.getCapability(IE_OPTIONS);
         assertTrue((boolean) options.get(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS));
         return desiredCapabilities;
     }
@@ -139,7 +140,6 @@ public class WebDriverTypeTests
     {
         String argument = "headless";
         WebDriverConfiguration configuration = new WebDriverConfiguration();
-        configuration.setCommandLineArguments(Optional.of(argument));
         DesiredCapabilities desiredCapabilities = testGetFirefoxWebDriver(configuration);
         FirefoxOptions expected = new FirefoxOptions();
         expected.addArguments(argument);
@@ -155,13 +155,15 @@ public class WebDriverTypeTests
 
     @Test
     @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$2")
+    @SuppressWarnings("unchecked")
     public void testGetIExploreWebDriverWithCommandLineArguments() throws Exception
     {
         String argument = "private";
         WebDriverConfiguration configuration = new WebDriverConfiguration();
-        configuration.setCommandLineArguments(Optional.of(argument));
+        configuration.setCommandLineArguments(new String[] { argument });
         DesiredCapabilities desiredCapabilities = testGetIExploreWebDriver(configuration);
-        assertEquals(argument, desiredCapabilities.getCapability(InternetExplorerDriver.IE_SWITCHES));
+        Map<String, Object> options = (Map<String, Object>) desiredCapabilities.getCapability(IE_OPTIONS);
+        assertEquals(argument, options.get(InternetExplorerDriver.IE_SWITCHES));
     }
 
     @Test
@@ -178,7 +180,7 @@ public class WebDriverTypeTests
         Map<String, String> experimentalOptionValue = singletonMap(OPTION_KEY, OPTION_VALUE);
         WebDriverConfiguration configuration = new WebDriverConfiguration();
         configuration.setBinaryPath(Optional.of(PATH));
-        configuration.setCommandLineArguments(Optional.of(ARGUMENT));
+        configuration.setCommandLineArguments(new String[] { ARGUMENT });
         configuration.setExperimentalOptions(singletonMap(MOBILE_EMULATION, experimentalOptionValue));
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.setBinary(PATH);
@@ -237,7 +239,7 @@ public class WebDriverTypeTests
         Map<String, String> experimentalOptionValue = singletonMap(OPTION_KEY, OPTION_VALUE);
         WebDriverConfiguration configuration = new WebDriverConfiguration();
         configuration.setBinaryPath(Optional.of(PATH));
-        configuration.setCommandLineArguments(Optional.of(ARGUMENT));
+        configuration.setCommandLineArguments(new String[] { ARGUMENT });
         configuration.setExperimentalOptions(singletonMap(MOBILE_EMULATION, experimentalOptionValue));
         OperaOptions operaOptions = new OperaOptions();
         operaOptions.setBinary(PATH);

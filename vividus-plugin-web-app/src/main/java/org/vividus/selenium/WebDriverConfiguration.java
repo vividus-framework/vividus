@@ -16,6 +16,7 @@
 
 package org.vividus.selenium;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +25,7 @@ public class WebDriverConfiguration
 {
     private Optional<String> driverExecutablePath = Optional.empty();
     private Optional<String> binaryPath = Optional.empty();
-    private Optional<String> commandLineArguments = Optional.empty();
+    private String[] commandLineArguments = {};
     private Map<String, Object> experimentalOptions = new HashMap<>();
 
     public Optional<String> getDriverExecutablePath()
@@ -47,14 +48,14 @@ public class WebDriverConfiguration
         this.binaryPath = binaryPath;
     }
 
-    public Optional<String> getCommandLineArguments()
+    public String[] getCommandLineArguments()
     {
-        return commandLineArguments;
+        return copy(commandLineArguments);
     }
 
-    public void setCommandLineArguments(Optional<String> commandLineArguments)
+    public void setCommandLineArguments(String[] commandLineArguments)
     {
-        this.commandLineArguments = commandLineArguments;
+        this.commandLineArguments = copy(commandLineArguments);
     }
 
     public Map<String, Object> getExperimentalOptions()
@@ -65,5 +66,10 @@ public class WebDriverConfiguration
     public void setExperimentalOptions(Map<String, Object> experimentalOptions)
     {
         this.experimentalOptions = experimentalOptions;
+    }
+
+    private String[] copy(String[] toCopy)
+    {
+        return Arrays.copyOf(toCopy, toCopy.length);
     }
 }
