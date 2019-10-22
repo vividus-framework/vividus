@@ -83,7 +83,7 @@
                         </ul>
                         <div class="tab-content">
                              <#assign contentType = bodyContentType?split('/')?last>
-                             <#if contentType != "html">
+                             <#if contentType == "html">
                                 <#assign body = body?html>
                              </#if>
                              <div id="pretty" class="tab-pane fade  in active">
