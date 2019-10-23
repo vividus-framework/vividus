@@ -25,12 +25,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
-import org.apache.http.ConnectionClosedException;
 import org.apache.http.Header;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicHeader;
@@ -38,28 +34,24 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.http.HttpMethod;
-import org.vividus.http.HttpRequestBuilder;
+import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
-import org.vividus.http.client.HttpResponse;
-import org.vividus.http.client.IHttpClient;
-import org.vividus.http.exception.HttpRequestBuildException;
-import org.vividus.softassert.ISoftAssert;
 
 public class ApiSteps
 {
     private static final String NAME = "name";
     private static final String VALUE = "value";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApiSteps.class);
-
     private String apiEndpoint;
+    private final HttpTestContext httpTestContext;
+    private final HttpRequestExecutor httpRequestExecutor;
 
-    private IHttpClient httpClient;
-    @Inject private HttpTestContext httpTestContext;
-    @Inject private ISoftAssert softAssert;
+    public ApiSteps(HttpTestContext httpTestContext, HttpRequestExecutor httpRequestExecutor)
+    {
+        this.httpTestContext = httpTestContext;
+        this.httpRequestExecutor = httpRequestExecutor;
+    }
 
     /**
      * Set up request body that will be used while sending request
@@ -141,7 +133,7 @@ public class ApiSteps
     @When("I issue a HTTP $httpMethod request for a resource with the URL '$url'")
     public void whenIDoHttpRequest(HttpMethod httpMethod, String url) throws IOException
     {
-        executeHttpCallSafely(prepareHttpRequestBuilder(httpMethod, url));
+        httpRequestExecutor.executeHttpRequest(httpMethod, url, Optional.empty());
     }
 
     /**
@@ -152,13 +144,12 @@ public class ApiSteps
      * @param httpMethod HTTP method type. Parameter accepts the following HTTP methods: <ul> <li>GET</li> <li>HEAD</li>
      * <li>POST</li> <li>PUT</li> <li>OPTIONS</li> <li>DELETE</li> <li>TRACE</li> <li>PATCH</li> </ul>
      * @param relativeURL relative URL
-     * @return HTTP response
      * @throws IOException If an input or output exception occurred
      */
     @When("I send HTTP $httpMethod to the relative URL '$relativeURL'")
-    public HttpResponse whenIDoHttpRequestToRelativeURL(HttpMethod httpMethod, String relativeURL) throws IOException
+    public void whenIDoHttpRequestToRelativeURL(HttpMethod httpMethod, String relativeURL) throws IOException
     {
-        return executeHttpCallSafely(prepareHttpRequestBuilder(httpMethod, apiEndpoint).withRelativeUrl(relativeURL));
+        httpRequestExecutor.executeHttpRequest(httpMethod, apiEndpoint, Optional.of(relativeURL));
     }
 
     /**
@@ -169,15 +160,14 @@ public class ApiSteps
      * <li>DELETE</li> <li>PATCH</li> </ul>
      * @param relativeURL relative URL
      * @param content HTTP method request body
-     * @return HTTP response
      * @throws IOException If an input or output exception occurred
      */
     @When(value = "I send HTTP $httpMethod to the relative URL '$relativeURL' with content: '$content'", priority = 1)
-    public HttpResponse whenIDoHttpRequestToRelativeURL(HttpMethod httpMethod, String relativeURL, String content)
+    public void whenIDoHttpRequestToRelativeURL(HttpMethod httpMethod, String relativeURL, String content)
             throws IOException
     {
         request(content);
-        return whenIDoHttpRequestToRelativeURL(httpMethod, relativeURL);
+        whenIDoHttpRequestToRelativeURL(httpMethod, relativeURL);
     }
 
     /**
@@ -242,40 +232,8 @@ public class ApiSteps
         }
     }
 
-    private HttpRequestBuilder prepareHttpRequestBuilder(HttpMethod httpMethod, String endpoint)
-    {
-        HttpRequestBuilder httpRequestBuilder = HttpRequestBuilder.create().withHttpMethod(httpMethod)
-                .withEndpoint(endpoint).withHeaders(httpTestContext.pullRequestHeaders());
-        httpTestContext.pullRequestEntity().ifPresent(httpRequestBuilder::withContent);
-        return httpRequestBuilder;
-    }
-
-    private HttpResponse executeHttpCallSafely(HttpRequestBuilder builder) throws IOException
-    {
-        try
-        {
-            HttpClientContext httpClientContext = new HttpClientContext();
-            httpTestContext.getCookieStore().ifPresent(httpClientContext::setCookieStore);
-            httpTestContext.getRequestConfig().ifPresent(httpClientContext::setRequestConfig);
-
-            HttpResponse httpResponse = httpClient.execute(builder.build(), httpClientContext);
-            LOGGER.info("Response time: {} ms", httpResponse.getResponseTimeInMs());
-            return httpResponse;
-        }
-        catch (HttpRequestBuildException | ConnectionClosedException e)
-        {
-            softAssert.recordFailedAssertion(e);
-            return null;
-        }
-    }
-
     public void setApiEndpoint(String apiEndpoint)
     {
         this.apiEndpoint = apiEndpoint;
-    }
-
-    public void setHttpClient(IHttpClient httpClient)
-    {
-        this.httpClient = httpClient;
     }
 }

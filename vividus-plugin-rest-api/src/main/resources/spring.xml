@@ -3,11 +3,15 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:util="http://www.springframework.org/schema/util"
     xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd
-        http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd"
+        http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
     default-lazy-init="true">
+
+    <context:component-scan base-package="org.vividus.http" />
 
     <bean id="httpTestContext" class="org.vividus.http.HttpTestContext" />
 
@@ -25,7 +29,6 @@
     <bean id="jsonSoftAssert" class="org.vividus.bdd.validator.JsonSoftAssert" parent="softAssert" />
 
     <bean id="apiSteps" class="org.vividus.bdd.steps.api.ApiSteps">
-        <property name="httpClient" ref="httpClient-RestApi"/>
         <property name="apiEndpoint" value="${rest-api.http.endpoint}"/>
     </bean>
 
