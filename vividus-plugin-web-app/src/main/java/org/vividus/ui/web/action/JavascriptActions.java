@@ -149,6 +149,13 @@ public class JavascriptActions implements IJavascriptActions
     }
 
     @Override
+    public double getDevicePixelRatio()
+    {
+        Number devicePixelRatio = executeScript("return window.devicePixelRatio");
+        return devicePixelRatio.doubleValue();
+    }
+
+    @Override
     public Map<String, String> getElementAttributes(WebElement webElement)
     {
         return executeScript("var attributes = arguments[0].attributes; var map = new Object();"

@@ -54,8 +54,6 @@ public interface IWebDriverManager
 
     boolean isOrientation(ScreenOrientation orientation);
 
-    double getDevicePixelRatio();
-
     Capabilities getCapabilities();
 
     Set<String> getWindowHandles();

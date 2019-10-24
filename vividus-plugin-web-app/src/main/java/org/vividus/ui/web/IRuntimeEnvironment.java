@@ -19,4 +19,6 @@ package org.vividus.ui.web;
 public interface IRuntimeEnvironment
 {
     String getUserAgent();
+
+    double getDevicePixelRatio();
 }

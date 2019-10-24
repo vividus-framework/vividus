@@ -183,7 +183,7 @@ class JavascriptActionsTests
     void testGetPageTextFirefox()
     {
         mockIsFirefox(true);
-        when(((JavascriptExecutor) webDriver).executeScript("return document.body.textContent")).thenReturn(TEXT);
+        mockScriptExecution("return document.body.textContent", TEXT);
         javascriptActions.getPageText();
         assertEquals(TEXT, javascriptActions.getPageText());
     }
@@ -192,7 +192,7 @@ class JavascriptActionsTests
     void testGetPageTextNotFirefox()
     {
         mockIsFirefox(false);
-        when(((JavascriptExecutor) webDriver).executeScript(BODY_INNER_TEXT)).thenReturn(TEXT);
+        mockScriptExecution(BODY_INNER_TEXT, TEXT);
         assertEquals(TEXT, javascriptActions.getPageText());
     }
 
@@ -215,7 +215,7 @@ class JavascriptActionsTests
     @Test
     void testGetUserAgent()
     {
-        when(((JavascriptExecutor) webDriver).executeScript("return navigator.userAgent")).thenReturn(USER_AGENT);
+        mockScriptExecution("return navigator.userAgent", USER_AGENT);
         assertEquals(USER_AGENT, javascriptActions.getUserAgent());
     }
 
@@ -267,6 +267,19 @@ class JavascriptActionsTests
         when(((JavascriptExecutor) webDriver).executeScript(viewportSize)).thenReturn(map);
         Dimension size = javascriptActions.getViewportSize();
         assertEquals(new Dimension(width.intValue(), height.intValue()), size);
+    }
+
+    @Test
+    void testGetDevicePixelRatio()
+    {
+        double devicePixelRatio = 1.5d;
+        mockScriptExecution("return window.devicePixelRatio", devicePixelRatio);
+        assertEquals(devicePixelRatio, javascriptActions.getDevicePixelRatio());
+    }
+
+    private void mockScriptExecution(String script, Object result)
+    {
+        when(((JavascriptExecutor) webDriver).executeScript(script)).thenReturn(result);
     }
 
     private void mockIsFirefox(boolean firefox)

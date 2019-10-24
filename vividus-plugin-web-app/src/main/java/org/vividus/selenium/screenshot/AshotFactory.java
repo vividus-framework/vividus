@@ -19,13 +19,17 @@ package org.vividus.selenium.screenshot;
 import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.cutting;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
+
+import com.google.common.base.Suppliers;
 
 import org.openqa.selenium.ScreenOrientation;
 import org.vividus.selenium.IWebDriverFactory;
 import org.vividus.selenium.SauceLabsCapabilityType;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.web.IRuntimeEnvironment;
 import org.vividus.ui.web.action.IJavascriptActions;
 
 import ru.yandex.qatools.ashot.AShot;
@@ -37,37 +41,35 @@ import ru.yandex.qatools.ashot.shooting.cutter.FixedCutStrategy;
 public class AshotFactory implements IAshotFactory
 {
     private ScreenshotShootingStrategy screenshotShootingStrategy;
-    private ShootingStrategy baseShootingStrategy;
 
     @Inject private IWebDriverFactory webDriverFactory;
     @Inject private IWebDriverManager webDriverManager;
     @Inject private IJavascriptActions javascriptActions;
+    @Inject private IRuntimeEnvironment runtimeEnvironment;
     @Inject private ScreenshotDebugger screenshotDebugger;
 
-    public void init()
-    {
-        baseShootingStrategy = ShootingStrategies.scaling((float) webDriverManager.getDevicePixelRatio());
-    }
+    private Supplier<ShootingStrategy> baseShootingStrategy = Suppliers.memoize(
+        () -> ShootingStrategies.scaling((float) runtimeEnvironment.getDevicePixelRatio()));
 
     @Override
     public AShot create(boolean viewportScreenshot, Optional<ScreenshotConfiguration> screenshotConfiguration)
     {
         return screenshotConfiguration.map(
             ashotConfiguration -> ashotConfiguration.getScreenshotShootingStrategy()
-                    .map(sss -> createAShot(baseShootingStrategy, sss, viewportScreenshot))
+                    .map(sss -> createAShot(baseShootingStrategy.get(), sss, viewportScreenshot))
                     .orElseGet(() -> createAshot(ashotConfiguration)))
-                .orElseGet(() -> createAShot(baseShootingStrategy, viewportScreenshot));
+                .orElseGet(() -> createAShot(baseShootingStrategy.get(), viewportScreenshot));
     }
 
     private AShot createAshot(ScreenshotConfiguration screenshotConfiguration)
     {
-        ShootingStrategy decorated = baseShootingStrategy;
+        ShootingStrategy decorated = baseShootingStrategy.get();
 
         int nativeFooterToCut = screenshotConfiguration.getNativeFooterToCut();
         int nativeHeaderToCut = screenshotConfiguration.getNativeHeaderToCut();
         if (anyNotZero(nativeFooterToCut, nativeHeaderToCut))
         {
-            decorated = cutting(baseShootingStrategy, new FixedCutStrategy(nativeHeaderToCut, nativeFooterToCut));
+            decorated = cutting(baseShootingStrategy.get(), new FixedCutStrategy(nativeHeaderToCut, nativeFooterToCut));
         }
 
         int footerToCut = screenshotConfiguration.getWebFooterToCut();

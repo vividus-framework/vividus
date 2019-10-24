@@ -85,7 +85,7 @@
         <property name="debugScreenshotsLocation" value="${selenium.screenshot.debug-directory}" />
     </bean>
 
-    <bean id="ashotFactory" class="org.vividus.selenium.screenshot.AshotFactory" init-method="init">
+    <bean id="ashotFactory" class="org.vividus.selenium.screenshot.AshotFactory">
         <property name="screenshotShootingStrategy" value="${selenium.screenshot.strategy}" />
     </bean>
 
@@ -96,7 +96,6 @@
 
     <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager">
         <property name="nativeApp" value="${mobile-native-app}" />
-        <property name="devicePixelRatio" value="${selenium.device-pixel-ratio}" />
     </bean>
 
     <bean id="fieldActions" class="org.vividus.ui.web.action.FieldActions" />
