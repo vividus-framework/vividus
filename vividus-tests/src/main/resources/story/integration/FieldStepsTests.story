@@ -10,7 +10,7 @@ Examples:
 |By.id(textInput)|textInput|
 
 Scenario: Set-Up
-Given I am on a page with the URL 'https://mdn.mozillademos.org/en-US/docs/Web/HTML/Element/input$samples/Styling_input_elements'
+Given I am on a page with the URL 'https://mdn.mozillademos.org/en-US/docs/Web/HTML/Element/input$samples/caret-color'
 
 Scenario: Step verification Then field located `$locator` does not exist
 Then field located `By.xpath(//noSuchField):a->filter.textPath(text)` does not exist
