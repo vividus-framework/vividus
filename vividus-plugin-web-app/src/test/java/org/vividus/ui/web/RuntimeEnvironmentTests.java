@@ -17,22 +17,22 @@
 package org.vividus.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.ui.web.action.IJavascriptActions;
 
 @ExtendWith(MockitoExtension.class)
 class RuntimeEnvironmentTests
 {
-    private static final String USER_AGENT = "userAgent";
-
     @Mock
-    private IJavascriptActions jsActions;
+    private IJavascriptActions javascriptActions;
 
     @InjectMocks
     private RuntimeEnvironment runtimeConfiguration;
@@ -40,15 +40,32 @@ class RuntimeEnvironmentTests
     @Test
     void testGetUserAgent()
     {
-        Mockito.when(jsActions.getUserAgent()).thenReturn(USER_AGENT);
-        assertEquals(USER_AGENT, runtimeConfiguration.getUserAgent());
+        String userAgent = "userAgent";
+        when(javascriptActions.getUserAgent()).thenReturn(userAgent);
+        assertEquals(userAgent, runtimeConfiguration.getUserAgent());
     }
 
     @Test
-    void testGetUserAgentMultipleCalls()
+    void testGetUserAgentMultipleTimes()
     {
         runtimeConfiguration.getUserAgent();
         runtimeConfiguration.getUserAgent();
-        Mockito.verify(jsActions).getUserAgent();
+        verify(javascriptActions, times(1)).getUserAgent();
+    }
+
+    @Test
+    void testGetDevicePixelRatio()
+    {
+        double devicePixelRatio = 2d;
+        when(javascriptActions.getDevicePixelRatio()).thenReturn(devicePixelRatio);
+        assertEquals(devicePixelRatio, runtimeConfiguration.getDevicePixelRatio());
+    }
+
+    @Test
+    void testGetDevicePixelRatioMultipleTimes()
+    {
+        runtimeConfiguration.getDevicePixelRatio();
+        runtimeConfiguration.getDevicePixelRatio();
+        verify(javascriptActions, times(1)).getDevicePixelRatio();
     }
 }

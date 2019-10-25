@@ -80,6 +80,8 @@ public interface IJavascriptActions
 
     String getUserAgent();
 
+    double getDevicePixelRatio();
+
     Map<String, String> getElementAttributes(WebElement webElement);
 
     Position getElementPosition(WebElement webElement);

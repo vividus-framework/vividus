@@ -625,13 +625,6 @@ class WebDriverManagerTests
         verifyNoInteractions(mobileDriver);
     }
 
-    @Test
-    void testGetScaleRatio()
-    {
-        webDriverManager.setDevicePixelRatio(1);
-        assertEquals(1, webDriverManager.getDevicePixelRatio());
-    }
-
     static Stream<Arguments> nativeApplicationViewportProvider()
     {
         return Stream.of(

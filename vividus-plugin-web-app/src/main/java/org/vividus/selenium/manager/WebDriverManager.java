@@ -59,7 +59,6 @@ public class WebDriverManager implements IWebDriverManager
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IWebDriverManagerContext webDriverManagerContext;
     private boolean nativeApp;
-    private double devicePixelRatio;
 
     @Override
     public void resize(BrowserWindowSize browserWindowSize)
@@ -327,12 +326,6 @@ public class WebDriverManager implements IWebDriverManager
     }
 
     @Override
-    public double getDevicePixelRatio()
-    {
-        return devicePixelRatio;
-    }
-
-    @Override
     public boolean isOrientation(ScreenOrientation orientation)
     {
         if (!isMobile())
@@ -362,10 +355,5 @@ public class WebDriverManager implements IWebDriverManager
     public void setNativeApp(boolean nativeApp)
     {
         this.nativeApp = nativeApp;
-    }
-
-    public void setDevicePixelRatio(double devicePixelRatio)
-    {
-        this.devicePixelRatio = devicePixelRatio;
     }
 }

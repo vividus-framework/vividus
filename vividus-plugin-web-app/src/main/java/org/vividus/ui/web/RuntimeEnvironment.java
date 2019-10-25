@@ -16,19 +16,30 @@
 
 package org.vividus.ui.web;
 
-import javax.inject.Inject;
-
 import org.vividus.ui.web.action.IJavascriptActions;
 
 public class RuntimeEnvironment implements IRuntimeEnvironment
 {
-    @Inject private IJavascriptActions javascriptActions;
+    private IJavascriptActions javascriptActions;
 
     private final ThreadLocal<String> userAgent = ThreadLocal.withInitial(() -> javascriptActions.getUserAgent());
+    private final ThreadLocal<Double> devicePixelRatio = ThreadLocal.withInitial(
+        () -> javascriptActions.getDevicePixelRatio());
+
+    public RuntimeEnvironment(IJavascriptActions javascriptActions)
+    {
+        this.javascriptActions = javascriptActions;
+    }
 
     @Override
     public String getUserAgent()
     {
         return userAgent.get();
+    }
+
+    @Override
+    public double getDevicePixelRatio()
+    {
+        return devicePixelRatio.get();
     }
 }
