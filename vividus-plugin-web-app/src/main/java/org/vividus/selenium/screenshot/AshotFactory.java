@@ -29,7 +29,6 @@ import org.openqa.selenium.ScreenOrientation;
 import org.vividus.selenium.IWebDriverFactory;
 import org.vividus.selenium.SauceLabsCapabilityType;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.IRuntimeEnvironment;
 import org.vividus.ui.web.action.IJavascriptActions;
 
 import ru.yandex.qatools.ashot.AShot;
@@ -45,11 +44,10 @@ public class AshotFactory implements IAshotFactory
     @Inject private IWebDriverFactory webDriverFactory;
     @Inject private IWebDriverManager webDriverManager;
     @Inject private IJavascriptActions javascriptActions;
-    @Inject private IRuntimeEnvironment runtimeEnvironment;
     @Inject private ScreenshotDebugger screenshotDebugger;
 
     private Supplier<ShootingStrategy> baseShootingStrategy = Suppliers.memoize(
-        () -> ShootingStrategies.scaling((float) runtimeEnvironment.getDevicePixelRatio()));
+        () -> ShootingStrategies.scaling((float) javascriptActions.getDevicePixelRatio()));
 
     @Override
     public AShot create(boolean viewportScreenshot, Optional<ScreenshotConfiguration> screenshotConfiguration)

@@ -17,6 +17,7 @@
 package org.vividus.ui.web.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +48,6 @@ class JavascriptActionsTests
     private static final String TEXT = "text";
     private static final String BODY_INNER_TEXT = "return document.body.innerText";
     private static final String ELEMENT_INNER_TEXT = "return arguments[0].innerText";
-    private static final String USER_AGENT = "user agent";
     private static final String SCRIPT_GET_ELEMENT_ATTRIBUTES = "var attributes = arguments[0].attributes;"
             + " var map = new Object(); for(i=0; i< attributes.length; i++)"
             + "{ map[attributes[i].name] = attributes[i].value; } return map;";
@@ -57,6 +57,9 @@ class JavascriptActionsTests
     private static final String LEFT = "left";
     private static final String SCRIPT_SET_TOP_POSITION = "var originTop = arguments[0].getBoundingClientRect().top;"
             + " arguments[0].style.top = \"%dpx\"; return Math.round(originTop);";
+
+    private static final String GET_USER_AGENT_JS = "return navigator.userAgent";
+    private static final String GET_DPR_JS = "return window.devicePixelRatio";
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -215,8 +218,17 @@ class JavascriptActionsTests
     @Test
     void testGetUserAgent()
     {
-        mockScriptExecution("return navigator.userAgent", USER_AGENT);
-        assertEquals(USER_AGENT, javascriptActions.getUserAgent());
+        String userAgent = "userAgent";
+        mockScriptExecution(GET_USER_AGENT_JS, userAgent);
+        assertEquals(userAgent, javascriptActions.getUserAgent());
+    }
+
+    @Test
+    void testGetUserAgentMultipleTimes()
+    {
+        javascriptActions.getUserAgent();
+        javascriptActions.getUserAgent();
+        verify((JavascriptExecutor) webDriver, times(1)).executeScript(GET_USER_AGENT_JS);
     }
 
     @Test
@@ -273,8 +285,18 @@ class JavascriptActionsTests
     void testGetDevicePixelRatio()
     {
         double devicePixelRatio = 1.5d;
-        mockScriptExecution("return window.devicePixelRatio", devicePixelRatio);
+        mockScriptExecution(GET_DPR_JS, devicePixelRatio);
         assertEquals(devicePixelRatio, javascriptActions.getDevicePixelRatio());
+    }
+
+    @Test
+    void testGetDevicePixelRatioMultipleTimes()
+    {
+        double devicePixelRatio = 1.5d;
+        mockScriptExecution(GET_DPR_JS, devicePixelRatio);
+        javascriptActions.getDevicePixelRatio();
+        javascriptActions.getDevicePixelRatio();
+        verify((JavascriptExecutor) webDriver, times(1)).executeScript(GET_DPR_JS);
     }
 
     private void mockScriptExecution(String script, Object result)

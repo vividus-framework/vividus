@@ -18,8 +18,6 @@ package org.vividus.ui.web.action;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -36,8 +34,22 @@ public class JavascriptActions implements IJavascriptActions
             + ".createEvent('MouseEvents');evObj.initEvent('%1$s', true, false); arguments[0].dispatchEvent(evObj);} "
             + "else if(document.createEventObject) { arguments[0].fireEvent('on%1$s');}";
 
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IWebDriverManager webDriverManager;
+    private IWebDriverProvider webDriverProvider;
+    private IWebDriverManager webDriverManager;
+
+    private final ThreadLocal<String> userAgent = ThreadLocal.withInitial(
+        () -> executeScript("return navigator.userAgent"));
+
+    private final ThreadLocal<Double> devicePixelRatio = ThreadLocal.withInitial(() -> {
+        Number devicePixelRatio = executeScript("return window.devicePixelRatio");
+        return devicePixelRatio.doubleValue();
+    });
+
+    public JavascriptActions(IWebDriverProvider webDriverProvider, IWebDriverManager webDriverManager)
+    {
+        this.webDriverProvider = webDriverProvider;
+        this.webDriverManager = webDriverManager;
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -145,14 +157,13 @@ public class JavascriptActions implements IJavascriptActions
     @Override
     public String getUserAgent()
     {
-        return executeScript("return navigator.userAgent");
+        return userAgent.get();
     }
 
     @Override
     public double getDevicePixelRatio()
     {
-        Number devicePixelRatio = executeScript("return window.devicePixelRatio");
-        return devicePixelRatio.doubleValue();
+        return devicePixelRatio.get();
     }
 
     @Override
