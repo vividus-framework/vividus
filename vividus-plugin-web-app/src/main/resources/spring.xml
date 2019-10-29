@@ -134,7 +134,6 @@
         <property name="javascriptActions" ref="javascriptActions" />
     </bean>
 
-    <bean id="runtimeEnvironment" class="org.vividus.ui.web.RuntimeEnvironment" />
     <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
 
     <bean id="searchActions" class="org.vividus.ui.web.action.SearchActions">

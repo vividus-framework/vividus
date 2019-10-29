@@ -39,7 +39,6 @@ import org.powermock.reflect.Whitebox;
 import org.vividus.selenium.IWebDriverFactory;
 import org.vividus.selenium.SauceLabsCapabilityType;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.IRuntimeEnvironment;
 import org.vividus.ui.web.action.IJavascriptActions;
 
 import ru.yandex.qatools.ashot.AShot;
@@ -71,8 +70,6 @@ class AshotFactoryTests
     private IScrollbarHandler scrollbarHandler;
     @Mock
     private ScreenshotDebugger screenshotDebugger;
-    @Mock
-    private IRuntimeEnvironment runtimeEnvironment;
 
     @InjectMocks
     private AshotFactory ashotFactory;
@@ -80,7 +77,7 @@ class AshotFactoryTests
     @BeforeEach
     void beforeEach()
     {
-        when(runtimeEnvironment.getDevicePixelRatio()).thenReturn(2d);
+        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
     }
 
     @Test
