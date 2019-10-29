@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -46,6 +47,7 @@ import org.jbehave.core.steps.StepMonitor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -114,10 +116,14 @@ public class ConfigurationTests
         List<StepMonitor> stepMonitors = List.of(mock(StepMonitor.class));
         spy.setStepMonitors(stepMonitors);
         spy.init();
+
         verify(spy).useKeywords(keywords);
         verify(spy).useCompositePaths(new HashSet<>(compositePaths));
-        verify(spy).useStoryParser(regexStoryParser);
-        verify(spy).useParameterConverters(parameterConverters);
+
+        InOrder inOrder = inOrder(spy);
+        inOrder.verify(spy).useParameterConverters(parameterConverters);
+        inOrder.verify(spy).useStoryParser(regexStoryParser);
+
         verify(spy).useStoryControls(storyControls);
         verifyStepMonitor(spy, stepMonitors.get(0));
     }

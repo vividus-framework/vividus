@@ -59,9 +59,9 @@ public class Configuration extends MostUsefulConfiguration
     {
         initKeywords();
         initCompositePaths();
-        useStoryParser(new RegexStoryParser(keywords(), examplesTableFactory()));
         useParameterConverters(new ParameterConvertersDecorator(this, parameterAdaptor, expressionAdaptor)
                 .addConverters(customConverters));
+        useStoryParser(new RegexStoryParser(keywords(), examplesTableFactory()));
         TableTransformers transformers = tableTransformers();
         customTableTransformers.forEach(transformers::useTransformer);
         useStepMonitor(new DelegatingStepMonitor(stepMonitors));
