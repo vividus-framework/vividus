@@ -31,3 +31,17 @@ Examples:
 |column1|column2|
 |A      |C      |
 |B      |D      |
+
+
+Scenario: Create a counter
+When I initialize the STORY variable `updatedNumber` with value `0`
+
+
+Scenario: Update the counter through ITERATING with a global variable
+When I initialize the STORY variable `updatedNumber` with value `#{eval(${updatedNumber} + 1)}`
+Examples:
+{transformer=ITERATING, limit=$\{iterationLimit\}}
+
+
+Scenario: Verify the number of actual iterations
+Then `${updatedNumber}` is = `${iterationLimit}`
