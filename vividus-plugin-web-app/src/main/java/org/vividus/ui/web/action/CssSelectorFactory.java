@@ -37,22 +37,8 @@ public class CssSelectorFactory implements ICssSelectorFactory
     @Override
     public String getCssSelector(WebElement element)
     {
-        String elementCss = javascriptActions.executeScriptFromResource(CssSelectorFactory.class,
+        return javascriptActions.executeScriptFromResource(CssSelectorFactory.class,
                 CSS_SELECTOR_FACTORY_SCRIPT_FILENAME, element);
-        return escapeSharpSymbol(elementCss);
-    }
-
-    private String escapeSharpSymbol(String elementCss)
-    {
-        if (elementCss.length() > 1)
-        {
-            char firstIdChar = elementCss.charAt(1);
-            if (elementCss.charAt(0) == '#' && Character.isDigit(firstIdChar))
-            {
-                return "#\\" + Integer.toHexString(firstIdChar) + elementCss.substring(2);
-            }
-        }
-        return elementCss;
     }
 
     @Override
@@ -66,6 +52,6 @@ public class CssSelectorFactory implements ICssSelectorFactory
     {
         List<String> elementCss = javascriptActions.executeScriptFromResource(CssSelectorFactory.class,
                 CSS_SELECTOR_FACTORY_SCRIPT_FILENAME, elements);
-        return elementCss.stream().map(this::escapeSharpSymbol);
+        return elementCss.stream();
     }
 }

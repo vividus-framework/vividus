@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,7 +37,8 @@ class CssSelectorFactoryTests
 {
     private static final String CSS_SELECTOR1 = ".css-selector1";
 
-    private static final List<String> CSS_SELECTORS = Arrays.asList(CSS_SELECTOR1, "#2");
+    private static final String SHARP_TWO = "#2";
+    private static final List<String> CSS_SELECTORS = Arrays.asList(CSS_SELECTOR1, SHARP_TWO);
 
     private static final String CSS_SELECTOR_FACTORY_JS = "css-selector-factory.js";
 
@@ -49,17 +48,13 @@ class CssSelectorFactoryTests
     @InjectMocks
     private CssSelectorFactory cssSelectorFactory;
 
-    @ParameterizedTest
-    @CsvSource({"cssLocator, cssLocator",
-                "'#abc',     '#abc'",
-                "a,          a",
-                "'#123',     '#\\3123'" })
-    void testGetCssSelectorForElement(String rawCss, String expectedCss)
+    @Test
+    void testGetCssSelectorForElement()
     {
         WebElement element = mock(WebElement.class);
         when(javascriptActions.executeScriptFromResource(CssSelectorFactory.class, CSS_SELECTOR_FACTORY_JS, element))
-                .thenReturn(rawCss);
-        assertEquals(expectedCss, cssSelectorFactory.getCssSelector(element));
+                .thenReturn(SHARP_TWO);
+        assertEquals(SHARP_TWO, cssSelectorFactory.getCssSelector(element));
     }
 
     @Test
@@ -69,17 +64,18 @@ class CssSelectorFactoryTests
         WebElement element2 = mock(WebElement.class);
         doReturn(CSS_SELECTORS).when(javascriptActions).executeScriptFromResource(CssSelectorFactory.class,
                 CSS_SELECTOR_FACTORY_JS, Arrays.asList(element1, element2));
-        assertEquals(".css-selector1,#\\32", cssSelectorFactory.getCssSelector(Arrays.asList(element1, element2)));
+        assertEquals(".css-selector1,#2", cssSelectorFactory.getCssSelector(Arrays.asList(element1, element2)));
     }
 
     @Test
     void testGetCssSelectorsOf()
     {
-        WebElement element1 = mock(WebElement.class);
-        WebElement element2 = mock(WebElement.class);
+        WebElement webElement1 = mock(WebElement.class);
+        WebElement webElement2 = mock(WebElement.class);
         doReturn(CSS_SELECTORS).when(javascriptActions).executeScriptFromResource(CssSelectorFactory.class,
-                CSS_SELECTOR_FACTORY_JS, Arrays.asList(element1, element2));
-        assertEquals(Arrays.asList(CSS_SELECTOR1, "#\\32"),
-                cssSelectorFactory.getCssSelectors(Arrays.asList(element1, element2)).collect(Collectors.toList()));
+                CSS_SELECTOR_FACTORY_JS, Arrays.asList(webElement1, webElement2));
+        assertEquals(Arrays.asList(CSS_SELECTOR1, SHARP_TWO), cssSelectorFactory
+                .getCssSelectors(Arrays.asList(webElement1, webElement2))
+                .collect(Collectors.toList()));
     }
 }

@@ -26,8 +26,15 @@ function buildElementIdentifier(element) {
     return identifier;
 }
 
-function escapeSpecialChars(str) {
-    return str.replace(/(:| |'|\.|!)/g, '\\$1')
+function escapeSpecialChars(string) {
+    var result = '';
+    var first = string.charCodeAt(0);
+    if (first >= 0x0030 && first <= 0x0039) {
+        result += '\\' + first.toString(16) + ' ';
+        string = string.substring(1);
+    }
+    result += string.replace(/(:| |'|\.|!)/g, '\\$1');
+    return result;
 }
 
 function escapeColon(str) {
