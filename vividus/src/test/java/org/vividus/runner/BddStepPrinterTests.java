@@ -45,7 +45,7 @@ import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.*", "org.xml.*", "org.w3c.*", "com.sun.*"})
 public class BddStepPrinterTests extends SystemOutTests
 {
     @Test
@@ -97,9 +97,9 @@ public class BddStepPrinterTests extends SystemOutTests
         StepCandidate stepCandidate2 = mockStepCandidate("When", "I do '$action'", "deprecatedMethod");
         StepCandidate stepCandidate3 = mockStepCandidate("Then", "I perform '$verification'", (Method) null);
         when(candidateSteps.listCandidates()).thenReturn(List.of(stepCandidate1, stepCandidate2, stepCandidate3));
-        return List.of("                        Given initial state is '$status'",
-                             "COMPOSITE IN STEPS FILE Then I perform '$verification'",
-                             "DEPRECATED              When I do '$action'");
+        return List.of("                         Given initial state is '$status'",
+                " DEPRECATED              When I do '$action'",
+                " COMPOSITE IN STEPS FILE Then I perform '$verification'");
     }
 
 
