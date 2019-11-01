@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -34,6 +35,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
@@ -42,7 +44,9 @@ import org.vividus.configuration.Vividus;
 
 public final class BddStepPrinter
 {
-    private static final String SPACE = " ";
+    private static final String DEPRECATED = "DEPRECATED";
+    private static final String COMPOSITE = "COMPOSITE IN STEPS FILE";
+    private static final String EMPTY = "";
 
     private BddStepPrinter()
     {
@@ -68,15 +72,23 @@ public final class BddStepPrinter
         Vividus.init();
         Set<Step> steps = getSteps();
 
+        int maxLocationLength = steps.stream().map(Step::getLocation).mapToInt(String::length).max().orElse(0);
+
+        List<String> stepsLines = steps.stream().map(s -> String
+                .format("%-" + (maxLocationLength + 1) + "s%-24s%s %s", s.getLocation(),
+                        s.deprecated ? DEPRECATED : (s.compositeInStepsFile ? COMPOSITE : EMPTY), s.startingWord,
+                        s.pattern))
+                .collect(Collectors.toList());
+
         String file = commandLine.getOptionValue(fileOption.getOpt());
         if (file == null)
         {
-            steps.forEach(System.out::println);
+            stepsLines.forEach(System.out::println);
         }
         else
         {
             Path path = Paths.get(file);
-            FileUtils.writeLines(path.toFile(), steps);
+            FileUtils.writeLines(path.toFile(), stepsLines);
             System.out.println("File with BDD steps: " + path.toAbsolutePath());
         }
     }
@@ -94,29 +106,47 @@ public final class BddStepPrinter
 
     private static Step createStepFrom(StepCandidate candidate)
     {
-        Step step = new Step();
-        step.setDefinition(candidate.getStartingWord() + SPACE + candidate.getPatternAsString());
+        Step step = new Step(candidate.getStartingWord(), candidate.getPatternAsString());
         Method method = candidate.getMethod();
         // Method could be null for composite steps declared in *.steps files
         boolean compositeInStepsFile = method == null;
         step.setCompositeInStepsFile(compositeInStepsFile);
-        step.setDeprecated(!compositeInStepsFile && method.isAnnotationPresent(Deprecated.class));
+        if (!compositeInStepsFile)
+        {
+            step.setDeprecated(method.isAnnotationPresent(Deprecated.class));
+            String baseFileName = FilenameUtils.getBaseName(
+                    method.getDeclaringClass().getProtectionDomain().getCodeSource().getLocation().toString());
+            step.setLocation(baseFileName.replaceAll("-\\d+\\.\\d+\\.\\d+.*", EMPTY));
+        }
+        else
+        {
+            step.setLocation(EMPTY);
+        }
         return step;
     }
 
-    private static class Step implements Comparable<Step>
+    private static final class Step implements Comparable<Step>
     {
-        private static final String DEPRECATED        = "DEPRECATED              ";
-        private static final String COMPOSITE         = "COMPOSITE IN STEPS FILE ";
-        private static final String EMPTY_PLACEHOLDER = "                        ";
-
-        private String definition;
+        private final String startingWord;
+        private final String pattern;
         private boolean deprecated;
         private boolean compositeInStepsFile;
+        private String location;
 
-        private void setDefinition(String definition)
+        private Step(String startingWord, String pattern)
         {
-            this.definition = definition;
+            this.startingWord = startingWord;
+            this.pattern = pattern;
+        }
+
+        private String getStartingWord()
+        {
+            return startingWord;
+        }
+
+        private String getPattern()
+        {
+            return pattern;
         }
 
         private void setDeprecated(boolean deprecated)
@@ -124,47 +154,57 @@ public final class BddStepPrinter
             this.deprecated = deprecated;
         }
 
-        public void setCompositeInStepsFile(boolean compositeInStepsFile)
+        private boolean isCompositeInStepsFile()
+        {
+            return compositeInStepsFile;
+        }
+
+        private void setCompositeInStepsFile(boolean compositeInStepsFile)
         {
             this.compositeInStepsFile = compositeInStepsFile;
         }
 
-        @Override
-        public String toString()
+        private String getLocation()
         {
-            return (deprecated ? DEPRECATED : compositeInStepsFile ? COMPOSITE : EMPTY_PLACEHOLDER) + definition;
+            return location;
+        }
+
+        private void setLocation(String location)
+        {
+            this.location = location;
         }
 
         @Override
         public int compareTo(Step anotherStep)
         {
-            return definition.compareTo(anotherStep.definition);
+            return Comparator.comparing(Step::isCompositeInStepsFile)
+                    .thenComparing(Step::getLocation)
+                    .thenComparing(Step::getStartingWord)
+                    .thenComparing(Step::getPattern)
+                    .compare(this, anotherStep);
         }
 
         @Override
-        public boolean equals(Object obj)
+        public boolean equals(Object o)
         {
-            if (obj == this)
+            if (this == o)
             {
                 return true;
             }
-            if (obj == null)
+            if (o == null || getClass() != o.getClass())
             {
                 return false;
             }
-            if (obj.getClass() != this.getClass())
-            {
-                return false;
-            }
-            Step other = (Step) obj;
-            return deprecated == other.deprecated && compositeInStepsFile == other.compositeInStepsFile
-                    && Objects.equals(definition, other.definition);
+            Step step = (Step) o;
+            return deprecated == step.deprecated && compositeInStepsFile == step.compositeInStepsFile && Objects.equals(
+                    startingWord, step.startingWord) && Objects.equals(pattern, step.pattern) && Objects.equals(
+                    location, step.location);
         }
 
         @Override
         public int hashCode()
         {
-            return Objects.hash(definition, deprecated, compositeInStepsFile);
+            return Objects.hash(startingWord, pattern, deprecated, compositeInStepsFile, location);
         }
     }
 }
