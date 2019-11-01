@@ -39,18 +39,12 @@ class UriUtilsTests
     private static final String USER_INFO = USER + ":" + PASSWORD;
     private static final String AUTHORITY = "somehost:8080";
     private static final String PATH = "/path";
-    private static final String BAD_PATH = "/pa | th";
     private static final String FRAGMENT = "#fragment";
-    private static final String BAD_FRAGMENT = "#fra| gme nt";
     private static final String GOOD_QUERY = "?name=goodvalue&a=b";
-    private static final String BAD_QUERY = "?name=bad|value&a=b";
-    private static final String ENCODED_BAD_QUERY = "?name=bad%7Cvalue&a=b";
     private static final String AT = "@";
 
     private static final String SERVER_URI_STR = SCHEME + SCHEME_SPLITTER + AUTHORITY;
     private static final String BASE_URI_STR = SERVER_URI_STR + PATH;
-    private static final String BASE_URI_BAD_QUERY_STR = BASE_URI_STR + BAD_QUERY + FRAGMENT;
-    private static final String URI_WITH_ENCODED_QUERY = BASE_URI_STR + ENCODED_BAD_QUERY + FRAGMENT;
     private static final URI BASE_URI = URI.create(BASE_URI_STR);
     private static final URI URI_WITH_USER_INFO = URI.create(SCHEME + SCHEME_SPLITTER + USER_INFO + AT + AUTHORITY
             + PATH);
@@ -149,42 +143,23 @@ class UriUtilsTests
         assertEquals(BASE_URI, newUri);
     }
 
-    @Test
-    void testCreateUri()
+    @ParameterizedTest
+    @CsvSource({
+        // CHECKSTYLE:OFF
+        "http://somehost:8080/path,                                   http://somehost:8080/path",
+        "http://somehost:8080/path?name=goodvalue&a=b#fragment,       http://somehost:8080/path?name=goodvalue&a=b#fragment",
+        "http://somehost:8080/pa | th?name=bad|value&a=b#fra| gme nt, http://somehost:8080/pa%20%7C%20th?name=bad%7Cvalue&a=b#fra%7C%20gme%20nt",
+        "http://somehost:8080/path?name=bad|value&a=b#fragment,       http://somehost:8080/path?name=bad%7Cvalue&a=b#fragment",
+        "http://somehost:8080/path?name=bad%7Cvalue&a=b#fragment,     http://somehost:8080/path?name=bad%7Cvalue&a=b#fragment",
+        "tel:1234567#0987,                                            tel:1234567#0987",
+        "https://ad.doubleclick.net/ddm/activity/src=5337729;type=brand0;cat=brand0;u9=[Cachebuster];u10=[SPIKA Locale];u11=[SPIKA Brand];u12=[Page Path];u13=[SPIKA Language];u14=[Cocktail ID];u15=[Page Type];dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord=1?," +
+            "https://ad.doubleclick.net/ddm/activity/src=5337729;type=brand0;cat=brand0;u9=%5BCachebuster%5D;u10=%5BSPIKA%20Locale%5D;u11=%5BSPIKA%20Brand%5D;u12=%5BPage%20Path%5D;u13=%5BSPIKA%20Language%5D;u14=%5BCocktail%20ID%5D;u15=%5BPage%20Type%5D;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord=1?"
+        // CHECKSTYLE:ON
+    })
+    void testCreateUri(String input, URI expected)
     {
-        String baseUriGoodQueryStr = BASE_URI_STR + GOOD_QUERY + FRAGMENT;
-        URI newUri = UriUtils.createUri(baseUriGoodQueryStr);
-        assertEquals(baseUriGoodQueryStr, newUri.toString());
-    }
-
-    @Test
-    void testCreateBadUri()
-    {
-        String baseBadUri = SERVER_URI_STR + BAD_PATH + BAD_QUERY + BAD_FRAGMENT;
-        URI newUri = UriUtils.createUri(baseBadUri);
-        String expected = SERVER_URI_STR + "/pa%20%7C%20th" + ENCODED_BAD_QUERY + "#fra%7C%20gme%20nt";
-        assertEquals(expected, newUri.toString());
-    }
-
-    @Test
-    void testCreateUriBadQuery()
-    {
-        URI newUri = UriUtils.createUri(BASE_URI_BAD_QUERY_STR);
-        assertEquals(URI_WITH_ENCODED_QUERY, newUri.toString());
-    }
-
-    @Test
-    void testCreateUriDoubleEncoding()
-    {
-        URI newUri = UriUtils.createUri(UriUtils.createUri(BASE_URI_BAD_QUERY_STR).toString());
-        assertEquals(URI_WITH_ENCODED_QUERY, newUri.toString());
-    }
-
-    @Test
-    void testCreateUriNoQuery()
-    {
-        URI newUri = UriUtils.createUri(BASE_URI_STR);
-        assertEquals(BASE_URI, newUri);
+        URI actual = UriUtils.createUri(input);
+        assertEquals(expected, actual);
     }
 
     @Test
