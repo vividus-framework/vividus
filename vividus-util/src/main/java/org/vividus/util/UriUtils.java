@@ -17,8 +17,10 @@
 package org.vividus.util;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -116,6 +118,12 @@ public final class UriUtils
             }
             String scheme = decodedUrl.substring(0, schemeSeparatorIndex);
 
+            if (scheme.startsWith("http"))
+            {
+                URL uri = new URL(decodedUrl);
+                return new URI(uri.getProtocol(), uri.getAuthority(), uri.getPath(), uri.getQuery(), uri.getRef());
+            }
+
             char fragmentSeparator = '#';
             int fragmentSeparatorIndex = decodedUrl.lastIndexOf(fragmentSeparator);
             String fragment = null;
@@ -136,7 +144,7 @@ public final class UriUtils
             }
             return URI.create(result.toString());
         }
-        catch (UnsupportedEncodingException | URISyntaxException e)
+        catch (UnsupportedEncodingException | URISyntaxException | MalformedURLException e)
         {
             throw new IllegalArgumentException(e);
         }
