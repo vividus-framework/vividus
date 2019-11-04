@@ -276,7 +276,6 @@ class BaseValidationsTests
                 eq(webElements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void testAssertIfExactNumberOfElementsFoundNullList()
     {

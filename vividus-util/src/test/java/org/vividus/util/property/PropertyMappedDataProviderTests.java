@@ -49,7 +49,7 @@ class PropertyMappedDataProviderTests
     }
 
     @Test
-    void testSuccesfulGet()
+    void testSuccessfulGet()
     {
         assertEquals(VALUE, provider.get(KEY));
     }

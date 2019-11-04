@@ -37,7 +37,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.support.ui.Select;
@@ -50,7 +49,6 @@ import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.SearchParameters;
 import org.vividus.ui.web.action.search.Visibility;
-import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,16 +78,10 @@ class DropdownStepsTests
     private IBaseValidations baseValidations;
 
     @Mock
-    private IWebUiContext webUiContext;
-
-    @Mock
     private IHighlightingSoftAssert softAssert;
 
     @Mock
     private WebElement webElement;
-
-    @Mock
-    private SearchContext searchContext;
 
     @InjectMocks
     private DropdownSteps dropdownSteps;

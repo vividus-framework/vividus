@@ -149,7 +149,6 @@ class VisualStepsTests
         verifyCheckResultPublish();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldAssertCheckResultForCompareAgainstActionAndUseStepLevelExclusions() throws IOException
     {
@@ -171,7 +170,6 @@ class VisualStepsTests
         verifyCheckResultPublish();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldRunVisualTestWithStepLevelExclusionsAndCustomScreenshotConfiguration() throws IOException
     {

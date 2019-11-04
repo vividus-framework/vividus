@@ -44,7 +44,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.HasCapabilities;
@@ -192,7 +191,7 @@ class MouseActionsTests
         WrapsElement wrapsElement = mock(WrapsElement.class);
         WebElement webElement = mock(WebElement.class);
         when(wrapsElement.getWrappedElement()).thenReturn(webElement);
-        MouseActions spy = Mockito.spy(mouseActions);
+        MouseActions spy = spy(mouseActions);
         ClickResult expectedResult = new ClickResult();
         doReturn(expectedResult).when(spy).click(webElement);
         ClickResult actualResult = spy.click(wrapsElement);

@@ -43,7 +43,6 @@ import com.jayway.jsonpath.PathNotFoundException;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.hamcrest.BaseMatcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
@@ -221,7 +220,7 @@ class JsonResponseValidationStepsTests
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
         jsonResponseValidationSteps.doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.EQUAL_TO, elementsNumber);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(elementsNumber),
-                verifyMatcher(TypeSafeMatcher.class, elementsNumber));
+                verifyMatcher(elementsNumber));
     }
 
     @ParameterizedTest
@@ -231,7 +230,7 @@ class JsonResponseValidationStepsTests
         jsonResponseValidationSteps.doesJsonPathElementsFromJsonMatchRule(JSON, jsonPath, ComparisonRule.EQUAL_TO,
                 elementsNumber);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(elementsNumber),
-                verifyMatcher(TypeSafeMatcher.class, elementsNumber));
+                verifyMatcher(elementsNumber));
     }
 
     @ParameterizedTest
@@ -286,7 +285,7 @@ class JsonResponseValidationStepsTests
         ISubStepExecutor subStepExecutor = mock(ISubStepExecutor.class);
         when(subStepExecutorFactory.createSubStepExecutor(stepsAsTable)).thenReturn(subStepExecutor);
         when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(number),
-                verifyMatcher(TypeSafeMatcher.class, number))).thenReturn(true);
+                verifyMatcher(number))).thenReturn(true);
         jsonResponseValidationSteps.performAllStepsForProvidedJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO,
                 number, json, jsonPath, stepsAsTable);
         verify(subStepExecutor, times(number)).execute(Optional.empty());
@@ -300,7 +299,7 @@ class JsonResponseValidationStepsTests
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
         ExamplesTable stepsAsTable = mock(ExamplesTable.class);
         when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + JSON_PATH), eq(0),
-                verifyMatcher(TypeSafeMatcher.class, 3))).thenReturn(false);
+                verifyMatcher(3))).thenReturn(false);
         jsonResponseValidationSteps.performAllStepsForJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 0,
                 JSON_PATH, stepsAsTable);
         verifyNoInteractions(stepsAsTable, subStepExecutorFactory);
@@ -308,39 +307,36 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testWaitForJsonFieldAppearsWithoutPolling() throws IOException, IllegalArgumentException,
-            IllegalAccessException, NoSuchFieldException, SecurityException
+    void testWaitForJsonFieldAppearsWithoutPolling() throws IOException, IllegalAccessException, NoSuchFieldException
     {
         mockResponse(JSON);
         testWaitForJsonFieldAppears(1);
         verify(httpClient).execute(argThat(base -> base instanceof HttpRequestBase
-                && ((HttpRequestBase) base).getMethod().equals(GET)
-                && ((HttpRequestBase) base).getURI().equals(URI.create(URL))),
+                && base.getMethod().equals(GET)
+                && base.getURI().equals(URI.create(URL))),
                 argThat(context -> context instanceof HttpClientContext));
     }
 
     @Test
-    void testWaitForJsonFieldAppearsWithPolling() throws IOException, IllegalArgumentException,
-            IllegalAccessException, NoSuchFieldException, SecurityException
+    void testWaitForJsonFieldAppearsWithPolling() throws IOException, IllegalAccessException, NoSuchFieldException
     {
         String body = "{\"key\":\"value\"}";
         mockResponse(body);
         testWaitForJsonFieldAppears(0);
         verify(httpClient, atLeast(6)).execute(argThat(base -> base instanceof HttpRequestBase
-                && ((HttpRequestBase) base).getMethod().equals(GET)
-                && ((HttpRequestBase) base).getURI().equals(URI.create(URL))),
+                && base.getMethod().equals(GET)
+                && base.getURI().equals(URI.create(URL))),
                 argThat(context -> context instanceof HttpClientContext));
         verify(httpClient, atMost(10)).execute(argThat(base -> base instanceof HttpRequestBase),
                 argThat(context -> context instanceof HttpClientContext));
     }
 
     @Test
-    void testWaitForJsonFieldAppearsHandledException() throws IOException, IllegalArgumentException,
-            IllegalAccessException, NoSuchFieldException, SecurityException
+    void testWaitForJsonFieldAppearsHandledException() throws IOException, IllegalAccessException, NoSuchFieldException
     {
         when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase
-                && ((HttpRequestBase) base).getMethod().equals(GET)
-                && ((HttpRequestBase) base).getURI().equals(URI.create(URL))),
+                && base.getMethod().equals(GET)
+                && base.getURI().equals(URI.create(URL))),
                 argThat(context -> context instanceof HttpClientContext)))
             .thenThrow(new ConnectionClosedException());
         HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
@@ -349,12 +345,12 @@ class JsonResponseValidationStepsTests
         executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
         jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT1S"));
         verify(softAssert).recordFailedAssertion(
-                (Exception) argThat(arg -> ConnectionClosedException.class.isInstance(arg)
+                (Exception) argThat(arg -> arg instanceof ConnectionClosedException
                         && "Connection is closed".equals(((Exception) arg).getMessage())));
     }
 
-    private void testWaitForJsonFieldAppears(int elementsFound) throws IllegalArgumentException,
-            IllegalAccessException, NoSuchFieldException, SecurityException, IOException
+    private void testWaitForJsonFieldAppears(int elementsFound) throws IllegalAccessException, NoSuchFieldException,
+            IOException
     {
         HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
         Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
@@ -362,7 +358,7 @@ class JsonResponseValidationStepsTests
         executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
         jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT2S"));
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH),
-                eq(elementsFound), verifyMatcher(TypeSafeMatcher.class, 1));
+                eq(elementsFound), verifyMatcher(1));
     }
 
     private void mockResponse(String body) throws IOException
@@ -386,7 +382,7 @@ class JsonResponseValidationStepsTests
         when(httpTestContext.getJsonContext()).thenReturn(RESPONSE_NULL);
         jsonResponseValidationSteps.doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.EQUAL_TO, number);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(number),
-                verifyMatcher(TypeSafeMatcher.class, number));
+                verifyMatcher(number));
     }
 
     @Test
@@ -413,8 +409,9 @@ class JsonResponseValidationStepsTests
         verifyNoMoreInteractions(softAssert);
     }
 
-    private <T, K> T verifyMatcher(Class<? extends BaseMatcher> clazz, K matching)
+    private <T, K> T verifyMatcher(K matching)
     {
+        Class<TypeSafeMatcher> clazz = TypeSafeMatcher.class;
         return argThat(arg -> clazz.isInstance(arg) && clazz.cast(arg).matches(matching));
     }
 }

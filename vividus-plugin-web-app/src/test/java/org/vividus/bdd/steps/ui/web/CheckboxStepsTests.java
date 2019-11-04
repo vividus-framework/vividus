@@ -43,7 +43,6 @@ import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,9 +63,6 @@ class CheckboxStepsTests
 
     @Mock
     private IBaseValidations baseValidations;
-
-    @Mock
-    private IWebUiContext webUiContext;
 
     @Mock
     private WebElement webElement;

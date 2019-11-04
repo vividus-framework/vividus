@@ -35,7 +35,6 @@ class SpringStepFactoryTest
     @Autowired
     private SpringStepFactory springStepFactory;
 
-    @SuppressWarnings("unchecked")
     @Test
     void customStepsInitializationTest()
     {

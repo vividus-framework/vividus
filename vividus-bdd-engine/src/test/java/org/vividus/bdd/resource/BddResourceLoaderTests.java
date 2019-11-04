@@ -51,9 +51,9 @@ class BddResourceLoaderTests
     private static final String SUCCESS = "success";
 
     private static final String[] DEFAULT_URLS = {
-            "file:/src/resources/story/sit/epam/ca/de/table/epam.table",
-            "file:/src/resources/story/sit/epam/table/epam.table",
-            "file:/src/resources/story/sit/epam/ca/table/epam.table" };
+            "file:/src/resources/story/sit/vividus/ca/de/table/vividus.table",
+            "file:/src/resources/story/sit/vividus/table/vividus.table",
+            "file:/src/resources/story/sit/vividus/ca/table/vividus.table" };
 
     @Mock
     private ResourcePatternResolver resourcePatternResolver;
@@ -233,7 +233,7 @@ class BddResourceLoaderTests
     {
         when(resourcePatternResolver.getResources(startsWith(CLASSPATH_ALL_URL_PREFIX)))
                 .thenThrow(new IOException());
-        assertThrows(ResourceLoadException.class, () -> bddResourceLoader.getResource("story/sit/jbaby.table"));
+        assertThrows(ResourceLoadException.class, () -> bddResourceLoader.getResource("story/sit/unknown.table"));
     }
 
     @Test

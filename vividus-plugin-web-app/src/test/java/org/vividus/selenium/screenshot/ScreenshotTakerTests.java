@@ -151,9 +151,8 @@ public class ScreenshotTakerTests
         }
         catch (IOException e)
         {
-            new UncheckedIOException(e);
+            throw new UncheckedIOException(e);
         }
-        return null;
     }
 
     @Test

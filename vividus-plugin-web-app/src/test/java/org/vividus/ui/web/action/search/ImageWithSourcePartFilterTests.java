@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,9 +44,6 @@ class ImageWithSourcePartFilterTests
 
     @Mock
     private WebElement webElement;
-
-    @Mock
-    private SearchContext searchContext;
 
     @BeforeEach
     void beforeEach()

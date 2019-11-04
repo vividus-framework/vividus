@@ -322,26 +322,26 @@ class WebDriverManagerTests
     @Test
     void testIsIpadIOSDevice()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, Platform.MAC.toString());
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, BrowserType.IPAD);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, Platform.MAC.toString());
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, BrowserType.IPAD);
         assertTrue(webDriverManager.isIOS());
     }
 
     @Test
     void testIsIphoneIOSDevice()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, Platform.MAC.toString());
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, BrowserType.IPHONE);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, Platform.MAC.toString());
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, BrowserType.IPHONE);
         assertTrue(webDriverManager.isIOS());
     }
 
     @Test
     void testIsIOSDeviceFalse()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
         assertFalse(webDriverManager.isIOS());
     }
 
@@ -350,59 +350,59 @@ class WebDriverManagerTests
     {
         Map<String, String> map = new HashMap<>();
         map.put(SauceLabsCapabilityType.DEVICE, BrowserType.IPHONE);
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, SauceLabsCapabilityType.CAPABILITIES, map);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, SauceLabsCapabilityType.CAPABILITIES, map);
         assertTrue(webDriverManager.isIOS());
     }
 
     @Test
     void testIsIOSUsingDeviceType()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, SauceLabsCapabilityType.DEVICE, BrowserType.IPHONE);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, SauceLabsCapabilityType.DEVICE, BrowserType.IPHONE);
         assertTrue(webDriverManager.isIOS());
     }
 
     @Test
     void testIsAndroidByPlatformName()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
         assertTrue(webDriverManager.isAndroid());
     }
 
     @Test
     void testIsMobileAndroidPlatform()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
         assertTrue(webDriverManager.isMobile());
     }
 
     @Test
     void testIsMobileAndroidBrowser()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, BrowserType.ANDROID);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, BrowserType.ANDROID);
         assertTrue(webDriverManager.isMobile());
     }
 
     @Test
     void testIsMobileAndroidCapabilitiesBrowser()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
         Capabilities androidCapabilities = mock(Capabilities.class);
-        when(havingCapabilitisWebDriver.getCapabilities()).thenReturn(androidCapabilities);
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, BrowserType.ANDROID);
+        when(havingCapabilitiesWebDriver.getCapabilities()).thenReturn(androidCapabilities);
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, BrowserType.ANDROID);
         assertTrue(webDriverManager.isAndroid());
     }
 
     @Test
     void testIsMobileAndroidCapabilitiesMobilePlatform()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
         Capabilities androidCapabilities = mock(Capabilities.class);
-        when(havingCapabilitisWebDriver.getCapabilities()).thenReturn(androidCapabilities);
+        when(havingCapabilitiesWebDriver.getCapabilities()).thenReturn(androidCapabilities);
         lenient().when(androidCapabilities.getCapability(DESIREDCAPABILITIES_KEY)).thenReturn(Collections.emptyMap());
         lenient().when(androidCapabilities.getCapability(CapabilityType.PLATFORM_NAME))
                 .thenReturn(MobilePlatform.ANDROID);
@@ -412,9 +412,9 @@ class WebDriverManagerTests
     @Test
     void testIsMobileAndroidDesiredCapabilitiesMobilePlatform()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
         Capabilities androidCapabilities = mock(Capabilities.class);
-        when(havingCapabilitisWebDriver.getCapabilities()).thenReturn(androidCapabilities);
+        when(havingCapabilitiesWebDriver.getCapabilities()).thenReturn(androidCapabilities);
         lenient().when(androidCapabilities.getCapability(DESIREDCAPABILITIES_KEY))
                 .thenReturn(Collections.singletonMap(CapabilityType.PLATFORM_NAME, "android"));
         lenient().when(androidCapabilities.getCapability(CapabilityType.PLATFORM_NAME))
@@ -425,9 +425,9 @@ class WebDriverManagerTests
     @Test
     void testIsMobileAndroidIncorrectDesiredCapabilitiesMobilePlatform()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
         Capabilities androidCapabilities = mock(Capabilities.class);
-        when(havingCapabilitisWebDriver.getCapabilities()).thenReturn(androidCapabilities);
+        when(havingCapabilitiesWebDriver.getCapabilities()).thenReturn(androidCapabilities);
         lenient().when(androidCapabilities.getCapability(DESIREDCAPABILITIES_KEY)).thenReturn("DesiredAndroid");
         lenient().when(androidCapabilities.getCapability(CapabilityType.PLATFORM_NAME))
                 .thenReturn(MobilePlatform.ANDROID);
@@ -437,18 +437,18 @@ class WebDriverManagerTests
     @Test
     void testIsAndroidFalse()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, BrowserType.CHROME);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, BrowserType.CHROME);
         assertFalse(webDriverManager.isAndroid());
     }
 
     @Test
     void testIsMobileFalse()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, SauceLabsCapabilityType.DEVICE_NAME, null);
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, Platform.LINUX.toString());
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, BrowserType.CHROME);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, SauceLabsCapabilityType.DEVICE_NAME, null);
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, Platform.LINUX.toString());
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, BrowserType.CHROME);
         assertFalse(webDriverManager.isMobile());
     }
 
@@ -492,8 +492,8 @@ class WebDriverManagerTests
     @MethodSource("webDriverTypeChecks")
     void testIsTypeAnyOf(String browserName, WebDriverType webDriverType, boolean result)
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, browserName);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, browserName);
         assertEquals(result, webDriverManager.isTypeAnyOf(webDriverType));
     }
 
@@ -501,8 +501,8 @@ class WebDriverManagerTests
     @MethodSource("webDriverTypeDetections")
     void testDetectType(String browserName, WebDriverType webDriverType)
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, browserName);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, browserName);
         assertEquals(webDriverType, webDriverManager.detectType());
     }
 
@@ -510,8 +510,8 @@ class WebDriverManagerTests
     void testIsBrowser()
     {
         String browserName = "chrome";
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, browserName);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, browserName);
         assertTrue(webDriverManager.isBrowserAnyOf(BrowserType.CHROME));
     }
 
@@ -519,8 +519,8 @@ class WebDriverManagerTests
     void testIsBrowserFalse()
     {
         String browserName = "browser";
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, BROWSER_TYPE, browserName);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, BROWSER_TYPE, browserName);
         assertFalse(webDriverManager.isBrowserAnyOf(BrowserType.CHROME));
     }
 
@@ -617,8 +617,8 @@ class WebDriverManagerTests
     @Test
     void testOrientationCached()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
         when(webDriverManagerContext.getParameter(WebDriverManagerParameter.ORIENTATION))
                 .thenReturn(ScreenOrientation.PORTRAIT);
         assertTrue(webDriverManager.isOrientation(ScreenOrientation.PORTRAIT));
@@ -672,18 +672,18 @@ class WebDriverManagerTests
     @Test
     void testGetWindowHandlesNotIOS()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
-        when(((WebDriver) havingCapabilitisWebDriver).getWindowHandles()).thenReturn(WINDOW_HANDLES);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
+        when(((WebDriver) havingCapabilitiesWebDriver).getWindowHandles()).thenReturn(WINDOW_HANDLES);
         assertEquals(WINDOW_HANDLES, webDriverManager.getWindowHandles());
     }
 
     @Test
     void testGetWindowHandlesIOS()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
-        when(((WebDriver) havingCapabilitisWebDriver).getWindowHandles()).thenReturn(WINDOW_HANDLES);
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
+        when(((WebDriver) havingCapabilitiesWebDriver).getWindowHandles()).thenReturn(WINDOW_HANDLES);
         assertEquals(WINDOW_HANDLES, webDriverManager.getWindowHandles());
     }
 
@@ -691,9 +691,9 @@ class WebDriverManagerTests
     void testGetWindowHandlesUnacceptableException()
     {
         String exceptionMessage = "Exception message";
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
-        when(((WebDriver) havingCapabilitisWebDriver).getWindowHandles())
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
+        when(((WebDriver) havingCapabilitiesWebDriver).getWindowHandles())
                 .thenThrow(new WebDriverException(exceptionMessage));
         WebDriverException exception = assertThrows(WebDriverException.class,
             () -> webDriverManager.getWindowHandles());
@@ -703,9 +703,9 @@ class WebDriverManagerTests
     @Test
     void testGetWindowHandlesLargeNumberOfAttempts()
     {
-        HasCapabilities havingCapabilitisWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitisWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
-        when(((WebDriver) havingCapabilitisWebDriver).getWindowHandles())
+        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
+        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
+        when(((WebDriver) havingCapabilitiesWebDriver).getWindowHandles())
                 .thenThrow(new WebDriverException(COULD_NOT_CONNECT_TO_APP));
         WebDriverException exception = assertThrows(WebDriverException.class,
             () -> webDriverManager.getWindowHandles());

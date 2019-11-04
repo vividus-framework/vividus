@@ -39,7 +39,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
-import org.vividus.softassert.ISoftAssert;
 
 @ExtendWith(MockitoExtension.class)
 class ApiStepsTests
@@ -51,9 +50,6 @@ class ApiStepsTests
 
     @Mock
     private HttpTestContext httpTestContext;
-
-    @Mock
-    private ISoftAssert softAssert;
 
     @Mock
     private HttpRequestExecutor httpRequestExecutor;

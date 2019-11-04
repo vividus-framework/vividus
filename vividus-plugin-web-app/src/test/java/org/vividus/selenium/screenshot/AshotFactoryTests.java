@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -57,8 +56,6 @@ class AshotFactoryTests
     private static final int TEN = 10;
 
     @Mock
-    private Map<String, ScreenshotConfiguration> ashotConfigurations;
-    @Mock
     private ShootingStrategy baseShootingStrategy;
     @Mock
     private IWebDriverFactory webDriverFactory;
@@ -66,8 +63,6 @@ class AshotFactoryTests
     private IWebDriverManager webDriverManager;
     @Mock
     private IJavascriptActions javascriptActions;
-    @Mock
-    private IScrollbarHandler scrollbarHandler;
     @Mock
     private ScreenshotDebugger screenshotDebugger;
 

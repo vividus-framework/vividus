@@ -39,7 +39,7 @@ class RowsCollectorTests
             Pair.of(HASH_INT, MAP));
 
     @Test
-    void shouldLeaveOnlyUnqiqueRowsAsDistinctFilter()
+    void shouldLeaveOnlyUniqueRowsAsDistinctFilter()
     {
         Assertions.assertEquals(Map.of(HASH_INT, MAP), ROWS.stream().collect(RowsCollector.DISTINCT.get()));
     }

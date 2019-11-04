@@ -19,6 +19,7 @@ package org.vividus.bdd.steps.integration;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -152,16 +153,16 @@ class ResourceCheckStepsTests
             @SuppressWarnings("unchecked")
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(9));
-            Iterator<ResourceValidation> resourceValdiations = validationsToReport.iterator();
-            validate(resourceValdiations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
-            validate(resourceValdiations, imageUri, "#image", CheckStatus.PASSED, N_A);
-            validate(resourceValdiations, gifImageUri, N_A, CheckStatus.PASSED, N_A);
-            validate(resourceValdiations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
-            validate(resourceValdiations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
-            validate(resourceValdiations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
-            validate(resourceValdiations, FTP_URI, FTP_ID, CheckStatus.FILTERED, N_A);
-            validate(resourceValdiations, JS_URI, JS_ID, CheckStatus.FILTERED, N_A);
-            validate(resourceValdiations, MAILTO_URI, MAILTO_ID, CheckStatus.FILTERED, N_A);
+            Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
+            validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
+            validate(resourceValidations, gifImageUri, N_A, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
+            validate(resourceValidations, FTP_URI, FTP_ID, CheckStatus.FILTERED, N_A);
+            validate(resourceValidations, JS_URI, JS_ID, CheckStatus.FILTERED, N_A);
+            validate(resourceValidations, MAILTO_URI, MAILTO_ID, CheckStatus.FILTERED, N_A);
             return true;
         }), eq(REPORT_NAME));
     }
@@ -186,15 +187,15 @@ class ResourceCheckStepsTests
             @SuppressWarnings("unchecked")
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(8));
-            Iterator<ResourceValidation> resourceValdiations = validationsToReport.iterator();
-            validate(resourceValdiations.next(), SERENITY_URI, HTTP_ID, CheckStatus.PASSED);
-            validate(resourceValdiations.next(), VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED);
-            validate(resourceValdiations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
-            validate(resourceValdiations.next(), FAQ_URI, RELATIVE_ID, CheckStatus.PASSED);
-            validate(resourceValdiations.next(), SHARP_URI, SHARP_ID, CheckStatus.FILTERED);
-            validate(resourceValdiations.next(), FTP_URI, FTP_ID, CheckStatus.FILTERED);
-            validate(resourceValdiations.next(), JS_URI, JS_ID, CheckStatus.FILTERED);
-            validate(resourceValdiations.next(), MAILTO_URI, MAILTO_ID, CheckStatus.FILTERED);
+            Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
+            validate(resourceValidations.next(), SERENITY_URI, HTTP_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), FAQ_URI, RELATIVE_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), SHARP_URI, SHARP_ID, CheckStatus.FILTERED);
+            validate(resourceValidations.next(), FTP_URI, FTP_ID, CheckStatus.FILTERED);
+            validate(resourceValidations.next(), JS_URI, JS_ID, CheckStatus.FILTERED);
+            validate(resourceValidations.next(), MAILTO_URI, MAILTO_ID, CheckStatus.FILTERED);
             return true;
         }), eq(REPORT_NAME));
     }
@@ -216,12 +217,12 @@ class ResourceCheckStepsTests
             @SuppressWarnings("unchecked")
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            ResourceValidation resourceValdiation = validationsToReport.iterator().next();
+            ResourceValidation resourceValidation = validationsToReport.iterator().next();
             Assertions.assertAll(
-                () -> assertEquals(null, resourceValdiation.getUri()),
-                () -> assertEquals(N_A, resourceValdiation.getCssSelector()),
-                () -> assertSame(CheckStatus.BROKEN, resourceValdiation.getCheckStatus()),
-                () -> assertEquals(FIRST_PAGE_URL, resourceValdiation.getPageURL()));
+                () -> assertNull(resourceValidation.getUri()),
+                () -> assertEquals(N_A, resourceValidation.getCssSelector()),
+                () -> assertSame(CheckStatus.BROKEN, resourceValidation.getCheckStatus()),
+                () -> assertEquals(FIRST_PAGE_URL, resourceValidation.getPageURL()));
             return true;
         }), eq(REPORT_NAME));
         verifyNoInteractions(httpTestContext);
@@ -246,12 +247,12 @@ class ResourceCheckStepsTests
             @SuppressWarnings("unchecked")
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            ResourceValidation resourceValdiation = validationsToReport.iterator().next();
+            ResourceValidation resourceValidation = validationsToReport.iterator().next();
             Assertions.assertAll(
-                () -> assertEquals(null, resourceValdiation.getUri()),
-                () -> assertEquals(N_A, resourceValdiation.getCssSelector()),
-                () -> assertSame(CheckStatus.BROKEN, resourceValdiation.getCheckStatus()),
-                () -> assertEquals(SECOND_PAGE_URL, resourceValdiation.getPageURL()));
+                () -> assertNull(resourceValidation.getUri()),
+                () -> assertEquals(N_A, resourceValidation.getCssSelector()),
+                () -> assertSame(CheckStatus.BROKEN, resourceValidation.getCheckStatus()),
+                () -> assertEquals(SECOND_PAGE_URL, resourceValidation.getPageURL()));
             return true;
         }), eq(REPORT_NAME));
         verify(apiSteps).whenIDoHttpRequest(HttpMethod.GET, SECOND_PAGE_URL);
@@ -260,12 +261,10 @@ class ResourceCheckStepsTests
     }
 
     @Test
-    void shouldReportExceptionOccuredInExecutingThread() throws IOException, InterruptedException, ExecutionException
+    void shouldReportExceptionOccuredInExecutingThread() throws InterruptedException, ExecutionException
     {
         InterruptedException interruptedException = new InterruptedException();
-        doNothing().when(executor).execute(argThat(r -> {
-            return true;
-        }), argThat(v -> {
+        doNothing().when(executor).execute(argThat(r -> true), argThat(v -> {
             v.uncaughtException(new Thread("Interrupted-0"), interruptedException);
             return true;
         }));
@@ -305,14 +304,14 @@ class ResourceCheckStepsTests
             @SuppressWarnings("unchecked")
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(7));
-            Iterator<ResourceValidation> resourceValdiations = validationsToReport.iterator();
-            validate(resourceValdiations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
-            validate(resourceValdiations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
-            validate(resourceValdiations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
-            validate(resourceValdiations, FTP_URI, FTP_ID, CheckStatus.FILTERED, N_A);
-            validate(resourceValdiations, SERENITY_URI, HTTP_ID, CheckStatus.FILTERED, N_A);
-            validate(resourceValdiations, JS_URI, JS_ID, CheckStatus.FILTERED, N_A);
-            validate(resourceValdiations, MAILTO_URI, MAILTO_ID, CheckStatus.FILTERED, N_A);
+            Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
+            validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
+            validate(resourceValidations, FTP_URI, FTP_ID, CheckStatus.FILTERED, N_A);
+            validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.FILTERED, N_A);
+            validate(resourceValidations, JS_URI, JS_ID, CheckStatus.FILTERED, N_A);
+            validate(resourceValidations, MAILTO_URI, MAILTO_ID, CheckStatus.FILTERED, N_A);
             return true;
         }), eq(REPORT_NAME));
     }

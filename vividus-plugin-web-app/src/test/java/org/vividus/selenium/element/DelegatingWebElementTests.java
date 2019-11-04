@@ -164,10 +164,10 @@ class DelegatingWebElementTests
     @Test
     void testGetCssValue()
     {
-        String propertName = "propertyName";
+        String propertyName = "propertyName";
         String cssValue = "cssValue";
-        when(webElement.getCssValue(propertName)).thenReturn(cssValue);
-        assertEquals(cssValue, delegatingWebElement.getCssValue(propertName));
+        when(webElement.getCssValue(propertyName)).thenReturn(cssValue);
+        assertEquals(cssValue, delegatingWebElement.getCssValue(propertyName));
     }
 
     @SuppressWarnings("unchecked")
@@ -195,14 +195,14 @@ class DelegatingWebElementTests
                 withSettings().extraInterfaces(Locatable.class));
         Coordinates coordinates = Mockito.mock(Coordinates.class);
         when(((Locatable) locatableWebElement).getCoordinates()).thenReturn(coordinates);
-        DelegatingWebElement locatableDelegatingWebelement = new DelegatingWebElement(locatableWebElement);
-        assertEquals(coordinates, locatableDelegatingWebelement.getCoordinates());
+        DelegatingWebElement locatableDelegatingWebElement = new DelegatingWebElement(locatableWebElement);
+        assertEquals(coordinates, locatableDelegatingWebElement.getCoordinates());
     }
 
     @Test
     void testToString()
     {
-        String toStringValue = "webElemntString";
+        String toStringValue = "webElementString";
         when(webElement.toString()).thenReturn(toStringValue);
         assertEquals(toStringValue, delegatingWebElement.toString());
     }

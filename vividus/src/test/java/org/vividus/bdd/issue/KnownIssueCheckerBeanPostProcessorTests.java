@@ -41,16 +41,16 @@ class KnownIssueCheckerBeanPostProcessorTests
     private static final String BEAN_NAME = "knownIssueChecker-Integration";
 
     @Mock
-    private ApplicationContext applicationContetxt;
+    private ApplicationContext applicationContext;
 
     @InjectMocks
-    private KnownIssueCheckerBeanPostProcessor knownIssueCheckerBeanPostProvessor;
+    private KnownIssueCheckerBeanPostProcessor knownIssueCheckerBeanPostProcessor;
 
     @Test
     void testPostProcessAfterInitializationNotKnownIssueChecker()
     {
         Object bean = Mockito.mock(Object.class);
-        assertEquals(bean, knownIssueCheckerBeanPostProvessor.postProcessAfterInitialization(bean, "bean"));
+        assertEquals(bean, knownIssueCheckerBeanPostProcessor.postProcessAfterInitialization(bean, "bean"));
     }
 
     @Test
@@ -58,10 +58,10 @@ class KnownIssueCheckerBeanPostProcessorTests
     {
         KnownIssueChecker issueChecker = Mockito.mock(KnownIssueChecker.class);
         Map<String, IKnownIssueDataProvider> map = new HashMap<>();
-        Mockito.when(applicationContetxt.getBeanNamesForType(Map.class)).thenReturn(new String[] { NAME, BEAN_NAME });
-        Mockito.when(applicationContetxt.getBean(BEAN_NAME, Map.class)).thenReturn(map);
+        Mockito.when(applicationContext.getBeanNamesForType(Map.class)).thenReturn(new String[] { NAME, BEAN_NAME });
+        Mockito.when(applicationContext.getBean(BEAN_NAME, Map.class)).thenReturn(map);
         assertEquals(issueChecker,
-                knownIssueCheckerBeanPostProvessor.postProcessAfterInitialization(issueChecker, ISSUE_CHECKER));
+                knownIssueCheckerBeanPostProcessor.postProcessAfterInitialization(issueChecker, ISSUE_CHECKER));
         Mockito.verify(issueChecker).setKnownIssueDataProviders(map);
     }
 
@@ -70,9 +70,9 @@ class KnownIssueCheckerBeanPostProcessorTests
     {
         KnownIssueChecker issueChecker = Mockito.mock(KnownIssueChecker.class);
         Map<String, IKnownIssueDataProvider> map = new HashMap<>();
-        Mockito.when(applicationContetxt.getBeanNamesForType(Map.class)).thenReturn(new String[] { NAME });
+        Mockito.when(applicationContext.getBeanNamesForType(Map.class)).thenReturn(new String[] { NAME });
         assertEquals(issueChecker,
-                knownIssueCheckerBeanPostProvessor.postProcessAfterInitialization(issueChecker, ISSUE_CHECKER));
+                knownIssueCheckerBeanPostProcessor.postProcessAfterInitialization(issueChecker, ISSUE_CHECKER));
         Mockito.verify(issueChecker).setKnownIssueDataProviders(map);
     }
 }

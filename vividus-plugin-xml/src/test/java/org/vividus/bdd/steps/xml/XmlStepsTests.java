@@ -110,7 +110,7 @@ class XmlStepsTests
     @Test
     void shouldRecordFailedAssertionOnTransformationException()
     {
-        xmlValidationSteps.saveTransformedXml(XML, "invald", null, null);
+        xmlValidationSteps.saveTransformedXml(XML, "invalid", null, null);
         verify(softAssert).recordFailedAssertion(any(TransformerException.class));
     }
 

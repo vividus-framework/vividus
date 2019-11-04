@@ -50,16 +50,16 @@ class JsonUtilsTests
     @Test
     void testToJsonSuccessDefault()
     {
-        String actaulJson = jsonUtils.toJson(TEST_OBJECT);
-        assertEquals(JSON_STRING, actaulJson);
+        String actualJson = jsonUtils.toJson(TEST_OBJECT);
+        assertEquals(JSON_STRING, actualJson);
     }
 
     @Test
     void testToJsonSuccessCamelCase()
     {
         jsonUtils.setNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-        String actaulJson = jsonUtils.toJson(TEST_OBJECT);
-        assertEquals("{\"id\":\"1\",\"first_name\":\"name\"}", actaulJson);
+        String actualJson = jsonUtils.toJson(TEST_OBJECT);
+        assertEquals("{\"id\":\"1\",\"first_name\":\"name\"}", actualJson);
     }
 
     @Test

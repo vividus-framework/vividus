@@ -52,28 +52,28 @@ public class ResourceUtilsTests
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
-    public void testResourceLoadingFromRootAsStringIsSuccesful()
+    public void testResourceLoadingFromRootAsStringIsSuccessful()
     {
         assertEquals(ROOT_RESOURCE_CONTENT, StringUtils
                 .normalizeLineFeeds(ResourceUtils.loadResource(RESOURCE_NAME)));
     }
 
     @Test
-    public void testResourceLoadingFromRootAsByteArrayIsSuccesful()
+    public void testResourceLoadingFromRootAsByteArrayIsSuccessful()
     {
         assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
                 normalizeBytes(ResourceUtils.loadResourceAsByteArray(RESOURCE_NAME)));
     }
 
     @Test
-    public void testResourceLoadingAsStringIsSuccesful()
+    public void testResourceLoadingAsStringIsSuccessful()
     {
         assertEquals(RESOURCE_CONTENT, StringUtils
                 .normalizeLineFeeds(ResourceUtils.loadResource(ResourceUtils.class, RESOURCE_NAME)));
     }
 
     @Test
-    public void testResourceLoadingAsByteArrayIsSuccesful()
+    public void testResourceLoadingAsByteArrayIsSuccessful()
     {
         assertArrayEquals(RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
                 normalizeBytes(ResourceUtils.loadResourceAsByteArray(ResourceUtils.class, RESOURCE_NAME)));
@@ -86,7 +86,7 @@ public class ResourceUtilsTests
     }
 
     @Test
-    public void testFileLoadingIsSuccesful()
+    public void testFileLoadingIsSuccessful()
     {
         File actual = ResourceUtils.loadFile(ResourceUtils.class, RESOURCE_NAME);
         Assertions.assertTrue(actual.exists());

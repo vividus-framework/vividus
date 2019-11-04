@@ -50,7 +50,7 @@ class DateValidationsStepsTests
     private ISoftAssert softAssert;
 
     @InjectMocks
-    private DateValidationSteps dateValidationsSteps = new DateValidationSteps(new DateUtils(TIME_ZONE_ID));
+    private final DateValidationSteps dateValidationsSteps = new DateValidationSteps(new DateUtils(TIME_ZONE_ID));
 
     @Test
     void testIsDateLess()

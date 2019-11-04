@@ -367,7 +367,6 @@ class ElementSearchActionTests
         assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 2))));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void testFindAllElementsWithException()
     {

@@ -22,36 +22,30 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.powermock.reflect.Whitebox;
 import org.vividus.ui.web.action.SearchActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 
+@ExtendWith(MockitoExtension.class)
 class WebElementDeserializerTests
 {
-    private static SearchActions searchActions = mock(SearchActions.class);
+    @Mock
+    private SearchActions searchActions;
 
-    private static WebElementDeserializer deserializer;
-
-    @BeforeAll
-    static void beforeAll()
-    {
-        deserializer = new WebElementDeserializer();
-        Whitebox.setInternalState(deserializer, "searchActions", searchActions);
-    }
+    @InjectMocks
+    private WebElementDeserializer deserializer;
 
     @Test
     void shouldReturnSupplierForWebElement() throws IOException
@@ -63,17 +57,20 @@ class WebElementDeserializerTests
         assertEquals(expected, deserializer.deserialize(parser, null).get());
     }
 
-    static Stream<Arguments> deserializerProvider()
+    @Test
+    void shouldReturnTypeBasedDeserializer()
     {
-        return Stream.of(
-            Arguments.of("Ljava/util/function/Supplier<Ljava/util/Optional<Lorg/openqa/selenium/WebElement;>;>;",
-                    deserializer),
-                Arguments.of("Ljava/util/function/Supplier<Ljava/util/Optional<Ljava/lang/Stringt;>;>;", null)
-                );
+        shouldReturnTypeBasedDeserializer(
+                "Ljava/util/function/Supplier<Ljava/util/Optional<Lorg/openqa/selenium/WebElement;>;>;", deserializer);
     }
 
-    @ParameterizedTest
-    @MethodSource("deserializerProvider")
+    @Test
+    void shouldReturnNullWhenNoTypeBasedDeserializerIsFound()
+    {
+        shouldReturnTypeBasedDeserializer(
+                "Ljava/util/function/Supplier<Ljava/util/Optional<Ljava/lang/Stringt;>;>;", null);
+    }
+
     void shouldReturnTypeBasedDeserializer(String type, JsonDeserializer<?> expected)
     {
         BeanProperty property = mock(BeanProperty.class);

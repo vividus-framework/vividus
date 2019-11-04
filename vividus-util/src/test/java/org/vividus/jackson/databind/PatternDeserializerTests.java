@@ -39,7 +39,7 @@ class PatternDeserializerTests
     }
 
     @Test
-    void shouldThrowExceptionInCaseOfNullPatterbn()
+    void shouldThrowExceptionInCaseOfNullPattern()
     {
         JsonParser jsonParser = mock(JsonParser.class);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,

@@ -76,14 +76,14 @@ class ScrollbarHandlerTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         Object object = mock(Object.class);
-        mockScrollbalHiding(object);
+        mockScrollbarHiding(object);
         scrollbarHandler.performActionWithHiddenScrollbars(action);
         verify((JavascriptExecutor) webDriver).executeScript(eq(HIDE_SCROLLBAR_SCRIPT), nullable(WebElement.class));
         verify((JavascriptExecutor) webDriver).executeScript(eq(RESTORE_STYLE_SCRIPT), nullable(WebElement.class),
                 eq(object));
     }
 
-    private void mockScrollbalHiding(Object object)
+    private void mockScrollbarHiding(Object object)
     {
         when(((JavascriptExecutor) webDriver).executeScript(eq(HIDE_SCROLLBAR_SCRIPT), nullable(WebElement.class)))
             .thenReturn(object);
@@ -108,7 +108,7 @@ class ScrollbarHandlerTests
     void testPerformActionWithHiddenScrollbarsNoOriginalStyle()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        mockScrollbalHiding(null);
+        mockScrollbarHiding(null);
         scrollbarHandler.performActionWithHiddenScrollbars(action);
         verify((JavascriptExecutor) webDriver, never()).executeScript(eq(RESTORE_STYLE_SCRIPT),
                 nullable(WebElement.class), any());
@@ -120,7 +120,7 @@ class ScrollbarHandlerTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         Supplier<?> action = mock(Supplier.class);
         Object object = mock(Object.class);
-        mockScrollbalHiding(object);
+        mockScrollbarHiding(object);
         when(action.get()).thenThrow(new WebDriverException());
         assertThrows(WebDriverException.class, () -> scrollbarHandler.performActionWithHiddenScrollbars(action));
         verify((JavascriptExecutor) webDriver).executeScript(eq(RESTORE_STYLE_SCRIPT),

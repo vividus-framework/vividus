@@ -200,6 +200,7 @@ class BddVariableStepsTests
         assertEquals("'variable' should be instance of map", exception.getMessage());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void shouldCompareTables()
     {
@@ -225,7 +226,7 @@ class BddVariableStepsTests
     }
 
     @Test
-    void shouldCompareEqualToNotAlignedListsRigthIsLongerOfMapsAndPublishResultTable()
+    void shouldCompareEqualToNotAlignedListsRightIsLongerOfMapsAndPublishResultTable()
     {
         List<Map<String, Object>> listOfMaps1 = List.of(Map.of(KEY, VALUE));
         List<Map<String, Object>> listOfMaps2 = List.of(Map.of(KEY, VALUE), Map.of(KEY, VALUE2));
@@ -273,9 +274,9 @@ class BddVariableStepsTests
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, true);
     }
 
-    private boolean compareResult(EntryComparisonResult result, String key, String left, String rigth)
+    private boolean compareResult(EntryComparisonResult result, String key, String left, String right)
     {
-        return key.equals(result.getKey()) && left.equals(result.getLeft()) && rigth.equals(result.getRight())
+        return key.equals(result.getKey()) && left.equals(result.getLeft()) && right.equals(result.getRight())
                 && result.isPassed();
     }
 

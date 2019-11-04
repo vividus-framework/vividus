@@ -29,14 +29,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.context.WebUiContext;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,13 +44,7 @@ class SliderStepsTests
     private static final String VALUE = "1";
 
     @Mock
-    private IJavascriptActions javascriptAcrions;
-
-    @Mock
-    private WebUiContext webUiContext;
-
-    @Mock
-    private SearchContext searchContext;
+    private IJavascriptActions javascriptActions;
 
     @Mock
     private IBaseValidations baseValidations;
@@ -67,7 +59,7 @@ class SliderStepsTests
     void setSliderValueNoSliderTest()
     {
         sliderSteps.setSliderValue(VALUE, XPATH);
-        verifyNoInteractions(javascriptAcrions);
+        verifyNoInteractions(javascriptActions);
     }
 
     @Test
@@ -76,7 +68,7 @@ class SliderStepsTests
         WebElement webElement = mock(WebElement.class);
         mockBaseValidations("Slider to select value in", webElement);
         sliderSteps.setSliderValue(VALUE, XPATH);
-        verify(javascriptAcrions).executeScript("arguments[0].value=arguments[1]", webElement, VALUE);
+        verify(javascriptActions).executeScript("arguments[0].value=arguments[1]", webElement, VALUE);
     }
 
     @Test

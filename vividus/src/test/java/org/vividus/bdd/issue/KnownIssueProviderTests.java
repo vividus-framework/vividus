@@ -92,7 +92,7 @@ class KnownIssueProviderTests
     }
 
     @Test
-    void testExceptionOnKnownIssueIdentifierWithMisingFields()
+    void testExceptionOnKnownIssueIdentifierWithMissingFields()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> initKnownIssueProvider(null, null));
@@ -101,7 +101,7 @@ class KnownIssueProviderTests
     }
 
     @Test
-    void testNoExceptionOnKnownIssueIdentifierWithoutMisingFields()
+    void testNoExceptionOnKnownIssueIdentifierWithoutMissingFields()
     {
         initKnownIssueProvider(KnownIssueType.EXTERNAL, "Assertion.*");
     }
@@ -132,7 +132,7 @@ class KnownIssueProviderTests
     }
 
     @Test
-    void testInitNoRresource() throws IOException
+    void testInitNoResource() throws IOException
     {
         knownIssueProvider.setFileName(FILENAME);
         ApplicationContext applicationContext = mock(ApplicationContext.class);

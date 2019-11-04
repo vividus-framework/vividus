@@ -46,20 +46,20 @@ class TextFormattingWebElementTests
     private WebElement webElement;
 
     @InjectMocks
-    private TextFormattingWebElement textFomattingWebElement;
+    private TextFormattingWebElement textFormattingWebElement;
 
     @Test
     void testGetText()
     {
         when(webElement.getText()).thenReturn(TEXT);
-        assertEquals(TEXT, textFomattingWebElement.getText());
+        assertEquals(TEXT, textFormattingWebElement.getText());
     }
 
     @Test
     void testGetTextNull()
     {
         when(webElement.getText()).thenReturn(null);
-        assertNull(textFomattingWebElement.getText());
+        assertNull(textFormattingWebElement.getText());
     }
 
     @SuppressWarnings("checkstyle:avoidescapedunicodecharacters")
@@ -67,14 +67,14 @@ class TextFormattingWebElementTests
     void testGetAttribute()
     {
         when(webElement.getAttribute(NAME)).thenReturn("att\u00A0");
-        assertEquals("att", textFomattingWebElement.getAttribute(NAME));
+        assertEquals("att", textFormattingWebElement.getAttribute(NAME));
     }
 
     @Test
     void testGetAttributeNull()
     {
         when(webElement.getAttribute(NAME)).thenReturn(null);
-        assertNull(textFomattingWebElement.getAttribute(NAME));
+        assertNull(textFormattingWebElement.getAttribute(NAME));
     }
 
     @Test
@@ -83,7 +83,7 @@ class TextFormattingWebElementTests
         when(webElement.getText()).thenReturn(TEXT);
         List<WebElement> list = List.of(webElement);
         when(webElement.findElements(LOCATOR)).thenReturn(list);
-        List<WebElement> actualList = textFomattingWebElement.findElements(LOCATOR);
+        List<WebElement> actualList = textFormattingWebElement.findElements(LOCATOR);
         TextFormattingWebElement element = (TextFormattingWebElement) actualList.get(0);
         verify(webElement).findElements(LOCATOR);
         assertEquals(TEXT, element.getText());
@@ -92,7 +92,7 @@ class TextFormattingWebElementTests
     @Test
     void testFindElement()
     {
-        assertTrue(textFomattingWebElement.findElement(LOCATOR) instanceof TextFormattingWebElement,
+        assertTrue(textFormattingWebElement.findElement(LOCATOR) instanceof TextFormattingWebElement,
                 ELEMENT_INSTANCE_SHOULD_BE_OF_TYPE_TEXT_FORMATTING_WEB_ELEMENT);
         verify(webElement).findElement(LOCATOR);
     }

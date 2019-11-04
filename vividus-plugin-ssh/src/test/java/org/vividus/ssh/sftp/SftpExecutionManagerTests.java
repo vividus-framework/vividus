@@ -42,7 +42,7 @@ public class SftpExecutionManagerTests
         SftpExecutor executor = mock(SftpExecutor.class);
         whenNew(SftpExecutor.class).withArguments(softAssert).thenReturn(executor);
         ServerConfiguration serverConfiguration = new ServerConfiguration();
-        Commands commands = new Commands("sftp-commnd");
+        Commands commands = new Commands("sftp-command");
         SftpOutput sftpOutput = new SftpOutput();
         when(executor.execute(serverConfiguration, commands)).thenReturn(sftpOutput);
         SftpOutputPublisher outputPublisher = mock(SftpOutputPublisher.class);

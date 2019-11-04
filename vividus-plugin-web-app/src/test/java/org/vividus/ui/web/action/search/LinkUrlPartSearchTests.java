@@ -89,7 +89,7 @@ class LinkUrlPartSearchTests
     }
 
     @Test
-    void testSearchLinksByUrlPartCaseInsensetive()
+    void testSearchLinksByUrlPartCaseInsensitive()
     {
         assertEquals(webElements, captureFoundElements(false, URL, HREF, URL_PART));
     }
@@ -101,7 +101,7 @@ class LinkUrlPartSearchTests
     }
 
     @Test
-    void testSearchLinksByUrlPartNotMatchCaseInsensetive()
+    void testSearchLinksByUrlPartNotMatchCaseInsensitive()
     {
         assertTrue(captureFoundElements(false, OTHER_URL, HREF, URL_PART).isEmpty());
     }

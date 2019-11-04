@@ -82,7 +82,6 @@ class ExpectedSearchContextConditionsTests
                 .apply(searchContext).booleanValue());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void testTextToBePresentInElementLocatedSuccessException()
     {
@@ -134,7 +133,6 @@ class ExpectedSearchContextConditionsTests
         assertNull(expectedConditions.visibilityOfAllElementsLocatedBy(XPATH_LOCATOR).apply(searchContext));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void testVisibilityOfAllElementsLocatedBySuccessException()
     {
@@ -225,7 +223,6 @@ class ExpectedSearchContextConditionsTests
         assertNull(expectedConditions.elementToBeClickable(XPATH_LOCATOR).apply(searchContext));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void testElementToBeClickableStaleElementException()
     {
@@ -265,7 +262,6 @@ class ExpectedSearchContextConditionsTests
         assertNull(expectedConditions.visibilityOfElement(XPATH_LOCATOR).apply(searchContext));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void testVisibilityOfElementLocatedNoElement()
     {
@@ -313,7 +309,6 @@ class ExpectedSearchContextConditionsTests
                 .booleanValue());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void testElementSelectionStateToBeStaleException()
     {
@@ -358,7 +353,6 @@ class ExpectedSearchContextConditionsTests
                 .booleanValue());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void testInvisibilityOfElementLocatedNoSuchElementException()
     {
@@ -368,7 +362,6 @@ class ExpectedSearchContextConditionsTests
                 .booleanValue());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void testInvisibilityOfElementLocatedStaleElementException()
     {

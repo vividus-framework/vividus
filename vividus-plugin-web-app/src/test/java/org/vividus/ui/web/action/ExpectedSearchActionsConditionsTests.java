@@ -66,7 +66,7 @@ class ExpectedSearchActionsConditionsTests
     private ExpectedSearchActionsConditions expectedSearchActionsConditions;
 
     @Test
-    void tetsPresenceOfAllElementsLocatedByNoElements()
+    void testPresenceOfAllElementsLocatedByNoElements()
     {
         IExpectedSearchContextCondition<List<WebElement>> condition = expectedSearchActionsConditions
                 .presenceOfAllElementsLocatedBy(searchAttributes);
@@ -76,7 +76,7 @@ class ExpectedSearchActionsConditionsTests
     }
 
     @Test
-    void tetsPresenceOfAllElementsLocatedBy()
+    void testPresenceOfAllElementsLocatedBy()
     {
         when(searchAttributes.toString()).thenReturn(TEXT);
         mockFindElements(webElement);
@@ -120,7 +120,7 @@ class ExpectedSearchActionsConditionsTests
     }
 
     @Test
-    void tetsVisibilityOfAllElementsIsDisplayedInvisible()
+    void testVisibilityOfAllElementsIsDisplayedInvisible()
     {
         when(searchAttributes.toString()).thenReturn(TEXT);
         mockFindElements(webElement);
@@ -132,7 +132,7 @@ class ExpectedSearchActionsConditionsTests
     }
 
     @Test
-    void tetsVisibilityOfAllElementsNoElements()
+    void testVisibilityOfAllElementsNoElements()
     {
         mockFindElements();
         IExpectedSearchContextCondition<List<WebElement>> condition = expectedSearchActionsConditions
@@ -153,7 +153,7 @@ class ExpectedSearchActionsConditionsTests
     }
 
     @Test
-    void tetsVisibilityOfAllElementsIsDisplayedVisible()
+    void testVisibilityOfAllElementsIsDisplayedVisible()
     {
         mockFindElements(webElement);
         when(webElement.isDisplayed()).thenReturn(true);

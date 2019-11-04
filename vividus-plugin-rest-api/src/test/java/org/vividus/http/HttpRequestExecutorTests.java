@@ -93,7 +93,7 @@ class HttpRequestExecutorTests
         when(httpTestContext.getRequestEntity()).thenReturn(Optional.of(requestEntity));
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
         verify(softAssert).recordFailedAssertion(
-                (Exception) argThat(arg -> HttpRequestBuildException.class.isInstance(arg)
+                (Exception) argThat(arg -> arg instanceof HttpRequestBuildException
                         && "java.lang.IllegalStateException: HTTP GET request can't include body"
                         .equals(((Exception) arg).getMessage())));
         verify(httpTestContext).releaseRequestData();
@@ -107,8 +107,8 @@ class HttpRequestExecutorTests
         mockHttpResponse(HttpRequestBase.class, URL);
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
 
-        verify(httpClient).execute(argThat(e -> HttpUriRequest.class.isInstance(e)),
-                argThat(e -> HttpContext.class.isInstance(e) && e.getAttribute("http.cookie-store") != null));
+        verify(httpClient).execute(argThat(HttpUriRequest.class::isInstance),
+                argThat(e -> e != null && e.getAttribute("http.cookie-store") != null));
         assertThat(logger.getLoggingEvents(), equalTo(List.of(info(LOG_MESSAGE_FORMAT, RESPONSE_TIME_IN_MS))));
         verify(httpTestContext).releaseRequestData();
     }
@@ -119,7 +119,7 @@ class HttpRequestExecutorTests
         String url = "malformed.url";
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, url, Optional.empty());
         verify(softAssert).recordFailedAssertion(
-                (Exception) argThat(arg -> HttpRequestBuildException.class.isInstance(arg)
+                (Exception) argThat(arg -> arg instanceof HttpRequestBuildException
                         && ("java.lang.IllegalArgumentException: Scheme is missing in URL: " + url)
                         .equals(((Exception) arg).getMessage())));
         verify(httpTestContext).releaseRequestData();
@@ -130,7 +130,7 @@ class HttpRequestExecutorTests
     {
         httpRequestExecutor.executeHttpRequest(HttpMethod.POST, URL, Optional.empty());
         verify(softAssert).recordFailedAssertion(
-                (Exception) argThat(arg -> HttpRequestBuildException.class.isInstance(arg)
+                (Exception) argThat(arg -> arg instanceof HttpRequestBuildException
                         && "java.lang.IllegalStateException: HTTP POST request must include body"
                         .equals(((Exception) arg).getMessage())));
         verify(httpTestContext).releaseRequestData();
@@ -139,11 +139,11 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestConnectionClosedException() throws IOException
     {
-        when(httpClient.execute(argThat(e -> HttpRequestBase.class.isInstance(e) && URL.equals(e.getURI().toString())),
+        when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URL.equals(e.getURI().toString())),
                 nullable(HttpContext.class))).thenThrow(new ConnectionClosedException());
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
         verify(softAssert).recordFailedAssertion(
-                (Exception) argThat(arg -> ConnectionClosedException.class.isInstance(arg)
+                (Exception) argThat(arg -> arg instanceof ConnectionClosedException
                         && "Connection is closed".equals(((Exception) arg).getMessage())));
         verify(httpTestContext).releaseRequestData();
     }
@@ -151,7 +151,7 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestIOException() throws IOException
     {
-        when(httpClient.execute(argThat(e -> HttpRequestBase.class.isInstance(e) && URL.equals(e.getURI().toString())),
+        when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URL.equals(e.getURI().toString())),
                 nullable(HttpContext.class))).thenThrow(new IOException());
         assertThrows(IOException.class,
             () -> httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty()));
@@ -165,7 +165,7 @@ class HttpRequestExecutorTests
         firstResponse.setResponseTimeInMs(0);
         HttpResponse secondResponse = new HttpResponse();
         secondResponse.setResponseTimeInMs(RESPONSE_TIME_IN_MS);
-        when(httpClient.execute(argThat(e -> HttpRequestBase.class.isInstance(e) && URL.equals(e.getURI().toString())),
+        when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URL.equals(e.getURI().toString())),
                 nullable(HttpContext.class))).thenReturn(firstResponse).thenReturn(secondResponse);
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty(),
             response -> response.getResponseTimeInMs() < RESPONSE_TIME_IN_MS);

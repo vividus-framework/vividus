@@ -44,7 +44,7 @@ class ScenarioBasedIndexerTests
     }
 
     @Test
-    void shouldResetCounte()
+    void shouldResetCounter()
     {
         assertEquals(NAME_0, indexer.index(NAME));
         assertEquals(NAME_1, indexer.index(NAME));

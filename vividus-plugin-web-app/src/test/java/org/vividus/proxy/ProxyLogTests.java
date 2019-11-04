@@ -151,8 +151,8 @@ class ProxyLogTests
     void testGetResponsesMatchUrlPattern()
     {
         mockHarLog(getRequest(), mockGetResponse(URL, TEXT));
-        List<String> actualresponses = proxyLog.getResponses(URL);
-        assertEquals(Collections.singletonList(URL), actualresponses);
+        List<String> actualResponses = proxyLog.getResponses(URL);
+        assertEquals(Collections.singletonList(URL), actualResponses);
     }
 
     @Test
@@ -160,8 +160,8 @@ class ProxyLogTests
     {
         HarResponse response = Mockito.mock(HarResponse.class);
         mockHarLog(getRequest(), response);
-        List<String> actualresponses = proxyLog.getResponses(TEXT);
-        assertTrue(actualresponses.isEmpty());
+        List<String> actualResponses = proxyLog.getResponses(TEXT);
+        assertTrue(actualResponses.isEmpty());
     }
 
     @Test
@@ -186,8 +186,8 @@ class ProxyLogTests
     void testGetResponses()
     {
         mockHarLog(null, mockGetResponse(URL, TEXT));
-        List<String> actualresponses = proxyLog.getResponses();
-        assertEquals(Collections.singletonList(URL), actualresponses);
+        List<String> actualResponses = proxyLog.getResponses();
+        assertEquals(Collections.singletonList(URL), actualResponses);
     }
 
     @Test

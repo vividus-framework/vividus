@@ -45,9 +45,9 @@ class PropertyMapperTests
 {
     private static final String PROPERTY_PREFIX = "user.";
     private static final String ADMINISTRATOR = "administrator";
-    private static final String ADMINISTARTOR_PROPERTY_FAMILY = PROPERTY_PREFIX + ADMINISTRATOR + ".";
-    private static final String ADMINISTRATOR_FIRST_NAME = ADMINISTARTOR_PROPERTY_FAMILY + "first-name";
-    private static final String ADMINISTRATOR_LAST_NAME = ADMINISTARTOR_PROPERTY_FAMILY + "last-name";
+    private static final String ADMINISTRATOR_PROPERTY_FAMILY = PROPERTY_PREFIX + ADMINISTRATOR + ".";
+    private static final String ADMINISTRATOR_FIRST_NAME = ADMINISTRATOR_PROPERTY_FAMILY + "first-name";
+    private static final String ADMINISTRATOR_LAST_NAME = ADMINISTRATOR_PROPERTY_FAMILY + "last-name";
     private static final String FIRST_NAME = "John";
     private static final String LAST_NAME = "Smith";
 
@@ -66,9 +66,9 @@ class PropertyMapperTests
         String pattern = ".*";
         String surName = "surName";
         String dob = "01.01.1900";
-        properties.put(ADMINISTARTOR_PROPERTY_FAMILY + "pattern", pattern);
-        properties.put(ADMINISTARTOR_PROPERTY_FAMILY + "sur-name", surName);
-        properties.put(ADMINISTARTOR_PROPERTY_FAMILY + "dob", dob);
+        properties.put(ADMINISTRATOR_PROPERTY_FAMILY + "pattern", pattern);
+        properties.put(ADMINISTRATOR_PROPERTY_FAMILY + "sur-name", surName);
+        properties.put(ADMINISTRATOR_PROPERTY_FAMILY + "dob", dob);
         when(propertyParser.getPropertiesByPrefix(PROPERTY_PREFIX)).thenReturn(properties);
         Whitebox.setInternalState(propertyMapper, "deserializers", Set.of(new PatternDeserializer(),
                 new SupplierDeserializer()));

@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
 import org.vividus.util.DateUtils;
 
 class ShiftDateExpressionProcessorTests
@@ -40,8 +39,7 @@ class ShiftDateExpressionProcessorTests
     private static final String INPUT_DATE = "2019-01-01T12:00:00.333Z";
     private static final String FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSVV";
 
-    @InjectMocks
-    private ShiftDateExpressionProcessor processor = new ShiftDateExpressionProcessor(
+    private final ShiftDateExpressionProcessor processor = new ShiftDateExpressionProcessor(
             new DateUtils(ZoneId.of("GMT-0")));
 
     static Stream<Arguments> shiftDateProvider()
