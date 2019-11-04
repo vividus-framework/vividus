@@ -51,7 +51,7 @@ import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.util.LocatorUtil;
 
-@SuppressWarnings({"unchecked", "checkstyle:methodcount"})
+@SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
 class WaitStepsTests
 {

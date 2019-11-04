@@ -47,7 +47,6 @@ import org.vividus.ui.web.action.search.Visibility;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.util.LocatorUtil;
 
-@SuppressWarnings("checkstyle:methodcount")
 @TakeScreenshotOnFailure
 public class SetContextSteps
 {

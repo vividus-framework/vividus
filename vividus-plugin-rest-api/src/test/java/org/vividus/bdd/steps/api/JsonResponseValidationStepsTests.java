@@ -413,7 +413,7 @@ class JsonResponseValidationStepsTests
         verifyNoMoreInteractions(softAssert);
     }
 
-    private <T, K> T verifyMatcher(@SuppressWarnings("rawtypes") Class<? extends BaseMatcher> clazz, K matching)
+    private <T, K> T verifyMatcher(Class<? extends BaseMatcher> clazz, K matching)
     {
         return argThat(arg -> clazz.isInstance(arg) && clazz.cast(arg).matches(matching));
     }

@@ -36,7 +36,6 @@ import org.vividus.util.Sleeper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@SuppressWarnings("MethodCount")
 public class WaitActions implements IWaitActions
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitActions.class);

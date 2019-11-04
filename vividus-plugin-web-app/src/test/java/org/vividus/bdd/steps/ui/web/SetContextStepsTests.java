@@ -55,7 +55,6 @@ import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.context.SearchContextSetter;
 import org.vividus.ui.web.util.LocatorUtil;
 
-@SuppressWarnings("checkstyle:methodcount")
 @ExtendWith(MockitoExtension.class)
 class SetContextStepsTests
 {

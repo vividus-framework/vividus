@@ -33,7 +33,6 @@ public class SpringStepFactoryBeanPostProcessor implements BeanPostProcessor, Ap
 
     private ApplicationContext applicationContext;
 
-    @SuppressWarnings("unchecked")
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
     {

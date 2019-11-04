@@ -42,7 +42,6 @@ import org.vividus.http.HttpTestContext;
 import org.vividus.softassert.ISoftAssert;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("checkstyle:LineLength")
 class ApiStepsTests
 {
     private static final String URL = "http://www.example.com/";
@@ -79,8 +78,10 @@ class ApiStepsTests
 
     @ParameterizedTest
     @CsvSource({
+            // CHECKSTYLE:OFF
             "'|name|type|value|\n|partName|STRING|content|',                                      text/plain; charset=ISO-8859-1",
             "'|name|type|value|contentType|\n|partName|STRING|content|text/html; charset=utf-8|', text/html; charset=utf-8"
+            // CHECKSTYLE:ON
     })
     void testPutMultipartRequest(String tableAsString, String contentType)
     {

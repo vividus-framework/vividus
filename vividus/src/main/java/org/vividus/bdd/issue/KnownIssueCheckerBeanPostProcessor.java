@@ -43,7 +43,6 @@ public class KnownIssueCheckerBeanPostProcessor implements BeanPostProcessor, Ap
         return issueChecker;
     }
 
-    @SuppressWarnings("unchecked")
     private Map<String, IKnownIssueDataProvider> getDataProviders()
     {
         Map<String, IKnownIssueDataProvider> allDataProviders = new HashMap<>();
