@@ -104,16 +104,13 @@
     <script src="../../webjars/highlight.js/9.12.0/highlight.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
-            $("code[id='original-code']").each(function(i, e) {
-                hljs.highlightBlock(e);
-            });
             $("code[id='pretty-code']").each(function(i, e) {
                 if(e.className.includes("json")){
                     var text = $(this).text();
                     var pretty =  JSON.stringify(JSON.parse(text), null, 2);
                     $(this).text(pretty);
-                    hljs.highlightBlock(e);
                 }
+                hljs.highlightBlock(e);
             });
         });
     </script>
