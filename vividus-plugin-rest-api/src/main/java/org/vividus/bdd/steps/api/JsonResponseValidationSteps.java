@@ -53,8 +53,6 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 
 public class JsonResponseValidationSteps
 {
-    private static final int DURATION_DIVIDER = 10;
-
     private ISoftAssert softAssert;
     private IJsonUtils jsonUtils;
 
@@ -222,15 +220,17 @@ public class JsonResponseValidationSteps
      * @param jsonPath A JSON path
      * @param resourceUrl Resource URL
      * @param duration Time duration to wait
+     * @param retryTimes How many times request will be retried; duration/retryTimes=timeout between requests
      * @throws IOException If an input or output exception occurred
      */
-    @When("I wait for presence of the element by JSON path '$jsonPath' in HTTP GET response from '$resourceUrl'"
-            + " for '$duration' duration")
-    public void waitForJsonFieldAppearance(String jsonPath, String resourceUrl, Duration duration) throws IOException
+    @When("I wait for presence of element by '$jsonPath' in HTTP GET response from '$resourceUrl'"
+            + " for '$duration' duration retrying $retryTimes times")
+    public void waitForJsonFieldAppearance(String jsonPath, String resourceUrl, Duration duration,
+            int retryTimes) throws IOException
     {
         long durationInMillis = duration.toMillis();
         long expectedTime = System.currentTimeMillis() + durationInMillis;
-        long pollingTimeoutMillis = durationInMillis / DURATION_DIVIDER;
+        long pollingTimeoutMillis = durationInMillis / retryTimes;
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, resourceUrl, Optional.empty(), response ->
         {
             if (response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0)

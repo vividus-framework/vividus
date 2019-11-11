@@ -3,3 +3,6 @@ Then the number of JSON elements by the JSON path '<jsonPath>' is > 0
 
 Composite: When I save a JSON element from response by JSON path '$jsonPath' to $scopes variable '$variableName'
 When I save a JSON element from '${response}' by JSON path '<jsonPath>' to <scopes> variable '<variableName>'
+
+Composite: When I wait for presence of the element by JSON path '$jsonPath' in HTTP GET response from '$resourceUrl' for '$duration' duration
+When I wait for presence of element by '<jsonPath>' in HTTP GET response from '<resourceUrl>' for '<duration>' duration retrying 10 times

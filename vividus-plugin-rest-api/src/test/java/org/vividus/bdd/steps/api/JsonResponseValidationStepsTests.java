@@ -76,6 +76,7 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 @ExtendWith(MockitoExtension.class)
 class JsonResponseValidationStepsTests
 {
+    private static final int DURATION_DIVIDER = 10;
     private static final String HTTP_REQUEST_EXECUTOR_FIELD = "httpRequestExecutor";
     private static final String GET = "GET";
     private static final String SOME_PATH = "$.some";
@@ -343,7 +344,8 @@ class JsonResponseValidationStepsTests
         Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
         executorField.setAccessible(true);
         executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
-        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT1S"));
+        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT1S"),
+                DURATION_DIVIDER);
         verify(softAssert).recordFailedAssertion(
                 (Exception) argThat(arg -> arg instanceof ConnectionClosedException
                         && "Connection is closed".equals(((Exception) arg).getMessage())));
@@ -356,7 +358,8 @@ class JsonResponseValidationStepsTests
         Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
         executorField.setAccessible(true);
         executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
-        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT2S"));
+        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT2S"),
+                DURATION_DIVIDER);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH),
                 eq(elementsFound), verifyMatcher(1));
     }
