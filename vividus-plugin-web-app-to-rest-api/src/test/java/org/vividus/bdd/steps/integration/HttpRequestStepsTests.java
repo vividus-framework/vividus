@@ -16,20 +16,17 @@
 
 package org.vividus.bdd.steps.integration;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+import java.util.Map;
 
 import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,9 +34,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.HttpTestContext;
+import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.ui.web.action.ICookieManager;
 
-@ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
+@ExtendWith(MockitoExtension.class)
 class HttpRequestStepsTests
 {
     @Mock
@@ -48,7 +46,8 @@ class HttpRequestStepsTests
     @Mock
     private ICookieManager cookieManager;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(HttpRequestSteps.class);
+    @Mock
+    private AttachmentPublisher attachmentPublisher;
 
     @InjectMocks
     private HttpRequestSteps httpRequestSteps;
@@ -63,9 +62,16 @@ class HttpRequestStepsTests
         when(cookieStore.getCookies()).thenReturn(List.of(cookie1, cookie2));
         httpRequestSteps.executeRequestUsingBrowserCookies();
         verify(httpTestContext).putCookieStore(cookieStore);
-        assertThat(logger.getLoggingEvents(),
-                is(List.of(debug("Setting cookies into API context: {}",
-                        "[version: 0][name: key][value: vale][domain: null][path: null][expiry: null];\n"
-                      + "[version: 0][name: key1][value: vale1][domain: null][path: null][expiry: null]"))));
+        verify(attachmentPublisher).publishAttachment(eq("org/vividus/bdd/steps/integration/browser-cookies.ftl"),
+            argThat(arg ->
+            {
+                @SuppressWarnings("unchecked")
+                List<Cookie> cookies = ((Map<String, List<Cookie>>) arg).get("cookies");
+                return cookies.size() == 2
+                        && cookies.get(0).toString().equals(
+                                "[version: 0][name: key][value: vale][domain: null][path: null][expiry: null]")
+                        && cookies.get(1).toString().equals(
+                                "[version: 0][name: key1][value: vale1][domain: null][path: null][expiry: null]");
+            }), eq("Browser cookies"));
     }
 }
