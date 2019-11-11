@@ -213,7 +213,7 @@ class LocatorUtilTests
     @Test
     void testGetXpathPatternWithNormalization4()
     {
-        By expectedLocator = By.xpath(".//*[normalize-space(text())='text %' and (local-name()='h1' or"
+        By expectedLocator = By.xpath(".//*[text()[normalize-space()='text %'] and (local-name()='h1' or"
                 + " local-name()='h2' or local-name()='h3')]/../..");
         By actualLocator = LocatorUtil.getXPathLocator(true, SECTION_PATTERN, TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);

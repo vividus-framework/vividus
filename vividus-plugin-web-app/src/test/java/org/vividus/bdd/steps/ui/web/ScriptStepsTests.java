@@ -60,7 +60,7 @@ class ScriptStepsTests
     {
         when(baseValidations.assertIfElementExists("Script with text 'test'",
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(".//script[normalize-space(text())=\"test\"]")
+                        new SearchParameters(".//script[text()[normalize-space()=\"test\"]]")
                                 .setVisibility(Visibility.ALL)))).thenReturn(mockedScript);
         assertEquals(scriptSteps.thenJavascriptFileWithTextIsIncludedInTheSourceCode(TEST), mockedScript);
     }

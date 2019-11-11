@@ -28,15 +28,15 @@ public final class LocatorUtil
     private static final String ANY = "*";
     private static final String CONCAT = "(| )((concat\\([^)]*\\))|('(?!')[^']*')|(\"(?!\\\")[^\"]*\"))";
     private static final Pattern ATTR_VALUE_PATTERN = Pattern
-            .compile("((text\\(\\))|(([\\s])([*]))|([.])|(@[\\w.\\-_(?!normalize-space)]*))(| )=" + CONCAT);
+            .compile("((([\\s])([*]))|([.])|(@[\\w.\\-_(?!normalize-space)]*))(| )=" + CONCAT);
     private static final Pattern ATTR_VALUE_TRANSLATE_PATTERN = Pattern
             .compile("(translate\\([^)]*\\))(| )=" + CONCAT);
-    private static final Pattern ANY_ATTR_VALUE_PATTERN = Pattern.compile("(@[*])(| )=" + CONCAT);
-
+    private static final Pattern ANY_ATTR_OR_TEXT_VALUE_PATTERN = Pattern.compile("((@[*])|(text\\(\\)))(| )="
+            + CONCAT);
     private static final Pattern ATTR_CONTAINS_PATTERN = Pattern.compile("(contains\\((?!normalize-space)(.*?)),");
 
-    private static final String NORMALIZE_SPACE_FORMAT = "$4normalize-space($2$5$6$7)=$10";
-    private static final String ANY_ATTR_NORMALIZE_SPACE_FORMAT = "$1[normalize-space()=$4]";
+    private static final String NORMALIZE_SPACE_FORMAT = "$3normalize-space($4$5$6)=$9";
+    private static final String ANY_ATTR_OR_TEXT_NORMALIZE_SPACE_FORMAT = "$1[normalize-space()=$6]";
     private static final String NORMALIZE_SPACE_TRANSLATE_FORMAT = "normalize-space($1)=$5$6$7";
     private static final String CONTAINS_NORMALIZE_SPACE_FORMAT = "contains(normalize-space($2),";
 
@@ -167,7 +167,7 @@ public final class LocatorUtil
     private static String normalizeXPath(String xpath)
     {
         String newXpath = ATTR_VALUE_PATTERN.matcher(xpath).replaceAll(NORMALIZE_SPACE_FORMAT);
-        newXpath = ANY_ATTR_VALUE_PATTERN.matcher(newXpath).replaceAll(ANY_ATTR_NORMALIZE_SPACE_FORMAT);
+        newXpath = ANY_ATTR_OR_TEXT_VALUE_PATTERN.matcher(newXpath).replaceAll(ANY_ATTR_OR_TEXT_NORMALIZE_SPACE_FORMAT);
         newXpath = SEARCH_IN_CURRENT_NODE_PATTERN.matcher(newXpath).replaceAll(NORMALIZE_CURRENT_NODE_PATTERN);
         newXpath = normalizeXpathWithOperators(newXpath);
         newXpath = ATTR_VALUE_TRANSLATE_PATTERN.matcher(newXpath).replaceAll(NORMALIZE_SPACE_TRANSLATE_FORMAT);
