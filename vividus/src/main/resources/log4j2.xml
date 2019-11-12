@@ -17,6 +17,10 @@
     <Loggers>
         <Logger name="org.springframework" level="WARN" />
         <Logger name="org.springframework.context.support.SimpleThreadScope" level="ERROR" />
+        <Logger name="org.vividus" level="DEBUG" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="file" />
+        </Logger>
         <Logger name="org.vividus.bdd.log" level="INFO" additivity="false">
             <AppenderRef ref="console" />
             <AppenderRef ref="file" />
@@ -27,10 +31,6 @@
             <AppenderRef ref="AllureLogAppender" />
         </Logger>
         <Logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="INFO" additivity="false">
-            <AppenderRef ref="console" />
-            <AppenderRef ref="file" />
-        </Logger>
-        <Logger name="org.vividus.runner.GenericRunner" level="DEBUG" additivity="false">
             <AppenderRef ref="console" />
             <AppenderRef ref="file" />
         </Logger>
