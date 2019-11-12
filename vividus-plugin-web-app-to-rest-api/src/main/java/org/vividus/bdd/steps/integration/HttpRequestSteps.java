@@ -16,23 +16,27 @@
 
 package org.vividus.bdd.steps.integration;
 
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
+import java.util.Map;
 
 import org.apache.http.client.CookieStore;
-import org.apache.http.cookie.Cookie;
 import org.jbehave.core.annotations.When;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.http.HttpTestContext;
+import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.ui.web.action.ICookieManager;
 
 public class HttpRequestSteps
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequestSteps.class);
-    @Inject private ICookieManager cookieManager;
-    @Inject private HttpTestContext httpTestContext;
+    private final ICookieManager cookieManager;
+    private final HttpTestContext httpTestContext;
+    private final AttachmentPublisher attachmentPublisher;
+
+    public HttpRequestSteps(ICookieManager cookieManager, HttpTestContext httpTestContext,
+            AttachmentPublisher attachmentPublisher)
+    {
+        this.cookieManager = cookieManager;
+        this.httpTestContext = httpTestContext;
+        this.attachmentPublisher = attachmentPublisher;
+    }
 
     /**
      * Step implemented to reuse browser cookies for HTTP client executed requests.
@@ -43,10 +47,8 @@ public class HttpRequestSteps
     public void executeRequestUsingBrowserCookies()
     {
         CookieStore cookieStore = cookieManager.getCookiesAsHttpCookieStore();
-        LOGGER.debug("Setting cookies into API context: {}",
-                cookieStore.getCookies().stream()
-                                        .map(Cookie::toString)
-                                        .collect(Collectors.joining(";\n")));
+        attachmentPublisher.publishAttachment("org/vividus/bdd/steps/integration/browser-cookies.ftl",
+                Map.of("cookies", cookieStore.getCookies()), "Browser cookies");
         httpTestContext.putCookieStore(cookieStore);
     }
 }
