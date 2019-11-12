@@ -29,6 +29,7 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import com.jayway.jsonpath.InvalidJsonException;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import org.jbehave.core.annotations.Then;
@@ -233,9 +234,16 @@ public class JsonResponseValidationSteps
         long pollingTimeoutMillis = durationInMillis / retryTimes;
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, resourceUrl, Optional.empty(), response ->
         {
-            if (response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0)
+            try
             {
-                return false;
+                if (response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0)
+                {
+                    return false;
+                }
+            }
+            catch (InvalidJsonException ignored)
+            {
+                //ignore exception
             }
             Sleeper.sleep(pollingTimeoutMillis, TimeUnit.MILLISECONDS);
             return System.currentTimeMillis() <= expectedTime;
