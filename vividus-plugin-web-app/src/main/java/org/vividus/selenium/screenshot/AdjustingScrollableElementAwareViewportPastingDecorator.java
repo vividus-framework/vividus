@@ -16,18 +16,23 @@
 
 package org.vividus.selenium.screenshot;
 
+import java.time.Duration;
+
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.web.action.IJavascriptActions;
 
+import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
-public class AdjustingScrollableElementAwareViewportPastingDecorator
-        extends ScrollableElementAwareViewportPastingDecorator
+public class AdjustingScrollableElementAwareViewportPastingDecorator extends DebuggingViewportPastingDecorator
 {
     private static final long serialVersionUID = 278174510416744242L;
 
+    private final transient WebElement scrollableElement;
+    private final transient IJavascriptActions javascriptActions;
+    private final Duration scrollTimeout;
     private final int headerToCut;
     private final int footerToCut;
     private int scrolls = 2;
@@ -35,7 +40,10 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator
     public AdjustingScrollableElementAwareViewportPastingDecorator(ShootingStrategy strategy,
             WebElement scrollableElement, IJavascriptActions javascriptActions, ScreenshotConfiguration configuration)
     {
-        super(strategy, scrollableElement, javascriptActions, configuration);
+        super(strategy);
+        this.javascriptActions = javascriptActions;
+        this.scrollableElement = scrollableElement;
+        this.scrollTimeout = configuration.getScrollTimeout();
         this.footerToCut = configuration.getWebFooterToCut();
         this.headerToCut = configuration.getWebHeaderToCut();
     }
@@ -49,13 +57,21 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator
     @Override
     public int getFullHeight(WebDriver driver)
     {
-        return super.getFullHeight(driver) + headerToCut + footerToCut;
+        return ((Number) javascriptActions.executeScript(
+                "return Math.max(document.body.scrollHeight,"
+              + "document.body.offsetHeight,"
+              + "document.documentElement.clientHeight,"
+              + "document.documentElement.scrollHeight,"
+              + "document.documentElement.offsetHeight,"
+              + "arguments[0].scrollHeight);", scrollableElement)).intValue()
+              + headerToCut + footerToCut;
     }
 
     @Override
     protected int getCurrentScrollY(JavascriptExecutor js)
     {
-        int scrollY = super.getCurrentScrollY(js);
+        int scrollY = ((Number) javascriptActions.executeScript("var scrollTop = arguments[0].scrollTop;"
+                + "if(scrollTop){return scrollTop;} else {return 0;}", scrollableElement)).intValue();
         if (scrolls != 0)
         {
             scrolls--;

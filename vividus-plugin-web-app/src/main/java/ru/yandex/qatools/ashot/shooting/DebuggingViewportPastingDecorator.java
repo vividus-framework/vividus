@@ -66,6 +66,7 @@ public class DebuggingViewportPastingDecorator extends ShootingDecorator {
         int pageWidth = getFullWidth(wd);
         int viewportHeight = getWindowHeight(wd);
         shootingArea = getShootingCoords(coordsSet, pageWidth, pageHeight, viewportHeight);
+        int startY = getCurrentScrollY(js);
 
         BufferedImage finalImage = new BufferedImage(pageWidth, shootingArea.height, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D graphics = finalImage.createGraphics();
@@ -76,13 +77,20 @@ public class DebuggingViewportPastingDecorator extends ShootingDecorator {
             Sleeper.sleep(Duration.ofMillis(scrollTimeout));
             BufferedImage part = getShootingStrategy().getScreenshot(wd);
             int currentScrollY = getCurrentScrollY(js);
-            screenshotDebugger.debug(this.getClass(), CURRENT_SCROLL + currentScrollY + "_part_" + n, part);
+            debugScreenshot(CURRENT_SCROLL + currentScrollY + "_part_" + n, part);
             graphics.drawImage(part, 0, currentScrollY - shootingArea.y, null);
-            screenshotDebugger.debug(this.getClass(), CURRENT_SCROLL + currentScrollY, finalImage);
+            debugScreenshot(CURRENT_SCROLL + currentScrollY, finalImage);
         }
 
         graphics.dispose();
+        scrollVertically(js, startY);
         return finalImage;
+    }
+
+    private void debugScreenshot(String debugMessage, BufferedImage debugImage) {
+        if (screenshotDebugger != null) {
+            screenshotDebugger.debug(this.getClass(), debugMessage, debugImage);
+        }
     }
 
     @Override
