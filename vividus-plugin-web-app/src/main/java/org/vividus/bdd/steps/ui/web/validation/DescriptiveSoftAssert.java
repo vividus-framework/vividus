@@ -29,12 +29,6 @@ public class DescriptiveSoftAssert extends SoftAssert implements IDescriptiveSof
     private static final Logger LOGGER = LoggerFactory.getLogger(SoftAssert.class);
 
     @Override
-    public boolean assertTrue(String businessDescription, String systemDescription, boolean condition)
-    {
-        return recordAssertion(businessDescription, systemDescription, condition);
-    }
-
-    @Override
     public <T> boolean assertThat(String businessDescription, String systemDescription, T actual,
             Matcher<? super T> matcher)
     {
@@ -50,13 +44,6 @@ public class DescriptiveSoftAssert extends SoftAssert implements IDescriptiveSof
         String matchedString = description.toString();
         return recordAssertion(businessDescription + StringUtils.SPACE + matchedString,
                 systemDescription + StringUtils.SPACE + matchedString, isMatches);
-    }
-
-    @Override
-    public boolean assertNotNull(String businessDescription, String systemDescription, Object object)
-    {
-        String assertionCondition = getNullAssertionDescription(object);
-        return recordAssertion(businessDescription, systemDescription + assertionCondition, object != null);
     }
 
     private boolean recordAssertion(String businessDescription, String systemDescription, boolean passed)

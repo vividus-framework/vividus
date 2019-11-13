@@ -53,11 +53,14 @@ import uk.org.lidalia.slf4jext.Level;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class DescriptiveSoftAssertTests
 {
-    private static final String BUSINESS_DESCRIPTION = "Business description";
+    private static final String TEST = "test";
 
+    private static final String BUSINESS_DESCRIPTION = "Business description";
     private static final String SYSTEM_DESCRIPTION = "System description";
 
-    private static final String TEST = "test";
+    private static final String FAILED_ASSERTION = " [Expected: \"\" Actual: was \"test\"]";
+    private static final String FAILED_BUSINESS_ASSERTION = BUSINESS_DESCRIPTION + FAILED_ASSERTION;
+    private static final String FAILED_SYSTEM_ASSERTION = SYSTEM_DESCRIPTION + FAILED_ASSERTION;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SoftAssert.class);
 
@@ -87,18 +90,6 @@ class DescriptiveSoftAssertTests
     }
 
     @Test
-    void testAssertTrue()
-    {
-        assertTrue(descriptiveSoftAssert.assertTrue(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, true));
-    }
-
-    @Test
-    void testAssertTrueFalse()
-    {
-        assertFalse(descriptiveSoftAssert.assertTrue(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, false));
-    }
-
-    @Test
     void testAssertThat()
     {
         LoggingEvent expectedEvent = new LoggingEvent(Level.DEBUG, "Pass: {}",
@@ -124,36 +115,37 @@ class DescriptiveSoftAssertTests
     }
 
     @Test
-    void testAssertTrueKnownIssueSystem()
+    void testAssertThatWithKnownSystemIssue()
     {
         KnownIssue issue = mock(KnownIssue.class);
-        when(knownIssueChecker.getKnownIssue(BUSINESS_DESCRIPTION)).thenReturn(issue);
-        descriptiveSoftAssert.assertTrue(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, false);
-        verify(formatter).getMessage(SYSTEM_DESCRIPTION, issue);
+        when(knownIssueChecker.getKnownIssue(FAILED_BUSINESS_ASSERTION)).thenReturn(null);
+        when(knownIssueChecker.getKnownIssue(FAILED_SYSTEM_ASSERTION)).thenReturn(issue);
+        descriptiveSoftAssert.assertThat(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, TEST, equalTo(""));
+        verify(formatter).getMessage(FAILED_SYSTEM_ASSERTION, issue);
     }
 
     @Test
-    void testAssertTrueKnownIssueBusiness()
+    void testAssertThatWithKnownBusinessIssue()
     {
         KnownIssue issue = mock(KnownIssue.class);
-        when(knownIssueChecker.getKnownIssue(BUSINESS_DESCRIPTION)).thenReturn(issue);
-        descriptiveSoftAssert.assertTrue(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, false);
-        verify(formatter).getMessage(BUSINESS_DESCRIPTION, issue);
+        when(knownIssueChecker.getKnownIssue(FAILED_BUSINESS_ASSERTION)).thenReturn(issue);
+        descriptiveSoftAssert.assertThat(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, TEST, equalTo(""));
+        verify(formatter).getMessage(FAILED_BUSINESS_ASSERTION, issue);
     }
 
     @Test
-    void testAssertTrueNullKnownIssue()
+    void testAssertThatWithNullKnownIssue()
     {
-        descriptiveSoftAssert.assertTrue(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, false);
+        descriptiveSoftAssert.assertThat(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, TEST, equalTo(""));
         verifyNoInteractions(formatter);
     }
 
     @Test
-    void testAssertTrueNullKnownIssueChecker()
+    void testAssertThatWithNullKnownIssueChecker()
     {
         DescriptiveSoftAssert spy = Mockito.spy(descriptiveSoftAssert);
         spy.setKnownIssueChecker(null);
-        spy.assertTrue(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, false);
+        spy.assertThat(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, TEST, equalTo(""));
         verifyNoInteractions(formatter);
     }
 }

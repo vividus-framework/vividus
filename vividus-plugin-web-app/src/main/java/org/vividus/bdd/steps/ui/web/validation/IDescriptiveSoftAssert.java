@@ -22,16 +22,6 @@ import org.vividus.softassert.ISoftAssert;
 public interface IDescriptiveSoftAssert extends ISoftAssert
 {
     /**
-     * Asserts that a condition is true. If it isn't, an assertion error is added to the collection.
-     * @param businessDescription The assertion description readable for user excluding technical information such as
-     * locators and so on
-     * @param systemDescription The assertion description for debug
-     * @param condition Condition to be checked
-     * @return <code>true</code> if assertion is passed, otherwise <code>false</code>
-     */
-    boolean assertTrue(String businessDescription, String systemDescription, boolean condition);
-
-    /**
      * Asserts that <code>actual</code> satisfies the condition specified by <code>matcher</code>.
      * If it is not, an assertion error is added to the collection.
      * Example:
@@ -63,14 +53,4 @@ public interface IDescriptiveSoftAssert extends ISoftAssert
      */
     <T> boolean assertThat(String businessDescription, String systemDescription, T actual,
             Matcher<? super T> matcher);
-
-    /**
-     * Asserts that an object isn't null. If it is, an assertion error is added to the collection.
-     * @param businessDescription The assertion description readable for user excluding technical information such as
-     * locators and so on
-     * @param systemDescription The assertion description for debug
-     * @param object Object to check or <code>null</code>
-     * @return <code>true</code> if assertion is passed, otherwise <code>false</code>
-     */
-    boolean assertNotNull(String businessDescription, String systemDescription, Object object);
 }
