@@ -17,7 +17,6 @@
 package org.vividus.selenium.screenshot;
 
 import static org.vividus.selenium.screenshot.ScreenshotConfiguration.SCROLL_TIMEOUT;
-import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.viewportPasting;
 
 import java.awt.Rectangle;
 
@@ -40,7 +39,8 @@ public enum ScreenshotShootingStrategy
         public ShootingStrategy getDecoratedShootingStrategy(ShootingStrategy shootingStrategy,
                 boolean viewportScreenshot, boolean landscape, String deviceName)
         {
-            return viewportScreenshot ? shootingStrategy : viewportPasting(shootingStrategy, SCROLL_TIMEOUT);
+            return viewportScreenshot ? shootingStrategy
+                    : new AdjustingViewportPastingDecorator(shootingStrategy, 0).withScrollTimeout(SCROLL_TIMEOUT);
         }
     },
     DEVICE_DEPENDENT

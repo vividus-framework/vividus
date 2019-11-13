@@ -44,7 +44,7 @@ class ScreenshotShootingStrategyTests
         return Stream.of(
             Arguments.of(ScreenshotShootingStrategy.SIMPLE,                  SimpleShootingStrategy.class,             false, false,  null                      ),
             Arguments.of(ScreenshotShootingStrategy.SIMPLE,                  ViewportShootingStrategy.class,           true,  false,  null                      ),
-            Arguments.of(ScreenshotShootingStrategy.VIEWPORT_PASTING,        ViewportPastingDecorator.class,          false, false,  null                      ),
+            Arguments.of(ScreenshotShootingStrategy.VIEWPORT_PASTING,        AdjustingViewportPastingDecorator.class, false, false,  null                      ),
             Arguments.of(ScreenshotShootingStrategy.VIEWPORT_PASTING,        SimpleShootingStrategy.class,            true,  false,  null                      ),
             Arguments.of(ScreenshotShootingStrategy.DEVICE_DEPENDENT,        DebuggingViewportPastingDecorator.class, false, false,  IPAD_SIMULATOR            ),
             Arguments.of(ScreenshotShootingStrategy.DEVICE_DEPENDENT,        CuttingDecorator.class,                  true,  false,  IPAD_SIMULATOR            ),

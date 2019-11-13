@@ -44,7 +44,6 @@ import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
 import ru.yandex.qatools.ashot.shooting.ScalingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
-import ru.yandex.qatools.ashot.shooting.ViewportPastingDecorator;
 import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
 import ru.yandex.qatools.ashot.shooting.cutter.FixedCutStrategy;
 
@@ -82,7 +81,8 @@ class AshotFactoryTests
         ashotFactory.setScreenshotShootingStrategy(ScreenshotShootingStrategy.VIEWPORT_PASTING);
         AShot aShot = ashotFactory.create(false, Optional.empty());
         assertThat(Whitebox.getInternalState(aShot, COORDS_PROVIDER), is(instanceOf(CeilingJsCoordsProvider.class)));
-        assertThat(Whitebox.getInternalState(aShot, SHOOTING_STRATEGY), instanceOf(ViewportPastingDecorator.class));
+        assertThat(Whitebox.getInternalState(aShot, SHOOTING_STRATEGY),
+                instanceOf(AdjustingViewportPastingDecorator.class));
     }
 
     private void mockDevice()
