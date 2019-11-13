@@ -22,16 +22,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -45,6 +47,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -57,7 +60,6 @@ import org.vividus.softassert.ISoftAssert;
 class HttpRequestExecutorTests
 {
     private static final String URL = "http://www.example.com/";
-    private static final String LOG_MESSAGE_FORMAT = "Response time: {} ms";
     private static final long RESPONSE_TIME_IN_MS = 100;
 
     @Mock
@@ -77,13 +79,15 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestFirstTime() throws IOException
     {
-        mockHttpResponse(HttpRequestBase.class, URL);
+        when(httpTestContext.getCookieStore()).thenReturn(Optional.empty());
+        when(httpTestContext.getRequestConfig()).thenReturn(Optional.empty());
+        HttpResponse httpResponse = mockHttpResponse(URL);
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
-        verify(httpTestContext).getRequestHeaders();
-        verify(httpTestContext).getRequestEntity();
-        assertThat(logger.getLoggingEvents(),
-                equalTo(List.of(info(LOG_MESSAGE_FORMAT, RESPONSE_TIME_IN_MS))));
-        verify(httpTestContext).releaseRequestData();
+        InOrder orderedHttpTestContext = inOrder(httpTestContext);
+        verifyHttpTestContext(orderedHttpTestContext, httpResponse);
+        orderedHttpTestContext.verify(httpTestContext).releaseRequestData();
+        orderedHttpTestContext.verifyNoMoreInteractions();
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(createResponseTimeLogEvent(httpResponse))));
     }
 
     @Test
@@ -104,13 +108,16 @@ class HttpRequestExecutorTests
     {
         CookieStore cookieStore = mock(CookieStore.class);
         when(httpTestContext.getCookieStore()).thenReturn(Optional.of(cookieStore));
-        mockHttpResponse(HttpRequestBase.class, URL);
+        HttpResponse httpResponse = mockHttpResponse(URL);
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
 
         verify(httpClient).execute(argThat(HttpUriRequest.class::isInstance),
                 argThat(e -> e != null && e.getAttribute("http.cookie-store") != null));
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(LOG_MESSAGE_FORMAT, RESPONSE_TIME_IN_MS))));
-        verify(httpTestContext).releaseRequestData();
+        InOrder orderedHttpTestContext = inOrder(httpTestContext);
+        verifyHttpTestContext(orderedHttpTestContext, httpResponse);
+        orderedHttpTestContext.verify(httpTestContext).releaseRequestData();
+        orderedHttpTestContext.verifyNoMoreInteractions();
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(createResponseTimeLogEvent(httpResponse))));
     }
 
     @Test
@@ -161,24 +168,41 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestPredicateFunction() throws IOException
     {
-        HttpResponse firstResponse = new HttpResponse();
-        firstResponse.setResponseTimeInMs(0);
-        HttpResponse secondResponse = new HttpResponse();
-        secondResponse.setResponseTimeInMs(RESPONSE_TIME_IN_MS);
+        HttpResponse httpResponse1 = new HttpResponse();
+        httpResponse1.setResponseTimeInMs(0);
+        HttpResponse httpResponse2 = new HttpResponse();
+        httpResponse2.setResponseTimeInMs(RESPONSE_TIME_IN_MS);
         when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URL.equals(e.getURI().toString())),
-                nullable(HttpContext.class))).thenReturn(firstResponse).thenReturn(secondResponse);
+                nullable(HttpContext.class))).thenReturn(httpResponse1).thenReturn(httpResponse2);
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty(),
             response -> response.getResponseTimeInMs() < RESPONSE_TIME_IN_MS);
-        verify(httpTestContext, times(2)).getRequestHeaders();
-        verify(httpTestContext, times(2)).getRequestEntity();
-        verify(httpTestContext).releaseRequestData();
+        InOrder orderedHttpTestContext = inOrder(httpTestContext);
+        verifyHttpTestContext(orderedHttpTestContext, httpResponse1);
+        verifyHttpTestContext(orderedHttpTestContext, httpResponse2);
+        orderedHttpTestContext.verify(httpTestContext).releaseRequestData();
+        orderedHttpTestContext.verifyNoMoreInteractions();
+        assertThat(logger.getLoggingEvents(),
+                equalTo(List.of(createResponseTimeLogEvent(httpResponse1), createResponseTimeLogEvent(httpResponse2))));
     }
 
-    private void mockHttpResponse(Class<? extends HttpUriRequest> requestClass, String url) throws IOException
+    private HttpResponse mockHttpResponse(String url) throws IOException
     {
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setResponseTimeInMs(RESPONSE_TIME_IN_MS);
-        when(httpClient.execute(argThat(e -> requestClass.isInstance(e) && url.equals(e.getURI().toString())),
+        when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URI.create(url).equals(e.getURI())),
                 nullable(HttpContext.class))).thenReturn(httpResponse);
+        return httpResponse;
+    }
+
+    private void verifyHttpTestContext(InOrder orderedHttpTestContext, HttpResponse httpResponse)
+    {
+        orderedHttpTestContext.verify(httpTestContext).getRequestHeaders();
+        orderedHttpTestContext.verify(httpTestContext).getRequestEntity();
+        orderedHttpTestContext.verify(httpTestContext).putResponse(httpResponse);
+    }
+
+    private LoggingEvent createResponseTimeLogEvent(HttpResponse httpResponse)
+    {
+        return info("Response time: {} ms", httpResponse.getResponseTimeInMs());
     }
 }
