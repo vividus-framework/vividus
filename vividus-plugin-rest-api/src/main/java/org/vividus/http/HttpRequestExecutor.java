@@ -118,6 +118,7 @@ public class HttpRequestExecutor
         httpTestContext.getRequestConfig().ifPresent(httpClientContext::setRequestConfig);
 
         HttpResponse httpResponse = httpClient.execute(requestBase, httpClientContext);
+        httpTestContext.putResponse(httpResponse);
         LOGGER.info("Response time: {} ms", httpResponse.getResponseTimeInMs());
         return httpResponse;
     }
