@@ -45,27 +45,11 @@ public class HighlightingSoftAssert implements IHighlightingSoftAssert
     }
 
     @Override
-    public boolean assertTrue(String businessDescription, String systemDescription, boolean condition)
-    {
-        boolean result = descriptiveSoftAssert.assertTrue(businessDescription, systemDescription, condition);
-        clearAssertingWebElements();
-        return result;
-    }
-
-    @Override
     public <T> boolean assertThat(String businessDescription, String systemDescription, T actual,
             Matcher<? super T> matcher)
     {
         boolean result = descriptiveSoftAssert.assertThat(businessDescription, systemDescription, actual,
                 matcher);
-        clearAssertingWebElements();
-        return result;
-    }
-
-    @Override
-    public boolean assertNotNull(String businessDescription, String systemDescription, Object object)
-    {
-        boolean result = descriptiveSoftAssert.assertNotNull(businessDescription, systemDescription, object);
         clearAssertingWebElements();
         return result;
     }

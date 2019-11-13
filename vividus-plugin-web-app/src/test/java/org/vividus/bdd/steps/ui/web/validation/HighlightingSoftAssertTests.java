@@ -19,7 +19,6 @@ package org.vividus.bdd.steps.ui.web.validation;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -270,26 +269,5 @@ class HighlightingSoftAssertTests
     {
         highlightingSoftAssert.verify();
         verify(descriptiveSoftAssert).verify();
-    }
-
-    @Test
-    void testAssertTrueBusinessSystemDescription()
-    {
-        when(descriptiveSoftAssert.assertTrue(DESCRIPTION, DESCRIPTION, CONDITION)).thenReturn(CONDITION);
-        boolean actualCondition = highlightingSoftAssert.assertTrue(DESCRIPTION, DESCRIPTION, CONDITION);
-        verify(descriptiveSoftAssert).assertTrue(DESCRIPTION, DESCRIPTION, CONDITION);
-        verify(webUiContext).clearAssertingWebElements();
-        assertTrue(actualCondition);
-    }
-
-    @Test
-    void testAsseertNotNullBusinessSystemDescription()
-    {
-        boolean expectedResult = true;
-        Object object = new Object();
-        when(descriptiveSoftAssert.assertNotNull(DESCRIPTION, DESCRIPTION, object)).thenReturn(CONDITION);
-        boolean actualResult = highlightingSoftAssert.assertNotNull(DESCRIPTION, DESCRIPTION, object);
-        verify(webUiContext).clearAssertingWebElements();
-        assertEquals(expectedResult, actualResult);
     }
 }
