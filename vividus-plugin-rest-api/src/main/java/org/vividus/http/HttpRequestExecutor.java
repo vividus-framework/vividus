@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import javax.inject.Named;
-
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -36,7 +34,6 @@ import org.vividus.softassert.ISoftAssert;
  * Executor of HTTP requests which supports some exceptions handling, test context releasing
  * and requests repeat with quit conditions.
  */
-@Named
 public class HttpRequestExecutor
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequestExecutor.class);
