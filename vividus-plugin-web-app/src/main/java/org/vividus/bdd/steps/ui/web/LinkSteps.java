@@ -43,9 +43,9 @@ public class LinkSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>text</h1></td>
+     * <b>text</b></td>
      * <td>
-     * <h1>link</h1></td>
+     * <b>link</b></td>
      * </tr>
      * </thead> <tbody>
      * <tr>
@@ -90,7 +90,7 @@ public class LinkSteps
      * Example:
      * <table border="1" style="width:10%">
      * <caption>A table of links</caption>
-     * <thead><tr><td><h1>text</h1></td></tr></thead>
+     * <thead><tr><td><b>text</b></td></tr></thead>
      * <tbody>
      * <tr><td>linkItem1</td></tr>
      * <tr><td>linkItem2</td></tr>

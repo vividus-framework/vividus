@@ -96,9 +96,9 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>name</h1></td>
+     * <b>name</b></td>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * </tr>
      * </thead>
      * </table>
@@ -203,17 +203,17 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>xpath</h1></td>
+     * <b>xpath</b></td>
      * <td>
-     * <h1>attributeName</h1></td>
+     * <b>attributeName</b></td>
      * <td>
-     * <h1>attributeValue</h1></td>
+     * <b>attributeValue</b></td>
      * <td>
-     * <h1>visibility</h1></td>
+     * <b>visibility</b></td>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * <td>
-     * <h1>absWidth</h1></td>
+     * <b>absWidth</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -282,17 +282,17 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>fieldName</h1></td>
+     * <b>fieldName</b></td>
      * <td>
-     * <h1>text</h1></td>
+     * <b>text</b></td>
      * <td>
-     * <h1>textPart</h1></td>
+     * <b>textPart</b></td>
      * <td>
-     * <h1>validationIconSource</h1></td>
+     * <b>validationIconSource</b></td>
      * <td>
-     * <h1>placeholder</h1></td>
+     * <b>placeholder</b></td>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -367,13 +367,13 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * <td>
-     * <h1>name</h1></td>
+     * <b>name</b></td>
      * <td>
-     * <h1>imageSrc</h1></td>
+     * <b>imageSrc</b></td>
      * <td>
-     * <h1>tooltip</h1></td>
+     * <b>tooltip</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -444,11 +444,11 @@ public class ParameterizedThenSteps
      * <caption>A table of parameters</caption>
      * <tr>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * <td>
-     * <h1>attributeName</h1></td>
+     * <b>attributeName</b></td>
      * <td>
-     * <h1>attributeValue</h1></td>
+     * <b>attributeValue</b></td>
      * </tr>
      * </table>
      * Where:
@@ -540,13 +540,13 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>dropDownName</h1></td>
+     * <b>dropDownName</b></td>
      * <td>
-     * <h1>selectedText1</h1></td>
+     * <b>selectedText1</b></td>
      * <td>
-     * <h1>selectedText2</h1></td>
+     * <b>selectedText2</b></td>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -621,13 +621,13 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>imageSrc</h1></td>
+     * <b>imageSrc</b></td>
      * <td>
-     * <h1>imageSrcPart</h1></td>
+     * <b>imageSrcPart</b></td>
      * <td>
-     * <h1>tooltip</h1></td>
+     * <b>tooltip</b></td>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * </tr>
      * <tr>
      * <td>value</td>
@@ -693,7 +693,7 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>srcPart</h1></td>
+     * <b>srcPart</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -708,7 +708,7 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>text</h1></td>
+     * <b>text</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -723,7 +723,7 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>textPart</h1></td>
+     * <b>textPart</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -790,13 +790,13 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>name</h1></td>
+     * <b>name</b></td>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * <td>
-     * <h1>attributeType</h1></td>
+     * <b>attributeType</b></td>
      * <td>
-     * <h1>attributeValue</h1></td>
+     * <b>attributeValue</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -865,15 +865,15 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * <td>
-     * <h1>text</h1></td>
+     * <b>text</b></td>
      * <td>
-     * <h1>URL</h1></td>
+     * <b>URL</b></td>
      * <td>
-     * <h1>tooltip</h1></td>
+     * <b>tooltip</b></td>
      * <td>
-     * <h1>urlPart</h1></td>
+     * <b>urlPart</b></td>
      * </tr>
      * </thead>
      * </table>
@@ -901,9 +901,9 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * <td>
-     * <h1>URL</h1></td>
+     * <b>URL</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -918,9 +918,9 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * <td>
-     * <h1>tooltip</h1></td>
+     * <b>tooltip</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -935,7 +935,7 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>text</h1></td>
+     * <b>text</b></td>
      * </tr>
      * </thead>
      * <tbody>
@@ -949,13 +949,13 @@ public class ParameterizedThenSteps
      * <thead>
      * <tr>
      * <td>
-     * <h1>state</h1></td>
+     * <b>state</b></td>
      * <td>
-     * <h1>text</h1></td>
+     * <b>text</b></td>
      * <td>
-     * <h1>tooltip</h1></td>
+     * <b>tooltip</b></td>
      * <td>
-     * <h1>urlPart</h1></td>
+     * <b>urlPart</b></td>
      * </tr>
      * </thead>
      * <tbody>
