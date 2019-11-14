@@ -30,10 +30,12 @@ import org.vividus.ui.web.action.search.Visibility;
 
 public final class SearchAttributesConversionUtils
 {
+    private static final int SEARCH_VALUE_GROUP = 2;
+    private static final int ATTRIBURTE_TYPE_GROUP = 1;
     private static final String EMPTY = "";
     private static final int ELEMENT_TYPE_GROUP = 3;
     private static final char CLOSING_BRACKET = ']';
-    private static final String LOCATOR_FORMAT = "By\\.([a-zA-Z]+)\\((.+?)\\):?([a-zA-Z]*)?";
+    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z]+)\\((.+?)\\):?([a-zA-Z]*)?";
     private static final Pattern SEARCH_ATTRIBUTE_PATTERN = Pattern.compile(LOCATOR_FORMAT);
     private static final Pattern FILTER_PATTERN = Pattern.compile("([a-zA-Z]+)(?:\\()([^()]*)(?:\\))");
 
@@ -56,8 +58,8 @@ public final class SearchAttributesConversionUtils
         Matcher matcher = SEARCH_ATTRIBUTE_PATTERN.matcher(locator);
         if (matcher.matches())
         {
-            String actionAttributeType = matcher.group(1).toLowerCase();
-            String searchValue = matcher.group(2);
+            String actionAttributeType = matcher.group(ATTRIBURTE_TYPE_GROUP).toLowerCase();
+            String searchValue = matcher.group(SEARCH_VALUE_GROUP);
             String elementType = matcher.group(ELEMENT_TYPE_GROUP);
             SearchAttributes searchAttributes = convertToSearchAttributes(actionAttributeType, searchValue);
             if (!elementType.isEmpty())
