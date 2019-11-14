@@ -152,9 +152,9 @@ public class CookieSteps
      * <caption>Table of parameters</caption>
      * <thead>
      * <tr>
-     * <td><h1>cookieName</h1></td>
-     * <td><h1>cookieValue</h1></td>
-     * <td><h1>path</h1></td>
+     * <td><b>cookieName</b></td>
+     * <td><b>cookieValue</b></td>
+     * <td><b>path</b></td>
      * </tr>
      * </thead>
      * <tbody>
