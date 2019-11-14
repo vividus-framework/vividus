@@ -38,7 +38,7 @@ class SearchAttributesConversionUtilsTests
     private static final String ENABLED = "enabled";
     private static final String ID = "id";
     private static final String INVALID_LOCATOR_MESSAGE = "Invalid locator format. "
-            + "Expected matches [By\\.([a-zA-Z]+)\\((.+?)\\):?([a-zA-Z]*)?] Actual: [";
+            + "Expected matches [(?:By\\.)?([a-zA-Z]+)\\((.+?)\\):?([a-zA-Z]*)?] Actual: [";
     private static final char CLOSING_BRACKET = ']';
     private static final String INVALID_LOCATOR = "To.xpath(.a)";
     private static final String TEXT = "text";
@@ -88,8 +88,11 @@ class SearchAttributesConversionUtilsTests
     {
         return Stream.of(
                 Arguments.of(createAttributes(ActionAttributeType.ID, ID, Visibility.INVISIBLE), "By.id(id):i"),
+                Arguments.of(createAttributes(ActionAttributeType.ID, ID, Visibility.INVISIBLE), "id(id):i"),
                 Arguments.of(createAttributes(ActionAttributeType.CSS_SELECTOR, "#id", Visibility.ALL),
                         "By.CSSselector(#id):all"),
+                Arguments.of(createAttributes(ActionAttributeType.CSS_SELECTOR, "#id1", Visibility.VISIBLE),
+                        "cssSelector(#id1)"),
                 Arguments.of(new SearchAttributes(ActionAttributeType.CLASS_NAME, "clazz"), "By.className(clazz)"),
                 Arguments.of(new SearchAttributes(ActionAttributeType.LINK_TEXT, "url"), "By.linkText(url)"),
                 Arguments.of(new SearchAttributes(ActionAttributeType.ELEMENT_NAME, "button"), "By.name(button)"),
