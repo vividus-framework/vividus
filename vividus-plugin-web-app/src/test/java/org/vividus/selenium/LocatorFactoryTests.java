@@ -30,6 +30,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.openqa.selenium.By;
 
 class LocatorFactoryTests
@@ -43,11 +45,12 @@ class LocatorFactoryTests
     private static final LocatorFactory.Locator FIRST_LOCATOR = new LocatorFactory.Locator("xpath", ".//");
     private static final LocatorFactory.Locator SECOND_LOCATOR = new LocatorFactory.Locator("cssSelector", "div");
 
-    @Test
-    void convertStringToLocatorTest()
+    @ParameterizedTest
+    @CsvSource({XPATH_PARAM, "xpath(.//a)"})
+    void convertStringToLocatorTest(String locatorAsString)
     {
         By expected = By.xpath(XPATH);
-        assertEquals(expected, LocatorFactory.convertStringToLocator(XPATH_PARAM));
+        assertEquals(expected, LocatorFactory.convertStringToLocator(locatorAsString));
     }
 
     @Test
