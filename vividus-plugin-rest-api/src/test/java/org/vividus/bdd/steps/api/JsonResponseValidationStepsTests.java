@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.steps.api;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,6 +39,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.jayway.jsonpath.InvalidJsonException;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import org.apache.http.ConnectionClosedException;
@@ -105,6 +107,8 @@ class JsonResponseValidationStepsTests
     private static final String JSON_PATH = "$..value";
     private static final String THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE =
             "The number of JSON elements by JSON path: ";
+    private static final String HTML =
+            "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\"/>";
 
     private final IJsonUtils jsonUtils = new JsonUtils(PropertyNamingStrategy.LOWER_CAMEL_CASE);
 
@@ -333,6 +337,46 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
+    void shouldIgnoreInvalidBodyDuringTimeoutTest() throws IOException, NoSuchFieldException, IllegalAccessException
+    {
+        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
+        Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
+        executorField.setAccessible(true);
+        executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
+        HttpResponse response = mock(HttpResponse.class);
+        when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
+                argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
+        when(httpTestContext.getResponse()).thenReturn(response);
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
+        when(response.getResponseBodyAsString()).thenReturn(HTML, JSON);
+        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
+                DURATION_DIVIDER);
+        verify(httpClient, times(2)).execute(argThat(base -> base instanceof HttpRequestBase),
+                argThat(context -> context instanceof HttpClientContext));
+        verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH), eq(1),
+                argThat(m -> "a value greater than <0>".equals(m.toString())));
+    }
+
+    @Test
+    void testPresenceOfExceptionThrownIfResponseDidNtContainJson() throws IOException, NoSuchFieldException,
+            IllegalAccessException
+    {
+        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
+        Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
+        executorField.setAccessible(true);
+        executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
+        HttpResponse response = mock(HttpResponse.class);
+        when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
+                argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
+        when(httpTestContext.getResponse()).thenReturn(response);
+        when(httpTestContext.getJsonContext()).thenReturn(HTML);
+        when(response.getResponseBodyAsString()).thenReturn(HTML);
+        assertThrows(InvalidJsonException.class, () -> jsonResponseValidationSteps
+                .waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
+                DURATION_DIVIDER));
+    }
+
+    @Test
     void testWaitForJsonFieldAppearsHandledException() throws IOException, IllegalAccessException, NoSuchFieldException
     {
         when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase
@@ -344,7 +388,7 @@ class JsonResponseValidationStepsTests
         Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
         executorField.setAccessible(true);
         executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
-        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT1S"),
+        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
                 DURATION_DIVIDER);
         verify(softAssert).recordFailedAssertion(
                 (Exception) argThat(arg -> arg instanceof ConnectionClosedException
