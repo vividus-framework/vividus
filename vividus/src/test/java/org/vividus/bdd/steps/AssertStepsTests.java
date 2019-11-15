@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,6 +76,14 @@ class AssertStepsTests
         when(rootRunningStory.getRunningScenario()).thenReturn(mock(RunningScenario.class));
         assertSteps.verifyIfAssertionsPassed();
         verify(softAssert, never()).verify();
+    }
+
+    @Test
+    void shouldVerifyAssertionUsingPattern()
+    {
+        Pattern compile = Pattern.compile(".+");
+        assertSteps.verifyIfAssertionMatcherPatter(compile);
+        verify(softAssert).verify(compile);
     }
 
     private void mockStoriesChain(RunningStory runningStory, RunningStory rootRunningStory)

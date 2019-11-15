@@ -17,6 +17,7 @@
 package org.vividus.softassert;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.google.common.eventbus.EventBus;
 
@@ -286,6 +287,19 @@ public class SoftAssert implements ISoftAssert
         {
             assertionCollection.clear();
         }
+    }
+
+    @Override
+    public void verify(Pattern pattern) throws VerificationError
+    {
+        if (getAssertionCollection().getAssertionErrors().stream()
+                                                         .map(SoftAssertionError::getError)
+                                                         .map(AssertionError::getMessage)
+                                                         .noneMatch(pattern.asMatchPredicate()))
+        {
+            return;
+        }
+        verify();
     }
 
     public void init()

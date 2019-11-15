@@ -16,6 +16,8 @@
 
 package org.vividus.softassert;
 
+import java.util.regex.Pattern;
+
 import org.hamcrest.Matcher;
 import org.vividus.softassert.exception.VerificationError;
 
@@ -200,4 +202,11 @@ public interface ISoftAssert
      * @throws VerificationError If there were any assertion errors collected
      */
     void verify() throws VerificationError;
+
+    /**
+     * Verifies if there is matching regex pattern assertion error. Throws exception if assertion error exists
+     * @param pattern to match assertion messages
+     * @throws VerificationError If there were any assertion errors collected
+     */
+    void verify(Pattern pattern) throws VerificationError;
 }

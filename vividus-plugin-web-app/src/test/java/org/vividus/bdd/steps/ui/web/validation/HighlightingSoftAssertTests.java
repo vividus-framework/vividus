@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
@@ -269,5 +270,13 @@ class HighlightingSoftAssertTests
     {
         highlightingSoftAssert.verify();
         verify(descriptiveSoftAssert).verify();
+    }
+
+    @Test
+    void testVerifyIfPatternMatches()
+    {
+        Pattern pattern = Pattern.compile(".+");
+        highlightingSoftAssert.verify(pattern);
+        verify(descriptiveSoftAssert).verify(pattern);
     }
 }

@@ -17,11 +17,13 @@
 package org.vividus.bdd.steps;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.ScenarioType;
+import org.jbehave.core.annotations.Then;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.softassert.ISoftAssert;
@@ -43,5 +45,18 @@ public class AssertSteps
         {
             softAssert.verify();
         }
+    }
+
+    /**
+     * Steps walks the failed assertions and if any of assertion messages matches regex
+     * all the failed assertions verified;
+     * Step could be useful when you have to fail-fast scenario in case of some assertion;
+     *
+     * @param assertionPatter to match assertions
+     */
+    @Then("I verify assertions matching '$assertionPattern'")
+    public void verifyIfAssertionMatcherPatter(Pattern assertionPatter)
+    {
+        softAssert.verify(assertionPatter);
     }
 }
