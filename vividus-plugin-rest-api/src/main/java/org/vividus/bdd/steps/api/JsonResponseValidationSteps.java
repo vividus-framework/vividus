@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -46,9 +45,9 @@ import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.Sleeper;
 import org.vividus.util.json.IJsonUtils;
 import org.vividus.util.json.JsonPathUtils;
+import org.vividus.util.wait.WaitMode;
 
 import net.javacrumbs.jsonunit.core.internal.Options;
 
@@ -208,14 +207,14 @@ public class JsonResponseValidationSteps
 
     /**
      * Waits until GET request to resource retrieves response body that contains specific JSON path
-     * for a specified amount of seconds.
+     * for a specified amount of time.
      * <p>
      * <b>Actions performed at this step:</b>
      * </p>
      * <ul>
      * <li>Executes HTTP GET request to the specified resource</li>
      * <li>Checks if response body contains an element by JSON path</li>
-     * <li>Sleeps during one tenth part of specified duration</li>
+     * <li>Sleeps during calculated part of specified duration</li>
      * <li>Repeats previous actions if element was not found and seconds timeout not expired</li>
      * </ul>
      * @param jsonPath A JSON path
@@ -229,11 +228,7 @@ public class JsonResponseValidationSteps
     public void waitForJsonFieldAppearance(String jsonPath, String resourceUrl, Duration duration,
             int retryTimes) throws IOException
     {
-        long durationInMillis = duration.toMillis();
-        long expectedTime = System.currentTimeMillis() + durationInMillis;
-        long pollingTimeoutMillis = durationInMillis / retryTimes;
-        httpRequestExecutor.executeHttpRequest(HttpMethod.GET, resourceUrl, Optional.empty(), response ->
-        {
+        httpRequestExecutor.executeHttpRequest(HttpMethod.GET, resourceUrl, Optional.empty(), response -> {
             try
             {
                 if (response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0)
@@ -245,9 +240,8 @@ public class JsonResponseValidationSteps
             {
                 //ignore exception
             }
-            Sleeper.sleep(pollingTimeoutMillis, TimeUnit.MILLISECONDS);
-            return System.currentTimeMillis() <= expectedTime;
-        });
+            return true;
+        }, new WaitMode(duration, retryTimes));
         if (httpTestContext.getResponse() != null)
         {
             doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.GREATER_THAN, 0);

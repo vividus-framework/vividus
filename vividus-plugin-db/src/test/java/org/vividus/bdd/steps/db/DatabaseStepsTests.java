@@ -50,6 +50,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -77,10 +78,14 @@ import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 @SuppressFBWarnings("OBL_UNSATISFIED_OBLIGATION")
 class DatabaseStepsTests
 {
+    private static final Duration TWO_SECONDS = Duration.ofSeconds(2);
+
+    private static final String EXAMPLES_TABLE = "|col1|\n|val2|";
+
     private static final String ADMIN = "admin";
 
     private static final String DB_KEY = "dbKey";
@@ -404,7 +409,7 @@ class DatabaseStepsTests
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
         mockRowsFilterAsNOOP();
         mockDataSource();
-        databaseSteps.compareData(List.of(Map.of(COL1, VAL1)), Set.of(), DB_KEY, new ExamplesTable("|col1|\n|val2|"));
+        databaseSteps.compareData(List.of(Map.of(COL1, VAL1)), Set.of(), DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_PATH), argThat(r -> {
             List<List<EntryComparisonResult>> results = (List<List<EntryComparisonResult>>) ((Map<?, ?>) r)
                     .get(RESULTS);
@@ -435,6 +440,77 @@ class DatabaseStepsTests
                             && 0 == source.getNoPair()
                             && 0 == target.getNoPair();
                 }), eq(QUERIES_STATISTICS));
+    }
+
+    @Test
+    void testWaitUntilQueryReturnedDataEqualToTable() throws Exception
+    {
+        mockRowsFilterAsNOOP();
+        mockDataSource(QUERY, DB_KEY, mockResultSet(COL1, VAL2));
+        when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
+        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
+        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
+                any(Map.class), eq(QUERIES_STATISTICS));
+        verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, true);
+    }
+
+    @Test
+    void testWaitTwiceUntilQueryReturnedDataEqualToTable() throws Exception
+    {
+        mockRowsFilterAsNOOP();
+
+        ResultSet rsFirst = mockResultSet(COL1, VAL1);
+        ResultSet rsSecond = mockResultSet(COL1, VAL2);
+        Statement stmt = mock(Statement.class);
+        when(stmt.executeQuery(QUERY)).thenReturn(rsFirst).thenReturn(rsSecond);
+        Connection con = mock(Connection.class);
+        when(con.createStatement()).thenReturn(stmt);
+        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        when(dataSource.getConnection()).thenReturn(con);
+        lenient().when(dataSources.get(DB_KEY)).thenReturn(dataSource);
+
+        when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
+        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
+        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
+                any(Map.class), eq(QUERIES_STATISTICS));
+        verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, true);
+    }
+
+    @Test
+    void testWaitUntilQueryReturnedDataEqualToTableFailed() throws Exception
+    {
+        mockRowsFilterAsNOOP();
+
+        ResultSet rsFirst = mockResultSet(COL1, VAL1);
+        ResultSet rsSecond = mockResultSet(COL1, VAL3);
+        Statement stmt = mock(Statement.class);
+        when(stmt.executeQuery(QUERY)).thenReturn(rsFirst).thenReturn(rsSecond);
+        Connection con = mock(Connection.class);
+        when(con.createStatement()).thenReturn(stmt);
+        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        when(dataSource.getConnection()).thenReturn(con);
+        lenient().when(dataSources.get(DB_KEY)).thenReturn(dataSource);
+
+        databaseSteps.waitForDataAppearance(
+                Duration.parse("PT2S"), 2, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
+        String logMessage = "SQL result data is not equal to expected data in {} records";
+        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(logMessage, 1), info(logMessage, 1))));
+        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
+                any(Map.class), eq(QUERIES_STATISTICS));
+        verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, false);
+        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_PATH), argThat(r -> {
+            @SuppressWarnings("unchecked")
+            List<List<EntryComparisonResult>> results = (List<List<EntryComparisonResult>>) ((Map<?, ?>) r)
+                    .get(RESULTS);
+            List<EntryComparisonResult> firstRowResults = results.get(0);
+            EntryComparisonResult result = firstRowResults.get(0);
+            return 1 == results.size()
+                && 1 == firstRowResults.size()
+                && VAL2.equals(result.getLeft())
+                && VAL3.equals(result.getRight())
+                && !result.isPassed();
+        }),
+               eq(QUERIES_COMPARISON_RESULT));
     }
 
     private void mockDataSource()

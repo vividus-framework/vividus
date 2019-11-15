@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,8 +57,11 @@ import org.vividus.bdd.util.RowsCollector;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.CheckedSupplier;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
+import org.vividus.util.wait.WaitMode;
+import org.vividus.util.wait.Waiter;
 
 public class DatabaseSteps
 {
@@ -206,6 +210,54 @@ public class DatabaseSteps
                         TimeUnit.MILLISECONDS);
 
         verifyComparisonResult(queriesStatistic, result);
+    }
+
+    /**
+     * Step waits until data received from SQL request is equal to data from examples table for some duration.
+     * Actions performed in the step:
+     * <ul>
+     *     <li>executes provided SQL query against database</li>
+     *     <li>compares data received from SQL request against examples table</li>
+     *     <li>sleeps during calculated part of specified duration</li>
+     *     <li>repeats previous actions if data was not equal and seconds timeout not expired</li>
+     * </ul>
+     * @param duration Time duration to wait
+     * @param retryTimes How many times request will be retried; duration/retryTimes=timeout between requests
+     * @param sqlQuery SQL query to execute
+     * @param dbKey Key identifying the database connection
+     * @param table Rows to compare data against
+     * @throws Exception In case of any exception
+     */
+    @When("I wait for '$duration' duration retrying $retryTimes times while data from `$sqlQuery`"
+            + " executed against `$dbKey` is equal to data from:$table")
+    public void waitForDataAppearance(Duration duration, int retryTimes, String sqlQuery, String dbKey,
+            ExamplesTable table) throws Exception
+    {
+        JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
+        QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate, jdbcTemplate);
+        Map<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table.getRows());
+        statistics.getTarget().setRowsQuantity(sourceData.size());
+
+        CheckedSupplier<List<List<EntryComparisonResult>>, Exception> resultProvider = () -> {
+            List<Map<String, Object>> data = jdbcTemplate.queryForList(sqlQuery);
+            statistics.getSource().setRowsQuantity(data.size());
+            Map<Object, Map<String, Object>> targetData = hashMap(Set.of(), data.stream()
+                    .map(m -> m.entrySet()
+                               .stream()
+                               .collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())))));
+            return compareData(statistics, sourceData, targetData);
+        };
+        Predicate<List<List<EntryComparisonResult>>> dataNotEqual = result -> {
+            boolean notEmpty = !result.isEmpty();
+            if (notEmpty)
+            {
+                LOGGER.info("SQL result data is not equal to expected data in {} records", result.size());
+            }
+            return notEmpty;
+        };
+        List<List<EntryComparisonResult>> comparisonResult =
+                Waiter.wait(new WaitMode(duration, retryTimes), resultProvider, dataNotEqual);
+        verifyComparisonResult(statistics, filterPassedChecks(comparisonResult));
     }
 
     private void verifyComparisonResult(QueriesStatistic statistics, List<List<EntryComparisonResult>> result)

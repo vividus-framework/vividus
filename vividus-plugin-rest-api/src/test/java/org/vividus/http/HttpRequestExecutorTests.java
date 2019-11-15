@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +56,7 @@ import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.exception.HttpRequestBuildException;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.wait.WaitMode;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class HttpRequestExecutorTests
@@ -175,7 +177,7 @@ class HttpRequestExecutorTests
         when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URL.equals(e.getURI().toString())),
                 nullable(HttpContext.class))).thenReturn(httpResponse1).thenReturn(httpResponse2);
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty(),
-            response -> response.getResponseTimeInMs() < RESPONSE_TIME_IN_MS);
+            response -> response.getResponseTimeInMs() < RESPONSE_TIME_IN_MS, new WaitMode(Duration.ofSeconds(1), 2));
         InOrder orderedHttpTestContext = inOrder(httpTestContext);
         verifyHttpTestContext(orderedHttpTestContext, httpResponse1);
         verifyHttpTestContext(orderedHttpTestContext, httpResponse2);
