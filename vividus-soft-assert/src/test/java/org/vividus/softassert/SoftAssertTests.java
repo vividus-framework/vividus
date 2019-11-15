@@ -21,19 +21,23 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.org.lidalia.slf4jext.Level.ERROR;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
+import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -51,6 +55,7 @@ import org.vividus.softassert.model.AssertionCollection;
 import org.vividus.softassert.model.SoftAssertionError;
 import org.vividus.testcontext.TestContext;
 
+@SuppressWarnings("checkstyle:methodcount")
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SoftAssertTests
 {
@@ -63,6 +68,7 @@ class SoftAssertTests
     private static final String EQUAL = "Equal";
     private static final String NOT_EQUAL = "Not equal";
     private static final String TEXT = "text";
+    private static final LoggingEvent ERROR_LOG_ENTRY = error("{}{}", TEXT, TEXT);
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SoftAssert.class);
 
@@ -333,7 +339,41 @@ class SoftAssertTests
         when(formatter.getFailedVerificationMessage(assertionErrors, count)).thenReturn(TEXT);
         logger.setEnabledLevels(ERROR);
         assertThrows(VerificationError.class, softAssert:: verify);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(error("{}{}", TEXT, TEXT))));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(ERROR_LOG_ENTRY)));
+    }
+
+    @Test
+    void shouldVerifyIfPatternMatches()
+    {
+        mockAssertionCollection();
+        int count = 1;
+        SoftAssertionError softAssertionError = mock(SoftAssertionError.class);
+        AssertionError assertionError = mock(AssertionError.class);
+        when(softAssertionError.getError()).thenReturn(assertionError);
+        when(assertionError.getMessage()).thenReturn(TEXT);
+        List<SoftAssertionError> assertionErrors = List.of(softAssertionError);
+        when(assertionCollection.getAssertionErrors()).thenReturn(assertionErrors);
+        when(formatter.getErrorsMessage(assertionErrors, true)).thenReturn(TEXT);
+        when(assertionCollection.getAssertionsCount()).thenReturn(count);
+        when(formatter.getFailedVerificationMessage(assertionErrors, count)).thenReturn(TEXT);
+        logger.setEnabledLevels(ERROR);
+        assertThrows(VerificationError.class, () -> softAssert.verify(Pattern.compile(TEXT)));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(ERROR_LOG_ENTRY)));
+    }
+
+    @Test
+    void shouldNotVerifyIfPatternNotMatches()
+    {
+        mockAssertionCollection();
+        SoftAssertionError softAssertionError = mock(SoftAssertionError.class);
+        AssertionError assertionError = mock(AssertionError.class);
+        when(softAssertionError.getError()).thenReturn(assertionError);
+        when(assertionError.getMessage()).thenReturn(TEXT);
+        List<SoftAssertionError> assertionErrors = List.of(softAssertionError);
+        when(assertionCollection.getAssertionErrors()).thenReturn(assertionErrors);
+        logger.setEnabledLevels(ERROR);
+        softAssert.verify(Pattern.compile("bazinga"));
+        assertThat(logger.getLoggingEvents(), empty());
     }
 
     @Test

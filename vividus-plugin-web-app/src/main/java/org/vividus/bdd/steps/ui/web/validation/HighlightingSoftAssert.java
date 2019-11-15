@@ -17,6 +17,7 @@
 package org.vividus.bdd.steps.ui.web.validation;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -194,6 +195,12 @@ public class HighlightingSoftAssert implements IHighlightingSoftAssert
     public void verify() throws VerificationError
     {
         descriptiveSoftAssert.verify();
+    }
+
+    @Override
+    public void verify(Pattern pattern) throws VerificationError
+    {
+        descriptiveSoftAssert.verify(pattern);
     }
 
     private void clearAssertingWebElements()

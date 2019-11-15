@@ -1,2 +1,8 @@
 {
+  "VVD-1": {
+    "type": "Internal",
+    "assertionPattern": ".*Doctor Who.*",
+    "scenarioPattern": "Verify step Then I verify assertions matching '.+'",
+    "storyPattern": "AssertStepsTests"
+  }
 }
