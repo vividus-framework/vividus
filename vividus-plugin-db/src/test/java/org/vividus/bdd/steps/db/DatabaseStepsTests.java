@@ -360,7 +360,7 @@ class DatabaseStepsTests
     @Test
     void shouldThrowTimeoutExceptionIfQueryTakesTooMuchTime()
     {
-        databaseSteps.setDbQueryTimeout(Duration.ofNanos(1));
+        databaseSteps.setDbQueryTimeout(Duration.ofNanos(0));
         when(dataSources.get(DB_KEY)).thenReturn(mock(DriverManagerDataSource.class));
         assertThrows(TimeoutException.class,
             () -> databaseSteps.compareData(QUERY, DB_KEY, QUERY, DB_KEY, Set.of(COL1)));
