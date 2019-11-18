@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +121,7 @@ class KnownIssueProviderTests
             .thenReturn(new Resource[] {resource});
         when(resource.getDescription()).thenReturn(FILENAME);
         InputStream knownIssues = IOUtils.toInputStream(ResourceUtils
-                .loadResource(KnownIssueProviderTests.class, FILENAME), Charset.defaultCharset());
+                .loadResource(KnownIssueProviderTests.class, FILENAME), StandardCharsets.UTF_8);
         when(resource.getInputStream()).thenReturn(knownIssues);
         when(propertyParser.getPropertyValue(PROPERTY_PREFIX, MAIN_PAGE_URL)).thenReturn(MAIN_PAGE_URL);
         when(propertyParser.getPropertyValue(MAIN_PAGE_URL)).thenReturn(URL);
@@ -167,7 +167,7 @@ class KnownIssueProviderTests
             .thenReturn(new Resource[] {resource});
         when(resource.getDescription()).thenReturn(FILENAME);
         InputStream knownIssues = IOUtils.toInputStream(ResourceUtils
-                .loadResource(KnownIssueProviderTests.class, FILENAME), Charset.defaultCharset());
+                .loadResource(KnownIssueProviderTests.class, FILENAME), StandardCharsets.UTF_8);
         when(resource.getInputStream()).thenReturn(knownIssues);
         when(propertyParser.getPropertyValue(PROPERTY_PREFIX, MAIN_PAGE_URL)).thenReturn(MAIN_PAGE_URL);
 
