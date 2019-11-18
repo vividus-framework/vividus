@@ -140,6 +140,21 @@ public class HttpResponseValidationSteps
     }
 
     /**
+     * Compare size of decompressed HTTP response body with value <b>sizeInBytes</b>
+     * @param comparisonRule The rule to compare values<br>
+     * (<i>Possible values:<b> less than, less than or equal to, greater than, greater than or equal to,
+     * equal to</b></i>)
+     * @param sizeInBytes expected size of the response body in bytes
+     */
+    @Then("size of decompressed response body is $comparisonRule `$sizeInBytes`")
+    public void doesDecomressedResponseBodySizeConfirmRule(ComparisonRule comparisonRule, int sizeInBytes)
+    {
+        performIfHttpResponseIsPresent(response ->
+            softAssert.assertThat("Size of decompressed HTTP response body", response.getResponseBody().length,
+                    comparisonRule.getComparisonRule(sizeInBytes)));
+    }
+
+    /**
      * This step should be preceded with the step executing HTTP request
      * Step asserts that the response has the expected HTTP <b>responseCode</b>
      * @param comparisonRule The rule to compare values (Available values: less than, less than or equal to,
