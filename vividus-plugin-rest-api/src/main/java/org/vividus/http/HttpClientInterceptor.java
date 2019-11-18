@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.report.allure.listener;
-
-import static java.util.stream.Stream.of;
+package org.vividus.http;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.inject.Inject;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -46,7 +43,12 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientInterceptor.class);
 
-    @Inject private IAttachmentPublisher attachmentPublisher;
+    private IAttachmentPublisher attachmentPublisher;
+
+    public HttpClientInterceptor(IAttachmentPublisher attachmentPublisher)
+    {
+        this.attachmentPublisher = attachmentPublisher;
+    }
 
     @Override
     public void process(HttpRequest request, HttpContext context)
@@ -57,15 +59,9 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
         {
             HttpEntityEnclosingRequest requestWithBody = (HttpEntityEnclosingRequest) request;
             HttpEntity entity = requestWithBody.getEntity();
-            ContentType contentType = ContentType.getLenient(entity);
-            if (contentType != null)
-            {
-                mimeType = contentType.getMimeType();
-            }
-            else
-            {
-                mimeType = getMimeType(requestWithBody.getAllHeaders());
-            }
+            mimeType = Optional.ofNullable(ContentType.getLenient(entity))
+                    .map(ContentType::getMimeType)
+                    .orElseGet(() -> getMimeType(requestWithBody.getAllHeaders()));
             try
             {
                 body = EntityUtils.toByteArray(entity);
@@ -96,13 +92,12 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
         dataMap.put("bodyContentType", mimeType);
         dataMap.put("statusCode", statusCode);
 
-        attachmentPublisher.publishAttachment("/org/vividus/bdd/report/allure/attachment/api-message.ftl", dataMap,
-                title);
+        attachmentPublisher.publishAttachment("/org/vividus/http/attachment/api-message.ftl", dataMap, title);
     }
 
     private String getMimeType(Header[] headers)
     {
-        Optional<Header> header = of(headers)
+        Optional<Header> header = Stream.of(headers)
                 .filter(h -> HttpHeaders.CONTENT_TYPE.equals(h.getName()) && StringUtils.isNoneBlank(h.getValue()))
                 .findFirst();
         return header.isPresent() ? header.get().getElements()[0].getName() : ContentType.DEFAULT_TEXT.getMimeType();
