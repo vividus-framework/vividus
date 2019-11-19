@@ -86,7 +86,7 @@ public final class HttpRequestBuilder
         return this;
     }
 
-    public HttpRequestBase build()
+    public HttpRequestBase build() throws HttpRequestBuildException
     {
         HttpRequestBase request;
         try

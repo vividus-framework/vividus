@@ -107,7 +107,8 @@ public class HttpRequestExecutor
         }
     }
 
-    private HttpResponse execute(HttpMethod httpMethod, String endpoint, String relativeURL) throws IOException
+    private HttpResponse execute(HttpMethod httpMethod, String endpoint, String relativeURL)
+            throws HttpRequestBuildException, IOException
     {
         HttpRequestBase requestBase = prepareHttpRequestBase(httpMethod, endpoint, relativeURL);
         HttpClientContext httpClientContext = new HttpClientContext();
@@ -121,6 +122,7 @@ public class HttpRequestExecutor
     }
 
     private HttpRequestBase prepareHttpRequestBase(HttpMethod httpMethod, String endpoint, String relativeURL)
+            throws HttpRequestBuildException
     {
         HttpRequestBuilder httpRequestBuilder = HttpRequestBuilder.create()
                 .withHttpMethod(httpMethod)

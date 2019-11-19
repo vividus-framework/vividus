@@ -40,14 +40,14 @@ class HttpRequestBuilderTests
     private final HttpRequestBuilder builder = HttpRequestBuilder.create();
 
     @Test
-    void buildGetWithoutContent()
+    void buildGetWithoutContent() throws HttpRequestBuildException
     {
         HttpRequestBase request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).build();
         assertRequest(request, HttpMethod.GET.name(), ENDPOINT);
     }
 
     @Test
-    void buildPostWithContent() throws IOException
+    void buildPostWithContent() throws HttpRequestBuildException, IOException
     {
         HttpRequestBase request = builder.withHttpMethod(HttpMethod.POST).withEndpoint(ENDPOINT).withContent(CONTENT)
                 .build();
@@ -55,7 +55,7 @@ class HttpRequestBuilderTests
     }
 
     @Test
-    void buildPostWithContentAndContentType() throws IOException
+    void buildPostWithContentAndContentType() throws HttpRequestBuildException, IOException
     {
         ContentType contentType = ContentType.APPLICATION_FORM_URLENCODED;
         HttpRequestBase request = builder.withHttpMethod(HttpMethod.POST).withEndpoint(ENDPOINT)
@@ -81,7 +81,7 @@ class HttpRequestBuilderTests
     }
 
     @Test
-    void buildGetToRelativeUrl()
+    void buildGetToRelativeUrl() throws HttpRequestBuildException
     {
         String relativeUrl = "/relativeUrl";
         HttpRequestBase request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT)
@@ -97,7 +97,7 @@ class HttpRequestBuilderTests
     }
 
     @Test
-    void buildGetWithHeaders()
+    void buildGetWithHeaders() throws HttpRequestBuildException
     {
         Header header = mock(Header.class);
         HttpRequestBase request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).withHeaders(
