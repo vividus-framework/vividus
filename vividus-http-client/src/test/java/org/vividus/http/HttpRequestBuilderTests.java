@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -110,7 +110,7 @@ class HttpRequestBuilderTests
             throws IOException
     {
         assertEquals(content, IOUtils.toString(((HttpEntityEnclosingRequestBase) request).getEntity().getContent(),
-                Charset.defaultCharset()));
+                StandardCharsets.UTF_8));
         assertRequest(request, method, url);
     }
 
