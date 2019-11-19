@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.report.allure.listener;
+package org.vividus.http;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -65,7 +65,7 @@ class HttpClientInterceptorTests
 {
     private static final String ENDPOINT = "uri";
     private static final String METHOD = "method";
-    private static final String API_MESSAGE_FTL = "/org/vividus/bdd/report/allure/attachment/api-message.ftl";
+    private static final String API_MESSAGE_FTL = "/org/vividus/http/attachment/api-message.ftl";
     private static final String RESPONSE = "Response: method uri";
     private static final String REQUEST = "Request: method uri";
     private static final String CONTENT_TYPE = "Content-Type";
@@ -75,16 +75,13 @@ class HttpClientInterceptorTests
     @Mock
     private IAttachmentPublisher attachmentPublisher;
 
-    @Mock
-    private Header header;
-
     @InjectMocks
     private HttpClientInterceptor httpClientInterceptor;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(HttpClientInterceptor.class);
 
     @Test
-    void testHttpRequestIsAttachedSuccessfully() throws Exception
+    void testHttpRequestIsAttachedSuccessfully() throws IOException
     {
         Header entityContentTypeHeader = mockContentTypeHeader();
         Header[] headers = {entityContentTypeHeader};
@@ -93,7 +90,7 @@ class HttpClientInterceptorTests
     }
 
     @Test
-    void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsSet() throws Exception
+    void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsSet() throws IOException
     {
         Header contentTypeHeader = mockContentTypeHeader();
         when(contentTypeHeader.getName()).thenReturn(CONTENT_TYPE);
@@ -102,13 +99,13 @@ class HttpClientInterceptorTests
     }
 
     @Test
-    void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsUnset() throws Exception
+    void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsUnset() throws IOException
     {
         testHttpRequestIsAttachedSuccessfully(new Header[] { mock(Header.class) }, null);
     }
 
     @Test
-    void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsEmpty() throws Exception
+    void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsEmpty() throws IOException
     {
         Header contentTypeHeader = mock(Header.class);
         when(contentTypeHeader.getName()).thenReturn(CONTENT_TYPE);
@@ -116,7 +113,7 @@ class HttpClientInterceptorTests
     }
 
     @Test
-    void testHttpRequestBodyIsAttachedSuccessfullyWithContentTypeIsUnknown() throws Exception
+    void testHttpRequestBodyIsAttachedSuccessfullyWithContentTypeIsUnknown() throws IOException
     {
         testHttpRequestIsAttachedSuccessfully(new Header[] {}, null);
     }
@@ -130,7 +127,7 @@ class HttpClientInterceptorTests
     }
 
     @Test
-    void testHttpRequestBodyAttachingIsFailed() throws Exception
+    void testHttpRequestBodyAttachingIsFailed() throws IOException
     {
         HttpEntity httpEntity = mock(HttpEntity.class);
         when(httpEntity.getContentType()).thenReturn(null);
@@ -163,7 +160,7 @@ class HttpClientInterceptorTests
         when(httpResponse.getResponseBody()).thenReturn(null);
         when(httpResponse.getMethod()).thenReturn(METHOD);
         when(httpResponse.getFrom()).thenReturn(URI.create(ENDPOINT));
-        mockResponseHeaders(httpResponse);
+        when(httpResponse.getResponseHeaders()).thenReturn(new Header[0]);
         httpClientInterceptor.attachResponse(httpResponse);
         verifyPublishAttachment(RESPONSE);
     }
@@ -173,12 +170,6 @@ class HttpClientInterceptorTests
         HeaderElement headerElement = mock(HeaderElement.class);
         when(headerElement.getName()).thenReturn(TEXT_PLAIN);
         return when(mock(Header.class).getElements()).thenReturn(new HeaderElement[] { headerElement }).getMock();
-    }
-
-    private void mockResponseHeaders(HttpResponse httpResponse)
-    {
-        Header[] headers = {header};
-        when(httpResponse.getResponseHeaders()).thenReturn(headers);
     }
 
     private void testHttpRequestIsAttachedSuccessfully(Header[] allRequestHeaders, Header entityContentTypeHeader)

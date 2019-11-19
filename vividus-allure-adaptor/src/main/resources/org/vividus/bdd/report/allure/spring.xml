@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="http://www.springframework.org/schema/beans"
-    xmlns:aop="http://www.springframework.org/schema/aop"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
     default-lazy-init="true">
 
     <bean id="abstractAllureStoryReporter" class="org.vividus.bdd.report.allure.AllureStoryReporter"
@@ -30,13 +28,5 @@
 
     <bean class="org.vividus.bdd.report.allure.listener.AllureAssertionFailureListener"
         lazy-init="false" />
-
-    <bean id="httpClientInterceptor" class="org.vividus.bdd.report.allure.listener.HttpClientInterceptor" />
-
-    <aop:config>
-        <aop:aspect id="httpClientAspect" ref="httpClientInterceptor">
-            <aop:after-returning method="attachResponse" returning="response" pointcut="execution(org.vividus.http.client.HttpResponse org.vividus.http.client.IHttpClient.*(..))" />
-        </aop:aspect>
-    </aop:config>
 
 </beans>
