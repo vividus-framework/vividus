@@ -355,9 +355,7 @@ public class SoftAssert implements ISoftAssert
         assertionError.setKnownIssue(issue);
         getAssertionCollection().addFailed(assertionError);
 
-        AssertionFailedEvent event = new AssertionFailedEvent();
-        event.setSoftAssertionError(assertionError);
-        eventBus.post(event);
+        eventBus.post(new AssertionFailedEvent(assertionError));
     }
 
     private AssertionError createAssertionError(String message, Throwable cause)

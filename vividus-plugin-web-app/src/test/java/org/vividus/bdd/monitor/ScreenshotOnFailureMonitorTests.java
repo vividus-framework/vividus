@@ -125,7 +125,7 @@ class ScreenshotOnFailureMonitorTests
     @Test
     void shouldNotTakeScreenshotIfItIsNotEnabled()
     {
-        monitor.onAssertionFailure(new AssertionFailedEvent());
+        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
         verifyNoInteractions(webDriverProvider, webUiContext, screenshotTaker);
         assertThat(logger.getLoggingEvents(), empty());
     }
@@ -134,7 +134,7 @@ class ScreenshotOnFailureMonitorTests
     void shouldNotTakeScreenshotIfWebDriverIsNotEnabled() throws NoSuchMethodException
     {
         enableScreenshotPublishing(false);
-        monitor.onAssertionFailure(new AssertionFailedEvent());
+        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
         verifyNoInteractions(webUiContext, screenshotTaker);
         assertThat(logger.getLoggingEvents(), empty());
     }
@@ -151,7 +151,7 @@ class ScreenshotOnFailureMonitorTests
         screenshot.setFileName(title + ".png");
         when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, List.of(searchContext))).thenReturn(
                 Optional.of(screenshot));
-        monitor.onAssertionFailure(new AssertionFailedEvent());
+        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
         verify(eventBus).post(argThat((ArgumentMatcher<AttachmentPublishEvent>) event -> {
             Attachment attachment = event.getAttachment();
             return Arrays.equals(screenshot.getData(), attachment.getContent()) && title.equals(attachment.getTitle());
@@ -168,7 +168,7 @@ class ScreenshotOnFailureMonitorTests
         when(webUiContext.getAssertingWebElements()).thenReturn(assertedWebElements);
         when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, assertedWebElements)).thenReturn(
                 Optional.empty());
-        monitor.onAssertionFailure(new AssertionFailedEvent());
+        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
         verifyNoInteractions(eventBus);
         assertThat(logger.getLoggingEvents(), empty());
     }
@@ -182,7 +182,7 @@ class ScreenshotOnFailureMonitorTests
         IllegalStateException exception = new IllegalStateException();
         when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, List.of(searchContext))).thenThrow(
                 exception);
-        monitor.onAssertionFailure(new AssertionFailedEvent());
+        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
         verifyNoInteractions(eventBus);
         assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception, "Unable to take a screenshot"))));
     }
