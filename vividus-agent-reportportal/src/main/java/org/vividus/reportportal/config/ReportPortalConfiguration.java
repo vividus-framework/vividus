@@ -20,7 +20,6 @@ import java.util.List;
 
 import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
 import com.epam.reportportal.jbehave.ReportPortalViewGenerator;
-import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.ViewGenerator;
@@ -48,9 +47,9 @@ public class ReportPortalConfiguration implements InitializingBean
     }
 
     @Bean
-    public AssertionFailureListener assertionFailureListener(EventBus eventBus)
+    public AssertionFailureListener assertionFailureListener()
     {
-        return new AssertionFailureListener(eventBus);
+        return new AssertionFailureListener();
     }
 
     @Bean

@@ -42,7 +42,9 @@ class AssertionManagerTests
     @BeforeEach
     void beforeEach()
     {
-        assertionManager = new AssertionManager(new EventBus(), softAssert);
+        EventBus eventBus = new EventBus();
+        assertionManager = new AssertionManager(eventBus, softAssert);
+        eventBus.register(assertionManager);
     }
 
     @Test

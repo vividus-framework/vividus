@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import com.epam.reportportal.jbehave.JBehaveContext;
 import com.epam.reportportal.jbehave.JBehaveContext.Story;
 import com.epam.reportportal.listeners.Statuses;
-import com.google.common.eventbus.EventBus;
 
 import org.junit.Test;
 import org.vividus.softassert.event.AssertionFailedEvent;
@@ -33,14 +32,12 @@ public class AssertionFailureListenerTests
     @Test
     public void testOnAssertionFailure()
     {
-        EventBus eventBus = mock(EventBus.class);
-        AssertionFailureListener listener = new AssertionFailureListener(eventBus);
+        AssertionFailureListener listener = new AssertionFailureListener();
         AssertionFailedEvent event = mock(AssertionFailedEvent.class);
         Story story = mock(Story.class);
         JBehaveContext.setCurrentStory(story);
         listener.onAssertionFailure(event);
         verify(story).setCurrentStepStatus(Statuses.FAILED);
-        verify(eventBus).register(listener);
-        verifyNoMoreInteractions(event, story, eventBus);
+        verifyNoMoreInteractions(event, story);
     }
 }

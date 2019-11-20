@@ -18,13 +18,11 @@ package org.vividus.reportportal.config;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
 import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
-import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.reporters.StoryReporter;
 import org.junit.jupiter.api.Test;
@@ -52,7 +50,7 @@ class ReportPortalConfigurationTests
     @Test
     void assertionFailureListener()
     {
-        assertNotNull(configuration.assertionFailureListener(mock(EventBus.class)));
+        assertNotNull(configuration.assertionFailureListener());
     }
 
     @Test
