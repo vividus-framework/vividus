@@ -42,7 +42,7 @@ public class ReportPortalConfiguration implements InitializingBean
     private List<StoryReporter> storyReporters;
 
     @Override
-    public void afterPropertiesSet() throws Exception
+    public void afterPropertiesSet()
     {
         storyReporters.add(new ReportPortalStoryReporter());
     }
