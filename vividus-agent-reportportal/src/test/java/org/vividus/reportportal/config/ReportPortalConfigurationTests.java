@@ -17,15 +17,37 @@
 package org.vividus.reportportal.config;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import java.util.List;
+
+import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
 import com.google.common.eventbus.EventBus;
 
+import org.jbehave.core.reporters.StoryReporter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class ReportPortalConfigurationTests
 {
-    private final ReportPortalConfiguration configuration = new ReportPortalConfiguration();
+    @Mock
+    private List<StoryReporter> storyReporters;
+
+    @InjectMocks
+    private ReportPortalConfiguration configuration;
+
+    @Test
+    void shouldAddReportPortalStoryReporterAfterPropertiesSet()
+    {
+        configuration.afterPropertiesSet();
+        verify(storyReporters).add(isA(ReportPortalStoryReporter.class));
+    }
 
     @Test
     void assertionFailureListener()
