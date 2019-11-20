@@ -36,9 +36,9 @@ public class AssertionManager
     }
 
     @Subscribe
-    public void onAssertionFailure(@SuppressWarnings("unused") AssertionFailedEvent event)
+    public void onAssertionFailure(AssertionFailedEvent event)
     {
-        if (failFast)
+        if (failFast && !event.getSoftAssertionError().isKnownIssue())
         {
             // Way to order EventBus listeners: all AssertionFailedEvent listeners and all events spawned by
             // these listeners must be processed, only after that verification may be triggered

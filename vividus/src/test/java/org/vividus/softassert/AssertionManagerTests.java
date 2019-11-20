@@ -17,25 +17,64 @@
 package org.vividus.softassert;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import com.google.common.eventbus.EventBus;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.event.AssertionFailedEvent;
+import org.vividus.softassert.model.SoftAssertionError;
 
+@ExtendWith(MockitoExtension.class)
 class AssertionManagerTests
 {
-    @ParameterizedTest
-    @CsvSource({"true, 1", "false, 0"})
-    void shouldFailFast(boolean failFast, int numberOfVerifyInvocations)
+    @Mock
+    private ISoftAssert softAssert;
+
+    private AssertionManager assertionManager;
+
+    @BeforeEach
+    void beforeEach()
     {
-        ISoftAssert softAssert = mock(SoftAssert.class);
-        AssertionManager assertionManager = new AssertionManager(new EventBus(), softAssert);
-        assertionManager.setFailFast(failFast);
+        assertionManager = new AssertionManager(new EventBus(), softAssert);
+    }
+
+    @Test
+    void shouldNotFailFast()
+    {
+        assertionManager.setFailFast(false);
         assertionManager.onAssertionFailure(new AssertionFailedEvent());
-        verify(softAssert, times(numberOfVerifyInvocations)).verify();
+        verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void shouldNotFailFastIfErrorIsKnownIssue()
+    {
+        assertionManager.setFailFast(true);
+        assertionManager.onAssertionFailure(createEventWithError(true));
+        verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void shouldFailFastIfErrorIsNotKnownIssue()
+    {
+        assertionManager.setFailFast(true);
+        assertionManager.onAssertionFailure(createEventWithError(false));
+        verify(softAssert).verify();
+    }
+
+    private AssertionFailedEvent createEventWithError(boolean knownIssue)
+    {
+        SoftAssertionError softAssertionError = mock(SoftAssertionError.class);
+        when(softAssertionError.isKnownIssue()).thenReturn(knownIssue);
+        AssertionFailedEvent event = new AssertionFailedEvent();
+        event.setSoftAssertionError(softAssertionError);
+        return event;
     }
 }
