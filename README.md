@@ -3,6 +3,9 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=vividus-framework_vividus&metric=alert_status)](https://sonarcloud.io/dashboard?id=vividus-framework_vividus)
 [![BrowserStack Status](https://automate.browserstack.com/badge.svg?badge_key=Mm9sbnBHa3FpaGttYmliQnArRmZ1ZWdsa3VsbkxGYjVrV24rL2JyV3RmTT0tLW1NYjFuM2o0UkRDbWZMM2phWm56Z3c9PQ==--3e7e38e3d87990e56aea8eb882d5e22821fdf36b)](https://automate.browserstack.com/public-build/Mm9sbnBHa3FpaGttYmliQnArRmZ1ZWdsa3VsbkxGYjVrV24rL2JyV3RmTT0tLW1NYjFuM2o0UkRDbWZMM2phWm56Z3c9PQ==--3e7e38e3d87990e56aea8eb882d5e22821fdf36b)
 
+## Support/Community
+[**Slack chat**](https://vividus-support.herokuapp.com/)
+
 ## Prerequisites
 #### Java
 - Install [JDK 12](https://jdk.java.net/12/)
