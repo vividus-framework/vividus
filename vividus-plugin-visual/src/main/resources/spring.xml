@@ -18,8 +18,7 @@
         <property name="overrideBaselines" value="${web.visual.override-baselines}" />
     </bean>
 
-    <bean id="fileSystemBaselineRepository" class="org.vividus.visual.engine.FileSystemBaselineRepository"
-         init-method="init">
+    <bean id="fileSystemBaselineRepository" class="org.vividus.visual.engine.FileSystemBaselineRepository">
         <property name="baselinesFolder" value="${web.visual.baselines-folder}" />
     </bean>
 
