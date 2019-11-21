@@ -18,6 +18,7 @@ package org.vividus.excel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -199,5 +200,14 @@ class ExcelSheetParserTests
     {
         sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
         assertEquals("name", sheetParser.getDataFromCell("A1"));
+    }
+
+    @Test
+    void testGetDataFromNotExistingCell()
+    {
+        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> sheetParser.getDataFromCell("A1001"));
+        assertEquals("Row at address 'A1001' doesn't exist", exception.getMessage());
     }
 }
