@@ -20,18 +20,12 @@ import java.util.Optional;
 
 import com.epam.reportportal.jbehave.JBehaveContext;
 import com.epam.reportportal.listeners.Statuses;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import org.vividus.softassert.event.AssertionFailedEvent;
 
 public class AssertionFailureListener
 {
-    public AssertionFailureListener(EventBus eventBus)
-    {
-        eventBus.register(this);
-    }
-
     @Subscribe
     public void onAssertionFailure(@SuppressWarnings("unused") AssertionFailedEvent event)
     {

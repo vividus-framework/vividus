@@ -32,7 +32,6 @@ public class AssertionManager
     {
         this.eventBus = eventBus;
         this.softAssert = softAssert;
-        eventBus.register(this);
     }
 
     @Subscribe
