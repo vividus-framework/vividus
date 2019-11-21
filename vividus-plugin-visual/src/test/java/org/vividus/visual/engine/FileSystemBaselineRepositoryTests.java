@@ -53,7 +53,7 @@ import ru.yandex.qatools.ashot.util.ImageTool;
 @SuppressFBWarnings("DMI_HARDCODED_ABSOLUTE_FILENAME")
 class FileSystemBaselineRepositoryTests
 {
-    private static final String BASELINE = "BASELINE";
+    private static final String BASELINE = "baseline";
 
     private static final File BASELINES_FOLDER = new File("./baselines");
 
@@ -65,8 +65,7 @@ class FileSystemBaselineRepositoryTests
     void shouldLoadBaselineFromFileSystem() throws IOException
     {
         fileSystemBaselineRepository.setBaselinesFolder(BASELINES_FOLDER);
-        fileSystemBaselineRepository.init();
-        assertThat(fileSystemBaselineRepository.getBaseline("baseline").get().getImage(),
+        assertThat(fileSystemBaselineRepository.getBaseline(BASELINE).get().getImage(),
                 ImageTool.equalImage(baseline));
     }
 
@@ -87,7 +86,6 @@ class FileSystemBaselineRepositoryTests
     void shouldReturnEmptyImageForMissingBaseline() throws IOException
     {
         fileSystemBaselineRepository.setBaselinesFolder(BASELINES_FOLDER);
-        fileSystemBaselineRepository.init();
         assertEquals(fileSystemBaselineRepository.getBaseline("missing_baseline"), Optional.empty());
     }
 
@@ -95,14 +93,13 @@ class FileSystemBaselineRepositoryTests
     void shouldThrowIllegalArgumentExceptionForNotExistingFoler()
     {
         fileSystemBaselineRepository.setBaselinesFolder(new File("no_such_folder"));
-        assertThrows(IllegalArgumentException.class, fileSystemBaselineRepository::init);
+        assertThrows(IllegalArgumentException.class, () -> fileSystemBaselineRepository.getBaseline(BASELINE));
     }
 
     @Test
     void shouldThrowExceptionWhenBaselineNotLoaded()
     {
         fileSystemBaselineRepository.setBaselinesFolder(BASELINES_FOLDER);
-        fileSystemBaselineRepository.init();
         ResourceLoadException exception = assertThrows(ResourceLoadException.class,
             () -> fileSystemBaselineRepository.getBaseline("corrupted_image").get().getImage());
         assertThat(exception.getMessage(), Matchers.matchesRegex(
@@ -113,7 +110,6 @@ class FileSystemBaselineRepositoryTests
     void shouldSaveBaselineIntoFolder(@TempDir File folder) throws IOException
     {
         fileSystemBaselineRepository.setBaselinesFolder(folder);
-        fileSystemBaselineRepository.init();
         Screenshot screenshot = mock(Screenshot.class);
         when(screenshot.getImage()).thenReturn(baseline);
         fileSystemBaselineRepository.saveBaseline(screenshot, BASELINE);

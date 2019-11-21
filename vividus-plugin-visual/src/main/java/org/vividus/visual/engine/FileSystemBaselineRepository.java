@@ -19,9 +19,12 @@ package org.vividus.visual.engine;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
+
+import com.google.common.base.Suppliers;
 
 import org.apache.tools.ant.util.StringUtils;
 import org.slf4j.Logger;
@@ -38,22 +41,22 @@ public class FileSystemBaselineRepository implements IBaselineRepository
 
     private File baselinesFolder;
 
-    public void init()
-    {
+    private final Supplier<File> baselineFolderResolver = Suppliers.memoize(() -> {
         if (!baselinesFolder.isAbsolute())
         {
             String replacement = "/";
-            baselinesFolder = ResourceUtils.loadFile(FileSystemBaselineRepository.class,
+            return ResourceUtils.loadFile(FileSystemBaselineRepository.class,
                             StringUtils.removePrefix(baselinesFolder.toString(), ".").replace("\\", replacement));
         }
-    }
+        return baselinesFolder;
+    });
 
     @Override
     public Optional<Screenshot> getBaseline(String baselineName) throws IOException
     {
         try
         {
-            File baselineFile = new File(baselinesFolder, appendExtension(baselineName));
+            File baselineFile = new File(baselineFolderResolver.get(), appendExtension(baselineName));
             Optional<Screenshot> loadedScreenshot = Optional
                     .ofNullable(ImageIO.read(baselineFile))
                     .map(Screenshot::new);
@@ -77,7 +80,7 @@ public class FileSystemBaselineRepository implements IBaselineRepository
     @Override
     public void saveBaseline(Screenshot toSave, String baselineName) throws IOException
     {
-        File baselineToSave = new File(baselinesFolder, baselineName);
+        File baselineToSave = new File(baselineFolderResolver.get(), baselineName);
         ImageUtils.writeAsPng(toSave.getImage(), baselineToSave);
         LOGGER.info("Baseline saved to: {}", appendExtension(baselineToSave.getAbsolutePath()));
     }
