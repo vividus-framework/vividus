@@ -49,7 +49,7 @@ class AssertionManagerTests
     void shouldNotFailFast()
     {
         assertionManager.setFailFast(false);
-        assertionManager.onAssertionFailure(new AssertionFailedEvent());
+        assertionManager.onAssertionFailure(mock(AssertionFailedEvent.class));
         verifyNoInteractions(softAssert);
     }
 
@@ -73,8 +73,6 @@ class AssertionManagerTests
     {
         SoftAssertionError softAssertionError = mock(SoftAssertionError.class);
         when(softAssertionError.isKnownIssue()).thenReturn(knownIssue);
-        AssertionFailedEvent event = new AssertionFailedEvent();
-        event.setSoftAssertionError(softAssertionError);
-        return event;
+        return new AssertionFailedEvent(softAssertionError);
     }
 }

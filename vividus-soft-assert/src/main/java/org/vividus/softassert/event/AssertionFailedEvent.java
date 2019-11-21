@@ -20,15 +20,15 @@ import org.vividus.softassert.model.SoftAssertionError;
 
 public class AssertionFailedEvent
 {
-    private SoftAssertionError softAssertionError;
+    private final SoftAssertionError softAssertionError;
+
+    public AssertionFailedEvent(SoftAssertionError softAssertionError)
+    {
+        this.softAssertionError = softAssertionError;
+    }
 
     public SoftAssertionError getSoftAssertionError()
     {
         return softAssertionError;
-    }
-
-    public void setSoftAssertionError(SoftAssertionError softAssertionError)
-    {
-        this.softAssertionError = softAssertionError;
     }
 }
