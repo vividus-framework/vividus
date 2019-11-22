@@ -219,6 +219,10 @@ public class ExcelSheetParser implements IExcelSheetParser
     {
         CellReference cellReference = new CellReference(address);
         Row row = sheet.getRow(cellReference.getRow());
+        if (row == null)
+        {
+            throw new IllegalArgumentException(String.format("Row at address '%s' doesn't exist", address));
+        }
         Cell cell = row.getCell(cellReference.getCol());
         return CellUtils.getCellValueAsString(cell);
     }
