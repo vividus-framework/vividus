@@ -22,8 +22,6 @@ import org.vividus.ui.web.util.LocatorUtil;
 
 public final class ElementPattern
 {
-    public static final String LOCAL_NAME_INPUT = ".//*[(local-name() = 'input' ";
-    public static final String LINK_IMAGE_TOOLTIP_PATTERN = ".//a[./img[@alt=%1$s or @title=%1$s]]";
     public static final String SELECT_PATTERN = ".//select[@*=%s]";
     public static final String LABEL_PATTERN = ".//label[text()=%1$s or *=%1$s or @*=%1$s]";
     public static final String RADIO_OPTION_INPUT_PATTERN = ".//input[@type='radio' and @id=%s]";
