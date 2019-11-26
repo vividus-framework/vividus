@@ -16,9 +16,6 @@
 
 package org.vividus.bdd.steps.ui.web;
 
-import static org.vividus.bdd.steps.ui.web.ElementPattern.LABEL_PATTERN;
-import static org.vividus.bdd.steps.ui.web.ElementPattern.RADIO_OPTION_INPUT_PATTERN;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +70,8 @@ public class RadioButtonSteps
     {
         WebElement radioButtonLabel = baseValidations.assertIfElementExists(
                 String.format("A radio button label with text '%s'", radioOption),
-                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(LABEL_PATTERN, radioOption)));
+                new SearchAttributes(ActionAttributeType.XPATH,
+                        LocatorUtil.getXPath(".//label[text()=%1$s or *=%1$s or @*=%1$s]", radioOption)));
         if (radioButtonLabel == null)
         {
             return null;
@@ -82,7 +80,7 @@ public class RadioButtonSteps
         if (StringUtils.isNotEmpty(labelForAtr))
         {
             return baseValidations.assertIfElementExists(RADIO_BUTTON, new SearchAttributes(ActionAttributeType.XPATH,
-                    LocatorUtil.getXPath(RADIO_OPTION_INPUT_PATTERN, labelForAtr)));
+                    LocatorUtil.getXPath(".//input[@type='radio' and @id=%s]", labelForAtr)));
         }
         return baseValidations.assertIfElementExists(RADIO_BUTTON, radioButtonLabel,
                 new SearchAttributes(ActionAttributeType.XPATH, "input[@type='radio']"));

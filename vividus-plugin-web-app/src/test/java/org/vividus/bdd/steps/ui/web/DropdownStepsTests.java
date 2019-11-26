@@ -49,7 +49,6 @@ import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.SearchParameters;
 import org.vividus.ui.web.action.search.Visibility;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
 class DropdownStepsTests
@@ -60,8 +59,8 @@ class DropdownStepsTests
     private static final String SELECTED_OPTION_IN_DROP_DOWN = "Selected option in drop down";
     private static final String ITEM_VALUE = "1";
     private static final String SELECTED_OPTIONS_ARE_PRESENT_IN_DROP_DOWN = "Selected options are present in drop down";
-    private static final String SELECT_PATTERN = ".//select[@*='%s']";
     private static final String DROP_DOWN_LIST_NAME = "dropDownListName";
+    private static final String DROP_DOWN_XPATH = ".//select[@*[normalize-space()=\"dropDownListName\"]]";
     private static final String TEXT = "text";
     private static final String DROPDOWN_EXAMPLES_TABLE = "|state|item|\n|true|text| ";
     private static final String DROPDOWN_SIZE_ASSERTION_MESSAGE =
@@ -94,7 +93,7 @@ class DropdownStepsTests
     {
         dropdownSteps.isDropDownWithNameFound(DROP_DOWN_LIST_NAME);
         verify(baseValidations).assertIfElementExists(DROP_DOWN_WITH_THE_NAME_DROP_DOWN_LIST_NAME,
-            new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(SELECT_PATTERN, DROP_DOWN_LIST_NAME)));
+                new SearchAttributes(ActionAttributeType.XPATH, DROP_DOWN_XPATH));
     }
 
     @Test
@@ -149,8 +148,7 @@ class DropdownStepsTests
         dropdownSteps.doesNotDropDownExist(DROP_DOWN_LIST_NAME);
         verify(baseValidations).assertIfElementDoesNotExist(DROP_DOWN_WITH_THE_NAME_DROP_DOWN_LIST_NAME,
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPath(ElementPattern.SELECT_PATTERN, DROP_DOWN_LIST_NAME))
-                                .setVisibility(Visibility.ALL)));
+                        new SearchParameters(DROP_DOWN_XPATH).setVisibility(Visibility.ALL)));
     }
 
     @Test
@@ -235,8 +233,7 @@ class DropdownStepsTests
     private WebElement findDropDownListWithParameters(boolean isMultiple)
     {
         when(baseValidations.assertIfElementExists(DROP_DOWN_WITH_THE_NAME_DROP_DOWN_LIST_NAME,
-            new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(ElementPattern.SELECT_PATTERN,
-                DROP_DOWN_LIST_NAME)))).thenReturn(webElement);
+                new SearchAttributes(ActionAttributeType.XPATH, DROP_DOWN_XPATH))).thenReturn(webElement);
         when(webElement.getTagName()).thenReturn(SELECT);
         when(webElement.getAttribute("multiple")).thenReturn(Boolean.toString(isMultiple));
         return webElement;

@@ -69,7 +69,7 @@ class SetContextStepsTests
     private static final String THE_FOUND_ELEMENT_IS = "The found element is ";
     private static final String ATTRIBUTE_TYPE = "attributeType";
     private static final String ATTRIBUTE_VALUE = "attributeValue";
-    private static final String XPATH_ATTRIBUTE_VALUE = LocatorUtil.getXPath(".//*[@" + ATTRIBUTE_TYPE + "=%s]",
+    private static final String XPATH_ATTRIBUTE_VALUE = LocatorUtil.getXPath(".//*[@attributeType=%s]",
             ATTRIBUTE_VALUE);
     private static final String FRAME_XPATH = ".//*[(local-name()='frame' or local-name()='iframe')"
             + " and normalize-space(@attributeType)=\"attributeValue\"]";
@@ -328,9 +328,11 @@ class SetContextStepsTests
         String attributeType = "class";
         String attributeValue = "class1";
         SetContextSteps spy = Mockito.spy(setContextSteps);
+        String xPath = LocatorUtil.getXPath(
+                ".//*[(local-name()='frame' or local-name()='iframe') and @" + attributeType + "=%s]", attributeValue);
         when(mockedBaseValidations.assertIfElementExists(
                 String.format("Frame with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
-                ElementPattern.getFrameSearchAttributes(attributeType, attributeValue))).thenReturn(mockedWebElement);
+                new SearchAttributes(ActionAttributeType.XPATH, xPath))).thenReturn(mockedWebElement);
         spy.switchingToFrame(attributeType, attributeValue);
         verify(spy).switchingToDefault();
         verify(mockedTargetLocator).frame(mockedWebElement);

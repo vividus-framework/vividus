@@ -36,7 +36,6 @@ import org.vividus.ui.web.action.IFieldActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.SearchParameters;
 import org.vividus.ui.web.action.search.Visibility;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -138,10 +137,9 @@ public class DropdownSteps
     @Then("a drop down with the name '$dropDownName' does not exist")
     public void doesNotDropDownExist(String dropDownName)
     {
-        baseValidations.assertIfElementDoesNotExist(String.format(DROP_DOWN_WITH_NAME, dropDownName),
-               new SearchAttributes(ActionAttributeType.XPATH,
-                       new SearchParameters(LocatorUtil.getXPath(ElementPattern.SELECT_PATTERN, dropDownName))
-                               .setVisibility(Visibility.ALL)));
+        SearchAttributes searchAttributes = createSearchAttributes(dropDownName);
+        searchAttributes.getSearchParameters().setVisibility(Visibility.ALL);
+        baseValidations.assertIfElementDoesNotExist(String.format(DROP_DOWN_WITH_NAME, dropDownName), searchAttributes);
     }
 
     /**
@@ -265,22 +263,22 @@ public class DropdownSteps
                 .map(Select::new);
     }
 
-    private Select findDropDownList(String businessDescription, String xpath, Object... args)
-    {
-        WebElement element = baseValidations.assertIfElementExists(businessDescription,
-                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(xpath, args)));
-        return element != null ? new Select(element) : null;
-    }
-
     private Select findDropDownList(String dropDownListName)
     {
-        return findDropDownList(String.format(DROP_DOWN_WITH_NAME, dropDownListName), ElementPattern.SELECT_PATTERN,
-                dropDownListName);
+        WebElement element = baseValidations.assertIfElementExists(String.format(DROP_DOWN_WITH_NAME, dropDownListName),
+                createSearchAttributes(dropDownListName));
+        return element != null ? new Select(element) : null;
     }
 
     private void selectItemInDDL(String dropDownListName, String text, boolean isAddition)
     {
         Select select = findDropDownList(dropDownListName);
         fieldActions.selectItemInDropDownList(select, text, isAddition);
+    }
+
+    private SearchAttributes createSearchAttributes(String dropDownListName)
+    {
+        return new SearchAttributes(ActionAttributeType.XPATH,
+                LocatorUtil.getXPath(".//select[@*=%s]", dropDownListName));
     }
 }
