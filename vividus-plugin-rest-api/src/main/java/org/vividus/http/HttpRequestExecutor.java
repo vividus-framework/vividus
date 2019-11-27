@@ -17,6 +17,7 @@
 package org.vividus.http;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -29,6 +30,8 @@ import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.exception.HttpRequestBuildException;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.wait.WaitMode;
+import org.vividus.util.wait.Waiter;
 
 /**
  * Executor of HTTP requests which supports some exceptions handling, test context releasing
@@ -61,7 +64,7 @@ public class HttpRequestExecutor
     public void executeHttpRequest(HttpMethod httpMethod, String endpoint, Optional<String> relativeURL)
             throws IOException
     {
-        executeHttpRequest(httpMethod, endpoint, relativeURL, response -> false);
+        executeHttpRequest(httpMethod, endpoint, relativeURL, response -> false, new WaitMode(Duration.ZERO, 1));
     }
 
     /**
@@ -73,19 +76,16 @@ public class HttpRequestExecutor
      * @param endpoint Request endpoint
      * @param relativeURL Relative URL - optional
      * @param repeatRequest Predicate condition to check response
+     * @param waitMode Which time duration to wait and how many retry times
      * @throws IOException If an input or output exception occurred
      */
     public void executeHttpRequest(HttpMethod httpMethod, String endpoint, Optional<String> relativeURL,
-            Predicate<HttpResponse> repeatRequest) throws IOException
+            Predicate<HttpResponse> repeatRequest, WaitMode waitMode) throws IOException
     {
         try
         {
-            HttpResponse httpResponse;
-            do
-            {
-                httpResponse = executeHttpCallSafely(httpMethod, endpoint, relativeURL.orElse(null));
-            }
-            while (repeatRequest.test(httpResponse));
+            Waiter.wait(waitMode,
+                () -> executeHttpCallSafely(httpMethod, endpoint, relativeURL.orElse(null)), repeatRequest);
         }
         finally
         {
