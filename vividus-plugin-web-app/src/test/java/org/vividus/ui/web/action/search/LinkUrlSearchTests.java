@@ -101,7 +101,7 @@ class LinkUrlSearchTests
 
     static Stream<Arguments> hrefProvider()
     {
-        //CHECKSTYLE:OFF
+        // CHECKSTYLE:OFF
         return Stream.of(
                 Arguments.of(SOME_URL,             SIMPLE_URL_WITH_PATH,      SIMPLE_URL            ),
                 Arguments.of(SIMPLE_URL_WITH_PATH, SIMPLE_URL_WITH_PATH,      SIMPLE_URL + PORT     ),
@@ -110,7 +110,7 @@ class LinkUrlSearchTests
                 Arguments.of("someUrl",            SIMPLE_URL_WITH_PATH,      "http://example.com/" ),
                 Arguments.of(SIMPLE_URL_WITH_PATH, SIMPLE_URL_WITH_PATH,      "https://example.com/")
         );
-        //CHECKSTYLE:ON
+        // CHECKSTYLE:ON
     }
 
     @ParameterizedTest

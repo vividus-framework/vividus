@@ -238,7 +238,7 @@ public class JsonResponseValidationSteps
             }
             catch (InvalidJsonException ignored)
             {
-                //ignore exception
+                // ignore exception
             }
             return true;
         }, new WaitMode(duration, retryTimes));

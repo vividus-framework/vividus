@@ -90,12 +90,12 @@ public class ScreenshotOnFailureMonitor extends NullStepMonitor
                     eventBus.post(new AttachmentPublishEvent(attachment));
                 });
             }
-            //CHECKSTYLE:OFF
+            // CHECKSTYLE:OFF
             catch (RuntimeException e)
             {
                 LOGGER.error("Unable to take a screenshot", e);
             }
-            //CHECKSTYLE:ON
+            // CHECKSTYLE:ON
         }
     }
 

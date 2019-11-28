@@ -76,7 +76,7 @@ class FilteringTableTransformerTests
         return properties;
     }
 
-    //CHECKSTYLE:OFF
+    // CHECKSTYLE:OFF
     static Stream<Arguments> tableSource() {
         return Stream.of(
             Arguments.of(TABLE, createProperties(3, 3, null),           TABLE),
@@ -89,5 +89,5 @@ class FilteringTableTransformerTests
             Arguments.of(TABLE, createProperties(null, 1, "key1"),      "|key1|\n|1|")
         );
     }
-    //CHECKSTYLE:ON
+    // CHECKSTYLE:ON
 }

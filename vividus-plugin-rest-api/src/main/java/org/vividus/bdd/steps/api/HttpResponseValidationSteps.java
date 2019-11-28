@@ -308,7 +308,7 @@ public class HttpResponseValidationSteps
         {
             new JsonUtils().toJson(responseBody);
 
-            //Single number ("1") is valid JSON as well, but we can't guarantee that it's really JSON
+            // Single number ("1") is valid JSON as well, but we can't guarantee that it's really JSON
             return StringUtils.startsWithAny(new String(responseBody, StandardCharsets.UTF_8).trim(), "[", "{");
         }
         catch (JsonProcessingException e)
