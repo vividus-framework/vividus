@@ -40,7 +40,6 @@ public final class UriUtils
 
     private UriUtils()
     {
-        // Nothing to do
     }
 
     public static URI addUserInfo(URI uri, String userInfo)

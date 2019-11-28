@@ -36,7 +36,6 @@ public final class VividusInitializationChecker
 {
     private VividusInitializationChecker()
     {
-        // Nothing to do
     }
 
     @SuppressWarnings("checkstyle:IllegalCatchExtended")

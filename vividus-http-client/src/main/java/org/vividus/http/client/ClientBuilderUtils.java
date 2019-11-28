@@ -38,7 +38,6 @@ public final class ClientBuilderUtils
 
     private ClientBuilderUtils()
     {
-        // Private constructor to disable instantiation
     }
 
     public static CredentialsProvider createCredentialsProvider(String usernamePassword)

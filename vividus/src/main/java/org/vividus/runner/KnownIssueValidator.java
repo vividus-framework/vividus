@@ -43,7 +43,6 @@ public final class KnownIssueValidator
 
     private KnownIssueValidator()
     {
-        // Nothing to do
     }
 
     public static void main(String[] args) throws ParseException, IOException

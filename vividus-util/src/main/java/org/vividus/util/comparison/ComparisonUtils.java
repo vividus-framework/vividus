@@ -31,7 +31,6 @@ public final class ComparisonUtils
 {
     private ComparisonUtils()
     {
-        //Utility class
     }
 
     public static List<EntryComparisonResult> compareMaps(Map<?, ?> var1Map, Map<?, ?> var2Map)

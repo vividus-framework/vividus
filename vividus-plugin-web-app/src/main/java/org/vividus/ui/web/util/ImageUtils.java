@@ -26,7 +26,6 @@ public final class ImageUtils
 {
     private ImageUtils()
     {
-        //Utility class;
     }
 
     public static void writeAsPng(BufferedImage toWrite, File location) throws IOException

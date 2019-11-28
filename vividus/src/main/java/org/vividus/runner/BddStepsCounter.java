@@ -63,7 +63,6 @@ public final class BddStepsCounter
 
     private BddStepsCounter()
     {
-        // Private constructor to disable external instantiation
     }
 
     public static void main(String[] args) throws IOException, ParseException

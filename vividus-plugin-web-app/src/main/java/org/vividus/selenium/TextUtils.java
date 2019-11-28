@@ -20,7 +20,6 @@ public final class TextUtils
 {
     private TextUtils()
     {
-        // Private constructor in utility class
     }
 
     @SuppressWarnings("checkstyle:avoidescapedunicodecharacters")

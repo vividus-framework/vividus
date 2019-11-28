@@ -32,7 +32,6 @@ public final class ObjectMapperFactory
 {
     private ObjectMapperFactory()
     {
-        // Utility class
     }
 
     public static ObjectMapper createWithCaseInsensitiveEnumDeserializer()

@@ -31,7 +31,6 @@ public final class BeanFactory
 
     private BeanFactory()
     {
-        // no instances to be created
     }
 
     public static ResourcePatternResolver getResourcePatternResolver()
