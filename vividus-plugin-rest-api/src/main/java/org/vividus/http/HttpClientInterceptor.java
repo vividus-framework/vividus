@@ -16,6 +16,7 @@
 
 package org.vividus.http;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -33,7 +34,6 @@ import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.RequestLine;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.client.HttpResponse;
@@ -62,9 +62,11 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
             mimeType = Optional.ofNullable(ContentType.getLenient(entity))
                     .map(ContentType::getMimeType)
                     .orElseGet(() -> getMimeType(requestWithBody.getAllHeaders()));
-            try
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream((int) entity.getContentLength()))
             {
-                body = EntityUtils.toByteArray(entity);
+                // https://github.com/apache/httpcomponents-client/commit/09cefc2b8970eea56d81b1a886d9bb769a48daf3
+                entity.writeTo(baos);
+                body = baos.toByteArray();
             }
             catch (IOException e)
             {

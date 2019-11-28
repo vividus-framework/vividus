@@ -21,14 +21,16 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -132,7 +134,7 @@ class HttpClientInterceptorTests
         HttpEntity httpEntity = mock(HttpEntity.class);
         when(httpEntity.getContentType()).thenReturn(null);
         IOException ioException = new IOException();
-        when(httpEntity.getContent()).thenThrow(ioException);
+        doThrow(ioException).when(httpEntity).writeTo(any(ByteArrayOutputStream.class));
         HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(new Header[] { mock(Header.class) },
                 httpEntity);
         testNoHttpRequestBodyIsAttached(httpRequest,
@@ -177,10 +179,11 @@ class HttpClientInterceptorTests
     {
         HttpEntity httpEntity = mock(HttpEntity.class);
         when(httpEntity.getContentType()).thenReturn(entityContentTypeHeader);
-        when(httpEntity.getContent()).thenReturn(new ByteArrayInputStream(DATA));
         HttpContext httpContext = mock(HttpContext.class);
         HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(allRequestHeaders, httpEntity);
         httpClientInterceptor.process(httpRequest, httpContext);
+        verify(httpEntity).getContentLength();
+        verify(httpEntity).writeTo(any(ByteArrayOutputStream.class));
         verifyPublishAttachment(REQUEST);
         verifyNoInteractions(httpContext);
         assertThat(logger.getLoggingEvents(), empty());
