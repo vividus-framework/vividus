@@ -248,7 +248,7 @@ public class JsonResponseValidationSteps
         }
     }
 
-     /**
+    /**
      * Step designed to perform steps against all elements found by JSON path in current json context or response
      * <b>if</b> they are matching comparison rule.
      * Actions performed by step:
