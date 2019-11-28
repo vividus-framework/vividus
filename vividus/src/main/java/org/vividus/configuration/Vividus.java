@@ -36,7 +36,6 @@ public final class Vividus
 {
     private Vividus()
     {
-        // Nothing to do
     }
 
     public static void init()

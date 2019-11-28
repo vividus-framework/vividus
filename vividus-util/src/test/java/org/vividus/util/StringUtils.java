@@ -20,7 +20,6 @@ public final class StringUtils
 {
     private StringUtils()
     {
-        //utility
     }
 
     public static String normalizeLineFeeds(String input)

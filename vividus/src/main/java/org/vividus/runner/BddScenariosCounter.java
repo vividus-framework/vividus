@@ -39,7 +39,6 @@ public final class BddScenariosCounter
 
     private BddScenariosCounter()
     {
-        // Nothing to do
     }
 
     public static void main(String[] args) throws ParseException, InitializationError, ReflectiveOperationException

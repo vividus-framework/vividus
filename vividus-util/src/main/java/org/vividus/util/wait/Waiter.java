@@ -26,7 +26,6 @@ public final class Waiter
 {
     private Waiter()
     {
-        // Nothing to do
     }
 
     public static <T, E extends Exception> T wait(WaitMode waitMode,

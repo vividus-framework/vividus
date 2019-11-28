@@ -50,7 +50,6 @@ public final class BddStepPrinter
 
     private BddStepPrinter()
     {
-        // Nothing to do
     }
 
     public static void main(String[] args) throws ParseException, IOException

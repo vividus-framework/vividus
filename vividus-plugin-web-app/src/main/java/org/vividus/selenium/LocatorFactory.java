@@ -33,7 +33,6 @@ public final class LocatorFactory
 
     private LocatorFactory()
     {
-        // nothing to do
     }
 
     public static By convertStringToLocator(String source)

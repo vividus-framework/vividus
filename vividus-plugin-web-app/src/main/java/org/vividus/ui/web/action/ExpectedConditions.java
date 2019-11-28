@@ -25,7 +25,6 @@ public final class ExpectedConditions
 {
     private ExpectedConditions()
     {
-        // nothing to do
     }
 
     public static ExpectedCondition<Boolean> isMultiSelectDropDown(WebElement element, boolean multiSelect)
