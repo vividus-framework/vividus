@@ -18,6 +18,7 @@ package org.vividus.selenium.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -94,5 +96,13 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
         assertEquals(100, strategy.getCurrentScrollY((JavascriptExecutor) webDriver));
         assertEquals(100, strategy.getCurrentScrollY((JavascriptExecutor) webDriver));
         assertEquals(142, strategy.getCurrentScrollY((JavascriptExecutor) webDriver));
+    }
+
+    @Test
+    void shouldUseScrollableElementToScrollVertically()
+    {
+        strategy.scrollVertically(mock(JavascriptExecutor.class), THE_ANSWER);
+        verify(javascriptActions, Mockito.times(1)).executeScript(
+                "arguments[0].scrollTo(0, arguments[1]); return [];", scrollableElement, THE_ANSWER);
     }
 }

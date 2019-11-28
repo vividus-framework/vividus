@@ -79,4 +79,11 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Deb
         }
         return scrollY + headerToCut;
     }
+
+    @Override
+    protected void scrollVertically(JavascriptExecutor js, int scrollY)
+    {
+        javascriptActions
+            .executeScript("arguments[0].scrollTo(0, arguments[1]); return [];", scrollableElement, scrollY);
+    }
 }
