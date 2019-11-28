@@ -16,6 +16,8 @@
 
 package org.vividus.selenium;
 
+import java.util.function.Function;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
@@ -29,35 +31,28 @@ public final class WebDriverUtil
 
     public static <T> T unwrap(WebDriver webDriver, Class<T> clazz)
     {
-        WebDriver webDriverUnwrapped = webDriver;
-        while (!clazz.isAssignableFrom(webDriverUnwrapped.getClass()))
-        {
-            if (webDriverUnwrapped instanceof WrapsDriver)
-            {
-                webDriverUnwrapped = ((WrapsDriver) webDriverUnwrapped).getWrappedDriver();
-            }
-            else
-            {
-                break;
-            }
-        }
-        return clazz.cast(webDriverUnwrapped); // Will throw exception
+        return unwrap(webDriver, WrapsDriver.class, WrapsDriver::getWrappedDriver, clazz);
     }
 
     public static <T> T unwrap(WebElement webElement, Class<T> clazz)
     {
-        WebElement webElementUnwrapped = webElement;
-        while (!clazz.isAssignableFrom(webElementUnwrapped.getClass()))
+        return unwrap(webElement, WrapsElement.class, WrapsElement::getWrappedElement, clazz);
+    }
+
+    private static <T, W, R> R unwrap(T toUnwrap, Class<W> wrapperClazz, Function<W, T> unwrapper, Class<R> targetClazz)
+    {
+        T unwrapped = toUnwrap;
+        while (!targetClazz.isAssignableFrom(unwrapped.getClass()))
         {
-            if (webElementUnwrapped instanceof WrapsElement)
+            if (wrapperClazz.isInstance(unwrapped))
             {
-                webElementUnwrapped = ((WrapsElement) webElementUnwrapped).getWrappedElement();
+                unwrapped = unwrapper.apply(wrapperClazz.cast(unwrapped));
             }
             else
             {
                 break;
             }
         }
-        return clazz.cast(webElementUnwrapped); // Will throw exception
+        return targetClazz.cast(unwrapped);
     }
 }
