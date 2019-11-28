@@ -38,7 +38,7 @@ class ScreenshotShootingStrategyTests
     private static final String IPHONE_SIMULATOR = "iPhone Simulator";
     private static final String IPAD_SIMULATOR = "iPad Simulator";
 
-    //CHECKSTYLE:OFF
+    // CHECKSTYLE:OFF
     static Stream<Arguments> data()
     {
         return Stream.of(
@@ -80,7 +80,7 @@ class ScreenshotShootingStrategyTests
             Arguments.of(ScreenshotShootingStrategy.PHONE_ANDROID_LANDSCAPE, ShootingTargetAreaStrategy.class,       true,  false,  null                      )
         );
     }
-    //CHECKSTYLE:ON
+    // CHECKSTYLE:ON
 
     @ParameterizedTest
     @MethodSource("data")

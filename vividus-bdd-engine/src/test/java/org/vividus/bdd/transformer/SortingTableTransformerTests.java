@@ -56,7 +56,7 @@ class SortingTableTransformerTests
         return properties;
     }
 
-    //CHECKSTYLE:OFF
+    // CHECKSTYLE:OFF
     static Stream<Arguments> tableSource() {
         return Stream.of(
             Arguments.of(TABLE,                                createProperties("key5"),      TABLE),
@@ -65,5 +65,5 @@ class SortingTableTransformerTests
             Arguments.of("|key1|key2|key3|\n|0|2|1|\n|0|2|5|", createProperties("key1|key3"), "|key1|key2|key3|\n|0|2|5|\n|0|2|1|")
         );
     }
-    //CHECKSTYLE:ON
+    // CHECKSTYLE:ON
 }
