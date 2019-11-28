@@ -497,12 +497,13 @@ class MouseActionsTests
     }
 
     @Test
-    void testMoveToElementOnSafari()
+    void shouldScrollToElementOnBrowsersNotPerformingScrollAutomatically()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(((HasInputDevices) webDriver).getMouse()).thenReturn(mouse);
         when(webDriverManager.isMobile()).thenReturn(false);
-        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(true);
+        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.FIREFOX, WebDriverType.EDGE))
+            .thenReturn(true);
         mouseActions.moveToElement(locatableWebElement);
         verify(javascriptActions).scrollIntoView(locatableWebElement, true);
     }

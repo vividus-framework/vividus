@@ -183,8 +183,9 @@ public class MouseActions implements IMouseActions
     {
         if (element != null)
         {
-            //Safari Driver doesn't scroll to element before moveTo action
-            if (webDriverManager.isMobile() || webDriverManager.isTypeAnyOf(WebDriverType.SAFARI))
+            //Safari, Firefox and Edge Drivers don't scroll to element before moveTo action
+            if (webDriverManager.isMobile()
+                    || webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.FIREFOX, WebDriverType.EDGE))
             {
                 javascriptActions.scrollIntoView(element, true);
             }
