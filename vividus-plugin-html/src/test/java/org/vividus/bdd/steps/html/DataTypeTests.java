@@ -20,13 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.stream.Stream;
-
 import org.jsoup.nodes.Element;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class DataTypeTests
 {
@@ -34,21 +31,18 @@ class DataTypeTests
     private static final String TEXT = "text";
     private static final Element ELEMENT = mock(Element.class);
 
-    @BeforeAll
-    static void beforeAll()
+    @BeforeEach
+    void beforeEach()
     {
         when(ELEMENT.text()).thenReturn(TEXT);
         when(ELEMENT.data()).thenReturn(DATA);
     }
 
-    private static Stream<Arguments> dataProvider()
-    {
-        return Stream.of(Arguments.of(DataType.DATA, DATA,
-                         Arguments.of(DataType.TEXT, TEXT)));
-    }
-
     @ParameterizedTest
-    @MethodSource("dataProvider")
+    @CsvSource({
+            "DATA, data",
+            "TEXT, text"
+    })
     void shouldExtractAppropriateData(DataType toTest, String expectedValue)
     {
         assertEquals(expectedValue, toTest.get(ELEMENT));

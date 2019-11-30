@@ -24,7 +24,7 @@ import org.vividus.softassert.event.AssertionFailedEvent;
 public class AssertionManager
 {
     private final EventBus eventBus;
-    private ISoftAssert softAssert;
+    private final ISoftAssert softAssert;
 
     private boolean failFast;
 

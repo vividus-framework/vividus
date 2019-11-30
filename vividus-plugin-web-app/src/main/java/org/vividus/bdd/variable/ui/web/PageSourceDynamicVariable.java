@@ -24,7 +24,7 @@ import org.vividus.selenium.IWebDriverProvider;
 @Named("pageSource")
 public class PageSourceDynamicVariable implements DynamicVariable
 {
-    private IWebDriverProvider webDriverProvider;
+    private final IWebDriverProvider webDriverProvider;
 
     public PageSourceDynamicVariable(IWebDriverProvider webDriverProvider)
     {

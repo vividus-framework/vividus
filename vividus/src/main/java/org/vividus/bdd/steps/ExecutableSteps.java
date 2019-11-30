@@ -24,8 +24,6 @@ import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
-import com.google.common.base.Preconditions;
-
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Alias;
@@ -149,7 +147,7 @@ public class ExecutableSteps
     {
         MutableInt iterationsCounter = new MutableInt();
         iterate(seed, limitMatcher, increment,
-            index -> Preconditions.checkArgument(iterationsCounter.incrementAndGet() < EXECUTIONS_NUMBER_THRESHOLD,
+            index -> checkArgument(iterationsCounter.incrementAndGet() < EXECUTIONS_NUMBER_THRESHOLD,
                     "Number of iterations has exceeded allowable limit " + EXECUTIONS_NUMBER_THRESHOLD));
     }
 

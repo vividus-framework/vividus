@@ -46,7 +46,7 @@ public class AshotFactory implements IAshotFactory
     @Inject private IJavascriptActions javascriptActions;
     @Inject private ScreenshotDebugger screenshotDebugger;
 
-    private Supplier<ShootingStrategy> baseShootingStrategy = Suppliers.memoize(
+    private final Supplier<ShootingStrategy> baseShootingStrategy = Suppliers.memoize(
         () -> ShootingStrategies.scaling((float) javascriptActions.getDevicePixelRatio()));
 
     @Override

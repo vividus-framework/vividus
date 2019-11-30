@@ -43,7 +43,7 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientInterceptor.class);
 
-    private IAttachmentPublisher attachmentPublisher;
+    private final IAttachmentPublisher attachmentPublisher;
 
     public HttpClientInterceptor(IAttachmentPublisher attachmentPublisher)
     {

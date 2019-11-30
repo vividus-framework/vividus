@@ -209,7 +209,6 @@ class BddResourceLoaderTests
     {
         mockGetAllResources(DEFAULT_URLS);
         String rawPath = "story/sit/list.table";
-        String truePath = CLASSPATH_ALL_URL_PREFIX + "story/sit/vividus/ca/table/list.table";
         List<String> params = List.of(MARKET, BRAND, LOCALE);
 
         when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(params);

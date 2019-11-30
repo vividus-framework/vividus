@@ -34,8 +34,8 @@ public class JavascriptActions implements IJavascriptActions
             + ".createEvent('MouseEvents');evObj.initEvent('%1$s', true, false); arguments[0].dispatchEvent(evObj);} "
             + "else if(document.createEventObject) { arguments[0].fireEvent('on%1$s');}";
 
-    private IWebDriverProvider webDriverProvider;
-    private IWebDriverManager webDriverManager;
+    private final IWebDriverProvider webDriverProvider;
+    private final IWebDriverManager webDriverManager;
 
     private final ThreadLocal<String> userAgent = ThreadLocal.withInitial(
         () -> executeScript("return navigator.userAgent"));

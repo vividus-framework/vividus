@@ -159,7 +159,7 @@ public class ResourceCheckSteps
     private URI createUri(String uri)
     {
         URI uriToCheck = URI.create(uri);
-        if (!uri.startsWith("/") || uriToCheck.isAbsolute())
+        if (uri.charAt(0) != '/' || uriToCheck.isAbsolute())
         {
             return uriToCheck;
         }

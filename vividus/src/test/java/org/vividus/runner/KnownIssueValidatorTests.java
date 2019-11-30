@@ -63,7 +63,7 @@ public class KnownIssueValidatorTests extends SystemOutTests
     private static final String SEPARATOR = "| ";
 
     @Rule
-    private TemporaryFolder tempDir = new TemporaryFolder();
+    private final TemporaryFolder tempDir = new TemporaryFolder();
 
     @BeforeClass
     public static void mockVividus()

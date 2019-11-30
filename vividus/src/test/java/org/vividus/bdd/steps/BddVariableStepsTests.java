@@ -185,10 +185,10 @@ class BddVariableStepsTests
                     ((Map<String, List<List<EntryComparisonResult>>>) results).get(RESULTS).get(0).get(0);
             EntryComparisonResult result2 =
                     ((Map<String, List<List<EntryComparisonResult>>>) results).get(RESULTS).get(0).get(1);
-            return (key1.equals(result1.getKey()) && value1.equals(result1.getLeft())
-                            && value1.equals(result1.getRight()) && result1.isPassed())
-                    && ("k2".equals(result2.getKey()) && "v2".equals(result2.getLeft())
-                            && result2.getRight() == null && !result2.isPassed());
+            return key1.equals(result1.getKey()) && value1.equals(result1.getLeft())
+                            && value1.equals(result1.getRight()) && result1.isPassed()
+                    && "k2".equals(result2.getKey()) && "v2".equals(result2.getLeft())
+                            && result2.getRight() == null && !result2.isPassed();
         }), eq(TABLES_ASSERT_MESSAGE));
     }
 
