@@ -69,7 +69,11 @@
                         ${cookie.path}
                     </td>
                     <td>
-                        ${cookie.expiryDate?datetime}
+                        <#if cookie.expiryDate??>
+                            ${cookie.expiryDate?datetime}
+                        <#else>
+                            Session
+                        </#if>
                     </td>
                     <td>
                         ${cookie.persistent?c}
