@@ -4,7 +4,6 @@ dependencies {
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-reporter')
-    implementation project(':vividus-util')
 
     implementation(group: 'io.qameta.allure', name: 'allure-java-commons', version: versions.allure)
     implementation(group: 'io.qameta.allure', name: 'allure-generator', version: versions.allure)
