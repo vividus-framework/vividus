@@ -32,7 +32,12 @@ public class AllureRunContext implements IAllureRunContext
     private static final String STORY_LABELS = "allureStoryLabels";
     private static final String GIVEN_STORY_LABELS = "allureGivenStoryLabels";
 
-    private TestContext testContext;
+    private final TestContext testContext;
+
+    public AllureRunContext(TestContext testContext)
+    {
+        this.testContext = testContext;
+    }
 
     @Override
     public List<Label> createNewStoryLabels(boolean givenStory)
@@ -123,11 +128,6 @@ public class AllureRunContext implements IAllureRunContext
     private Deque<ExecutionStages> getExecutionStages()
     {
         return testContext.get(ExecutionStages.class, LinkedList::new);
-    }
-
-    public void setTestContext(TestContext testContext)
-    {
-        this.testContext = testContext;
     }
 
     private static class ExecutionStages

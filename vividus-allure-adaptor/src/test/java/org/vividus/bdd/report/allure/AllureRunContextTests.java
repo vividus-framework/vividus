@@ -24,7 +24,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.vividus.bdd.report.allure.model.ScenarioExecutionStage;
 import org.vividus.bdd.report.allure.model.StoryExecutionStage;
@@ -39,13 +38,7 @@ class AllureRunContextTests
     private static final String GIVEN_STORY_LABELS = "allureGivenStoryLabels";
 
     private final TestContext testContext = new SimpleTestContext();
-    private final AllureRunContext allureRunContext = new AllureRunContext();
-
-    @BeforeEach
-    void beforeEach()
-    {
-        allureRunContext.setTestContext(testContext);
-    }
+    private final AllureRunContext allureRunContext = new AllureRunContext(testContext);
 
     @Test
     void testCreateNewStoryLabelsForRootStory()

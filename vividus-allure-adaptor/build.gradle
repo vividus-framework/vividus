@@ -14,7 +14,6 @@ dependencies {
     implementation(group: 'ru.yandex.qatools.clay', name: 'clay-utils', version: '2.5')
     implementation(group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy, classifier: 'indy')
     implementation(group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1')
-    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
