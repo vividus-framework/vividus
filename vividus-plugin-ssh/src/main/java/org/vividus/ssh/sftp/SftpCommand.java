@@ -19,6 +19,8 @@ package org.vividus.ssh.sftp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -105,13 +107,28 @@ public enum SftpCommand
         protected String execute(ChannelSftp channel, String content, String destination)
                 throws SftpException, IOException
         {
-            try (InputStream is = IOUtils.toInputStream(content, StandardCharsets.UTF_8))
-            {
-                channel.put(is, destination);
-            }
-            return null;
+            return executePutCommand(channel, IOUtils.toInputStream(content, StandardCharsets.UTF_8), destination);
+        }
+    },
+    PUT_FROM_FILE
+    {
+        @Override
+        protected String execute(ChannelSftp channel, String filePath, String destination)
+                throws IOException, SftpException
+        {
+            return executePutCommand(channel, Files.newInputStream(Paths.get(filePath)), destination);
         }
     };
+
+    private static String executePutCommand(ChannelSftp channel, InputStream inputStream, String destination)
+            throws IOException, SftpException
+    {
+        try (inputStream)
+        {
+            channel.put(inputStream, destination);
+        }
+        return null;
+    }
 
     protected String execute(ChannelSftp channel, String parameter1, String parameter2)
             throws SftpException, IOException

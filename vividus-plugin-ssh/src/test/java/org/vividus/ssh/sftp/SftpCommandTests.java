@@ -19,6 +19,7 @@ package org.vividus.ssh.sftp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Vector;
@@ -37,13 +39,18 @@ import com.jcraft.jsch.SftpException;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.mockito.ArgumentCaptor;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.util.ResourceUtils;
 
+@ExtendWith(MockitoExtension.class)
 class SftpCommandTests
 {
+    private static final String REMOTE_PATH = "/remote/path";
     private static final String PARAM_1 = "param1";
     private static final String PARAM_2 = "param2";
     private static final String PARAM_3 = "param3";
@@ -71,7 +78,7 @@ class SftpCommandTests
     }
 
     @ParameterizedTest
-    @EnumSource(value = SftpCommand.class, mode = Mode.EXCLUDE, names = "PUT")
+    @EnumSource(value = SftpCommand.class, mode = Mode.EXCLUDE, names = {"PUT", "PUT_FROM_FILE"})
     void shouldNotSupportTwoParameters(SftpCommand command)
     {
         shouldNotSupportUnexpectedParameters(command, "Command %s doesn't support two parameters",
@@ -168,14 +175,33 @@ class SftpCommandTests
     @Test
     void shouldExecutePutCommand() throws IOException, SftpException
     {
-        ChannelSftp channel = mock(ChannelSftp.class);
         String content = "content";
-        String destination = "/remote/path";
+        ChannelSftp channel = mock(ChannelSftp.class);
         ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-        doNothing().when(channel).put(inputStreamArgumentCaptor.capture(), eq(destination));
-        String result = SftpCommand.PUT.execute(channel, content, destination);
+        doNothing().when(channel).put(inputStreamArgumentCaptor.capture(), eq(REMOTE_PATH));
+        String result = SftpCommand.PUT.execute(channel, content, REMOTE_PATH);
         assertNull(result);
         assertEquals(content, new String(inputStreamArgumentCaptor.getValue().readAllBytes(), StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void shouldExecutePutFileCommand() throws IOException, SftpException
+    {
+        String filePath = ResourceUtils.loadFile(SftpCommand.class, "test.txt").getPath();
+        ChannelSftp channel = mock(ChannelSftp.class);
+        doNothing().when(channel).put((InputStream) argThat(is -> {
+            try
+            {
+                return "Hello".equals(new String(((InputStream) is).readAllBytes(), StandardCharsets.UTF_8));
+            }
+            catch (IOException e)
+            {
+                throw new UncheckedIOException(e);
+            }
+        }),
+            eq(REMOTE_PATH));
+        String result = SftpCommand.PUT_FROM_FILE.execute(channel, filePath, REMOTE_PATH);
+        assertNull(result);
     }
 
     @Test

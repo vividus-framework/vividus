@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.steps.ssh;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -110,13 +111,34 @@ public class SshSteps
     @When("I create file with content `$content` at path `$destination` on $server over SFTP")
     public void createFileOverSftp(String content, String destination, String server) throws CommandExecutionException
     {
+        executePutCommand(SftpCommand.PUT, List.of(content, destination), server);
+    }
+
+    /**
+     * Step retrieves server configuration by key, opens SFTP session and put local file at remote destination
+     * @param filePath    File path of file for putting on server
+     * @param destination Remote file destination
+     * @param server      Server key matching any of configured ones
+     * @throws IOException if I/O exception occurs during file reading
+     * @throws CommandExecutionException if any error happens during file creation
+     */
+    @When("I copy local file located at `$filePath` to path `$destination` on $server over SFTP")
+    public void copyFileOverSftp(String filePath, String destination, String server)
+            throws IOException, CommandExecutionException
+    {
+        executePutCommand(SftpCommand.PUT_FROM_FILE, List.of(filePath, destination), server);
+    }
+
+    private void executePutCommand(SftpCommand command, List<String> parameters, String server)
+            throws CommandExecutionException
+    {
         executeCommands(new Commands(null)
         {
             @Override
             @SuppressWarnings("unchecked")
             public <T> List<SingleCommand<T>> getSingleCommands(Function<String, T> commandFactory)
             {
-                return List.of((SingleCommand<T>) new SingleCommand<>(SftpCommand.PUT, List.of(content, destination)));
+                return List.of((SingleCommand<T>) new SingleCommand<>(command, parameters));
             }
         }, server, Protocol.SFTP);
     }

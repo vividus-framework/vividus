@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +50,7 @@ import org.vividus.ssh.sftp.SftpOutput;
 @ExtendWith(MockitoExtension.class)
 class SshStepsTests
 {
+    private static final String DESTINATION_PATH = "/path";
     private static final String SERVER = "my-server";
     private static final ServerConfiguration SERVER_CONFIGURATION = new ServerConfiguration();
 
@@ -99,22 +101,35 @@ class SshStepsTests
     }
 
     @Test
-    void shouldCreateFileOverSftp() throws CommandExecutionException
+    void shouldCreateFileOverSftp() throws CommandExecutionException, IOException
+    {
+        String content = "content";
+        testPutFile(SftpCommand.PUT, content, () -> sshSteps.createFileOverSftp(content, DESTINATION_PATH, SERVER));
+    }
+
+    @Test
+    void testPutFileSftp() throws CommandExecutionException, IOException
+    {
+        String filePath = "/test.txt";
+        testPutFile(SftpCommand.PUT_FROM_FILE, filePath,
+            () -> sshSteps.copyFileOverSftp(filePath, DESTINATION_PATH, SERVER));
+    }
+
+    private void testPutFile(SftpCommand command, String parameter, StepRunner stepExecutor)
+            throws CommandExecutionException, IOException
     {
         CommandExecutionManager<SftpOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SFTP);
-        String content = "content";
-        String destination = "/path";
         when(executionManager.run(eq(SERVER_CONFIGURATION), argThat(commands -> {
             List<SingleCommand<Object>> singleCommands = commands.getSingleCommands(null);
             if (singleCommands.size() == 1)
             {
                 SingleCommand<Object> singleCommand = singleCommands.get(0);
-                return singleCommand.getCommand() == SftpCommand.PUT && List.of(content, destination).equals(
-                        singleCommand.getParameters());
+                return singleCommand.getCommand() == command
+                        && List.of(parameter, DESTINATION_PATH).equals(singleCommand.getParameters());
             }
             return false;
         }))).thenReturn(new SftpOutput());
-        sshSteps.createFileOverSftp(content, destination, SERVER);
+        stepExecutor.run();
         verify(sshTestContext).putSshOutput(null);
     }
 
@@ -143,5 +158,11 @@ class SshStepsTests
     private interface CommandExecutor
     {
         Object execute(Commands commands) throws CommandExecutionException;
+    }
+
+    @FunctionalInterface
+    private interface StepRunner
+    {
+        void run() throws CommandExecutionException, IOException;
     }
 }
