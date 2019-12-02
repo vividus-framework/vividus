@@ -58,7 +58,7 @@ ext {
         jsoup:                  '1.12.1',
         junit:                  '5.5.2',
         junit4Dataprovider:     '2.6',
-        mockito:                '3.1.0',
+        mockito:                '3.2.0',
         powermock:              '2.0.4',
         slf4jTest:              '2.1.1'
     ]
