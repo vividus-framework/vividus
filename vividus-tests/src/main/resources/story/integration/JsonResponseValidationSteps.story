@@ -19,13 +19,13 @@ Then `${numberOfBooks}` is equal to `<booksNumber>`
 
 
 Scenario: Verify composite step 'When I wait for presence of element by '$jsonPath' in HTTP GET response from '$resourceUrl' for '$duration' duration retrying $retryTimes times'
-When I wait for presence of element by '<jsonPath>' in HTTP GET response from '<URL>' for 'PT1M' duration retrying 2 times
+When I wait for presence of element by '<jsonPath>' in HTTP GET response from '<URL>' for 'PT1M' duration retrying 20 times
 When I save a JSON element from response by JSON path '<jsonPath>' to scenario variable 'numberOfBooks'
 Then `${numberOfBooks}` is equal to `<booksNumber>`
 
 !-- Composites validation
 
 Scenario: Verify composite step 'When I wait for presence of the element by JSON path '$jsonPath' in HTTP GET response from '$resourceUrl' for '$duration' duration'
-When I wait for presence of the element by JSON path '<jsonPath>' in HTTP GET response from '<URL>' for 'PT2M' duration
+When I wait for presence of the element by JSON path '<jsonPath>' in HTTP GET response from '<URL>' for 'PT30S' duration
 When I save a JSON element from response by JSON path '<jsonPath>' to scenario variable 'numberOfBooks'
 Then `${numberOfBooks}` is equal to `<booksNumber>`
