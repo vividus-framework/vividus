@@ -10,14 +10,10 @@
         <property name="bddRunContext" ref="bddRunContext" />
         <property name="testContext" ref="testContext" />
         <property name="allureRunContext">
-            <bean class="org.vividus.bdd.report.allure.AllureRunContext">
-                <property name="testContext" ref="testContext" />
-            </bean>
+            <bean class="org.vividus.bdd.report.allure.AllureRunContext" />
         </property>
         <property name="verificationErrorAdapter">
-            <bean class="org.vividus.bdd.report.allure.adapter.VerificationErrorAdapter">
-                <property name="assertionFormatter" ref="assertionFormatter" />
-            </bean>
+            <bean class="org.vividus.bdd.report.allure.adapter.VerificationErrorAdapter" />
         </property>
     </bean>
 

@@ -16,8 +16,6 @@
 
 package org.vividus.bdd.report.allure.listener;
 
-import javax.inject.Inject;
-
 import com.google.common.eventbus.Subscribe;
 
 import org.vividus.bdd.report.allure.IAllureStepReporter;
@@ -29,7 +27,12 @@ import io.qameta.allure.model.Status;
 
 public class AllureAssertionFailureListener
 {
-    @Inject private IAllureStepReporter allureStepReporter;
+    private final IAllureStepReporter allureStepReporter;
+
+    public AllureAssertionFailureListener(IAllureStepReporter allureStepReporter)
+    {
+        this.allureStepReporter = allureStepReporter;
+    }
 
     @Subscribe
     public void onAssertionFailure(AssertionFailedEvent event)

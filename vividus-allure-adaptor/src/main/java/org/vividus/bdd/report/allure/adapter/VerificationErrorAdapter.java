@@ -21,17 +21,17 @@ import org.vividus.softassert.formatter.IAssertionFormatter;
 
 public class VerificationErrorAdapter implements IVerificationErrorAdapter
 {
-    private IAssertionFormatter assertionFormatter;
+    private final IAssertionFormatter assertionFormatter;
+
+    public VerificationErrorAdapter(IAssertionFormatter assertionFormatter)
+    {
+        this.assertionFormatter = assertionFormatter;
+    }
 
     @Override
     public VerificationError adapt(VerificationError error)
     {
         String errorsMessage = assertionFormatter.getErrorsMessage(error.getErrors(), false);
         return new AdaptedVerificationError(errorsMessage, error);
-    }
-
-    public void setAssertionFormatter(IAssertionFormatter assertionFormatter)
-    {
-        this.assertionFormatter = assertionFormatter;
     }
 }
