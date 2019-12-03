@@ -45,7 +45,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.report.allure.AllureReportGenerator;
@@ -65,7 +64,7 @@ public class AllureReportGeneratorTests
     public TemporaryFolder testFolder = new TemporaryFolder(new File("./"));
 
     @Mock
-    private ApplicationContext applicationContext;
+    private ResourcePatternResolver resourcePatternResolver;
 
     private AllureReportGenerator allureReportGenerator;
 
@@ -73,8 +72,7 @@ public class AllureReportGeneratorTests
     public void before()
     {
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, "output/allure-results");
-        allureReportGenerator = new AllureReportGenerator();
-        allureReportGenerator.setApplicationContext(applicationContext);
+        allureReportGenerator = new AllureReportGenerator(resourcePatternResolver);
     }
 
     @After
@@ -126,7 +124,7 @@ public class AllureReportGeneratorTests
         allureReportGenerator.setReportDirectory(testFolder.getRoot());
         Resource resource = Mockito.mock(Resource.class);
         Resource[] resources = {resource};
-        when(applicationContext.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
+        when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
         URL resourceURL = PowerMockito.mock(URL.class);
         when(resource.getURL()).thenReturn(resourceURL);
         when(resourceURL.toString()).thenReturn("/allure-customization/some_file.txt");

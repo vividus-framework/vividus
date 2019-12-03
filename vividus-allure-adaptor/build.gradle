@@ -9,7 +9,7 @@ dependencies {
     implementation(group: 'io.qameta.allure', name: 'allure-generator', version: versions.allure)
     implementation(group: 'io.qameta.allure', name: 'allure-plugin-api', version: versions.allure)
 
-    implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
+    implementation(group: 'org.springframework', name: 'spring-core', version: versions.spring)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'ru.yandex.qatools.clay', name: 'clay-utils', version: '2.5')
     implementation(group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy, classifier: 'indy')

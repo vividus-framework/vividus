@@ -24,8 +24,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
@@ -35,7 +33,7 @@ import io.qameta.allure.core.Configuration;
 import io.qameta.allure.summary.SummaryPlugin;
 import io.qameta.allure.util.PropertiesUtils;
 
-public class AllureReportGenerator implements ApplicationContextAware, IAllureReportGenerator
+public class AllureReportGenerator implements IAllureReportGenerator
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AllureReportGenerator.class);
     private static final String ALLURE_CUSTOMIZATION_PATH = "/allure-customization/";
@@ -46,9 +44,14 @@ public class AllureReportGenerator implements ApplicationContextAware, IAllureRe
     private final File resultsDirectory =
             new File((String) PropertiesUtils.loadAllureProperties().get("allure.results.directory"));
 
-    private ApplicationContext applicationContext;
+    private final ResourcePatternResolver resourcePatternResolver;
 
     private boolean started;
+
+    public AllureReportGenerator(ResourcePatternResolver resourcePatternResolver)
+    {
+        this.resourcePatternResolver = resourcePatternResolver;
+    }
 
     @Override
     public void start()
@@ -102,7 +105,7 @@ public class AllureReportGenerator implements ApplicationContextAware, IAllureRe
 
     private void customizeReport() throws IOException
     {
-        for (Resource resource : applicationContext.getResources(ALLURE_CUSTOMIZATION_PATTERN))
+        for (Resource resource : resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN))
         {
             String path = resource.getURL().toString();
             String relativePath = path
@@ -175,11 +178,5 @@ public class AllureReportGenerator implements ApplicationContextAware, IAllureRe
     public void setReportDirectory(File reportDirectory)
     {
         this.reportDirectory = reportDirectory;
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext)
-    {
-        this.applicationContext = applicationContext;
     }
 }
