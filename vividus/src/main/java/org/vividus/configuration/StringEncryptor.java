@@ -26,6 +26,7 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 public final class StringEncryptor
 {
     private static final Pattern ENCRYPTED_PROPERTY_PATTERN = Pattern.compile("ENC\\((.*)\\)");
+
     private StringEncryptor()
     {
     }

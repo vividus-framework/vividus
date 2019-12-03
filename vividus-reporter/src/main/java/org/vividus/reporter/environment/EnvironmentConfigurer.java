@@ -40,6 +40,7 @@ public class EnvironmentConfigurer
     private static final String PROPERTY_PREFIX = "environment-configurer.";
     private static final String DYNAMIC = "dynamic";
     private static final String DYNAMIC_PROPERTY_PREFIX = PROPERTY_PREFIX + DYNAMIC + '.';
+
     static
     {
         Stream.of(PropertyCategory.values())

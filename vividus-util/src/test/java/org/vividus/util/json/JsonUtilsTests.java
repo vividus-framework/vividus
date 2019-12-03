@@ -38,6 +38,7 @@ class JsonUtilsTests
             + " {\"id\":\"2\",\"first_name\":\"name2\"}]";
 
     private static final TestClass TEST_OBJECT;
+
     static
     {
         TEST_OBJECT = new TestClass();
