@@ -35,8 +35,8 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Selector.SelectorParseException;
-import org.vividus.bdd.steps.api.ApiSteps;
 import org.vividus.http.HttpMethod;
+import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.reporter.event.AttachmentPublisher;
@@ -56,7 +56,7 @@ public class ResourceCheckSteps
 
     @Inject private ResourceValidator resourceValidator;
     @Inject private AttachmentPublisher attachmentPublisher;
-    @Inject private ApiSteps apiSteps;
+    @Inject private HttpRequestExecutor httpRequestExecutor;
     @Inject private SoftAssert softAssert;
     @Inject private WebApplicationConfiguration webApplicationConfiguration;
     @Inject private ContextCopyingExecutor executor;
@@ -198,7 +198,7 @@ public class ResourceCheckSteps
                      {
                          try
                          {
-                             apiSteps.whenIDoHttpRequest(HttpMethod.GET, pageURL);
+                             httpRequestExecutor.executeHttpRequest(HttpMethod.GET, pageURL, Optional.empty());
                              return Optional.ofNullable(httpTestContext.getResponse())
                                             .map(HttpResponse::getResponseBodyAsString)
                                             .map(b -> createResourceValidations(getElements(cssSelector, b),
