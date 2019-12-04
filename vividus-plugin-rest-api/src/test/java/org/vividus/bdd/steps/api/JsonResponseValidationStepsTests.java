@@ -255,7 +255,7 @@ class JsonResponseValidationStepsTests
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         String variableName = VARIABLE_NAME;
         JsonResponseValidationSteps spy = Mockito.spy(jsonResponseValidationSteps);
-        spy.saveJsonElementFromContexToVariable(STRING_PATH, scopes, variableName);
+        spy.saveJsonElementFromContextToVariable(STRING_PATH, scopes, variableName);
         verify(spy).saveJsonElementToVariable(JSON, STRING_PATH, scopes, variableName);
     }
 

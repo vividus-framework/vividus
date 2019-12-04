@@ -154,9 +154,9 @@ public class ConfigurationTests
 
     private static ResourceBatch equalToCompositeStepsBatch(String compositePathPatterns)
     {
-        List<String> resourceInludePatterns = List.of(compositePathPatterns);
+        List<String> resourceIncludePatterns = List.of(compositePathPatterns);
         return argThat(batch -> "/".equals(batch.getResourceLocation())
-                && resourceInludePatterns.equals(batch.getResourceIncludePatterns())
+                && resourceIncludePatterns.equals(batch.getResourceIncludePatterns())
                 && List.of().equals(batch.getResourceExcludePatterns()));
     }
 

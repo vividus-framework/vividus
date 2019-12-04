@@ -136,7 +136,7 @@ public class JsonResponseValidationSteps
      * <b>Actions performed at this step:</b>
      * </p>
      * <ul>
-     * <li>Extracts value by jsonPath from JSON context or HTTP responsee</li>
+     * <li>Extracts value by jsonPath from JSON context or HTTP response</li>
      * <li>Saves value extracted into the variable with specified name</li>
      * </ul>
      * @param jsonPath json path
@@ -151,7 +151,7 @@ public class JsonResponseValidationSteps
      * @param variableName variable name
      */
     @When("I save JSON element from context by JSON path `$jsonPath` to $scopes variable `$variableName`")
-    public void saveJsonElementFromContexToVariable(String jsonPath, Set<VariableScope> scopes, String variableName)
+    public void saveJsonElementFromContextToVariable(String jsonPath, Set<VariableScope> scopes, String variableName)
     {
         saveJsonElementToVariable(getActualJson(), jsonPath, scopes, variableName);
     }

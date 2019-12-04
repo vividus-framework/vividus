@@ -95,13 +95,13 @@ class HttpResponseStepsTests
     }
 
     @Test
-    void testVerifyArhiveContainsEntries()
+    void testVerifyArchiveContainsEntries()
     {
         mockHttpResponse();
         Set<String> archiveEntries = Set.of(IMAGE_PNG, FILE_JSON);
         String dummy = "dummy";
         String message = "The response archive contains entry with name ";
-        httpResponseSteps.verifyArhiveContainsEntries(List.of(
+        httpResponseSteps.verifyArchiveContainsEntries(List.of(
                 createEntry(FILE_JSON),
                 createEntry(IMAGE_PNG),
                 createEntry(dummy)

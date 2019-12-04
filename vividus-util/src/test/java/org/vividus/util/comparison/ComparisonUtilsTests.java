@@ -145,7 +145,7 @@ class ComparisonUtilsTests
     }
 
     @Test
-    void shouldCompareMapsAndReturnyResultForEmptyTables()
+    void shouldCompareMapsAndReturnResultForEmptyTables()
     {
         List<List<EntryComparisonResult>> result = ComparisonUtils.compareListsOfMaps(List.of(Map.of(FIRST_COLUMN, 1)),
                 List.of(Map.of(SECOND_COLUMN, 1)));

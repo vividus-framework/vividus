@@ -54,7 +54,7 @@ class CookieManagerTests
     private static final String JS_COOKIE_FORMAT = "document.cookie='name=0; path=/; domain=domain.com'";
 
     @Mock
-    private IJavascriptActions javasciptActions;
+    private IJavascriptActions javascriptActions;
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -83,28 +83,28 @@ class CookieManagerTests
         mockIsSafari(true);
         mockGetCookies(new Cookie(COOKIE_NAME, COOKIE_VALUE));
         cookieManager.deleteAllCookies();
-        verify(javasciptActions).executeScript(JS_DELETE_COOKIE_FORMAT);
+        verify(javascriptActions).executeScript(JS_DELETE_COOKIE_FORMAT);
     }
 
     @Test
     void testAddCookie()
     {
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, DOMAIN);
-        verify(javasciptActions).executeScript(JS_COOKIE_FORMAT);
+        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
     }
 
     @Test
     void testAddCookieUrl() throws MalformedURLException
     {
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, new URL(DOMAIN));
-        verify(javasciptActions).executeScript(JS_COOKIE_FORMAT);
+        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
     }
 
     @Test
     void testAddCookieUri()
     {
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, URI.create(DOMAIN));
-        verify(javasciptActions).executeScript(JS_COOKIE_FORMAT);
+        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
     }
 
     @Test
@@ -121,7 +121,7 @@ class CookieManagerTests
     {
         mockIsSafari(true);
         cookieManager.deleteCookie(COOKIE_NAME);
-        verify(javasciptActions).executeScript(JS_DELETE_COOKIE_FORMAT);
+        verify(javascriptActions).executeScript(JS_DELETE_COOKIE_FORMAT);
     }
 
     @Test

@@ -36,7 +36,7 @@ import org.vividus.http.client.IHttpClient;
 import org.vividus.util.UriUtils;
 import org.vividus.util.json.JsonPathUtils;
 
-public class JsonRestApiTableTransfomer implements ExtendedTableTransformer
+public class JsonRestApiTableTransformer implements ExtendedTableTransformer
 {
     @Inject private IBddVariableContext bddVariableContext;
     private IHttpClient httpClient;
