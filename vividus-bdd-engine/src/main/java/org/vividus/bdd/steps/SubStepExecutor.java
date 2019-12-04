@@ -67,9 +67,15 @@ public class SubStepExecutor implements ISubStepExecutor
             state = state.run(composedStep, new ArrayList<>(), storyReporter);
         }
         stepResult.describeTo(storyReporter);
-        if (ExceptionUtils.getRootCause(stepResult.getFailure()) instanceof InterruptedException)
+        UUIDExceptionWrapper stepResultFailure = stepResult.getFailure();
+        Throwable rootCause = ExceptionUtils.getRootCause(stepResultFailure);
+        if (rootCause instanceof InterruptedException)
         {
-            throw new IllegalStateException(stepResult.getFailure());
+            throw new IllegalStateException(stepResultFailure);
+        }
+        else if (rootCause instanceof Error)
+        {
+            throw (Error) rootCause;
         }
     }
 }
