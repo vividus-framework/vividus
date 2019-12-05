@@ -46,8 +46,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.steps.api.ApiSteps;
 import org.vividus.http.HttpMethod;
+import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.reporter.event.AttachmentPublisher;
@@ -123,7 +123,7 @@ class ResourceCheckStepsTests
     @Mock
     private AttachmentPublisher attachmentPublisher;
     @Mock
-    private ApiSteps apiSteps;
+    private HttpRequestExecutor httpRequestExecutor;
     @Mock
     private HttpTestContext httpTestContext;
     @Mock
@@ -181,8 +181,8 @@ class ResourceCheckStepsTests
         ExamplesTable examplesTable =
                 new ExamplesTable("|pages|\n|https://first.page|\n|https://second.page|");
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
-        verify(apiSteps).whenIDoHttpRequest(HttpMethod.GET, SECOND_PAGE_URL);
-        verify(apiSteps).whenIDoHttpRequest(HttpMethod.GET, FIRST_PAGE_URL);
+        verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
+        verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings("unchecked")
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
@@ -207,7 +207,8 @@ class ResourceCheckStepsTests
         runExecutor();
         mockWebApplicationConfiguration();
         IOException ioException = new IOException();
-        doThrow(ioException).when(apiSteps).whenIDoHttpRequest(HttpMethod.GET, FIRST_PAGE_URL);
+        doThrow(ioException).when(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL,
+                Optional.empty());
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
         ExamplesTable examplesTable =
@@ -255,7 +256,7 @@ class ResourceCheckStepsTests
                 () -> assertEquals(SECOND_PAGE_URL, resourceValidation.getPageURL()));
             return true;
         }), eq(REPORT_NAME));
-        verify(apiSteps).whenIDoHttpRequest(HttpMethod.GET, SECOND_PAGE_URL);
+        verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
         verify(softAssert).recordFailedAssertion(
                 "Unable to get page with URL: https://second.page; Response is received without body;");
     }
