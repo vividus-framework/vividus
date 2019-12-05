@@ -22,15 +22,12 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.vividus.ui.validation.matcher.WebElementMatchers.elementNumber;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.By;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
@@ -40,7 +37,6 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.IWindowsActions;
 import org.vividus.ui.web.action.SearchActions;
-import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.Visibility;
@@ -50,16 +46,12 @@ import org.vividus.ui.web.util.LocatorUtil;
 @TakeScreenshotOnFailure
 public class SetContextSteps
 {
-    private static final String THE_FOUND_ELEMENT_IS = "The found element is ";
-    private static final String POP_UP_CSS_SELECTOR = "*[style*='z-index:']";
     private static final String AN_ELEMENT_WITH_THE_ATTRIBUTE = "An element with the attribute '%1$s'='%2$s'";
-    private static final String AN_ELEMENT_WITH_THE_NAME = "An element with the name '%1$s'";
 
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IWebUiContext webUiContext;
     @Inject private IBaseValidations baseValidations;
     @Inject private SearchActions searchActions;
-    @Inject private WebElementActions webElementActions;
     @Inject private IHighlightingSoftAssert highlightingSoftAssert;
     @Inject private IWindowsActions windowsActions;
 
@@ -75,34 +67,6 @@ public class SetContextSteps
     public void changeContextToPage()
     {
         webUiContext.reset();
-    }
-
-    /**
-     * Set the context to the <b>row containing cell with the particular <i>text</i></b>in a table
-     * <p>
-     * <b>Cell</b> is a {@literal
-     * <td>
-     * } tag in a <i>row</i> tag.
-     * <b>Row</b> is a {@literal
-     * <tr>
-     * } tag in a {@literal
-     * <table>
-     * } tag
-     * <p>
-     * @param cellText is the text in a table cell
-     */
-    @When("I change context to the table row containing cell with the text '$text'")
-    public void changeContextToRowContainingCellWithTextInTable(String cellText)
-    {
-        changeContextToPage();
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.TAG_NAME, "td").addFilter(
-                ActionAttributeType.CASE_SENSITIVE_TEXT, cellText);
-        WebElement td = baseValidations.assertIfElementExists(String.format("Cell with the text '%s'", cellText),
-                attributes);
-        WebElement row = baseValidations.assertIfElementExists(
-                String.format("Table row containing cell with the text '%s'", cellText), td,
-                new SearchAttributes(ActionAttributeType.XPATH, "./ancestor::tr[1]"));
-        webUiContext.putSearchContext(row, () -> changeContextToRowContainingCellWithTextInTable(cellText));
     }
 
     /**
@@ -128,9 +92,10 @@ public class SetContextSteps
     public void changeContextToElementWithName(State state, String name)
     {
         changeContextToPage();
-        WebElement element = baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_THE_NAME, name),
-                new SearchAttributes(ActionAttributeType.ELEMENT_NAME, name).addFilter(ActionAttributeType.STATE,
-                        state.toString()));
+        WebElement element = baseValidations.assertIfElementExists(
+                String.format("An element with the name '%1$s'", name),
+                new SearchAttributes(ActionAttributeType.ELEMENT_NAME, name)
+                        .addFilter(ActionAttributeType.STATE, state.toString()));
         webUiContext.putSearchContext(element, () -> changeContextToElementWithName(state, name));
     }
 
@@ -168,46 +133,12 @@ public class SetContextSteps
         WebElement element = baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_THE_ATTRIBUTE,
                 attributeType, attributeValue), new SearchAttributes(ActionAttributeType.XPATH,
                         LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-        if (!baseValidations.assertElementState(THE_FOUND_ELEMENT_IS + state, state, element))
+        if (!baseValidations.assertElementState("The found element is " + state, state, element))
         {
             element = null;
         }
         webUiContext.putSearchContext(element, () -> changeContextToStateElementWithAttribute(state,
                 attributeType, attributeValue));
-    }
-
-    /**
-     * Set the context to a pop-up
-     * A <b>pop-up</b> is an element which is displayed on the top of any other element
-     * (it has the highest z-index in its CSS style value).
-     */
-    @When("I change context to a pop-up")
-    public void changeContextToAPopUp()
-    {
-        changeContextToPage();
-        List<WebElement> popUpList = searchActions.findElements(webUiContext.getSearchContext(),
-                By.cssSelector(POP_UP_CSS_SELECTOR));
-        List<WebElement> popUps = new ArrayList<>();
-        int maxZ = Integer.MIN_VALUE;
-        for (WebElement popUp : popUpList)
-        {
-            int currentZ = Integer.parseInt(webElementActions.getCssValue(popUp, "z-index"));
-            if (currentZ > maxZ)
-            {
-                popUps.clear();
-                popUps.add(popUp);
-                maxZ = currentZ;
-            }
-            else if (currentZ == maxZ)
-            {
-                popUps.add(popUp);
-            }
-        }
-        if (baseValidations.assertElementNumber("The number of Pop-ups on the page",
-                String.format("The number of elements found by css selector '%s'", POP_UP_CSS_SELECTOR), popUps, 1))
-        {
-            webUiContext.putSearchContext(popUps.get(0), this::changeContextToAPopUp);
-        }
     }
 
     /**
@@ -276,7 +207,7 @@ public class SetContextSteps
         switchingToDefault();
         SearchAttributes frameSearchAttributes = ElementPattern.getFrameSearchAttributes(attributeType, attributeValue);
         frameSearchAttributes.getSearchParameters().setVisibility(Visibility.ALL);
-        List<WebElement> frames = searchActions.findElements(getSearchContext(), frameSearchAttributes);
+        List<WebElement> frames = searchActions.findElements(webUiContext.getSearchContext(), frameSearchAttributes);
         if (highlightingSoftAssert.assertThat(
                 "Number of frames found", String.format("Frame with attribute %1$s = %2$s and number %3$s is found",
                         attributeType, attributeValue, numberValue),
@@ -429,10 +360,5 @@ public class SetContextSteps
     private WebDriver getWebDriver()
     {
         return webDriverProvider.get();
-    }
-
-    private SearchContext getSearchContext()
-    {
-        return webUiContext.getSearchContext();
     }
 }
