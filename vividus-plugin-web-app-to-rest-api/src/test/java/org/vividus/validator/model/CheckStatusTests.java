@@ -25,8 +25,8 @@ class CheckStatusTests
 {
     @ParameterizedTest
     @CsvSource("false,FAILED, true,PASSED")
-    void shouldReturnCorrespondingCheckStatus(boolean conditinion, CheckStatus expectedStatus)
+    void shouldReturnCorrespondingCheckStatus(boolean condition, CheckStatus expectedStatus)
     {
-        assertEquals(expectedStatus, CheckStatus.get(conditinion));
+        assertEquals(expectedStatus, CheckStatus.get(condition));
     }
 }

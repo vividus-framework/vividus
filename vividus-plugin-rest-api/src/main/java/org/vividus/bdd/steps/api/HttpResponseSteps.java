@@ -83,7 +83,7 @@ public class HttpResponseSteps
      * @param parameters contains names
      */
     @Then("the response archive contains entries with the names:$parameters")
-    public void verifyArhiveContainsEntries(List<NamedEntry> parameters)
+    public void verifyArchiveContainsEntries(List<NamedEntry> parameters)
     {
         Set<String> entryNames = ZipUtils.readZipEntryNamesFromBytes(getResponseBody());
         parameters.stream().map(NamedEntry::getName).forEach(expectedName ->

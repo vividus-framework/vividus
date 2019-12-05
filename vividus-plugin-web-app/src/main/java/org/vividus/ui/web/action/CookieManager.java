@@ -42,7 +42,7 @@ public class CookieManager implements ICookieManager
     private static final String JS_DELETE_COOKIE_FORMAT = "document.cookie='%s=; expires=-1'";
 
     @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IJavascriptActions javasciptActions;
+    @Inject private IJavascriptActions javascriptActions;
     @Inject private IWebDriverManager webDriverManager;
 
     @Override
@@ -67,7 +67,7 @@ public class CookieManager implements ICookieManager
     {
         String cookie = String.format(JS_COOKIE_FORMAT, cookieName, cookieValue, path, domain);
         LOGGER.debug("Adding cookie: {}", cookie);
-        javasciptActions.executeScript(cookie);
+        javascriptActions.executeScript(cookie);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class CookieManager implements ICookieManager
         // Workaround for safari driver bug:
         // https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/5212
         String deleteScript = String.format(JS_DELETE_COOKIE_FORMAT, cookieName);
-        javasciptActions.executeScript(deleteScript);
+        javascriptActions.executeScript(deleteScript);
     }
 
     @Override

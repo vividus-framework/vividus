@@ -31,8 +31,8 @@ class ContextCopyingExecutorTests
     {
         TestContext testContext = new ThreadedTestContext();
         testContext.put(ContextCopyingExecutorTests.class, CONTEXT_VALUE);
-        ContextCopyingExecutor contexCopyingExecutor = new ContextCopyingExecutor(testContext);
-        contexCopyingExecutor.execute(() -> {
+        ContextCopyingExecutor contextCopyingExecutor = new ContextCopyingExecutor(testContext);
+        contextCopyingExecutor.execute(() -> {
             assertEquals(CONTEXT_VALUE, testContext.get(ContextCopyingExecutorTests.class));
         }, (t, e) -> { });
     }

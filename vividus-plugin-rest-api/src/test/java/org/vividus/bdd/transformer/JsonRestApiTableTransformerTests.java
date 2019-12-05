@@ -41,9 +41,9 @@ import org.vividus.util.ResourceUtils;
 import org.vividus.util.UriUtils;
 
 @ExtendWith(MockitoExtension.class)
-class JsonRestApiTableTransfomerTests
+class JsonRestApiTableTransformerTests
 {
-    private static final String JSON_DATA = ResourceUtils.loadResource(JsonRestApiTableTransfomerTests.class,
+    private static final String JSON_DATA = ResourceUtils.loadResource(JsonRestApiTableTransformerTests.class,
             "data.json");
     private static final String URL = "url";
     private static final String URL_VALUE = "https://example.com/";
@@ -56,7 +56,7 @@ class JsonRestApiTableTransfomerTests
     private IHttpClient httpClient;
 
     @InjectMocks
-    private JsonRestApiTableTransfomer jsonTableGenerator;
+    private JsonRestApiTableTransformer jsonTableGenerator;
 
     @Test
     void testTransformFromUrl() throws IOException

@@ -77,9 +77,9 @@ public class DeprecatedPropertiesHandler
         replaceDeprecated(properties, properties);
     }
 
-    public void replaceDeprecated(Properties checkPoperties, Properties replaceInProperties)
+    public void replaceDeprecated(Properties checkProperties, Properties replaceInProperties)
     {
-        for (Entry<Object, Object> entry : checkPoperties.entrySet())
+        for (Entry<Object, Object> entry : checkProperties.entrySet())
         {
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();

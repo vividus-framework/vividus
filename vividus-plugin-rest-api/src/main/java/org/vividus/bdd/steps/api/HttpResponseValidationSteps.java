@@ -147,7 +147,7 @@ public class HttpResponseValidationSteps
      * @param sizeInBytes expected size of the response body in bytes
      */
     @Then("size of decompressed response body is $comparisonRule `$sizeInBytes`")
-    public void doesDecomressedResponseBodySizeConfirmRule(ComparisonRule comparisonRule, int sizeInBytes)
+    public void doesDecompressedResponseBodySizeConfirmRule(ComparisonRule comparisonRule, int sizeInBytes)
     {
         performIfHttpResponseIsPresent(response ->
             softAssert.assertThat("Size of decompressed HTTP response body", response.getResponseBody().length,

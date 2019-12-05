@@ -137,20 +137,20 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
-    void testDecomressedResponseBodySizeNoHttpResponse()
+    void testDecompressedResponseBodySizeNoHttpResponse()
     {
-        httpResponseValidationSteps.doesDecomressedResponseBodySizeConfirmRule(ComparisonRule.LESS_THAN, 10);
+        httpResponseValidationSteps.doesDecompressedResponseBodySizeConfirmRule(ComparisonRule.LESS_THAN, 10);
         verifyNoHttpResponse();
     }
 
     @Test
-    void testDecomressedResponseBodySizeEquslTo()
+    void testDecompressedResponseBodySizeEqualTo()
     {
         mockHttpResponse();
         String body = RESPONSE_BODY;
         when(softAssert.assertNotNull(HTTP_RESPONSE_IS_NOT_NULL, httpResponse)).thenReturn(true);
         httpResponse.setResponseBody(body.getBytes(StandardCharsets.UTF_8));
-        httpResponseValidationSteps.doesDecomressedResponseBodySizeConfirmRule(ComparisonRule.EQUAL_TO, 10);
+        httpResponseValidationSteps.doesDecompressedResponseBodySizeConfirmRule(ComparisonRule.EQUAL_TO, 10);
         verify(softAssert).assertThat(eq("Size of decompressed HTTP response body"),
                 eq(body.getBytes(StandardCharsets.UTF_8).length),
                 argThat(m -> "a value equal to <10>".equals(m.toString())));

@@ -47,10 +47,10 @@ class BrowserWindowSizeListenerTests
     @Test
     void testOnWebDriverCreate()
     {
-        boolean remoteExectuion = true;
-        when(webDriverProvider.isRemoteExecution()).thenReturn(remoteExectuion);
+        boolean remoteExecution = true;
+        when(webDriverProvider.isRemoteExecution()).thenReturn(remoteExecution);
         BrowserWindowSize browserWindowSize = mock(BrowserWindowSize.class);
-        when(browserWindowSizeProvider.getBrowserWindowSize(remoteExectuion)).thenReturn(browserWindowSize);
+        when(browserWindowSizeProvider.getBrowserWindowSize(remoteExecution)).thenReturn(browserWindowSize);
         browserWindowSizeListener.onWebDriverCreate(new WebDriverCreateEvent(mock(WebDriver.class)));
         verify(webDriverManager).resize(browserWindowSize);
     }

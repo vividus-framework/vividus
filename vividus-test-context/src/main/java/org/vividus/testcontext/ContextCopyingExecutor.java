@@ -39,14 +39,14 @@ public class ContextCopyingExecutor
         Map<Object, Object> runContextData = new HashMap<>();
         testContext.copyAllTo(runContextData);
         new ForkJoinPool(Runtime.getRuntime().availableProcessors(),
-                new ContextAwawreForkJoinThreadsFactory(runContextData), handler, false).submit(toRun).get();
+                new ContextAwareForkJoinThreadsFactory(runContextData), handler, false).submit(toRun).get();
     }
 
-    private final class ContextAwawreForkJoinThreadsFactory implements ForkJoinWorkerThreadFactory
+    private final class ContextAwareForkJoinThreadsFactory implements ForkJoinWorkerThreadFactory
     {
         private final Map<Object, Object> runContextData;
 
-        private ContextAwawreForkJoinThreadsFactory(Map<Object, Object> runContextData)
+        private ContextAwareForkJoinThreadsFactory(Map<Object, Object> runContextData)
         {
             this.runContextData = runContextData;
         }
