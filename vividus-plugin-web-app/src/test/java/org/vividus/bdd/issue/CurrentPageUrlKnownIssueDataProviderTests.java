@@ -20,12 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.vividus.selenium.IWebDriverProvider;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +48,16 @@ class CurrentPageUrlKnownIssueDataProviderTests
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(url);
 
-        assertEquals(url, currentPageUrlDataProvider.getData());
+        assertEquals(Optional.of(url), currentPageUrlDataProvider.getData());
+    }
+
+    @Test
+    void testGetDataException()
+    {
+        WebDriver driver = mock(WebDriver.class);
+        when(webDriverProvider.get()).thenReturn(driver);
+        when(driver.getCurrentUrl()).thenThrow(new WebDriverException());
+
+        assertEquals(Optional.empty(), currentPageUrlDataProvider.getData());
     }
 }
