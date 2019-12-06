@@ -77,7 +77,6 @@ public class CsvReader
         return readCsvFile(reader, header).map(CSVRecord::toMap).collect(Collectors.toList());
     }
 
-
     private Stream<CSVRecord> readCsvFile(Reader reader, String... header) throws IOException
     {
         return StreamSupport.stream(csvFormat.withHeader(header).parse(reader).spliterator(), false);

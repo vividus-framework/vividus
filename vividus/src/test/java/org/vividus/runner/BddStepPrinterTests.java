@@ -102,7 +102,6 @@ public class BddStepPrinterTests extends SystemOutTests
                 " COMPOSITE IN STEPS FILE Then I perform '$verification'");
     }
 
-
     private StepCandidate mockStepCandidate(String startingWord, String patternAsString, String methodName)
             throws ReflectiveOperationException
     {

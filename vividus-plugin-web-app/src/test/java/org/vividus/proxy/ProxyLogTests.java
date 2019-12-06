@@ -127,7 +127,6 @@ class ProxyLogTests
         assertTrue(actualHarEntries.isEmpty());
     }
 
-
     @Test
     void testGetLogEntriesNonMatchingHttpMethodButMatchingUrl()
     {

@@ -52,7 +52,6 @@ public class EnvironmentConfigurer
     private IPropertyMapper propertyMapper;
     private IPropertyParser propertyParser;
 
-
     @SuppressWarnings("unchecked")
     public void init() throws IOException
     {

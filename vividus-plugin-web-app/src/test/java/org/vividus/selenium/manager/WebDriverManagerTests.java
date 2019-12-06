@@ -310,7 +310,6 @@ class WebDriverManagerTests
         assertTrue(webDriverManager.isIOS());
     }
 
-
     @Test
     void testIsNotIOSDeviceWhenPlatformNameIsEnum()
     {

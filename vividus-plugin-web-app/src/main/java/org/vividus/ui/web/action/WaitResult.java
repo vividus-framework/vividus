@@ -16,7 +16,6 @@
 
 package org.vividus.ui.web.action;
 
-
 public class WaitResult<T>
 {
     private boolean waitPassed;
