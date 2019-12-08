@@ -44,14 +44,17 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.action.search.SearchAttributes;
 
 @ExtendWith(MockitoExtension.class)
-public class DragAndDropStepsTests
+class DragAndDropStepsTests
 {
     private static final String ACTIONS_SEQUENCE = "{id=default mouse, type=pointer, parameters={pointerType=mouse}, "
             + "actions=["
             + "{duration=100, x=0, y=0, type=pointerMove, origin=Mock for WebElement, hashCode: %s}, "
             + "{button=0, type=pointerDown}, "
-            + "{duration=250, x=100, y=50, type=pointerMove, origin=pointer}, "
-            + "{button=0, type=pointerUp}]}";
+            + "{duration=200, x=10, y=0, type=pointerMove, origin=pointer}, "
+            + "{duration=200, x=-10, y=0, type=pointerMove, origin=pointer}, "
+            + "{duration=200, x=100, y=50, type=pointerMove, origin=pointer}, "
+            + "{button=0, type=pointerUp}, "
+            + "{duration=1000, type=pause}]}";
 
     @Mock
     private IBaseValidations baseValidations;
