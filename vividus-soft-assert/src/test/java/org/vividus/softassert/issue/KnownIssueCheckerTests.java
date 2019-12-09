@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -142,7 +143,7 @@ class KnownIssueCheckerTests
             .getKnownIssueIdentifiers();
         IKnownIssueDataProvider dataProvider = mock(IKnownIssueDataProvider.class);
         Map<String, IKnownIssueDataProvider> providersMap = Collections.singletonMap(CURRENT_PAGE_URL, dataProvider);
-        when(dataProvider.getData()).thenReturn("http://example.com");
+        when(dataProvider.getData()).thenReturn(Optional.of("http://example.com"));
         knownIssueChecker.setKnownIssueDataProviders(providersMap);
 
         assertKnownIssue(false, TEXT);
@@ -157,7 +158,22 @@ class KnownIssueCheckerTests
             .getKnownIssueIdentifiers();
         IKnownIssueDataProvider dataProvider = mock(IKnownIssueDataProvider.class);
         Map<String, IKnownIssueDataProvider> providersMap = Collections.singletonMap(CURRENT_PAGE_URL, dataProvider);
-        when(dataProvider.getData()).thenReturn("http://different.com");
+        when(dataProvider.getData()).thenReturn(Optional.of("http://different.com"));
+        knownIssueChecker.setKnownIssueDataProviders(providersMap);
+
+        assertNull(knownIssueChecker.getKnownIssue(PATTERN));
+    }
+
+    @Test
+    void testGetKnownIssueWithDynamicDataProviderReturnEmpty()
+    {
+        KnownIssueIdentifier identifier = createIdentifier();
+        identifier.setDynamicPatterns(Collections.singletonMap(CURRENT_PAGE_URL, EXAMPLE_COM));
+        Mockito.doReturn(Collections.singletonMap(TEXT, identifier)).when(knownIssueProvider)
+                .getKnownIssueIdentifiers();
+        IKnownIssueDataProvider dataProvider = mock(IKnownIssueDataProvider.class);
+        Map<String, IKnownIssueDataProvider> providersMap = Collections.singletonMap(CURRENT_PAGE_URL, dataProvider);
+        when(dataProvider.getData()).thenReturn(Optional.empty());
         knownIssueChecker.setKnownIssueDataProviders(providersMap);
 
         assertNull(knownIssueChecker.getKnownIssue(PATTERN));

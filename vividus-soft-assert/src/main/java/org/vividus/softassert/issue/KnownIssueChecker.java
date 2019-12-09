@@ -123,7 +123,8 @@ public class KnownIssueChecker implements IKnownIssueChecker
                 String key = entry.getKey();
                 Pattern pattern = entry.getValue();
                 return Optional.ofNullable(knownIssueDataProviders.get(key))
-                           .map(p -> pattern.matcher(p.getData()).matches())
+                        .flatMap(IKnownIssueDataProvider::getData)
+                           .map(d -> pattern.matcher(d).matches())
                            .orElse(false);
             });
         }

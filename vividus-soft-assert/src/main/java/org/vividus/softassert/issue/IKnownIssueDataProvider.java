@@ -16,7 +16,9 @@
 
 package org.vividus.softassert.issue;
 
+import java.util.Optional;
+
 public interface IKnownIssueDataProvider
 {
-    String getData();
+    Optional<String> getData();
 }

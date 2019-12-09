@@ -16,8 +16,11 @@
 
 package org.vividus.bdd.issue;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
+import org.openqa.selenium.WebDriverException;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.issue.IKnownIssueDataProvider;
 
@@ -26,8 +29,15 @@ public class CurrentPageUrlKnownIssueDataProvider implements IKnownIssueDataProv
     @Inject private IWebDriverProvider webDriverProvider;
 
     @Override
-    public String getData()
+    public Optional<String> getData()
     {
-        return webDriverProvider.get().getCurrentUrl();
+        try
+        {
+            return Optional.ofNullable(webDriverProvider.get().getCurrentUrl());
+        }
+        catch (WebDriverException e)
+        {
+            return Optional.empty();
+        }
     }
 }
