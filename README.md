@@ -8,12 +8,12 @@
 
 ## Prerequisites
 #### Java
-- Install [JDK 12](https://jdk.java.net/12/)
+- Install [JDK 13](https://jdk.java.net/13/)
 - Configure `JAVA_HOME` environment variable
 - Update `PATH` environment variable: add `$JAVA_HOME/bin`
 
 #### Eclipse
-- Install [Eclipse IDE 2019-06](https://www.eclipse.org/downloads/packages/release/2019-06/r/eclipse-ide-java-developers)
+- Install [Eclipse IDE 2019-09](https://www.eclipse.org/downloads/packages/release/2019-09/r/eclipse-ide-java-developers)
 - Add [JBehave plugin](https://jbehave.org/eclipse-integration.html)
 
 
@@ -30,7 +30,7 @@
     ./gradlew build eclipse
     ```
 
-4. [Import project to Eclipse](https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-importproject.htm)
+4. [Import project to Eclipse](https://help.eclipse.org/2019-09/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-importproject.htm)
 
 ## Acknowledgements
 [<img src="https://saucelabs.com/images/logo-saucelabs.png" width="180px" alt="SauceLabs">](https://saucelabs.com)
