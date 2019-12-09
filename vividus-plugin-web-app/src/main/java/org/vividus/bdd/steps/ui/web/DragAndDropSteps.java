@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import java.time.Duration;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -47,6 +49,7 @@ public class DragAndDropSteps
      * @param target target element
      */
     @When("I drag element located `$origin` and drop it at $location of element located `$target`")
+    @SuppressWarnings("checkstyle:MagicNumber")
     public void dragAndDropToTargetAtLocation(SearchAttributes origin, Location location, SearchAttributes target)
     {
         WebElement originElement = baseValidations.assertIfElementExists("Origin element", origin);
@@ -56,8 +59,15 @@ public class DragAndDropSteps
         {
             Point offsetPoint = location.getPoint(originElement.getRect(), targetElement.getRect());
             new Actions(webDriverProvider.get())
-                .dragAndDropBy(originElement, offsetPoint.getX(), offsetPoint.getY())
-                .perform();
+                    .clickAndHold(originElement)
+                    // Selenium bug: https://github.com/SeleniumHQ/selenium/issues/1365#issuecomment-547786925
+                    .moveByOffset(10, 0)
+                    .moveByOffset(-10, 0)
+                    .moveByOffset(offsetPoint.getX(), offsetPoint.getY())
+                    .release()
+                    // Wait for DOM stabilization
+                    .pause(Duration.ofSeconds(1))
+                    .perform();
         }
     }
 }
