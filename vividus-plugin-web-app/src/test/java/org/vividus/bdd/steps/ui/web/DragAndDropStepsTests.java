@@ -41,46 +41,47 @@ import org.openqa.selenium.interactions.Interactive;
 import org.vividus.bdd.steps.ui.web.model.Location;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.search.SearchAttributes;
 
 @ExtendWith(MockitoExtension.class)
 class DragAndDropStepsTests
 {
-    private static final String ACTIONS_SEQUENCE = "{id=default mouse, type=pointer, parameters={pointerType=mouse}, "
-            + "actions=["
-            + "{duration=100, x=0, y=0, type=pointerMove, origin=Mock for WebElement, hashCode: %s}, "
-            + "{button=0, type=pointerDown}, "
-            + "{duration=200, x=10, y=0, type=pointerMove, origin=pointer}, "
-            + "{duration=200, x=-10, y=0, type=pointerMove, origin=pointer}, "
-            + "{duration=200, x=100, y=50, type=pointerMove, origin=pointer}, "
-            + "{button=0, type=pointerUp}, "
-            + "{duration=1000, type=pause}]}";
-
-    @Mock
-    private IBaseValidations baseValidations;
-
     @Mock
     private IWebDriverProvider webDriverProvider;
 
     @Mock
-    private SearchAttributes searchAttributes;
+    private IJavascriptActions javascriptActions;
+
+    @Mock
+    private IBaseValidations baseValidations;
 
     @InjectMocks
     private DragAndDropSteps dragAndDropSteps;
 
     @Test
-    void testDragAndDropToTargetAtLocation()
+    void shouldDragAndDropToTargetAtLocation()
     {
-        WebElement origin = mockRect(100, 100, 50, 50);
-        mockFindElements(origin, mockRect(200, 200, 50, 50));
+        WebElement draggable = mockWebElementWithRect(100, 100, 50, 50);
+        WebElement target = mockWebElementWithRect(200, 200, 50, 50);
         WebDriver driver = mock(WebDriver.class, withSettings().extraInterfaces(Interactive.class));
         when(webDriverProvider.get()).thenReturn(driver);
-        dragAndDropSteps.dragAndDropToTargetAtLocation(searchAttributes, Location.TOP, searchAttributes);
-        verify((Interactive) driver).perform(argThat(arg -> arg.iterator().next().encode().toString()
-                .equals(String.format(ACTIONS_SEQUENCE, origin.hashCode()))));
+        testDragAndDropToTargetAtLocation(draggable, Location.TOP, target);
+        String actionsSequence = String.format(
+                "{id=default mouse, type=pointer, parameters={pointerType=mouse}, "
+                + "actions=["
+                + "{duration=100, x=0, y=0, type=pointerMove, origin=Mock for WebElement, hashCode: %s}, "
+                + "{button=0, type=pointerDown}, "
+                + "{duration=200, x=10, y=0, type=pointerMove, origin=pointer}, "
+                + "{duration=200, x=-10, y=0, type=pointerMove, origin=pointer}, "
+                + "{duration=200, x=100, y=50, type=pointerMove, origin=pointer}, "
+                + "{button=0, type=pointerUp}, "
+                + "{duration=1000, type=pause}]}", draggable.hashCode());
+        verify((Interactive) driver).perform(
+                argThat(arg -> arg.iterator().next().encode().toString().equals(actionsSequence)));
     }
 
-    private static WebElement mockRect(int x, int y, int height, int width)
+    private static WebElement mockWebElementWithRect(int x, int y, int height, int width)
     {
         WebElement element = mock(WebElement.class);
         when(element.getRect()).thenReturn(new Rectangle(x, y, height, width));
@@ -98,16 +99,46 @@ class DragAndDropStepsTests
 
     @MethodSource("getElements")
     @ParameterizedTest
-    void testDragAndDropToTargetAtLocationElementsNotFound(WebElement origin, WebElement target)
+    void shouldNotDragAndDropWhenAnyElementIsNotFound(WebElement draggable, WebElement target)
     {
-        mockFindElements(origin, target);
-        dragAndDropSteps.dragAndDropToTargetAtLocation(searchAttributes, Location.TOP, searchAttributes);
+        testDragAndDropToTargetAtLocation(draggable, Location.TOP, target);
         verifyNoInteractions(webDriverProvider);
     }
 
-    void mockFindElements(WebElement origin, WebElement target)
+    private void testDragAndDropToTargetAtLocation(WebElement draggable, Location location, WebElement target)
     {
-        lenient().when(baseValidations.assertIfElementExists("Origin element", searchAttributes)).thenReturn(origin);
-        lenient().when(baseValidations.assertIfElementExists("Target element", searchAttributes)).thenReturn(target);
+        SearchAttributes draggableSearchAttributes = mockDraggableElementSearch(draggable);
+        SearchAttributes targetSearchAttributes = mockTargetElementSearch(target);
+        dragAndDropSteps.dragAndDropToTargetAtLocation(draggableSearchAttributes, location, targetSearchAttributes);
+    }
+
+    @Test
+    void shouldSimulateDragAndDrop()
+    {
+        WebElement draggable = mock(WebElement.class);
+        WebElement target = mock(WebElement.class);
+        SearchAttributes draggableSearchAttributes = mockDraggableElementSearch(draggable);
+        SearchAttributes targetSearchAttributes = mockTargetElementSearch(target);
+        dragAndDropSteps.simulateDragAndDrop(draggableSearchAttributes, targetSearchAttributes);
+        verify(javascriptActions).executeScriptFromResource(DragAndDropSteps.class, "simulate-drag-and-drop.js",
+                draggable, target);
+    }
+
+    private SearchAttributes mockDraggableElementSearch(WebElement draggable)
+    {
+        return mockElementSearch(draggable, "Draggable element");
+    }
+
+    private SearchAttributes mockTargetElementSearch(WebElement target)
+    {
+        return mockElementSearch(target, "Target element");
+    }
+
+    private SearchAttributes mockElementSearch(WebElement element, String assertionDescription)
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        lenient().when(baseValidations.assertIfElementExists(assertionDescription, searchAttributes)).thenReturn(
+                element);
+        return searchAttributes;
     }
 }
