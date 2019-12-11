@@ -25,10 +25,11 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.TextUtils;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.web.listener.IWebApplicationListener;
 import org.vividus.ui.web.model.Position;
 import org.vividus.util.ResourceUtils;
 
-public class JavascriptActions implements IJavascriptActions
+public class JavascriptActions implements IJavascriptActions, IWebApplicationListener
 {
     private static final String TRIGGER_EVENT_FORMAT = "if(document.createEvent){var evObj = document"
             + ".createEvent('MouseEvents');evObj.initEvent('%1$s', true, false); arguments[0].dispatchEvent(evObj);} "
@@ -37,12 +38,16 @@ public class JavascriptActions implements IJavascriptActions
     private final IWebDriverProvider webDriverProvider;
     private final IWebDriverManager webDriverManager;
 
-    private final ThreadLocal<String> userAgent = ThreadLocal.withInitial(
-        () -> executeScript("return navigator.userAgent"));
-
-    private final ThreadLocal<Double> devicePixelRatio = ThreadLocal.withInitial(() -> {
-        Number devicePixelRatio = executeScript("return window.devicePixelRatio");
-        return devicePixelRatio.doubleValue();
+    private final ThreadLocal<BrowserConfig> browserConfig = ThreadLocal.withInitial(() -> {
+        String userAgentKey = "userAgent";
+        String devicePixelRatioKey = "devicePixelRatio";
+        Map<String, ?> browserConfig = executeScript("return {"
+                + userAgentKey + ": navigator.userAgent,"
+                + devicePixelRatioKey + ": window.devicePixelRatio"
+                + "}");
+        String userAgent = (String) browserConfig.get(userAgentKey);
+        double devicePixelRatio = ((Number) browserConfig.get(devicePixelRatioKey)).doubleValue();
+        return new BrowserConfig(userAgent, devicePixelRatio);
     });
 
     public JavascriptActions(IWebDriverProvider webDriverProvider, IWebDriverManager webDriverManager)
@@ -155,15 +160,21 @@ public class JavascriptActions implements IJavascriptActions
     }
 
     @Override
+    public void onLoad()
+    {
+        browserConfig.get();
+    }
+
+    @Override
     public String getUserAgent()
     {
-        return userAgent.get();
+        return browserConfig.get().userAgent;
     }
 
     @Override
     public double getDevicePixelRatio()
     {
-        return devicePixelRatio.get();
+        return browserConfig.get().devicePixelRatio;
     }
 
     @Override
@@ -203,5 +214,17 @@ public class JavascriptActions implements IJavascriptActions
     private JavascriptExecutor getJavascriptExecutor()
     {
         return (JavascriptExecutor) webDriverProvider.get();
+    }
+
+    private static final class BrowserConfig
+    {
+        private final String userAgent;
+        private final double devicePixelRatio;
+
+        private BrowserConfig(String userAgent, double devicePixelRatio)
+        {
+            this.userAgent = userAgent;
+            this.devicePixelRatio = devicePixelRatio;
+        }
     }
 }
