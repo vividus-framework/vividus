@@ -58,8 +58,12 @@ class JavascriptActionsTests
     private static final String SCRIPT_SET_TOP_POSITION = "var originTop = arguments[0].getBoundingClientRect().top;"
             + " arguments[0].style.top = \"%dpx\"; return Math.round(originTop);";
 
-    private static final String GET_USER_AGENT_JS = "return navigator.userAgent";
-    private static final String GET_DPR_JS = "return window.devicePixelRatio";
+    private static final String GET_BROWSER_CONFIG_JS = "return {userAgent: navigator.userAgent,"
+            + "devicePixelRatio: window.devicePixelRatio}";
+    private static final String USER_AGENT_VALUE = "Mozilla";
+    private static final Double DEVICE_PIXEL_RATIO_VALUE = 1.5;
+    private static final Map<String, ?> BROWSER_CONFIG = Map.of("userAgent", USER_AGENT_VALUE, "devicePixelRatio",
+            DEVICE_PIXEL_RATIO_VALUE);
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -216,19 +220,21 @@ class JavascriptActionsTests
     }
 
     @Test
-    void testGetUserAgent()
+    void testOnLoadBrowserConfig()
     {
-        String userAgent = "userAgent";
-        mockScriptExecution(GET_USER_AGENT_JS, userAgent);
-        assertEquals(userAgent, javascriptActions.getUserAgent());
+        mockScriptExecution(GET_BROWSER_CONFIG_JS, BROWSER_CONFIG);
+        javascriptActions.onLoad();
+        assertEquals(USER_AGENT_VALUE, javascriptActions.getUserAgent());
+        assertEquals(DEVICE_PIXEL_RATIO_VALUE, javascriptActions.getDevicePixelRatio());
     }
 
     @Test
-    void testGetUserAgentMultipleTimes()
+    void testOnLoadMultipleTimes()
     {
-        javascriptActions.getUserAgent();
-        javascriptActions.getUserAgent();
-        verify((JavascriptExecutor) webDriver, times(1)).executeScript(GET_USER_AGENT_JS);
+        mockScriptExecution(GET_BROWSER_CONFIG_JS, BROWSER_CONFIG);
+        javascriptActions.onLoad();
+        javascriptActions.onLoad();
+        verify((JavascriptExecutor) webDriver, times(1)).executeScript(GET_BROWSER_CONFIG_JS);
     }
 
     @Test
@@ -279,24 +285,6 @@ class JavascriptActionsTests
         when(((JavascriptExecutor) webDriver).executeScript(viewportSize)).thenReturn(map);
         Dimension size = javascriptActions.getViewportSize();
         assertEquals(new Dimension(width.intValue(), height.intValue()), size);
-    }
-
-    @Test
-    void testGetDevicePixelRatio()
-    {
-        double devicePixelRatio = 1.5d;
-        mockScriptExecution(GET_DPR_JS, devicePixelRatio);
-        assertEquals(devicePixelRatio, javascriptActions.getDevicePixelRatio());
-    }
-
-    @Test
-    void testGetDevicePixelRatioMultipleTimes()
-    {
-        double devicePixelRatio = 1.5d;
-        mockScriptExecution(GET_DPR_JS, devicePixelRatio);
-        javascriptActions.getDevicePixelRatio();
-        javascriptActions.getDevicePixelRatio();
-        verify((JavascriptExecutor) webDriver, times(1)).executeScript(GET_DPR_JS);
     }
 
     private void mockScriptExecution(String script, Object result)

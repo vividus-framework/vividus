@@ -375,6 +375,7 @@
         <property name="lists">
             <list>
                 <ref bean="delegatingWebApplicationListener-CustomWebApplicationListeners" />
+                <ref bean="javascriptActions" />
             </list>
         </property>
     </bean>
