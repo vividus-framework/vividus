@@ -38,7 +38,7 @@ configure(nonTestSubprojects) {
 
         pkg {
             repo = 'maven-releases'
-            name = project.name
+            name = "${project.group}.${project.name}"
             desc = project.description
             userOrg = 'vividus'
             licenses = ['Apache-2.0']
