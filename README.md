@@ -1,3 +1,4 @@
+[![Download](https://api.bintray.com/packages/vividus/maven-releases/org.vividus.vividus/images/download.svg)](https://bintray.com/vividus/maven-releases/org.vividus.vividus/_latestVersion)
 [![Build Status](https://travis-ci.com/vividus-framework/vividus.svg?branch=master)](https://travis-ci.com/vividus-framework/vividus)
 [![codecov](https://codecov.io/gh/vividus-framework/vividus/branch/master/graph/badge.svg)](https://codecov.io/gh/vividus-framework/vividus)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=vividus-framework_vividus&metric=alert_status)](https://sonarcloud.io/dashboard?id=vividus-framework_vividus)
