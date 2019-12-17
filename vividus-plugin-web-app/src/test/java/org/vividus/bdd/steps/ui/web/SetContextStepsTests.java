@@ -17,11 +17,8 @@
 package org.vividus.bdd.steps.ui.web;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,7 +33,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
@@ -46,7 +42,6 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.IWindowsActions;
 import org.vividus.ui.web.action.SearchActions;
-import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.SearchParameters;
@@ -86,8 +81,6 @@ class SetContextStepsTests
     private static final String NEW_WINDOW_IS_FOUND = "New window is found";
     private static final String NEW_WINDOW = "New window '";
     private static final String NEW_WINDOW_OR_TAB_IS_FOUND = "New window or browser tab name is ";
-    private static final String Z_INDEX_VALUE = "1000";
-    private static final String Z_INDEX = "z-index";
     private static final String TEXT = "text";
     private static final String TABLE_ROW_WITH_CELL_WITH_TEXT = "Table row containing cell with the text '%s'";
     private static final String ANCESTOR_TR = "./ancestor::tr[1]";
@@ -105,9 +98,6 @@ class SetContextStepsTests
     private WebElement mockedWebElement;
 
     @Mock
-    private WebElementActions webElementActions;
-
-    @Mock
     private IWebDriverProvider webDriverProvider;
 
     @Mock
@@ -121,8 +111,6 @@ class SetContextStepsTests
 
     @Mock
     private IWindowsActions windowsActions;
-
-    private List<WebElement> mockedWebElements;
 
     @InjectMocks
     private SetContextSteps setContextSteps;
@@ -179,38 +167,6 @@ class SetContextStepsTests
     }
 
     @Test
-    void testChangeContextToAPopUpFalse()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(mockedWebElement);
-        mockPopUps(Z_INDEX_VALUE, false);
-        setContextSteps.changeContextToAPopUp();
-        verify(webUiContext).reset();
-        verify(webUiContext, never()).putSearchContext(eq(mockedWebElement), any(SearchContextSetter.class));
-    }
-
-    @Test
-    void testChangeContextToAPopUp()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(mockedWebElement);
-        mockPopUps("500", true);
-        setContextSteps.changeContextToAPopUp();
-        verifyContextSetting(mockedWebElement);
-    }
-
-    private void mockPopUps(String secondZIndex, boolean isSingle)
-    {
-        WebElement webElement2 = mock(WebElement.class);
-        mockedWebElements = List.of(mockedWebElement, webElement2);
-        String selector = "*[style*='z-index:']";
-        when(mockedSearchActions.findElements(mockedWebElement, By.cssSelector(selector)))
-                .thenReturn(mockedWebElements);
-        when(webElementActions.getCssValue(mockedWebElement, Z_INDEX)).thenReturn(Z_INDEX_VALUE);
-        when(webElementActions.getCssValue(webElement2, Z_INDEX)).thenReturn(secondZIndex);
-        when(mockedBaseValidations.assertElementNumber(anyString(), anyString(), anyList(), eq(1)))
-                .thenReturn(isSingle);
-    }
-
-    @Test
     void testChangeContextToStateElementWithName()
     {
         when(mockedBaseValidations
@@ -227,20 +183,6 @@ class SetContextStepsTests
     {
         setContextSteps.changeContextToElementWithName(State.ENABLED, NAME);
         verifyContextSetting(null);
-    }
-
-    @Test
-    void testChangeContextToARowContainingCellWithTextInATable()
-    {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.TAG_NAME, "td").addFilter(
-                ActionAttributeType.CASE_SENSITIVE_TEXT, TEXT);
-        when(mockedBaseValidations.assertIfElementExists(String.format("Cell with the text '%s'", TEXT), attributes))
-                .thenReturn(mockedWebElement);
-        when(mockedBaseValidations.assertIfElementExists(String.format(TABLE_ROW_WITH_CELL_WITH_TEXT, TEXT),
-                mockedWebElement, new SearchAttributes(ActionAttributeType.XPATH, ANCESTOR_TR)))
-                .thenReturn(mockedWebElement);
-        setContextSteps.changeContextToRowContainingCellWithTextInTable(TEXT);
-        verifyContextSetting(mockedWebElement);
     }
 
     @Test
@@ -374,7 +316,7 @@ class SetContextStepsTests
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
         when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
         int framesNumber = 2;
-        mockedWebElements = List.of(mockedWebElement, mockedWebElement);
+        List<WebElement> mockedWebElements = List.of(mockedWebElement, mockedWebElement);
         SearchParameters searchParameters = new SearchParameters(FRAME_XPATH).setVisibility(Visibility.ALL);
         SearchAttributes frameSearchAttributes = new SearchAttributes(ActionAttributeType.XPATH, searchParameters);
         when(mockedSearchActions.findElements(mockedWebElement, frameSearchAttributes)).thenReturn(mockedWebElements);
@@ -395,7 +337,6 @@ class SetContextStepsTests
         when(webUiContext.getSearchContext()).thenReturn(mockedWebElement);
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
         when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
-        mockedWebElements = List.of();
         setContextSteps.switchToFrame(1, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verify(mockedTargetLocator, never()).frame(mockedWebElement);
     }
@@ -406,7 +347,7 @@ class SetContextStepsTests
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
         when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
         int framesNumber = 1;
-        mockedWebElements = List.of(mockedWebElement);
+        List<WebElement> mockedWebElements = List.of(mockedWebElement);
         Mockito.lenient().when(mockedSearchActions.findElements(mockedWebDiver,
                 new SearchAttributes(ActionAttributeType.XPATH, FRAME_XPATH))).thenReturn(mockedWebElements);
         setContextSteps.switchToFrame(framesNumber, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
