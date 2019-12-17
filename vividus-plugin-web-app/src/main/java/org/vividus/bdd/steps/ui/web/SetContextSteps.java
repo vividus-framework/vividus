@@ -171,7 +171,7 @@ public class SetContextSteps
         switchingToDefault();
         WebElement frame = baseValidations.assertIfElementExists(
                 String.format("Frame with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
-                ElementPattern.getFrameSearchAttributes(attributeType, attributeValue));
+                getFrameSearchAttributes(attributeType, attributeValue));
         switchToFrame(frame);
     }
 
@@ -205,7 +205,7 @@ public class SetContextSteps
     public void switchToFrame(int numberValue, String attributeType, String attributeValue)
     {
         switchingToDefault();
-        SearchAttributes frameSearchAttributes = ElementPattern.getFrameSearchAttributes(attributeType, attributeValue);
+        SearchAttributes frameSearchAttributes = getFrameSearchAttributes(attributeType, attributeValue);
         frameSearchAttributes.getSearchParameters().setVisibility(Visibility.ALL);
         List<WebElement> frames = searchActions.findElements(webUiContext.getSearchContext(), frameSearchAttributes);
         if (highlightingSoftAssert.assertThat(
@@ -355,6 +355,13 @@ public class SetContextSteps
             getWebDriver().switchTo().frame(frame);
             changeContextToPage();
         }
+    }
+
+    private static SearchAttributes getFrameSearchAttributes(String attributeType, String attributeValue)
+    {
+        String xPath = LocatorUtil.getXPath(
+                ".//*[(local-name()='frame' or local-name()='iframe') and @" + attributeType + "=%s]", attributeValue);
+        return new SearchAttributes(ActionAttributeType.XPATH, xPath);
     }
 
     private WebDriver getWebDriver()

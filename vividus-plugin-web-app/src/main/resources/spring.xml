@@ -304,16 +304,6 @@
     <bean id="waitSteps" class="org.vividus.bdd.steps.ui.web.WaitSteps" />
     <bean id="webElementsSteps" class="org.vividus.bdd.steps.ui.web.WebElementsSteps" />
 
-    <bean id="parameterizedThenSteps" class="org.vividus.bdd.steps.ui.web.generic.steps.ParameterizedThenSteps">
-        <property name="webUiContext" ref="webUiContext" />
-        <property name="searchActions" ref="searchActions" />
-        <property name="descriptiveSoftAssert" ref="descriptiveSoftAssert" />
-        <property name="parameterizedValidations" ref="parameterizedValidations" />
-        <property name="parameterizedChecks" ref="parameterizedChecks" />
-        <property name="parameterizedSearchActions" ref="parameterizedSearchActions" />
-        <property name="checkboxSteps" ref="checkboxSteps" />
-    </bean>
-
     <bean id="actionSteps" class="org.vividus.bdd.steps.ui.web.ActionSteps" />
 
     <bean id="vividusWebDriverSetupSteps" class="org.vividus.bdd.steps.VividusWebDriverSetupSteps" />
@@ -326,14 +316,6 @@
     <bean id="screenshotTakingSteps" class="org.vividus.bdd.steps.ui.ScreenshotTakingSteps" />
 
     <bean id="proxySteps" class="org.vividus.proxy.steps.ProxySteps" />
-
-    <bean id="parameterizedValidations" class="org.vividus.bdd.steps.ui.web.generic.steps.ParameterizedValidations" />
-
-    <bean id="parameterizedChecks" class="org.vividus.bdd.steps.ui.web.generic.steps.ParameterizedChecks" />
-
-    <bean id="parameterizedSearchActions" class="org.vividus.bdd.steps.ui.web.generic.steps.ParameterizedSearchActions">
-        <property name="linkFilterAction" ref="linkUrlSearch" />
-    </bean>
 
     <bean class="org.vividus.bdd.monitor.ScreenshotOnFailureMonitor" />
 
@@ -430,7 +412,6 @@
     </bean>
 
     <util:list id="stepBeanNames-WebUi" value-type="java.lang.String">
-        <value>parameterizedThenSteps</value>
         <value>alertSteps</value>
         <value>cookieSteps</value>
         <value>scriptSteps</value>

@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,19 +36,20 @@ import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
 class RadioButtonStepsTests
 {
-    private static final String A_RADIO_BUTTON_LABEL_WITH_TEXT_RADIO_OPTION =
-            "A radio " + "button label with text 'radioOptionValue'";
     private static final String RADIO_BUTTON = "Radio button";
     private static final String VALUE = "value";
     private static final String FOR = "for";
     private static final String RADIO_OPTION = "radioOptionValue";
-    private static final String PATTERN_RADIO_XPATH = "input[@type='radio' and @id='%s']";
-    private static final String TABLE = "|radioOption|\n |radioOptionValue|";
+    private static final ExamplesTable RADIO_OPTIONS_TABLE = new ExamplesTable("|radioOption|\n |radioOptionValue|");
+    private static final String RADIO_OPTION_INPUT_XPATH = ".//input[normalize-space(@type)='radio'"
+            + " and normalize-space(@id)=\"value\"]";
+    private static final String LABEL_XPATH = ".//label[text()[normalize-space()=\"radioOptionValue\"]"
+            + " or *[normalize-space()=\"radioOptionValue\"]"
+            + " or @*[normalize-space()=\"radioOptionValue\"]]";
 
     @Mock
     private IBaseValidations baseValidations;
@@ -63,31 +66,27 @@ class RadioButtonStepsTests
     @Test
     void testIfRadioOptionExists()
     {
-        mockRadioOptionLabelSearch();
+        mockRadioOptionLabelSearch(webElement);
         when(webElement.getAttribute(FOR)).thenReturn(VALUE);
         radioButtonSteps.assertIfRadioOptionExists(RADIO_OPTION);
-        verify(baseValidations).assertIfElementExists(RADIO_BUTTON, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(ElementPattern.RADIO_OPTION_INPUT_PATTERN, VALUE)));
+        verify(baseValidations).assertIfElementExists(RADIO_BUTTON,
+                new SearchAttributes(ActionAttributeType.XPATH, RADIO_OPTION_INPUT_XPATH));
     }
 
     @Test
     void testIfRadioOptionExistsNullLabel()
     {
-        mockRadioOptionLabelSearch();
-        when(baseValidations.assertIfElementExists(A_RADIO_BUTTON_LABEL_WITH_TEXT_RADIO_OPTION,
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPath(ElementPattern.LABEL_PATTERN, RADIO_OPTION)))).thenReturn(null);
+        mockRadioOptionLabelSearch(webElement);
+        mockRadioOptionLabelSearch(null);
         radioButtonSteps.assertIfRadioOptionExists(RADIO_OPTION);
-        verify(baseValidations, never()).assertIfElementExists(RADIO_BUTTON,
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPath(ElementPattern.RADIO_OPTION_INPUT_PATTERN, VALUE)));
+        verify(baseValidations, never()).assertIfElementExists(eq(RADIO_BUTTON), any(SearchAttributes.class));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     void testIfRadioOptionExistsEmptyOrNullForAttribute(String forAttribute)
     {
-        mockRadioOptionLabelSearch();
+        mockRadioOptionLabelSearch(webElement);
         when(webElement.getAttribute(FOR)).thenReturn(forAttribute);
         radioButtonSteps.assertIfRadioOptionExists(RADIO_OPTION);
         verify(baseValidations).assertIfElementExists(RADIO_BUTTON, webElement,
@@ -97,10 +96,10 @@ class RadioButtonStepsTests
     @Test
     void testIfStateRadioOptionExists()
     {
-        mockRadioOptionLabelSearch();
+        mockRadioOptionLabelSearch(webElement);
         when(webElement.getAttribute(FOR)).thenReturn(VALUE);
-        when(baseValidations.assertIfElementExists(RADIO_BUTTON, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(ElementPattern.RADIO_OPTION_INPUT_PATTERN, VALUE)))).thenReturn(webElement);
+        when(baseValidations.assertIfElementExists(RADIO_BUTTON,
+                new SearchAttributes(ActionAttributeType.XPATH, RADIO_OPTION_INPUT_XPATH))).thenReturn(webElement);
         radioButtonSteps.assertIfRadioOptionExists(State.ENABLED, RADIO_OPTION);
         verify(baseValidations).assertElementState("The found radio button is " + State.ENABLED, State.ENABLED,
                 webElement);
@@ -109,10 +108,10 @@ class RadioButtonStepsTests
     @Test
     void testCheckRadioOptionInGroup()
     {
-        mockRadioOptionLabelSearch();
+        mockRadioOptionLabelSearch(webElement);
         when(webElement.getAttribute(FOR)).thenReturn(VALUE);
-        when(baseValidations.assertIfElementExists(RADIO_BUTTON, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(ElementPattern.RADIO_OPTION_INPUT_PATTERN, VALUE)))).thenReturn(webElement);
+        when(baseValidations.assertIfElementExists(RADIO_BUTTON,
+                new SearchAttributes(ActionAttributeType.XPATH, RADIO_OPTION_INPUT_XPATH))).thenReturn(webElement);
         radioButtonSteps.checkRadioOption(RADIO_OPTION);
         verify(mouseActions).click(webElement);
     }
@@ -120,29 +119,24 @@ class RadioButtonStepsTests
     @Test
     void testDoesElementContainRadioOptions()
     {
-        mockRadioOptionLabelSearch();
-        when(webElement.getAttribute(FOR)).thenReturn(RADIO_OPTION);
-        ExamplesTable radioOptions = new ExamplesTable(TABLE);
-        radioButtonSteps.doesElementContainRadioOptions(radioOptions);
-        verify(baseValidations).assertIfElementExists(RADIO_BUTTON, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(ElementPattern.RADIO_OPTION_INPUT_PATTERN, RADIO_OPTION)));
+        mockRadioOptionLabelSearch(webElement);
+        when(webElement.getAttribute(FOR)).thenReturn(VALUE);
+        radioButtonSteps.doesElementContainRadioOptions(RADIO_OPTIONS_TABLE);
+        verify(baseValidations).assertIfElementExists(RADIO_BUTTON,
+                new SearchAttributes(ActionAttributeType.XPATH, RADIO_OPTION_INPUT_XPATH));
     }
 
     @Test
     void testElementDoesNotContainRadioOptions()
     {
-        mockRadioOptionLabelSearch();
-        ExamplesTable radioOptions = new ExamplesTable(TABLE);
-        radioButtonSteps.doesElementContainRadioOptions(radioOptions);
-        verify(baseValidations, never()).assertIfElementExists(RADIO_BUTTON,
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPath(PATTERN_RADIO_XPATH, RADIO_OPTION)));
+        mockRadioOptionLabelSearch(webElement);
+        radioButtonSteps.doesElementContainRadioOptions(RADIO_OPTIONS_TABLE);
+        verify(baseValidations, never()).assertIfElementExists(eq(RADIO_BUTTON), any(SearchAttributes.class));
     }
 
-    private void mockRadioOptionLabelSearch()
+    private void mockRadioOptionLabelSearch(WebElement label)
     {
-        when(baseValidations.assertIfElementExists(A_RADIO_BUTTON_LABEL_WITH_TEXT_RADIO_OPTION,
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPath(ElementPattern.LABEL_PATTERN, RADIO_OPTION)))).thenReturn(webElement);
+        when(baseValidations.assertIfElementExists("A radio button label with text 'radioOptionValue'",
+                new SearchAttributes(ActionAttributeType.XPATH, LABEL_XPATH))).thenReturn(label);
     }
 }
