@@ -70,7 +70,9 @@ public class ActionSteps
      * <li><code>offset</code> the offset to move by (ex.: (10, 10))</li>
      * </ul>
      * @param actions table of actions to execute
+     * @deprecated Use <i>When I execute sequence of actions: actions</i>
      */
+    @Deprecated
     @When("I execute the sequence of actions: $actions")
     public void executeActionsSequence(List<Action> actions)
     {
