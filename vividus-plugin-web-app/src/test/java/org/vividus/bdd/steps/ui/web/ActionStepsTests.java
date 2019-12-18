@@ -16,15 +16,23 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import static java.lang.String.format;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,8 +43,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Interactive;
+import org.openqa.selenium.interactions.Sequence;
 import org.vividus.bdd.steps.ui.web.model.Action;
 import org.vividus.bdd.steps.ui.web.model.ActionType;
+import org.vividus.bdd.steps.ui.web.model.SequenceAction;
+import org.vividus.bdd.steps.ui.web.model.SequenceActionType;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
@@ -49,6 +61,11 @@ class ActionStepsTests
     private static final String SIGNATURE_FIELD_XPATH = "//canvas";
     private static final String ELEMENT_EXISTS_MESSAGE = "Element for interaction";
     private static final String OFFSETS_PRESENT_MESSAGE = "Action offset is present";
+    private static final String POINTER_MOVE = "{duration=100, x=0, y=0, type=pointerMove, origin=Mock for WebElement, "
+            + "hashCode: %d}, ";
+    private static final String DURATION_PART = "{duration=0, type=pause}, {duration=0, type=pause}, {duration=0, "
+            + "type=pause}, {duration=0, type=pause}, ";
+    private static final String TEXT = "text";
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -59,7 +76,7 @@ class ActionStepsTests
     @Mock
     private ISoftAssert softAssert;
 
-    @Mock
+    @Mock(extraInterfaces = Interactive.class)
     private WebDriver webDriver;
 
     @Mock
@@ -115,6 +132,75 @@ class ActionStepsTests
         when(softAssert.assertTrue(OFFSETS_PRESENT_MESSAGE, false)).thenReturn(false);
         actionSteps.executeActionsSequence(actions);
         verify(softAssert).assertTrue(OFFSETS_PRESENT_MESSAGE, false);
+    }
+
+    @SuppressWarnings("LineLength")
+    @Test
+    void testExecuteSequenceOfActions()
+    {
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, SIGNATURE_FIELD_XPATH);
+        Point point = mock(Point.class);
+        WebElement webElement = mock(WebElement.class);
+        int offset = 15;
+
+        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, searchAttributes)).thenReturn(webElement);
+        when(point.getX()).thenReturn(offset);
+        when(point.getY()).thenReturn(offset);
+
+        List<SequenceAction> actions = List.of(
+                new SequenceAction(SequenceActionType.DOUBLE_CLICK, searchAttributes),
+                new SequenceAction(SequenceActionType.CLICK_AND_HOLD, searchAttributes),
+                new SequenceAction(SequenceActionType.MOVE_BY_OFFSET, point),
+                new SequenceAction(SequenceActionType.RELEASE, searchAttributes),
+                new SequenceAction(SequenceActionType.SEND_KEYS, TEXT),
+                new SequenceAction(SequenceActionType.CLICK, searchAttributes)
+                );
+        actionSteps.executeSequenceOfActions(actions);
+        verify((Interactive) webDriver).perform(argThat(arg -> {
+            int hash = webElement.hashCode();
+            String mouseSequence = "{id=default mouse, type=pointer, parameters={pointerType=mouse}, actions=["
+                    + format(POINTER_MOVE, hash)
+                    + "{button=0, type=pointerDown}, {button=0, type=pointerUp}, {button=0, type=pointerDown}, {button=0, type=pointerUp}, "
+                    + format(POINTER_MOVE, hash)
+                    + "{button=0, type=pointerDown}, "
+                    + "{duration=200, x=15, y=15, type=pointerMove, origin=pointer}, "
+                    + format(POINTER_MOVE, hash)
+                    + "{button=0, type=pointerUp}, "
+                    + DURATION_PART + DURATION_PART
+                    + format(POINTER_MOVE, hash)
+                    + "{button=0, type=pointerDown}, {button=0, type=pointerUp}]}";
+            String keyboardSequence = "{type=key, actions=["
+                    + DURATION_PART + DURATION_PART
+                    + "{duration=0, type=pause}, {duration=0, type=pause}, "
+                    + "{type=keyDown, value=t}, {type=keyUp, value=t}, {type=keyDown, value=e}, {type=keyUp, value=e}, "
+                    + "{type=keyDown, value=x}, {type=keyUp, value=x}, {type=keyDown, value=t}, {type=keyUp, value=t}, "
+                    + "{duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}], id=default keyboard}";
+            return asString(arg).equals(mouseSequence + keyboardSequence);
+        }));
+    }
+
+    @Test
+    void testExecuteActionsSequenceElementIsNull()
+    {
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, SIGNATURE_FIELD_XPATH);
+
+        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, searchAttributes)).thenReturn(null);
+
+        List<SequenceAction> actions = List.of(
+                new SequenceAction(SequenceActionType.DOUBLE_CLICK, searchAttributes),
+                new SequenceAction(SequenceActionType.SEND_KEYS, TEXT)
+                );
+        actionSteps.executeSequenceOfActions(actions);
+        verify((Interactive) webDriver, never()).perform(any());
+    }
+
+    private static String asString(Collection<Sequence> sequences)
+    {
+        return sequences.stream()
+                .map(Sequence::encode)
+                .map(Map::toString)
+                .sorted()
+                .collect(Collectors.joining());
     }
 
     private List<Action> createActionsList(SearchAttributes searchAttributes)
