@@ -27,8 +27,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.ZoneId;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,10 +42,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.expression.FormatDateExpressionProcessor;
 import org.vividus.bdd.expression.IExpressionProcessor;
 import org.vividus.bdd.expression.StringsExpressionProcessor;
-import org.vividus.util.DateUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ExpressionAdapterTests
@@ -196,11 +192,10 @@ class ExpressionAdapterTests
     @Test
     void testExpressionProcessingError()
     {
-        String input = "#{formatDate(01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSS)}";
-        FormatDateExpressionProcessor processor = new FormatDateExpressionProcessor(
-                new DateUtils(ZoneId.systemDefault()));
+        String input = "#{generateLocalized(number.number_between 'a','b', ru)}";
+        IExpressionProcessor processor = new StringsExpressionProcessor();
         expressionAdaptor.setProcessors(List.of(processor));
-        assertThrows(DateTimeParseException.class, () -> expressionAdaptor.process(input));
+        assertThrows(RuntimeException.class, () -> expressionAdaptor.process(input));
         assertThat(logger.getLoggingEvents(),
                 is(List.of(error("Unable to process expression '{}'", input))));
     }
