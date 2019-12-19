@@ -112,23 +112,61 @@ public class ActionSteps
 
     /**
      * Executes the sequence of web actions
-     * <div>Example:</div>
+     * <div><b>Example:</b></div>
+     * <pre>
      * <code>
-     *   <br>When I execute the sequence of actions:
-     *   <br>|type          |argument                                |
-     *   <br>|DOUBLE_CLICK  |By.xpath(//signature-pad-control/canvas)|
-     *   <br>|CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas)|
-     *   <br>|MOVE_BY_OFFSET|(-300, 0)                               |
-     *   <br>|RELEASE       |By.xpath(//signature-pad-control/canvas)|
-     *   <br>|SEND_KEYS     |Text                                    |
-     *   <br>|CLICK         |By.xpath(//signature-pad-control/canvas)|
+     * When I execute sequence of actions:
+     * <br> |type          |argument                                |
+     * <br> |DOUBLE_CLICK  |By.fieldText(Hello World)               |
+     * <br> |CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas)|
+     * <br> |MOVE_BY_OFFSET|(-300, 0)                               |
+     * <br> |RELEASE       |By.xpath(//signature-pad-control/canvas)|
+     * <br> |SEND_KEYS     |Text                                    |
+     * <br> |CLICK         |By.placeholder(Enter your password)     |
      * </code>
-     * <br>
-     * <br>
+     * </pre>
      * where
      * <ul>
-     * <li><code>type</code> is one of web actions: DOUBLE_CLICK, CLICK_AND_HOLD, MOVE_BY_OFFSET,
-     * RELEASE, SEND_KEYS, CLICK</li>
+     * <li><code>type</code> can be taken from the following table:
+     * <table border="1" style="border-collapse: collapse; border: 1px solid black">
+     * <caption style="display: none">Arguments for action types</caption>
+     * <tr>
+     * <th>type</th>
+     * <th>argument</th>
+     * <th>example</th>
+     * </tr>
+     * <tr>
+     * <td>DOUBLE_CLICK</td>
+     * <td>search attribute</td>
+     * <td>By.linkUrl(/examples)</td>
+     * </tr>
+     * <tr>
+     * <td>CLICK_AND_HOLD</td>
+     * <td>search attribute</td>
+     * <td>By.linkText(Click me)</td>
+     * </tr>
+     * <tr>
+     * <td>MOVE_BY_OFFSET</td>
+     * <td>point</td>
+     * <td>(10, 15) where <b>x</b> is 10 and <b>y</b> is 15</td>
+     * </tr>
+     * <tr>
+     * <td>RELEASE</td>
+     * <td>search attribute</td>
+     * <td>By.tagName(div)</td>
+     * </tr>
+     * <tr>
+     * <td>SEND_KEYS</td>
+     * <td>text</td>
+     * <td>Minsk City</td>
+     * </tr>
+     * <tr>
+     * <td>CLICK</td>
+     * <td>search attribute</td>
+     * <td>By.caseSensitiveText(Done)</td>
+     * </tr>
+     * </table>
+     * </li>
      * <li><code>argument</code> either text or search attribute or point</li>
      * </ul>
      * @param actions table of actions to execute
