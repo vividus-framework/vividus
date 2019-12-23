@@ -40,7 +40,8 @@ class EvalExpressionProcessorTests
                 Arguments.of("eval(100 / 5 - 16 * 2 + 6)", "-6"),
                 Arguments.of("eval(`string\n1` == `string\n1`)", "true"),
                 Arguments.of("eval(`string\n1` == `string1`)", FALSE),
-                Arguments.of("eval(`string\n1` == 'string1')", FALSE)
+                Arguments.of("eval(`string\n1` == 'string1')", FALSE),
+                Arguments.of("eval(var t = 20; var s = function(x, y) {x + y + t}; t = 54; s(15, 7))", "42")
         );
     }
 

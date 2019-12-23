@@ -25,7 +25,7 @@ import javax.inject.Named;
 
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.JexlScript;
 
 @Named
 public class EvalExpressionProcessor implements IExpressionProcessor
@@ -45,8 +45,8 @@ public class EvalExpressionProcessor implements IExpressionProcessor
         if (expressionMatcher.find())
         {
             String expressionToEvaluate = expressionMatcher.group(EVAL_GROUP);
-            JexlExpression jexlExpression = jexlEngine.get().createExpression(expressionToEvaluate);
-            return Optional.of(jexlExpression.evaluate(JexlEngine.EMPTY_CONTEXT).toString());
+            JexlScript jexlScript = jexlEngine.get().createScript(expressionToEvaluate);
+            return Optional.of(jexlScript.execute(JexlEngine.EMPTY_CONTEXT).toString());
         }
         return Optional.empty();
     }
