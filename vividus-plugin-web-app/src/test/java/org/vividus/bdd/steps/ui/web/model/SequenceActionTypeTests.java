@@ -79,10 +79,10 @@ public class SequenceActionTypeTests
     }
 
     @Test
-    void testSendKeys()
+    void testEnterText()
     {
         String value = "value";
-        SequenceActionType.SEND_KEYS.addAction(baseAction, value);
+        SequenceActionType.ENTER_TEXT.addAction(baseAction, value);
         verify(baseAction).sendKeys(value);
         verifyNoMoreInteractions(baseAction);
     }

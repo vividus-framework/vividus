@@ -57,7 +57,7 @@ public enum SequenceActionType
             performOnWebElement(argument, actions::release);
         }
     },
-    SEND_KEYS(String.class)
+    ENTER_TEXT(String.class)
     {
         @Override
         public void addAction(Actions actions, Object argument)

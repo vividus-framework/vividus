@@ -121,7 +121,7 @@ public class ActionSteps
      * <br> |CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas)|
      * <br> |MOVE_BY_OFFSET|(-300, 0)                               |
      * <br> |RELEASE       |By.xpath(//signature-pad-control/canvas)|
-     * <br> |SEND_KEYS     |Text                                    |
+     * <br> |ENTER_TEXT    |Text                                    |
      * <br> |CLICK         |By.placeholder(Enter your password)     |
      * </code>
      * </pre>
@@ -156,7 +156,7 @@ public class ActionSteps
      * <td>By.tagName(div)</td>
      * </tr>
      * <tr>
-     * <td>SEND_KEYS</td>
+     * <td>ENTER_TEXT</td>
      * <td>text</td>
      * <td>Minsk City</td>
      * </tr>
