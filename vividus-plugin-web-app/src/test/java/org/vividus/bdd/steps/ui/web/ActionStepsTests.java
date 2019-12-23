@@ -152,7 +152,7 @@ class ActionStepsTests
                 new SequenceAction(SequenceActionType.CLICK_AND_HOLD, searchAttributes),
                 new SequenceAction(SequenceActionType.MOVE_BY_OFFSET, point),
                 new SequenceAction(SequenceActionType.RELEASE, searchAttributes),
-                new SequenceAction(SequenceActionType.SEND_KEYS, TEXT),
+                new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT),
                 new SequenceAction(SequenceActionType.CLICK, searchAttributes)
                 );
         actionSteps.executeSequenceOfActions(actions);
@@ -188,7 +188,7 @@ class ActionStepsTests
 
         List<SequenceAction> actions = List.of(
                 new SequenceAction(SequenceActionType.DOUBLE_CLICK, searchAttributes),
-                new SequenceAction(SequenceActionType.SEND_KEYS, TEXT)
+                new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT)
                 );
         actionSteps.executeSequenceOfActions(actions);
         verify((Interactive) webDriver, never()).perform(any());

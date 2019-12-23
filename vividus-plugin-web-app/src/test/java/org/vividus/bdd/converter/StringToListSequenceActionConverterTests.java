@@ -86,11 +86,11 @@ class StringToListSequenceActionConverterTests
     @Test
     void testConvertValueString()
     {
-        String value = "|type     |argument|\n"
-                     + "|SEND_KEYS|text    |";
+        String value = "|type      |argument|\n"
+                     + "|ENTER_TEXT|text    |";
         List<SequenceAction> actions = converter.convertValue(value, null);
         assertThat(actions, hasSize(1));
-        verifySequenceAction(actions.get(0), SequenceActionType.SEND_KEYS, TEXT);
+        verifySequenceAction(actions.get(0), SequenceActionType.ENTER_TEXT, TEXT);
         verifyNoMoreInteractions(stringToSearchAttributesConverter, pointConverter);
     }
 
