@@ -94,6 +94,17 @@ class StringToListSequenceActionConverterTests
         verifyNoMoreInteractions(stringToSearchAttributesConverter, pointConverter);
     }
 
+    @Test
+    void testConvertKeys()
+    {
+        String value = "|type      |argument     |\n"
+                     + "|PRESS_KEYS|value1,value2|";
+        List<SequenceAction> actions = converter.convertValue(value, null);
+        assertThat(actions, hasSize(1));
+        verifySequenceAction(actions.get(0), SequenceActionType.PRESS_KEYS, List.of("value1", "value2"));
+        verifyNoMoreInteractions(stringToSearchAttributesConverter, pointConverter);
+    }
+
     private static void verifySequenceAction(SequenceAction action, SequenceActionType expectedType,
             Object expectedArgument)
     {

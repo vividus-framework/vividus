@@ -16,77 +16,123 @@
 
 package org.vividus.bdd.steps.ui.web.model;
 
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.vividus.selenium.KeysUtils;
 
 public enum SequenceActionType
 {
-    DOUBLE_CLICK(WebElement.class)
+    DOUBLE_CLICK
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
             performOnWebElement(argument, actions::doubleClick);
         }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return WebElement.class;
+        }
     },
-    CLICK_AND_HOLD(WebElement.class)
+    CLICK_AND_HOLD
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
             performOnWebElement(argument, actions::clickAndHold);
         }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return WebElement.class;
+        }
     },
-    MOVE_BY_OFFSET(Point.class)
+    MOVE_BY_OFFSET
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
             perform(argument, (Point arg) -> actions.moveByOffset(arg.getX(), arg.getY()));
         }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return Point.class;
+        }
     },
-    RELEASE(WebElement.class)
+    RELEASE
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
             performOnWebElement(argument, actions::release);
         }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return WebElement.class;
+        }
     },
-    ENTER_TEXT(String.class)
+    ENTER_TEXT
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
             perform(argument, (String arg) -> actions.sendKeys(arg));
         }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return String.class;
+        }
     },
-    CLICK(WebElement.class)
+    PRESS_KEYS
+    {
+        private final Type argumentType = TypeUtils.parameterize(List.class, String.class);
+
+        @Override
+        public void addAction(Actions actions, Object argument)
+        {
+            perform(argument, (List<String> arg) -> actions.sendKeys(KeysUtils.keysToCharSequenceArray(arg)));
+        }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return argumentType;
+        }
+    },
+    CLICK
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
             performOnWebElement(argument, actions::click);
         }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return WebElement.class;
+        }
     };
 
-    private final Class<?> argumentType;
-
-    SequenceActionType(Class<?> argumentType)
-    {
-        this.argumentType = argumentType;
-    }
-
-    public Class<?> getArgumentType()
-    {
-        return argumentType;
-    }
-
     public abstract void addAction(Actions actions, Object argument);
+
+    public abstract Type getArgumentType();
 
     <T, U extends WebElement> void performOnWebElement(T argument, Consumer<U> argumentConsumer)
     {
@@ -96,8 +142,8 @@ public enum SequenceActionType
     @SuppressWarnings("unchecked")
     <T, U> void perform(T argument, Consumer<U> argumentConsumer)
     {
-        Validate.isInstanceOf(getArgumentType(), argument, "Argument for %s action must be of type %s", name(),
-                getArgumentType());
+        Validate.isTrue(TypeUtils.isAssignable(argument.getClass(), getArgumentType()),
+                "Argument for %s action must be of type %s", name(), getArgumentType());
         argumentConsumer.accept((U) argument);
     }
 }

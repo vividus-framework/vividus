@@ -123,6 +123,7 @@ public class ActionSteps
      * <br> |RELEASE       |By.xpath(//signature-pad-control/canvas)|
      * <br> |ENTER_TEXT    |Text                                    |
      * <br> |CLICK         |By.placeholder(Enter your password)     |
+     * <br> |PRESS_KEYS    |BACK_SPACE                              |
      * </code>
      * </pre>
      * where
@@ -164,6 +165,12 @@ public class ActionSteps
      * <td>CLICK</td>
      * <td>search attribute</td>
      * <td>By.caseSensitiveText(Done)</td>
+     * </tr>
+     * <tr>
+     * <td>PRESS_KEYS</td>
+     * <td><a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
+     * </td>
+     * <td>BACK_SPACE</td>
      * </tr>
      * </table>
      * </li>

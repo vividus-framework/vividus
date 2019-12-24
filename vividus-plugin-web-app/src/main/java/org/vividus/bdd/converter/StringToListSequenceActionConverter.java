@@ -18,12 +18,14 @@ package org.vividus.bdd.converter;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.web.model.SequenceAction;
@@ -49,13 +51,19 @@ public class StringToListSequenceActionConverter extends AbstractParameterConver
             .map(params ->
             {
                 SequenceActionType actionType = params.valueAs("type", SequenceActionType.class);
-                String argumentValue = params.valueAs("argument", String.class);
-                return new SequenceAction(actionType, convertArgument(argumentValue, actionType.getArgumentType()));
+                Type argumentType = actionType.getArgumentType();
+                return new SequenceAction(actionType, convertArgument(argumentAs(params, String.class),
+                        argumentType, () -> argumentAs(params, argumentType)));
             })
             .collect(Collectors.toList());
     }
 
-    private Object convertArgument(String argumentValue, Class<?> argumentType)
+    private <T> T argumentAs(Parameters parameters, Type type)
+    {
+        return parameters.valueAs("argument", type);
+    }
+
+    private Object convertArgument(String argumentValue, Type argumentType, Supplier<Object> defaultConverter)
     {
         if (argumentType.equals(WebElement.class))
         {
@@ -65,6 +73,6 @@ public class StringToListSequenceActionConverter extends AbstractParameterConver
         {
             return pointConverter.convertValue(argumentValue, null);
         }
-        return argumentValue;
+        return defaultConverter.get();
     }
 }
