@@ -32,6 +32,18 @@ Examples:
 |A      |C      |
 |B      |D      |
 
+Scenario: Declare story variable to be used in the next scenario
+When I initialize the story variable `for-merging-transformer` with value `X`
+
+Scenario: Verify MERGING transformer with table body
+Then `<column1>` is equal to `A`
+Then `<column2>` is equal to `X`
+Then `<column3>` is equal to `B`
+Examples:
+{transformer=MERGING, mergeMode=columns, tables=/data/for-merging-transformer.table}
+|column1|column2                   |
+|A      |${for-merging-transformer}|
+
 
 Scenario: Create a counter
 When I initialize the STORY variable `updatedNumber` with value `0`

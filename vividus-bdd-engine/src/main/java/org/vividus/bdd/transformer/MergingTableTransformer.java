@@ -17,12 +17,13 @@
 package org.vividus.bdd.transformer;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.function.Predicate.not;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,13 +42,27 @@ public class MergingTableTransformer implements ExtendedTableTransformer
     {
         MergeMode mergeMode = getMandatoryEnumProperty(properties, "mergeMode", MergeMode.class);
 
-        List<String> tables = Arrays.stream(properties.getProperties().getProperty("tables").split("(?<!\\\\);"))
+        List<String> tables = Optional.ofNullable(properties.getProperties().getProperty("tables"))
+                .stream()
+                .map(t -> t.split("(?<!\\\\);"))
+                .flatMap(Stream::of)
                 .map(t -> t.replace("\\;", ";").trim())
                 .distinct()
+                .filter(not(String::isBlank))
                 .collect(Collectors.toList());
-        checkArgument(tables.size() > 1, "Please, specify more than one unique table paths");
 
-        List<ExamplesTable> examplesTables = tables.stream()
+        Stream<String> examplesTablesStream = tables.stream();
+        if (tableAsString.isBlank())
+        {
+            checkArgument(tables.size() > 1, "Please, specify more than one unique table paths");
+        }
+        else
+        {
+            checkArgument(tables.size() > 0, "Please, specify at least one table path");
+            examplesTablesStream = Stream.concat(examplesTablesStream, Stream.of(tableAsString));
+        }
+
+        List<ExamplesTable> examplesTables = examplesTablesStream
                 .map(p -> configuration.examplesTableFactory().createExamplesTable(p))
                 .collect(Collectors.toCollection(LinkedList::new));
         String fillerValue = properties.getProperties().getProperty("fillerValue");
