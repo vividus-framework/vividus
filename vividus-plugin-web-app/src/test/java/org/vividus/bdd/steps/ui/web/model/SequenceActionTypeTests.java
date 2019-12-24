@@ -23,6 +23,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,6 +38,8 @@ import org.openqa.selenium.interactions.Actions;
 @ExtendWith(MockitoExtension.class)
 public class SequenceActionTypeTests
 {
+    private static final String VALUE = "value";
+
     @Mock
     private Actions baseAction;
 
@@ -81,9 +85,16 @@ public class SequenceActionTypeTests
     @Test
     void testEnterText()
     {
-        String value = "value";
-        SequenceActionType.ENTER_TEXT.addAction(baseAction, value);
-        verify(baseAction).sendKeys(value);
+        SequenceActionType.ENTER_TEXT.addAction(baseAction, VALUE);
+        verify(baseAction).sendKeys(VALUE);
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testPressKeys()
+    {
+        SequenceActionType.PRESS_KEYS.addAction(baseAction, List.of(VALUE));
+        verify(baseAction).sendKeys(new CharSequence[] { VALUE });
         verifyNoMoreInteractions(baseAction);
     }
 
