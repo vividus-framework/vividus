@@ -39,7 +39,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.http.IHttpRedirectsProvider;
+import org.vividus.http.HttpRedirectsProvider;
 import org.vividus.sitemap.ISiteMapParser;
 import org.vividus.sitemap.SiteMapParseException;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -70,7 +70,7 @@ class SiteMapTableTransformerTests
     private WebApplicationConfiguration webApplicationConfiguration;
 
     @Mock
-    private IHttpRedirectsProvider redirectsProvider;
+    private HttpRedirectsProvider redirectsProvider;
 
     @InjectMocks
     private SiteMapTableTransformer siteMapTableTransformer;

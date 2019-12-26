@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.transformer.ExtendedTableTransformer;
 import org.vividus.bdd.util.ExamplesTableProcessor;
-import org.vividus.http.IHttpRedirectsProvider;
+import org.vividus.http.HttpRedirectsProvider;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 
 public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTableTransformer
@@ -39,7 +39,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private WebApplicationConfiguration webApplicationConfiguration;
-    private IHttpRedirectsProvider httpRedirectsProvider;
+    private HttpRedirectsProvider httpRedirectsProvider;
     private boolean filterRedirects;
 
     @Override
@@ -101,7 +101,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
         this.webApplicationConfiguration = webApplicationConfiguration;
     }
 
-    public void setHttpRedirectsProvider(IHttpRedirectsProvider httpRedirectsProvider)
+    public void setHttpRedirectsProvider(HttpRedirectsProvider httpRedirectsProvider)
     {
         this.httpRedirectsProvider = httpRedirectsProvider;
     }
