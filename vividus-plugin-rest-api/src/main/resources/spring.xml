@@ -53,21 +53,6 @@
         </property>
     </bean>
 
-    <bean id="httpRedirectsProvider" class="org.vividus.http.HttpRedirectsProvider">
-        <property name="httpClient">
-            <bean class="org.vividus.http.client.HttpClient"
-                  factory-bean="httpClientFactory"
-                  factory-method="buildHttpClient">
-                <constructor-arg>
-                    <bean parent="httpClientConfig">
-                        <property name="circularRedirectsAllowed" value="${http.redirects-provider.circular-redirects-allowed}" />
-                        <property name="credentials" value="${http.redirects-provider.credentials}" />
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </property>
-    </bean>
-
     <bean class="org.vividus.http.HttpRequestExecutor">
         <constructor-arg ref="httpClient-RestApi" />
         <constructor-arg ref="httpTestContext" />
