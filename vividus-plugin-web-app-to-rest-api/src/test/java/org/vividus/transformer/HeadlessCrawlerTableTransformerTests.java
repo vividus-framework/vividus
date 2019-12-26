@@ -57,7 +57,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.crawler.ICrawlControllerFactory;
 import org.vividus.crawler.LinkCrawler;
 import org.vividus.crawler.LinkCrawlerFactory;
-import org.vividus.http.IHttpRedirectsProvider;
+import org.vividus.http.HttpRedirectsProvider;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.util.UriUtils;
 
@@ -92,7 +92,7 @@ class HeadlessCrawlerTableTransformerTests
     private WebApplicationConfiguration webApplicationConfiguration;
 
     @Mock
-    private IHttpRedirectsProvider redirectsProvider;
+    private HttpRedirectsProvider redirectsProvider;
 
     @InjectMocks
     private HeadlessCrawlerTableTransformer transformer;

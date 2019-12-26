@@ -26,11 +26,16 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.vividus.http.client.ExternalServiceException;
 import org.vividus.http.client.IHttpClient;
 
-public class HttpRedirectsProvider implements IHttpRedirectsProvider
+public class HttpRedirectsProvider
 {
     private IHttpClient httpClient;
 
-    @Override
+    /**
+     * Executes HEAD request to get redirects.
+     * Throws IllegalStateException in case of status code outside of "200-207"
+     * @param from URI to issue HEAD request
+     * @return List of redirects. {@code null} if there are no redirects.
+     */
     public List<URI> getRedirects(URI from)
     {
         try
