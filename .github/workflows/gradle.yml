@@ -17,13 +17,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: Checkout (including submodules and tags)
       shell: bash
-    # Checkout submodules: https://github.com/actions/checkout#checkout-submodules
-    # Fetch all tags: https://github.com/actions/checkout#fetch-all-tags
+      # Fetch all history for all tags and branches: https://github.com/actions/checkout#fetch-all-history-for-all-tags-and-branches
+      # Checkout submodules: https://github.com/actions/checkout#checkout-submodules
       run: |
+        git fetch --prune --unshallow
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-        git fetch --no-tags --prune --depth=2 origin +refs/heads/*:refs/remotes/origin/*
 
     - name: Set up JDK 13
       uses: actions/setup-java@v1
