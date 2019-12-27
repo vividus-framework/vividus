@@ -142,16 +142,13 @@ class SearchAttributesConversionUtilsTests
 
     private static SearchAttributes createAttributes(ActionAttributeType type, String value, Visibility elementType)
     {
-        SearchParameters searchParameters = new SearchParameters(value);
-        searchParameters.setVisibility(elementType);
+        SearchParameters searchParameters = new SearchParameters(value, elementType);
         return new SearchAttributes(type, searchParameters);
     }
 
     private static SearchAttributes createAttributes(ActionAttributeType type, String value, Visibility elementType,
             ActionAttributeType filter, String filterValue)
     {
-        SearchParameters searchParameters = new SearchParameters(value);
-        searchParameters.setVisibility(elementType);
-        return new SearchAttributes(type, searchParameters).addFilter(filter, filterValue);
+        return createAttributes(type, value, elementType).addFilter(filter, filterValue);
     }
 }

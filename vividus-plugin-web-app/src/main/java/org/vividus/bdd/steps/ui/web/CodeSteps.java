@@ -128,8 +128,8 @@ public class CodeSteps
     {
         WebElement faviconElement = baseValidations.assertIfElementExists("Favicon",
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPath("//head/link[@rel='shortcut icon' or @rel='icon']"))
-                                .setVisibility(Visibility.ALL)));
+                        new SearchParameters(LocatorUtil.getXPath("//head/link[@rel='shortcut icon' or @rel='icon']"),
+                                Visibility.ALL)));
         if (faviconElement != null)
         {
             String href = faviconElement.getAttribute("href");

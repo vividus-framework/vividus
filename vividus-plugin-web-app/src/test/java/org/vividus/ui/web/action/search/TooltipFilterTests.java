@@ -36,7 +36,7 @@ class TooltipFilterTests
     private static final String TITLE = "title";
     private static final String TOOLTIP = "tooltip";
 
-    private final SearchParameters parameters = new SearchParameters("value");
+    private final SearchParameters parameters = new SearchParameters("value", Visibility.ALL, false);
     private final TooltipFilter search = new TooltipFilter();
     private final List<WebElement> webElements = new ArrayList<>();
 
@@ -47,8 +47,6 @@ class TooltipFilterTests
     void beforeEach()
     {
         webElements.add(webElement);
-        parameters.setWaitForElement(false);
-        parameters.setVisibility(Visibility.ALL);
     }
 
     @Test

@@ -34,11 +34,17 @@ public class SearchParameters
         this.value = value;
     }
 
-    public SearchParameters(SearchParameters searchParameters)
+    public SearchParameters(String value, Visibility visibility)
     {
-        this.value = searchParameters.value;
-        this.visibility = searchParameters.visibility;
-        this.waitForElement = searchParameters.waitForElement;
+        this.value = value;
+        this.visibility = visibility;
+    }
+
+    public SearchParameters(String value, Visibility visibility, boolean waitForElement)
+    {
+        this.value = value;
+        this.visibility = visibility;
+        this.waitForElement = waitForElement;
     }
 
     public String getValue()

@@ -48,10 +48,10 @@ class ScriptStepsTests
     @Test
     void testThenJavascriptFileWithNameIsIncludedInTheSourceCode()
     {
-        when(baseValidations.assertIfElementExists("Script with the name 'test'", new SearchAttributes(
-                ActionAttributeType.XPATH, new SearchParameters(".//script[contains(normalize-space(@src), \"test\")]")
-                .setVisibility(Visibility.ALL))))
-                        .thenReturn(mockedScript);
+        when(baseValidations.assertIfElementExists("Script with the name 'test'",
+                new SearchAttributes(ActionAttributeType.XPATH,
+                        new SearchParameters(".//script[contains(normalize-space(@src), \"test\")]", Visibility.ALL))))
+                .thenReturn(mockedScript);
         assertEquals(scriptSteps.thenJavascriptFileWithNameIsIncludedInTheSourceCode(TEST), mockedScript);
     }
 
@@ -60,8 +60,8 @@ class ScriptStepsTests
     {
         when(baseValidations.assertIfElementExists("Script with text 'test'",
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(".//script[text()[normalize-space()=\"test\"]]")
-                                .setVisibility(Visibility.ALL)))).thenReturn(mockedScript);
+                        new SearchParameters(".//script[text()[normalize-space()=\"test\"]]", Visibility.ALL))))
+                .thenReturn(mockedScript);
         assertEquals(scriptSteps.thenJavascriptFileWithTextIsIncludedInTheSourceCode(TEST), mockedScript);
     }
 
@@ -70,8 +70,8 @@ class ScriptStepsTests
     {
         when(baseValidations.assertIfElementExists("Script with the text part 'test'",
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(".//script[contains(normalize-space(text()),\"test\")]")
-                                .setVisibility(Visibility.ALL)))).thenReturn(mockedScript);
+                        new SearchParameters(".//script[contains(normalize-space(text()),\"test\")]", Visibility.ALL))))
+                .thenReturn(mockedScript);
         assertEquals(scriptSteps.thenJavascriptWithTextPartIsIncludedInTheSourceCode(TEST), mockedScript);
     }
 }

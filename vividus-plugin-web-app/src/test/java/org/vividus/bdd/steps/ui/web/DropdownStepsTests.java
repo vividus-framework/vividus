@@ -147,8 +147,7 @@ class DropdownStepsTests
     {
         dropdownSteps.doesNotDropDownExist(DROP_DOWN_LIST_NAME);
         verify(baseValidations).assertIfElementDoesNotExist(DROP_DOWN_WITH_THE_NAME_DROP_DOWN_LIST_NAME,
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(DROP_DOWN_XPATH).setVisibility(Visibility.ALL)));
+                new SearchAttributes(ActionAttributeType.XPATH, new SearchParameters(DROP_DOWN_XPATH, Visibility.ALL)));
     }
 
     @Test

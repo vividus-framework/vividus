@@ -52,8 +52,8 @@ public class ScriptSteps
     {
         return baseValidations.assertIfElementExists(String.format("Script with the name '%s'", jsFileName),
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPath(".//script[contains(@src, %s)]", jsFileName))
-                                .setVisibility(Visibility.ALL)));
+                        new SearchParameters(LocatorUtil.getXPath(".//script[contains(@src, %s)]", jsFileName),
+                                Visibility.ALL)));
     }
 
     /**
@@ -77,8 +77,7 @@ public class ScriptSteps
     {
         return baseValidations.assertIfElementExists(String.format("Script with text '%s'", jsText),
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPath(".//script[text()=%s]", jsText))
-                                .setVisibility(Visibility.ALL)));
+                        new SearchParameters(LocatorUtil.getXPath(".//script[text()=%s]", jsText), Visibility.ALL)));
     }
 
     /**
@@ -102,7 +101,7 @@ public class ScriptSteps
     {
         return baseValidations.assertIfElementExists(String.format("Script with the text part '%s'", jsTextPart),
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPath(".//script[contains(text(),%s)]", jsTextPart))
-                                .setVisibility(Visibility.ALL)));
+                        new SearchParameters(LocatorUtil.getXPath(".//script[contains(text(),%s)]", jsTextPart),
+                                Visibility.ALL)));
     }
 }

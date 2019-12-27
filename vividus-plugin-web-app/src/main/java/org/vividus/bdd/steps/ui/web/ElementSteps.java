@@ -100,8 +100,8 @@ public class ElementSteps implements ResourceLoaderAware
             }
             WebElement browse = baseValidations.assertIfElementExists(AN_ELEMENT,
                     new SearchAttributes(ActionAttributeType.XPATH,
-                            new SearchParameters(LocatorUtil.getXPathByAttribute(attributeType, attributeValue))
-                                    .setVisibility(Visibility.ALL)));
+                            new SearchParameters(LocatorUtil.getXPathByAttribute(attributeType, attributeValue),
+                                    Visibility.ALL)));
             if (browse != null)
             {
                 browse.sendKeys(fullFilePath);
@@ -278,8 +278,8 @@ public class ElementSteps implements ResourceLoaderAware
     {
         WebElement webElement = webUiContext.getSearchContext(WebElement.class);
         WebElement bodyElement = baseValidations.assertIfElementExists("'Body' element", webDriverProvider.get(),
-                new SearchAttributes(ActionAttributeType.XPATH, new SearchParameters(LocatorUtil.getXPath("//body"))
-                        .setVisibility(Visibility.ALL)));
+                new SearchAttributes(ActionAttributeType.XPATH,
+                        new SearchParameters(LocatorUtil.getXPath("//body"), Visibility.ALL)));
         elementValidations.assertIfElementHasWidthInPerc(bodyElement, webElement, widthInPerc);
     }
 

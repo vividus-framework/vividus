@@ -319,7 +319,7 @@ class SetContextStepsTests
         when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
         int framesNumber = 2;
         List<WebElement> mockedWebElements = List.of(mockedWebElement, mockedWebElement);
-        SearchParameters searchParameters = new SearchParameters(FRAME_XPATH).setVisibility(Visibility.ALL);
+        SearchParameters searchParameters = new SearchParameters(FRAME_XPATH, Visibility.ALL);
         SearchAttributes frameSearchAttributes = new SearchAttributes(ActionAttributeType.XPATH, searchParameters);
         when(mockedSearchActions.findElements(mockedWebElement, frameSearchAttributes)).thenReturn(mockedWebElements);
         when(softAssert

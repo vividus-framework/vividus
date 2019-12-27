@@ -63,7 +63,7 @@ class FieldStepsTests
     void testDoesNotFieldExist()
     {
         SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.FIELD_NAME,
-                new SearchParameters(FIELD_NAME).setVisibility(Visibility.ALL));
+                new SearchParameters(FIELD_NAME, Visibility.ALL));
         fieldSteps.doesNotFieldExist(searchAttributes);
         verify(baseValidations).assertIfElementDoesNotExist(
                 "A field with attributes Field name: 'fieldName'; Visibility: ALL;", searchAttributes);

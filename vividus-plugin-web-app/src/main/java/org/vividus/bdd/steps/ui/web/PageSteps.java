@@ -314,8 +314,8 @@ public class PageSteps
         WebElement element = baseValidations.assertIfElementExists(
                 String.format("An element with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPathByAttribute(attributeType, attributeValue))
-                                .setVisibility(Visibility.ALL)));
+                        new SearchParameters(LocatorUtil.getXPathByAttribute(attributeType, attributeValue),
+                                Visibility.ALL)));
         if (element != null)
         {
             boolean pageVisibleAreaScrolledToElement = webElementActions.isPageVisibleAreaScrolledToElement(element);

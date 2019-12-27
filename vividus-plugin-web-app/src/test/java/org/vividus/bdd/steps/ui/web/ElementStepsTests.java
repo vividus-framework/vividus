@@ -194,8 +194,8 @@ public class ElementStepsTests
         int widthInPerc = 50;
         when(webUiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         when(baseValidations.assertIfElementExists("'Body' element", webDriverProvider.get(),
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters("//body").setVisibility(Visibility.ALL)))).thenReturn(bodyElement);
+                new SearchAttributes(ActionAttributeType.XPATH, new SearchParameters("//body", Visibility.ALL))))
+                .thenReturn(bodyElement);
         elementSteps.isElementHasRightWidth(widthInPerc);
         verify(elementValidations).assertIfElementHasWidthInPerc(bodyElement, webElement, widthInPerc);
     }
@@ -321,7 +321,7 @@ public class ElementStepsTests
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(false);
         when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE).setVisibility(Visibility.ALL)))).thenReturn(webElement);
+                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
         elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
     }
@@ -339,7 +339,7 @@ public class ElementStepsTests
         mockResourceLoader(resource);
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE).setVisibility(Visibility.ALL)))).thenReturn(webElement);
+                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
         elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
         PowerMockito.verifyStatic(FileUtils.class);
@@ -357,7 +357,7 @@ public class ElementStepsTests
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
         when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE).setVisibility(Visibility.ALL)))).thenReturn(webElement);
+                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
         elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
     }
@@ -374,7 +374,7 @@ public class ElementStepsTests
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
         when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE).setVisibility(Visibility.ALL)))).thenReturn(webElement);
+                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
         elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
     }
@@ -388,7 +388,7 @@ public class ElementStepsTests
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
         when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE).setVisibility(Visibility.ALL)))).thenReturn(webElement);
+                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
         elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
     }
@@ -410,7 +410,7 @@ public class ElementStepsTests
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(false);
         when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE).setVisibility(Visibility.ALL)))).thenReturn(null);
+                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(null);
         elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
         verify(webElement, never()).sendKeys(ABSOLUTE_PATH);
     }

@@ -142,8 +142,8 @@ class CodeStepsTests
         codeSteps.ifFaviconWithSrcExists(FAVICON_IMG_PNG);
         verifyNoInteractions(softAssert);
         verify(mockedBaseValidations).assertIfElementExists(FAVICON, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LocatorUtil.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG))
-                        .setVisibility(Visibility.ALL)));
+                new SearchParameters(LocatorUtil.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG),
+                        Visibility.ALL)));
     }
 
     @Test
@@ -226,8 +226,8 @@ class CodeStepsTests
     private void mockFavicon(String hrefAttribute)
     {
         when(mockedBaseValidations.assertIfElementExists(FAVICON, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LocatorUtil.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG))
-                        .setVisibility(Visibility.ALL)))).thenReturn(mockedWebElement);
+                new SearchParameters(LocatorUtil.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG),
+                        Visibility.ALL)))).thenReturn(mockedWebElement);
         when(mockedWebElement.getAttribute(HREF)).thenReturn(hrefAttribute);
         when(softAssert.assertNotNull(FAVICON_CONTAINS_HREF_ATTRIBUTE, hrefAttribute))
                 .thenReturn(true);

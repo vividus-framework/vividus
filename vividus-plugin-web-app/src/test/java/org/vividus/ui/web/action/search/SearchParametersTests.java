@@ -46,13 +46,9 @@ class SearchParametersTests
     }
 
     @Test
-    void testSearchParametersArgConstructor()
+    void testSearchParametersAllArgsConstructor()
     {
-        SearchParameters testParameters = new SearchParameters(VALUE);
-        testParameters.setVisibility(Visibility.ALL);
-        testParameters.setWaitForElement(false);
-
-        SearchParameters parameters = new SearchParameters(testParameters);
+        SearchParameters parameters = new SearchParameters(VALUE, Visibility.ALL, false);
         assertEquals(VALUE, parameters.getValue());
         assertEquals(Visibility.ALL, parameters.getVisibility());
         assertFalse(parameters.isWaitForElement());

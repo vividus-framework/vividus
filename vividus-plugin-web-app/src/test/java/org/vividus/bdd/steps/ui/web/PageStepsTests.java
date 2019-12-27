@@ -213,8 +213,7 @@ class PageStepsTests
         WebElement webElement = mock(WebElement.class);
         when(mockedBaseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTE_ID_VALUE,
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE))
-                                .setVisibility(Visibility.ALL))))
+                        new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE), Visibility.ALL))))
                             .thenReturn(webElement);
         when(webElementActions.isPageVisibleAreaScrolledToElement(webElement)).thenReturn(true);
         pageSteps.isPageScrolledToAnElement(ID, VALUE);
@@ -227,8 +226,7 @@ class PageStepsTests
     {
         when(mockedBaseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTE_ID_VALUE,
                 new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE))
-                                .setVisibility(Visibility.ALL))))
+                        new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE), Visibility.ALL))))
                             .thenReturn(null);
         pageSteps.isPageScrolledToAnElement(ID, VALUE);
         verify(softAssert, never()).assertTrue("The page is scrolled to an element with the attribute",

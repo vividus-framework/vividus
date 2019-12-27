@@ -48,7 +48,8 @@ public class CheckboxNameSearch extends AbstractElementSearchAction implements I
     private List<WebElement> searchCheckboxLabels(SearchContext searchContext, SearchParameters parameters)
     {
         String checkBoxName = parameters.getValue();
-        SearchParameters nonDisplayedParameters = new SearchParameters(parameters).setVisibility(Visibility.ALL);
+        SearchParameters nonDisplayedParameters = new SearchParameters(parameters.getValue(), Visibility.ALL,
+                parameters.isWaitForElement());
 
         List<WebElement> checkboxLabels = findElements(searchContext,
                 getXPathLocator(String.format(CHECKBOX_LABEL_FORMAT, checkBoxName)), parameters);
