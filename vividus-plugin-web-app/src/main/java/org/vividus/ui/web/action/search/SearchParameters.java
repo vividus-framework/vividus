@@ -51,38 +51,10 @@ public class SearchParameters
         return visibility;
     }
 
-    public boolean isVisibility(Visibility visibility)
-    {
-        return visibility == this.visibility;
-    }
-
     public SearchParameters setVisibility(Visibility visibility)
     {
         this.visibility = visibility;
         return this;
-    }
-
-    /**
-     * @deprecated Will be removed in favor of usage {@link Visibility} instead of boolean visibility parameters
-     * Use instead  {@link #isVisibility(Visibility)}
-     * @return true if displayed only elements will be located, false otherwise
-     */
-    @Deprecated
-    public boolean isDisplayedOnly()
-    {
-        return isVisibility(Visibility.VISIBLE);
-    }
-
-    /**
-     * @deprecated Will be removed in favor of usage {@link Visibility} instead of boolean visibility parameters
-     * Use instead {@link #setVisibility(Visibility)}
-     * @param displayedOnly true if displayed only elements will be located, false otherwise
-     * @return Search Parameters
-     */
-    @Deprecated
-    public SearchParameters setDisplayedOnly(boolean displayedOnly)
-    {
-        return setVisibility(displayedOnly ? Visibility.VISIBLE : Visibility.ALL);
     }
 
     public boolean isWaitForElement()

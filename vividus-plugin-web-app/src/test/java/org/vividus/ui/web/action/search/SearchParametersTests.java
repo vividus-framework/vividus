@@ -32,7 +32,7 @@ class SearchParametersTests
     {
         SearchParameters parameters = new SearchParameters();
         assertNull(parameters.getValue());
-        assertTrue(parameters.isVisibility(Visibility.VISIBLE));
+        assertEquals(Visibility.VISIBLE, parameters.getVisibility());
         assertTrue(parameters.isWaitForElement());
     }
 
@@ -41,7 +41,7 @@ class SearchParametersTests
     {
         SearchParameters parameters = new SearchParameters(VALUE);
         assertEquals(VALUE, parameters.getValue());
-        assertTrue(parameters.isVisibility(Visibility.VISIBLE));
+        assertEquals(Visibility.VISIBLE, parameters.getVisibility());
         assertTrue(parameters.isWaitForElement());
     }
 
@@ -54,16 +54,8 @@ class SearchParametersTests
 
         SearchParameters parameters = new SearchParameters(testParameters);
         assertEquals(VALUE, parameters.getValue());
-        assertFalse(parameters.isVisibility(Visibility.VISIBLE));
+        assertEquals(Visibility.ALL, parameters.getVisibility());
         assertFalse(parameters.isWaitForElement());
-    }
-
-    @Test
-    void testSetDisplayedOnly()
-    {
-        SearchParameters parameters = new SearchParameters();
-        parameters.setVisibility(Visibility.ALL);
-        assertFalse(parameters.isVisibility(Visibility.VISIBLE));
     }
 
     @Test
@@ -87,6 +79,6 @@ class SearchParametersTests
     void shouldCheckVisibility()
     {
         SearchParameters parameters = new SearchParameters();
-        assertTrue(parameters.isVisibility(Visibility.VISIBLE));
+        assertEquals(Visibility.VISIBLE, parameters.getVisibility());
     }
 }
