@@ -1,3 +1,8 @@
+Composite: When I send HTTP $httpMethod to the relative URL '$relativeURL' with content: '$content'
+Priority: 1
+Given request body: <content>
+When I send HTTP <httpMethod> to the relative URL '<relativeURL>'
+
 Composite: Then a JSON element by the JSON path '$jsonPath' exists
 Then the number of JSON elements by the JSON path '<jsonPath>' is > 0
 

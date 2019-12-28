@@ -153,24 +153,6 @@ public class ApiSteps
     }
 
     /**
-     * Step is sending HTTP request for the given <b>relative URL</b>
-     * and saving HTTP response into Scenario-level variable.<br>
-     * Only methods that can contain body should be used.
-     * @param httpMethod HTTP method type. Parameter accepts the following HTTP methods: <ul> <li>POST</li> <li>PUT</li>
-     * <li>DELETE</li> <li>PATCH</li> </ul>
-     * @param relativeURL relative URL
-     * @param content HTTP method request body
-     * @throws IOException If an input or output exception occurred
-     */
-    @When(value = "I send HTTP $httpMethod to the relative URL '$relativeURL' with content: '$content'", priority = 1)
-    public void whenIDoHttpRequestToRelativeURL(HttpMethod httpMethod, String relativeURL, String content)
-            throws IOException
-    {
-        request(content);
-        whenIDoHttpRequestToRelativeURL(httpMethod, relativeURL);
-    }
-
-    /**
      * Set up custom request configurations
      * @param configItems Table representing list of configuration items with columns "name" and "value"
      *  specifying their names and values respectively.

@@ -132,15 +132,6 @@ class ApiStepsTests
     }
 
     @Test
-    void testWhenIDoHttpRequestToRelativeURLWithContent() throws IOException
-    {
-        apiSteps.setApiEndpoint(URL);
-        apiSteps.whenIDoHttpRequestToRelativeURL(HttpMethod.GET, RELATIVE_URL, CONTENT);
-        verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, URL, Optional.of(RELATIVE_URL));
-        verifyPutRequestEntity(CONTENT);
-    }
-
-    @Test
     void testSetCustomRequestConfig() throws ReflectiveOperationException
     {
         ExamplesTable configItems = new ExamplesTable("|redirectsEnabled|connectionRequestTimeout|cookieSpec|"
