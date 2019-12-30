@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.steps.api;
+package org.vividus.bdd.model;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -75,7 +75,7 @@ class RequestPartTypeTests
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         String name = "fileKey";
         String fileName = "requestBody.txt";
-        RequestPartType.FILE.addPart(builder, name, "./" + fileName, contentTypeAsString);
+        RequestPartType.FILE.addPart(builder, name, "/" + fileName, contentTypeAsString);
         assertHttpEntity(builder, buildExpectedEntity(name + "\"; filename=\"" + fileName,
                 contentType, "binary", "{body}"));
     }

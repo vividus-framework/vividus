@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,16 +44,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.model.ArchiveVariable;
+import org.vividus.bdd.model.NamedEntry;
+import org.vividus.bdd.model.OutputFormat;
 import org.vividus.bdd.steps.ByteArrayValidationRule;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.http.ConnectionDetails;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("checkstyle:MethodCount")
 class HttpResponseValidationStepsTests
 {
     private static final String SET_COOKIES_HEADER_NAME = "Set-Cookies";
@@ -63,6 +69,10 @@ class HttpResponseValidationStepsTests
     private static final String NUMBER_RESPONSE_HEADERS_WITH_NAME =
             "The number of the response headers with the name '%s'";
     private static final String HTTP_RESPONSE_IS_NOT_NULL = "HTTP response is not null";
+    private static final String TLS_V1_2 = "TLSv1.2";
+    private static final String CONNECTION_SECURE_ASSERTION = "Connection is secure";
+    private static final String FILE_JSON = "file.json";
+    private static final String IMAGE_PNG = "images/image.png";
 
     @Mock
     private HttpTestContext httpTestContext;
@@ -199,7 +209,7 @@ class HttpResponseValidationStepsTests
         when(softAssert.assertEquals("Arrays size", 6, 6)).thenReturn(true);
         httpResponse.setResponseBody(new byte[] { 123, 98, 111, 100, 121, 125 });
         httpResponseValidationSteps.doesResponseBodyMatchResource(ByteArrayValidationRule.IS_EQUAL_TO,
-                "requestBody.txt");
+                "/requestBody.txt");
         verify(softAssert).recordPassedAssertion("Expected and actual arrays are equal");
     }
 
@@ -220,11 +230,11 @@ class HttpResponseValidationStepsTests
 
     @ParameterizedTest
     @CsvSource({
-            "{},                application/json",
-            "[],                application/json",
-            "' {\"key\":1}',    application/json",
-            "{',                text/plain",
-            "1',                text/plain"
+            "{},             application/json",
+            "[],             application/json",
+            "' {\"key\":1}', application/json",
+            "{',             text/plain",
+            "1',             text/plain"
     })
     void testContentTypeOfResponseBodyWithText(String responseBody, String expectedContentType)
     {
@@ -356,6 +366,116 @@ class HttpResponseValidationStepsTests
     {
         httpResponseValidationSteps.isHeaderWithNameFound(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO, 1);
         verifyNoHttpResponse();
+    }
+
+    @Test
+    void shouldValidateSecuredConnection()
+    {
+        boolean secure = true;
+        String actualProtocol = "TLSv1.3";
+        ConnectionDetails connectionDetails = new ConnectionDetails();
+        connectionDetails.setSecure(secure);
+        connectionDetails.setSecurityProtocol(actualProtocol);
+
+        when(httpTestContext.getConnectionDetails()).thenReturn(connectionDetails);
+        when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.TRUE);
+        httpResponseValidationSteps.isConnectionSecured(TLS_V1_2);
+        verify(softAssert).assertEquals("Security protocol", TLS_V1_2, actualProtocol);
+    }
+
+    @Test
+    void shouldValidateNonSecuredConnection()
+    {
+        boolean secure = false;
+        ConnectionDetails connectionDetails = new ConnectionDetails();
+        connectionDetails.setSecure(secure);
+
+        when(httpTestContext.getConnectionDetails()).thenReturn(connectionDetails);
+        when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.FALSE);
+        httpResponseValidationSteps.isConnectionSecured(TLS_V1_2);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void testSaveFilesContentToVariables()
+    {
+        mockHttpResponseWithArchive();
+
+        String json = "json";
+        String image = "image";
+        String base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVK"
+                + "w4bAAAACklEQVQImWNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg==";
+
+        httpResponseValidationSteps.saveFilesContentToVariables(
+                List.of(createVariable(IMAGE_PNG, image, OutputFormat.BASE64),
+                        createVariable(FILE_JSON, json, OutputFormat.TEXT)));
+        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
+        verify(bddVariableContext).putVariable(scopes, image, base64);
+        verify(bddVariableContext).putVariable(scopes, json,
+                "{\"plugin\": \"vividus-plugin-rest-api\"}\n");
+        verifyNoInteractions(softAssert);
+        verifyNoMoreInteractions(bddVariableContext);
+    }
+
+    @Test
+    void testSaveFilesContentToVariablesInvalidPath()
+    {
+        mockHttpResponseWithArchive();
+
+        String path = "path";
+        httpResponseValidationSteps.saveFilesContentToVariables(
+                List.of(createVariable(path, path, OutputFormat.BASE64)));
+        verify(softAssert).recordFailedAssertion(
+                String.format("Unable to find entry by name %s in response archive", path));
+        verifyNoInteractions(bddVariableContext);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void testVerifyArchiveContainsEntries()
+    {
+        mockHttpResponseWithArchive();
+        Set<String> archiveEntries = Set.of(IMAGE_PNG, FILE_JSON);
+        String dummy = "dummy";
+        String message = "The response archive contains entry with name ";
+        httpResponseValidationSteps.verifyArchiveContainsEntries(List.of(
+                createEntry(FILE_JSON),
+                createEntry(IMAGE_PNG),
+                createEntry(dummy)
+        ));
+        verify(softAssert).assertThat(eq(message + FILE_JSON), eq(archiveEntries),
+                argThat(e -> e.matches(archiveEntries)));
+        verify(softAssert).assertThat(eq(message + IMAGE_PNG), eq(archiveEntries),
+                argThat(e -> e.matches(archiveEntries)));
+        verify(softAssert).assertThat(eq(message + dummy), eq(archiveEntries),
+                argThat(e -> !e.matches(archiveEntries)));
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    private static NamedEntry createEntry(String name)
+    {
+        NamedEntry entry = new NamedEntry();
+        entry.setName(name);
+        return entry;
+    }
+
+    private void mockHttpResponseWithArchive()
+    {
+        byte[] data = ResourceUtils.loadResourceAsByteArray(getClass(), "/org/vividus/bdd/steps/api/archive.zip");
+        HttpResponse response = mock(HttpResponse.class);
+        when(httpTestContext.getResponse()).thenReturn(response);
+        when(response.getResponseBody()).thenReturn(data);
+    }
+
+    private static ArchiveVariable createVariable(String path, String variableName, OutputFormat outputFormat)
+    {
+        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
+        ArchiveVariable variable = new ArchiveVariable();
+        variable.setPath(path);
+        variable.setOutputFormat(outputFormat);
+        variable.setScopes(scopes);
+        variable.setVariableName(variableName);
+        return variable;
     }
 
     private String mockHeaderRetrieval()

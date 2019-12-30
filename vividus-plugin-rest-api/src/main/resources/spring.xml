@@ -17,19 +17,16 @@
 
     <bean id="jsonSoftAssert" class="org.vividus.bdd.validator.JsonSoftAssert" parent="softAssert" />
 
-    <bean id="apiSteps" class="org.vividus.bdd.steps.api.ApiSteps">
+    <bean id="apiSteps" class="org.vividus.bdd.steps.api.HttpRequestSteps">
         <property name="apiEndpoint" value="${rest-api.http.endpoint}"/>
     </bean>
 
-    <bean id="connectionValidationSteps" class="org.vividus.bdd.steps.api.ConnectionValidationSteps" />
     <bean id="httpResponseValidationSteps" class="org.vividus.bdd.steps.api.HttpResponseValidationSteps" />
 
     <bean id="jsonResponseValidationSteps" class="org.vividus.bdd.steps.api.JsonResponseValidationSteps">
         <property name="softAssert" ref="jsonSoftAssert" />
         <property name="jsonUtils" ref="jsonUtils-LowerCamelCase"/>
     </bean>
-
-    <bean id="httpResponseSteps" class="org.vividus.bdd.steps.api.HttpResponseSteps"/>
 
     <bean id="httpClient-RestApi" class="org.vividus.http.client.HttpClient"
         factory-bean="httpClientFactory"
@@ -69,9 +66,7 @@
 
     <util:list id="stepBeanNames-Api" value-type="java.lang.String">
         <value>apiSteps</value>
-        <value>connectionValidationSteps</value>
         <value>httpResponseValidationSteps</value>
-        <value>httpResponseSteps</value>
         <value>jsonResponseValidationSteps</value>
     </util:list>
 </beans>
