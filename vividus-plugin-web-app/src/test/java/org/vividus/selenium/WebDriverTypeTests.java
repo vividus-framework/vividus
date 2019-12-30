@@ -208,6 +208,7 @@ public class WebDriverTypeTests
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         EdgeOptions edgeOptions = new EdgeOptions();
         edgeOptions.merge(desiredCapabilities);
+        edgeOptions.setCapability("ms:inPrivate", true);
         EdgeDriver expected = mock(EdgeDriver.class);
         whenNew(EdgeDriver.class).withParameterTypes(EdgeOptions.class).withArguments(edgeOptions).thenReturn(expected);
         WebDriver actual = WebDriverType.EDGE.getWebDriver(desiredCapabilities, new WebDriverConfiguration());

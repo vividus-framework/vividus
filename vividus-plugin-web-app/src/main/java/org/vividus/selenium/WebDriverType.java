@@ -141,6 +141,7 @@ public enum WebDriverType
         {
             EdgeOptions edgeOptions = new EdgeOptions();
             edgeOptions.merge(desiredCapabilities);
+            edgeOptions.setCapability("ms:inPrivate", true);
             return new EdgeDriver(edgeOptions);
         }
 
