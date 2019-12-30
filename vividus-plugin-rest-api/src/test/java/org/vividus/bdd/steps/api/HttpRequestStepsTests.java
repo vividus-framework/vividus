@@ -41,7 +41,7 @@ import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 
 @ExtendWith(MockitoExtension.class)
-class ApiStepsTests
+class HttpRequestStepsTests
 {
     private static final String URL = "http://www.example.com/";
     private static final String RELATIVE_URL = "/relativeUrl";
@@ -55,12 +55,12 @@ class ApiStepsTests
     private HttpRequestExecutor httpRequestExecutor;
 
     @InjectMocks
-    private ApiSteps apiSteps;
+    private HttpRequestSteps httpRequestSteps;
 
     @Test
     void testRequest()
     {
-        apiSteps.request(CONTENT);
+        httpRequestSteps.request(CONTENT);
         verifyPutRequestEntity(CONTENT);
     }
 
@@ -68,7 +68,7 @@ class ApiStepsTests
     void testRequestUtf8Content()
     {
         String content = "{\"storeUserNewPassword\": \"зЛЖЛВеБЛги!\"}";
-        apiSteps.request(content);
+        httpRequestSteps.request(content);
         verifyPutRequestEntity(content);
     }
 
@@ -82,7 +82,7 @@ class ApiStepsTests
     void testPutMultipartRequest(String tableAsString, String contentType)
     {
         ExamplesTable requestParts = new ExamplesTable(tableAsString);
-        apiSteps.putMultipartRequest(requestParts);
+        httpRequestSteps.putMultipartRequest(requestParts);
         verify(httpTestContext).putRequestEntity(argThat(entity ->
         {
             try
@@ -103,7 +103,7 @@ class ApiStepsTests
     void testSetUpRequestHeaders()
     {
         ExamplesTable headers = new ExamplesTable("|name|value|\n|name1|value1|");
-        apiSteps.setUpRequestHeaders(headers);
+        httpRequestSteps.setUpRequestHeaders(headers);
         verify(httpTestContext).putRequestHeaders(argThat(actual ->
         {
             if (actual.size() == 1)
@@ -119,15 +119,15 @@ class ApiStepsTests
     @EnumSource(HttpMethod.class)
     void testWhenIIssueHttpRequest(HttpMethod method) throws IOException
     {
-        apiSteps.whenIDoHttpRequest(method, URL);
+        httpRequestSteps.whenIDoHttpRequest(method, URL);
         verify(httpRequestExecutor).executeHttpRequest(method, URL, Optional.empty());
     }
 
     @Test
     void testWhenIDoHttpRequestToRelativeURL() throws IOException
     {
-        apiSteps.setApiEndpoint(URL);
-        apiSteps.whenIDoHttpRequestToRelativeURL(HttpMethod.GET, RELATIVE_URL);
+        httpRequestSteps.setApiEndpoint(URL);
+        httpRequestSteps.whenIDoHttpRequestToRelativeURL(HttpMethod.GET, RELATIVE_URL);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, URL, Optional.of(RELATIVE_URL));
     }
 
@@ -136,7 +136,7 @@ class ApiStepsTests
     {
         ExamplesTable configItems = new ExamplesTable("|redirectsEnabled|connectionRequestTimeout|cookieSpec|"
                 + "\n|false|2|superCookie|");
-        apiSteps.setCustomRequestConfig(configItems);
+        httpRequestSteps.setCustomRequestConfig(configItems);
         verify(httpTestContext).putRequestConfig(argThat(config -> !config.isRedirectsEnabled()));
     }
 
@@ -145,7 +145,7 @@ class ApiStepsTests
     {
         ExamplesTable configItems = new ExamplesTable("|nonExistentField|\n|any|");
         NoSuchFieldException exception = assertThrows(NoSuchFieldException.class,
-            () -> apiSteps.setCustomRequestConfig(configItems));
+            () -> httpRequestSteps.setCustomRequestConfig(configItems));
         assertEquals("nonExistentField", exception.getMessage());
     }
 

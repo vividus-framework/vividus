@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.steps.api;
+package org.vividus.bdd.model;
 
 import java.util.Optional;
 

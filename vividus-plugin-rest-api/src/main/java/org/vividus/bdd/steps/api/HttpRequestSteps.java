@@ -34,11 +34,12 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
+import org.vividus.bdd.model.RequestPartType;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 
-public class ApiSteps
+public class HttpRequestSteps
 {
     private static final String NAME = "name";
     private static final String VALUE = "value";
@@ -47,7 +48,7 @@ public class ApiSteps
     private final HttpTestContext httpTestContext;
     private final HttpRequestExecutor httpRequestExecutor;
 
-    public ApiSteps(HttpTestContext httpTestContext, HttpRequestExecutor httpRequestExecutor)
+    public HttpRequestSteps(HttpTestContext httpTestContext, HttpRequestExecutor httpRequestExecutor)
     {
         this.httpTestContext = httpTestContext;
         this.httpRequestExecutor = httpRequestExecutor;

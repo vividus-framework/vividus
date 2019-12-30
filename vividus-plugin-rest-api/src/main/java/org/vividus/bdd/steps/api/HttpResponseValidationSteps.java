@@ -17,16 +17,16 @@
 package org.vividus.bdd.steps.api;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItem;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -39,24 +39,36 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.model.ArchiveVariable;
+import org.vividus.bdd.model.NamedEntry;
 import org.vividus.bdd.steps.ByteArrayValidationRule;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.http.ConnectionDetails;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonProcessingException;
 import org.vividus.util.json.JsonUtils;
+import org.vividus.util.zip.ZipUtils;
 
 public class HttpResponseValidationSteps
 {
     private static final Tika TIKA = new Tika();
 
-    @Inject private HttpTestContext httpTestContext;
-    @Inject private ISoftAssert softAssert;
-    @Inject private IBddVariableContext bddVariableContext;
+    private final HttpTestContext httpTestContext;
+    private final IBddVariableContext bddVariableContext;
+    private final ISoftAssert softAssert;
+
+    public HttpResponseValidationSteps(HttpTestContext httpTestContext, IBddVariableContext bddVariableContext,
+            ISoftAssert softAssert)
+    {
+        this.httpTestContext = httpTestContext;
+        this.bddVariableContext = bddVariableContext;
+        this.softAssert = softAssert;
+    }
 
     /**
      * Checks HTTP response does not contain body
@@ -285,6 +297,72 @@ public class HttpResponseValidationSteps
             response -> bddVariableContext.putVariable(scopes, variableName, response.getResponseBodyAsString()));
     }
 
+    /**
+     * This step should be preceded with any step executing HTTP request
+     * The step validates that HTTP connection was secured with the expected protocol
+     * @param securityProtocol expected security protocol, e.g. TLSv1.2
+     */
+    @Then("the connection is secured using $securityProtocol protocol")
+    public void isConnectionSecured(String securityProtocol)
+    {
+        ConnectionDetails connectionDetails = httpTestContext.getConnectionDetails();
+        if (softAssert.assertTrue("Connection is secure", connectionDetails.isSecure()))
+        {
+            softAssert.assertEquals("Security protocol", securityProtocol,
+                    connectionDetails.getSecurityProtocol());
+        }
+    }
+
+    /**
+     * Saves content of a file from archive in response to context variable in specified format
+     * Example:
+     * <p>
+     * <code>
+     * When I save files content from the response archive into variables with parameters:<br>
+     * |path                        |variableName|scope   |outputFormat|
+     * |files/2011-11-11/skyrim.json|entityJson  |SCENARIO|TEXT        |
+     * </code>
+     * </p>
+     * Currently available types are TEXT and BASE64
+     * @param parameters describes saving parameters
+     */
+    @When("I save content of the response archive entries to the variables:$parameters")
+    public void saveFilesContentToVariables(List<ArchiveVariable> parameters)
+    {
+        List<String> expectedEntries = parameters.stream().map(ArchiveVariable::getPath).collect(Collectors.toList());
+        Map<String, byte[]> zipEntries = ZipUtils.readZipEntriesFromBytes(getResponseBody(), expectedEntries::contains);
+        parameters.forEach(arcVar ->
+        {
+            String path = arcVar.getPath();
+            Optional.ofNullable(zipEntries.get(path)).ifPresentOrElse(
+                data -> bddVariableContext.putVariable(arcVar.getScopes(), arcVar.getVariableName(),
+                        arcVar.getOutputFormat().convert(data)),
+                () -> softAssert.recordFailedAssertion(
+                        String.format("Unable to find entry by name %s in response archive", path)));
+        });
+    }
+
+    /**
+     * Verifies that one of specified entries in the response archive has one of specified names
+     * Example:
+     * <p>
+     * <code>
+     * Then the response archive contains entries with the names:$parameters<br>
+     * |name                        |
+     * |files/2011-11-11/skyrim.json|
+     * </code>
+     * </p>
+     * @param parameters contains names
+     */
+    @Then("the response archive contains entries with the names:$parameters")
+    public void verifyArchiveContainsEntries(List<NamedEntry> parameters)
+    {
+        Set<String> entryNames = ZipUtils.readZipEntryNamesFromBytes(getResponseBody());
+        parameters.stream().map(NamedEntry::getName).forEach(expectedName ->
+                softAssert.assertThat("The response archive contains entry with name " + expectedName, entryNames,
+                        hasItem(expectedName)));
+    }
+
     private Optional<String> getHeaderValueByName(HttpResponse response, String httpHeaderName)
     {
         return getHeaderByName(response, httpHeaderName).map(Header::getValue);
@@ -300,6 +378,11 @@ public class HttpResponseValidationSteps
     private HttpResponse getResponse()
     {
         return httpTestContext.getResponse();
+    }
+
+    private byte[] getResponseBody()
+    {
+        return getResponse().getResponseBody();
     }
 
     private boolean isJson(byte[] responseBody)
