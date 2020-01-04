@@ -216,7 +216,7 @@ class AlertActionsTests
         when(webDriverManager.isAndroid()).thenReturn(Boolean.TRUE);
         Action.ACCEPT.process(alert, webDriverManager);
         verify(webDriverManager).performActionInNativeContext(argThat(f -> {
-            f.apply(webDriver);
+            f.accept(webDriver);
             return true;
         }));
     }
