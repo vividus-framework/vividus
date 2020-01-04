@@ -17,7 +17,7 @@
 package org.vividus.selenium.manager;
 
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
@@ -34,7 +34,7 @@ public interface IWebDriverManager
 
     Dimension getSize();
 
-    <R> R performActionInNativeContext(Function<WebDriver, R> function);
+    void performActionInNativeContext(Consumer<WebDriver> consumer);
 
     boolean isMobile();
 

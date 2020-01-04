@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -100,7 +101,7 @@ public class WebDriverManager implements IWebDriverManager
                     webDriverManagerContext.getParameter(WebDriverManagerParameter.SCREEN_SIZE);
             if (dimension == null)
             {
-                dimension = performActionInNativeContext(this::getSize);
+                dimension = runInNativeContext(this::getSize);
                 webDriverManagerContext.putParameter(WebDriverManagerParameter.SCREEN_SIZE, dimension);
             }
             return isOrientation(ScreenOrientation.LANDSCAPE) ? new Dimension(dimension.height, dimension.width)
@@ -109,13 +110,21 @@ public class WebDriverManager implements IWebDriverManager
         return getSize(getWebDriver());
     }
 
+    @Override
+    public void performActionInNativeContext(Consumer<WebDriver> consumer)
+    {
+        runInNativeContext(webDriver -> {
+            consumer.accept(webDriver);
+            return webDriver;
+        });
+    }
+
     private Dimension getSize(WebDriver webDriver)
     {
         return webDriver.manage().window().getSize();
     }
 
-    @Override
-    public <R> R performActionInNativeContext(Function<WebDriver, R> function)
+    private <R> R runInNativeContext(Function<WebDriver, R> function)
     {
         if (isMobile())
         {

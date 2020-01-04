@@ -138,7 +138,6 @@ public class AlertActions implements IAlertActions
                             {
                                 buttons.get(0).click();
                             }
-                            return webDriver;
                         });
                     }
                 }

@@ -78,10 +78,9 @@ class WebDriverManagerTests
 {
     private static final String DESIREDCAPABILITIES_KEY = "desired";
     private static final String BROWSER_TYPE = "browser type";
-    private static final String EXPECTED_RESULT = "expectedResult";
     private static final String NATIVE_APP_CONTEXT = "NATIVE_APP";
     private static final String WEBVIEW_CONTEXT = "WEBVIEW_1";
-    private static final Set<String> WINDOW_HANDLES = Collections.singleton("windowHandle");
+    private static final Set<String> WINDOW_HANDLES = Set.of("windowHandle");
     private static final String COULD_NOT_CONNECT_TO_APP = "Could not connect to a valid app after 20 tries.";
 
     @Mock
@@ -244,7 +243,7 @@ class WebDriverManagerTests
         WebDriver webDriverConfigured = mock(WebDriver.class);
         when(webDriverProvider.get()).thenReturn(webDriverConfigured);
         WebDriverManager spy = spyIsMobile(false);
-        spy.performActionInNativeContext(webDriver -> EXPECTED_RESULT);
+        spy.performActionInNativeContext(webDriver -> assertEquals(webDriverConfigured, webDriver));
         verifyNoInteractions(webDriverConfigured);
     }
 
@@ -257,8 +256,7 @@ class WebDriverManagerTests
         contexts.add(NATIVE_APP_CONTEXT);
         mockMobileDriverContext(mobileDriver, WEBVIEW_CONTEXT, contexts);
         WebDriverManager spy = spyIsMobile(true);
-        String result = EXPECTED_RESULT;
-        assertEquals(result, spy.performActionInNativeContext(webDriver -> result));
+        spy.performActionInNativeContext(webDriver -> assertEquals(mobileDriver, webDriver));
         verify(mobileDriver).context(NATIVE_APP_CONTEXT);
         verify(mobileDriver).context(WEBVIEW_CONTEXT);
     }
@@ -270,7 +268,7 @@ class WebDriverManagerTests
         mockMobileDriverContext(mobileDriver, WEBVIEW_CONTEXT, new HashSet<>());
         WebDriverManager spy = spyIsMobile(true);
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> spy.performActionInNativeContext(driver -> EXPECTED_RESULT));
+            () -> spy.performActionInNativeContext(webDriver -> assertEquals(mobileDriver, webDriver)));
         assertEquals("MobileDriver doesn't have context: " + NATIVE_APP_CONTEXT, exception.getMessage());
     }
 
@@ -279,9 +277,8 @@ class WebDriverManagerTests
     {
         when(webDriverProvider.getUnwrapped(MobileDriver.class)).thenReturn(mobileDriver);
         when(mobileDriver.getContext()).thenReturn(NATIVE_APP_CONTEXT);
-        String result = EXPECTED_RESULT;
         WebDriverManager spy = spyIsMobile(true);
-        assertEquals(result, spy.performActionInNativeContext(webDriver -> result));
+        spy.performActionInNativeContext(webDriver -> assertEquals(mobileDriver, webDriver));
         verify(mobileDriver, never()).context(NATIVE_APP_CONTEXT);
         verify(mobileDriver, never()).getContextHandles();
     }
