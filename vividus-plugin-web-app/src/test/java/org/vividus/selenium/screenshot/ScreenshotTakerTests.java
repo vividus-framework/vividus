@@ -92,7 +92,7 @@ public class ScreenshotTakerTests
     @Mock
     private IWebDriverProvider webDriverProvider;
 
-    @Mock(extraInterfaces = {JavascriptExecutor.class})
+    @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
 
     @Mock

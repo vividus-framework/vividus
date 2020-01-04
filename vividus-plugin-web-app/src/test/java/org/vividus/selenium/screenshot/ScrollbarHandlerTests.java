@@ -48,7 +48,7 @@ class ScrollbarHandlerTests
             "var originalStyleOverflow = document.documentElement.style.overflow;"
                     + "document.documentElement.style.overflow='hidden';return originalStyleOverflow;";
 
-    @Mock(extraInterfaces = {JavascriptExecutor.class})
+    @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
 
     @Mock
