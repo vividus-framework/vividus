@@ -6,7 +6,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
-    implementation(group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.698')
+    implementation(group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.700')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
