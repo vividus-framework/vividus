@@ -40,11 +40,13 @@
         </property>
     </bean>
 
+    <bean id="stringToDateTimeFormatterConverter" class="org.vividus.spring.StringToDateTimeFormatterConverter" />
+
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="converters">
             <set>
-                <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
                 <ref bean="stringToEditorConverter" />
+                <ref bean="stringToDateTimeFormatterConverter" />
             </set>
         </property>
     </bean>
