@@ -44,7 +44,6 @@
         <property name="converters">
             <set>
                 <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
-                <bean class="org.vividus.spring.StringToLocaleConverter"/>
                 <ref bean="stringToEditorConverter" />
             </set>
         </property>

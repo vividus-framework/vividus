@@ -17,6 +17,7 @@
 package org.vividus.configuration;
 
 import java.lang.System.Logger.Level;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -28,6 +29,7 @@ public class Bean
 {
     private Optional<Pattern> optionalPattern;
     private Set<Level> setOfEnumeration;
+    private Locale locale;
 
     public void setOptionalPattern(Optional<Pattern> optionalPattern)
     {
@@ -37,5 +39,10 @@ public class Bean
     public void setSetOfEnumeration(Set<Level> setOfEnumeration)
     {
         this.setOfEnumeration = setOfEnumeration;
+    }
+
+    public void setLocale(Locale locale)
+    {
+        this.locale = locale;
     }
 }

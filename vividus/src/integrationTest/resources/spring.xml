@@ -8,5 +8,6 @@
         <bean class="org.vividus.configuration.Bean">
             <property name="optionalPattern" value=".+" />
             <property name="setOfEnumeration" value="ALL,INFO" />
+            <property name="locale" value="zh" />
         </bean>
     </beans>
