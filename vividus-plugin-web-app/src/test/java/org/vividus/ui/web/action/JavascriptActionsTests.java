@@ -38,7 +38,6 @@ import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.model.Position;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -245,21 +244,6 @@ class JavascriptActionsTests
         when(((JavascriptExecutor) webDriver).executeScript(SCRIPT_GET_ELEMENT_ATTRIBUTES, mockedWebElement))
                 .thenReturn(attributes);
         assertEquals(javascriptActions.getElementAttributes(mockedWebElement), attributes);
-    }
-
-    @Test
-    void testGetElementPosition()
-    {
-        Map<String, Long> map = new HashMap<>();
-        Long top = 1L;
-        Long left = 2L;
-        map.put(TOP, top);
-        map.put(LEFT, left);
-        when(((JavascriptExecutor) webDriver).executeScript(SCRIPT_GET_ELEMENT_POSITION, mockedWebElement))
-                .thenReturn(map);
-        Position position = javascriptActions.getElementPosition(mockedWebElement);
-        assertEquals(position.getTop(), top.intValue());
-        assertEquals(position.getLeft(), left.intValue());
     }
 
     @Test

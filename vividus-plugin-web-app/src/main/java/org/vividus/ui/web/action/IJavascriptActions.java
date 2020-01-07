@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.model.Position;
 
 public interface IJavascriptActions
 {
@@ -83,8 +82,6 @@ public interface IJavascriptActions
     double getDevicePixelRatio();
 
     Map<String, String> getElementAttributes(WebElement webElement);
-
-    Position getElementPosition(WebElement webElement);
 
     /**
      * Sets the top position of a positioned element.

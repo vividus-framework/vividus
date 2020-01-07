@@ -26,7 +26,6 @@ import org.vividus.selenium.TextUtils;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.listener.IWebApplicationListener;
-import org.vividus.ui.web.model.Position;
 import org.vividus.util.ResourceUtils;
 
 public class JavascriptActions implements IJavascriptActions, IWebApplicationListener
@@ -183,15 +182,6 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
         return executeScript("var attributes = arguments[0].attributes; var map = new Object();"
                 + " for(i=0; i< attributes.length; i++){ map[attributes[i].name] = attributes[i].value; } return map;",
                 webElement);
-    }
-
-    @Override
-    public Position getElementPosition(WebElement webElement)
-    {
-        Map<String, Long> result = executeScript("var coordinates = arguments[0].getBoundingClientRect();"
-                + " var left = Math.round(coordinates.left), top = Math.round(coordinates.top); return {left, top};",
-                webElement);
-        return new Position(result.get("top").intValue(), result.get("left").intValue());
     }
 
     @Override
