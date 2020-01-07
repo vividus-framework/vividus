@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <beans xmlns="http://www.springframework.org/schema/beans" xmlns:util="http://www.springframework.org/schema/util"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xsi:schemaLocation="
+            http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+        <bean class="org.vividus.configuration.Bean">
+            <property name="optionalPattern" value=".+" />
+            <property name="setOfEnumeration" value="ALL,INFO" />
+        </bean>
+    </beans>

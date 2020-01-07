@@ -338,6 +338,7 @@
                 <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
                 <bean class="org.vividus.spring.StringToLocaleConverter"/>
                 <bean class="org.vividus.spring.StringToIntegerRangeConverter"/>
+                <ref bean="stringToEditorConverter" />
             </set>
         </property>
     </bean>

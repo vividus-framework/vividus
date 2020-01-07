@@ -34,11 +34,18 @@
         </property>
     </bean>
 
+    <bean id="stringToEditorConverter" class="org.vividus.spring.StringToEditorGenericConverter" init-method="init">
+        <property name="propertyEditorRegistry">
+            <bean class="org.vividus.spring.EagerlyInitializingPropertyEditorRegistrySupport" />
+        </property>
+    </bean>
+
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="converters">
             <set>
                 <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
                 <bean class="org.vividus.spring.StringToLocaleConverter"/>
+                <ref bean="stringToEditorConverter" />
             </set>
         </property>
     </bean>
