@@ -72,7 +72,7 @@ public class ActionSteps
      * @param actions table of actions to execute
      * @deprecated Use <i>When I execute sequence of actions: actions</i>
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0", forRemoval = true)
     @When("I execute the sequence of actions: $actions")
     public void executeActionsSequence(List<Action> actions)
     {
