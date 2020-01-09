@@ -130,7 +130,7 @@ public class BddStepPrinterTests extends SystemOutTests
         // used for testing purposes
     }
 
-    @SuppressWarnings({"unused", "checkstyle:MissingDeprecated"})
+    @SuppressWarnings({"unused", "checkstyle:MissingDeprecated", "checkstyle:RequiredParameterForAnnotation"})
     @Deprecated
     private void deprecatedMethod()
     {
