@@ -19,10 +19,6 @@ task integrationTest(type: Test) {
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
-eclipse.classpath.file.whenMerged {
-    tinkerEclipseTestClasspath(entries, 'integrationTest')
-}
-
 configurations.all {
     exclude group: 'commons-logging'
     exclude group: 'org.springframework', module: 'spring-jcl'
