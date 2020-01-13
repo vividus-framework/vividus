@@ -57,9 +57,9 @@ import org.vividus.bdd.util.RowsCollector;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.CheckedSupplier;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
+import org.vividus.util.function.CheckedSupplier;
 import org.vividus.util.wait.WaitMode;
 import org.vividus.util.wait.Waiter;
 

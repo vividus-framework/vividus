@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.util;
+package org.vividus.util.function;
 
 @FunctionalInterface
 public interface CheckedSupplier<T, E extends Exception>

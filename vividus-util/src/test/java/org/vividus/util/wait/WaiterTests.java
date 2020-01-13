@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.vividus.util.CheckedSupplier;
+import org.vividus.util.function.CheckedSupplier;
 
 @RunWith(PowerMockRunner.class)
 @SuppressWarnings("unchecked")

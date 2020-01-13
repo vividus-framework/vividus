@@ -19,8 +19,8 @@ package org.vividus.util.wait;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-import org.vividus.util.CheckedSupplier;
 import org.vividus.util.Sleeper;
+import org.vividus.util.function.CheckedSupplier;
 
 public final class Waiter
 {
