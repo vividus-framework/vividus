@@ -36,8 +36,9 @@ public class StepExamplesTableParser implements IStepExamplesTableParser
     @Override
     public List<Step> parse(ExamplesTable stepsAsTable)
     {
-        String storyAsText = stepsAsTable.getRowsAsParameters().stream()
-                .map(p -> p.<String>valueAs("step", String.class)).collect(Collectors.joining(System.lineSeparator()));
+        String storyAsText = stepsAsTable.getRows().stream()
+                .map(p -> p.get("step"))
+                .collect(Collectors.joining(System.lineSeparator()));
         List<String> stepsAsText = new ArrayList<>();
         if (!storyAsText.isEmpty())
         {
