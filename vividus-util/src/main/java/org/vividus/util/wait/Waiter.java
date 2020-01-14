@@ -24,23 +24,26 @@ import org.vividus.util.function.CheckedSupplier;
 
 public final class Waiter
 {
-    private Waiter()
+    private final long durationInMillis;
+    private final long pollingTimeoutMillis;
+
+    public Waiter(WaitMode waitMode)
     {
+        durationInMillis = waitMode.getDuration().toMillis();
+        pollingTimeoutMillis = durationInMillis / waitMode.getRetryTimes();
     }
 
-    public static <T, E extends Exception> T wait(WaitMode waitMode,
-            CheckedSupplier<T, E> valueProvider, Predicate<T> repeatCondition) throws E
+    public <T, E extends Exception> T wait(CheckedSupplier<T, E> valueProvider, Predicate<T> repeatCondition) throws E
     {
-        long durationInMillis = waitMode.getDuration().toMillis();
-        long expectedTime = System.currentTimeMillis() + durationInMillis;
-        long pollingTimeoutMillis = durationInMillis / waitMode.getRetryTimes();
+        long endTime = System.currentTimeMillis() + durationInMillis;
+
         T value;
         do
         {
             value = valueProvider.get();
             Sleeper.sleep(pollingTimeoutMillis, TimeUnit.MILLISECONDS);
         }
-        while (repeatCondition.test(value) && System.currentTimeMillis() <= expectedTime);
+        while (repeatCondition.test(value) && System.currentTimeMillis() <= endTime);
         return value;
     }
 }

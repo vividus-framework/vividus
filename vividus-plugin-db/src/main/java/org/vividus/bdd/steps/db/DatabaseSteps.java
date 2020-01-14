@@ -255,8 +255,8 @@ public class DatabaseSteps
             }
             return notEmpty;
         };
-        List<List<EntryComparisonResult>> comparisonResult =
-                Waiter.wait(new WaitMode(duration, retryTimes), resultProvider, dataNotEqual);
+        Waiter waiter = new Waiter(new WaitMode(duration, retryTimes));
+        List<List<EntryComparisonResult>> comparisonResult = waiter.wait(resultProvider, dataNotEqual);
         verifyComparisonResult(statistics, filterPassedChecks(comparisonResult));
     }
 
