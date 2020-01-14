@@ -31,7 +31,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,7 +58,6 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
-import org.vividus.util.function.CheckedSupplier;
 import org.vividus.util.wait.WaitMode;
 import org.vividus.util.wait.Waiter;
 
@@ -238,25 +236,30 @@ public class DatabaseSteps
         Map<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table.getRows());
         statistics.getTarget().setRowsQuantity(sourceData.size());
 
-        CheckedSupplier<List<List<EntryComparisonResult>>, Exception> resultProvider = () -> {
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(sqlQuery);
-            statistics.getSource().setRowsQuantity(data.size());
-            Map<Object, Map<String, Object>> targetData = hashMap(Set.of(), data.stream()
-                    .map(m -> m.entrySet()
-                               .stream()
-                               .collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())))));
-            return compareData(statistics, sourceData, targetData);
-        };
-        Predicate<List<List<EntryComparisonResult>>> dataNotEqual = result -> {
-            boolean notEmpty = !result.isEmpty();
-            if (notEmpty)
-            {
-                LOGGER.info("SQL result data is not equal to expected data in {} records", result.size());
-            }
-            return notEmpty;
-        };
         Waiter waiter = new Waiter(new WaitMode(duration, retryTimes));
-        List<List<EntryComparisonResult>> comparisonResult = waiter.wait(resultProvider, dataNotEqual);
+        List<List<EntryComparisonResult>> comparisonResult = waiter.wait(
+            () -> {
+                List<Map<String, Object>> data = jdbcTemplate.queryForList(sqlQuery);
+                statistics.getSource().setRowsQuantity(data.size());
+                Map<Object, Map<String, Object>> targetData = hashMap(Set.of(),
+                        data.stream().map(
+                            m -> m.entrySet()
+                               .stream()
+                               .collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())))
+                        )
+                );
+                return compareData(statistics, sourceData, targetData);
+            },
+            result -> {
+                boolean empty = result.isEmpty();
+                if (!empty)
+                {
+                    LOGGER.atInfo().addArgument(result::size).log(
+                            "SQL result data is not equal to expected data in {} records");
+                }
+                return empty;
+            }
+        );
         verifyComparisonResult(statistics, filterPassedChecks(comparisonResult));
     }
 

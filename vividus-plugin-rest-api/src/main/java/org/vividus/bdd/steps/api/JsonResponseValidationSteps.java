@@ -231,16 +231,12 @@ public class JsonResponseValidationSteps
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, resourceUrl, Optional.empty(), response -> {
             try
             {
-                if (response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0)
-                {
-                    return false;
-                }
+                return response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0;
             }
             catch (InvalidJsonException ignored)
             {
-                // ignore exception
+                return false;
             }
-            return true;
         }, new WaitMode(duration, retryTimes));
         if (httpTestContext.getResponse() != null)
         {

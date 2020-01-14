@@ -64,7 +64,7 @@ public class HttpRequestExecutor
     public void executeHttpRequest(HttpMethod httpMethod, String endpoint, Optional<String> relativeURL)
             throws IOException
     {
-        executeHttpRequest(httpMethod, endpoint, relativeURL, response -> false, new WaitMode(Duration.ZERO, 1));
+        executeHttpRequest(httpMethod, endpoint, relativeURL, response -> true, new WaitMode(Duration.ZERO, 1));
     }
 
     /**
@@ -75,17 +75,17 @@ public class HttpRequestExecutor
      * @param httpMethod HttpMethod to execute
      * @param endpoint Request endpoint
      * @param relativeURL Relative URL - optional
-     * @param repeatRequest Predicate condition to check response
+     * @param stopCondition Condition used to check whether stop wait or proceed to the next iteration
      * @param waitMode Which time duration to wait and how many retry times
      * @throws IOException If an input or output exception occurred
      */
     public void executeHttpRequest(HttpMethod httpMethod, String endpoint, Optional<String> relativeURL,
-            Predicate<HttpResponse> repeatRequest, WaitMode waitMode) throws IOException
+            Predicate<HttpResponse> stopCondition, WaitMode waitMode) throws IOException
     {
         Waiter waiter = new Waiter(waitMode);
         try
         {
-            waiter.wait(() -> executeHttpCallSafely(httpMethod, endpoint, relativeURL.orElse(null)), repeatRequest);
+            waiter.wait(() -> executeHttpCallSafely(httpMethod, endpoint, relativeURL.orElse(null)), stopCondition);
         }
         finally
         {

@@ -34,15 +34,15 @@ class WaiterTests
     void shouldReturnValueAfterReachingTimeout() throws IOException
     {
         CheckedSupplier<Boolean, IOException> valueProvider = mock(CheckedSupplier.class);
-        when(valueProvider.get()).thenReturn(true);
-        assertTrue(new Waiter(new WaitMode(Duration.ofMillis(500), 2)).wait(valueProvider, Boolean::booleanValue));
+        when(valueProvider.get()).thenReturn(false);
+        assertFalse(new Waiter(new WaitMode(Duration.ofMillis(500), 2)).wait(valueProvider, Boolean::booleanValue));
     }
 
     @Test
     void shouldReturnValueAfterReachingStopCondition() throws IOException
     {
         CheckedSupplier<Boolean, IOException> valueProvider = mock(CheckedSupplier.class);
-        when(valueProvider.get()).thenReturn(true).thenReturn(false).thenReturn(true);
-        assertFalse(new Waiter(new WaitMode(Duration.ofSeconds(1), 3)).wait(valueProvider, Boolean::booleanValue));
+        when(valueProvider.get()).thenReturn(false).thenReturn(true).thenReturn(false);
+        assertTrue(new Waiter(new WaitMode(Duration.ofSeconds(1), 3)).wait(valueProvider, Boolean::booleanValue));
     }
 }
