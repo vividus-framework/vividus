@@ -18,32 +18,31 @@ package org.vividus.util.wait;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.time.Duration;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
 import org.vividus.util.function.CheckedSupplier;
 
-@RunWith(PowerMockRunner.class)
 @SuppressWarnings("unchecked")
-public class WaiterTests
+class WaiterTests
 {
     @Test
-    public void testOneTime() throws Exception
+    void shouldReturnValueAfterReachingTimeout() throws IOException
     {
-        CheckedSupplier<Boolean, Exception> valueProvider = PowerMockito.mock(CheckedSupplier.class);
-        PowerMockito.when(valueProvider.get()).thenReturn(true);
-        assertTrue(Waiter.wait(new WaitMode(Duration.ZERO, 1), valueProvider, Boolean::booleanValue));
+        CheckedSupplier<Boolean, IOException> valueProvider = mock(CheckedSupplier.class);
+        when(valueProvider.get()).thenReturn(true);
+        assertTrue(new Waiter(new WaitMode(Duration.ofMillis(500), 2)).wait(valueProvider, Boolean::booleanValue));
     }
 
     @Test
-    public void testMultipleTimes() throws Exception
+    void shouldReturnValueAfterReachingStopCondition() throws IOException
     {
-        CheckedSupplier<Boolean, Exception> valueProvider = PowerMockito.mock(CheckedSupplier.class);
-        PowerMockito.when(valueProvider.get()).thenReturn(true).thenReturn(false);
-        assertFalse(Waiter.wait(new WaitMode(Duration.ofSeconds(1), 2), valueProvider, Boolean::booleanValue));
+        CheckedSupplier<Boolean, IOException> valueProvider = mock(CheckedSupplier.class);
+        when(valueProvider.get()).thenReturn(true).thenReturn(false).thenReturn(true);
+        assertFalse(new Waiter(new WaitMode(Duration.ofSeconds(1), 3)).wait(valueProvider, Boolean::booleanValue));
     }
 }

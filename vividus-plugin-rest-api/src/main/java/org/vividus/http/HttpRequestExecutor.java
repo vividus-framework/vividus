@@ -82,10 +82,10 @@ public class HttpRequestExecutor
     public void executeHttpRequest(HttpMethod httpMethod, String endpoint, Optional<String> relativeURL,
             Predicate<HttpResponse> repeatRequest, WaitMode waitMode) throws IOException
     {
+        Waiter waiter = new Waiter(waitMode);
         try
         {
-            Waiter.wait(waitMode,
-                () -> executeHttpCallSafely(httpMethod, endpoint, relativeURL.orElse(null)), repeatRequest);
+            waiter.wait(() -> executeHttpCallSafely(httpMethod, endpoint, relativeURL.orElse(null)), repeatRequest);
         }
         finally
         {
