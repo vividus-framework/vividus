@@ -16,6 +16,11 @@ branches:
   only:
     - master
 
+# Remove --depth flag, becasue Travis CI can clone repositories to a maximum depth of 50 commits
+# https://docs.travis-ci.com/user/customizing-the-build#git-clone-depth
+git:
+  depth: false
+
 install: skip
 
 jobs:
@@ -23,7 +28,7 @@ jobs:
     - stage: Build
       script:
         - ./gradlew build
-        - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then git fetch --unshallow && ./gradlew sonarqube; fi
+        - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./gradlew sonarqube; fi
       after_success: bash <(curl -s https://codecov.io/bash)
     - stage: "Integration tests"
       script: ./gradlew :vividus-tests:runStories
