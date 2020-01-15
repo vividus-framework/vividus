@@ -102,7 +102,7 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
     @Override
     public void scrollToEndOf(WebElement element)
     {
-        executeScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", element);
+        executeScript("arguments[0].scrollTop = arguments[0].scrollHeight", element);
     }
 
     @Override
