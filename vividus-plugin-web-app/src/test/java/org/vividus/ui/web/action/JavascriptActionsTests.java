@@ -145,7 +145,7 @@ class JavascriptActionsTests
     void testScrollToEndOf()
     {
         javascriptActions.scrollToEndOf(mockedWebElement);
-        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)",
+        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollTop = arguments[0].scrollHeight",
                 mockedWebElement);
     }
 
