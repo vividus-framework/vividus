@@ -33,7 +33,7 @@ public final class Waiter
         pollingTimeoutMillis = durationInMillis / waitMode.getRetryTimes();
     }
 
-    public <T, E extends Exception> T wait(CheckedSupplier<T, E> valueProvider, Predicate<T> repeatCondition) throws E
+    public <T, E extends Exception> T wait(CheckedSupplier<T, E> valueProvider, Predicate<T> stopCondition) throws E
     {
         long endTime = System.currentTimeMillis() + durationInMillis;
 
@@ -43,7 +43,7 @@ public final class Waiter
             value = valueProvider.get();
             Sleeper.sleep(pollingTimeoutMillis, TimeUnit.MILLISECONDS);
         }
-        while (repeatCondition.test(value) && System.currentTimeMillis() <= endTime);
+        while (!stopCondition.test(value) && System.currentTimeMillis() <= endTime);
         return value;
     }
 }
