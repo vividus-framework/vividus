@@ -50,10 +50,6 @@ class JavascriptActionsTests
     private static final String SCRIPT_GET_ELEMENT_ATTRIBUTES = "var attributes = arguments[0].attributes;"
             + " var map = new Object(); for(i=0; i< attributes.length; i++)"
             + "{ map[attributes[i].name] = attributes[i].value; } return map;";
-    private static final String SCRIPT_GET_ELEMENT_POSITION = "var coordinates = arguments[0].getBoundingClientRect();"
-            + " var left = Math.round(coordinates.left), top = Math.round(coordinates.top); return {left, top};";
-    private static final String TOP = "top";
-    private static final String LEFT = "left";
     private static final String SCRIPT_SET_TOP_POSITION = "var originTop = arguments[0].getBoundingClientRect().top;"
             + " arguments[0].style.top = \"%dpx\"; return Math.round(originTop);";
 
