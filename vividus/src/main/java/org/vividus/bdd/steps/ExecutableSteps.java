@@ -61,7 +61,7 @@ public class ExecutableSteps
     {
         if (condition)
         {
-            ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+            SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
             subStepExecutor.execute(Optional.empty());
         }
     }
@@ -100,7 +100,7 @@ public class ExecutableSteps
         int minimum = 0;
         checkArgument(minimum <= number && number <= EXECUTIONS_NUMBER_THRESHOLD,
             "Please, specify executions number in the range from %s to %s", minimum, EXECUTIONS_NUMBER_THRESHOLD);
-        ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
         IntStream.range(0, number).forEach(i -> subStepExecutor.execute(Optional.empty()));
     }
 
@@ -135,7 +135,7 @@ public class ExecutableSteps
     {
         Matcher<Integer> limitMatcher = comparisonRule.getComparisonRule(limit);
         checkForLimit(seed, limitMatcher, increment);
-        ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
         iterate(seed, limitMatcher, increment, iterationVariable ->
         {
             bddVariableContext.putVariable(VariableScope.STEP, "iterationVariable", iterationVariable);

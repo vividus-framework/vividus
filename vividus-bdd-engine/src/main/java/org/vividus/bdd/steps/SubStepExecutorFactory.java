@@ -39,7 +39,7 @@ public class SubStepExecutorFactory implements ISubStepExecutorFactory
     @Inject private ISubStepsListener subStepsListener;
 
     @Override
-    public ISubStepExecutor createSubStepExecutor(ExamplesTable stepsToExecute)
+    public SubStepExecutor createSubStepExecutor(ExamplesTable stepsToExecute)
     {
         StoryReporter storyReporter = configuration.storyReporter(
                 bddRunContext.getRootRunningStory().getStory().getPath());

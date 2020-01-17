@@ -29,7 +29,7 @@ import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.Step;
 import org.jbehave.core.steps.StepResult;
 
-public class SubStepExecutor implements ISubStepExecutor
+public class SubStepExecutor
 {
     private final Configuration configuration;
     private final StoryReporter storyReporter;
@@ -45,7 +45,6 @@ public class SubStepExecutor implements ISubStepExecutor
         this.subStepsListener = subStepsListener;
     }
 
-    @Override
     public void execute(Optional<Supplier<String>> stepContextInfoProvider)
     {
         subStepsListener.beforeSubSteps();

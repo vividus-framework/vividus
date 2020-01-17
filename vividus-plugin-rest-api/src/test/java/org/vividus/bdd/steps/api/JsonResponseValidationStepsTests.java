@@ -60,8 +60,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepExecutor;
 import org.vividus.bdd.steps.ISubStepExecutorFactory;
+import org.vividus.bdd.steps.SubStepExecutor;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
@@ -287,7 +287,7 @@ class JsonResponseValidationStepsTests
     void testPerformAllStepsForProvidedJsonIfFound(String json, String jsonPath, int number)
     {
         ExamplesTable stepsAsTable = mock(ExamplesTable.class);
-        ISubStepExecutor subStepExecutor = mock(ISubStepExecutor.class);
+        SubStepExecutor subStepExecutor = mock(SubStepExecutor.class);
         when(subStepExecutorFactory.createSubStepExecutor(stepsAsTable)).thenReturn(subStepExecutor);
         when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(number),
                 verifyMatcher(number))).thenReturn(true);
