@@ -29,15 +29,15 @@ import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.Step;
 import org.jbehave.core.steps.StepResult;
 
-public class SubStepExecutor
+public class SubSteps
 {
     private final Configuration configuration;
     private final StoryReporter storyReporter;
     private final List<Step> steps;
     private final ISubStepsListener subStepsListener;
 
-    public SubStepExecutor(Configuration configuration, StoryReporter storyReporter,
-            List<Step> steps, ISubStepsListener subStepsListener)
+    public SubSteps(Configuration configuration, StoryReporter storyReporter, List<Step> steps,
+            ISubStepsListener subStepsListener)
     {
         this.configuration = configuration;
         this.storyReporter = storyReporter;

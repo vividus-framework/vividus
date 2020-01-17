@@ -57,7 +57,7 @@
         <property name="embedder" ref="embedder"/>
     </bean>
 
-    <bean id="subStepExecutorFactory" class="org.vividus.bdd.steps.SubStepExecutorFactory" />
+    <bean id="subStepsFactory" class="org.vividus.bdd.steps.SubStepsFactory" />
 
     <bean id="bddResourceLoader" class="org.vividus.bdd.resource.BddResourceLoader">
         <property name="resourceLoadConfiguration" ref="resourceLoadConfiguration" />

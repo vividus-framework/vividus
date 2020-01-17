@@ -43,7 +43,7 @@ import org.vividus.bdd.parser.IStepExamplesTableParser;
 import org.vividus.bdd.spring.Configuration;
 
 @ExtendWith(MockitoExtension.class)
-class SubStepExecutorFactoryTest
+class SubStepsFactoryTest
 {
     @Mock
     private Configuration configuration;
@@ -57,16 +57,16 @@ class SubStepExecutorFactoryTest
     private ExamplesTable stepsToExecute;
 
     @InjectMocks
-    private SubStepExecutorFactory subStepExecutorFactory;
+    private SubStepsFactory subStepsFactory;
 
     @Test
-    void testCreateSubStepExecutor()
+    void testCreateSubSteps()
     {
         Step step = mock(Step.class);
         List<Step> steps = List.of(step);
         when(stepExamplesTableParser.parse(stepsToExecute)).thenReturn(steps);
         StoryReporter storyReporter = mockStoryReporter();
-        SubStepExecutor executor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        SubSteps executor = subStepsFactory.createSubSteps(stepsToExecute);
         assertEquals(steps, getFieldValue("steps", executor));
         DelegatingStoryReporter actualStoryReporter = getFieldValue("storyReporter", executor);
         assertNotEquals(storyReporter, actualStoryReporter);
@@ -79,7 +79,7 @@ class SubStepExecutorFactoryTest
     @SuppressWarnings("unchecked")
     private <T> T getFieldValue(String fieldName, Object objectToExtractValue)
     {
-        Field field = ReflectionUtils.findField(SubStepExecutor.class, fieldName);
+        Field field = ReflectionUtils.findField(SubSteps.class, fieldName);
         field.setAccessible(true);
         return (T) ReflectionUtils.getField(field, objectToExtractValue);
     }

@@ -36,7 +36,7 @@ public class ExecutableSteps
 {
     public static final int EXECUTIONS_NUMBER_THRESHOLD = 50;
 
-    @Inject private ISubStepExecutorFactory subStepExecutorFactory;
+    @Inject private ISubStepsFactory subStepsFactory;
     @Inject private IBddVariableContext bddVariableContext;
 
     /**
@@ -61,8 +61,8 @@ public class ExecutableSteps
     {
         if (condition)
         {
-            SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
-            subStepExecutor.execute(Optional.empty());
+            SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
+            subSteps.execute(Optional.empty());
         }
     }
 
@@ -78,7 +78,7 @@ public class ExecutableSteps
     {
         if (bddVariableContext.getVariable(name) == null)
         {
-            subStepExecutorFactory.createSubStepExecutor(stepsToExecute).execute(Optional.empty());
+            subStepsFactory.createSubSteps(stepsToExecute).execute(Optional.empty());
         }
     }
 
@@ -100,8 +100,8 @@ public class ExecutableSteps
         int minimum = 0;
         checkArgument(minimum <= number && number <= EXECUTIONS_NUMBER_THRESHOLD,
             "Please, specify executions number in the range from %s to %s", minimum, EXECUTIONS_NUMBER_THRESHOLD);
-        SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
-        IntStream.range(0, number).forEach(i -> subStepExecutor.execute(Optional.empty()));
+        SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
+        IntStream.range(0, number).forEach(i -> subSteps.execute(Optional.empty()));
     }
 
     /**
@@ -135,11 +135,11 @@ public class ExecutableSteps
     {
         Matcher<Integer> limitMatcher = comparisonRule.getComparisonRule(limit);
         checkForLimit(seed, limitMatcher, increment);
-        SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
         iterate(seed, limitMatcher, increment, iterationVariable ->
         {
             bddVariableContext.putVariable(VariableScope.STEP, "iterationVariable", iterationVariable);
-            subStepExecutor.execute(Optional.empty());
+            subSteps.execute(Optional.empty());
         });
     }
 

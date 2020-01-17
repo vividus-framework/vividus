@@ -18,7 +18,7 @@ package org.vividus.bdd.steps;
 
 import org.jbehave.core.model.ExamplesTable;
 
-public interface ISubStepExecutorFactory
+public interface ISubStepsFactory
 {
-    SubStepExecutor createSubStepExecutor(ExamplesTable stepsToExecute);
+    SubSteps createSubSteps(ExamplesTable stepsToExecute);
 }
