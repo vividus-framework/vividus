@@ -19,6 +19,7 @@ package org.vividus.bdd.context;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +37,10 @@ public class BddVariableContext implements IBddVariableContext
     private static final int VARIABLE_NAME_GROUP = 1;
     private static final int LIST_INDEX_GROUP = 2;
     private static final int MAP_KEY_GROUP = 3;
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("([^\\[\\].]*)(?:\\[(\\d+)])?(?:\\.(.*))?");
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile(
+            "([^\\[\\]\\.:]+):?(?:\\[(\\d+)\\])?:?(?:\\.([^:]+))?:?");
+    private static final char COLON = ':';
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BddVariableContext.class);
 
     private TestContext testContext;
@@ -52,13 +56,20 @@ public class BddVariableContext implements IBddVariableContext
                 .map(scope -> getVariable(variables.getVariables(scope), variableKey))
                 .filter(Objects::nonNull)
                 .findFirst()
-                .orElse(System.getProperty(variableKey));
+                .or(() -> getDefault(variableKey))
+                .orElseGet(() -> System.getProperty(variableKey));
     }
 
     @Override
     public void putVariable(Set<VariableScope> variableScopes, String variableKey, Object variableValue)
     {
         variableScopes.forEach(s -> putVariable(s, variableKey, variableValue));
+    }
+
+    private Optional<String> getDefault(String key)
+    {
+        int colonIndex = key.lastIndexOf(COLON);
+        return colonIndex >= 0 ? Optional.of(key.substring(colonIndex + 1)) : Optional.empty();
     }
 
     @Override

@@ -59,6 +59,7 @@ import org.vividus.testcontext.SimpleTestContext;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class BddVariableContextTests
 {
+    private static final String DEFAULT = "defaultValue";
     private static final String SAVE_MESSAGE_TEMPLATE = "Saving a value '{}' into the '{}' variable '{}'";
     private static final String VALUE = "value";
     private static final String KEY = "key";
@@ -150,12 +151,16 @@ class BddVariableContextTests
     {
         return Stream.of(
             // CHECKSTYLE:OFF
-            arguments(VARIABLE_KEY,         List.of(Map.of(KEY, VALUE)), List.of(Map.of(KEY, VALUE))),
-            arguments("variableKey[0]",     List.of(Map.of(KEY, VALUE)), Map.of(KEY, VALUE)),
-            arguments("variableKey[0].key", List.of(Map.of(KEY, VALUE)), VALUE),
-            arguments("variableKey.key",    Map.of(KEY, VALUE), VALUE),
-            arguments("variableKey[0]",     List.of(Set.of(KEY)),        Set.of(KEY)),
-            arguments("variableKey[7]",     List.of(Map.of(KEY, VALUE)), null)
+            arguments(VARIABLE_KEY,                      List.of(Map.of(KEY, VALUE)), List.of(Map.of(KEY, VALUE))),
+            arguments("variableKey:defaultValue",        null,                        DEFAULT),
+            arguments("variableKey[0]",                  List.of(Map.of(KEY, VALUE)), Map.of(KEY, VALUE)),
+            arguments("variableKey[0]:defaultValue",     List.of(),                   DEFAULT),
+            arguments("variableKey[0].key",              List.of(Map.of(KEY, VALUE)), VALUE),
+            arguments("variableKey[0].key:defaultValue", List.of(),                   DEFAULT),
+            arguments("variableKey.key",                 Map.of(KEY, VALUE),          VALUE),
+            arguments("variableKey.key:defaultValue",    Map.of(),                    DEFAULT),
+            arguments("variableKey[0]",                  List.of(Set.of(KEY)),        Set.of(KEY)),
+            arguments("variableKey[7]",                  List.of(Map.of(KEY, VALUE)), null)
            // CHECKSTYLE:ON
         );
     }
