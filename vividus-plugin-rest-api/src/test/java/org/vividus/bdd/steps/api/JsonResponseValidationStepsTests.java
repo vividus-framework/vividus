@@ -60,8 +60,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepExecutorFactory;
-import org.vividus.bdd.steps.SubStepExecutor;
+import org.vividus.bdd.steps.ISubStepsFactory;
+import org.vividus.bdd.steps.SubSteps;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
@@ -119,7 +119,7 @@ class JsonResponseValidationStepsTests
     private ISoftAssert softAssert;
 
     @Mock
-    private ISubStepExecutorFactory subStepExecutorFactory;
+    private ISubStepsFactory subStepsFactory;
 
     @Mock
     private HttpTestContext httpTestContext;
@@ -287,13 +287,13 @@ class JsonResponseValidationStepsTests
     void testPerformAllStepsForProvidedJsonIfFound(String json, String jsonPath, int number)
     {
         ExamplesTable stepsAsTable = mock(ExamplesTable.class);
-        SubStepExecutor subStepExecutor = mock(SubStepExecutor.class);
-        when(subStepExecutorFactory.createSubStepExecutor(stepsAsTable)).thenReturn(subStepExecutor);
+        SubSteps subSteps = mock(SubSteps.class);
+        when(subStepsFactory.createSubSteps(stepsAsTable)).thenReturn(subSteps);
         when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(number),
                 verifyMatcher(number))).thenReturn(true);
         jsonResponseValidationSteps.performAllStepsForProvidedJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO,
                 number, json, jsonPath, stepsAsTable);
-        verify(subStepExecutor, times(number)).execute(Optional.empty());
+        verify(subSteps, times(number)).execute(Optional.empty());
         verify(httpTestContext).getJsonContext();
         verify(httpTestContext).putJsonContext(null);
     }
@@ -307,7 +307,7 @@ class JsonResponseValidationStepsTests
                 verifyMatcher(3))).thenReturn(false);
         jsonResponseValidationSteps.performAllStepsForJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 0,
                 JSON_PATH, stepsAsTable);
-        verifyNoInteractions(stepsAsTable, subStepExecutorFactory);
+        verifyNoInteractions(stepsAsTable, subStepsFactory);
         verify(httpTestContext, times(0)).putJsonContext(any());
     }
 

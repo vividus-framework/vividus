@@ -44,8 +44,8 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepExecutorFactory;
-import org.vividus.bdd.steps.SubStepExecutor;
+import org.vividus.bdd.steps.ISubStepsFactory;
+import org.vividus.bdd.steps.SubSteps;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.ICssSelectorFactory;
@@ -69,9 +69,9 @@ class NestedStepsTests
     @Mock
     private IWebUiContext webUiContext;
     @Mock
-    private ISubStepExecutorFactory subStepExecutorFactory;
+    private ISubStepsFactory subStepsFactory;
     @Mock
-    private SubStepExecutor subStepExecutor;
+    private SubSteps subSteps;
     @Mock
     private ISearchActions searchActions;
     @Mock
@@ -87,8 +87,8 @@ class NestedStepsTests
     {
         ExamplesTable stepsAsTable = mock(ExamplesTable.class);
         SearchAttributes searchAttributes = mock(SearchAttributes.class);
-        when(subStepExecutorFactory.createSubStepExecutor(stepsAsTable)).thenReturn(subStepExecutor);
-        doNothing().when(subStepExecutor).execute(eq(Optional.empty()));
+        when(subStepsFactory.createSubSteps(stepsAsTable)).thenReturn(subSteps);
+        doNothing().when(subSteps).execute(eq(Optional.empty()));
         WebElement first = mock(WebElement.class);
         WebElement second = mock(WebElement.class);
         when(baseValidations.assertIfNumberOfElementsFound(ELEMENTS_TO_PERFORM_STEPS, searchAttributes, 1,
@@ -116,7 +116,7 @@ class NestedStepsTests
                 searchAttributes, stepsAsTable);
         verifyNoInteractions(cssSelectorFactory);
         verifyNoInteractions(webUiContext);
-        verifyNoInteractions(subStepExecutor);
+        verifyNoInteractions(subSteps);
     }
 
     @Test
@@ -143,7 +143,7 @@ class NestedStepsTests
         ExamplesTable stepsAsTable = mock(ExamplesTable.class);
         SearchAttributes searchAttributes = mock(SearchAttributes.class);
         List<WebElement> elements = List.of(mock(WebElement.class));
-        when(subStepExecutorFactory.createSubStepExecutor(stepsAsTable)).thenReturn(subStepExecutor);
+        when(subStepsFactory.createSubSteps(stepsAsTable)).thenReturn(subSteps);
         when(searchActions.findElements(searchContext, searchAttributes)).thenReturn(elements).thenReturn(elements)
             .thenReturn(List.of());
         when(softAssert.assertThat(eq(ELEMENTS_NUMBER), eq(1), argThat(m ->
@@ -152,7 +152,7 @@ class NestedStepsTests
 
         nestedSteps.performAllStepsWhileElementsExist(ComparisonRule.EQUAL_TO, 1, searchAttributes, 5, stepsAsTable);
 
-        verify(subStepExecutor, times(2)).execute(Optional.empty());
+        verify(subSteps, times(2)).execute(Optional.empty());
         verify(searchContextSetter, times(2)).setSearchContext();
         verify(searchActions, times(3)).findElements(searchContext, searchAttributes);
         verify(softAssert).assertThat(eq(ELEMENTS_NUMBER), eq(1),
@@ -180,7 +180,7 @@ class NestedStepsTests
         ExamplesTable stepsAsTable = mock(ExamplesTable.class);
         SearchAttributes searchAttributes = mock(SearchAttributes.class);
         List<WebElement> elements = List.of(mock(WebElement.class));
-        when(subStepExecutorFactory.createSubStepExecutor(stepsAsTable)).thenReturn(subStepExecutor);
+        when(subStepsFactory.createSubSteps(stepsAsTable)).thenReturn(subSteps);
         when(searchActions.findElements(searchContext, searchAttributes)).thenReturn(elements);
         when(softAssert.assertThat(eq(ELEMENTS_NUMBER), eq(1), argThat(m ->
             ComparisonRule.EQUAL_TO.getComparisonRule(1).toString().equals(m.toString())))).thenReturn(true);
@@ -188,7 +188,7 @@ class NestedStepsTests
 
         nestedSteps.performAllStepsWhileElementsExist(ComparisonRule.EQUAL_TO, 1, searchAttributes, 2, stepsAsTable);
 
-        verify(subStepExecutor, times(2)).execute(Optional.empty());
+        verify(subSteps, times(2)).execute(Optional.empty());
         verify(searchContextSetter, times(2)).setSearchContext();
         verify(searchActions, times(2)).findElements(searchContext, searchAttributes);
         verify(softAssert).recordFailedAssertion("Elements number a value equal to <1>"
@@ -203,7 +203,7 @@ class NestedStepsTests
 
         nestedSteps.performAllStepsWhileElementsExist(ComparisonRule.EQUAL_TO, 1, searchAttributes, -1, stepsAsTable);
 
-        verifyNoInteractions(webUiContext, softAssert, subStepExecutor, searchActions);
+        verifyNoInteractions(webUiContext, softAssert, subSteps, searchActions);
     }
 
     @Test
@@ -212,12 +212,12 @@ class NestedStepsTests
         SearchContext searchContext = mockWebUiContext();
         ExamplesTable stepsAsTable = mock(ExamplesTable.class);
         SearchAttributes searchAttributes = mock(SearchAttributes.class);
-        when(subStepExecutorFactory.createSubStepExecutor(stepsAsTable)).thenReturn(subStepExecutor);
+        when(subStepsFactory.createSubSteps(stepsAsTable)).thenReturn(subSteps);
         when(searchActions.findElements(searchContext, searchAttributes)).thenReturn(List.of(mock(WebElement.class)));
 
         nestedSteps.performAllStepsWhileElementsExist(ComparisonRule.EQUAL_TO, 2, searchAttributes, 5, stepsAsTable);
 
-        verifyNoInteractions(subStepExecutor);
+        verifyNoInteractions(subSteps);
         verify(searchActions, times(1)).findElements(searchContext, searchAttributes);
         verify(softAssert).assertThat(eq(ELEMENTS_NUMBER), eq(1), argThat(m ->
             ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));

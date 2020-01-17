@@ -45,7 +45,7 @@ class ExecutableStepsTests
     private static final String ITERATION_VARIABLE = "iterationVariable";
 
     @Mock
-    private ISubStepExecutorFactory subStepExecutorFactory;
+    private ISubStepsFactory subStepsFactory;
 
     @Mock
     private IBddVariableContext bddVariableContext;
@@ -59,22 +59,22 @@ class ExecutableStepsTests
     @Test
     void testTrue()
     {
-        SubStepExecutor subStepExecutor = mockSubStepExecutor(examplesTable);
+        SubSteps subSteps = mockSubSteps(examplesTable);
         executableSteps.performAllStepsIfConditionIsTrue(true, examplesTable);
-        verify(subStepExecutor).execute(Optional.empty());
+        verify(subSteps).execute(Optional.empty());
     }
 
     @Test
     void testFalse()
     {
         executableSteps.performAllStepsIfConditionIsTrue(false, examplesTable);
-        verifyNoInteractions(subStepExecutorFactory);
+        verifyNoInteractions(subStepsFactory);
     }
 
     @Test
     void shouldRunStepsIfVariableIsNotSet()
     {
-        SubStepExecutor executor = mockSubStepExecutor(examplesTable);
+        SubSteps executor = mockSubSteps(examplesTable);
         executableSteps.ifVariableNotSetPerformSteps(KEY, examplesTable);
         verify(executor).execute(Optional.empty());
     }
@@ -84,13 +84,13 @@ class ExecutableStepsTests
     {
         when(bddVariableContext.getVariable(KEY)).thenReturn("value");
         executableSteps.ifVariableNotSetPerformSteps(KEY, examplesTable);
-        verifyNoInteractions(subStepExecutorFactory);
+        verifyNoInteractions(subStepsFactory);
     }
 
     @Test
     void testPerformStepsNumberTimes()
     {
-        SubStepExecutor executor = mockSubStepExecutor(examplesTable);
+        SubSteps executor = mockSubSteps(examplesTable);
         executableSteps.performStepsNumberTimes(2, examplesTable);
         verify(executor, times(2)).execute(Optional.empty());
     }
@@ -107,7 +107,7 @@ class ExecutableStepsTests
     @Test
     void testExecuteStepsWhileConditionIsTrueWithStep()
     {
-        SubStepExecutor executor = mockSubStepExecutor(examplesTable);
+        SubSteps executor = mockSubSteps(examplesTable);
         executableSteps.executeStepsWhileConditionIsTrueWithStep(ComparisonRule.LESS_THAN, 5, 2, 1, examplesTable);
         verify(executor, times(2)).execute(Optional.empty());
         verify(bddVariableContext).putVariable(VariableScope.STEP, ITERATION_VARIABLE, 1);
@@ -121,13 +121,13 @@ class ExecutableStepsTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> executableSteps
                 .executeStepsWhileConditionIsTrueWithStep(ComparisonRule.LESS_THAN, 5, -2, 1, examplesTable));
         assertEquals("Number of iterations has exceeded allowable limit 50", exception.getMessage());
-        verifyNoInteractions(bddVariableContext, examplesTable, subStepExecutorFactory);
+        verifyNoInteractions(bddVariableContext, examplesTable, subStepsFactory);
     }
 
-    private SubStepExecutor mockSubStepExecutor(ExamplesTable table)
+    private SubSteps mockSubSteps(ExamplesTable table)
     {
-        SubStepExecutor executor = mock(SubStepExecutor.class);
-        when(subStepExecutorFactory.createSubStepExecutor(table)).thenReturn(executor);
+        SubSteps executor = mock(SubSteps.class);
+        when(subStepsFactory.createSubSteps(table)).thenReturn(executor);
         return executor;
     }
 }

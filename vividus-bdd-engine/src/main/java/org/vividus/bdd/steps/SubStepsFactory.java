@@ -31,7 +31,7 @@ import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
 import org.vividus.bdd.spring.Configuration;
 
-public class SubStepExecutorFactory implements ISubStepExecutorFactory
+public class SubStepsFactory implements ISubStepsFactory
 {
     @Inject private Configuration configuration;
     @Inject private IBddRunContext bddRunContext;
@@ -39,7 +39,7 @@ public class SubStepExecutorFactory implements ISubStepExecutorFactory
     @Inject private ISubStepsListener subStepsListener;
 
     @Override
-    public SubStepExecutor createSubStepExecutor(ExamplesTable stepsToExecute)
+    public SubSteps createSubSteps(ExamplesTable stepsToExecute)
     {
         StoryReporter storyReporter = configuration.storyReporter(
                 bddRunContext.getRootRunningStory().getStory().getPath());
@@ -53,6 +53,6 @@ public class SubStepExecutorFactory implements ISubStepExecutorFactory
             storyReporter = new DelegatingStoryReporter(filteredDelegates);
         }
         List<Step> steps = stepExamplesTableParser.parse(stepsToExecute);
-        return new SubStepExecutor(configuration, storyReporter, steps, subStepsListener);
+        return new SubSteps(configuration, storyReporter, steps, subStepsListener);
     }
 }

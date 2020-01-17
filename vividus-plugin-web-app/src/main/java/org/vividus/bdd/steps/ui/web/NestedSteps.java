@@ -31,8 +31,8 @@ import org.jbehave.core.model.ExamplesTable;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepExecutorFactory;
-import org.vividus.bdd.steps.SubStepExecutor;
+import org.vividus.bdd.steps.ISubStepsFactory;
+import org.vividus.bdd.steps.SubSteps;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.ICssSelectorFactory;
@@ -47,7 +47,7 @@ import org.vividus.ui.web.context.SearchContextSetter;
 public class NestedSteps
 {
     @Inject private IWebUiContext webUiContext;
-    @Inject private ISubStepExecutorFactory subStepExecutorFactory;
+    @Inject private ISubStepsFactory subStepsFactory;
     @Inject private IBaseValidations baseValidations;
     @Inject private ISearchActions searchActions;
     @Inject private ISoftAssert softAssert;
@@ -82,7 +82,7 @@ public class NestedSteps
     public void performAllStepsForElementIfFound(ComparisonRule comparisonRule, int number, SearchAttributes locator,
             ExamplesTable stepsToExecute)
     {
-        SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
         List<WebElement> elements = baseValidations
                 .assertIfNumberOfElementsFound("Elements to iterate with steps", locator, number, comparisonRule);
         if (!elements.isEmpty())
@@ -91,7 +91,7 @@ public class NestedSteps
             runStepsWithContextReset(() ->
             {
                 webUiContext.putSearchContext(elements.get(0), () -> { });
-                subStepExecutor.execute(Optional.empty());
+                subSteps.execute(Optional.empty());
             });
             IntStream.range(1, cssSelectors.size()).forEach(i -> {
                 WebElement element = baseValidations
@@ -100,7 +100,7 @@ public class NestedSteps
                 runStepsWithContextReset(() ->
                 {
                     webUiContext.putSearchContext(element, () -> { });
-                    subStepExecutor.execute(Optional.empty());
+                    subSteps.execute(Optional.empty());
                 });
             });
         }
@@ -140,12 +140,12 @@ public class NestedSteps
             int iterationLimit, ExamplesTable stepsToExecute)
     {
         int iterationsCounter = iterationLimit;
-        SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
         Matcher<Integer> elementNumberMatcher = comparisonRule.getComparisonRule(number);
         MutableBoolean firstIteration = new MutableBoolean(true);
         while (iterationsCounter > 0 && isExpectedElementsQuantity(locator, elementNumberMatcher, firstIteration))
         {
-            runStepsWithContextReset(() -> subStepExecutor.execute(Optional.empty()));
+            runStepsWithContextReset(() -> subSteps.execute(Optional.empty()));
             iterationsCounter--;
         }
         if (iterationsCounter == 0)

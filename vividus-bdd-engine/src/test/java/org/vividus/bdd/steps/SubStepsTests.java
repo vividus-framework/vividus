@@ -40,7 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class SubStepExecutorTests
+class SubStepsTests
 {
     @Mock
     private StoryReporter storyReporter;
@@ -54,12 +54,12 @@ class SubStepExecutorTests
     @Mock
     private ISubStepsListener subStepsListener;
 
-    private SubStepExecutor subStepExecutor;
+    private SubSteps subSteps;
 
     @BeforeEach
     void beforeEach()
     {
-        subStepExecutor = new SubStepExecutor(configuration, storyReporter, List.of(step), subStepsListener);
+        subSteps = new SubSteps(configuration, storyReporter, List.of(step), subStepsListener);
     }
 
     @Test
@@ -77,7 +77,7 @@ class SubStepExecutorTests
         Keywords keywords = mock(Keywords.class);
         when(configuration.keywords()).thenReturn(keywords);
         when(step.asString(keywords)).thenReturn("step");
-        subStepExecutor.execute(Optional.of(parameterProvider));
+        subSteps.execute(Optional.of(parameterProvider));
 
         ordered.verify(subStepsListener).beforeSubSteps();
         ordered.verify(parameterProvider).get();
@@ -93,7 +93,7 @@ class SubStepExecutorTests
         StepResult stepResult = mock(StepResult.class);
         InOrder ordered = inOrder(subStepsListener, step,  stepResult);
         when(step.perform(storyReporter, null)).thenReturn(stepResult);
-        subStepExecutor.execute(Optional.empty());
+        subSteps.execute(Optional.empty());
 
         ordered.verify(subStepsListener).beforeSubSteps();
         ordered.verify(stepResult).describeTo(storyReporter);
@@ -108,7 +108,7 @@ class SubStepExecutorTests
         InOrder ordered = inOrder(subStepsListener, step, stepResult);
         when(step.perform(storyReporter, null)).thenReturn(stepResult);
         when(stepResult.getFailure()).thenReturn(new UUIDExceptionWrapper(new InterruptedException()));
-        assertThrows(IllegalStateException.class, () -> subStepExecutor.execute(Optional.empty()));
+        assertThrows(IllegalStateException.class, () -> subSteps.execute(Optional.empty()));
 
         ordered.verify(subStepsListener).beforeSubSteps();
         ordered.verify(stepResult).describeTo(storyReporter);
@@ -124,7 +124,7 @@ class SubStepExecutorTests
         when(step.perform(storyReporter, null)).thenReturn(stepResult);
         AssertionError error = new AssertionError();
         when(stepResult.getFailure()).thenReturn(new UUIDExceptionWrapper(error));
-        AssertionError actual = assertThrows(AssertionError.class, () -> subStepExecutor.execute(Optional.empty()));
+        AssertionError actual = assertThrows(AssertionError.class, () -> subSteps.execute(Optional.empty()));
         assertEquals(error, actual);
 
         ordered.verify(stepResult).describeTo(storyReporter);
