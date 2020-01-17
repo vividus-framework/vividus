@@ -59,7 +59,7 @@ class ExecutableStepsTests
     @Test
     void testTrue()
     {
-        ISubStepExecutor subStepExecutor = mockSubStepExecutor(examplesTable);
+        SubStepExecutor subStepExecutor = mockSubStepExecutor(examplesTable);
         executableSteps.performAllStepsIfConditionIsTrue(true, examplesTable);
         verify(subStepExecutor).execute(Optional.empty());
     }
@@ -74,7 +74,7 @@ class ExecutableStepsTests
     @Test
     void shouldRunStepsIfVariableIsNotSet()
     {
-        ISubStepExecutor executor = mockSubStepExecutor(examplesTable);
+        SubStepExecutor executor = mockSubStepExecutor(examplesTable);
         executableSteps.ifVariableNotSetPerformSteps(KEY, examplesTable);
         verify(executor).execute(Optional.empty());
     }
@@ -90,7 +90,7 @@ class ExecutableStepsTests
     @Test
     void testPerformStepsNumberTimes()
     {
-        ISubStepExecutor executor = mockSubStepExecutor(examplesTable);
+        SubStepExecutor executor = mockSubStepExecutor(examplesTable);
         executableSteps.performStepsNumberTimes(2, examplesTable);
         verify(executor, times(2)).execute(Optional.empty());
     }
@@ -107,7 +107,7 @@ class ExecutableStepsTests
     @Test
     void testExecuteStepsWhileConditionIsTrueWithStep()
     {
-        ISubStepExecutor executor = mockSubStepExecutor(examplesTable);
+        SubStepExecutor executor = mockSubStepExecutor(examplesTable);
         executableSteps.executeStepsWhileConditionIsTrueWithStep(ComparisonRule.LESS_THAN, 5, 2, 1, examplesTable);
         verify(executor, times(2)).execute(Optional.empty());
         verify(bddVariableContext).putVariable(VariableScope.STEP, ITERATION_VARIABLE, 1);
@@ -124,9 +124,9 @@ class ExecutableStepsTests
         verifyNoInteractions(bddVariableContext, examplesTable, subStepExecutorFactory);
     }
 
-    private ISubStepExecutor mockSubStepExecutor(ExamplesTable table)
+    private SubStepExecutor mockSubStepExecutor(ExamplesTable table)
     {
-        ISubStepExecutor executor = mock(ISubStepExecutor.class);
+        SubStepExecutor executor = mock(SubStepExecutor.class);
         when(subStepExecutorFactory.createSubStepExecutor(table)).thenReturn(executor);
         return executor;
     }

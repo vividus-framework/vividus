@@ -20,5 +20,5 @@ import org.jbehave.core.model.ExamplesTable;
 
 public interface ISubStepExecutorFactory
 {
-    ISubStepExecutor createSubStepExecutor(ExamplesTable stepsToExecute);
+    SubStepExecutor createSubStepExecutor(ExamplesTable stepsToExecute);
 }

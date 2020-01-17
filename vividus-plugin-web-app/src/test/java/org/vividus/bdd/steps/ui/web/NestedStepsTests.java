@@ -44,8 +44,8 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepExecutor;
 import org.vividus.bdd.steps.ISubStepExecutorFactory;
+import org.vividus.bdd.steps.SubStepExecutor;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.ICssSelectorFactory;
@@ -71,7 +71,7 @@ class NestedStepsTests
     @Mock
     private ISubStepExecutorFactory subStepExecutorFactory;
     @Mock
-    private ISubStepExecutor subStepExecutor;
+    private SubStepExecutor subStepExecutor;
     @Mock
     private ISearchActions searchActions;
     @Mock

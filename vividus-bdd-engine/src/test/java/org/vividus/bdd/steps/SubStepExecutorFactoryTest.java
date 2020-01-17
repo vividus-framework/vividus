@@ -66,7 +66,7 @@ class SubStepExecutorFactoryTest
         List<Step> steps = List.of(step);
         when(stepExamplesTableParser.parse(stepsToExecute)).thenReturn(steps);
         StoryReporter storyReporter = mockStoryReporter();
-        ISubStepExecutor executor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        SubStepExecutor executor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
         assertEquals(steps, getFieldValue("steps", executor));
         DelegatingStoryReporter actualStoryReporter = getFieldValue("storyReporter", executor);
         assertNotEquals(storyReporter, actualStoryReporter);

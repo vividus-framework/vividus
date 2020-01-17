@@ -37,8 +37,8 @@ import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.diff.JsonDiffMatcher;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepExecutor;
 import org.vividus.bdd.steps.ISubStepExecutorFactory;
+import org.vividus.bdd.steps.SubStepExecutor;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
@@ -309,7 +309,7 @@ public class JsonResponseValidationSteps
         if (assertJsonElementsNumber(jsonPath, countElementsNumber(jsonElements), comparisonRule, elementsNumber))
         {
             String jsonContext = getActualJson();
-            ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+            SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
             jsonElements.get().stream().map(jsonUtils::toJson).forEach(jsonElement ->
             {
                 httpTestContext.putJsonContext(jsonElement);

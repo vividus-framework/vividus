@@ -31,8 +31,8 @@ import org.jbehave.core.model.ExamplesTable;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepExecutor;
 import org.vividus.bdd.steps.ISubStepExecutorFactory;
+import org.vividus.bdd.steps.SubStepExecutor;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.ICssSelectorFactory;
@@ -82,7 +82,7 @@ public class NestedSteps
     public void performAllStepsForElementIfFound(ComparisonRule comparisonRule, int number, SearchAttributes locator,
             ExamplesTable stepsToExecute)
     {
-        ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
         List<WebElement> elements = baseValidations
                 .assertIfNumberOfElementsFound("Elements to iterate with steps", locator, number, comparisonRule);
         if (!elements.isEmpty())
@@ -140,7 +140,7 @@ public class NestedSteps
             int iterationLimit, ExamplesTable stepsToExecute)
     {
         int iterationsCounter = iterationLimit;
-        ISubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
+        SubStepExecutor subStepExecutor = subStepExecutorFactory.createSubStepExecutor(stepsToExecute);
         Matcher<Integer> elementNumberMatcher = comparisonRule.getComparisonRule(number);
         MutableBoolean firstIteration = new MutableBoolean(true);
         while (iterationsCounter > 0 && isExpectedElementsQuantity(locator, elementNumberMatcher, firstIteration))
