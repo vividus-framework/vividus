@@ -18,7 +18,6 @@ package org.vividus.bdd.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -27,7 +26,6 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Optional;
 
-import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,13 +43,10 @@ class ExecutableStepsTests
     private static final String ITERATION_VARIABLE = "iterationVariable";
 
     @Mock
-    private ISubStepsFactory subStepsFactory;
-
-    @Mock
     private IBddVariableContext bddVariableContext;
 
     @Mock
-    private ExamplesTable examplesTable;
+    private SubSteps subSteps;
 
     @InjectMocks
     private ExecutableSteps executableSteps;
@@ -59,40 +54,37 @@ class ExecutableStepsTests
     @Test
     void testTrue()
     {
-        SubSteps subSteps = mockSubSteps(examplesTable);
-        executableSteps.performAllStepsIfConditionIsTrue(true, examplesTable);
+        executableSteps.performAllStepsIfConditionIsTrue(true, subSteps);
         verify(subSteps).execute(Optional.empty());
     }
 
     @Test
     void testFalse()
     {
-        executableSteps.performAllStepsIfConditionIsTrue(false, examplesTable);
-        verifyNoInteractions(subStepsFactory);
+        executableSteps.performAllStepsIfConditionIsTrue(false, subSteps);
+        verifyNoInteractions(subSteps);
     }
 
     @Test
     void shouldRunStepsIfVariableIsNotSet()
     {
-        SubSteps executor = mockSubSteps(examplesTable);
-        executableSteps.ifVariableNotSetPerformSteps(KEY, examplesTable);
-        verify(executor).execute(Optional.empty());
+        executableSteps.ifVariableNotSetPerformSteps(KEY, subSteps);
+        verify(subSteps).execute(Optional.empty());
     }
 
     @Test
     void shouldNotRunStepsIfVariableIsSet()
     {
         when(bddVariableContext.getVariable(KEY)).thenReturn("value");
-        executableSteps.ifVariableNotSetPerformSteps(KEY, examplesTable);
-        verifyNoInteractions(subStepsFactory);
+        executableSteps.ifVariableNotSetPerformSteps(KEY, subSteps);
+        verifyNoInteractions(subSteps);
     }
 
     @Test
     void testPerformStepsNumberTimes()
     {
-        SubSteps executor = mockSubSteps(examplesTable);
-        executableSteps.performStepsNumberTimes(2, examplesTable);
-        verify(executor, times(2)).execute(Optional.empty());
+        executableSteps.performStepsNumberTimes(2, subSteps);
+        verify(subSteps, times(2)).execute(Optional.empty());
     }
 
     @ParameterizedTest
@@ -100,16 +92,16 @@ class ExecutableStepsTests
     void testPerformStepsNumberTimesWrongExecutionsNumber(int number)
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> executableSteps.performStepsNumberTimes(number, examplesTable));
+            () -> executableSteps.performStepsNumberTimes(number, subSteps));
         assertEquals("Please, specify executions number in the range from 0 to 50", exception.getMessage());
+        verifyNoInteractions(subSteps);
     }
 
     @Test
     void testExecuteStepsWhileConditionIsTrueWithStep()
     {
-        SubSteps executor = mockSubSteps(examplesTable);
-        executableSteps.executeStepsWhileConditionIsTrueWithStep(ComparisonRule.LESS_THAN, 5, 2, 1, examplesTable);
-        verify(executor, times(2)).execute(Optional.empty());
+        executableSteps.executeStepsWhileConditionIsTrueWithStep(ComparisonRule.LESS_THAN, 5, 2, 1, subSteps);
+        verify(subSteps, times(2)).execute(Optional.empty());
         verify(bddVariableContext).putVariable(VariableScope.STEP, ITERATION_VARIABLE, 1);
         verify(bddVariableContext).putVariable(VariableScope.STEP, ITERATION_VARIABLE, 3);
         verifyNoMoreInteractions(bddVariableContext);
@@ -119,15 +111,8 @@ class ExecutableStepsTests
     void testExecuteStepsWhileConditionIsTrueWithStepException()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> executableSteps
-                .executeStepsWhileConditionIsTrueWithStep(ComparisonRule.LESS_THAN, 5, -2, 1, examplesTable));
+                .executeStepsWhileConditionIsTrueWithStep(ComparisonRule.LESS_THAN, 5, -2, 1, subSteps));
         assertEquals("Number of iterations has exceeded allowable limit 50", exception.getMessage());
-        verifyNoInteractions(bddVariableContext, examplesTable, subStepsFactory);
-    }
-
-    private SubSteps mockSubSteps(ExamplesTable table)
-    {
-        SubSteps executor = mock(SubSteps.class);
-        when(subStepsFactory.createSubSteps(table)).thenReturn(executor);
-        return executor;
+        verifyNoInteractions(bddVariableContext, subSteps);
     }
 }

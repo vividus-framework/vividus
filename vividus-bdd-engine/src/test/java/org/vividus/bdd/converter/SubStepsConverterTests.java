@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.steps;
+package org.vividus.bdd.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.ConcurrentStoryReporter;
 import org.jbehave.core.reporters.DelegatingStoryReporter;
@@ -41,9 +42,11 @@ import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
 import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.steps.ISubStepsListener;
+import org.vividus.bdd.steps.SubSteps;
 
 @ExtendWith(MockitoExtension.class)
-class SubStepsFactoryTest
+class SubStepsConverterTests
 {
     @Mock
     private Configuration configuration;
@@ -53,20 +56,23 @@ class SubStepsFactoryTest
     private ISubStepsListener subStepsListener;
     @Mock
     private IStepExamplesTableParser stepExamplesTableParser;
-    @Mock
-    private ExamplesTable stepsToExecute;
 
     @InjectMocks
-    private SubStepsFactory subStepsFactory;
+    private SubStepsConverter subStepsConverter;
 
     @Test
     void testCreateSubSteps()
     {
+        ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
+        when(configuration.examplesTableFactory()).thenReturn(examplesTableFactory);
+        ExamplesTable stepsToExecuteTable = mock(ExamplesTable.class);
+        String stepsToExecute = "stepsToExecute";
+        when(examplesTableFactory.createExamplesTable(stepsToExecute)).thenReturn(stepsToExecuteTable);
         Step step = mock(Step.class);
         List<Step> steps = List.of(step);
-        when(stepExamplesTableParser.parse(stepsToExecute)).thenReturn(steps);
+        when(stepExamplesTableParser.parse(stepsToExecuteTable)).thenReturn(steps);
         StoryReporter storyReporter = mockStoryReporter();
-        SubSteps executor = subStepsFactory.createSubSteps(stepsToExecute);
+        SubSteps executor = subStepsConverter.convertValue(stepsToExecute, SubSteps.class);
         assertEquals(steps, getFieldValue("steps", executor));
         DelegatingStoryReporter actualStoryReporter = getFieldValue("storyReporter", executor);
         assertNotEquals(storyReporter, actualStoryReporter);

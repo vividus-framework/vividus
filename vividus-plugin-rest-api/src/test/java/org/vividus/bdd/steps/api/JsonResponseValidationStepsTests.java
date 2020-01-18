@@ -46,7 +46,6 @@ import org.apache.http.ConnectionClosedException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.hamcrest.TypeSafeMatcher;
-import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,7 +59,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepsFactory;
 import org.vividus.bdd.steps.SubSteps;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.HttpRequestExecutor;
@@ -117,9 +115,6 @@ class JsonResponseValidationStepsTests
 
     @Mock
     private ISoftAssert softAssert;
-
-    @Mock
-    private ISubStepsFactory subStepsFactory;
 
     @Mock
     private HttpTestContext httpTestContext;
@@ -286,13 +281,11 @@ class JsonResponseValidationStepsTests
     })
     void testPerformAllStepsForProvidedJsonIfFound(String json, String jsonPath, int number)
     {
-        ExamplesTable stepsAsTable = mock(ExamplesTable.class);
         SubSteps subSteps = mock(SubSteps.class);
-        when(subStepsFactory.createSubSteps(stepsAsTable)).thenReturn(subSteps);
         when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(number),
                 verifyMatcher(number))).thenReturn(true);
         jsonResponseValidationSteps.performAllStepsForProvidedJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO,
-                number, json, jsonPath, stepsAsTable);
+                number, json, jsonPath, subSteps);
         verify(subSteps, times(number)).execute(Optional.empty());
         verify(httpTestContext).getJsonContext();
         verify(httpTestContext).putJsonContext(null);
@@ -302,12 +295,12 @@ class JsonResponseValidationStepsTests
     void testPerformAllStepsForJsonIfFound()
     {
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
-        ExamplesTable stepsAsTable = mock(ExamplesTable.class);
+        SubSteps subSteps = mock(SubSteps.class);
         when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + JSON_PATH), eq(0),
                 verifyMatcher(3))).thenReturn(false);
         jsonResponseValidationSteps.performAllStepsForJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 0,
-                JSON_PATH, stepsAsTable);
-        verifyNoInteractions(stepsAsTable, subStepsFactory);
+                JSON_PATH, subSteps);
+        verifyNoInteractions(subSteps);
         verify(httpTestContext, times(0)).putJsonContext(any());
     }
 
