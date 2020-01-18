@@ -27,11 +27,9 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepsFactory;
 import org.vividus.bdd.steps.SubSteps;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.softassert.ISoftAssert;
@@ -47,7 +45,6 @@ import org.vividus.ui.web.context.SearchContextSetter;
 public class NestedSteps
 {
     @Inject private IWebUiContext webUiContext;
-    @Inject private ISubStepsFactory subStepsFactory;
     @Inject private IBaseValidations baseValidations;
     @Inject private ISearchActions searchActions;
     @Inject private ISoftAssert softAssert;
@@ -80,9 +77,8 @@ public class NestedSteps
             priority = 5)
     @Alias("I find $comparisonRule '$number' elements by $locator and for each element do$stepsToExecute")
     public void performAllStepsForElementIfFound(ComparisonRule comparisonRule, int number, SearchAttributes locator,
-            ExamplesTable stepsToExecute)
+            SubSteps stepsToExecute)
     {
-        SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
         List<WebElement> elements = baseValidations
                 .assertIfNumberOfElementsFound("Elements to iterate with steps", locator, number, comparisonRule);
         if (!elements.isEmpty())
@@ -91,7 +87,7 @@ public class NestedSteps
             runStepsWithContextReset(() ->
             {
                 webUiContext.putSearchContext(elements.get(0), () -> { });
-                subSteps.execute(Optional.empty());
+                stepsToExecute.execute(Optional.empty());
             });
             IntStream.range(1, cssSelectors.size()).forEach(i -> {
                 WebElement element = baseValidations
@@ -100,7 +96,7 @@ public class NestedSteps
                 runStepsWithContextReset(() ->
                 {
                     webUiContext.putSearchContext(element, () -> { });
-                    subSteps.execute(Optional.empty());
+                    stepsToExecute.execute(Optional.empty());
                 });
             });
         }
@@ -137,15 +133,14 @@ public class NestedSteps
     @Alias("I find $comparisonRule '$number' elements $locator and while they exist do up "
             + "to $iterationLimit iteration of$stepsToExecute")
     public void performAllStepsWhileElementsExist(ComparisonRule comparisonRule, int number, SearchAttributes locator,
-            int iterationLimit, ExamplesTable stepsToExecute)
+            int iterationLimit, SubSteps stepsToExecute)
     {
         int iterationsCounter = iterationLimit;
-        SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
         Matcher<Integer> elementNumberMatcher = comparisonRule.getComparisonRule(number);
         MutableBoolean firstIteration = new MutableBoolean(true);
         while (iterationsCounter > 0 && isExpectedElementsQuantity(locator, elementNumberMatcher, firstIteration))
         {
-            runStepsWithContextReset(() -> subSteps.execute(Optional.empty()));
+            runStepsWithContextReset(() -> stepsToExecute.execute(Optional.empty()));
             iterationsCounter--;
         }
         if (iterationsCounter == 0)

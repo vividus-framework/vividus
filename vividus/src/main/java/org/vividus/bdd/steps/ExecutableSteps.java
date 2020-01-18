@@ -28,7 +28,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 
@@ -36,7 +35,6 @@ public class ExecutableSteps
 {
     public static final int EXECUTIONS_NUMBER_THRESHOLD = 50;
 
-    @Inject private ISubStepsFactory subStepsFactory;
     @Inject private IBddVariableContext bddVariableContext;
 
     /**
@@ -57,12 +55,11 @@ public class ExecutableSteps
     @SuppressWarnings("MagicNumber")
     @When(value = "the condition `$condition` is true I do$stepsToExecute", priority = 5)
     @Alias(value = "the condition '$condition' is true I do$stepsToExecute")
-    public void performAllStepsIfConditionIsTrue(boolean condition, ExamplesTable stepsToExecute)
+    public void performAllStepsIfConditionIsTrue(boolean condition, SubSteps stepsToExecute)
     {
         if (condition)
         {
-            SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
-            subSteps.execute(Optional.empty());
+            stepsToExecute.execute(Optional.empty());
         }
     }
 
@@ -74,11 +71,11 @@ public class ExecutableSteps
      * @param stepsToExecute steps to execute
      */
     @When("variable '$name' is not set I do:$stepsToExecute")
-    public void ifVariableNotSetPerformSteps(String name, ExamplesTable stepsToExecute)
+    public void ifVariableNotSetPerformSteps(String name, SubSteps stepsToExecute)
     {
         if (bddVariableContext.getVariable(name) == null)
         {
-            subStepsFactory.createSubSteps(stepsToExecute).execute(Optional.empty());
+            stepsToExecute.execute(Optional.empty());
         }
     }
 
@@ -95,13 +92,12 @@ public class ExecutableSteps
      * @param stepsToExecute examples table with steps to execute <b>number</b> times
      */
     @When("I `$number` times do:$stepsToExecute")
-    public void performStepsNumberTimes(int number, ExamplesTable stepsToExecute)
+    public void performStepsNumberTimes(int number, SubSteps stepsToExecute)
     {
         int minimum = 0;
         checkArgument(minimum <= number && number <= EXECUTIONS_NUMBER_THRESHOLD,
             "Please, specify executions number in the range from %s to %s", minimum, EXECUTIONS_NUMBER_THRESHOLD);
-        SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
-        IntStream.range(0, number).forEach(i -> subSteps.execute(Optional.empty()));
+        IntStream.range(0, number).forEach(i -> stepsToExecute.execute(Optional.empty()));
     }
 
     /**
@@ -131,15 +127,14 @@ public class ExecutableSteps
     @When("I execute steps while counter is $comparisonRule `$limit` with increment `$increment` starting from `$seed`"
             + ":$stepsToExecute")
     public void executeStepsWhileConditionIsTrueWithStep(ComparisonRule comparisonRule, int limit, int increment,
-            int seed, ExamplesTable stepsToExecute)
+            int seed, SubSteps stepsToExecute)
     {
         Matcher<Integer> limitMatcher = comparisonRule.getComparisonRule(limit);
         checkForLimit(seed, limitMatcher, increment);
-        SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
         iterate(seed, limitMatcher, increment, iterationVariable ->
         {
             bddVariableContext.putVariable(VariableScope.STEP, "iterationVariable", iterationVariable);
-            subSteps.execute(Optional.empty());
+            stepsToExecute.execute(Optional.empty());
         });
     }
 

@@ -33,11 +33,9 @@ import com.jayway.jsonpath.PathNotFoundException;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.diff.JsonDiffMatcher;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ISubStepsFactory;
 import org.vividus.bdd.steps.SubSteps;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.HttpMethod;
@@ -58,7 +56,6 @@ public class JsonResponseValidationSteps
 
     @Inject private HttpTestContext httpTestContext;
     @Inject private IBddVariableContext bddVariableContext;
-    @Inject private ISubStepsFactory subStepsFactory;
     @Inject private IAttachmentPublisher attachmentPublisher;
     @Inject private HttpRequestExecutor httpRequestExecutor;
 
@@ -270,7 +267,7 @@ public class JsonResponseValidationSteps
     @When(value = "I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element do"
             + "$stepsToExecute", priority = 6)
     public void performAllStepsForJsonIfFound(ComparisonRule comparisonRule, int elementsNumber, String jsonPath,
-            ExamplesTable stepsToExecute)
+            SubSteps stepsToExecute)
     {
         performAllStepsForProvidedJsonIfFound(comparisonRule, elementsNumber, getActualJson(), jsonPath,
                 stepsToExecute);
@@ -303,17 +300,16 @@ public class JsonResponseValidationSteps
     @When("I find $comparisonRule `$elementsNumber` JSON elements from `$json` by `$jsonPath` and for each element do"
             + "$stepsToExecute")
     public void performAllStepsForProvidedJsonIfFound(ComparisonRule comparisonRule, int elementsNumber, String json,
-            String jsonPath, ExamplesTable stepsToExecute)
+            String jsonPath, SubSteps stepsToExecute)
     {
         Optional<List<?>> jsonElements = getElements(json, jsonPath);
         if (assertJsonElementsNumber(jsonPath, countElementsNumber(jsonElements), comparisonRule, elementsNumber))
         {
             String jsonContext = getActualJson();
-            SubSteps subSteps = subStepsFactory.createSubSteps(stepsToExecute);
             jsonElements.get().stream().map(jsonUtils::toJson).forEach(jsonElement ->
             {
                 httpTestContext.putJsonContext(jsonElement);
-                subSteps.execute(Optional.empty());
+                stepsToExecute.execute(Optional.empty());
             });
             httpTestContext.putJsonContext(jsonContext);
         }
