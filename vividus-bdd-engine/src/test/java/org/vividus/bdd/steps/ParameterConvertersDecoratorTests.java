@@ -17,6 +17,7 @@
 package org.vividus.bdd.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.jbehave.core.steps.ParameterConverters.NumberConverter;
 import org.jbehave.core.steps.ParameterConverters.StringConverter;
 import org.jbehave.core.steps.StepMonitor;
@@ -167,5 +169,14 @@ class ParameterConvertersDecoratorTests
         when(parameterAdaptor.convert(VALUE)).thenReturn(adaptedValue);
         assertEquals(adaptedValue, parameterConverters.convert(VALUE, type));
         verifyNoInteractions(expressionAdaptor);
+    }
+
+    @Test
+    void shouldSkipDecorationForSubSteps()
+    {
+        SubSteps subSteps = mock(SubSteps.class);
+        parameterConverters.addConverters(new FunctionalParameterConverter<>(SubSteps.class, s -> subSteps));
+        assertEquals(subSteps, parameterConverters.convert("sub-steps", SubSteps.class));
+        verifyNoInteractions(parameterAdaptor, expressionAdaptor);
     }
 }
