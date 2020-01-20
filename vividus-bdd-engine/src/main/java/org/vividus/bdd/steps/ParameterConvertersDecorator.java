@@ -42,6 +42,10 @@ public class ParameterConvertersDecorator extends ParameterConverters
     @Override
     public Object convert(String value, Type type)
     {
+        if (type == SubSteps.class)
+        {
+            return super.convert(value, type);
+        }
         Object adaptedValue = parameterAdaptor.convert(value);
         if (type == String.class || adaptedValue instanceof String)
         {
