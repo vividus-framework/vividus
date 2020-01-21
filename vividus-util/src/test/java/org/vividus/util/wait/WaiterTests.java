@@ -19,12 +19,15 @@ package org.vividus.util.wait;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
+import org.vividus.util.function.CheckedRunnable;
 import org.vividus.util.function.CheckedSupplier;
 
 @SuppressWarnings("unchecked")
@@ -44,5 +47,13 @@ class WaiterTests
         CheckedSupplier<Boolean, IOException> valueProvider = mock(CheckedSupplier.class);
         when(valueProvider.get()).thenReturn(false).thenReturn(true).thenReturn(false);
         assertTrue(new Waiter(new WaitMode(Duration.ofSeconds(1), 3)).wait(valueProvider, Boolean::booleanValue));
+    }
+
+    @Test
+    void shouldInvokeRunnableOnceBeforeReachingStopCondition() throws IOException
+    {
+        CheckedRunnable<IOException> checkedRunnable = mock(CheckedRunnable.class);
+        new Waiter(new WaitMode(Duration.ZERO, 1)).wait(checkedRunnable, Boolean.TRUE::booleanValue);
+        verify(checkedRunnable, times(1)).run();
     }
 }
