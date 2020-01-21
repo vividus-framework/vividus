@@ -13,6 +13,10 @@
         <property name="softAssert" ref="softAssert" />
     </bean>
 
+    <bean id="dateUtils" class="org.vividus.util.DateUtils">
+        <constructor-arg value="${location.zone-id}" />
+    </bean>
+
     <util:list id="stepBeanNames-DateTime" value-type="java.lang.String">
          <value>dateValidationSteps</value>
     </util:list>
