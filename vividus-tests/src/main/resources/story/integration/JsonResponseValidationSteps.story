@@ -39,3 +39,17 @@ Then a JSON element from '
     "fieldToBeIgnored": "valueToBeIgnored"
 }
 ' by the JSON path '$' is equal to '${expected-json}' ignoring extra fields
+
+Scenario: Verify step "When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute"
+When I wait for presence of element by `$.json.iteration3` for `PT15S` duration retrying 3 times
+|step                                                                                          |
+|When I initialize the step variable `iteration` with value `#{eval(${iteration:0} + 1)}`      |
+|When I set request headers:                                                                   |
+|{headerSeparator=!,valueSeparator=!}                                                          |
+|!name         !value            !                                                             |
+|!Content-Type !application/json !                                                             |
+|Given request body: {                                                                         |
+|  "iteration${iteration}": ${iteration}                                                       |
+|}                                                                                             |
+|When I send HTTP POST to the relative URL '/post'                                             |
+|Then a JSON element by the JSON path '$.headers.Content-Type' is equal to '"application/json"'|

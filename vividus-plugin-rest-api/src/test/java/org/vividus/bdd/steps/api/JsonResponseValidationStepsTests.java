@@ -388,6 +388,33 @@ class JsonResponseValidationStepsTests
                         && "Connection is closed".equals(((Exception) arg).getMessage())));
     }
 
+    @Test
+    void shouldWaitForJsonElement()
+    {
+        SubSteps stepsToExecute = mock(SubSteps.class);
+        when(httpTestContext.getResponse())
+                .thenReturn(createHttpResponse(HTML))
+                .thenReturn(createHttpResponse(OBJECT_PATH_RESULT))
+                .thenReturn(createHttpResponse(JSON));
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
+        int retryTimes = 3;
+        jsonResponseValidationSteps.waitForJsonElement(STRING_PATH, Duration.ofSeconds(1), retryTimes, stepsToExecute);
+        verify(stepsToExecute, times(retryTimes)).execute(Optional.empty());
+        verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH), eq(1),
+                verifyMatcher(1));
+    }
+
+    @Test
+    void shouldNotWaitForJsonElementWhenHttpResponseIsNull()
+    {
+        SubSteps stepsToExecute = mock(SubSteps.class);
+        when(httpTestContext.getResponse()).thenReturn(null);
+        int retryTimes = 3;
+        jsonResponseValidationSteps.waitForJsonElement(STRING_PATH, Duration.ofSeconds(1), retryTimes, stepsToExecute);
+        verify(stepsToExecute, times(1)).execute(Optional.empty());
+        verifyNoInteractions(softAssert);
+    }
+
     private void testWaitForJsonFieldAppears(int elementsFound) throws IllegalAccessException, NoSuchFieldException,
             IOException
     {
@@ -403,13 +430,19 @@ class JsonResponseValidationStepsTests
 
     private void mockResponse(String body) throws IOException
     {
-        HttpResponse response = new HttpResponse();
-        response.setResponseTimeInMs(0);
-        response.setResponseBody(body != null ? body.getBytes(StandardCharsets.UTF_8) : null);
+        HttpResponse response = createHttpResponse(body);
         when(httpTestContext.getResponse()).thenReturn(response);
         when(httpTestContext.getJsonContext()).thenReturn(body);
         when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
                 argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
+    }
+
+    private HttpResponse createHttpResponse(String body)
+    {
+        HttpResponse response = new HttpResponse();
+        response.setResponseTimeInMs(0);
+        response.setResponseBody(body.getBytes(StandardCharsets.UTF_8));
+        return response;
     }
 
     @ParameterizedTest

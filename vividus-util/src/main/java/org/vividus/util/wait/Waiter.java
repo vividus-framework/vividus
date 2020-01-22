@@ -17,9 +17,11 @@
 package org.vividus.util.wait;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 import org.vividus.util.Sleeper;
+import org.vividus.util.function.CheckedRunnable;
 import org.vividus.util.function.CheckedSupplier;
 
 public final class Waiter
@@ -45,5 +47,16 @@ public final class Waiter
         }
         while (!stopCondition.test(value) && System.currentTimeMillis() <= endTime);
         return value;
+    }
+
+    public <E extends Exception> void wait(CheckedRunnable<E> runnable, BooleanSupplier stopCondition) throws E
+    {
+        wait(
+            () -> {
+                runnable.run();
+                return (Void) null;
+            },
+            alwaysNull -> stopCondition.getAsBoolean()
+        );
     }
 }

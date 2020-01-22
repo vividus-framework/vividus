@@ -41,11 +41,13 @@ import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
+import org.vividus.http.client.HttpResponse;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.json.IJsonUtils;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.util.wait.WaitMode;
+import org.vividus.util.wait.Waiter;
 
 import net.javacrumbs.jsonunit.core.internal.Options;
 
@@ -225,16 +227,52 @@ public class JsonResponseValidationSteps
     public void waitForJsonFieldAppearance(String jsonPath, String resourceUrl, Duration duration,
             int retryTimes) throws IOException
     {
-        httpRequestExecutor.executeHttpRequest(HttpMethod.GET, resourceUrl, Optional.empty(), response -> {
-            try
-            {
-                return response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0;
-            }
-            catch (InvalidJsonException ignored)
-            {
-                return false;
-            }
-        }, new WaitMode(duration, retryTimes));
+        httpRequestExecutor.executeHttpRequest(HttpMethod.GET, resourceUrl, Optional.empty(),
+            response -> isJsonElementSearchCompleted(response, jsonPath), new WaitMode(duration, retryTimes));
+        assertJsonElementExists(jsonPath);
+    }
+
+    /**
+     * Waits for a specified amount of time until HTTP response body contains an element by the specified JSON path.
+     * <p>
+     * <b>Actions performed:</b>
+     * </p>
+     * <ul>
+     * <li>Execute sub-steps</li>
+     * <li>Check if HTTP response is present and response body contains an element by JSON path</li>
+     * <li>Stop step execution if HTTP response is not present or JSON element is found, otherwise
+     * sleep for the calculated part of specified duration and repeat actions from the start</li>
+     * </ul>
+     * @param jsonPath JSON path of element to find
+     * @param duration Full duration of time to wait
+     * @param retryTimes Number of attempts (duration/retryTimes is a sleep timeout between sub-steps execution)
+     * @param stepsToExecute Steps to execute at each wait iteration
+     */
+    @When("I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times"
+            + "$stepsToExecute")
+    public void waitForJsonElement(String jsonPath, Duration duration, int retryTimes, SubSteps stepsToExecute)
+    {
+        new Waiter(new WaitMode(duration, retryTimes)).wait(
+                () -> stepsToExecute.execute(Optional.empty()),
+                () -> isJsonElementSearchCompleted(httpTestContext.getResponse(), jsonPath)
+        );
+        assertJsonElementExists(jsonPath);
+    }
+
+    private boolean isJsonElementSearchCompleted(HttpResponse response, String jsonPath)
+    {
+        try
+        {
+            return response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0;
+        }
+        catch (InvalidJsonException ignored)
+        {
+            return false;
+        }
+    }
+
+    private void assertJsonElementExists(String jsonPath)
+    {
         if (httpTestContext.getResponse() != null)
         {
             doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.GREATER_THAN, 0);
