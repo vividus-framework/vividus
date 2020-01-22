@@ -16,10 +16,12 @@
 
 package org.vividus.util;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -75,5 +77,33 @@ public class DateUtils
             }
         }
         return zonedDateTime;
+    }
+
+    /**
+     * Converts the <b>dateTime</b> to the number of seconds from the epoch
+     * of 1970-01-01T00:00:00Z.
+     * @param dateTime A date-time text string
+     * @param formatter A formatter for parsing date-time strings
+     * @return the number of seconds from the epoch of 1970-01-01T00:00:00Z
+     */
+    public long toEpochSecond(String dateTime, DateTimeFormatter formatter)
+    {
+        return parseDateTime(dateTime, formatter).toLocalDateTime().toEpochSecond(getZoneOffset());
+    }
+
+    /**
+     * Obtains an instance of {@code LocalDateTime} using seconds from the
+     * epoch of 1970-01-01T00:00:00Z.
+     * @param seconds the number of seconds from the epoch of 1970-01-01T00:00:00Z
+     * @return {@code LocalDateTime} instance
+     */
+    public LocalDateTime fromEpochSecond(long seconds)
+    {
+        return LocalDateTime.ofEpochSecond(seconds, 0, getZoneOffset());
+    }
+
+    private ZoneOffset getZoneOffset()
+    {
+        return zoneId.getRules().getOffset(Instant.now());
     }
 }

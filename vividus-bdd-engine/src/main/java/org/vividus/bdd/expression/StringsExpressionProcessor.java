@@ -22,9 +22,8 @@ import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
+import java.util.function.UnaryOperator;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.github.javafaker.Faker;
@@ -34,20 +33,20 @@ import org.vividus.util.ILocationProvider;
 import org.vividus.util.ResourceUtils;
 
 @Named
-public class StringsExpressionProcessor implements IExpressionProcessor
+public class StringsExpressionProcessor extends DelegatingExpressionProcessor
 {
     private static final String COMMA = ",";
 
-    @Inject private ILocationProvider locationProvider;
-
-    private final List<IExpressionProcessor> unaryExpressions = List.of(
+    public StringsExpressionProcessor(ILocationProvider locationProvider)
+    {
+        super(List.of(
             new UnaryExpressionProcessor("trim",              StringUtils::trim),
             new UnaryExpressionProcessor("toLowerCase",       StringUtils::lowerCase),
             new UnaryExpressionProcessor("toUpperCase",       StringUtils::upperCase),
             new UnaryExpressionProcessor("capitalize",        StringUtils::capitalize),
             new UnaryExpressionProcessor("uncapitalize",      StringUtils::uncapitalize),
-            new UnaryExpressionProcessor("generate",          this::generate),
-            new UnaryExpressionProcessor("generateLocalized", this::generateLocalized),
+            new UnaryExpressionProcessor("generate",          input -> generate(locationProvider.getLocale(), input)),
+            new UnaryExpressionProcessor("generateLocalized", generateLocalized()),
             new UnaryExpressionProcessor("encodeUrl",         input -> URLEncoder.encode(input, UTF_8)),
             new UnaryExpressionProcessor("loadResource",      ResourceUtils::loadResource),
             new UnaryExpressionProcessor("resourceToBase64",  input -> Base64.getEncoder()
@@ -55,30 +54,20 @@ public class StringsExpressionProcessor implements IExpressionProcessor
             new UnaryExpressionProcessor("decodeFromBase64",  input -> new String(Base64.getDecoder()
                     .decode(input.getBytes(UTF_8)), UTF_8)),
             new UnaryExpressionProcessor("encodeToBase64",    input -> new String(Base64.getEncoder()
-                    .encode(input.getBytes(UTF_8)), UTF_8)));
-
-    @Override
-    public Optional<String> execute(String expression)
-    {
-        return unaryExpressions.stream()
-            .map(processor -> processor.execute(expression))
-            .filter(Optional::isPresent)
-            .findFirst()
-            .orElseGet(Optional::empty);
+                    .encode(input.getBytes(UTF_8)), UTF_8))
+            ));
     }
 
-    private String generate(String input)
+    private static UnaryOperator<String> generateLocalized()
     {
-        return generate(locationProvider.getLocale(), input);
-    }
-
-    private String generateLocalized(String input)
-    {
-        String inputPart = StringUtils.substringBeforeLast(input, COMMA);
-        String[] localeParts = StringUtils.split(StringUtils.substringAfterLast(input, COMMA), '-');
-        Locale locale = localeParts.length == 2 ? new Locale(localeParts[0].trim(), localeParts[1].trim()) : new Locale(
-                localeParts[0].trim());
-        return generate(locale, inputPart);
+        return input ->
+        {
+            String inputPart = StringUtils.substringBeforeLast(input, COMMA);
+            String[] localeParts = StringUtils.split(StringUtils.substringAfterLast(input, COMMA), '-');
+            Locale locale = localeParts.length == 2 ? new Locale(localeParts[0].trim(), localeParts[1].trim())
+                    : new Locale(localeParts[0].trim());
+            return generate(locale, inputPart);
+        };
     }
 
     private static String generate(Locale locale, String input)
