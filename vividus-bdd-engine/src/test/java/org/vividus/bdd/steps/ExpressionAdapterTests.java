@@ -22,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,6 +45,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.expression.IExpressionProcessor;
 import org.vividus.bdd.expression.StringsExpressionProcessor;
+import org.vividus.util.ILocationProvider;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ExpressionAdapterTests
@@ -97,7 +99,8 @@ class ExpressionAdapterTests
     {
         String input = "#{capitalize(#{trim(#{toLowerCase( VIVIDUS )})})}";
         String output = "Vividus";
-        IExpressionProcessor processor = new StringsExpressionProcessor();
+        ILocationProvider locationProvider = mock(ILocationProvider.class);
+        IExpressionProcessor processor = new StringsExpressionProcessor(locationProvider);
         expressionAdaptor.setProcessors(List.of(processor));
         String actual = expressionAdaptor.process(input);
         assertEquals(output, actual);
@@ -193,7 +196,8 @@ class ExpressionAdapterTests
     void testExpressionProcessingError()
     {
         String input = "#{generateLocalized(number.number_between 'a','b', ru)}";
-        IExpressionProcessor processor = new StringsExpressionProcessor();
+        ILocationProvider locationProvider = mock(ILocationProvider.class);
+        IExpressionProcessor processor = new StringsExpressionProcessor(locationProvider);
         expressionAdaptor.setProcessors(List.of(processor));
         assertThrows(RuntimeException.class, () -> expressionAdaptor.process(input));
         assertThat(logger.getLoggingEvents(),
