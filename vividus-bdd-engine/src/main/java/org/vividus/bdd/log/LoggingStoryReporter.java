@@ -16,7 +16,6 @@
 
 package org.vividus.bdd.log;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import org.jbehave.core.reporters.TxtOutput;
@@ -28,7 +27,7 @@ public class LoggingStoryReporter extends TxtOutput
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingStoryReporter.class);
 
     @SuppressWarnings("resource")
-    public LoggingStoryReporter() throws UnsupportedEncodingException
+    public LoggingStoryReporter()
     {
         super(new LoggingPrintStream(LOGGER));
     }

@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.logging.log4j.core.Filter;
@@ -36,20 +36,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AllureLogAppenderTests
 {
-    private static final String CHARSET = StandardCharsets.UTF_8.toString();
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
     private final PrintStream defaultPrintStreamErr = System.err;
 
     @BeforeEach
-    void beforeEach() throws UnsupportedEncodingException
+    void beforeEach()
     {
         System.setErr(new PrintStream(outContent, true, CHARSET));
     }
 
     @Test
-    void testCreateAppenderWithNullName() throws UnsupportedEncodingException
+    void testCreateAppenderWithNullName()
     {
         Filter filter = mock(Filter.class);
         Layout<?> layout = mock(Layout.class);

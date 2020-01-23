@@ -17,7 +17,6 @@
 package org.vividus.bdd.log;
 
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import org.slf4j.Logger;
@@ -26,9 +25,9 @@ public class LoggingPrintStream extends PrintStream
 {
     private final Logger logger;
 
-    public LoggingPrintStream(Logger logger) throws UnsupportedEncodingException
+    public LoggingPrintStream(Logger logger)
     {
-        super(System.out, false, StandardCharsets.UTF_8.name());
+        super(System.out, false, StandardCharsets.UTF_8);
         this.logger = logger;
     }
 

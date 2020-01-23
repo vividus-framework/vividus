@@ -16,7 +16,6 @@
 
 package org.vividus.bdd.log;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
@@ -31,7 +30,7 @@ public class LoggingStepMonitor extends PrintStreamStepMonitor
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingStepMonitor.class);
 
     @SuppressWarnings("resource")
-    public LoggingStepMonitor() throws UnsupportedEncodingException
+    public LoggingStepMonitor()
     {
         super(new LoggingPrintStream(LOGGER));
     }

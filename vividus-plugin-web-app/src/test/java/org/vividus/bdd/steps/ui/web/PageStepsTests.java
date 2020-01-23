@@ -34,7 +34,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
@@ -487,7 +486,7 @@ class PageStepsTests
     }
 
     @Test
-    void testCheckUriIsLoaded() throws UnsupportedEncodingException
+    void testCheckUriIsLoaded()
     {
         String url = HTTP_EXAMPLE_COM;
         when(webDriverProvider.get()).thenReturn(driver);

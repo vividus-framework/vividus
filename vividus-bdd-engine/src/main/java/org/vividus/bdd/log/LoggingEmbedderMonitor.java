@@ -16,7 +16,6 @@
 
 package org.vividus.bdd.log;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import org.jbehave.core.embedder.EmbedderControls;
@@ -30,7 +29,7 @@ public class LoggingEmbedderMonitor extends PrintStreamEmbedderMonitor
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingEmbedderMonitor.class);
 
     @SuppressWarnings("resource")
-    public LoggingEmbedderMonitor() throws UnsupportedEncodingException
+    public LoggingEmbedderMonitor()
     {
         super(new LoggingPrintStream(LOGGER));
     }

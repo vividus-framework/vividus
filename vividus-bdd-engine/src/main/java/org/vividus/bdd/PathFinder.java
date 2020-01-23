@@ -55,7 +55,7 @@ public class PathFinder implements IPathFinder
             for (Resource resource : foundResources)
             {
                 String resourceUri = resource.getURI().toASCIIString().replaceAll(PLUS_SIGN_REGEX, PLUS_SIGN_ENCODED);
-                consumer.accept(URLDecoder.decode(resourceUri, StandardCharsets.UTF_8.name()));
+                consumer.accept(URLDecoder.decode(resourceUri, StandardCharsets.UTF_8));
             }
         }
     }

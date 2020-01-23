@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -268,18 +267,17 @@ public class PageSteps
      * <b>URL</b> is the internet address of the current page which is located in the address bar
      * <p>
      * @param url String value of URL
-     * @throws UnsupportedEncodingException if the Character Encoding is not supported
      */
     @Then("the page with the URL '$URL' is loaded")
-    public void checkUriIsLoaded(String url) throws UnsupportedEncodingException
+    public void checkUriIsLoaded(String url)
     {
         String actualUrl = getWebDriver().getCurrentUrl();
         highlightingSoftAssert.assertEquals("Page has correct URL", decodeUrl(url), decodeUrl(actualUrl));
     }
 
-    private String decodeUrl(String url) throws UnsupportedEncodingException
+    private String decodeUrl(String url)
     {
-        return StringEscapeUtils.unescapeHtml4(URLDecoder.decode(url, StandardCharsets.UTF_8.name()));
+        return StringEscapeUtils.unescapeHtml4(URLDecoder.decode(url, StandardCharsets.UTF_8));
     }
 
     /**

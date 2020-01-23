@@ -19,7 +19,7 @@ package org.vividus;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.After;
@@ -28,19 +28,19 @@ import org.junit.BeforeClass;
 
 public class SystemOutTests
 {
-    private static final String CHARSET = StandardCharsets.UTF_8.toString();
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final PrintStream DEFAULT_PRINT_STREAM = System.out;
 
     private static ByteArrayOutputStream output;
 
     @BeforeClass
-    public static void beforeClass() throws UnsupportedEncodingException
+    public static void beforeClass()
     {
         output = new ByteArrayOutputStream();
         System.setOut(new PrintStream(output, true, CHARSET));
     }
 
-    protected String getOutput() throws UnsupportedEncodingException
+    protected String getOutput()
     {
         return output.toString(CHARSET);
     }

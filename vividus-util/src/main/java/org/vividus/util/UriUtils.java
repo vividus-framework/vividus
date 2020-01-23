@@ -16,7 +16,6 @@
 
 package org.vividus.util;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -108,7 +107,7 @@ public final class UriUtils
     {
         try
         {
-            String decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8.name());
+            String decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8);
 
             int schemeSeparatorIndex = decodedUrl.indexOf(SCHEME_SEPARATOR);
             if (schemeSeparatorIndex < 0)
@@ -143,7 +142,7 @@ public final class UriUtils
             }
             return URI.create(result.toString());
         }
-        catch (UnsupportedEncodingException | URISyntaxException | MalformedURLException e)
+        catch (URISyntaxException | MalformedURLException e)
         {
             throw new IllegalArgumentException(e);
         }

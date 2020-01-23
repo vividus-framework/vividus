@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -117,7 +116,7 @@ public class BddStepPrinterTests extends SystemOutTests
         return stepCandidate;
     }
 
-    private void assertOutput(List<String> lines) throws UnsupportedEncodingException
+    private void assertOutput(List<String> lines)
     {
         String lineSeparator = System.lineSeparator();
         String expectedOutput = lines.stream().collect(Collectors.joining(lineSeparator, "", lineSeparator));
