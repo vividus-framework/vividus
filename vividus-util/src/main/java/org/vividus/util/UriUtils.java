@@ -119,7 +119,8 @@ public final class UriUtils
             if (scheme.startsWith("http"))
             {
                 URL uri = new URL(decodedUrl);
-                return new URI(uri.getProtocol(), uri.getAuthority(), uri.getPath(), uri.getQuery(), uri.getRef());
+                return normalizeToRfc3986(
+                        new URI(uri.getProtocol(), uri.getAuthority(), uri.getPath(), uri.getQuery(), uri.getRef()));
             }
 
             char fragmentSeparator = '#';
@@ -145,6 +146,35 @@ public final class UriUtils
         catch (URISyntaxException | MalformedURLException e)
         {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Partially transforms RFC 2396 compliant URI to RFC 3986 compliant one: percent-encode square brackets found in
+     * URL query and URL fragment. For the complete list of required changes to make URI compliant with RFC 3986 see:
+     * <a href="https://cr.openjdk.java.net/~dfuchs/writeups/updating-uri/">
+     *     Updating URI support for RFC 3986 and RFC 3987 in the JDK
+     * </a>
+     * @param uri URI to normalize
+     * @return URI partially compliant with RFC 3986
+     */
+    private static URI normalizeToRfc3986(URI uri)
+    {
+        StringBuilder normalizedUri = new StringBuilder(uri.toString());
+        encodeSquareBrackets(normalizedUri, uri.getRawQuery());
+        encodeSquareBrackets(normalizedUri, uri.getRawFragment());
+        return URI.create(normalizedUri.toString());
+    }
+
+    private static void encodeSquareBrackets(StringBuilder normalizedUri, String uriPart)
+    {
+        if (uriPart != null)
+        {
+            String encodedUriPart = uriPart
+                    .replace("[", "%5B")
+                    .replace("]", "%5D");
+            int indexOfUriPart = normalizedUri.indexOf(uriPart);
+            normalizedUri.replace(indexOfUriPart, indexOfUriPart + uriPart.length(), encodedUriPart);
         }
     }
 
