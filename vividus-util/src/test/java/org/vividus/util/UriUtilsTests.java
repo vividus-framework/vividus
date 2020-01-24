@@ -153,7 +153,11 @@ class UriUtilsTests
         "http://somehost:8080/path?name=bad%7Cvalue&a=b#fragment,     http://somehost:8080/path?name=bad%7Cvalue&a=b#fragment",
         "tel:1234567#0987,                                            tel:1234567#0987",
         "https://ad.doubleclick.net/ddm/activity/src=5337729;type=brand0;cat=brand0;u9=[Cachebuster];u10=[SPIKA Locale];u11=[SPIKA Brand];u12=[Page Path];u13=[SPIKA Language];u14=[Cocktail ID];u15=[Page Type];dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord=1?," +
-            "https://ad.doubleclick.net/ddm/activity/src=5337729;type=brand0;cat=brand0;u9=%5BCachebuster%5D;u10=%5BSPIKA%20Locale%5D;u11=%5BSPIKA%20Brand%5D;u12=%5BPage%20Path%5D;u13=%5BSPIKA%20Language%5D;u14=%5BCocktail%20ID%5D;u15=%5BPage%20Type%5D;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord=1?"
+            "https://ad.doubleclick.net/ddm/activity/src=5337729;type=brand0;cat=brand0;u9=%5BCachebuster%5D;u10=%5BSPIKA%20Locale%5D;u11=%5BSPIKA%20Brand%5D;u12=%5BPage%20Path%5D;u13=%5BSPIKA%20Language%5D;u14=%5BCocktail%20ID%5D;u15=%5BPage%20Type%5D;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;ord=1?",
+        "https://somehost:8080/exportToCSV?filter=%7B%22locations%22:%5B%5D%7D&pageNumber=0&pageSize=10," +
+            "https://somehost:8080/exportToCSV?filter=%7B%22locations%22:%5B%5D%7D&pageNumber=0&pageSize=10",
+        "https://somehost:8080/exportToCSV[]?filter={\"locations\":[]}&pageNumber=0&pageSize=10#frag[]," +
+                "https://somehost:8080/exportToCSV%5B%5D?filter=%7B%22locations%22:%5B%5D%7D&pageNumber=0&pageSize=10#frag%5B%5D"
         // CHECKSTYLE:ON
     })
     void testCreateUri(String input, URI expected)
