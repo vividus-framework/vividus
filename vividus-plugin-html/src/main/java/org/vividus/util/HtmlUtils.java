@@ -23,7 +23,8 @@ import org.jsoup.select.Elements;
 public final class HtmlUtils
 {
     private HtmlUtils()
-    { }
+    {
+    }
 
     public static Elements getElements(String html, String cssSelector)
     {

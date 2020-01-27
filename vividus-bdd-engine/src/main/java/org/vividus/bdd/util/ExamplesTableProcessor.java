@@ -34,7 +34,8 @@ public final class ExamplesTableProcessor
     private static final String DEFAULT_SEPARATOR_VALUE = "|";
 
     private ExamplesTableProcessor()
-    { }
+    {
+    }
 
     public static List<String> parseRows(String tableAsString)
     {
