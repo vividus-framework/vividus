@@ -17,6 +17,7 @@
 package org.vividus.visual.engine;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,48 +46,35 @@ import org.junit.jupiter.api.io.TempDir;
 import org.vividus.bdd.resource.ResourceLoadException;
 import org.vividus.util.ResourceUtils;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
-@SuppressFBWarnings("DMI_HARDCODED_ABSOLUTE_FILENAME")
 class FileSystemBaselineRepositoryTests
 {
     private static final String BASELINE = "baseline";
-
     private static final File BASELINES_FOLDER = new File("./baselines");
+    private static final String DEFAULT_EXTENSION = ".png";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(FileSystemBaselineRepository.class);
-    private final BufferedImage baseline = loadBaseline();
     private final FileSystemBaselineRepository fileSystemBaselineRepository = new FileSystemBaselineRepository();
 
     @Test
     void shouldLoadBaselineFromFileSystem() throws IOException
     {
         fileSystemBaselineRepository.setBaselinesFolder(BASELINES_FOLDER);
-        assertThat(fileSystemBaselineRepository.getBaseline(BASELINE).get().getImage(),
-                ImageTool.equalImage(baseline));
-    }
-
-    private BufferedImage loadBaseline()
-    {
-        try
-        {
-            return ImageIO.read(
-                    ResourceUtils.loadFile(FileSystemBaselineRepositoryTests.class, "/baselines/baseline.png"));
-        }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException(e);
-        }
+        BufferedImage baseline = loadBaseline();
+        assertThat(fileSystemBaselineRepository.getBaseline(BASELINE).get().getImage(), ImageTool.equalImage(baseline));
     }
 
     @Test
-    void shouldReturnEmptyImageForMissingBaseline() throws IOException
+    void shouldReturnEmptyImageForMissingBaseline(@TempDir File baselineFolder) throws IOException
     {
-        fileSystemBaselineRepository.setBaselinesFolder(BASELINES_FOLDER);
-        assertEquals(fileSystemBaselineRepository.getBaseline("missing_baseline"), Optional.empty());
+        fileSystemBaselineRepository.setBaselinesFolder(baselineFolder);
+        String baselineName = "missing_baseline";
+        assertEquals(fileSystemBaselineRepository.getBaseline(baselineName), Optional.empty());
+        assertThat(logger.getLoggingEvents(), is(List.of(warn("Unable to find a baseline at the path: {}",
+                baselineFolder.toPath().resolve(baselineName + DEFAULT_EXTENSION).toFile()))));
     }
 
     @Test
@@ -102,8 +90,8 @@ class FileSystemBaselineRepositoryTests
         fileSystemBaselineRepository.setBaselinesFolder(BASELINES_FOLDER);
         ResourceLoadException exception = assertThrows(ResourceLoadException.class,
             () -> fileSystemBaselineRepository.getBaseline("corrupted_image").get().getImage());
-        assertThat(exception.getMessage(), Matchers.matchesRegex(
-                "Unable to load baseline with path: .+[\\\\/]baselines[\\\\/]corrupted_image.png"));
+        assertThat(exception.getMessage(), Matchers.matchesRegex("The baseline at the path "
+                + "'.+[\\\\/]baselines[\\\\/]corrupted_image.png' is broken or has unsupported format"));
     }
 
     @Test
@@ -111,12 +99,26 @@ class FileSystemBaselineRepositoryTests
     {
         fileSystemBaselineRepository.setBaselinesFolder(folder);
         Screenshot screenshot = mock(Screenshot.class);
+        BufferedImage baseline = loadBaseline();
         when(screenshot.getImage()).thenReturn(baseline);
         fileSystemBaselineRepository.saveBaseline(screenshot, BASELINE);
-        File baselineFile = new File(folder, BASELINE + ".png");
+        File baselineFile = new File(folder, BASELINE + DEFAULT_EXTENSION);
         assertThat(baselineFile, FileMatchers.anExistingFile());
         assertThat(logger.getLoggingEvents(), is(List.of(info("Baseline saved to: {}",
                 baselineFile.getAbsolutePath()))));
         assertThat(ImageIO.read(baselineFile), ImageTool.equalImage(baseline));
+    }
+
+    private BufferedImage loadBaseline()
+    {
+        try
+        {
+            return ImageIO.read(
+                    ResourceUtils.loadFile(FileSystemBaselineRepositoryTests.class, "/baselines/baseline.png"));
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
     }
 }
