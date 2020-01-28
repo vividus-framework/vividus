@@ -31,6 +31,7 @@ import javax.inject.Inject;
 import com.jayway.jsonpath.InvalidJsonException;
 import com.jayway.jsonpath.PathNotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
@@ -261,9 +262,15 @@ public class JsonResponseValidationSteps
 
     private boolean isJsonElementSearchCompleted(HttpResponse response, String jsonPath)
     {
+        if (response == null)
+        {
+            return true;
+        }
+        String responseBody = response.getResponseBodyAsString();
         try
         {
-            return response == null || getElementsNumber(response.getResponseBodyAsString(), jsonPath) > 0;
+            // Empty response may be in case of HTTP "204 NO CONTENT"
+            return StringUtils.isNotEmpty(responseBody) && getElementsNumber(responseBody, jsonPath) > 0;
         }
         catch (InvalidJsonException ignored)
         {

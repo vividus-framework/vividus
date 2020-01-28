@@ -395,9 +395,10 @@ class JsonResponseValidationStepsTests
         when(httpTestContext.getResponse())
                 .thenReturn(createHttpResponse(HTML))
                 .thenReturn(createHttpResponse(OBJECT_PATH_RESULT))
+                .thenReturn(new HttpResponse())
                 .thenReturn(createHttpResponse(JSON));
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
-        int retryTimes = 3;
+        int retryTimes = 4;
         jsonResponseValidationSteps.waitForJsonElement(STRING_PATH, Duration.ofSeconds(1), retryTimes, stepsToExecute);
         verify(stepsToExecute, times(retryTimes)).execute(Optional.empty());
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH), eq(1),
