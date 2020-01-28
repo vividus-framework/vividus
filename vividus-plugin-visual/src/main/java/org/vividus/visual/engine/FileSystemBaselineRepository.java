@@ -16,12 +16,12 @@
 
 package org.vividus.visual.engine;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 
 import com.google.common.base.Suppliers;
@@ -54,22 +54,19 @@ public class FileSystemBaselineRepository implements IBaselineRepository
     @Override
     public Optional<Screenshot> getBaseline(String baselineName) throws IOException
     {
-        try
+        File baselineFile = new File(baselineFolderResolver.get(), appendExtension(baselineName));
+        if (!baselineFile.exists())
         {
-            File baselineFile = new File(baselineFolderResolver.get(), appendExtension(baselineName));
-            Optional<Screenshot> loadedScreenshot = Optional
-                    .ofNullable(ImageIO.read(baselineFile))
-                    .map(Screenshot::new);
-            if (loadedScreenshot.isEmpty())
-            {
-                throw new ResourceLoadException("Unable to load baseline with path: " + baselineFile);
-            }
-            return loadedScreenshot;
-        }
-        catch (IIOException e)
-        {
+            LOGGER.warn("Unable to find a baseline at the path: {}", baselineFile);
             return Optional.empty();
         }
+        BufferedImage baselineImage = ImageIO.read(baselineFile);
+        if (baselineImage == null)
+        {
+            throw new ResourceLoadException(
+                    "The baseline at the path '" + baselineFile + "' is broken or has unsupported format");
+        }
+        return Optional.of(new Screenshot(baselineImage));
     }
 
     private String appendExtension(String baselineName)
