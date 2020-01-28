@@ -7,6 +7,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugs.toolVersion)
