@@ -222,7 +222,10 @@ public class JsonResponseValidationSteps
      * @param duration Time duration to wait
      * @param retryTimes How many times request will be retried; duration/retryTimes=timeout between requests
      * @throws IOException If an input or output exception occurred
+     * @deprecated Use <i>When I wait for presence of element by `$jsonPath` for `$duration` duration
+     * retrying $retryTimes times$stepsToExecute</i>
      */
+    @Deprecated(since = "0.2.0", forRemoval = true)
     @When("I wait for presence of element by '$jsonPath' in HTTP GET response from '$resourceUrl'"
             + " for '$duration' duration retrying $retryTimes times")
     public void waitForJsonFieldAppearance(String jsonPath, String resourceUrl, Duration duration,
