@@ -106,6 +106,13 @@ class BddRunContextTests
     }
 
     @Test
+    void testGetRunningBatchKey()
+    {
+        bddRunContext.putRunningBatch(BATCH_KEY);
+        assertEquals(BATCH_KEY, bddRunContext.getRunningBatchKey());
+    }
+
+    @Test
     void testRemoveRunningBatch()
     {
         bddRunContext.putRunningBatch(BATCH_KEY);

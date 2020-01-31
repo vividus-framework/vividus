@@ -31,6 +31,8 @@ public interface IBddRunContext
 
     ResourceBatch getRunningBatch();
 
+    String getRunningBatchKey();
+
     void setDryRun(boolean dryRun);
 
     boolean isDryRun();
