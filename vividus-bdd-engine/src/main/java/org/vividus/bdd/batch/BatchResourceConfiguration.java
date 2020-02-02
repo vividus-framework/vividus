@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.resource;
+package org.vividus.bdd.batch;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class ResourceBatch
+public class BatchResourceConfiguration
 {
     private String resourceLocation;
     private List<String> resourceIncludePatterns = List.of();

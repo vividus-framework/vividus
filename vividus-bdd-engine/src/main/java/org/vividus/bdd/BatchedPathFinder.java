@@ -22,31 +22,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.vividus.bdd.resource.ResourceBatch;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
+import org.vividus.bdd.batch.BatchStorage;
 
 public class BatchedPathFinder implements IBatchedPathFinder
 {
     private IPathFinder pathFinder;
-    private IBatchStorage batchStorage;
+    private BatchStorage batchStorage;
+
+    public BatchedPathFinder(IPathFinder pathFinder, BatchStorage batchStorage)
+    {
+        this.pathFinder = pathFinder;
+        this.batchStorage = batchStorage;
+    }
 
     @Override
     public Map<String, List<String>> findPaths() throws IOException
     {
         Map<String, List<String>> batchedPaths = new LinkedHashMap<>();
-        for (Entry<String, ResourceBatch> batch : batchStorage.getBatches().entrySet())
+        for (Entry<String, BatchResourceConfiguration> batch : batchStorage.getBatchResourceConfigurations().entrySet())
         {
             batchedPaths.put(batch.getKey(), pathFinder.findPaths(batch.getValue()));
         }
         return batchedPaths;
-    }
-
-    public void setPathFinder(IPathFinder pathFinder)
-    {
-        this.pathFinder = pathFinder;
-    }
-
-    public void setBatchStorage(IBatchStorage batchStorage)
-    {
-        this.batchStorage = batchStorage;
     }
 }

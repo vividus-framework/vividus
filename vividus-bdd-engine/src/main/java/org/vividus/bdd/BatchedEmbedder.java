@@ -22,21 +22,36 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.embedder.EmbedderControls;
+import org.jbehave.core.embedder.EmbedderMonitor;
 import org.jbehave.core.embedder.MetaFilter;
 import org.jbehave.core.embedder.PerformableTree;
 import org.jbehave.core.embedder.StoryManager;
 import org.jbehave.core.failures.BatchFailures;
+import org.jbehave.core.steps.InjectableStepsFactory;
+import org.vividus.bdd.batch.BatchExecutionConfiguration;
+import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.context.BddRunContext;
 
-public class BatchedEmbedder extends ExtendedEmbedder
+public class BatchedEmbedder extends Embedder
 {
-    private BddRunContext bddRunContext;
+    private final BddRunContext bddRunContext;
+    private final BatchStorage batchStorage;
 
-    private String batch;
     private boolean ignoreFailureInBatches;
     private boolean reportBeforeStories = true;
     private boolean reportAfterStories;
+    private boolean generateViewAfterBatches;
+
+    private String batch;
+
+    public BatchedEmbedder(BddRunContext bddRunContext, BatchStorage batchStorage)
+    {
+        this.bddRunContext = bddRunContext;
+        this.batchStorage = batchStorage;
+    }
 
     public void runStoriesAsPaths(Map<String, List<String>> storyPathsBatches)
     {
@@ -52,6 +67,11 @@ public class BatchedEmbedder extends ExtendedEmbedder
 
                 Entry<String, List<String>> storyPathsBatch = iterator.next();
                 batch = storyPathsBatch.getKey();
+
+                BatchExecutionConfiguration batchExecutionConfiguration = batchStorage.getBatchExecutionConfiguration(
+                        batch);
+                useEmbedderControls(createEmbedderControls(batchExecutionConfiguration));
+                useMetaFilters(batchExecutionConfiguration.getMetaFilters());
 
                 EmbedderControls embedderControls = embedderControls();
                 embedderMonitor.usingControls(embedderControls);
@@ -95,7 +115,7 @@ public class BatchedEmbedder extends ExtendedEmbedder
         }
         finally
         {
-            if (getEmbedderControlsProvider().isGenerateViewAfterBatches())
+            if (generateViewAfterBatches)
             {
                 generateReportsView();
             }
@@ -118,18 +138,16 @@ public class BatchedEmbedder extends ExtendedEmbedder
         return performableTree;
     }
 
-    @Override
-    public EmbedderControls embedderControls()
+    private EmbedderControls createEmbedderControls(BatchExecutionConfiguration batchExecutionConfiguration)
     {
-        IEmbedderControlsProvider embedderControlsProvider = getEmbedderControlsProvider();
-        return Optional.ofNullable(batch)
-                .map(embedderControlsProvider::get)
-                .orElseGet(embedderControlsProvider::getDefault);
-    }
-
-    public void setBddRunContext(BddRunContext bddRunContext)
-    {
-        this.bddRunContext = bddRunContext;
+        EmbedderControls embedderControls = new EmbedderControls();
+        embedderControls.useStoryTimeouts(
+                Long.toString(batchExecutionConfiguration.getStoryExecutionTimeout().toSeconds()));
+        Optional.ofNullable(batchExecutionConfiguration.getThreads())
+                .ifPresent(embedderControls::useThreads);
+        embedderControls.doIgnoreFailureInStories(true);
+        embedderControls.doGenerateViewAfterStories(false);
+        return embedderControls;
     }
 
     public void setPerformableTree(PerformableTree performableTree)
@@ -140,5 +158,25 @@ public class BatchedEmbedder extends ExtendedEmbedder
     public void setIgnoreFailureInBatches(boolean ignoreFailureInBatches)
     {
         this.ignoreFailureInBatches = ignoreFailureInBatches;
+    }
+
+    public void setConfiguration(Configuration configuration)
+    {
+        useConfiguration(configuration);
+    }
+
+    public void setStepFactory(InjectableStepsFactory stepsFactory)
+    {
+        useStepsFactory(stepsFactory);
+    }
+
+    public void setEmbedderMonitor(EmbedderMonitor embedderMonitor)
+    {
+        useEmbedderMonitor(embedderMonitor);
+    }
+
+    public void setGenerateViewAfterBatches(boolean generateViewAfterBatches)
+    {
+        this.generateViewAfterBatches = generateViewAfterBatches;
     }
 }

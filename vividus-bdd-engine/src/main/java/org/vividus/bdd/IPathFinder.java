@@ -19,10 +19,10 @@ package org.vividus.bdd;
 import java.io.IOException;
 import java.util.List;
 
-import org.vividus.bdd.resource.ResourceBatch;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
 
 @FunctionalInterface
 public interface IPathFinder
 {
-    List<String> findPaths(ResourceBatch resourceBatch) throws IOException;
+    List<String> findPaths(BatchResourceConfiguration batchResourceConfiguration) throws IOException;
 }

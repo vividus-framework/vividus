@@ -55,7 +55,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.vividus.bdd.IPathFinder;
-import org.vividus.bdd.resource.ResourceBatch;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.steps.ExpressionAdaptor;
 import org.vividus.bdd.steps.ParameterAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
@@ -152,7 +152,7 @@ public class ConfigurationTests
         verify(tableTransformer).transform(tableAsString, examplesTableProperties);
     }
 
-    private static ResourceBatch equalToCompositeStepsBatch(String compositePathPatterns)
+    private static BatchResourceConfiguration equalToCompositeStepsBatch(String compositePathPatterns)
     {
         List<String> resourceIncludePatterns = List.of(compositePathPatterns);
         return argThat(batch -> "/".equals(batch.getResourceLocation())

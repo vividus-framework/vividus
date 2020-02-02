@@ -30,9 +30,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.IBatchStorage;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
+import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.model.RunningStory;
-import org.vividus.bdd.resource.ResourceBatch;
 import org.vividus.testcontext.SimpleTestContext;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,7 @@ class BddRunContextTests
     private static final String BATCH_KEY = "batchKey";
 
     @Mock
-    private IBatchStorage batchStorage;
+    private BatchStorage batchStorage;
 
     @InjectMocks
     private BddRunContext bddRunContext;
@@ -100,8 +100,8 @@ class BddRunContextTests
     {
         String batchKey = BATCH_KEY;
         bddRunContext.putRunningBatch(batchKey);
-        ResourceBatch batch = new ResourceBatch();
-        when(batchStorage.getBatch(batchKey)).thenReturn(batch);
+        BatchResourceConfiguration batch = new BatchResourceConfiguration();
+        when(batchStorage.getBatchResourceConfiguration(batchKey)).thenReturn(batch);
         assertEquals(batch, bddRunContext.getRunningBatch());
     }
 

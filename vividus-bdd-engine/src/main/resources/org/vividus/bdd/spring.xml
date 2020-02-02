@@ -9,9 +9,10 @@
         <property name="batchStorage" ref="batchStorage" />
     </bean>
 
-    <bean id="batchStorage" class="org.vividus.bdd.BatchStorage">
-       <constructor-arg ref="propertyMapper" />
-       <constructor-arg value="bdd.story-loader." />
+    <bean id="batchStorage" class="org.vividus.bdd.batch.BatchStorage">
+        <constructor-arg ref="propertyMapper" />
+        <constructor-arg value="${bdd.story-execution-timeout}" />
+        <constructor-arg value="${bdd.all-meta-filters}" />
     </bean>
 
     <bean id="bddVariableContext" class="org.vividus.bdd.context.BddVariableContext">
@@ -29,10 +30,7 @@
         <property name="bddResourceLoader" ref="bddResourceLoader" />
     </bean>
 
-    <bean id="batchedPathFinder" class="org.vividus.bdd.BatchedPathFinder">
-        <property name="batchStorage" ref="batchStorage" />
-        <property name="pathFinder" ref="pathFinder" />
-    </bean>
+    <bean id="batchedPathFinder" class="org.vividus.bdd.BatchedPathFinder" />
 
     <bean id="storyLoader" class="org.vividus.bdd.StoryLoader">
         <property name="examplesTableLoader" ref="examplesTableLoader" />
@@ -50,22 +48,11 @@
         <property name="cacheTables" value="${bdd.cache-examples-table}" />
     </bean>
 
-    <bean id="stepExamplesTableParser" class="org.vividus.bdd.parser.StepExamplesTableParser">
-        <property name="configuration" ref="configuration"/>
-        <property name="embedder" ref="embedder"/>
-    </bean>
+    <bean class="org.vividus.bdd.parser.StepExamplesTableParser" />
 
     <bean id="bddResourceLoader" class="org.vividus.bdd.resource.BddResourceLoader">
         <property name="resourceLoadConfiguration" ref="resourceLoadConfiguration" />
         <property name="resourcePatternResolver" ref="pathMatchingResourcePatternResolver" />
-    </bean>
-
-    <bean id="embedderControlsProvider" class="org.vividus.bdd.EmbedderControlsProvider"
-        init-method="init">
-        <property name="propertyMapper" ref="propertyMapper" />
-        <property name="storyExecutionTimeout" value="${bdd.story-execution-timeout}" />
-        <property name="ignoreFailureInStories" value="true" />
-        <property name="generateViewAfterBatches" value="${bdd.generate-view-after-batches}" />
     </bean>
 
     <bean id="storyReporterBuilder" class="org.vividus.bdd.ExtendedStoryReporterBuilder">
@@ -107,22 +94,17 @@
         <constructor-arg index="0" ref="configuration" />
     </bean>
 
-    <bean id="embedder" class="org.vividus.bdd.ExtendedEmbedder">
-        <property name="embedderControlsProvider" ref="embedderControlsProvider" />
+    <bean id="batchedEmbedder" class="org.vividus.bdd.BatchedEmbedder">
         <property name="configuration" ref="configuration" />
-        <property name="metaFilters" value="${bdd.all-meta-filters}" />
         <property name="stepFactory" ref="stepFactory" />
         <property name="embedderMonitor">
             <bean class="org.vividus.bdd.log.LoggingEmbedderMonitor" />
         </property>
-    </bean>
-
-    <bean id="batchedEmbedder" class="org.vividus.bdd.BatchedEmbedder" parent="embedder">
         <property name="performableTree">
             <bean class="org.vividus.bdd.BatchedPerformableTree" />
         </property>
-        <property name="bddRunContext" ref="bddRunContext" />
         <property name="ignoreFailureInBatches" value="${bdd.ignore-failure-in-batches}" />
+        <property name="generateViewAfterBatches" value="${bdd.generate-view-after-batches}" />
     </bean>
 
     <bean id="parameterAdaptor" class="org.vividus.bdd.steps.ParameterAdaptor">

@@ -36,7 +36,7 @@ import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vividus.bdd.IPathFinder;
-import org.vividus.bdd.resource.ResourceBatch;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.steps.ExpressionAdaptor;
 import org.vividus.bdd.steps.ParameterAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
@@ -78,7 +78,7 @@ public class Configuration extends MostUsefulConfiguration
 
     private void initCompositePaths() throws IOException
     {
-        ResourceBatch compositeStepsBatch = new ResourceBatch();
+        BatchResourceConfiguration compositeStepsBatch = new BatchResourceConfiguration();
         compositeStepsBatch.setResourceLocation("/");
         compositeStepsBatch.setResourceIncludePatterns(compositePaths);
         compositeStepsBatch.setResourceExcludePatterns(null);

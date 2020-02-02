@@ -31,8 +31,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.resource.BddResourceLoader;
-import org.vividus.bdd.resource.ResourceBatch;
 
 @ExtendWith(MockitoExtension.class)
 class PathFinderTests
@@ -52,21 +52,21 @@ class PathFinderTests
     @Test
     void testFindPaths() throws IOException
     {
-        ResourceBatch resourceBatch = new ResourceBatch();
-        resourceBatch.setResourceLocation("story/uat");
-        resourceBatch.setResourceIncludePatterns(STORY_INCLUDE_PATTERN + PATTERN_SEPARATOR + OTHER_INCLUDE_PATTERN);
-        resourceBatch.setResourceExcludePatterns(STORY_EXCLUDE_PATTERN + PATTERN_SEPARATOR + OTHER_EXCLUDE_PATTERN);
+        BatchResourceConfiguration config = new BatchResourceConfiguration();
+        config.setResourceLocation("story/uat");
+        config.setResourceIncludePatterns(STORY_INCLUDE_PATTERN + PATTERN_SEPARATOR + OTHER_INCLUDE_PATTERN);
+        config.setResourceExcludePatterns(STORY_EXCLUDE_PATTERN + PATTERN_SEPARATOR + OTHER_EXCLUDE_PATTERN);
         String uri1 = "uri:resource1";
         Resource resource1 = mockResource(uri1);
         String uri2 = "uri:resource2";
         Resource resource2 = mockResource(uri2);
         String uri3 = "uri:resource3";
         Resource resource3 = mockResource(uri3);
-        mockResources(resourceBatch, STORY_INCLUDE_PATTERN, resource3);
-        mockResources(resourceBatch, STORY_EXCLUDE_PATTERN);
-        mockResources(resourceBatch, OTHER_INCLUDE_PATTERN, resource2, resource1);
-        mockResources(resourceBatch, OTHER_EXCLUDE_PATTERN, resource2);
-        List<String> paths = pathFinder.findPaths(resourceBatch);
+        mockResources(config, STORY_INCLUDE_PATTERN, resource3);
+        mockResources(config, STORY_EXCLUDE_PATTERN);
+        mockResources(config, OTHER_INCLUDE_PATTERN, resource2, resource1);
+        mockResources(config, OTHER_EXCLUDE_PATTERN, resource2);
+        List<String> paths = pathFinder.findPaths(config);
         assertEquals(List.of(uri1, uri3), paths);
     }
 
@@ -75,8 +75,8 @@ class PathFinderTests
         return when(mock(Resource.class).getURI()).thenReturn(URI.create(uri)).getMock();
     }
 
-    private void mockResources(ResourceBatch resourceBatch, String pattern, Resource... resources)
+    private void mockResources(BatchResourceConfiguration config, String pattern, Resource... resources)
     {
-        doReturn(resources).when(bddResourceLoader).getResources(resourceBatch.getResourceLocation(), pattern);
+        doReturn(resources).when(bddResourceLoader).getResources(config.getResourceLocation(), pattern);
     }
 }

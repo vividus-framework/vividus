@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.resource;
+package org.vividus.bdd.batch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,50 +23,50 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-class ResourceBatchTests
+class BatchResourceConfigurationTests
 {
     private static final String PATTERN = "testPattern";
 
-    private final ResourceBatch resourceBatch = new ResourceBatch();
+    private final BatchResourceConfiguration batchResourceConfiguration = new BatchResourceConfiguration();
 
     @Test
     void testSetResourceIncludePatterns()
     {
-        resourceBatch.setResourceIncludePatterns(PATTERN);
-        assertPatterns(resourceBatch.getResourceIncludePatterns());
+        batchResourceConfiguration.setResourceIncludePatterns(PATTERN);
+        assertPatterns(batchResourceConfiguration.getResourceIncludePatterns());
     }
 
     @Test
     void testGetResourceIncludePatterns()
     {
-        resourceBatch.setResourceIncludePatterns(null);
-        assertTrue(resourceBatch.getResourceIncludePatterns().isEmpty());
+        batchResourceConfiguration.setResourceIncludePatterns(null);
+        assertTrue(batchResourceConfiguration.getResourceIncludePatterns().isEmpty());
     }
 
     @Test
     void testSetResourceExcludePatterns()
     {
-        resourceBatch.setResourceExcludePatterns(PATTERN);
-        assertPatterns(resourceBatch.getResourceExcludePatterns());
+        batchResourceConfiguration.setResourceExcludePatterns(PATTERN);
+        assertPatterns(batchResourceConfiguration.getResourceExcludePatterns());
     }
 
     @Test
     void testGetResourceExcludePatterns()
     {
-        resourceBatch.setResourceExcludePatterns(null);
-        assertTrue(resourceBatch.getResourceExcludePatterns().isEmpty());
+        batchResourceConfiguration.setResourceExcludePatterns(null);
+        assertTrue(batchResourceConfiguration.getResourceExcludePatterns().isEmpty());
     }
 
     @Test
     void testGetResourceExcludePatternsDefaultValueEmpty()
     {
-        assertTrue(resourceBatch.getResourceExcludePatterns().isEmpty());
+        assertTrue(batchResourceConfiguration.getResourceExcludePatterns().isEmpty());
     }
 
     @Test
     void testGetResourceIncludePatternsDefaultValueEmpty()
     {
-        assertTrue(resourceBatch.getResourceExcludePatterns().isEmpty());
+        assertTrue(batchResourceConfiguration.getResourceExcludePatterns().isEmpty());
     }
 
     private void assertPatterns(List<String> patterns)

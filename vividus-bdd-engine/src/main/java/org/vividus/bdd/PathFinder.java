@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.springframework.core.io.Resource;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.resource.IBddResourceLoader;
-import org.vividus.bdd.resource.ResourceBatch;
 
 public class PathFinder implements IPathFinder
 {
@@ -36,21 +36,21 @@ public class PathFinder implements IPathFinder
     private IBddResourceLoader bddResourceLoader;
 
     @Override
-    public List<String> findPaths(ResourceBatch resourceBatch) throws IOException
+    public List<String> findPaths(BatchResourceConfiguration batchResourceConfiguration) throws IOException
     {
         List<String> paths = new ArrayList<>();
-        process(resourceBatch, resourceBatch.getResourceIncludePatterns(), paths::add);
-        process(resourceBatch, resourceBatch.getResourceExcludePatterns(), paths::remove);
+        process(batchResourceConfiguration, batchResourceConfiguration.getResourceIncludePatterns(), paths::add);
+        process(batchResourceConfiguration, batchResourceConfiguration.getResourceExcludePatterns(), paths::remove);
         Collections.sort(paths);
         return paths;
     }
 
-    private void process(ResourceBatch resourceBatch, List<String> resourcePatterns, Consumer<String> consumer)
-            throws IOException
+    private void process(BatchResourceConfiguration batchResourceConfiguration, List<String> resourcePatterns,
+            Consumer<String> consumer) throws IOException
     {
         for (String resourcePattern : resourcePatterns)
         {
-            Resource[] foundResources = bddResourceLoader.getResources(resourceBatch.getResourceLocation(),
+            Resource[] foundResources = bddResourceLoader.getResources(batchResourceConfiguration.getResourceLocation(),
                     resourcePattern);
             for (Resource resource : foundResources)
             {

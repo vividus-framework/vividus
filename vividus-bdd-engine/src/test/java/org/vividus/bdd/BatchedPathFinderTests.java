@@ -28,7 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.resource.ResourceBatch;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
+import org.vividus.bdd.batch.BatchStorage;
 
 @ExtendWith(MockitoExtension.class)
 class BatchedPathFinderTests
@@ -37,7 +38,7 @@ class BatchedPathFinderTests
     private PathFinder pathFinder;
 
     @Mock
-    private IBatchStorage batchStorage;
+    private BatchStorage batchStorage;
 
     @InjectMocks
     private BatchedPathFinder batchedPathFinder;
@@ -45,14 +46,14 @@ class BatchedPathFinderTests
     @Test
     void testFindPaths() throws IOException
     {
-        ResourceBatch resourceBatch = new ResourceBatch();
-        resourceBatch.setResourceLocation("testLocation");
-        resourceBatch.setResourceIncludePatterns("testIncludePattern");
-        resourceBatch.setResourceExcludePatterns("testExcludePattern");
+        BatchResourceConfiguration batchResourceConfiguration = new BatchResourceConfiguration();
+        batchResourceConfiguration.setResourceLocation("testLocation");
+        batchResourceConfiguration.setResourceIncludePatterns("testIncludePattern");
+        batchResourceConfiguration.setResourceExcludePatterns("testExcludePattern");
         String batchKey = "batch1";
-        when(batchStorage.getBatches()).thenReturn(Map.of(batchKey, resourceBatch));
+        when(batchStorage.getBatchResourceConfigurations()).thenReturn(Map.of(batchKey, batchResourceConfiguration));
         List<String> testPaths = List.of("testPath");
-        when(pathFinder.findPaths(resourceBatch)).thenReturn(testPaths);
+        when(pathFinder.findPaths(batchResourceConfiguration)).thenReturn(testPaths);
         Map<String, List<String>> actual = batchedPathFinder.findPaths();
         Map<String, List<String>> expected = Map.of(batchKey, testPaths);
         assertEquals(expected, actual);

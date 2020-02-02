@@ -45,7 +45,7 @@ import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.StoryLoader;
-import org.vividus.bdd.resource.ResourceBatch;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.spring.Configuration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
@@ -100,8 +100,8 @@ public final class BddStepsCounter
     {
         StoryParser storyParser = configuration.storyParser();
         Keywords keywords = configuration.keywords();
-        ResourceBatch resourceBatch = createResourceBatch(storyLocation);
-        for (String path : pathFinder.findPaths(resourceBatch))
+        BatchResourceConfiguration batchResourceConfiguration = createResourceBatch(storyLocation);
+        for (String path : pathFinder.findPaths(batchResourceConfiguration))
         {
             String storyString = storyLoader.loadResourceAsText(path);
             Story story = storyParser.parseStory(storyString);
@@ -113,13 +113,13 @@ public final class BddStepsCounter
         }
     }
 
-    private ResourceBatch createResourceBatch(String storyLocation)
+    private BatchResourceConfiguration createResourceBatch(String storyLocation)
     {
-        ResourceBatch resourceBatch = new ResourceBatch();
-        resourceBatch.setResourceLocation(storyLocation);
-        resourceBatch.setResourceIncludePatterns("**/*.story");
-        resourceBatch.setResourceExcludePatterns("");
-        return resourceBatch;
+        BatchResourceConfiguration batchResourceConfiguration = new BatchResourceConfiguration();
+        batchResourceConfiguration.setResourceLocation(storyLocation);
+        batchResourceConfiguration.setResourceIncludePatterns("**/*.story");
+        batchResourceConfiguration.setResourceExcludePatterns("");
+        return batchResourceConfiguration;
     }
 
     private void fillStepCandidates()

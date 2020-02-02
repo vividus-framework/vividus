@@ -22,15 +22,15 @@ import java.util.Optional;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
-import org.vividus.bdd.IBatchStorage;
+import org.vividus.bdd.batch.BatchResourceConfiguration;
+import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.model.RunningStory;
-import org.vividus.bdd.resource.ResourceBatch;
 import org.vividus.testcontext.TestContext;
 
 public class BddRunContext implements IBddRunContext
 {
     private TestContext testContext;
-    private IBatchStorage batchStorage;
+    private BatchStorage batchStorage;
 
     private Optional<String> runningBatchKey;
     private boolean dryRun;
@@ -96,9 +96,9 @@ public class BddRunContext implements IBddRunContext
     }
 
     @Override
-    public ResourceBatch getRunningBatch()
+    public BatchResourceConfiguration getRunningBatch()
     {
-        return batchStorage.getBatch(getRunningBatchKey());
+        return batchStorage.getBatchResourceConfiguration(getRunningBatchKey());
     }
 
     @Override
@@ -134,7 +134,7 @@ public class BddRunContext implements IBddRunContext
         this.testContext = testContext;
     }
 
-    public void setBatchStorage(IBatchStorage batchStorage)
+    public void setBatchStorage(BatchStorage batchStorage)
     {
         this.batchStorage = batchStorage;
     }

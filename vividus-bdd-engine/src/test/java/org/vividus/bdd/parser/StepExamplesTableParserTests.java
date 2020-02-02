@@ -43,7 +43,6 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.ExtendedEmbedder;
 import org.vividus.bdd.spring.Configuration;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +54,7 @@ class StepExamplesTableParserTests
     private Configuration configuration;
 
     @Mock
-    private ExtendedEmbedder embedder;
+    private InjectableStepsFactory stepsFactory;
 
     @InjectMocks
     private StepExamplesTableParser stepExamplesTableParser;
@@ -112,8 +111,6 @@ class StepExamplesTableParserTests
 
     private List<CandidateSteps> mockCandidateSteps()
     {
-        InjectableStepsFactory stepsFactory = mock(InjectableStepsFactory.class);
-        when(embedder.stepsFactory()).thenReturn(stepsFactory);
         List<CandidateSteps> candidateSteps = new ArrayList<>();
         when(stepsFactory.createCandidateSteps()).thenReturn(candidateSteps);
         return candidateSteps;
