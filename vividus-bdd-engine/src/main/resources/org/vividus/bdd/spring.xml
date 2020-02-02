@@ -20,9 +20,7 @@
     </bean>
 
     <bean id="variablesFactory" class="org.vividus.bdd.variable.VariablesFactory"
-        init-method="init">
-        <property name="propertyParser" ref="propertyParser" />
-    </bean>
+        init-method="init" />
 
     <bean id="pathMatchingResourcePatternResolver"
         class="org.springframework.core.io.support.PathMatchingResourcePatternResolver" />

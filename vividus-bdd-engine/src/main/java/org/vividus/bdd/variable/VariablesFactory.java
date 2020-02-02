@@ -16,29 +16,55 @@
 
 package org.vividus.bdd.variable;
 
+import static java.util.Map.entry;
+
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
+import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.IPropertyParser;
 
 public class VariablesFactory implements IVariablesFactory
 {
-    private static final String VARIABLES_PROPERTY_FAMILY = "bdd.variables.global";
-    private IPropertyParser propertyParser;
+    private static final String BDD_VARIABLES_PREFIX = "bdd.variables.";
+    private static final String BATCH_PREFIX = "batch-";
+    private static final String VARIABLES_PROPERTY_FAMILY = BDD_VARIABLES_PREFIX + "global";
+
+    private final IPropertyParser propertyParser;
+    private final IPropertyMapper propertyMapper;
+    private final IBddRunContext bddRunContext;
 
     private Map<String, String> globalVariables;
+    private Map<String, Map<String, String>> batchVariables;
     private final Map<String, Object> nextBatchesVariables = new ConcurrentHashMap<>();
 
-    public void init()
+    public VariablesFactory(IPropertyParser propertyParser, IPropertyMapper propertyMapper,
+            IBddRunContext bddRunContext)
+    {
+        this.propertyParser = propertyParser;
+        this.propertyMapper = propertyMapper;
+        this.bddRunContext = bddRunContext;
+    }
+
+    public void init() throws IOException
     {
         globalVariables = propertyParser.getPropertyValuesByFamily(VARIABLES_PROPERTY_FAMILY);
+        batchVariables = propertyMapper.readValues(BDD_VARIABLES_PREFIX + BATCH_PREFIX, Map.class).entrySet()
+            .stream()
+            .map(e -> entry(BATCH_PREFIX + e.getKey(), e.getValue()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
     public Variables createVariables()
     {
         Variables variables = new Variables();
-        variables.getVariables(VariableScope.GLOBAL).putAll(globalVariables);
+        Map<String, Object> globalScoped = variables.getVariables(VariableScope.GLOBAL);
+        globalScoped.putAll(globalVariables);
+        globalScoped.putAll(batchVariables.getOrDefault(bddRunContext.getRunningBatchKey(), Map.of()));
         variables.getVariables(VariableScope.NEXT_BATCHES).putAll(nextBatchesVariables);
         return variables;
     }
@@ -53,10 +79,5 @@ public class VariablesFactory implements IVariablesFactory
     public void addNextBatchesVariable(String variableKey, Object variableValue)
     {
         nextBatchesVariables.put(variableKey, variableValue);
-    }
-
-    public void setPropertyParser(IPropertyParser propertyParser)
-    {
-        this.propertyParser = propertyParser;
     }
 }

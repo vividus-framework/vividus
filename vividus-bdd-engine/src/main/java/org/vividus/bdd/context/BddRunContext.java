@@ -98,8 +98,13 @@ public class BddRunContext implements IBddRunContext
     @Override
     public ResourceBatch getRunningBatch()
     {
-        String batchKey = runningBatchKey.orElseThrow(() -> new IllegalStateException("No running batch is found"));
-        return batchStorage.getBatch(batchKey);
+        return batchStorage.getBatch(getRunningBatchKey());
+    }
+
+    @Override
+    public String getRunningBatchKey()
+    {
+        return runningBatchKey.orElseThrow(() -> new IllegalStateException("No running batch is found"));
     }
 
     public Status getStoryStatus(Story story)

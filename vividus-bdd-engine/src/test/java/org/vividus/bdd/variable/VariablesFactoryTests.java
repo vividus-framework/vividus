@@ -20,34 +20,42 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.IPropertyParser;
 
 class VariablesFactoryTests
 {
-    private static final String VARIABLES_PROPERTY_FAMILY = "bdd.variables.global";
+    private static final String GLOBAL_PROPERTY_FAMILY = "bdd.variables.global";
+    private static final String BATCH_PROPERTY_FAMILY = "bdd.variables.batch-";
+    private static final String SCOPE_KEY = "scopeKey";
+    private static final String BATCH = "batch";
     private static final String KEY = "key";
     private static final String VALUE = "value";
 
     @Test
-    void testFactoryInitialization()
+    void testFactoryInitialization() throws IOException
     {
-        Map<String, String> values = new HashMap<>();
-        values.put(KEY, VALUE);
+        Map<String, String> globals = Map.of(KEY, VALUE, SCOPE_KEY, "global");
+        Map<String, String> batches = Map.of(SCOPE_KEY, BATCH);
 
         IPropertyParser propertyParser = mock(IPropertyParser.class);
+        IPropertyMapper propertyMapper = mock(IPropertyMapper.class);
+        IBddRunContext bddRunContext = mock(IBddRunContext.class);
 
-        VariablesFactory variablesFactory = new VariablesFactory();
-        variablesFactory.setPropertyParser(propertyParser);
-        when(propertyParser.getPropertyValuesByFamily(VARIABLES_PROPERTY_FAMILY)).thenReturn(values);
+        VariablesFactory variablesFactory = new VariablesFactory(propertyParser, propertyMapper, bddRunContext);
+        when(propertyParser.getPropertyValuesByFamily(GLOBAL_PROPERTY_FAMILY)).thenReturn(globals);
+        when(propertyMapper.readValues(BATCH_PROPERTY_FAMILY, Map.class)).thenReturn(Map.of("1", batches));
+        when(bddRunContext.getRunningBatchKey()).thenReturn("batch-1");
         variablesFactory.init();
         variablesFactory.addNextBatchesVariable(KEY, VALUE);
         Variables variables = variablesFactory.createVariables();
 
-        assertEquals(Map.of(KEY, VALUE), variables.getVariables(VariableScope.GLOBAL));
+        assertEquals(Map.of(KEY, VALUE, SCOPE_KEY, BATCH), variables.getVariables(VariableScope.GLOBAL));
         assertEquals(Map.of(KEY, VALUE), variables.getVariables(VariableScope.NEXT_BATCHES));
     }
 }
