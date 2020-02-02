@@ -24,14 +24,20 @@ import java.util.stream.Collectors;
 import org.jbehave.core.embedder.MatchingStepMonitor;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Scenario;
+import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.Step;
-import org.vividus.bdd.ExtendedEmbedder;
 import org.vividus.bdd.spring.Configuration;
 
 public class StepExamplesTableParser implements IStepExamplesTableParser
 {
-    private Configuration configuration;
-    private ExtendedEmbedder embedder;
+    private final Configuration configuration;
+    private final InjectableStepsFactory stepsFactory;
+
+    public StepExamplesTableParser(Configuration configuration, InjectableStepsFactory stepsFactory)
+    {
+        this.configuration = configuration;
+        this.stepsFactory = stepsFactory;
+    }
 
     @Override
     public List<Step> parse(ExamplesTable stepsAsTable)
@@ -46,17 +52,7 @@ public class StepExamplesTableParser implements IStepExamplesTableParser
         }
         Scenario scenario = new Scenario(stepsAsText);
         MatchingStepMonitor monitor = new MatchingStepMonitor(configuration.stepMonitor());
-        return configuration.stepCollector().collectScenarioSteps(embedder.stepsFactory().createCandidateSteps(),
+        return configuration.stepCollector().collectScenarioSteps(stepsFactory.createCandidateSteps(),
                 scenario, Map.of(), monitor);
-    }
-
-    public void setConfiguration(Configuration configuration)
-    {
-        this.configuration = configuration;
-    }
-
-    public void setEmbedder(ExtendedEmbedder embedder)
-    {
-        this.embedder = embedder;
     }
 }
