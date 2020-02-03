@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -236,15 +237,16 @@ class PageStepsTests
     void testCloseCurrentWindow()
     {
         String currentWindow = CURRENT_WINDOW_GUID;
-        String originalWindow = "{248427e8-e67d-47ba-923f-4051f349f813}";
+        String windowToSwitchTo = "{248427e8-e67d-47ba-923f-4051f349f813}";
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getWindowHandle()).thenReturn(currentWindow);
-        when(webDriverManager.getWindowHandles()).thenReturn(Set.of(currentWindow, originalWindow));
+        Set<String> windowHandles = new LinkedHashSet<>(List.of(currentWindow, windowToSwitchTo));
+        when(webDriverManager.getWindowHandles()).thenReturn(windowHandles);
         TargetLocator mockedTargetLocator = mock(TargetLocator.class);
         when(driver.switchTo()).thenReturn(mockedTargetLocator);
         pageSteps.closeCurrentWindow();
         verify(driver).close();
-        verify(mockedTargetLocator).window(originalWindow);
+        verify(mockedTargetLocator).window(windowToSwitchTo);
     }
 
     @Test
