@@ -34,10 +34,12 @@ import org.jbehave.core.steps.InjectableStepsFactory;
 import org.vividus.bdd.batch.BatchExecutionConfiguration;
 import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.context.BddRunContext;
+import org.vividus.bdd.context.IBddVariableContext;
 
 public class BatchedEmbedder extends Embedder
 {
     private final BddRunContext bddRunContext;
+    private final IBddVariableContext bddVariableContext;
     private final BatchStorage batchStorage;
 
     private boolean ignoreFailureInBatches;
@@ -47,9 +49,11 @@ public class BatchedEmbedder extends Embedder
 
     private String batch;
 
-    public BatchedEmbedder(BddRunContext bddRunContext, BatchStorage batchStorage)
+    public BatchedEmbedder(BddRunContext bddRunContext, IBddVariableContext bddVariableContext,
+            BatchStorage batchStorage)
     {
         this.bddRunContext = bddRunContext;
+        this.bddVariableContext = bddVariableContext;
         this.batchStorage = batchStorage;
     }
 
@@ -100,6 +104,7 @@ public class BatchedEmbedder extends Embedder
                 }
                 finally
                 {
+                    bddVariableContext.clearVariables();
                     bddRunContext.removeRunningBatch();
                     shutdownExecutorService();
                 }

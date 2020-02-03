@@ -31,4 +31,6 @@ public interface IBddVariableContext
     void initVariables();
 
     void clearVariables(VariableScope variableScope);
+
+    void clearVariables();
 }

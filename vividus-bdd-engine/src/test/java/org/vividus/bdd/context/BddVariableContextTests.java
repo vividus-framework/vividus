@@ -211,6 +211,17 @@ class BddVariableContextTests
         verify(variablesFactory).createVariables();
     }
 
+    @Test
+    void testClearAllVariables()
+    {
+        SimpleTestContext testContext = new SimpleTestContext();
+        Class<Variables> key = Variables.class;
+        testContext.put(key, new Variables());
+        bddVariableContext.setTestContext(testContext);
+        bddVariableContext.clearVariables();
+        assertNull(testContext.get(key));
+    }
+
     private Variables putVariable(VariableScope variableScope)
     {
         return putVariable(variableScope, VARIABLE_VALUE);
