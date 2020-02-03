@@ -18,7 +18,6 @@ package org.vividus.bdd.context;
 
 import java.util.Deque;
 
-import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.model.RunningStory;
 
 public interface IBddRunContext
@@ -28,8 +27,6 @@ public interface IBddRunContext
     RunningStory getRootRunningStory();
 
     Deque<RunningStory> getStoriesChain();
-
-    BatchResourceConfiguration getRunningBatch();
 
     String getRunningBatchKey();
 

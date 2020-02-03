@@ -22,15 +22,12 @@ import java.util.Optional;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Story;
-import org.vividus.bdd.batch.BatchResourceConfiguration;
-import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.testcontext.TestContext;
 
 public class BddRunContext implements IBddRunContext
 {
     private TestContext testContext;
-    private BatchStorage batchStorage;
 
     private Optional<String> runningBatchKey;
     private boolean dryRun;
@@ -96,12 +93,6 @@ public class BddRunContext implements IBddRunContext
     }
 
     @Override
-    public BatchResourceConfiguration getRunningBatch()
-    {
-        return batchStorage.getBatchResourceConfiguration(getRunningBatchKey());
-    }
-
-    @Override
     public String getRunningBatchKey()
     {
         return runningBatchKey.orElseThrow(() -> new IllegalStateException("No running batch is found"));
@@ -132,10 +123,5 @@ public class BddRunContext implements IBddRunContext
     public void setTestContext(TestContext testContext)
     {
         this.testContext = testContext;
-    }
-
-    public void setBatchStorage(BatchStorage batchStorage)
-    {
-        this.batchStorage = batchStorage;
     }
 }
