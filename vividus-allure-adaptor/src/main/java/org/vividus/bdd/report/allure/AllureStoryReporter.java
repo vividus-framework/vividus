@@ -136,19 +136,26 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
                     storyLabels.add(new Label().setName(LabelName.STORY.value()).setValue(name));
                     storyLabels.add(new Label().setName(LabelName.FEATURE.value()).setValue(groupByMetaTag));
                     storyLabels.add(new Label().setName(LabelName.FRAMEWORK.value()).setValue("Vividus"));
-                    if (givenStory)
-                    {
-                        allureRunContext.getRootStoryLabels().stream()
-                                .filter(l -> LabelName.SUITE.value().equals(l.getName()))
-                                .findFirst()
-                                .map(Label::getValue)
-                                .map(v -> new Label().setName(LabelName.PARENT_SUITE.value()).setValue(v))
-                                .ifPresent(storyLabels::add);
-                    }
+
+                    getParentSuiteKey(givenStory)
+                            .map(v -> new Label().setName(LabelName.PARENT_SUITE.value()).setValue(v))
+                            .ifPresent(storyLabels::add);
                     break;
             }
         }
         super.beforeStory(story, givenStory);
+    }
+
+    private Optional<String> getParentSuiteKey(boolean givenStory)
+    {
+        if (givenStory)
+        {
+            return allureRunContext.getRootStoryLabels().stream()
+                    .filter(l -> LabelName.SUITE.value().equals(l.getName()))
+                    .findFirst()
+                    .map(Label::getValue);
+        }
+        return Optional.of(bddRunContext.getRunningBatchKey());
     }
 
     @Override

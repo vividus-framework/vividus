@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -192,7 +193,7 @@ class AllureStoryReporterTests
                 .thenReturn(linkedQueueItem)
                 .thenReturn(linkedQueueItem)
                 .thenReturn(null);
-        mockStoryLabels();
+        when(allureRunContext.getCurrentStoryLabels()).thenReturn(new ArrayList<>());
         testExampleHandling(1);
     }
 
@@ -204,30 +205,44 @@ class AllureStoryReporterTests
                 .thenReturn(null)
                 .thenReturn(null)
                 .thenReturn(linkedQueueItem);
-        mockStoryLabels();
         testExampleHandling(0);
     }
 
     @Test
     void testBeforeStoryDefault()
     {
-        testBeforeStory("", false, false);
+        boolean givenStory = false;
+        List<Label> storyLabels = mockNewStoryLabels(givenStory);
+        String batchKey = mockRunningBatchKey();
+        testBeforeStory("", givenStory, false);
         verifyNoInteractions(allureReportGenerator);
+        assertEquals(7, storyLabels.size());
+        assertLabel(LabelName.PARENT_SUITE.value(), batchKey, storyLabels.get(6));
     }
 
     @Test
     void testBeforeStoryDefaultDryRun()
     {
         when(bddRunContext.isDryRun()).thenReturn(true);
-        testBeforeStory("", false, false);
+        boolean givenStory = false;
+        List<Label> storyLabels = mockNewStoryLabels(givenStory);
+        String batchKey = mockRunningBatchKey();
+        testBeforeStory("", givenStory, false);
         verifyNoInteractions(allureReportGenerator);
+        assertEquals(7, storyLabels.size());
+        assertLabel(LabelName.PARENT_SUITE.value(), batchKey, storyLabels.get(6));
     }
 
     @Test
     void testBeforeStoryDefaultGroup()
     {
-        testBeforeStory("", false, true);
+        boolean givenStory = false;
+        List<Label> storyLabels = mockNewStoryLabels(givenStory);
+        String batchKey = mockRunningBatchKey();
+        testBeforeStory("", givenStory, true);
         verifyNoInteractions(allureReportGenerator);
+        assertEquals(7, storyLabels.size());
+        assertLabel(LabelName.PARENT_SUITE.value(), batchKey, storyLabels.get(6));
     }
 
     @Test
@@ -242,7 +257,6 @@ class AllureStoryReporterTests
     {
         Story story = mockRunningStory(false, true);
         story.namedAs("");
-        mockStoryLabels();
         mockScenarioUid(false);
         allureStoryReporter.beforeStory(story, true);
         verify(next).beforeStory(story, true);
@@ -308,18 +322,39 @@ class AllureStoryReporterTests
     {
         Story story = mockRunningStory(storyWithGroup, true);
         story.namedAs(storyName);
-        mockStoryLabels();
         allureStoryReporter.beforeStory(story, givenStory);
         verify(next).beforeStory(story, givenStory);
+    }
+
+    private List<Label> mockNewStoryLabels(boolean givenStory)
+    {
+        List<Label> storyLabels = new LinkedList<>();
+        when(allureRunContext.createNewStoryLabels(givenStory)).thenReturn(storyLabels);
+        return storyLabels;
+    }
+
+    private String mockRunningBatchKey()
+    {
+        String batchKey = "batch-1";
+        when(bddRunContext.getRunningBatchKey()).thenReturn(batchKey);
+        return batchKey;
+    }
+
+    private void assertLabel(String expectedName, String expectedValue, Label actual)
+    {
+        assertEquals(expectedName, actual.getName());
+        assertEquals(expectedValue, actual.getValue());
     }
 
     @Test
     void testBeforeScenario()
     {
         Story story = mockRunningStory(false, true);
-        mockStoryLabels();
+        boolean givenStory = false;
+        mockNewStoryLabels(givenStory);
+        mockRunningBatchKey();
         mockScenarioUid(true);
-        allureStoryReporter.beforeStory(story, false);
+        allureStoryReporter.beforeStory(story, givenStory);
         Scenario scenario = story.getScenarios().get(0);
         allureStoryReporter.beforeScenario(scenario);
         verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
@@ -333,7 +368,6 @@ class AllureStoryReporterTests
     void testBeforeScenarioInGivenStoryScenarioLevel()
     {
         Story story = mockRunningStory(false, true);
-        mockStoryLabels();
         mockScenarioUid(false);
         Scenario scenario = story.getScenarios().get(0);
         allureStoryReporter.beforeScenario(scenario);
@@ -348,9 +382,11 @@ class AllureStoryReporterTests
     void testBeforeScenarioNoTier()
     {
         Story story = mockRunningStory(false, false);
-        mockStoryLabels();
+        boolean givenStory = false;
+        mockNewStoryLabels(givenStory);
+        mockRunningBatchKey();
         mockScenarioUid(true);
-        allureStoryReporter.beforeStory(story, false);
+        allureStoryReporter.beforeStory(story, givenStory);
         Scenario scenario = story.getScenarios().get(0);
         allureStoryReporter.beforeScenario(scenario);
         verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
@@ -400,7 +436,7 @@ class AllureStoryReporterTests
         Story story = new Story(null, null, new Meta(getStoryMeta()), null, List.of(scenario));
         RunningStory runningStory = getRunningStory(story, runningScenario);
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
-        mockStoryLabels();
+        when(allureRunContext.getCurrentStoryLabels()).thenReturn(new ArrayList<>());
         mockScenarioUid(true);
         allureStoryReporter.beforeScenario(scenario);
         verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
@@ -458,6 +494,7 @@ class AllureStoryReporterTests
         story2.namedAs(storyName);
         when(bddRunContext.getRunningStory()).thenReturn(runningStory1, runningStory2);
         when(allureRunContext.createNewStoryLabels(false)).thenReturn(story1Labels, story2Labels);
+        mockRunningBatchKey();
         allureStoryReporter.beforeStory(story1, false);
         allureStoryReporter.beforeStory(story2, false);
         return List.of(runningStory1, runningStory2);
@@ -840,11 +877,13 @@ class AllureStoryReporterTests
     void testAddTestCaseInfo()
     {
         mockScenarioUid(true);
-        mockStoryLabels();
+        boolean givenStory = false;
+        mockNewStoryLabels(givenStory);
+        mockRunningBatchKey();
         Story story = mockRunningStory(new Properties(), putTestCaseMetaProperties(getScenarioMeta(false),
                 EXPECTED_SCENARIO_TEST_CASE_GROUP, EXPECTED_SCENARIO_TEST_CASE_ID, EXPECTED_SCENARIO_REQUIREMENT_ID),
                 List.of());
-        allureStoryReporter.beforeStory(story, false);
+        allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
         TestResult captured = testResultCaptor.getValue();
@@ -869,14 +908,16 @@ class AllureStoryReporterTests
     void testAddTestCaseInfoIdenticalValuesOnStoreAndScenarioLevel()
     {
         mockScenarioUid(true);
-        mockStoryLabels();
+        boolean givenStory = false;
+        mockNewStoryLabels(givenStory);
+        mockRunningBatchKey();
         Story story = mockRunningStory(
                 putTestCaseMetaProperties(new Properties(), EXPECTED_SCENARIO_TEST_CASE_GROUP,
                         EXPECTED_SCENARIO_TEST_CASE_ID, EXPECTED_SCENARIO_REQUIREMENT_ID),
                 putTestCaseMetaProperties(getScenarioMeta(false), EXPECTED_SCENARIO_TEST_CASE_GROUP,
                         EXPECTED_SCENARIO_TEST_CASE_ID, EXPECTED_SCENARIO_REQUIREMENT_ID),
                 List.of());
-        allureStoryReporter.beforeStory(story, false);
+        allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
         List<Label> labels = testResultCaptor.getValue().getLabels();
@@ -1034,11 +1075,6 @@ class AllureStoryReporterTests
         mockScenarioUid(false);
     }
 
-    private void mockStoryLabels()
-    {
-        Mockito.lenient().when(allureRunContext.getCurrentStoryLabels()).thenReturn(new ArrayList<>());
-    }
-
     private void testExampleHandling(int scenarioRowIndex)
     {
         Properties scenarioMeta = getScenarioMeta(true);
@@ -1057,7 +1093,10 @@ class AllureStoryReporterTests
         tableRow.putAll(Maps.fromProperties(storyMeta));
 
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
-        allureStoryReporter.beforeStory(story, false);
+        boolean givenStory = false;
+        mockNewStoryLabels(givenStory);
+        mockRunningBatchKey();
+        allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.example(tableRow, scenarioRowIndex);
         verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
         verify(next).example(tableRow, scenarioRowIndex);
