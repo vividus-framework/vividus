@@ -2,7 +2,7 @@
 <Configuration status="WARN" packages="org.vividus.bdd.log">
     <Appenders>
         <Console name="console">
-            <PatternLayout pattern="%d [%t] %-5p %c - %m%n" />
+            <PatternLayout pattern="%highlight{%d [%t] %-5p %c - %m%n}" />
         </Console>
         <RollingFile name="file" fileName="output/logs/log4.log" filePattern="output/logs/log4j.%i.log">
             <PatternLayout pattern="%d [%t] %-5p %c - %m%n" />
