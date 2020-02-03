@@ -42,6 +42,7 @@ public class BddVariableContext implements IBddVariableContext
     private static final char COLON = ':';
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BddVariableContext.class);
+    private static final Class<Variables> VARIABLES_KEY = Variables.class;
 
     private TestContext testContext;
     private IVariablesFactory variablesFactory;
@@ -102,6 +103,12 @@ public class BddVariableContext implements IBddVariableContext
         getVariables().getVariables(variableScope).clear();
     }
 
+    @Override
+    public void clearVariables()
+    {
+        testContext.remove(VARIABLES_KEY);
+    }
+
     @SuppressWarnings("unchecked")
     private Object getVariable(Map<String, Object> variables, String key)
     {
@@ -132,7 +139,7 @@ public class BddVariableContext implements IBddVariableContext
 
     private Variables getVariables()
     {
-        return testContext.get(Variables.class, variablesFactory::createVariables);
+        return testContext.get(VARIABLES_KEY, variablesFactory::createVariables);
     }
 
     public void setTestContext(TestContext testContext)

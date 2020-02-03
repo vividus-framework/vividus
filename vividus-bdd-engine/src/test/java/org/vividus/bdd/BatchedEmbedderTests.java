@@ -52,6 +52,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.batch.BatchExecutionConfiguration;
 import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.context.BddRunContext;
+import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.spring.Configuration;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,6 +70,9 @@ class BatchedEmbedderTests
 
     @Mock
     private BddRunContext bddRunContext;
+
+    @Mock
+    private IBddVariableContext bddVariableContext;
 
     @InjectMocks
     private BatchedEmbedder embedder;
@@ -105,7 +109,8 @@ class BatchedEmbedderTests
         batches.put(BATCH, testStoryPaths);
         batches.put("batch-2", List.of("path2"));
         spy.runStoriesAsPaths(batches);
-        InOrder inOrder = inOrder(spy, embedderMonitor, storyManager, bddRunContext, executorService);
+        InOrder inOrder = inOrder(spy, embedderMonitor, storyManager, bddRunContext, bddVariableContext,
+                executorService);
         inOrder.verify(spy).processSystemProperties();
         inOrder.verify(spy).useEmbedderControls(argThat(this::assertEmbedderControls));
         inOrder.verify(spy).useMetaFilters(List.of(META_FILTERS));
@@ -113,6 +118,7 @@ class BatchedEmbedderTests
         inOrder.verify(bddRunContext).putRunningBatch(BATCH);
         inOrder.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), argThat(
             failures -> failures.size() == 1 && failures.containsKey(key) && failures.containsValue(throwable)));
+        inOrder.verify(bddVariableContext).clearVariables();
         inOrder.verify(bddRunContext).removeRunningBatch();
         inOrder.verify(executorService).shutdownNow();
         inOrder.verifyNoMoreInteractions();
@@ -137,11 +143,13 @@ class BatchedEmbedderTests
         List<String> testStoryPaths = List.of(PATH);
         mockBatchExecutionConfiguration();
         spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
-        InOrder inOrder = inOrder(spy, embedderMonitor, storyManager, bddRunContext, executorService);
+        InOrder inOrder = inOrder(spy, embedderMonitor, storyManager, bddRunContext, bddVariableContext,
+                executorService);
         inOrder.verify(spy).processSystemProperties();
         inOrder.verify(embedderMonitor).usingControls(mockedEmbedderControls);
         inOrder.verify(bddRunContext).putRunningBatch(BATCH);
         inOrder.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), any(BatchFailures.class));
+        inOrder.verify(bddVariableContext).clearVariables();
         inOrder.verify(bddRunContext).removeRunningBatch();
         inOrder.verify(executorService).shutdownNow();
         inOrder.verify(spy).generateReportsView();
