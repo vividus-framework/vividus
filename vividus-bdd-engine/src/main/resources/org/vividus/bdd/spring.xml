@@ -6,7 +6,6 @@
 
     <bean id="bddRunContext" class="org.vividus.bdd.context.BddRunContext">
         <property name="testContext" ref="testContext" />
-        <property name="batchStorage" ref="batchStorage" />
     </bean>
 
     <bean id="batchStorage" class="org.vividus.bdd.batch.BatchStorage">

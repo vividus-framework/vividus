@@ -20,31 +20,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.batch.BatchResourceConfiguration;
-import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.testcontext.SimpleTestContext;
 
-@ExtendWith(MockitoExtension.class)
 class BddRunContextTests
 {
     private static final String BATCH_KEY = "batchKey";
 
-    @Mock
-    private BatchStorage batchStorage;
-
-    @InjectMocks
-    private BddRunContext bddRunContext;
+    private BddRunContext bddRunContext = new BddRunContext();
 
     @Test
     void testGetStoriesChain()
@@ -96,16 +84,6 @@ class BddRunContextTests
     }
 
     @Test
-    void testPutRunningBatch()
-    {
-        String batchKey = BATCH_KEY;
-        bddRunContext.putRunningBatch(batchKey);
-        BatchResourceConfiguration batch = new BatchResourceConfiguration();
-        when(batchStorage.getBatchResourceConfiguration(batchKey)).thenReturn(batch);
-        assertEquals(batch, bddRunContext.getRunningBatch());
-    }
-
-    @Test
     void testGetRunningBatchKey()
     {
         bddRunContext.putRunningBatch(BATCH_KEY);
@@ -113,11 +91,11 @@ class BddRunContextTests
     }
 
     @Test
-    void testRemoveRunningBatch()
+    void testRemoveRunningBatchKey()
     {
         bddRunContext.putRunningBatch(BATCH_KEY);
         bddRunContext.removeRunningBatch();
-        IllegalStateException exception = assertThrows(IllegalStateException.class, bddRunContext :: getRunningBatch);
+        IllegalStateException exception = assertThrows(IllegalStateException.class, bddRunContext::getRunningBatchKey);
         assertEquals("No running batch is found", exception.getMessage());
     }
 
