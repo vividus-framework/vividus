@@ -23,18 +23,18 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public final class UriUtils
 {
-    private static final String EMPTY = "";
     private static final char SCHEME_SEPARATOR = ':';
     private static final String USER_INFO_SEPARATOR = "@";
-    private static final String QUERY_SEPARATOR = "?";
-    private static final String FRAGMENT_SEPARATOR = "#";
+    private static final char QUERY_SEPARATOR = '?';
+    private static final char FRAGMENT_SEPARATOR = '#';
     private static final char SLASH = '/';
 
     private UriUtils()
@@ -80,25 +80,25 @@ public final class UriUtils
 
     public static URI removeUserInfo(URI uri)
     {
-        return removePart(uri, uri::getRawUserInfo, EMPTY, USER_INFO_SEPARATOR);
+        return removePart(uri, URI::getRawUserInfo, p -> p + USER_INFO_SEPARATOR);
     }
 
     public static URI removeQuery(URI uri)
     {
-        return removePart(uri, uri::getRawQuery, QUERY_SEPARATOR, EMPTY);
+        return removePart(uri, URI::getRawQuery, p -> QUERY_SEPARATOR + p);
     }
 
     public static URI removeFragment(URI uri)
     {
-        return removePart(uri, uri::getFragment, FRAGMENT_SEPARATOR, EMPTY);
+        return removePart(uri, URI::getFragment, p -> FRAGMENT_SEPARATOR + p);
     }
 
-    private static URI removePart(URI uri, Supplier<String> partSupplier, String startSeparator, String endSeparator)
+    public static URI removePart(URI uri, Function<URI, String> partExtractor, UnaryOperator<String> partDecorator)
     {
-        String part = partSupplier.get();
+        String part = partExtractor.apply(uri);
         if (part != null)
         {
-            return URI.create(uri.toString().replace(startSeparator + part + endSeparator, EMPTY));
+            return URI.create(StringUtils.remove(uri.toString(), partDecorator.apply(part)));
         }
         return uri;
     }
@@ -123,8 +123,7 @@ public final class UriUtils
                         new URI(uri.getProtocol(), uri.getAuthority(), uri.getPath(), uri.getQuery(), uri.getRef()));
             }
 
-            char fragmentSeparator = '#';
-            int fragmentSeparatorIndex = decodedUrl.lastIndexOf(fragmentSeparator);
+            int fragmentSeparatorIndex = decodedUrl.lastIndexOf(FRAGMENT_SEPARATOR);
             String fragment = null;
             if (fragmentSeparatorIndex < 0)
             {
@@ -139,7 +138,7 @@ public final class UriUtils
             StringBuilder result = new StringBuilder(uri.getRawSchemeSpecificPart());
             if (fragment != null)
             {
-                result.append(fragmentSeparator).append(uri.getRawFragment());
+                result.append(FRAGMENT_SEPARATOR).append(uri.getRawFragment());
             }
             return URI.create(result.toString());
         }
