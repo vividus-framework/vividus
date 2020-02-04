@@ -157,7 +157,12 @@ class UriUtilsTests
         "https://somehost:8080/exportToCSV?filter=%7B%22locations%22:%5B%5D%7D&pageNumber=0&pageSize=10," +
             "https://somehost:8080/exportToCSV?filter=%7B%22locations%22:%5B%5D%7D&pageNumber=0&pageSize=10",
         "https://somehost:8080/exportToCSV[]?filter={\"locations\":[]}&pageNumber=0&pageSize=10#frag[]," +
-                "https://somehost:8080/exportToCSV%5B%5D?filter=%7B%22locations%22:%5B%5D%7D&pageNumber=0&pageSize=10#frag%5B%5D"
+            "https://somehost:8080/exportToCSV%5B%5D?filter=%7B%22locations%22:%5B%5D%7D&pageNumber=0&pageSize=10#frag%5B%5D",
+        "https://somehost:8080/path/%23121:14,                        https://somehost:8080/path/%23121:14",
+        "https://somehost:8080/path/%23122%3A14,                      https://somehost:8080/path/%23122:14",
+        "https://somehost:8080/path?key=%23121:14,                    https://somehost:8080/path?key=%23121:14",
+        "https://somehost:8080/path?key=%23121:14#fragment,           https://somehost:8080/path?key=%23121:14#fragment",
+        "https://somehost:8080/path?key=%23121:14#hash-in%23fragment, https://somehost:8080/path?key=%23121:14#hash-in%23fragment",
         // CHECKSTYLE:ON
     })
     void testCreateUri(String input, URI expected)
