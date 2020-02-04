@@ -21,9 +21,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +40,7 @@ public final class UriUtils
     private static final String QUERY_SEPARATOR = "?";
     private static final String FRAGMENT_SEPARATOR = "#";
     private static final char SLASH = '/';
+    private static final List<Marker> CHARACTERS_TO_NOT_DECODE = List.of(Marker.of(FRAGMENT_SEPARATOR));
 
     private UriUtils()
     {
@@ -107,7 +112,7 @@ public final class UriUtils
     {
         try
         {
-            String decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8);
+            String decodedUrl = URLDecoder.decode(markEncoded(url), StandardCharsets.UTF_8);
 
             int schemeSeparatorIndex = decodedUrl.indexOf(SCHEME_SEPARATOR);
             if (schemeSeparatorIndex < 0)
@@ -119,8 +124,8 @@ public final class UriUtils
             if (scheme.startsWith("http"))
             {
                 URL uri = new URL(decodedUrl);
-                return normalizeToRfc3986(
-                        new URI(uri.getProtocol(), uri.getAuthority(), uri.getPath(), uri.getQuery(), uri.getRef()));
+                return process(new URI(uri.getProtocol(), uri.getAuthority(), uri.getPath(), uri.getQuery(),
+                        uri.getRef()));
             }
 
             char fragmentSeparator = '#';
@@ -149,6 +154,27 @@ public final class UriUtils
         }
     }
 
+    private static String markEncoded(String toMark)
+    {
+        return process(toMark, r -> r.encodedPattern, r -> r.markedEncoded);
+    }
+
+    private static String restoreEncoded(String toRestore)
+    {
+        return process(toRestore, r -> r.markedDecodedPattern, r -> r.encoded);
+    }
+
+    private static String process(String toProcess, Function<Marker, Pattern> replace,
+            Function<Marker, String> insert)
+    {
+        String processed = toProcess;
+        for (Marker replacement : CHARACTERS_TO_NOT_DECODE)
+        {
+            processed = replace.apply(replacement).matcher(processed).replaceAll(insert.apply(replacement));
+        }
+        return processed;
+    }
+
     /**
      * Partially transforms RFC 2396 compliant URI to RFC 3986 compliant one: percent-encode square brackets found in
      * URL query and URL fragment. For the complete list of required changes to make URI compliant with RFC 3986 see:
@@ -158,12 +184,17 @@ public final class UriUtils
      * @param uri URI to normalize
      * @return URI partially compliant with RFC 3986
      */
-    private static URI normalizeToRfc3986(URI uri)
+    private static String normalizeToRfc3986(URI uri)
     {
         StringBuilder normalizedUri = new StringBuilder(uri.toString());
         encodeSquareBrackets(normalizedUri, uri.getRawQuery());
         encodeSquareBrackets(normalizedUri, uri.getRawFragment());
-        return URI.create(normalizedUri.toString());
+        return normalizedUri.toString();
+    }
+
+    private static URI process(URI uri)
+    {
+        return URI.create(restoreEncoded(normalizeToRfc3986(uri)));
     }
 
     private static void encodeSquareBrackets(StringBuilder normalizedUri, String uriPart)
@@ -256,6 +287,30 @@ public final class UriUtils
         public String getPassword()
         {
             return password;
+        }
+    }
+
+    private static final class Marker
+    {
+     // CHECKSTYLE:OFF
+        private static final String MARK = "\u200f";
+     // CHECKSTYLE:ON
+        private final String encoded;
+        private final String markedEncoded;
+        private final Pattern markedDecodedPattern;
+        private final Pattern encodedPattern;
+
+        private Marker(String decoded, String encoded)
+        {
+            this.encoded = encoded;
+            this.markedEncoded = MARK + encoded;
+            this.markedDecodedPattern = Pattern.compile(MARK + decoded);
+            this.encodedPattern = Pattern.compile(encoded);
+        }
+
+        private static Marker of(String decoded)
+        {
+            return new Marker(decoded, URLEncoder.encode(decoded, StandardCharsets.UTF_8));
         }
     }
 }
