@@ -29,7 +29,8 @@ public class BddRunContext implements IBddRunContext
 {
     private TestContext testContext;
 
-    private Optional<String> runningBatchKey;
+    // must be initialized for jbehave-junit-runner
+    private Optional<String> runningBatchKey = Optional.of("batch-1");
     private boolean dryRun;
 
     public void putRunningStory(RunningStory story, boolean givenStory)
