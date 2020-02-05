@@ -16,8 +16,6 @@
 
 package org.vividus.selenium.manager;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -60,7 +58,6 @@ import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Window;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
 import org.vividus.selenium.BrowserWindowSize;
@@ -80,8 +77,6 @@ class WebDriverManagerTests
     private static final String BROWSER_TYPE = "browser type";
     private static final String NATIVE_APP_CONTEXT = "NATIVE_APP";
     private static final String WEBVIEW_CONTEXT = "WEBVIEW_1";
-    private static final Set<String> WINDOW_HANDLES = Set.of("windowHandle");
-    private static final String COULD_NOT_CONNECT_TO_APP = "Could not connect to a valid app after 20 tries.";
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -663,48 +658,5 @@ class WebDriverManagerTests
         assertEquals(dimension.getHeight(), actualDimension.getHeight());
         assertEquals(dimension.getWidth(), actualDimension.getWidth());
         verify(mobileDriver, never()).manage();
-    }
-
-    @Test
-    void testGetWindowHandlesNotIOS()
-    {
-        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
-        when(((WebDriver) havingCapabilitiesWebDriver).getWindowHandles()).thenReturn(WINDOW_HANDLES);
-        assertEquals(WINDOW_HANDLES, webDriverManager.getWindowHandles());
-    }
-
-    @Test
-    void testGetWindowHandlesIOS()
-    {
-        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
-        when(((WebDriver) havingCapabilitiesWebDriver).getWindowHandles()).thenReturn(WINDOW_HANDLES);
-        assertEquals(WINDOW_HANDLES, webDriverManager.getWindowHandles());
-    }
-
-    @Test
-    void testGetWindowHandlesUnacceptableException()
-    {
-        String exceptionMessage = "Exception message";
-        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
-        when(((WebDriver) havingCapabilitiesWebDriver).getWindowHandles())
-                .thenThrow(new WebDriverException(exceptionMessage));
-        WebDriverException exception = assertThrows(WebDriverException.class,
-            () -> webDriverManager.getWindowHandles());
-        assertThat(exception.getMessage(), containsString(exceptionMessage));
-    }
-
-    @Test
-    void testGetWindowHandlesLargeNumberOfAttempts()
-    {
-        HasCapabilities havingCapabilitiesWebDriver = mockWebDriverWithCapabilities();
-        setCapabilities(havingCapabilitiesWebDriver, CapabilityType.PLATFORM_NAME, MobilePlatform.IOS);
-        when(((WebDriver) havingCapabilitiesWebDriver).getWindowHandles())
-                .thenThrow(new WebDriverException(COULD_NOT_CONNECT_TO_APP));
-        WebDriverException exception = assertThrows(WebDriverException.class,
-            () -> webDriverManager.getWindowHandles());
-        assertThat(exception.getMessage(), containsString(COULD_NOT_CONNECT_TO_APP));
     }
 }

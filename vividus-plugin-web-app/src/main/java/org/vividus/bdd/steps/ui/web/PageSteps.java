@@ -370,7 +370,7 @@ public class PageSteps
     {
         WebDriver driver = getWebDriver();
         String currentWindow = driver.getWindowHandle();
-        for (String window : webDriverManager.getWindowHandles())
+        for (String window : driver.getWindowHandles())
         {
             if (!window.equals(currentWindow))
             {

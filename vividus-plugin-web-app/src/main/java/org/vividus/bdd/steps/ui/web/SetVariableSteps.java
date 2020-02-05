@@ -34,7 +34,6 @@ import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.ISearchActions;
@@ -51,7 +50,6 @@ public class SetVariableSteps
 {
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private ISoftAssert softAssert;
-    @Inject private IWebDriverManager webDriverManager;
 
     @Inject private ISearchActions searchActions;
 
@@ -142,7 +140,7 @@ public class SetVariableSteps
     @When("I get the number of open windows and set it to the $scopes variable '$variable'")
     public void saveNumberOfOpenWindow(Set<VariableScope> scopes, String variable)
     {
-        int value = webDriverManager.getWindowHandles().size();
+        int value = webDriverProvider.get().getWindowHandles().size();
         bddVariableContext.putVariable(scopes, variable, value);
     }
 

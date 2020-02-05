@@ -31,7 +31,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.context.IWebUiContext;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,9 +38,6 @@ class WindowSwitchListenerTest
 {
     private static final String WINDOW_NAME1 = "windowName1";
     private static final String WINDOW_NAME2 = "windowName2";
-
-    @Mock
-    private IWebDriverManager webDriverManager;
 
     @Mock
     private IWebUiContext webUiContext;
@@ -56,8 +52,7 @@ class WindowSwitchListenerTest
     void testBeforeWindow()
     {
         windowSwitchListener.beforeSwitchToWindow(WINDOW_NAME1, webDriver);
-
-        verifyNoInteractions(webDriverManager, webUiContext);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -66,7 +61,7 @@ class WindowSwitchListenerTest
         windowSwitchListener.afterSwitchToWindow(WINDOW_NAME1, webDriver);
         mockWindowHandles(WINDOW_NAME1, WINDOW_NAME2);
         windowSwitchListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
-        verifyNoInteractions(webUiContext, webDriver);
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -85,6 +80,6 @@ class WindowSwitchListenerTest
 
     private void mockWindowHandles(String... names)
     {
-        when(webDriverManager.getWindowHandles()).thenReturn(new HashSet<>(Arrays.asList(names)));
+        when(webDriver.getWindowHandles()).thenReturn(new HashSet<>(Arrays.asList(names)));
     }
 }

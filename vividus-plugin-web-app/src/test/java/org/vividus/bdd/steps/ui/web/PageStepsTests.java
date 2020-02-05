@@ -241,7 +241,7 @@ class PageStepsTests
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getWindowHandle()).thenReturn(currentWindow);
         Set<String> windowHandles = new LinkedHashSet<>(List.of(currentWindow, windowToSwitchTo));
-        when(webDriverManager.getWindowHandles()).thenReturn(windowHandles);
+        when(driver.getWindowHandles()).thenReturn(windowHandles);
         TargetLocator mockedTargetLocator = mock(TargetLocator.class);
         when(driver.switchTo()).thenReturn(mockedTargetLocator);
         pageSteps.closeCurrentWindow();

@@ -211,9 +211,9 @@ class WaitActionsTests
         Set<String> windowHandles = new HashSet<>();
         windowHandles.add("111");
         windowHandles.add(VALUE_222);
-        when(webDriverManager.getWindowHandles()).thenReturn(windowHandles);
+        when(webDriver.getWindowHandles()).thenReturn(windowHandles);
         waitActions.waitForNewWindowOpen(webDriver, 1, TIMEOUT_MILLIS, true);
-        verify(webDriverManager).getWindowHandles();
+        verify(webDriver).getWindowHandles();
     }
 
     @Test

@@ -42,7 +42,6 @@ import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.ISearchActions;
@@ -85,9 +84,6 @@ class SetVariableStepsTests
 
     @Mock
     private ISearchActions searchActions;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
 
     @Mock
     private IBaseValidations baseValidations;
@@ -213,7 +209,8 @@ class SetVariableStepsTests
     @Test
     void testCheckNumberOfOpenWindow()
     {
-        when(webDriverManager.getWindowHandles()).thenReturn(Collections.singleton(VARIABLE));
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.getWindowHandles()).thenReturn(Collections.singleton(VARIABLE));
         setVariableSteps.saveNumberOfOpenWindow(VARIABLE_SCOPE, VARIABLE);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE, 1);
     }

@@ -23,13 +23,11 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.context.IWebUiContext;
 
 public class WindowSwitchListener extends AbstractWebDriverEventListener
 {
     private final ThreadLocal<String> currentWindowIdentifier = ThreadLocal.withInitial(() -> StringUtils.EMPTY);
-    @Inject private IWebDriverManager webDriverManager;
     @Inject private IWebUiContext webUiContext;
 
     @Override
@@ -40,7 +38,7 @@ public class WindowSwitchListener extends AbstractWebDriverEventListener
         {
             return;
         }
-        Set<String> windowHandles = webDriverManager.getWindowHandles();
+        Set<String> windowHandles = driver.getWindowHandles();
         if (!windowHandles.contains(currentIdentifier))
         {
             driver.switchTo().window(windowHandles.iterator().next());

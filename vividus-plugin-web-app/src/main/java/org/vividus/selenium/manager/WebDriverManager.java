@@ -16,7 +16,6 @@
 
 package org.vividus.selenium.manager;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
@@ -35,7 +34,6 @@ import org.openqa.selenium.Rotatable;
 import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Window;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -44,7 +42,6 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.SauceLabsCapabilityType;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.WebDriverUtil;
-import org.vividus.util.Sleeper;
 
 import io.appium.java_client.MobileDriver;
 import io.appium.java_client.MobileElement;
@@ -52,9 +49,6 @@ import io.appium.java_client.remote.MobilePlatform;
 
 public class WebDriverManager implements IWebDriverManager
 {
-    private static final int GET_WINDOW_HANDLE_RETRIES = 5;
-    private static final Duration GET_WINDOW_HANDLE_SLEEP_DURATION = Duration.ofMillis(500);
-
     private static final String DESIREDCAPABILITIES_KEY = "desired";
 
     @Inject private IWebDriverProvider webDriverProvider;
@@ -312,26 +306,7 @@ public class WebDriverManager implements IWebDriverManager
     @Override
     public Set<String> getWindowHandles()
     {
-        WebDriver driver = getWebDriver();
-        if (isIOS())
-        {
-            // Workaround for issue https://github.com/appium/appium/issues/6825
-            for (int counter = 0; counter < GET_WINDOW_HANDLE_RETRIES; counter++)
-            {
-                try
-                {
-                    return driver.getWindowHandles();
-                }
-                catch (WebDriverException exception)
-                {
-                    if (exception.getMessage().contains("Could not connect to a valid app after 20 tries."))
-                    {
-                        Sleeper.sleep(GET_WINDOW_HANDLE_SLEEP_DURATION);
-                    }
-                }
-            }
-        }
-        return driver.getWindowHandles();
+        return getWebDriver().getWindowHandles();
     }
 
     @Override

@@ -136,7 +136,7 @@ public class WaitActions implements IWaitActions
             @Override
             public Boolean apply(WebDriver webDriver)
             {
-                return webDriverManager.getWindowHandles().size() > alreadyOpenedWindowNumber;
+                return webDriver.getWindowHandles().size() > alreadyOpenedWindowNumber;
             }
 
             @Override
@@ -252,7 +252,7 @@ public class WaitActions implements IWaitActions
             @Override
             public Boolean apply(WebDriver webDriver)
             {
-                return !webDriverManager.getWindowHandles().contains(windowHandleToClose);
+                return !webDriver.getWindowHandles().contains(windowHandleToClose);
             }
 
             @Override
