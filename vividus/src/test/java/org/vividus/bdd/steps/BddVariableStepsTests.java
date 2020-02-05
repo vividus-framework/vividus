@@ -344,4 +344,14 @@ class BddVariableStepsTests
         verify(softAssert).assertThat(eq(String.format("Value '%s' matches pattern '%s'", VALUE, pattern)),
                 eq(VALUE), argThat(e -> e.toString().equals("a string matching the pattern '.*'")));
     }
+
+    @Test
+    void testInitVariableWithGivenValues()
+    {
+        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
+        ExamplesTable table = new ExamplesTable("|key0|key1|\n|value0|value1|");
+        bddVariableSteps.initVariableWithGivenValues(scopes, VALUE, table);
+        List<Map<String, String>> listOfMaps = List.of(Map.of("key0", "value0", "key1", "value1"));
+        verify(bddVariableContext).putVariable(scopes, VALUE, listOfMaps);
+    }
 }
