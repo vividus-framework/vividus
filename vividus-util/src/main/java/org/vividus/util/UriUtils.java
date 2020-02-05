@@ -107,7 +107,7 @@ public final class UriUtils
     {
         try
         {
-            String decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8);
+            String decodedUrl = decode(url);
 
             int schemeSeparatorIndex = decodedUrl.indexOf(SCHEME_SEPARATOR);
             if (schemeSeparatorIndex < 0)
@@ -115,28 +115,16 @@ public final class UriUtils
                 throw new IllegalArgumentException("Scheme is missing in URL: " + url);
             }
             String scheme = decodedUrl.substring(0, schemeSeparatorIndex);
+            String decodedFragment = extractDecodedFragment(url);
 
             if (scheme.startsWith("http"))
             {
-                URL uri = new URL(decodedUrl);
-                return normalizeToRfc3986(
-                        new URI(uri.getProtocol(), uri.getAuthority(), uri.getPath(), uri.getQuery(), uri.getRef()));
+                return buildUrl(decodedUrl, decodedFragment);
             }
 
-            int fragmentSeparatorIndex = decodedUrl.lastIndexOf(FRAGMENT_SEPARATOR);
-            String fragment = null;
-            if (fragmentSeparatorIndex < 0)
-            {
-                fragmentSeparatorIndex = decodedUrl.length();
-            }
-            else
-            {
-                fragment = decodedUrl.substring(fragmentSeparatorIndex + 1);
-            }
-
-            URI uri = new URI(scheme, decodedUrl.substring(0, fragmentSeparatorIndex), fragment);
+            URI uri = new URI(scheme, removeFragment(decodedUrl, decodedFragment), decodedFragment);
             StringBuilder result = new StringBuilder(uri.getRawSchemeSpecificPart());
-            if (fragment != null)
+            if (decodedFragment != null)
             {
                 result.append(FRAGMENT_SEPARATOR).append(uri.getRawFragment());
             }
@@ -146,6 +134,43 @@ public final class UriUtils
         {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    private static URI buildUrl(String decodedUrl, String decodedFragment)
+            throws MalformedURLException, URISyntaxException
+    {
+        URL uri = new URL(decodedUrl);
+        String path = uri.getPath();
+        String query = uri.getQuery();
+        String ref = uri.getRef();
+        if (ref != null && !ref.equals(decodedFragment))
+        {
+            if (decodedFragment != null)
+            {
+                ref = removeFragment(ref, decodedFragment);
+            }
+            if (query != null)
+            {
+                query = query + FRAGMENT_SEPARATOR + ref;
+            }
+            else
+            {
+                path = path + FRAGMENT_SEPARATOR + ref;
+            }
+            ref = decodedFragment;
+        }
+        return normalizeToRfc3986(new URI(uri.getProtocol(), uri.getAuthority(), path, query, ref));
+    }
+
+    private static String decode(String data)
+    {
+        return URLDecoder.decode(data, StandardCharsets.UTF_8);
+    }
+
+    private static String extractDecodedFragment(String url)
+    {
+        int fragmentStart = url.lastIndexOf(FRAGMENT_SEPARATOR);
+        return fragmentStart >= 0 ? decode(url.substring(fragmentStart + 1)) : null;
     }
 
     /**
@@ -163,6 +188,16 @@ public final class UriUtils
         encodeSquareBrackets(normalizedUri, uri.getRawQuery());
         encodeSquareBrackets(normalizedUri, uri.getRawFragment());
         return URI.create(normalizedUri.toString());
+    }
+
+    private static String removeFragment(String url, String fragment)
+    {
+        if (fragment != null)
+        {
+            int fragmentStartIndex = url.length() - fragment.length();
+            return url.substring(0, fragmentStartIndex - 1);
+        }
+        return url;
     }
 
     private static void encodeSquareBrackets(StringBuilder normalizedUri, String uriPart)
