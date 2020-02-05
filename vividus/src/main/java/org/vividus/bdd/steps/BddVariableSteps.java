@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -36,6 +37,7 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.util.MapUtils;
 import org.vividus.bdd.variable.VariableScope;
@@ -227,6 +229,28 @@ public class BddVariableSteps
     public void saveVariableToFile(String pathname, String fileContent) throws IOException
     {
         FileUtils.writeStringToFile(new File(pathname), fileContent, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Saves examples table as list of maps to variable
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName A name of variable to assign the values
+     * @param examplesTable A table for saving in variable
+     */
+    @When("I initialize $scopes variable `$variableName` with values:$examplesTable")
+    public void initVariableWithGivenValues(Set<VariableScope> scopes, String variableName,
+                ExamplesTable examplesTable)
+    {
+        List<Map<String, String>> listOfMaps = examplesTable.getRowsAsParameters()
+                .stream().map(Parameters::values).collect(Collectors.toList());
+        bddVariableContext.putVariable(scopes, variableName, listOfMaps);
     }
 
     private boolean compareListsOfMaps(Object variable1, Object variable2)
