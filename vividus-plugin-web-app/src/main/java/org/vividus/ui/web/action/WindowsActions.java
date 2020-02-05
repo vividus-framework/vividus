@@ -41,7 +41,7 @@ public class WindowsActions implements IWindowsActions
     @Override
     public void closeAllWindowsExceptOne()
     {
-        Set<String> windows = webDriverManager.getWindowHandles();
+        Set<String> windows = getWebDriver().getWindowHandles();
         if (windows.size() > 1)
         {
             if (webDriverManager.isAndroid())
@@ -87,13 +87,14 @@ public class WindowsActions implements IWindowsActions
     @Override
     public void switchToPreviousWindow()
     {
-        getWebDriver().switchTo().window(webDriverManager.getWindowHandles().iterator().next());
+        WebDriver webDriver = getWebDriver();
+        webDriver.switchTo().window(webDriver.getWindowHandles().iterator().next());
     }
 
     private String pickWindow(BiFunction<WebDriver, String, String> picker, Supplier<String> defaultValueProvider)
     {
         WebDriver driver = getWebDriver();
-        for (String window : webDriverManager.getWindowHandles())
+        for (String window : driver.getWindowHandles())
         {
             String value = picker.apply(driver, window);
             if (null != value)

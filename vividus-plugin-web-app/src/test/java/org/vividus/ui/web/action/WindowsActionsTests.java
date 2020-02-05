@@ -20,12 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hamcrest.Matcher;
@@ -69,21 +68,19 @@ class WindowsActionsTests
     @Test
     void testCloseAllWindowsExceptOneOneWindow()
     {
-        when(webDriverManager.getWindowHandles()).thenReturn(new HashSet<>());
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.getWindowHandles()).thenReturn(new HashSet<>());
         windowsActions.closeAllWindowsExceptOne();
-        verify(webDriverManager, times(1)).getWindowHandles();
-        verifyNoMoreInteractions(webDriver);
+        verify(webDriver).getWindowHandles();
     }
 
     @Test
     void testCloseAllWindowsExceptOneNotMobile()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        Set<String> windows = new HashSet<>();
-        windows.add(WINDOW1);
-        windows.add(WINDOW2);
+        Set<String> windows = new LinkedHashSet<>(List.of(WINDOW1, WINDOW2));
         TargetLocator targetLocator = mock(TargetLocator.class);
-        when(webDriverManager.getWindowHandles()).thenReturn(windows);
+        when(webDriver.getWindowHandles()).thenReturn(windows);
         when(webDriver.switchTo()).thenReturn(targetLocator);
         Options options = mock(Options.class);
         Window window = mock(Window.class);
@@ -101,11 +98,9 @@ class WindowsActionsTests
         WebDriver webDriver = mock(WebDriver.class);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriverManager.isAndroid()).thenReturn(true);
-        Set<String> windows = new HashSet<>();
-        windows.add(WINDOW1);
-        windows.add(WINDOW2);
+        Set<String> windows = new LinkedHashSet<>(List.of(WINDOW1, WINDOW2));
         TargetLocator targetLocator = mock(TargetLocator.class);
-        when(webDriverManager.getWindowHandles()).thenReturn(windows);
+        when(webDriver.getWindowHandles()).thenReturn(windows);
         when(webDriver.switchTo()).thenReturn(targetLocator);
         Navigation navigation = mock(Navigation.class);
         when(webDriver.navigate()).thenReturn(navigation);
@@ -183,7 +178,7 @@ class WindowsActionsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         TargetLocator targetLocator = mock(TargetLocator.class);
-        when(webDriverManager.getWindowHandles()).thenReturn(Collections.singleton(WINDOW1));
+        when(webDriver.getWindowHandles()).thenReturn(Set.of(WINDOW1));
         when(webDriver.switchTo()).thenReturn(targetLocator).thenReturn(targetLocator);
         windowsActions.switchToPreviousWindow();
 
@@ -192,6 +187,6 @@ class WindowsActionsTests
 
     private void mockWindowHandles(String... windowHandles)
     {
-        when(webDriverManager.getWindowHandles()).thenReturn(new HashSet<>(Arrays.asList(windowHandles)));
+        when(webDriver.getWindowHandles()).thenReturn(new LinkedHashSet<>(List.of(windowHandles)));
     }
 }
