@@ -20,6 +20,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +33,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.TargetLocator;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.context.SearchContextSetter;
 import org.vividus.ui.web.event.WebDriverCreateEvent;
@@ -35,6 +42,9 @@ import org.vividus.ui.web.event.WebDriverQuitEvent;
 @ExtendWith(MockitoExtension.class)
 class WebUiContextListenerTests
 {
+    private static final String WINDOW_NAME1 = "windowName1";
+    private static final String WINDOW_NAME2 = "windowName2";
+
     @Mock
     private IWebUiContext webUiContext;
 
@@ -77,5 +87,38 @@ class WebUiContextListenerTests
     {
         webUiContextListener.afterNavigateTo("url", mock(WebDriver.class));
         verify(webUiContext).reset();
+    }
+
+    @Test
+    void testBeforeWindow()
+    {
+        WebDriver webDriver = mock(WebDriver.class);
+        webUiContextListener.beforeSwitchToWindow(WINDOW_NAME1, webDriver);
+        verifyNoInteractions(webUiContext);
+    }
+
+    @Test
+    void testBeforeWindowWindowExists()
+    {
+        WebDriver webDriver = mock(WebDriver.class);
+        webUiContextListener.afterSwitchToWindow(WINDOW_NAME1, webDriver);
+        when(webDriver.getWindowHandles()).thenReturn(new LinkedHashSet<>(List.of(WINDOW_NAME1, WINDOW_NAME2)));
+        webUiContextListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
+        verifyNoInteractions(webUiContext);
+    }
+
+    @Test
+    void testBeforeWindowWindowNotExists()
+    {
+        WebDriver webDriver = mock(WebDriver.class);
+        webUiContextListener.afterSwitchToWindow(WINDOW_NAME1, webDriver);
+        TargetLocator targetLocator = mock(TargetLocator.class);
+        when(webDriver.switchTo()).thenReturn(targetLocator);
+        when(webDriver.getWindowHandles()).thenReturn(Set.of(WINDOW_NAME2));
+
+        webUiContextListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
+
+        verify(webUiContext).reset();
+        verify(targetLocator).window(WINDOW_NAME2);
     }
 }

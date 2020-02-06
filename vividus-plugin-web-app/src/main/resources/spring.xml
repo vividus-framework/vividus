@@ -375,7 +375,6 @@
                     <bean class="org.vividus.ui.web.listener.WebUiContextListener" lazy-init="false">
                         <property name="webUiContext" ref="webUiContext" />
                     </bean>
-                    <bean class="org.vividus.ui.web.listener.WindowSwitchListener" />
                 </list>
             </list>
         </property>
