@@ -16,8 +16,11 @@
 
 package org.vividus.ui.web.listener;
 
+import java.util.Set;
+
 import com.google.common.eventbus.Subscribe;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
 import org.vividus.ui.web.context.IWebUiContext;
@@ -26,6 +29,8 @@ import org.vividus.ui.web.event.WebDriverQuitEvent;
 
 public class WebUiContextListener extends AbstractWebDriverEventListener
 {
+    private final ThreadLocal<String> currentWindowIdentifier = ThreadLocal.withInitial(() -> StringUtils.EMPTY);
+
     private IWebUiContext webUiContext;
 
     @Subscribe
@@ -56,6 +61,28 @@ public class WebUiContextListener extends AbstractWebDriverEventListener
     public void afterNavigateTo(String url, WebDriver driver)
     {
         webUiContext.reset();
+    }
+
+    @Override
+    public void beforeSwitchToWindow(String windowName, WebDriver driver)
+    {
+        String currentIdentifier = currentWindowIdentifier.get();
+        if (currentIdentifier.isEmpty())
+        {
+            return;
+        }
+        Set<String> windowHandles = driver.getWindowHandles();
+        if (!windowHandles.contains(currentIdentifier))
+        {
+            driver.switchTo().window(windowHandles.iterator().next());
+            webUiContext.reset();
+        }
+    }
+
+    @Override
+    public void afterSwitchToWindow(String windowName, WebDriver driver)
+    {
+        currentWindowIdentifier.set(windowName);
     }
 
     public void setWebUiContext(IWebUiContext webUiContext)
