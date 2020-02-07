@@ -36,7 +36,7 @@ import org.vividus.util.property.IPropertyParser;
 @ExtendWith(MockitoExtension.class)
 class ResourceLoadConfigurationTests
 {
-    private static final String VARIABLES_PROPERTY_FAMILY = "bdd.resource-loader";
+    private static final String VARIABLES_PROPERTY_PREFIX = "bdd.resource-loader.";
 
     private static final String LOCALE_KEY = "locale";
 
@@ -64,7 +64,7 @@ class ResourceLoadConfigurationTests
 
     private void initProperties(Map<String, String> props)
     {
-        Mockito.when(propertyParser.getPropertyValuesByFamily(VARIABLES_PROPERTY_FAMILY)).thenReturn(props);
+        Mockito.when(propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX)).thenReturn(props);
         resourceLoadConfiguration.init();
     }
 

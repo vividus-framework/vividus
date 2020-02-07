@@ -21,8 +21,8 @@
                 <constructor-arg>
                     <bean parent="httpClientConfig">
                         <property name="headersMap">
-                            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByFamily">
-                                <constructor-arg value="sitemap.parser.http.header" />
+                            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
+                                <constructor-arg value="sitemap.parser.http.header." />
                             </bean>
                         </property>
                     </bean>

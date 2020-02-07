@@ -60,7 +60,7 @@ public class WebDriverFactory implements IWebDriverFactory
 
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
 
-    private static final String SELENIUM_GRID_PROPERTY_FAMILY = "selenium.grid.capabilities";
+    private static final String SELENIUM_GRID_PROPERTY_PREFIX = "selenium.grid.capabilities.";
 
     @Inject private IRemoteWebDriverFactory remoteWebDriverFactory;
     @Inject private ITimeoutConfigurer timeoutConfigurer;
@@ -71,7 +71,7 @@ public class WebDriverFactory implements IWebDriverFactory
     private IJsonUtils jsonUtils;
 
     private final Supplier<DesiredCapabilities> seleniumGridDesiredCapabilities = Suppliers.memoize(
-        () -> new DesiredCapabilities(propertyParser.getPropertyValuesByFamily(SELENIUM_GRID_PROPERTY_FAMILY)));
+        () -> new DesiredCapabilities(propertyParser.getPropertyValuesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX)));
 
     private final ConcurrentHashMap<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 

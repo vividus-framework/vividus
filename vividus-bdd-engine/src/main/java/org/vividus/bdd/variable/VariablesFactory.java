@@ -31,7 +31,7 @@ public class VariablesFactory implements IVariablesFactory
 {
     private static final String BDD_VARIABLES_PREFIX = "bdd.variables.";
     private static final String BATCH_PREFIX = "batch-";
-    private static final String VARIABLES_PROPERTY_FAMILY = BDD_VARIABLES_PREFIX + "global";
+    private static final String VARIABLES_PROPERTY_PREFIX = BDD_VARIABLES_PREFIX + "global.";
 
     private final IPropertyParser propertyParser;
     private final IPropertyMapper propertyMapper;
@@ -51,7 +51,7 @@ public class VariablesFactory implements IVariablesFactory
 
     public void init() throws IOException
     {
-        globalVariables = propertyParser.getPropertyValuesByFamily(VARIABLES_PROPERTY_FAMILY);
+        globalVariables = propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX);
         batchVariables = propertyMapper.readValues(BDD_VARIABLES_PREFIX + BATCH_PREFIX, Map.class).entrySet()
             .stream()
             .map(e -> entry(BATCH_PREFIX + e.getKey(), e.getValue()))

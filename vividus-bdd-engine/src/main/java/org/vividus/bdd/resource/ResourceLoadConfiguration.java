@@ -24,7 +24,7 @@ import org.vividus.util.property.IPropertyParser;
 
 public class ResourceLoadConfiguration implements IResourceLoadConfiguration
 {
-    private static final String VARIABLES_PROPERTY_FAMILY = "bdd.resource-loader";
+    private static final String VARIABLES_PROPERTY_PREFIX = "bdd.resource-loader.";
 
     private IPropertyParser propertyParser;
 
@@ -32,7 +32,7 @@ public class ResourceLoadConfiguration implements IResourceLoadConfiguration
 
     public void init()
     {
-        resourceLoadParameters = propertyParser.getPropertyValuesByFamily(VARIABLES_PROPERTY_FAMILY);
+        resourceLoadParameters = propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX);
     }
 
     @Override
