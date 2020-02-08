@@ -21,8 +21,8 @@ import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,29 +45,32 @@ public class BatchStorage
         this.defaultStoryExecutionTimeout = Duration.ofSeconds(Long.parseLong(defaultStoryExecutionTimeout));
 
         batchResourceConfigurations = readFromProperties(propertyMapper, "bdd.story-loader.batch-",
-                BatchResourceConfiguration.class, UnaryOperator.identity());
-
+                BatchResourceConfiguration.class);
         batchExecutionConfigurations = readFromProperties(propertyMapper, "bdd.batch-",
-                BatchExecutionConfiguration.class, batchExecutionConfiguration -> {
-                if (batchExecutionConfiguration.getMetaFilters() == null)
-                {
-                    batchExecutionConfiguration.setMetaFilters(this.defaultMetaFilters);
-                }
-                if (batchExecutionConfiguration.getStoryExecutionTimeout() == null)
-                {
-                    batchExecutionConfiguration.setStoryExecutionTimeout(this.defaultStoryExecutionTimeout);
-                }
-                return batchExecutionConfiguration;
+                BatchExecutionConfiguration.class);
+
+        batchExecutionConfigurations.forEach((key, config) -> {
+            if (config.getName() == null)
+            {
+                config.setName(key);
             }
-        );
+            if (config.getMetaFilters() == null)
+            {
+                config.setMetaFilters(this.defaultMetaFilters);
+            }
+            if (config.getStoryExecutionTimeout() == null)
+            {
+                config.setStoryExecutionTimeout(this.defaultStoryExecutionTimeout);
+            }
+        });
     }
 
     private <T> Map<String, T> readFromProperties(IPropertyMapper propertyMapper, String propertyPrefix,
-            Class<T> valueType, UnaryOperator<T> valueMapper) throws IOException
+            Class<T> valueType) throws IOException
     {
         return propertyMapper.readValues(propertyPrefix, valueType).entrySet().stream()
-                .collect(Collectors.toMap(e -> BATCH + e.getKey(), e -> valueMapper.apply(e.getValue()),
-                    (v1, v2) -> null, () -> new TreeMap<>(getBatchKeyComparator())));
+                .collect(Collectors.toMap(e -> BATCH + e.getKey(), Entry::getValue, (v1, v2) -> null,
+                    () -> new TreeMap<>(getBatchKeyComparator())));
     }
 
     private Comparator<String> getBatchKeyComparator()
@@ -89,6 +92,7 @@ public class BatchStorage
     {
         return batchExecutionConfigurations.computeIfAbsent(batchKey, b -> {
             BatchExecutionConfiguration config = new BatchExecutionConfiguration();
+            config.setName(batchKey);
             config.setStoryExecutionTimeout(defaultStoryExecutionTimeout);
             config.setMetaFilters(defaultMetaFilters);
             return config;

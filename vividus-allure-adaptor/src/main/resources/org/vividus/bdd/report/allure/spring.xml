@@ -8,6 +8,7 @@
         abstract="true">
         <property name="allureReportGenerator" ref="allureReportGenerator" />
         <property name="bddRunContext" ref="bddRunContext" />
+        <property name="batchStorage" ref="batchStorage" />
         <property name="testContext" ref="testContext" />
         <property name="allureRunContext">
             <bean class="org.vividus.bdd.report.allure.AllureRunContext" />

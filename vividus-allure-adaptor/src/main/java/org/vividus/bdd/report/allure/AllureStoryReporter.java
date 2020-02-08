@@ -37,6 +37,7 @@ import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.vividus.bdd.ChainedStoryReporter;
 import org.vividus.bdd.JBehaveFailureUnwrapper;
+import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.MetaWrapper;
 import org.vividus.bdd.model.RunningScenario;
@@ -80,6 +81,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     private final AllureLifecycle lifecycle = Allure.getLifecycle();
     private IAllureReportGenerator allureReportGenerator;
     private IBddRunContext bddRunContext;
+    private BatchStorage batchStorage;
     private TestContext testContext;
     private IAllureRunContext allureRunContext;
     private IVerificationErrorAdapter verificationErrorAdapter;
@@ -155,7 +157,9 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
                     .findFirst()
                     .map(Label::getValue);
         }
-        return Optional.of(bddRunContext.getRunningBatchKey());
+        String runningBatchKey = bddRunContext.getRunningBatchKey();
+        String batchName = batchStorage.getBatchExecutionConfiguration(runningBatchKey).getName();
+        return Optional.of(batchName);
     }
 
     @Override
@@ -668,6 +672,11 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     public void setBddRunContext(IBddRunContext bddRunContext)
     {
         this.bddRunContext = bddRunContext;
+    }
+
+    public void setBatchStorage(BatchStorage batchStorage)
+    {
+        this.batchStorage = batchStorage;
     }
 
     public void setTestContext(TestContext testContext)

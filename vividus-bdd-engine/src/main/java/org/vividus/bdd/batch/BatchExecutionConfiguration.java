@@ -23,9 +23,20 @@ import org.apache.commons.lang3.StringUtils;
 
 public class BatchExecutionConfiguration
 {
+    private String name;
     private Integer threads;
     private List<String> metaFilters;
     private Duration storyExecutionTimeout;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
     public Integer getThreads()
     {

@@ -44,6 +44,7 @@ class BatchStorageTests
     private static final long DEFAULT_TIMEOUT = 300;
     private static final List<String> DEFAULT_META_FILTERS = List.of("groovy: !skip");
 
+    private static final String BATCH_2_NAME = "second batch name";
     private static final int BATCH_2_THREADS = 5;
     private static final Duration BATCH_2_TIMEOUT = Duration.ofHours(1);
     private static final String BATCH_2_META_FILTERS = "grooyv: !ignored";
@@ -71,6 +72,7 @@ class BatchStorageTests
         BatchExecutionConfiguration batchExecutionConfiguration1 = new BatchExecutionConfiguration();
         batchExecutionConfiguration1.setMetaFilters((String) null);
         BatchExecutionConfiguration batchExecutionConfiguration2 = new BatchExecutionConfiguration();
+        batchExecutionConfiguration2.setName(BATCH_2_NAME);
         batchExecutionConfiguration2.setThreads(BATCH_2_THREADS);
         batchExecutionConfiguration2.setStoryExecutionTimeout(BATCH_2_TIMEOUT);
         batchExecutionConfiguration2.setMetaFilters(BATCH_2_META_FILTERS);
@@ -104,7 +106,7 @@ class BatchStorageTests
     @Test
     void shouldGetBatchExecutionConfigurationInitializedWithDefaultValues()
     {
-        assertDefaultBatchExecutionConfiguration(batchStorage.getBatchExecutionConfiguration(BATCH_KEYS.get(0)));
+        assertDefaultBatchExecutionConfiguration(BATCH_KEYS.get(0));
     }
 
     @Test
@@ -113,6 +115,7 @@ class BatchStorageTests
         BatchExecutionConfiguration config = batchStorage.getBatchExecutionConfiguration(BATCH_KEYS.get(1));
         assertAll(() ->
         {
+            assertEquals(BATCH_2_NAME, config.getName());
             assertEquals(BATCH_2_THREADS, config.getThreads());
             assertEquals(BATCH_2_TIMEOUT, config.getStoryExecutionTimeout());
             assertEquals(List.of(BATCH_2_META_FILTERS), config.getMetaFilters());
@@ -122,12 +125,14 @@ class BatchStorageTests
     @Test
     void shouldCreateNonExistentBatchExecutionConfiguration()
     {
-        assertDefaultBatchExecutionConfiguration(batchStorage.getBatchExecutionConfiguration("batch-100"));
+        assertDefaultBatchExecutionConfiguration("batch-100");
     }
 
-    private void assertDefaultBatchExecutionConfiguration(BatchExecutionConfiguration config)
+    private void assertDefaultBatchExecutionConfiguration(String batchKey)
     {
+        BatchExecutionConfiguration config = batchStorage.getBatchExecutionConfiguration(batchKey);
         assertAll(() -> {
+            assertEquals(batchKey,  config.getName());
             assertNull(config.getThreads());
             assertEquals(Duration.ofSeconds(DEFAULT_TIMEOUT), config.getStoryExecutionTimeout());
             assertEquals(DEFAULT_META_FILTERS, config.getMetaFilters());
