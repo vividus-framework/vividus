@@ -38,8 +38,8 @@
 
     <bean id="restApiHttpClientConfig" parent="httpClientConfig">
         <property name="headersMap">
-            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByFamily">
-                <constructor-arg value="rest-api.http.header" />
+            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
+                <constructor-arg value="rest-api.http.header." />
             </bean>
         </property>
         <property name="lastRequestInterceptor" ref="httpClientInterceptor" />

@@ -48,8 +48,8 @@
     </bean>
 
     <bean id="localDnsStorage" factory-bean="propertyParser"
-        factory-method="getPropertyValuesByFamily">
-        <constructor-arg value="http.local-dns-storage" />
+        factory-method="getPropertyValuesByPrefix">
+        <constructor-arg value="http.local-dns-storage." />
     </bean>
 
 

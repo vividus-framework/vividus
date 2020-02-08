@@ -23,7 +23,7 @@ public interface IPropertyParser
 {
     Map<String, String> getPropertiesByPrefix(String propertyPrefix);
 
-    Map<String, String> getPropertyValuesByFamily(String family);
+    Map<String, String> getPropertyValuesByPrefix(String propertyPrefix);
 
     Map<String, String> getPropertiesByRegex(Pattern regex);
 

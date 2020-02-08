@@ -17,6 +17,7 @@
 package org.vividus.util.property;
 
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.lang3.StringUtils.removeStart;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,12 +25,8 @@ import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class PropertyParser implements IPropertyParser
 {
-    private static final String PROPERTY_FAMILY_SPLITTER = ".";
-
     private Properties properties;
 
     @Override
@@ -39,12 +36,11 @@ public class PropertyParser implements IPropertyParser
     }
 
     @Override
-    public Map<String, String> getPropertyValuesByFamily(String family)
+    public Map<String, String> getPropertyValuesByPrefix(String propertyPrefix)
     {
-        return getPropertiesByPrefix(family + PROPERTY_FAMILY_SPLITTER).entrySet()
+        return getPropertiesByPrefix(propertyPrefix).entrySet()
                 .stream()
-                .filter(p -> family.equals(extractPropertyFamily(p)))
-                .collect(toMap(PropertyParser::extractPropertyKey, Entry::getValue));
+                .collect(toMap(e -> removeStart(e.getKey(), propertyPrefix), Entry::getValue));
     }
 
     @Override
@@ -63,16 +59,6 @@ public class PropertyParser implements IPropertyParser
     {
         return properties.entrySet().stream().filter(filter)
                 .collect(toMap(p -> (String) p.getKey(), p -> (String) p.getValue()));
-    }
-
-    private static String extractPropertyFamily(Entry<String, String> p)
-    {
-        return StringUtils.substringBeforeLast(p.getKey(), PROPERTY_FAMILY_SPLITTER);
-    }
-
-    private static String extractPropertyKey(Entry<String, String> p)
-    {
-        return StringUtils.substringAfterLast(p.getKey(), PROPERTY_FAMILY_SPLITTER);
     }
 
     public void setProperties(Properties properties)

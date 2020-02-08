@@ -32,8 +32,8 @@ import org.junit.jupiter.api.Test;
 
 class PropertyParserTests
 {
-    private static final String FAMILY = "family";
-    private static final String OTHER_PROP3 = ".other.prop3";
+    private static final String PREFIX = "prefix.";
+    private static final String OTHER_PROP3 = "other.prop3";
     private static final String VAL3 = "val3";
 
     private PropertyParser parser;
@@ -48,8 +48,8 @@ class PropertyParserTests
         expectedPropertyValues.put("prop2", "val2");
 
         properties = new Properties();
-        expectedPropertyValues.forEach((key, value) -> properties.put(FAMILY + "." + key, value));
-        properties.put(FAMILY + OTHER_PROP3, VAL3);
+        expectedPropertyValues.forEach((key, value) -> properties.put(PREFIX + key, value));
+        properties.put(PREFIX + OTHER_PROP3, VAL3);
         parser = new PropertyParser();
         parser.setProperties(properties);
     }
@@ -57,29 +57,31 @@ class PropertyParserTests
     @Test
     void testGetPropertiesByPrefix()
     {
-        Map<String, String> propertiesByPrefix = parser.getPropertiesByPrefix(FAMILY);
+        Map<String, String> propertiesByPrefix = parser.getPropertiesByPrefix(PREFIX);
         assertThat(propertiesByPrefix.entrySet(), equalTo(properties.entrySet()));
     }
 
     @Test
-    void testGetPropertyValuesByFamily()
+    void testGetPropertyValuesByPrefix()
     {
-        Map<String, String> actualPropertyValues = parser.getPropertyValuesByFamily(FAMILY);
-        assertThat(actualPropertyValues.entrySet(), equalTo(expectedPropertyValues.entrySet()));
+        Map<String, String> actualPropertyValues = parser.getPropertyValuesByPrefix(PREFIX);
+        Map<String, String> expected = new HashMap<>(expectedPropertyValues);
+        expected.put(OTHER_PROP3, VAL3);
+        assertThat(actualPropertyValues.entrySet(), equalTo(expected.entrySet()));
     }
 
     @Test
     void testGetPropertiesByRegex()
     {
-        Map<String, String> propertiesByPrefix = parser.getPropertiesByRegex(Pattern.compile(FAMILY + ".*prop3"));
+        Map<String, String> propertiesByPrefix = parser.getPropertiesByRegex(Pattern.compile(PREFIX + ".*prop3"));
         assertThat(propertiesByPrefix.entrySet(),
-                equalTo(Collections.singletonMap(FAMILY + OTHER_PROP3, VAL3).entrySet()));
+                equalTo(Collections.singletonMap(PREFIX + OTHER_PROP3, VAL3).entrySet()));
     }
 
     @Test
     void testGetPropertyValue()
     {
         Entry<String, String> property = expectedPropertyValues.entrySet().iterator().next();
-        assertEquals(property.getValue(), parser.getPropertyValue(FAMILY + ".%s", property.getKey()));
+        assertEquals(property.getValue(), parser.getPropertyValue(PREFIX + "%s", property.getKey()));
     }
 }
