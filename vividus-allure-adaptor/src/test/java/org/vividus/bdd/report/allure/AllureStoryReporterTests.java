@@ -71,6 +71,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.batch.BatchExecutionConfiguration;
+import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.context.BddRunContext;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
@@ -132,6 +134,9 @@ class AllureStoryReporterTests
 
     @Mock
     private IBddRunContext bddRunContext;
+
+    @Mock
+    private BatchStorage batchStorage;
 
     @Mock
     private TestContext testContext;
@@ -213,7 +218,7 @@ class AllureStoryReporterTests
     {
         boolean givenStory = false;
         List<Label> storyLabels = mockNewStoryLabels(givenStory);
-        String batchKey = mockRunningBatchKey();
+        String batchKey = mockRunningBatchName();
         testBeforeStory("", givenStory, false);
         verifyNoInteractions(allureReportGenerator);
         assertEquals(7, storyLabels.size());
@@ -226,7 +231,7 @@ class AllureStoryReporterTests
         when(bddRunContext.isDryRun()).thenReturn(true);
         boolean givenStory = false;
         List<Label> storyLabels = mockNewStoryLabels(givenStory);
-        String batchKey = mockRunningBatchKey();
+        String batchKey = mockRunningBatchName();
         testBeforeStory("", givenStory, false);
         verifyNoInteractions(allureReportGenerator);
         assertEquals(7, storyLabels.size());
@@ -238,7 +243,7 @@ class AllureStoryReporterTests
     {
         boolean givenStory = false;
         List<Label> storyLabels = mockNewStoryLabels(givenStory);
-        String batchKey = mockRunningBatchKey();
+        String batchKey = mockRunningBatchName();
         testBeforeStory("", givenStory, true);
         verifyNoInteractions(allureReportGenerator);
         assertEquals(7, storyLabels.size());
@@ -333,11 +338,15 @@ class AllureStoryReporterTests
         return storyLabels;
     }
 
-    private String mockRunningBatchKey()
+    private String mockRunningBatchName()
     {
         String batchKey = "batch-1";
         when(bddRunContext.getRunningBatchKey()).thenReturn(batchKey);
-        return batchKey;
+        String batchName = "my-batch";
+        BatchExecutionConfiguration config = new BatchExecutionConfiguration();
+        config.setName(batchName);
+        when(batchStorage.getBatchExecutionConfiguration(batchKey)).thenReturn(config);
+        return batchName;
     }
 
     private void assertLabel(String expectedName, String expectedValue, Label actual)
@@ -352,7 +361,7 @@ class AllureStoryReporterTests
         Story story = mockRunningStory(false, true);
         boolean givenStory = false;
         mockNewStoryLabels(givenStory);
-        mockRunningBatchKey();
+        mockRunningBatchName();
         mockScenarioUid(true);
         allureStoryReporter.beforeStory(story, givenStory);
         Scenario scenario = story.getScenarios().get(0);
@@ -384,7 +393,7 @@ class AllureStoryReporterTests
         Story story = mockRunningStory(false, false);
         boolean givenStory = false;
         mockNewStoryLabels(givenStory);
-        mockRunningBatchKey();
+        mockRunningBatchName();
         mockScenarioUid(true);
         allureStoryReporter.beforeStory(story, givenStory);
         Scenario scenario = story.getScenarios().get(0);
@@ -494,7 +503,7 @@ class AllureStoryReporterTests
         story2.namedAs(storyName);
         when(bddRunContext.getRunningStory()).thenReturn(runningStory1, runningStory2);
         when(allureRunContext.createNewStoryLabels(false)).thenReturn(story1Labels, story2Labels);
-        mockRunningBatchKey();
+        mockRunningBatchName();
         allureStoryReporter.beforeStory(story1, false);
         allureStoryReporter.beforeStory(story2, false);
         return List.of(runningStory1, runningStory2);
@@ -879,7 +888,7 @@ class AllureStoryReporterTests
         mockScenarioUid(true);
         boolean givenStory = false;
         mockNewStoryLabels(givenStory);
-        mockRunningBatchKey();
+        mockRunningBatchName();
         Story story = mockRunningStory(new Properties(), putTestCaseMetaProperties(getScenarioMeta(false),
                 EXPECTED_SCENARIO_TEST_CASE_GROUP, EXPECTED_SCENARIO_TEST_CASE_ID, EXPECTED_SCENARIO_REQUIREMENT_ID),
                 List.of());
@@ -910,7 +919,7 @@ class AllureStoryReporterTests
         mockScenarioUid(true);
         boolean givenStory = false;
         mockNewStoryLabels(givenStory);
-        mockRunningBatchKey();
+        mockRunningBatchName();
         Story story = mockRunningStory(
                 putTestCaseMetaProperties(new Properties(), EXPECTED_SCENARIO_TEST_CASE_GROUP,
                         EXPECTED_SCENARIO_TEST_CASE_ID, EXPECTED_SCENARIO_REQUIREMENT_ID),
@@ -1095,7 +1104,7 @@ class AllureStoryReporterTests
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
         boolean givenStory = false;
         mockNewStoryLabels(givenStory);
-        mockRunningBatchKey();
+        mockRunningBatchName();
         allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.example(tableRow, scenarioRowIndex);
         verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
