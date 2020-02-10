@@ -87,7 +87,7 @@ ext {
         junit4:                 '4.13',
         slf4j:                  '2.0.0-alpha1',
         spring:                 '5.2.3.RELEASE',
-        jsoup:                  '1.12.1',
+        jsoup:                  '1.12.2',
         junit:                  '5.6.0',
         junit4Dataprovider:     '2.6',
         mockito:                '3.2.4',
