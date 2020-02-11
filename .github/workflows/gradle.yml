@@ -37,5 +37,9 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 13.0.1
+
     - name: Build with Gradle
       run: ./gradlew build
+      
+    - name: Integration tests
+      run: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration
