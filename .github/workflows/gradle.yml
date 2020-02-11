@@ -49,6 +49,12 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew build
-      
+
     - name: Integration tests
       run: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration
+
+    - name: Publish Integration tests report
+      uses: actions/upload-artifact@v1
+      with:
+        name: Integration Tests - Allure report
+        path: vividus-tests/output/reports/allure
