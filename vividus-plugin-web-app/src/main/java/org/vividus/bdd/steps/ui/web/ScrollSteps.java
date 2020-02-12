@@ -60,8 +60,10 @@ public class ScrollSteps
      * <ul>
      * <li>Scrolls to the end of the page</li>
      * </ul>
+     * @deprecated Step will be removed use {@link #scrollContextIn(ScrollDirection)}
      */
     @When("I scroll to the end of the page")
+    @Deprecated(forRemoval = true, since = "0.2.1")
     public void scrollToTheEndOfThePage()
     {
         javascriptActions.scrollToEndOfPage();
@@ -75,8 +77,10 @@ public class ScrollSteps
      * <ul>
      * <li>Scrolls to the start of the page</li>
      * </ul>
+     * @deprecated Step will be removed use {@link #scrollContextIn(ScrollDirection)}
      */
     @When("I scroll to the start of the page")
+    @Deprecated(forRemoval = true, since = "0.2.1")
     public void scrollToTheStartOfThePage()
     {
         javascriptActions.scrollToStartOfPage();
