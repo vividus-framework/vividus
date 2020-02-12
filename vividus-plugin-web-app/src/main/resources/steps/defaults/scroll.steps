@@ -1,0 +1,5 @@
+Composite: When I scroll to the end of the context
+When I scroll context to BOTTOM edge
+
+Composite: When I scroll to the start of the context
+When I scroll context to TOP edge

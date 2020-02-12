@@ -299,6 +299,7 @@
     <bean id="setContextSteps" class="org.vividus.bdd.steps.ui.web.SetContextSteps" />
     <bean id="sliderSteps" class="org.vividus.bdd.steps.ui.web.SliderSteps" />
     <bean id="scriptSteps" class="org.vividus.bdd.steps.ui.web.ScriptSteps" />
+    <bean id="scrollSteps" class="org.vividus.bdd.steps.ui.web.ScrollSteps" />
     <bean id="setVariableSteps" class="org.vividus.bdd.steps.ui.web.SetVariableSteps" />
     <bean id="videoPlayerSteps" class="org.vividus.bdd.steps.ui.web.VideoPlayerSteps" />
     <bean id="waitSteps" class="org.vividus.bdd.steps.ui.web.WaitSteps" />
@@ -438,5 +439,6 @@
         <value>localStorageSteps</value>
         <value>proxySteps</value>
         <value>dragAndDropSteps</value>
+        <value>scrollSteps</value>
     </util:list>
  </beans>

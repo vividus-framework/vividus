@@ -25,7 +25,6 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -34,7 +33,6 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
@@ -181,36 +179,6 @@ public class PageSteps
     }
 
     /**
-     * Scrolls to the end of the page with dynamically loading content upon scrolling
-     * Before using step, it is necessary to wait until scroll appears if it exists
-     * <p>Attribute scroll manages scroll bars in a browser window
-     * when the content of a web page exceeds the size of the current window
-     * </p>
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Scrolls to the end of the page</li>
-     * </ul>
-     */
-    @When("I scroll to the end of the page")
-    public void scrollToTheEndOfThePage()
-    {
-        javascriptActions.scrollToEndOfPage();
-    }
-
-    /**
-     * Scrolls to the start of the page
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Scrolls to the start of the page</li>
-     * </ul>
-     */
-    @When("I scroll to the start of the page")
-    public void scrollToTheStartOfThePage()
-    {
-        javascriptActions.scrollToStartOfPage();
-    }
-
-    /**
      * Opens page with the given <b>pageUrl</b> in a new window object(tab)
      * @param pageUrl An absolute URL of the page
      */
@@ -237,29 +205,6 @@ public class PageSteps
         highlightingSoftAssert.assertThat("The page load time is less than load time threshold.",
                 String.format("The page load time is less than '%s'", pageLoadTimeThreshold),
                 navigateActions.getActualPageLoadTimeInMs(), lessThan(pageLoadTimeThreshold));
-    }
-
-    @When("I scroll to the end of the context")
-    public void scrollToEndOfContext()
-    {
-        scrollContext(this::scrollToTheEndOfThePage, javascriptActions::scrollToEndOf);
-    }
-
-    @When("I scroll to the start of the context")
-    public void scrollToStartOfContext()
-    {
-        scrollContext(this::scrollToTheStartOfThePage, javascriptActions::scrollToStartOf);
-    }
-
-    private void scrollContext(Runnable pageScroller, Consumer<WebElement> elementScroller)
-    {
-        SearchContext context = webUiContext.getSearchContext();
-        if (context instanceof WebDriver)
-        {
-            pageScroller.run();
-            return;
-        }
-        elementScroller.accept((WebElement) context);
     }
 
     /**

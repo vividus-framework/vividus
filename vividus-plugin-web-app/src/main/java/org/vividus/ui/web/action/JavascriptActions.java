@@ -201,6 +201,18 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
         return new Dimension(result.get("width").intValue(), result.get("height").intValue());
     }
 
+    @Override
+    public void scrollToLeftOf(WebElement element)
+    {
+        executeScript("arguments[0].scrollLeft=0;", element);
+    }
+
+    @Override
+    public void scrollToRightOf(WebElement element)
+    {
+        executeScript("arguments[0].scrollLeft=arguments[0].scrollWidth;", element);
+    }
+
     private JavascriptExecutor getJavascriptExecutor()
     {
         return (JavascriptExecutor) webDriverProvider.get();
