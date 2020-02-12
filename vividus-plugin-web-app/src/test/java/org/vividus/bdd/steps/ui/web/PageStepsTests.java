@@ -326,54 +326,6 @@ class PageStepsTests
     }
 
     @Test
-    void testScrollToTheEndOfThePage()
-    {
-        pageSteps.scrollToTheEndOfThePage();
-        verify(javascriptActions).scrollToEndOfPage();
-    }
-
-    @Test
-    void testScrollToTheStartOfThePage()
-    {
-        pageSteps.scrollToTheStartOfThePage();
-        verify(javascriptActions).scrollToStartOfPage();
-    }
-
-    @Test
-    void testScrollToEndOfContextWhenContextIsPage()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(driver);
-        pageSteps.scrollToEndOfContext();
-        verify(javascriptActions).scrollToEndOfPage();
-    }
-
-    @Test
-    void testScrollToEndOfContextWhenContextIsElement()
-    {
-        WebElement webElement = mock(WebElement.class);
-        when(webUiContext.getSearchContext()).thenReturn(webElement);
-        pageSteps.scrollToEndOfContext();
-        verify(javascriptActions).scrollToEndOf(webElement);
-    }
-
-    @Test
-    void testScrollToStartOfContextWhenContextIsPage()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(driver);
-        pageSteps.scrollToStartOfContext();
-        verify(javascriptActions).scrollToStartOfPage();
-    }
-
-    @Test
-    void testScrollToStartOfContextWhenContextIsElement()
-    {
-        WebElement webElement = mock(WebElement.class);
-        when(webUiContext.getSearchContext()).thenReturn(webElement);
-        pageSteps.scrollToStartOfContext();
-        verify(javascriptActions).scrollToStartOf(webElement);
-    }
-
-    @Test
     void testOpenPageUrlInNewWindow()
     {
         pageSteps.openPageUrlInNewWindow(URL);

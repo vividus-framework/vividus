@@ -267,6 +267,21 @@ class JavascriptActionsTests
         assertEquals(new Dimension(width.intValue(), height.intValue()), size);
     }
 
+    @Test
+    void shouldScrollToTheStartOfWebElement()
+    {
+        javascriptActions.scrollToLeftOf(mockedWebElement);
+        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollLeft=0;", mockedWebElement);
+    }
+
+    @Test
+    void shouldScrollToTheEndOfWebElement()
+    {
+        javascriptActions.scrollToRightOf(mockedWebElement);
+        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollLeft=arguments[0].scrollWidth;",
+                mockedWebElement);
+    }
+
     private void mockScriptExecution(String script, Object result)
     {
         when(((JavascriptExecutor) webDriver).executeScript(script)).thenReturn(result);

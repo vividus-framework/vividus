@@ -63,6 +63,10 @@ public interface IJavascriptActions
 
     void scrollToStartOf(WebElement element);
 
+    void scrollToLeftOf(WebElement element);
+
+    void scrollToRightOf(WebElement element);
+
     /**
      * Opens page URL in a new window
      * @param pageUrl An absolute URL of the page
