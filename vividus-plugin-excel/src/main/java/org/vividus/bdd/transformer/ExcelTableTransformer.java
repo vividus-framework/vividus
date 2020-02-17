@@ -28,6 +28,7 @@ import javax.inject.Named;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.jbehave.core.model.ExamplesTableProperties;
+import org.vividus.bdd.model.CellValue;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 import org.vividus.excel.ExcelSheetParser;
 import org.vividus.excel.ExcelSheetsExtractor;
@@ -79,7 +80,8 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
     private List<String> extractDataFromRage(IExcelSheetParser sheetParser, ExamplesTableProperties properties,
             String range)
     {
-        List<String> data = sheetParser.getDataFromRange(range);
+        List<String> data = sheetParser.getDataFromRange(range).stream().map(CellValue::getValue)
+                .collect(Collectors.toList());
         String incrementAsString = properties.getProperties().getProperty("increment");
         if (incrementAsString != null)
         {

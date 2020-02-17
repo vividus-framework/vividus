@@ -17,10 +17,8 @@
 package org.vividus.excel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +28,7 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.vividus.bdd.model.CellValue;
 
 class ExcelSheetParserTests
 {
@@ -59,6 +58,12 @@ class ExcelSheetParserTests
         expectedTitleRowData = new LinkedList<>();
         expectedTitleRowData.add(TITLE_KEY_PRODUCT);
         expectedTitleRowData.add(TITLE_KEY_PRICE);
+    }
+
+    @Test
+    void testGetSheet()
+    {
+        assertEquals(mappingSheet, sheetParser.getSheet());
     }
 
     @Test
@@ -185,14 +190,23 @@ class ExcelSheetParserTests
     @Test
     void testGetDataFromRange()
     {
+        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
+        List<CellValue> dataFromRange = sheetParser.getDataFromRange("B2:B7");
+        assertEquals(6, dataFromRange.size());
         String openStatus = "OPEN";
         String closedStatus = "CLOSED";
-        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
-        List<String> dataFromRange = sheetParser.getDataFromRange("B2:B7");
-        List<String> expectedData = Arrays.asList(
-                openStatus, openStatus, openStatus, "PENDING", closedStatus, closedStatus);
-        assertEquals(expectedData.size(), dataFromRange.size());
-        assertIterableEquals(expectedData, dataFromRange, "Values are equal");
+        assertCellValue(dataFromRange.get(0), openStatus, "B2");
+        assertCellValue(dataFromRange.get(1), openStatus, "B3");
+        assertCellValue(dataFromRange.get(2), openStatus, "B4");
+        assertCellValue(dataFromRange.get(3), "PENDING", "B5");
+        assertCellValue(dataFromRange.get(4), closedStatus, "B6");
+        assertCellValue(dataFromRange.get(5), closedStatus, "B7");
+    }
+
+    private static void assertCellValue(CellValue actual, String value, String address)
+    {
+        assertEquals(value, actual.getValue());
+        assertEquals(address, actual.getAddress());
     }
 
     @Test

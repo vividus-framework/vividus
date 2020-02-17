@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Sheet;
+import org.vividus.bdd.model.CellValue;
 
 public interface IExcelSheetParser
 {
@@ -37,7 +38,7 @@ public interface IExcelSheetParser
 
     Sheet getSheet();
 
-    List<String> getDataFromRange(String range);
+    List<CellValue> getDataFromRange(String range);
 
     String getDataFromCell(String cellAddress);
 }
