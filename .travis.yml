@@ -3,12 +3,6 @@ language: java
 jdk:
   - openjdk13
 
-addons:
-  sonarcloud:
-    organization: "vividus"
-    token:
-        secure: "MslnWjgEGXiuajQvoKRHLSo9246L7jvipbV5fnTbh/Sc6qrWOlDMLiOqZxjG03+D5k2UENaftKGJOfjQtdb6EBV/cSipDzENsHm5fsCg4XW7xKYSnfIKoaeuv5LXr/7IJX63FQQTnYhTMvY8tb930I5FYjURxhK8PVfwEWhGtGeTDj+L2HE5tsR7T1YN97zDWov9oTY2tUueWwhOv+ppNztdsbLsZb1Oep/AymO041yO+G8E5a0P4UG0bTevHxmnrGtrnal516NFvDZ8XKn4nzlwrAQuMb97/liBgtlzK6NUqnTJ0b0/H7eW4dnJlaMtPidjc4vgS4yDjcwC0tmHjA38zvs1fRDpSn9hMXTVmqf57YfiwYH2+zpTcpWrvtANm8C40f22WjdFfe5nFTuWNlgeToWmdUHW/L/pPNMtyiXtS59M6StshMTKPwyQosL29JsjrD6U77rLTjPXQDZU3KULvH6sNBxGVYW2mWm37rhJ3E6M+UwNSk2I6DkpHfNy2VK3iQ5urzyKC+AEmP2orguDwdSwwUauMSHfX1LCqo9m7GpdD0ROUEHH/SBMAWjeBnDZuCwWbrTOUIRDyureoxiaISCsyIz/s14ZPbEQjPje9bjaCChdt/8d5vuJ9MVRXcSYiG9lyxW6I6K09PmFDk9O9DxOP015h0/RlFTB2ms="
-
 # only build commits/PRs targeted to the master branch
 # this avoids duplicate builds for push + PR
 # https://github.com/travis-ci/travis-ci/issues/1147
@@ -28,7 +22,6 @@ jobs:
     - stage: Build
       script:
         - ./gradlew build
-        - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./gradlew sonarqube; fi
       after_success: bash <(curl -s https://codecov.io/bash)
     - stage: "Integration tests"
       script: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration
