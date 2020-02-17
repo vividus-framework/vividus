@@ -48,7 +48,16 @@ jobs:
         java-version: 13.0.1
 
     - name: Build with Gradle
-      run: ./gradlew build
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        if [ -n $SONAR_TOKEN ]; then
+            ./gradlew build sonarqube -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=vividus -Dsonar.projectKey=vividus-framework_vividus
+        else
+            echo No SONAR_TOKEN, SonarQube analysis will be skipped
+            ./gradlew build
+        fi
 
     - name: Integration tests
       run: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration

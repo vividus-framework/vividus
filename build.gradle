@@ -66,12 +66,6 @@ task jacocoAggregatedReport(type: JacocoReport) {
 
 project.description = 'Vividus'
 
-sonarqube {
-    properties {
-        property 'sonar.projectKey', 'vividus-framework_vividus'
-    }
-}
-
 ext {
     versions = [
         allure:                 '2.13.1',
