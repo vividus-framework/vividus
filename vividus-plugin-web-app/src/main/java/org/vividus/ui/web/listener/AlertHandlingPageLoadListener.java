@@ -16,64 +16,58 @@
 
 package org.vividus.ui.web.listener;
 
-import javax.inject.Inject;
-
 import com.google.common.eventbus.Subscribe;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchFrameException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.ui.web.event.PageLoadEndEvent;
 
 public class AlertHandlingPageLoadListener extends AbstractWebDriverEventListener
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AlertHandlingPageLoadListener.class);
 
-    private static final String ALERT_SCRIPT = "confirm = function(message){return arguments[0];};"
-            + "alert = function(message){return arguments[0];};prompt = function(message){return arguments[0];};";
-
-    @Inject private JavascriptActions javascriptActions;
     private AlertHandlingOptions alertHandlingOptions;
 
     @Override
     public void afterNavigateTo(String url, WebDriver driver)
     {
-        selectOptionForAlertHandling();
+        selectOptionForAlertHandling(driver);
     }
 
     @Override
     public void afterNavigateBack(WebDriver driver)
     {
-        selectOptionForAlertHandling();
+        selectOptionForAlertHandling(driver);
     }
 
     @Override
     public void afterNavigateForward(WebDriver driver)
     {
-        selectOptionForAlertHandling();
+        selectOptionForAlertHandling(driver);
     }
 
     @Override
     public void afterClickOn(WebElement element, WebDriver driver)
     {
-        selectOptionForAlertHandling();
+        selectOptionForAlertHandling(driver);
     }
 
     @Subscribe
-    public void onPageLoadFinish(@SuppressWarnings("unused") PageLoadEndEvent event)
+    public void onPageLoadFinish(PageLoadEndEvent event)
     {
-        selectOptionForAlertHandling();
+        selectOptionForAlertHandling(event.getWebDriver());
     }
 
-    private void selectOptionForAlertHandling()
+    private void selectOptionForAlertHandling(WebDriver driver)
     {
         try
         {
-            alertHandlingOptions.selectOptionForAlertHandling(javascriptActions, ALERT_SCRIPT);
+            alertHandlingOptions.selectOptionForAlertHandling((JavascriptExecutor) driver);
         }
         catch (NoSuchFrameException e)
         {

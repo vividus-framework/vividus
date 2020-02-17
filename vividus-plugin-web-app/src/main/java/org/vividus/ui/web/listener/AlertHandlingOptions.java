@@ -16,35 +16,32 @@
 
 package org.vividus.ui.web.listener;
 
-import org.vividus.ui.web.action.JavascriptActions;
+import org.openqa.selenium.JavascriptExecutor;
 
 public enum AlertHandlingOptions
 {
-    ACCEPT
+    ACCEPT(Boolean.TRUE),
+    DISMISS(Boolean.FALSE),
+    DO_NOTHING(null)
     {
         @Override
-        public void selectOptionForAlertHandling(JavascriptActions javascriptActions, String alertHandlingScript)
-        {
-            javascriptActions.executeScript(alertHandlingScript, Boolean.TRUE);
-        }
-    },
-    DISMISS
-    {
-        @Override
-        public void selectOptionForAlertHandling(JavascriptActions javascriptActions, String alertHandlingScript)
-        {
-            javascriptActions.executeScript(alertHandlingScript, Boolean.FALSE);
-        }
-    },
-    DO_NOTHING
-    {
-        @Override
-        public void selectOptionForAlertHandling(JavascriptActions javascriptActions, String alertHandlingScript)
+        public void selectOptionForAlertHandling(JavascriptExecutor javascriptExecutor)
         {
             // Nothing to do
         }
     };
 
-    protected abstract void selectOptionForAlertHandling(JavascriptActions javascriptActions,
-            String alertHandlingScript);
+    private final Boolean result;
+
+    AlertHandlingOptions(Boolean result)
+    {
+        this.result = result;
+    }
+
+    protected void selectOptionForAlertHandling(JavascriptExecutor javascriptExecutor)
+    {
+        javascriptExecutor.executeScript("confirm = function(message){return arguments[0];};"
+                + "alert = function(message){return arguments[0];};"
+                + "prompt = function(message){return arguments[0];};", result);
+    }
 }
