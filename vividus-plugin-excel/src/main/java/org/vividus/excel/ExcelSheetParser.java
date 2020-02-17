@@ -16,7 +16,6 @@
 
 package org.vividus.excel;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,9 +32,10 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.ss.util.cellwalk.CellWalk;
+import org.vividus.bdd.model.CellValue;
 
 public class ExcelSheetParser implements IExcelSheetParser
 {
@@ -204,14 +204,12 @@ public class ExcelSheetParser implements IExcelSheetParser
     }
 
     @Override
-    public List<String> getDataFromRange(String range)
+    public List<CellValue> getDataFromRange(String range)
     {
-        CellRangeAddress cellRangeAddress = CellRangeAddress.valueOf(range);
-        CellWalk cellWalk = new CellWalk(sheet, cellRangeAddress);
-        List<String> resultData = new ArrayList<>();
-        cellWalk.traverse((cell, ctx) -> Optional.ofNullable(CellUtils.getCellValueAsString(cell))
-                .ifPresent(resultData::add));
-        return resultData;
+        return StreamSupport.stream(CellRangeAddress.valueOf(range).spliterator(), false)
+                .map(CellAddress::formatAsString)
+                .map(addr -> new CellValue(getDataFromCell(addr), addr))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -223,8 +221,8 @@ public class ExcelSheetParser implements IExcelSheetParser
         {
             throw new IllegalArgumentException(String.format("Row at address '%s' doesn't exist", address));
         }
-        Cell cell = row.getCell(cellReference.getCol());
-        return CellUtils.getCellValueAsString(cell);
+        return Optional.ofNullable(row.getCell(cellReference.getCol())).map(CellUtils::getCellValueAsString)
+                .orElse(null);
     }
 
     private static class SheetDataLimits
