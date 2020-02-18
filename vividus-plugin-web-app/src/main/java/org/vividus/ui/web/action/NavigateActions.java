@@ -113,10 +113,18 @@ public class NavigateActions implements INavigateActions
         return actualPageLoadTimeInMs.get();
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatchExtended")
     private void handleTimeoutException(TimeoutException exception)
     {
         softAssert.recordFailedAssertion(exception);
-        javascriptActions.executeScript("window.stop()");
+        try
+        {
+            javascriptActions.executeScript("window.stop()");
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Unable to stop resource loading", e);
+        }
     }
 
     private WebDriver getWebDriver()

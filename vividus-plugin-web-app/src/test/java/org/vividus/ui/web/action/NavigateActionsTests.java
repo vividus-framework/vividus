@@ -16,7 +16,10 @@
 
 package org.vividus.ui.web.action;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.error;
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -24,6 +27,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.List;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -35,16 +43,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
+import org.openqa.selenium.WebDriverException;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class })
 class NavigateActionsTests
 {
     private static final String SCRIPT_WINDOW_STOP = "window.stop()";
     private static final String URL_STR = "http://somewhere.com/page";
     private static final URI URL = URI.create(URL_STR);
     private static final long WAIT_MILLS = 5;
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(NavigateActions.class);
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -95,6 +106,22 @@ class NavigateActionsTests
         navigateActions.navigateTo(URL_STR);
         verify(softAssert).recordFailedAssertion(exception);
         verify(javascriptActions).executeScript(SCRIPT_WINDOW_STOP);
+    }
+
+    @Test
+    void testNavigateWithTimeoutExceptionAndExceptionAtResourceLoading()
+    {
+        when(webDriver.navigate()).thenReturn(navigation);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        TimeoutException exception = mock(TimeoutException.class);
+        doThrow(exception).when(navigation).to(URL_STR);
+        WebDriverException webDriverException = new WebDriverException();
+        when(javascriptActions.executeScript(SCRIPT_WINDOW_STOP)).thenThrow(webDriverException);
+        navigateActions.navigateTo(URL_STR);
+        verify(softAssert).recordFailedAssertion(exception);
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+                info("Loading: {}", URL_STR),
+                error(webDriverException, "Unable to stop resource loading"))));
     }
 
     @Test
