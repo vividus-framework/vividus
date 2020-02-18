@@ -53,10 +53,10 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
         if [ -n $SONAR_TOKEN ]; then
-            ./gradlew build sonarqube -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=vividus -Dsonar.projectKey=vividus-framework_vividus
+            ./gradlew build sonarqube -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=vividus -Dsonar.projectKey=vividus-framework_vividus --info
         else
             echo No SONAR_TOKEN, SonarQube analysis will be skipped
-            ./gradlew build
+            ./gradlew build --info
         fi
 
     - name: Integration tests
