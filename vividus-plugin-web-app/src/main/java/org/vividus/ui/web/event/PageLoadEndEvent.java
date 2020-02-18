@@ -16,22 +16,26 @@
 
 package org.vividus.ui.web.event;
 
+import org.openqa.selenium.WebDriver;
+
 public class PageLoadEndEvent
 {
-    private boolean newPageLoaded;
+    private final boolean newPageLoaded;
+    private final WebDriver webDriver;
 
-    public PageLoadEndEvent(boolean newPageLoaded)
+    public PageLoadEndEvent(boolean newPageLoaded, WebDriver webDriver)
     {
         this.newPageLoaded = newPageLoaded;
-    }
-
-    public void setNewPageLoaded(boolean newPageLoaded)
-    {
-        this.newPageLoaded = newPageLoaded;
+        this.webDriver = webDriver;
     }
 
     public boolean isNewPageLoaded()
     {
         return newPageLoaded;
+    }
+
+    public WebDriver getWebDriver()
+    {
+        return webDriver;
     }
 }

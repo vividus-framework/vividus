@@ -68,12 +68,13 @@ public class MouseActions implements IMouseActions
         ClickResult clickResult = new ClickResult();
         if (element != null)
         {
-            WebElement page = getWebDriver().findElement(BODY_XPATH_LOCATOR);
+            WebDriver webDriver = getWebDriver();
+            WebElement page = webDriver.findElement(BODY_XPATH_LOCATOR);
             try
             {
                 moveToElement(element);
                 element.click();
-                afterClick(clickResult, page, defaultAlertAction);
+                afterClick(clickResult, page, webDriver, defaultAlertAction);
             }
             catch (WebDriverException webDriverException)
             {
@@ -91,7 +92,7 @@ public class MouseActions implements IMouseActions
                         {
                             element.click();
                         }
-                        afterClick(clickResult, page, defaultAlertAction);
+                        afterClick(clickResult, page, webDriver, defaultAlertAction);
                     }
                     catch (WebDriverException e)
                     {
@@ -104,7 +105,7 @@ public class MouseActions implements IMouseActions
                 }
                 else if (message.contains("Timed out waiting for page to load"))
                 {
-                    afterClick(clickResult, page, defaultAlertAction);
+                    afterClick(clickResult, page, webDriver, defaultAlertAction);
                 }
                 else
                 {
@@ -145,19 +146,20 @@ public class MouseActions implements IMouseActions
             webDriverEventListeners.forEach(listener -> listener.beforeClickOn(element, webDriver));
             javascriptActions.click(element);
             webDriverEventListeners.forEach(listener -> listener.afterClickOn(element, webDriver));
-            afterClick(clickResult, page, Optional.empty());
+            afterClick(clickResult, page, webDriver, Optional.empty());
         }
         return clickResult;
     }
 
-    private void afterClick(ClickResult clickResult, WebElement page, Optional<Action> defaultAlertAction)
+    private void afterClick(ClickResult clickResult, WebElement page, WebDriver webDriver,
+            Optional<Action> defaultAlertAction)
     {
         defaultAlertAction.ifPresent(alertActions::processAlert);
         if (!alertActions.isAlertPresent())
         {
             waitActions.waitForPageLoad();
             resetContextIfNeeded(clickResult, page);
-            eventBus.post(new PageLoadEndEvent(clickResult.isNewPageLoaded()));
+            eventBus.post(new PageLoadEndEvent(clickResult.isNewPageLoaded(), webDriver));
         }
         clickResult.setClicked(true);
     }
