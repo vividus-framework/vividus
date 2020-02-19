@@ -88,6 +88,12 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
     }
 
     @Override
+    public void scrollElementIntoViewportCenter(WebElement webElement)
+    {
+        executeAsyncScriptFromResource(JavascriptActions.class, "scroll-element-into-viewport-center.js", webElement);
+    }
+
+    @Override
     public void scrollToEndOfPage()
     {
         executeAsyncScriptFromResource(JavascriptActions.class, "scroll-to-end-of-page.js");

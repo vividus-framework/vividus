@@ -23,12 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -42,6 +43,7 @@ import com.google.common.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -115,37 +117,34 @@ class MouseActionsTests
     @InjectMocks
     private MouseActions mouseActions;
 
-    private void verifyWebElement(MouseActions mouseActionsSpy, boolean alertPresent, boolean newPageLoaded,
-            ClickResult result)
+    private void verifyWebElement(int clickAttempts, boolean alertPresent, boolean newPageLoaded, ClickResult result)
     {
-        verify(webElement).click();
+        verify(webElement, times(clickAttempts)).click();
         assertTrue(result.isClicked());
-        verify(mouseActionsSpy).moveToElement(webElement);
         assertEquals(newPageLoaded, result.isNewPageLoaded());
+        InOrder ordered = inOrder(javascriptActions, alertActions, waitActions, eventBus, webUiContext);
+        ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
+        ordered.verify(alertActions).isAlertPresent();
         if (!alertPresent)
         {
-            verify(waitActions).waitForPageLoad();
-            verify(eventBus)
+            ordered.verify(waitActions).waitForPageLoad();
+            ordered.verify(alertActions).waitForAlert(webDriver);
+            ordered.verify(eventBus)
                     .post(ArgumentMatchers.<PageLoadEndEvent>argThat(arg -> arg.isNewPageLoaded() == newPageLoaded));
         }
-        else
-        {
-            verifyNoInteractions(eventBus);
-        }
-    }
-
-    private MouseActions mockMoveToElement()
-    {
-        MouseActions mouseActionsSpy = spy(this.mouseActions);
-        doNothing().when(mouseActionsSpy).moveToElement(webElement);
-        return mouseActionsSpy;
+        ordered.verifyNoMoreInteractions();
     }
 
     private void testClick(boolean alertPresent, boolean newPageLoaded)
     {
-        MouseActions mouseActionsSpy = mockMoveToElement();
-        ClickResult result = mouseActionsSpy.click(webElement);
-        verifyWebElement(mouseActionsSpy, alertPresent, newPageLoaded, result);
+        ClickResult result = mouseActions.click(webElement);
+        verifyWebElement(1, alertPresent, newPageLoaded, result);
+    }
+
+    private void testClickWithElementNotClickableException()
+    {
+        ClickResult result = mouseActions.click(webElement);
+        verifyWebElement(2, false, false, result);
     }
 
     @Test
@@ -224,13 +223,13 @@ class MouseActionsTests
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
         WebDriverException e2 = new WebDriverException(STALE_EXCEPTION);
         doThrow(e).doThrow(e2).when(webElement).click();
-        MouseActions mouseActionsSpy = mockMoveToElement();
-        ClickResult result = mouseActionsSpy.click(webElement);
+        ClickResult result = mouseActions.click(webElement);
         verify(webElement, never()).sendKeys("");
         assertFalse(result.isNewPageLoaded());
-        verify(softAssert).recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + e2);
-        verify(alertActions, never()).waitForAlert(webDriver);
-        verifyNoInteractions(webUiContext);
+        InOrder ordered = inOrder(javascriptActions, alertActions, eventBus, webUiContext, softAssert);
+        ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
+        ordered.verify(softAssert).recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + e2);
+        ordered.verifyNoMoreInteractions();
     }
 
     @Test
@@ -277,12 +276,8 @@ class MouseActionsTests
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
         doThrow(e).doNothing().when(webElement).click();
         when(alertActions.isAlertPresent()).thenReturn(Boolean.FALSE);
-        MouseActions mouseActionsSpy = mockMoveToElement();
-        ClickResult result = mouseActionsSpy.click(webElement);
+        testClickWithElementNotClickableException();
         verify(webElement, never()).sendKeys("");
-        assertFalse(result.isNewPageLoaded());
-        verify(alertActions).waitForAlert(webDriver);
-        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -294,11 +289,11 @@ class MouseActionsTests
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
         WebDriverException e2 = new WebDriverException(STALE_EXCEPTION);
         doThrow(e).doThrow(e2).when(webElement).click();
-        MouseActions mouseActionsSpy = mockMoveToElement();
-        mouseActionsSpy.click(webElement);
-        verify(softAssert).recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + e2);
-        verify(alertActions, never()).waitForAlert(webDriver);
-        verifyNoInteractions(webUiContext);
+        mouseActions.click(webElement);
+        InOrder ordered = inOrder(javascriptActions, alertActions, eventBus, webUiContext, softAssert);
+        ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
+        ordered.verify(softAssert).recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + e2);
+        ordered.verifyNoMoreInteractions();
     }
 
     @Test
@@ -309,11 +304,7 @@ class MouseActionsTests
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
         doThrow(e).doNothing().when(webElement).click();
-        MouseActions mouseActionsSpy = mockMoveToElement();
-        ClickResult result = mouseActionsSpy.click(webElement);
-        assertFalse(result.isNewPageLoaded());
-        verify(alertActions).waitForAlert(webDriver);
-        verify(eventBus).post(any(PageLoadEndEvent.class));
+        testClickWithElementNotClickableException();
     }
 
     @Test
@@ -324,13 +315,14 @@ class MouseActionsTests
 
         WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
         doThrow(e).when(webElement).click();
-        MouseActions mouseActionsSpy = mockMoveToElement();
-        ClickResult result = mouseActionsSpy.click(webElement);
-        verify(javascriptActions).click(webElement);
+        ClickResult result = mouseActions.click(webElement);
         assertFalse(result.isNewPageLoaded());
-        verify(alertActions).waitForAlert(webDriver);
-        verify(eventBus).post(any(PageLoadEndEvent.class));
-        verifyNoInteractions(webUiContext);
+        InOrder ordered = inOrder(javascriptActions, alertActions, eventBus, webUiContext, softAssert);
+        ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
+        ordered.verify(javascriptActions).click(webElement);
+        ordered.verify(alertActions).waitForAlert(webDriver);
+        ordered.verify(eventBus).post(any(PageLoadEndEvent.class));
+        ordered.verifyNoMoreInteractions();
     }
 
     @Test
@@ -341,13 +333,7 @@ class MouseActionsTests
 
         WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
         doThrow(e).doNothing().when(webElement).click();
-        MouseActions mouseActionsSpy = mockMoveToElement();
-        ClickResult result = mouseActionsSpy.click(webElement);
-        verifyNoInteractions(javascriptActions);
-        assertFalse(result.isNewPageLoaded());
-        verify(alertActions).waitForAlert(webDriver);
-        verify(eventBus).post(any(PageLoadEndEvent.class));
-        verifyNoInteractions(webUiContext);
+        testClickWithElementNotClickableException();
     }
 
     @Test
@@ -358,12 +344,7 @@ class MouseActionsTests
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
         doThrow(e).doNothing().when(webElement).click();
-        MouseActions mouseActionsSpy = mockMoveToElement();
-        ClickResult result = mouseActionsSpy.click(webElement);
-        assertFalse(result.isNewPageLoaded());
-        verify(alertActions).waitForAlert(webDriver);
-        verify(eventBus).post(any(PageLoadEndEvent.class));
-        verifyNoInteractions(webUiContext);
+        testClickWithElementNotClickableException();
     }
 
     @Test
@@ -401,10 +382,8 @@ class MouseActionsTests
         boolean alertPresent = true;
         mockBodySearch();
         when(alertActions.isAlertPresent()).thenReturn(alertPresent);
-        MouseActions mouseActionsSpy = mockMoveToElement();
-        ClickResult result = mouseActionsSpy.click(webElement, Optional.of(Action.ACCEPT));
-        verifyWebElement(mouseActionsSpy, alertPresent, false, result);
-        verifyNoInteractions(webUiContext);
+        ClickResult result = mouseActions.click(webElement, Optional.of(Action.ACCEPT));
+        verifyWebElement(1, alertPresent, false, result);
     }
 
     private WebElement mockBodySearch()
@@ -467,9 +446,7 @@ class MouseActionsTests
     void testMoveToNullElement()
     {
         mouseActions.moveToElement(null);
-        verifyNoInteractions(webDriverProvider);
-        verifyNoInteractions(javascriptActions);
-        verifyNoInteractions(softAssert);
+        verifyNoInteractions(webDriverProvider, javascriptActions, softAssert);
     }
 
     @Test
