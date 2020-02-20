@@ -17,6 +17,7 @@
 package org.vividus.ui.web.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,9 +66,6 @@ class JavascriptActionsTests
 
     @Mock
     private IWebDriverManager webDriverManager;
-
-    @Mock
-    private WebElement mockedWebElement;
 
     @Mock(extraInterfaces = { JavascriptExecutor.class, HasCapabilities.class })
     private WebDriver webDriver;
@@ -120,9 +118,20 @@ class JavascriptActionsTests
     @Test
     void testScrollIntoView()
     {
-        javascriptActions.scrollIntoView(mockedWebElement, true);
-        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollIntoView(arguments[1])",
-                mockedWebElement, true);
+        WebElement webElement = mock(WebElement.class);
+        javascriptActions.scrollIntoView(webElement, true);
+        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollIntoView(arguments[1])", webElement,
+                true);
+    }
+
+    @Test
+    void testScrollElementIntoViewportCenter()
+    {
+        WebElement webElement = mock(WebElement.class);
+        javascriptActions.scrollElementIntoViewportCenter(webElement);
+        verify((JavascriptExecutor) webDriver).executeAsyncScript(
+                ResourceUtils.loadResource(JavascriptActionsTests.class, "scroll-element-into-viewport-center.js"),
+                webElement);
     }
 
     @Test
@@ -144,16 +153,18 @@ class JavascriptActionsTests
     @Test
     void testScrollToEndOf()
     {
-        javascriptActions.scrollToEndOf(mockedWebElement);
+        WebElement webElement = mock(WebElement.class);
+        javascriptActions.scrollToEndOf(webElement);
         verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollTop = arguments[0].scrollHeight",
-                mockedWebElement);
+                webElement);
     }
 
     @Test
     void testScrollToStartOf()
     {
-        javascriptActions.scrollToStartOf(mockedWebElement);
-        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollTop = 0", mockedWebElement);
+        WebElement webElement = mock(WebElement.class);
+        javascriptActions.scrollToStartOf(webElement);
+        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollTop = 0", webElement);
     }
 
     @Test
@@ -167,18 +178,20 @@ class JavascriptActionsTests
     @Test
     void testTriggerEvents()
     {
+        WebElement webElement = mock(WebElement.class);
         String script = "if(document.createEvent){var evObj = document.createEvent('MouseEvents');"
                 + "evObj.initEvent('click', true, false); arguments[0].dispatchEvent(evObj);}"
                 + " else if(document.createEventObject) { arguments[0].fireEvent('onclick');}";
-        javascriptActions.triggerMouseEvents(mockedWebElement, "click");
-        verify((JavascriptExecutor) webDriver).executeScript(script, mockedWebElement);
+        javascriptActions.triggerMouseEvents(webElement, "click");
+        verify((JavascriptExecutor) webDriver).executeScript(script, webElement);
     }
 
     @Test
     void testClick()
     {
-        javascriptActions.click(mockedWebElement);
-        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].click()", mockedWebElement);
+        WebElement webElement = mock(WebElement.class);
+        javascriptActions.click(webElement);
+        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].click()", webElement);
     }
 
     @Test
@@ -201,17 +214,19 @@ class JavascriptActionsTests
     @Test
     void testGetElementTextNotFirefox()
     {
+        WebElement webElement = mock(WebElement.class);
         mockIsFirefox(false);
-        when(((JavascriptExecutor) webDriver).executeScript(ELEMENT_INNER_TEXT, mockedWebElement)).thenReturn(TEXT);
-        assertEquals(TEXT, javascriptActions.getElementText(mockedWebElement));
+        when(((JavascriptExecutor) webDriver).executeScript(ELEMENT_INNER_TEXT, webElement)).thenReturn(TEXT);
+        assertEquals(TEXT, javascriptActions.getElementText(webElement));
     }
 
     @Test
     void testGetElementValue()
     {
-        when(((JavascriptExecutor) webDriver).executeScript("return arguments[0].value", mockedWebElement))
+        WebElement webElement = mock(WebElement.class);
+        when(((JavascriptExecutor) webDriver).executeScript("return arguments[0].value", webElement))
                 .thenReturn(TEXT);
-        assertEquals(TEXT, javascriptActions.getElementValue(mockedWebElement));
+        assertEquals(TEXT, javascriptActions.getElementValue(webElement));
     }
 
     @Test
@@ -235,20 +250,21 @@ class JavascriptActionsTests
     @Test
     void testGetElementAttributesValues()
     {
-        Map<String, String> attributes = new HashMap<>();
-        attributes.put(TEXT, TEXT);
-        when(((JavascriptExecutor) webDriver).executeScript(SCRIPT_GET_ELEMENT_ATTRIBUTES, mockedWebElement))
+        WebElement webElement = mock(WebElement.class);
+        Map<String, String> attributes = Map.of(TEXT, TEXT);
+        when(((JavascriptExecutor) webDriver).executeScript(SCRIPT_GET_ELEMENT_ATTRIBUTES, webElement))
                 .thenReturn(attributes);
-        assertEquals(javascriptActions.getElementAttributes(mockedWebElement), attributes);
+        assertEquals(javascriptActions.getElementAttributes(webElement), attributes);
     }
 
     @Test
     void testSetElementTopPosition()
     {
+        WebElement webElement = mock(WebElement.class);
         Long top = 10L;
-        when(((JavascriptExecutor) webDriver).executeScript(String.format(SCRIPT_SET_TOP_POSITION, top),
-                mockedWebElement)).thenReturn(top);
-        int resultTop = javascriptActions.setElementTopPosition(mockedWebElement, top.intValue());
+        when(((JavascriptExecutor) webDriver).executeScript(String.format(SCRIPT_SET_TOP_POSITION, top), webElement))
+                .thenReturn(top);
+        int resultTop = javascriptActions.setElementTopPosition(webElement, top.intValue());
         assertEquals(top.intValue(), resultTop);
     }
 
@@ -270,16 +286,18 @@ class JavascriptActionsTests
     @Test
     void shouldScrollToTheStartOfWebElement()
     {
-        javascriptActions.scrollToLeftOf(mockedWebElement);
-        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollLeft=0;", mockedWebElement);
+        WebElement webElement = mock(WebElement.class);
+        javascriptActions.scrollToLeftOf(webElement);
+        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollLeft=0;", webElement);
     }
 
     @Test
     void shouldScrollToTheEndOfWebElement()
     {
-        javascriptActions.scrollToRightOf(mockedWebElement);
+        WebElement webElement = mock(WebElement.class);
+        javascriptActions.scrollToRightOf(webElement);
         verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollLeft=arguments[0].scrollWidth;",
-                mockedWebElement);
+                webElement);
     }
 
     private void mockScriptExecution(String script, Object result)

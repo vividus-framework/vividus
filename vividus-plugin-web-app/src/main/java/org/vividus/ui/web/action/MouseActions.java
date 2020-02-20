@@ -72,7 +72,7 @@ public class MouseActions implements IMouseActions
             WebElement page = webDriver.findElement(BODY_XPATH_LOCATOR);
             try
             {
-                moveToElement(element);
+                javascriptActions.scrollElementIntoViewportCenter(element);
                 element.click();
                 afterClick(clickResult, page, webDriver, defaultAlertAction);
             }

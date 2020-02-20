@@ -49,6 +49,8 @@ public interface IJavascriptActions
 
     void scrollIntoView(WebElement webElement, boolean alignedToTheTop);
 
+    void scrollElementIntoViewportCenter(WebElement webElement);
+
     /**
      * Scrolls to the end of the page with dynamically loading content upon scrolling
      */
