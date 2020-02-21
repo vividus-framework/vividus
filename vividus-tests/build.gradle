@@ -3,6 +3,8 @@ project.description = 'Vivuds tests'
 tasks.artifactoryPublish.enabled = false
 tasks.publish.enabled = false
 
+runStories.treatKnownIssuesOnlyAsPassed = true
+
 dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-csv')
