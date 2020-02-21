@@ -30,6 +30,7 @@ public class KnownIssueIdentifier
     private Pattern assertionCompiledPattern;
     private Map<String, Pattern> additionalCompiledPatterns = Collections.emptyMap();
     private Map<String, Pattern> dynamicCompiledPatterns = Collections.emptyMap();
+    private Map<String, Pattern> runtimeDataPatterns = Map.of();
 
     public KnownIssueType getType()
     {
@@ -78,9 +79,20 @@ public class KnownIssueIdentifier
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue(), Pattern.DOTALL)));
     }
 
+    public void setRuntimeDataPatterns(Map<String, String> runtimeDataPatterns)
+    {
+        this.runtimeDataPatterns = runtimeDataPatterns.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue(), Pattern.DOTALL)));
+    }
+
     public Map<String, Pattern> getDynamicCompiledPatterns()
     {
         return dynamicCompiledPatterns;
+    }
+
+    public Map<String, Pattern> getRuntimeDataPatterns()
+    {
+        return runtimeDataPatterns;
     }
 
     public Pattern getTestSuiteCompiledPattern()

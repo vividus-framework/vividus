@@ -17,12 +17,13 @@
         <property name="bddRunContext" ref="bddRunContext" />
     </bean>
 
-    <bean id="knownIssueProvider" class="org.vividus.bdd.issue.KnownIssueProvider"
-          init-method="init">
+    <bean class="org.vividus.bdd.issue.KnownIssueProvider" init-method="init">
         <property name="fileName" value="${known-issue-provider.fileName}" />
         <property name="knownIssueIdentifiers" ref="knownIssues" />
         <property name="propertyParser" ref="propertyParser" />
     </bean>
+
+    <bean class="org.vividus.bdd.issue.DelegatingKnownIssueDataProvider" />
 
     <bean class="org.vividus.spring.SubscriberRegisteringBeanPostProcessor" />
     <bean class="org.vividus.bdd.issue.KnownIssueCheckerBeanPostProcessor" />
