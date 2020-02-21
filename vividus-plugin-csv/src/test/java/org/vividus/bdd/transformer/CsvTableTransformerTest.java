@@ -40,6 +40,8 @@ class CsvTableTransformerTest
     private static final String CSV_FILE_NAME = "test.csv";
     private static final String EMPTY_EXAMPLES_TABLE = "";
 
+    private CsvTableTransformer csvTableTransformer = new CsvTableTransformer(new CsvReader());
+
     @Test
     void testTransform()
     {
@@ -50,7 +52,7 @@ class CsvTableTransformerTest
         Properties properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, CSV_FILE_NAME);
         assertEquals(expectedValue,
-            new CsvTableTransformer().transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
+                csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
     }
 
     @Test
@@ -58,7 +60,7 @@ class CsvTableTransformerTest
     {
         Properties properties = new Properties();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-            new CsvTableTransformer().transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
+                csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
         assertEquals("'csvPath' is not set in ExamplesTable properties", exception.getMessage());
     }
 
@@ -68,7 +70,7 @@ class CsvTableTransformerTest
         Properties properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, "");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                new CsvTableTransformer().transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
+                csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
         assertEquals("ExamplesTable property 'csvPath' is blank", exception.getMessage());
     }
 
