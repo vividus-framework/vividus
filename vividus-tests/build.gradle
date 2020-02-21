@@ -2,6 +2,7 @@ project.description = 'Vivuds tests'
 
 tasks.artifactoryPublish.enabled = false
 tasks.publish.enabled = false
+tasks.runStories.treatKnownIssuesOnlyAsPassed=true
 
 dependencies {
     implementation project(':vividus')
