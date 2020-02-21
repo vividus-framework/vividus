@@ -36,11 +36,6 @@ public class CsvTableTransformer implements ExtendedTableTransformer
 {
     private final CsvReader csvReader;
 
-    public CsvTableTransformer()
-    {
-        this(new CsvReader());
-    }
-
     public CsvTableTransformer(CsvReader csvReader)
     {
         this.csvReader = csvReader;

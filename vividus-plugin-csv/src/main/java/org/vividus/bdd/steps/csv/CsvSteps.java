@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
@@ -30,9 +28,14 @@ import org.vividus.csv.CsvReader;
 
 public class CsvSteps
 {
-    private final CsvReader csvReader = new CsvReader();
+    private IBddVariableContext bddVariableContext;
+    private CsvReader csvReader;
 
-    @Inject private IBddVariableContext bddVariableContext;
+    public CsvSteps(IBddVariableContext bddVariableContext, CsvReader csvReader)
+    {
+        this.bddVariableContext = bddVariableContext;
+        this.csvReader = csvReader;
+    }
 
     /**
      * Save CSV string to indexed <i>zero</i>-based variable, e.g. var[0], var[1] and etc.

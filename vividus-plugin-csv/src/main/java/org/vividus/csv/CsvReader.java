@@ -42,6 +42,11 @@ public class CsvReader
         this(CSVFormat.DEFAULT);
     }
 
+    public CsvReader(Character escape)
+    {
+        this(CSVFormat.DEFAULT.withEscape(escape));
+    }
+
     public CsvReader(CSVFormat csvFormat)
     {
         this.csvFormat = csvFormat;

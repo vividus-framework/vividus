@@ -50,6 +50,14 @@ class CsvReaderTests
     }
 
     @Test
+    void testReadCsvWithEscapedDataFromPath() throws Exception
+    {
+        Path filePath = Paths.get(getCsvResource("unittest-escaped.csv").toURI());
+        List<Map<String, String>> result = new CsvReader('\\').readCsvFile(filePath, FIRST_HEADER, SECOND_HEADER);
+        assertEquals(List.of(Map.of(FIRST_HEADER, FIRST_VALUE, SECOND_HEADER, "value2 with \" inside")), result);
+    }
+
+    @Test
     void testReadCsvFromStringWithoutHeaders() throws Exception
     {
         String csv = FIRST_VALUE + COMMA + SECOND_VALUE;
@@ -75,6 +83,11 @@ class CsvReaderTests
 
     private URL getCsvResource()
     {
-        return getClass().getResource("unittest.csv");
+        return getCsvResource("unittest.csv");
+    }
+
+    private URL getCsvResource(String resourceName)
+    {
+        return getClass().getResource(resourceName);
     }
 }
