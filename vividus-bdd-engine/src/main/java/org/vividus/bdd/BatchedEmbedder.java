@@ -21,7 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.embedder.EmbedderControls;
@@ -79,6 +83,8 @@ public class BatchedEmbedder extends Embedder
 
                 EmbedderControls embedderControls = embedderControls();
                 embedderMonitor.usingControls(embedderControls);
+                ExecutorService executorService = createExecutorService(embedderControls.threads());
+                useExecutorService(executorService);
 
                 List<String> storyPaths = storyPathsBatch.getValue();
                 if (embedderControls.skip())
@@ -106,7 +112,7 @@ public class BatchedEmbedder extends Embedder
                 {
                     bddVariableContext.clearVariables();
                     bddRunContext.removeRunningBatch();
-                    shutdownExecutorService();
+                    executorService.shutdownNow();
                 }
             }
         });
@@ -141,6 +147,14 @@ public class BatchedEmbedder extends Embedder
         performableTree.setReportAfterStories(reportAfterStories);
         performableTree.setIgnoreFailureInBatches(ignoreFailureInBatches);
         return performableTree;
+    }
+
+    private ExecutorService createExecutorService(int threads)
+    {
+        ThreadFactory threadFactory = new BasicThreadFactory.Builder()
+                .namingPattern(batch + "-thread-%d")
+                .build();
+        return Executors.newFixedThreadPool(threads, threadFactory);
     }
 
     private EmbedderControls createEmbedderControls(BatchExecutionConfiguration batchExecutionConfiguration)

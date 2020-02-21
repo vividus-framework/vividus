@@ -16,7 +16,10 @@
 
 package org.vividus.bdd;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,11 +31,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.jbehave.core.embedder.EmbedderControls;
 import org.jbehave.core.embedder.EmbedderMonitor;
 import org.jbehave.core.embedder.MetaFilter;
@@ -58,6 +64,7 @@ import org.vividus.bdd.spring.Configuration;
 @ExtendWith(MockitoExtension.class)
 class BatchedEmbedderTests
 {
+    private static final int THREADS = 2;
     private static final String PATH = "path1";
     private static final String BATCH = "batch-1";
     private static final String META_FILTERS = "groovy: !skip";
@@ -93,9 +100,6 @@ class BatchedEmbedderTests
         doReturn(storyManager).when(spy).storyManager();
         MetaFilter mockedFilter = mock(MetaFilter.class);
         doReturn(mockedFilter).when(spy).metaFilter();
-        ExecutorService executorService = mock(ExecutorService.class);
-        spy.executorService();
-        spy.useExecutorService(executorService);
         List<String> testStoryPaths = List.of(PATH);
         String key = "key";
         Throwable throwable = mock(Throwable.class);
@@ -109,19 +113,20 @@ class BatchedEmbedderTests
         batches.put(BATCH, testStoryPaths);
         batches.put("batch-2", List.of("path2"));
         spy.runStoriesAsPaths(batches);
-        InOrder inOrder = inOrder(spy, embedderMonitor, storyManager, bddRunContext, bddVariableContext,
-                executorService);
-        inOrder.verify(spy).processSystemProperties();
-        inOrder.verify(spy).useEmbedderControls(argThat(this::assertEmbedderControls));
-        inOrder.verify(spy).useMetaFilters(List.of(META_FILTERS));
-        inOrder.verify(embedderMonitor).usingControls(argThat(this::assertEmbedderControls));
-        inOrder.verify(bddRunContext).putRunningBatch(BATCH);
-        inOrder.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), argThat(
+        InOrder ordered = inOrder(spy, embedderMonitor, storyManager, bddRunContext, bddVariableContext);
+        ordered.verify(spy).processSystemProperties();
+        ordered.verify(spy).useEmbedderControls(argThat(this::assertEmbedderControls));
+        ordered.verify(spy).useMetaFilters(List.of(META_FILTERS));
+        ordered.verify(embedderMonitor).usingControls(argThat(this::assertEmbedderControls));
+        List<ExecutorService> service = new ArrayList<>(1);
+        ordered.verify(spy).useExecutorService(argThat(service::add));
+        ordered.verify(bddRunContext).putRunningBatch(BATCH);
+        ordered.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), argThat(
             failures -> failures.size() == 1 && failures.containsKey(key) && failures.containsValue(throwable)));
-        inOrder.verify(bddVariableContext).clearVariables();
-        inOrder.verify(bddRunContext).removeRunningBatch();
-        inOrder.verify(executorService).shutdownNow();
-        inOrder.verifyNoMoreInteractions();
+        ordered.verify(bddVariableContext).clearVariables();
+        ordered.verify(bddRunContext).removeRunningBatch();
+        ordered.verifyNoMoreInteractions();
+        verifyExecutorService(service.get(0));
     }
 
     @Test
@@ -130,30 +135,37 @@ class BatchedEmbedderTests
         embedder.setIgnoreFailureInBatches(true);
         embedder.setGenerateViewAfterBatches(true);
         BatchedEmbedder spy = Mockito.spy(embedder);
-        EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
-        when(mockedEmbedderControls.threads()).thenReturn(1);
         doNothing().when(spy).generateReportsView();
         StoryManager storyManager = mock(StoryManager.class);
         doReturn(storyManager).when(spy).storyManager();
         MetaFilter mockedFilter = mock(MetaFilter.class);
         doReturn(mockedFilter).when(spy).metaFilter();
-        ExecutorService executorService = mock(ExecutorService.class);
-        spy.executorService();
-        spy.useExecutorService(executorService);
         List<String> testStoryPaths = List.of(PATH);
+        EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
+        when(mockedEmbedderControls.threads()).thenReturn(THREADS);
         mockBatchExecutionConfiguration();
         spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
-        InOrder inOrder = inOrder(spy, embedderMonitor, storyManager, bddRunContext, bddVariableContext,
-                executorService);
-        inOrder.verify(spy).processSystemProperties();
-        inOrder.verify(embedderMonitor).usingControls(mockedEmbedderControls);
-        inOrder.verify(bddRunContext).putRunningBatch(BATCH);
-        inOrder.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), any(BatchFailures.class));
-        inOrder.verify(bddVariableContext).clearVariables();
-        inOrder.verify(bddRunContext).removeRunningBatch();
-        inOrder.verify(executorService).shutdownNow();
-        inOrder.verify(spy).generateReportsView();
-        inOrder.verifyNoMoreInteractions();
+        InOrder ordered = inOrder(spy, embedderMonitor, storyManager, bddRunContext, bddVariableContext);
+        ordered.verify(spy).processSystemProperties();
+        ordered.verify(embedderMonitor).usingControls(mockedEmbedderControls);
+        List<ExecutorService> service = new ArrayList<>(1);
+        ordered.verify(spy).useExecutorService(argThat(service::add));
+        ordered.verify(bddRunContext).putRunningBatch(BATCH);
+        ordered.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), any(BatchFailures.class));
+        ordered.verify(bddVariableContext).clearVariables();
+        ordered.verify(bddRunContext).removeRunningBatch();
+        ordered.verify(spy).generateReportsView();
+        ordered.verifyNoMoreInteractions();
+        verifyExecutorService(service.get(0));
+    }
+
+    private void verifyExecutorService(ExecutorService service)
+    {
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) service;
+        assertEquals(THREADS, executorService.getCorePoolSize());
+        assertTrue(executorService.isTerminated());
+        assertTrue(executorService.isShutdown());
+        assertThat(executorService.getThreadFactory(), instanceOf(BasicThreadFactory.class));
     }
 
     @Test
@@ -220,6 +232,7 @@ class BatchedEmbedderTests
     {
         EmbedderControls mockedEmbedderControls = mock(EmbedderControls.class);
         doReturn(mockedEmbedderControls).when(spy).embedderControls();
+        when(mockedEmbedderControls.threads()).thenReturn(THREADS);
         return mockedEmbedderControls;
     }
 
@@ -228,12 +241,13 @@ class BatchedEmbedderTests
         BatchExecutionConfiguration batchExecutionConfiguration = new BatchExecutionConfiguration();
         batchExecutionConfiguration.setStoryExecutionTimeout(Duration.ofHours(1));
         batchExecutionConfiguration.setMetaFilters(META_FILTERS);
+        batchExecutionConfiguration.setThreads(2);
         when(batchStorage.getBatchExecutionConfiguration(BATCH)).thenReturn(batchExecutionConfiguration);
     }
 
     private boolean assertEmbedderControls(EmbedderControls controls)
     {
-        return controls.threads() == 1
+        return controls.threads() == THREADS
                 && "3600".equals(controls.storyTimeouts())
                 && controls.ignoreFailureInStories()
                 && !controls.generateViewAfterStories();
