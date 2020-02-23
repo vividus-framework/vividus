@@ -32,7 +32,6 @@ import org.jbehave.core.embedder.EmbedderControls;
 import org.jbehave.core.embedder.EmbedderMonitor;
 import org.jbehave.core.embedder.MetaFilter;
 import org.jbehave.core.embedder.PerformableTree;
-import org.jbehave.core.embedder.StoryManager;
 import org.jbehave.core.failures.BatchFailures;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.vividus.bdd.batch.BatchExecutionConfiguration;
@@ -96,11 +95,10 @@ public class BatchedEmbedder extends Embedder
                 try
                 {
                     bddRunContext.putRunningBatch(batch);
-                    StoryManager storyManager = storyManager();
                     MetaFilter filter = metaFilter();
                     BatchFailures failures = new BatchFailures(embedderControls.verboseFailures());
 
-                    storyManager.runStoriesAsPaths(storyPaths, filter, failures);
+                    storyManager().runStoriesAsPaths(storyPaths, filter, failures);
 
                     handleFailures(failures);
                     if (!ignoreFailureInBatches && !failures.isEmpty())
@@ -113,6 +111,7 @@ public class BatchedEmbedder extends Embedder
                     bddVariableContext.clearVariables();
                     bddRunContext.removeRunningBatch();
                     executorService.shutdownNow();
+                    storyManager = null;
                 }
             }
         });
@@ -131,12 +130,6 @@ public class BatchedEmbedder extends Embedder
                 generateReportsView();
             }
         }
-    }
-
-    @Override
-    public StoryManager storyManager()
-    {
-        return createStoryManager();
     }
 
     @Override
