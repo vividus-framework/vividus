@@ -24,7 +24,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.vividus.softassert.issue.IKnownIssueDataProvider;
-import org.vividus.softassert.issue.KnownIssueChecker;
 
 public class KnownIssueCheckerBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware
 {
@@ -34,11 +33,11 @@ public class KnownIssueCheckerBeanPostProcessor implements BeanPostProcessor, Ap
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
     {
-        if (!(bean instanceof KnownIssueChecker))
+        if (!(bean instanceof DelegatingKnownIssueDataProvider))
         {
             return bean;
         }
-        KnownIssueChecker issueChecker = (KnownIssueChecker) bean;
+        DelegatingKnownIssueDataProvider issueChecker = (DelegatingKnownIssueDataProvider) bean;
         issueChecker.setKnownIssueDataProviders(getDataProviders());
         return issueChecker;
     }

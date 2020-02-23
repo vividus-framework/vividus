@@ -79,6 +79,7 @@ class KnownIssueProviderTests
         knownIssueIdentifier.setStoryPattern("Story.*");
         knownIssueIdentifier.setScenarioPattern("Scenario 1.*");
         knownIssueIdentifier.setStepPattern("Given.*");
+        knownIssueIdentifier.setVariablePatterns(Map.of("var-1", "value-1-.*"));
         return knownIssueIdentifier;
     }
 

@@ -7,7 +7,12 @@
           init-method="init">
         <property name="testContext" ref="testContext" />
         <property name="formatter" ref="assertionFormatter" />
-        <property name="knownIssueChecker" ref="knownIssueChecker" />
+        <property name="knownIssueChecker">
+            <bean class="org.vividus.softassert.issue.KnownIssueChecker">
+                <property name="testInfoProvider" ref="testInfoProvider" />
+                <property name="issueStateProvider" ref="issueStateProvider" />
+            </bean>
+        </property>
         <property name="eventBus" ref="eventBus" />
     </bean>
 
@@ -21,9 +26,4 @@
         </property>
     </bean>
 
-    <bean id="knownIssueChecker" class="org.vividus.softassert.issue.KnownIssueChecker">
-        <property name="issueStateProvider" ref="issueStateProvider" />
-        <property name="testInfoProvider" ref="testInfoProvider" />
-        <property name="knownIssueProvider" ref="knownIssueProvider" />
-    </bean>
 </beans>

@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.issue;
 
+import java.util.Map;
+
 import org.vividus.softassert.issue.KnownIssueIdentifier;
 
 /**
@@ -36,5 +38,10 @@ public class BddKnownIssueIdentifier extends KnownIssueIdentifier
     public void setStepPattern(String pattern)
     {
         setTestStepPattern(pattern);
+    }
+
+    public void setVariablePatterns(Map<String, String> patterns)
+    {
+        setRuntimeDataPatterns(patterns);
     }
 }

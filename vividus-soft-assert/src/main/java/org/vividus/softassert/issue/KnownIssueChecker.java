@@ -19,16 +19,24 @@ package org.vividus.softassert.issue;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.vividus.softassert.model.KnownIssue;
 
 public class KnownIssueChecker implements IKnownIssueChecker
 {
-    private IKnownIssueProvider knownIssueProvider;
-    private IIssueStateProvider issueStateProvider;
+    private final IKnownIssueProvider knownIssueProvider;
+    private final KnownIssueDataProvider knownIssueDataProvider;
+
     private ITestInfoProvider testInfoProvider;
-    private Map<String, IKnownIssueDataProvider> knownIssueDataProviders;
+    private IIssueStateProvider issueStateProvider;
+
+    public KnownIssueChecker(IKnownIssueProvider knownIssueProvider, KnownIssueDataProvider knownIssueDataProvider)
+    {
+        this.knownIssueProvider = knownIssueProvider;
+        this.knownIssueDataProvider = knownIssueDataProvider;
+    }
 
     @Override
     public KnownIssue getKnownIssue(String failedAssertion)
@@ -61,11 +69,6 @@ public class KnownIssueChecker implements IKnownIssueChecker
         }
     }
 
-    public void setKnownIssueProvider(IKnownIssueProvider knownIssueProvider)
-    {
-        this.knownIssueProvider = knownIssueProvider;
-    }
-
     public void setTestInfoProvider(ITestInfoProvider testInfoProvider)
     {
         this.testInfoProvider = testInfoProvider;
@@ -74,11 +77,6 @@ public class KnownIssueChecker implements IKnownIssueChecker
     public void setIssueStateProvider(IIssueStateProvider issueStateProvider)
     {
         this.issueStateProvider = issueStateProvider;
-    }
-
-    public void setKnownIssueDataProviders(Map<String, IKnownIssueDataProvider> knownIssueDataProviders)
-    {
-        this.knownIssueDataProviders = knownIssueDataProviders;
     }
 
     private class CandidateIssue
@@ -98,8 +96,8 @@ public class KnownIssueChecker implements IKnownIssueChecker
         boolean isProperCandidate(String candidateId, KnownIssueIdentifier candidate)
         {
             resetCurrentPatternsMatched();
-            Map<String, Pattern> dynamicPatterns = candidate.getDynamicCompiledPatterns();
-            if (!doAllDynamicPatternsMatch(dynamicPatterns))
+            if (!doAllDataPatternsMatch(candidate.getDynamicCompiledPatterns()) || !doAllDataPatternsMatch(
+                    candidate.getRuntimeDataPatterns()))
             {
                 return false;
             }
@@ -117,15 +115,15 @@ public class KnownIssueChecker implements IKnownIssueChecker
             return false;
         }
 
-        private boolean doAllDynamicPatternsMatch(Map<String, Pattern> dynamicPatterns)
+        private boolean doAllDataPatternsMatch(Map<String, Pattern> dataPatterns)
         {
-            return dynamicPatterns.entrySet().stream().allMatch(entry -> {
+            return dataPatterns.entrySet().stream().allMatch(entry -> {
                 String key = entry.getKey();
                 Pattern pattern = entry.getValue();
-                return Optional.ofNullable(knownIssueDataProviders.get(key))
-                        .flatMap(IKnownIssueDataProvider::getData)
-                           .map(d -> pattern.matcher(d).matches())
-                           .orElse(false);
+                return knownIssueDataProvider.getData(key)
+                            .map(pattern::matcher)
+                            .map(Matcher::matches)
+                            .orElse(false);
             });
         }
 

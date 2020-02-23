@@ -17,6 +17,8 @@
 package org.vividus.bdd.issue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +31,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.vividus.softassert.issue.IKnownIssueDataProvider;
-import org.vividus.softassert.issue.KnownIssueChecker;
 
 @ExtendWith(MockitoExtension.class)
 class KnownIssueCheckerBeanPostProcessorTests
@@ -56,23 +57,23 @@ class KnownIssueCheckerBeanPostProcessorTests
     @Test
     void testPostProcessAfterInitializationKnownIssueChecker()
     {
-        KnownIssueChecker issueChecker = Mockito.mock(KnownIssueChecker.class);
+        DelegatingKnownIssueDataProvider dataProvider = Mockito.mock(DelegatingKnownIssueDataProvider.class);
         Map<String, IKnownIssueDataProvider> map = new HashMap<>();
-        Mockito.when(applicationContext.getBeanNamesForType(Map.class)).thenReturn(new String[] { NAME, BEAN_NAME });
-        Mockito.when(applicationContext.getBean(BEAN_NAME, Map.class)).thenReturn(map);
-        assertEquals(issueChecker,
-                knownIssueCheckerBeanPostProcessor.postProcessAfterInitialization(issueChecker, ISSUE_CHECKER));
-        Mockito.verify(issueChecker).setKnownIssueDataProviders(map);
+        when(applicationContext.getBeanNamesForType(Map.class)).thenReturn(new String[] { NAME, BEAN_NAME });
+        when(applicationContext.getBean(BEAN_NAME, Map.class)).thenReturn(map);
+        assertEquals(dataProvider,
+                knownIssueCheckerBeanPostProcessor.postProcessAfterInitialization(dataProvider, ISSUE_CHECKER));
+        verify(dataProvider).setKnownIssueDataProviders(map);
     }
 
     @Test
     void testPostProcessAfterInitializationKnownIssueCheckerNoProviders()
     {
-        KnownIssueChecker issueChecker = Mockito.mock(KnownIssueChecker.class);
+        DelegatingKnownIssueDataProvider dataProvider = Mockito.mock(DelegatingKnownIssueDataProvider.class);
         Map<String, IKnownIssueDataProvider> map = new HashMap<>();
-        Mockito.when(applicationContext.getBeanNamesForType(Map.class)).thenReturn(new String[] { NAME });
-        assertEquals(issueChecker,
-                knownIssueCheckerBeanPostProcessor.postProcessAfterInitialization(issueChecker, ISSUE_CHECKER));
-        Mockito.verify(issueChecker).setKnownIssueDataProviders(map);
+        when(applicationContext.getBeanNamesForType(Map.class)).thenReturn(new String[] { NAME });
+        assertEquals(dataProvider,
+                knownIssueCheckerBeanPostProcessor.postProcessAfterInitialization(dataProvider, ISSUE_CHECKER));
+        verify(dataProvider).setKnownIssueDataProviders(map);
     }
 }

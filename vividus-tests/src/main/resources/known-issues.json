@@ -4,5 +4,11 @@
     "assertionPattern": ".*Doctor Who.*",
     "scenarioPattern": "Verify step Then I verify assertions matching '.+'",
     "storyPattern": "AssertStepsTests"
+  },
+  "VVD-2": {
+    "type": "Internal",
+    "assertionPattern": ".*\\[Expected: a value equal to <5> Actual: <4> was less than <5>\\]",
+    "storyPattern": "KnownIssues",
+    "variablePatterns": { "var":  "value-.*" }
   }
 }

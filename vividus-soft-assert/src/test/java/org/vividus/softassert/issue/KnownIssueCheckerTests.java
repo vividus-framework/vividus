@@ -18,15 +18,15 @@ package org.vividus.softassert.issue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,7 +34,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.model.KnownIssue;
 
@@ -42,6 +41,8 @@ import org.vividus.softassert.model.KnownIssue;
 class KnownIssueCheckerTests
 {
     private static final String EXAMPLE_COM = ".*example.com";
+    private static final String URL = "http://example.com";
+    private static final String ANOTHER_URL = "http://different.com";
     private static final String CURRENT_PAGE_URL = "currentPageUrl";
     private static final String TEXT = "text";
     private static final String PATTERN = "pattern";
@@ -65,8 +66,18 @@ class KnownIssueCheckerTests
     @Mock
     private ITestInfoProvider testInfoProvider;
 
+    @Mock
+    private KnownIssueDataProvider knownIssueDataProvider;
+
     @InjectMocks
     private KnownIssueChecker knownIssueChecker;
+
+    @BeforeEach
+    void beforeEach()
+    {
+        knownIssueChecker.setTestInfoProvider(testInfoProvider);
+        knownIssueChecker.setIssueStateProvider(issueStateProvider);
+    }
 
     static Stream<Arguments> getKnownIssueWithNotNullTestInfoDataProvider()
     {
@@ -138,13 +149,9 @@ class KnownIssueCheckerTests
     void testGetKnownIssueWithDynamicDataProvider()
     {
         KnownIssueIdentifier identifier = createIdentifier();
-        identifier.setDynamicPatterns(Collections.singletonMap(CURRENT_PAGE_URL, EXAMPLE_COM));
-        Mockito.doReturn(Collections.singletonMap(TEXT, identifier)).when(knownIssueProvider)
-            .getKnownIssueIdentifiers();
-        IKnownIssueDataProvider dataProvider = mock(IKnownIssueDataProvider.class);
-        Map<String, IKnownIssueDataProvider> providersMap = Collections.singletonMap(CURRENT_PAGE_URL, dataProvider);
-        when(dataProvider.getData()).thenReturn(Optional.of("http://example.com"));
-        knownIssueChecker.setKnownIssueDataProviders(providersMap);
+        identifier.setDynamicPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
+        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
+        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.of(URL));
 
         assertKnownIssue(false, TEXT);
     }
@@ -153,13 +160,9 @@ class KnownIssueCheckerTests
     void testGetKnownIssueWithDynamicDataProviderMismatchedData()
     {
         KnownIssueIdentifier identifier = createIdentifier();
-        identifier.setDynamicPatterns(Collections.singletonMap(CURRENT_PAGE_URL, EXAMPLE_COM));
-        Mockito.doReturn(Collections.singletonMap(TEXT, identifier)).when(knownIssueProvider)
-            .getKnownIssueIdentifiers();
-        IKnownIssueDataProvider dataProvider = mock(IKnownIssueDataProvider.class);
-        Map<String, IKnownIssueDataProvider> providersMap = Collections.singletonMap(CURRENT_PAGE_URL, dataProvider);
-        when(dataProvider.getData()).thenReturn(Optional.of("http://different.com"));
-        knownIssueChecker.setKnownIssueDataProviders(providersMap);
+        identifier.setDynamicPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
+        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
+        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.of(ANOTHER_URL));
 
         assertNull(knownIssueChecker.getKnownIssue(PATTERN));
     }
@@ -168,13 +171,42 @@ class KnownIssueCheckerTests
     void testGetKnownIssueWithDynamicDataProviderReturnEmpty()
     {
         KnownIssueIdentifier identifier = createIdentifier();
-        identifier.setDynamicPatterns(Collections.singletonMap(CURRENT_PAGE_URL, EXAMPLE_COM));
-        Mockito.doReturn(Collections.singletonMap(TEXT, identifier)).when(knownIssueProvider)
-                .getKnownIssueIdentifiers();
-        IKnownIssueDataProvider dataProvider = mock(IKnownIssueDataProvider.class);
-        Map<String, IKnownIssueDataProvider> providersMap = Collections.singletonMap(CURRENT_PAGE_URL, dataProvider);
-        when(dataProvider.getData()).thenReturn(Optional.empty());
-        knownIssueChecker.setKnownIssueDataProviders(providersMap);
+        identifier.setDynamicPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
+        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
+        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.empty());
+
+        assertNull(knownIssueChecker.getKnownIssue(PATTERN));
+    }
+
+    @Test
+    void testGetKnownIssueWithRuntimeDataProvider()
+    {
+        KnownIssueIdentifier identifier = createIdentifier();
+        identifier.setRuntimeDataPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
+        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
+        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.of(URL));
+
+        assertKnownIssue(false, TEXT);
+    }
+
+    @Test
+    void testGetKnownIssueWithRuntimeDataProviderMismatchedData()
+    {
+        KnownIssueIdentifier identifier = createIdentifier();
+        identifier.setRuntimeDataPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
+        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
+        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.of(ANOTHER_URL));
+
+        assertNull(knownIssueChecker.getKnownIssue(PATTERN));
+    }
+
+    @Test
+    void testGetKnownIssueWithRuntimeDataProviderReturnEmpty()
+    {
+        KnownIssueIdentifier identifier = createIdentifier();
+        identifier.setRuntimeDataPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
+        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
+        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.empty());
 
         assertNull(knownIssueChecker.getKnownIssue(PATTERN));
     }
@@ -219,7 +251,7 @@ class KnownIssueCheckerTests
             boolean potentiallyKnown)
     {
         when(testInfoProvider.getTestInfo()).thenReturn(createTestInfo(STEP, CASE, SUITE));
-        Mockito.doReturn(identifierMap).when(knownIssueProvider).getKnownIssueIdentifiers();
+        doReturn(identifierMap).when(knownIssueProvider).getKnownIssueIdentifiers();
         assertKnownIssue(potentiallyKnown, SECOND_ISSUE);
     }
 
@@ -227,7 +259,7 @@ class KnownIssueCheckerTests
     {
         Map<String, KnownIssueIdentifier> identifierMap = new HashMap<>();
         identifierMap.put(TEXT, createIdentifier());
-        Mockito.doReturn(identifierMap).when(knownIssueProvider).getKnownIssueIdentifiers();
+        doReturn(identifierMap).when(knownIssueProvider).getKnownIssueIdentifiers();
     }
 
     private KnownIssueIdentifier createIdentifier()
