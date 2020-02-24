@@ -64,7 +64,7 @@
         </property>
     </bean>
 
-    <bean id="configuration" class="org.vividus.bdd.spring.Configuration"
+    <bean id="configuration" class="org.vividus.bdd.spring.ExtendedConfiguration"
         init-method="init">
         <property name="pathFinder" ref="pathFinder" />
         <property name="storyLoader" ref="storyLoader" />

@@ -22,8 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
-import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.io.StoryLoader;
 import org.jbehave.core.model.TableTransformers;
@@ -42,7 +42,7 @@ import org.vividus.bdd.steps.ParameterAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
 
 @SuppressWarnings("rawtypes")
-public class Configuration extends MostUsefulConfiguration
+public class ExtendedConfiguration extends Configuration
 {
     private IPathFinder pathFinder;
     private ParameterAdaptor parameterAdaptor;

@@ -31,14 +31,14 @@ import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.jbehave.core.steps.Step;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.bdd.steps.ISubStepsListener;
 import org.vividus.bdd.steps.SubSteps;
 
 @Named
 public class SubStepsConverter extends FunctionalParameterConverter<SubSteps>
 {
-    public SubStepsConverter(Configuration configuration, IBddRunContext bddRunContext,
+    public SubStepsConverter(ExtendedConfiguration configuration, IBddRunContext bddRunContext,
             IStepExamplesTableParser stepExamplesTableParser, ISubStepsListener subStepsListener)
     {
         super(subSteps -> {

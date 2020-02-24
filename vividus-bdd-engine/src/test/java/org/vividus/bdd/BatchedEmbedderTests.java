@@ -59,7 +59,7 @@ import org.vividus.bdd.batch.BatchExecutionConfiguration;
 import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.context.BddRunContext;
 import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class BatchedEmbedderTests
@@ -186,7 +186,7 @@ class BatchedEmbedderTests
     @Test
     void testStoryManager()
     {
-        Configuration mockedConfiguration = mock(Configuration.class);
+        ExtendedConfiguration mockedConfiguration = mock(ExtendedConfiguration.class);
         ExtendedStoryReporterBuilder mockedExtendedStoryReporterBuilder = mock(ExtendedStoryReporterBuilder.class);
         when(mockedConfiguration.storyReporterBuilder()).thenReturn(mockedExtendedStoryReporterBuilder);
         BatchedEmbedder spy = Mockito.spy(embedder);

@@ -46,7 +46,7 @@ import org.vividus.SystemOutTests;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.PathFinder;
 import org.vividus.bdd.StoryLoader;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
@@ -85,7 +85,7 @@ public class BddStepsCounterTests extends SystemOutTests
     private StoryParser storyParser;
 
     @Mock
-    private Configuration configuration;
+    private ExtendedConfiguration configuration;
 
     @Mock
     private Story story;
@@ -195,7 +195,7 @@ public class BddStepsCounterTests extends SystemOutTests
         PowerMockito.doNothing().when(Vividus.class, "init");
         when(BeanFactory.getBean(StoryLoader.class)).thenReturn(storyLoader);
         when(BeanFactory.getBean(IPathFinder.class)).thenReturn(pathFinder);
-        when(BeanFactory.getBean(Configuration.class)).thenReturn(configuration);
+        when(BeanFactory.getBean(ExtendedConfiguration.class)).thenReturn(configuration);
         when(configuration.keywords()).thenReturn(keywords);
         when(keywords.and()).thenReturn(AND);
         when(keywords.ignorable()).thenReturn(COMMENT);
