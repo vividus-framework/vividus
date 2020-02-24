@@ -41,7 +41,7 @@ import org.mockito.stubbing.Answer;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.proxy.IProxy;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,7 +58,7 @@ class ProxyAgentStoryReporterTests
     private IBddRunContext bddRunContext;
 
     @Mock
-    private Configuration configuration;
+    private ExtendedConfiguration configuration;
 
     @Mock
     private StoryReporter next;

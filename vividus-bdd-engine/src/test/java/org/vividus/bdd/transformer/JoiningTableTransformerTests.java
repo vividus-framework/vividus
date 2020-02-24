@@ -31,7 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class JoiningTableTransformerTests
@@ -50,7 +50,7 @@ class JoiningTableTransformerTests
     private ExamplesTableFactory factory;
 
     @Mock
-    private Configuration configuration;
+    private ExtendedConfiguration configuration;
 
     @InjectMocks
     private JoiningTableTransformer joiningTableTransformer;

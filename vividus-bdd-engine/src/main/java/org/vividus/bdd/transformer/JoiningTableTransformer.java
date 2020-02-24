@@ -21,12 +21,12 @@ import javax.inject.Named;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTableProperties;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 
 @Named("JOINING")
 public class JoiningTableTransformer implements ExtendedTableTransformer
 {
-    @Inject private Configuration configuration;
+    @Inject private ExtendedConfiguration configuration;
 
     @Override
     public String transform(String tableAsString, ExamplesTableProperties properties)

@@ -46,7 +46,7 @@ import org.jbehave.core.steps.StepCandidate;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.StoryLoader;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
@@ -87,7 +87,7 @@ public final class BddStepsCounter
         IPathFinder pathFinder = BeanFactory.getBean(IPathFinder.class);
         String storyLocation = commandLine.hasOption(directoryOption.getOpt())
                 ? commandLine.getOptionValue(directoryOption.getOpt()) : DEFAULT_STORY_LOCATION;
-        Configuration configuration = BeanFactory.getBean(Configuration.class);
+        ExtendedConfiguration configuration = BeanFactory.getBean(ExtendedConfiguration.class);
 
         fillStepList(configuration, storyLoader, pathFinder, storyLocation);
         fillStepCandidates();
@@ -95,7 +95,7 @@ public final class BddStepsCounter
         printResults(commandLine, topOption, System.out);
     }
 
-    private void fillStepList(Configuration configuration, StoryLoader storyLoader, IPathFinder pathFinder,
+    private void fillStepList(ExtendedConfiguration configuration, StoryLoader storyLoader, IPathFinder pathFinder,
             String storyLocation) throws IOException
     {
         StoryParser storyParser = configuration.storyParser();
@@ -131,7 +131,7 @@ public final class BddStepsCounter
         }
     }
 
-    private void fillStepsWithStats(Configuration configuration)
+    private void fillStepsWithStats(ExtendedConfiguration configuration)
     {
         Keywords keywords = configuration.keywords();
         String previousNonAndStep = null;

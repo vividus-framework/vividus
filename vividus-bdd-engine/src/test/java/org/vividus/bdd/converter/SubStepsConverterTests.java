@@ -41,7 +41,7 @@ import org.springframework.util.ReflectionUtils;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.bdd.steps.ISubStepsListener;
 import org.vividus.bdd.steps.SubSteps;
 
@@ -49,7 +49,7 @@ import org.vividus.bdd.steps.SubSteps;
 class SubStepsConverterTests
 {
     @Mock
-    private Configuration configuration;
+    private ExtendedConfiguration configuration;
     @Mock
     private IBddRunContext bddRunContext;
     @Mock

@@ -22,7 +22,7 @@ import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.ControllingMetaTag;
 
@@ -33,7 +33,7 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
 
     @Inject private IProxy proxy;
     @Inject private IBddRunContext bddRunContext;
-    @Inject private Configuration configuration;
+    @Inject private ExtendedConfiguration configuration;
 
     @Override
     public void beforeStory(Story story, boolean givenStory)

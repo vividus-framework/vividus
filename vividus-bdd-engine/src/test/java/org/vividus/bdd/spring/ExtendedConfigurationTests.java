@@ -61,7 +61,7 @@ import org.vividus.bdd.steps.ParameterAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
 
 @RunWith(PowerMockRunner.class)
-public class ConfigurationTests
+public class ExtendedConfigurationTests
 {
     private static final String SEPARATOR = "|";
 
@@ -75,7 +75,7 @@ public class ConfigurationTests
     private ExpressionAdaptor expressionAdaptor;
 
     @InjectMocks
-    private Configuration configuration;
+    private ExtendedConfiguration configuration;
 
     @Before
     public void before()
@@ -88,14 +88,14 @@ public class ConfigurationTests
     }
 
     @Test
-    @PrepareForTest(Configuration.class)
+    @PrepareForTest(ExtendedConfiguration.class)
     public void testInit() throws Exception
     {
         String compositePathPatterns = "**/*.steps";
         List<String> compositePaths = List.of("/path/to/composite.steps");
         when(pathFinder.findPaths(equalToCompositeStepsBatch(compositePathPatterns))).thenReturn(compositePaths);
 
-        Configuration spy = spy(configuration);
+        ExtendedConfiguration spy = spy(configuration);
         Keywords keywords = mock(Keywords.class);
         PowerMockito.whenNew(Keywords.class).withArguments(Keywords.defaultKeywords()).thenReturn(keywords);
         ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
@@ -128,7 +128,7 @@ public class ConfigurationTests
         verifyStepMonitor(spy, stepMonitors.get(0));
     }
 
-    private static void verifyStepMonitor(Configuration spy, StepMonitor expectedStepMonitorDelegate)
+    private static void verifyStepMonitor(ExtendedConfiguration spy, StepMonitor expectedStepMonitorDelegate)
     {
         StepMonitor actualStepMonitor = spy.stepMonitor();
         assertThat(actualStepMonitor, instanceOf(DelegatingStepMonitor.class));

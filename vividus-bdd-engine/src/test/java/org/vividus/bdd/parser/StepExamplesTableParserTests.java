@@ -43,7 +43,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class StepExamplesTableParserTests
@@ -51,7 +51,7 @@ class StepExamplesTableParserTests
     private static final String STEP = "When I do something";
 
     @Mock
-    private Configuration configuration;
+    private ExtendedConfiguration configuration;
 
     @Mock
     private InjectableStepsFactory stepsFactory;

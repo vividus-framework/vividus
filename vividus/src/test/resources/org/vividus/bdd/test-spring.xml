@@ -14,7 +14,7 @@
 
     <bean id="stepFactory" class="org.vividus.bdd.steps.SpringStepFactory">
         <constructor-arg index="0">
-            <bean class="org.vividus.bdd.spring.Configuration" />
+            <bean class="org.vividus.bdd.spring.ExtendedConfiguration" />
         </constructor-arg>
     </bean>
 

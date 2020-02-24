@@ -26,14 +26,14 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.Step;
-import org.vividus.bdd.spring.Configuration;
+import org.vividus.bdd.spring.ExtendedConfiguration;
 
 public class StepExamplesTableParser implements IStepExamplesTableParser
 {
-    private final Configuration configuration;
+    private final ExtendedConfiguration configuration;
     private final InjectableStepsFactory stepsFactory;
 
-    public StepExamplesTableParser(Configuration configuration, InjectableStepsFactory stepsFactory)
+    public StepExamplesTableParser(ExtendedConfiguration configuration, InjectableStepsFactory stepsFactory)
     {
         this.configuration = configuration;
         this.stepsFactory = stepsFactory;
