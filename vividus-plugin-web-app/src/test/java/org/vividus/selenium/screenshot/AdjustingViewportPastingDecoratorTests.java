@@ -68,12 +68,13 @@ class AdjustingViewportPastingDecoratorTests
     }
 
     @Test
-    void testAdjustedCurrentScrollYIsReturnedAfterScrolling()
+    void testAdjustedCurrentScrollYIsReturnedAfterSecondScrolling()
     {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) webDriver;
         int currentScrollY = 100;
         when(jsExecutor.executeScript(eq(SCROLL_Y_SCRIPT))).thenReturn(currentScrollY);
         decorator.getCurrentScrollY(jsExecutor);
+        assertEquals(currentScrollY, decorator.getCurrentScrollY(jsExecutor));
         assertEquals(currentScrollY + HEADER_ADJUSTMENT, decorator.getCurrentScrollY(jsExecutor));
     }
 }
