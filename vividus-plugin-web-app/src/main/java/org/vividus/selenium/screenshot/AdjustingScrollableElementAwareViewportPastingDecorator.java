@@ -16,42 +16,26 @@
 
 package org.vividus.selenium.screenshot;
 
-import java.time.Duration;
-
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.web.action.IJavascriptActions;
 
-import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
-public class AdjustingScrollableElementAwareViewportPastingDecorator extends DebuggingViewportPastingDecorator
+public class AdjustingScrollableElementAwareViewportPastingDecorator extends AdjustingViewportPastingDecorator
 {
     private static final long serialVersionUID = 278174510416744242L;
 
     private final transient WebElement scrollableElement;
     private final transient IJavascriptActions javascriptActions;
-    private final Duration scrollTimeout;
-    private final int headerToCut;
-    private final int footerToCut;
-    private int scrolls = 2;
 
     public AdjustingScrollableElementAwareViewportPastingDecorator(ShootingStrategy strategy,
             WebElement scrollableElement, IJavascriptActions javascriptActions, ScreenshotConfiguration configuration)
     {
-        super(strategy);
+        super(strategy, configuration.getWebHeaderToCut(), configuration.getWebFooterToCut());
         this.javascriptActions = javascriptActions;
         this.scrollableElement = scrollableElement;
-        this.scrollTimeout = configuration.getScrollTimeout();
-        this.footerToCut = configuration.getWebFooterToCut();
-        this.headerToCut = configuration.getWebHeaderToCut();
-    }
-
-    @Override
-    public int getWindowHeight(WebDriver driver)
-    {
-        return super.getWindowHeight(driver) - footerToCut - headerToCut;
     }
 
     @Override
@@ -64,20 +48,14 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Deb
               + "document.documentElement.scrollHeight,"
               + "document.documentElement.offsetHeight,"
               + "arguments[0].scrollHeight);", scrollableElement)).intValue()
-              + headerToCut + footerToCut;
+              + getHeaderAdjustment() + getFooterAdjustment();
     }
 
     @Override
-    protected int getCurrentScrollY(JavascriptExecutor js)
+    protected int getScrollY(JavascriptExecutor js)
     {
-        int scrollY = ((Number) javascriptActions.executeScript("var scrollTop = arguments[0].scrollTop;"
+        return ((Number) javascriptActions.executeScript("var scrollTop = arguments[0].scrollTop;"
                 + "if(scrollTop){return scrollTop;} else {return 0;}", scrollableElement)).intValue();
-        if (scrolls != 0)
-        {
-            scrolls--;
-            return scrollY;
-        }
-        return scrollY + headerToCut;
     }
 
     @Override

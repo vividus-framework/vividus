@@ -25,9 +25,9 @@ import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 class AdjustingViewportPastingDecorator extends DebuggingViewportPastingDecorator
 {
     private static final long serialVersionUID = -18255457270069458L;
-    private boolean beforeScrolling = true;
     private final int headerAdjustment;
     private final int footerAdjustment;
+    private int scrolls = 2;
 
     AdjustingViewportPastingDecorator(ShootingStrategy strategy, int headerAdjustment, int footerAdjustment)
     {
@@ -50,12 +50,27 @@ class AdjustingViewportPastingDecorator extends DebuggingViewportPastingDecorato
     @Override
     protected int getCurrentScrollY(JavascriptExecutor js)
     {
-        int currentScrollY = super.getCurrentScrollY(js);
-        if (beforeScrolling)
+        int currentScrollY = getScrollY(js);
+        if (scrolls != 0)
         {
-            beforeScrolling = false;
+            scrolls--;
             return currentScrollY;
         }
         return currentScrollY + headerAdjustment;
+    }
+
+    protected int getScrollY(JavascriptExecutor js)
+    {
+        return super.getCurrentScrollY(js);
+    }
+
+    public int getHeaderAdjustment()
+    {
+        return headerAdjustment;
+    }
+
+    public int getFooterAdjustment()
+    {
+        return footerAdjustment;
     }
 }
