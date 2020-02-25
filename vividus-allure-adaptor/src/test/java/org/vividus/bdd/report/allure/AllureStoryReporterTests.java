@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.report.allure;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
@@ -93,6 +95,7 @@ import io.qameta.allure.AllureLifecycle;
 import io.qameta.allure.entity.LabelName;
 import io.qameta.allure.model.Label;
 import io.qameta.allure.model.Link;
+import io.qameta.allure.model.Parameter;
 import io.qameta.allure.model.Status;
 import io.qameta.allure.model.StepResult;
 import io.qameta.allure.model.TestResult;
@@ -199,7 +202,13 @@ class AllureStoryReporterTests
                 .thenReturn(linkedQueueItem)
                 .thenReturn(null);
         when(allureRunContext.getCurrentStoryLabels()).thenReturn(new ArrayList<>());
-        testExampleHandling(1);
+        Entry<String, String> tableRow = testExampleHandling(1);
+        verify(allureLifecycle).updateStep(eq(null), argThat(updater -> {
+            StepResult stepResult = new StepResult();
+            updater.accept(stepResult);
+            assertParameters(tableRow, stepResult.getParameters());
+            return true;
+        }));
     }
 
     @Test
@@ -210,7 +219,13 @@ class AllureStoryReporterTests
                 .thenReturn(null)
                 .thenReturn(null)
                 .thenReturn(linkedQueueItem);
-        testExampleHandling(0);
+        Entry<String, String> tableRow = testExampleHandling(0);
+        verify(allureLifecycle).updateTestCase(eq(linkedQueueItem.getValue()), argThat(updater -> {
+            TestResult testResult = new TestResult();
+            updater.accept(testResult);
+            assertParameters(tableRow, testResult.getParameters());
+            return true;
+        }));
     }
 
     @Test
@@ -1084,7 +1099,7 @@ class AllureStoryReporterTests
         mockScenarioUid(false);
     }
 
-    private void testExampleHandling(int scenarioRowIndex)
+    private Entry<String, String> testExampleHandling(int scenarioRowIndex)
     {
         Properties scenarioMeta = getScenarioMeta(true);
         Scenario scenario = new Scenario(SCENARIO, new Meta(scenarioMeta));
@@ -1111,6 +1126,17 @@ class AllureStoryReporterTests
         verify(next).example(tableRow, scenarioRowIndex);
         verify(allureLifecycle).scheduleTestCase(any(TestResult.class));
         verify(allureLifecycle).startTestCase(scenarioUid);
+        return Map.entry(key, value);
+    }
+
+    private void assertParameters(Entry<String, String> tableRow, List<Parameter> parameters)
+    {
+        assertEquals(1, parameters.size());
+        Parameter actual = parameters.get(0);
+        assertAll(
+            () -> assertEquals(tableRow.getKey(), actual.getName()),
+            () -> assertEquals(tableRow.getValue(), actual.getValue())
+        );
     }
 
     private BddRunContext setupContext()
