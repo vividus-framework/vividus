@@ -16,15 +16,19 @@
 
 package org.vividus.selenium.screenshot;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +59,26 @@ class FilesystemScreenshotDebuggerTests
         filesystemScreenshotDebugger.setDebugScreenshotsLocation(Optional.empty());
         filesystemScreenshotDebugger.debug(FilesystemScreenshotDebuggerTests.class, "", null);
         assertThat(testLogger.getLoggingEvents(), empty());
+    }
+
+    @Test
+    void shouldCleanUpFolder(@TempDir File debugFolder) throws IOException
+    {
+        filesystemScreenshotDebugger.setDebugScreenshotsLocation(Optional.of(debugFolder));
+        assertThat(debugFolder.list(), is(arrayWithSize(0)));
+        assertTrue(new File(debugFolder, "temp.txt").createNewFile());
+        assertThat(debugFolder.list(), is(arrayWithSize(1)));
+        filesystemScreenshotDebugger.cleanUp();
+        assertThat(debugFolder.list(), is(arrayWithSize(0)));
+    }
+
+    @Test
+    void shouldLogExceptionIfCleanUpFails(@TempDir File debugFolder) throws IOException
+    {
+        File invalidFolder = new File(debugFolder, "/invalid");
+        filesystemScreenshotDebugger.setDebugScreenshotsLocation(Optional.of(invalidFolder));
+        filesystemScreenshotDebugger.cleanUp();
+        assertThat(testLogger.getLoggingEvents(), is(List.of(debug("Unable to clean-up folder {}", invalidFolder))));
     }
 
     @Test

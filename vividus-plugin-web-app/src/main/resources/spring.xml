@@ -81,7 +81,8 @@
         </property>
     </bean>
 
-    <bean id="screenshotDebugger" class="org.vividus.selenium.screenshot.FilesystemScreenshotDebugger">
+    <bean id="screenshotDebugger" class="org.vividus.selenium.screenshot.FilesystemScreenshotDebugger"
+        init-method="cleanUp">
         <property name="debugScreenshotsLocation" value="${selenium.screenshot.debug-directory}" />
     </bean>
 

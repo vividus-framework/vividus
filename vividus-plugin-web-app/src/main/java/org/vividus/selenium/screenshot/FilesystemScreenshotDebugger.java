@@ -20,7 +20,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Consumer;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.ui.web.util.ImageUtils;
@@ -32,10 +34,24 @@ public class FilesystemScreenshotDebugger implements ScreenshotDebugger
 
     private Optional<File> debugScreenshotsLocation;
 
+    public void cleanUp()
+    {
+        executeIfPathSet(l -> {
+            try
+            {
+                FileUtils.cleanDirectory(l);
+            }
+            catch (IOException | IllegalArgumentException e)
+            {
+                LOGGER.atDebug().addArgument(l).log("Unable to clean-up folder {}");
+            }
+        });
+    }
+
     @Override
     public void debug(Class<?> clazz, String suffix, BufferedImage debugImage)
     {
-        debugScreenshotsLocation.ifPresent(l ->
+        executeIfPathSet(l ->
         {
             File location = new File(l, System.currentTimeMillis() + UNDERSCORE + clazz.getSimpleName()
                 + UNDERSCORE + suffix);
@@ -50,6 +66,11 @@ public class FilesystemScreenshotDebugger implements ScreenshotDebugger
                 LOGGER.debug("Unable to save debug screenshot to {}", filePath, e);
             }
         });
+    }
+
+    private void executeIfPathSet(Consumer<File> toExecute)
+    {
+        debugScreenshotsLocation.ifPresent(toExecute);
     }
 
     public void setDebugScreenshotsLocation(Optional<File> debugScreenshotsLocation)
