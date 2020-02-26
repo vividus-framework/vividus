@@ -63,6 +63,7 @@ jobs:
       run: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration
 
     - name: Publish Integration tests report
+      if: always()
       uses: actions/upload-artifact@v1
       with:
         name: Integration Tests - Allure report
