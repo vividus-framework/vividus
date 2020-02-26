@@ -156,7 +156,7 @@ class HttpResponseValidationStepsTests
     @Test
     void testDecompressedResponseBodySizeEqualTo()
     {
-        mockHttpResponse();
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
         String body = RESPONSE_BODY;
         when(softAssert.assertNotNull(HTTP_RESPONSE_IS_NOT_NULL, httpResponse)).thenReturn(true);
         httpResponse.setResponseBody(body.getBytes(StandardCharsets.UTF_8));
