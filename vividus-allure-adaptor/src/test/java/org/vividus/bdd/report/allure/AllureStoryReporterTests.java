@@ -428,8 +428,7 @@ class AllureStoryReporterTests
         List<Label> story1Labels = new ArrayList<>();
         List<Label> story2Labels = new ArrayList<>();
         startStoriesWithSameName(story1Labels, story2Labels);
-        when(allureRunContext.getCurrentStoryLabels()).thenReturn(story1Labels);
-        when(allureRunContext.getCurrentStoryLabels()).thenReturn(story2Labels);
+        when(allureRunContext.getCurrentStoryLabels()).thenReturn(story1Labels).thenReturn(story2Labels);
         mockScenarioUid(true);
         allureStoryReporter.beforeScenario(new Scenario("Scenario 1", Meta.EMPTY));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
@@ -527,7 +526,6 @@ class AllureStoryReporterTests
     @Test
     void testBeforeStep()
     {
-        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
         mockScenarioUid(false);
         allureStoryReporter.beforeStep(GIVEN_STEP);
         verify(next).beforeStep(GIVEN_STEP);

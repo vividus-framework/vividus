@@ -76,7 +76,6 @@ class RadioButtonStepsTests
     @Test
     void testIfRadioOptionExistsNullLabel()
     {
-        mockRadioOptionLabelSearch(webElement);
         mockRadioOptionLabelSearch(null);
         radioButtonSteps.assertIfRadioOptionExists(RADIO_OPTION);
         verify(baseValidations, never()).assertIfElementExists(eq(RADIO_BUTTON), any(SearchAttributes.class));

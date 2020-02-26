@@ -127,8 +127,6 @@ class ElementValidationsTests
     void testAssertAllElementsHaveEqualDimensionHeight()
     {
         List<WebElement> mockedWebElements = List.of(mockedWebElement, mockedWebElement);
-        when(mockedIHighlightingSoftAssert.withHighlightedElements(mockedWebElements))
-                .thenReturn(descriptiveSoftAssert);
         when(mockedWebElement.getSize()).thenReturn(seleniumDimension);
         when(seleniumDimension.getHeight()).thenReturn(DIMENSION_VALUE);
         Dimension dimension = Dimension.HEIGHT;

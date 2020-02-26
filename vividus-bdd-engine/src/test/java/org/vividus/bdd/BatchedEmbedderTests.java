@@ -174,6 +174,7 @@ class BatchedEmbedderTests
         embedder.setIgnoreFailureInBatches(true);
         BatchedEmbedder spy = Mockito.spy(embedder);
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
+        when(mockedEmbedderControls.threads()).thenReturn(THREADS);
         when(mockedEmbedderControls.skip()).thenReturn(true);
         List<String> testStoryPaths = List.of(PATH);
         mockBatchExecutionConfiguration();
@@ -194,6 +195,7 @@ class BatchedEmbedderTests
         InjectableStepsFactory mockedInjectableStepsFactory = mock(InjectableStepsFactory.class);
         spy.useStepsFactory(mockedInjectableStepsFactory);
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
+        when(mockedEmbedderControls.threads()).thenReturn(THREADS);
         ExecutorService mockedExecutorService = mock(ExecutorService.class);
         spy.useExecutorService(mockedExecutorService);
         PerformableTree mockedPerformableTree = mock(BatchedPerformableTree.class);
@@ -232,7 +234,6 @@ class BatchedEmbedderTests
     {
         EmbedderControls mockedEmbedderControls = mock(EmbedderControls.class);
         doReturn(mockedEmbedderControls).when(spy).embedderControls();
-        when(mockedEmbedderControls.threads()).thenReturn(THREADS);
         return mockedEmbedderControls;
     }
 

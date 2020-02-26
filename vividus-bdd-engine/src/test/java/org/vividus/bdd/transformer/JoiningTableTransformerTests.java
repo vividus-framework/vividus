@@ -78,7 +78,6 @@ class JoiningTableTransformerTests
         Properties properties = createProperties(COLUMNS);
         properties.setProperty(COLUMNS_TO_JOIN, "var8");
         properties.setProperty(JOINED_COLUMN, "var9");
-        when(configuration.examplesTableFactory()).thenReturn(factory);
         mockCreateExamplesTable(PATH, "|var7|var8|\n|z|t|\n|y|e|");
         assertJoin(PATH, properties, "|var7|var9|\n|z|t|\n|y|e|");
     }

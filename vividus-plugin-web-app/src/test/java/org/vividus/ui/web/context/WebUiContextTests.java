@@ -222,7 +222,6 @@ class WebUiContextTests
     void testResetWhenWebDriverIsNotInitialized()
     {
         stepContext.setTestContext(context);
-        when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(false);
         stepContext.reset();
         assertNull(stepContext.getSearchContext());

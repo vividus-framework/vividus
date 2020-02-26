@@ -120,20 +120,24 @@ class CodeStepsTests
     @Test
     void testFaviconExistsUrlPartExists()
     {
-        mockFavicon(SITE + FAVICON_IMG_PNG);
+        String hrefAttribute = SITE + FAVICON_IMG_PNG;
+        mockFavicon(hrefAttribute);
+        when(softAssert.assertNotNull(FAVICON_CONTAINS_HREF_ATTRIBUTE, hrefAttribute)).thenReturn(true);
         codeSteps.ifFaviconWithSrcExists(FAVICON_IMG_PNG);
-        verify(softAssert).assertNotNull(FAVICON_CONTAINS_HREF_ATTRIBUTE, SITE + FAVICON_IMG_PNG);
+        verify(softAssert).assertNotNull(FAVICON_CONTAINS_HREF_ATTRIBUTE, hrefAttribute);
         verify(softAssert).assertThat(eq(THE_FAVICON_WITH_THE_SRC_CONTAINING + FAVICON_IMG_PNG + EXISTS),
-                eq(SITE + FAVICON_IMG_PNG), any());
+                eq(hrefAttribute), any());
     }
 
     @Test
     void testFaviconExistsUrlPartDifferent()
     {
-        mockFavicon(SITE);
+        String hrefAttribute = SITE;
+        mockFavicon(hrefAttribute);
+        when(softAssert.assertNotNull(FAVICON_CONTAINS_HREF_ATTRIBUTE, hrefAttribute)).thenReturn(true);
         codeSteps.ifFaviconWithSrcExists(FAVICON_IMG_PNG);
         verify(softAssert).assertThat(eq(THE_FAVICON_WITH_THE_SRC_CONTAINING + FAVICON_IMG_PNG + EXISTS),
-                eq(SITE), any());
+                eq(hrefAttribute), any());
     }
 
     @Test
@@ -229,7 +233,5 @@ class CodeStepsTests
                 new SearchParameters(LocatorUtil.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG),
                         Visibility.ALL)))).thenReturn(mockedWebElement);
         when(mockedWebElement.getAttribute(HREF)).thenReturn(hrefAttribute);
-        when(softAssert.assertNotNull(FAVICON_CONTAINS_HREF_ATTRIBUTE, hrefAttribute))
-                .thenReturn(true);
     }
 }
