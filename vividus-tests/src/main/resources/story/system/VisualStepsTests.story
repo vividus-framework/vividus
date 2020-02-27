@@ -1,4 +1,4 @@
-Description: Integration tests for Visual plugin steps
+Description: System tests for Visual plugin steps
 
 Meta:
     @group vividus-plugin-visual
