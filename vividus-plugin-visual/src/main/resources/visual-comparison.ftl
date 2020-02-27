@@ -5,7 +5,7 @@
     <title>Visual tests result table</title>
     <link rel="stylesheet" href="../../css/external.css"/>
     <link rel="stylesheet" href="../../styles.css"/>
-    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <link href="../../webjars/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 </head>
 <body>
     <style>
@@ -48,7 +48,7 @@
 
     <script src="../../webjars/jquery/2.1.1/jquery.min.js"></script>
     <script src="../../webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script src="../../webjars/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>>
     <#if compare>
     <script type="text/javascript">
         $(document).ready(function(){
