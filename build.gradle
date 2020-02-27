@@ -68,7 +68,7 @@ project.description = 'Vividus'
 
 ext {
     versions = [
-        allure:                 '2.13.1',
+        allure:                 '2.13.2',
         commonsIo:              '2.6',
         commonsLang3:           '3.9',
         commonsText:            '1.8',
