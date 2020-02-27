@@ -44,7 +44,6 @@ When I <action> baseline with `context-element-cut` ignoring:
 
 Scenario: Validation of step When I $actionType baseline with `$name` ignoring:$ignoredElements for context element not in viewport with element cut
 When I change context to an element by By.xpath(.//p[last()])
-When I perform javascript 'return document.querySelector('p:last-child').getBoundingClientRect();' and save result to the 'scenario' variable 'rect'
 When I <action> baseline with `not-viewport-context-element-cut` ignoring:
 |ELEMENT                                                                                     |
 |By.cssSelector(img)|
