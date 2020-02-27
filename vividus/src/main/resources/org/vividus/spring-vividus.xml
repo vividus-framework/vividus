@@ -48,6 +48,12 @@
         <property name="next" ref="statusStoryReporter" />
     </bean>
 
+    <bean id="abstractExamplesTableStringConverter"
+        class="org.vividus.bdd.converter.AbstractExamplesTableStringConverter"
+        abstract="true">
+        <property name="examplesTableFactory" value="#{@'configuration'.getExamplesTableFactory()}" />
+    </bean>
+
     <bean id="statusStoryReporter" class="org.vividus.bdd.StatusStoryReporter">
         <property name="next">
             <bean class="org.jbehave.core.reporters.DelegatingStoryReporter">
