@@ -78,6 +78,7 @@
             <bean class="org.jbehave.core.configuration.spring.SpringStoryControls">
                 <property name="dryRun" value="${bdd.configuration.dry-run}" />
                 <property name="resetStateBeforeScenario" value="${bdd.configuration.reset-state-before-scenario}" />
+                <property name="skipStoryIfGivenStoryFailed" value="${bdd.configuration.skip-story-if-given-story-failed}" />
             </bean>
         </property>
         <property name="parallelStoryExamplesEnabled" value="${bdd.configuration.parallel-story-examples-enabled}"/>
