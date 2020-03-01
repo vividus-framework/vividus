@@ -36,7 +36,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class ClientBuilderUtilsTest
+public class ClientBuilderUtilsTests
 {
     private static final AuthScope DEFAULT_AUTH_SCOPE = AuthScope.ANY;
 

@@ -31,7 +31,7 @@ import org.openqa.selenium.WebDriver;
 import ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy;
 
 @ExtendWith(MockitoExtension.class)
-class ShootingTargetAreaStrategyTest
+class ShootingTargetAreaStrategyTests
 {
     private static final int SCREENSHOT_WIDTH = 100;
     private static final int SCREENSHOT_HEIGHT = 500;

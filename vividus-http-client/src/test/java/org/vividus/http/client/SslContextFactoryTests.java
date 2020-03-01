@@ -41,7 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.keystore.IKeyStoreFactory;
 
 @ExtendWith(MockitoExtension.class)
-class SslContextFactoryTest
+class SslContextFactoryTests
 {
     @Mock
     private IKeyStoreFactory keyStoreFactory;

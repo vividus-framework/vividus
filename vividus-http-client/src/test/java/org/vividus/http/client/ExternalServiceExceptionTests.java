@@ -14,23 +14,30 @@
  * limitations under the License.
  */
 
-package org.vividus.aws.s3;
+package org.vividus.http.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.amazonaws.services.s3.AmazonS3;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 
-public class AmazonS3ClientFactoryTest
+class ExternalServiceExceptionTests
 {
+    private static final String MESSAGE = "message";
+
     @Test
-    void shouldCreateNewClientInstance()
+    void testExternalServiceExceptionConstructorWithString()
     {
-        String s3AccessKey = "s3AccessKey";
-        String s3SecretKey = "s3SecretKey";
-        String region = "us-east-1";
-        AmazonS3 client = AmazonS3ClientFactory.create(s3AccessKey, s3SecretKey, region);
-        assertEquals(region, client.getRegionName());
+        ExternalServiceException exception = new ExternalServiceException(MESSAGE);
+        assertEquals(MESSAGE, exception.getMessage());
+    }
+
+    @Test
+    void testExternalServiceExceptionConstructorWithStringAndThrowable()
+    {
+        Throwable cause = mock(Exception.class);
+        ExternalServiceException exception = new ExternalServiceException(MESSAGE, cause);
+        assertEquals(MESSAGE, exception.getMessage());
+        assertEquals(cause, exception.getCause());
     }
 }

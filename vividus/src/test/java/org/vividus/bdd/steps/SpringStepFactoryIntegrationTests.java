@@ -30,7 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("classpath:/org/vividus/bdd/test-spring.xml")
-class SpringStepFactoryTest
+class SpringStepFactoryIntegrationTests
 {
     @Autowired
     private SpringStepFactory springStepFactory;

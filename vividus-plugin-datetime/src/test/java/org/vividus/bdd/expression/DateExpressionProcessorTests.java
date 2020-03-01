@@ -46,7 +46,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.util.DateUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-class DateExpressionProcessorTest
+class DateExpressionProcessorTests
 {
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DateExpressionProcessor.class);
 

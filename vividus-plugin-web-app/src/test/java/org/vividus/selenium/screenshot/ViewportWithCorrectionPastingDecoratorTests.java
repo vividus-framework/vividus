@@ -33,7 +33,7 @@ import org.openqa.selenium.WebDriver;
 import ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy;
 
 @ExtendWith(MockitoExtension.class)
-class ViewportWithCorrectionPastingDecoratorTest
+class ViewportWithCorrectionPastingDecoratorTests
 {
     private static final int SCREENSHOT_CORRECTED_WIDTH = 10;
     private static final int SCREENSHOT_CORRECTED_HEIGHT = 20;

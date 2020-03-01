@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class HttpResponseTest
+class HttpResponseTests
 {
     private static final String HEADER_NAME = "name";
     private static final String EXCEPTION_MSG_PATTERN = "Service returned response with unexpected status code: [%d]. ";

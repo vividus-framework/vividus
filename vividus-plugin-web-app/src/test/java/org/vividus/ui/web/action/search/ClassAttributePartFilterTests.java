@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 
 @ExtendWith(MockitoExtension.class)
-class ClassAttributePartFilterTest
+class ClassAttributePartFilterTests
 {
     private static final String TEXT = "text";
     private static final String CLASS_ATTRIBUTE = "class";

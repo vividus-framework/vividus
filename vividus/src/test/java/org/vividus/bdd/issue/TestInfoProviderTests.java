@@ -34,7 +34,7 @@ import org.vividus.bdd.model.RunningStory;
 import org.vividus.softassert.issue.TestInfo;
 
 @ExtendWith(MockitoExtension.class)
-class TestInfoProviderTest
+class TestInfoProviderTests
 {
     private static final String TEST_SUITE = "suite";
     private static final String TEST_STEP = "step";

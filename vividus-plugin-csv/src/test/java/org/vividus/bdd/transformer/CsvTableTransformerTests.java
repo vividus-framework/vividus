@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.csv.CsvReader;
 
 @ExtendWith(MockitoExtension.class)
-class CsvTableTransformerTest
+class CsvTableTransformerTests
 {
     private static final String CSV_PATH_PROPERTY_NAME = "csvPath";
     private static final String CSV_FILE_NAME = "test.csv";

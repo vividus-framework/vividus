@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 
-class StringToSearchAttributesSetConverterTest
+class StringToSearchAttributesSetConverterTests
 {
     private static final String COMA_SPACE = ", ";
     private static final String LOCATOR_ID = "By.id(id)";

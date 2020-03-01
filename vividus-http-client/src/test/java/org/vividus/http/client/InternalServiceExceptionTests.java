@@ -14,35 +14,30 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.issue;
+package org.vividus.http.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
-class IssueStateProviderTest
+class InternalServiceExceptionTests
 {
-    private static final String VALID_ISSUE_ID = "ISSUE-123";
-    private static final String UNKNOWN = "UNKNOWN";
-
-    @InjectMocks
-    private IssueStateProvider issueStateProvider;
+    private static final String MESSAGE = "message";
 
     @Test
-    void testGetStatusSuccess()
+    void testInternalServiceExceptionConstructorWithString()
     {
-        String actualStatus = issueStateProvider.getIssueStatus(VALID_ISSUE_ID);
-        assertEquals(UNKNOWN, actualStatus);
+        InternalServiceException exception = new InternalServiceException(MESSAGE);
+        assertEquals(MESSAGE, exception.getMessage());
     }
 
     @Test
-    void testGetResolutionSuccess()
+    void testInternalServiceExceptionConstructorWithStringAndThrowable()
     {
-        String actualStatus = issueStateProvider.getIssueResolution(VALID_ISSUE_ID);
-        assertEquals(UNKNOWN, actualStatus);
+        Throwable cause = mock(Exception.class);
+        InternalServiceException exception = new InternalServiceException(MESSAGE, cause);
+        assertEquals(MESSAGE, exception.getMessage());
+        assertEquals(cause, exception.getCause());
     }
 }

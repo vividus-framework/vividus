@@ -32,7 +32,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.web.event.PageLoadEndEvent;
 
 @ExtendWith(MockitoExtension.class)
-class AlertHandlingPageLoadListenerTest
+class AlertHandlingPageLoadListenerTests
 {
     private static final String URL = "url";
     private static final String ALERT_SCRIPT = "confirm = function(message){return arguments[0];};"

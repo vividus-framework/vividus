@@ -14,30 +14,35 @@
  * limitations under the License.
  */
 
-package org.vividus.http.client;
+package org.vividus.bdd.issue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-class ExternalServiceExceptionTest
+@ExtendWith(MockitoExtension.class)
+class IssueStateProviderTests
 {
-    private static final String MESSAGE = "message";
+    private static final String VALID_ISSUE_ID = "ISSUE-123";
+    private static final String UNKNOWN = "UNKNOWN";
+
+    @InjectMocks
+    private IssueStateProvider issueStateProvider;
 
     @Test
-    void testExternalServiceExceptionConstructorWithString()
+    void testGetStatusSuccess()
     {
-        ExternalServiceException exception = new ExternalServiceException(MESSAGE);
-        assertEquals(MESSAGE, exception.getMessage());
+        String actualStatus = issueStateProvider.getIssueStatus(VALID_ISSUE_ID);
+        assertEquals(UNKNOWN, actualStatus);
     }
 
     @Test
-    void testExternalServiceExceptionConstructorWithStringAndThrowable()
+    void testGetResolutionSuccess()
     {
-        Throwable cause = mock(Exception.class);
-        ExternalServiceException exception = new ExternalServiceException(MESSAGE, cause);
-        assertEquals(MESSAGE, exception.getMessage());
-        assertEquals(cause, exception.getCause());
+        String actualStatus = issueStateProvider.getIssueResolution(VALID_ISSUE_ID);
+        assertEquals(UNKNOWN, actualStatus);
     }
 }

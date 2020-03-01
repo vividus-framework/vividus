@@ -54,7 +54,7 @@ import org.mockito.stubbing.Answer;
 import org.vividus.util.Sleeper;
 
 @ExtendWith(MockitoExtension.class)
-class HttpClientTest
+class HttpClientTests
 {
     private static final String GET = "GET";
     private static final String HEAD = "HEAD";

@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.junit.jupiter.api.Test;
 
-class ThreadedBasicCookieStoreTest
+class ThreadedBasicCookieStoreTests
 {
     private static final String NAME = "name";
     private static final String VALUE = "value";

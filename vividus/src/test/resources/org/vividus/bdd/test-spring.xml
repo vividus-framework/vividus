@@ -36,8 +36,8 @@
         <value>ShouldNotAppearsSteps</value>
     </util:list>
 
-    <bean id="SuperSteps" class="org.vividus.bdd.steps.SpringStepFactoryTest$SuperSteps" />
-    <bean id="DefaultSteps" class="org.vividus.bdd.steps.SpringStepFactoryTest$DefaultSteps" />
-    <bean id="ShouldNotAppearSteps" class="org.vividus.bdd.steps.SpringStepFactoryTest$ShouldNotAppearSteps" />
+    <bean id="SuperSteps" class="org.vividus.bdd.steps.SpringStepFactoryIntegrationTests$SuperSteps" />
+    <bean id="DefaultSteps" class="org.vividus.bdd.steps.SpringStepFactoryIntegrationTests$DefaultSteps" />
+    <bean id="ShouldNotAppearSteps" class="org.vividus.bdd.steps.SpringStepFactoryIntegrationTests$ShouldNotAppearSteps" />
 
 </beans>
