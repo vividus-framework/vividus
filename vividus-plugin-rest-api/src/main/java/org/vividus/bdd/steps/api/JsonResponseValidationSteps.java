@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.steps.api;
 
+import static java.lang.String.format;
+import static java.lang.String.join;
 import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 
 import java.io.IOException;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -54,6 +58,15 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 
 public class JsonResponseValidationSteps
 {
+    private static final Set<String> ASSERTION_BOUNDS = Set.of(
+            "Different (?:value|keys) found",
+            "Array \"[^\"]+\" has different"
+            );
+    private static final String PIPE = "|";
+    private static final Pattern DIFFERENCES_PATTERN = Pattern.compile(
+            "(?=(?:" + join(PIPE, ASSERTION_BOUNDS) + ")).+?(?=(?:" + join(PIPE, ASSERTION_BOUNDS) + "|$))",
+            Pattern.DOTALL);
+
     private ISoftAssert softAssert;
     private IJsonUtils jsonUtils;
 
@@ -88,11 +101,32 @@ public class JsonResponseValidationSteps
     @Then("a JSON element from '$json' by the JSON path '$jsonPath' is equal to '$expectedData'$options")
     public boolean isDataByJsonPathFromJsonEqual(String json, String jsonPath, String expectedData, Options options)
     {
-        Function<String, Boolean> mapper = actualData ->
-            softAssert.assertThat("Data by JSON path: " + jsonPath + " is equal to '" + expectedData + "'",
-                    actualData, new JsonDiffMatcher(attachmentPublisher, expectedData).withOptions(options));
+        return getDataByJsonPath(json, jsonPath, expectedData).map(match(jsonPath, expectedData, options))
+                .orElse(Boolean.FALSE).booleanValue();
+    }
 
-        return getDataByJsonPath(json, jsonPath, expectedData).map(mapper).orElse(Boolean.FALSE).booleanValue();
+    private Function<String, Boolean> match(String jsonPath, String expectedData, Options options)
+    {
+        return actualData ->
+        {
+            JsonDiffMatcher jsonMatcher = new JsonDiffMatcher(attachmentPublisher, expectedData).withOptions(options);
+            jsonMatcher.matches(actualData);
+            String differences = jsonMatcher.getDifferences();
+
+            if (differences == null)
+            {
+                return softAssert.assertThat(format("Data by JSON path: %s is equal to '%s'", jsonPath, expectedData),
+                        actualData, jsonMatcher);
+            }
+
+            Matcher matcher = DIFFERENCES_PATTERN.matcher(differences);
+            while (matcher.find())
+            {
+                String assertion = matcher.group().strip();
+                softAssert.recordFailedAssertion(assertion);
+            }
+            return false;
+        };
     }
 
     /**

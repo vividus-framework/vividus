@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.diff;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.hamcrest.Description;
@@ -30,6 +31,7 @@ public class JsonDiffMatcher extends AbstractJsonPatchMatcher<JsonDiffMatcher> i
 {
     private final IAttachmentPublisher attachmentPublisher;
     private final String expected;
+    private final Map<Object, Boolean> matchCache = new HashMap<>();
 
     public JsonDiffMatcher(IAttachmentPublisher attachmentPublisher, String expected)
     {
@@ -49,7 +51,7 @@ public class JsonDiffMatcher extends AbstractJsonPatchMatcher<JsonDiffMatcher> i
     @Override
     public boolean matches(Object actual)
     {
-        return super.matches(expected, actual);
+        return matchCache.computeIfAbsent(actual, k -> super.matches(expected, k));
     }
 
     @Override

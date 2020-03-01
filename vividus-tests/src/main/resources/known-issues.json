@@ -10,5 +10,17 @@
     "assertionPattern": ".*\\[Expected: a value equal to <5> Actual: <4> was less than <5>\\]",
     "storyPattern": "KnownIssues",
     "variablePatterns": { "var":  "value-.*" }
+  },
+  "VVD-3": {
+    "type": "Internal",
+    "assertionPattern": ".*Different value found (when comparing expected array element|in node).*",
+    "scenarioPattern": "Known issues should be detected and matched for separate JSON assertions",
+    "storyPattern": "KnownIssues"
+  },
+  "VVD-4": {
+    "type": "Internal",
+    "assertionPattern": ".*Different keys found in node.*",
+    "scenarioPattern": "Known issues should be detected and matched for separate JSON assertions",
+    "storyPattern": "KnownIssues"
   }
 }
