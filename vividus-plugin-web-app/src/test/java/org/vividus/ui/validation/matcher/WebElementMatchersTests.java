@@ -16,8 +16,8 @@
 
 package org.vividus.ui.validation.matcher;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;

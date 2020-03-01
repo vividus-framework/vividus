@@ -17,8 +17,8 @@
 package org.vividus.ui.web.action;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

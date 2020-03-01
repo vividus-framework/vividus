@@ -16,9 +16,9 @@
 
 package org.vividus.util.comparison;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 
 import java.math.BigDecimal;
 import java.util.Comparator;

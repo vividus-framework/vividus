@@ -17,9 +17,9 @@
 package org.vividus.bdd.monitor;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;

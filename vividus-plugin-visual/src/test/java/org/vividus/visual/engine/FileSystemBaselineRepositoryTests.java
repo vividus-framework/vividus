@@ -18,8 +18,8 @@ package org.vividus.visual.engine;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;

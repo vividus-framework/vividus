@@ -16,8 +16,8 @@
 
 package org.vividus.util.pool;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.commons.pool2.PooledObject;

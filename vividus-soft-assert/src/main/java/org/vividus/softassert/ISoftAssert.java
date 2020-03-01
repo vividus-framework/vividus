@@ -162,7 +162,7 @@ public interface ISoftAssert
      * @param matcher an expression, built of {@link Matcher}s, specifying allowed
      * values
      * @return <code>true</code> if assertion is passed, otherwise <code>false</code>
-     * @see org.hamcrest.CoreMatchers
+     * @see org.hamcrest.Matchers
      * @see org.hamcrest.MatcherAssert
      */
     <T> boolean assertThat(String description, T actual, Matcher<? super T> matcher);

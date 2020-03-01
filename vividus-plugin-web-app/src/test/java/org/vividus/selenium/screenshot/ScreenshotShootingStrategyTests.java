@@ -16,8 +16,8 @@
 
 package org.vividus.selenium.screenshot;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 
 import java.util.stream.Stream;
 

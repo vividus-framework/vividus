@@ -16,8 +16,8 @@
 
 package org.vividus.bdd.util;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 import java.util.List;
 import java.util.Map;
