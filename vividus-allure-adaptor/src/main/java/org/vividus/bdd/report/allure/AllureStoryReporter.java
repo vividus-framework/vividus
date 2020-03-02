@@ -17,6 +17,7 @@
 package org.vividus.bdd.report.allure;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -75,7 +76,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     private static final char TEST_CASE_META_SEPARATOR = ';';
     private static final String CURRENT_STEP_KEY = "allureCurrentLinkedStep";
     private static final String TEST_TIER = "testTier";
-    private static final String GROUP_BY_META_TAG = "group";
     private static final String TEST_CASE_ID = "testCaseId";
 
     private final AllureLifecycle lifecycle = Allure.getLifecycle();
@@ -110,9 +110,9 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         if (runningStory.isAllowed())
         {
             allureRunContext.initExecutionStages();
-            String name = runningStory.getName();
+            String storyName = runningStory.getName();
 
-            switch (name)
+            switch (storyName)
             {
                 case "BeforeStories":
                     allureReportGenerator.start();
@@ -122,44 +122,56 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
                     break;
                 default:
                     List<Label> storyLabels = allureRunContext.createNewStoryLabels(givenStory);
-                    String title = givenStory ? "Given Story: " + name : name;
+                    String title = givenStory ? "Given Story: " + storyName : storyName;
                     if (!bddRunContext.isDryRun() && getLinkedStep() != null)
                     {
                         startStep(title, false);
                         break;
                     }
-                    storyLabels.add(new Label().setName(LabelName.SUITE.value()).setValue(title));
-                    storyLabels.add(new Label().setName(LabelName.HOST.value()).setValue(ResultsUtils.getHostName()));
-                    storyLabels.add(new Label().setName(LabelName.THREAD.value())
-                            .setValue(ResultsUtils.getThreadName()));
-
-                    String groupByMetaTag = new MetaWrapper(story.getMeta()).getOptionalPropertyValue(GROUP_BY_META_TAG)
-                            .orElse("Ungrouped");
-                    storyLabels.add(new Label().setName(LabelName.STORY.value()).setValue(name));
-                    storyLabels.add(new Label().setName(LabelName.FEATURE.value()).setValue(groupByMetaTag));
-                    storyLabels.add(new Label().setName(LabelName.FRAMEWORK.value()).setValue("Vividus"));
-
-                    getParentSuiteKey(givenStory)
-                            .map(v -> new Label().setName(LabelName.PARENT_SUITE.value()).setValue(v))
-                            .ifPresent(storyLabels::add);
+                    collectLabels(runningStory, givenStory, title).forEach(
+                        (name, value) -> storyLabels.add(new Label().setName(name.value()).setValue(value)));
                     break;
             }
         }
         super.beforeStory(story, givenStory);
     }
 
-    private Optional<String> getParentSuiteKey(boolean givenStory)
+    private Map<LabelName, String> collectLabels(RunningStory runningStory, boolean givenStory, String allureStoryTitle)
     {
+        Map<LabelName, String> labels = new EnumMap<>(LabelName.class);
+        labels.put(LabelName.HOST, ResultsUtils.getHostName());
+        labels.put(LabelName.THREAD, ResultsUtils.getThreadName());
+        labels.put(LabelName.STORY, runningStory.getName());
+        labels.put(LabelName.FRAMEWORK, "Vividus");
+        labels.put(LabelName.FEATURE, new MetaWrapper(runningStory.getStory().getMeta())
+                .getOptionalPropertyValue("group").orElse("Ungrouped"));
+        labels.put(LabelName.PARENT_SUITE, getBatchName());
+
         if (givenStory)
         {
-            return allureRunContext.getRootStoryLabels().stream()
-                    .filter(l -> LabelName.SUITE.value().equals(l.getName()))
-                    .findFirst()
-                    .map(Label::getValue);
+            labels.put(LabelName.SUITE, getParentSuiteKey());
+            labels.put(LabelName.SUB_SUITE, allureStoryTitle);
         }
+        else
+        {
+            labels.put(LabelName.SUITE, allureStoryTitle);
+        }
+        return labels;
+    }
+
+    private String getParentSuiteKey()
+    {
+        return allureRunContext.getRootStoryLabels().stream()
+                .filter(l -> LabelName.SUITE.value().equals(l.getName()))
+                .findFirst()
+                .map(Label::getValue)
+                .orElseThrow(() -> new IllegalStateException("No running root story found"));
+    }
+
+    private String getBatchName()
+    {
         String runningBatchKey = bddRunContext.getRunningBatchKey();
-        String batchName = batchStorage.getBatchExecutionConfiguration(runningBatchKey).getName();
-        return Optional.of(batchName);
+        return batchStorage.getBatchExecutionConfiguration(runningBatchKey).getName();
     }
 
     @Override
