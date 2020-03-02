@@ -65,7 +65,9 @@ import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.IJsonUtils;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.util.json.JsonUtils;
@@ -121,6 +123,9 @@ class JsonResponseValidationStepsTests
 
     @Mock
     private IHttpClient httpClient;
+
+    @Mock
+    private IAttachmentPublisher attachmentPublisher;
 
     @InjectMocks
     private JsonResponseValidationSteps jsonResponseValidationSteps;
@@ -473,6 +478,29 @@ class JsonResponseValidationStepsTests
         jsonResponseValidationSteps.saveJsonElementToVariable(RESPONSE_NULL, SOME_PATH, Set.of(VariableScope.STORY),
                 VARIABLE_NAME);
         verifyPathNotFoundExceptionRecording(NON_EXISTING_SOME_PATH);
+    }
+
+    @Test
+    void testIsDataByJsonPathFromJsonEqualCheckMissmatches()
+    {
+        String json = ResourceUtils.loadResource(getClass(), "missmatches-actual-data.json");
+        String expected = ResourceUtils.loadResource(getClass(), "missmatches-expected-data.json");
+        jsonResponseValidationSteps.isDataByJsonPathFromJsonEqual(json, "$", expected,
+                new Options(Option.IGNORING_ARRAY_ORDER));
+        verify(softAssert).recordFailedAssertion("Different value found when comparing expected array element [0] to"
+                + " actual element [0].");
+        verify(softAssert).recordFailedAssertion("Different keys found in node \"[0]\", missing: \"[0].missing_value\""
+                + ", extra: \"[0].extra_value\",\"[0].line_terminator\", expected: <{\"different_value\":\"nf83u\""
+                + ",\"missing_value\":\"2k3nf\",\"numbers_array\":[0, 1, 2]}> but was: <{\"different_value\":\"2ince\""
+                + ",\"extra_value\":\"4ujeu\",\"line_terminator\":\"jfnse4\n4mn2j\nm38uff\n\",\"numbers_array\":"
+                + "[0, -1]}>");
+        verify(softAssert).recordFailedAssertion("Different value found in node \"[0].different_value\", expected:"
+                + " <\"nf83u\"> but was: <\"2ince\">.");
+        verify(softAssert).recordFailedAssertion("Array \"[0].numbers_array\" has different length, expected: <3>"
+                + " but was: <2>.");
+        verify(softAssert).recordFailedAssertion("Array \"[0].numbers_array\" has different content. Missing values:"
+                + " [1, 2], extra values: [-1], expected: <[0,1,2]> but was: <[0,-1]>");
+        verifyNoMoreInteractions(softAssert);
     }
 
     private void verifyPathNotFoundExceptionRecording(String nonExistingJsonPath)
