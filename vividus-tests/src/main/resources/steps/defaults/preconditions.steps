@@ -1,6 +1,0 @@
-Composite: When I pass age check
-When I switch to a frame by the xpath '//iframe[contains(@id, 'gating-frame')]'
-When I enter '#{P(dd)}' in a field with the name 'dobDay'
-When I enter '#{P1M(MM)}' in a field with the name 'dobMonth'
-When I enter '#{-P30Y(YYYY)}' in a field with the name 'dobYear'
-When I click on an element by the xpath '//button[@id='submitGatingBtn']'
