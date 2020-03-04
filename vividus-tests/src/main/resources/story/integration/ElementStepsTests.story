@@ -70,6 +70,11 @@ Given I am on a page with the URL '<radioButtonsURL>'
 When I change context to an element with the attribute 'type'='submit'
 Then the context element has the CSS property 'color' containing '(0, 0, 0, 1)'
 
+Scenario: Should not fail click step when element in Cross-Origin frame
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/frames.html'
+When I switch to a frame with the attribute 'id'='exampleCom'
+When I click on element located `By.xpath(//a[contains(text(), 'More')])`
+
 !-- Composites down there
 
 Scenario: Step verification Then an element with the name '$elementName' containing text '$text' exists
