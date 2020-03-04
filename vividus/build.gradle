@@ -16,6 +16,9 @@ task integrationTest(type: Test) {
     classpath = sourceSets.integrationTest.runtimeClasspath
 }
 
+// https://github.com/spotbugs/spotbugs-gradle-plugin/issues/115
+spotbugsIntegrationTest.auxClassPaths += integrationTest.classpath
+
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
