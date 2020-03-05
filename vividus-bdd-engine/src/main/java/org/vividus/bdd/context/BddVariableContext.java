@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -125,31 +126,33 @@ public class BddVariableContext implements IBddVariableContext
         }
         String variableKey = variableMatcher.group(VARIABLE_NAME_GROUP);
         return Optional.ofNullable(variables.get(variableKey))
-                       .map(v -> resolveAsListItem(variableMatcher, v))
-                       .map(v -> resolveAsMapItem(variableMatcher, v));
+                       .map(v -> tryResolve(variableMatcher.group(LIST_INDEX_GROUP), v, asListItem()))
+                       .map(v -> tryResolve(variableMatcher.group(MAP_KEY_GROUP), v, asMapItem()));
+    }
+
+    private static Object tryResolve(String key, Object variable, BiFunction<String, Object, Object> resolver)
+    {
+        if (key == null)
+        {
+            return variable;
+        }
+        return resolver.apply(key, variable);
     }
 
     @SuppressWarnings("unchecked")
-    private Object resolveAsMapItem(Matcher variableMatcher, Object variable)
+    private static BiFunction<String, Object, Object> asMapItem()
     {
-        String mapKey = variableMatcher.group(MAP_KEY_GROUP);
-        if (mapKey != null && variable instanceof Map)
-        {
-            return ((Map<String, ?>) variable).get(mapKey);
-        }
-        return variable;
+        return (k, v) -> v instanceof Map ? ((Map<String, ?>) v).get(k) : v;
     }
 
-    private Object resolveAsListItem(Matcher variableMatcher, Object v)
+    private static BiFunction<String, Object, Object> asListItem()
     {
-        String listIndex = variableMatcher.group(LIST_INDEX_GROUP);
-        if (listIndex != null)
+        return (k, v) ->
         {
             List<?> listVariable = (List<?>) v;
-            int elementIndex = Integer.parseInt(listIndex);
+            int elementIndex = Integer.parseInt(k);
             return elementIndex < listVariable.size() ? listVariable.get(elementIndex) : null;
-        }
-        return v;
+        };
     }
 
     private Variables getVariables()
