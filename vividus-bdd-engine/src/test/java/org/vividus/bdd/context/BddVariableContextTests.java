@@ -59,6 +59,8 @@ import org.vividus.testcontext.SimpleTestContext;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class BddVariableContextTests
 {
+    private static final String VARIABLE_KEY_KEY = "variableKey.key";
+    private static final String VARIABLE_KEY_0 = "variableKey[0]";
     private static final String DEFAULT = "defaultValue";
     private static final String SAVE_MESSAGE_TEMPLATE = "Saving a value '{}' into the '{}' variable '{}'";
     private static final String VALUE = "value";
@@ -153,14 +155,14 @@ class BddVariableContextTests
         return Stream.of(
             arguments(VARIABLE_KEY,                      List.of(Map.of(KEY, VALUE)), List.of(Map.of(KEY, VALUE))),
             arguments("variableKey:defaultValue",        null,                        DEFAULT),
-            arguments("variableKey[0]",                  List.of(Map.of(KEY, VALUE)), Map.of(KEY, VALUE)),
+            arguments(VARIABLE_KEY_0,                    List.of(Map.of(KEY, VALUE)), Map.of(KEY, VALUE)),
             arguments("variableKey[0]:defaultValue",     List.of(),                   DEFAULT),
             arguments("variableKey[0].key",              List.of(Map.of(KEY, VALUE)), VALUE),
             arguments("variableKey[0].key:defaultValue", List.of(),                   DEFAULT),
-            arguments("variableKey.key",                 Map.of(KEY, VALUE),          VALUE),
-            arguments("variableKey.key",                 VALUE,                       VALUE),
+            arguments(VARIABLE_KEY_KEY,                  Map.of(KEY, VALUE),          VALUE),
+            arguments(VARIABLE_KEY_KEY,                  VALUE,                       VALUE),
             arguments("variableKey.key:defaultValue",    Map.of(),                    DEFAULT),
-            arguments("variableKey[0]",                  List.of(Set.of(KEY)),        Set.of(KEY)),
+            arguments(VARIABLE_KEY_0,                    List.of(Set.of(KEY)),        Set.of(KEY)),
             arguments("variableKey[7]",                  List.of(Map.of(KEY, VALUE)), null)
         );
     }
