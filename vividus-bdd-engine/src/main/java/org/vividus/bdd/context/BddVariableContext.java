@@ -112,26 +112,29 @@ public class BddVariableContext implements IBddVariableContext
     @SuppressWarnings("unchecked")
     private Object getVariable(Map<String, Object> variables, String key)
     {
-        Matcher variableMatcher = VARIABLE_PATTERN.matcher(key);
-        if (!variableMatcher.find())
+        Object variable = variables.get(key);
+        if (variable == null)
         {
-            return variables.get(key);
-        }
-        String variableKey = variableMatcher.group(VARIABLE_NAME_GROUP);
-        Object variable = variables.get(variableKey);
-        if (variable != null)
-        {
-            String listIndex = variableMatcher.group(LIST_INDEX_GROUP);
-            if (listIndex != null)
+            Matcher variableMatcher = VARIABLE_PATTERN.matcher(key);
+            if (variableMatcher.find())
             {
-                List<?> listVariable = (List<?>) variable;
-                int elementIndex = Integer.parseInt(listIndex);
-                variable = elementIndex < listVariable.size() ? listVariable.get(elementIndex) : null;
-            }
-            String mapKey = variableMatcher.group(MAP_KEY_GROUP);
-            if (mapKey != null && variable instanceof Map)
-            {
-                variable = ((Map<String, ?>) variable).get(mapKey);
+                String variableKey = variableMatcher.group(VARIABLE_NAME_GROUP);
+                variable = variables.get(variableKey);
+                if (variable != null)
+                {
+                    String listIndex = variableMatcher.group(LIST_INDEX_GROUP);
+                    if (listIndex != null)
+                    {
+                        List<?> listVariable = (List<?>) variable;
+                        int elementIndex = Integer.parseInt(listIndex);
+                        variable = elementIndex < listVariable.size() ? listVariable.get(elementIndex) : null;
+                    }
+                    String mapKey = variableMatcher.group(MAP_KEY_GROUP);
+                    if (mapKey != null && variable instanceof Map)
+                    {
+                        variable = ((Map<String, ?>) variable).get(mapKey);
+                    }
+                }
             }
         }
         return variable;

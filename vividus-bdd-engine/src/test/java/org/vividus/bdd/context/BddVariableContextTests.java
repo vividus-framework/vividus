@@ -147,10 +147,10 @@ class BddVariableContextTests
         assertEquals(VARIABLE_VALUE, bddVariableContext.getVariable(VARIABLE_KEY));
     }
 
+    @SuppressWarnings("checkstyle:MultipleStringLiterals")
     static Stream<Arguments> variablesProvider()
     {
         return Stream.of(
-            // CHECKSTYLE:OFF
             arguments(VARIABLE_KEY,                      List.of(Map.of(KEY, VALUE)), List.of(Map.of(KEY, VALUE))),
             arguments("variableKey:defaultValue",        null,                        DEFAULT),
             arguments("variableKey[0]",                  List.of(Map.of(KEY, VALUE)), Map.of(KEY, VALUE)),
@@ -158,10 +158,10 @@ class BddVariableContextTests
             arguments("variableKey[0].key",              List.of(Map.of(KEY, VALUE)), VALUE),
             arguments("variableKey[0].key:defaultValue", List.of(),                   DEFAULT),
             arguments("variableKey.key",                 Map.of(KEY, VALUE),          VALUE),
+            arguments("variableKey.key",                 VALUE,                       VALUE),
             arguments("variableKey.key:defaultValue",    Map.of(),                    DEFAULT),
             arguments("variableKey[0]",                  List.of(Set.of(KEY)),        Set.of(KEY)),
             arguments("variableKey[7]",                  List.of(Map.of(KEY, VALUE)), null)
-           // CHECKSTYLE:ON
         );
     }
 
