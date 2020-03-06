@@ -37,7 +37,7 @@ public class BddVariableContext implements IBddVariableContext
     private static final int VARIABLE_NAME_GROUP = 1;
     private static final int LIST_INDEX_GROUP = 2;
     private static final int MAP_KEY_GROUP = 3;
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile(
+    private static final Pattern COMPLEX_VARIABLE_PATTERN = Pattern.compile(
             "([^\\[\\]\\.:]+):?(?:\\[(\\d+)\\])?:?(?:\\.([^:]+))?:?");
     private static final char COLON = ':';
 
@@ -109,33 +109,45 @@ public class BddVariableContext implements IBddVariableContext
         testContext.remove(VARIABLES_KEY);
     }
 
-    @SuppressWarnings("unchecked")
     private Object getVariable(Map<String, Object> variables, String key)
     {
-        Object variable = variables.get(key);
-        if (variable == null)
+        return Optional.ofNullable(variables.get(key))
+                       .or(() -> resolveAsComplexType(variables, key))
+                       .orElse(null);
+    }
+
+    private Optional<Object> resolveAsComplexType(Map<String, Object> variables, String key)
+    {
+        Matcher variableMatcher = COMPLEX_VARIABLE_PATTERN.matcher(key);
+        if (!variableMatcher.find())
         {
-            Matcher variableMatcher = VARIABLE_PATTERN.matcher(key);
-            if (variableMatcher.find())
-            {
-                String variableKey = variableMatcher.group(VARIABLE_NAME_GROUP);
-                variable = variables.get(variableKey);
-                if (variable != null)
-                {
-                    String listIndex = variableMatcher.group(LIST_INDEX_GROUP);
-                    if (listIndex != null)
-                    {
-                        List<?> listVariable = (List<?>) variable;
-                        int elementIndex = Integer.parseInt(listIndex);
-                        variable = elementIndex < listVariable.size() ? listVariable.get(elementIndex) : null;
-                    }
-                    String mapKey = variableMatcher.group(MAP_KEY_GROUP);
-                    if (mapKey != null && variable instanceof Map)
-                    {
-                        variable = ((Map<String, ?>) variable).get(mapKey);
-                    }
-                }
-            }
+            return Optional.empty();
+        }
+        String variableKey = variableMatcher.group(VARIABLE_NAME_GROUP);
+        return Optional.ofNullable(variables.get(variableKey))
+                       .map(v -> resolveAsListItem(variableMatcher, v))
+                       .map(v -> resolveAsMapItem(variableMatcher, v));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object resolveAsMapItem(Matcher variableMatcher, Object variable)
+    {
+        String mapKey = variableMatcher.group(MAP_KEY_GROUP);
+        if (mapKey != null && variable instanceof Map)
+        {
+            return ((Map<String, ?>) variable).get(mapKey);
+        }
+        return variable;
+    }
+
+    private Object resolveAsListItem(Matcher variableMatcher, Object variable)
+    {
+        String listIndex = variableMatcher.group(LIST_INDEX_GROUP);
+        if (listIndex != null)
+        {
+            List<?> listVariable = (List<?>) variable;
+            int elementIndex = Integer.parseInt(listIndex);
+            return elementIndex < listVariable.size() ? listVariable.get(elementIndex) : null;
         }
         return variable;
     }
