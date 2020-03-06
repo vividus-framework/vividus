@@ -37,3 +37,6 @@ When I save data of element from HTML `${html}` by CSS selector `script` to scen
 When I save text of element from HTML `${html}` by CSS selector `h1` to scenario variable `text`
 Then `${data}` is equal to `//<![CDATA[Here comes the data//]]>`
 Then `${text}` is equal to `This is a Heading`
+
+Scenario: Verify step: 'Then number of elements found by CSS selector `$cssSelector` in HTML `$html` is $comparisonRule `$quantity`'
+Then number of elements found by CSS selector `*:containsOwn(Page Title)` in HTML `${html}` is = `1`

@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.Set;
 
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,6 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
@@ -41,8 +43,7 @@ import org.vividus.util.ResourceUtils;
 class HtmlStepsTests
 {
     private static final String TEXT = "Example Domain";
-    private static final String MATCHER_VALUE = "<1>";
-    private static final String NUMBER_OF_ELEMENTS_FOUND_FORMAT = "Number of elements found by css selector '%s'";
+    private static final String NUMBER_OF_ELEMENTS_FOUND_FORMAT = "Number of elements found by CSS selector '%s'";
     private static final String VARIABLE_NAME = "variableName";
     private static final String HREF = "href";
     private static final String HTML_CONTENT = ResourceUtils.loadResource(HtmlStepsTests.class, "index.html");
@@ -89,7 +90,7 @@ class HtmlStepsTests
     void testDoesElementByCssSelectorExist(String selector, int size, boolean result)
     {
         mockFoundElements(selector, size, result);
-        htmlSteps.doesElementByCssSelectorExist(HTML_CONTENT, selector);
+        htmlSteps.doesElementByCssSelectorExist(selector, HTML_CONTENT, ComparisonRule.EQUAL_TO, 1);
         verifyFoundElements(selector, size);
     }
 
@@ -129,12 +130,17 @@ class HtmlStepsTests
     private void mockFoundElements(String selector, int size, boolean result)
     {
         lenient().when(softAssert.assertThat(eq(String.format(NUMBER_OF_ELEMENTS_FOUND_FORMAT, selector)), eq(size),
-                argThat(arg -> arg.toString().equals(MATCHER_VALUE)))).thenReturn(result);
+                elementsMatcher())).thenReturn(result);
     }
 
     private void verifyFoundElements(String selector, int size)
     {
         verify(softAssert).assertThat(eq(String.format(NUMBER_OF_ELEMENTS_FOUND_FORMAT, selector)), eq(size),
-                argThat(arg -> arg.toString().equals(MATCHER_VALUE)));
+                elementsMatcher());
+    }
+
+    private Matcher<? super Integer> elementsMatcher()
+    {
+        return argThat(m -> "a value equal to <1>".equals(m.toString()));
     }
 }
