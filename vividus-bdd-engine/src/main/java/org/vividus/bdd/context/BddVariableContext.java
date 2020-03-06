@@ -148,7 +148,7 @@ public class BddVariableContext implements IBddVariableContext
     private Object resolveAsListItem(Matcher variableMatcher, Object variable)
     {
         String listIndex = variableMatcher.group(LIST_INDEX_GROUP);
-        if (listIndex != null)
+        if (listIndex != null && variable instanceof List)
         {
             List<?> listVariable = (List<?>) variable;
             int elementIndex = Integer.parseInt(listIndex);

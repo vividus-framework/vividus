@@ -154,6 +154,8 @@ class BddVariableContextTests
             arguments("",                                null,                        null),
             arguments("variableKey:defaultValue",        null,                        "defaultValue"),
             arguments("variableKey[0]",                  List.of(Map.of(KEY, VALUE)), Map.of(KEY, VALUE)),
+            arguments("variableKey[0].key",              Map.of(KEY, VALUE),          VALUE),
+            arguments("variableKey[0]",                  null,                        null),
             arguments("variableKey[0]:defaultValue",     List.of(),                   "defaultValue"),
             arguments("variableKey[0].key",              List.of(Map.of(KEY, VALUE)), VALUE),
             arguments("variableKey[0].key:defaultValue", List.of(),                   "defaultValue"),

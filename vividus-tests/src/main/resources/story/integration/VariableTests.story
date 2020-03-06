@@ -20,7 +20,16 @@ Then `value1` is = `${testMap[0].key1}`
 Then `value2` is = `${testMap[0].key2}`
 
 Scenario: Verify ability to use variables with names containing special characters
+!-- The following checks verify handling of non-initialized BDD variables
+Then `${vAr}` is equal to `${vAr}`
+Then `${v.ar}` is equal to `${v.ar}`
+Then `${var[0]}` is equal to `${var[0]}`
+Then `${v[0].ar}` is equal to `${v[0].ar}`
+Then `${v.ar[0]}` is equal to `${v.ar[0]}`
+Then `${v:ar}` is equal to `${v:ar}`
 Then `${}` is equal to `${}`
+Then `${:default}` is equal to `default`
+
 When I initialize the scenario variable `vAr` with value `vAl`
 When I initialize the scenario variable `v.ar` with value `v.al`
 When I initialize the scenario variable `var[0]` with value `val[0]`
