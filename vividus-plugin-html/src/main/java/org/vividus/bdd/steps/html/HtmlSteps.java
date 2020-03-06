@@ -21,12 +21,12 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.HtmlUtils;
@@ -36,24 +36,49 @@ public class HtmlSteps
     @Inject private ISoftAssert softAssert;
     @Inject private IBddVariableContext bddVariableContext;
 
-    /**
-     * Checks if HTML contains element by CSS selector
-     * @param html HTML to check
-     * @param cssSelector CSS selector
-     * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
-     * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
-     * @return element by CSS selector
-     */
-    @Then("HTML `$html` contains element by CSS selector `$cssSelector`")
-    public Optional<Element> doesElementByCssSelectorExist(String html, String cssSelector)
+    private Optional<Element> findElementByCssSelectorExist(String html, String cssSelector)
     {
-        Elements elements = HtmlUtils.getElements(html, cssSelector);
-        if (softAssert.assertThat(String.format("Number of elements found by css selector '%s'", cssSelector),
-                elements.size(), Matchers.equalTo(1)))
+        Elements elements = findElements(html, cssSelector);
+        if (assertElements(cssSelector, ComparisonRule.EQUAL_TO, 1, elements))
         {
             return Optional.of(elements.first());
         }
         return Optional.empty();
+    }
+
+    /**
+     * Checks if HTML contains elements according to rule by CSS selector
+     * @param cssSelector CSS selector
+     * @param html HTML to check
+     * @param comparisonRule The rule to compare values
+     * <br>(<i>Possible values:</i>
+     * <br> less than (&lt;),
+     * <br> less than or equal to (&lt;=),
+     * <br> greater than(&gt;)
+     * <br> greater than or equal to(&gt;=),
+     * <br> equal to(=))
+     * @param number Number of elements
+     * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
+     * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
+     * @return true if elements quantity corresponds to rule, false otherwise
+     */
+    @Then("number of elements found by CSS selector `$cssSelector` in HTML `$html` is $comparisonRule `$quantity`")
+    public boolean doesElementByCssSelectorExist(String cssSelector, String html, ComparisonRule comparisonRule,
+            int number)
+    {
+        Elements elements = findElements(html, cssSelector);
+        return assertElements(cssSelector, comparisonRule, number, elements);
+    }
+
+    private boolean assertElements(String cssSelector, ComparisonRule comparisonRule, int number, Elements elements)
+    {
+        return softAssert.assertThat(String.format("Number of elements found by CSS selector '%s'", cssSelector),
+                elements.size(), comparisonRule.getComparisonRule(number));
+    }
+
+    private Elements findElements(String html, String cssSelector)
+    {
+        return HtmlUtils.getElements(html, cssSelector);
     }
 
     /**
@@ -67,7 +92,7 @@ public class HtmlSteps
     @Then("HTML `$html` contains data `$expectedData` by CSS selector `$cssSelector`")
     public void elementContainsDataByCssSelector(String html, String expectedData, String cssSelector)
     {
-        doesElementByCssSelectorExist(html, cssSelector).ifPresent(e -> softAssert
+        findElementByCssSelectorExist(html, cssSelector).ifPresent(e -> softAssert
                 .assertEquals("Element found by css selector contains expected data", expectedData, e.text()));
     }
 
@@ -86,7 +111,7 @@ public class HtmlSteps
     public void saveAttributeValueOfElementByCssSelector(String attributeName, String html, String cssSelector,
             Set<VariableScope> scopes, String variableName)
     {
-        doesElementByCssSelectorExist(html, cssSelector)
+        findElementByCssSelectorExist(html, cssSelector)
                 .ifPresent(e -> bddVariableContext.putVariable(scopes, variableName, e.attr(attributeName)));
     }
 
@@ -105,7 +130,7 @@ public class HtmlSteps
     public void saveData(DataType dataType, String html, String cssSelector, Set<VariableScope> scopes,
             String variableName)
     {
-        doesElementByCssSelectorExist(html, cssSelector)
+        findElementByCssSelectorExist(html, cssSelector)
                 .ifPresent(e -> bddVariableContext.putVariable(scopes, variableName, dataType.get(e)));
     }
 }
