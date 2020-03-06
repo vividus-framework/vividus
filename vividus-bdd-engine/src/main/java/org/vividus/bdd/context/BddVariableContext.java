@@ -58,7 +58,7 @@ public class BddVariableContext implements IBddVariableContext
                 .filter(Objects::nonNull)
                 .findFirst()
                 .or(() -> getDefault(variableKey))
-                .orElseGet(() -> System.getProperty(variableKey));
+                .orElseGet(() -> getSystem(variableKey));
     }
 
     @Override
@@ -71,6 +71,11 @@ public class BddVariableContext implements IBddVariableContext
     {
         int colonIndex = key.lastIndexOf(COLON);
         return colonIndex >= 0 ? Optional.of(key.substring(colonIndex + 1)) : Optional.empty();
+    }
+
+    private Object getSystem(String variableKey)
+    {
+        return variableKey.isBlank() ? null : System.getProperty(variableKey);
     }
 
     @Override
