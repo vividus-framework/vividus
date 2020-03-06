@@ -94,6 +94,11 @@ public enum ComparisonRule implements IComparisonRule
                 .findFirst();
     }
 
+    public String toString()
+    {
+        return super.toString().replace('_', ' ').toLowerCase();
+    }
+
     public String getSign()
     {
         return sign;

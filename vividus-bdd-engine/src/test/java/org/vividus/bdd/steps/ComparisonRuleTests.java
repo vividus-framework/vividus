@@ -54,6 +54,20 @@ class ComparisonRuleTests
         // @formatter:on
     }
 
+    static Stream<Arguments> getComparisonRuleAsString()
+    {
+        // @formatter:off
+        return Stream.of(
+            Arguments.of("less than", ComparisonRule.LESS_THAN),
+            Arguments.of("less than or equal to", ComparisonRule.LESS_THAN_OR_EQUAL_TO),
+            Arguments.of("greater than", ComparisonRule.GREATER_THAN),
+            Arguments.of("greater than or equal to", ComparisonRule.GREATER_THAN_OR_EQUAL_TO),
+            Arguments.of("equal to", ComparisonRule.EQUAL_TO),
+            Arguments.of("not equal to", ComparisonRule.NOT_EQUAL_TO)
+        );
+        // @formatter:on
+    }
+
     static Stream<Arguments> getVariableMatcher()
     {
         // @formatter:off
@@ -109,5 +123,12 @@ class ComparisonRuleTests
         String variable = "variable";
         assertEquals(ComparisonRule.EQUAL_TO.getComparisonRule(variable).toString(),
                 Matchers.equalTo(variable).toString());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getComparisonRuleAsString")
+    void shouldReturnComparisonRulesInPlainText(String expecred, ComparisonRule toCheck)
+    {
+        assertEquals(expecred, toCheck.toString());
     }
 }
