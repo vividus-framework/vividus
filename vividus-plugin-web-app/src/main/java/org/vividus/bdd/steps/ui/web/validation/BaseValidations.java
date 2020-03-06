@@ -294,10 +294,9 @@ public class BaseValidations implements IBaseValidations
     public List<WebElement> assertIfNumberOfElementsFound(String businessDescription, SearchContext searchContext,
             SearchAttributes searchAttributes, int number, ComparisonRule comparisonRule)
     {
-        String comparisonDescription = comparisonRule.toString().toLowerCase().replace('_', ' ');
         List<WebElement> elements = searchActions.findElements(searchContext, searchAttributes);
         String systemDescription = String.format("Number of elements found by '%s' is %s %d", searchAttributes,
-                comparisonDescription, number);
+                comparisonRule, number);
         return softAssert.assertThat(businessDescription, systemDescription, elements,
                 elementNumber(comparisonRule.getComparisonRule(number))) ? elements : List.of();
     }
