@@ -60,7 +60,7 @@
 
     <aop:config>
         <aop:aspect id="httpClientAspect" ref="httpClientInterceptor">
-            <aop:after-returning method="attachResponse" returning="response" pointcut="execution(org.vividus.http.client.HttpResponse org.vividus.http.client.IHttpClient.*(..))" />
+            <aop:after-returning method="attachResponse" returning="response" pointcut="bean(httpClient-RestApi) **and** execution(org.vividus.http.client.HttpResponse org.vividus.http.client.IHttpClient.*(..))" />
         </aop:aspect>
     </aop:config>
 
