@@ -55,13 +55,11 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.context.IWebUiContext;
-import org.vividus.visual.engine.IVisualCheckFactory;
 import org.vividus.visual.engine.IVisualTestingEngine;
-import org.vividus.visual.engine.IgnoreStrategy;
-import org.vividus.visual.engine.VisualCheckFactory;
-import org.vividus.visual.engine.VisualCheckFactory.VisualCheck;
 import org.vividus.visual.model.VisualActionType;
+import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
+import org.vividus.visual.screenshot.IgnoreStrategy;
 
 @ExtendWith(MockitoExtension.class)
 class VisualStepsTests
@@ -117,7 +115,7 @@ class VisualStepsTests
 
     private void mockWebUiContext()
     {
-        when(webUiContext.getSearchContext(SearchContext.class)).thenReturn(mock(SearchContext.class));
+        when(webUiContext.getSearchContext()).thenReturn(mock(SearchContext.class));
     }
 
     @Test
@@ -246,9 +244,11 @@ class VisualStepsTests
     }
 
     @Test
-    void shouldNotPerformVisualCheckIfSearchContextIsNull()
+    void shouldThrowExceptionWhenContextIsNull()
     {
-        visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE));
+        assertEquals("Search context is null, please check is browser session started", exception.getMessage());
         verifyNoInteractions(visualCheckFactory, visualTestingEngine, attachmentPublisher, softAssert);
     }
 
