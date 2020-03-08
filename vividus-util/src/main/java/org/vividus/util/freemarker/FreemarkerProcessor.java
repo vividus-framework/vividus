@@ -47,7 +47,7 @@ public class FreemarkerProcessor
      */
     public FreemarkerProcessor(Class<?> resourceLoaderClass, String templatePath)
     {
-        configuration = new Configuration(Configuration.getVersion());
+        configuration = new Configuration(Configuration.VERSION_2_3_30);
         configuration.setClassForTemplateLoading(resourceLoaderClass, templatePath);
         configuration.setDefaultEncoding(StandardCharsets.UTF_8.toString());
         configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
