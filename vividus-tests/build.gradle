@@ -7,6 +7,7 @@ runStories.treatKnownIssuesOnlyAsPassed = true
 
 dependencies {
     implementation project(':vividus')
+    implementation project(':vividus-plugin-applitools')
     implementation project(':vividus-plugin-csv')
     implementation project(':vividus-plugin-datetime')
     implementation project(':vividus-plugin-html')

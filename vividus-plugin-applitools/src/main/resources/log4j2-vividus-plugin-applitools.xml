@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Loggers>
+        <Logger name="org.vividus.visual.eyes.service.ImageVisualTestingService" level="DEBUG" additivity="false">
+            <AppenderRef ref="console" level="info"/>
+            <AppenderRef ref="file" level="info"/>
+            <AppenderRef ref="AllureLogAppender" level="warn"/>
+        </Logger>
+    </Loggers>
+</Configuration>

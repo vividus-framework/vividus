@@ -18,7 +18,7 @@ package org.vividus.visual.engine;
 
 import java.io.IOException;
 
-import org.vividus.visual.engine.VisualCheckFactory.VisualCheck;
+import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
 public interface IVisualTestingEngine

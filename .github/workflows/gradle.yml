@@ -74,11 +74,13 @@ jobs:
       env:
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
         BROWSERSTACK_KEY: ${{ secrets.BROWSERSTACK_KEY }}
+        APPLITOOLS_EXECUTE_KEY: ${{ secrets.APPLITOOLS_EXECUTE_KEY }}
+        APPLITOOLS_READ_KEY: ${{ secrets.APPLITOOLS_READ_KEY }}
       run: |
-        if [ -n $BROWSERSTACK_USER ] && [ -n $BROWSERSTACK_KEY ]; then
+        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY ]]; then
             ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system -Pvividus.configuration.suite=system -Pvividus.configuration.profile=web/desktop/chrome
         else
-            echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY variables, System tests will be skipped
+            echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY and/or APPLITOOLS_EXECUTE_KEY and/or APPLITOOLS_READ_KEY variables, System tests will be skipped
         fi
 
     - name: Publish System tests report

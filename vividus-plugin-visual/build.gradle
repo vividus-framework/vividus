@@ -6,6 +6,7 @@ dependencies {
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
+    implementation project(':vividus-extension-visual-testing')
 
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)

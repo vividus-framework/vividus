@@ -9,12 +9,6 @@
     <bean id="visualSteps" class="org.vividus.visual.VisualSteps" />
 
     <bean id="visualTestingEngine" class="org.vividus.visual.engine.VisualTestingEngine">
-        <property name="ignoreStrategies">
-            <util:map key-type="org.vividus.visual.engine.IgnoreStrategy" map-class="java.util.LinkedHashMap">
-                <entry key="ELEMENT" value="${web.visual.ignored-elements}"/>
-                <entry key="AREA" value="${web.visual.ignored-areas}"/>
-            </util:map>
-        </property>
         <property name="overrideBaselines" value="${web.visual.override-baselines}" />
     </bean>
 
@@ -22,16 +16,7 @@
         <property name="baselinesFolder" value="${web.visual.baselines-folder}" />
     </bean>
 
-    <bean id="adjustingCoordsProvider" class="org.vividus.visual.engine.AdjustingCoordsProvider" />
-
-    <bean id="scenario" class="org.vividus.visual.engine.ScenarioBasedIndexer" />
-
-    <bean id="visualCheckFactory" class="org.vividus.visual.engine.VisualCheckFactory" >
-        <property name="screenshotIndexer" value="${web.visual.indexer}" />
-    </bean>
-
     <util:list id="stepBeanNames-Visual">
         <value>visualSteps</value>
-        <value>scenario</value>
     </util:list>
 </beans>

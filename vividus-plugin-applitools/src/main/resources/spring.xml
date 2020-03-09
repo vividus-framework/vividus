@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util
+        https://www.springframework.org/schema/util/spring-util.xsd" default-lazy-init="true" profile="web">
+
+    <context:annotation-config />
+    <context:component-scan base-package="org.vividus.visual.eyes" />
+
+    <bean id="visualTestingSteps" class="org.vividus.visual.eyes.VisualTestingSteps" />
+
+    <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory" >
+        <property name="executeApiKey" value="${web.visual.applitools.execute-api-key}" />
+        <property name="readApiKey" value="${web.visual.applitools.read-api-key}" />
+        <property name="hostApp" value="${web.visual.applitools.host-app}" />
+        <property name="hostOS" value="${web.visual.applitools.host-os}" />
+        <property name="viewportSize" value="${web.visual.applitools.viewport-size}" />
+        <property name="matchLevel" value="${web.visual.applitools.match-level}" />
+        <property name="serverUri" value="${web.visual.applitools.server-uri}" />
+        <property name="appName" value="${web.visual.applitools.app-name}" />
+        <property name="baselineEnvName" value="${web.visual.applitools.baseline-env-name}" />
+    </bean>
+
+    <bean id="applitoolsCheckConverter" class="org.vividus.visual.eyes.bdd.converter.ExamplesTableToApplitoolsVisualChecksConverter">
+       <property name="visualCheckFactory" ref="applitoolsVisualCheckFactory" />
+       <property name="examplesTableFactory" value="#{@'configuration'.getExamplesTableFactory()}" />
+    </bean>
+
+    <bean id="eyesLogHandler" class="org.vividus.visual.eyes.logger.EyesLogHandler">
+        <constructor-arg value="org.vividus.visual.eyes.service.ImageVisualTestingService" />
+    </bean>
+
+    <bean class="org.vividus.http.client.HttpClient" id="eyesHttpClient"
+        factory-bean="httpClientFactory"
+        factory-method="buildHttpClient">
+        <constructor-arg>
+            <bean parent="restApiHttpClientConfig">
+                <property name="lastRequestInterceptor"><null/></property>
+                <property name="lastResponseInterceptor"><null/></property>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <util:list id="stepBeanNames-Eyes-Visual">
+        <value>visualTestingSteps</value>
+    </util:list>
+</beans>

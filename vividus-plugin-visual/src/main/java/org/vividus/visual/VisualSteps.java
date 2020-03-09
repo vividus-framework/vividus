@@ -25,36 +25,40 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
 import com.google.gson.reflect.TypeToken;
 
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.By;
-import org.openqa.selenium.SearchContext;
 import org.vividus.bdd.resource.ResourceLoadException;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.context.IWebUiContext;
-import org.vividus.visual.engine.IVisualCheckFactory;
+import org.vividus.visual.bdd.AbstractVisualSteps;
 import org.vividus.visual.engine.IVisualTestingEngine;
-import org.vividus.visual.engine.IgnoreStrategy;
-import org.vividus.visual.engine.VisualCheckFactory.VisualCheck;
 import org.vividus.visual.model.VisualActionType;
+import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
+import org.vividus.visual.screenshot.IgnoreStrategy;
 
-public class VisualSteps
+public class VisualSteps extends AbstractVisualSteps
 {
     private static final Type SET_BY = new TypeToken<Set<By>>() { }.getType();
 
-    @Inject private IVisualTestingEngine visualTestingEngine;
-    @Inject private ISoftAssert softAssert;
-    @Inject private IAttachmentPublisher attachmentPublisher;
-    @Inject private IVisualCheckFactory visualCheckFactory;
-    @Inject private IWebUiContext webUiContext;
+    private final IVisualTestingEngine visualTestingEngine;
+    private final ISoftAssert softAssert;
+    private final IVisualCheckFactory visualCheckFactory;
+
+    public VisualSteps(IWebUiContext webUiContext, IAttachmentPublisher attachmentPublisher,
+            IVisualTestingEngine visualTestingEngine, ISoftAssert softAssert, IVisualCheckFactory visualCheckFactory)
+    {
+        super(webUiContext, attachmentPublisher);
+        this.visualTestingEngine = visualTestingEngine;
+        this.softAssert = softAssert;
+        this.visualCheckFactory = visualCheckFactory;
+    }
 
     /**
      * Step establishes baseline or compares against existing one.
@@ -85,40 +89,35 @@ public class VisualSteps
 
     private void performVisualAction(Supplier<VisualCheck> visualCheckFactory)
     {
-        SearchContext searchContext = webUiContext.getSearchContext(SearchContext.class);
-        if (searchContext == null)
-        {
-            return;
-        }
-        VisualCheck visualCheck = visualCheckFactory.get();
-        visualCheck.setSearchContext(searchContext);
-        VisualCheckResult visualCheckResult;
-        try
-        {
-            if (visualCheck.getAction() == VisualActionType.COMPARE_AGAINST)
+        execute(check -> {
+            VisualCheckResult visualCheckResult = new VisualCheckResult(check);
+            try
             {
-                visualCheckResult = visualTestingEngine.compareAgainst(visualCheck);
-                if (visualCheckResult.getBaseline() == null)
+                if (check.getAction() == VisualActionType.COMPARE_AGAINST)
                 {
-                    softAssert.recordFailedAssertion(
-                            "Unable to find baseline with name: " + visualCheck.getBaselineName());
+                    visualCheckResult = visualTestingEngine.compareAgainst(check);
+                    if (visualCheckResult.getBaseline() == null)
+                    {
+                        softAssert.recordFailedAssertion(
+                                "Unable to find baseline with name: " + check.getBaselineName());
+                    }
+                    else
+                    {
+                        softAssert.assertTrue("Visual check passed", visualCheckResult.isPassed());
+                    }
                 }
                 else
                 {
-                    softAssert.assertTrue("Visual check passed", visualCheckResult.isPassed());
+                    visualCheckResult = visualTestingEngine.establish(check);
                 }
+                return visualCheckResult;
             }
-            else
+            catch (IOException | ResourceLoadException e)
             {
-                visualCheckResult = visualTestingEngine.establish(visualCheck);
+                softAssert.recordFailedAssertion(e);
             }
-            attachmentPublisher.publishAttachment("visual-comparison.ftl", Map.of("result", visualCheckResult),
-                    "Visual comparison");
-        }
-        catch (IOException | ResourceLoadException e)
-        {
-            softAssert.recordFailedAssertion(e);
-        }
+            return null;
+        }, visualCheckFactory, "visual-comparison.ftl");
     }
 
     /**
