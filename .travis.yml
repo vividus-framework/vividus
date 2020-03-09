@@ -27,7 +27,7 @@ jobs:
       script: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration
     - stage: Publish
       if: branch = master AND type IN (push)
-      script: ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=http://oss.jfrog.org -Dartifactory.publish.repoKey=oss-snapshot-local -Dartifactory.publish.username=$BINTRAY_USER -Dartifactory.publish.password=$BINTRAY_KEY -Dartifactory.publish.buildInfo=false
+      script: ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=http://oss.jfrog.org -Dartifactory.publish.repoKey=oss-snapshot-local -Dartifactory.publish.username=$BINTRAY_USER -Dartifactory.publish.password=$BINTRAY_KEY -Dartifactory.publish.buildInfo=false  -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m"
 
 before_cache:
   - find $HOME/.gradle/caches/ -name "*.lock" -type f -delete -print
