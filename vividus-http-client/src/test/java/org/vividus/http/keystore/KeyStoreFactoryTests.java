@@ -26,7 +26,6 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class KeyStoreFactoryTests
@@ -36,27 +35,17 @@ public class KeyStoreFactoryTests
     private static final String CA = "CA";
     private static final String JKS = "JKS";
 
-    private final KeyStoreFactory keyStoreFactory = new KeyStoreFactory();
-
-    @BeforeEach
-    void before()
-    {
-        keyStoreFactory.setKeyStoreType(JKS);
-    }
-
     @Test
     void testGetKeyStore()
     {
-        keyStoreFactory.setKeyStorePath(JKS_PATH);
-        keyStoreFactory.setKeyStorePassword(PASSWORD);
+        KeyStoreFactory keyStoreFactory = createKeyStoreFactory(JKS_PATH, PASSWORD);
         assertEquals(keyStoreFactory.getKeyStore(), keyStoreFactory.getKeyStore());
     }
 
     @Test
     void testGetCachedKeyStore() throws GeneralSecurityException
     {
-        keyStoreFactory.setKeyStorePath(JKS_PATH);
-        keyStoreFactory.setKeyStorePassword(PASSWORD);
+        KeyStoreFactory keyStoreFactory = createKeyStoreFactory(JKS_PATH, PASSWORD);
 
         Optional<KeyStore> optionalkeyStore = keyStoreFactory.getKeyStore();
 
@@ -74,8 +63,7 @@ public class KeyStoreFactoryTests
     @Test
     void testGetKeyStoreException()
     {
-        keyStoreFactory.setKeyStorePath(JKS_PATH);
-        keyStoreFactory.setKeyStorePassword(null);
+        KeyStoreFactory keyStoreFactory = createKeyStoreFactory(JKS_PATH, null);
         Exception exception = assertThrows(IllegalStateException.class, keyStoreFactory::getKeyStore);
         assertEquals(String.format("Key store password for %s %s must not be null", JKS, JKS_PATH),
                 exception.getMessage());
@@ -84,8 +72,13 @@ public class KeyStoreFactoryTests
     @Test
     void testGetKeyStoreEmptyPath()
     {
-        keyStoreFactory.setKeyStorePath(null);
+        KeyStoreFactory keyStoreFactory = createKeyStoreFactory(null, null);
         Optional<KeyStore> optionalkeyStore = keyStoreFactory.getKeyStore();
         assertFalse(optionalkeyStore.isPresent());
+    }
+
+    private static KeyStoreFactory createKeyStoreFactory(String keyStorePath, String keyStorePassword)
+    {
+        return new KeyStoreFactory(new KeyStoreOptions(keyStorePath, keyStorePassword, JKS));
     }
 }

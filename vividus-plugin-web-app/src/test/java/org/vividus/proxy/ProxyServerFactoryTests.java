@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -30,11 +31,14 @@ import com.browserup.bup.proxy.dns.AdvancedHostResolver;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.littleshoot.proxy.MitmManager;
 import org.littleshoot.proxy.impl.ThreadPoolConfiguration;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.vividus.proxy.mitm.IMitmManagerFactory;
+import org.vividus.proxy.mitm.MitmManagerOptions;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.net.ssl.*")
@@ -56,14 +60,21 @@ public class ProxyServerFactoryTests
     @PrepareForTest({BrowserUpProxyServer.class, ThreadPoolConfiguration.class, ProxyServerFactory.class})
     public void testCreateProxyServerConfig() throws Exception
     {
-        AdvancedHostResolver hostNameResolver = mock(AdvancedHostResolver.class);
+        MitmManagerOptions mitmManagerOptions = mock(MitmManagerOptions.class);
+        IMitmManagerFactory mitmManagerFactory = mock(IMitmManagerFactory.class);
+        MitmManager mitmManager = mock(MitmManager.class);
+        when(mitmManagerFactory.createMitmManager(mitmManagerOptions)).thenReturn(mitmManager);
         BrowserUpProxyServer mockedServer = mock(BrowserUpProxyServer.class);
         PowerMockito.whenNew(BrowserUpProxyServer.class).withNoArguments().thenReturn(mockedServer);
         ThreadPoolConfiguration mockedConfig = mock(ThreadPoolConfiguration.class);
         PowerMockito.whenNew(ThreadPoolConfiguration.class).withNoArguments().thenReturn(mockedConfig);
+        AdvancedHostResolver hostNameResolver = mock(AdvancedHostResolver.class);
 
         boolean trustAllServers = true;
+        proxyServerFactory.setMitmManagerOptions(mitmManagerOptions);
+        proxyServerFactory.setMitmManagerFactory(mitmManagerFactory);
         proxyServerFactory.setTrustAllServers(trustAllServers);
+        proxyServerFactory.setMitmEnabled(true);
         proxyServerFactory.setAdvancedHostResolver(hostNameResolver);
         proxyServerFactory.setCaptureTypes(CaptureType.getAllContentCaptureTypes());
         proxyServerFactory.createProxyServer();
@@ -71,8 +82,28 @@ public class ProxyServerFactoryTests
         verify(mockedConfig).withClientToProxyWorkerThreads(expectedThreadsCount);
         verify(mockedConfig).withProxyToServerWorkerThreads(expectedThreadsCount);
         verify(mockedServer).setTrustAllServers(trustAllServers);
+        verify(mockedServer).setMitmManager(mitmManager);
         verify(mockedServer).setThreadPoolConfiguration(mockedConfig);
         verify(mockedServer).setHostNameResolver(hostNameResolver);
         verify(mockedServer).enableHarCaptureTypes(CaptureType.getAllContentCaptureTypes());
+    }
+
+    @Test
+    @PrepareForTest({BrowserUpProxyServer.class, ThreadPoolConfiguration.class, ProxyServerFactory.class})
+    public void testCreateProxyServerConfigDisableMitm() throws Exception
+    {
+        MitmManagerOptions mitmManagerOptions = mock(MitmManagerOptions.class);
+        IMitmManagerFactory mitmManagerFactory = mock(IMitmManagerFactory.class);
+        MitmManager mitmManager = mock(MitmManager.class);
+        when(mitmManagerFactory.createMitmManager(mitmManagerOptions)).thenReturn(mitmManager);
+        BrowserUpProxyServer mockedServer = mock(BrowserUpProxyServer.class);
+        PowerMockito.whenNew(BrowserUpProxyServer.class).withNoArguments().thenReturn(mockedServer);
+
+        proxyServerFactory.setMitmManagerOptions(mitmManagerOptions);
+        proxyServerFactory.setMitmManagerFactory(mitmManagerFactory);
+        proxyServerFactory.setMitmEnabled(true);
+        proxyServerFactory.createProxyServer();
+
+        verify(mockedServer).setMitmManager(mitmManager);
     }
 }

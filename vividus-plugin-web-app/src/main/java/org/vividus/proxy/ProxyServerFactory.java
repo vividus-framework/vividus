@@ -24,11 +24,16 @@ import com.browserup.bup.proxy.CaptureType;
 import com.browserup.bup.proxy.dns.AdvancedHostResolver;
 
 import org.littleshoot.proxy.impl.ThreadPoolConfiguration;
+import org.vividus.proxy.mitm.IMitmManagerFactory;
+import org.vividus.proxy.mitm.MitmManagerOptions;
 
 public class ProxyServerFactory implements IProxyServerFactory
 {
     private static final int PROXY_WORKER_THREADS = 16;
     private boolean trustAllServers;
+    private boolean mitmEnabled;
+    private MitmManagerOptions mitmManagerOptions;
+    private IMitmManagerFactory mitmManagerFactory;
     private AdvancedHostResolver advancedHostResolver;
     private Set<CaptureType> captureTypes;
 
@@ -39,6 +44,10 @@ public class ProxyServerFactory implements IProxyServerFactory
         proxyServer.setHostNameResolver(advancedHostResolver);
         proxyServer.setTrustAllServers(trustAllServers);
         proxyServer.enableHarCaptureTypes(captureTypes);
+        if (mitmEnabled)
+        {
+            proxyServer.setMitmManager(mitmManagerFactory.createMitmManager(mitmManagerOptions));
+        }
         ThreadPoolConfiguration config = new ThreadPoolConfiguration();
         config.withClientToProxyWorkerThreads(PROXY_WORKER_THREADS);
         config.withProxyToServerWorkerThreads(PROXY_WORKER_THREADS);
@@ -49,6 +58,21 @@ public class ProxyServerFactory implements IProxyServerFactory
     public void setTrustAllServers(boolean trustAllServers)
     {
         this.trustAllServers = trustAllServers;
+    }
+
+    public void setMitmEnabled(boolean mitmEnabled)
+    {
+        this.mitmEnabled = mitmEnabled;
+    }
+
+    public void setMitmManagerOptions(MitmManagerOptions mitmManagerOptions)
+    {
+        this.mitmManagerOptions = mitmManagerOptions;
+    }
+
+    public void setMitmManagerFactory(IMitmManagerFactory mitmManagerFactory)
+    {
+        this.mitmManagerFactory = mitmManagerFactory;
     }
 
     public void setAdvancedHostResolver(AdvancedHostResolver advancedHostResolver)
