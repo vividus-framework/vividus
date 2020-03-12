@@ -61,6 +61,11 @@ jobs:
             ./gradlew build -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m"
         fi
 
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
+
     - name: Integration tests
       run: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration
 
