@@ -73,26 +73,21 @@ public class WebDriverFactory implements IWebDriverFactory
     private final Supplier<DesiredCapabilities> seleniumGridDesiredCapabilities = Suppliers.memoize(
         () -> new DesiredCapabilities(propertyParser.getPropertyValuesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX)));
 
-    private final ConcurrentHashMap<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
+    private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
     @Override
     public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities)
     {
-        return getWebDriver(webDriverType, desiredCapabilities);
+        return Optional.ofNullable(desiredCapabilities.getCapability(CapabilityType.BROWSER_NAME))
+                       .map(String.class::cast)
+                       .map(browserName -> getWebDriver(WebDriverType.valueOf(browserName), desiredCapabilities))
+                       .orElseGet(() -> getWebDriver(this.webDriverType, desiredCapabilities));
     }
 
-    @Override
-    public WebDriver getWebDriver(WebDriverType webDriverType, DesiredCapabilities desiredCapabilities)
+    private WebDriver getWebDriver(WebDriverType webDriverType, DesiredCapabilities desiredCapabilities)
     {
         WebDriverConfiguration configuration = getWebDriverConfiguration(webDriverType, true);
         return createWebDriver(webDriverType.getWebDriver(desiredCapabilities, configuration));
-    }
-
-    @Override
-    public WebDriver getWebDriver(String webDriverType, DesiredCapabilities desiredCapabilities)
-    {
-        return webDriverType != null ? getWebDriver(WebDriverType.valueOf(webDriverType), desiredCapabilities)
-                : getWebDriver(desiredCapabilities);
     }
 
     @Override
