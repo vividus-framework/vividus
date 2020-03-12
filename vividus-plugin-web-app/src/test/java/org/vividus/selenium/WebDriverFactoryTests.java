@@ -16,7 +16,8 @@
 
 package org.vividus.selenium;
 
-import static java.util.Collections.singletonMap;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,7 +28,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
@@ -55,6 +54,8 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.powermock.reflect.Whitebox;
+import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
@@ -95,29 +96,19 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetWebDriver()
-    {
-        WebDriverFactory spy = Mockito.spy(webDriverFactory);
-        WebDriverType webDriverType = mock(WebDriverType.class);
-        spy.setWebDriverType(webDriverType);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        lenient().doReturn(driver).when(spy).getWebDriver(webDriverType, desiredCapabilities);
-        assertEquals(driver, spy.getWebDriver(desiredCapabilities));
-    }
-
-    @Test
     void testGetWebDriverWithWebDriverType() throws Exception
     {
         WebDriverType webDriverType = mock(WebDriverType.class);
-        WebDriverConfiguration configuration = new WebDriverConfiguration();
+        webDriverFactory.setWebDriverType(webDriverType);
+        WebDriverConfiguration configuration = mock(WebDriverConfiguration.class);
         configuration.setBinaryPath(Optional.of(PATH));
         injectConfigurations(webDriverType, configuration);
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         when(webDriverType.getWebDriver(desiredCapabilities, configuration)).thenReturn(driver);
-        Timeouts timeouts = mockTimeouts(driver);
-        assertEquals(driver,
-                ((WrapsDriver) webDriverFactory.getWebDriver(webDriverType, desiredCapabilities)).getWrappedDriver());
-        verify(timeoutConfigurer).configure(timeouts);
+        mockTimeouts(driver);
+        WebDriver actualDriver = webDriverFactory.getWebDriver(desiredCapabilities);
+        assertThat(actualDriver, instanceOf(TextFormattingWebDriver.class));
+        assertEquals(driver, ((WrapsDriver) actualDriver).getWrappedDriver());
     }
 
     @Test
@@ -125,12 +116,12 @@ class WebDriverFactoryTests
     {
         WebDriverConfiguration configuration = new WebDriverConfiguration();
         WebDriverType webDriverType = mock(WebDriverType.class);
+        webDriverFactory.setWebDriverType(webDriverType);
         injectConfigurations(webDriverType, configuration);
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         when(webDriverType.getWebDriver(desiredCapabilities, configuration)).thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
-        assertEquals(driver,
-                ((WrapsDriver) webDriverFactory.getWebDriver(webDriverType, desiredCapabilities)).getWrappedDriver());
+        assertEquals(driver, ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
     }
 
@@ -139,6 +130,7 @@ class WebDriverFactoryTests
     {
         WebDriverType webDriverType = mock(WebDriverType.class);
         when(webDriverType.isBinaryPathSupported()).thenReturn(Boolean.TRUE);
+        webDriverFactory.setWebDriverType(webDriverType);
         lenient().when(propertyParser.getPropertyValue("web.driver." + webDriverType + ".driver-executable-path"))
                 .thenReturn(PATH);
         lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
@@ -149,7 +141,7 @@ class WebDriverFactoryTests
                         && Optional.of(PATH).equals(config.getDriverExecutablePath())))).thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
         assertEquals(driver,
-                ((WrapsDriver) webDriverFactory.getWebDriver(webDriverType, desiredCapabilities)).getWrappedDriver());
+                ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
     }
 
@@ -158,6 +150,7 @@ class WebDriverFactoryTests
     {
         WebDriverType webDriverType = mock(WebDriverType.class);
         when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.TRUE);
+        webDriverFactory.setWebDriverType(webDriverType);
         lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn(null);
         lenient().when(
@@ -169,7 +162,7 @@ class WebDriverFactoryTests
                 .thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
         assertEquals(driver,
-                ((WrapsDriver) webDriverFactory.getWebDriver(webDriverType, desiredCapabilities)).getWrappedDriver());
+                ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
     }
 
@@ -177,6 +170,7 @@ class WebDriverFactoryTests
     void testGetWebDriverWithWebDriverTypeAndExperimentalOptionsConfiguration()
     {
         WebDriverType webDriverType = mock(WebDriverType.class);
+        webDriverFactory.setWebDriverType(webDriverType);
         lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn(null);
         lenient().when(
@@ -184,11 +178,11 @@ class WebDriverFactoryTests
                 .thenReturn("{\"mobileEmulation\": {\"deviceName\": \"iPhone 8\"}}");
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         when(webDriverType.getWebDriver(eq(desiredCapabilities),
-                argThat(config -> singletonMap("mobileEmulation", singletonMap("deviceName", "iPhone 8"))
+                argThat(config ->  Map.of("mobileEmulation", Map.of("deviceName", "iPhone 8"))
                         .equals(config.getExperimentalOptions())))).thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
         assertEquals(driver,
-                ((WrapsDriver) webDriverFactory.getWebDriver(webDriverType, desiredCapabilities)).getWrappedDriver());
+                ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
     }
 
@@ -196,11 +190,13 @@ class WebDriverFactoryTests
     void testGetWebDriverWithWebDriverTypeAndInvalidBinaryPathConfiguration()
     {
         WebDriverType webDriverType = mock(WebDriverType.class);
+        webDriverFactory.setWebDriverType(webDriverType);
         when(webDriverType.isBinaryPathSupported()).thenReturn(Boolean.FALSE);
         when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType))).thenReturn(
                 PATH);
+        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-            () -> webDriverFactory.getWebDriver(webDriverType, null));
+            () -> webDriverFactory.getWebDriver(desiredCapabilities));
         assertEquals("Configuring of binary-path is not supported for " + webDriverType, exception.getMessage());
     }
 
@@ -208,36 +204,18 @@ class WebDriverFactoryTests
     void testGetWebDriverWithWebDriverTypeAndInvalidCommandLineArgumentsConfiguration()
     {
         WebDriverType webDriverType = mock(WebDriverType.class);
+        webDriverFactory.setWebDriverType(webDriverType);
         when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.FALSE);
         lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn(null);
         lenient().when(
                 propertyParser.getPropertyValue(String.format(COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn(ARG_1);
+        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-            () -> webDriverFactory.getWebDriver(webDriverType, null));
+            () -> webDriverFactory.getWebDriver(desiredCapabilities));
         assertEquals("Configuring of command-line-arguments is not supported for " + webDriverType,
                 exception.getMessage());
-    }
-
-    @Test
-    void testGetWebDriverStringWebDriverType()
-    {
-        WebDriverFactory spy = Mockito.spy(webDriverFactory);
-        String webDriverType = "CHROME";
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        lenient().doReturn(driver).when(spy).getWebDriver(WebDriverType.CHROME, desiredCapabilities);
-        assertEquals(driver, spy.getWebDriver(webDriverType, desiredCapabilities));
-    }
-
-    @Test
-    void testGetWebDriverStringWebDriverTypeIsNull()
-    {
-        String webDriverType = null;
-        WebDriverFactory spy = Mockito.spy(webDriverFactory);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        lenient().doReturn(driver).when(spy).getWebDriver(desiredCapabilities);
-        assertEquals(driver, spy.getWebDriver(webDriverType, desiredCapabilities));
     }
 
     @Test
@@ -350,10 +328,8 @@ class WebDriverFactoryTests
     private void injectConfigurations(WebDriverType webDriverType, WebDriverConfiguration configuration)
             throws ReflectiveOperationException
     {
-        ConcurrentHashMap<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
+        Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
         configurations.put(webDriverType, configuration);
-        Field field = WebDriverFactory.class.getDeclaredField("configurations");
-        field.setAccessible(true);
-        field.set(webDriverFactory, configurations);
+        Whitebox.setInternalState(webDriverFactory, "configurations", configurations);
     }
 }

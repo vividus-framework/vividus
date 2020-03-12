@@ -18,7 +18,6 @@ package org.vividus.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -198,7 +197,7 @@ public class VividusWebDriverFactoryTests
     public void testCreateWebDriverLocalWithProxy() throws Exception
     {
         mockSeleniumProxyCreation(false);
-        when(webDriverFactory.getWebDriver(eq(FIREFOX), any(DesiredCapabilities.class))).thenReturn(driver);
+        when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(false, FIREFOX);
         verifyProxyCreation(false);
     }
@@ -207,7 +206,7 @@ public class VividusWebDriverFactoryTests
     public void testCreateWebDriverLocalNoProxy() throws Exception
     {
         when(proxy.isStarted()).thenReturn(false);
-        when(webDriverFactory.getWebDriver(eq(FIREFOX), any(DesiredCapabilities.class))).thenReturn(driver);
+        when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(false, FIREFOX);
     }
 }

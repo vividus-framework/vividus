@@ -71,8 +71,7 @@ public class VividusWebDriverFactory implements IVividusWebDriverFactory
         }
         else
         {
-            webDriver = webDriverFactory.getWebDriver(
-                    (String) desiredCapabilities.getCapability(CapabilityType.BROWSER_NAME), desiredCapabilities);
+            webDriver = webDriverFactory.getWebDriver(desiredCapabilities);
         }
 
         EventFiringWebDriver eventFiringWebDriver = new EventFiringWebDriver(webDriver);
