@@ -58,3 +58,20 @@ Examples:
 
 Scenario: Verify the number of actual iterations
 Then `${updatedNumber}` is = `${iterationLimit}`
+
+
+Scenario: Verify FILTERING transformer with byMax parameters
+Then `<column1>` is equal to `A`
+Then `<column2>` is equal to `B`
+Examples:
+{transformer=FILTERING, byMaxColumns=2, byMaxRows=1}
+|column1|column2|column3|
+|A      |B      |C      |
+|D      |E      |F      |
+
+
+Scenario: Verify FILTERING transformer with byColumnNames parameter and external table
+Then `<column3>` is equal to `C`
+Examples:
+{transformer=FILTERING, byColumnNames=column3}
+/data/for-filtering-transformer.table

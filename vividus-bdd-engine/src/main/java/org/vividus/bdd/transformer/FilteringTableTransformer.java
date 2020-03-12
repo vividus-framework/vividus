@@ -18,16 +18,23 @@ package org.vividus.bdd.transformer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.ExamplesTableProperties;
-import org.jbehave.core.model.TableUtils;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
 @Named("FILTERING")
@@ -36,6 +43,8 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
     private static final String BY_MAX_COLUMNS_PROPERTY = "byMaxColumns";
     private static final String BY_MAX_ROWS_PROPERTY = "byMaxRows";
     private static final String BY_COLUMNS_NAMES_PROPERTY = "byColumnNames";
+
+    private Supplier<ExamplesTableFactory> examplesTableFactory;
 
     @Override
     public String transform(String tableAsString, ExamplesTableProperties properties)
@@ -49,41 +58,48 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
         checkArgument(!(byMaxColumns != null && byColumnNames != null),
                 "Conflicting properties declaration found: '%s' and '%s'",
                 BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY);
+        ExamplesTable examplesTable = examplesTableFactory.get().createExamplesTable(tableAsString);
 
-        List<String> tableRows = ExamplesTableProcessor.parseRows(tableAsString);
-        List<String> headerValues = TableUtils.parseRow(tableRows.get(0), true, properties);
-        List<Integer> filteredColumnIndexes = byColumnNames == null
-                ? getLimitedColumns(headerValues, byMaxColumns) : getFilteredColumns(headerValues, byColumnNames);
-
-        int resultDataRows = byMaxRows == null ? tableRows.size() - 1 : Integer.parseInt(byMaxRows);
-        List<List<String>> updatedDataRows = ExamplesTableProcessor.parseDataRows(tableRows, properties)
-                .stream()
-                .limit(resultDataRows)
-                .map(r -> filterRowByIndexes(filteredColumnIndexes, r))
-                .collect(Collectors.toList());
-
-        return ExamplesTableProcessor.buildExamplesTable(filterRowByIndexes(filteredColumnIndexes, headerValues),
-                updatedDataRows, properties, true);
-    }
-
-    private List<Integer> getLimitedColumns(List<String> headerValues, String byMaxColumns)
-    {
+        List<String> headerValues = examplesTable.getHeaders();
         int columnsLimit = byMaxColumns == null
                 ? headerValues.size() : Math.min(headerValues.size(), Integer.parseInt(byMaxColumns));
-        return IntStream.rangeClosed(0, columnsLimit - 1).boxed().collect(Collectors.toList());
-    }
+        List<String> filteredColumnsNames = byColumnNames == null ? headerValues.subList(0, columnsLimit)
+                : Arrays.stream(StringUtils.split(byColumnNames, ';')).map(String::trim).collect(Collectors.toList());
+        Set<String> filteredHeaders = new HashSet<>(filteredColumnsNames);
 
-    private List<Integer> getFilteredColumns(List<String> headerValues, String byColumnNames)
-    {
-        return Arrays.stream(StringUtils.split(byColumnNames, ';'))
-                .map(String::trim)
-                .map(headerValues::indexOf)
-                .filter(i -> i > -1)
+        List<Map<String, String>> result = filterByHeaders(filteredHeaders, headerValues,
+                getFilteredRows(byMaxRows, examplesTable));
+
+        List<List<String>> resultRows = result.stream()
+                .map(TreeMap::new)
+                .map(Map::values)
+                .map(ArrayList::new)
                 .collect(Collectors.toList());
+
+        return ExamplesTableProcessor.buildExamplesTable(filteredHeaders, resultRows, properties, true, true);
     }
 
-    private List<String> filterRowByIndexes(List<Integer> columnsToUse, List<String> row)
+    private List<Map<String, String>> filterByHeaders(Set<String> filteredHeaders, List<String> headerValues,
+            List<Map<String, String>> result)
     {
-        return row.stream().filter(e -> columnsToUse.contains(row.indexOf(e))).collect(Collectors.toList());
+        Set<String> headersForDeleting = new HashSet<>(headerValues);
+        headersForDeleting.removeAll(filteredHeaders);
+        result.stream().map(m -> m.keySet().removeAll(headersForDeleting))
+            .collect(Collectors.toList());
+        return result;
+    }
+
+    private List<Map<String, String>> getFilteredRows(String byMaxRows, ExamplesTable examplesTable)
+    {
+        return Optional.ofNullable(byMaxRows)
+                .map(Integer::parseInt)
+                .filter(m -> m < examplesTable.getRowCount())
+                .map(m -> examplesTable.getRows().subList(0, m))
+                .orElseGet(examplesTable::getRows);
+    }
+
+    public void setExamplesTableFactory(Supplier<ExamplesTableFactory> examplesTableFactory)
+    {
+        this.examplesTableFactory = examplesTableFactory;
     }
 }
