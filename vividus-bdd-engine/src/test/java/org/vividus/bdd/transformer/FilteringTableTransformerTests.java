@@ -18,25 +18,40 @@ package org.vividus.bdd.transformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import java.util.Properties;
 import java.util.stream.Stream;
 
+import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.ExamplesTableProperties;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class FilteringTableTransformerTests
 {
     private static final String TABLE = "|key1|key2|key3|\n|1|2|3|\n|4|5|6|\n|7|8|9|";
-    private final FilteringTableTransformer transformer = new FilteringTableTransformer();
+
+    @Mock
+    private ExamplesTableFactory factory;
+
+    @InjectMocks
+    private FilteringTableTransformer transformer;
 
     @ParameterizedTest
     @MethodSource("tableSource")
     void testTransform(String tableToTransform, Properties properties, String expectedTable)
     {
+        transformer.setExamplesTableFactory(() -> factory);
+        when(factory.createExamplesTable(tableToTransform)).thenReturn(new ExamplesTable(TABLE));
         assertEquals(expectedTable, transformer.transform(tableToTransform, new ExamplesTableProperties(properties)));
     }
 
@@ -86,7 +101,8 @@ class FilteringTableTransformerTests
             Arguments.of(TABLE, createProperties(2, null, null),        "|key1|key2|\n|1|2|\n|4|5|\n|7|8|"),
             Arguments.of(TABLE, createProperties(null, 2, "key1;key3"), "|key1|key3|\n|1|3|\n|4|6|"),
             Arguments.of(TABLE, createProperties(null, 5, "key3;key2"), "|key2|key3|\n|2|3|\n|5|6|\n|8|9|"),
-            Arguments.of(TABLE, createProperties(null, 1, "key1"),      "|key1|\n|1|")
+            Arguments.of(TABLE, createProperties(null, 1, "key1"),      "|key1|\n|1|"),
+            Arguments.of("/test.table", createProperties(2, 1, null),   "|key1|key2|\n|1|2|")
         );
     }
     // CHECKSTYLE:ON
