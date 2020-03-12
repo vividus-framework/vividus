@@ -7,9 +7,13 @@
     default-lazy-init="true">
 
     <bean id="keyStoreFactory" class="org.vividus.http.keystore.KeyStoreFactory" >
-        <property name="keyStorePath" value="${http.key-store.path:#{null}}" />
-        <property name="keyStorePassword" value="${http.key-store.password:#{null}}" />
-        <property name="keyStoreType" value="JKS" />
+        <constructor-arg>
+            <bean class="org.vividus.http.keystore.KeyStoreOptions">
+                <constructor-arg index="0" value="${http.key-store.path}" />
+                <constructor-arg index="1" value="${http.key-store.password}" />
+                <constructor-arg index="2" value="${http.key-store.type}" />
+            </bean>
+        </constructor-arg>
     </bean>
 
     <bean id="sslContextFactory" class="org.vividus.http.client.SslContextFactory" >
