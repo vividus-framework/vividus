@@ -25,5 +25,5 @@ public interface IWebDriverFactory
 
     WebDriver getRemoteWebDriver(DesiredCapabilities desiredCapabilities);
 
-    DesiredCapabilities getSeleniumGridDesiredCapabilities();
+    <T> T getCapability(String capabilityName);
 }

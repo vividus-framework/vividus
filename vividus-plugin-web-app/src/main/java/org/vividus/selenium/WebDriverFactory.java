@@ -18,6 +18,7 @@ package org.vividus.selenium;
 
 import java.net.URL;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,7 +72,14 @@ public class WebDriverFactory implements IWebDriverFactory
     private IJsonUtils jsonUtils;
 
     private final Supplier<DesiredCapabilities> seleniumGridDesiredCapabilities = Suppliers.memoize(
-        () -> new DesiredCapabilities(propertyParser.getPropertyValuesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX)));
+        () -> new DesiredCapabilities(
+                propertyParser.getPropertyValuesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX)
+                .entrySet()
+                .stream()
+                .map(e -> StringUtils.equalsAnyIgnoreCase(e.getValue(), "true", "false")
+                        ? Map.entry(e.getKey(), Boolean.parseBoolean(e.getValue()))
+                        : e)
+                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue))));
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
@@ -165,8 +173,14 @@ public class WebDriverFactory implements IWebDriverFactory
         return Optional.ofNullable(propertyParser.getPropertyValue("web.driver." + webDriverType + "." + propertyKey));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public DesiredCapabilities getSeleniumGridDesiredCapabilities()
+    public <T> T getCapability(String capabilityName)
+    {
+        return (T) getSeleniumGridDesiredCapabilities().getCapability(capabilityName);
+    }
+
+    private DesiredCapabilities getSeleniumGridDesiredCapabilities()
     {
         return seleniumGridDesiredCapabilities.get();
     }

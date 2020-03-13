@@ -105,8 +105,7 @@ public class AshotFactory implements IAshotFactory
     private AShot createAShot(ShootingStrategy baseShootingStrategy,
             ScreenshotShootingStrategy screenshotShootingStrategy, boolean viewportScreenshot)
     {
-        String deviceName = (String) webDriverFactory.getSeleniumGridDesiredCapabilities()
-                .getCapability(SauceLabsCapabilityType.DEVICE_NAME);
+        String deviceName = webDriverFactory.getCapability(SauceLabsCapabilityType.DEVICE_NAME);
         boolean landscapeOrientation = webDriverManager.isOrientation(ScreenOrientation.LANDSCAPE);
         ShootingStrategy shootingStrategy = screenshotShootingStrategy.getDecoratedShootingStrategy(
                 baseShootingStrategy, viewportScreenshot, landscapeOrientation, deviceName);

@@ -19,7 +19,9 @@ package org.vividus.selenium;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -309,6 +312,24 @@ class WebDriverFactoryTests
         assertEquals(remoteWebDriver,
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+    }
+
+    @Test
+    void shouldReturnConvertedRemoteDriverCapability()
+    {
+        String key1 = "key1";
+        String key2 = "key2";
+        String key3 = "key3";
+        String key4 = "key4";
+        String trueValue = "true";
+        String arg = "arg";
+        when(propertyParser.getPropertyValuesByPrefix("selenium.grid.capabilities."))
+                .thenReturn(Map.of(key1, trueValue, key2, "false", key3, trueValue.toUpperCase(), key4, arg));
+        Assertions.assertAll(
+            () -> assertTrue((boolean) webDriverFactory.getCapability(key1)),
+            () -> assertFalse((boolean) webDriverFactory.getCapability(key2)),
+            () -> assertTrue((boolean) webDriverFactory.getCapability(key3)),
+            () -> assertEquals(arg, webDriverFactory.getCapability(key4)));
     }
 
     private static Timeouts mockTimeouts(WebDriver webDriver)
