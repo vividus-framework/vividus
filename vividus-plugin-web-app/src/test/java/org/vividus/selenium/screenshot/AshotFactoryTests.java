@@ -33,7 +33,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.powermock.reflect.Whitebox;
 import org.vividus.selenium.IWebDriverFactory;
 import org.vividus.selenium.SauceLabsCapabilityType;
@@ -77,7 +76,7 @@ class AshotFactoryTests
     @Test
     void shouldCreateAshotViaScreenshotShootingStrategyIfThereIfConfigurationNotFound()
     {
-        mockDevice();
+        mockDeviceAndOrientation();
         ashotFactory.setScreenshotShootingStrategy(ScreenshotShootingStrategy.VIEWPORT_PASTING);
         AShot aShot = ashotFactory.create(false, Optional.empty());
         assertThat(Whitebox.getInternalState(aShot, COORDS_PROVIDER), is(instanceOf(CeilingJsCoordsProvider.class)));
@@ -85,19 +84,17 @@ class AshotFactoryTests
                 instanceOf(AdjustingViewportPastingDecorator.class));
     }
 
-    private void mockDevice()
+    private void mockDeviceAndOrientation()
     {
-        DesiredCapabilities capabilities = mock(DesiredCapabilities.class);
-        when(webDriverFactory.getSeleniumGridDesiredCapabilities()).thenReturn(capabilities);
         String deviceName = "Google pixel 3";
-        when(capabilities.getCapability(SauceLabsCapabilityType.DEVICE_NAME)).thenReturn(deviceName);
+        when(webDriverFactory.getCapability(SauceLabsCapabilityType.DEVICE_NAME)).thenReturn(deviceName);
         when(webDriverManager.isOrientation(ScreenOrientation.LANDSCAPE)).thenReturn(true);
     }
 
     @Test
     void shouldCreateAshotViaScreenshotShootingStrategyUsingStrategyFromConfiguration()
     {
-        mockDevice();
+        mockDeviceAndOrientation();
         ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration();
         screenshotConfiguration.setScreenshotShootingStrategy(Optional.of(ScreenshotShootingStrategy.SIMPLE));
         AShot aShot = ashotFactory.create(false, Optional.of(screenshotConfiguration));
@@ -108,8 +105,6 @@ class AshotFactoryTests
     @Test
     void shouldCreateAshotViaWithSimpleCoords()
     {
-        DesiredCapabilities capabilities = mock(DesiredCapabilities.class);
-        when(webDriverFactory.getSeleniumGridDesiredCapabilities()).thenReturn(capabilities);
         ashotFactory.setScreenshotShootingStrategy(ScreenshotShootingStrategy.SIMPLE);
         ShootingStrategy strategy = ScreenshotShootingStrategy.SIMPLE
                 .getDecoratedShootingStrategy(baseShootingStrategy, false, false, null);
