@@ -27,6 +27,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,13 +48,10 @@ import org.jbehave.core.embedder.StoryManager;
 import org.jbehave.core.embedder.StoryTimeouts.TimeoutParser;
 import org.jbehave.core.failures.BatchFailures;
 import org.jbehave.core.steps.InjectableStepsFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.batch.BatchExecutionConfiguration;
 import org.vividus.bdd.batch.BatchStorage;
@@ -81,30 +79,19 @@ class BatchedEmbedderTests
     @Mock
     private IBddVariableContext bddVariableContext;
 
-    @InjectMocks
-    private BatchedEmbedder embedder;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        embedder.setEmbedderMonitor(embedderMonitor);
-    }
+    @Mock
+    private StoryManager storyManager;
 
     @Test
     void testRunStoriesAsPathsIgnoreFailureInBatchesTrue()
     {
-        embedder.setIgnoreFailureInBatches(false);
-        embedder.setGenerateViewAfterBatches(false);
-        BatchedEmbedder spy = Mockito.spy(embedder);
-        StoryManager storyManager = mock(StoryManager.class);
-        doReturn(storyManager).when(spy).storyManager();
+        BatchedEmbedder spy = createBatchedEmbedderSpy(false, false);
         MetaFilter mockedFilter = mock(MetaFilter.class);
         doReturn(mockedFilter).when(spy).metaFilter();
         List<String> testStoryPaths = List.of(PATH);
         String key = "key";
         Throwable throwable = mock(Throwable.class);
-        doNothing().when(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), argThat(failures ->
-        {
+        doNothing().when(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), argThat(failures -> {
             failures.put(key, throwable);
             return true;
         }));
@@ -121,8 +108,9 @@ class BatchedEmbedderTests
         List<ExecutorService> service = new ArrayList<>(1);
         ordered.verify(spy).useExecutorService(argThat(service::add));
         ordered.verify(bddRunContext).putRunningBatch(BATCH);
-        ordered.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), argThat(
-            failures -> failures.size() == 1 && failures.containsKey(key) && failures.containsValue(throwable)));
+        ordered.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter),
+                argThat(failures -> failures.size() == 1 && failures.containsKey(key) && failures
+                        .containsValue(throwable)));
         ordered.verify(bddVariableContext).clearVariables();
         ordered.verify(bddRunContext).removeRunningBatch();
         ordered.verifyNoMoreInteractions();
@@ -132,12 +120,8 @@ class BatchedEmbedderTests
     @Test
     void testRunStoriesAsPaths()
     {
-        embedder.setIgnoreFailureInBatches(true);
-        embedder.setGenerateViewAfterBatches(true);
-        BatchedEmbedder spy = Mockito.spy(embedder);
+        BatchedEmbedder spy = createBatchedEmbedderSpy(true, true);
         doNothing().when(spy).generateReportsView();
-        StoryManager storyManager = mock(StoryManager.class);
-        doReturn(storyManager).when(spy).storyManager();
         MetaFilter mockedFilter = mock(MetaFilter.class);
         doReturn(mockedFilter).when(spy).metaFilter();
         List<String> testStoryPaths = List.of(PATH);
@@ -171,8 +155,7 @@ class BatchedEmbedderTests
     @Test
     void testRunStoriesAsPathsSkip()
     {
-        embedder.setIgnoreFailureInBatches(true);
-        BatchedEmbedder spy = Mockito.spy(embedder);
+        BatchedEmbedder spy = createBatchedEmbedderSpy(true, false);
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
         when(mockedEmbedderControls.threads()).thenReturn(THREADS);
         when(mockedEmbedderControls.skip()).thenReturn(true);
@@ -190,7 +173,9 @@ class BatchedEmbedderTests
         ExtendedConfiguration mockedConfiguration = mock(ExtendedConfiguration.class);
         ExtendedStoryReporterBuilder mockedExtendedStoryReporterBuilder = mock(ExtendedStoryReporterBuilder.class);
         when(mockedConfiguration.storyReporterBuilder()).thenReturn(mockedExtendedStoryReporterBuilder);
-        BatchedEmbedder spy = Mockito.spy(embedder);
+        BatchedEmbedder embedder = new BatchedEmbedder(bddRunContext, bddVariableContext, batchStorage);
+        embedder.setEmbedderMonitor(embedderMonitor);
+        BatchedEmbedder spy = spy(embedder);
         spy.useConfiguration(mockedConfiguration);
         InjectableStepsFactory mockedInjectableStepsFactory = mock(InjectableStepsFactory.class);
         spy.useStepsFactory(mockedInjectableStepsFactory);
@@ -214,9 +199,10 @@ class BatchedEmbedderTests
     @Test
     void testPerformableTree()
     {
+        BatchedEmbedder spy = createBatchedEmbedderSpy(false, false);
         BatchedPerformableTree mockedPerformableTree = mock(BatchedPerformableTree.class);
-        embedder.usePerformableTree(mockedPerformableTree);
-        embedder.performableTree();
+        spy.usePerformableTree(mockedPerformableTree);
+        spy.performableTree();
         verify(mockedPerformableTree).setReportBeforeStories(true);
         verify(mockedPerformableTree).setReportAfterStories(false);
     }
@@ -224,10 +210,20 @@ class BatchedEmbedderTests
     @Test
     void testSetPerformableTree()
     {
+        BatchedEmbedder spy = createBatchedEmbedderSpy(false, false);
         PerformableTree mockedPerformableTree = mock(BatchedPerformableTree.class);
-        BatchedEmbedder spy = Mockito.spy(embedder);
         spy.setPerformableTree(mockedPerformableTree);
         verify(spy).usePerformableTree(mockedPerformableTree);
+    }
+
+    private BatchedEmbedder createBatchedEmbedderSpy(boolean ignoreFailureInBatches, boolean generateViewAfterBatches)
+    {
+        TestBatchedEmbedder embedder = new TestBatchedEmbedder(bddRunContext, bddVariableContext, batchStorage,
+                storyManager);
+        embedder.setEmbedderMonitor(embedderMonitor);
+        embedder.setIgnoreFailureInBatches(ignoreFailureInBatches);
+        embedder.setGenerateViewAfterBatches(generateViewAfterBatches);
+        return spy(embedder);
     }
 
     private EmbedderControls mockEmbedderControls(BatchedEmbedder spy)
@@ -252,5 +248,29 @@ class BatchedEmbedderTests
                 && "3600".equals(controls.storyTimeouts())
                 && controls.ignoreFailureInStories()
                 && !controls.generateViewAfterStories();
+    }
+
+    @SuppressWarnings("checkstyle:FinalClass")
+    private static class TestBatchedEmbedder extends BatchedEmbedder
+    {
+        private final StoryManager storyManagerToBeUsedAfterReset;
+
+        private TestBatchedEmbedder(BddRunContext bddRunContext, IBddVariableContext bddVariableContext,
+                BatchStorage batchStorage, StoryManager storyManagerToBeUsedAfterReset)
+        {
+            super(bddRunContext, bddVariableContext, batchStorage);
+            storyManager = mock(StoryManager.class);
+            this.storyManagerToBeUsedAfterReset = storyManagerToBeUsedAfterReset;
+        }
+
+        @Override
+        public StoryManager storyManager()
+        {
+            if (storyManager == null)
+            {
+                storyManager = storyManagerToBeUsedAfterReset;
+            }
+            return storyManager;
+        }
     }
 }
