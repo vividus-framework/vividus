@@ -95,6 +95,11 @@ public class BatchedEmbedder extends Embedder
                 try
                 {
                     bddRunContext.putRunningBatch(batch);
+
+                    // JBehaveJUnitRunner may have already initialized StoryManager with default PerformableTree and
+                    // EmebedderControls, so we need to reset it and new one will be created in storyManager()
+                    storyManager = null;
+
                     MetaFilter filter = metaFilter();
                     BatchFailures failures = new BatchFailures(embedderControls.verboseFailures());
 
