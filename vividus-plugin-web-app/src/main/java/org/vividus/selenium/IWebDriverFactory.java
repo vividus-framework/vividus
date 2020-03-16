@@ -25,5 +25,5 @@ public interface IWebDriverFactory
 
     WebDriver getRemoteWebDriver(DesiredCapabilities desiredCapabilities);
 
-    <T> T getCapability(String capabilityName);
+    <T> T getCapability(String capabilityName, boolean localRun);
 }

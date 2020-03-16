@@ -87,7 +87,7 @@ class AshotFactoryTests
     private void mockDeviceAndOrientation()
     {
         String deviceName = "Google pixel 3";
-        when(webDriverFactory.getCapability(SauceLabsCapabilityType.DEVICE_NAME)).thenReturn(deviceName);
+        when(webDriverFactory.getCapability(SauceLabsCapabilityType.DEVICE_NAME, false)).thenReturn(deviceName);
         when(webDriverManager.isOrientation(ScreenOrientation.LANDSCAPE)).thenReturn(true);
     }
 

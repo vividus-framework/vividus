@@ -16,6 +16,9 @@
 
 package org.vividus.selenium;
 
+import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.lang3.StringUtils.equalsAnyIgnoreCase;
+
 import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +32,9 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import com.google.common.base.Suppliers;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Capabilities;
@@ -62,6 +68,7 @@ public class WebDriverFactory implements IWebDriverFactory
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
 
     private static final String SELENIUM_GRID_PROPERTY_PREFIX = "selenium.grid.capabilities.";
+    private static final String LOCAL_DRIVER_PROPERTY_PREFIX = "selenium.capabilities.";
 
     @Inject private IRemoteWebDriverFactory remoteWebDriverFactory;
     @Inject private ITimeoutConfigurer timeoutConfigurer;
@@ -72,24 +79,47 @@ public class WebDriverFactory implements IWebDriverFactory
     private IJsonUtils jsonUtils;
 
     private final Supplier<DesiredCapabilities> seleniumGridDesiredCapabilities = Suppliers.memoize(
-        () -> new DesiredCapabilities(
-                propertyParser.getPropertyValuesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX)
-                .entrySet()
-                .stream()
-                .map(e -> StringUtils.equalsAnyIgnoreCase(e.getValue(), "true", "false")
-                        ? Map.entry(e.getKey(), Boolean.parseBoolean(e.getValue()))
-                        : e)
-                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue))));
+        () -> getCapabilitiesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX));
+
+    private final Supplier<DesiredCapabilities> localDriverDesiredCapabilities = Suppliers.memoize(
+        () -> getCapabilitiesByPrefix(LOCAL_DRIVER_PROPERTY_PREFIX));
+
+    private final LoadingCache<Boolean, DesiredCapabilities> webDriverCapabilities = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Boolean, DesiredCapabilities>()
+            {
+                public DesiredCapabilities load(Boolean local)
+                {
+                    DesiredCapabilities localCapabilities = localDriverDesiredCapabilities.get();
+                    if (Boolean.TRUE.equals(local))
+                    {
+                        return localCapabilities;
+                    }
+                    return localCapabilities.merge(seleniumGridDesiredCapabilities.get());
+                }
+            });
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
+
+    private DesiredCapabilities getCapabilitiesByPrefix(String prefix)
+    {
+        return propertyParser.getPropertyValuesByPrefix(prefix)
+            .entrySet()
+            .stream()
+            .map(e -> equalsAnyIgnoreCase(e.getValue(), "true", "false")
+                ? Map.entry(e.getKey(), Boolean.parseBoolean(e.getValue()))
+                : e)
+            .collect(Collectors.collectingAndThen(toMap(Entry::getKey, Entry::getValue), DesiredCapabilities::new));
+    }
 
     @Override
     public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities)
     {
-        return Optional.ofNullable(desiredCapabilities.getCapability(CapabilityType.BROWSER_NAME))
-                       .map(String.class::cast)
-                       .map(browserName -> getWebDriver(WebDriverType.valueOf(browserName), desiredCapabilities))
-                       .orElseGet(() -> getWebDriver(this.webDriverType, desiredCapabilities));
+        WebDriverType driverType =
+            Optional.ofNullable(desiredCapabilities.getCapability(CapabilityType.BROWSER_NAME))
+                    .map(String.class::cast)
+                    .map(WebDriverType::valueOf)
+                    .orElse(this.webDriverType);
+        return getWebDriver(driverType, desiredCapabilities);
     }
 
     private WebDriver getWebDriver(WebDriverType webDriverType, DesiredCapabilities desiredCapabilities)
@@ -101,8 +131,7 @@ public class WebDriverFactory implements IWebDriverFactory
     @Override
     public WebDriver getRemoteWebDriver(DesiredCapabilities desiredCapabilities)
     {
-        DesiredCapabilities mergedDesiredCapabilities = new DesiredCapabilities(getSeleniumGridDesiredCapabilities())
-                .merge(desiredCapabilities);
+        DesiredCapabilities mergedDesiredCapabilities = getWebDriverCapabilities(false, desiredCapabilities);
         WebDriverType webDriverType = WebDriverManager.detectType(mergedDesiredCapabilities);
 
         Capabilities capabilities = mergedDesiredCapabilities;
@@ -175,14 +204,19 @@ public class WebDriverFactory implements IWebDriverFactory
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getCapability(String capabilityName)
+    public <T> T getCapability(String capabilityName, boolean localRun)
     {
-        return (T) getSeleniumGridDesiredCapabilities().getCapability(capabilityName);
+        return (T) getWebDriverCapabilities(localRun).getCapability(capabilityName);
     }
 
-    private DesiredCapabilities getSeleniumGridDesiredCapabilities()
+    private DesiredCapabilities getWebDriverCapabilities(boolean localRun)
     {
-        return seleniumGridDesiredCapabilities.get();
+        return webDriverCapabilities.getUnchecked(localRun);
+    }
+
+    private DesiredCapabilities getWebDriverCapabilities(boolean localRun, DesiredCapabilities toMerge)
+    {
+        return new DesiredCapabilities(getWebDriverCapabilities(localRun)).merge(toMerge);
     }
 
     public void setWebDriverType(WebDriverType webDriverType)
