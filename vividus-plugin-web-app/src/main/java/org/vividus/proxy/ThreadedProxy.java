@@ -16,73 +16,149 @@
 
 package org.vividus.proxy;
 
-import javax.inject.Inject;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.filters.RequestFilter;
 
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vividus.model.IntegerRange;
+
 public class ThreadedProxy implements IProxy
 {
-    @Inject private IProxyServerFactory proxyServerFactory;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThreadedProxy.class);
 
-    private final ThreadLocal<IProxy> proxy = ThreadLocal.withInitial(() ->
+    private final InetAddress proxyHost;
+    private final Queue<Integer> proxyPorts;
+    private final boolean useEphemeralPort;
+    private final ThreadLocal<IProxy> proxy;
+
+    public ThreadedProxy(String proxyHost, IntegerRange proxyPorts, IProxyFactory proxyFactory)
+            throws UnknownHostException
     {
-        Proxy proxy = new Proxy();
-        proxy.setProxyServerFactory(proxyServerFactory);
-        return proxy;
-    });
+        Set<Integer> proxyPortsRange = proxyPorts.getRange();
+        if (proxyPortsRange.contains(0))
+        {
+            Validate.isTrue(proxyPortsRange.size() == 1,
+                    "Port 0 (ephemeral port selection) can not be used with custom ports");
+            useEphemeralPort = true;
+        }
+        else
+        {
+            useEphemeralPort = false;
+            proxyPortsRange.forEach(ThreadedProxy::validatePort);
+        }
+        this.proxyPorts = new LinkedList<>(proxyPortsRange);
+        this.proxy = ThreadLocal.withInitial(proxyFactory::createProxy);
+        this.proxyHost = InetAddress.getByName(proxyHost);
+    }
+
+    @SuppressWarnings("MagicNumber")
+    private static void validatePort(int port)
+    {
+        Validate.isTrue(port > 0 && port <= 65535, "Expected ports range is 1-65535 but got: %d", port);
+    }
 
     @Override
     public void start()
     {
-        proxy.get().start();
+        perform(() -> proxy().start(), () ->
+        {
+            Validate.isTrue(!proxyPorts.isEmpty(), "There are no available ports in the ports pool");
+            int port = proxyPorts.poll();
+            LOGGER.atInfo().addArgument(port).log("Allocate {} port from the proxy ports pool");
+            logAvailablePorts();
+            proxy().start(port, proxyHost);
+        });
+    }
+
+    @Override
+    public void start(int port, InetAddress address)
+    {
+        proxy().start(port, address);
     }
 
     @Override
     public void startRecording()
     {
-        proxy.get().startRecording();
+        proxy().startRecording();
     }
 
     @Override
     public void stopRecording()
     {
-        proxy.get().stopRecording();
+        proxy().stopRecording();
     }
 
     @Override
     public void stop()
     {
-        proxy.get().stop();
+        perform(() -> proxy().stop(), () ->
+        {
+            int port = proxy().getProxyServer().getPort();
+            proxyPorts.add(port);
+            LOGGER.atInfo().addArgument(port).log("Return {} port back to the proxy ports pool");
+            logAvailablePorts();
+            proxy().stop();
+        });
+    }
+
+    private void perform(Runnable ephemeralPortsAction, Runnable customPortsAction)
+    {
+        if (useEphemeralPort)
+        {
+            ephemeralPortsAction.run();
+            return;
+        }
+        synchronized (proxyPorts)
+        {
+            customPortsAction.run();
+        }
     }
 
     @Override
     public boolean isStarted()
     {
-        return proxy.get().isStarted();
+        return proxy().isStarted();
     }
 
     @Override
     public BrowserUpProxy getProxyServer()
     {
-        return proxy.get().getProxyServer();
+        return proxy().getProxyServer();
     }
 
     @Override
     public ProxyLog getLog()
     {
-        return proxy.get().getLog();
+        return proxy().getLog();
     }
 
     @Override
     public void addRequestFilter(RequestFilter requestFilter)
     {
-        proxy.get().addRequestFilter(requestFilter);
+        proxy().addRequestFilter(requestFilter);
     }
 
     @Override
     public void clearRequestFilters()
     {
-        proxy.get().clearRequestFilters();
+        proxy().clearRequestFilters();
+    }
+
+    private void logAvailablePorts()
+    {
+        LOGGER.atInfo().addArgument(proxyPorts::toString).log("Available ports for proxies in the pool: {}");
+    }
+
+    private IProxy proxy()
+    {
+        return proxy.get();
     }
 }

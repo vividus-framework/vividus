@@ -28,6 +28,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,6 +75,17 @@ class ProxyTests
         when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
         proxy.start();
         verify(browserMobProxy).start();
+    }
+
+    @Test
+    void testStartOnAddr() throws UnknownHostException
+    {
+        configureProxy();
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        InetAddress address = InetAddress.getLocalHost();
+        int port = 8080;
+        proxy.start(port, address);
+        verify(browserMobProxy).start(port, address);
     }
 
     @Test

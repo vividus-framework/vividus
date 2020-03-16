@@ -34,7 +34,13 @@
         <property name="followRedirects" value="${sitemap.parser.follow-redirects}" />
     </bean>
 
-    <bean id="proxy" class="org.vividus.proxy.ThreadedProxy" />
+    <bean id="proxy" class="org.vividus.proxy.ThreadedProxy" >
+        <constructor-arg index="0" value="${proxy.host}" />
+        <constructor-arg index="1" value="${proxy.ports}" />
+        <constructor-arg index="2" >
+            <bean class="org.vividus.proxy.ProxyFactory" />
+        </constructor-arg>
+    </bean>
 
     <bean id="mitmManagerFactory" class="org.vividus.proxy.mitm.MitmManagerFactory" />
 
@@ -409,6 +415,7 @@
                 <bean class="org.vividus.spring.StringToSearchAttributesSetConverter" />
                 <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
                 <bean class="org.vividus.spring.StringToLocaleConverter"/>
+                <bean class="org.vividus.spring.StringToIntegerRangeConverter"/>
             </set>
         </property>
     </bean>

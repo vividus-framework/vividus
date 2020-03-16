@@ -14,32 +14,22 @@
  * limitations under the License.
  */
 
-package org.vividus.proxy;
+package org.vividus.model;
 
-import java.net.InetAddress;
+import java.util.Collections;
+import java.util.Set;
 
-import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.filters.RequestFilter;
-
-public interface IProxy
+public class IntegerRange
 {
-    void start();
+    private final Set<Integer> range;
 
-    void start(int port, InetAddress address);
+    public IntegerRange(Set<Integer> range)
+    {
+        this.range = Collections.unmodifiableSet(range);
+    }
 
-    void startRecording();
-
-    void stopRecording();
-
-    void stop();
-
-    boolean isStarted();
-
-    BrowserUpProxy getProxyServer();
-
-    ProxyLog getLog();
-
-    void addRequestFilter(RequestFilter requestFilter);
-
-    void clearRequestFilters();
+    public Set<Integer> getRange()
+    {
+        return range;
+    }
 }
