@@ -5,6 +5,17 @@ ext {
     hadoopVersion = '3.2.0'
 }
 
+import static org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
+import static org.apache.tools.ant.taskdefs.condition.Os.isFamily
+
+if (isFamily(FAMILY_WINDOWS)) {
+    test {
+        systemProperties = [
+            'hadoop.home.dir': "${project.buildDir}/resources/test"
+        ]
+    }
+}
+
 dependencies {
     api project(':vividus-bdd-engine')
     implementation project(':vividus-util')
