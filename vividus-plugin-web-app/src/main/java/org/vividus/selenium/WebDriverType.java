@@ -171,6 +171,23 @@ public enum WebDriverType
             setDriverExecutablePathImpl(driverExecutablePath, OperaDriverService.OPERA_DRIVER_EXE_PROPERTY,
                     WebDriverManager::operadriver);
         }
+    },
+    EDGE_CHROMIUM(false, false, false, Set.of(), BrowserType.EDGE)
+    {
+        @Override
+        public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
+        {
+            EdgeOptions edgeOptions = new EdgeOptions();
+            edgeOptions.merge(desiredCapabilities);
+            return new EdgeDriver(edgeOptions);
+        }
+
+        @Override
+        void setDriverExecutablePath(Optional<String> driverExecutablePath)
+        {
+            setDriverExecutablePathImpl(driverExecutablePath, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
+                    WebDriverManager::edgedriver);
+        }
     };
 
     public static final String IE_OPTIONS = "se:ieOptions";

@@ -216,6 +216,19 @@ public class WebDriverTypeTests
     }
 
     @Test
+    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$7")
+    public void testGetEdgeChromiumWebDriver() throws Exception
+    {
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        EdgeOptions edgeOptions = new EdgeOptions();
+        edgeOptions.merge(desiredCapabilities);
+        EdgeDriver expected = mock(EdgeDriver.class);
+        whenNew(EdgeDriver.class).withParameterTypes(EdgeOptions.class).withArguments(edgeOptions).thenReturn(expected);
+        WebDriver actual = WebDriverType.EDGE_CHROMIUM.getWebDriver(desiredCapabilities, new WebDriverConfiguration());
+        assertEquals(expected, actual);
+    }
+
+    @Test
     @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$6")
     public void testGetOperaWebDriver() throws Exception
     {
@@ -251,12 +264,13 @@ public class WebDriverTypeTests
 
     @Test
     @DataProvider({
-        "FIREFOX,   true",
-        "IEXPLORE,  false",
-        "CHROME,    true",
-        "SAFARI,    false",
-        "EDGE,      false",
-        "OPERA,     true"
+        "FIREFOX,       true",
+        "IEXPLORE,      false",
+        "CHROME,        true",
+        "SAFARI,        false",
+        "EDGE,          false",
+        "EDGE_CHROMIUM, false",
+        "OPERA,         true"
         })
     public void testIsBinaryPathSupported(WebDriverType type, boolean binaryPathSupported)
     {
@@ -265,12 +279,13 @@ public class WebDriverTypeTests
 
     @Test
     @DataProvider({
-        "FIREFOX,   true",
-        "IEXPLORE,  true",
-        "CHROME,    true",
-        "SAFARI,    false",
-        "EDGE,      false",
-        "OPERA,     true"
+        "FIREFOX,       true",
+        "IEXPLORE,      true",
+        "CHROME,        true",
+        "SAFARI,        false",
+        "EDGE,          false",
+        "EDGE_CHROMIUM, false",
+        "OPERA,         true"
         })
     public void testIsCommandLineArgumentsSupported(WebDriverType type, boolean commandLineArgumentsSupported)
     {
@@ -279,12 +294,13 @@ public class WebDriverTypeTests
 
     @Test
     @DataProvider({
-            "FIREFOX,   true",
-            "IEXPLORE,  true",
-            "CHROME,    false",
-            "SAFARI,    false",
-            "EDGE,      false",
-            "OPERA,     false"
+            "FIREFOX,       true",
+            "IEXPLORE,      true",
+            "CHROME,        false",
+            "SAFARI,        false",
+            "EDGE,          false",
+            "EDGE_CHROMIUM, false",
+            "OPERA,         false"
     })
     public void testIsUseW3C(WebDriverType type, boolean useW3C)
     {
@@ -293,12 +309,13 @@ public class WebDriverTypeTests
 
     @Test
     @DataProvider({
-            "FIREFOX,   false",
-            "IEXPLORE,  false",
-            "CHROME,    false",
-            "SAFARI,    false",
-            "EDGE,      true",
-            "OPERA,     false"
+            "FIREFOX,       false",
+            "IEXPLORE,      false",
+            "CHROME,        false",
+            "SAFARI,        false",
+            "EDGE,          true",
+            "EDGE_CHROMIUM, true",
+            "OPERA,         false"
     })
     public void testGetDriverSpecificCapabilities(WebDriverType type, boolean empty)
     {
@@ -307,11 +324,12 @@ public class WebDriverTypeTests
 
     @Test
     @DataProvider({
-        "FIREFOX,   webdriver.gecko.driver",
-        "IEXPLORE,  webdriver.ie.driver",
-        "CHROME,    webdriver.chrome.driver",
-        "EDGE,      webdriver.edge.driver",
-        "OPERA,     webdriver.opera.driver"
+        "FIREFOX,       webdriver.gecko.driver",
+        "IEXPLORE,      webdriver.ie.driver",
+        "CHROME,        webdriver.chrome.driver",
+        "EDGE,          webdriver.edge.driver",
+        "EDGE_CHROMIUM, webdriver.edge.driver",
+        "OPERA,         webdriver.opera.driver"
         })
     public void testSetDriverExecutablePath(WebDriverType type, String propertyName)
     {
