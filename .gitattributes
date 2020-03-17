@@ -7,4 +7,5 @@
 *.zip -text
 *.bat -text
 *.zip -text
+*.exe -text
 *.parquet -text
