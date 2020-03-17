@@ -16,8 +16,10 @@
 
 package org.vividus.proxy;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.BrowserUpProxyServer;
@@ -36,10 +38,21 @@ public class Proxy implements IProxy
     @Override
     public void start()
     {
+        startProxy(BrowserUpProxy::start);
+    }
+
+    @Override
+    public void start(int port, InetAddress address)
+    {
+        startProxy(proxy -> proxy.start(port, address));
+    }
+
+    private void startProxy(Consumer<BrowserUpProxy> starter)
+    {
         if (!isStarted())
         {
             proxyServer = proxyServerFactory.createProxyServer();
-            proxyServer.start();
+            starter.accept(proxyServer);
         }
     }
 

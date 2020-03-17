@@ -16,30 +16,26 @@
 
 package org.vividus.proxy;
 
-import java.net.InetAddress;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.filters.RequestFilter;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-public interface IProxy
+@ExtendWith(MockitoExtension.class)
+public class ProxyFactoryTests
 {
-    void start();
+    @Mock
+    private IProxyServerFactory proxyServerFactory;
 
-    void start(int port, InetAddress address);
+    @InjectMocks
+    private ProxyFactory proxyFactory;
 
-    void startRecording();
-
-    void stopRecording();
-
-    void stop();
-
-    boolean isStarted();
-
-    BrowserUpProxy getProxyServer();
-
-    ProxyLog getLog();
-
-    void addRequestFilter(RequestFilter requestFilter);
-
-    void clearRequestFilters();
+    @Test
+    void testCreateProxy()
+    {
+        assertNotNull(proxyFactory.createProxy());
+    }
 }

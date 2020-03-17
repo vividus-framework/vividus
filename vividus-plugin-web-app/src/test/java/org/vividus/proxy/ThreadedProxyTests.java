@@ -16,97 +16,228 @@
 
 package org.vividus.proxy;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Set;
+
+import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.filters.RequestFilter;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.vividus.model.IntegerRange;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(fullyQualifiedNames = "org.vividus.proxy.*")
-public class ThreadedProxyTests
+@ExtendWith(TestLoggerFactoryExtension.class)
+class ThreadedProxyTests
 {
-    private final ThreadedProxy threadedProxy = new ThreadedProxy();
+    private static final TestLogger TEST_LOGGER = TestLoggerFactory.getTestLogger(ThreadedProxy.class);
+
+    private static final String LOCALHOST = "localhost";
+    private static final InetAddress INET_ADDR;
+
+    static
+    {
+        try
+        {
+            INET_ADDR = InetAddress.getByName(LOCALHOST);
+        }
+        catch (UnknownHostException e)
+        {
+            throw new IllegalStateException(e);
+        }
+    }
 
     @Mock
-    private Proxy proxy;
+    private IProxy proxy;
 
-    @Before
-    public void before() throws Exception
+    @Mock
+    private IProxyFactory proxyFactory;
+
+    private ThreadedProxy threadedProxy;
+
+    @BeforeEach
+    void before() throws Exception
     {
         MockitoAnnotations.initMocks(this);
-        PowerMockito.whenNew(Proxy.class).withNoArguments().thenReturn(proxy);
+        when(proxyFactory.createProxy()).thenReturn(proxy);
     }
 
     @Test
-    public void testStart()
+    void testAllocatePort() throws UnknownHostException
     {
+        int port = 55389;
+        BrowserUpProxy mobProxy = mock(BrowserUpProxy.class);
+        when(proxy.getProxyServer()).thenReturn(mobProxy);
+        when(mobProxy.getPort()).thenReturn(port);
+        threadedProxy = new ThreadedProxy(LOCALHOST, range(port), proxyFactory);
+        InOrder order = inOrder(proxy);
+
+        threadedProxy.start();
+        threadedProxy.stop();
+
+        order.verify(proxy).start(port, INET_ADDR);
+        order.verify(proxy).getProxyServer();
+        order.verify(proxy).stop();
+        order.verifyNoMoreInteractions();
+
+        String portsMessage = "Available ports for proxies in the pool: {}";
+        assertEquals(List.of(
+                info("Allocate {} port from the proxy ports pool", port),
+                info(portsMessage, List.of().toString()),
+                info("Return {} port back to the proxy ports pool", port),
+                info(portsMessage, List.of(port).toString())),
+                TEST_LOGGER.getLoggingEvents());
+    }
+
+    @Test
+    void testAllocateDefaultPort() throws UnknownHostException
+    {
+        defaultInit();
+        InOrder order = inOrder(proxy);
+
+        threadedProxy.start();
+        threadedProxy.stop();
+
+        order.verify(proxy).start();
+        order.verify(proxy).stop();
+        order.verifyNoMoreInteractions();
+
+        assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
+    }
+
+    @Test
+    void testAllocateIllegalPortsSequence()
+    {
+        Exception exception = assertThrows(IllegalArgumentException.class,
+            () -> new ThreadedProxy(LOCALHOST, range(0, 56701), proxyFactory));
+        assertEquals("Port 0 (ephemeral port selection) can not be used with custom ports", exception.getMessage());
+        assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
+    }
+
+    @Test
+    void testAllocateIllegalPortsNumbers()
+    {
+        Exception exception = assertThrows(IllegalArgumentException.class,
+            () -> new ThreadedProxy(LOCALHOST, range(-1), proxyFactory));
+        assertEquals("Expected ports range is 1-65535 but got: -1", exception.getMessage());
+        assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
+    }
+
+    @Test
+    void testAllocateNoPortsAvailable() throws UnknownHostException
+    {
+        threadedProxy = new ThreadedProxy(LOCALHOST, range(54786), proxyFactory);
+        threadedProxy.start();
+        Exception exception = assertThrows(IllegalArgumentException.class, threadedProxy::start);
+        assertEquals("There are no available ports in the ports pool", exception.getMessage());
+    }
+
+    @Test
+    void testStart() throws UnknownHostException
+    {
+        defaultInit();
         threadedProxy.start();
         verify(proxy).start();
     }
 
     @Test
-    public void testSstopRecording()
+    void testStartOnPort() throws UnknownHostException
     {
+        threadedProxy = new ThreadedProxy(LOCALHOST, range(1), proxyFactory);
+        threadedProxy.start(1, INET_ADDR);
+        verify(proxy).start(1, INET_ADDR);
+    }
+
+    @Test
+    void testStopRecording() throws UnknownHostException
+    {
+        defaultInit();
         threadedProxy.stopRecording();
         verify(proxy).stopRecording();
     }
 
     @Test
-    public void teststartRecording()
+    void testStartRecording() throws UnknownHostException
     {
+        defaultInit();
         threadedProxy.startRecording();
         verify(proxy).startRecording();
     }
 
     @Test
-    public void teststop()
+    void testStop() throws UnknownHostException
     {
+        defaultInit();
         threadedProxy.stop();
         verify(proxy).stop();
     }
 
     @Test
-    public void testisStarted()
+    void testIsStarted() throws UnknownHostException
     {
+        defaultInit();
         threadedProxy.isStarted();
         verify(proxy).isStarted();
     }
 
     @Test
-    public void testgetProxyServer()
+    void testGetProxyServer() throws UnknownHostException
     {
+        defaultInit();
         threadedProxy.getProxyServer();
         verify(proxy).getProxyServer();
     }
 
     @Test
-    public void testgetLog()
+    void testGetLog() throws UnknownHostException
     {
+        defaultInit();
         threadedProxy.getLog();
         verify(proxy).getLog();
     }
 
     @Test
-    public void testclearRequestFilters()
+    void testClearRequestFilters() throws UnknownHostException
     {
+        defaultInit();
         threadedProxy.clearRequestFilters();
         verify(proxy).clearRequestFilters();
     }
 
     @Test
-    public void testaddRequestFilter()
+    void testAddRequestFilter() throws UnknownHostException
     {
+        defaultInit();
         RequestFilter requestFilter = Mockito.mock(RequestFilter.class);
         threadedProxy.addRequestFilter(requestFilter);
         verify(proxy).addRequestFilter(requestFilter);
+    }
+
+    private void defaultInit() throws UnknownHostException
+    {
+        threadedProxy = new ThreadedProxy(LOCALHOST, range(0), proxyFactory);
+    }
+
+    private IntegerRange range(Integer... numbers)
+    {
+        return new IntegerRange(Set.of(numbers));
     }
 }

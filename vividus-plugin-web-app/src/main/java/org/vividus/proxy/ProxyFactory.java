@@ -16,30 +16,20 @@
 
 package org.vividus.proxy;
 
-import java.net.InetAddress;
-
-import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.filters.RequestFilter;
-
-public interface IProxy
+public class ProxyFactory implements IProxyFactory
 {
-    void start();
+    private final IProxyServerFactory proxyServerFactory;
 
-    void start(int port, InetAddress address);
+    public ProxyFactory(IProxyServerFactory proxyServerFactory)
+    {
+        this.proxyServerFactory = proxyServerFactory;
+    }
 
-    void startRecording();
-
-    void stopRecording();
-
-    void stop();
-
-    boolean isStarted();
-
-    BrowserUpProxy getProxyServer();
-
-    ProxyLog getLog();
-
-    void addRequestFilter(RequestFilter requestFilter);
-
-    void clearRequestFilters();
+    @Override
+    public IProxy createProxy()
+    {
+        Proxy proxy = new Proxy();
+        proxy.setProxyServerFactory(proxyServerFactory);
+        return proxy;
+    }
 }
