@@ -83,7 +83,7 @@ ext {
         spring:                 '5.2.4.RELEASE',
         junit:                  '5.6.0',
         junit4Dataprovider:     '2.6',
-        mockito:                '3.3.1',
+        mockito:                '3.3.3',
         powermock:              '2.0.5',
         slf4jTest:              '2.1.1'
     ]
