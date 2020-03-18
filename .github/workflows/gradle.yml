@@ -61,6 +61,13 @@ jobs:
             ./gradlew build -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m"
         fi
 
+    - name: Publish unit and integration tests reports
+      if: always()
+      uses: actions/upload-artifact@v1
+      with:
+        name: Output
+        path: vividus/output/reports/tests
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
