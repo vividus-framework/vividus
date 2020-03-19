@@ -128,7 +128,8 @@ class WebApplicationConfigurationTests
     {
         WebApplicationConfiguration webApplicationConfiguration = prepareWebApplicationConfiguration(actualWidth);
         webApplicationConfiguration.setMobileScreenResolutionWidthThreshold(WIDTH_THRESHOLD);
-        assertEquals(mobileViewport, webApplicationConfiguration.isMobileViewport());
+        IJavascriptActions javascriptActions = mockJavascriptActions(actualWidth);
+        assertEquals(mobileViewport, webApplicationConfiguration.isMobileViewport(javascriptActions));
     }
 
     @ParameterizedTest
@@ -137,16 +138,21 @@ class WebApplicationConfigurationTests
     {
         WebApplicationConfiguration webApplicationConfiguration = prepareWebApplicationConfiguration(actualWidth);
         webApplicationConfiguration.setTabletScreenResolutionWidthThreshold(WIDTH_THRESHOLD);
-        assertEquals(tabletViewport, webApplicationConfiguration.isTabletViewport());
+        IJavascriptActions javascriptActions = mockJavascriptActions(actualWidth);
+        assertEquals(tabletViewport, webApplicationConfiguration.isTabletViewport(javascriptActions));
     }
 
     private static WebApplicationConfiguration prepareWebApplicationConfiguration(int actualWidth)
     {
-        IJavascriptActions javascriptActions = mock(IJavascriptActions.class);
-        when(javascriptActions.getViewportSize()).thenReturn(new Dimension(actualWidth, VIEWPORT_HEIGHT));
         WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(MAIN_APP_URL,
                 AuthenticationMode.URL);
-        webApplicationConfiguration.setJavascriptActions(javascriptActions);
         return webApplicationConfiguration;
+    }
+
+    private static IJavascriptActions mockJavascriptActions(int actualWidth)
+    {
+        IJavascriptActions javascriptActions = mock(IJavascriptActions.class);
+        when(javascriptActions.getViewportSize()).thenReturn(new Dimension(actualWidth, VIEWPORT_HEIGHT));
+        return javascriptActions;
     }
 }
