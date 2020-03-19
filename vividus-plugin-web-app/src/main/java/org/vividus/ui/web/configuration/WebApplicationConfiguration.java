@@ -30,8 +30,6 @@ public class WebApplicationConfiguration
     private String applicationEnvironmentType;
     private final ThreadLocal<ConfigurationStorage> configurationStorage;
 
-    private IJavascriptActions javascriptActions;
-
     public WebApplicationConfiguration(String mainApplicationPageUrlString, AuthenticationMode authenticationMode)
     {
         configurationStorage = ThreadLocal.withInitial(() ->
@@ -90,29 +88,24 @@ public class WebApplicationConfiguration
                 : configurationStorage.get().mainApplicationPageUri.getHost();
     }
 
-    public boolean isMobileViewport()
+    public boolean isMobileViewport(IJavascriptActions javascritActions)
     {
-        return getViewportWidth() <= mobileScreenResolutionWidthThreshold;
+        return getViewportWidth(javascritActions) <= mobileScreenResolutionWidthThreshold;
     }
 
-    public boolean isTabletViewport()
+    public boolean isTabletViewport(IJavascriptActions javascritActions)
     {
-        return getViewportWidth() <= tabletScreenResolutionWidthThreshold;
+        return getViewportWidth(javascritActions) <= tabletScreenResolutionWidthThreshold;
     }
 
-    private int getViewportWidth()
+    private int getViewportWidth(IJavascriptActions javascritActions)
     {
-        return javascriptActions.getViewportSize().getWidth();
+        return javascritActions.getViewportSize().getWidth();
     }
 
     public void setApplicationEnvironmentType(String applicationEnvironmentType)
     {
         this.applicationEnvironmentType = applicationEnvironmentType;
-    }
-
-    public void setJavascriptActions(IJavascriptActions javascriptActions)
-    {
-        this.javascriptActions = javascriptActions;
     }
 
     private static final class ConfigurationStorage

@@ -155,7 +155,6 @@
         <property name="mobileScreenResolutionWidthThreshold" value="${web-application.phone-resolution-width-threshold}" />
         <property name="tabletScreenResolutionWidthThreshold" value="${web-application.tablet-resolution-width-threshold}" />
         <property name="applicationEnvironmentType" value="${web-application.environment-type}" />
-        <property name="javascriptActions" ref="javascriptActions" />
     </bean>
 
     <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
