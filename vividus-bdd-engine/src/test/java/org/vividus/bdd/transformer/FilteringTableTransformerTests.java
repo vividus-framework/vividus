@@ -39,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class FilteringTableTransformerTests
 {
     private static final String TABLE = "|key1|key2|key3|\n|1|2|3|\n|4|5|6|\n|7|8|9|";
+    private static final String BY_MAX_ROWS_PROPERTY = "byMaxRows";
 
     @Mock
     private ExamplesTableFactory factory;
@@ -53,6 +54,18 @@ class FilteringTableTransformerTests
         transformer.setExamplesTableFactory(() -> factory);
         when(factory.createExamplesTable(tableToTransform)).thenReturn(new ExamplesTable(TABLE));
         assertEquals(expectedTable, transformer.transform(tableToTransform, new ExamplesTableProperties(properties)));
+    }
+
+    @Test
+    void testTransformUnorderedHeader()
+    {
+        String table = "|key2|key3|key1|\n|2|3|1|\n|4|5|6|\n|7|8|9|";
+        transformer.setExamplesTableFactory(() -> factory);
+        when(factory.createExamplesTable(table)).thenReturn(new ExamplesTable(table));
+        Properties properties = new Properties();
+        properties.setProperty(BY_MAX_ROWS_PROPERTY, "1");
+        assertEquals("|key2|key3|key1|\n|2|3|1|", transformer.transform(table,
+                new ExamplesTableProperties(properties)));
     }
 
     @Test
@@ -82,7 +95,7 @@ class FilteringTableTransformerTests
         }
         if (byMaxRows != null)
         {
-            properties.setProperty("byMaxRows", String.valueOf(byMaxRows));
+            properties.setProperty(BY_MAX_ROWS_PROPERTY, String.valueOf(byMaxRows));
         }
         if (byColumnNames != null)
         {
