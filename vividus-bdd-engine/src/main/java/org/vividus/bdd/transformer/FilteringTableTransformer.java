@@ -20,12 +20,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -60,32 +58,21 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
                 BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY);
         ExamplesTable examplesTable = examplesTableFactory.get().createExamplesTable(tableAsString);
 
-        List<String> headerValues = examplesTable.getHeaders();
-        int columnsLimit = byMaxColumns == null
-                ? headerValues.size() : Math.min(headerValues.size(), Integer.parseInt(byMaxColumns));
-        List<String> filteredColumnsNames = byColumnNames == null ? headerValues.subList(0, columnsLimit)
-                : Arrays.stream(StringUtils.split(byColumnNames, ';')).map(String::trim).collect(Collectors.toList());
-        Set<String> filteredHeaders = new HashSet<>(filteredColumnsNames);
-
-        List<Map<String, String>> result = filterByHeaders(filteredHeaders, headerValues,
-                getFilteredRows(byMaxRows, examplesTable));
+        List<String> filteredColumns = getFilteredHeaders(byMaxColumns, byColumnNames, examplesTable.getHeaders());
+        List<Map<String, String>> result = filterByHeaders(filteredColumns, getFilteredRows(byMaxRows, examplesTable));
 
         List<List<String>> resultRows = result.stream()
-                .map(TreeMap::new)
+                .map(LinkedHashMap::new)
                 .map(Map::values)
                 .map(ArrayList::new)
                 .collect(Collectors.toList());
 
-        return ExamplesTableProcessor.buildExamplesTable(filteredHeaders, resultRows, properties, true, true);
+        return ExamplesTableProcessor.buildExamplesTable(filteredColumns, resultRows, properties, true, true);
     }
 
-    private List<Map<String, String>> filterByHeaders(Set<String> filteredHeaders, List<String> headerValues,
-            List<Map<String, String>> result)
+    private List<Map<String, String>> filterByHeaders(List<String> filteredColumns, List<Map<String, String>> result)
     {
-        Set<String> headersForDeleting = new HashSet<>(headerValues);
-        headersForDeleting.removeAll(filteredHeaders);
-        result.stream().map(m -> m.keySet().removeAll(headersForDeleting))
-            .collect(Collectors.toList());
+        result.stream().map(m -> m.keySet().retainAll(filteredColumns)).collect(Collectors.toList());
         return result;
     }
 
@@ -96,6 +83,24 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
                 .filter(m -> m < examplesTable.getRowCount())
                 .map(m -> examplesTable.getRows().subList(0, m))
                 .orElseGet(examplesTable::getRows);
+    }
+
+    private List<String> getFilteredHeaders(String byMaxColumns, String byColumnNames, List<String> headerValues)
+    {
+        int columnsLimit = byMaxColumns == null
+                ? headerValues.size() : Math.min(headerValues.size(), Integer.parseInt(byMaxColumns));
+        List<String> filteredColumns = new ArrayList<>(headerValues);
+        if (byColumnNames == null)
+        {
+            filteredColumns = filteredColumns.subList(0, columnsLimit);
+        }
+        else
+        {
+            List<String> columnNames = Arrays.stream(StringUtils.split(byColumnNames, ';'))
+                    .map(String::trim).collect(Collectors.toList());
+            filteredColumns.retainAll(columnNames);
+        }
+        return filteredColumns;
     }
 
     public void setExamplesTableFactory(Supplier<ExamplesTableFactory> examplesTableFactory)
