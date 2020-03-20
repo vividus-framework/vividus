@@ -23,11 +23,13 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
 import com.github.javafaker.Faker;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.ILocationProvider;
 import org.vividus.util.ResourceUtils;
@@ -35,6 +37,8 @@ import org.vividus.util.ResourceUtils;
 @Named
 public class StringsExpressionProcessor extends DelegatingExpressionProcessor
 {
+    private static final Pattern COMMA_SEPARATED = Pattern.compile("(?<!\\\\), ?");
+    private static final Pattern ESCAPED_COMMA = Pattern.compile("\\\\,");
     private static final String COMMA = ",";
 
     public StringsExpressionProcessor(ILocationProvider locationProvider)
@@ -54,8 +58,16 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor
             new UnaryExpressionProcessor("decodeFromBase64",  input -> new String(Base64.getDecoder()
                     .decode(input.getBytes(UTF_8)), UTF_8)),
             new UnaryExpressionProcessor("encodeToBase64",    input -> new String(Base64.getEncoder()
-                    .encode(input.getBytes(UTF_8)), UTF_8))
+                    .encode(input.getBytes(UTF_8)), UTF_8)),
+            new UnaryExpressionProcessor("anyOf",             StringsExpressionProcessor::anyOf)
             ));
+    }
+
+    private static String anyOf(String input)
+    {
+        String[] parts = COMMA_SEPARATED.split(input);
+        int length = parts.length;
+        return length == 0 ? "" : ESCAPED_COMMA.matcher(parts[RandomUtils.nextInt(0, length)]).replaceAll(COMMA);
     }
 
     private static UnaryOperator<String> generateLocalized()

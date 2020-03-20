@@ -16,6 +16,11 @@
 
 package org.vividus.bdd.expression;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.when;
@@ -73,7 +78,11 @@ class StringsExpressionProcessorTests
                 arguments("resourceToBase64(/org/vividus/bdd/expressions/resource.txt)",   BASE_64),
                 arguments("resourceToBase64(org/vividus/bdd/expressions/resource.txt)",    BASE_64),
                 arguments("decodeFromBase64(QmFydWNo)",                                    "Baruch"),
-                arguments("encodeToBase64(Baruch)",                                        "QmFydWNo")
+                arguments("encodeToBase64(Baruch)",                                        "QmFydWNo"),
+                arguments("anyOf(123)",                                                    "123"),
+                arguments("anyOf()",                                                       EMPTY),
+                arguments("anyOf(,)",                                                      EMPTY),
+                arguments("anyOf(\\,)",                                                    ",")
         );
     }
 
@@ -89,5 +98,12 @@ class StringsExpressionProcessorTests
     {
         when(locationProvider.getLocale()).thenReturn(Locale.US);
         assertEquals("AA", processor.execute("generate(regexify '[A]{2}')").get());
+    }
+
+    @Test
+    void shouldPickRandomValue()
+    {
+        assertThat(processor.execute("anyOf(one,two, three\\, or,, four)").get(),
+                anyOf(equalTo("one"), equalTo("two"), equalTo("three, or"), equalTo("four"), emptyString()));
     }
 }

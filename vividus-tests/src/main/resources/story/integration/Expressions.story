@@ -14,3 +14,6 @@ Scenario: Verify epoch generation and conversion
 When I initialize the SCENARIO variable `date` with value `#{generateDate(P, yyyy-MM-dd'T'HH:mm:ss)}`
 When I initialize the SCENARIO variable `epoch` with value `#{toEpochSecond(${date})}`
 Then `${date}` is equal to `#{fromEpochSecond(${epoch})}`
+
+Scenario: Verify anyOf expression
+Then `#{anyOf(1, 2\,3,3)}` matches `1|2,3|3`
