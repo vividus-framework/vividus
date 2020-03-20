@@ -12,8 +12,12 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platform }}
 
     steps:
     - uses: actions/checkout@v2
@@ -53,6 +57,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      shell: bash
       run: |
         if [[ -n $SONAR_TOKEN ]]; then
             ./gradlew build sonarqube -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=vividus -Dsonar.projectKey=vividus-framework_vividus -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m"
@@ -61,7 +66,7 @@ jobs:
             ./gradlew build -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m"
         fi
 
-    - name: Publish unit and integration tests reports
+    - name: Publish unit and integration tests reports - ${{ matrix.platform }}
       if: always()
       uses: actions/upload-artifact@v1
       with:
@@ -69,27 +74,30 @@ jobs:
         path: vividus/output/reports/tests
 
     - name: Upload coverage to Codecov
+      if: matrix.platform == 'ubuntu-latest'
       uses: codecov/codecov-action@v1
       with:
         fail_ci_if_error: true
 
     - name: Integration tests
+      if: matrix.platform == 'ubuntu-latest'
       run: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration
 
     - name: Publish Integration tests report
-      if: always()
+      if: matrix.platform == 'ubuntu-latest'
       uses: actions/upload-artifact@v1
       with:
-        name: Integration Tests - Allure report
+        name: Integration Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
 
     - name: System tests
-      if: always()
+      if: matrix.platform == 'ubuntu-latest'
       env:
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
         BROWSERSTACK_KEY: ${{ secrets.BROWSERSTACK_KEY }}
         APPLITOOLS_EXECUTE_KEY: ${{ secrets.APPLITOOLS_EXECUTE_KEY }}
         APPLITOOLS_READ_KEY: ${{ secrets.APPLITOOLS_READ_KEY }}
+      shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY ]]; then
             ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system -Pvividus.configuration.suite=system -Pvividus.configuration.profile=web/desktop/chrome
@@ -98,21 +106,21 @@ jobs:
         fi
 
     - name: Publish System tests report
-      if: always()
+      if: matrix.platform == 'ubuntu-latest'
       uses: actions/upload-artifact@v1
       with:
-        name: System Tests - Allure report
+        name: System Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
 
     - name: Publish Snapshot Artifacts
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
       env:
         BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
         BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
       run: ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=http://oss.jfrog.org -Dartifactory.publish.repoKey=oss-snapshot-local -Dartifactory.publish.username=$BINTRAY_USER -Dartifactory.publish.password=$BINTRAY_KEY -Dartifactory.publish.buildInfo=false
 
     - name: Publish Release Artifacts
-      if: startsWith(github.ref, 'refs/tags/release-')
+      if: startsWith(github.ref, 'refs/tags/release-') && matrix.platform == 'ubuntu-latest'
       env:
         BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
         BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
