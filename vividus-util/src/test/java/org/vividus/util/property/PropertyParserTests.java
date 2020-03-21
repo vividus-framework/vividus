@@ -27,14 +27,22 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class PropertyParserTests
 {
     private static final String PREFIX = "prefix.";
-    private static final String OTHER_PROP3 = "other.prop3";
-    private static final String VAL3 = "val3";
+    private static final String OTHER = "other";
+    private static final char DOT = '.';
+    private static final String PROP_1 = "prop1";
+    private static final String VAL_1 = "val1";
+    private static final String PROP_2 = "prop2";
+    private static final String VAL_2 = "val2";
+    private static final String VAL_3 = "val3";
+    private static final String PROP_3 = "prop3";
+    private static final String OTHER_PROP3 = OTHER + DOT + PROP_3;
 
     private PropertyParser parser;
     private Map<String, String> expectedPropertyValues;
@@ -44,12 +52,12 @@ class PropertyParserTests
     void beforeEach()
     {
         expectedPropertyValues = new HashMap<>();
-        expectedPropertyValues.put("prop1", "val1");
-        expectedPropertyValues.put("prop2", "val2");
+        expectedPropertyValues.put(PROP_1, VAL_1);
+        expectedPropertyValues.put(PROP_2, VAL_2);
 
         properties = new Properties();
         expectedPropertyValues.forEach((key, value) -> properties.put(PREFIX + key, value));
-        properties.put(PREFIX + OTHER_PROP3, VAL3);
+        properties.put(PREFIX + OTHER_PROP3, VAL_3);
         parser = new PropertyParser();
         parser.setProperties(properties);
     }
@@ -66,7 +74,7 @@ class PropertyParserTests
     {
         Map<String, String> actualPropertyValues = parser.getPropertyValuesByPrefix(PREFIX);
         Map<String, String> expected = new HashMap<>(expectedPropertyValues);
-        expected.put(OTHER_PROP3, VAL3);
+        expected.put(OTHER_PROP3, VAL_3);
         assertThat(actualPropertyValues.entrySet(), equalTo(expected.entrySet()));
     }
 
@@ -75,7 +83,7 @@ class PropertyParserTests
     {
         Map<String, String> propertiesByPrefix = parser.getPropertiesByRegex(Pattern.compile(PREFIX + ".*prop3"));
         assertThat(propertiesByPrefix.entrySet(),
-                equalTo(Collections.singletonMap(PREFIX + OTHER_PROP3, VAL3).entrySet()));
+                equalTo(Collections.singletonMap(PREFIX + OTHER_PROP3, VAL_3).entrySet()));
     }
 
     @Test
@@ -83,5 +91,39 @@ class PropertyParserTests
     {
         Entry<String, String> property = expectedPropertyValues.entrySet().iterator().next();
         assertEquals(property.getValue(), parser.getPropertyValue(PREFIX + "%s", property.getKey()));
+    }
+
+    @Test
+    void testGetPropertyValuesTreeByPrefix()
+    {
+        String val4 = "val4";
+        String val5 = "val5";
+        properties.put(PREFIX + "other.other1.prop4", val4);
+        properties.put(PREFIX + "other.other1.prop5", val5);
+        parser.setProperties(properties);
+        Map<String, Object> actualPropertyValues = parser.getPropertyValuesTreeByPrefix(PREFIX);
+        Map<String, Object> expected = Map.of(
+                PROP_1, VAL_1,
+                PROP_2, VAL_2,
+                OTHER, Map.of(
+                        PROP_3, VAL_3,
+                        "other1", Map.of(
+                                "prop4", val4,
+                                "prop5", val5
+                                )
+                        ));
+        assertThat(actualPropertyValues.entrySet(), equalTo(expected.entrySet()));
+    }
+
+    @Test
+    void testGetPropertyValuesTreeByPrefixWrongKey()
+    {
+        properties.put(PREFIX + OTHER, VAL_1);
+        properties.put(PREFIX + OTHER + DOT + PROP_1, VAL_1);
+        parser.setProperties(properties);
+        Exception exception = Assertions.assertThrows(IllegalArgumentException.class,
+            () -> parser.getPropertyValuesTreeByPrefix(PREFIX));
+        assertThat("Path key 'other' from path 'other.prop1' is already used as a property key",
+            equalTo(exception.getMessage()));
     }
 }

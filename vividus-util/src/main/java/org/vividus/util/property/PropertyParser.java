@@ -19,11 +19,15 @@ package org.vividus.util.property;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class PropertyParser implements IPropertyParser
 {
@@ -41,6 +45,43 @@ public class PropertyParser implements IPropertyParser
         return getPropertiesByPrefix(propertyPrefix).entrySet()
                 .stream()
                 .collect(toMap(e -> removeStart(e.getKey(), propertyPrefix), Entry::getValue));
+    }
+
+    @Override
+    public Map<String, Object> getPropertyValuesTreeByPrefix(String propertyPrefix)
+    {
+        Map<String, Object> container = new HashMap<>();
+        getPropertyValuesByPrefix(propertyPrefix).forEach((k, v) -> putByPath(container, k, v));
+        return container;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void putByPath(Map<String, Object> container, String path, String value)
+    {
+        String[] paths = StringUtils.split(path, '.');
+        int limit = paths.length - 1;
+        String key = paths[limit];
+        Map<String, Object> target = Arrays.stream(paths)
+                .limit(limit)
+                .reduce(container, (map, pathKey) ->
+                {
+                    Map<String, Object> nested = (Map<String, Object>) map.compute(pathKey, (k, v) ->
+                    {
+                        if (v == null)
+                        {
+                            return new HashMap<>();
+                        }
+                        else if (v instanceof Map)
+                        {
+                            return v;
+                        }
+                        throw new IllegalArgumentException(String.format(
+                                "Path key '%s' from path '%s' is already used as a property key", pathKey, path));
+                    });
+                    map.put(pathKey, nested);
+                    return nested;
+                }, (l, r) -> l);
+        target.put(key, value);
     }
 
     @Override

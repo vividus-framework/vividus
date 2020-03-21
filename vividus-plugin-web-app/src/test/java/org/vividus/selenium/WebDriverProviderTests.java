@@ -16,9 +16,14 @@
 
 package org.vividus.selenium;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +32,8 @@ import com.google.common.eventbus.EventBus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -105,5 +112,30 @@ class WebDriverProviderTests
         webDriverProvider.get();
         webDriverProvider.destroy();
         verify(driver).quit();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "false, false, false",
+        "true, false, false",
+        "true, true, true"
+    })
+    void testIsRemoteExecution(boolean initialized, boolean remote, boolean expected)
+    {
+        WebDriverProvider spy = spy(webDriverProvider);
+        testContext.put(VividusWebDriver.class, vividusWebDriver);
+
+        when(spy.isWebDriverInitialized()).thenReturn(initialized);
+        lenient().when(vividusWebDriver.isRemote()).thenReturn(remote);
+
+        assertEquals(expected, spy.isRemoteExecution());
+    }
+
+    @Test
+    void testGetUnwrapped()
+    {
+        testContext.put(VividusWebDriver.class, vividusWebDriver);
+        when(vividusWebDriver.getWrappedDriver()).thenReturn(wrapsDriver);
+        assertThat(webDriverProvider.getUnwrapped(WrapsDriver.class), instanceOf(WrapsDriver.class));
     }
 }
