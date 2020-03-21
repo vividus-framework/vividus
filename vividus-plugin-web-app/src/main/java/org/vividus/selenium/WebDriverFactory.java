@@ -84,13 +84,18 @@ public class WebDriverFactory implements IWebDriverFactory
 
     private DesiredCapabilities getCapabilitiesByPrefix(String prefix)
     {
-        return propertyParser.getPropertyValuesByPrefix(prefix)
+        return propertyParser.getPropertyValuesTreeByPrefix(prefix)
             .entrySet()
             .stream()
-            .map(e -> equalsAnyIgnoreCase(e.getValue(), "true", "false")
-                ? Map.entry(e.getKey(), Boolean.parseBoolean(e.getValue()))
+            .map(e -> isBoolean(e.getValue())
+                ? Map.entry(e.getKey(), Boolean.parseBoolean((String) e.getValue()))
                 : e)
             .collect(Collectors.collectingAndThen(toMap(Entry::getKey, Entry::getValue), DesiredCapabilities::new));
+    }
+
+    private boolean isBoolean(Object value)
+    {
+        return value instanceof String && equalsAnyIgnoreCase((String) value, "true", "false");
     }
 
     @Override

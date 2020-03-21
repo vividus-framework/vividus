@@ -25,6 +25,8 @@ public interface IPropertyParser
 
     Map<String, String> getPropertyValuesByPrefix(String propertyPrefix);
 
+    Map<String, Object> getPropertyValuesTreeByPrefix(String propertyPrefix);
+
     Map<String, String> getPropertiesByRegex(Pattern regex);
 
     String getPropertyValue(String propertyNameFormat, Object... args);
