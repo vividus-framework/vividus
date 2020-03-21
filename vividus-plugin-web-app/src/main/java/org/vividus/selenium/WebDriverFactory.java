@@ -23,11 +23,9 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -49,22 +47,6 @@ import org.vividus.util.property.IPropertyParser;
 
 public class WebDriverFactory implements IWebDriverFactory
 {
-    private static final Set<String> GENERIC_CAPABILITIES = Stream.of(CapabilityType.class.getFields())
-            .filter(f -> f.getType().equals(String.class))
-            .map(f ->
-            {
-                try
-                {
-                    return f.get(null);
-                }
-                catch (IllegalAccessException e)
-                {
-                    throw new IllegalStateException(e);
-                }
-            })
-            .map(String.class::cast)
-            .collect(Collectors.toSet());
-
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
 
     private static final String SELENIUM_GRID_PROPERTY_PREFIX = "selenium.grid.capabilities.";
