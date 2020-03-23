@@ -56,6 +56,13 @@ class JsonUtilsTests
     }
 
     @Test
+    void testToPrettyJsonSuccessDefault()
+    {
+        String actualJson = jsonUtils.toPrettyJson(TEST_OBJECT);
+        assertEquals(String.format("{%n  \"id\" : \"1\",%n  \"firstName\" : \"name\"%n}"), actualJson);
+    }
+
+    @Test
     void testToJsonSuccessCamelCase()
     {
         jsonUtils.setNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);

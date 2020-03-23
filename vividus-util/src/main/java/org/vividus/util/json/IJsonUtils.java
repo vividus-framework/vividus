@@ -25,6 +25,8 @@ public interface IJsonUtils
 {
     String toJson(Object object) throws JsonProcessingException;
 
+    String toPrettyJson(Object object) throws JsonProcessingException;
+
     <T> T toObject(String json, Class<T> clazz) throws JsonProcessingException;
 
     <T> List<T> toObjectList(String json, Class<T> clazz) throws JsonProcessingException;

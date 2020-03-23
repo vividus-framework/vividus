@@ -36,10 +36,13 @@ import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.util.json.IJsonUtils;
@@ -47,6 +50,8 @@ import org.vividus.util.property.IPropertyParser;
 
 public class WebDriverFactory implements IWebDriverFactory
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebDriverFactory.class);
+
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
 
     private static final String SELENIUM_GRID_PROPERTY_PREFIX = "selenium.grid.capabilities.";
@@ -141,6 +146,11 @@ public class WebDriverFactory implements IWebDriverFactory
     {
         WebDriver driver = new TextFormattingWebDriver(webDriver);
         timeoutConfigurer.configure(driver.manage().timeouts());
+
+        LOGGER.atInfo()
+              .addArgument(() -> jsonUtils
+                      .toPrettyJson(WebDriverUtil.unwrap(driver, HasCapabilities.class).getCapabilities().asMap()))
+              .log("Session capabilities:\n{}");
         return driver;
     }
 

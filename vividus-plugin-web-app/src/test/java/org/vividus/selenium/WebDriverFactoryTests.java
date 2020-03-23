@@ -16,8 +16,10 @@
 
 package org.vividus.selenium;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -35,11 +37,15 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +54,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Timeouts;
@@ -63,7 +71,7 @@ import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class WebDriverFactoryTests
 {
     private static final String SELENIUM_CAPABILITIES = "selenium.capabilities.";
@@ -84,7 +92,9 @@ class WebDriverFactoryTests
     private static final String ARG_2 = "--arg2";
     private static final String ARGS = ARG_1 + " " + ARG_2;
 
-    @Mock
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(WebDriverFactory.class);
+
+    @Mock(extraInterfaces = HasCapabilities.class)
     private WebDriver driver;
 
     @Mock
@@ -111,6 +121,7 @@ class WebDriverFactoryTests
     @Test
     void testGetWebDriverWithWebDriverType() throws Exception
     {
+        mockCapabilities((HasCapabilities) driver);
         WebDriverType webDriverType = mock(WebDriverType.class);
         webDriverFactory.setWebDriverType(webDriverType);
         WebDriverConfiguration configuration = mock(WebDriverConfiguration.class);
@@ -122,11 +133,13 @@ class WebDriverFactoryTests
         WebDriver actualDriver = webDriverFactory.getWebDriver(desiredCapabilities);
         assertThat(actualDriver, instanceOf(TextFormattingWebDriver.class));
         assertEquals(driver, ((WrapsDriver) actualDriver).getWrappedDriver());
+        assertLogger();
     }
 
     @Test
     void testGetWebDriverWithWebDriverTypeWOBinary() throws Exception
     {
+        mockCapabilities((HasCapabilities) driver);
         WebDriverConfiguration configuration = new WebDriverConfiguration();
         WebDriverType webDriverType = mock(WebDriverType.class);
         webDriverFactory.setWebDriverType(webDriverType);
@@ -136,11 +149,13 @@ class WebDriverFactoryTests
         Timeouts timeouts = mockTimeouts(driver);
         assertEquals(driver, ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
     }
 
     @Test
     void testGetWebDriverWithWebDriverTypeAndBinaryPathConfiguration()
     {
+        mockCapabilities((HasCapabilities) driver);
         WebDriverType webDriverType = mock(WebDriverType.class);
         when(webDriverType.isBinaryPathSupported()).thenReturn(Boolean.TRUE);
         webDriverFactory.setWebDriverType(webDriverType);
@@ -156,11 +171,13 @@ class WebDriverFactoryTests
         assertEquals(driver,
                 ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
     }
 
     @Test
     void testGetWebDriverWithWebDriverTypeAndCommandLineArgumentsConfiguration()
     {
+        mockCapabilities((HasCapabilities) driver);
         WebDriverType webDriverType = mock(WebDriverType.class);
         when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.TRUE);
         webDriverFactory.setWebDriverType(webDriverType);
@@ -177,11 +194,13 @@ class WebDriverFactoryTests
         assertEquals(driver,
                 ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
     }
 
     @Test
     void testGetWebDriverWithWebDriverTypeAndExperimentalOptionsConfiguration()
     {
+        mockCapabilities((HasCapabilities) driver);
         WebDriverType webDriverType = mock(WebDriverType.class);
         webDriverFactory.setWebDriverType(webDriverType);
         lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
@@ -197,6 +216,7 @@ class WebDriverFactoryTests
         assertEquals(driver,
                 ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
     }
 
     @Test
@@ -234,6 +254,7 @@ class WebDriverFactoryTests
     @Test
     void testGetRemoteWebDriver() throws Exception
     {
+        mockCapabilities(remoteWebDriver);
         setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         when(remoteWebDriverFactory.getRemoteWebDriver(URL.toURL(), desiredCapabilities)).thenReturn(remoteWebDriver);
@@ -241,12 +262,14 @@ class WebDriverFactoryTests
         assertEquals(remoteWebDriver,
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void testGetRemoteWebDriverFirefoxDriver() throws MalformedURLException
     {
+        mockCapabilities(remoteWebDriver);
         setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities(new FirefoxOptions());
         when(remoteWebDriverFactory.getRemoteWebDriver(eq(URL.toURL()), argThat(caps ->
@@ -260,11 +283,13 @@ class WebDriverFactoryTests
         assertEquals(remoteWebDriver,
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
     }
 
     @Test
     void testGetRemoteWebDriverMarionetteDriver() throws Exception
     {
+        mockCapabilities(remoteWebDriver);
         setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName("marionette");
@@ -274,11 +299,13 @@ class WebDriverFactoryTests
         assertEquals(remoteWebDriver,
             ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
     }
 
     @Test
     void testGetRemoteWebDriverIEDriver() throws Exception
     {
+        mockCapabilities(remoteWebDriver);
         setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName(BrowserType.IEXPLORE);
@@ -289,6 +316,7 @@ class WebDriverFactoryTests
         assertEquals(remoteWebDriver,
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
     }
 
     @Test
@@ -313,6 +341,7 @@ class WebDriverFactoryTests
 
     private void testGetRemoteWebDriverIsChrome(ChromeOptions chromeOptions) throws Exception
     {
+        mockCapabilities(remoteWebDriver);
         setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName(BrowserType.CHROME);
@@ -322,6 +351,7 @@ class WebDriverFactoryTests
         assertEquals(remoteWebDriver,
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
     }
 
     @Test
@@ -367,6 +397,19 @@ class WebDriverFactoryTests
             () -> assertEquals(ARG, webDriverFactory.getCapability(KEY3, false)));
         verify(propertyParser).getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES);
         verify(propertyParser).getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES);
+    }
+
+    private static void mockCapabilities(HasCapabilities hasCapabilities)
+    {
+        Capabilities capabilities = mock(Capabilities.class);
+        when(hasCapabilities.getCapabilities()).thenReturn(capabilities);
+        when(capabilities.asMap()).thenReturn(Map.of("key", "value"));
+    }
+
+    private void assertLogger()
+    {
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info("Session capabilities:\n{}", String.format("{%n  \"key\" : \"value\"%n}")))));
     }
 
     private static Timeouts mockTimeouts(WebDriver webDriver)
