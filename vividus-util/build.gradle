@@ -12,9 +12,7 @@ dependencies {
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
     implementation(group: 'commons-io', name: 'commons-io', version: versions.commonsIo)
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
-    implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0') {
-        exclude group: 'net.minidev', module: 'json-smart'
-    }
+    implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
