@@ -24,9 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.selenium.IBrowserWindowSizeProvider;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.action.IWindowsActions;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,12 +32,6 @@ class WebUiVividusSetupStepsTests
 {
     @Mock
     private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private IBrowserWindowSizeProvider browserWindowSizeProvider;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
 
     @Mock
     private IWindowsActions windowsActions;
