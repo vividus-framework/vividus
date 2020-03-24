@@ -19,32 +19,13 @@ package org.vividus.bdd.steps;
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.AfterScenario;
-import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.ScenarioType;
-import org.vividus.selenium.IBrowserWindowSizeProvider;
-import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.action.IWindowsActions;
 
 public class WebUiVividusSetupSteps extends VividusWebDriverSetupSteps
 {
     @Inject private IWindowsActions windowsActions;
-    @Inject private IBrowserWindowSizeProvider browserWindowSizeProvider;
-    @Inject private IWebDriverManager webDriverManager;
     private WindowsStrategy windowsStrategy;
-
-    @Override
-    @BeforeScenario(uponType = ScenarioType.ANY)
-    public void beforeScenario()
-    {
-        super.beforeScenario();
-        IWebDriverProvider webDriverProvider = getWebDriverProvider();
-        if (webDriverProvider.isWebDriverInitialized())
-        {
-            webDriverManager
-                    .resize(browserWindowSizeProvider.getBrowserWindowSize(webDriverProvider.isRemoteExecution()));
-        }
-    }
 
     @AfterScenario(uponType = ScenarioType.ANY)
     public void afterScenario()
