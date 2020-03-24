@@ -54,6 +54,12 @@ public class JsonUtils implements IJsonUtils
     }
 
     @Override
+    public String toPrettyJson(Object object) throws JsonProcessingException
+    {
+        return performOperation(() -> mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object));
+    }
+
+    @Override
     public <T> T toObject(String json, Class<T> clazz) throws JsonProcessingException
     {
         return performOperation(() -> mapper.readValue(json, clazz));
