@@ -65,6 +65,7 @@ class ResourceCheckStepsTests
     private static final String FIRST_PAGE_TABLE = "|pages|\n|https://first.page|";
     private static final String SECOND_PAGE_URL = "https://second.page";
     private static final String FIRST_PAGE_URL = "https://first.page";
+    private static final String THIRD_PAGE_URL = "https://third.page";
     private static final String N_A = "N/A";
     private static final String RESULTS = "results";
     private static final String MAILTO_ID = "#mailto";
@@ -117,6 +118,18 @@ class ResourceCheckStepsTests
           + "  <a id='about' href='https://vividus.org/about'>About</a>"
           + "</body>"
           + "</html>";
+
+    private static final String THIRD_PAGE =
+            "<!DOCTYPE html>\r\n"
+          + "<html>\r\n"
+          + "<head\\r\n"
+          + "<title>Title of the document</title>\r\n"
+          + "</head>\r\n"
+          + "<body>\r\n"
+          + "  <a id='about' href='https://vividus.org/about'>About</a>\r\n"
+          + "  <video id='about'>Some video without attributes</a>\r\n"
+          + "</body>\r\n"
+          + "</html>\r\n";
 
     @Mock(lenient = true)
     private ResourceValidator resourceValidator;
@@ -198,6 +211,32 @@ class ResourceCheckStepsTests
             validate(resourceValidations.next(), MAILTO_URI, MAILTO_ID, CheckStatus.FILTERED);
             return true;
         }), eq(REPORT_NAME));
+    }
+
+    @Test
+    void shouldCheckResourcesFromPagesWithEmptyResource() throws IOException, InterruptedException, ExecutionException
+    {
+        mockResourceValidator();
+        runExecutor();
+        mockWebApplicationConfiguration();
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
+        when(httpResponse.getResponseBodyAsString()).thenReturn(THIRD_PAGE);
+        resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
+        resourceCheckSteps.init();
+        ExamplesTable examplesTable =
+                new ExamplesTable("|pages|\n|https://third.page|");
+        resourceCheckSteps.checkResources(LINK_SELECTOR + ", video", examplesTable);
+        verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, THIRD_PAGE_URL, Optional.empty());
+        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
+            @SuppressWarnings("unchecked")
+            Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
+            assertThat(validationsToReport, hasSize(1));
+            Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
+            validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
+            return true;
+        }), eq(REPORT_NAME));
+        verify(softAssert).recordFailedAssertion("Element by selector #about doesn't contain href/src attributes");
     }
 
     @Test
