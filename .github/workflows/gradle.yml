@@ -84,7 +84,7 @@ jobs:
       run: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration
 
     - name: Publish Integration tests report
-      if: matrix.platform == 'ubuntu-latest'
+      if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v1
       with:
         name: Integration Tests - Allure report - ${{ matrix.platform }}
@@ -106,7 +106,7 @@ jobs:
         fi
 
     - name: Publish System tests report
-      if: matrix.platform == 'ubuntu-latest'
+      if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v1
       with:
         name: System Tests - Allure report - ${{ matrix.platform }}
