@@ -230,3 +230,6 @@ When I wait until element located `By.elementName(<elementName>)` contains text 
 
 Composite: Then an element with the name '$elementName' disappears in '$timeout' seconds
 Then element located `By.elementName(<elementName>)` disappears in '$timeout'
+
+Composite: When I select an element with the '$attributeType'='$attributeValue' and upload the file '$filePath'
+When I select element located `By.xpath(//*[@<attributeType>="<attributeValue>"])` and upload file `<filePath>`

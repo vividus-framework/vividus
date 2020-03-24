@@ -68,21 +68,19 @@ public class ElementSteps implements ResourceLoaderAware
     private ResourceLoader resourceLoader;
 
     /**
-     * This steps is uploading the file with the given relative path
-     * <p>A <b>relative path</b> - starts from some given working directory,
+     * This step uploads a file with the given relative path
+     * <p>A <b>relative path</b> starts from some given working directory,
      * avoiding the need to provide the full absolute path
      * (i.e. <i>'about.jpeg'</i> is in the root directory
      * or <i>'/story/uploadfiles/about.png'</i>)</p>
-     * @param attributeType A type of the element's attribute
-     * @param attributeValue A value of the element's attribute
-
+     * @param locator The locator for the upload element
      * @param filePath relative path to the file to be uploaded
      * @see <a href="https://en.wikipedia.org/wiki/Path_(computing)#Absolute_and_relative_paths"> <i>Absolute and
      * relative paths</i></a>
      * @throws IOException If an input or output exception occurred
      */
-    @When("I select an element with the '$attributeType'='$attributeValue' and upload the file '$filePath'")
-    public void uploadFile(String attributeType, String attributeValue, String filePath) throws IOException
+    @When("I select element located `$locator` and upload file `$filePath`")
+    public void uploadFile(SearchAttributes locator, String filePath) throws IOException
     {
         Resource resource = resourceLoader.getResource(ResourceLoader.CLASSPATH_URL_PREFIX + filePath);
         if (!resource.exists())
@@ -98,10 +96,8 @@ public class ElementSteps implements ResourceLoaderAware
             {
                 webDriverProvider.getUnwrapped(RemoteWebDriver.class).setFileDetector(new LocalFileDetector());
             }
-            WebElement browse = baseValidations.assertIfElementExists(AN_ELEMENT,
-                    new SearchAttributes(ActionAttributeType.XPATH,
-                            new SearchParameters(LocatorUtil.getXPathByAttribute(attributeType, attributeValue),
-                                    Visibility.ALL)));
+            locator.getSearchParameters().setVisibility(Visibility.ALL);
+            WebElement browse = baseValidations.assertIfElementExists(AN_ELEMENT, locator);
             if (browse != null)
             {
                 browse.sendKeys(fullFilePath);

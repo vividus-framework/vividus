@@ -70,6 +70,12 @@ Given I am on a page with the URL '<radioButtonsURL>'
 When I change context to an element with the attribute 'type'='submit'
 Then the context element has the CSS property 'color' containing '(0, 0, 0, 1)'
 
+Scenario: Step verification When I select an element '$locator' and upload the file '$filePath'
+Given I am on a page with the URL 'http://demo.guru99.com/test/upload/'
+When I select element located `By.id(uploadfile_0)` and upload file `/data/file_for_upload_step.png`
+When I click on element located `By.name(send)`
+Then the text 'has been successfully uploaded' exists
+
 Scenario: Should not fail click step when element in Cross-Origin frame
 Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/frames.html'
 When I switch to a frame with the attribute 'id'='exampleCom'
@@ -183,3 +189,9 @@ Given I am on a page with the URL '<rightClickButtonURL>'
 Then an element by the xpath './/*[@class='context-menu-item context-menu-icon context-menu-icon-edit']' does not exist
 When I perform right click on an element by the xpath './/*[@class='context-menu-one btn btn-neutral']'
 Then an element by the xpath './/*[@class='context-menu-item context-menu-icon context-menu-icon-edit']' exists
+
+Scenario: Step verification When I select an element with the '$attributeType'='$attributeValue' and upload the file '$filePath'
+Given I am on a page with the URL 'http://demo.guru99.com/test/upload/'
+When I select an element with the 'id'='uploadfile_0' and upload the file '/data/file_for_upload_step.png'
+When I click on element located `By.name(send)`
+Then the text 'has been successfully uploaded' exists
