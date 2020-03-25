@@ -82,6 +82,7 @@ public class ResourceCheckSteps
      *         a. If status code acceptable than check considered as passed;
      *         b. If status code not acceptable but one of (404, 405, 501, 503) then GET request will be sent;
      *         c. If GET status code acceptable than check considered as passed otherwise failed;
+     *     3. If element doesn't contain href or src attribute fail assertion will be recorded
      * @param cssSelector to locate resources
      * @param html to validate
      * @throws InterruptedException when a thread is interrupted
@@ -123,19 +124,18 @@ public class ResourceCheckSteps
             Function<Pair<URI, String>, ResourceValidation> resourceValidationFactory)
     {
         return elements.map(e ->
-            Pair.of(createUri(getElementAttribute(e, "href").orElseGet(() -> e.attr("src")).trim()), getSelector(e)))
+            Pair.of(getElementAttribute(e, "href").orElseGet(() -> e.attr("src")).trim(), getSelector(e)))
+                       .filter(p -> !p.getKey().isEmpty() || softAssert.recordFailedAssertion(
+                        "Element by selector " + p.getValue() + " doesn't contain href/src attributes"))
+                       .map(p -> Pair.of(createUri(p.getKey()), p.getValue()))
                        .map(resourceValidationFactory)
-                       .map(rv -> {
-                           URI toCheck = rv.getUri();
-                           boolean validatable = Optional.ofNullable(toCheck.getScheme())
-                                                         .map(s -> ALLOWED_SCHEMES.contains(s))
-                                                         .orElse(false)
-                                                         && !excludeHrefsPattern.matcher(rv.toString()).matches();
-                           if (!validatable)
+                       .peek(rv ->
+                       {
+                           if (!Optional.ofNullable(rv.getUri().getScheme()).map(ALLOWED_SCHEMES::contains)
+                                   .orElse(false) || excludeHrefsPattern.matcher(rv.toString()).matches())
                            {
                                rv.setCheckStatus(CheckStatus.FILTERED);
                            }
-                           return rv;
                        });
     }
 
