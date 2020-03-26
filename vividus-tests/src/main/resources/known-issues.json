@@ -22,5 +22,11 @@
     "assertionPattern": ".*Different keys found in node.*",
     "scenarioPattern": "Known issues should be detected and matched for separate JSON assertions",
     "storyPattern": "KnownIssues"
+  },
+  "VVD-5": {
+    "type": "Internal",
+    "assertionPattern": "HTTP response body is not present",
+    "scenarioPattern": "Verify failure in step .*",
+    "storyPattern": "JsonResponseValidationSteps"
   }
 }

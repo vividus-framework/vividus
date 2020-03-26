@@ -317,9 +317,17 @@ public class JsonResponseValidationSteps
 
     private void assertJsonElementExists(String jsonPath)
     {
-        if (httpTestContext.getResponse() != null)
+        HttpResponse response = httpTestContext.getResponse();
+        if (response != null)
         {
-            doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.GREATER_THAN, 0);
+            if (response.getResponseBody() != null)
+            {
+                doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.GREATER_THAN, 0);
+            }
+            else
+            {
+                softAssert.recordFailedAssertion("HTTP response body is not present");
+            }
         }
     }
 
