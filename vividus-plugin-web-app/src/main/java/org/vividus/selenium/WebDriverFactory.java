@@ -81,7 +81,7 @@ public class WebDriverFactory implements IWebDriverFactory
                     {
                         return localCapabilities;
                     }
-                    return localCapabilities.merge(seleniumGridDesiredCapabilities.get());
+                    return merge(localCapabilities, seleniumGridDesiredCapabilities.get());
                 }
             });
 
@@ -111,13 +111,10 @@ public class WebDriverFactory implements IWebDriverFactory
                     .map(String.class::cast)
                     .map(WebDriverType::valueOf)
                     .orElse(this.webDriverType);
-        return getWebDriver(driverType, desiredCapabilities);
-    }
-
-    private WebDriver getWebDriver(WebDriverType webDriverType, DesiredCapabilities desiredCapabilities)
-    {
-        WebDriverConfiguration configuration = getWebDriverConfiguration(webDriverType, true);
-        return createWebDriver(webDriverType.getWebDriver(desiredCapabilities, configuration));
+        boolean localRun = true;
+        WebDriverConfiguration configuration = getWebDriverConfiguration(driverType, localRun);
+        return createWebDriver(driverType.getWebDriver(getWebDriverCapabilities(localRun, desiredCapabilities),
+                configuration));
     }
 
     @Override
@@ -213,7 +210,12 @@ public class WebDriverFactory implements IWebDriverFactory
 
     private DesiredCapabilities getWebDriverCapabilities(boolean localRun, DesiredCapabilities toMerge)
     {
-        return new DesiredCapabilities(getWebDriverCapabilities(localRun)).merge(toMerge);
+        return merge(getWebDriverCapabilities(localRun), toMerge);
+    }
+
+    private DesiredCapabilities merge(DesiredCapabilities base, DesiredCapabilities toMerge)
+    {
+        return new DesiredCapabilities(base).merge(toMerge);
     }
 
     public void setWebDriverType(WebDriverType webDriverType)

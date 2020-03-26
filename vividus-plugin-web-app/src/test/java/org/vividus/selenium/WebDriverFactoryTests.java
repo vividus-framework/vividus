@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -125,15 +126,19 @@ class WebDriverFactoryTests
         WebDriverType webDriverType = mock(WebDriverType.class);
         webDriverFactory.setWebDriverType(webDriverType);
         WebDriverConfiguration configuration = mock(WebDriverConfiguration.class);
+        Map<String, Object> capablities = Map.of(KEY1, TRUE, KEY2, FALSE);
+        when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES)).thenReturn(capablities);
         configuration.setBinaryPath(Optional.of(PATH));
         injectConfigurations(webDriverType, configuration);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        when(webDriverType.getWebDriver(desiredCapabilities, configuration)).thenReturn(driver);
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities(Map.of(KEY2, true));
+        when(webDriverType.getWebDriver(new DesiredCapabilities(Map.of(KEY1, Boolean.TRUE, KEY2,  Boolean.TRUE)),
+                configuration)).thenReturn(driver);
         mockTimeouts(driver);
         WebDriver actualDriver = webDriverFactory.getWebDriver(desiredCapabilities);
         assertThat(actualDriver, instanceOf(TextFormattingWebDriver.class));
         assertEquals(driver, ((WrapsDriver) actualDriver).getWrappedDriver());
         assertLogger();
+        verify(propertyParser, never()).getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES);
     }
 
     @Test
@@ -145,7 +150,7 @@ class WebDriverFactoryTests
         webDriverFactory.setWebDriverType(webDriverType);
         injectConfigurations(webDriverType, configuration);
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        when(webDriverType.getWebDriver(desiredCapabilities, configuration)).thenReturn(driver);
+        when(webDriverType.getWebDriver(new DesiredCapabilities(), configuration)).thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
         assertEquals(driver, ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
@@ -164,7 +169,7 @@ class WebDriverFactoryTests
         lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn(PATH);
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        when(webDriverType.getWebDriver(eq(desiredCapabilities),
+        when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
                 argThat(config -> Optional.of(PATH).equals(config.getBinaryPath())
                         && Optional.of(PATH).equals(config.getDriverExecutablePath())))).thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
@@ -187,7 +192,7 @@ class WebDriverFactoryTests
                 propertyParser.getPropertyValue(String.format(COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn(ARGS);
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        when(webDriverType.getWebDriver(eq(desiredCapabilities),
+        when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
                 argThat(config -> Arrays.equals(new String[] { ARG_1, ARG_2 }, config.getCommandLineArguments()))))
                 .thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
@@ -209,7 +214,7 @@ class WebDriverFactoryTests
                 propertyParser.getPropertyValue(String.format(EXPERIMENTAL_OPTIONS_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn("{\"mobileEmulation\": {\"deviceName\": \"iPhone 8\"}}");
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        when(webDriverType.getWebDriver(eq(desiredCapabilities),
+        when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
                 argThat(config ->  Map.of("mobileEmulation", Map.of("deviceName", "iPhone 8"))
                         .equals(config.getExperimentalOptions())))).thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
@@ -360,12 +365,16 @@ class WebDriverFactoryTests
         lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES))
             .thenReturn(Map.of(KEY1, TRUE, KEY3, TRUE.toUpperCase(), KEY4, ARG));
         lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES))
-            .thenReturn(Map.of(KEY2, FALSE));
+            .thenReturn(Map.of(KEY1, FALSE, KEY2, FALSE));
         Assertions.assertAll(
             () -> assertTrue((boolean) webDriverFactory.getCapability(KEY1, false)),
             () -> assertFalse((boolean) webDriverFactory.getCapability(KEY2, false)),
             () -> assertTrue((boolean) webDriverFactory.getCapability(KEY3, false)),
-            () -> assertEquals(ARG, webDriverFactory.getCapability(KEY4, false)));
+            () -> assertEquals(ARG, webDriverFactory.getCapability(KEY4, false)),
+            () -> assertFalse((boolean) webDriverFactory.getCapability(KEY1, true)),
+            () -> assertFalse((boolean) webDriverFactory.getCapability(KEY2, true)),
+            () -> assertNull(webDriverFactory.getCapability(KEY3, true)),
+            () -> assertNull(webDriverFactory.getCapability(KEY4, true)));
     }
 
     @Test
