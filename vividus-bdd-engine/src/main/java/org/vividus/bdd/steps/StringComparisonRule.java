@@ -25,7 +25,8 @@ public enum StringComparisonRule
 {
     IS_EQUAL_TO(Matchers::equalTo),
     CONTAINS(Matchers::containsString),
-    DOES_NOT_CONTAIN(expected -> Matchers.not(CONTAINS.createMatcher(expected)));
+    DOES_NOT_CONTAIN(expected -> Matchers.not(CONTAINS.createMatcher(expected))),
+    MATCHES(Matchers::matchesRegex);
 
     private final Function<String, Matcher<String>> matcherFactory;
 
