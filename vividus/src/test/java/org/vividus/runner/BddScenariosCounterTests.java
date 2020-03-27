@@ -37,14 +37,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.vividus.SystemOutTests;
+import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Vividus.class, BeanFactory.class, BddScenariosCounter.class })
 @PowerMockIgnore({ "javax.*", "com.sun.*", "jdk.*", "org.xml.*", "org.w3c.*" })
-public class BddScenariosCounterTests extends SystemOutTests
+public class BddScenariosCounterTests extends SystemStreamTests
 {
     private static final String DEFAULT_STORY_LOCATION = "story";
     private static final String DIR_VALUE = "story/bvt";
@@ -86,9 +86,9 @@ public class BddScenariosCounterTests extends SystemOutTests
         BddScenariosCounter.main(new String[0]);
 
         verify(properties).put(RESOURCE_LOCATION, DEFAULT_STORY_LOCATION);
-        assertThat(getOutput(), containsString(1 + SEPARATOR + STORIES));
-        assertThat(getOutput(), containsString(1 + SEPARATOR + SCENARIOS));
-        assertThat(getOutput(), containsString(1 + SEPARATOR + SCENARIOS_WITH_EXAMPLES));
+        assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + STORIES));
+        assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + SCENARIOS));
+        assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + SCENARIOS_WITH_EXAMPLES));
     }
 
     @Test
@@ -111,9 +111,9 @@ public class BddScenariosCounterTests extends SystemOutTests
 
         BddScenariosCounter.main(new String[0]);
 
-        assertThat(getOutput(), containsString(1 + SEPARATOR + STORIES));
-        assertThat(getOutput(), containsString(2 + SEPARATOR + SCENARIOS));
-        assertThat(getOutput(), containsString(3 + SEPARATOR + SCENARIOS_WITH_EXAMPLES));
+        assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + STORIES));
+        assertThat(getOutStreamContent(), containsString(2 + SEPARATOR + SCENARIOS));
+        assertThat(getOutStreamContent(), containsString(3 + SEPARATOR + SCENARIOS_WITH_EXAMPLES));
     }
 
     @Test
@@ -136,7 +136,7 @@ public class BddScenariosCounterTests extends SystemOutTests
     public void testHelpOptionIsPresent() throws Exception
     {
         BddScenariosCounter.main(new String[] {"--help"});
-        assertThat(getOutput(), containsString("usage: BddScenariosCounter"));
+        assertThat(getOutStreamContent(), containsString("usage: BddScenariosCounter"));
     }
 
     private Properties mockPropertiesBeanInstantiation()

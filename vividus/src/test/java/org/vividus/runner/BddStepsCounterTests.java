@@ -42,7 +42,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.vividus.SystemOutTests;
+import org.vividus.SystemStreamTests;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.PathFinder;
 import org.vividus.bdd.StoryLoader;
@@ -52,7 +52,7 @@ import org.vividus.configuration.Vividus;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Vividus.class, BeanFactory.class })
-public class BddStepsCounterTests extends SystemOutTests
+public class BddStepsCounterTests extends SystemStreamTests
 {
     private static final String STEP_PATTERN = "%s I do something with '%s'";
     private static final String AND = "And";
@@ -121,7 +121,7 @@ public class BddStepsCounterTests extends SystemOutTests
     {
         mockStepsAndCandidates(DEFAULT_STORY_LOCATION, List.of(WHEN_STEP), List.of(stepCandidate));
         BddStepsCounter.main(new String[0]);
-        String output = getOutput();
+        String output = getOutStreamContent();
         assertTrue(output.contains(NO_MATCHED_STEPS));
         assertTrue(output.contains(NO_STEP_CANDIDATES));
         assertTrue(output.contains(WHEN_STEP));
@@ -134,7 +134,7 @@ public class BddStepsCounterTests extends SystemOutTests
     {
         mockStepsAndCandidates(DEFAULT_STORY_LOCATION, List.of(COMMENT + WHEN_STEP), List.of(stepCandidate));
         BddStepsCounter.main(new String[0]);
-        String output = getOutput();
+        String output = getOutStreamContent();
         assertTrue(output.contains(NO_MATCHED_STEPS));
         assertFalse(output.contains(NO_STEP_CANDIDATES));
     }
@@ -163,7 +163,7 @@ public class BddStepsCounterTests extends SystemOutTests
         when(stepCandidate.getStartingWord()).thenReturn(THEN).thenReturn(THEN).thenReturn(WHEN);
         when(stepCandidate.getPatternAsString()).thenReturn(CANDIDATE_STRING);
         BddStepsCounter.main(new String[] { "--top", ONE_OCCURRENCE });
-        String output = getOutput();
+        String output = getOutStreamContent();
         assertTrue(output.contains(String.format(STEP_PATTERN, THEN, VARIABLE)));
         assertFalse(output.contains(String.format(STEP_PATTERN, WHEN, VARIABLE)));
         assertTrue(output.contains(TWO_OCCURRENCES));
@@ -180,7 +180,7 @@ public class BddStepsCounterTests extends SystemOutTests
         when(stepCandidate.getStartingWord()).thenReturn(WHEN);
         when(stepCandidate.getPatternAsString()).thenReturn(CANDIDATE_STRING);
         BddStepsCounter.main(new String[0]);
-        String output = getOutput();
+        String output = getOutStreamContent();
         assertTrue(output.contains(TOP_STEPS));
         assertTrue(output.contains(OCCURRENCES));
         assertTrue(output.contains(String.format(STEP_PATTERN, WHEN, VARIABLE)));
