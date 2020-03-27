@@ -16,7 +16,6 @@
 
 package org.vividus.bdd.steps.api;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,7 +38,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.jayway.jsonpath.InvalidJsonException;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import org.apache.http.ConnectionClosedException;
@@ -346,6 +344,7 @@ class JsonResponseValidationStepsTests
                 argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
         when(httpTestContext.getResponse()).thenReturn(response);
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
+        when(response.getResponseBody()).thenReturn(JSON.getBytes(StandardCharsets.UTF_8));
         when(response.getResponseBodyAsString()).thenReturn(HTML, JSON);
         jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
                 DURATION_DIVIDER);
@@ -356,7 +355,7 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testPresenceOfExceptionThrownIfResponseDidNtContainJson() throws IOException, NoSuchFieldException,
+    void testFailedAssertionRecordingIfResponseDidNtContainJson() throws IOException, NoSuchFieldException,
             IllegalAccessException
     {
         HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
@@ -367,11 +366,10 @@ class JsonResponseValidationStepsTests
         when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
                 argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
         when(httpTestContext.getResponse()).thenReturn(response);
-        when(httpTestContext.getJsonContext()).thenReturn(HTML);
         when(response.getResponseBodyAsString()).thenReturn(HTML);
-        assertThrows(InvalidJsonException.class, () -> jsonResponseValidationSteps
-                .waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
-                DURATION_DIVIDER));
+        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
+                DURATION_DIVIDER);
+        verify(softAssert).recordFailedAssertion("HTTP response body is not present");
     }
 
     @Test

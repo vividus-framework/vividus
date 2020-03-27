@@ -53,3 +53,8 @@ When I wait for presence of element by `$.json.iteration3` for `PT15S` duration 
 |}                                                                                             |
 |When I send HTTP POST to the relative URL '/post'                                             |
 |Then a JSON element by the JSON path '$.headers.Content-Type' is equal to '"application/json"'|
+
+Scenario: Verify failure in step "When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute"
+When I wait for presence of element by `$.non-existing` for `PT1S` duration retrying 1 times
+|step                                                                                          |
+|When I send HTTP GET to the relative URL '/status/204'                                        |
