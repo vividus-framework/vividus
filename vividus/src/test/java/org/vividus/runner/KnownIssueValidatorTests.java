@@ -43,7 +43,7 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.vividus.SystemOutTests;
+import org.vividus.SystemStreamTests;
 import org.vividus.bdd.issue.BddKnownIssueIdentifier;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
@@ -54,7 +54,7 @@ import org.vividus.softassert.model.KnownIssue;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Vividus.class, BeanFactory.class})
 @PowerMockIgnore({"javax.*", "com.sun.*", "jdk.*", "org.xml.*", "org.w3c.*"})
-public class KnownIssueValidatorTests extends SystemOutTests
+public class KnownIssueValidatorTests extends SystemStreamTests
 {
     private static final String EMPTY = "";
     private static final String KEY = "key";
@@ -82,7 +82,7 @@ public class KnownIssueValidatorTests extends SystemOutTests
 
         KnownIssueValidator.main(new String[0]);
         verify(knownIssueChecker).setTestInfoProvider(null);
-        assertThat(getOutput(), is(equalTo(EMPTY)));
+        assertThat(getOutStreamContent(), is(equalTo(EMPTY)));
     }
 
     @Test
@@ -98,7 +98,7 @@ public class KnownIssueValidatorTests extends SystemOutTests
         doReturn(knownIssues).when(knownIssueProvider).getKnownIssueIdentifiers();
 
         KnownIssueValidator.main(new String[0]);
-        assertThat(getOutput(), containsString(KEY));
+        assertThat(getOutStreamContent(), containsString(KEY));
     }
 
     @Test
@@ -117,14 +117,15 @@ public class KnownIssueValidatorTests extends SystemOutTests
         when(knownIssue.getIdentifier()).thenReturn(KEY);
 
         KnownIssueValidator.main(new String[]{"--file", failuresList.toString()});
-        assertThat(getOutput(), stringContainsInOrder(KEY, SEPARATOR, MATCHED_FAILURE, SEPARATOR, UNMATCHED_FAILURE));
+        assertThat(getOutStreamContent(),
+                stringContainsInOrder(KEY, SEPARATOR, MATCHED_FAILURE, SEPARATOR, UNMATCHED_FAILURE));
     }
 
     @Test
     public void testHelpOptionIsPresent() throws Exception
     {
         KnownIssueValidator.main(new String[]{"--help"});
-        assertThat(getOutput(), containsString("usage: KnownIssueValidator"));
+        assertThat(getOutStreamContent(), containsString("usage: KnownIssueValidator"));
     }
 
     @Test

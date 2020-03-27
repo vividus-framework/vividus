@@ -39,13 +39,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.vividus.SystemOutTests;
+import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({"javax.*", "org.xml.*", "org.w3c.*", "com.sun.*"})
-public class BddStepPrinterTests extends SystemOutTests
+public class BddStepPrinterTests extends SystemStreamTests
 {
     @Test
     public void testPrintHelp() throws Exception
@@ -120,7 +120,7 @@ public class BddStepPrinterTests extends SystemOutTests
     {
         String lineSeparator = System.lineSeparator();
         String expectedOutput = lines.stream().collect(Collectors.joining(lineSeparator, "", lineSeparator));
-        assertEquals(expectedOutput, getOutput());
+        assertEquals(expectedOutput, getOutStreamContent());
     }
 
     @SuppressWarnings("unused")
