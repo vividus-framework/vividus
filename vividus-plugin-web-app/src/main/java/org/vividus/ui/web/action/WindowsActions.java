@@ -74,8 +74,10 @@ public class WindowsActions implements IWindowsActions
     {
         return pickWindow((WebDriver driver, String window) ->
         {
+            LOGGER.atInfo().addArgument(window).log("Switching to a window \"{}\"");
             driver.switchTo().window(window);
             String title = driver.getTitle();
+            LOGGER.atInfo().addArgument(title).log("Switched to a window with the title: \"{}\"");
             if (matcher.matches(title))
             {
                 return title;

@@ -16,6 +16,9 @@
 
 package org.vividus.ui.web.action;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -26,6 +29,10 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
@@ -45,13 +52,15 @@ import org.openqa.selenium.WebDriver.Window;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class WindowsActionsTests
 {
     private static final String WINDOW3 = "window3";
     private static final int DIMENSION_SIZE = 100;
     private static final String WINDOW2 = "window2";
     private static final String WINDOW1 = "window1";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(WindowsActions.class);
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -171,6 +180,14 @@ class WindowsActionsTests
         inOrder.verify(targetLocator).window(WINDOW3);
         inOrder.verify(targetLocator).window(WINDOW2);
         inOrder.verify(targetLocator).window(WINDOW1);
+        String switchMessage = "Switching to a window \"{}\"";
+        String titleMessage = "Switched to a window with the title: \"{}\"";
+        assertThat(logger.getLoggingEvents(), is(List.of(info(switchMessage, WINDOW3),
+                                                         info(titleMessage, WINDOW3),
+                                                         info(switchMessage, WINDOW2),
+                                                         info(titleMessage, WINDOW2),
+                                                         info(switchMessage, WINDOW1),
+                                                         info(titleMessage, WINDOW1))));
     }
 
     @Test

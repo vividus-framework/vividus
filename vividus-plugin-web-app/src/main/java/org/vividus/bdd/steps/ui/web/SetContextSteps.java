@@ -16,27 +16,33 @@
 
 package org.vividus.bdd.steps.ui.web;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.vividus.ui.validation.matcher.WebElementMatchers.elementNumber;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import javax.inject.Inject;
 
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
+import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
+import org.vividus.ui.web.action.IWaitActions;
 import org.vividus.ui.web.action.IWindowsActions;
 import org.vividus.ui.web.action.SearchActions;
+import org.vividus.ui.web.action.WaitResult;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.Visibility;
@@ -54,6 +60,7 @@ public class SetContextSteps
     @Inject private SearchActions searchActions;
     @Inject private IHighlightingSoftAssert highlightingSoftAssert;
     @Inject private IWindowsActions windowsActions;
+    @Inject private IWaitActions waitActions;
 
     /**
      * Set the context for further localization of elements to the <b>page</b> itself
@@ -291,58 +298,84 @@ public class SetContextSteps
     }
 
     /**
-     * Switch the focus of future browser commands to the new <b>window object</b> with the specified <b>windowName</b>.
-     * <p>
-     * Each browser <b>window</b> or <b>tab</b> is considered to be a separate <b>window object</b>. This object holds
-     * corresponding <b>Document</b> object, which itself is a html page.
-     * </p>
-     * <b>WindowName</b> references to the page title, which is set by {@code <title>} tag.
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Searches among currently opened windows (and tabs) for a window with the specified <b>windowName</b>.</li>
-     * <li>If such window is found switches focus to it. If window is not found current focus stays unchanged;</li>
-     * </ul>
-     * @param windowName Value of the {@code <title>} tag of a desired window
-     * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
-     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
-     */
-    @When("I switch to a window with the name '$windowName'")
-    public void switchingToWindow(String windowName)
+    * Switch the focus of future browser commands to the new <b>window object</b> with the specified <b>windowName</b>.
+    * <p>
+    * Each browser <b>window</b> or <b>tab</b> is considered to be a separate <b>window object</b>. This object holds
+    * corresponding <b>Document</b> object, which itself is a HTML page.
+    * </p>
+    * <b>WindowName</b> references to the page title, which is set by {@code <title>} tag.
+    * <p>
+    * Actions performed at this step:
+    * <ul>
+    * <li>Searches among currently opened windows (and tabs) for a window with the specified <b>windowName</b>.</li>
+    * <li>If such window is found switches focus to it. If window is not found current focus stays unchanged;</li>
+    * </ul>
+    * @param comparisonRule is equal to, contains, does not contain
+    * @param windowName Value of the {@code <title>} tag of a desired window
+    * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
+    * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+    */
+    @When("I switch to window with title that $stringComparisonRule `$windowName`")
+    public void switchingToWindow(StringComparisonRule comparisonRule, String windowName)
     {
-        switchToWindow(equalTo(windowName));
+        Matcher<String> matcher = comparisonRule.createMatcher(windowName);
+        String titleAfterSwitch = windowsActions.switchToWindowWithMatchingTitle(matcher);
+        resetContextIf(() ->
+            highlightingSoftAssert.assertThat("New window or browser tab name is ", "Window or tab name is ",
+                titleAfterSwitch, matcher));
     }
 
     /**
-     * Switch the focus of future browser commands to the new <b>window object</b> with the specified part of
-     * <b>windowName</b>.
-     * <p>
-     * Each browser <b>window</b> or <b>tab</b> is considered to be a separate <b>window object</b>. This object holds
-     * corresponding <b>Document</b> object, which itself is a html page.
-     * </p>
-     * <b>WindowName</b> references to the page title, which is set by {@code <title>} tag.
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Searches among currently opened windows (and tabs) for a window which has the specified part of the
-     * <b>windowName</b>.</li>
-     * <li>If such window is found switches focus to it. If window is not found current focus stays unchanged;</li>
-     * </ul>
-     * @param windowPartName Any part of the value of the {@code <title>} tag of a desired window
-     * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
-     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
-     */
-    @When("I switch to a window with the name containing '$windowPartName'")
-    public void switchingToWindowPartName(String windowPartName)
+    * Wait for a window and switches the focus of future browser commands to the new
+    * <b>window object</b> with the specified <b>title</b>.
+    * <p>
+    * Each browser <b>window</b> or <b>tab</b> is considered to be a separate <b>window object</b>. This object holds
+    * corresponding <b>Document</b> object, which itself is a HTML page.
+    * </p>
+    * <b>Title</b> references to the page title, which is set by {@code <title>} tag.
+    * <p>
+    * Actions performed at this step:
+    * <ul>
+    * <li>Searches among currently opened windows (and tabs) for a window with the specified <b>windowName</b>.</li>
+    * <li>If such window is found switches focus to it. If window is not found current focus stays unchanged;</li>
+    * </ul>
+    * @param comparisonRule is equal to, contains, does not contain
+    * @param title Value of the {@code <title>} tag of a desired window
+    * @param duration in format <a href="https://en.wikipedia.org/wiki/ISO_8601">Duration Format</a>
+    * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
+    * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+    */
+    @When("I wait `$duration` until window with title that $comparisonRule `$title` appears and switch to it")
+    public void waitForWindowAndSwitch(Duration duration, StringComparisonRule comparisonRule, String title)
     {
-        switchToWindow(containsString(windowPartName));
+        Matcher<String> expected = comparisonRule.createMatcher(title);
+        WaitResult<Boolean> result = waitActions.wait(webDriverProvider.get(), duration, new ExpectedCondition<>()
+        {
+            @Override
+            public Boolean apply(WebDriver driver)
+            {
+                try
+                {
+                    return expected.matches(windowsActions.switchToWindowWithMatchingTitle(expected));
+                }
+                catch (WebDriverException webDriverException)
+                {
+                    return false;
+                }
+            }
+
+            @Override
+            public String toString()
+            {
+                return String.format("switch to a window where title %s \"%s\"", comparisonRule, title);
+            }
+        });
+        resetContextIf(result::isWaitPassed);
     }
 
-    private void switchToWindow(Matcher<String> matcher)
+    private void resetContextIf(BooleanSupplier condition)
     {
-        String titleAfterSwitch = windowsActions.switchToWindowWithMatchingTitle(matcher);
-        if (highlightingSoftAssert.assertThat("New window or browser tab name is ", "Window or tab name is ",
-                titleAfterSwitch, matcher))
+        if (condition.getAsBoolean())
         {
             changeContextToPage();
         }
