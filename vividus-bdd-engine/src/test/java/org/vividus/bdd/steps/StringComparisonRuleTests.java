@@ -24,6 +24,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
+import org.hamcrest.core.StringRegularExpression;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -36,7 +37,8 @@ class StringComparisonRuleTests
         return Stream.of(
             Arguments.of(StringComparisonRule.IS_EQUAL_TO,      IsEqual.class),
             Arguments.of(StringComparisonRule.CONTAINS,         StringContains.class),
-            Arguments.of(StringComparisonRule.DOES_NOT_CONTAIN, IsNot.class)
+            Arguments.of(StringComparisonRule.DOES_NOT_CONTAIN, IsNot.class),
+            Arguments.of(StringComparisonRule.MATCHES,          StringRegularExpression.class)
         );
         // @formatter:on
     }
