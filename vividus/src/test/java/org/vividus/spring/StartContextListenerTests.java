@@ -17,13 +17,14 @@
 package org.vividus.spring;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -32,14 +33,23 @@ import org.springframework.context.event.ContextStartedEvent;
 class StartContextListenerTests
 {
     @Test
-    void testOnApplicationEvent(@TempDir Path tempDir) throws IOException
+    void shouldDeleteCleanableDirectories(@TempDir Path tempDir) throws IOException
     {
-        Path path = tempDir.resolve("to-be-cleaned-up");
-        Files.createDirectories(path);
-        File file = path.toFile();
+        Path dir = tempDir.resolve("to-be-cleaned-up");
+        Files.createDirectories(dir);
         StartContextListener startContextListener = new StartContextListener();
-        startContextListener.setCleanableDirectories(List.of(file));
+        startContextListener.setCleanableDirectories(Optional.of(List.of(dir.toFile())));
         startContextListener.onApplicationEvent(mock(ContextStartedEvent.class));
-        assertFalse(file.exists());
+        assertTrue(Files.exists(tempDir));
+        assertFalse(Files.exists(dir));
+    }
+
+    @Test
+    void shouldIgnoreNonExistentCleanableDirectories(@TempDir Path tempDir)
+    {
+        StartContextListener startContextListener = new StartContextListener();
+        startContextListener.setCleanableDirectories(Optional.of(List.of(tempDir.resolve("non-existent").toFile())));
+        startContextListener.onApplicationEvent(mock(ContextStartedEvent.class));
+        assertTrue(Files.exists(tempDir));
     }
 }
