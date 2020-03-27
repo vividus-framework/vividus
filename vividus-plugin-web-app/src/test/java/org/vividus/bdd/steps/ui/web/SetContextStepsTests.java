@@ -16,6 +16,9 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,7 +28,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,13 +40,17 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
+import org.vividus.ui.web.action.IWaitActions;
 import org.vividus.ui.web.action.IWindowsActions;
 import org.vividus.ui.web.action.SearchActions;
+import org.vividus.ui.web.action.WaitResult;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.SearchParameters;
@@ -54,8 +63,8 @@ import org.vividus.ui.web.util.LocatorUtil;
 class SetContextStepsTests
 {
     private static final String EQUALS_MATCHER = "\"new title\"";
-    private static final String CONTAINING_MATCHER = "a string containing \"new title\"";
     private static final String NEW_TITLE = "new title";
+    private static final String QUOTE = "\"";
     private static final String TITLE = "Title";
     private static final String MATCHER_STRING = "not \"{770e3411-5e19-4831-8f36-fc76e46a2807}\"";
     private static final String AN_ELEMENT_WITH_THE_NAME_NAME = "An element with the name 'name'";
@@ -68,22 +77,19 @@ class SetContextStepsTests
             ATTRIBUTE_VALUE);
     private static final String FRAME_XPATH = ".//*[(local-name()='frame' or local-name()='iframe')"
             + " and normalize-space(@attributeType)=\"attributeValue\"]";
+    private static final String WINDOW_OR_TAB_WITH_NAME = "Window or tab name is ";
     private static final String IS_FOUND = " is found";
     private static final String SIGN_EQUALITY = " = ";
     private static final String AND_NUMBER = " and number ";
+    private static final String NEW_WINDOW_OR_TAB_IS_FOUND = "New window or browser tab name is ";
     private static final String FRAME_WITH_ATTRIBUTE = "Frame with attribute ";
     private static final String NAME = "name";
     private static final String APOSTROPHE = "'";
     private static final String XPATH = "someXpath";
     private static final String CURRENT_WINDOW_HANDLE = "{770e3411-5e19-4831-8f36-fc76e46a2807}";
     private static final String OTHER_WINDOW_HANDLE = "{248427e8-e67d-47ba-923f-4051f349f813}";
-    private static final String WINDOW_OR_TAB_WITH_NAME = "Window or tab name is ";
     private static final String NEW_WINDOW_IS_FOUND = "New window is found";
     private static final String NEW_WINDOW = "New window '";
-    private static final String NEW_WINDOW_OR_TAB_IS_FOUND = "New window or browser tab name is ";
-    private static final String TEXT = "text";
-    private static final String TABLE_ROW_WITH_CELL_WITH_TEXT = "Table row containing cell with the text '%s'";
-    private static final String ANCESTOR_TR = "./ancestor::tr[1]";
 
     @Mock
     private IBaseValidations mockedBaseValidations;
@@ -111,6 +117,9 @@ class SetContextStepsTests
 
     @Mock
     private IWindowsActions windowsActions;
+
+    @Mock
+    private IWaitActions waitActions;
 
     @InjectMocks
     private SetContextSteps setContextSteps;
@@ -213,56 +222,6 @@ class SetContextStepsTests
     }
 
     @Test
-    void testSwitchingToWindowWithPartNameNoNewPage()
-    {
-        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> matcher.toString()
-                .contains(CONTAINING_MATCHER)))).thenReturn(TITLE);
-        setContextSteps.switchingToWindowPartName(NEW_TITLE);
-        verify(softAssert).assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
-                eq(TITLE), argThat(matcher -> matcher.toString().contains(CONTAINING_MATCHER)));
-        verifyNoInteractions(webUiContext);
-    }
-
-    @Test
-    void testSwitchingToWindowWithTheFullName()
-    {
-        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> matcher.toString()
-                .contains(CONTAINING_MATCHER)))).thenReturn(NEW_TITLE);
-        when(softAssert.assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
-                eq(NEW_TITLE), argThat(matcher -> matcher.toString().contains(CONTAINING_MATCHER)))).thenReturn(true);
-
-        setContextSteps.switchingToWindowPartName(NEW_TITLE);
-
-        verify(webUiContext).reset();
-    }
-
-    @Test
-    void testSwitchingToWindowWithNameNoNewPage()
-    {
-        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> matcher.toString()
-                .equals(EQUALS_MATCHER)))).thenReturn(TITLE);
-
-        setContextSteps.switchingToWindow(NEW_TITLE);
-
-        verify(softAssert).assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
-                eq(TITLE), argThat(matcher -> matcher.toString().equals(EQUALS_MATCHER)));
-        verifyNoInteractions(webUiContext);
-    }
-
-    @Test
-    void testSwitchingToWindowWithName()
-    {
-        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> matcher.toString()
-                .equals(EQUALS_MATCHER)))).thenReturn(NEW_TITLE);
-        when(softAssert.assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
-                eq(NEW_TITLE), argThat(matcher -> matcher.toString().equals(EQUALS_MATCHER)))).thenReturn(true);
-
-        setContextSteps.switchingToWindow(NEW_TITLE);
-
-        verify(webUiContext).reset();
-    }
-
-    @Test
     void testSwitchingToFrame()
     {
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
@@ -279,6 +238,30 @@ class SetContextStepsTests
         verify(spy).switchingToDefault();
         verify(mockedTargetLocator).frame(mockedWebElement);
         verify(webUiContext, times(2)).reset();
+    }
+
+    @Test
+    void shouldSwitchAndResetContex()
+    {
+        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> matcher.toString()
+                .equals(EQUALS_MATCHER)))).thenReturn(TITLE);
+        when(softAssert.assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
+                eq(TITLE), argThat(matcher -> matcher.toString().equals(EQUALS_MATCHER)))).thenReturn(true);
+
+        setContextSteps.switchingToWindow(StringComparisonRule.IS_EQUAL_TO, NEW_TITLE);
+
+        verify(webUiContext).reset();
+    }
+
+    @Test
+    void testSwitchingToWindowWithPartNameNoNewPage()
+    {
+        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> matcher.toString()
+                .contains(EQUALS_MATCHER)))).thenReturn(TITLE);
+        setContextSteps.switchingToWindow(StringComparisonRule.IS_EQUAL_TO, NEW_TITLE);
+        verify(softAssert).assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
+                eq(TITLE), argThat(matcher -> matcher.toString().contains(EQUALS_MATCHER)));
+        verifyNoInteractions(webUiContext);
     }
 
     @Test
@@ -354,5 +337,42 @@ class SetContextStepsTests
                 new SearchAttributes(ActionAttributeType.XPATH, FRAME_XPATH))).thenReturn(mockedWebElements);
         setContextSteps.switchToFrame(framesNumber, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verify(mockedTargetLocator, never()).frame(mockedWebElement);
+    }
+
+    @Test
+    void shouldSwitchToAWindowMatchingTheRuleAndResetContext()
+    {
+        Duration duration = Duration.ofMillis(1);
+        when(webDriverProvider.get()).thenReturn(mockedWebDiver);
+        WaitResult<Boolean> result = new WaitResult<>();
+        result.setWaitPassed(true);
+        when(waitActions.wait(eq(mockedWebDiver), eq(duration), waitForWindow())).thenReturn(result);
+        when(windowsActions.switchToWindowWithMatchingTitle(
+            argThat(m -> (QUOTE + TITLE + QUOTE).equals(m.toString()))))
+            .thenThrow(new WebDriverException()).thenReturn(TITLE);
+        setContextSteps.waitForWindowAndSwitch(duration, StringComparisonRule.IS_EQUAL_TO, TITLE);
+        verify(webUiContext).reset();
+    }
+
+    @Test
+    void shouldNotResetToAPageIfSwitchNotSucceeded()
+    {
+        Duration duration = Duration.ofMillis(1);
+        when(webDriverProvider.get()).thenReturn(mockedWebDiver);
+        WaitResult<Object> result = new WaitResult<>();
+        result.setWaitPassed(false);
+        when(waitActions.wait(eq(mockedWebDiver), eq(duration), any())).thenReturn(result);
+        setContextSteps.waitForWindowAndSwitch(duration, StringComparisonRule.IS_EQUAL_TO, TITLE);
+        verifyNoInteractions(softAssert);
+    }
+
+    private Function<WebDriver, Boolean> waitForWindow()
+    {
+        return argThat(waiter -> {
+            assertFalse(waiter.apply(mockedWebDiver));
+            assertTrue(waiter.apply(mockedWebDiver));
+            assertEquals("switch to a window where title IS_EQUAL_TO \"Title\"", waiter.toString());
+            return true;
+        });
     }
 }

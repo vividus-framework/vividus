@@ -1,0 +1,5 @@
+Composite: When I switch to a window with the name '$windowName'
+When I switch to window with title that is equal to `<windowName>`
+
+Composite: When I switch to a window with the name containing '$windowPartName'
+When I switch to window with title that contains `<windowPartName>`
