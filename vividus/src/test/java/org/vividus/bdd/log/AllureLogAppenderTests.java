@@ -16,51 +16,84 @@
 
 package org.vividus.bdd.log;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.logging.log4j.core.LogEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.SystemStreamTests;
+import org.vividus.bdd.report.allure.AllureStoryReporter;
 
 @ExtendWith(MockitoExtension.class)
-class AllureLogAppenderTests
+class AllureLogAppenderTests extends SystemStreamTests
 {
-    private static final Charset CHARSET = StandardCharsets.UTF_8;
+    private static final String NAME = "Name";
 
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-
-    private final PrintStream defaultPrintStreamErr = System.err;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        System.setErr(new PrintStream(outContent, true, CHARSET));
-    }
+    @Mock private Filter filter;
+    @Mock private Layout<?> layout;
 
     @Test
-    void testCreateAppenderWithNullName()
+    void shouldNotCreateAppenderWithNullName()
     {
-        Filter filter = mock(Filter.class);
-        Layout<?> layout = mock(Layout.class);
         AllureLogAppender appender = AllureLogAppender.createAppender(null, filter, layout);
-        assertTrue(outContent.toString(CHARSET).contains("No name provided for AllureLogAppender"));
+        assertThat(getErrStreamContent(), containsString("No name provided for AllureLogAppender"));
         assertNull(appender);
     }
 
-    @AfterEach
-    void afterEach()
+    @Test
+    void shouldCreateAppenderWithNonNullName()
     {
-        System.setErr(defaultPrintStreamErr);
+        AllureLogAppender appender = AllureLogAppender.createAppender(NAME, filter, layout);
+        assertNotNull(appender);
+        assertEquals(NAME, appender.getName());
+        assertEquals(filter, appender.getFilter());
+        assertEquals(layout, appender.getLayout());
+    }
+
+    @Test
+    void shouldBeSingleton()
+    {
+        AllureLogAppender appender = AllureLogAppender.createAppender(NAME, filter, layout);
+        assertNotNull(appender);
+        assertEquals(appender, AllureLogAppender.getInstance());
+    }
+
+    @Test
+    void shouldNotAppendLogEventIfAllureStoryReporterIsNotSet()
+    {
+        AllureLogAppender appender = AllureLogAppender.createAppender(NAME, filter, layout);
+        LogEvent logEvent = mock(LogEvent.class);
+        appender.append(logEvent);
+        verifyNoInteractions(logEvent);
+    }
+
+    @Test
+    void shouldAddLogStepIfAllureStoryReporterIsSet()
+    {
+        AllureLogAppender appender = AllureLogAppender.createAppender(NAME, filter, layout);
+        final AllureStoryReporter allureStoryReporter = mock(AllureStoryReporter.class);
+        appender.setAllureStoryReporter(allureStoryReporter);
+        LogEvent logEvent = mock(LogEvent.class);
+        final String logEntry = "message";
+        final Level logLevel = Level.INFO;
+        when(layout.toByteArray(logEvent)).thenReturn(logEntry.getBytes(StandardCharsets.UTF_8));
+        when(logEvent.getLevel()).thenReturn(logLevel);
+        appender.append(logEvent);
+        verify(allureStoryReporter).addLogStep(logLevel.name(), logEntry);
     }
 }

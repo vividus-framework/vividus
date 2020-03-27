@@ -48,10 +48,13 @@ public class AllureLogAppender extends AbstractAppender
         if (name == null)
         {
             LOGGER.error("No name provided for AllureLogAppender");
-            return null;
+            instance = null;
+        }
+        else
+        {
+            instance = new AllureLogAppender(name, filter, layout);
         }
 
-        instance = new AllureLogAppender(name, filter, layout);
         return instance;
     }
 
