@@ -18,8 +18,8 @@ package org.vividus.spring;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationListener;
@@ -27,20 +27,12 @@ import org.springframework.context.event.ContextStartedEvent;
 
 public class StartContextListener implements ApplicationListener<ContextStartedEvent>
 {
-    private List<File> cleanableDirectories;
+    private Optional<List<File>> cleanableDirectories;
 
     @Override
     public void onApplicationEvent(ContextStartedEvent event)
     {
-        clean();
-    }
-
-    private void clean()
-    {
-        if (cleanableDirectories != null)
-        {
-            cleanableDirectories.forEach(this::deleteDirectory);
-        }
+        cleanableDirectories.stream().flatMap(List::stream).forEach(this::deleteDirectory);
     }
 
     private void deleteDirectory(File directory)
@@ -58,8 +50,8 @@ public class StartContextListener implements ApplicationListener<ContextStartedE
         }
     }
 
-    public void setCleanableDirectories(List<File> cleanableDirectories)
+    public void setCleanableDirectories(Optional<List<File>> cleanableDirectories)
     {
-        this.cleanableDirectories = Collections.unmodifiableList(cleanableDirectories);
+        this.cleanableDirectories = cleanableDirectories;
     }
 }
