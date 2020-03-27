@@ -8,7 +8,6 @@ dependencies {
 
     implementation(group: 'org.springframework', name: 'spring-jdbc', version: versions.spring)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
 
     testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)

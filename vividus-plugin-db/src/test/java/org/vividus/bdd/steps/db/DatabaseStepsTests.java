@@ -135,23 +135,20 @@ class DatabaseStepsTests
 
     private static final String DURATION_PATTERN = "[0-2][0-9]:[0-5][0-9]:[01][0-9]\\.[0-9]{3}";
 
-    @Mock
-    private IBddVariableContext bddVariableContext;
+    private final IBddVariableContext bddVariableContext = mock(IBddVariableContext.class);
 
-    @Mock
-    private ISoftAssert softAssert;
+    private final ISoftAssert softAssert = mock(ISoftAssert.class);
+
+    private final IAttachmentPublisher attachmentPublisher = mock(IAttachmentPublisher.class);
 
     @Mock
     private Map<String, DriverManagerDataSource> dataSources;
 
     @Mock
-    private IAttachmentPublisher attachmentPublisher;
-
-    @Mock
     private HashFunction hashFunction;
 
     @InjectMocks
-    private DatabaseSteps databaseSteps;
+    private DatabaseSteps databaseSteps = new DatabaseSteps(bddVariableContext, attachmentPublisher, softAssert);
 
     @BeforeEach
     void beforeEach()

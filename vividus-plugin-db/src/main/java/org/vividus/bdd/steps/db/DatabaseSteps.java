@@ -34,8 +34,6 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 
@@ -64,16 +62,24 @@ import org.vividus.util.wait.Waiter;
 public class DatabaseSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSteps.class);
+    private final IBddVariableContext bddVariableContext;
+    private final IAttachmentPublisher attachmentPublisher;
+    private final ISoftAssert softAssert;
     private HashFunction hashFunction;
-    @Inject private IBddVariableContext bddVariableContext;
-    @Inject private IAttachmentPublisher attachmentPublisher;
-    @Inject private ISoftAssert softAssert;
     private Map<String, DriverManagerDataSource> dataSources;
     private Duration dbQueryTimeout;
     private RowsCollector rowsCollector;
     private int diffLimit;
 
     private final Map<String, JdbcTemplate> jdbcTemplates = new ConcurrentHashMap<>();
+
+    public DatabaseSteps(IBddVariableContext bddVariableContext, IAttachmentPublisher attachmentPublisher,
+            ISoftAssert softAssert)
+    {
+        this.bddVariableContext = bddVariableContext;
+        this.attachmentPublisher = attachmentPublisher;
+        this.softAssert = softAssert;
+    }
 
     /**
      * Step is intended to verify SQL state of JDBC connection
