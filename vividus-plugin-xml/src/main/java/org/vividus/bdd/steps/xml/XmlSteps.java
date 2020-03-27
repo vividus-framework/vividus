@@ -21,8 +21,6 @@ import static org.hamcrest.xml.HasXPath.hasXPath;
 import java.io.IOException;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
@@ -38,8 +36,14 @@ import org.xmlunit.diff.ElementSelectors;
 
 public class XmlSteps
 {
-    @Inject private ISoftAssert softAssert;
-    @Inject private IBddVariableContext bddVariableContext;
+    private final ISoftAssert softAssert;
+    private final IBddVariableContext bddVariableContext;
+
+    public XmlSteps(ISoftAssert softAssert, IBddVariableContext bddVariableContext)
+    {
+        this.softAssert = softAssert;
+        this.bddVariableContext = bddVariableContext;
+    }
 
     /**
      * Save XML data by XPath to the variable
