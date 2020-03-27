@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.context.SshTestContext;
@@ -40,10 +38,18 @@ import org.vividus.ssh.sftp.SftpOutput;
 
 public class SshSteps
 {
-    @Inject private IBddVariableContext bddVariableContext;
-    @Inject private Map<String, CommandExecutionManager<?>> commandExecutionManagers;
-    @Inject private SshTestContext sshTestContext;
+    private final IBddVariableContext bddVariableContext;
+    private final Map<String, CommandExecutionManager<?>> commandExecutionManagers;
+    private final SshTestContext sshTestContext;
     private Map<String, ServerConfiguration> serverConfigurations;
+
+    public SshSteps(IBddVariableContext bddVariableContext,
+            Map<String, CommandExecutionManager<?>> commandExecutionManagers, SshTestContext sshTestContext)
+    {
+        this.bddVariableContext = bddVariableContext;
+        this.commandExecutionManagers = commandExecutionManagers;
+        this.sshTestContext = sshTestContext;
+    }
 
     /**
      * Step retrieves server configuration by key, opens SSH session and executes commands remotely.
