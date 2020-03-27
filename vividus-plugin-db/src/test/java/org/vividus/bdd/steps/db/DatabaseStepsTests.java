@@ -137,9 +137,9 @@ class DatabaseStepsTests
 
     private final IBddVariableContext bddVariableContext = mock(IBddVariableContext.class);
 
-    private final ISoftAssert softAssert  = mock(ISoftAssert.class);
+    private final ISoftAssert softAssert = mock(ISoftAssert.class);
 
-    private final IAttachmentPublisher attachmentPublisher  = mock(IAttachmentPublisher.class);
+    private final IAttachmentPublisher attachmentPublisher = mock(IAttachmentPublisher.class);
 
     @Mock
     private Map<String, DriverManagerDataSource> dataSources;
