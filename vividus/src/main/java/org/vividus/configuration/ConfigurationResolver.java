@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +33,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -50,6 +52,7 @@ public final class ConfigurationResolver
     private static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
     private static final String ROOT = "";
     private static final String PROFILE = "profile";
+    private static final String PROFILES = "profiles";
     private static final String ENVIRONMENT = "environment";
     private static final String ENVIRONMENTS = "environments";
     private static final String SUITE = "suite";
@@ -127,17 +130,44 @@ public final class ConfigurationResolver
     private static Multimap<String, String> assembleConfiguration(Properties configurationProperties,
             Properties overridingProperties)
     {
-        List<String> environments = Stream.of(StringUtils.split(
-                getConfigurationPropertyValue(configurationProperties, overridingProperties, ENVIRONMENTS), ','))
-                .collect(Collectors.toList());
-
         Multimap<String, String> configuration = LinkedHashMultimap.create();
-        configuration.put(PROFILE,
-                getConfigurationPropertyValue(configurationProperties, overridingProperties, PROFILE));
-        // First environments in the sequence have high priority then next ones
-        configuration.putAll(ENVIRONMENT, Lists.reverse(environments));
+
+        String profiles = getCompetingConfigurationPropertyValue(configurationProperties, overridingProperties,
+                Pair.of(PROFILE, PROFILES));
+        configuration.putAll(PROFILE, asPaths(profiles));
+        String environments = getConfigurationPropertyValue(configurationProperties, overridingProperties,
+                ENVIRONMENTS);
+        configuration.putAll(ENVIRONMENT, asPaths(environments));
         configuration.put(SUITE, getConfigurationPropertyValue(configurationProperties, overridingProperties, SUITE));
         return configuration;
+    }
+
+    private static String getCompetingConfigurationPropertyValue(Properties configurationProperties,
+            Properties overridingProperties, Pair<String, String> competingKeys)
+    {
+        return Stream.of(competingKeys.getLeft(), competingKeys.getRight())
+                .map(k -> Map.entry(k,
+                        getConfigurationPropertyValue(configurationProperties, overridingProperties, k, false)))
+                .filter(e -> e.getValue().isPresent())
+                .collect(Collectors.collectingAndThen(Collectors.toList(), props ->
+                {
+                    int size = props.size();
+                    if (size == 1)
+                    {
+                        return props.get(0).getValue().get();
+                    }
+                    String errorMessage = size == 0 ? "Either '%s' or '%s' configuration property must be set"
+                            : "Exactly one configuration property: '%s' or '%s' must be set";
+                    throw new IllegalStateException(
+                            String.format(errorMessage, competingKeys.getLeft(), competingKeys.getRight()));
+                }));
+    }
+
+    private static List<String> asPaths(String value)
+    {
+        // First configuration paths in the sequence have high priority then next ones
+        return Stream.of(StringUtils.split(value, ','))
+                .collect(Collectors.collectingAndThen(Collectors.toList(), Lists::reverse));
     }
 
     private static Map<String, String> loadFilteredSystemProperties()
@@ -153,6 +183,12 @@ public final class ConfigurationResolver
     private static String getConfigurationPropertyValue(Properties configurationProperties,
             Properties overridingProperties, String key)
     {
+        return getConfigurationPropertyValue(configurationProperties, overridingProperties, key, true).get();
+    }
+
+    private static Optional<String> getConfigurationPropertyValue(Properties configurationProperties,
+            Properties overridingProperties, String key, boolean failOnAbsence)
+    {
         String propertyName = CONFIGURATION_PROPERTY_FAMILY + key;
         String value = System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + propertyName,
                 System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + key,
@@ -165,7 +201,11 @@ public final class ConfigurationResolver
                 value = configurationProperties.getProperty(propertyName);
                 if (value == null)
                 {
-                    throw new IllegalStateException(key + " is not set");
+                    if (failOnAbsence)
+                    {
+                        throw new IllegalStateException(key + " is not set");
+                    }
+                    return Optional.empty();
                 }
             }
         }
@@ -173,7 +213,7 @@ public final class ConfigurationResolver
         {
             overridingProperties.put(propertyName, value);
         }
-        return value;
+        return Optional.of(value);
     }
 
     private static void resolveSpelExpressions(Properties properties)
