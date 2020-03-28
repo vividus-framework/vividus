@@ -30,7 +30,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.BeanIsAbstractException;
 
-class BeanFactoryTests
+class BeanFactoryIntegrationTests
 {
     private static final String CONFIGURATION_PROFILE = "configuration.profile";
     private static final String ENVIRONMENTS_PROPERTY = "configuration.environments";
