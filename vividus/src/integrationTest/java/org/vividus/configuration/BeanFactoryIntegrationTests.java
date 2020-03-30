@@ -33,9 +33,11 @@ import org.springframework.beans.factory.BeanIsAbstractException;
 class BeanFactoryIntegrationTests
 {
     private static final String CONFIGURATION_PROFILE = "configuration.profile";
+    private static final String CONFIGURATION_PROFILES = "configuration.profiles";
     private static final String ENVIRONMENTS_PROPERTY = "configuration.environments";
 
     private static final String BASIC_ENV = "basicenv";
+    private static final String BASIC_PROFILE = "basicprofile";
     private static final String ADDITIONAL_ENV = "additionalenv/props";
 
     private static final String PROPERTY_VALUE_FROM_SUITE = "value-from-suite";
@@ -83,6 +85,7 @@ class BeanFactoryIntegrationTests
     @Test
     void testConfigurationResolverMultipleEnvironments() throws IOException
     {
+        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
         System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV + "," + ADDITIONAL_ENV);
         BeanFactory.open();
         assertProperties("additionalenv-props-property-value", "additionalenv-property-value");
@@ -91,6 +94,7 @@ class BeanFactoryIntegrationTests
     @Test
     void testConfigurationResolverEnvironmentsIsNotSet()
     {
+        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
         Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
         assertEquals("environments is not set", exception.getMessage());
     }
@@ -98,6 +102,7 @@ class BeanFactoryIntegrationTests
     @Test
     void testConfigurationResolverSuiteOverridesEnvironments() throws Exception
     {
+        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
         System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV);
         BeanFactory.open();
         assertSuiteProperty("env-suite-overridable-property", PROPERTY_VALUE_FROM_SUITE);
@@ -106,6 +111,7 @@ class BeanFactoryIntegrationTests
     @Test
     void testConfigurationResolverSuiteOverridesProfile() throws Exception
     {
+        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
         System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV);
         BeanFactory.open();
         assertSuiteProperty("profile-suite-overridable-property", PROPERTY_VALUE_FROM_SUITE);
@@ -114,10 +120,38 @@ class BeanFactoryIntegrationTests
     @Test
     void testConfigurationResolverDeeperSuiteOverridesUpperSuite() throws Exception
     {
+        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
         System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV);
         System.setProperty("configuration.suite", "integration");
         BeanFactory.open();
         assertSuiteProperty("deeper-suite-level-overridable-property", "value-from-deeper-level");
+    }
+
+    @Test
+    void testConfigurationResolverBothProfileAndProfilePropertiesAreSet()
+    {
+        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
+        Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
+        assertEquals("Exactly one configuration property: 'profile' or 'profiles' must be set", exception.getMessage());
+    }
+
+    @Test
+    void testConfigurationResolverProfilesHierarchy() throws Exception
+    {
+        System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE + ",otherprofile");
+        BeanFactory.open();
+        assertSuiteProperty("basic-profile-property-value", "basic-value");
+        assertSuiteProperty("basic-profile-property-override-value", "basic-override-value");
+        assertSuiteProperty("other-profile-property-value", "other-value");
+    }
+
+    @Test
+    void testConfigurationResolverNeitherProfileNorProfilePropertiesAreNotSet()
+    {
+        Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
+        assertEquals("Either 'profile' or 'profiles' configuration property must be set", exception.getMessage());
     }
 
     private void assertSuiteProperty(String key, String expectedValue) throws IOException
@@ -139,7 +173,7 @@ class BeanFactoryIntegrationTests
 
     private void resetBeanFactory()
     {
-        Stream.of(CONFIGURATION_PROFILE, ENVIRONMENTS_PROPERTY).forEach(System::clearProperty);
+        Stream.of(CONFIGURATION_PROFILE, ENVIRONMENTS_PROPERTY, CONFIGURATION_PROFILES).forEach(System::clearProperty);
         BeanFactory.reset();
         ConfigurationResolver.reset();
     }
