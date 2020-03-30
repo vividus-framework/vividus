@@ -54,11 +54,17 @@ public class WebDriverManager implements IWebDriverManager
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IWebDriverManagerContext webDriverManagerContext;
     private boolean nativeApp;
+    private boolean electronApp;
 
     @Override
     public void resize(BrowserWindowSize browserWindowSize)
     {
-        resize(getWebDriver(), browserWindowSize);
+        if (isElectronApp())
+        {
+            return;
+        }
+        WebDriver webDriver = getWebDriver();
+        resize(webDriver, browserWindowSize);
         // Chrome-only workaround for situations when custom browser viewport size was set before 'window.maximize();'
         // and it prevents following window-resizing actions
         // Reported issue: https://bugs.chromium.org/p/chromedriver/issues/detail?id=1638
@@ -70,19 +76,20 @@ public class WebDriverManager implements IWebDriverManager
         }
     }
 
-    public static void resize(WebDriver webDriver, BrowserWindowSize browserWindowSize)
+    public void resize(WebDriver webDriver, BrowserWindowSize browserWindowSize)
     {
-        if (!isMobile(WebDriverUtil.unwrap(webDriver, HasCapabilities.class).getCapabilities()))
+        if (isElectronApp() || isMobile(WebDriverUtil.unwrap(webDriver, HasCapabilities.class).getCapabilities()))
         {
-            Window window = webDriver.manage().window();
-            if (browserWindowSize == null)
-            {
-                window.maximize();
-            }
-            else
-            {
-                window.setSize(browserWindowSize.toDimension());
-            }
+            return;
+        }
+        Window window = webDriver.manage().window();
+        if (browserWindowSize == null)
+        {
+            window.maximize();
+        }
+        else
+        {
+            window.setSize(browserWindowSize.toDimension());
         }
     }
 
@@ -331,6 +338,12 @@ public class WebDriverManager implements IWebDriverManager
         return capabilities != null && supplier.getAsBoolean();
     }
 
+    @Override
+    public boolean isElectronApp()
+    {
+        return electronApp;
+    }
+
     private WebDriver getWebDriver()
     {
         return webDriverProvider.get();
@@ -339,5 +352,10 @@ public class WebDriverManager implements IWebDriverManager
     public void setNativeApp(boolean nativeApp)
     {
         this.nativeApp = nativeApp;
+    }
+
+    public void setElectronApp(boolean electronApp)
+    {
+        this.electronApp = electronApp;
     }
 }

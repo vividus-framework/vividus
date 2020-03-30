@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import com.browserup.bup.BrowserUpProxy;
@@ -33,12 +33,10 @@ import com.browserup.bup.client.ClientUtil;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.Proxy;
@@ -56,6 +54,7 @@ import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.proxy.IProxy;
+import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
@@ -82,6 +81,9 @@ public class VividusWebDriverFactoryTests
     @Mock
     private IBrowserWindowSizeProvider browserWindowSizeProvider;
 
+    @Mock
+    private IWebDriverManager webDriverManager;
+
     @InjectMocks
     private VividusWebDriverFactory vividusWebDriverFactory;
 
@@ -94,17 +96,13 @@ public class VividusWebDriverFactoryTests
     @Mock
     private Proxy seleniumProxy;
 
-    @Before
-    public void before()
-    {
-        MockitoAnnotations.initMocks(this);
-    }
+    @Mock
+    private WebDriverEventListener webDriverEventListener;
 
     private void runCreateTest(boolean remoteExecution, String browserName) throws Exception
     {
-        WebDriverEventListener webDriverEventListener = mock(WebDriverEventListener.class);
-        vividusWebDriverFactory.setWebDriverEventListeners(Collections.singletonList(webDriverEventListener));
         vividusWebDriverFactory.setRemoteExecution(remoteExecution);
+        vividusWebDriverFactory.setWebDriverEventListeners(List.of(webDriverEventListener));
 
         when(bddRunContext.getRunningStory()).thenReturn(createRunningStory(browserName));
         EventFiringWebDriver eventFiringWebDriver = mock(EventFiringWebDriver.class);
@@ -114,13 +112,15 @@ public class VividusWebDriverFactoryTests
         Window window = mock(Window.class);
         when(options.window()).thenReturn(window);
         when(eventFiringWebDriver.getCapabilities()).thenReturn(mock(Capabilities.class));
+        BrowserWindowSize windowSize = new BrowserWindowSize("1920x1080");
         when(browserWindowSizeProvider.getBrowserWindowSize(remoteExecution))
-                .thenReturn(new BrowserWindowSize("1920x1080"));
+                .thenReturn(windowSize);
         VividusWebDriver vividusWebDriver = vividusWebDriverFactory.create();
         assertEquals(eventFiringWebDriver, vividusWebDriver.getWrappedDriver());
         verify(eventFiringWebDriver).register(webDriverEventListener);
         assertEquals(remoteExecution, vividusWebDriver.isRemote());
         verify(webDriverManagerContext).reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
+        verify(webDriverManager).resize(eventFiringWebDriver, windowSize);
     }
 
     private static RunningStory createRunningStory(String browserName)

@@ -188,6 +188,14 @@ class WaitActionsTests
     }
 
     @Test
+    void shouldNoWaitForElectronAppsWindowsLoad()
+    {
+        when(webDriverManager.isElectronApp()).thenReturn(true);
+        waitActions.waitForPageLoad(webDriver);
+        verifyNoInteractions(javascriptActions);
+    }
+
+    @Test
     void testWaitForPageLoadWithoutAlert()
     {
         mockDescriptiveWait(ChronoUnit.DAYS);

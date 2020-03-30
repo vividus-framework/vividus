@@ -21,8 +21,6 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import com.browserup.bup.client.ClientUtil;
 
 import org.jbehave.core.model.Meta;
@@ -38,19 +36,33 @@ import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.MetaWrapper;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.proxy.IProxy;
+import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 public class VividusWebDriverFactory implements IVividusWebDriverFactory
 {
-    @Inject private IWebDriverFactory webDriverFactory;
-    @Inject private IBddRunContext bddRunContext;
-    @Inject private IWebDriverManagerContext webDriverManagerContext;
-    @Inject private IProxy proxy;
-    @Inject private IBrowserWindowSizeProvider browserWindowSizeProvider;
+    private final IWebDriverFactory webDriverFactory;
+    private final IBddRunContext bddRunContext;
+    private final IWebDriverManagerContext webDriverManagerContext;
+    private final IProxy proxy;
+    private final IBrowserWindowSizeProvider browserWindowSizeProvider;
+    private final IWebDriverManager webDriverManager;
+
     private boolean remoteExecution;
     private List<WebDriverEventListener> webDriverEventListeners;
+
+    public VividusWebDriverFactory(IWebDriverFactory webDriverFactory, IBddRunContext bddRunContext,
+        IWebDriverManagerContext webDriverManagerContext, IProxy proxy,
+        IBrowserWindowSizeProvider browserWindowSizeProvider, IWebDriverManager webDriverManager)
+    {
+        this.webDriverFactory = webDriverFactory;
+        this.bddRunContext = bddRunContext;
+        this.webDriverManagerContext = webDriverManagerContext;
+        this.proxy = proxy;
+        this.browserWindowSizeProvider = browserWindowSizeProvider;
+        this.webDriverManager = webDriverManager;
+    }
 
     @Override
     public VividusWebDriver create()
@@ -78,7 +90,7 @@ public class VividusWebDriverFactory implements IVividusWebDriverFactory
         webDriverEventListeners.forEach(eventFiringWebDriver::register);
 
         vividusWebDriver.setWebDriver(eventFiringWebDriver);
-        WebDriverManager.resize(vividusWebDriver.getWrappedDriver(),
+        webDriverManager.resize(vividusWebDriver.getWrappedDriver(),
                 browserWindowSizeProvider.getBrowserWindowSize(remoteExecution));
         return vividusWebDriver;
     }

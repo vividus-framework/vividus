@@ -32,6 +32,8 @@ public interface IWebDriverManager
 
     void resize(BrowserWindowSize browserWindowSize);
 
+    void resize(WebDriver toResize, BrowserWindowSize browserWindowSize);
+
     Dimension getSize();
 
     void performActionInNativeContext(Consumer<WebDriver> consumer);
@@ -53,6 +55,8 @@ public interface IWebDriverManager
     boolean isAndroidNativeApp();
 
     boolean isOrientation(ScreenOrientation orientation);
+
+    boolean isElectronApp();
 
     Capabilities getCapabilities();
 

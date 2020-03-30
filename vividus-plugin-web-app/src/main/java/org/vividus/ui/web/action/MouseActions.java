@@ -154,12 +154,15 @@ public class MouseActions implements IMouseActions
     private void afterClick(ClickResult clickResult, WebElement page, WebDriver webDriver,
             Optional<Action> defaultAlertAction)
     {
-        defaultAlertAction.ifPresent(alertActions::processAlert);
-        if (!alertActions.isAlertPresent())
+        if (!webDriverManager.isElectronApp())
         {
-            waitActions.waitForPageLoad();
-            resetContextIfNeeded(clickResult, page);
-            eventBus.post(new PageLoadEndEvent(clickResult.isNewPageLoaded(), webDriver));
+            defaultAlertAction.ifPresent(alertActions::processAlert);
+            if (!alertActions.isAlertPresent())
+            {
+                waitActions.waitForPageLoad();
+                resetContextIfNeeded(clickResult, page);
+                eventBus.post(new PageLoadEndEvent(clickResult.isNewPageLoaded(), webDriver));
+            }
         }
         clickResult.setClicked(true);
     }
