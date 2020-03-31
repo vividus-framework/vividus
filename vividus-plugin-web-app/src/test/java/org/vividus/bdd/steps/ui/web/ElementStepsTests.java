@@ -320,9 +320,10 @@ public class ElementStepsTests
         mockResourceLoader(mockResource(ABSOLUTE_PATH, file, true));
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(false);
-        when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
-        elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                new SearchParameters(XPATH).setVisibility(Visibility.ALL));
+        when(baseValidations.assertIfElementExists(AN_ELEMENT, searchAttributes)).thenReturn(webElement);
+        elementSteps.uploadFile(searchAttributes, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
     }
 
@@ -338,9 +339,10 @@ public class ElementStepsTests
         when(resource.getInputStream()).thenReturn(inputStream);
         mockResourceLoader(resource);
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
-        when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
-        elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                new SearchParameters(XPATH).setVisibility(Visibility.ALL));
+        when(baseValidations.assertIfElementExists(AN_ELEMENT, searchAttributes)).thenReturn(webElement);
+        elementSteps.uploadFile(searchAttributes, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
         PowerMockito.verifyStatic(FileUtils.class);
         FileUtils.copyInputStreamToFile(eq(resource.getInputStream()), any(File.class));
@@ -356,9 +358,10 @@ public class ElementStepsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
-        when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
-        elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                new SearchParameters(XPATH).setVisibility(Visibility.ALL));
+        when(baseValidations.assertIfElementExists(AN_ELEMENT, searchAttributes)).thenReturn(webElement);
+        elementSteps.uploadFile(searchAttributes, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
     }
 
@@ -373,9 +376,10 @@ public class ElementStepsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
-        when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
-        elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                new SearchParameters(XPATH).setVisibility(Visibility.ALL));
+        when(baseValidations.assertIfElementExists(AN_ELEMENT, searchAttributes)).thenReturn(webElement);
+        elementSteps.uploadFile(searchAttributes, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
     }
 
@@ -387,9 +391,10 @@ public class ElementStepsTests
         mockRemoteWebDriver();
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
-        when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
-                new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(webElement);
-        elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                new SearchParameters(XPATH).setVisibility(Visibility.ALL));
+        when(baseValidations.assertIfElementExists(AN_ELEMENT, searchAttributes)).thenReturn(webElement);
+        elementSteps.uploadFile(searchAttributes, FILE_PATH);
         verify(webElement).sendKeys(ABSOLUTE_PATH);
     }
 
@@ -398,7 +403,9 @@ public class ElementStepsTests
     {
         File file = mockFileForUpload();
         mockResourceLoader(mockResource(ABSOLUTE_PATH, file, true));
-        elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                new SearchParameters(XPATH).setVisibility(Visibility.ALL));
+        elementSteps.uploadFile(searchAttributes, FILE_PATH);
         verify(webElement, never()).sendKeys(ABSOLUTE_PATH);
     }
 
@@ -411,7 +418,9 @@ public class ElementStepsTests
         when(webDriverProvider.isRemoteExecution()).thenReturn(false);
         when(baseValidations.assertIfElementExists(AN_ELEMENT, new SearchAttributes(ActionAttributeType.XPATH,
                 new SearchParameters(LOCATOR_BY_ATTRIBUTE, Visibility.ALL)))).thenReturn(null);
-        elementSteps.uploadFile(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, FILE_PATH);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                new SearchParameters(XPATH).setVisibility(Visibility.ALL));
+        elementSteps.uploadFile(searchAttributes, FILE_PATH);
         verify(webElement, never()).sendKeys(ABSOLUTE_PATH);
     }
 
