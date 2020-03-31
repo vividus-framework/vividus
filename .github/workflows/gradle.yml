@@ -122,7 +122,7 @@ jobs:
       run: |
         declare -a profiles=( iexplore chrome firefox edge )
         for profile in "${profiles[@]}"; do
-          ./gradlew runStories -Pvividus.configuration.environments=grid -Pvividus.configuration.suite=grid -Pconfiguration.profiles=web/desktop/${profile},browserstack/web
+          ./gradlew runStories -Pvividus.configuration.environments=grid -Pvividus.configuration.suite=grid -Pvividus.configuration.profiles=web/desktop/${profile},browserstack/web
         done
 
     - name: Publish Snapshot Artifacts
