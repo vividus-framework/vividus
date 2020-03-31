@@ -70,7 +70,7 @@ ext {
     versions = [
         allure:                 '2.13.2',
         commonsIo:              '2.6',
-        commonsLang3:           '3.9',
+        commonsLang3:           '3.10',
         commonsText:            '1.8',
         groovy:                 '2.5.10',
         guava:                  '28.2-jre',
