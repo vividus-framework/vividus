@@ -145,6 +145,8 @@ class BeanFactoryIntegrationTests
         assertSuiteProperty("basic-profile-property-value", "basic-value");
         assertSuiteProperty("basic-profile-property-override-value", "basic-override-value");
         assertSuiteProperty("other-profile-property-value", "other-value");
+        assertSuiteProperty("property-wtih-expression-containing-placeholder-for-another-property-with-expression",
+                "yes");
     }
 
     @Test

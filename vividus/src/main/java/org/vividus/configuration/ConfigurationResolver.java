@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -109,6 +110,8 @@ public final class ConfigurationResolver
 
         properties.putAll(overridingAndSystemProperties);
 
+        resolveSpelExpressions(properties, true);
+
         PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX,
                 PLACEHOLDER_SUFFIX, PLACEHOLDER_VALUE_SEPARATOR, false);
 
@@ -120,7 +123,7 @@ public final class ConfigurationResolver
             entry.setValue(propertyPlaceholderHelper.replacePlaceholders(value, properties::getProperty));
         }
         deprecatedPropertiesHandler.removeDeprecated(properties);
-        resolveSpelExpressions(properties);
+        resolveSpelExpressions(properties, false);
         processSystemProperties(properties);
 
         instance = new ConfigurationResolver(properties);
@@ -216,21 +219,30 @@ public final class ConfigurationResolver
         return Optional.of(value);
     }
 
-    private static void resolveSpelExpressions(Properties properties)
+    private static void resolveSpelExpressions(Properties properties, boolean ignoreValuesWithPropertyPlaceholders)
     {
+        Optional<Set<String>> propertyPlaceholders = ignoreValuesWithPropertyPlaceholders
+                ? Optional.of(properties.stringPropertyNames().stream()
+                        .map(n -> PLACEHOLDER_PREFIX + n + PLACEHOLDER_SUFFIX)
+                        .collect(Collectors.toSet()))
+                : Optional.empty();
+
         SpelExpressionParser spelExpressionParser = new SpelExpressionParser();
         for (Entry<Object, Object> entry : properties.entrySet())
         {
             String value = (String) entry.getValue();
-            try
+            if (propertyPlaceholders.stream().flatMap(Set::stream).noneMatch(value::contains))
             {
-                entry.setValue(spelExpressionParser.parseExpression(value, ParserContext.TEMPLATE_EXPRESSION)
-                        .getValue());
-            }
-            catch (Exception e)
-            {
-                throw new IllegalStateException("Exception during evaluation of expression " + value
-                        + " for property '" + entry.getKey() + "'", e);
+                try
+                {
+                    entry.setValue(
+                            spelExpressionParser.parseExpression(value, ParserContext.TEMPLATE_EXPRESSION).getValue());
+                }
+                catch (Exception e)
+                {
+                    throw new IllegalStateException("Exception during evaluation of expression " + value
+                            + " for property '" + entry.getKey() + "'", e);
+                }
             }
         }
     }
