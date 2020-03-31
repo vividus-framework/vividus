@@ -70,7 +70,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v1
       with:
-        name: Output
+        name: Unit and Integration Tests - Reports - ${{ matrix.platform }}
         path: vividus/output/reports/tests
 
     - name: Upload coverage to Codecov
