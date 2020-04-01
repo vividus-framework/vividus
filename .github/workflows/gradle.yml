@@ -4,7 +4,7 @@ on:
   push:
     branches:
     - master
-    tags: 
+    tags:
     - release-[0-9]+.[0-9]+.[0-9]+
   pull_request:
     branches:
@@ -100,7 +100,11 @@ jobs:
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY ]]; then
-            ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system -Pvividus.configuration.suite=system -Pvividus.configuration.profiles=web/desktop/chrome,browserstack/web
+            ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system \
+                                                -Pvividus.configuration.suite=system \
+                                                -Pvividus.configuration.profiles=browserstack/web,web/desktop/chrome \
+                                                -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
+                                                -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY}
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY and/or APPLITOOLS_EXECUTE_KEY and/or APPLITOOLS_READ_KEY variables, System tests will be skipped
         fi
@@ -115,15 +119,22 @@ jobs:
     - name: Browserstack Integration
       if: matrix.platform == 'ubuntu-latest'
       env:
-        GRID_USER: ${{ secrets.BROWSERSTACK_USER }}
-        GRID_KEY: ${{ secrets.BROWSERSTACK_KEY }}
-        GRID_HOST: hub-cloud.browserstack.com
+        BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
+        BROWSERSTACK_KEY: ${{ secrets.BROWSERSTACK_KEY }}
       shell: bash
       run: |
-        declare -a profiles=( iexplore chrome firefox edge )
-        for profile in "${profiles[@]}"; do
-          ./gradlew runStories -Pvividus.configuration.environments=grid -Pvividus.configuration.suite=grid -Pvividus.configuration.profiles=web/desktop/${profile},browserstack/web
-        done
+        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
+          declare -a profiles=( iexplore chrome firefox edge )
+          for profile in "${profiles[@]}"; do
+            ./gradlew runStories -Pvividus.configuration.environments=grid \
+                                 -Pvividus.configuration.suite=grid \
+                                 -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \
+                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
+                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY}
+          done
+        else
+            echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY, Browserstack integration tests will be skipped
+        fi
 
     - name: Publish Snapshot Artifacts
       if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
