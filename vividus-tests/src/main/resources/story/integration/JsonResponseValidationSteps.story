@@ -58,3 +58,6 @@ Scenario: Verify failure in step "When I wait for presence of element by `$jsonP
 When I wait for presence of element by `$.non-existing` for `PT1S` duration retrying 1 times
 |step                                                                                          |
 |When I send HTTP GET to the relative URL '/status/204'                                        |
+
+Scenario: Verify JSON validator can successfully compare int vs float numbers
+Then a JSON element from '{"number":0.0}' by the JSON path '$.number' is equal to '0'
