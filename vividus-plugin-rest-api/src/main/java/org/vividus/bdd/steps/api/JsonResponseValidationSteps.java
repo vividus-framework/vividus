@@ -21,6 +21,7 @@ import static java.lang.String.join;
 import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -109,7 +110,8 @@ public class JsonResponseValidationSteps
     {
         return actualData ->
         {
-            JsonDiffMatcher jsonMatcher = new JsonDiffMatcher(attachmentPublisher, expectedData).withOptions(options);
+            JsonDiffMatcher jsonMatcher = new JsonDiffMatcher(attachmentPublisher, expectedData).withOptions(options)
+                    .withTolerance(BigDecimal.ZERO);
             jsonMatcher.matches(actualData);
             String differences = jsonMatcher.getDifferences();
 
