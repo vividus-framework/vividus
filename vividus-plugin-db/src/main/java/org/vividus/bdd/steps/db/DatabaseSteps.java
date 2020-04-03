@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
@@ -133,6 +134,37 @@ public class DatabaseSteps
     public void executeSql(String sqlQuery, String dbKey, Set<VariableScope> scopes, String variableName)
     {
         List<Map<String, Object>> result = getJdbcTemplate(dbKey).queryForList(sqlQuery);
+        bddVariableContext.putVariable(scopes, variableName, result);
+    }
+
+    /**
+     * Joins two data sets from previously executed SQL queries;
+     * @param left data set to join
+     * @param right data set to join
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName a name of variable to store a result
+     */
+    @When("I merge `$left` and `$right` and save result to $scopes variable `$variableName`")
+    public void joinDataSets(List<Map<String, Object>> left, List<Map<String, Object>> right,
+            Set<VariableScope> scopes, String variableName)
+    {
+        List<Map<String, Object>> result = new ArrayList<>(left.size() + right.size());
+        if (!left.isEmpty() && !right.isEmpty())
+        {
+            Set<String> leftHeader = left.get(0).keySet();
+            Set<String> rightHeader = right.get(0).keySet();
+            Validate.isTrue(leftHeader.equals(rightHeader),
+                    "Data sets should have same columns;\nLeft:  %s\nRight: %s", leftHeader, rightHeader);
+        }
+        result.addAll(left);
+        result.addAll(right);
         bddVariableContext.putVariable(scopes, variableName, result);
     }
 
