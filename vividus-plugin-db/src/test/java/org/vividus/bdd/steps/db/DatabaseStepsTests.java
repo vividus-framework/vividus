@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -59,6 +60,9 @@ import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -508,6 +512,44 @@ class DatabaseStepsTests
                 && !result.isPassed();
         }),
                eq(QUERIES_COMPARISON_RESULT));
+    }
+
+    @Test
+    void shouldThrowExceptionForDataSetsWithDifferentHeaders()
+    {
+        Set<VariableScope> variableScope = Set.of(VariableScope.SCENARIO);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> databaseSteps.joinDataSets(List.of(Map.of(COL1, VAL1)),
+                List.of(Map.of(COL2, VAL1)), variableScope, VAL1));
+        assertEquals("Data sets should have same columns;\nLeft:  [col1]\nRight: [col2]",
+                exception.getMessage());
+    }
+
+    static Stream<Arguments> dataSetsProvider()
+    {
+        return Stream.of(
+                Arguments.of(List.of(),                   List.of(Map.of(COL1, VAL1))),
+                Arguments.of(List.of(Map.of(COL1, VAL1)), List.of()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("dataSetsProvider")
+    void shouldNotVerifyHeadersIfOneOfDataSetsEmpty(List<Map<String, Object>> left, List<Map<String, Object>> right)
+    {
+        Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
+        databaseSteps.joinDataSets(left, right, variableScopes, VAL1);
+        verify(bddVariableContext).putVariable(variableScopes, VAL1, List.of(Map.of(COL1, VAL1)));
+    }
+
+    @Test
+    void shouldMergeDataSets()
+    {
+        Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
+        Map<String, Object> row = Map.of(COL1, VAL1);
+        List<Map<String, Object>> left = List.of(row);
+        List<Map<String, Object>> right = List.of(row);
+        databaseSteps.joinDataSets(left, right, variableScopes, VAL1);
+        verify(bddVariableContext).putVariable(variableScopes, VAL1, List.of(row, row));
     }
 
     private void mockDataSource()
