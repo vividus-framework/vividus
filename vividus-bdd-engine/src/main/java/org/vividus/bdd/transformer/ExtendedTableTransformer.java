@@ -16,7 +16,8 @@
 
 package org.vividus.bdd.transformer;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.notBlank;
 
 import java.util.Arrays;
 import java.util.Map.Entry;
@@ -31,14 +32,14 @@ public interface ExtendedTableTransformer extends TableTransformer
 {
     default void checkTableEmptiness(String tableAsString)
     {
-        checkArgument(StringUtils.isBlank(tableAsString), "Input table must be empty");
+        isTrue(StringUtils.isBlank(tableAsString), "Input table must be empty");
     }
 
     static String getMandatoryNonBlankProperty(ExamplesTableProperties tableProperties, String propertyName)
     {
         String propertyValue = tableProperties.getProperties().getProperty(propertyName);
-        checkArgument(propertyValue != null, "'%s' is not set in ExamplesTable properties", propertyName);
-        checkArgument(StringUtils.isNotBlank(propertyValue), "ExamplesTable property '%s' is blank", propertyName);
+        isTrue(propertyValue != null, "'%s' is not set in ExamplesTable properties", propertyName);
+        notBlank(propertyValue, "ExamplesTable property '%s' is blank", propertyName);
         return propertyValue;
     }
 
@@ -47,8 +48,8 @@ public interface ExtendedTableTransformer extends TableTransformer
     {
         String propertyValueStr = properties.getProperties().getProperty(propertyName);
         E propertyValue = EnumUtils.getEnumIgnoreCase(enumClass, propertyValueStr);
-        checkArgument(propertyValue != null, "Value of ExamplesTable property '%s' must be from range %s",
-                propertyName, Arrays.toString(enumClass.getEnumConstants()));
+        isTrue(propertyValue != null, "Value of ExamplesTable property '%s' must be from range %s", propertyName,
+                Arrays.toString(enumClass.getEnumConstants()));
         return propertyValue;
     }
 
@@ -61,14 +62,14 @@ public interface ExtendedTableTransformer extends TableTransformer
         String propertyValue2 = tableProperties.getProperties().getProperty(propertyName2);
         if (propertyValue1 != null)
         {
-            checkArgument(propertyValue2 == null,
+            isTrue(propertyValue2 == null,
                     "Only one ExamplesTable property must be set, but found both '%s' and '%s'", propertyName1,
                     propertyName2);
             return processor1.getValue().apply(propertyValue1);
         }
         else
         {
-            checkArgument(propertyValue2 != null, "One of ExamplesTable properties must be set: either '%s' or '%s'",
+            isTrue(propertyValue2 != null, "One of ExamplesTable properties must be set: either '%s' or '%s'",
                     propertyName1, propertyName2);
             return processor2.getValue().apply(propertyValue2);
         }

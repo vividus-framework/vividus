@@ -16,7 +16,7 @@
 
 package org.vividus.bdd.transformer;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,10 +50,10 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
         String byMaxColumns = properties.getProperties().getProperty(BY_MAX_COLUMNS_PROPERTY);
         String byMaxRows = properties.getProperties().getProperty(BY_MAX_ROWS_PROPERTY);
         String byColumnNames = properties.getProperties().getProperty(BY_COLUMNS_NAMES_PROPERTY);
-        checkArgument(byMaxColumns != null || byMaxRows != null || byColumnNames != null,
+        isTrue(byMaxColumns != null || byMaxRows != null || byColumnNames != null,
                 "At least one of the following properties should be specified: '%s', '%s', '%s'",
                 BY_MAX_COLUMNS_PROPERTY, BY_MAX_ROWS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY);
-        checkArgument(!(byMaxColumns != null && byColumnNames != null),
+        isTrue(!(byMaxColumns != null && byColumnNames != null),
                 "Conflicting properties declaration found: '%s' and '%s'",
                 BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY);
         ExamplesTable examplesTable = examplesTableFactory.get().createExamplesTable(tableAsString);

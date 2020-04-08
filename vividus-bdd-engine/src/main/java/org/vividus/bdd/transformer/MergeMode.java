@@ -16,7 +16,7 @@
 
 package org.vividus.bdd.transformer;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +42,7 @@ public enum MergeMode
         @Override
         protected void validateInput(ExamplesTable current, ExamplesTable next, boolean strict)
         {
-            checkArgument(!strict || CollectionUtils.isEqualCollection(current.getHeaders(), next.getHeaders()),
+            isTrue(!strict || CollectionUtils.isEqualCollection(current.getHeaders(), next.getHeaders()),
                     "Please, specify tables with the same sets of headers");
         }
 
@@ -83,9 +83,9 @@ public enum MergeMode
         @Override
         protected void validateInput(ExamplesTable current, ExamplesTable next, boolean strict)
         {
-            checkArgument(!strict || current.getRows().size() == next.getRows().size(),
+            isTrue(!strict || current.getRows().size() == next.getRows().size(),
                     "Please, specify tables with the same number of rows");
-            checkArgument(CollectionUtils.intersection(current.getHeaders(), next.getHeaders()).isEmpty(),
+            isTrue(CollectionUtils.intersection(current.getHeaders(), next.getHeaders()).isEmpty(),
                     "Please, specify tables with the unique sets of headers");
         }
 
