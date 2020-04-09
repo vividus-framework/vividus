@@ -16,8 +16,8 @@
 
 package org.vividus.bdd.transformer;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.function.Predicate.not;
+import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -54,11 +54,11 @@ public class MergingTableTransformer implements ExtendedTableTransformer
         Stream<String> examplesTablesStream = tables.stream();
         if (tableAsString.isBlank())
         {
-            checkArgument(tables.size() > 1, "Please, specify more than one unique table paths");
+            isTrue(tables.size() > 1, "Please, specify more than one unique table paths");
         }
         else
         {
-            checkArgument(tables.size() > 0, "Please, specify at least one table path");
+            isTrue(tables.size() > 0, "Please, specify at least one table path");
             examplesTablesStream = Stream.concat(examplesTablesStream, Stream.of(tableAsString));
         }
 

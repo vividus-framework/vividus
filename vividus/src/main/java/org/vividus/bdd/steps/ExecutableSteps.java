@@ -16,7 +16,8 @@
 
 package org.vividus.bdd.steps;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.Validate.inclusiveBetween;
+import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.util.Optional;
 import java.util.function.IntConsumer;
@@ -95,7 +96,7 @@ public class ExecutableSteps
     public void performStepsNumberTimes(int number, SubSteps stepsToExecute)
     {
         int minimum = 0;
-        checkArgument(minimum <= number && number <= EXECUTIONS_NUMBER_THRESHOLD,
+        inclusiveBetween(minimum, EXECUTIONS_NUMBER_THRESHOLD, number,
             "Please, specify executions number in the range from %s to %s", minimum, EXECUTIONS_NUMBER_THRESHOLD);
         IntStream.range(0, number).forEach(i -> stepsToExecute.execute(Optional.empty()));
     }
@@ -142,7 +143,7 @@ public class ExecutableSteps
     {
         MutableInt iterationsCounter = new MutableInt();
         iterate(seed, limitMatcher, increment,
-            index -> checkArgument(iterationsCounter.incrementAndGet() < EXECUTIONS_NUMBER_THRESHOLD,
+            index -> isTrue(iterationsCounter.incrementAndGet() < EXECUTIONS_NUMBER_THRESHOLD,
                     "Number of iterations has exceeded allowable limit " + EXECUTIONS_NUMBER_THRESHOLD));
     }
 
