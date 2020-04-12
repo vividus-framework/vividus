@@ -40,6 +40,22 @@ class HttpRequestBuilderTests
     private final HttpRequestBuilder builder = HttpRequestBuilder.create();
 
     @Test
+    void shouldValidateEndpoint()
+    {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> builder.withHttpMethod(HttpMethod.GET).build());
+        assertEquals("Endpoint must be not null", exception.getMessage());
+    }
+
+    @Test
+    void shouldValidateHttpMethod()
+    {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> builder.withEndpoint(ENDPOINT).build());
+        assertEquals("HTTP method must be not null", exception.getMessage());
+    }
+
+    @Test
     void buildGetWithoutContent() throws HttpRequestBuildException
     {
         HttpRequestBase request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).build();

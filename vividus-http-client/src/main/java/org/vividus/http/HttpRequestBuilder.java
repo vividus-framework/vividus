@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -88,6 +89,8 @@ public final class HttpRequestBuilder
 
     public HttpRequestBase build() throws HttpRequestBuildException
     {
+        Validate.isTrue(endpoint != null, "Endpoint must be not null");
+        Validate.isTrue(httpMethod != null, "HTTP method must be not null");
         HttpRequestBase request;
         try
         {
