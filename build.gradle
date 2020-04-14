@@ -73,7 +73,7 @@ ext {
         commonsLang3:           '3.10',
         commonsText:            '1.8',
         groovy:                 '2.5.10',
-        guava:                  '28.2-jre',
+        guava:                  '29.0-jre',
         hamcrest:               '2.2',
         httpclient:             '4.5.11',
         javaxInject:            '1',
