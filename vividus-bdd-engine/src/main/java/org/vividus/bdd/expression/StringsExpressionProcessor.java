@@ -28,6 +28,9 @@ import java.util.regex.Pattern;
 import javax.inject.Named;
 
 import com.github.javafaker.Faker;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +43,15 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor
     private static final Pattern COMMA_SEPARATED = Pattern.compile("(?<!\\\\), ?");
     private static final Pattern ESCAPED_COMMA = Pattern.compile("\\\\,");
     private static final String COMMA = ",";
+
+    private static final LoadingCache<Locale, Faker> FAKERS = CacheBuilder.newBuilder().build(new CacheLoader<>()
+    {
+        @Override
+        public Faker load(Locale locale)
+        {
+            return new Faker(locale);
+        }
+    });
 
     public StringsExpressionProcessor(ILocationProvider locationProvider)
     {
@@ -84,6 +96,6 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor
 
     private static String generate(Locale locale, String input)
     {
-        return new Faker(locale).expression(String.format("#{%s}", input));
+        return FAKERS.getUnchecked(locale).expression(String.format("#{%s}", input));
     }
 }
