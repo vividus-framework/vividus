@@ -45,7 +45,21 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
         URI mainApplicationPage = getMainApplicationPageUri();
         CrawlController controller = crawlControllerFactory.createCrawlController(mainApplicationPage);
 
+        addSeeds(mainApplicationPage, controller);
+
+        LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
+        controller.start(new LinkCrawlerFactory(linkCrawlerData), NUMBER_OF_CRAWLERS);
+        Set<String> absoluteUrls = linkCrawlerData.getAbsoluteUrls();
+        return filterResults(absoluteUrls.stream());
+    });
+
+    private void addSeeds(URI mainApplicationPage, CrawlController controller)
+    {
         controller.addSeed(mainApplicationPage.toString());
+        if (this.seedRelativeUrls == null)
+        {
+            return;
+        }
         String mainApplicationPagePath = StringUtils.appendIfMissing(mainApplicationPage.getPath(), FORWARD_SLASH);
         this.seedRelativeUrls.stream()
                 .map(seedRelativeUrl -> StringUtils.removeStart(seedRelativeUrl, FORWARD_SLASH))
@@ -53,12 +67,7 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
                 .map(relativeUrl -> UriUtils.buildNewUrl(mainApplicationPage, relativeUrl))
                 .map(URI::toString)
                 .forEach(controller::addSeed);
-
-        LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        controller.start(new LinkCrawlerFactory(linkCrawlerData), NUMBER_OF_CRAWLERS);
-        Set<String> absoluteUrls = linkCrawlerData.getAbsoluteUrls();
-        return filterResults(absoluteUrls.stream());
-    });
+    }
 
     @Override
     protected Set<String> fetchUrls(ExamplesTableProperties properties)
