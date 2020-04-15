@@ -32,7 +32,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
 public enum MergeMode

@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.vividus.bdd.transformer.ExtendedTableTransformer;
 import org.vividus.model.SiteMap;
 import org.vividus.sitemap.ISiteMapParser;

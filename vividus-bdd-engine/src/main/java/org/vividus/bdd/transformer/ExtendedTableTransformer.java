@@ -25,7 +25,7 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 
 public interface ExtendedTableTransformer extends TableTransformer

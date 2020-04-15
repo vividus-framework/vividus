@@ -27,7 +27,8 @@ import java.util.stream.Stream;
 import javax.inject.Named;
 
 import org.apache.poi.ss.usermodel.Sheet;
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.model.CellValue;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 import org.vividus.excel.ExcelSheetParser;
@@ -40,7 +41,7 @@ import org.vividus.excel.WorkbookParsingException;
 public class ExcelTableTransformer implements ExtendedTableTransformer
 {
     @Override
-    public String transform(String tableAsString, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
     {
         checkTableEmptiness(tableAsString);
         String path = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "path");

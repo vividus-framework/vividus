@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Properties;
 
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.junit.jupiter.api.Test;
 
 class IteratingTableTransformerTests
@@ -33,7 +33,7 @@ class IteratingTableTransformerTests
     void shouldFailIfNoLimitSet()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> tableTransformer.transform(TABLE, new ExamplesTableProperties(new Properties())));
+            () -> tableTransformer.transform(TABLE, null, new ExamplesTableProperties(new Properties())));
         assertEquals("'limit' is not set in ExamplesTable properties", exception.getMessage());
     }
 
@@ -43,6 +43,6 @@ class IteratingTableTransformerTests
         Properties properties = new Properties();
         properties.put("limit", "2");
         assertEquals("|iterator|\n|0|\n|1|",
-                tableTransformer.transform(TABLE, new ExamplesTableProperties(properties)));
+                tableTransformer.transform(TABLE, null, new ExamplesTableProperties(properties)));
     }
 }

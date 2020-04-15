@@ -27,7 +27,7 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Properties;
 
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -52,7 +52,7 @@ class CsvTableTransformerTests
         Properties properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, CSV_FILE_NAME);
         assertEquals(expectedValue,
-                csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
+                csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, null, new ExamplesTableProperties(properties)));
     }
 
     @Test
@@ -60,7 +60,7 @@ class CsvTableTransformerTests
     {
         Properties properties = new Properties();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
+                csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, null, new ExamplesTableProperties(properties)));
         assertEquals("'csvPath' is not set in ExamplesTable properties", exception.getMessage());
     }
 
@@ -70,7 +70,7 @@ class CsvTableTransformerTests
         Properties properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, "");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
+                csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, null, new ExamplesTableProperties(properties)));
         assertEquals("ExamplesTable property 'csvPath' is blank", exception.getMessage());
     }
 
@@ -84,7 +84,7 @@ class CsvTableTransformerTests
         CsvTableTransformer csvTableTransformer = new CsvTableTransformer(csvReader);
         when(csvReader.readCsvFile(csvResource)).thenThrow(new IOException());
         Throwable exception = assertThrows(UncheckedIOException.class, () ->
-            csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, new ExamplesTableProperties(properties)));
+            csvTableTransformer.transform(EMPTY_EXAMPLES_TABLE, null, new ExamplesTableProperties(properties)));
         assertEquals("Problem during CSV file reading", exception.getMessage());
     }
 }

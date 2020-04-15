@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.jbehave.core.model.ExamplesTableProperties;
-import org.jbehave.core.model.TableUtils;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.TableParsers;
 
 public final class ExamplesTableProcessor
 {
@@ -44,10 +44,11 @@ public final class ExamplesTableProcessor
                 .collect(Collectors.toList());
     }
 
-    public static List<List<String>> parseDataRows(List<String> rows, ExamplesTableProperties properties)
+    public static List<List<String>> parseDataRows(List<String> rows, TableParsers tableParsers,
+            ExamplesTableProperties properties)
     {
         return rows.stream().skip(1)
-        .map(row -> TableUtils.parseRow(row, false, properties))
+        .map(row -> tableParsers.parseRow(row, false, properties))
         .collect(Collectors.toCollection(LinkedList::new));
     }
 

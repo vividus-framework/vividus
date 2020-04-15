@@ -33,7 +33,7 @@ import java.util.Set;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -98,7 +98,7 @@ class SiteMapTableTransformerTests
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(Set.of());
         SiteMapTableGenerationException exception = assertThrows(SiteMapTableGenerationException.class,
-            () -> siteMapTableTransformer.transform("", createExamplesTableProperties()));
+            () -> siteMapTableTransformer.transform("", null, createExamplesTableProperties()));
         assertEquals(NO_URLS_FOUND_MESSAGE, exception.getMessage());
     }
 
@@ -122,7 +122,7 @@ class SiteMapTableTransformerTests
         properties.getProperties().put(IGNORE_ERRORS_PROPERTY_NAME, "false");
         siteMapTableTransformer.setIgnoreErrors(true);
         SiteMapTableGenerationException exception = assertThrows(SiteMapTableGenerationException.class,
-            () -> siteMapTableTransformer.transform("", properties));
+            () -> siteMapTableTransformer.transform("", null, properties));
         assertEquals(NO_URLS_FOUND_MESSAGE, exception.getMessage());
     }
 
@@ -133,7 +133,7 @@ class SiteMapTableTransformerTests
         SiteMapParseException exception = new SiteMapParseException(SITEMAP, new IOException());
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenThrow(exception);
         IllegalStateException actualException = assertThrows(IllegalStateException.class,
-            () -> siteMapTableTransformer.transform("", createExamplesTableProperties()));
+            () -> siteMapTableTransformer.transform("", null, createExamplesTableProperties()));
         assertEquals(exception, actualException.getCause());
     }
 
