@@ -16,20 +16,18 @@
 
 package org.vividus.bdd.converter;
 
-import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.inject.Named;
 
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 
 @Named
-public class PathConverter extends AbstractParameterConverter<Path>
+public class PathConverter extends FunctionalParameterConverter<Path>
 {
-    @Override
-    public Path convertValue(String value, Type type)
+    public PathConverter()
     {
-        return Paths.get(value);
+        super(Paths::get);
     }
 }

@@ -27,11 +27,6 @@
         <property name="baselineEnvName" value="${web.visual.applitools.baseline-env-name}" />
     </bean>
 
-    <bean id="applitoolsCheckConverter" class="org.vividus.visual.eyes.bdd.converter.ExamplesTableToApplitoolsVisualChecksConverter">
-       <property name="visualCheckFactory" ref="applitoolsVisualCheckFactory" />
-       <property name="examplesTableFactory" value="#{@'configuration'.getExamplesTableFactory()}" />
-    </bean>
-
     <bean id="eyesLogHandler" class="org.vividus.visual.eyes.logger.EyesLogHandler">
         <constructor-arg value="org.vividus.visual.eyes.service.ImageVisualTestingService" />
     </bean>

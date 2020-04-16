@@ -45,7 +45,7 @@ import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.ViewGenerator;
 import org.jbehave.core.steps.DelegatingStepMonitor;
-import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.ChainableParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
 import org.junit.Before;
 import org.junit.Test;
@@ -109,8 +109,7 @@ public class ExtendedConfigurationTests
         ParameterConvertersDecorator parameterConverters = mock(ParameterConvertersDecorator.class);
         PowerMockito.whenNew(ParameterConvertersDecorator.class).withArguments(spy, parameterAdaptor, expressionAdaptor)
                 .thenReturn(parameterConverters);
-        @SuppressWarnings("rawtypes")
-        List<ParameterConverter> parameterConverterList = List.of();
+        List<ChainableParameterConverter<?, ?>> parameterConverterList = List.of();
         when(parameterConverters.addConverters(parameterConverterList)).thenReturn(parameterConverters);
         StoryControls storyControls = mock(StoryControls.class);
         spy.setCustomConverters(parameterConverterList);

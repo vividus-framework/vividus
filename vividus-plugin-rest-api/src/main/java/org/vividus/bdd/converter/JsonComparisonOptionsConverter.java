@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
@@ -36,7 +35,6 @@ public class JsonComparisonOptionsConverter extends AbstractParameterConverter<O
 {
     private final FluentEnumListConverter fluentEnumListConverter;
 
-    @Inject
     public JsonComparisonOptionsConverter(FluentEnumListConverter fluentEnumListConverter)
     {
         this.fluentEnumListConverter = fluentEnumListConverter;
