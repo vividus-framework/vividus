@@ -102,16 +102,18 @@ jobs:
         BROWSERSTACK_KEY: ${{ secrets.BROWSERSTACK_KEY }}
         APPLITOOLS_EXECUTE_KEY: ${{ secrets.APPLITOOLS_EXECUTE_KEY }}
         APPLITOOLS_READ_KEY: ${{ secrets.APPLITOOLS_READ_KEY }}
+        MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+        MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
       shell: bash
       run: |
-        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY ]]; then
+        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD ]]; then
             ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system \
                                                 -Pvividus.configuration.suite=system \
                                                 -Pvividus.configuration.profiles=browserstack/web,web/desktop/chrome \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY}
         else
-            echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY and/or APPLITOOLS_EXECUTE_KEY and/or APPLITOOLS_READ_KEY variables, System tests will be skipped
+            echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY and/or APPLITOOLS_EXECUTE_KEY and/or APPLITOOLS_READ_KEY and/or MONGODB_USERNAME and/or MONGODB_PASSWORD variables, System tests will be skipped
         fi
 
     - name: Publish System tests report
