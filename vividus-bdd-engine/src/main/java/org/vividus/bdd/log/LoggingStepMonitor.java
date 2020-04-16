@@ -18,6 +18,7 @@ package org.vividus.bdd.log;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Queue;
 
 import org.jbehave.core.model.StepPattern;
 import org.jbehave.core.steps.PrintStreamStepMonitor;
@@ -86,7 +87,7 @@ public class LoggingStepMonitor extends PrintStreamStepMonitor
     }
 
     @Override
-    public void convertedValueOfType(String value, Type type, Object converted, Class<?> converterClass)
+    public void convertedValueOfType(String value, Type type, Object converted, Queue<Class<?>> converterClasses)
     {
         // Skip logging as it's not informative
     }
