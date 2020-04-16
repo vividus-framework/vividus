@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import javax.inject.Inject;
+
 import com.google.common.base.Suppliers;
 
 import org.jbehave.core.configuration.Configuration;
@@ -36,7 +38,7 @@ import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.reporters.ViewGenerator;
 import org.jbehave.core.steps.DelegatingStepMonitor;
-import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.ChainableParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vividus.bdd.IPathFinder;
@@ -45,13 +47,12 @@ import org.vividus.bdd.steps.ExpressionAdaptor;
 import org.vividus.bdd.steps.ParameterAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
 
-@SuppressWarnings("rawtypes")
 public class ExtendedConfiguration extends Configuration
 {
     private IPathFinder pathFinder;
     private ParameterAdaptor parameterAdaptor;
     private ExpressionAdaptor expressionAdaptor;
-    private List<ParameterConverter> customConverters;
+    private List<ChainableParameterConverter<?, ?>> customConverters;
     private List<StepMonitor> stepMonitors;
     private Map<String, TableTransformer> customTableTransformers;
     private String compositePaths;
@@ -131,8 +132,8 @@ public class ExtendedConfiguration extends Configuration
         this.parameterAdaptor = parameterAdaptor;
     }
 
-    @Autowired
-    public void setCustomConverters(List<ParameterConverter> customConverters)
+    @Inject
+    public void setCustomConverters(List<ChainableParameterConverter<?, ?>> customConverters)
     {
         this.customConverters = Collections.unmodifiableList(customConverters);
     }

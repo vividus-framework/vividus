@@ -16,31 +16,30 @@
 
 package org.vividus.bdd.converter;
 
-import java.lang.reflect.Type;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.apache.commons.lang3.Validate;
+import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.openqa.selenium.Point;
 
 @Named
-public class PointConverter extends AbstractParameterConverter<Point>
+public class PointConverter extends FunctionalParameterConverter<Point>
 {
     private static final Pattern POINT_PATTERN = Pattern.compile("\\((-?\\d+),\\s*(-?\\d+)\\)");
 
-    @Override
-    public Point convertValue(String value, Type type)
+    public PointConverter()
     {
-        Matcher matcher = POINT_PATTERN.matcher(value);
-        if (matcher.matches())
+        super(value ->
         {
+            Matcher matcher = POINT_PATTERN.matcher(value);
+            Validate.isTrue(matcher.matches(), "Unable to parse point: %s. It should match regular expression: %s",
+                    value, POINT_PATTERN.pattern());
             int x = Integer.parseInt(matcher.group(1));
             int y = Integer.parseInt(matcher.group(2));
             return new Point(x, y);
-        }
-        throw new IllegalArgumentException("Unable to parse point: " + value + ". It should match regular experession: "
-                + POINT_PATTERN.pattern());
+        });
     }
 }

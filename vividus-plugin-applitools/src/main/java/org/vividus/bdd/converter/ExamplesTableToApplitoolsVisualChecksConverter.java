@@ -14,34 +14,33 @@
  * limitations under the License.
  */
 
-package org.vividus.visual.eyes.bdd.converter;
+package org.vividus.bdd.converter;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import javax.inject.Named;
 
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTableFactory;
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.AbstractChainableParameterConverter;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 
+@Named
 public class ExamplesTableToApplitoolsVisualChecksConverter
-    extends AbstractParameterConverter<List<ApplitoolsVisualCheck>>
+    extends AbstractChainableParameterConverter<ExamplesTable, List<ApplitoolsVisualCheck>>
 {
-    private ApplitoolsVisualCheckFactory visualCheckFactory;
-    private Supplier<ExamplesTableFactory> examplesTableFactory;
+    private final ApplitoolsVisualCheckFactory visualCheckFactory;
 
-    @Override
-    public List<ApplitoolsVisualCheck> convertValue(String value, Type type)
+    public ExamplesTableToApplitoolsVisualChecksConverter(ApplitoolsVisualCheckFactory visualCheckFactory)
     {
-        ExamplesTable toConvert = createExamplesTable(value);
-        return createChecks(toConvert);
+        this.visualCheckFactory = visualCheckFactory;
     }
 
-    private List<ApplitoolsVisualCheck> createChecks(ExamplesTable toConvert)
+    @Override
+    public List<ApplitoolsVisualCheck> convertValue(ExamplesTable toConvert, Type type)
     {
         return toConvert.getRowsAs(ApplitoolsVisualCheck.class)
                         .stream()
@@ -58,20 +57,5 @@ public class ExamplesTableToApplitoolsVisualChecksConverter
     private <T> void checkNotNull(T toCheck, String fieldName)
     {
         Validate.isTrue(toCheck != null, fieldName + " should be set");
-    }
-
-    private ExamplesTable createExamplesTable(String from)
-    {
-        return examplesTableFactory.get().createExamplesTable(from);
-    }
-
-    public void setExamplesTableFactory(Supplier<ExamplesTableFactory> examplesTableFactory)
-    {
-        this.examplesTableFactory = examplesTableFactory;
-    }
-
-    public void setVisualCheckFactory(ApplitoolsVisualCheckFactory visualCheckFactory)
-    {
-        this.visualCheckFactory = visualCheckFactory;
     }
 }

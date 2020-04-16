@@ -18,7 +18,6 @@ package org.vividus.bdd.converter;
 
 import java.lang.reflect.Type;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
@@ -30,7 +29,6 @@ public class ComparisonRuleParameterConverter extends AbstractParameterConverter
 {
     private final FluentEnumConverter fluentEnumConverter;
 
-    @Inject
     public ComparisonRuleParameterConverter(FluentEnumConverter fluentEnumConverter)
     {
         this.fluentEnumConverter = fluentEnumConverter;

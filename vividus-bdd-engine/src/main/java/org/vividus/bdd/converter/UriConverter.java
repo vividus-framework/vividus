@@ -16,20 +16,18 @@
 
 package org.vividus.bdd.converter;
 
-import java.lang.reflect.Type;
 import java.net.URI;
 
 import javax.inject.Named;
 
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.vividus.util.UriUtils;
 
 @Named
-public class UriConverter extends AbstractParameterConverter<URI>
+public class UriConverter extends FunctionalParameterConverter<URI>
 {
-    @Override
-    public URI convertValue(String value, Type type)
+    public UriConverter()
     {
-        return UriUtils.createUri(value);
+        super(UriUtils::createUri);
     }
 }

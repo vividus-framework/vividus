@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.visual.eyes.bdd.converter;
+package org.vividus.bdd.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTableFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,19 +46,11 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
     private static final VisualActionType ESTABLISH = VisualActionType.ESTABLISH;
     private static final String BASELINE = "baseline";
     private static final String BATCH = "batch";
-    private static final String EXAMPLES_TABLE = "|action|\n|establish|";
 
     @Mock private ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
-    @Mock private ExamplesTableFactory examplesTableFactory;
 
     @InjectMocks
     private ExamplesTableToApplitoolsVisualChecksConverter converter;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        converter.setExamplesTableFactory(() -> examplesTableFactory);
-    }
 
     @Test
     void shouldConvertExamplesTableIntoApplitoolsVisualChecks()
@@ -68,18 +58,18 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         ApplitoolsVisualCheck visualCheck =
                 spy(new ApplitoolsVisualCheck(BATCH, BASELINE, ESTABLISH));
         List<ApplitoolsVisualCheck> checks = List.of(visualCheck, visualCheck);
-        mockExamplesTable(checks);
+        ExamplesTable examplesTable = mockExamplesTable(checks);
         when(applitoolsVisualCheckFactory.unite(visualCheck)).thenReturn(visualCheck);
-        assertEquals(checks, converter.convertValue(EXAMPLES_TABLE, null));
+        assertEquals(checks, converter.convertValue(examplesTable, null));
         verify(applitoolsVisualCheckFactory, times(2)).unite(visualCheck);
         verify(visualCheck, times(2)).buildIgnores();
     }
 
-    private void mockExamplesTable(List<ApplitoolsVisualCheck> checks)
+    private ExamplesTable mockExamplesTable(List<ApplitoolsVisualCheck> checks)
     {
         ExamplesTable examplesTable = mock(ExamplesTable.class);
-        when(examplesTableFactory.createExamplesTable(EXAMPLES_TABLE)).thenReturn(examplesTable);
         when(examplesTable.getRowsAs(ApplitoolsVisualCheck.class)).thenReturn(checks);
+        return examplesTable;
     }
 
     @SuppressWarnings("unused")
@@ -95,9 +85,9 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
     @MethodSource("dataProvider")
     void shouldThrowExceptionIfMandatoryFieldNotSet(ApplitoolsVisualCheck visualCheck, String fieldName)
     {
-        mockExamplesTable(List.of(visualCheck));
+        ExamplesTable examplesTable = mockExamplesTable(List.of(visualCheck));
         IllegalArgumentException iae =
-                assertThrows(IllegalArgumentException.class, () -> converter.convertValue(EXAMPLES_TABLE, null));
+                assertThrows(IllegalArgumentException.class, () -> converter.convertValue(examplesTable, null));
         assertEquals(fieldName + " should be set", iae.getMessage());
     }
 }

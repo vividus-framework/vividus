@@ -16,19 +16,16 @@
 
 package org.vividus.bdd.converter;
 
-import java.lang.reflect.Type;
-
 import javax.inject.Named;
 
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.vividus.ssh.Commands;
 
 @Named
-public class CommandsConverter extends AbstractParameterConverter<Commands>
+public class CommandsConverter extends FunctionalParameterConverter<Commands>
 {
-    @Override
-    public Commands convertValue(String value, Type type)
+    public CommandsConverter()
     {
-        return new Commands(value);
+        super(Commands::new);
     }
 }
