@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Properties;
 
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +55,7 @@ class ExcelTableTransformerTests
         properties.getProperties().setProperty(RANGE, RANGE_VALUE);
         properties.getProperties().setProperty(ADDRESSES, "1,3,5");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform("", properties));
+            () -> transformer.transform("", null, properties));
         assertEquals("Only one ExamplesTable property must be set, but found both 'range' and 'addresses'",
                 exception.getMessage());
     }
@@ -64,7 +64,7 @@ class ExcelTableTransformerTests
     void testCheckConcurrentConditionsWithoutPropertiesThrowException()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform("", properties));
+            () -> transformer.transform("", null, properties));
         assertEquals("One of ExamplesTable properties must be set: either 'range' or 'addresses'",
                 exception.getMessage());
     }
@@ -75,7 +75,7 @@ class ExcelTableTransformerTests
         properties.getProperties().setProperty(RANGE, RANGE_VALUE);
         properties.getProperties().setProperty(INCREMENT, "2");
         properties.getProperties().setProperty(JOIN_VALUES, TRUE);
-        String actualResult = transformer.transform("", properties);
+        String actualResult = transformer.transform("", null, properties);
         assertEquals("|data|\n|OPEN CLOSED|", actualResult);
     }
 
@@ -83,7 +83,7 @@ class ExcelTableTransformerTests
     void testTransformWithUsingRangeWithoutIncrement()
     {
         properties.getProperties().setProperty(RANGE, RANGE_VALUE);
-        String actualResult = transformer.transform("", properties);
+        String actualResult = transformer.transform("", null, properties);
         assertEquals("|data|\n|OPEN|\n|PENDING|\n|CLOSED|", actualResult);
     }
 
@@ -91,7 +91,7 @@ class ExcelTableTransformerTests
     void testTransformWithUsingAddresses()
     {
         properties.getProperties().setProperty(ADDRESSES, "B4;B6");
-        String actualResult = transformer.transform("", properties);
+        String actualResult = transformer.transform("", null, properties);
         assertEquals("|data|\n|OPEN|\n|CLOSED|", actualResult);
     }
 
@@ -100,7 +100,7 @@ class ExcelTableTransformerTests
     {
         properties.getProperties().setProperty(ADDRESSES, "B7;B8");
         properties.getProperties().setProperty(JOIN_VALUES, TRUE);
-        String actualResult = transformer.transform("", properties);
+        String actualResult = transformer.transform("", null, properties);
         assertEquals("|data|\n|CLOSED CLOSED |", actualResult);
     }
 
@@ -110,7 +110,7 @@ class ExcelTableTransformerTests
         properties.getProperties().setProperty(ADDRESSES, "B6;B8");
         properties.getProperties().setProperty(JOIN_VALUES, TRUE);
         properties.getProperties().setProperty("lineBreakReplacement", " ");
-        String actualResult = transformer.transform("", properties);
+        String actualResult = transformer.transform("", null, properties);
         assertEquals("|data|\n|CLOSED CLOSED  |", actualResult);
     }
 }

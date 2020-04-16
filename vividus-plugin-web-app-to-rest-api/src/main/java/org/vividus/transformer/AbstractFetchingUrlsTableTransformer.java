@@ -24,7 +24,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.TableParsers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.transformer.ExtendedTableTransformer;
@@ -43,7 +44,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
     private boolean filterRedirects;
 
     @Override
-    public String transform(String tableAsString, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
     {
         checkTableEmptiness(tableAsString);
         Set<String> urls = fetchUrls(properties).stream()

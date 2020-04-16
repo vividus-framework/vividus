@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.TableParsers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -86,7 +87,7 @@ class ExamplesTableProcessorTests
     void testParseDataRows()
     {
         assertEquals(List.of(VALUES1, VALUES2),
-                ExamplesTableProcessor.parseDataRows(TABLE_AS_ROW_LIST, createProperties()));
+                ExamplesTableProcessor.parseDataRows(TABLE_AS_ROW_LIST, new TableParsers(), createProperties()));
     }
 
     @Test

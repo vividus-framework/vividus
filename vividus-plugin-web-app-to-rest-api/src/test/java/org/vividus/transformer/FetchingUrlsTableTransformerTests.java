@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.junit.jupiter.api.Test;
 
 class FetchingUrlsTableTransformerTests
@@ -38,7 +38,8 @@ class FetchingUrlsTableTransformerTests
     {
         ExamplesTableProperties properties = new ExamplesTableProperties(new Properties());
         properties.getProperties().setProperty(COLUMN, URLS);
-        assertEquals("|urls|\n|/first|\n|/second|\n|/fourth%25|\n|/third|", transformer.transform("", properties));
+        assertEquals("|urls|\n|/first|\n|/second|\n|/fourth%25|\n|/third|", transformer.transform("", null,
+                properties));
     }
 
     @Test
@@ -48,7 +49,7 @@ class FetchingUrlsTableTransformerTests
         properties.setProperty(COLUMN, " ");
         ExamplesTableProperties tableProeprties = new ExamplesTableProperties(properties);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform("", tableProeprties));
+            () -> transformer.transform("", null, tableProeprties));
         assertEquals("ExamplesTable property 'column' is blank", exception.getMessage());
     }
 
@@ -58,7 +59,7 @@ class FetchingUrlsTableTransformerTests
         Properties properties = new Properties();
         ExamplesTableProperties tableProeprties = new ExamplesTableProperties(properties);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform("|first|", tableProeprties));
+            () -> transformer.transform("|first|", null, tableProeprties));
         assertEquals("Input table must be empty", exception.getMessage());
     }
 

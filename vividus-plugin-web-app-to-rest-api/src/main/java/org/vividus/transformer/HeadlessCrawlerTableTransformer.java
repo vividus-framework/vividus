@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 import com.google.common.base.Suppliers;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.vividus.crawler.ICrawlControllerFactory;
 import org.vividus.crawler.LinkCrawlerData;
 import org.vividus.crawler.LinkCrawlerFactory;

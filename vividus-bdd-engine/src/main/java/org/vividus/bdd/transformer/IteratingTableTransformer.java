@@ -22,7 +22,8 @@ import java.util.stream.Stream;
 
 import javax.inject.Named;
 
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
 @Named("ITERATING")
@@ -31,7 +32,7 @@ public class IteratingTableTransformer implements ExtendedTableTransformer
     private static final List<String> ITERATOR = List.of("iterator");
 
     @Override
-    public String transform(String tableAsString, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
     {
         checkTableEmptiness(tableAsString);
         String limit = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "limit");

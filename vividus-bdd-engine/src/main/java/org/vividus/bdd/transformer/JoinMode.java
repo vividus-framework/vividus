@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 import org.vividus.bdd.util.MapUtils;
 

@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -82,7 +82,7 @@ class JsonRestApiTableTransformerTests
         Map<String, String> keyToJsonPathValue = Map.ofEntries(columns, source);
         String expectedTable = "|column_code|column_codeSystem|column_type|\n|107214|VIVIDUS|A|\n|107224|VIVIDUS|B|"
                 + "\n|107314|VIVIDUS|C|\n|107324|VIVIDUS|D|\n|107XX4|VIVIDUS|E|\n|1|true|F|";
-        String table = jsonTableGenerator.transform(StringUtils.EMPTY, createProperties(keyToJsonPathValue));
+        String table = jsonTableGenerator.transform(StringUtils.EMPTY, null, createProperties(keyToJsonPathValue));
         assertEquals(expectedTable, table);
     }
 
@@ -91,7 +91,7 @@ class JsonRestApiTableTransformerTests
     {
         ExamplesTableProperties properties = createProperties(Collections.singletonMap(COLUMNS, "key=value,url"));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> jsonTableGenerator.transform(StringUtils.EMPTY, properties));
+            () -> jsonTableGenerator.transform(StringUtils.EMPTY, null, properties));
         assertEquals("One of ExamplesTable properties must be set: either 'url' or 'variable'", exception.getMessage());
     }
 
@@ -100,7 +100,7 @@ class JsonRestApiTableTransformerTests
     {
         ExamplesTableProperties properties = createProperties(Collections.singletonMap(URL, URL_VALUE));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> jsonTableGenerator.transform(StringUtils.EMPTY, properties));
+            () -> jsonTableGenerator.transform(StringUtils.EMPTY, null, properties));
         assertEquals("'columns' is not set in ExamplesTable properties", exception.getMessage());
     }
 

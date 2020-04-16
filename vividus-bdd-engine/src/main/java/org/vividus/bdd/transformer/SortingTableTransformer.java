@@ -24,26 +24,26 @@ import java.util.stream.Collectors;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTableProperties;
-import org.jbehave.core.model.TableUtils;
+import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
 @Named("SORTING")
 public class SortingTableTransformer implements ExtendedTableTransformer
 {
     @Override
-    public String transform(String tableAsString, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
     {
         String byColumns = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "byColumns");
         List<String> rowsToSort = ExamplesTableProcessor.parseRows(tableAsString);
         String header = rowsToSort.get(0);
-        List<String> headerValues = TableUtils.parseRow(header, true, properties);
+        List<String> headerValues = tableParsers.parseRow(header, true, properties);
         List<Integer> columnsToCompare = Arrays.stream(StringUtils.split(byColumns, '|'))
                 .map(String::trim)
                 .map(headerValues::indexOf)
                 .filter(i -> i > -1)
                 .collect(Collectors.toList());
-        List<List<String>> rows = ExamplesTableProcessor.parseDataRows(rowsToSort, properties).stream()
+        List<List<String>> rows = ExamplesTableProcessor.parseDataRows(rowsToSort, tableParsers, properties).stream()
                 .sorted((r1, r2) ->
                 {
                     int result = 0;

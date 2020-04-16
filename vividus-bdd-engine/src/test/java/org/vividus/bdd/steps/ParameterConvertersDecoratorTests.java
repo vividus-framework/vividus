@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,7 +77,8 @@ class ParameterConvertersDecoratorTests
         when(parameterAdaptor.convert(value)).thenReturn(convertedValue);
         String actual = (String) parameterConverters.convert(value, type);
         assertEquals("Varvar" + System.lineSeparator() + "Varvar2", actual);
-        verify(stepMonitor).convertedValueOfType(convertedValue, type, actual, StringConverter.class);
+        verify(stepMonitor).convertedValueOfType(convertedValue, type, actual,
+                new LinkedList<>(List.of(StringConverter.class)));
     }
 
     @Test
@@ -115,7 +117,8 @@ class ParameterConvertersDecoratorTests
         when(parameterAdaptor.convert(VALUE)).thenReturn(VALUE);
         Optional<Integer> actual = (Optional<Integer>) parameterConverters.convert(VALUE, type);
         assertEquals(convertedValue, actual);
-        verify(stepMonitor).convertedValueOfType(VALUE, Integer.class, baseConvertedValue, NumberConverter.class);
+        verify(stepMonitor).convertedValueOfType(VALUE, Integer.class, baseConvertedValue,
+                new LinkedList<>(List.of(NumberConverter.class)));
     }
 
     @Test
@@ -126,7 +129,7 @@ class ParameterConvertersDecoratorTests
         Type type = int.class;
         Object actual = parameterConverters.convert(VALUE, type);
         assertEquals(Integer.parseInt(VALUE), actual);
-        verify(stepMonitor).convertedValueOfType(VALUE, type, actual, NumberConverter.class);
+        verify(stepMonitor).convertedValueOfType(VALUE, type, actual, new LinkedList<>(List.of(NumberConverter.class)));
     }
 
     @Test
@@ -148,7 +151,7 @@ class ParameterConvertersDecoratorTests
         Type type = Float.class;
         Object actual = parameterConverters.convert(VALUE, type);
         assertEquals(Float.parseFloat(VALUE), actual);
-        verify(stepMonitor).convertedValueOfType(VALUE, type, actual, NumberConverter.class);
+        verify(stepMonitor).convertedValueOfType(VALUE, type, actual, new LinkedList<>(List.of(NumberConverter.class)));
     }
 
     @Test
