@@ -367,6 +367,22 @@ class MouseActionsTests
     }
 
     @Test
+    void shouldNotProcessAlertsAfterClickForElectronApps()
+    {
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        WebElement body = mock(WebElement.class);
+        WebDriverEventListener webDriverEventListener = mock(WebDriverEventListener.class);
+        mouseActions.setWebDriverEventListeners(List.of(webDriverEventListener));
+        when(webDriver.findElement(BODY_XPATH_LOCATOR)).thenReturn(body);
+        when(webDriverManager.isElectronApp()).thenReturn(true);
+        ClickResult result = mouseActions.clickViaJavascript(webElement);
+        verify(webDriverEventListener).beforeClickOn(webElement, webDriver);
+        verify(webDriverEventListener).afterClickOn(webElement, webDriver);
+        assertFalse(result.isNewPageLoaded());
+        verifyNoInteractions(webUiContext, alertActions, eventBus);
+    }
+
+    @Test
     void testClickViaJavascriptNullElement()
     {
         ClickResult result = mouseActions.clickViaJavascript(null);

@@ -202,6 +202,27 @@ class WebDriverManagerTests
     }
 
     @Test
+    void shouldNotResizeElectronApps()
+    {
+        webDriverManager.setElectronApp(true);
+        WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
+        BrowserWindowSize browserWindowSize = mock(BrowserWindowSize.class);
+        webDriverManager.resize(browserWindowSize);
+        verify(webDriver, never()).manage();
+        verifyNoInteractions(webDriverProvider);
+    }
+
+    @Test
+    void shouldNotResizeWindowSizeForElectronApps()
+    {
+        webDriverManager.setElectronApp(true);
+        WebDriver webDriver = mock(WebDriver.class);
+        BrowserWindowSize browserWindowSize = mock(BrowserWindowSize.class);
+        webDriverManager.resize(webDriver, browserWindowSize);
+        verify(webDriver, never()).manage();
+    }
+
+    @Test
     void testGetSize()
     {
         MobileDriver<?> mobileDriver = mock(MobileDriver.class, withSettings().extraInterfaces(HasCapabilities.class));

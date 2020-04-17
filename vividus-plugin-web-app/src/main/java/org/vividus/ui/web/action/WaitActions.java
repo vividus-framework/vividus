@@ -61,7 +61,7 @@ public class WaitActions implements IWaitActions
     @Override
     public void waitForPageLoad(WebDriver webDriver)
     {
-        if (!alertActions.isAlertPresent(webDriver))
+        if (!alertActions.isAlertPresent(webDriver) && !webDriverManager.isElectronApp())
         {
             boolean iexplore = webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE);
             /*

@@ -120,6 +120,7 @@
 
     <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager">
         <property name="nativeApp" value="${mobile-native-app}" />
+        <property name="electronApp" value="${desktop-electron-app}" />
     </bean>
 
     <bean id="fieldActions" class="org.vividus.ui.web.action.FieldActions" />
