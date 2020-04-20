@@ -93,6 +93,32 @@ When I execute commands
  in `${collectionName}` collection against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `count`
 Then `${count}` is equal to `2`
 
+Scenario: Native find
+When I execute command `
+{
+    find: "${collectionName}",
+    filter: { age: { $gte: 1 } },
+    sort: { age: 1 },
+    projection: { age: 1, name: 1, _id: 0 }
+}
+` against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `native-find`
+Then `${native-find.ok}` is equal to `1.0`
+Then a JSON element from '${native-find.cursor}' by the JSON path '$.firstBatch' is equal to '
+[
+   {
+      "age": 20,
+      "name": "Rowena Fitzpatrick"
+   },
+   {
+      "age": 33,
+      "name": "Joanna Pierce"
+   },
+   {
+      "age": 40,
+      "name": "Buck Frazier"
+   }
+]'
+
 Scenario: Tear down
 When I execute command `{ drop: "${collectionName}" }` against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `drop`
 Then `${drop.ok}` is equal to `1.0`
