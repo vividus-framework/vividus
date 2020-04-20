@@ -54,8 +54,7 @@ public class ResourceUtilsTests
     @Test
     public void testResourceLoadingFromRootAsStringIsSuccessful()
     {
-        assertEquals(ROOT_RESOURCE_CONTENT, StringUtils
-                .normalizeLineFeeds(ResourceUtils.loadResource(RESOURCE_NAME)));
+        assertEquals(ROOT_RESOURCE_CONTENT, normalizeLineFeeds(ResourceUtils.loadResource(RESOURCE_NAME)));
     }
 
     @Test
@@ -68,8 +67,8 @@ public class ResourceUtilsTests
     @Test
     public void testResourceLoadingAsStringIsSuccessful()
     {
-        assertEquals(RESOURCE_CONTENT, StringUtils
-                .normalizeLineFeeds(ResourceUtils.loadResource(ResourceUtils.class, RESOURCE_NAME)));
+        assertEquals(RESOURCE_CONTENT,
+                normalizeLineFeeds(ResourceUtils.loadResource(ResourceUtils.class, RESOURCE_NAME)));
     }
 
     @Test
@@ -81,8 +80,12 @@ public class ResourceUtilsTests
 
     private byte[] normalizeBytes(byte[] bytes)
     {
-        return StringUtils.normalizeLineFeeds(new String(bytes, StandardCharsets.UTF_8))
-                .getBytes(StandardCharsets.UTF_8);
+        return normalizeLineFeeds(new String(bytes, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static String normalizeLineFeeds(String input)
+    {
+        return input.replaceAll("\r\n|\n", System.lineSeparator());
     }
 
     @Test
