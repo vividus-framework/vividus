@@ -23,4 +23,7 @@
         <property name="screenshotIndexer" value="${web.visual.indexer}" />
     </bean>
 
+    <util:list id="stepBeanNames-Visual-Hooks">
+        <value>scenario</value>
+    </util:list>
 </beans>
