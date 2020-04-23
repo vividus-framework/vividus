@@ -18,17 +18,19 @@ package org.vividus.bdd.report.allure;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jbehave.core.failures.BeforeOrAfterFailed;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
@@ -40,7 +42,6 @@ import org.vividus.bdd.ChainedStoryReporter;
 import org.vividus.bdd.JBehaveFailureUnwrapper;
 import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.MetaWrapper;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.report.allure.adapter.IVerificationErrorAdapter;
@@ -58,7 +59,6 @@ import org.vividus.testcontext.TestContext;
 
 import io.qameta.allure.Allure;
 import io.qameta.allure.AllureLifecycle;
-import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.entity.LabelName;
 import io.qameta.allure.model.Label;
 import io.qameta.allure.model.Link;
@@ -73,10 +73,7 @@ import io.qameta.allure.util.ResultsUtils;
 @SuppressWarnings("checkstyle:MethodCount")
 public class AllureStoryReporter extends ChainedStoryReporter implements IAllureStepReporter
 {
-    private static final char TEST_CASE_META_SEPARATOR = ';';
     private static final String CURRENT_STEP_KEY = "allureCurrentLinkedStep";
-    private static final String TEST_TIER = "testTier";
-    private static final String TEST_CASE_ID = "testCaseId";
 
     private final AllureLifecycle lifecycle = Allure.getLifecycle();
     private IAllureReportGenerator allureReportGenerator;
@@ -129,7 +126,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
                         break;
                     }
                     collectLabels(runningStory, givenStory, title).forEach(
-                        (name, value) -> storyLabels.add(new Label().setName(name.value()).setValue(value)));
+                        (name, value) -> storyLabels.add(ResultsUtils.createLabel(name.value(), value)));
                     break;
             }
         }
@@ -143,8 +140,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         labels.put(LabelName.THREAD, ResultsUtils.getThreadName());
         labels.put(LabelName.STORY, runningStory.getName());
         labels.put(LabelName.FRAMEWORK, "Vividus");
-        labels.put(LabelName.FEATURE, new MetaWrapper(runningStory.getStory().getMeta())
-                .getOptionalPropertyValue("group").orElse("Ungrouped"));
         labels.put(LabelName.PARENT_SUITE, getBatchName());
 
         if (givenStory)
@@ -371,18 +366,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         }
     }
 
-    private List<Label> getTestCaseMetaLabels(String key, Meta... metas)
-    {
-        return Stream.of(metas)
-                .map(MetaWrapper::new)
-                .map(meta -> meta.getOptionalPropertyValue(key))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .flatMap(propertyValue -> Stream.of(StringUtils.split(propertyValue, TEST_CASE_META_SEPARATOR)))
-                .map(StringUtils::trim).distinct().map(v -> new Label().setName(key).setValue(v))
-                .collect(Collectors.toList());
-    }
-
     @Override
     public void updateStepStatus(Status status)
     {
@@ -533,20 +516,22 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         allureRunContext.setStoryExecutionStage(storyExecutionStage);
         if (getLinkedStep() == null)
         {
-            List<Label> labels = new ArrayList<>(allureRunContext.getCurrentStoryLabels());
-
-            Story story = bddRunContext.getRunningStory().getStory();
+            Meta storyMeta = bddRunContext.getRunningStory().getStory().getMeta();
             Meta scenarioMeta = runningScenario.getScenario().getMeta();
-            new MetaWrapper(scenarioMeta).getOptionalPropertyValue(TEST_TIER)
-                    .map(testTier -> SeverityLevel.values()[Integer.parseInt(testTier)])
-                    .map(SeverityLevel::value)
-                    .ifPresent(severityLevel -> labels.add(new Label().setName("severity").setValue(severityLevel)));
 
-            List<Label> testCaseMetaLabels = Stream
-                    .of("testCaseGroup", TEST_CASE_ID, "requirementId")
-                    .flatMap(label -> getTestCaseMetaLabels(label, scenarioMeta, story.getMeta()).stream()).distinct()
+            Map<VividusLabel, Set<String>> metaLabels = Stream.of(VividusLabel.values())
+                    .collect(Collectors.toMap(Function.identity(),
+                        label -> label.extractMetaValues(storyMeta, scenarioMeta), (l, r) -> l, LinkedHashMap::new));
+
+            List<Link> links = metaLabels.entrySet().stream()
+                    .flatMap(e -> e.getValue().stream().map(v -> e.getKey().createLink(v)))
+                    .flatMap(Optional::stream)
                     .collect(Collectors.toList());
-            labels.addAll(testCaseMetaLabels);
+
+            List<Label> labels = metaLabels.entrySet().stream()
+                    .flatMap(e -> e.getValue().stream().map(v -> e.getKey().createLabel(v)))
+                    .collect(Collectors.toList());
+            labels.addAll(allureRunContext.getCurrentStoryLabels());
 
             int index = runningScenario.getIndex();
             String scenarioId = runningScenario.getUuid() + (index != -1 ? "[" + index + "]" : "");
@@ -554,7 +539,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
                     .setUuid(scenarioId)
                     .setName(runningScenario.getTitle())
                     .setLabels(labels)
-                    .setLinks(convertLabelsToLinks(testCaseMetaLabels))
+                    .setLinks(links)
                     .setStatus(StatusPriority.getLowest().getStatusModel()));
             lifecycle.startTestCase(scenarioId);
             putCurrentStepId(scenarioId);
@@ -565,24 +550,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         }
         allureRunContext.setStoryExecutionStage(storyExecutionStage);
         allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
-    }
-
-    private List<Link> convertLabelsToLinks(List<Label> labels)
-    {
-        List<Link> links = new ArrayList<>();
-        for (Label label : labels)
-        {
-            if (label.getName().equals(TEST_CASE_ID))
-            {
-                String identifier = label.getValue();
-                Link link = ResultsUtils.createIssueLink(identifier);
-                if (!identifier.equals(link.getUrl()))
-                {
-                    links.add(link.setType(ResultsUtils.TMS_LINK_TYPE));
-                }
-            }
-        }
-        return links;
     }
 
     private void updateLabels(List<Label> labels, LabelName labelToUpdate, String newValue)

@@ -1,7 +1,7 @@
 Description: Integration tests for HtmlSteps class
 
 Meta:
-    @group vividus-plugin-html
+    @epic vividus-plugin-html
 
 Lifecycle:
 Before:

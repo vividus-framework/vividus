@@ -1,7 +1,8 @@
 Description: Integration tests for environment variables
 
 Meta:
-    @group environment-variables
+    @epic vividus-core
+    @feature environment-variables
 
 Scenario: Verify environment variable is loaded from local system
 Then `${java}` matches `.*(jdk|jre){1}.*`

@@ -1,7 +1,7 @@
 Description: Integration tests for JsonResponseValidationSteps class (base website http://jsonpath.herokuapp.com/)
 
 Meta:
-    @group vividus-plugin-rest-api
+    @epic vividus-plugin-rest-api
 
 Lifecycle:
 Before:

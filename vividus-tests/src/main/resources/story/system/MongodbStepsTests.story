@@ -1,7 +1,8 @@
 Description: Integration tests for MongoDbSteps class
 
 Meta:
-  @group vividus-plugin-mongodb
+    @epic vividus-plugin-mongodb
+    @requirementId 435
 
 Scenario: Set up
 When I initialize the STORY variable `collectionName` with value `#{generate(regexify '[a-z]{15}')}`

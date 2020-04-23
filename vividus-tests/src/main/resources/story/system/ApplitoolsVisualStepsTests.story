@@ -1,7 +1,7 @@
 Description: System tests for Applitools Visual plugin steps
 
 Meta:
-    @group vividus-plugin-applitools
+    @epic vividus-plugin-applitools
 
 Lifecycle:
 Examples:

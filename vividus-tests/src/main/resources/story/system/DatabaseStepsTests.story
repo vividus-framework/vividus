@@ -1,7 +1,8 @@
 Description: Integration tests for DatabaseSteps class
 
 Meta:
-  @group vividus-plugin-db
+    @epic vividus-plugin-db
+    @requirementId 435
 
 Scenario: Verify step: 'When I merge `$left` and `$right` and save result to $scopes variable `$variableName`'
 When I execute SQL query `

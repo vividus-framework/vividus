@@ -1,5 +1,5 @@
 Meta:
-    @group plugin-web-app
+    @epic vividus-plugin-web-app
 
 Lifecycle:
 Examples:

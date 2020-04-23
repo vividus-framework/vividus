@@ -64,8 +64,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
@@ -120,21 +120,20 @@ class AllureStoryReporterTests
     private static final String SUB_STEP_UID = STEP_UID + DASH + THREAD_ID;
     private static final String CURRENT_STEP_KEY = "allureCurrentLinkedStep";
     private static final String STORY_NAME = "name";
-    private static final String EXPECTED_SCENARIO_TEST_CASE_GROUP = "testScenarioTestCaseGroup";
     private static final String EXPECTED_SCENARIO_TEST_CASE_ID = "testScenarioTestCaseId";
     private static final String EXPECTED_SCENARIO_REQUIREMENT_ID = "testScenarioRequirementId";
+
     private static final String ALLURE_LINK_ISSUE_PROPERTY = "allure.link.issue.pattern";
-    private static final String ISSUE_LINK_PREFIX = "https://example.org/";
+    private static final String ALLURE_LINK_TMS_PROPERTY = "allure.link.tms.pattern";
+
+    private static final String ISSUE_LINK_PREFIX = "https://issue/";
+    private static final String TMS_LINK_PREFIX = "https://tms/";
 
     private static final String LIFECYCLE_BEFORE_STORY = "Lifecycle: Before story";
     private static final String LIFECYCLE_AFTER_STORY = "Lifecycle: After story";
 
     private static final String TEST_CASE_ID = "testCaseId";
-    private static final String TEST_CASE_GROUP = "testCaseGroup";
     private static final String REQUIREMENT_ID = "requirementId";
-
-    private static final String GROUP = "group";
-    private static final String UNGROUPED = "Ungrouped";
 
     @Captor
     private ArgumentCaptor<TestResult> testResultCaptor;
@@ -181,13 +180,16 @@ class AllureStoryReporterTests
     @BeforeAll
     static void beforeAll()
     {
-        System.setProperty(ALLURE_LINK_ISSUE_PROPERTY, ISSUE_LINK_PREFIX + "{}");
+        String placeholder = "{}";
+        System.setProperty(ALLURE_LINK_ISSUE_PROPERTY, ISSUE_LINK_PREFIX + placeholder);
+        System.setProperty(ALLURE_LINK_TMS_PROPERTY, TMS_LINK_PREFIX + placeholder);
     }
 
     @AfterAll
     static void afterAll()
     {
         System.clearProperty(ALLURE_LINK_ISSUE_PROPERTY);
+        System.clearProperty(ALLURE_LINK_TMS_PROPERTY);
     }
 
     @BeforeEach
@@ -236,24 +238,17 @@ class AllureStoryReporterTests
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "true, true",
-            "false, true",
-            "true, false",
-            "false, false"
-    })
-    void testBeforeStoryDefault(boolean dryRun, boolean storyWithGroup)
+    @ValueSource(booleans = {true, false})
+    void testBeforeStoryDefault(boolean dryRun)
     {
         when(bddRunContext.isDryRun()).thenReturn(dryRun);
         List<Label> storyLabels = mockStoryStart(false);
-        Story story = testBeforeStory(BASE_STORY, false, storyWithGroup);
+        testBeforeStory(BASE_STORY, false);
         verifyNoInteractions(allureReportGenerator);
-        assertEquals(7, storyLabels.size());
+        assertEquals(6, storyLabels.size());
         assertLabel(LabelName.PARENT_SUITE, BATCH_NAME, storyLabels.get(0));
         assertLabel(LabelName.SUITE, BASE_STORY, storyLabels.get(1));
-        assertLabel(LabelName.FEATURE, storyWithGroup ? story.getMeta().getProperty(GROUP) : UNGROUPED,
-                storyLabels.get(2));
-        assertLabel(LabelName.STORY, BASE_STORY, storyLabels.get(3));
+        assertLabel(LabelName.STORY, BASE_STORY, storyLabels.get(2));
     }
 
     @Test
@@ -262,20 +257,19 @@ class AllureStoryReporterTests
         when(allureRunContext.getRootStoryLabels()).thenReturn(
                 List.of(new Label().setName(LabelName.SUITE.value()).setValue(BASE_STORY)));
         List<Label> storyLabels = mockStoryStart(true);
-        testBeforeStory(GIVEN_STORY, true, false);
+        testBeforeStory(GIVEN_STORY, true);
         verifyNoInteractions(allureReportGenerator);
-        assertEquals(8, storyLabels.size());
+        assertEquals(7, storyLabels.size());
         assertLabel(LabelName.PARENT_SUITE, BATCH_NAME, storyLabels.get(0));
         assertLabel(LabelName.SUITE, BASE_STORY, storyLabels.get(1));
         assertLabel(LabelName.SUB_SUITE, "Given Story: " + GIVEN_STORY, storyLabels.get(2));
-        assertLabel(LabelName.FEATURE, UNGROUPED, storyLabels.get(3));
-        assertLabel(LabelName.STORY, GIVEN_STORY, storyLabels.get(4));
+        assertLabel(LabelName.STORY, GIVEN_STORY, storyLabels.get(3));
     }
 
     @Test
     void testBeforeStoryScenarioGivenStory()
     {
-        Story story = mockRunningStory(false, true);
+        Story story = mockRunningStoryWithSeverity(true);
         story.namedAs("");
         mockScenarioUid(false);
         allureStoryReporter.beforeStory(story, true);
@@ -291,7 +285,7 @@ class AllureStoryReporterTests
         when(allureRunContext.getRootStoryLabels()).thenReturn(
                 List.of(new Label().setName(LabelName.SUITE.value()).setValue(BASE_STORY)));
         when(bddRunContext.isDryRun()).thenReturn(true);
-        Story story = mockRunningStory(false, true);
+        Story story = mockRunningStoryWithSeverity(true);
         story.namedAs("");
         allureStoryReporter.beforeStory(story, true);
         verify(next).beforeStory(story, true);
@@ -312,14 +306,14 @@ class AllureStoryReporterTests
     @Test
     void testBeforeStories()
     {
-        testBeforeStory("BeforeStories", false, false);
+        testBeforeStory("BeforeStories", false);
         verify(allureReportGenerator).start();
     }
 
     @Test
     void testAfterStories()
     {
-        testBeforeStory("AfterStories", false, false);
+        testBeforeStory("AfterStories", false);
         verify(allureReportGenerator).end();
     }
 
@@ -341,9 +335,9 @@ class AllureStoryReporterTests
         );
     }
 
-    private Story testBeforeStory(String storyName, boolean givenStory, boolean storyWithGroup)
+    private Story testBeforeStory(String storyName, boolean givenStory)
     {
-        Story story = mockRunningStory(storyWithGroup, true);
+        Story story = mockRunningStoryWithSeverity(true);
         story.namedAs(storyName);
         allureStoryReporter.beforeStory(story, givenStory);
         verify(next).beforeStory(story, givenStory);
@@ -370,7 +364,7 @@ class AllureStoryReporterTests
     @Test
     void testBeforeScenario()
     {
-        Story story = mockRunningStory(false, true);
+        Story story = mockRunningStoryWithSeverity(true);
         boolean givenStory = false;
         mockStoryStart(givenStory);
         mockScenarioUid(true);
@@ -387,7 +381,7 @@ class AllureStoryReporterTests
     @Test
     void testBeforeScenarioInGivenStoryScenarioLevel()
     {
-        Story story = mockRunningStory(false, true);
+        Story story = mockRunningStoryWithSeverity(true);
         mockScenarioUid(false);
         Scenario scenario = story.getScenarios().get(0);
         allureStoryReporter.beforeScenario(scenario);
@@ -399,9 +393,9 @@ class AllureStoryReporterTests
     }
 
     @Test
-    void testBeforeScenarioNoTier()
+    void testBeforeScenarioNoSeverity()
     {
-        Story story = mockRunningStory(false, false);
+        Story story = mockRunningStoryWithSeverity(false);
         boolean givenStory = false;
         mockStoryStart(givenStory);
         mockScenarioUid(true);
@@ -433,7 +427,7 @@ class AllureStoryReporterTests
     @Test
     void testBeforeScenarioStoriesWithSameNamesGivenStory()
     {
-        Story story = mockRunningStory(false, true);
+        Story story = mockRunningStoryWithSeverity(true);
         story.namedAs("given.story");
         List<Label> givenStoryLabels = List.of(
                 new Label().setName(LabelName.PARENT_SUITE.value()).setValue(STORY_NAME));
@@ -758,7 +752,7 @@ class AllureStoryReporterTests
     void testStoryCancelledNoRunningStep()
     {
         mockScenarioUid(false);
-        Story story = mockRunningStory(false, true);
+        Story story = mockRunningStoryWithSeverity(true);
         StoryDuration storyDuration = new StoryDuration(0);
         allureStoryReporter.storyCancelled(story, storyDuration);
         verify(allureLifecycle, never()).stopStep(STEP_UID);
@@ -774,7 +768,7 @@ class AllureStoryReporterTests
         linkedQueueItem = linkedQueueItem.attachItem(STEP_UID);
         when(testContext.get(CURRENT_STEP_KEY)).thenReturn(linkedQueueItem).thenReturn(linkedQueueItem)
                 .thenReturn(linkedQueueItem).thenReturn(new LinkedQueueItem<>(SCENARIO_UID));
-        Story story = mockRunningStory(false, true);
+        Story story = mockRunningStoryWithSeverity(true);
         StoryDuration storyDuration = new StoryDuration(0);
         allureStoryReporter.storyCancelled(story, storyDuration);
         verify(allureLifecycle).stopStep(STEP_UID);
@@ -897,8 +891,7 @@ class AllureStoryReporterTests
         boolean givenStory = false;
         mockStoryStart(givenStory);
         Story story = mockRunningStory(new Properties(), putTestCaseMetaProperties(getScenarioMeta(false),
-                EXPECTED_SCENARIO_TEST_CASE_GROUP, EXPECTED_SCENARIO_TEST_CASE_ID, EXPECTED_SCENARIO_REQUIREMENT_ID),
-                List.of());
+                EXPECTED_SCENARIO_TEST_CASE_ID, EXPECTED_SCENARIO_REQUIREMENT_ID), List.of());
         allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
@@ -907,16 +900,12 @@ class AllureStoryReporterTests
         Optional<Label> label = labels.stream().filter(l -> TEST_CASE_ID.equals(l.getName())).findFirst();
         assertTrue(label.isPresent());
         assertEquals(EXPECTED_SCENARIO_TEST_CASE_ID, label.get().getValue());
-        label = labels.stream().filter(l -> TEST_CASE_GROUP.equals(l.getName())).findFirst();
-        assertTrue(label.isPresent());
-        assertEquals(EXPECTED_SCENARIO_TEST_CASE_GROUP, label.get().getValue());
         label = labels.stream().filter(l -> REQUIREMENT_ID.equals(l.getName())).findFirst();
         assertTrue(label.isPresent());
         assertEquals(EXPECTED_SCENARIO_REQUIREMENT_ID, label.get().getValue());
         List<Link> links = captured.getLinks();
         assertFalse(links.isEmpty());
-        assertEquals(ISSUE_LINK_PREFIX + EXPECTED_SCENARIO_TEST_CASE_ID, links.get(0).getUrl());
-        assertEquals(ISSUE_LINK_PREFIX + EXPECTED_SCENARIO_TEST_CASE_ID, links.get(0).getUrl());
+        assertEquals(TMS_LINK_PREFIX + EXPECTED_SCENARIO_TEST_CASE_ID, links.get(0).getUrl());
         assertEquals(StatusPriority.getLowest().getStatusModel(), captured.getStatus());
     }
 
@@ -927,17 +916,16 @@ class AllureStoryReporterTests
         boolean givenStory = false;
         mockStoryStart(givenStory);
         Story story = mockRunningStory(
-                putTestCaseMetaProperties(new Properties(), EXPECTED_SCENARIO_TEST_CASE_GROUP,
-                        EXPECTED_SCENARIO_TEST_CASE_ID, EXPECTED_SCENARIO_REQUIREMENT_ID),
-                putTestCaseMetaProperties(getScenarioMeta(false), EXPECTED_SCENARIO_TEST_CASE_GROUP,
-                        EXPECTED_SCENARIO_TEST_CASE_ID, EXPECTED_SCENARIO_REQUIREMENT_ID),
+                putTestCaseMetaProperties(new Properties(), EXPECTED_SCENARIO_TEST_CASE_ID,
+                        EXPECTED_SCENARIO_REQUIREMENT_ID),
+                putTestCaseMetaProperties(getScenarioMeta(false), EXPECTED_SCENARIO_TEST_CASE_ID,
+                        EXPECTED_SCENARIO_REQUIREMENT_ID),
                 List.of());
         allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
         List<Label> labels = testResultCaptor.getValue().getLabels();
         assertEquals(1, labels.stream().filter(l -> TEST_CASE_ID.equals(l.getName())).count());
-        assertEquals(1, labels.stream().filter(l -> TEST_CASE_GROUP.equals(l.getName())).count());
         assertEquals(1, labels.stream().filter(l -> REQUIREMENT_ID.equals(l.getName())).count());
     }
 
@@ -997,14 +985,10 @@ class AllureStoryReporterTests
         verify(next).failed(GIVEN_STEP, throwable);
     }
 
-    private Story mockRunningStory(boolean storyWithGroup, boolean tierProperty)
+    private Story mockRunningStoryWithSeverity(boolean useSeverity)
     {
-        Properties scenarioMeta = getScenarioMeta(tierProperty);
+        Properties scenarioMeta = getScenarioMeta(useSeverity);
         Properties storyMeta = getStoryMeta();
-        if (storyWithGroup)
-        {
-            storyMeta.setProperty(GROUP, "storyGroup");
-        }
         return mockRunningStory(storyMeta, scenarioMeta, List.of());
     }
 
@@ -1034,13 +1018,13 @@ class AllureStoryReporterTests
         return runningStory;
     }
 
-    private Properties getScenarioMeta(boolean tierProperty)
+    private Properties getScenarioMeta(boolean useSeverity)
     {
         Properties scenarioMeta = new Properties();
         scenarioMeta.setProperty("scenarioMetaKey", "scenarioMetaValue");
-        if (tierProperty)
+        if (useSeverity)
         {
-            scenarioMeta.setProperty("testTier", "1");
+            scenarioMeta.setProperty("severity", "2");
         }
         return scenarioMeta;
     }
@@ -1061,10 +1045,8 @@ class AllureStoryReporterTests
         return storyMeta;
     }
 
-    private Properties putTestCaseMetaProperties(final Properties meta, String testCaseGroup, String testCaseId,
-            String requirementId)
+    private Properties putTestCaseMetaProperties(final Properties meta, String testCaseId, String requirementId)
     {
-        meta.setProperty(TEST_CASE_GROUP, testCaseGroup);
         meta.setProperty(TEST_CASE_ID, testCaseId);
         meta.setProperty(REQUIREMENT_ID, requirementId);
         return meta;

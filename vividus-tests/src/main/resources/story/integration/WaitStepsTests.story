@@ -1,7 +1,7 @@
 Description: Integration tests for WaitSteps class.
 
 Meta:
-    @group vividus-plugin-web-app
+    @epic vividus-plugin-web-app
 
 Scenario: Step verification I wait until element located '$locator' disappears
 Given I am on a page with the URL 'https://www.w3schools.com/jQuery/tryit.asp?filename=tryjquery_hide_slow'

@@ -1,7 +1,8 @@
 Description: Integration tests for variables
 
 Meta:
-    @group variables
+    @epic vividus-bdd-engine
+    @feature variables
 
 Scenario: Verify default variables
 Then `1` is = `${key:1}`

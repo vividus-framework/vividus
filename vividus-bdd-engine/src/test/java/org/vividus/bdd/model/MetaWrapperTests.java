@@ -17,13 +17,20 @@
 package org.vividus.bdd.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import org.jbehave.core.model.Meta;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class MetaWrapperTests
 {
@@ -36,5 +43,30 @@ class MetaWrapperTests
         when(meta.getProperty(propertyName)).thenReturn(propertyValue);
         MetaWrapper metaWrapper = new MetaWrapper(meta);
         assertEquals(Optional.of(propertyValue), metaWrapper.getOptionalPropertyValue(propertyName));
+    }
+
+    static Stream<Arguments> metaValues()
+    {
+        return Stream.of(
+                arguments("gh-25;gh-128;gh-25", Set.of("gh-25", "gh-128")),
+                arguments("",                   Set.of())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("metaValues")
+    void testGetPropertyValues(String value, Set<String> expected)
+    {
+        String name = "testCaseId";
+        Properties properties = new Properties();
+        properties.setProperty(name, value);
+        Meta meta = new Meta(properties);
+        assertEquals(expected, new MetaWrapper(meta).getPropertyValues(name));
+    }
+
+    @Test
+    void testGetPropertyValuesForNonExistentMeta()
+    {
+        assertEquals(Set.of(), new MetaWrapper(new Meta()).getPropertyValues("non-existent"));
     }
 }

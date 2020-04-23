@@ -1,7 +1,7 @@
 Description: Integration tests for REST API steps
 
 Meta:
-    @group vividus-plugin-rest-api
+    @epic vividus-plugin-rest-api
 
 Lifecycle:
 Before:
