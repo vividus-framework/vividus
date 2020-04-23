@@ -1,5 +1,5 @@
 Meta:
-    @group vividus-plugin-web-app
+    @epic vividus-plugin-web-app
 
 Scenario: Scroll RIGHT for element Verify step: When I scroll context to $scrollDirection edge
 Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/scrollableElements.html'

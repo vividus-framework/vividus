@@ -1,5 +1,5 @@
 Meta:
-    @group vividus-plugin-web-app
+    @epic vividus-plugin-web-app
 
 Scenario: Step verification Then context contains list of link items with the text: $expectedLinkItems
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link'

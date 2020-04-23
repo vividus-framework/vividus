@@ -1,7 +1,8 @@
 Description: Integration tests for various Vividus ExamplesTable transformers
 
 Meta:
-    @group table-transformers
+    @epic vividus-bdd-engine
+    @feature table-transformers
 
 Scenario: Verify FROM_CSV transformer
 Then `<country>` is equal to `Belarus`

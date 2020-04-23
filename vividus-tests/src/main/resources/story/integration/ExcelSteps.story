@@ -1,5 +1,5 @@
 Meta:
-    @group vividus-plugin-excel
+    @epic vividus-plugin-excel
 
 Lifecycle:
 Before:

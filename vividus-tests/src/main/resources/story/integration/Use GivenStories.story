@@ -1,5 +1,5 @@
 Meta:
-    @group bdd-engine
+    @epic vividus-bdd-engine
 
 GivenStories: /story/integration/Precondition.story
 

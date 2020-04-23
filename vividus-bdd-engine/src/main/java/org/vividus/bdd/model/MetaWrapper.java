@@ -17,14 +17,20 @@
 package org.vividus.bdd.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
 
 public class MetaWrapper
 {
+    private static final char META_VALUES_SEPARATOR = ';';
+
     private final Meta meta;
 
     public MetaWrapper(Meta meta)
@@ -52,5 +58,12 @@ public class MetaWrapper
     {
         String value = meta.getProperty(propertyName);
         return value.isEmpty() ? Optional.empty() : Optional.of(value);
+    }
+
+    public Set<String> getPropertyValues(String propertyName)
+    {
+        return Stream.of(StringUtils.split(meta.getProperty(propertyName), META_VALUES_SEPARATOR))
+                .map(StringUtils::trim)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

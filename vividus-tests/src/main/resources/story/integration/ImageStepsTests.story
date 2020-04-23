@@ -1,5 +1,5 @@
 Meta:
-    @group vividus-plugin-web-app
+    @epic vividus-plugin-web-app
 
 Scenario: Step verification When I hover a mouse over an image with the src '$src'
 Given I am on a page with the URL 'https://www.w3schools.com/howto/howto_css_image_overlay.asp'

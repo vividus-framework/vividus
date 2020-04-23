@@ -1,7 +1,8 @@
 Description: Integration tests for various Vividus expressions
 
 Meta:
-    @group expressions
+    @epic vividus-bdd-engine
+    @feature expressions
 
 Scenario: [Deprecated] Verify date generation and format
 When I initialize the scenario variable `currentDate` with value `#{P}`

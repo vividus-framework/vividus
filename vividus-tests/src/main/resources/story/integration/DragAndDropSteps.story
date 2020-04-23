@@ -1,5 +1,5 @@
 Meta:
-    @group vividus-plugin-web-app
+    @epic vividus-plugin-web-app
 
 Scenario: Step verification 'When I drag element located `$origin` and drop it at $location of element located `$target`'
 Given I am on a page with the URL 'https://4qp6vjp319.codesandbox.io/'

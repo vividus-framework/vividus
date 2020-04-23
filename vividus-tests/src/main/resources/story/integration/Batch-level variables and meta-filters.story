@@ -1,7 +1,8 @@
 Description: Integration tests for batch-level variables and meta-filters
 
 Meta:
-    @group variables
+    @epic vividus-bdd-engine
+    @feature variables
 
 Lifecycle:
 Examples:

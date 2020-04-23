@@ -1,7 +1,8 @@
 Description: Tests to demonstrate working with JSON Web Tokens (JWTs)
 
 Meta:
-    @group JWT
+    @epic vividus-examples
+    @feature JWT
 
 Scenario: Decode/encode JWTs, validate extracked jsons
 When I initialize the scenario variable `JWT` with value `#{loadResource(JWT.txt)}`

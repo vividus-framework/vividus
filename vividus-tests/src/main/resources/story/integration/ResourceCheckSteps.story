@@ -1,7 +1,7 @@
 Description: Integration tests for ResourceCheckStes class
 
 Meta:
-    @group vividus-plugin-rest-to-web-api
+    @epic vividus-plugin-rest-to-web-api
 
 Lifecycle:
 Examples:

@@ -1,7 +1,7 @@
 Description: Integration tests for SshSteps class (requires enabling of SSH connection to host)
 
 Meta:
-    @group vividus-plugin-ssh
+    @epic vividus-plugin-ssh
 
 Scenario: Verify step 'When I execute commands `$commands` on $server over $protocol'
 When I execute commands `cd /; pwd` on localhost over <protocol>

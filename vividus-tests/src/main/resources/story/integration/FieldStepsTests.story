@@ -2,7 +2,7 @@ Description: Integration tests for FieldSteps class. Page for verification origi
 https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 
 Meta:
-    @group vividus-plugin-web-app
+    @epic vividus-plugin-web-app
 
 Lifecycle:
 Examples:

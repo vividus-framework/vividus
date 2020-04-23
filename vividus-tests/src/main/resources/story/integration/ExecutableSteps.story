@@ -1,7 +1,8 @@
 Description: Integration tests for ExecutableSteps class.
 
 Meta:
-    @group executable-steps
+    @epic vividus-core
+    @feature executable-steps
 
 Scenario: Step verification When I iterate while counter is $comparisonRule `$limit` with increment `$increment` starting from `$seed`:$stepsToExecute
 

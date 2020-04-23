@@ -1,7 +1,7 @@
 Description: Integration tests for XmlSteps class
 
 Meta:
-    @group vividus-plugin-xml
+    @epic vividus-plugin-xml
 
 Lifecycle:
 Before:

@@ -1,7 +1,8 @@
 Description: Integration tests for known issues functionality
 
 Meta:
-    @group known-issues
+    @epic vividus-core
+    @feature known-issues
 
 Scenario: Known issue should be detected and matched by variable pattern
 When I initialize the scenario variable `var` with value `value-#{generate(regexify '[a-z]{5}')}`
