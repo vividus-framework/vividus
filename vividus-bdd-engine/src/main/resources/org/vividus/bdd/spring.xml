@@ -64,6 +64,8 @@
         </property>
     </bean>
 
+    <bean id="expressionAdaptor" class="org.vividus.bdd.steps.ExpressionAdaptor" />
+
     <bean id="configuration" class="org.vividus.bdd.spring.ExtendedConfiguration"
         init-method="init">
         <property name="pathFinder" ref="pathFinder" />
@@ -71,9 +73,7 @@
         <property name="storyReporterBuilder" ref="storyReporterBuilder" />
         <property name="parameterAdaptor" ref="parameterAdaptor" />
         <property name="compositePaths" value="${bdd.configuration.all-composite-paths}"/>
-        <property name="expressionAdaptor">
-            <bean class="org.vividus.bdd.steps.ExpressionAdaptor" />
-        </property>
+        <property name="expressionAdaptor" ref="expressionAdaptor" />
         <property name="storyControls">
             <bean class="org.jbehave.core.configuration.spring.SpringStoryControls">
                 <property name="dryRun" value="${bdd.configuration.dry-run}" />
