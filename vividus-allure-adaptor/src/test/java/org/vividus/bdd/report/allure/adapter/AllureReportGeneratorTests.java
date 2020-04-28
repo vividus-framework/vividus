@@ -16,11 +16,14 @@
 
 package org.vividus.bdd.report.allure.adapter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,9 +31,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -49,6 +54,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.report.allure.AllureReportGenerator;
 
+import io.qameta.allure.Constants;
 import io.qameta.allure.ReportGenerator;
 
 @RunWith(PowerMockRunner.class)
@@ -85,56 +91,107 @@ public class AllureReportGeneratorTests
     public void testStart() throws IOException
     {
         File testFile = testFolder.newFile();
-        File resultsDirectory = testFolder.getRoot();
-        allureReportGenerator.setReportDirectory(resultsDirectory);
+        File reportDirectory = testFolder.getRoot();
+        allureReportGenerator.setReportDirectory(reportDirectory);
         allureReportGenerator.start();
-        assertFalse(FileUtils.directoryContains(resultsDirectory, testFile));
+        assertFalse(FileUtils.directoryContains(reportDirectory, testFile));
     }
 
     @Test
     public void testStartNoReportDirectory()
     {
-        File resultsDirectory = Mockito.mock(File.class);
-        allureReportGenerator.setReportDirectory(resultsDirectory);
+        File reportDirectory = Mockito.mock(File.class);
+        allureReportGenerator.setReportDirectory(reportDirectory);
         allureReportGenerator.start();
-        verify(resultsDirectory, never()).listFiles();
+        verify(reportDirectory, never()).listFiles();
     }
 
     @Test
-    public void testStartException()
+    @PrepareForTest(FileUtils.class)
+    public void testStartException() throws IOException
     {
-        File resultsDirectory = Mockito.mock(File.class);
-        allureReportGenerator.setReportDirectory(resultsDirectory);
-        when(resultsDirectory.exists()).thenReturn(true);
-        assertThrows(IllegalArgumentException.class, () -> allureReportGenerator.start());
+        File reportDirectory = Mockito.mock(File.class);
+        allureReportGenerator.setReportDirectory(reportDirectory);
+        when(reportDirectory.exists()).thenReturn(true);
+        IOException ioException = Mockito.mock(IOException.class);
+        PowerMockito.mockStatic(FileUtils.class);
+        PowerMockito.doThrow(ioException).when(FileUtils.class);
+        FileUtils.cleanDirectory(reportDirectory);
+        Exception thrown = assertThrows(IllegalStateException.class, () -> allureReportGenerator.start());
+        assertEquals(ioException, thrown.getCause());
     }
 
+    @Test
+    @PrepareForTest(AllureReportGenerator.class)
+    public void testEndNotStarted() throws Exception
+    {
+        AllureReportGenerator spy = PowerMockito.spy(allureReportGenerator);
+        spy.end();
+        PowerMockito.verifyPrivate(spy, never()).invoke("generateReport");
+    }
+
+    @SuppressWarnings("unchecked")
     @Test
     @PrepareForTest({ReportGenerator.class, AllureReportGenerator.class, FileUtils.class})
     public void testEnd() throws Exception
     {
-        File resultsDirectory = testFolder.getRoot();
-        allureReportGenerator.setReportDirectory(resultsDirectory);
+        File historyDirectory = testFolder.newFolder();
+        allureReportGenerator.setHistoryDirectory(historyDirectory);
+        File reportDirectory = testFolder.getRoot();
+        allureReportGenerator.setReportDirectory(reportDirectory);
         ReportGenerator reportGenerator = PowerMockito.mock(ReportGenerator.class);
         PowerMockito.whenNew(ReportGenerator.class).withAnyArguments().thenReturn(reportGenerator);
-        PowerMockito.doNothing().when(reportGenerator).generate(any(Path.class), any(Path[].class));
         PowerMockito.mockStatic(FileUtils.class);
+        PowerMockito.doAnswer(a ->
+        {
+            resolveTrendsDir(reportDirectory);
+            return a;
+        }).when(reportGenerator).generate(any(Path.class), any(List.class));
         String text = "text";
         when(FileUtils.readFileToString(any(File.class), eq(StandardCharsets.UTF_8))).thenReturn(text);
         allureReportGenerator.setReportDirectory(testFolder.getRoot());
-        Resource resource = Mockito.mock(Resource.class);
-        Resource[] resources = {resource};
+        Resource resource = mockResource("/allure-customization/some_file.txt");
+        Resource folder = mockResource("/allure-customization/folder/");
+        Resource[] resources = { resource, folder };
         when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
-        URL resourceURL = PowerMockito.mock(URL.class);
-        when(resource.getURL()).thenReturn(resourceURL);
-        when(resourceURL.toString()).thenReturn("/allure-customization/some_file.txt");
-        InputStream stubInputStream = new ByteArrayInputStream("test data".getBytes(StandardCharsets.UTF_8));
-        when(resource.getInputStream()).thenReturn(stubInputStream);
         allureReportGenerator.start();
         allureReportGenerator.end();
+        PowerMockito.verifyStatic(FileUtils.class, never());
+        FileUtils.copyInputStreamToFile(eq(folder.getInputStream()), any(File.class));
         PowerMockito.verifyStatic(FileUtils.class);
         FileUtils.copyInputStreamToFile(eq(resource.getInputStream()), any(File.class));
+        PowerMockito.verifyStatic(FileUtils.class, times(2));
         FileUtils.writeStringToFile(any(File.class), eq(text), eq(StandardCharsets.UTF_8));
-        verify(reportGenerator).generate(any(Path.class), any(Path.class));
+        PowerMockito.verifyStatic(FileUtils.class);
+        FileUtils.copyDirectory(argThat(arg -> arg.getAbsolutePath().equals(resolveTrendsDir(reportDirectory))),
+                eq(historyDirectory));
+        verify(reportGenerator).generate(any(Path.class), any(List.class));
+    }
+
+    private Resource mockResource(String asString) throws IOException
+    {
+        Resource resource = Mockito.mock(Resource.class);
+        URL resourceURL = PowerMockito.mock(URL.class);
+        when(resource.getURL()).thenReturn(resourceURL);
+        when(resourceURL.toString()).thenReturn(asString);
+        InputStream stubInputStream = new ByteArrayInputStream("test data".getBytes(StandardCharsets.UTF_8));
+        when(resource.getInputStream()).thenReturn(stubInputStream);
+        return resource;
+    }
+
+    private String resolveTrendsDir(File dir)
+    {
+        try
+        {
+            File history = new File(dir, Constants.HISTORY_DIR);
+            history.mkdir();
+            File trends = new File(history, "trends");
+            trends.createNewFile();
+            return history.getAbsolutePath();
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
     }
 }

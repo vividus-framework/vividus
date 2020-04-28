@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.report.allure;
 
+import static org.apache.commons.io.FileUtils.copyDirectory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,8 +30,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 import io.qameta.allure.ConfigurationBuilder;
+import io.qameta.allure.Constants;
 import io.qameta.allure.ReportGenerator;
 import io.qameta.allure.core.Configuration;
+import io.qameta.allure.duration.DurationTrendPlugin;
+import io.qameta.allure.history.HistoryTrendPlugin;
 import io.qameta.allure.summary.SummaryPlugin;
 import io.qameta.allure.util.PropertiesUtils;
 
@@ -40,6 +45,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private static final String ALLURE_CUSTOMIZATION_PATTERN = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
             + ALLURE_CUSTOMIZATION_PATH + "**";
 
+    private File historyDirectory;
     private File reportDirectory;
     private final File resultsDirectory =
             new File((String) PropertiesUtils.loadAllureProperties().get("allure.results.directory"));
@@ -83,24 +89,27 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private void generateReport()
     {
-        try
+        wrap(() ->
         {
-            createDirectory(reportDirectory);
+            createDirectories(reportDirectory, historyDirectory);
+            copyDirectory(historyDirectory, resolveHistoryDir(resultsDirectory));
             generateData();
             customizeReport();
-        }
-        catch (IOException e)
-        {
-            throw new IllegalStateException(e);
-        }
+            copyDirectory(resolveHistoryDir(reportDirectory), historyDirectory);
+        });
         LOGGER.info("Allure report is successfully generated at: {}", reportDirectory.getAbsolutePath());
+    }
+
+    private File resolveHistoryDir(File root)
+    {
+        return new File(root, Constants.HISTORY_DIR);
     }
 
     private void generateData() throws IOException
     {
         Configuration configuration = new ConfigurationBuilder().useDefault().fromExtensions(List.of(
-                new SummaryPlugin())).build();
-        new ReportGenerator(configuration).generate(reportDirectory.toPath(), resultsDirectory.toPath());
+                new SummaryPlugin(), new HistoryTrendPlugin(), new DurationTrendPlugin())).build();
+        new ReportGenerator(configuration).generate(reportDirectory.toPath(), List.of(resultsDirectory.toPath()));
     }
 
     private void customizeReport() throws IOException
@@ -130,12 +139,16 @@ public class AllureReportGenerator implements IAllureReportGenerator
         String javascriptString = FileUtils.readFileToString(javascriptFile, StandardCharsets.UTF_8);
         String cssString = FileUtils.readFileToString(cssFile, StandardCharsets.UTF_8);
 
+        String brokenStatusColor = "#d35ebf";
         javascriptString = javascriptString
+                // Replacing of gray colors with #d35ebf in CSS does not affect the color used to draw
+                // <rect> HTML elements used to display trends
+                .replace("#aaa", brokenStatusColor)
                 .replace("unknown:\"Unknown\"", "unknown:\"Known\"")
                 .replace("\"failed\",\"broken\",\"passed\",\"skipped\",\"unknown\"",
-                        "\"passed\",\"unknown\",\"failed\",\"broken\",\"skipped\"");
+                        "\"failed\",\"unknown\",\"passed\",\"broken\",\"skipped\"");
         cssString = cssString
-                .replace("#ffd050", "#d35ebf")
+                .replace("#ffd050", brokenStatusColor)
                 .replace("#d35ebe", "#ffd051")
                 .replace("#fffae6", "#faebf8")
                 .replace("#faebf7", "#fffae7")
@@ -146,11 +159,14 @@ public class AllureReportGenerator implements IAllureReportGenerator
         FileUtils.writeStringToFile(cssFile, cssString, StandardCharsets.UTF_8);
     }
 
-    private static void createDirectory(File directory) throws IOException
+    private static void createDirectories(File... directories) throws IOException
     {
-        if (!directory.exists())
+        for (File directory : directories)
         {
-            FileUtils.forceMkdir(directory);
+            if (!directory.exists())
+            {
+                FileUtils.forceMkdir(directory);
+            }
         }
     }
 
@@ -159,14 +175,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
         LOGGER.debug("Cleaning up allure {} directory {}", directoryDescription, directory);
         if (directory.exists())
         {
-            try
-            {
-                FileUtils.cleanDirectory(directory);
-            }
-            catch (IOException e)
-            {
-                throw new IllegalStateException(e);
-            }
+            wrap(() -> FileUtils.cleanDirectory(directory));
             LOGGER.debug("Allure {} directory {} is successfully cleaned", directoryDescription, directory);
         }
         else
@@ -175,8 +184,30 @@ public class AllureReportGenerator implements IAllureReportGenerator
         }
     }
 
+    private static void wrap(IOExecutable executable)
+    {
+        try
+        {
+            executable.execute();
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public void setReportDirectory(File reportDirectory)
     {
         this.reportDirectory = reportDirectory;
+    }
+
+    public void setHistoryDirectory(File historyDirectory)
+    {
+        this.historyDirectory = historyDirectory;
+    }
+
+    private interface IOExecutable
+    {
+        void execute() throws IOException;
     }
 }
