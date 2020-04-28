@@ -177,7 +177,7 @@ class HttpRequestExecutorTests
         when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URL.equals(e.getURI().toString())),
                 nullable(HttpContext.class))).thenReturn(httpResponse1).thenReturn(httpResponse2);
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty(),
-            response -> response.getResponseTimeInMs() >= RESPONSE_TIME_IN_MS, new WaitMode(Duration.ofSeconds(1), 2));
+            response -> response.getResponseTimeInMs() >= RESPONSE_TIME_IN_MS, new WaitMode(Duration.ofSeconds(2), 2));
         InOrder orderedHttpTestContext = inOrder(httpTestContext);
         verifyHttpTestContext(orderedHttpTestContext, httpResponse1);
         verifyHttpTestContext(orderedHttpTestContext, httpResponse2);
