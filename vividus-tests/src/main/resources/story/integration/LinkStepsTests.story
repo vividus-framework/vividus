@@ -36,6 +36,7 @@ Then number of elements found by `By.cssSelector(body > a:hover)` is equal to `1
 
 Scenario: Step verification When I click on a link with the URL containing '$URLpart' and the text '$text'
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
+When I click on a button with the name 'Jump to section'
 When I click on a link with the URL containing 'ntax' and the text 'Syntax'
 Then the page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover#Syntax' is loaded
 
@@ -46,16 +47,19 @@ Then the page with the URL 'http://www.echoecho.com/myfile.htm' is loaded
 
 Scenario: Step verification When I click on a link with the text '$text' and URL '$URL'
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
+When I click on a button with the name 'Jump to section'
 When I click on a link with the text 'Syntax' and URL '#Syntax'
 Then the page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover#Syntax' is loaded
 
 Scenario: Step verification When I click on a link with the text '$text'
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
+When I click on a button with the name 'Jump to section'
 When I click on a link with the text 'Syntax'
 Then the page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover#Syntax' is loaded
 
 Scenario: Step verification When I click on a link with the URL '$URL'
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
+When I click on a button with the name 'Jump to section'
 When I click on a link with the URL '#Syntax'
 Then the page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover#Syntax' is loaded
 
@@ -125,10 +129,12 @@ Then a [VISIBLE] link with the text 'Visit our HTML Tutorial' and URL 'https://w
 
 Scenario: Step verification Then a [$state] link with text '$text' and URL containing '$URLpart' exists
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
+When I click on a button with the name 'Jump to section'
 Then a [VISIBLE] link with text 'Syntax' and URL containing '#Syntax' exists
 
 Scenario: Step verification Then a link with the text '$text' and URL containing '$URLpart' exists
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
+When I click on a button with the name 'Jump to section'
 Then a link with the text 'Syntax' and URL containing 'ntax' exists
 
 Scenario: Step verification Then a link with the text '$text' and URL '$URL' exists
