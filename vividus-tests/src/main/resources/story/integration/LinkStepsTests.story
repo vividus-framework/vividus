@@ -35,10 +35,9 @@ When I hover a mouse over a link with the URL '#'
 Then number of elements found by `By.cssSelector(body > a:hover)` is equal to `1`
 
 Scenario: Step verification When I click on a link with the URL containing '$URLpart' and the text '$text'
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
-When I click on a button with the name 'Jump to section'
-When I click on a link with the URL containing 'ntax' and the text 'Syntax'
-Then the page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover#Syntax' is loaded
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+When I click on a link with the URL containing 'ementId' and the text 'Link to an element'
+Then the page with the URL '${vividus-test-site-url}/links.html#ElementId' is loaded
 
 Scenario: Step verification When I click on an image with the tooltip '$tooltipImage'
 Given I am on a page with the URL 'http://www.echoecho.com/htmllinks06.htm'
@@ -46,22 +45,19 @@ When I click on an image with the tooltip 'Link to this page'
 Then the page with the URL 'http://www.echoecho.com/myfile.htm' is loaded
 
 Scenario: Step verification When I click on a link with the text '$text' and URL '$URL'
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
-When I click on a button with the name 'Jump to section'
-When I click on a link with the text 'Syntax' and URL '#Syntax'
-Then the page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover#Syntax' is loaded
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+When I click on a link with the text 'Link to an element' and URL '#ElementId'
+Then the page with the URL '${vividus-test-site-url}/links.html#ElementId' is loaded
 
 Scenario: Step verification When I click on a link with the text '$text'
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
-When I click on a button with the name 'Jump to section'
-When I click on a link with the text 'Syntax'
-Then the page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover#Syntax' is loaded
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+When I click on a link with the text 'Link to an element'
+Then the page with the URL '${vividus-test-site-url}/links.html#ElementId' is loaded
 
 Scenario: Step verification When I click on a link with the URL '$URL'
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
-When I click on a button with the name 'Jump to section'
-When I click on a link with the URL '#Syntax'
-Then the page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover#Syntax' is loaded
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+When I click on a link with the URL '#ElementId'
+Then the page with the URL '${vividus-test-site-url}/links.html#ElementId' is loaded
 
 Scenario: Step verification When I click on a link with the URL containing '$URLpart'
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/'
@@ -128,22 +124,20 @@ When I switch to a frame with the attribute 'id'='iframeResult'
 Then a [VISIBLE] link with the text 'Visit our HTML Tutorial' and URL 'https://www.w3schools.com/html/' and tooltip 'Go to W3Schools HTML section' exists
 
 Scenario: Step verification Then a [$state] link with text '$text' and URL containing '$URLpart' exists
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
-When I click on a button with the name 'Jump to section'
-Then a [VISIBLE] link with text 'Syntax' and URL containing '#Syntax' exists
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+Then a [VISIBLE] link with text 'Link to an element' and URL containing '#ElementId' exists
 
 Scenario: Step verification Then a link with the text '$text' and URL containing '$URLpart' exists
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
-When I click on a button with the name 'Jump to section'
-Then a link with the text 'Syntax' and URL containing 'ntax' exists
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+Then a link with the text 'Link to an element' and URL containing 'ementId' exists
 
 Scenario: Step verification Then a link with the text '$text' and URL '$URL' exists
-Given I am on a page with the URL 'https://mdn.mozillademos.org/en-US/docs/Web/CSS/@media/any-hover$samples/Example?revision=1506720#'
-Then a link with the text 'Try hovering over me!' and URL '#' exists
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+Then a link with the text 'Link to an element' and URL '#ElementId' exists
 
 Scenario: Step verification Then a [$state] link with the text '$text' and URL '$URL' exists
-Given I am on a page with the URL 'https://mdn.mozillademos.org/en-US/docs/Web/CSS/@media/any-hover$samples/Example?revision=1506720#'
-Then a [VISIBLE] link with the text 'Try hovering over me!' and URL '#' exists
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+Then a [VISIBLE] link with the text 'Link to an element' and URL '#ElementId' exists
 
 Scenario: Step verification Then a link tag with href '$href' exists
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/'
