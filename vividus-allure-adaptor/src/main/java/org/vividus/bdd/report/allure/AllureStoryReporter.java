@@ -552,12 +552,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
     }
 
-    private void updateLabels(List<Label> labels, LabelName labelToUpdate, String newValue)
-    {
-        labels.stream().filter(label -> labelToUpdate.value().equals(label.getName()))
-                .forEach(label -> label.setValue(newValue));
-    }
-
     private void stopTestCase()
     {
         if (allureRunContext.getScenarioExecutionStage() == ScenarioExecutionStage.IN_PROGRESS)
