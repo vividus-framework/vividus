@@ -1,0 +1,3 @@
+{transformer=RESOLVING_EXPRESSIONS_EAGERLY}
+|name                          |
+|#{generate(Address.firstName)}|

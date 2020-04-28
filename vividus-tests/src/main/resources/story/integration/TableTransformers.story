@@ -76,3 +76,12 @@ Then `<column3>` is equal to `C`
 Examples:
 {transformer=FILTERING, byColumnNames=column3}
 /data/for-filtering-transformer.table
+
+
+Scenario: Verify RESOLVING_EXPRESSIONS_EAGERLY transformer
+When I initialize story variable `table` with values:
+/data/without-eagerly-transformer.table
+Then `${table[0].name}` is not equal to `${table[0].name}`
+When I initialize story variable `table_resolved` with values:
+/data/with-eagerly-transformer.table
+Then `${table_resolved[0].name}` is equal to `${table_resolved[0].name}`
