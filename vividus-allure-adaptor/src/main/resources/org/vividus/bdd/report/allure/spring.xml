@@ -21,6 +21,7 @@
     <bean id="allureReportGenerator" class="org.vividus.bdd.report.allure.AllureReportGenerator"
         destroy-method="end">
         <property name="reportDirectory" value="${allure.report-directory}" />
+        <property name="historyDirectory" value="${allure.history-directory}" />
     </bean>
 
     <bean class="org.vividus.bdd.report.allure.listener.AllureAssertionFailureListener"
