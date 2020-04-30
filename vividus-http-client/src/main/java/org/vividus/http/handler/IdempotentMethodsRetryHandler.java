@@ -28,12 +28,13 @@ public class IdempotentMethodsRetryHandler extends DefaultHttpRequestRetryHandle
     @Override
     protected boolean handleAsIdempotent(final HttpRequest request)
     {
-        if (idempotentMethodsSendingRequestBody != null && !super.handleAsIdempotent(request))
+        boolean idempotent = super.handleAsIdempotent(request);
+        if (idempotent || idempotentMethodsSendingRequestBody == null)
         {
-            String method = request.getRequestLine().getMethod().toUpperCase();
-            return idempotentMethodsSendingRequestBody.contains(method);
+            return idempotent;
         }
-        return true;
+        String method = request.getRequestLine().getMethod().toUpperCase();
+        return idempotentMethodsSendingRequestBody.contains(method);
     }
 
     public void setIdempotentMethodsSendingRequestBody(List<String> idempotentMethodsSendingRequestBody)
