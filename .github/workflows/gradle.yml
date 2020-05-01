@@ -84,9 +84,20 @@ jobs:
       with:
         fail_ci_if_error: true
 
+    - name: Cache tests history
+      if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest' && always()
+      uses: actions/cache@v1
+      with:
+        path: vividus-tests/output/history
+        key: ${{ runner.os }}-tests-history-cache-${{ hashFiles('**/*.json') }}
+        restore-keys: |
+          ${{ runner.os }}-tests-history-cache-
+
     - name: Integration tests
       if: matrix.platform == 'ubuntu-latest'
-      run: ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration
+      run: | 
+        ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration \
+                                            -Pvividus.allure.history-directory=output/history/integration-tests
 
     - name: Publish Integration tests report
       if: matrix.platform == 'ubuntu-latest' && always()
@@ -111,7 +122,8 @@ jobs:
                                                 -Pvividus.configuration.suite=system \
                                                 -Pvividus.configuration.profiles=browserstack/web,web/desktop/chrome \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
-                                                -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY}
+                                                -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
+                                                -Pvividus.allure.history-directory=output/history/system-tests
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY and/or APPLITOOLS_EXECUTE_KEY and/or APPLITOOLS_READ_KEY and/or MONGODB_USERNAME and/or MONGODB_PASSWORD variables, System tests will be skipped
         fi
