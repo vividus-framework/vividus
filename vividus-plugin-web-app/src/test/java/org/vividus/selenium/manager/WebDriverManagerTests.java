@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -161,35 +160,6 @@ class WebDriverManagerTests
         when(mockOptions(webDriver).window()).thenReturn(window);
         webDriverManager.resize(null);
         verify(window).maximize();
-    }
-
-    @Test
-    void testResizeWebDriverWithNullBrowserSizeChrome()
-    {
-        WebDriverManager spy = Mockito.spy(webDriverManager);
-        WebDriver webDriver = mockWebDriverHavingCapabilities();
-        Window window = mock(Window.class);
-        when(mockOptions(webDriver).window()).thenReturn(window);
-        Dimension maxSize = new Dimension(1920, 1200);
-        when(window.getSize()).thenReturn(maxSize);
-        doReturn(true).when(spy).isBrowserAnyOf(BrowserType.CHROME);
-        spy.resize(null);
-        verify(window).maximize();
-        verify(window).setSize(maxSize);
-    }
-
-    @Test
-    void testResizeWebDriverWithNullBrowserSizeChromeAndroid()
-    {
-        WebDriverManager spy = Mockito.spy(webDriverManager);
-        WebDriver webDriver = mockWebDriverHavingCapabilities();
-        Window window = mock(Window.class);
-        when(mockOptions(webDriver).window()).thenReturn(window);
-        doReturn(true).when(spy).isBrowserAnyOf(BrowserType.CHROME);
-        doReturn(true).when(spy).isAndroid();
-        spy.resize(null);
-        verify(window, never()).getSize();
-        verify(window, never()).setSize(any(Dimension.class));
     }
 
     @Test

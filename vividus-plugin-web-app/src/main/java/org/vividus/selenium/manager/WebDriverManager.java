@@ -65,15 +65,6 @@ public class WebDriverManager implements IWebDriverManager
         }
         WebDriver webDriver = getWebDriver();
         resize(webDriver, browserWindowSize);
-        // Chrome-only workaround for situations when custom browser viewport size was set before 'window.maximize();'
-        // and it prevents following window-resizing actions
-        // Reported issue: https://bugs.chromium.org/p/chromedriver/issues/detail?id=1638
-        if (isBrowserAnyOf(BrowserType.CHROME) && !isAndroid())
-        {
-            Window window = getWebDriver().manage().window();
-            Dimension size = window.getSize();
-            window.setSize(size);
-        }
     }
 
     public void resize(WebDriver webDriver, BrowserWindowSize browserWindowSize)
