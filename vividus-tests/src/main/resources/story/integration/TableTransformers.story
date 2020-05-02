@@ -85,3 +85,30 @@ Then `${table[0].name}` is not equal to `${table[0].name}`
 When I initialize story variable `table_resolved` with values:
 /data/with-eagerly-transformer.table
 Then `${table_resolved[0].name}` is equal to `${table_resolved[0].name}`
+
+
+Scenario: Verify RESOLVING_SELF_REFERENCES_EAGERLY transformer chained
+Then `<column1>` is equal to `A`
+Then `<column2>` is equal to `A`
+Then `<column3>` is equal to `A`
+Examples:
+{transformer=RESOLVING_SELF_REFERENCES_EAGERLY}
+|column1|column2  |column3  |
+|A      |<column3>|<column1>|
+
+
+Scenario: Verify RESOLVING_SELF_REFERENCES_EAGERLY transformer inlined
+Then `<column2>` is equal to `aAa`
+Examples:
+{transformer=RESOLVING_SELF_REFERENCES_EAGERLY}
+|column1|column2    |
+|A      |a<column1>a|
+
+
+Scenario: Verify RESOLVING_SELF_REFERENCES_EAGERLY transformer default behavior
+Then `<column2>` is equal to `<column>`
+Then `<column3>` is equal to ``
+Examples:
+{transformer=RESOLVING_SELF_REFERENCES_EAGERLY}
+|column1|column2 |column3|
+|A      |<column>|
