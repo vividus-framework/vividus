@@ -516,7 +516,8 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         allureRunContext.setStoryExecutionStage(storyExecutionStage);
         if (getLinkedStep() == null)
         {
-            Meta storyMeta = bddRunContext.getRunningStory().getStory().getMeta();
+            Story story = bddRunContext.getRunningStory().getStory();
+            Meta storyMeta = story.getMeta();
             Meta scenarioMeta = runningScenario.getScenario().getMeta();
 
             Map<VividusLabel, Set<String>> metaLabels = Stream.of(VividusLabel.values())
@@ -536,6 +537,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
             int index = runningScenario.getIndex();
             String scenarioId = runningScenario.getUuid() + (index != -1 ? "[" + index + "]" : "");
             lifecycle.scheduleTestCase(new TestResult()
+                    .setHistoryId(getHistoryId(story.getName(), runningScenario.getTitle()))
                     .setUuid(scenarioId)
                     .setName(runningScenario.getTitle())
                     .setLabels(labels)
@@ -550,6 +552,11 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         }
         allureRunContext.setStoryExecutionStage(storyExecutionStage);
         allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
+    }
+
+    private static String getHistoryId(String story, String title)
+    {
+        return String.format("[story: %s][scenario: %s]", story, title);
     }
 
     private void stopTestCase()
