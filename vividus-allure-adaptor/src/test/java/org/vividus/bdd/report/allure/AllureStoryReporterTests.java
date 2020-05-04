@@ -896,6 +896,7 @@ class AllureStoryReporterTests
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
         TestResult captured = testResultCaptor.getValue();
+        assertEquals("[story: name][scenario: Scenario]", captured.getHistoryId());
         List<Label> labels = captured.getLabels();
         Optional<Label> label = labels.stream().filter(l -> TEST_CASE_ID.equals(l.getName())).findFirst();
         assertTrue(label.isPresent());
@@ -994,7 +995,7 @@ class AllureStoryReporterTests
 
     private Story mockRunningStory(Properties storyMeta, Properties scenarioMeta, List<String> steps)
     {
-        RunningStory runningStory = createRunningStory(storyMeta, scenarioMeta, steps, null);
+        RunningStory runningStory = createRunningStory(storyMeta, scenarioMeta, steps, STORY_NAME);
         Mockito.lenient().when(bddRunContext.getRunningStory()).thenReturn(runningStory);
         return runningStory.getStory();
     }
