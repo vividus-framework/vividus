@@ -57,6 +57,20 @@ public enum SequenceActionType
             return WebElement.class;
         }
     },
+    MOVE_TO
+    {
+        @Override
+        public void addAction(Actions actions, Object argument)
+        {
+            performOnWebElement(argument, actions::moveToElement);
+        }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return WebElement.class;
+        }
+    },
     MOVE_BY_OFFSET
     {
         @Override

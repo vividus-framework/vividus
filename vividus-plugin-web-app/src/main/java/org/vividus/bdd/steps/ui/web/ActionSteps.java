@@ -124,6 +124,7 @@ public class ActionSteps
      * <br> |ENTER_TEXT    |Text                                    |
      * <br> |CLICK         |By.placeholder(Enter your password)     |
      * <br> |PRESS_KEYS    |BACK_SPACE                              |
+     * <br> |MOVE_TO       |By.id(name)                             |
      * </code>
      * </pre>
      * where
@@ -171,6 +172,11 @@ public class ActionSteps
      * <td><a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
      * </td>
      * <td>BACK_SPACE</td>
+     * </tr>
+     * <tr>
+     * <td>MOVE_TO</td>
+     * <td>search attribute</td>
+     * <td>By.id(username)</td>
      * </tr>
      * </table>
      * </li>
