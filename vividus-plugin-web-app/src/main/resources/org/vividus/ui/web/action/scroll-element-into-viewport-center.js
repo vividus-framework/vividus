@@ -13,7 +13,7 @@ var exit = arguments[arguments.length-1];
         setTimeout(scrollElementIntoViewportCenter, 500);
     }
     catch(e) {
-        console.error(e, e.stack)
+        // swallow error quietly
     }
     exit();
 }) ();
