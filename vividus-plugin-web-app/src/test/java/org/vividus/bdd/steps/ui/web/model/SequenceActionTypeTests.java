@@ -63,6 +63,14 @@ public class SequenceActionTypeTests
     }
 
     @Test
+    void testMoveTo()
+    {
+        SequenceActionType.MOVE_TO.addAction(baseAction, element);
+        verify(baseAction).moveToElement(element);
+        verifyNoMoreInteractions(baseAction, element);
+    }
+
+    @Test
     void testMoveByOffset()
     {
         int offset = 10;

@@ -61,8 +61,9 @@ class ActionStepsTests
     private static final String SIGNATURE_FIELD_XPATH = "//canvas";
     private static final String ELEMENT_EXISTS_MESSAGE = "Element for interaction";
     private static final String OFFSETS_PRESENT_MESSAGE = "Action offset is present";
-    private static final String POINTER_MOVE = "{duration=100, x=0, y=0, type=pointerMove, origin=Mock for WebElement, "
-            + "hashCode: %d}, ";
+    private static final String POINTER_MOVE_ACTION = "{duration=100, x=0, y=0, type=pointerMove, origin=Mock for "
+            + "WebElement, hashCode: %d}";
+    private static final String POINTER_MOVE = POINTER_MOVE_ACTION + ", ";
     private static final String DURATION_PART = "{duration=0, type=pause}, {duration=0, type=pause}, {duration=0, "
             + "type=pause}, {duration=0, type=pause}, ";
     private static final String TEXT = "text";
@@ -153,7 +154,8 @@ class ActionStepsTests
                 new SequenceAction(SequenceActionType.MOVE_BY_OFFSET, point),
                 new SequenceAction(SequenceActionType.RELEASE, searchAttributes),
                 new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT),
-                new SequenceAction(SequenceActionType.CLICK, searchAttributes)
+                new SequenceAction(SequenceActionType.CLICK, searchAttributes),
+                new SequenceAction(SequenceActionType.MOVE_TO, searchAttributes)
                 );
         actionSteps.executeSequenceOfActions(actions);
         verify((Interactive) webDriver).perform(argThat(arg -> {
@@ -168,13 +170,16 @@ class ActionStepsTests
                     + "{button=0, type=pointerUp}, "
                     + DURATION_PART + DURATION_PART
                     + format(POINTER_MOVE, hash)
-                    + "{button=0, type=pointerDown}, {button=0, type=pointerUp}]}";
+                    + "{button=0, type=pointerDown}, {button=0, type=pointerUp}, "
+                    + format(POINTER_MOVE_ACTION, hash)
+                    + "]}";
             String keyboardSequence = "{type=key, actions=["
                     + DURATION_PART + DURATION_PART
                     + "{duration=0, type=pause}, {duration=0, type=pause}, "
                     + "{type=keyDown, value=t}, {type=keyUp, value=t}, {type=keyDown, value=e}, {type=keyUp, value=e}, "
                     + "{type=keyDown, value=x}, {type=keyUp, value=x}, {type=keyDown, value=t}, {type=keyUp, value=t}, "
-                    + "{duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}], id=default keyboard}";
+                    + "{duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}], "
+                    + "id=default keyboard}";
             return asString(arg).equals(mouseSequence + keyboardSequence);
         }));
     }
