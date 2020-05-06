@@ -554,9 +554,9 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
     }
 
-    private static String getHistoryId(String story, String title)
+    private String getHistoryId(String story, String title)
     {
-        return String.format("[story: %s][scenario: %s]", story, title);
+        return String.format("[batch: %s][story: %s][scenario: %s]", getBatchName(), story, title);
     }
 
     private void stopTestCase()
