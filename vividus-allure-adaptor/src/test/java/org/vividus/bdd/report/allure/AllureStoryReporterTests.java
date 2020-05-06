@@ -354,11 +354,17 @@ class AllureStoryReporterTests
 
     private void mockRunningBatchName()
     {
-        String batchKey = "batch-1";
+        String batchKey = mockBatchExecutionConfiguration();
         when(bddRunContext.getRunningBatchKey()).thenReturn(batchKey);
+    }
+
+    private String mockBatchExecutionConfiguration()
+    {
+        String batchKey = "batch-1";
         BatchExecutionConfiguration config = new BatchExecutionConfiguration();
         config.setName(BATCH_NAME);
         when(batchStorage.getBatchExecutionConfiguration(batchKey)).thenReturn(config);
+        return batchKey;
     }
 
     @Test
@@ -427,6 +433,7 @@ class AllureStoryReporterTests
     @Test
     void testBeforeScenarioStoriesWithSameNamesGivenStory()
     {
+        mockRunningBatchName();
         Story story = mockRunningStoryWithSeverity(true);
         story.namedAs("given.story");
         List<Label> givenStoryLabels = List.of(
@@ -441,6 +448,7 @@ class AllureStoryReporterTests
     @Test
     void testBeforeScenarioGivenStoriesHasAnchors()
     {
+        mockRunningBatchName();
         GivenStories givenStories = mock(GivenStories.class);
         Scenario scenario = new Scenario(SCENARIO, new Meta(getScenarioMeta(true)), givenStories, ExamplesTable.EMPTY,
                 List.of());
@@ -461,6 +469,7 @@ class AllureStoryReporterTests
     void beforeScenarioShouldStopLifecycleBeforeStorySteps()
     {
         BddRunContext bddRunContext = setupContext();
+        mockBatchExecutionConfiguration();
 
         when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS);
         when(allureRunContext.getScenarioExecutionStage()).thenReturn(ScenarioExecutionStage.IN_PROGRESS);
@@ -525,6 +534,7 @@ class AllureStoryReporterTests
     void beforeStepShouldStartLifecycleBeforeStorySteps()
     {
         BddRunContext bddRunContext = setupContext();
+        mockBatchExecutionConfiguration();
 
         when(allureRunContext.getStoryExecutionStage()).thenReturn(null);
         testContext.put(CURRENT_STEP_KEY, null);
@@ -555,6 +565,7 @@ class AllureStoryReporterTests
     void beforeStepShouldStartLifecycleAfterStorySteps()
     {
         BddRunContext bddRunContext = setupContext();
+        mockBatchExecutionConfiguration();
 
         when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.AFTER_SCENARIO);
         testContext.put(CURRENT_STEP_KEY, null);
@@ -896,7 +907,7 @@ class AllureStoryReporterTests
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
         TestResult captured = testResultCaptor.getValue();
-        assertEquals("[story: name][scenario: Scenario]", captured.getHistoryId());
+        assertEquals("[batch: my-batch][story: name][scenario: Scenario]", captured.getHistoryId());
         List<Label> labels = captured.getLabels();
         Optional<Label> label = labels.stream().filter(l -> TEST_CASE_ID.equals(l.getName())).findFirst();
         assertTrue(label.isPresent());
