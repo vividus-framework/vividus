@@ -97,8 +97,7 @@ jobs:
       if: matrix.platform == 'ubuntu-latest'
       run: |
         ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration \
-                                            -Pvividus.allure.history-directory=output/history/integration-tests \
-                                            -Pvividus.selenium.capabilities.acceptInsecureCerts=true
+                                            -Pvividus.allure.history-directory=output/history/integration-tests
 
     - name: Publish Integration tests report
       if: matrix.platform == 'ubuntu-latest' && always()
