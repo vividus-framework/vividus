@@ -17,18 +17,24 @@
 package org.vividus.bdd.steps.ui.web;
 
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.context.IWebUiContext;
 
 public class ScrollSteps
 {
     private final IWebUiContext webUiContext;
     private final IJavascriptActions javascriptActions;
+    private final IBaseValidations baseValidaitons;
 
-    public ScrollSteps(IWebUiContext webUiContext, IJavascriptActions javascriptActions)
+    public ScrollSteps(IWebUiContext webUiContext, IJavascriptActions javascriptActions,
+            IBaseValidations baseValidations)
     {
         this.webUiContext = webUiContext;
         this.javascriptActions = javascriptActions;
+        this.baseValidaitons = baseValidations;
     }
 
     /**
@@ -45,6 +51,21 @@ public class ScrollSteps
     public void scrollContextIn(ScrollDirection scrollDirection)
     {
         scrollDirection.scroll(webUiContext, javascriptActions);
+    }
+
+    /**
+     * Scroll the element into view by calling API:
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView">Scroll into view</a>
+     * @param locator to locate an element
+     */
+    @When("I scroll element located `$locator` into view")
+    public void scrollIntoView(SearchAttributes locator)
+    {
+        WebElement toScroll = baseValidaitons.assertIfAtLeastOneElementExists("Element to scroll into view", locator);
+        if (null != toScroll)
+        {
+            javascriptActions.scrollIntoView(toScroll, true);
+        }
     }
 
     /**
