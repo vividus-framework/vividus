@@ -98,7 +98,7 @@ jobs:
       run: |
         ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration \
                                             -Pvividus.allure.history-directory=output/history/integration-tests \
-                                            -Pvividus.web.driver.CHROME.command-line-arguments="--headless --hide-scrollbars --ignore-certificate-errors"
+                                            -Pvividus.selenium.capabilities.acceptInsecureCerts=true
 
     - name: Publish Integration tests report
       if: matrix.platform == 'ubuntu-latest' && always()
