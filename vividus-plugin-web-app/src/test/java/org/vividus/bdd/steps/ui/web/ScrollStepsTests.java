@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -30,16 +31,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.context.IWebUiContext;
 
 @ExtendWith(MockitoExtension.class)
 class ScrollStepsTests
 {
+    private static final String ELEMENT_TO_SCROLL_INTO_VIEW = "Element to scroll into view";
+
     @Mock
     private IWebUiContext webUiContext;
     @Mock
     private IJavascriptActions javascriptActions;
+    @Mock
+    private IBaseValidations baseValiation;
 
     @InjectMocks
     private ScrollSteps scrollSteps;
@@ -126,6 +133,26 @@ class ScrollStepsTests
     {
         scrollSteps.scrollToTheStartOfThePage();
         verify(javascriptActions).scrollToStartOfPage();
+    }
+
+    @Test
+    void shouldScrollElementIntoViewAlignedToATop()
+    {
+        WebElement webElement = mock(WebElement.class);
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        when(baseValiation.assertIfAtLeastOneElementExists(ELEMENT_TO_SCROLL_INTO_VIEW, searchAttributes))
+            .thenReturn(webElement);
+        scrollSteps.scrollIntoView(searchAttributes);
+        verify(javascriptActions).scrollIntoView(webElement, true);
+    }
+
+    @Test
+    void shouldNotCallJavaScriptActionsIfNoElementFound()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        scrollSteps.scrollIntoView(searchAttributes);
+        verifyNoInteractions(javascriptActions);
+        verify(baseValiation).assertIfAtLeastOneElementExists(ELEMENT_TO_SCROLL_INTO_VIEW, searchAttributes);
     }
 
     private void verifyUnsupportedScroll(Executable toTest)

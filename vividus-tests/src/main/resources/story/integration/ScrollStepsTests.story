@@ -41,6 +41,14 @@ When I scroll to the start of the context
 When I change context to an element by By.id(current-vertical):a
 Then the text matches '0'
 
+Scenario: Verify step: When I scroll element located `$locator` into view
+Meta:
+    @requirementId 436
+When I refresh the page
+When I scroll element located `xpath(//a[text()="Contact"])` into view
+When I change context to an element by By.id(current-vertical):a
+Then the text matches '\d+'
+
 Scenario: Scroll BOTTOM for page Verify step: When I scroll context to $scrollDirection edge
 Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/scrollablePage.html'
 When I scroll context to BOTTOM edge
