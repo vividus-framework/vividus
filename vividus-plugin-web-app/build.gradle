@@ -2,7 +2,7 @@ project.description = 'Vividus plugin for testing web applications'
 
 ext {
     seleniumVersion = '4.0.0-alpha-1'
-    browserupProxyVersion = '2.0.1'
+    browserupProxyVersion = '2.1.0'
 }
 
 dependencies {
