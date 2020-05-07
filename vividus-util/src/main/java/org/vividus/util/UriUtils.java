@@ -164,7 +164,7 @@ public final class UriUtils
 
     private static String decode(String data)
     {
-        return URLDecoder.decode(data, StandardCharsets.UTF_8);
+        return URLDecoder.decode(data.replace("+", "%2B"), StandardCharsets.UTF_8);
     }
 
     private static String extractDecodedFragment(String url)
