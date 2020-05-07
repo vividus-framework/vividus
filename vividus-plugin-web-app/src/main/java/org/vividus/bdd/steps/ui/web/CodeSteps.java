@@ -59,8 +59,8 @@ public class CodeSteps
      * When I execute javaScript `remote:throttle` with arguments:<br>
      * |value                |type  |<br>
      * |{"condition": "Wifi"}|object|
-     *</code>
-     *</p>
+     * </code>
+     * </p>
      */
     @When("I execute javascript `$jsCode` with arguments:$args")
     public void executeJavascriptWithArguments(String jsCode, List<JsArgument> args)
@@ -149,7 +149,7 @@ public class CodeSteps
      * (<i>Possible values: <b>LESS_THAN or &lt;, LESS_THAN_OR_EQUAL_TO or &lt;=, GREATER_THAN or &gt;,
      * GREATER_THAN_OR_EQUAL_TO or &gt;=, EQUAL_TO or =, NOT_EQUAL_TO or !=</b></i>)
      * @return <b>List&lt;WebElement&gt;</b> A collection of elements matching the locator,
-     *<b> null</b> - if there are no desired elements
+     * <b> null</b> - if there are no desired elements
      */
     @Then("number of invisible elements `$locator` is $comparisonRule `$quantity`")
     public List<WebElement> doesInvisibleQuantityOfElementsExists(SearchAttributes locator,
