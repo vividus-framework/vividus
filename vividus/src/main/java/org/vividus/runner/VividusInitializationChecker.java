@@ -16,8 +16,8 @@
 
 package org.vividus.runner;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -61,8 +61,7 @@ public final class VividusInitializationChecker
         if (commandLine.hasOption(ignoreOption.getOpt()))
         {
             List<String> ignoreBeans = List.of(commandLine.getOptionValue(ignoreOption.getOpt()).split(","));
-            beanNames = Arrays.stream(beanNames).filter(beanName -> !ignoreBeans.contains(beanName))
-                    .toArray(String[]::new);
+            beanNames = Stream.of(beanNames).filter(beanName -> !ignoreBeans.contains(beanName)).toArray(String[]::new);
         }
         for (String beanName : beanNames)
         {

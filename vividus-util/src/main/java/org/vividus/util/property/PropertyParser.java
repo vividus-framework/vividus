@@ -19,13 +19,13 @@ package org.vividus.util.property;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -61,7 +61,7 @@ public class PropertyParser implements IPropertyParser
         String[] paths = StringUtils.split(path, '.');
         int limit = paths.length - 1;
         String key = paths[limit];
-        Map<String, Object> target = Arrays.stream(paths)
+        Map<String, Object> target = Stream.of(paths)
                 .limit(limit)
                 .reduce(container, (map, pathKey) ->
                 {

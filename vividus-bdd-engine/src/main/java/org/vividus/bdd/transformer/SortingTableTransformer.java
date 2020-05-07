@@ -16,10 +16,10 @@
 
 package org.vividus.bdd.transformer;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Named;
 
@@ -38,7 +38,7 @@ public class SortingTableTransformer implements ExtendedTableTransformer
         List<String> rowsToSort = ExamplesTableProcessor.parseRows(tableAsString);
         String header = rowsToSort.get(0);
         List<String> headerValues = tableParsers.parseRow(header, true, properties);
-        List<Integer> columnsToCompare = Arrays.stream(StringUtils.split(byColumns, '|'))
+        List<Integer> columnsToCompare = Stream.of(StringUtils.split(byColumns, '|'))
                 .map(String::trim)
                 .map(headerValues::indexOf)
                 .filter(i -> i > -1)

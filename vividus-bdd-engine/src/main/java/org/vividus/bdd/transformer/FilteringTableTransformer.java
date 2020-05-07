@@ -19,13 +19,13 @@ package org.vividus.bdd.transformer;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Named;
 
@@ -97,7 +97,7 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
         }
         else
         {
-            List<String> columnNames = Arrays.stream(StringUtils.split(byColumnNames, ';'))
+            List<String> columnNames = Stream.of(StringUtils.split(byColumnNames, ';'))
                     .map(String::trim).collect(Collectors.toList());
             filteredColumns.retainAll(columnNames);
         }

@@ -16,7 +16,6 @@
 
 package org.vividus.spring;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.springframework.core.convert.converter.Converter;
 import org.vividus.model.IntegerRange;
@@ -51,7 +51,7 @@ public class StringToIntegerRangeConverter implements Converter<String, IntegerR
     @Override
     public IntegerRange convert(String source)
     {
-        return Arrays.stream(source.split(",")).map(value ->
+        return Stream.of(source.split(",")).map(value ->
         {
             for (Map.Entry<Pattern, Function<Matcher, List<Integer>>> handler : REGEX_HANDLERS.entrySet())
             {

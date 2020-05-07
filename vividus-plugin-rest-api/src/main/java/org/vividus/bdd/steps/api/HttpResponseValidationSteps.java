@@ -20,13 +20,13 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -212,7 +212,7 @@ public class HttpResponseValidationSteps
         {
             getHeaderByName(response, httpHeaderName).ifPresent(header ->
             {
-                List<String> actualAttributes = Arrays.stream(header.getElements()).map(HeaderElement::getName)
+                List<String> actualAttributes = Stream.of(header.getElements()).map(HeaderElement::getName)
                         .collect(Collectors.toList());
                 for (Parameters row : attributes.getRowsAsParameters(true))
                 {

@@ -16,13 +16,13 @@
 
 package org.vividus.bdd.util;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
 import org.jbehave.core.model.TableParsers;
@@ -39,7 +39,7 @@ public final class ExamplesTableProcessor
 
     public static List<String> parseRows(String tableAsString)
     {
-        return Arrays.stream(tableAsString.split(ROW_SEPARATOR_PATTERN))
+        return Stream.of(tableAsString.split(ROW_SEPARATOR_PATTERN))
                 .map(String::trim)
                 .collect(Collectors.toList());
     }
