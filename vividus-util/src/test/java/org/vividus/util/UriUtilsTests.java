@@ -163,9 +163,11 @@ class UriUtilsTests
         "https://somehost:8080/path?key=%23121:14,                    https://somehost:8080/path?key=%23121:14",
         "https://somehost:8080/path?key=%23121:14#fragment,           https://somehost:8080/path?key=%23121:14#fragment",
         "https://somehost:8080/path?key=%23121:14#hash-in%23fragment, https://somehost:8080/path?key=%23121:14#hash-in%23fragment",
-        "http://somehost:8080/path?date=1980-09-26T00:00:00+02:00&country=US, http://somehost:8080/path?date=1980-09-26T00:00:00+02:00&country=US",
-        "http://somehost:8080/path?date=1980-09-26T00%3A00%3A00%2B02%3A00&country=US, http://somehost:8080/path?date=1980-09-26T00:00:00+02:00&country=US",
-        "http://somehost:8080/path?date=1980-09-26T00:00:00%2B02:00&country=US, http://somehost:8080/path?date=1980-09-26T00:00:00+02:00&country=US"
+        "http://somehost:8080/path?date=1980-09-26T00:00:00+02:00&country=US, http://somehost:8080/path?date=1980-09-26T00:00:00%2B02:00&country=US",
+        "http://somehost:8080/path?date=1980-09-26T00%3A00%3A00%2B02%3A00&country=US, http://somehost:8080/path?date=1980-09-26T00:00:00%2B02:00&country=US",
+        "http://somehost:8080/path?date=1980-09-26T00:00:00%2B02:00&country=US, http://somehost:8080/path?date=1980-09-26T00:00:00%2B02:00&country=US",
+        "http://somehost:8080/path#00:00:00%2B02:00, http://somehost:8080/path#00:00:00%2B02:00",
+        "http://somehost:8080/path#00:00:00+02:00, http://somehost:8080/path#00:00:00%2B02:00"
         // CHECKSTYLE:ON
     })
     void testCreateUri(String input, URI expected)
