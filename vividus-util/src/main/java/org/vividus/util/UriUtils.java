@@ -162,9 +162,14 @@ public final class UriUtils
         return normalizeToRfc3986(new URI(uri.getProtocol(), uri.getAuthority(), path, query, ref));
     }
 
+    private static String encodePlusCharacter(String data)
+    {
+        return data.replace("+", "%2B");
+    }
+
     private static String decode(String data)
     {
-        return URLDecoder.decode(data.replace("+", "%2B"), StandardCharsets.UTF_8);
+        return URLDecoder.decode(encodePlusCharacter(data), StandardCharsets.UTF_8);
     }
 
     private static String extractDecodedFragment(String url)
@@ -185,8 +190,8 @@ public final class UriUtils
     private static URI normalizeToRfc3986(URI uri)
     {
         StringBuilder normalizedUri = new StringBuilder(uri.toString());
-        encodeSquareBrackets(normalizedUri, uri.getRawQuery());
-        encodeSquareBrackets(normalizedUri, uri.getRawFragment());
+        encodeSpecialCharacters(normalizedUri, uri.getRawQuery());
+        encodeSpecialCharacters(normalizedUri, uri.getRawFragment());
         return URI.create(normalizedUri.toString());
     }
 
@@ -200,13 +205,14 @@ public final class UriUtils
         return url;
     }
 
-    private static void encodeSquareBrackets(StringBuilder normalizedUri, String uriPart)
+    private static void encodeSpecialCharacters(StringBuilder normalizedUri, String uriPart)
     {
         if (uriPart != null)
         {
             String encodedUriPart = uriPart
                     .replace("[", "%5B")
                     .replace("]", "%5D");
+            encodedUriPart = encodePlusCharacter(encodedUriPart);
             int indexOfUriPart = normalizedUri.indexOf(uriPart);
             normalizedUri.replace(indexOfUriPart, indexOfUriPart + uriPart.length(), encodedUriPart);
         }
