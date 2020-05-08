@@ -233,3 +233,6 @@ Then element located `By.elementName(<elementName>)` disappears in '$timeout'
 
 Composite: When I select an element with the '$attributeType'='$attributeValue' and upload the file '$filePath'
 When I select element located `By.xpath(//*[@<attributeType>="<attributeValue>"])` and upload file `<filePath>`
+
+Composite: When I change context to an element by $locator
+When I change context to element located `<locator>`
