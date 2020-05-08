@@ -78,14 +78,14 @@ public class SetContextSteps
 
     /**
      * Set the context for further localization of elements to an <b>element</b> specified by <b>locator</b>
-     * @param searchAttributes Locator used to find an element
+     * @param locator Locator used to find an element
      */
-    @When("I change context to an element by $locator")
-    public void changeContextToElement(SearchAttributes searchAttributes)
+    @When("I change context to element located `$locator`")
+    public void changeContextToElement(SearchAttributes locator)
     {
         changeContextToPage();
-        WebElement element = baseValidations.assertIfElementExists("Element to set context", searchAttributes);
-        webUiContext.putSearchContext(element, () -> changeContextToElement(searchAttributes));
+        WebElement element = baseValidations.assertIfElementExists("Element to set context", locator);
+        webUiContext.putSearchContext(element, () -> changeContextToElement(locator));
     }
 
     /**
