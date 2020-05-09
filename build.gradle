@@ -75,7 +75,7 @@ ext {
         groovy:                 '2.5.11',
         guava:                  '29.0-jre',
         hamcrest:               '2.2',
-        httpclient:             '4.5.11',
+        httpclient:             '4.5.12',
         javaxInject:            '1',
         jbehave:                '4.6.4-alpha.2',
         junit4:                 '4.13',
