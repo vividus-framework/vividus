@@ -84,6 +84,7 @@
         <property name="parallelStoryExamplesEnabled" value="${bdd.configuration.parallel-story-examples-enabled}"/>
         <property name="examplesTableHeaderSeparator" value="${bdd.configuration.examples-table-header-separator}"/>
         <property name="examplesTableValueSeparator" value="${bdd.configuration.examples-table-value-separator}"/>
+        <property name="parameterControls" ref="parameterControls" />
     </bean>
 
     <bean class="org.vividus.bdd.log.LoggingStepMonitor" />
@@ -114,5 +115,7 @@
     <bean id="FILTERING" class="org.vividus.bdd.transformer.FilteringTableTransformer">
        <property name="examplesTableFactory" value="#{@'configuration'.getExamplesTableFactory()}" />
     </bean>
+
+    <bean id="parameterControls" class="org.jbehave.core.steps.ParameterControls" />
 
 </beans>

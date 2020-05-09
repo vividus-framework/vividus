@@ -38,6 +38,7 @@ import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.reporters.ViewGenerator;
 import org.jbehave.core.steps.DelegatingStepMonitor;
+import org.jbehave.core.steps.ParameterControls;
 import org.jbehave.core.steps.ParameterConverters.ChainableParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +60,13 @@ public class ExtendedConfiguration extends Configuration
     private StoryControls storyControls;
     private String examplesTableHeaderSeparator;
     private String examplesTableValueSeparator;
+    private ParameterControls parameterControls;
 
     public void init() throws IOException
     {
         initKeywords();
         initCompositePaths();
+        useParameterControls(parameterControls);
         useParameterConverters(new ParameterConvertersDecorator(this, parameterAdaptor, expressionAdaptor)
                 .addConverters(customConverters));
         useStoryParser(new RegexStoryParser(keywords(), examplesTableFactory()));
@@ -162,5 +165,10 @@ public class ExtendedConfiguration extends Configuration
     public void setExamplesTableValueSeparator(String examplesTableValueSeparator)
     {
         this.examplesTableValueSeparator = examplesTableValueSeparator;
+    }
+
+    public void setParameterControls(ParameterControls parameterControls)
+    {
+        this.parameterControls = parameterControls;
     }
 }
