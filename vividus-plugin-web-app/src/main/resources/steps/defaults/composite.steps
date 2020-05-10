@@ -96,6 +96,12 @@ Then field located `By.fieldName(<fieldName>):a->filter.state(<state>)` exists
 Composite: When I enter '$text' in a field by the xpath '$xpath'
 When I enter `<text>` in field located `By.xpath(<xpath>)`
 
+Composite: When I enter `$text` in field located `$locator` using keyboard
+When I execute sequence of actions:
+|type      |argument |
+|CLICK     |<locator>|
+|ENTER_TEXT|<text>   |
+
 Composite: When I select '$text' from a drop down by the xpath '$xpath'
 When I select `$text` from drop down located `By.xpath(<xpath>)`
 
