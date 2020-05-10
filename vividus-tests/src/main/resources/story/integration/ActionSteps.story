@@ -3,10 +3,83 @@ Description: Integration tests for ActionSteps class.
 Meta:
     @epic vividus-plugin-web-app
 
-Scenario: Action verification MOVE_TO
-Given I am on a page with the URL 'https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_over_enter'
-When I switch to a frame with the attribute 'id'='iframeResult'
+Scenario: Action verification MOVE_BY_OFFSET
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+Then number of elements found by `By.xpath(//*[@id='moveCount' and text()='0'])` is equal to `1`
 When I execute sequence of actions:
-|type   |argument                                                   |
-|MOVE_TO|By.xpath(//div[contains(., 'onmouseover: Mouse over me!')])|
-Then the text 'onmouseover: 1' exists
+|type          |argument                                   |
+|MOVE_TO       |By.xpath(//div[contains(., 'Mouse move!')])|
+|MOVE_BY_OFFSET|(0, 10)                                    |
+|MOVE_BY_OFFSET|(0, -10)                                   |
+|MOVE_BY_OFFSET|(0, 10)                                    |
+|MOVE_BY_OFFSET|(0, -10)                                   |
+Then number of elements found by `By.xpath(//*[@id='moveCount' and text()='5'])` is equal to `1`
+
+Scenario: Action verification MOVE_TO
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+Then number of elements found by `By.xpath(//*[@id='enterCount' and text()='0'])` is equal to `1`
+When I execute sequence of actions:
+|type   |argument                                    |
+|MOVE_TO|By.xpath(//div[contains(., 'Mouse enter!')])|
+Then number of elements found by `By.xpath(//*[@id='enterCount' and text()='1'])` is equal to `1`
+
+Scenario: Action verification CLICK
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+When I initialize the scenario variable `expectedText` with value `Good day!`
+Then the text '${expectedText}' does not exist
+When I execute sequence of actions:
+|type |argument                             |
+|CLICK|By.xpath(//button[text()='Click me'])|
+Then the text '${expectedText}' exists
+
+Scenario: Action verification CLICK_AND_HOLD
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+When I change context to an element by By.id(target)
+Then the context element has the CSS property 'background-color'='rgba(255, 255, 255, 1)'
+When I execute sequence of actions:
+|type          |argument         |
+|CLICK_AND_HOLD|By.xpath(self::*)|
+Then the context element has the CSS property 'background-color'='rgba(255, 0, 0, 1)'
+
+Scenario: Action verification RELEASE
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+When I change context to an element by By.id(target)
+Then the context element has the CSS property 'background-color'='rgba(255, 255, 255, 1)'
+When I execute sequence of actions:
+|type          |argument         |
+|CLICK_AND_HOLD|By.xpath(self::*)|
+|RELEASE       |By.xpath(self::*)|
+Then the context element has the CSS property 'background-color'='rgba(0, 128, 0, 1)'
+
+Scenario: Action verification DOUBLE_CLICK
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+When I initialize the scenario variable `expectedText` with value `Good day!`
+Then the text '${expectedText}' does not exist
+When I execute sequence of actions:
+|type        |argument                                |
+|DOUBLE_CLICK|By.xpath(//p[text()='Double-click me.'])|
+Then the text '${expectedText}' exists
+
+Scenario: Action verification ENTER_TEXT
+Given I am on a page with the URL '${vividus-test-site-url}/inputs.html'
+When I initialize the scenario variable `input` with value `#{generate(regexify '[a-z]{15}')}`
+Then the text '${input}' does not exist
+When I click on element located `By.xpath(//label[@for='text'])`
+When I execute sequence of actions:
+|type      |argument|
+|ENTER_TEXT|${input}|
+Then the text '${input}' exists
+
+Scenario: Action verification PRESS_KEYS
+Given I am on a page with the URL '${vividus-test-site-url}/inputs.html'
+When I initialize the scenario variable `input` with value `mark#{generate(regexify '[a-z]{10}')}`
+When I enter `${input}` in field located `By.id(text)`
+Then the text '${input}' exists
+When I click on element located `By.xpath(//label[@for='text'])`
+When I find = `1` elements `By.xpath(//div[@id='output' and text()!='mark'])` and while they exist do up to 11 iteration of
+|step                                                            |
+|When I execute sequence of actions:                             |
+|{headerSeparator=!, valueSeparator=!}                           |
+|!type      !argument   !                                        |
+|!PRESS_KEYS!BACK_SPACE !                                        |
+Then number of elements found by `By.xpath(//div[@id='output' and text()='mark'])` is equal to `1`
