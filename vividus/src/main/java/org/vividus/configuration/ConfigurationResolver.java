@@ -112,8 +112,7 @@ public final class ConfigurationResolver
 
         resolveSpelExpressions(properties, true);
 
-        PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX,
-                PLACEHOLDER_SUFFIX, PLACEHOLDER_VALUE_SEPARATOR, false);
+        PropertyPlaceholderHelper propertyPlaceholderHelper = createPropertyPlaceholderHelper(false);
 
         for (Entry<Object, Object> entry : properties.entrySet())
         {
@@ -130,18 +129,34 @@ public final class ConfigurationResolver
         return instance;
     }
 
+    private static PropertyPlaceholderHelper createPropertyPlaceholderHelper(boolean ignoreUnresolvablePlaceholders)
+    {
+        return new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, PLACEHOLDER_VALUE_SEPARATOR,
+                ignoreUnresolvablePlaceholders);
+    }
+
     private static Multimap<String, String> assembleConfiguration(Properties configurationProperties,
             Properties overridingProperties)
     {
-        Multimap<String, String> configuration = LinkedHashMultimap.create();
-
         String profiles = getCompetingConfigurationPropertyValue(configurationProperties, overridingProperties,
                 Pair.of(PROFILE, PROFILES));
-        configuration.putAll(PROFILE, asPaths(profiles));
         String environments = getConfigurationPropertyValue(configurationProperties, overridingProperties,
                 ENVIRONMENTS);
+        String suite = getConfigurationPropertyValue(configurationProperties, overridingProperties, SUITE);
+
+        Properties mergedProperties = new Properties();
+        mergedProperties.putAll(configurationProperties);
+        mergedProperties.putAll(overridingProperties);
+        PropertyPlaceholderHelper propertyPlaceholderHelper = createPropertyPlaceholderHelper(true);
+
+        profiles = propertyPlaceholderHelper.replacePlaceholders(profiles, mergedProperties::getProperty);
+        environments = propertyPlaceholderHelper.replacePlaceholders(environments, mergedProperties::getProperty);
+        suite = propertyPlaceholderHelper.replacePlaceholders(suite, mergedProperties::getProperty);
+
+        Multimap<String, String> configuration = LinkedHashMultimap.create();
+        configuration.putAll(PROFILE, asPaths(profiles));
         configuration.putAll(ENVIRONMENT, asPaths(environments));
-        configuration.put(SUITE, getConfigurationPropertyValue(configurationProperties, overridingProperties, SUITE));
+        configuration.put(SUITE, suite);
         return configuration;
     }
 

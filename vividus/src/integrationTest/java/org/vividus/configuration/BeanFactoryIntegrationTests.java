@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.BeanIsAbstractException;
 
@@ -34,7 +35,8 @@ class BeanFactoryIntegrationTests
 {
     private static final String CONFIGURATION_PROFILE = "configuration.profile";
     private static final String CONFIGURATION_PROFILES = "configuration.profiles";
-    private static final String ENVIRONMENTS_PROPERTY = "configuration.environments";
+    private static final String CONFIGURATION_ENVIRONMENTS = "configuration.environments";
+    private static final String CONFIGURATION_SUITE = "configuration.suite";
 
     private static final String BASIC_ENV = "basicenv";
     private static final String BASIC_PROFILE = "basicprofile";
@@ -67,7 +69,7 @@ class BeanFactoryIntegrationTests
     void testBeanFactory(String profile)
     {
         System.setProperty(CONFIGURATION_PROFILE, profile);
-        System.setProperty(ENVIRONMENTS_PROPERTY, "integrationtest");
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, "integrationtest");
         BeanFactory.open();
         for (String beanName : BeanFactory.getBeanDefinitionNames())
         {
@@ -86,9 +88,26 @@ class BeanFactoryIntegrationTests
     void testConfigurationResolverMultipleEnvironments() throws IOException
     {
         System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
-        System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV + "," + ADDITIONAL_ENV);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV + "," + ADDITIONAL_ENV);
         BeanFactory.open();
         assertProperties("additionalenv-props-property-value", "additionalenv-property-value");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "${profile-to-use}, basicenv,               integration",
+            "basicprofile,      ${environments-to-use}, integration",
+            "basicprofile,      basicenv,               ${suite-to-use}"
+    })
+    void shouldResolvePlaceholdersInConfigurationProperties(String profile, String environments, String suite)
+            throws IOException
+    {
+        System.setProperty(CONFIGURATION_PROFILE, profile);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, environments);
+        System.setProperty(CONFIGURATION_SUITE, suite);
+        BeanFactory.open();
+        assertProperties(null, null);
+        assertIntegrationSuiteProperty();
     }
 
     @Test
@@ -103,7 +122,7 @@ class BeanFactoryIntegrationTests
     void testConfigurationResolverSuiteOverridesEnvironments() throws Exception
     {
         System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
-        System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         BeanFactory.open();
         assertSuiteProperty("env-suite-overridable-property", PROPERTY_VALUE_FROM_SUITE);
     }
@@ -112,7 +131,7 @@ class BeanFactoryIntegrationTests
     void testConfigurationResolverSuiteOverridesProfile() throws Exception
     {
         System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
-        System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         BeanFactory.open();
         assertSuiteProperty("profile-suite-overridable-property", PROPERTY_VALUE_FROM_SUITE);
     }
@@ -121,10 +140,10 @@ class BeanFactoryIntegrationTests
     void testConfigurationResolverDeeperSuiteOverridesUpperSuite() throws Exception
     {
         System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
-        System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV);
-        System.setProperty("configuration.suite", "integration");
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
+        System.setProperty(CONFIGURATION_SUITE, "integration");
         BeanFactory.open();
-        assertSuiteProperty("deeper-suite-level-overridable-property", "value-from-deeper-level");
+        assertIntegrationSuiteProperty();
     }
 
     @Test
@@ -139,7 +158,7 @@ class BeanFactoryIntegrationTests
     @Test
     void testConfigurationResolverProfilesHierarchy() throws Exception
     {
-        System.setProperty(ENVIRONMENTS_PROPERTY, BASIC_ENV);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE + ",otherprofile");
         BeanFactory.open();
         assertSuiteProperty("basic-profile-property-value", "basic-value");
@@ -154,6 +173,11 @@ class BeanFactoryIntegrationTests
     {
         Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
         assertEquals("Either 'profile' or 'profiles' configuration property must be set", exception.getMessage());
+    }
+
+    private void assertIntegrationSuiteProperty() throws IOException
+    {
+        assertSuiteProperty("deeper-suite-level-overridable-property", "value-from-deeper-level");
     }
 
     private void assertSuiteProperty(String key, String expectedValue) throws IOException
@@ -175,7 +199,8 @@ class BeanFactoryIntegrationTests
 
     private void resetBeanFactory()
     {
-        Stream.of(CONFIGURATION_PROFILE, ENVIRONMENTS_PROPERTY, CONFIGURATION_PROFILES).forEach(System::clearProperty);
+        Stream.of(CONFIGURATION_PROFILE, CONFIGURATION_ENVIRONMENTS, CONFIGURATION_PROFILES).forEach(
+                System::clearProperty);
         BeanFactory.reset();
         ConfigurationResolver.reset();
     }
