@@ -3,7 +3,7 @@ project.description = 'Vividus plugin for Mongo DB testing'
 dependencies {
     api project(':vividus-bdd-engine')
     implementation project(':vividus-util')
-    implementation(group: 'org.mongodb', name: 'mongodb-driver-sync', version: '4.0.2')
+    implementation(group: 'org.mongodb', name: 'mongodb-driver-sync', version: '4.0.3')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
