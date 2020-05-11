@@ -36,6 +36,10 @@
         </constructor-arg>
     </bean>
 
+    <bean id="cookieStoreProvider" class="org.vividus.http.CookieStoreProvider">
+        <constructor-arg value="${rest-api.http.cookie-store-level}" />
+    </bean>
+
     <bean id="restApiHttpClientConfig" parent="httpClientConfig">
         <property name="headersMap">
             <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
@@ -47,6 +51,9 @@
             <bean class="org.vividus.http.SavingConnectionDetailsHttpResponseInterceptor">
                 <property name="httpTestContext" ref="httpTestContext" />
             </bean>
+        </property>
+        <property name="cookieStore">
+            <bean factory-method="getCookieStore" factory-bean="cookieStoreProvider" />
         </property>
     </bean>
 
@@ -68,5 +75,6 @@
         <value>apiSteps</value>
         <value>httpResponseValidationSteps</value>
         <value>jsonResponseValidationSteps</value>
+        <value>cookieStoreProvider</value>
     </util:list>
 </beans>

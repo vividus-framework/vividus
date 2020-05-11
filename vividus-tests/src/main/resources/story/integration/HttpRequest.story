@@ -16,3 +16,12 @@ Examples:
 |query-parameter-value|
 |00:00:00+02:00       |
 |00:00:00%2B02:00     |
+
+Scenario: Set HTTP cookies
+When I send HTTP GET to the relative URL '/cookies/set?vividus-cookie=vividus'
+When I send HTTP GET to the relative URL '/cookies'
+Then a JSON element by the JSON path '$.cookies' is equal to '{"vividus-cookie": "vividus"}'
+
+Scenario: Verify HTTP cookies are cleared
+When I send HTTP GET to the relative URL '/cookies'
+Then a JSON element by the JSON path '$.cookies' is equal to '{}'
