@@ -103,7 +103,7 @@ When I execute sequence of actions:
 |ENTER_TEXT|<text>   |
 
 Composite: When I select '$text' from a drop down by the xpath '$xpath'
-When I select `$text` from drop down located `By.xpath(<xpath>)`
+When I select `<text>` from drop down located `By.xpath(<xpath>)`
 
 Composite: Then an element with the name '$elementName' containing text '$text' exists
 Then number of elements found by `By.elementName(<elementName>)->filter.textPart(<text>)` is equal to `1`
