@@ -36,6 +36,14 @@ class AdjustingViewportPastingDecorator extends DebuggingViewportPastingDecorato
         this.footerAdjustment = footerAdjustment;
     }
 
+    AdjustingViewportPastingDecorator(ShootingStrategy strategy, int headerAdjustment, int footerAdjustment,
+            String target)
+    {
+        super(strategy, target);
+        this.headerAdjustment = headerAdjustment;
+        this.footerAdjustment = footerAdjustment;
+    }
+
     AdjustingViewportPastingDecorator(ShootingStrategy strategy, int headerAdjustment)
     {
         this(strategy, headerAdjustment, 0);

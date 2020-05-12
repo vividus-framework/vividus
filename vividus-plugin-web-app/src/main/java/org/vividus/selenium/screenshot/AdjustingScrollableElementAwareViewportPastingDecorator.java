@@ -33,7 +33,7 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Adj
     public AdjustingScrollableElementAwareViewportPastingDecorator(ShootingStrategy strategy,
             WebElement scrollableElement, IJavascriptActions javascriptActions, ScreenshotConfiguration configuration)
     {
-        super(strategy, configuration.getWebHeaderToCut(), configuration.getWebFooterToCut());
+        super(strategy, configuration.getWebHeaderToCut(), configuration.getWebFooterToCut(), "arguments[1]");
         this.javascriptActions = javascriptActions;
         this.scrollableElement = scrollableElement;
     }
@@ -62,6 +62,6 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Adj
     protected void scrollVertically(JavascriptExecutor js, int scrollY)
     {
         javascriptActions
-            .executeScript("arguments[0].scrollTo(0, arguments[1]); return [];", scrollableElement, scrollY);
+            .executeScript(getScrollVerticallyScript(), scrollY, scrollableElement);
     }
 }

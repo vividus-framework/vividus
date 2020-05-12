@@ -103,6 +103,16 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
     {
         strategy.scrollVertically(mock(JavascriptExecutor.class), THE_ANSWER);
         verify(javascriptActions, Mockito.times(1)).executeScript(
-                "arguments[0].scrollTo(0, arguments[1]); return [];", scrollableElement, THE_ANSWER);
+                  "if ('scrollBehavior' in document.documentElement.style) {"
+                + "    arguments[1].scrollTo({"
+                + "        \"top\": arguments[0],"
+                + "        \"left\": 0,"
+                + "        \"behavior\": \"instant\""
+                + "    });"
+                + "} else {"
+                + "    arguments[1].scrollTo(0, arguments[0]);"
+                + "}"
+                + "return [];",
+                THE_ANSWER, scrollableElement);
     }
 }

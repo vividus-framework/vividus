@@ -39,14 +39,31 @@ import ru.yandex.qatools.ashot.coordinates.Coords;
  */
 // CHECKSTYLE:OFF
 public class DebuggingViewportPastingDecorator extends ShootingDecorator {
+    private static final String SCROLL_Y_TEMPLATE =
+              "if ('scrollBehavior' in document.documentElement.style) {"
+            + "    %1$s.scrollTo({"
+            + "        \"top\": arguments[0],"
+            + "        \"left\": 0,"
+            + "        \"behavior\": \"instant\""
+            + "    });"
+            + "} else {"
+            + "    %1$s.scrollTo(0, arguments[0]);"
+            + "}"
+            + "return [];";
     private static final long serialVersionUID = 4173686031614281540L;
     private static final String CURRENT_SCROLL = "current_scroll_";
     protected int scrollTimeout = 0;
     private Coords shootingArea;
     private transient ScreenshotDebugger screenshotDebugger;
+    private final String scrollVerticallyScript;
 
     public DebuggingViewportPastingDecorator(ShootingStrategy strategy) {
+        this(strategy, "window");
+    }
+
+    protected DebuggingViewportPastingDecorator(ShootingStrategy strategy, String target) {
         super(strategy);
+        scrollVerticallyScript = String.format(SCROLL_Y_TEMPLATE, target);
     }
 
     public DebuggingViewportPastingDecorator withScrollTimeout(int scrollTimeout) {
@@ -116,7 +133,12 @@ public class DebuggingViewportPastingDecorator extends ShootingDecorator {
     }
 
     protected void scrollVertically(JavascriptExecutor js, int scrollY) {
-        js.executeScript("scrollTo(0, arguments[0]); return [];", scrollY);
+        js.executeScript(scrollVerticallyScript, scrollY);
+    }
+
+    protected String getScrollVerticallyScript()
+    {
+        return scrollVerticallyScript;
     }
 
     private Coords getShootingCoords(Set<Coords> coords, int pageWidth, int pageHeight, int viewPortHeight) {
