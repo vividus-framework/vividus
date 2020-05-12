@@ -86,7 +86,7 @@ jobs:
 
     - name: Cache tests history
       if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest' && always()
-      uses: actions/cache@v1
+      uses: pat-s/always-upload-cache@v1.1.4
       with:
         path: vividus-tests/output/history
         key: ${{ runner.os }}-tests-history-cache-${{ hashFiles('**/*.json') }}
