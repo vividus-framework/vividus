@@ -361,6 +361,17 @@ public class WaitSteps
                     xpath, seconds), result.isWaitPassed());
     }
 
+    /**
+     * Checks that no alert displayed during the <b><i>timeout</i></b>.
+     * Makes {@value #DIVISOR} attempts to confirm alert displaying at regular intervals
+     * <br>Example:<br>
+     * <code> Then alert does not appear in `PT30S`</code>
+     * - checks that no alert displayed for 30 seconds, polling every 3 seconds
+     *
+     * @param timeout Desired timeout according to
+     * <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> standard
+     * @return true if alert does not appeared, false otherwise
+     */
     @Then("alert does not appear in `$timeout`")
     public boolean waitAlertDoesNotAppear(Duration timeout)
     {
