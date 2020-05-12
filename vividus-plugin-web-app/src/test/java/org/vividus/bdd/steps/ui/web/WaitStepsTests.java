@@ -269,6 +269,20 @@ class WaitStepsTests
     }
 
     @Test
+    void testWaitDurationWithPollingDurationTillElementDisappears()
+    {
+        when(webUiContext.getSearchContext()).thenReturn(webElement);
+        WaitResult<Boolean> waitResult = new WaitResult<>();
+        waitResult.setWaitPassed(true);
+        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH);
+        IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
+        when(waitActions.wait(webElement, TIMEOUT, TIMEOUT, condition)).thenReturn(waitResult);
+        when(expectedSearchActionsConditions.invisibilityOfElement(attributes)).thenReturn(condition);
+        assertTrue(waitSteps.waitDurationWithPollingDurationTillElementState(TIMEOUT, TIMEOUT, attributes,
+                State.NOT_VISIBLE));
+    }
+
+    @Test
     void testWaitTillFrameAppears()
     {
         when(webUiContext.getSearchContext(WebDriver.class)).thenReturn(webDriver);

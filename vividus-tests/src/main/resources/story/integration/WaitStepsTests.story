@@ -32,3 +32,14 @@ When I execute sequence of actions:
 |CLICK         |By.id(toClick)                                  |
 Then an alert is not present
 Then an element with the id 'anchor' disappears
+
+Scenario: Step verification I wait '$duration' with '$pollingDuration' polling until element located `$locator` becomes $state
+Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
+Then number of elements found by `<element>` is equal to `<before>`
+When I click on element located `<button>`
+When I wait `PT10S` with `PT1S` polling until element located `<element>` becomes <state>
+Then number of elements found by `<element>` is equal to `<after>`
+Examples:
+|button            |element               |state      |before|after|
+|By.id(button-hide)|By.id(element-to-hide)|NOT_VISIBLE|1     |0    |
+|By.id(button-show)|By.id(element-to-show)|VISIBLE    |0     |1    |
