@@ -265,6 +265,7 @@ public class SetContextSteps
     @When("I switch to a frame by the xpath '$xpath'")
     public void switchingToFramebyXpath(String xpathExpression)
     {
+        changeContextToPage();
         WebElement element = baseValidations.assertIfElementExists("A frame",
                 new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(xpathExpression)));
         switchToFrame(element);
@@ -386,7 +387,6 @@ public class SetContextSteps
         if (frame != null)
         {
             getWebDriver().switchTo().frame(frame);
-            changeContextToPage();
         }
     }
 

@@ -4,7 +4,7 @@ Meta:
 Lifecycle:
 Examples:
 |windowsTitle|indexTitle       |vivdus-test-site                                           |
-|Windows     |Vividus Test Site|https://vividus-test-site.herokuapp.com/windows.html|
+|Windows     |Vividus Test Site|${vividus-test-site-url}/windows.html|
 
 
 Scenario: Verify step: "When I switch to a window with the name '$windowName'"
@@ -35,3 +35,15 @@ When I wait `PT3S` until window with title that is equal to `<indexTitle>` appea
 Then the page title is equal to '<indexTitle>'
 When I close the current window
 Then the page title is equal to '<windowsTitle>'
+
+
+Scenario: Verify step: "When I switch to a frame by the xpath '$xpath'"
+Given I am on a page with the URL '${vividus-test-site-url}/nestedFrames.html'
+When I change context to element located `id(toRemove):a`
+When I perform javascript '
+document.querySelector('#toRemove').remove();
+return [];
+' and save result to the 'scenario' variable 'result'
+When I switch to a frame by the xpath '//iframe[@id='parent']'
+When I switch to a frame by the xpath '//frame[@id='exampleCom']'
+When I click on element located `By.xpath(//a)`
