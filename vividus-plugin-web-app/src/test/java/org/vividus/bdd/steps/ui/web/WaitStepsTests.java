@@ -43,6 +43,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.IExpectedConditions;
 import org.vividus.ui.web.action.IExpectedSearchContextCondition;
+import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.ISearchActions;
 import org.vividus.ui.web.action.IWaitActions;
 import org.vividus.ui.web.action.WaitResult;
@@ -97,6 +98,9 @@ class WaitStepsTests
 
     @Mock
     private ISearchActions searchActions;
+
+    @Mock
+    private IJavascriptActions javascriptActions;
 
     @InjectMocks
     private WaitSteps waitSteps;
@@ -396,5 +400,12 @@ class WaitStepsTests
         waitSteps.waitTillFrameAppearsAndSwitchToIt(NAME);
         verify(waitActions).wait(eq(webDriver),
                 argThat(condition -> condition.toString().equals("frame to be available: " + NAME)));
+    }
+
+    @Test
+    void shouldWaitForAScroll()
+    {
+        waitSteps.waitForScroll();
+        verify(javascriptActions).waitUntilScrollFinished();
     }
 }

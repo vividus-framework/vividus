@@ -99,4 +99,9 @@ public interface IJavascriptActions
     int setElementTopPosition(WebElement webElement, int top);
 
     Dimension getViewportSize();
+
+    /**
+     * Waits for the scroll events finish via async JS script execution;
+     */
+    void waitUntilScrollFinished();
 }

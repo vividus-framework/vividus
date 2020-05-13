@@ -90,13 +90,18 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
     @Override
     public void scrollElementIntoViewportCenter(WebElement webElement)
     {
-        executeAsyncScriptFromResource(JavascriptActions.class, "scroll-element-into-viewport-center.js", webElement);
+        executeAsyncScriptFromResource("scroll-element-into-viewport-center.js", webElement);
     }
 
     @Override
     public void scrollToEndOfPage()
     {
-        executeAsyncScriptFromResource(JavascriptActions.class, "scroll-to-end-of-page.js");
+        executeAsyncScriptFromResource("scroll-to-end-of-page.js");
+    }
+
+    private void executeAsyncScriptFromResource(String resource, Object... args)
+    {
+        executeAsyncScriptFromResource(JavascriptActions.class, resource, args);
     }
 
     @Override
@@ -217,6 +222,12 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
     public void scrollToRightOf(WebElement element)
     {
         executeScript("arguments[0].scrollLeft=arguments[0].scrollWidth;", element);
+    }
+
+    @Override
+    public void waitUntilScrollFinished()
+    {
+        executeAsyncScriptFromResource("wait-for-scroll.js");
     }
 
     private JavascriptExecutor getJavascriptExecutor()

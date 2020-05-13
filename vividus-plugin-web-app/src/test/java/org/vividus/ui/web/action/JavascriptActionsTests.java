@@ -300,6 +300,14 @@ class JavascriptActionsTests
                 webElement);
     }
 
+    @Test
+    void shouldExecuteScriptWaitingForScrollFinish()
+    {
+        javascriptActions.waitUntilScrollFinished();
+        verify((JavascriptExecutor) webDriver).executeAsyncScript(
+                ResourceUtils.loadResource(JavascriptActionsTests.class, "wait-for-scroll.js"));
+    }
+
     private void mockScriptExecution(String script, Object result)
     {
         when(((JavascriptExecutor) webDriver).executeScript(script)).thenReturn(result);
