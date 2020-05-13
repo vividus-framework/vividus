@@ -42,6 +42,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.IExpectedConditions;
+import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.ISearchActions;
 import org.vividus.ui.web.action.IWaitActions;
@@ -65,6 +66,7 @@ public class WaitSteps
     @Inject private IExpectedConditions<By> expectedSearchContextConditions;
     @Inject private IExpectedConditions<SearchAttributes> expectedSearchActionsConditions;
     @Inject private IBaseValidations baseValidations;
+    @Inject private IJavascriptActions javascriptActions;
 
     public boolean waitTillElementWithTextDisappearsPageRefresh(String text, Duration timeout)
     {
@@ -455,6 +457,16 @@ public class WaitSteps
     {
         return waitActions.wait(getSearchContext(), expectedSearchActionsConditions.invisibilityOfElement(locator))
                 .isWaitPassed();
+    }
+
+    /**
+     * Waits for the scroll finish; Could be useful for the cases when you have very slow scroll
+     * and need to synchronize the tests with the scroll
+     */
+    @When("I wait until scroll is finished")
+    public void waitForScroll()
+    {
+        javascriptActions.waitUntilScrollFinished();
     }
 
     /**
