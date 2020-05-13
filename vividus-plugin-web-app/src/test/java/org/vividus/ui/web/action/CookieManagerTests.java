@@ -16,6 +16,9 @@
 
 package org.vividus.ui.web.action;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -30,6 +33,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.ClientCookie;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -151,12 +156,18 @@ class CookieManagerTests
         List<org.apache.http.cookie.Cookie> resultCookies = cookieStore.getCookies();
         assertEquals(1, resultCookies.size());
         org.apache.http.cookie.Cookie httpCookie = resultCookies.get(0);
-        assertEquals(seleniumCookie.getDomain(), httpCookie.getDomain());
-        assertEquals(seleniumCookie.getExpiry(), httpCookie.getExpiryDate());
-        assertEquals(seleniumCookie.getName(), httpCookie.getName());
-        assertEquals(seleniumCookie.getPath(), httpCookie.getPath());
-        assertEquals(seleniumCookie.getValue(), httpCookie.getValue());
-        assertEquals(seleniumCookie.isSecure(), httpCookie.isSecure());
+        assertThat(httpCookie, instanceOf(BasicClientCookie.class));
+        BasicClientCookie clientCookie = (BasicClientCookie) httpCookie;
+        assertAll(
+            () -> assertEquals(seleniumCookie.getDomain(), clientCookie.getDomain()),
+            () -> assertEquals(seleniumCookie.getExpiry(), clientCookie.getExpiryDate()),
+            () -> assertEquals(seleniumCookie.getName(), clientCookie.getName()),
+            () -> assertEquals(seleniumCookie.getPath(), clientCookie.getPath()),
+            () -> assertEquals(seleniumCookie.getValue(), clientCookie.getValue()),
+            () -> assertEquals(seleniumCookie.isSecure(), clientCookie.isSecure()),
+            () -> assertEquals(seleniumCookie.getDomain(), clientCookie.getAttribute(ClientCookie.DOMAIN_ATTR)),
+            () -> assertEquals(seleniumCookie.getPath(), clientCookie.getAttribute(ClientCookie.PATH_ATTR))
+        );
     }
 
     private void configureMockedWebDriver()

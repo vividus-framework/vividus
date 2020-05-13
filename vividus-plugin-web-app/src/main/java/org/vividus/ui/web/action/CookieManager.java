@@ -23,7 +23,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.http.client.CookieStore;
-import org.apache.http.cookie.SetCookie;
+import org.apache.http.cookie.ClientCookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver.Options;
@@ -125,11 +125,13 @@ public class CookieManager implements ICookieManager
 
     private static org.apache.http.cookie.Cookie createHttpClientCookie(Cookie seleniumCookie)
     {
-        SetCookie httpClientCookie = new BasicClientCookie(seleniumCookie.getName(), seleniumCookie.getValue());
+        BasicClientCookie httpClientCookie = new BasicClientCookie(seleniumCookie.getName(), seleniumCookie.getValue());
         httpClientCookie.setDomain(seleniumCookie.getDomain());
         httpClientCookie.setPath(seleniumCookie.getPath());
         httpClientCookie.setExpiryDate(seleniumCookie.getExpiry());
         httpClientCookie.setSecure(seleniumCookie.isSecure());
+        httpClientCookie.setAttribute(ClientCookie.DOMAIN_ATTR, seleniumCookie.getDomain());
+        httpClientCookie.setAttribute(ClientCookie.PATH_ATTR, seleniumCookie.getPath());
         return httpClientCookie;
     }
 
