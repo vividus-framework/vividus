@@ -106,13 +106,6 @@ jobs:
         name: Integration Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
 
-    - name: Publish Integration tests history
-      if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest' && always()
-      uses: actions/upload-artifact@v1
-      with:
-        name: Integration Tests - History - ${{ matrix.platform }}
-        path: vividus-tests/output/history/integration-tests
-
     - name: System tests
       if: matrix.platform == 'ubuntu-latest'
       env:
@@ -141,13 +134,6 @@ jobs:
       with:
         name: System Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
-    
-    - name: Publish System tests history
-      if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest' && always()
-      uses: actions/upload-artifact@v1
-      with:
-        name: System Tests - History - ${{ matrix.platform }}
-        path: vividus-tests/output/history/system-tests
 
     - name: Browserstack Integration
       if: matrix.platform == 'ubuntu-latest'
