@@ -89,7 +89,7 @@ jobs:
       uses: pat-s/always-upload-cache@v1.1.4
       with:
         path: vividus-tests/output/history
-        key: ${{ runner.os }}-tests-history-cache-${{ hashFiles('**/*.json') }}
+        key: ${{ runner.os }}-tests-history-cache-${{ hashFiles('vividus-tests/output/history/**/*.json') }}
         restore-keys: |
           ${{ runner.os }}-tests-history-cache-
 
