@@ -47,6 +47,15 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-wrapper-
 
+    - name: Cache tests history
+      if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
+      uses: pat-s/always-upload-cache@v1.1.4
+      with:
+        path: vividus-tests/output/history
+        key: ${{ runner.os }}-tests-history-cache-${{ hashFiles('vividus-tests/output/history/**/*.json') }}
+        restore-keys: |
+          ${{ runner.os }}-tests-history-cache-
+
 
     - name: Set up JDK 13
       uses: actions/setup-java@v1
@@ -83,15 +92,6 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         fail_ci_if_error: true
-
-    - name: Cache tests history
-      if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest' && always()
-      uses: pat-s/always-upload-cache@v1.1.4
-      with:
-        path: vividus-tests/output/history
-        key: ${{ runner.os }}-tests-history-cache-${{ hashFiles('vividus-tests/output/history/**/*.json') }}
-        restore-keys: |
-          ${{ runner.os }}-tests-history-cache-
 
     - name: Integration tests
       if: matrix.platform == 'ubuntu-latest'
