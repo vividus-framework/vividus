@@ -43,7 +43,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/wrapper/gradle-wrapper.properties') }}
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('vividus-build-system/**/wrapper/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-wrapper-
 
