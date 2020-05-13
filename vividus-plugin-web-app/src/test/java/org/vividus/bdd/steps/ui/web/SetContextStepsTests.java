@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -34,6 +34,7 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -237,7 +238,7 @@ class SetContextStepsTests
         spy.switchingToFrame(attributeType, attributeValue);
         verify(spy).switchingToDefault();
         verify(mockedTargetLocator).frame(mockedWebElement);
-        verify(webUiContext, times(2)).reset();
+        verify(webUiContext).reset();
     }
 
     @Test
@@ -281,9 +282,10 @@ class SetContextStepsTests
         when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
         when(mockedBaseValidations.assertIfElementExists("A frame", new SearchAttributes(ActionAttributeType.XPATH,
                 LocatorUtil.getXPath(XPATH)))).thenReturn(mockedWebElement);
+        InOrder ordered = inOrder(mockedTargetLocator, webUiContext);
         setContextSteps.switchingToFramebyXpath(XPATH);
-        verify(mockedTargetLocator).frame(mockedWebElement);
-        verify(webUiContext).reset();
+        ordered.verify(webUiContext).reset();
+        ordered.verify(mockedTargetLocator).frame(mockedWebElement);
     }
 
     @Test
@@ -313,7 +315,7 @@ class SetContextStepsTests
         setContextSteps.switchToFrame(framesNumber, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verify(mockedTargetLocator).defaultContent();
         verify(mockedTargetLocator).frame(mockedWebElement);
-        verify(webUiContext, times(2)).reset();
+        verify(webUiContext).reset();
     }
 
     @Test
