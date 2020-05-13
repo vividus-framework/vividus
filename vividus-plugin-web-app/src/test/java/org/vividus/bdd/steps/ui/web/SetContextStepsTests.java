@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
@@ -54,8 +52,6 @@ import org.vividus.ui.web.action.SearchActions;
 import org.vividus.ui.web.action.WaitResult;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.action.search.Visibility;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.context.SearchContextSetter;
 import org.vividus.ui.web.util.LocatorUtil;
@@ -76,14 +72,9 @@ class SetContextStepsTests
     private static final String ATTRIBUTE_VALUE = "attributeValue";
     private static final String XPATH_ATTRIBUTE_VALUE = LocatorUtil.getXPath(".//*[@attributeType=%s]",
             ATTRIBUTE_VALUE);
-    private static final String FRAME_XPATH = ".//*[(local-name()='frame' or local-name()='iframe')"
-            + " and normalize-space(@attributeType)=\"attributeValue\"]";
     private static final String WINDOW_OR_TAB_WITH_NAME = "Window or tab name is ";
     private static final String IS_FOUND = " is found";
-    private static final String SIGN_EQUALITY = " = ";
-    private static final String AND_NUMBER = " and number ";
     private static final String NEW_WINDOW_OR_TAB_IS_FOUND = "New window or browser tab name is ";
-    private static final String FRAME_WITH_ATTRIBUTE = "Frame with attribute ";
     private static final String NAME = "name";
     private static final String APOSTROPHE = "'";
     private static final String XPATH = "someXpath";
@@ -223,25 +214,6 @@ class SetContextStepsTests
     }
 
     @Test
-    void testSwitchingToFrame()
-    {
-        when(webDriverProvider.get()).thenReturn(mockedWebDiver);
-        when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
-        String attributeType = "class";
-        String attributeValue = "class1";
-        SetContextSteps spy = Mockito.spy(setContextSteps);
-        String xPath = LocatorUtil.getXPath(
-                ".//*[(local-name()='frame' or local-name()='iframe') and @" + attributeType + "=%s]", attributeValue);
-        when(mockedBaseValidations.assertIfElementExists(
-                String.format("Frame with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
-                new SearchAttributes(ActionAttributeType.XPATH, xPath))).thenReturn(mockedWebElement);
-        spy.switchingToFrame(attributeType, attributeValue);
-        verify(spy, never()).switchingToDefault();
-        verify(mockedTargetLocator).frame(mockedWebElement);
-        verify(webUiContext).reset();
-    }
-
-    @Test
     void shouldSwitchAndResetContex()
     {
         when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> matcher.toString()
@@ -266,22 +238,15 @@ class SetContextStepsTests
     }
 
     @Test
-    void testSwitchingToFrameNull()
-    {
-        setContextSteps.switchingToFrame(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verify(mockedWebDiver, never()).switchTo();
-        verify(webDriverProvider, never()).get();
-    }
-
-    @Test
     void testSwitchingToFrameByXpathIfElementExist()
     {
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
         when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
-        when(mockedBaseValidations.assertIfElementExists("A frame", new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(XPATH)))).thenReturn(mockedWebElement);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                LocatorUtil.getXPath(XPATH));
+        when(mockedBaseValidations.assertIfElementExists("A frame", searchAttributes)).thenReturn(mockedWebElement);
         InOrder ordered = inOrder(mockedTargetLocator, webUiContext);
-        setContextSteps.switchingToFramebyXpath(XPATH);
+        setContextSteps.switchingToFrame(searchAttributes);
         ordered.verify(webUiContext).reset();
         ordered.verify(mockedTargetLocator).frame(mockedWebElement);
         verify(mockedTargetLocator, never()).defaultContent();
@@ -290,52 +255,11 @@ class SetContextStepsTests
     @Test
     void testSwitchingToFrameByXpathIfElementNotExist()
     {
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                LocatorUtil.getXPath(XPATH));
         when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
-        setContextSteps.switchingToFramebyXpath(XPATH);
+        setContextSteps.switchingToFrame(searchAttributes);
         verify(mockedWebDiver.switchTo(), never()).frame(mockedWebElement);
-    }
-
-    @Test
-    void testSwitchToFrameElementFoundCorrectNumber()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(mockedWebElement);
-        when(webDriverProvider.get()).thenReturn(mockedWebDiver);
-        when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
-        int framesNumber = 2;
-        List<WebElement> mockedWebElements = List.of(mockedWebElement, mockedWebElement);
-        SearchParameters searchParameters = new SearchParameters(FRAME_XPATH, Visibility.ALL);
-        SearchAttributes frameSearchAttributes = new SearchAttributes(ActionAttributeType.XPATH, searchParameters);
-        when(mockedSearchActions.findElements(mockedWebElement, frameSearchAttributes)).thenReturn(mockedWebElements);
-        when(softAssert
-                .assertThat(
-                        eq("Number of frames found"), eq(FRAME_WITH_ATTRIBUTE + ATTRIBUTE_TYPE + SIGN_EQUALITY
-                                + ATTRIBUTE_VALUE + AND_NUMBER + framesNumber + IS_FOUND),
-                        eq(mockedWebElements), any())).thenReturn(true);
-        setContextSteps.switchToFrame(framesNumber, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verify(mockedTargetLocator, never()).defaultContent();
-        verify(mockedTargetLocator).frame(mockedWebElement);
-        verify(webUiContext).reset();
-    }
-
-    @Test
-    void testSwitchToFrameElementNotFoundCorrectNumber()
-    {
-        when(webUiContext.getSearchContext()).thenReturn(mockedWebElement);
-        setContextSteps.switchToFrame(1, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verify(mockedWebDiver, never()).switchTo();
-        verify(webDriverProvider, never()).get();
-    }
-
-    @Test
-    void testSwitchToFrameElementFoundIncorrectNumber()
-    {
-        int framesNumber = 1;
-        List<WebElement> mockedWebElements = List.of(mockedWebElement);
-        Mockito.lenient().when(mockedSearchActions.findElements(mockedWebDiver,
-                new SearchAttributes(ActionAttributeType.XPATH, FRAME_XPATH))).thenReturn(mockedWebElements);
-        setContextSteps.switchToFrame(framesNumber, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verify(mockedTargetLocator, never()).frame(mockedWebElement);
-        verify(webDriverProvider, never()).get();
     }
 
     @Test

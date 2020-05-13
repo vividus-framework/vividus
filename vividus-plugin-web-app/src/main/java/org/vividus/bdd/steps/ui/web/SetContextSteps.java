@@ -17,12 +17,9 @@
 package org.vividus.bdd.steps.ui.web;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
-import static org.vividus.ui.validation.matcher.WebElementMatchers.elementNumber;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import javax.inject.Inject;
@@ -41,11 +38,9 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.IWaitActions;
 import org.vividus.ui.web.action.IWindowsActions;
-import org.vividus.ui.web.action.SearchActions;
 import org.vividus.ui.web.action.WaitResult;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.Visibility;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -57,7 +52,6 @@ public class SetContextSteps
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IWebUiContext webUiContext;
     @Inject private IBaseValidations baseValidations;
-    @Inject private SearchActions searchActions;
     @Inject private IHighlightingSoftAssert highlightingSoftAssert;
     @Inject private IWindowsActions windowsActions;
     @Inject private IWaitActions waitActions;
@@ -149,82 +143,6 @@ public class SetContextSteps
     }
 
     /**
-     * Switching to the frame with specified <b>attribute type</b> and <b>attribute value</b>
-     * <p>
-     * A <b>frame</b> is used for splitting browser page into several segments, each of which can show a different
-     * document (content). This enables updates of parts of a website while the user browses without making them reload
-     * the whole page (this is now largely replaced by AJAX).
-     * <p>
-     * <b>Frames</b> are located inside {@code <iframe>} tag.
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Finds the frame with desired parameters;
-     * <li>If frame is found, switches focus to it.
-     * </ul>
-     * @see <a href="https://en.wikipedia.org/wiki/HTML_element#Frames"><i>Frames</i></a>
-     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
-     * @param attributeType attribute type of {@code <iframe>} tag
-     * @param attributeValue attribute value of the specified attributeType
-     * <p>
-     * <b>Example:</b>
-     * <pre>
-     * {@code <iframe attributeType=}<b>'attributeValue'</b>{@code >some iframe content</iframe>}
-     * </pre>
-     */
-    @When("I switch to a frame with the attribute '$attributeType'='$attributeValue'")
-    public void switchingToFrame(String attributeType, String attributeValue)
-    {
-        changeContextToPage();
-        WebElement frame = baseValidations.assertIfElementExists(
-                String.format("Frame with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
-                getFrameSearchAttributes(attributeType, attributeValue));
-        switchToFrame(frame);
-    }
-
-    /**
-     * Switching to the frame with specified <b>attribute type</b> and <b>attribute value</b> by frame index
-     * <p>
-     * A <b>frame</b> is used for splitting browser page into several segments, each of which can show a different
-     * document (content). This enables updates of parts of a website while the user browses without making them reload
-     * the whole page (this is now largely replaced by AJAX).
-     * <p>
-     * <b>Frames</b> are located inside {@code <iframe>} tag.
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Finds the frames with desired parameters;
-     * <li>If frame is found, switches focus to it.
-     * </ul>
-     * @see <a href="https://en.wikipedia.org/wiki/HTML_element#Frames"><i>Frames</i></a>
-     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
-     * @param numberValue index of the frame, starts from 1. So if there are two frames found the second one will have
-     * numberValue = 2
-     * @param attributeType attribute type of {@code <iframe>} tag
-     * @param attributeValue attribute value of the specified attributeType
-     * <p>
-     * <b>Example:</b>
-     * <pre>
-     * {@code <iframe attributeType=}<b>'attributeValue'</b>{@code >some iframe content</iframe>}
-     * </pre>
-     */
-    @When("I switch to a frame number '$numberValue' with the attribute '$attributeType'='$attributeValue'")
-    public void switchToFrame(int numberValue, String attributeType, String attributeValue)
-    {
-        changeContextToPage();
-        SearchAttributes frameSearchAttributes = getFrameSearchAttributes(attributeType, attributeValue);
-        frameSearchAttributes.getSearchParameters().setVisibility(Visibility.ALL);
-        List<WebElement> frames = searchActions.findElements(webUiContext.getSearchContext(), frameSearchAttributes);
-        if (highlightingSoftAssert.assertThat(
-                "Number of frames found", String.format("Frame with attribute %1$s = %2$s and number %3$s is found",
-                        attributeType, attributeValue, numberValue),
-                frames, elementNumber(greaterThanOrEqualTo(numberValue))))
-        {
-            switchToFrame(frames.get(numberValue - 1));
-        }
-    }
-
-    /**
      * Switching to the default content of the page
      * <p>
      * Actions performed at this step:
@@ -240,7 +158,7 @@ public class SetContextSteps
     }
 
     /**
-     * Switching to the frame with xpath
+     * Switching to the frame using one of supported locators
      * <p>
      * A <b>frame</b> is used for splitting browser page into several segments, each of which can show a different
      * document (content). This enables updates of parts of a website while the user browses without making them reload
@@ -255,19 +173,18 @@ public class SetContextSteps
      * </ul>
      * @see <a href="https://en.wikipedia.org/wiki/HTML_element#Frames"><i>Frames</i></a>
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
-     * @param xpathExpression 'xpath' expression to locate frame element
+     * @param locator to locate frame element
      * <p>
      * <b>Example:</b>
      * <pre>
      * {@code <iframe attributeType=}<b>'attributeValue'</b>{@code > some iframe content</iframe>}
      * </pre>
      */
-    @When("I switch to a frame by the xpath '$xpath'")
-    public void switchingToFramebyXpath(String xpathExpression)
+    @When("I switch to frame located `$locator`")
+    public void switchingToFrame(SearchAttributes locator)
     {
         changeContextToPage();
-        WebElement element = baseValidations.assertIfElementExists("A frame",
-                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(xpathExpression)));
+        WebElement element = baseValidations.assertIfElementExists("A frame", locator);
         switchToFrame(element);
     }
 
@@ -388,13 +305,6 @@ public class SetContextSteps
         {
             getWebDriver().switchTo().frame(frame);
         }
-    }
-
-    private static SearchAttributes getFrameSearchAttributes(String attributeType, String attributeValue)
-    {
-        String xPath = LocatorUtil.getXPath(
-                ".//*[(local-name()='frame' or local-name()='iframe') and @" + attributeType + "=%s]", attributeValue);
-        return new SearchAttributes(ActionAttributeType.XPATH, xPath);
     }
 
     private WebDriver getWebDriver()

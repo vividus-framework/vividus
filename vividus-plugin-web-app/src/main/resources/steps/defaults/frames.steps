@@ -1,0 +1,8 @@
+Composite: When I switch to a frame by the xpath '$xpath'
+When I switch to frame located `xpath(<xpath>)`
+
+Composite: When I switch to a frame with the attribute '$attributeType'='$attributeValue'
+When I switch to frame located `xpath(.//*[(local-name()='frame' or local-name()='iframe') and @<attributeType>='<attributeValue>'])`
+
+Composite: When I switch to a frame number '$numberValue' with the attribute '$attributeType'='$attributeValue'
+When I switch to frame located `xpath((.//*[(local-name()='frame' or local-name()='iframe') and @<attributeType>='<attributeValue>'])[<numberValue>]):a`
