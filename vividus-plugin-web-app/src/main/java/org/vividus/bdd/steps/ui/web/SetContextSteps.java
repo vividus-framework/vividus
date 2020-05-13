@@ -175,7 +175,7 @@ public class SetContextSteps
     @When("I switch to a frame with the attribute '$attributeType'='$attributeValue'")
     public void switchingToFrame(String attributeType, String attributeValue)
     {
-        switchingToDefault();
+        changeContextToPage();
         WebElement frame = baseValidations.assertIfElementExists(
                 String.format("Frame with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
                 getFrameSearchAttributes(attributeType, attributeValue));
@@ -211,7 +211,7 @@ public class SetContextSteps
     @When("I switch to a frame number '$numberValue' with the attribute '$attributeType'='$attributeValue'")
     public void switchToFrame(int numberValue, String attributeType, String attributeValue)
     {
-        switchingToDefault();
+        changeContextToPage();
         SearchAttributes frameSearchAttributes = getFrameSearchAttributes(attributeType, attributeValue);
         frameSearchAttributes.getSearchParameters().setVisibility(Visibility.ALL);
         List<WebElement> frames = searchActions.findElements(webUiContext.getSearchContext(), frameSearchAttributes);
