@@ -77,7 +77,7 @@ jobs:
             ./gradlew build -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m"
           fi
         else
-          ./gradlew build
+          ./gradlew build --no-daemon
         fi
 
     - name: Publish unit and integration tests reports - ${{ matrix.platform }}
