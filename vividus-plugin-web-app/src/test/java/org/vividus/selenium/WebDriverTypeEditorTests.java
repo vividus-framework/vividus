@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.spring;
+package org.vividus.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.vividus.selenium.WebDriverType;
 
 class WebDriverTypeEditorTests
 {
