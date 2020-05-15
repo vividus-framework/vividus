@@ -428,14 +428,6 @@
 
     <bean id="browserLogCleanningListener" class="org.vividus.bdd.steps.ui.web.listener.BrowserLogCleanningListener" />
 
-    <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
-        <property name="customEditors">
-            <map>
-                <entry key="org.vividus.selenium.WebDriverType" value="org.vividus.ui.web.spring.WebDriverTypeEditor"/>
-            </map>
-        </property>
-    </bean>
-
     <util:list id="stepBeanNames-WebUi" value-type="java.lang.String">
         <value>alertSteps</value>
         <value>cookieSteps</value>

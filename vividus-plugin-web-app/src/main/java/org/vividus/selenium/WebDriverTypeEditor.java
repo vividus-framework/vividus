@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.spring;
+package org.vividus.selenium;
 
 import java.beans.PropertyEditorSupport;
-
-import org.vividus.selenium.WebDriverType;
 
 public class WebDriverTypeEditor extends PropertyEditorSupport
 {
