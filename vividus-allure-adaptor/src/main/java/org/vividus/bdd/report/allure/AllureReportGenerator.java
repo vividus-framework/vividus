@@ -18,22 +18,30 @@ package org.vividus.bdd.report.allure;
 
 import static org.apache.commons.io.FileUtils.copyDirectory;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.vividus.util.property.IPropertyMapper;
 
 import io.qameta.allure.ConfigurationBuilder;
 import io.qameta.allure.Constants;
+import io.qameta.allure.Extension;
 import io.qameta.allure.ReportGenerator;
 import io.qameta.allure.core.Configuration;
 import io.qameta.allure.duration.DurationTrendPlugin;
+import io.qameta.allure.entity.ExecutorInfo;
+import io.qameta.allure.executor.ExecutorPlugin;
 import io.qameta.allure.history.HistoryTrendPlugin;
 import io.qameta.allure.summary.SummaryPlugin;
 import io.qameta.allure.util.PropertiesUtils;
@@ -50,12 +58,14 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private final File resultsDirectory =
             new File((String) PropertiesUtils.loadAllureProperties().get("allure.results.directory"));
 
+    private final IPropertyMapper propertyMapper;
     private final ResourcePatternResolver resourcePatternResolver;
 
     private boolean started;
 
-    public AllureReportGenerator(ResourcePatternResolver resourcePatternResolver)
+    public AllureReportGenerator(IPropertyMapper propertyMapper, ResourcePatternResolver resourcePatternResolver)
     {
+        this.propertyMapper = propertyMapper;
         this.resourcePatternResolver = resourcePatternResolver;
     }
 
@@ -91,6 +101,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
     {
         wrap(() ->
         {
+            writeExecutorInfo();
             createDirectories(reportDirectory, historyDirectory);
             copyDirectory(historyDirectory, resolveHistoryDir(resultsDirectory));
             generateData();
@@ -100,6 +111,16 @@ public class AllureReportGenerator implements IAllureReportGenerator
         LOGGER.info("Allure report is successfully generated at: {}", reportDirectory.getAbsolutePath());
     }
 
+    private void writeExecutorInfo() throws IOException
+    {
+        ExecutorInfo executorInfo = propertyMapper.readValue("allure.executor.", ExecutorInfo.class);
+
+        try (BufferedWriter writer = Files.newBufferedWriter(resultsDirectory.toPath().resolve("executor.json")))
+        {
+            new ObjectMapper().writeValue(writer, executorInfo);
+        }
+    }
+
     private File resolveHistoryDir(File root)
     {
         return new File(root, Constants.HISTORY_DIR);
@@ -107,8 +128,13 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private void generateData() throws IOException
     {
-        Configuration configuration = new ConfigurationBuilder().useDefault().fromExtensions(List.of(
-                new SummaryPlugin(), new HistoryTrendPlugin(), new DurationTrendPlugin())).build();
+        List<Extension> plugins = List.of(
+                new SummaryPlugin(),
+                new HistoryTrendPlugin(),
+                new DurationTrendPlugin(),
+                new ExecutorPlugin()
+        );
+        Configuration configuration = new ConfigurationBuilder().useDefault().fromExtensions(plugins).build();
         new ReportGenerator(configuration).generate(reportDirectory.toPath(), List.of(resultsDirectory.toPath()));
     }
 

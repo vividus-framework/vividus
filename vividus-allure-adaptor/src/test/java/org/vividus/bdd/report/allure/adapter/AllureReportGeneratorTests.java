@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -53,9 +54,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.report.allure.AllureReportGenerator;
+import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
 import io.qameta.allure.ReportGenerator;
+import io.qameta.allure.entity.ExecutorInfo;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.xml.*")
@@ -69,16 +72,22 @@ public class AllureReportGeneratorTests
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder(new File("./"));
 
+    private File resultsDirectory;
+
+    @Mock
+    private PropertyMapper propertyMapper;
+
     @Mock
     private ResourcePatternResolver resourcePatternResolver;
 
     private AllureReportGenerator allureReportGenerator;
 
     @Before
-    public void before()
+    public void before() throws IOException
     {
-        System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, "output/allure-results");
-        allureReportGenerator = new AllureReportGenerator(resourcePatternResolver);
+        resultsDirectory = testFolder.newFolder("allure-results");
+        System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.getAbsolutePath());
+        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver);
     }
 
     @After
@@ -154,6 +163,16 @@ public class AllureReportGeneratorTests
         Resource folder = mockResource("/allure-customization/folder/");
         Resource[] resources = { resource, folder };
         when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
+        ExecutorInfo executorInfo = new ExecutorInfo();
+        executorInfo.setName("Jenkins");
+        executorInfo.setType("jenkins");
+        executorInfo.setUrl("https://my-jenkins.url");
+        executorInfo.setBuildOrder(77L);
+        executorInfo.setBuildName("test-run#77");
+        executorInfo.setBuildUrl("https://my-jenkins.url/test-run#77");
+        executorInfo.setReportName("Test Run Allure Report");
+        executorInfo.setReportUrl("https://my-jenkins.url/test-run#77/AllureReport");
+        when(propertyMapper.readValue("allure.executor.", ExecutorInfo.class)).thenReturn(executorInfo);
         allureReportGenerator.start();
         allureReportGenerator.end();
         PowerMockito.verifyStatic(FileUtils.class, never());
@@ -166,6 +185,17 @@ public class AllureReportGeneratorTests
         FileUtils.copyDirectory(argThat(arg -> arg.getAbsolutePath().equals(resolveTrendsDir(reportDirectory))),
                 eq(historyDirectory));
         verify(reportGenerator).generate(any(Path.class), any(List.class));
+        assertEquals("{"
+                    + "\"name\":\"" + executorInfo.getName()
+                    + "\",\"type\":\"" + executorInfo.getType()
+                    + "\",\"url\":\"" + executorInfo.getUrl()
+                    + "\",\"buildOrder\":" + executorInfo.getBuildOrder()
+                    + ",\"buildName\":\"" + executorInfo.getBuildName()
+                    + "\",\"buildUrl\":\"" + executorInfo.getBuildUrl()
+                    + "\",\"reportName\":\"" + executorInfo.getReportName()
+                    + "\",\"reportUrl\":\"" + executorInfo.getReportUrl()
+                    + "\"}",
+                Files.readString(resultsDirectory.toPath().resolve("executor.json")));
     }
 
     private Resource mockResource(String asString) throws IOException

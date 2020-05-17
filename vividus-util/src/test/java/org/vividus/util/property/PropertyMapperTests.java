@@ -16,13 +16,12 @@
 
 package org.vividus.util.property;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasKey;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -33,63 +32,85 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
 
 @ExtendWith(MockitoExtension.class)
 class PropertyMapperTests
 {
     private static final String PROPERTY_PREFIX = "user.";
     private static final String ADMINISTRATOR = "administrator";
-    private static final String ADMINISTRATOR_PROPERTY_FAMILY = PROPERTY_PREFIX + ADMINISTRATOR + ".";
-    private static final String ADMINISTRATOR_FIRST_NAME = ADMINISTRATOR_PROPERTY_FAMILY + "first-name";
-    private static final String ADMINISTRATOR_LAST_NAME = ADMINISTRATOR_PROPERTY_FAMILY + "last-name";
+
     private static final String FIRST_NAME = "John";
+    private static final String MIDDLE_NAME = "Junior";
     private static final String LAST_NAME = "Smith";
+    private static final String PATTERN = ".*";
+    private static final String DOB = "01.01.1900";
+    private static final Set<JsonDeserializer<?>> DESERIALIZERS = Set.of(new PatternDeserializer(),
+            new SupplierDeserializer());
 
     @Mock
     private PropertyParser propertyParser;
 
-    @InjectMocks
     private PropertyMapper propertyMapper;
 
-    @Test
-    void testSuccessfulPropertyMappingToCollectionOfObjects() throws IOException
+    @BeforeEach
+    void beforeEach()
     {
-        Map<String, String> properties = new HashMap<>();
-        properties.put(ADMINISTRATOR_FIRST_NAME, FIRST_NAME);
-        properties.put(ADMINISTRATOR_LAST_NAME, LAST_NAME);
-        String pattern = ".*";
-        String surName = "surName";
-        String dob = "01.01.1900";
-        properties.put(ADMINISTRATOR_PROPERTY_FAMILY + "pattern", pattern);
-        properties.put(ADMINISTRATOR_PROPERTY_FAMILY + "sur-name", surName);
-        properties.put(ADMINISTRATOR_PROPERTY_FAMILY + "dob", dob);
+        propertyMapper = new PropertyMapper(propertyParser, DESERIALIZERS);
+    }
+
+    @Test
+    void shouldMapPropertiesToSingleObject() throws IOException
+    {
+        Map<String, String> properties = createObjectProperties("");
+        when(propertyParser.getPropertyValuesByPrefix(PROPERTY_PREFIX)).thenReturn(properties);
+        User result = propertyMapper.readValue(PROPERTY_PREFIX, User.class);
+        assertUser(result);
+    }
+
+    @Test
+    void shouldMapPropertiesToCollectionOfObjects() throws IOException
+    {
+        Map<String, String> properties = createObjectProperties(PROPERTY_PREFIX + ADMINISTRATOR + '.');
         when(propertyParser.getPropertiesByPrefix(PROPERTY_PREFIX)).thenReturn(properties);
-        Whitebox.setInternalState(propertyMapper, "deserializers", Set.of(new PatternDeserializer(),
-                new SupplierDeserializer()));
-        propertyMapper.init();
         Map<String, User> result = propertyMapper.readValues(PROPERTY_PREFIX, User.class);
         assertEquals(1, result.size());
-        assertThat(result, hasKey(ADMINISTRATOR));
-        User administrator = result.get(ADMINISTRATOR);
-        assertEquals(FIRST_NAME, administrator.getFirstName());
-        assertEquals(LAST_NAME, administrator.getLastName());
-        assertEquals(pattern, administrator.getPattern().toString());
-        assertEquals(pattern, administrator.getPattern().toString());
-        assertEquals(Optional.of(surName), administrator.getSurName());
-        assertEquals(dob, administrator.getDob().get());
+        User user = result.get(ADMINISTRATOR);
+        assertNotNull(user);
+        assertUser(user);
+    }
+
+    private Map<String, String> createObjectProperties(String objectPropertyPrefix)
+    {
+        return Map.of(
+            objectPropertyPrefix + "first-name", FIRST_NAME,
+            objectPropertyPrefix + "last-name", LAST_NAME,
+            objectPropertyPrefix + "pattern", PATTERN,
+            objectPropertyPrefix + "middle-name", MIDDLE_NAME,
+            objectPropertyPrefix + "dob", DOB
+        );
+    }
+
+    private void assertUser(User user)
+    {
+        assertAll(
+            () -> assertEquals(FIRST_NAME, user.getFirstName()),
+            () -> assertEquals(LAST_NAME, user.getLastName()),
+            () -> assertEquals(PATTERN, user.getPattern().toString()),
+            () -> assertEquals(Optional.of(MIDDLE_NAME), user.getMiddleName()),
+            () -> assertEquals(DOB, user.getDob().get())
+        );
     }
 
     private static final class User
     {
         private String firstName;
+        private Optional<String> middleName;
         private String lastName;
-        private Optional<String> surName;
         private Pattern pattern;
         private Supplier<String> dob;
 
@@ -108,9 +129,9 @@ class PropertyMapperTests
             return pattern;
         }
 
-        public Optional<String> getSurName()
+        public Optional<String> getMiddleName()
         {
-            return surName;
+            return middleName;
         }
 
         public Supplier<String> getDob()

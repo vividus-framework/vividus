@@ -7,6 +7,8 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
+    <bean id="propertyMapper" class="org.vividus.util.property.PropertyMapper" />
+
     <bean id="jsonUtils-LowerCamelCase" class="org.vividus.util.json.JsonUtils">
         <constructor-arg>
             <util:constant static-field="com.fasterxml.jackson.databind.PropertyNamingStrategy.LOWER_CAMEL_CASE"/>
