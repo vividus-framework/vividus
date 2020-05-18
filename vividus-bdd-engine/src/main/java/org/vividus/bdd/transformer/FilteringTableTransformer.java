@@ -17,9 +17,9 @@
 package org.vividus.bdd.transformer;
 
 import static org.apache.commons.lang3.Validate.isTrue;
+import static org.vividus.bdd.util.ExamplesTableProcessor.asDataRows;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,13 +62,7 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
         List<String> filteredColumns = getFilteredHeaders(byMaxColumns, byColumnNames, examplesTable.getHeaders());
         List<Map<String, String>> result = filterByHeaders(filteredColumns, getFilteredRows(byMaxRows, examplesTable));
 
-        List<List<String>> resultRows = result.stream()
-                .map(LinkedHashMap::new)
-                .map(Map::values)
-                .map(ArrayList::new)
-                .collect(Collectors.toList());
-
-        return ExamplesTableProcessor.buildExamplesTable(filteredColumns, resultRows, properties, true, true);
+        return ExamplesTableProcessor.buildExamplesTable(filteredColumns, asDataRows(result), properties, true, true);
     }
 
     private List<Map<String, String>> filterByHeaders(List<String> filteredColumns, List<Map<String, String>> result)

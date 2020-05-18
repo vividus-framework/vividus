@@ -18,19 +18,40 @@ package org.vividus.bdd.transformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterControls;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class ResolvingSelfReferencesEagerlyTransformerTests
 {
-    private final ResolvingSelfReferencesEagerlyTransformer transformer = new ResolvingSelfReferencesEagerlyTransformer(
-            new ParameterControls());
+    @Mock
+    private Supplier<ExamplesTableFactory> examplesTableFactorySupplier;
+
+    @Mock
+    private ExamplesTableFactory examplesTableFactory;
+
+    private ResolvingSelfReferencesEagerlyTransformer transformer;
+
+    @BeforeEach
+    void init()
+    {
+        when(examplesTableFactorySupplier.get()).thenReturn(examplesTableFactory);
+        transformer = new ResolvingSelfReferencesEagerlyTransformer(new ParameterControls(),
+                examplesTableFactorySupplier);
+    }
 
     @ParameterizedTest
     @CsvSource({
@@ -39,7 +60,7 @@ class ResolvingSelfReferencesEagerlyTransformerTests
             "'|A|B|C|D|E|F|\n|<C>|<A>|c|<F>|<D>|<B>|', '|A|B|C|D|E|F|\n|c|c|c|c|c|c|'",
             "'|A|B|C|\n|a|<A><C>|c|',                  '|A|B|C|\n|a|ac|c|'",
             "'|A|B|C|\n|a<p>|<p><A>|c|',               '|A|B|C|\n|a<p>|<p>a<p>|c|'",
-            "'|A|B|C|\n|a|<A>|',                       '|A|B|C|\n|a|a|'",
+            "'|A|B|C|\n|a|<A>|',                       '|A|B|C|\n|a|a||'",
             "'|A|B|\n|a|<A>|c|',                       '|A|B|\n|a|a|'",
             "'|A|B|C|\n|a|<<A>>|c|',                   '|A|B|C|\n|a|<<A>>|c|'"
     })
@@ -72,6 +93,7 @@ class ResolvingSelfReferencesEagerlyTransformerTests
 
     private String transform(String beforeTransform)
     {
+        when(examplesTableFactory.createExamplesTable(beforeTransform)).thenReturn(new ExamplesTable(beforeTransform));
         return transformer.transform(beforeTransform, new TableParsers(),
                 new ExamplesTable.ExamplesTableProperties(new Properties()));
     }

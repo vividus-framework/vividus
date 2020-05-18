@@ -16,12 +16,17 @@
 
 package org.vividus.bdd.transformer;
 
+import static org.vividus.bdd.util.ExamplesTableProcessor.asDataRows;
+
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.steps.ExpressionAdaptor;
 import org.vividus.bdd.util.ExamplesTableProcessor;
@@ -30,24 +35,27 @@ import org.vividus.bdd.util.ExamplesTableProcessor;
 public class ResolvingExpressionsEagerlyTransformer implements ExtendedTableTransformer
 {
     private final ExpressionAdaptor expressionAdaptor;
+    private final Supplier<ExamplesTableFactory> examplesTableFactory;
 
-    public ResolvingExpressionsEagerlyTransformer(ExpressionAdaptor expressionAdaptor)
+    public ResolvingExpressionsEagerlyTransformer(ExpressionAdaptor expressionAdaptor,
+            Supplier<ExamplesTableFactory> examplesTableFactory)
     {
         this.expressionAdaptor = expressionAdaptor;
+        this.examplesTableFactory = examplesTableFactory;
     }
 
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
     {
-        List<String> rows = ExamplesTableProcessor.parseRows(tableAsString);
-        List<String> headerValues = tableParsers.parseRow(rows.get(0), true, properties);
-        List<List<String>> resolvedData = ExamplesTableProcessor
-                .parseDataRows(resolveExpressions(rows), tableParsers, properties);
+        ExamplesTable table = examplesTableFactory.get().createExamplesTable(tableAsString);
+        List<String> headerValues = table.getHeaders();
+        List<List<String>> resolvedData = resolveExpressions(asDataRows(table));
         return ExamplesTableProcessor.buildExamplesTable(headerValues, resolvedData, properties, true);
     }
 
-    private List<String> resolveExpressions(List<String> rows)
+    private List<List<String>> resolveExpressions(List<List<String>> rows)
     {
-        return rows.stream().map(expressionAdaptor::process).collect(Collectors.toList());
+        return rows.stream().map(l -> l.stream().map(expressionAdaptor::process).collect(Collectors.toList()))
+                .collect(Collectors.toList());
     }
 }

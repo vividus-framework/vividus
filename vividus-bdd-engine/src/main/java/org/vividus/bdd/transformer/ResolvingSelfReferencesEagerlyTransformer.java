@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,7 +29,9 @@ import java.util.stream.IntStream;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.Validate;
+import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterControls;
 import org.vividus.bdd.util.ExamplesTableProcessor;
@@ -38,10 +41,13 @@ public class ResolvingSelfReferencesEagerlyTransformer implements ExtendedTableT
 {
     private final ParameterControls parameterControls;
     private final Pattern placeholderPattern;
+    private final Supplier<ExamplesTableFactory> examplesTableFactory;
 
-    public ResolvingSelfReferencesEagerlyTransformer(ParameterControls parameterControls)
+    public ResolvingSelfReferencesEagerlyTransformer(ParameterControls parameterControls,
+            Supplier<ExamplesTableFactory> examplesTableFactory)
     {
         this.parameterControls = parameterControls;
+        this.examplesTableFactory = examplesTableFactory;
         placeholderPattern = Pattern.compile(
                 parameterControls.nameDelimiterLeft() + "(.*?)" + parameterControls.nameDelimiterRight());
     }
@@ -49,9 +55,9 @@ public class ResolvingSelfReferencesEagerlyTransformer implements ExtendedTableT
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
     {
-        List<String> tableAsRows = ExamplesTableProcessor.parseRows(tableAsString);
-        List<String> header = tableParsers.parseRow(tableAsRows.get(0), true, properties);
-        List<List<String>> inputRows = ExamplesTableProcessor.parseDataRows(tableAsRows, tableParsers, properties);
+        ExamplesTable table = examplesTableFactory.get().createExamplesTable(tableAsString);
+        List<String> header = table.getHeaders();
+        List<List<String>> inputRows = ExamplesTableProcessor.asDataRows(table);
         List<List<String>> resolvedRows = new SelfReferencesResolver(header).resolveRows(inputRows);
         return ExamplesTableProcessor.buildExamplesTable(header, resolvedRows, properties, true);
     }

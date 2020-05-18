@@ -18,32 +18,41 @@ package org.vividus.bdd.transformer;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
 @Named("SORTING")
 public class SortingTableTransformer implements ExtendedTableTransformer
 {
+    private final Supplier<ExamplesTableFactory> examplesTableFactory;
+
+    public SortingTableTransformer(Supplier<ExamplesTableFactory> examplesTableFactory)
+    {
+        this.examplesTableFactory = examplesTableFactory;
+    }
+
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
     {
         String byColumns = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "byColumns");
-        List<String> rowsToSort = ExamplesTableProcessor.parseRows(tableAsString);
-        String header = rowsToSort.get(0);
-        List<String> headerValues = tableParsers.parseRow(header, true, properties);
+        ExamplesTable table = examplesTableFactory.get().createExamplesTable(tableAsString);
+        List<String> headerValues = table.getHeaders();
         List<Integer> columnsToCompare = Stream.of(StringUtils.split(byColumns, '|'))
                 .map(String::trim)
                 .map(headerValues::indexOf)
                 .filter(i -> i > -1)
                 .collect(Collectors.toList());
-        List<List<String>> rows = ExamplesTableProcessor.parseDataRows(rowsToSort, tableParsers, properties).stream()
+        List<List<String>> rows = ExamplesTableProcessor.asDataRows(table).stream()
                 .sorted((r1, r2) ->
                 {
                     int result = 0;

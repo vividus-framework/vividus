@@ -16,20 +16,20 @@
 
 package org.vividus.bdd.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
-import org.jbehave.core.model.TableParsers;
 
 public final class ExamplesTableProcessor
 {
-    private static final String ROW_SEPARATOR_PATTERN = "\r?\n";
     private static final String VALUE_SEPARATOR_KEY = "valueSeparator";
     private static final String DEFAULT_SEPARATOR_VALUE = "|";
 
@@ -37,19 +37,31 @@ public final class ExamplesTableProcessor
     {
     }
 
-    public static List<String> parseRows(String tableAsString)
+    /**
+     * Converts collection of mapped rows that contains headers cells to data cells mapping
+     * into collection of unmapped data rows
+     *
+     * @param mappedRows examples table rows
+     * @return collection of rows
+     */
+    public static List<List<String>> asDataRows(List<Map<String, String>> mappedRows)
     {
-        return Stream.of(tableAsString.split(ROW_SEPARATOR_PATTERN))
-                .map(String::trim)
+        return mappedRows.stream()
+                .map(LinkedHashMap::new)
+                .map(Map::values)
+                .map(ArrayList::new)
                 .collect(Collectors.toList());
     }
 
-    public static List<List<String>> parseDataRows(List<String> rows, TableParsers tableParsers,
-            ExamplesTableProperties properties)
+    /**
+     * Converts examples table into collection of unmapped data rows
+     *
+     * @param examplesTable examples table
+     * @return collection of rows
+     */
+    public static List<List<String>> asDataRows(ExamplesTable examplesTable)
     {
-        return rows.stream().skip(1)
-        .map(row -> tableParsers.parseRow(row, false, properties))
-        .collect(Collectors.toCollection(LinkedList::new));
+        return asDataRows(examplesTable.getRows());
     }
 
     public static String buildExamplesTableFromColumns(Collection<String> header, List<List<String>> columnsData,

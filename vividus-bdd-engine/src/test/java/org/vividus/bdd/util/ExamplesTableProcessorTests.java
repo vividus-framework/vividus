@@ -16,16 +16,17 @@
 
 package org.vividus.bdd.util;
 
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
-import org.jbehave.core.model.TableParsers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,30 +34,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class ExamplesTableProcessorTests
 {
-    private static final String ROW_AS_STRING = "|1|0|";
-    private static final String KEYS_AS_STRING = "|key1|key2|";
     private static final String ZERO = "0";
-    private static final List<String> TABLE_AS_ROW_LIST = List.of(KEYS_AS_STRING, "|4|3|", ROW_AS_STRING);
-    private static final List<String> VALUES1 = List.of("4", "3");
-    private static final List<String> VALUES2 = List.of("1", ZERO);
-    private static final List<String> KEYS = List.of("key1", "key2");
+    private static final String ONE = "1";
+    private static final String THREE = "3";
+    private static final String FOUR = "4";
+    private static final List<String> VALUES1 = List.of(FOUR, THREE);
+    private static final List<String> VALUES2 = List.of(ONE, ZERO);
+    private static final String KEY_1 = "key1";
+    private static final String KEY_2 = "key2";
+    private static final List<String> KEYS = List.of(KEY_1, KEY_2);
     private static final String TABLE = "|key1|key2|\n|4|3|\n|1|0|";
-
-    @ParameterizedTest
-    @MethodSource("tableSource")
-    void testParseRows(String table, List<String> expectedRows)
-    {
-        assertEquals(expectedRows, ExamplesTableProcessor.parseRows(table));
-    }
-
-    static Stream<Arguments> tableSource()
-    {
-        return Stream.of(
-            Arguments.of(TABLE, TABLE_AS_ROW_LIST),
-            Arguments.of(EMPTY, List.of(EMPTY)),
-            Arguments.of("|key1|key2|\n|value?|some?value|\r\n|1|0|",
-                    List.of(KEYS_AS_STRING, "|value?|some?value|", ROW_AS_STRING)));
-    }
 
     @ParameterizedTest
     @MethodSource("tableToBuildSource")
@@ -84,10 +71,21 @@ class ExamplesTableProcessorTests
     }
 
     @Test
-    void testParseDataRows()
+    void testAsDataRowsExamplesTable()
     {
-        assertEquals(List.of(VALUES1, VALUES2),
-                ExamplesTableProcessor.parseDataRows(TABLE_AS_ROW_LIST, new TableParsers(), createProperties()));
+        assertEquals(List.of(VALUES1, VALUES2), ExamplesTableProcessor.asDataRows(new ExamplesTable(TABLE)));
+    }
+
+    @Test
+    void testAsDataRowsMap()
+    {
+        Map<String, String> row1 = new LinkedHashMap<>();
+        row1.put(KEY_1, FOUR);
+        row1.put(KEY_2, THREE);
+        Map<String, String> row2 = new LinkedHashMap<>();
+        row2.put(KEY_1, ONE);
+        row2.put(KEY_2, ZERO);
+        assertEquals(List.of(VALUES1, VALUES2), ExamplesTableProcessor.asDataRows(List.of(row1, row2)));
     }
 
     @Test

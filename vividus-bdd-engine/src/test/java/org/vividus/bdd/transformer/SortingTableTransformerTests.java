@@ -18,27 +18,47 @@ package org.vividus.bdd.transformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableParsers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class SortingTableTransformerTests
 {
     private static final String TABLE_WITH_SAME_VALUES = "|key1|key2|\n|10|0|\n|1|0|";
     private static final String TABLE = "|key1|key2|\n|4|3|\n|1|0|";
-    private final SortingTableTransformer transformer = new SortingTableTransformer();
+
+    @Mock
+    private Supplier<ExamplesTableFactory> examplesTableFactorySupplier;
+
+    @Mock
+    private ExamplesTableFactory examplesTableFactory;
+
+    @InjectMocks
+    private SortingTableTransformer transformer;
 
     @ParameterizedTest
     @MethodSource("tableSource")
     void testTransform(String expectedTable, Properties properties, String tableToTransform)
     {
+        when(examplesTableFactorySupplier.get()).thenReturn(examplesTableFactory);
+        when(examplesTableFactory.createExamplesTable(tableToTransform))
+                .thenReturn(new ExamplesTable(tableToTransform));
         assertEquals(expectedTable, transformer.transform(tableToTransform, new TableParsers(),
                 new ExamplesTableProperties(properties)));
     }

@@ -21,9 +21,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableParsers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,21 +37,31 @@ import org.vividus.bdd.steps.ExpressionAdaptor;
 @ExtendWith(MockitoExtension.class)
 class ResolvingExpressionsEagerlyTransformerTests
 {
-    private static final String HEADER = "|header|";
-
     @Mock
     private ExpressionAdaptor expressionAdaptor;
 
+    @Mock
+    private Supplier<ExamplesTableFactory> examplesTableFactorySupplier;
+
+    @Mock
+    private ExamplesTableFactory examplesTableFactory;
+
     @InjectMocks
     private ResolvingExpressionsEagerlyTransformer transformer;
+
+    @BeforeEach
+    void init()
+    {
+        when(examplesTableFactorySupplier.get()).thenReturn(examplesTableFactory);
+    }
 
     @Test
     void shouldResolveDataRowsTest()
     {
         String table = "|header|\n|row1|\n|row2|";
-        when(expressionAdaptor.process(eq(HEADER))).thenReturn(HEADER);
-        when(expressionAdaptor.process(eq("|row1|"))).thenReturn("resolved_row1");
-        when(expressionAdaptor.process(eq("|row2|"))).thenReturn("resolved_row2");
+        when(examplesTableFactory.createExamplesTable(table)).thenReturn(new ExamplesTable(table));
+        when(expressionAdaptor.process(eq("row1"))).thenReturn("resolved_row1");
+        when(expressionAdaptor.process(eq("row2"))).thenReturn("resolved_row2");
         String actual = transformer
                 .transform(table, new TableParsers(), new ExamplesTable.ExamplesTableProperties(new Properties()));
         assertEquals("|header|\n|resolved_row1|\n|resolved_row2|", actual);
@@ -58,8 +71,8 @@ class ResolvingExpressionsEagerlyTransformerTests
     void shouldNotResolveHeaderTest()
     {
         String table = "|header|\n|row|";
-        when(expressionAdaptor.process(eq(HEADER))).thenReturn("|resolved_header|");
-        when(expressionAdaptor.process(eq("|row|"))).thenReturn("resolved_row");
+        when(examplesTableFactory.createExamplesTable(table)).thenReturn(new ExamplesTable(table));
+        when(expressionAdaptor.process(eq("row"))).thenReturn("resolved_row");
         String actual = transformer
                 .transform(table, new TableParsers(), new ExamplesTable.ExamplesTableProperties(new Properties()));
         assertEquals("|header|\n|resolved_row|", actual);
