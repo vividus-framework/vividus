@@ -70,7 +70,7 @@ public class AllureReportGeneratorTests
     private static final String ALLURE_RESULTS_DIRECTORY_PROPERTY = "allure.results.directory";
 
     @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder(new File("./"));
+    public TemporaryFolder testFolder = new TemporaryFolder();
 
     private File resultsDirectory;
 
