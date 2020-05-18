@@ -22,6 +22,16 @@ import java.util.Map;
 public interface IPropertyMapper
 {
     /**
+     * Maps properties with specified prefix to the object created using property names and values
+     * @param <T> type of resulting object
+     * @param propertyPrefix Prefix of properties
+     * @param resultType Resulting object type
+     * @return object created using property names and values
+     * @throws IOException if any error is occurred during mapping of properties to objects
+     */
+    <T> T readValue(String propertyPrefix, Class<T> resultType) throws IOException;
+
+    /**
      * Maps properties with specified prefix to the map with values representing objects created using property names
      * and values
      * @param <T> type of resulting objects

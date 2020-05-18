@@ -14,10 +14,6 @@
         <property name="properties" ref="properties" />
     </bean>
 
-    <bean id="propertyMapper" class="org.vividus.util.property.PropertyMapper" init-method="init">
-        <property name="propertyParser" ref="propertyParser" />
-    </bean>
-
     <bean id="configurationResolver" class="org.vividus.configuration.ConfigurationResolver"
         factory-method="getInstance" />
 
