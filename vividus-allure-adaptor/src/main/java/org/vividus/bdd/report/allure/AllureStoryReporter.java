@@ -17,16 +17,20 @@
 package org.vividus.bdd.report.allure;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
@@ -537,7 +541,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
             int index = runningScenario.getIndex();
             String scenarioId = runningScenario.getUuid() + (index != -1 ? "[" + index + "]" : "");
             lifecycle.scheduleTestCase(new TestResult()
-                    .setHistoryId(getHistoryId(story.getName(), runningScenario.getTitle()))
+                    .setHistoryId(getHistoryId(runningScenario.getTitle()))
                     .setUuid(scenarioId)
                     .setName(runningScenario.getTitle())
                     .setLabels(labels)
@@ -554,9 +558,15 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
     }
 
-    private String getHistoryId(String story, String title)
+    private String getHistoryId(String title)
     {
-        return String.format("[batch: %s][story: %s][scenario: %s]", getBatchName(), story, title);
+        Deque<RunningStory> chain = bddRunContext.getStoriesChain();
+        String chainedStories = StreamSupport.stream(
+                Spliterators.spliterator(chain.descendingIterator(), chain.size(), Spliterator.ORDERED), false)
+                .map(RunningStory::getStory)
+                .map(Story::getPath)
+                .collect(Collectors.joining(" > "));
+        return String.format("[batch: %s][stories-chain: %s][scenario: %s]", getBatchName(), chainedStories, title);
     }
 
     private void stopTestCase()
