@@ -520,8 +520,8 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         allureRunContext.setStoryExecutionStage(storyExecutionStage);
         if (getLinkedStep() == null)
         {
-            Story story = bddRunContext.getRunningStory().getStory();
-            Meta storyMeta = story.getMeta();
+            RunningStory runningStory = bddRunContext.getRunningStory();
+            Meta storyMeta = runningStory.getStory().getMeta();
             Meta scenarioMeta = runningScenario.getScenario().getMeta();
 
             Map<VividusLabel, Set<String>> metaLabels = Stream.of(VividusLabel.values())
@@ -541,7 +541,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
             int index = runningScenario.getIndex();
             String scenarioId = runningScenario.getUuid() + (index != -1 ? "[" + index + "]" : "");
             lifecycle.scheduleTestCase(new TestResult()
-                    .setHistoryId(getHistoryId(runningScenario.getTitle()))
+                    .setHistoryId(getHistoryId(runningStory))
                     .setUuid(scenarioId)
                     .setName(runningScenario.getTitle())
                     .setLabels(labels)
@@ -558,7 +558,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
     }
 
-    private String getHistoryId(String title)
+    private String getHistoryId(RunningStory runningStory)
     {
         Deque<RunningStory> chain = bddRunContext.getStoriesChain();
         String chainedStories = StreamSupport.stream(
@@ -566,7 +566,17 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
                 .map(RunningStory::getStory)
                 .map(Story::getPath)
                 .collect(Collectors.joining(" > "));
-        return String.format("[batch: %s][stories-chain: %s][scenario: %s]", getBatchName(), chainedStories, title);
+
+        RunningScenario runningScenario = runningStory.getRunningScenario();
+        List<Scenario> scenariosWithTitle = runningStory.getStory().getScenarios().stream()
+                .filter(scenario -> scenario.getTitle().equals(runningScenario.getScenario().getTitle()))
+                .collect(Collectors.toList());
+        StringBuilder scenario = new StringBuilder(runningScenario.getTitle());
+        if (scenariosWithTitle.size() > 1)
+        {
+            scenario.append('-').append(scenariosWithTitle.indexOf(runningScenario.getScenario()));
+        }
+        return String.format("[batch: %s][stories-chain: %s][scenario: %s]", getBatchName(), chainedStories, scenario);
     }
 
     private void stopTestCase()
