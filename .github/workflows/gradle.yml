@@ -97,7 +97,15 @@ jobs:
       if: matrix.platform == 'ubuntu-latest'
       run: |
         ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=integration \
-                                            -Pvividus.allure.history-directory=output/history/integration-tests
+                                            -Pvividus.allure.history-directory=output/history/integration-tests \
+                                            -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                            -Pvividus.allure.executor.type=github \
+                                            -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                            -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                            -Pvividus.allure.executor.build-name="Integration Tests ${GITHUB_RUN_ID}" \
+                                            -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                            -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                            -Pvividus.allure.executor.report-name="Integration tests report"
 
     - name: Publish Integration tests report
       if: matrix.platform == 'ubuntu-latest' && always()
@@ -123,7 +131,15 @@ jobs:
                                                 -Pvividus.configuration.profiles=browserstack/web,web/desktop/chrome \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
-                                                -Pvividus.allure.history-directory=output/history/system-tests
+                                                -Pvividus.allure.history-directory=output/history/system-tests \
+                                                -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                                -Pvividus.allure.executor.type=github \
+                                                -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                                -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                                -Pvividus.allure.executor.build-name="System Tests ${GITHUB_RUN_ID}" \
+                                                -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                -Pvividus.allure.executor.report-name="System tests report"
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY and/or APPLITOOLS_EXECUTE_KEY and/or APPLITOOLS_READ_KEY and/or MONGODB_USERNAME and/or MONGODB_PASSWORD variables, System tests will be skipped
         fi
