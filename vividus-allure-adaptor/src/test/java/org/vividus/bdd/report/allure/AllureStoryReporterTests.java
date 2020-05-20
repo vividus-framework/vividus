@@ -490,8 +490,13 @@ class AllureStoryReporterTests
 
     private void assertTestResultLabel(LabelName labelName, String labelValue)
     {
+        assertTestResultLabel(labelName.value(), labelValue);
+    }
+
+    private void assertTestResultLabel(String labelName, String labelValue)
+    {
         List<Label> labels = testResultCaptor.getValue().getLabels();
-        Optional<Label> label = labels.stream().filter(l -> labelName.value().equals(l.getName())).findFirst();
+        Optional<Label> label = labels.stream().filter(l -> labelName.equals(l.getName())).findFirst();
         assertTrue(label.isPresent());
         assertEquals(labelValue, label.get().getValue());
     }
@@ -534,9 +539,7 @@ class AllureStoryReporterTests
         when(allureRunContext.getStoryExecutionStage()).thenReturn(null);
         testContext.put(CURRENT_STEP_KEY, null);
 
-        RunningStory runningStory = new RunningStory();
-        runningStory.setStory(new Story(List.of()));
-        bddRunContext.putRunningStory(runningStory, false);
+        bddRunContext.putRunningStory(createRunningStory(false), false);
 
         String step = "before-story-step";
         allureStoryReporter.beforeStep(step);
@@ -565,9 +568,7 @@ class AllureStoryReporterTests
         when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.AFTER_SCENARIO);
         testContext.put(CURRENT_STEP_KEY, null);
 
-        RunningStory runningStory = new RunningStory();
-        runningStory.setStory(new Story(List.of()));
-        bddRunContext.putRunningStory(runningStory, false);
+        bddRunContext.putRunningStory(createRunningStory(false), false);
 
         String step = "after-story-step";
         allureStoryReporter.beforeStep(step);
@@ -758,7 +759,7 @@ class AllureStoryReporterTests
     void testStoryCancelledNoRunningStep()
     {
         mockScenarioUid(false);
-        Story story = mockRunningStoryWithSeverity(true).getStory();
+        Story story = createRunningStory(true).getStory();
         StoryDuration storyDuration = new StoryDuration(0);
         allureStoryReporter.storyCancelled(story, storyDuration);
         verify(allureLifecycle, never()).stopStep(STEP_UID);
@@ -774,7 +775,7 @@ class AllureStoryReporterTests
         linkedQueueItem = linkedQueueItem.attachItem(STEP_UID);
         when(testContext.get(CURRENT_STEP_KEY)).thenReturn(linkedQueueItem).thenReturn(linkedQueueItem)
                 .thenReturn(linkedQueueItem).thenReturn(new LinkedQueueItem<>(SCENARIO_UID));
-        Story story = mockRunningStoryWithSeverity(true).getStory();
+        Story story = createRunningStory(true).getStory();
         StoryDuration storyDuration = new StoryDuration(0);
         allureStoryReporter.storyCancelled(story, storyDuration);
         verify(allureLifecycle).stopStep(STEP_UID);
@@ -896,23 +897,22 @@ class AllureStoryReporterTests
         mockScenarioUid(true);
         boolean givenStory = false;
         mockStoryStart(givenStory);
-        RunningStory runningStory = mockRunningStory(new Properties(),
-                putTestCaseMetaProperties(getScenarioMeta(false), EXPECTED_SCENARIO_TEST_CASE_ID,
-                        EXPECTED_SCENARIO_REQUIREMENT_ID), List.of());
-        Story story = runningStory.getStory();
+        Properties scenarioMeta = putTestCaseMetaProperties(getScenarioMeta(false), EXPECTED_SCENARIO_TEST_CASE_ID,
+                EXPECTED_SCENARIO_REQUIREMENT_ID);
+        Scenario scenario1 = createScenario(scenarioMeta, List.of());
+        Scenario scenario2 = createScenario(scenarioMeta, List.of());
+        RunningScenario runningScenario = getRunningScenario(scenario1, 0);
+        Story story = new Story(STORY_NAME, null, new Meta(new Properties()), null, List.of(scenario1, scenario2));
+        RunningStory runningStory = getRunningStory(story, runningScenario);
+        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
         when(bddRunContext.getStoriesChain()).thenReturn(new LinkedList<>(List.of(runningStory)));
         allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
         TestResult captured = testResultCaptor.getValue();
-        assertEquals("[batch: my-batch][stories-chain: name][scenario: Scenario]", captured.getHistoryId());
-        List<Label> labels = captured.getLabels();
-        Optional<Label> label = labels.stream().filter(l -> TEST_CASE_ID.equals(l.getName())).findFirst();
-        assertTrue(label.isPresent());
-        assertEquals(EXPECTED_SCENARIO_TEST_CASE_ID, label.get().getValue());
-        label = labels.stream().filter(l -> REQUIREMENT_ID.equals(l.getName())).findFirst();
-        assertTrue(label.isPresent());
-        assertEquals(EXPECTED_SCENARIO_REQUIREMENT_ID, label.get().getValue());
+        assertEquals("[batch: my-batch][stories-chain: name][scenario: Scenario-0]", captured.getHistoryId());
+        assertTestResultLabel(TEST_CASE_ID, EXPECTED_SCENARIO_TEST_CASE_ID);
+        assertTestResultLabel(REQUIREMENT_ID, EXPECTED_SCENARIO_REQUIREMENT_ID);
         List<Link> links = captured.getLinks();
         assertFalse(links.isEmpty());
         assertEquals(TMS_LINK_PREFIX + EXPECTED_SCENARIO_TEST_CASE_ID, links.get(0).getUrl());
@@ -1006,18 +1006,29 @@ class AllureStoryReporterTests
     private RunningStory mockRunningStory(Properties storyMeta, Properties scenarioMeta, List<String> steps)
     {
         RunningStory runningStory = createRunningStory(storyMeta, scenarioMeta, steps, STORY_NAME);
-        lenient().when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
         return runningStory;
+    }
+
+    private RunningStory createRunningStory(boolean useSeverity)
+    {
+        Properties scenarioMeta = getScenarioMeta(useSeverity);
+        Properties storyMeta = getStoryMeta();
+        return createRunningStory(storyMeta, scenarioMeta, List.of(), STORY_NAME);
     }
 
     private RunningStory createRunningStory(Properties storyMeta, Properties scenarioMeta, List<String> steps,
             String storyPath)
     {
-        Scenario scenario = new Scenario(SCENARIO, new Meta(scenarioMeta), GivenStories.EMPTY, ExamplesTable.EMPTY,
-                steps);
+        Scenario scenario = createScenario(scenarioMeta, steps);
         RunningScenario runningScenario = getRunningScenario(scenario, 0);
         Story story = new Story(storyPath, null, new Meta(storyMeta), null, List.of(scenario));
         return getRunningStory(story, runningScenario);
+    }
+
+    private Scenario createScenario(Properties scenarioMeta, List<String> steps)
+    {
+        return new Scenario(SCENARIO, new Meta(scenarioMeta), GivenStories.EMPTY, ExamplesTable.EMPTY, steps);
     }
 
     private RunningStory getRunningStory(Story story, RunningScenario runningScenario)
