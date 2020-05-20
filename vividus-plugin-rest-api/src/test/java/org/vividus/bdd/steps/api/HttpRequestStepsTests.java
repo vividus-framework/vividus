@@ -19,11 +19,17 @@ package org.vividus.bdd.steps.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -33,12 +39,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.steps.SubSteps;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
+import org.vividus.http.client.HttpResponse;
 
 @ExtendWith(MockitoExtension.class)
 class HttpRequestStepsTests
@@ -47,6 +56,9 @@ class HttpRequestStepsTests
     private static final String RELATIVE_URL = "/relativeUrl";
     private static final String CONTENT = "content";
     private static final String CR_LF = "\r\n";
+    private static final int RETRY_TIMES = 3;
+    private static final int RESPONSE_CODE = 200;
+    private static final Duration DURATION = Duration.ofSeconds(5);
 
     @Mock
     private HttpTestContext httpTestContext;
@@ -147,6 +159,32 @@ class HttpRequestStepsTests
         NoSuchFieldException exception = assertThrows(NoSuchFieldException.class,
             () -> httpRequestSteps.setCustomRequestConfig(configItems));
         assertEquals("nonExistentField", exception.getMessage());
+    }
+
+    static Stream<HttpResponse> getHttpResponse()
+    {
+        return Stream.of(new HttpResponse(), null);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getHttpResponse")
+    void testWaitForResponseCode(HttpResponse httpResponse)
+    {
+        SubSteps stepsToExecute = mock(SubSteps.class);
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
+        httpRequestSteps.waitForResponseCode(RESPONSE_CODE, DURATION, RETRY_TIMES, stepsToExecute);
+        verify(stepsToExecute, atLeast(2)).execute(Optional.empty());
+    }
+
+    @Test
+    void testWaitForResponseCodeWhenResponseCodeIsEqualToExpected()
+    {
+        SubSteps stepsToExecute = mock(SubSteps.class);
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        when(httpResponse.getStatusCode()).thenReturn(403, 200);
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
+        httpRequestSteps.waitForResponseCode(RESPONSE_CODE, DURATION, RETRY_TIMES, stepsToExecute);
+        verify(stepsToExecute, times(2)).execute(Optional.empty());
     }
 
     private void verifyPutRequestEntity(String expectedContent)
