@@ -48,15 +48,11 @@ import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.IWaitActions;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.action.search.Visibility;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.listener.IWebApplicationListener;
-import org.vividus.ui.web.util.LocatorUtil;
 import org.vividus.util.UriUtils;
 
 @SuppressWarnings("MethodCount")
@@ -236,36 +232,28 @@ public class PageSteps
     }
 
     /**
-     * Checks if the page is scrolled to the specific element
-     * with specified attribute and attribute value
+     * Checks if the page is scrolled to the specific element located by locator
      * <br>Example: &lt;a id="information_collection" name="information_collection_name"&gt; -
-     * Then the page is scrolled to an element with the attribute 'id'='information_collection'
+     * Then page is scrolled to element located `id(information_collection)`
      * <p>
      * Actions performed at this step:
      * <ul>
-     * <li>Assert that element with specified attribute and attribute value exists
-     * <li>Checks wether page is scrolled to the bery bottom
+     * <li>Assert that element with specified locator exists
+     * <li>Checks whether page is scrolled to the very bottom
      * <li>If yes --&gt; verify that element's Y coordinate is positive which means that element is visible if no --&gt;
      * get element's Y coordinate and verify that it's close to 0 which means that element is an the very top
      * </ul>
-     * @param attributeType A type of the element's attribute
-     * @param attributeValue A value of the element's attribute
+     * @param locator A locator to locate element
      */
-    @Then("the page is scrolled to an element with the attribute '$attributeType'='$attributeValue'")
-    public void isPageScrolledToAnElement(String attributeType, String attributeValue)
+    @Then("page is scrolled to element located `$locator`")
+    public void isPageScrolledToAnElement(SearchAttributes locator)
     {
-        WebElement element = baseValidations.assertIfElementExists(
-                String.format("An element with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPathByAttribute(attributeType, attributeValue),
-                                Visibility.ALL)));
+        WebElement element = baseValidations.assertIfElementExists("Element to verify position", locator);
         if (element != null)
         {
             boolean pageVisibleAreaScrolledToElement = webElementActions.isPageVisibleAreaScrolledToElement(element);
-            highlightingSoftAssert.assertTrue(
-                    String.format("The page is scrolled to an element with the attribute %1$s and value %2$s",
-                            attributeType, attributeValue),
-                    pageVisibleAreaScrolledToElement);
+            highlightingSoftAssert.assertTrue(String.format("The page is scrolled to an element with located by %s",
+                locator), pageVisibleAreaScrolledToElement);
         }
     }
 

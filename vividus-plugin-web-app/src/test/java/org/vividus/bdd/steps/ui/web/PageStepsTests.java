@@ -27,7 +27,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -82,7 +81,7 @@ import org.vividus.util.UriUtils;
 class PageStepsTests
 {
     private static final String HTTP_EXAMPLE_COM = "http://example.com";
-    private static final String AN_ELEMENT_WITH_THE_ATTRIBUTE_ID_VALUE = "An element with the attribute 'id'='value'";
+    private static final String ELEMENT_TO_VERIFY_POSITION = "Element to verify position";
     private static final String CURRENT_WINDOW_GUID = "{770e3411-5e19-4831-8f36-fc76e46a2807}";
     private static final String ID = "id";
     private static final String VALUE = "value";
@@ -211,26 +210,25 @@ class PageStepsTests
     void testIsElementAtTheTop()
     {
         WebElement webElement = mock(WebElement.class);
-        when(mockedBaseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTE_ID_VALUE,
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE), Visibility.ALL))))
-                            .thenReturn(webElement);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE), Visibility.ALL));
+        when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, searchAttributes))
+                .thenReturn(webElement);
         when(webElementActions.isPageVisibleAreaScrolledToElement(webElement)).thenReturn(true);
-        pageSteps.isPageScrolledToAnElement(ID, VALUE);
-        verify(softAssert)
-                .assertTrue("The page is scrolled to an element with the attribute id and value value", true);
+        pageSteps.isPageScrolledToAnElement(searchAttributes);
+        verify(softAssert).assertTrue("The page is scrolled to an element with located by  XPath: "
+                + "'.//*[normalize-space(@id)=\"value\"]'; Visibility: ALL;", true);
     }
 
     @Test
     void testIsElementAtTheTopElementNull()
     {
-        when(mockedBaseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTE_ID_VALUE,
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE), Visibility.ALL))))
-                            .thenReturn(null);
-        pageSteps.isPageScrolledToAnElement(ID, VALUE);
-        verify(softAssert, never()).assertTrue("The page is scrolled to an element with the attribute",
-                false);
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+                new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE)));
+        when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, searchAttributes))
+                .thenReturn(null);
+        pageSteps.isPageScrolledToAnElement(searchAttributes);
+        verifyNoInteractions(softAssert);
     }
 
     @Test
