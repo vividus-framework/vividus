@@ -541,7 +541,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
             int index = runningScenario.getIndex();
             String scenarioId = runningScenario.getUuid() + (index != -1 ? "[" + index + "]" : "");
             lifecycle.scheduleTestCase(new TestResult()
-                    .setHistoryId(getHistoryId(runningStory))
+                    .setHistoryId(getHistoryId(runningStory, runningScenario))
                     .setUuid(scenarioId)
                     .setName(runningScenario.getTitle())
                     .setLabels(labels)
@@ -558,7 +558,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
     }
 
-    private String getHistoryId(RunningStory runningStory)
+    private String getHistoryId(RunningStory runningStory, RunningScenario runningScenario)
     {
         Deque<RunningStory> chain = bddRunContext.getStoriesChain();
         String chainedStories = StreamSupport.stream(
@@ -567,7 +567,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
                 .map(Story::getPath)
                 .collect(Collectors.joining(" > "));
 
-        RunningScenario runningScenario = runningStory.getRunningScenario();
         List<Scenario> scenariosWithTitle = runningStory.getStory().getScenarios().stream()
                 .filter(scenario -> scenario.getTitle().equals(runningScenario.getScenario().getTitle()))
                 .collect(Collectors.toList());
