@@ -1,0 +1,2 @@
+Composite: Then the page is scrolled to an element with the attribute '$attributeType'='$attributeValue'
+Then page is scrolled to element located `xpath(//*[@<attributeType>='<attributeValue>']):a`
