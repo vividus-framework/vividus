@@ -533,21 +533,37 @@ class AllureStoryReporterTests
     @Test
     void beforeStepShouldStartLifecycleBeforeStorySteps()
     {
+        beforeStepShouldStartLifecycleStorySteps(null, "before-story-step", LIFECYCLE_BEFORE_STORY);
+    }
+
+    @Test
+    void beforeStepShouldStartLifecycleAfterStorySteps()
+    {
+        beforeStepShouldStartLifecycleStorySteps(StoryExecutionStage.AFTER_SCENARIO, "after-story-step",
+                LIFECYCLE_AFTER_STORY);
+    }
+
+    private void beforeStepShouldStartLifecycleStorySteps(StoryExecutionStage storyExecutionStage, String step,
+            String testCaseName)
+    {
         BddRunContext bddRunContext = setupContext();
         mockBatchExecutionConfiguration();
 
-        when(allureRunContext.getStoryExecutionStage()).thenReturn(null);
+        when(allureRunContext.getStoryExecutionStage()).thenReturn(storyExecutionStage);
         testContext.put(CURRENT_STEP_KEY, null);
 
-        bddRunContext.putRunningStory(createRunningStory(false), false);
+        Story story = new Story(STORY_NAME, null, new Meta(getStoryMeta()), null, List.of());
+        RunningStory runningStory = getRunningStory(story, null);
+        bddRunContext.putRunningStory(runningStory, false);
 
-        String step = "before-story-step";
         allureStoryReporter.beforeStep(step);
 
         InOrder ordered = inOrder(allureLifecycle, next);
         ordered.verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
         TestResult testResult = testResultCaptor.getValue();
-        assertEquals(LIFECYCLE_BEFORE_STORY, testResult.getName());
+        assertEquals(testCaseName, testResult.getName());
+        assertEquals(String.format("[batch: my-batch][stories-chain: name][scenario: %s]", testCaseName),
+                testResult.getHistoryId());
         ordered.verify(allureLifecycle).startTestCase(testResult.getUuid());
         ArgumentCaptor<StepResult> stepResultCaptor = ArgumentCaptor.forClass(StepResult.class);
         ordered.verify(allureLifecycle).startStep(eq(testResult.getUuid()), eq(testResult.getUuid() + DASH + THREAD_ID),
@@ -555,33 +571,6 @@ class AllureStoryReporterTests
         StepResult capturedStepResult = stepResultCaptor.getValue();
         assertEquals(step, capturedStepResult.getName());
         assertEquals(StatusPriority.getLowest().getStatusModel(), capturedStepResult.getStatus());
-        ordered.verify(next).beforeStep(step);
-        verifyNoMoreInteractions(next, allureLifecycle);
-    }
-
-    @Test
-    void beforeStepShouldStartLifecycleAfterStorySteps()
-    {
-        BddRunContext bddRunContext = setupContext();
-        mockBatchExecutionConfiguration();
-
-        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.AFTER_SCENARIO);
-        testContext.put(CURRENT_STEP_KEY, null);
-
-        bddRunContext.putRunningStory(createRunningStory(false), false);
-
-        String step = "after-story-step";
-        allureStoryReporter.beforeStep(step);
-
-        InOrder ordered = inOrder(allureLifecycle, next);
-        ordered.verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
-        TestResult testResult = testResultCaptor.getValue();
-        assertEquals(LIFECYCLE_AFTER_STORY, testResult.getName());
-        ordered.verify(allureLifecycle).startTestCase(testResult.getUuid());
-        ArgumentCaptor<StepResult> stepResultCaptor = ArgumentCaptor.forClass(StepResult.class);
-        ordered.verify(allureLifecycle).startStep(eq(testResult.getUuid()), eq(testResult.getUuid() + DASH + THREAD_ID),
-                stepResultCaptor.capture());
-        assertEquals(step, stepResultCaptor.getValue().getName());
         ordered.verify(next).beforeStep(step);
         verifyNoMoreInteractions(next, allureLifecycle);
     }
