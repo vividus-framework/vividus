@@ -43,7 +43,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -162,8 +162,8 @@ class HeadlessCrawlerTableTransformerTests
         transformer.setSeedRelativeUrls(toSet(SEED));
         Set<String> urls = testFetchUrls(DEFAULT_RELATIVE_URL, List.of(SEED));
         assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
-        ExamplesTableProperties examplesTableProperties = buildExamplesTableProperties();
-        Set<String> urls2 = transformer.fetchUrls(examplesTableProperties);
+        TableProperties tableProperties = buildTableProperties();
+        Set<String> urls2 = transformer.fetchUrls(tableProperties);
         verifyNoMoreInteractions(crawlControllerFactory);
         assertSame(urls, urls2);
         verifyNoInteractions(redirectsProvider);
@@ -176,12 +176,12 @@ class HeadlessCrawlerTableTransformerTests
         String mainAppPage = buildAppPageUrl(DEFAULT_RELATIVE_URL);
         CrawlController crawlController = mockCrawlerControllerFactory(mainAppPage);
         InOrder ordered = inOrder(crawlControllerFactory, crawlController);
-        ExamplesTableProperties examplesTableProperties = buildExamplesTableProperties();
+        TableProperties tableProperties = buildTableProperties();
         transformer.setSeedRelativeUrls(toSet(seedRelativeUrlsProperty));
-        Set<String> urls = runUrlFetching(mainAppPage, examplesTableProperties,
+        Set<String> urls = runUrlFetching(mainAppPage, tableProperties,
                 List.of(seedRelativeUrlsProperty), crawlController, ordered);
         assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
-        Set<String> urls2 = transformer.fetchUrls(examplesTableProperties);
+        Set<String> urls2 = transformer.fetchUrls(tableProperties);
         verifyNoMoreInteractions(crawlControllerFactory, crawlController);
         assertThat(urls2, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
         assertSame(urls, urls2);
@@ -202,19 +202,19 @@ class HeadlessCrawlerTableTransformerTests
     {
         String mainAppPage = buildAppPageUrl(mainAppPageRelativeUrl);
         CrawlController crawlController = mockCrawlerControllerFactory(mainAppPage);
-        ExamplesTableProperties examplesTableProperties = buildExamplesTableProperties();
-        return runUrlFetching(mainAppPage, examplesTableProperties, expectedSeedRelativeUrls, crawlController);
+        TableProperties tableProperties = buildTableProperties();
+        return runUrlFetching(mainAppPage, tableProperties, expectedSeedRelativeUrls, crawlController);
     }
 
-    private Set<String> runUrlFetching(String mainAppPage, ExamplesTableProperties examplesTableProperties,
+    private Set<String> runUrlFetching(String mainAppPage, TableProperties tableProperties,
                                        List<String> expectedSeedRelativeUrls, CrawlController crawlController)
     {
         InOrder ordered = inOrder(crawlControllerFactory, crawlController);
-        return runUrlFetching(mainAppPage, examplesTableProperties, expectedSeedRelativeUrls,
+        return runUrlFetching(mainAppPage, tableProperties, expectedSeedRelativeUrls,
                 crawlController, ordered);
     }
 
-    private Set<String> runUrlFetching(String mainAppPage, ExamplesTableProperties examplesTableProperties,
+    private Set<String> runUrlFetching(String mainAppPage, TableProperties tableProperties,
                                        List<String> expectedSeedRelativeUrls, CrawlController crawlController,
                                        InOrder ordered)
     {
@@ -239,7 +239,7 @@ class HeadlessCrawlerTableTransformerTests
             }
             return false;
         }), eq(50));
-        Set<String> urls = transformer.fetchUrls(examplesTableProperties);
+        Set<String> urls = transformer.fetchUrls(tableProperties);
         ordered.verify(crawlControllerFactory).createCrawlController(mainAppPageUri);
         Stream.concat(Stream.of(mainAppPage),
                 expectedSeedRelativeUrls.stream().map(HeadlessCrawlerTableTransformerTests::buildAppPageUrl))
@@ -264,9 +264,9 @@ class HeadlessCrawlerTableTransformerTests
         return crawlController;
     }
 
-    private static ExamplesTableProperties buildExamplesTableProperties()
+    private static TableProperties buildTableProperties()
     {
-        return new ExamplesTableProperties(new Properties());
+        return new TableProperties(new Properties());
     }
 
     private static WebURL createWebUrl(String url)

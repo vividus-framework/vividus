@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 import com.google.common.base.Suppliers;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.vividus.crawler.ICrawlControllerFactory;
 import org.vividus.crawler.LinkCrawlerData;
 import org.vividus.crawler.LinkCrawlerFactory;
@@ -70,7 +70,7 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
     }
 
     @Override
-    protected Set<String> fetchUrls(ExamplesTableProperties properties)
+    protected Set<String> fetchUrls(TableProperties properties)
     {
         return urlsProvider.get();
     }

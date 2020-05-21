@@ -31,7 +31,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.util.ExamplesTableProcessor;
@@ -46,7 +46,7 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
     private Supplier<ExamplesTableFactory> examplesTableFactory;
 
     @Override
-    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         String byMaxColumns = properties.getProperties().getProperty(BY_MAX_COLUMNS_PROPERTY);
         String byMaxRows = properties.getProperties().getProperty(BY_MAX_ROWS_PROPERTY);

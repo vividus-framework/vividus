@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Properties;
 
-import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +50,7 @@ class ResolvingExpressionsEagerlyTransformerTests
         when(expressionAdaptor.process(eq("|row1|"))).thenReturn("resolved_row1");
         when(expressionAdaptor.process(eq("|row2|"))).thenReturn("resolved_row2");
         String actual = transformer
-                .transform(table, new TableParsers(), new ExamplesTable.ExamplesTableProperties(new Properties()));
+                .transform(table, new TableParsers(), new TableProperties(new Properties()));
         assertEquals("|header|\n|resolved_row1|\n|resolved_row2|", actual);
     }
 
@@ -61,7 +61,7 @@ class ResolvingExpressionsEagerlyTransformerTests
         when(expressionAdaptor.process(eq(HEADER))).thenReturn("|resolved_header|");
         when(expressionAdaptor.process(eq("|row|"))).thenReturn("resolved_row");
         String actual = transformer
-                .transform(table, new TableParsers(), new ExamplesTable.ExamplesTableProperties(new Properties()));
+                .transform(table, new TableParsers(), new TableProperties(new Properties()));
         assertEquals("|header|\n|resolved_row|", actual);
     }
 }

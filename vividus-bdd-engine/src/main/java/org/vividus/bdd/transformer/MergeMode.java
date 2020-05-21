@@ -32,7 +32,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
 public enum MergeMode
@@ -48,7 +48,7 @@ public enum MergeMode
 
         @Override
         protected List<ExamplesTable> alignTables(List<ExamplesTable> examplesTables, String fillerValue,
-                ExamplesTableProperties properties)
+                TableProperties properties)
         {
             List<String> mergedHeaders = mergeHeaders(examplesTables);
             return examplesTables.stream().map(table -> {
@@ -57,7 +57,7 @@ public enum MergeMode
                 {
                     return table;
                 }
-                ExamplesTableProperties tableProperties = new ExamplesTableProperties(table.getProperties());
+                TableProperties tableProperties = new TableProperties(table.getProperties());
                 ExamplesTable supplementingTable = buildSupplementingTable(tableProperties, fillerValue, missingHeaders,
                         table.getRowCount());
                 String merged = COLUMNS.merge(List.of(table, supplementingTable), tableProperties, Optional.empty(),
@@ -91,7 +91,7 @@ public enum MergeMode
 
         @Override
         protected List<ExamplesTable> alignTables(List<ExamplesTable> examplesTables, String fillerValue,
-                ExamplesTableProperties properties)
+                TableProperties properties)
         {
             int maxRowCount = examplesTables.stream().mapToInt(ExamplesTable::getRowCount).max().orElse(0);
 
@@ -101,7 +101,7 @@ public enum MergeMode
                 {
                     return table;
                 }
-                ExamplesTableProperties tableProperties = new ExamplesTableProperties(table.getProperties());
+                TableProperties tableProperties = new TableProperties(table.getProperties());
                 ExamplesTable supplementingTable = buildSupplementingTable(tableProperties, fillerValue,
                         table.getHeaders(), missingRowCount);
                 String merged = ROWS.merge(List.of(table, supplementingTable), tableProperties, Optional.empty(), true);
@@ -124,12 +124,12 @@ public enum MergeMode
         }
     };
 
-    public String merge(List<ExamplesTable> tables, ExamplesTableProperties properties, Optional<String> fillerValue)
+    public String merge(List<ExamplesTable> tables, TableProperties properties, Optional<String> fillerValue)
     {
         return merge(tables, properties, fillerValue, false);
     }
 
-    private String merge(List<ExamplesTable> tables, ExamplesTableProperties properties, Optional<String> fillerValue,
+    private String merge(List<ExamplesTable> tables, TableProperties properties, Optional<String> fillerValue,
             boolean appendTableProperties)
     {
         validate(tables, fillerValue.isEmpty());
@@ -143,7 +143,7 @@ public enum MergeMode
     protected abstract void validateInput(ExamplesTable current, ExamplesTable next, boolean strict);
 
     protected abstract List<ExamplesTable> alignTables(List<ExamplesTable> examplesTables, String fillerValue,
-            ExamplesTableProperties properties);
+            TableProperties properties);
 
     protected abstract List<List<String>> merge(List<ExamplesTable> examplesTables);
 
@@ -162,7 +162,7 @@ public enum MergeMode
                 .collect(Collectors.toList());
     }
 
-    private static ExamplesTable buildSupplementingTable(ExamplesTableProperties properties, String fillerValue,
+    private static ExamplesTable buildSupplementingTable(TableProperties properties, String fillerValue,
             Collection<String> header, int rowCount)
     {
         List<List<String>> rows = Collections.nCopies(rowCount, Collections.nCopies(header.size(), fillerValue));

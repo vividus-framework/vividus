@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import java.util.Properties;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -128,8 +128,8 @@ class JoiningTableTransformerTests
     private void assertJoin(String table, Properties properties, String expected)
     {
         when(configuration.examplesTableFactory()).thenReturn(factory);
-        ExamplesTableProperties examplesTableProperties = new ExamplesTableProperties(properties);
-        assertEquals(expected, joiningTableTransformer.transform(table, null, examplesTableProperties));
+        TableProperties tableProperties = new TableProperties(properties);
+        assertEquals(expected, joiningTableTransformer.transform(table, null, tableProperties));
     }
 
     private void mockCreateExamplesTable(String path, String table)
@@ -147,7 +147,7 @@ class JoiningTableTransformerTests
     private void verifyIllegalArgumentException(Properties properties, String message)
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> joiningTableTransformer.transform(PATH, null, new ExamplesTableProperties(properties)));
+            () -> joiningTableTransformer.transform(PATH, null, new TableProperties(properties)));
         assertEquals(message, exception.getMessage());
     }
 }

@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
     private boolean filterRedirects;
 
     @Override
-    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         checkTableEmptiness(tableAsString);
         Set<String> urls = fetchUrls(properties).stream()
@@ -54,7 +54,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
         return build(urls, properties);
     }
 
-    protected abstract Set<String> fetchUrls(ExamplesTableProperties properties);
+    protected abstract Set<String> fetchUrls(TableProperties properties);
 
     protected Set<String> filterResults(Stream<String> urls)
     {
@@ -89,7 +89,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
         }
     }
 
-    private String build(Set<String> urls, ExamplesTableProperties properties)
+    private String build(Set<String> urls, TableProperties properties)
     {
         String columnName = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, COLUMN_KEY);
         List<String> urlsList = new ArrayList<>(urls);

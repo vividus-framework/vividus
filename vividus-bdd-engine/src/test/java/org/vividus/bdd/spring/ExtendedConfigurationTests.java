@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
@@ -149,9 +149,9 @@ public class ExtendedConfigurationTests
         configuration.setCustomTableTransformers(Map.of(name, tableTransformer));
         configuration.init();
         String tableAsString = "tableAsString";
-        ExamplesTableProperties examplesTableProperties = new ExamplesTableProperties(new Properties());
-        configuration.tableTransformers().transform(name, tableAsString, null, examplesTableProperties);
-        verify(tableTransformer).transform(tableAsString, null, examplesTableProperties);
+        TableProperties tableProperties = new TableProperties(new Properties());
+        configuration.tableTransformers().transform(name, tableAsString, null, tableProperties);
+        verify(tableTransformer).transform(tableAsString, null, tableProperties);
     }
 
     private static BatchResourceConfiguration equalToCompositeStepsBatch(String compositePathPatterns)

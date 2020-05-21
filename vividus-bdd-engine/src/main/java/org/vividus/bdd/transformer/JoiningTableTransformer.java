@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.spring.ExtendedConfiguration;
 
@@ -30,7 +30,7 @@ public class JoiningTableTransformer implements ExtendedTableTransformer
     @Inject private ExtendedConfiguration configuration;
 
     @Override
-    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         JoinMode joinMode = getMandatoryEnumProperty(properties, "joinMode", JoinMode.class);
         ExamplesTable examplesTable = configuration.examplesTableFactory().createExamplesTable(tableAsString);

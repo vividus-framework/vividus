@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,14 +40,14 @@ class SortingTableTransformerTests
     void testTransform(String expectedTable, Properties properties, String tableToTransform)
     {
         assertEquals(expectedTable, transformer.transform(tableToTransform, new TableParsers(),
-                new ExamplesTableProperties(properties)));
+                new TableProperties(properties)));
     }
 
     @Test
     void testFailOnMissingTableProperty()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE, new TableParsers(), new ExamplesTableProperties(new Properties())));
+            () -> transformer.transform(TABLE, new TableParsers(), new TableProperties(new Properties())));
         assertEquals("'byColumns' is not set in ExamplesTable properties", exception.getMessage());
     }
 
