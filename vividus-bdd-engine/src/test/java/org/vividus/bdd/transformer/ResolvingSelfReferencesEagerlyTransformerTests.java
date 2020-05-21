@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Properties;
 
-import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterControls;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -72,7 +72,6 @@ class ResolvingSelfReferencesEagerlyTransformerTests
 
     private String transform(String beforeTransform)
     {
-        return transformer.transform(beforeTransform, new TableParsers(),
-                new ExamplesTable.ExamplesTableProperties(new Properties()));
+        return transformer.transform(beforeTransform, new TableParsers(), new TableProperties(new Properties()));
     }
 }

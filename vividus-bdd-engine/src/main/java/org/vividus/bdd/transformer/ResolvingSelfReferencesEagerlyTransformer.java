@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.Validate;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterControls;
 import org.vividus.bdd.util.ExamplesTableProcessor;
@@ -47,7 +47,7 @@ public class ResolvingSelfReferencesEagerlyTransformer implements ExtendedTableT
     }
 
     @Override
-    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         List<String> tableAsRows = ExamplesTableProcessor.parseRows(tableAsString);
         List<String> header = tableParsers.parseRow(tableAsRows.get(0), true, properties);

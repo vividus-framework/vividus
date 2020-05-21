@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -121,15 +121,15 @@ class ExamplesTableProcessorTests
     {
         List<String> values = List.of("a1", "a2");
         String expectedTable = "{valueSeparator=!}\n|key1|key2|\n!a1!a2!";
-        Properties pp = new Properties();
-        pp.setProperty("valueSeparator", "!");
-        ExamplesTableProperties p = new ExamplesTableProperties(pp);
+        Properties properties = new Properties();
+        properties.setProperty("valueSeparator", "!");
+        TableProperties tableProperties = new TableProperties(properties);
         assertEquals(expectedTable,
-                ExamplesTableProcessor.buildExamplesTable(KEYS, List.of(values), p, false, true));
+                ExamplesTableProcessor.buildExamplesTable(KEYS, List.of(values), tableProperties, false, true));
     }
 
-    private ExamplesTableProperties createProperties()
+    private TableProperties createProperties()
     {
-        return new ExamplesTableProperties(new Properties());
+        return new TableProperties(new Properties());
     }
 }

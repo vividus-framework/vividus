@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Properties;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ class ExcelTableTransformerTests
 
     private final ExcelTableTransformer transformer = new ExcelTableTransformer();
 
-    private final ExamplesTableProperties properties = new ExamplesTableProperties(new Properties());
+    private final TableProperties properties = new TableProperties(new Properties());
 
     @BeforeEach
     void beforeEach()

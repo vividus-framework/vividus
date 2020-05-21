@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 
 public final class ExamplesTableProcessor
@@ -45,7 +45,7 @@ public final class ExamplesTableProcessor
     }
 
     public static List<List<String>> parseDataRows(List<String> rows, TableParsers tableParsers,
-            ExamplesTableProperties properties)
+            TableProperties properties)
     {
         return rows.stream().skip(1)
         .map(row -> tableParsers.parseRow(row, false, properties))
@@ -53,7 +53,7 @@ public final class ExamplesTableProcessor
     }
 
     public static String buildExamplesTableFromColumns(Collection<String> header, List<List<String>> columnsData,
-            ExamplesTableProperties properties)
+            TableProperties properties)
     {
         boolean columnsAligned = columnsData
                 .stream()
@@ -74,13 +74,13 @@ public final class ExamplesTableProcessor
     }
 
     public static String buildExamplesTable(Collection<String> header, List<List<String>> data,
-            ExamplesTableProperties properties, boolean checkForValueSeparator)
+            TableProperties properties, boolean checkForValueSeparator)
     {
         return buildExamplesTable(header, data, properties, checkForValueSeparator, false);
     }
 
     public static String buildExamplesTable(Collection<String> header, List<List<String>> data,
-            ExamplesTableProperties properties, boolean checkForValueSeparator, boolean appendTableProperties)
+            TableProperties properties, boolean checkForValueSeparator, boolean appendTableProperties)
     {
         String valueSeparator = checkForValueSeparator ? determineValueSeparator(data, properties)
                 : properties.getValueSeparator();
@@ -99,7 +99,7 @@ public final class ExamplesTableProcessor
         return examplesTableBuilder.toString();
     }
 
-    private static void appendTableProperties(StringBuilder examplesTableBuilder, ExamplesTableProperties properties,
+    private static void appendTableProperties(StringBuilder examplesTableBuilder, TableProperties properties,
             String rowSeparator)
     {
         StringBuilder propertiesStringBuilder = new StringBuilder();
@@ -127,7 +127,7 @@ public final class ExamplesTableProcessor
         examplesTable.append(valueSeparator);
     }
 
-    private static String determineValueSeparator(List<List<String>> data, ExamplesTableProperties properties)
+    private static String determineValueSeparator(List<List<String>> data, TableProperties properties)
     {
         List<String> valueSeparators = List.of(properties.getValueSeparator(), DEFAULT_SEPARATOR_VALUE,
                 "!", "?", "$", "#", "%", "*");

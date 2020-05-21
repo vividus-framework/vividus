@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -89,7 +89,7 @@ class JsonRestApiTableTransformerTests
     @Test
     void testSourceTransformPropertyIsNotSpecifiedException()
     {
-        ExamplesTableProperties properties = createProperties(Collections.singletonMap(COLUMNS, "key=value,url"));
+        TableProperties properties = createProperties(Collections.singletonMap(COLUMNS, "key=value,url"));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> jsonTableGenerator.transform(StringUtils.EMPTY, null, properties));
         assertEquals("One of ExamplesTable properties must be set: either 'url' or 'variable'", exception.getMessage());
@@ -98,16 +98,16 @@ class JsonRestApiTableTransformerTests
     @Test
     void testColumnsTransformPropertyIsNotSpecifiedException()
     {
-        ExamplesTableProperties properties = createProperties(Collections.singletonMap(URL, URL_VALUE));
+        TableProperties properties = createProperties(Collections.singletonMap(URL, URL_VALUE));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> jsonTableGenerator.transform(StringUtils.EMPTY, null, properties));
         assertEquals("'columns' is not set in ExamplesTable properties", exception.getMessage());
     }
 
-    private static ExamplesTableProperties createProperties(Map<String, String> keyToJsonPathValue)
+    private static TableProperties createProperties(Map<String, String> keyToJsonPathValue)
     {
         Properties properties = new Properties();
         properties.putAll(keyToJsonPathValue);
-        return new ExamplesTableProperties(properties);
+        return new TableProperties(properties);
     }
 }

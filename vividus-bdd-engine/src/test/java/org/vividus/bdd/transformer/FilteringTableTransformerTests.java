@@ -24,7 +24,7 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +54,7 @@ class FilteringTableTransformerTests
         transformer.setExamplesTableFactory(() -> factory);
         when(factory.createExamplesTable(tableToTransform)).thenReturn(new ExamplesTable(TABLE));
         assertEquals(expectedTable, transformer.transform(tableToTransform, null,
-                new ExamplesTableProperties(properties)));
+                new TableProperties(properties)));
     }
 
     @Test
@@ -66,14 +66,14 @@ class FilteringTableTransformerTests
         Properties properties = new Properties();
         properties.setProperty(BY_MAX_ROWS_PROPERTY, "1");
         assertEquals("|key2|key3|key1|\n|2|3|1|", transformer.transform(table, null,
-                new ExamplesTableProperties(properties)));
+                new TableProperties(properties)));
     }
 
     @Test
     void testFailOnMissingProperties()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE, null, new ExamplesTableProperties(new Properties())));
+            () -> transformer.transform(TABLE, null, new TableProperties(new Properties())));
         assertEquals("At least one of the following properties should be specified: 'byMaxColumns', 'byMaxRows', "
                 + "'byColumnNames'", exception.getMessage());
     }
@@ -82,7 +82,7 @@ class FilteringTableTransformerTests
     void testFailOnConflictingProperties()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE, null, new ExamplesTableProperties(createProperties(1, null, "key2"))));
+            () -> transformer.transform(TABLE, null, new TableProperties(createProperties(1, null, "key2"))));
         assertEquals("Conflicting properties declaration found: 'byMaxColumns' and 'byColumnNames'",
                 exception.getMessage());
     }

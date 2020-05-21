@@ -25,7 +25,7 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 
 public interface ExtendedTableTransformer extends TableTransformer
@@ -35,7 +35,7 @@ public interface ExtendedTableTransformer extends TableTransformer
         isTrue(StringUtils.isBlank(tableAsString), "Input table must be empty");
     }
 
-    static String getMandatoryNonBlankProperty(ExamplesTableProperties tableProperties, String propertyName)
+    static String getMandatoryNonBlankProperty(TableProperties tableProperties, String propertyName)
     {
         String propertyValue = tableProperties.getProperties().getProperty(propertyName);
         isTrue(propertyValue != null, "'%s' is not set in ExamplesTable properties", propertyName);
@@ -43,7 +43,7 @@ public interface ExtendedTableTransformer extends TableTransformer
         return propertyValue;
     }
 
-    default <E extends Enum<E>> E getMandatoryEnumProperty(ExamplesTableProperties properties, String propertyName,
+    default <E extends Enum<E>> E getMandatoryEnumProperty(TableProperties properties, String propertyName,
             Class<E> enumClass)
     {
         String propertyValueStr = properties.getProperties().getProperty(propertyName);
@@ -54,7 +54,7 @@ public interface ExtendedTableTransformer extends TableTransformer
     }
 
     default <T extends Entry<String, Function<String, R>>, R> R processCompetingMandatoryProperties(
-            ExamplesTableProperties tableProperties, T processor1, T processor2)
+            TableProperties tableProperties, T processor1, T processor2)
     {
         String propertyName1 = processor1.getKey();
         String propertyName2 = processor2.getKey();

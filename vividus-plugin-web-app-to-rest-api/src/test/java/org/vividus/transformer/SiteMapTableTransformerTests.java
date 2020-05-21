@@ -33,7 +33,7 @@ import java.util.Set;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -80,7 +80,7 @@ class SiteMapTableTransformerTests
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);
-        Set<String> actual = siteMapTableTransformer.fetchUrls(createExamplesTableProperties());
+        Set<String> actual = siteMapTableTransformer.fetchUrls(createTableProperties());
         assertEquals(Set.of(OUTGOING_ABSOLUT_URL), actual);
     }
 
@@ -88,7 +88,7 @@ class SiteMapTableTransformerTests
     void testFetchUrlsWithoutSiteMapRelativeUrl()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> siteMapTableTransformer.fetchUrls(new ExamplesTableProperties(new Properties())));
+            () -> siteMapTableTransformer.fetchUrls(new TableProperties(new Properties())));
         assertEquals("'siteMapRelativeUrl' is not set in ExamplesTable properties", exception.getMessage());
     }
 
@@ -98,7 +98,7 @@ class SiteMapTableTransformerTests
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(Set.of());
         SiteMapTableGenerationException exception = assertThrows(SiteMapTableGenerationException.class,
-            () -> siteMapTableTransformer.transform("", null, createExamplesTableProperties()));
+            () -> siteMapTableTransformer.transform("", null, createTableProperties()));
         assertEquals(NO_URLS_FOUND_MESSAGE, exception.getMessage());
     }
 
@@ -108,7 +108,7 @@ class SiteMapTableTransformerTests
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(Set.of());
-        ExamplesTableProperties properties = createExamplesTableProperties();
+        TableProperties properties = createTableProperties();
         properties.getProperties().put(IGNORE_ERRORS_PROPERTY_NAME, TRUE);
         assertEquals(Set.of(), siteMapTableTransformer.fetchUrls(properties));
     }
@@ -118,7 +118,7 @@ class SiteMapTableTransformerTests
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(Set.of());
-        ExamplesTableProperties properties = createExamplesTableProperties();
+        TableProperties properties = createTableProperties();
         properties.getProperties().put(IGNORE_ERRORS_PROPERTY_NAME, "false");
         siteMapTableTransformer.setIgnoreErrors(true);
         SiteMapTableGenerationException exception = assertThrows(SiteMapTableGenerationException.class,
@@ -133,7 +133,7 @@ class SiteMapTableTransformerTests
         SiteMapParseException exception = new SiteMapParseException(SITEMAP, new IOException());
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenThrow(exception);
         IllegalStateException actualException = assertThrows(IllegalStateException.class,
-            () -> siteMapTableTransformer.transform("", null, createExamplesTableProperties()));
+            () -> siteMapTableTransformer.transform("", null, createTableProperties()));
         assertEquals(exception, actualException.getCause());
     }
 
@@ -144,7 +144,7 @@ class SiteMapTableTransformerTests
         SiteMapParseException exception = new SiteMapParseException(SITEMAP, new IOException());
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenThrow(exception);
         siteMapTableTransformer.setIgnoreErrors(true);
-        assertEquals(Set.of(), siteMapTableTransformer.fetchUrls(createExamplesTableProperties()));
+        assertEquals(Set.of(), siteMapTableTransformer.fetchUrls(createTableProperties()));
     }
 
     @Test
@@ -153,7 +153,7 @@ class SiteMapTableTransformerTests
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         SiteMapParseException exception = new SiteMapParseException(SITEMAP, new IOException());
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenThrow(exception);
-        ExamplesTableProperties properties = createExamplesTableProperties();
+        TableProperties properties = createTableProperties();
         properties.getProperties().put(IGNORE_ERRORS_PROPERTY_NAME, TRUE);
         assertEquals(Set.of(), siteMapTableTransformer.fetchUrls(properties));
     }
@@ -166,7 +166,7 @@ class SiteMapTableTransformerTests
         siteMapTableTransformer.setFilterRedirects(true);
         IllegalStateException illegalStateException = new IllegalStateException();
         when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUT_URL))).thenThrow(illegalStateException);
-        Set<String> actual = siteMapTableTransformer.fetchUrls(createExamplesTableProperties());
+        Set<String> actual = siteMapTableTransformer.fetchUrls(createTableProperties());
         assertThat(actual, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
         assertThat(logger.getLoggingEvents(), is(List.of(warn(illegalStateException,
                 "Exception during redirects receiving"))));
@@ -179,19 +179,19 @@ class SiteMapTableTransformerTests
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);
         siteMapTableTransformer.setFilterRedirects(true);
         when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUT_URL))).thenReturn(null);
-        Set<String> actual = siteMapTableTransformer.fetchUrls(createExamplesTableProperties());
+        Set<String> actual = siteMapTableTransformer.fetchUrls(createTableProperties());
         assertThat(actual, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
     }
 
-    private static ExamplesTableProperties createExamplesTablePropertiesWithValueSeparator(String valueSeparator)
+    private static TableProperties createTablePropertiesWithValueSeparator(String valueSeparator)
     {
-        return new ExamplesTableProperties("siteMapRelativeUrl=" + SITEMAP_XML, DEFAULT_SEPARATOR, valueSeparator,
+        return new TableProperties("siteMapRelativeUrl=" + SITEMAP_XML, DEFAULT_SEPARATOR, valueSeparator,
                 "!--");
     }
 
-    private static ExamplesTableProperties createExamplesTableProperties()
+    private static TableProperties createTableProperties()
     {
-        return createExamplesTablePropertiesWithValueSeparator(DEFAULT_SEPARATOR);
+        return createTablePropertiesWithValueSeparator(DEFAULT_SEPARATOR);
     }
 
     private static SiteMapURL createValidSiteMapURL(String relativeURL)

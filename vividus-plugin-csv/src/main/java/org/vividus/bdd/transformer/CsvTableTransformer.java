@@ -27,7 +27,7 @@ import java.util.List;
 import javax.inject.Named;
 
 import org.apache.commons.csv.CSVRecord;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 import org.vividus.csv.CsvReader;
@@ -43,7 +43,7 @@ public class CsvTableTransformer implements ExtendedTableTransformer
     }
 
     @Override
-    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         checkTableEmptiness(tableAsString);
         String csvPath = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "csvPath");

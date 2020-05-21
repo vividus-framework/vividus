@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.steps.ExpressionAdaptor;
 import org.vividus.bdd.util.ExamplesTableProcessor;
@@ -37,7 +37,7 @@ public class ResolvingExpressionsEagerlyTransformer implements ExtendedTableTran
     }
 
     @Override
-    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         List<String> rows = ExamplesTableProcessor.parseRows(tableAsString);
         List<String> headerValues = tableParsers.parseRow(rows.get(0), true, properties);

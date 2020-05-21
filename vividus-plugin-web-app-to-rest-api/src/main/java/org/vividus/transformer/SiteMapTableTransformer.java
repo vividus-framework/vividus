@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.vividus.bdd.transformer.ExtendedTableTransformer;
 import org.vividus.model.SiteMap;
 import org.vividus.sitemap.ISiteMapParser;
@@ -41,7 +41,7 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
     private final List<SiteMap> siteMaps = Collections.synchronizedList(new LinkedList<>());
 
     @Override
-    public Set<String> fetchUrls(ExamplesTableProperties properties)
+    public Set<String> fetchUrls(TableProperties properties)
     {
         Properties tableProperties = properties.getProperties();
         boolean throwException = !Optional.ofNullable(tableProperties.getProperty("ignoreErrors"))

@@ -29,7 +29,7 @@ import javax.inject.Inject;
 
 import com.google.common.base.Splitter;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.util.ExamplesTableProcessor;
@@ -44,7 +44,7 @@ public class JsonRestApiTableTransformer implements ExtendedTableTransformer
 
     @SuppressWarnings("unchecked")
     @Override
-    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         checkTableEmptiness(tableAsString);
 

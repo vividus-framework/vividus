@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import javax.inject.Named;
 
 import org.apache.poi.ss.usermodel.Sheet;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.model.CellValue;
 import org.vividus.bdd.util.ExamplesTableProcessor;
@@ -41,7 +41,7 @@ import org.vividus.excel.WorkbookParsingException;
 public class ExcelTableTransformer implements ExtendedTableTransformer
 {
     @Override
-    public String transform(String tableAsString, TableParsers tableParsers, ExamplesTableProperties properties)
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         checkTableEmptiness(tableAsString);
         String path = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "path");
@@ -71,14 +71,14 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
         return build(result, properties);
     }
 
-    private List<String> extractData(IExcelSheetParser sheetParser, ExamplesTableProperties properties)
+    private List<String> extractData(IExcelSheetParser sheetParser, TableProperties properties)
     {
         return processCompetingMandatoryProperties(properties,
                 entry("range", range -> extractDataFromRage(sheetParser, properties, range)),
                 entry("addresses", addresses -> extractDataFromAddresses(sheetParser, addresses)));
     }
 
-    private List<String> extractDataFromRage(IExcelSheetParser sheetParser, ExamplesTableProperties properties,
+    private List<String> extractDataFromRage(IExcelSheetParser sheetParser, TableProperties properties,
             String range)
     {
         List<String> data = sheetParser.getDataFromRange(range).stream().map(CellValue::getValue)
@@ -99,7 +99,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
         return Stream.of(addresses.split(";")).map(sheetParser::getDataFromCell).collect(Collectors.toList());
     }
 
-    private String build(List<String> data, ExamplesTableProperties properties)
+    private String build(List<String> data, TableProperties properties)
     {
         String columnName = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "column");
         String joinValues = properties.getProperties().getProperty("joinValues");

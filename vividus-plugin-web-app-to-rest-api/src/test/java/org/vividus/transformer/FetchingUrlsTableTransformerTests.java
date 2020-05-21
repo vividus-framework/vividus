@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.junit.jupiter.api.Test;
 
 class FetchingUrlsTableTransformerTests
@@ -36,7 +36,7 @@ class FetchingUrlsTableTransformerTests
     @Test
     void testTransformFromResults()
     {
-        ExamplesTableProperties properties = new ExamplesTableProperties(new Properties());
+        TableProperties properties = new TableProperties(new Properties());
         properties.getProperties().setProperty(COLUMN, URLS);
         assertEquals("|urls|\n|/first|\n|/second|\n|/fourth%25|\n|/third|", transformer.transform("", null,
                 properties));
@@ -47,7 +47,7 @@ class FetchingUrlsTableTransformerTests
     {
         Properties properties = new Properties();
         properties.setProperty(COLUMN, " ");
-        ExamplesTableProperties tableProeprties = new ExamplesTableProperties(properties);
+        TableProperties tableProeprties = new TableProperties(properties);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform("", null, tableProeprties));
         assertEquals("ExamplesTable property 'column' is blank", exception.getMessage());
@@ -57,7 +57,7 @@ class FetchingUrlsTableTransformerTests
     void testTransformWithNotEmptyTableAsStringParameter()
     {
         Properties properties = new Properties();
-        ExamplesTableProperties tableProeprties = new ExamplesTableProperties(properties);
+        TableProperties tableProeprties = new TableProperties(properties);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform("|first|", null, tableProeprties));
         assertEquals("Input table must be empty", exception.getMessage());
@@ -66,7 +66,7 @@ class FetchingUrlsTableTransformerTests
     private static final class TestTransformer extends AbstractFetchingUrlsTableTransformer
     {
         @Override
-        protected Set<String> fetchUrls(ExamplesTableProperties properties)
+        protected Set<String> fetchUrls(TableProperties properties)
         {
             return new HashSet<>(Arrays.asList("http://someurl/first", "http://someurl.com/second",
                     "/third", "/fourth%25"));

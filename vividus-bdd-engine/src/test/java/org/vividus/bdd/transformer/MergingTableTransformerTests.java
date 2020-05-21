@@ -25,7 +25,7 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -287,8 +287,8 @@ class MergingTableTransformerTests
 
     private void assertMerge(String tableBody, Properties properties, String expected)
     {
-        ExamplesTableProperties examplesTableProperties = new ExamplesTableProperties(properties);
-        assertEquals(expected, mergingTableTransformer.transform(tableBody, null, examplesTableProperties));
+        TableProperties tableProperties = new TableProperties(properties);
+        assertEquals(expected, mergingTableTransformer.transform(tableBody, null, tableProperties));
     }
 
     private Properties createProperties(String mergeMode, String tables)
@@ -308,7 +308,7 @@ class MergingTableTransformerTests
     private void verifyIllegalArgumentException(String tableBody, Properties properties, String message)
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> mergingTableTransformer.transform(tableBody, null, new ExamplesTableProperties(properties)));
+            () -> mergingTableTransformer.transform(tableBody, null, new TableProperties(properties)));
         assertEquals(message, exception.getMessage());
     }
 }

@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.ExamplesTable.ExamplesTableProperties;
+import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 import org.vividus.bdd.util.MapUtils;
 
@@ -36,7 +36,7 @@ public enum JoinMode
     ROWS
     {
         @Override
-        protected String join(ExamplesTable table, ExamplesTableProperties properties)
+        protected String join(ExamplesTable table, TableProperties properties)
         {
             Map<String, List<String>> tableMap = MapUtils.convertExamplesTableToMap(table);
             List<List<String>> tableData = tableMap.values().stream()
@@ -50,7 +50,7 @@ public enum JoinMode
     COLUMNS
     {
         @Override
-        protected String join(ExamplesTable table, ExamplesTableProperties properties)
+        protected String join(ExamplesTable table, TableProperties properties)
         {
             String joinedColumn = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "joinedColumn");
             Set<String> columnsToJoin = getColumnsToJoin(table, properties);
@@ -76,7 +76,7 @@ public enum JoinMode
             return ExamplesTableProcessor.buildExamplesTableFromColumns(headers, columns, properties);
         }
 
-        private Set<String> getColumnsToJoin(ExamplesTable table, ExamplesTableProperties properties)
+        private Set<String> getColumnsToJoin(ExamplesTable table, TableProperties properties)
         {
             return Optional.ofNullable(properties.getProperties().getProperty("columnsToJoin"))
                     .map(columnsToJoin ->
@@ -96,5 +96,5 @@ public enum JoinMode
         return rows.stream().map(cellBuilder).collect(Collectors.toList());
     }
 
-    protected abstract String join(ExamplesTable table, ExamplesTableProperties properties);
+    protected abstract String join(ExamplesTable table, TableProperties properties);
 }
