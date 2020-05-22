@@ -21,17 +21,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
-
-import com.google.common.base.Suppliers;
 
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.io.StoryLoader;
-import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
@@ -91,11 +87,6 @@ public class ExtendedConfiguration extends Configuration
         compositeStepsBatch.setResourceIncludePatterns(compositePaths);
         compositeStepsBatch.setResourceExcludePatterns(null);
         useCompositePaths(new HashSet<>(pathFinder.findPaths(compositeStepsBatch)));
-    }
-
-    public Supplier<ExamplesTableFactory> getExamplesTableFactory()
-    {
-        return Suppliers.memoize(this::examplesTableFactory);
     }
 
     public void setPathFinder(IPathFinder pathFinder)

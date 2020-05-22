@@ -34,8 +34,6 @@ import org.vividus.bdd.steps.ExpressionAdaptor;
 @ExtendWith(MockitoExtension.class)
 class ResolvingExpressionsEagerlyTransformerTests
 {
-    private static final String HEADER = "|header|";
-
     @Mock
     private ExpressionAdaptor expressionAdaptor;
 
@@ -46,9 +44,8 @@ class ResolvingExpressionsEagerlyTransformerTests
     void shouldResolveDataRowsTest()
     {
         String table = "|header|\n|row1|\n|row2|";
-        when(expressionAdaptor.process(eq(HEADER))).thenReturn(HEADER);
-        when(expressionAdaptor.process(eq("|row1|"))).thenReturn("resolved_row1");
-        when(expressionAdaptor.process(eq("|row2|"))).thenReturn("resolved_row2");
+        when(expressionAdaptor.process(eq("row1"))).thenReturn("resolved_row1");
+        when(expressionAdaptor.process(eq("row2"))).thenReturn("resolved_row2");
         String actual = transformer
                 .transform(table, new TableParsers(), new TableProperties(new Properties()));
         assertEquals("|header|\n|resolved_row1|\n|resolved_row2|", actual);
@@ -58,8 +55,7 @@ class ResolvingExpressionsEagerlyTransformerTests
     void shouldNotResolveHeaderTest()
     {
         String table = "|header|\n|row|";
-        when(expressionAdaptor.process(eq(HEADER))).thenReturn("|resolved_header|");
-        when(expressionAdaptor.process(eq("|row|"))).thenReturn("resolved_row");
+        when(expressionAdaptor.process(eq("row"))).thenReturn("resolved_row");
         String actual = transformer
                 .transform(table, new TableParsers(), new TableProperties(new Properties()));
         assertEquals("|header|\n|resolved_row|", actual);

@@ -17,11 +17,12 @@
 package org.vividus.bdd.transformer;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import javax.inject.Named;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.model.ExamplesTable.TableRows;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.steps.ExpressionAdaptor;
 import org.vividus.bdd.util.ExamplesTableProcessor;
@@ -39,15 +40,15 @@ public class ResolvingExpressionsEagerlyTransformer implements ExtendedTableTran
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
-        List<String> rows = ExamplesTableProcessor.parseRows(tableAsString);
-        List<String> headerValues = tableParsers.parseRow(rows.get(0), true, properties);
-        List<List<String>> resolvedData = ExamplesTableProcessor
-                .parseDataRows(resolveExpressions(rows), tableParsers, properties);
-        return ExamplesTableProcessor.buildExamplesTable(headerValues, resolvedData, properties, true);
+        TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
+        List<Map<String, String>> rows = tableRows.getRows();
+        resolveExpressions(rows);
+        return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(), rows, properties);
     }
 
-    private List<String> resolveExpressions(List<String> rows)
+    private void resolveExpressions(List<Map<String, String>> list)
     {
-        return rows.stream().map(expressionAdaptor::process).collect(Collectors.toList());
+        list.stream().forEach(map -> map.entrySet().stream()
+                .forEach(entry -> entry.setValue(expressionAdaptor.process(entry.getValue()))));
     }
 }

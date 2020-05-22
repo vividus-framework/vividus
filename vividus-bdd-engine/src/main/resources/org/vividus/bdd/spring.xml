@@ -112,10 +112,6 @@
         <property name="bddVariableContext" ref="bddVariableContext" />
     </bean>
 
-    <bean id="FILTERING" class="org.vividus.bdd.transformer.FilteringTableTransformer">
-       <property name="examplesTableFactory" value="#{@'configuration'.getExamplesTableFactory()}" />
-    </bean>
-
     <bean id="parameterControls" class="org.jbehave.core.steps.ParameterControls" />
 
 </beans>
