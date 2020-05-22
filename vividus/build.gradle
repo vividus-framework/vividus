@@ -37,6 +37,7 @@ dependencies {
     api project(':vividus-reporter')
 
     implementation project(':vividus-allure-adaptor')
+    implementation project(':vividus-analytics')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 

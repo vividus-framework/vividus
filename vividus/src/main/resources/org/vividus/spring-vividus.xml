@@ -58,6 +58,7 @@
                                 <ref bean="storyReporters" />
                                 <list>
                                     <bean class="org.vividus.bdd.log.LoggingStoryReporter" />
+                                    <ref bean="analyticsStoryReporter" />
                                 </list>
                             </list>
                         </property>
