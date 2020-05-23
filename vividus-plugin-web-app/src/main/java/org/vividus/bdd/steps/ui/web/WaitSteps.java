@@ -84,29 +84,6 @@ public class WaitSteps
 
     /**
      * Waits <b>duration</b> with <b>pollingDuration</b> until <b>an element</b> by the specified <b>locator</b>
-     * appears in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><i>Finds</i> an element by the specified <b>locator</b> within search context
-     * <li><i>Waits</i> <b>duration</b> with <b>pollingDuration</b> until this element becomes visible
-     * </ul>
-     * @param duration Total waiting time for an element becomes visible
-     * @param pollingDuration Defines the timeout between attempts
-     * @param locator Locator to search for elements
-     * @return True if element appears, otherwise false
-     */
-    @When("I wait '$duration' with '$pollingDuration' polling until an element located by $locator appears")
-    public boolean waitDurationWithPollingDurationTillElementAppears(Duration duration, Duration pollingDuration,
-            SearchAttributes locator)
-    {
-        return waitActions.wait(getSearchContext(), duration, pollingDuration,
-                expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(locator)).isWaitPassed();
-    }
-
-    /**
-     * Waits <b>duration</b> with <b>pollingDuration</b> until <b>an element</b> by the specified <b>locator</b>
      * becomes a <b>state</b> in the specified search context
      * <p>
      * Actions performed at this step:
