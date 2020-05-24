@@ -324,7 +324,7 @@ class JsonResponseValidationStepsTests
         String body = "{\"key\":\"value\"}";
         mockResponse(body);
         testWaitForJsonFieldAppears(0);
-        verify(httpClient, atLeast(6)).execute(argThat(base -> base instanceof HttpRequestBase
+        verify(httpClient, atLeast(5)).execute(argThat(base -> base instanceof HttpRequestBase
                 && base.getMethod().equals(GET)
                 && base.getURI().equals(URI.create(URL))),
                 argThat(context -> context instanceof HttpClientContext));
