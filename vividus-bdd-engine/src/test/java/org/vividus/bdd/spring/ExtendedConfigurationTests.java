@@ -19,13 +19,11 @@ package org.vividus.bdd.spring;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,7 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Supplier;
 
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
@@ -178,19 +175,5 @@ public class ExtendedConfigurationTests
         ViewGenerator viewGenerator = mock(ViewGenerator.class);
         configuration.setViewGenerator(viewGenerator);
         assertEquals(viewGenerator, configuration.viewGenerator());
-    }
-
-    @Test
-    public void shouldReturnMemoizedSupplierForExamplesTableFactory() throws IOException
-    {
-        ExtendedConfiguration spy = spy(configuration);
-        ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
-        spy.init();
-        spy.useExamplesTableFactory(examplesTableFactory);
-        Supplier<ExamplesTableFactory> supplier = spy.getExamplesTableFactory();
-        assertSame(examplesTableFactory, supplier.get());
-        assertSame(examplesTableFactory, supplier.get());
-        assertSame(examplesTableFactory, supplier.get());
-        verify(spy, times(2)).examplesTableFactory();
     }
 }

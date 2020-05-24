@@ -19,20 +19,17 @@ package org.vividus.bdd.transformer;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
-import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.ExamplesTable.TableRows;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
@@ -42,8 +39,6 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
     private static final String BY_MAX_COLUMNS_PROPERTY = "byMaxColumns";
     private static final String BY_MAX_ROWS_PROPERTY = "byMaxRows";
     private static final String BY_COLUMNS_NAMES_PROPERTY = "byColumnNames";
-
-    private Supplier<ExamplesTableFactory> examplesTableFactory;
 
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
@@ -57,18 +52,13 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
         isTrue(!(byMaxColumns != null && byColumnNames != null),
                 "Conflicting properties declaration found: '%s' and '%s'",
                 BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY);
-        ExamplesTable examplesTable = examplesTableFactory.get().createExamplesTable(tableAsString);
+        TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
 
-        List<String> filteredColumns = getFilteredHeaders(byMaxColumns, byColumnNames, examplesTable.getHeaders());
-        List<Map<String, String>> result = filterByHeaders(filteredColumns, getFilteredRows(byMaxRows, examplesTable));
+        List<String> filteredColumns = getFilteredHeaders(byMaxColumns, byColumnNames, tableRows.getHeaders());
+        List<Map<String, String>> result = filterByHeaders(filteredColumns,
+                getFilteredRows(byMaxRows, tableRows.getRows()));
 
-        List<List<String>> resultRows = result.stream()
-                .map(LinkedHashMap::new)
-                .map(Map::values)
-                .map(ArrayList::new)
-                .collect(Collectors.toList());
-
-        return ExamplesTableProcessor.buildExamplesTable(filteredColumns, resultRows, properties, true, true);
+        return ExamplesTableProcessor.buildExamplesTable(filteredColumns, result, properties);
     }
 
     private List<Map<String, String>> filterByHeaders(List<String> filteredColumns, List<Map<String, String>> result)
@@ -77,13 +67,13 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
         return result;
     }
 
-    private List<Map<String, String>> getFilteredRows(String byMaxRows, ExamplesTable examplesTable)
+    private List<Map<String, String>> getFilteredRows(String byMaxRows, List<Map<String, String>> list)
     {
         return Optional.ofNullable(byMaxRows)
                 .map(Integer::parseInt)
-                .filter(m -> m < examplesTable.getRowCount())
-                .map(m -> examplesTable.getRows().subList(0, m))
-                .orElseGet(examplesTable::getRows);
+                .filter(m -> m < list.size())
+                .map(m -> list.subList(0, m))
+                .orElse(list);
     }
 
     private List<String> getFilteredHeaders(String byMaxColumns, String byColumnNames, List<String> headerValues)
@@ -102,10 +92,5 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
             filteredColumns.retainAll(columnNames);
         }
         return filteredColumns;
-    }
-
-    public void setExamplesTableFactory(Supplier<ExamplesTableFactory> examplesTableFactory)
-    {
-        this.examplesTableFactory = examplesTableFactory;
     }
 }

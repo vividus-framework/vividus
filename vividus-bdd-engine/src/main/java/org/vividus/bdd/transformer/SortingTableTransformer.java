@@ -18,6 +18,7 @@ package org.vividus.bdd.transformer;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,6 +26,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.model.ExamplesTable.TableRows;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
@@ -34,28 +36,28 @@ public class SortingTableTransformer implements ExtendedTableTransformer
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
+        TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
         String byColumns = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "byColumns");
-        List<String> rowsToSort = ExamplesTableProcessor.parseRows(tableAsString);
-        String header = rowsToSort.get(0);
-        List<String> headerValues = tableParsers.parseRow(header, true, properties);
-        List<Integer> columnsToCompare = Stream.of(StringUtils.split(byColumns, '|'))
+        List<String> headerValues = tableRows.getHeaders();
+        List<String> columnsToCompare = Stream.of(StringUtils.split(byColumns, '|'))
                 .map(String::trim)
-                .map(headerValues::indexOf)
-                .filter(i -> i > -1)
                 .collect(Collectors.toList());
-        List<List<String>> rows = ExamplesTableProcessor.parseDataRows(rowsToSort, tableParsers, properties).stream()
+        List<Map<String, String>> rows = tableRows.getRows().stream()
                 .sorted((r1, r2) ->
                 {
                     int result = 0;
-                    Iterator<Integer> indexIterator = columnsToCompare.iterator();
-                    while (result == 0 && indexIterator.hasNext())
+                    Iterator<String> columnIterator = columnsToCompare.iterator();
+                    while (result == 0 && columnIterator.hasNext())
                     {
-                        int index = indexIterator.next();
-                        result = r1.get(index).compareTo(r2.get(index));
+                        String column = columnIterator.next();
+                        if (headerValues.contains(column))
+                        {
+                            result = r1.get(column).compareTo(r2.get(column));
+                        }
                     }
                     return result;
                 })
                 .collect(Collectors.toList());
-        return ExamplesTableProcessor.buildExamplesTable(headerValues, rows, properties, true);
+        return ExamplesTableProcessor.buildExamplesTable(headerValues, rows, properties);
     }
 }

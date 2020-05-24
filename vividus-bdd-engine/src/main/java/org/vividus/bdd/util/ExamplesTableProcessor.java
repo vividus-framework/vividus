@@ -16,40 +16,24 @@
 
 package org.vividus.bdd.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
-import org.jbehave.core.model.TableParsers;
 
 public final class ExamplesTableProcessor
 {
-    private static final String ROW_SEPARATOR_PATTERN = "\r?\n";
     private static final String VALUE_SEPARATOR_KEY = "valueSeparator";
     private static final String DEFAULT_SEPARATOR_VALUE = "|";
 
     private ExamplesTableProcessor()
     {
-    }
-
-    public static List<String> parseRows(String tableAsString)
-    {
-        return Stream.of(tableAsString.split(ROW_SEPARATOR_PATTERN))
-                .map(String::trim)
-                .collect(Collectors.toList());
-    }
-
-    public static List<List<String>> parseDataRows(List<String> rows, TableParsers tableParsers,
-            TableProperties properties)
-    {
-        return rows.stream().skip(1)
-        .map(row -> tableParsers.parseRow(row, false, properties))
-        .collect(Collectors.toCollection(LinkedList::new));
     }
 
     public static String buildExamplesTableFromColumns(Collection<String> header, List<List<String>> columnsData,
@@ -71,6 +55,29 @@ public final class ExamplesTableProcessor
             i -> String.format("column '%s' has %d value(s)", headerIterator.next(), columnsData.get(i).size()))
             .collect(Collectors.joining(", "));
         throw new IllegalArgumentException("Columns are not aligned: " + columnNamesPerValuesNumbers);
+    }
+
+    /**
+     * Build a table using input <b>headers</b> and <b>rows</b>
+     *
+     * @param headers table headers
+     * @param rows table rows
+     * @param properties table properties
+     * @return examples table as string
+     */
+    public static String buildExamplesTable(Collection<String> headers, List<Map<String, String>> rows,
+            TableProperties properties)
+    {
+        return buildExamplesTable(headers, asDataRows(rows), properties, false, false);
+    }
+
+    private static List<List<String>> asDataRows(List<Map<String, String>> rows)
+    {
+        return rows.stream()
+                .map(LinkedHashMap::new)
+                .map(Map::values)
+                .map(ArrayList::new)
+                .collect(Collectors.toList());
     }
 
     public static String buildExamplesTable(Collection<String> header, List<List<String>> data,

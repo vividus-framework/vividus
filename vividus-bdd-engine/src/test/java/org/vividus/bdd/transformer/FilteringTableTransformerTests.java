@@ -18,21 +18,17 @@ package org.vividus.bdd.transformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
-import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.TableParsers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,19 +37,14 @@ class FilteringTableTransformerTests
     private static final String TABLE = "|key1|key2|key3|\n|1|2|3|\n|4|5|6|\n|7|8|9|";
     private static final String BY_MAX_ROWS_PROPERTY = "byMaxRows";
 
-    @Mock
-    private ExamplesTableFactory factory;
-
-    @InjectMocks
-    private FilteringTableTransformer transformer;
+    private final TableParsers tableParsers = new TableParsers();
+    private final FilteringTableTransformer transformer = new FilteringTableTransformer();
 
     @ParameterizedTest
     @MethodSource("tableSource")
     void testTransform(String tableToTransform, Properties properties, String expectedTable)
     {
-        transformer.setExamplesTableFactory(() -> factory);
-        when(factory.createExamplesTable(tableToTransform)).thenReturn(new ExamplesTable(TABLE));
-        assertEquals(expectedTable, transformer.transform(tableToTransform, null,
+        assertEquals(expectedTable, transformer.transform(tableToTransform, tableParsers,
                 new TableProperties(properties)));
     }
 
@@ -61,11 +52,9 @@ class FilteringTableTransformerTests
     void testTransformUnorderedHeader()
     {
         String table = "|key2|key3|key1|\n|2|3|1|\n|4|5|6|\n|7|8|9|";
-        transformer.setExamplesTableFactory(() -> factory);
-        when(factory.createExamplesTable(table)).thenReturn(new ExamplesTable(table));
         Properties properties = new Properties();
         properties.setProperty(BY_MAX_ROWS_PROPERTY, "1");
-        assertEquals("|key2|key3|key1|\n|2|3|1|", transformer.transform(table, null,
+        assertEquals("|key2|key3|key1|\n|2|3|1|", transformer.transform(table, tableParsers,
                 new TableProperties(properties)));
     }
 
@@ -73,7 +62,7 @@ class FilteringTableTransformerTests
     void testFailOnMissingProperties()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE, null, new TableProperties(new Properties())));
+            () -> transformer.transform(TABLE, tableParsers, new TableProperties(new Properties())));
         assertEquals("At least one of the following properties should be specified: 'byMaxColumns', 'byMaxRows', "
                 + "'byColumnNames'", exception.getMessage());
     }
@@ -82,7 +71,7 @@ class FilteringTableTransformerTests
     void testFailOnConflictingProperties()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE, null, new TableProperties(createProperties(1, null, "key2"))));
+            () -> transformer.transform(TABLE, tableParsers, new TableProperties(createProperties(1, null, "key2"))));
         assertEquals("Conflicting properties declaration found: 'byMaxColumns' and 'byColumnNames'",
                 exception.getMessage());
     }
@@ -115,8 +104,7 @@ class FilteringTableTransformerTests
             Arguments.of(TABLE, createProperties(2, null, null),        "|key1|key2|\n|1|2|\n|4|5|\n|7|8|"),
             Arguments.of(TABLE, createProperties(null, 2, "key1;key3"), "|key1|key3|\n|1|3|\n|4|6|"),
             Arguments.of(TABLE, createProperties(null, 5, "key3;key2"), "|key2|key3|\n|2|3|\n|5|6|\n|8|9|"),
-            Arguments.of(TABLE, createProperties(null, 1, "key1"),      "|key1|\n|1|"),
-            Arguments.of("/test.table", createProperties(2, 1, null),   "|key1|key2|\n|1|2|")
+            Arguments.of(TABLE, createProperties(null, 1, "key1"),      "|key1|\n|1|")
         );
     }
     // CHECKSTYLE:ON
