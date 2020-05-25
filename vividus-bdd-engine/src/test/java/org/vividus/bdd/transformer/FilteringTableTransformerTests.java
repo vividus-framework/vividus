@@ -64,15 +64,53 @@ class FilteringTableTransformerTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform(TABLE, tableParsers, new TableProperties(new Properties())));
         assertEquals("At least one of the following properties should be specified: 'byMaxColumns', 'byMaxRows', "
-                + "'byColumnNames'", exception.getMessage());
+                + "'byColumnNames', 'column.<regex placeholder>'", exception.getMessage());
     }
 
     @Test
     void testFailOnConflictingProperties()
     {
+        TableProperties tableProperties = new TableProperties(createProperties(1, null, "key2"));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE, tableParsers, new TableProperties(createProperties(1, null, "key2"))));
+            () -> transformer.transform(TABLE, tableParsers, tableProperties));
         assertEquals("Conflicting properties declaration found: 'byMaxColumns' and 'byColumnNames'",
+                exception.getMessage());
+    }
+
+    @Test
+    void testTransformUsingRegex()
+    {
+        String table = "|city    |rand |capital |founded |\n"
+                     + "|Minsk   |2152 |true    |1067    |\n"
+                     + "|Norilsk |1103 |false   |1920    |\n"
+                     + "|Magadan |9843 |false   |1939    |\n";
+
+        Properties properties = new Properties();
+        properties.setProperty("column.city", "(?i).*?n.*");
+        properties.setProperty("column.capital", "false");
+        properties.setProperty("column.founded", "\\d9[23](0|9)");
+
+        String transformed = transformer.transform(table, tableParsers, new TableProperties(properties));
+
+        String expected = "|city|rand|capital|founded|\n"
+                        + "|Norilsk|1103|false|1920|\n"
+                        + "|Magadan|9843|false|1939|";
+
+        assertEquals(expected, transformed);
+    }
+
+    @Test
+    void testTransformUsingRegexInvalidProperties()
+    {
+        Properties properties = new Properties();
+        properties.setProperty("column.demo", ".*");
+        properties.setProperty(BY_MAX_ROWS_PROPERTY, "2");
+
+        TableProperties tableProperties = new TableProperties(properties);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> transformer.transform(TABLE, tableParsers, tableProperties));
+        assertEquals("Filtering by regex is not allowed to be used together with the following properties:"
+                + " 'byMaxColumns', 'byColumnNames', 'byMaxRows'",
                 exception.getMessage());
     }
 

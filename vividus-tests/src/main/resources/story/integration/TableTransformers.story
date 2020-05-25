@@ -123,3 +123,16 @@ Examples:
 |column1|column2|
 |A      |C      |
 |B      |D      |
+
+
+Scenario: Verify FILTERING transformer by regex
+Then `<shouldMatchRegex>` matches `^([01]+|\W+|[A-Z]+)$`
+Examples:
+{transformer=FILTERING, column.shouldMatchRegex=^([01]+|\W+|[A-Z]+)$}
+|shouldMatchRegex|
+|10100101011     |
+|+!@#<>          |
+|@(-_-)@         |
+|ABCDEFGXYZU     |
+|jhbdahjabw      |
+|738162378613896 |
