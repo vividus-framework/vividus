@@ -62,14 +62,18 @@ public class DateExpressionProcessor implements IExpressionProcessor
             return generateDate(new DateExpression(durationMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP, DURATION_GROUP,
                     GENERATE_DATE_FORMAT_GROUP));
         }
-        durationMatcher = ISO_DURATION_PATTERN_WITH_FORMAT_PATTERN.matcher(expression);
-        if (durationMatcher.find())
+        Matcher isoDurationMatcher = ISO_DURATION_PATTERN_WITH_FORMAT_PATTERN.matcher(expression);
+        if (isoDurationMatcher.find())
         {
-            DateExpression dateExpression = new DateExpression(durationMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
+            DateExpression dateExpression = new DateExpression(isoDurationMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
                     DURATION_GROUP, FORMAT_GROUP);
-            LOGGER.warn("WARNING: The syntax of expression #{{}} is deprecated, use new syntax #{generateDate({}{})",
-                    expression, durationMatcher.group(1),
-                    dateExpression.hasCustomFormat() ? ", " + dateExpression.getCustomFormatString() : "");
+            LOGGER.atWarn()
+                  .addArgument(expression)
+                  .addArgument(() -> isoDurationMatcher.group(1))
+                  .addArgument(() -> dateExpression.hasCustomFormat()
+                          ? ", " + dateExpression.getCustomFormatString()
+                          : "")
+                  .log("WARNING: The syntax of expression #{{}} is deprecated, use new syntax #{generateDate({}{})");
             return generateDate(dateExpression);
         }
         return Optional.empty();
