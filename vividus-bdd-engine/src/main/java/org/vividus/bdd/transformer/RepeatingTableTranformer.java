@@ -16,30 +16,37 @@
 
 package org.vividus.bdd.transformer;
 
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map;
 
 import javax.inject.Named;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.model.ExamplesTable.TableRows;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
-@Named("ITERATING")
-public class IteratingTableTransformer implements ExtendedTableTransformer
+@Named("REPEATING")
+public class RepeatingTableTranformer implements ExtendedTableTransformer
 {
-    private static final List<String> ITERATOR = List.of("iterator");
-
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
-        checkTableEmptiness(tableAsString);
-        int limit = ExtendedTableTransformer.getMandatoryIntProperty(properties, "limit");
-        List<String> column = Stream.iterate(0, i -> i + 1)
-                .limit(limit)
-                .map(String::valueOf)
-                .collect(Collectors.toList());
-        return ExamplesTableProcessor.buildExamplesTableFromColumns(ITERATOR, List.of(column), properties);
+        TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
+        int times = ExtendedTableTransformer.getMandatoryIntProperty(properties, "times");
+        List<Map<String, String>> rows = nCopies(times, tableRows);
+        return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(), rows, properties);
+    }
+
+    private List<Map<String, String>> nCopies(int times, TableRows tableRows)
+    {
+        List<Map<String, String>> examplesTableRows = tableRows.getRows();
+        List<Map<String, String>> rows = new LinkedList<>();
+        for (int i = 0; i < times; i++)
+        {
+            rows.addAll(examplesTableRows);
+        }
+        return rows;
     }
 }
