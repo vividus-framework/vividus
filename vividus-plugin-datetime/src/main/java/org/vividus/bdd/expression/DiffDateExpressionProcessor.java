@@ -19,14 +19,14 @@ package org.vividus.bdd.expression;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
@@ -38,13 +38,6 @@ public class DiffDateExpressionProcessor implements IExpressionProcessor
             .compile("^diffDate\\((.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?)(,(?<!\\\\,)(.+?))?\\)$",
                     Pattern.CASE_INSENSITIVE);
     private static final String MINUS_SIGN = "-";
-    private static final Map<String, Function<Duration, Long>> FORMATTERS =
-            Map.of("days",  Duration::toDays,
-                   "hours", Duration::toHours,
-                   "minutes", Duration::toMinutes,
-                   "seconds", Duration::toSeconds,
-                   "millis", Duration::toMillis,
-                   "nanos", Duration::toNanos);
 
     private static final int FIRST_INPUT_DATE_GROUP = 1;
     private static final int FIRST_INPUT_FORMAT_GROUP = 2;
@@ -72,9 +65,9 @@ public class DiffDateExpressionProcessor implements IExpressionProcessor
             String durationAsString = duration.toString();
             return Optional.ofNullable(expressionMatcher.group(FORMAT_GROUP))
                            .map(String::trim)
-                           .map(String::toLowerCase)
-                           .map(FORMATTERS::get)
-                           .map(c -> c.apply(duration))
+                           .map(String::toUpperCase)
+                           .map(t -> EnumUtils.getEnum(ChronoUnit.class, t))
+                           .map(u -> u.between(firstZonedDateTime, secondZonedDateTime))
                            .map(l -> l.toString())
                            .or(() -> processNegative(duration, durationAsString));
         }
