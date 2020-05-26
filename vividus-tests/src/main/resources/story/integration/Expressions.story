@@ -18,3 +18,6 @@ Then `${date}` is equal to `#{fromEpochSecond(${epoch})}`
 
 Scenario: Verify anyOf expression
 Then `#{anyOf(1, 2\,3,3)}` matches `1|2,3|3`
+
+Scenario: Verify diffDate with formatting
+Then `777` is = `#{diffDate(2019-01-01T12:00:00.223Z,yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:01.000Z,yyyy-MM-dd'T'HH:mm:ss.SSSVV, milliS)}`
