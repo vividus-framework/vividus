@@ -42,16 +42,21 @@ class DiffDateExpressionProcessorTests
         // CHECKSTYLE:OFF
         // @formatter:off
         return Stream.of(
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)", "PT0S"               ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.353Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)", "PT0.02S"            ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:03:03.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)", "PT3M3S"             ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T11:05:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)", "-PT55M"             ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T11:05:03.353Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)", "-PT54M56.98S"       ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-02T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)", "PT24H"              ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2018-02-02T11:05:00.352Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)", "-PT7992H54M59.981S" ),
-            Arguments.of("diffDate(10042019 13:20:43 GMT,             ddMMyyyy HH:mm:ss zzz,       10042019 06:22:43 US/Pacific, ddMMyyyy HH:mm:ss zzz)",       "PT2M"               ),
-            Arguments.of("diffDate(\"10 Apr 2019 13:20:43\",          \"dd MMM yyyy HH:mm:ss\",    10 Apr 2019 09:20:43,         dd MMM yyyy HH:mm:ss)",        "-PT4H"              ),
-            Arguments.of("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019-04-10 03,                yyyy-MM-dd HH)",               "-PT10H"             )
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT0S"               ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.353Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT0.02S"            ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:03:03.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT3M3S"             ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T11:05:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT55M"             ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T11:05:03.353Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT54M56.98S"       ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-02T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT24H"              ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2018-02-02T11:05:00.352Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT7992H54M59.981S" ),
+            Arguments.of("diffDate(10042019 13:20:43 GMT,             ddMMyyyy HH:mm:ss zzz,       10042019 06:22:43 US/Pacific, ddMMyyyy HH:mm:ss zzz)",                "PT2M"               ),
+            Arguments.of("diffDate(\"10 Apr 2019 13:20:43\",          \"dd MMM yyyy HH:mm:ss\",    10 Apr 2019 09:20:43,         dd MMM yyyy HH:mm:ss)",                 "-PT4H"              ),
+            Arguments.of("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019-04-10 03,                yyyy-MM-dd HH)",                        "-PT10H"             ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, days)",    "365"                ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, Hours)",   "8760"               ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, mInuteS)", "525600"             ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.555Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, milliS)",  "222"                ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.555Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, nanos)",   "222000000"          )
         );
         // CHECKSTYLE:ON
         // @formatter:on

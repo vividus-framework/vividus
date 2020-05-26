@@ -19,7 +19,9 @@ package org.vividus.bdd.expression;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,9 +33,18 @@ import org.vividus.util.DateUtils;
 @Named
 public class DiffDateExpressionProcessor implements IExpressionProcessor
 {
+    private static final int FORMAT_GROUP = 6;
     private static final Pattern DIFF_DATE_PATTERN = Pattern
-            .compile("^diffDate\\((.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?)\\)$", Pattern.CASE_INSENSITIVE);
+            .compile("^diffDate\\((.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?)(,(?<!\\\\,)(.+?))?\\)$",
+                    Pattern.CASE_INSENSITIVE);
     private static final String MINUS_SIGN = "-";
+    private static final Map<String, Function<Duration, Long>> FORMATTERS =
+            Map.of("days",  Duration::toDays,
+                   "hours", Duration::toHours,
+                   "minutes", Duration::toMinutes,
+                   "seconds", Duration::toSeconds,
+                   "millis", Duration::toMillis,
+                   "nanos", Duration::toNanos);
 
     private static final int FIRST_INPUT_DATE_GROUP = 1;
     private static final int FIRST_INPUT_FORMAT_GROUP = 2;
@@ -59,11 +70,22 @@ public class DiffDateExpressionProcessor implements IExpressionProcessor
                     SECOND_INPUT_FORMAT_GROUP);
             Duration duration = Duration.between(firstZonedDateTime, secondZonedDateTime);
             String durationAsString = duration.toString();
-            return duration.isNegative()
-                    ? Optional.of(MINUS_SIGN + durationAsString.replace(MINUS_SIGN, StringUtils.EMPTY))
-                    : Optional.of(durationAsString);
+            return Optional.ofNullable(expressionMatcher.group(FORMAT_GROUP))
+                           .map(String::trim)
+                           .map(String::toLowerCase)
+                           .map(FORMATTERS::get)
+                           .map(c -> c.apply(duration))
+                           .map(l -> l.toString())
+                           .or(() -> processNegative(duration, durationAsString));
         }
         return Optional.empty();
+    }
+
+    private Optional<String> processNegative(Duration duration, String durationAsString)
+    {
+        return duration.isNegative()
+                ? Optional.of(MINUS_SIGN + durationAsString.replace(MINUS_SIGN, StringUtils.EMPTY))
+                : Optional.of(durationAsString);
     }
 
     private ZonedDateTime getZonedDateTime(Matcher expressionMatcher, int inputDateGroup, int inputFormatGroup)
