@@ -256,16 +256,17 @@ class WaitStepsTests
     }
 
     @Test
-    void testWaitDurationWithPollingDurationTillElementAppears()
+    void testWaitDurationWithPollingDurationTillElementDisappears()
     {
         when(webUiContext.getSearchContext()).thenReturn(webElement);
-        WaitResult<List<WebElement>> waitResult = new WaitResult<>();
+        WaitResult<Boolean> waitResult = new WaitResult<>();
         waitResult.setWaitPassed(true);
         SearchAttributes attributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH);
-        IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(attributes)).thenReturn(condition);
+        IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
         when(waitActions.wait(webElement, TIMEOUT, TIMEOUT, condition)).thenReturn(waitResult);
-        assertTrue(waitSteps.waitDurationWithPollingDurationTillElementAppears(TIMEOUT, TIMEOUT, attributes));
+        when(expectedSearchActionsConditions.invisibilityOfElement(attributes)).thenReturn(condition);
+        assertTrue(waitSteps.waitDurationWithPollingDurationTillElementState(TIMEOUT, TIMEOUT, attributes,
+                State.NOT_VISIBLE));
     }
 
     @Test

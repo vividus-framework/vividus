@@ -84,25 +84,33 @@ public class WaitSteps
 
     /**
      * Waits <b>duration</b> with <b>pollingDuration</b> until <b>an element</b> by the specified <b>locator</b>
-     * appears in the specified search context
+     * becomes a <b>state</b> in the specified search context
      * <p>
      * Actions performed at this step:
      * </p>
      * <ul>
      * <li><i>Finds</i> an element by the specified <b>locator</b> within search context
-     * <li><i>Waits</i> <b>duration</b> with <b>pollingDuration</b> until this element becomes visible
+     * <li><i>Waits</i> <b>duration</b> with <b>pollingDuration</b> until this element becomes <b>state</b>
      * </ul>
-     * @param duration Total waiting time for an element becomes visible
-     * @param pollingDuration Defines the timeout between attempts
-     * @param locator Locator to search for elements
-     * @return True if element appears, otherwise false
+     * <br>Example:<br>
+     * <code>When I wait 'PT30S' with 'PT10S' polling until element located `By.id(text)` becomes NOT_VISIBLE</code>
+     * - wait until all elements with id=text becomes not visible for 30 seconds, polling every 10 seconds
+     *
+     * @param duration        Total waiting time according to
+     *                        <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> standard
+     * @param pollingDuration Defines the timeout between attempts according to
+     *                        <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> standard
+     * @param locator         Locator to search for elements
+     * @param state           State value of the element
+     * (<i>Possible values:</i> <b>ENABLED, DISABLED, SELECTED, NOT_SELECTED, VISIBLE, NOT_VISIBLE</b>)
+     * @return True if element becomes a <b>state</b>, otherwise false
      */
-    @When("I wait '$duration' with '$pollingDuration' polling until an element located by $locator appears")
-    public boolean waitDurationWithPollingDurationTillElementAppears(Duration duration, Duration pollingDuration,
-            SearchAttributes locator)
+    @When("I wait `$duration` with `$pollingDuration` polling until element located `$locator` becomes $state")
+    public boolean waitDurationWithPollingDurationTillElementState(Duration duration, Duration pollingDuration,
+            SearchAttributes locator, State state)
     {
         return waitActions.wait(getSearchContext(), duration, pollingDuration,
-                expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(locator)).isWaitPassed();
+                state.getExpectedCondition(expectedSearchActionsConditions, locator)).isWaitPassed();
     }
 
     /**

@@ -242,3 +242,6 @@ When I select element located `By.xpath(//*[@<attributeType>="<attributeValue>"]
 
 Composite: When I change context to an element by $locator
 When I change context to element located `<locator>`
+
+Composite: When I wait '$duration' with '$pollingDuration' polling until an element located by $locator appears
+When I wait `<duration>` with `<pollingDuration>` polling until element located `<locator>` becomes VISIBLE
