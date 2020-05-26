@@ -43,6 +43,7 @@ class DiffDateExpressionProcessorTests
         // @formatter:off
         return Stream.of(
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT0S"               ),
+            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:02.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, plumbus)", "PT2S"               ),
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.353Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT0.02S"            ),
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:03:03.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT3M3S"             ),
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T11:05:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT55M"             ),
