@@ -112,3 +112,14 @@ Examples:
 {transformer=RESOLVING_SELF_REFERENCES_EAGERLY}
 |column1|column2 |column3|
 |A      |<column>|
+
+
+Scenario: Verify REPEATING transformer
+Then `<column1>` is equal to `A B A B A B`
+Then `<column2>` is equal to `C D C D C D`
+Examples:
+{transformer=REPEATING, times=3}
+{transformer=JOINING, joinMode=rows}
+|column1|column2|
+|A      |C      |
+|B      |D      |

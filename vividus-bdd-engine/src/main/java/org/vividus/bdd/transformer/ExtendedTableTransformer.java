@@ -43,6 +43,11 @@ public interface ExtendedTableTransformer extends TableTransformer
         return propertyValue;
     }
 
+    static int getMandatoryIntProperty(TableProperties tableProperties, String propertyName)
+    {
+        return Integer.parseInt(getMandatoryNonBlankProperty(tableProperties, propertyName));
+    }
+
     default <E extends Enum<E>> E getMandatoryEnumProperty(TableProperties properties, String propertyName,
             Class<E> enumClass)
     {
