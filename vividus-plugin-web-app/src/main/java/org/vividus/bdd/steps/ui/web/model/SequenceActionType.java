@@ -29,12 +29,12 @@ import org.vividus.selenium.KeysUtils;
 
 public enum SequenceActionType
 {
-    DOUBLE_CLICK
+    DOUBLE_CLICK(true)
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
-            performOnWebElement(argument, actions::doubleClick);
+            performOnWebElement(argument, actions::doubleClick, actions::doubleClick);
         }
 
         @Override
@@ -43,12 +43,12 @@ public enum SequenceActionType
             return WebElement.class;
         }
     },
-    CLICK_AND_HOLD
+    CLICK_AND_HOLD(true)
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
-            performOnWebElement(argument, actions::clickAndHold);
+            performOnWebElement(argument, actions::clickAndHold, actions::clickAndHold);
         }
 
         @Override
@@ -57,12 +57,12 @@ public enum SequenceActionType
             return WebElement.class;
         }
     },
-    MOVE_TO
+    MOVE_TO(false)
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
-            performOnWebElement(argument, actions::moveToElement);
+            performOnWebElement(argument, actions::moveToElement, () -> { });
         }
 
         @Override
@@ -71,7 +71,7 @@ public enum SequenceActionType
             return WebElement.class;
         }
     },
-    MOVE_BY_OFFSET
+    MOVE_BY_OFFSET(false)
     {
         @Override
         public void addAction(Actions actions, Object argument)
@@ -85,12 +85,12 @@ public enum SequenceActionType
             return Point.class;
         }
     },
-    RELEASE
+    RELEASE(true)
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
-            performOnWebElement(argument, actions::release);
+            performOnWebElement(argument, actions::release, actions::release);
         }
 
         @Override
@@ -99,7 +99,7 @@ public enum SequenceActionType
             return WebElement.class;
         }
     },
-    ENTER_TEXT
+    ENTER_TEXT(false)
     {
         @Override
         public void addAction(Actions actions, Object argument)
@@ -113,7 +113,7 @@ public enum SequenceActionType
             return String.class;
         }
     },
-    PRESS_KEYS
+    PRESS_KEYS(false)
     {
         private final Type argumentType = TypeUtils.parameterize(List.class, String.class);
 
@@ -129,12 +129,12 @@ public enum SequenceActionType
             return argumentType;
         }
     },
-    CLICK
+    CLICK(true)
     {
         @Override
         public void addAction(Actions actions, Object argument)
         {
-            performOnWebElement(argument, actions::click);
+            performOnWebElement(argument, actions::click, actions::click);
         }
 
         @Override
@@ -144,20 +144,44 @@ public enum SequenceActionType
         }
     };
 
+    private final boolean nullable;
+
+    SequenceActionType(boolean nullable)
+    {
+        this.nullable = nullable;
+    }
+
+    public boolean isNullable()
+    {
+        return nullable;
+    }
+
     public abstract void addAction(Actions actions, Object argument);
 
     public abstract Type getArgumentType();
 
-    <T, U extends WebElement> void performOnWebElement(T argument, Consumer<U> argumentConsumer)
+    <T, U extends WebElement> void performOnWebElement(T argument, Consumer<U> argumentConsumer, Runnable emptyRunner)
     {
-        perform(argument, argumentConsumer);
+        perform(argument, argumentConsumer, emptyRunner);
+    }
+
+    <T, U> void perform(T argument, Consumer<U> argumentConsumer)
+    {
+        perform(argument, argumentConsumer, () -> { });
     }
 
     @SuppressWarnings("unchecked")
-    <T, U> void perform(T argument, Consumer<U> argumentConsumer)
+    <T, U> void perform(T argument, Consumer<U> argumentConsumer, Runnable emptyRunner)
     {
-        Validate.isTrue(TypeUtils.isAssignable(argument.getClass(), getArgumentType()),
-                "Argument for %s action must be of type %s", name(), getArgumentType());
-        argumentConsumer.accept((U) argument);
+        if (argument == null)
+        {
+            emptyRunner.run();
+        }
+        else
+        {
+            Validate.isTrue(TypeUtils.isAssignable(argument.getClass(), getArgumentType()),
+                    "Argument for %s action must be of type %s", name(), getArgumentType());
+            argumentConsumer.accept((U) argument);
+        }
     }
 }

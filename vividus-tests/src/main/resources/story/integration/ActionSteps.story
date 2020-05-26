@@ -32,6 +32,16 @@ When I execute sequence of actions:
 |CLICK|By.xpath(//button[text()='Click me'])|
 Then the text '${expectedText}' exists
 
+Scenario: Action verification CLICK with no argument
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+When I initialize the scenario variable `expectedText` with value `Good day!`
+Then the text '${expectedText}' does not exist
+When I execute sequence of actions:
+|type   |argument                             |
+|MOVE_TO|By.xpath(//button[text()='Click me'])|
+|CLICK  |                                     |
+Then the text '${expectedText}' exists
+
 Scenario: Action verification CLICK_AND_HOLD
 Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
 When I change context to an element by By.id(target)
@@ -39,6 +49,16 @@ Then the context element has the CSS property 'background-color'='rgba(255, 255,
 When I execute sequence of actions:
 |type          |argument         |
 |CLICK_AND_HOLD|By.xpath(self::*)|
+Then the context element has the CSS property 'background-color'='rgba(255, 0, 0, 1)'
+
+Scenario: Action verification CLICK_AND_HOLD with no argument
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+When I change context to an element by By.id(target)
+Then the context element has the CSS property 'background-color'='rgba(255, 255, 255, 1)'
+When I execute sequence of actions:
+|type          |argument         |
+|MOVE_TO       |By.xpath(self::*)|
+|CLICK_AND_HOLD|                 |
 Then the context element has the CSS property 'background-color'='rgba(255, 0, 0, 1)'
 
 Scenario: Action verification RELEASE
@@ -51,6 +71,16 @@ When I execute sequence of actions:
 |RELEASE       |By.xpath(self::*)|
 Then the context element has the CSS property 'background-color'='rgba(0, 128, 0, 1)'
 
+Scenario: Action verification RELEASE with no argument
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+When I change context to an element by By.id(target)
+Then the context element has the CSS property 'background-color'='rgba(255, 255, 255, 1)'
+When I execute sequence of actions:
+|type          |argument         |
+|CLICK_AND_HOLD|By.xpath(self::*)|
+|RELEASE       |                 |
+Then the context element has the CSS property 'background-color'='rgba(0, 128, 0, 1)'
+
 Scenario: Action verification DOUBLE_CLICK
 Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
 When I initialize the scenario variable `expectedText` with value `Good day!`
@@ -58,6 +88,16 @@ Then the text '${expectedText}' does not exist
 When I execute sequence of actions:
 |type        |argument                                |
 |DOUBLE_CLICK|By.xpath(//p[text()='Double-click me.'])|
+Then the text '${expectedText}' exists
+
+Scenario: Action verification DOUBLE_CLICK with no argument
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+When I initialize the scenario variable `expectedText` with value `Good day!`
+Then the text '${expectedText}' does not exist
+When I execute sequence of actions:
+|type        |argument                                |
+|MOVE_TO     |By.xpath(//p[text()='Double-click me.'])|
+|DOUBLE_CLICK|                                        |
 Then the text '${expectedText}' exists
 
 Scenario: Action verification ENTER_TEXT

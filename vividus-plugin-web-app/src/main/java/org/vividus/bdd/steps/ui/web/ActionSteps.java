@@ -118,11 +118,15 @@ public class ActionSteps
      * When I execute sequence of actions:
      * <br> |type          |argument                                |
      * <br> |DOUBLE_CLICK  |By.fieldText(Hello World)               |
+     * <br> |DOUBLE_CLICK  |                                        |
      * <br> |CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas)|
+     * <br> |CLICK_AND_HOLD|                                        |
      * <br> |MOVE_BY_OFFSET|(-300, 0)                               |
      * <br> |RELEASE       |By.xpath(//signature-pad-control/canvas)|
+     * <br> |RELEASE       |                                        |
      * <br> |ENTER_TEXT    |Text                                    |
      * <br> |CLICK         |By.placeholder(Enter your password)     |
+     * <br> |CLICK         |                                        |
      * <br> |PRESS_KEYS    |BACK_SPACE                              |
      * <br> |MOVE_TO       |By.id(name)                             |
      * </code>
@@ -139,12 +143,12 @@ public class ActionSteps
      * </tr>
      * <tr>
      * <td>DOUBLE_CLICK</td>
-     * <td>search attribute</td>
+     * <td>search attribute or empty value</td>
      * <td>By.linkUrl(/examples)</td>
      * </tr>
      * <tr>
      * <td>CLICK_AND_HOLD</td>
-     * <td>search attribute</td>
+     * <td>search attribute or empty value</td>
      * <td>By.linkText(Click me)</td>
      * </tr>
      * <tr>
@@ -154,7 +158,7 @@ public class ActionSteps
      * </tr>
      * <tr>
      * <td>RELEASE</td>
-     * <td>search attribute</td>
+     * <td>search attribute or empty value</td>
      * <td>By.tagName(div)</td>
      * </tr>
      * <tr>
@@ -164,7 +168,7 @@ public class ActionSteps
      * </tr>
      * <tr>
      * <td>CLICK</td>
-     * <td>search attribute</td>
+     * <td>search attribute or empty value</td>
      * <td>By.caseSensitiveText(Done)</td>
      * </tr>
      * <tr>
@@ -190,7 +194,7 @@ public class ActionSteps
         performActions(actions, (builder, action) ->
         {
             Object argument = action.getArgument();
-            if (argument.getClass().equals(SearchAttributes.class))
+            if (argument != null && argument.getClass().equals(SearchAttributes.class))
             {
                 Optional<WebElement> element = findElement((SearchAttributes) argument);
                 if (element.isEmpty())

@@ -55,10 +55,26 @@ public class SequenceActionTypeTests
     }
 
     @Test
+    void testDoubleClickNoElement()
+    {
+        SequenceActionType.DOUBLE_CLICK.addAction(baseAction, null);
+        verify(baseAction).doubleClick();
+        verifyNoMoreInteractions(baseAction, element);
+    }
+
+    @Test
     void testClickAndHold()
     {
         SequenceActionType.CLICK_AND_HOLD.addAction(baseAction, element);
         verify(baseAction).clickAndHold(element);
+        verifyNoMoreInteractions(baseAction, element);
+    }
+
+    @Test
+    void testClickAndHoldNoElement()
+    {
+        SequenceActionType.CLICK_AND_HOLD.addAction(baseAction, null);
+        verify(baseAction).clickAndHold();
         verifyNoMoreInteractions(baseAction, element);
     }
 
@@ -91,6 +107,14 @@ public class SequenceActionTypeTests
     }
 
     @Test
+    void testReleaseNoElement()
+    {
+        SequenceActionType.RELEASE.addAction(baseAction, null);
+        verify(baseAction).release();
+        verifyNoMoreInteractions(baseAction, element);
+    }
+
+    @Test
     void testEnterText()
     {
         SequenceActionType.ENTER_TEXT.addAction(baseAction, VALUE);
@@ -111,6 +135,14 @@ public class SequenceActionTypeTests
     {
         SequenceActionType.CLICK.addAction(baseAction, element);
         verify(baseAction).click(element);
+        verifyNoMoreInteractions(baseAction, element);
+    }
+
+    @Test
+    void testClickNoElement()
+    {
+        SequenceActionType.CLICK.addAction(baseAction, null);
+        verify(baseAction).click();
         verifyNoMoreInteractions(baseAction, element);
     }
 
