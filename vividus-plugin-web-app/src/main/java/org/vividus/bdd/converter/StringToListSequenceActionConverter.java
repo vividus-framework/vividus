@@ -51,8 +51,13 @@ public class StringToListSequenceActionConverter extends AbstractParameterConver
             .map(params ->
             {
                 SequenceActionType actionType = params.valueAs("type", SequenceActionType.class);
+                String argumentAsString = argumentAs(params, String.class);
+                if (argumentAsString.isEmpty() && actionType.isNullable())
+                {
+                    return new SequenceAction(actionType, null);
+                }
                 Type argumentType = actionType.getArgumentType();
-                return new SequenceAction(actionType, convertArgument(argumentAs(params, String.class),
+                return new SequenceAction(actionType, convertArgument(argumentAsString,
                         argumentType, () -> argumentAs(params, argumentType)));
             })
             .collect(Collectors.toList());

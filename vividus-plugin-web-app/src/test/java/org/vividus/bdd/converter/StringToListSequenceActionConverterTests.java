@@ -69,6 +69,23 @@ class StringToListSequenceActionConverterTests
     }
 
     @Test
+    void testConvertNullableClick()
+    {
+        String by = "By.xpath(//button)";
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        when(stringToSearchAttributesConverter.convertValue(by, null)).thenReturn(searchAttributes);
+        String value = "|type   |argument          |\n"
+                     + "|MOVE_TO|By.xpath(//button)|\n"
+                     + "|CLICK  |                  |";
+        List<SequenceAction> actions = converter.convertValue(value, null);
+        assertThat(actions, hasSize(2));
+        verifySequenceAction(actions.get(0), SequenceActionType.MOVE_TO, searchAttributes);
+        verifySequenceAction(actions.get(1), SequenceActionType.CLICK, null);
+        verify(stringToSearchAttributesConverter).convertValue(by, null);
+        verifyNoMoreInteractions(stringToSearchAttributesConverter, pointConverter);
+    }
+
+    @Test
     void testConvertValuePoint()
     {
         String pointAsString = "(100, 100)";

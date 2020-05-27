@@ -63,10 +63,15 @@ class ActionStepsTests
     private static final String OFFSETS_PRESENT_MESSAGE = "Action offset is present";
     private static final String POINTER_MOVE_ACTION = "{duration=100, x=0, y=0, type=pointerMove, origin=Mock for "
             + "WebElement, hashCode: %d}";
-    private static final String POINTER_MOVE = POINTER_MOVE_ACTION + ", ";
+    private static final String SEPARATOR = ", ";
+    private static final String POINTER_MOVE = POINTER_MOVE_ACTION + SEPARATOR;
     private static final String DURATION_PART = "{duration=0, type=pause}, {duration=0, type=pause}, {duration=0, "
             + "type=pause}, {duration=0, type=pause}, ";
     private static final String TEXT = "text";
+    private static final String CLICK_ACTION = "{button=0, type=pointerDown}, {button=0, type=pointerUp}";
+    private static final String DOUBLE_CLICK_ACTION = CLICK_ACTION + SEPARATOR + CLICK_ACTION;
+    private static final String RELEASE_ACTION = "{button=0, type=pointerUp}";
+    private static final String CLICK_AND_HOLD_ACTION = "{button=0, type=pointerDown}";
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -155,30 +160,40 @@ class ActionStepsTests
                 new SequenceAction(SequenceActionType.RELEASE, searchAttributes),
                 new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT),
                 new SequenceAction(SequenceActionType.CLICK, searchAttributes),
-                new SequenceAction(SequenceActionType.MOVE_TO, searchAttributes)
+                new SequenceAction(SequenceActionType.MOVE_TO, searchAttributes),
+                new SequenceAction(SequenceActionType.DOUBLE_CLICK, null),
+                new SequenceAction(SequenceActionType.CLICK_AND_HOLD, null),
+                new SequenceAction(SequenceActionType.RELEASE, null),
+                new SequenceAction(SequenceActionType.CLICK, null)
                 );
         actionSteps.executeSequenceOfActions(actions);
         verify((Interactive) webDriver).perform(argThat(arg -> {
             int hash = webElement.hashCode();
             String mouseSequence = "{id=default mouse, type=pointer, parameters={pointerType=mouse}, actions=["
                     + format(POINTER_MOVE, hash)
-                    + "{button=0, type=pointerDown}, {button=0, type=pointerUp}, {button=0, type=pointerDown}, {button=0, type=pointerUp}, "
+                    + DOUBLE_CLICK_ACTION + SEPARATOR
                     + format(POINTER_MOVE, hash)
-                    + "{button=0, type=pointerDown}, "
-                    + "{duration=200, x=15, y=15, type=pointerMove, origin=pointer}, "
+                    + CLICK_AND_HOLD_ACTION + SEPARATOR
+                    + "{duration=200, x=15, y=15, type=pointerMove, origin=pointer}" + SEPARATOR
                     + format(POINTER_MOVE, hash)
-                    + "{button=0, type=pointerUp}, "
+                    + RELEASE_ACTION + SEPARATOR
                     + DURATION_PART + DURATION_PART
                     + format(POINTER_MOVE, hash)
-                    + "{button=0, type=pointerDown}, {button=0, type=pointerUp}, "
-                    + format(POINTER_MOVE_ACTION, hash)
+                    + CLICK_ACTION + SEPARATOR
+                    + format(POINTER_MOVE_ACTION, hash) + SEPARATOR
+                    + DOUBLE_CLICK_ACTION + SEPARATOR
+                    + CLICK_AND_HOLD_ACTION + SEPARATOR
+                    + RELEASE_ACTION + SEPARATOR
+                    + CLICK_ACTION
                     + "]}";
             String keyboardSequence = "{type=key, actions=["
                     + DURATION_PART + DURATION_PART
                     + "{duration=0, type=pause}, {duration=0, type=pause}, "
                     + "{type=keyDown, value=t}, {type=keyUp, value=t}, {type=keyDown, value=e}, {type=keyUp, value=e}, "
                     + "{type=keyDown, value=x}, {type=keyUp, value=x}, {type=keyDown, value=t}, {type=keyUp, value=t}, "
-                    + "{duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}], "
+                    + "{duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause},"
+                    + " {duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause},"
+                    + " {duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}, {duration=0, type=pause}], "
                     + "id=default keyboard}";
             return asString(arg).equals(mouseSequence + keyboardSequence);
         }));
