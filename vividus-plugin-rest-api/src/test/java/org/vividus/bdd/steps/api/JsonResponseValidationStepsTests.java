@@ -403,7 +403,8 @@ class JsonResponseValidationStepsTests
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
         int retryTimes = 4;
         jsonResponseValidationSteps.waitForJsonElement(STRING_PATH, Duration.ofSeconds(2), retryTimes, stepsToExecute);
-        verify(stepsToExecute, times(retryTimes)).execute(Optional.empty());
+        verify(stepsToExecute, atLeast(retryTimes - 1)).execute(Optional.empty());
+        verify(stepsToExecute, atMost(retryTimes)).execute(Optional.empty());
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH), eq(1),
                 verifyMatcher(1));
     }
