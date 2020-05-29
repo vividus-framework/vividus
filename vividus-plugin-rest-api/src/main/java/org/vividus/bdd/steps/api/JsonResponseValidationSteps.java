@@ -37,6 +37,7 @@ import com.jayway.jsonpath.InvalidJsonException;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
@@ -61,9 +62,10 @@ public class JsonResponseValidationSteps
 {
     private static final Set<String> ASSERTION_BOUNDS = Set.of(
             "Different (?:value|keys) found",
-            "Array \"[^\"]+\" has different"
+            "Array \"[^\"]*\" has different"
             );
     private static final String PIPE = "|";
+    private static final char LF = '\n';
     private static final Pattern DIFFERENCES_PATTERN = Pattern.compile(
             "(?=(?:" + join(PIPE, ASSERTION_BOUNDS) + ")).+?(?=(?:" + join(PIPE, ASSERTION_BOUNDS) + "|$))",
             Pattern.DOTALL);
@@ -121,12 +123,18 @@ public class JsonResponseValidationSteps
                         actualData, jsonMatcher);
             }
 
+            StringBuilder matched = new StringBuilder("JSON documents are different:").append(LF);
             Matcher matcher = DIFFERENCES_PATTERN.matcher(differences);
             while (matcher.find())
             {
                 String assertion = matcher.group().strip();
+                matched.append(assertion).append(LF);
                 softAssert.recordFailedAssertion(assertion);
             }
+            String matchedDiff = matched.toString();
+            Validate.isTrue(matchedDiff.equals(differences),
+                    "Unable to match all JSON diff entries from the diff text."
+                    + "%nExpected diff to match:%n%s%nActual matched diff:%n%s%n", differences, matchedDiff);
             return false;
         };
     }
