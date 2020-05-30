@@ -27,20 +27,29 @@ class RoundExpressionProcessorTests
 
     @ParameterizedTest
     @CsvSource({
-        "'round(3)',            true",
-        "'round(-3)',           true",
-        "'round(+3)',           false",
-        "'round(2.90,1)',       true",
-        "'round(-30.12, 23)',   true",
-        "'round(.12, 0)',       false",
-        "'round(2.0094, 20)',   true",
-        "'raund(24)',           false",
-        "'round(ABC)',          false",
-        "'round(1, A)',         false",
-        "'round(,12)',          false",
-        "'round(12,)',          false",
-        "'round(1,2,3)',        false",
-        "'round(1.2,3.1.3,1)',  false"
+        "'round(3)',              true",
+        "'round(-3)',             true",
+        "'round(+3)',             false",
+        "'round(2.90,1)',         true",
+        "'round(-30.12, 23)',     true",
+        "'round(.12, 0)',         false",
+        "'round(2.0094, 20)',     true",
+        "'raund(24)',             false",
+        "'round(ABC)',            false",
+        "'round(1, A)',           false",
+        "'round(,12)',            false",
+        "'round(12,)',            false",
+        "'round(1,2,3)',          false",
+        "'round(1.2,3.1.3,1)',    false",
+        "'round(1,2,ceiling)',    true",
+        "'round(1,2,floor)',      true",
+        "'round(1,2,up)',         true",
+        "'round(1,2,down)',       true",
+        "'round(1,2,half_up)',    true",
+        "'round(1,2,half_down)',  true",
+        "'round(1,2,half_even)',  true",
+        "'round(1,2,unnecessary)',true",
+        "'round(1,2,left)',       false"
     })
     void testApply(String expression, boolean expected)
     {
@@ -106,7 +115,29 @@ class RoundExpressionProcessorTests
         "'round(024.059, 1)',       24.1",
         "'round(24.501, 1)',        24.5",
         "'round(9999999999999999999999999999999999999999.9, 0)', 10000000000000000000000000000000000000000",
-        "'round(9.9999999999999999999999999999999999999999999999999999999999999999999999999999999, 0)', 10"
+        "'round(9.9999999999999999999999999999999999999999999999999999999999999999999999999999999, 0)', 10",
+        "'round(1.4, 0, ceiling)',       2",
+        "'round(1.6, 0, ceiling)',       2",
+        "'round(-1.4, 0, ceiling)',     -1",
+        "'round(-1.6, 0, ceiling)',     -1",
+        "'round(1.4, 0, floor)',         1",
+        "'round(1.6, 0, floor)',         1",
+        "'round(-1.4, 0, floor)',       -2",
+        "'round(-1.6, 0, floor)',       -2",
+        "'round(1.4444, 3, ceiling)',    1.445",
+        "'round(1.6666, 3, ceiling)',    1.667",
+        "'round(-1.4444, 3, ceiling)',  -1.444",
+        "'round(-1.6666, 3, ceiling)',  -1.666",
+        "'round(1.4444, 3, floor)',      1.444",
+        "'round(1.6666, 3, floor)',      1.666",
+        "'round(-1.4444, 3, floor)',    -1.445",
+        "'round(-1.6666, 3, floor)',    -1.667",
+        "'round(-1.4444, 3, up)',       -1.445",
+        "'round(-1.4444, 3, down)',     -1.444",
+        "'round(-1.4444, 3, half_up)',  -1.444",
+        "'round(-1.4444, 3, half_down)',-1.444",
+        "'round(-1.4444, 3, half_even)',-1.444",
+        "'round(-1.1, 2, unnecessary)', -1.1"
     })
     void testRound(String expression, String expected)
     {
