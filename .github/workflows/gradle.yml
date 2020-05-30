@@ -77,7 +77,7 @@ jobs:
 
     - name: Publish unit and integration tests reports - ${{ matrix.platform }}
       if: always()
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: Unit and Integration Tests - Reports - ${{ matrix.platform }}
         path: vividus/output/reports/tests
@@ -104,7 +104,7 @@ jobs:
 
     - name: Publish Integration tests report
       if: matrix.platform == 'ubuntu-latest' && always()
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: Integration Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
@@ -141,7 +141,7 @@ jobs:
 
     - name: Publish System tests report
       if: matrix.platform == 'ubuntu-latest' && always()
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: System Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
