@@ -186,6 +186,22 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
+    void testIsDataByJsonPathFromJsonEqualCheckEmptyArrayMissmatch()
+    {
+        String json = "{ \"arrayKey\": [ { \"idKey\": \"q4jn0f8\", \"randValueKey\": \"i4t8ivC\"} ] }";
+        String expected = "[ { \"idKey\": \"b54Y8id\", \"randValueKey\": \"i4t8ivC\"} ]";
+
+        jsonResponseValidationSteps.isDataByJsonPathFromJsonEqual(json, "$.arrayKey.[?(@.idKey==\"b54Y8id\")]",
+                expected, Options.empty());
+
+        verify(softAssert).recordFailedAssertion("Array \"\" has different length, expected: <1> but was: <0>.");
+        verify(softAssert).recordFailedAssertion("Array \"\" has different content. Missing values: "
+                + "[{\"idKey\":\"b54Y8id\",\"randValueKey\":\"i4t8ivC\"}], expected: <[{\"idKey\":\"b54Y8id\","
+                + "\"randValueKey\":\"i4t8ivC\"}]> but was: <[]>");
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
     void testIsDataByJsonPathEqualIgnoringArrayOrderAndExtraArrayItems()
     {
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
