@@ -45,12 +45,12 @@ public class BatchedEmbedder extends Embedder
     private final IBddVariableContext bddVariableContext;
     private final BatchStorage batchStorage;
 
-    private boolean ignoreFailureInBatches;
     private boolean reportBeforeStories = true;
     private boolean reportAfterStories;
     private boolean generateViewAfterBatches;
 
     private String batch;
+    private boolean ignoreFailure;
 
     public BatchedEmbedder(BddRunContext bddRunContext, IBddVariableContext bddVariableContext,
             BatchStorage batchStorage)
@@ -80,6 +80,8 @@ public class BatchedEmbedder extends Embedder
                 useEmbedderControls(createEmbedderControls(batchExecutionConfiguration));
                 useMetaFilters(batchExecutionConfiguration.getMetaFilters());
 
+                ignoreFailure = batchExecutionConfiguration.isIgnoreFailure();
+
                 EmbedderControls embedderControls = embedderControls();
                 embedderMonitor.usingControls(embedderControls);
                 ExecutorService executorService = createExecutorService(embedderControls.threads());
@@ -106,7 +108,7 @@ public class BatchedEmbedder extends Embedder
                     storyManager().runStoriesAsPaths(storyPaths, filter, failures);
 
                     handleFailures(failures);
-                    if (!ignoreFailureInBatches && !failures.isEmpty())
+                    if (!ignoreFailure && !failures.isEmpty())
                     {
                         break;
                     }
@@ -143,7 +145,7 @@ public class BatchedEmbedder extends Embedder
         BatchedPerformableTree performableTree = (BatchedPerformableTree) super.performableTree();
         performableTree.setReportBeforeStories(reportBeforeStories);
         performableTree.setReportAfterStories(reportAfterStories);
-        performableTree.setIgnoreFailureInBatches(ignoreFailureInBatches);
+        performableTree.setIgnoreFailureInBatches(ignoreFailure);
         return performableTree;
     }
 
@@ -170,11 +172,6 @@ public class BatchedEmbedder extends Embedder
     public void setPerformableTree(PerformableTree performableTree)
     {
         usePerformableTree(performableTree);
-    }
-
-    public void setIgnoreFailureInBatches(boolean ignoreFailureInBatches)
-    {
-        this.ignoreFailureInBatches = ignoreFailureInBatches;
     }
 
     public void setConfiguration(Configuration configuration)

@@ -37,12 +37,14 @@ public class BatchStorage
 
     private final Duration defaultStoryExecutionTimeout;
     private final List<String> defaultMetaFilters;
+    private final boolean ignoreFailureInBatches;
 
     public BatchStorage(IPropertyMapper propertyMapper, String defaultStoryExecutionTimeout,
-            List<String> defaultMetaFilters) throws IOException
+            List<String> defaultMetaFilters, boolean ignoreFailureInBatches) throws IOException
     {
         this.defaultMetaFilters = defaultMetaFilters;
         this.defaultStoryExecutionTimeout = Duration.ofSeconds(Long.parseLong(defaultStoryExecutionTimeout));
+        this.ignoreFailureInBatches = ignoreFailureInBatches;
 
         batchResourceConfigurations = readFromProperties(propertyMapper, "bdd.story-loader.batch-",
                 BatchResourceConfiguration.class);
@@ -61,6 +63,10 @@ public class BatchStorage
             if (config.getStoryExecutionTimeout() == null)
             {
                 config.setStoryExecutionTimeout(this.defaultStoryExecutionTimeout);
+            }
+            if (config.isIgnoreFailure() == null)
+            {
+                config.setIgnoreFailure(ignoreFailureInBatches);
             }
         });
     }
@@ -95,6 +101,7 @@ public class BatchStorage
             config.setName(batchKey);
             config.setStoryExecutionTimeout(defaultStoryExecutionTimeout);
             config.setMetaFilters(defaultMetaFilters);
+            config.setIgnoreFailure(ignoreFailureInBatches);
             return config;
         });
     }

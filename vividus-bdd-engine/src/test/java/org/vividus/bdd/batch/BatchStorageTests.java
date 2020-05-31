@@ -19,7 +19,9 @@ package org.vividus.bdd.batch;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -71,11 +73,13 @@ class BatchStorageTests
 
         BatchExecutionConfiguration batchExecutionConfiguration1 = new BatchExecutionConfiguration();
         batchExecutionConfiguration1.setMetaFilters((String) null);
+        batchExecutionConfiguration1.setIgnoreFailure(null);
         BatchExecutionConfiguration batchExecutionConfiguration2 = new BatchExecutionConfiguration();
         batchExecutionConfiguration2.setName(BATCH_2_NAME);
         batchExecutionConfiguration2.setThreads(BATCH_2_THREADS);
         batchExecutionConfiguration2.setStoryExecutionTimeout(BATCH_2_TIMEOUT);
         batchExecutionConfiguration2.setMetaFilters(BATCH_2_META_FILTERS);
+        batchExecutionConfiguration2.setIgnoreFailure(false);
         Map<String, BatchExecutionConfiguration> batchExecutionConfigurations = new HashMap<>();
         batchExecutionConfigurations.put(BATCH_NUMBERS.get(0), batchExecutionConfiguration1);
         batchExecutionConfigurations.put(BATCH_NUMBERS.get(1), batchExecutionConfiguration2);
@@ -86,7 +90,7 @@ class BatchStorageTests
         when(propertyMapper.readValues("bdd.batch-", BatchExecutionConfiguration.class)).thenReturn(
                 batchExecutionConfigurations);
 
-        batchStorage = new BatchStorage(propertyMapper, Long.toString(DEFAULT_TIMEOUT), DEFAULT_META_FILTERS);
+        batchStorage = new BatchStorage(propertyMapper, Long.toString(DEFAULT_TIMEOUT), DEFAULT_META_FILTERS, true);
     }
 
     @Test
@@ -119,6 +123,7 @@ class BatchStorageTests
             assertEquals(BATCH_2_THREADS, config.getThreads());
             assertEquals(BATCH_2_TIMEOUT, config.getStoryExecutionTimeout());
             assertEquals(List.of(BATCH_2_META_FILTERS), config.getMetaFilters());
+            assertFalse(config.isIgnoreFailure());
         });
     }
 
@@ -136,6 +141,7 @@ class BatchStorageTests
             assertNull(config.getThreads());
             assertEquals(Duration.ofSeconds(DEFAULT_TIMEOUT), config.getStoryExecutionTimeout());
             assertEquals(DEFAULT_META_FILTERS, config.getMetaFilters());
+            assertTrue(config.isIgnoreFailure());
         });
     }
 }

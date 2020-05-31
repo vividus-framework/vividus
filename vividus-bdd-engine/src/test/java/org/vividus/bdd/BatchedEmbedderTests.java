@@ -85,7 +85,7 @@ class BatchedEmbedderTests
     @Test
     void testRunStoriesAsPathsIgnoreFailureInBatchesTrue()
     {
-        BatchedEmbedder spy = createBatchedEmbedderSpy(false, false);
+        BatchedEmbedder spy = createBatchedEmbedderSpy(false);
         MetaFilter mockedFilter = mock(MetaFilter.class);
         doReturn(mockedFilter).when(spy).metaFilter();
         List<String> testStoryPaths = List.of(PATH);
@@ -95,7 +95,7 @@ class BatchedEmbedderTests
             failures.put(key, throwable);
             return true;
         }));
-        mockBatchExecutionConfiguration();
+        mockBatchExecutionConfiguration(false);
         Map<String, List<String>> batches = new LinkedHashMap<>();
         batches.put(BATCH, testStoryPaths);
         batches.put("batch-2", List.of("path2"));
@@ -120,14 +120,14 @@ class BatchedEmbedderTests
     @Test
     void testRunStoriesAsPaths()
     {
-        BatchedEmbedder spy = createBatchedEmbedderSpy(true, true);
+        BatchedEmbedder spy = createBatchedEmbedderSpy(true);
         doNothing().when(spy).generateReportsView();
         MetaFilter mockedFilter = mock(MetaFilter.class);
         doReturn(mockedFilter).when(spy).metaFilter();
         List<String> testStoryPaths = List.of(PATH);
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
         when(mockedEmbedderControls.threads()).thenReturn(THREADS);
-        mockBatchExecutionConfiguration();
+        mockBatchExecutionConfiguration(true);
         spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
         InOrder ordered = inOrder(spy, embedderMonitor, storyManager, bddRunContext, bddVariableContext);
         ordered.verify(spy).processSystemProperties();
@@ -155,12 +155,12 @@ class BatchedEmbedderTests
     @Test
     void testRunStoriesAsPathsSkip()
     {
-        BatchedEmbedder spy = createBatchedEmbedderSpy(true, false);
+        BatchedEmbedder spy = createBatchedEmbedderSpy(false);
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
         when(mockedEmbedderControls.threads()).thenReturn(THREADS);
         when(mockedEmbedderControls.skip()).thenReturn(true);
         List<String> testStoryPaths = List.of(PATH);
-        mockBatchExecutionConfiguration();
+        mockBatchExecutionConfiguration(true);
         spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
         verify(spy).processSystemProperties();
         verify(embedderMonitor).usingControls(mockedEmbedderControls);
@@ -199,7 +199,7 @@ class BatchedEmbedderTests
     @Test
     void testPerformableTree()
     {
-        BatchedEmbedder spy = createBatchedEmbedderSpy(false, false);
+        BatchedEmbedder spy = createBatchedEmbedderSpy(false);
         BatchedPerformableTree mockedPerformableTree = mock(BatchedPerformableTree.class);
         spy.usePerformableTree(mockedPerformableTree);
         spy.performableTree();
@@ -210,18 +210,17 @@ class BatchedEmbedderTests
     @Test
     void testSetPerformableTree()
     {
-        BatchedEmbedder spy = createBatchedEmbedderSpy(false, false);
+        BatchedEmbedder spy = createBatchedEmbedderSpy(false);
         PerformableTree mockedPerformableTree = mock(BatchedPerformableTree.class);
         spy.setPerformableTree(mockedPerformableTree);
         verify(spy).usePerformableTree(mockedPerformableTree);
     }
 
-    private BatchedEmbedder createBatchedEmbedderSpy(boolean ignoreFailureInBatches, boolean generateViewAfterBatches)
+    private BatchedEmbedder createBatchedEmbedderSpy(boolean generateViewAfterBatches)
     {
         TestBatchedEmbedder embedder = new TestBatchedEmbedder(bddRunContext, bddVariableContext, batchStorage,
                 storyManager);
         embedder.setEmbedderMonitor(embedderMonitor);
-        embedder.setIgnoreFailureInBatches(ignoreFailureInBatches);
         embedder.setGenerateViewAfterBatches(generateViewAfterBatches);
         return spy(embedder);
     }
@@ -233,12 +232,13 @@ class BatchedEmbedderTests
         return mockedEmbedderControls;
     }
 
-    private void mockBatchExecutionConfiguration()
+    private void mockBatchExecutionConfiguration(boolean ignoreFailure)
     {
         BatchExecutionConfiguration batchExecutionConfiguration = new BatchExecutionConfiguration();
         batchExecutionConfiguration.setStoryExecutionTimeout(Duration.ofHours(1));
         batchExecutionConfiguration.setMetaFilters(META_FILTERS);
         batchExecutionConfiguration.setThreads(2);
+        batchExecutionConfiguration.setIgnoreFailure(ignoreFailure);
         when(batchStorage.getBatchExecutionConfiguration(BATCH)).thenReturn(batchExecutionConfiguration);
     }
 

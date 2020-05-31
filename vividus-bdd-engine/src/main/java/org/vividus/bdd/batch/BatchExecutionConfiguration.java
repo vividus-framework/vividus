@@ -27,6 +27,7 @@ public class BatchExecutionConfiguration
     private Integer threads;
     private List<String> metaFilters;
     private Duration storyExecutionTimeout;
+    private Boolean ignoreFailure;
 
     public String getName()
     {
@@ -71,5 +72,15 @@ public class BatchExecutionConfiguration
     public void setStoryExecutionTimeout(Duration storyExecutionTimeout)
     {
         this.storyExecutionTimeout = storyExecutionTimeout;
+    }
+
+    public Boolean isIgnoreFailure()
+    {
+        return ignoreFailure;
+    }
+
+    public void setIgnoreFailure(Boolean ignoreFailure)
+    {
+        this.ignoreFailure = ignoreFailure;
     }
 }
