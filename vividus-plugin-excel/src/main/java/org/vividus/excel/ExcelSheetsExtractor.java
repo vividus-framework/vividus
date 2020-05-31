@@ -36,7 +36,7 @@ import org.vividus.util.ResourceUtils;
 
 public class ExcelSheetsExtractor implements IExcelSheetsExtractor
 {
-    private List<Sheet> sheets;
+    private final List<Sheet> sheets;
 
     public ExcelSheetsExtractor(byte[] bytes) throws WorkbookParsingException
     {

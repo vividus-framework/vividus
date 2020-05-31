@@ -436,7 +436,6 @@ class WebDriverFactoryTests
     }
 
     private void injectConfigurations(WebDriverType webDriverType, WebDriverConfiguration configuration)
-            throws ReflectiveOperationException
     {
         Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
         configurations.put(webDriverType, configuration);

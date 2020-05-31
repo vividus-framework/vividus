@@ -41,8 +41,7 @@ class AdaptedVerificationErrorTests
     @Test
     void testPrintStackTrace()
     {
-        StackTraceElement[] stackTraceElement = new StackTraceElement[] {
-                new StackTraceElement("ClassName", "methodName", "fileName", 1) };
+        StackTraceElement[] stackTraceElement = { new StackTraceElement("ClassName", "methodName", "fileName", 1) };
         when(verificationErrorOriginal.getStackTrace()).thenReturn(stackTraceElement);
         AdaptedVerificationError verificationError = new AdaptedVerificationError(ERROR_MESSAGE,
                 verificationErrorOriginal);

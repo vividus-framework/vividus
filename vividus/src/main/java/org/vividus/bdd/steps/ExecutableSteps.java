@@ -55,7 +55,7 @@ public class ExecutableSteps
      */
     @SuppressWarnings("MagicNumber")
     @When(value = "the condition `$condition` is true I do$stepsToExecute", priority = 5)
-    @Alias(value = "the condition '$condition' is true I do$stepsToExecute")
+    @Alias("the condition '$condition' is true I do$stepsToExecute")
     public void performAllStepsIfConditionIsTrue(boolean condition, SubSteps stepsToExecute)
     {
         if (condition)

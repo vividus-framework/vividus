@@ -84,16 +84,17 @@ public enum ComparisonRule implements IComparisonRule
     public static ComparisonRule parse(String sign)
     {
         return bySign(sign).orElseThrow(() ->
-            new IllegalArgumentException("Unknown comparison sign: \'" + sign + "\'"));
+            new IllegalArgumentException("Unknown comparison sign: '" + sign + "'"));
     }
 
     public static Optional<ComparisonRule> bySign(String sign)
     {
-        return Stream.of(ComparisonRule.values())
+        return Stream.of(values())
                 .filter(comparisonRule -> sign.equalsIgnoreCase(comparisonRule.sign))
                 .findFirst();
     }
 
+    @Override
     public String toString()
     {
         return super.toString().replace('_', ' ').toLowerCase();

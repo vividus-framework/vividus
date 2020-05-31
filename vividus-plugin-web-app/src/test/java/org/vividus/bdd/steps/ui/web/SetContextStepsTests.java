@@ -48,7 +48,6 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.IWaitActions;
 import org.vividus.ui.web.action.IWindowsActions;
-import org.vividus.ui.web.action.SearchActions;
 import org.vividus.ui.web.action.WaitResult;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
@@ -88,9 +87,6 @@ class SetContextStepsTests
 
     @Mock
     private IWebUiContext webUiContext;
-
-    @Mock
-    private SearchActions mockedSearchActions;
 
     @Mock
     private WebElement mockedWebElement;

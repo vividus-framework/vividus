@@ -202,7 +202,7 @@ public class WebElementActions implements IWebElementActions
 
     private static boolean isElementContenteditable(WebElement element)
     {
-        return Boolean.valueOf(element.getAttribute("contenteditable"));
+        return Boolean.parseBoolean(element.getAttribute("contenteditable"));
     }
 
     private boolean isValueEqualTo(WebElement element, String expectedValue)

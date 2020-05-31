@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -97,7 +96,7 @@ class ScreenshotOnFailureMonitorTests
     {
         return Stream.of(getClass().getDeclaredMethod(WHEN_STEP_METHOD),
                 TestSteps.class.getDeclaredMethod("innerWhenStep"))
-                .map(method ->
+                .flatMap(method ->
                 {
                     reset(bddRunContext);
                     mockScenarioAndStoryMeta(EMPTY_META);
@@ -107,19 +106,19 @@ class ScreenshotOnFailureMonitorTests
                             dynamicTest("afterPerformingProcessesStepWithAnnotation",
                                 () -> monitor.afterPerforming(I_DO_ACTION, false, method))
                             );
-                }).flatMap(Function.identity());
+                });
     }
 
     @TestFactory
     Stream<DynamicTest> shouldIgnoreStepWithoutAnnotation() throws NoSuchMethodException
     {
         return Stream.of(getClass().getDeclaredMethod("anotherWhenStep"), null)
-                .map(method -> Stream.of(
+                .flatMap(method -> Stream.of(
                         dynamicTest("beforePerformingIgnoresStepWithoutAnnotation",
                             () -> monitor.beforePerforming(I_DO_ACTION, false, method)),
                         dynamicTest("afterPerformingIgnoresStepWithoutAnnotation",
                             () -> monitor.afterPerforming(I_DO_ACTION, false, method))
-                        )).flatMap(Function.identity());
+                        ));
     }
 
     @Test

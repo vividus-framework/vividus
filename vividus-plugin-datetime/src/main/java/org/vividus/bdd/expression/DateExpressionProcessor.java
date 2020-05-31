@@ -32,14 +32,14 @@ public class DateExpressionProcessor implements IExpressionProcessor
     private static final Logger LOGGER = LoggerFactory.getLogger(DateExpressionProcessor.class);
 
     private static final Pattern ISO_DURATION_PATTERN_WITH_FORMAT_PATTERN = Pattern
-            .compile("^((-)?P((?:\\d+[YMWD]{1})*)((?:T?\\d+[HMS]{1})*))(?:\\((.*)\\))?$");
+            .compile("^((-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*))(?:\\((.*)\\))?$");
     private static final int FORMAT_GROUP = 5;
 
     private static final Pattern GENERATE_DATE_PATTERN = Pattern
-            .compile("^generateDate\\(((-)?P((?:\\d+[YMWD]{1})*)((?:T?\\d+[HMS]{1})*))(,\\s*(.*))?\\)$");
+            .compile("^generateDate\\(((-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*))(,\\s*(.*))?\\)$");
     private static final int GENERATE_DATE_FORMAT_GROUP = 6;
 
-    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("YYYY-MM-dd\'T\'HH:mm:ss");
+    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss");
 
     private static final int MINUS_SIGN_GROUP = 2;
     private static final int PERIOD_GROUP = 3;

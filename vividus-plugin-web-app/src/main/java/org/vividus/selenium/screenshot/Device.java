@@ -176,7 +176,7 @@ public enum Device
 
     public static Device getByDeviceName(String deviceName)
     {
-        return Stream.of(Device.values())
+        return Stream.of(values())
                 .filter(device -> device.hasDeviceName(deviceName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("No device is found for name: " + deviceName));

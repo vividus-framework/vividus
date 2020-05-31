@@ -48,7 +48,7 @@ public class ResolvingExpressionsEagerlyTransformer implements ExtendedTableTran
 
     private void resolveExpressions(List<Map<String, String>> list)
     {
-        list.stream().forEach(map -> map.entrySet().stream()
+        list.forEach(map -> map.entrySet()
                 .forEach(entry -> entry.setValue(expressionAdaptor.process(entry.getValue()))));
     }
 }

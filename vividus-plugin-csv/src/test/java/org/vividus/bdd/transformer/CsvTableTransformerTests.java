@@ -40,7 +40,7 @@ class CsvTableTransformerTests
     private static final String CSV_FILE_NAME = "test.csv";
     private static final String EMPTY_EXAMPLES_TABLE = "";
 
-    private CsvTableTransformer csvTableTransformer = new CsvTableTransformer(new CsvReader());
+    private final CsvTableTransformer csvTableTransformer = new CsvTableTransformer(new CsvReader());
 
     @Test
     void testTransform()

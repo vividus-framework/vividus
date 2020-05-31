@@ -18,8 +18,8 @@ package org.vividus.bdd.model;
 
 public class CellValue
 {
-    private String value;
-    private String address;
+    private final String value;
+    private final String address;
 
     public CellValue(String value, String address)
     {

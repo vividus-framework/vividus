@@ -335,13 +335,12 @@ class AllureStoryReporterTests
         );
     }
 
-    private Story testBeforeStory(String storyName, boolean givenStory)
+    private void testBeforeStory(String storyName, boolean givenStory)
     {
         Story story = mockRunningStoryWithSeverity(true).getStory();
         story.namedAs(storyName);
         allureStoryReporter.beforeStory(story, givenStory);
         verify(next).beforeStory(story, givenStory);
-        return story;
     }
 
     private List<Label> mockStoryStart(boolean givenStory)

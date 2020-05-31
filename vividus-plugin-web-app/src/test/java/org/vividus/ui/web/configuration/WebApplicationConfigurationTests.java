@@ -126,7 +126,7 @@ class WebApplicationConfigurationTests
     @MethodSource("resolutionDataProvider")
     void testIsMobileWindowResolution(int actualWidth, boolean mobileViewport)
     {
-        WebApplicationConfiguration webApplicationConfiguration = prepareWebApplicationConfiguration(actualWidth);
+        WebApplicationConfiguration webApplicationConfiguration = prepareWebApplicationConfiguration();
         webApplicationConfiguration.setMobileScreenResolutionWidthThreshold(WIDTH_THRESHOLD);
         IJavascriptActions javascriptActions = mockJavascriptActions(actualWidth);
         assertEquals(mobileViewport, webApplicationConfiguration.isMobileViewport(javascriptActions));
@@ -136,17 +136,15 @@ class WebApplicationConfigurationTests
     @MethodSource("resolutionDataProvider")
     void testIsTabletWindowResolution(int actualWidth, boolean tabletViewport)
     {
-        WebApplicationConfiguration webApplicationConfiguration = prepareWebApplicationConfiguration(actualWidth);
+        WebApplicationConfiguration webApplicationConfiguration = prepareWebApplicationConfiguration();
         webApplicationConfiguration.setTabletScreenResolutionWidthThreshold(WIDTH_THRESHOLD);
         IJavascriptActions javascriptActions = mockJavascriptActions(actualWidth);
         assertEquals(tabletViewport, webApplicationConfiguration.isTabletViewport(javascriptActions));
     }
 
-    private static WebApplicationConfiguration prepareWebApplicationConfiguration(int actualWidth)
+    private static WebApplicationConfiguration prepareWebApplicationConfiguration()
     {
-        WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(MAIN_APP_URL,
-                AuthenticationMode.URL);
-        return webApplicationConfiguration;
+        return new WebApplicationConfiguration(MAIN_APP_URL, AuthenticationMode.URL);
     }
 
     private static IJavascriptActions mockJavascriptActions(int actualWidth)

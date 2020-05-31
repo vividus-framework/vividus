@@ -262,12 +262,11 @@ public class DatabaseSteps
      * @param sqlQuery SQL query to execute
      * @param dbKey Key identifying the database connection
      * @param table Rows to compare data against
-     * @throws Exception In case of any exception
      */
     @When("I wait for '$duration' duration retrying $retryTimes times while data from `$sqlQuery`"
             + " executed against `$dbKey` is equal to data from:$table")
     public void waitForDataAppearance(Duration duration, int retryTimes, String sqlQuery, String dbKey,
-            ExamplesTable table) throws Exception
+            ExamplesTable table)
     {
         JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
         QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate, jdbcTemplate);

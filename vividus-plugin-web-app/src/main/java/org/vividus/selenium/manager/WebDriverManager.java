@@ -67,6 +67,7 @@ public class WebDriverManager implements IWebDriverManager
         resize(webDriver, browserWindowSize);
     }
 
+    @Override
     public void resize(WebDriver webDriver, BrowserWindowSize browserWindowSize)
     {
         if (isElectronApp() || isMobile(WebDriverUtil.unwrap(webDriver, HasCapabilities.class).getCapabilities()))

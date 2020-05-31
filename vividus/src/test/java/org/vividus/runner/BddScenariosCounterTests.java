@@ -147,11 +147,10 @@ public class BddScenariosCounterTests extends SystemStreamTests
         return properties;
     }
 
-    private JUnitReportingRunner mockJUnitReportingRunnerInstantiation(Description root) throws Exception
+    private void mockJUnitReportingRunnerInstantiation(Description root) throws Exception
     {
         JUnitReportingRunner runner = mock(JUnitReportingRunner.class);
         whenNew(JUnitReportingRunner.class).withArguments(StoriesRunner.class).thenReturn(runner);
         when(runner.getDescription()).thenReturn(root);
-        return runner;
     }
 }

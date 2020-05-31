@@ -63,6 +63,7 @@ class BddVariableContextTests
     private static final String VARIABLE_KEY = "variableKey";
     private static final String KEY = "key";
     private static final String VALUE = "value";
+    private static final String DEFAULT_VALUE = "defaultValue";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(BddVariableContext.class);
 
@@ -152,17 +153,17 @@ class BddVariableContextTests
             arguments(VARIABLE_KEY,                      List.of(Map.of(KEY, VALUE)), List.of(Map.of(KEY, VALUE))),
             arguments(VARIABLE_KEY,                      null,                        null),
             arguments("",                                null,                        null),
-            arguments("variableKey:defaultValue",        null,                        "defaultValue"),
+            arguments("variableKey:defaultValue",        null,                        DEFAULT_VALUE),
             arguments("variableKey[0]",                  List.of(Map.of(KEY, VALUE)), Map.of(KEY, VALUE)),
             arguments("variableKey[0].key",              Map.of(KEY, VALUE),          VALUE),
             arguments("variableKey[0]",                  null,                        null),
-            arguments("variableKey[0]:defaultValue",     List.of(),                   "defaultValue"),
+            arguments("variableKey[0]:defaultValue",     List.of(),                   DEFAULT_VALUE),
             arguments("variableKey[0].key",              List.of(Map.of(KEY, VALUE)), VALUE),
-            arguments("variableKey[0].key:defaultValue", List.of(),                   "defaultValue"),
+            arguments("variableKey[0].key:defaultValue", List.of(),                   DEFAULT_VALUE),
             arguments("variableKey.key",                 Map.of(KEY, VALUE),          VALUE),
             arguments("variableKey.key",                 VALUE,                       VALUE),
             arguments("variableKey.key",                 null,                        null),
-            arguments("variableKey.key:defaultValue",    Map.of(),                    "defaultValue"),
+            arguments("variableKey.key:defaultValue",    Map.of(),                    DEFAULT_VALUE),
             arguments("variableKey[0]",                  List.of(Set.of(KEY)),        Set.of(KEY)),
             arguments("variableKey[7]",                  List.of(Map.of(KEY, VALUE)), null)
         );

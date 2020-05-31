@@ -285,7 +285,7 @@ public class ScreenshotTakerTests
     }
 
     @Test
-    public void shouldTakeScreenshotAsFile() throws Exception
+    public void shouldTakeScreenshotAsFile() throws IOException
     {
         mockTakeScreenshotWithHighlights();
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);

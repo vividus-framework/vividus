@@ -73,7 +73,7 @@ class FilesystemScreenshotDebuggerTests
     }
 
     @Test
-    void shouldLogExceptionIfCleanUpFails(@TempDir File debugFolder) throws IOException
+    void shouldLogExceptionIfCleanUpFails(@TempDir File debugFolder)
     {
         File invalidFolder = new File(debugFolder, "/invalid");
         filesystemScreenshotDebugger.setDebugScreenshotsLocation(Optional.of(invalidFolder));

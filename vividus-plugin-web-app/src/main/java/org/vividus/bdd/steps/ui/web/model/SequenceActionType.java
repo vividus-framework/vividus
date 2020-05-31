@@ -104,7 +104,7 @@ public enum SequenceActionType
         @Override
         public void addAction(Actions actions, Object argument)
         {
-            perform(argument, (String arg) -> actions.sendKeys(arg));
+            perform(argument, (Consumer<String>) actions::sendKeys);
         }
 
         @Override

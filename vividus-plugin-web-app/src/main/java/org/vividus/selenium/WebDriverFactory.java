@@ -72,8 +72,9 @@ public class WebDriverFactory implements IWebDriverFactory
         () -> getCapabilitiesByPrefix(LOCAL_DRIVER_PROPERTY_PREFIX));
 
     private final LoadingCache<Boolean, DesiredCapabilities> webDriverCapabilities = CacheBuilder.newBuilder()
-            .build(new CacheLoader<Boolean, DesiredCapabilities>()
+            .build(new CacheLoader<>()
             {
+                @Override
                 public DesiredCapabilities load(Boolean local)
                 {
                     DesiredCapabilities localCapabilities = localDriverDesiredCapabilities.get();

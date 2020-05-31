@@ -27,8 +27,8 @@ import org.vividus.bdd.batch.BatchStorage;
 
 public class BatchedPathFinder implements IBatchedPathFinder
 {
-    private IPathFinder pathFinder;
-    private BatchStorage batchStorage;
+    private final IPathFinder pathFinder;
+    private final BatchStorage batchStorage;
 
     public BatchedPathFinder(IPathFinder pathFinder, BatchStorage batchStorage)
     {

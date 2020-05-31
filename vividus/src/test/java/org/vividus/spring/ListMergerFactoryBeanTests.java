@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 class ListMergerFactoryBeanTests
 {
-    private ListMergerFactoryBean<String> bean = new ListMergerFactoryBean<>();
+    private final ListMergerFactoryBean<String> bean = new ListMergerFactoryBean<>();
 
     @Test
     void shouldMergeLists()

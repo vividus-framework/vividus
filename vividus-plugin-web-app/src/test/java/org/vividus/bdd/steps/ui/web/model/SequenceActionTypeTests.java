@@ -126,7 +126,7 @@ public class SequenceActionTypeTests
     void testPressKeys()
     {
         SequenceActionType.PRESS_KEYS.addAction(baseAction, List.of(VALUE));
-        verify(baseAction).sendKeys(new CharSequence[] { VALUE });
+        verify(baseAction).sendKeys(VALUE);
         verifyNoMoreInteractions(baseAction);
     }
 

@@ -57,7 +57,7 @@ class ThreadedProxySystemTests
     {
         String host = "localhost";
         InetAddress address = InetAddress.getByName(host);
-        IntegerRange range = new IntegerRange(Set.of(55023, 53450, 55300));
+        IntegerRange range = new IntegerRange(Set.of(55_023, 53_450, 55_300));
         IProxyFactory proxyFactory = mock(IProxyFactory.class);
         ThreadedProxy threadedProxy = new ThreadedProxy(host, range, proxyFactory);
 
@@ -105,7 +105,7 @@ class ThreadedProxySystemTests
         String defaultThreadPrefix = "pool-1-thread-";
         return IntStream.range(0, numberOfThreads)
             .map(i -> i + 1)
-            .mapToObj(Integer::valueOf)
+            .boxed()
             .map(String::valueOf)
             .map(defaultThreadPrefix::concat)
             .collect(Collectors.toMap(Function.identity(), tn -> mock(IProxy.class)));

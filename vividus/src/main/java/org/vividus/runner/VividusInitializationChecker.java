@@ -42,8 +42,6 @@ public final class VividusInitializationChecker
     public static void main(String[] args) throws ParseException
     {
         Vividus.init();
-        boolean isFailed = false;
-        Logger logger = LoggerFactory.getLogger(VividusInitializationChecker.class);
         CommandLineParser parser = new DefaultParser();
         Option helpOption = new Option("h", "help", false, "print this message.");
         Option ignoreOption = new Option("i", "ignoreBeans", true,
@@ -63,6 +61,8 @@ public final class VividusInitializationChecker
             List<String> ignoreBeans = List.of(commandLine.getOptionValue(ignoreOption.getOpt()).split(","));
             beanNames = Stream.of(beanNames).filter(beanName -> !ignoreBeans.contains(beanName)).toArray(String[]::new);
         }
+        boolean failed = false;
+        Logger logger = LoggerFactory.getLogger(VividusInitializationChecker.class);
         for (String beanName : beanNames)
         {
             try
@@ -75,11 +75,11 @@ public final class VividusInitializationChecker
             }
             catch (Exception e)
             {
-                isFailed = true;
+                failed = true;
                 logger.error(e.toString());
             }
         }
-        if (isFailed)
+        if (failed)
         {
             throw new RuntimeException("Initialization of beans has been failed");
         }

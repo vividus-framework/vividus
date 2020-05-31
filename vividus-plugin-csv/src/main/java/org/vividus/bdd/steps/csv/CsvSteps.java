@@ -28,8 +28,8 @@ import org.vividus.csv.CsvReader;
 
 public class CsvSteps
 {
-    private IBddVariableContext bddVariableContext;
-    private CsvReader csvReader;
+    private final IBddVariableContext bddVariableContext;
+    private final CsvReader csvReader;
 
     public CsvSteps(IBddVariableContext bddVariableContext, CsvReader csvReader)
     {

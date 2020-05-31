@@ -68,7 +68,7 @@ public class DiffDateExpressionProcessor implements IExpressionProcessor
                            .map(String::toUpperCase)
                            .map(t -> EnumUtils.getEnum(ChronoUnit.class, t))
                            .map(u -> u.between(firstZonedDateTime, secondZonedDateTime))
-                           .map(l -> l.toString())
+                           .map(Object::toString)
                            .or(() -> processNegative(duration, durationAsString));
         }
         return Optional.empty();

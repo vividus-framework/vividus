@@ -100,11 +100,11 @@ class HeadlessCrawlerTableTransformerTests
     {
         // @formatter:off
         return Stream.of(
-                Arguments.of(DEFAULT_RELATIVE_URL, toSet(PATH2, PATH3),      asList(PATH2, SLASH_PATH3)),
-                Arguments.of(ROOT,                 toSet(PATH4, "path5"),    asList("/path5", PATH4)),
-                Arguments.of("/go",                toSet("path6", "/path7"), asList("/go/path7", "/go/path6")),
-                Arguments.of("/go/",               toSet("path8", "/path9"), asList("/go/path8", "/go/path9")),
-                Arguments.of(DEFAULT_RELATIVE_URL, null,                     asList())
+                Arguments.of(DEFAULT_RELATIVE_URL, toSet(PATH2, PATH3),      List.of(PATH2, SLASH_PATH3)),
+                Arguments.of(ROOT,                 toSet(PATH4, "path5"),    List.of("/path5", PATH4)),
+                Arguments.of("/go",                toSet("path6", "/path7"), List.of("/go/path7", "/go/path6")),
+                Arguments.of("/go/",               toSet("path8", "/path9"), List.of("/go/path8", "/go/path9")),
+                Arguments.of(DEFAULT_RELATIVE_URL, null,                     List.of())
         );
         // @formatter:on
     }

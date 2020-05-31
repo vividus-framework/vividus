@@ -62,7 +62,7 @@ public class ThreadedProxy implements IProxy
     @SuppressWarnings("MagicNumber")
     private static void validatePort(int port)
     {
-        Validate.isTrue(port > 0 && port <= 65535, "Expected ports range is 1-65535 but got: %d", port);
+        Validate.isTrue(port > 0 && port <= 65_535, "Expected ports range is 1-65535 but got: %d", port);
     }
 
     @Override

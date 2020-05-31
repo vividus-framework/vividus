@@ -79,7 +79,7 @@ public enum MongoCommand
 
     static
     {
-        COMMANDS = Stream.of(MongoCommand.values())
+        COMMANDS = Stream.of(values())
                 .collect(Collectors.groupingBy(MongoCommand::getCommandType, Collectors.toList()));
     }
 

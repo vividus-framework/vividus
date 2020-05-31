@@ -29,7 +29,7 @@ public class BrowserWindowSize
 
     public BrowserWindowSize(String sizeAsString)
     {
-        Matcher matcher = Pattern.compile("(\\d{1,})x(\\d{1,})").matcher(sizeAsString);
+        Matcher matcher = Pattern.compile("(\\d+)x(\\d+)").matcher(sizeAsString);
         if (matcher.matches())
         {
             width = Integer.parseInt(matcher.group(1));

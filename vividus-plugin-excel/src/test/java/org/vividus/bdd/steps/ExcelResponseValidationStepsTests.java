@@ -122,7 +122,7 @@ class ExcelResponseValidationStepsTests
     void testExcelSheetWithIndexHasRecordsNoSheetWithIndex()
     {
         steps.excelSheetWithIndexHasRecords(10, List.of());
-        verify(softAssert).recordFailedAssertion(String.format("Sheet with the index 10 doesn't exist"));
+        verify(softAssert).recordFailedAssertion("Sheet with the index 10 doesn't exist");
         verifyNoMoreInteractions(softAssert);
     }
 
@@ -130,7 +130,7 @@ class ExcelResponseValidationStepsTests
     void testExcelSheetWithNameHasRecordsNoSheetWithIndex()
     {
         steps.excelSheetWithNameHasRecords("test", List.of());
-        verify(softAssert).recordFailedAssertion(String.format("Sheet with the name test doesn't exist"));
+        verify(softAssert).recordFailedAssertion("Sheet with the name test doesn't exist");
         verifyNoMoreInteractions(softAssert);
     }
 

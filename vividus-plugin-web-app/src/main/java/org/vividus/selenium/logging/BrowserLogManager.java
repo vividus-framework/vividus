@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,8 +47,7 @@ public final class BrowserLogManager
         LogEntries log = getLog(driver);
         return logLevelsToInclude.stream()
                 .map(BrowserLogLevel::getLevel)
-                .map(level -> filter(log, level))
-                .flatMap(Function.identity())
+                .flatMap(level -> filter(log, level))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 

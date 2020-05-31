@@ -43,7 +43,7 @@ public class StringToIntegerRangeConverter implements Converter<String, IntegerR
             int end = Integer.parseInt(m.group(2));
 
             return IntStream.rangeClosed(start, end)
-                    .mapToObj(Integer::valueOf)
+                    .boxed()
                     .collect(Collectors.toList());
         };
     }

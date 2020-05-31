@@ -18,5 +18,5 @@ package org.vividus.bdd.steps.mongodb.command;
 
 public enum CommandType
 {
-    TERMINAL, SOURCE, INTERMEDIATE;
+    TERMINAL, SOURCE, INTERMEDIATE
 }

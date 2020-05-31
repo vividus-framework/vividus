@@ -152,7 +152,7 @@ class DatabaseStepsTests
     private HashFunction hashFunction;
 
     @InjectMocks
-    private DatabaseSteps databaseSteps = new DatabaseSteps(bddVariableContext, attachmentPublisher, softAssert);
+    private final DatabaseSteps databaseSteps = new DatabaseSteps(bddVariableContext, attachmentPublisher, softAssert);
 
     @BeforeEach
     void beforeEach()

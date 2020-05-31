@@ -110,7 +110,7 @@ class ElementSearchActionTests
     private IExpectedConditions<By> expectedConditions;
 
     @InjectMocks
-    private AbstractElementSearchAction elementSearchAction = new AbstractElementSearchAction() { };
+    private final AbstractElementSearchAction elementSearchAction = new AbstractElementSearchAction() { };
 
     private void mockFoundElements()
     {

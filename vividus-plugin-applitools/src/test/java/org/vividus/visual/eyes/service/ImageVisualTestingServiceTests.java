@@ -151,7 +151,7 @@ class ImageVisualTestingServiceTests
     }
 
     @Test
-    void shouldNotRetrieveImagesWhenUrlNotAvailable() throws IOException
+    void shouldNotRetrieveImagesWhenUrlNotAvailable()
     {
         ApplitoolsVisualCheck applitoolsVisualCheck = createCheck();
         Eyes eyes = mockEyes(applitoolsVisualCheck);
@@ -195,7 +195,7 @@ class ImageVisualTestingServiceTests
         return eyes;
     }
 
-    private void mockTestResult(Eyes eyes) throws IOException
+    private void mockTestResult(Eyes eyes)
     {
         TestResults results = mockTestResults(eyes);
 

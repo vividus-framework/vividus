@@ -107,10 +107,9 @@ public class ExcelResponseValidationSteps
         {
             IExcelSheetParser parser = new ExcelSheetParser(s);
             records.stream()
-                .map(r -> parser.getDataFromRange(r.getCellsRange())
+                .flatMap(r -> parser.getDataFromRange(r.getCellsRange())
                         .stream()
                         .map(cv -> entry(cv, r.getValueRegex())))
-                .flatMap(Function.identity())
                 .filter(filterMatched())
                 .collect(Collectors.collectingAndThen(Collectors.toList(), v ->
                 {
@@ -159,7 +158,7 @@ public class ExcelResponseValidationSteps
             {
                 return !pattern.get().asMatchPredicate().test(cellValue.getValue());
             }
-            return !pattern.isEmpty() || cellValue.getValue() != null;
+            return pattern.isPresent() || cellValue.getValue() != null;
         };
     }
 }

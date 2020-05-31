@@ -32,7 +32,7 @@ class BddRunContextTests
 {
     private static final String BATCH_KEY = "batchKey";
 
-    private BddRunContext bddRunContext = new BddRunContext();
+    private final BddRunContext bddRunContext = new BddRunContext();
 
     @Test
     void testGetStoriesChain()

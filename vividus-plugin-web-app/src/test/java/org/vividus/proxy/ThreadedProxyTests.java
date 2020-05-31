@@ -41,7 +41,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.vividus.model.IntegerRange;
 
@@ -74,7 +73,7 @@ class ThreadedProxyTests
     private ThreadedProxy threadedProxy;
 
     @BeforeEach
-    void before() throws Exception
+    void before()
     {
         MockitoAnnotations.initMocks(this);
         when(proxyFactory.createProxy()).thenReturn(proxy);
@@ -83,7 +82,7 @@ class ThreadedProxyTests
     @Test
     void testAllocatePort() throws UnknownHostException
     {
-        int port = 55389;
+        int port = 55_389;
         BrowserUpProxy mobProxy = mock(BrowserUpProxy.class);
         when(proxy.getProxyServer()).thenReturn(mobProxy);
         when(mobProxy.getPort()).thenReturn(port);
@@ -127,7 +126,7 @@ class ThreadedProxyTests
     void testAllocateIllegalPortsSequence()
     {
         Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> new ThreadedProxy(LOCALHOST, range(0, 56701), proxyFactory));
+            () -> new ThreadedProxy(LOCALHOST, range(0, 56_701), proxyFactory));
         assertEquals("Port 0 (ephemeral port selection) can not be used with custom ports", exception.getMessage());
         assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
     }
@@ -144,7 +143,7 @@ class ThreadedProxyTests
     @Test
     void testAllocateNoPortsAvailable() throws UnknownHostException
     {
-        threadedProxy = new ThreadedProxy(LOCALHOST, range(54786), proxyFactory);
+        threadedProxy = new ThreadedProxy(LOCALHOST, range(54_786), proxyFactory);
         threadedProxy.start();
         Exception exception = assertThrows(IllegalArgumentException.class, threadedProxy::start);
         assertEquals("There are no available ports in the ports pool", exception.getMessage());
@@ -226,7 +225,7 @@ class ThreadedProxyTests
     void testAddRequestFilter() throws UnknownHostException
     {
         defaultInit();
-        RequestFilter requestFilter = Mockito.mock(RequestFilter.class);
+        RequestFilter requestFilter = mock(RequestFilter.class);
         threadedProxy.addRequestFilter(requestFilter);
         verify(proxy).addRequestFilter(requestFilter);
     }

@@ -59,7 +59,7 @@ public class MergingTableTransformer implements ExtendedTableTransformer
         }
         else
         {
-            isTrue(tables.size() > 0, "Please, specify at least one table path");
+            isTrue(!tables.isEmpty(), "Please, specify at least one table path");
             examplesTablesStream = Stream.concat(examplesTablesStream, Stream.of(tableAsString));
         }
 

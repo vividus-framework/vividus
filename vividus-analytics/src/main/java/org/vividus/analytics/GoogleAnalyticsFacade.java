@@ -20,7 +20,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -81,7 +80,7 @@ public class GoogleAnalyticsFacade
         {
             projectName = PROJECT_NAME_PATTERN.matcher(pathParts[pathParts.length - 2]).replaceFirst("$1");
         }
-        return UUID.nameUUIDFromBytes(DigestUtils.sha512Hex(projectName).getBytes(StandardCharsets.UTF_8)).toString();
+        return UUID.nameUUIDFromBytes(DigestUtils.sha512Hex(projectName).getBytes(UTF_8)).toString();
     }
 
     public void postEvent(AnalyticsEvent analyticsEvent)
@@ -89,8 +88,7 @@ public class GoogleAnalyticsFacade
         List<NameValuePair> params = new ArrayList<>();
         params.addAll(defaultParameters);
         params.addAll(convertToNameValuePairs(analyticsEvent));
-        StringEntity entity = new StringEntity(URLEncodedUtils.format(params, UTF_8),
-                UTF_8);
+        StringEntity entity = new StringEntity(URLEncodedUtils.format(params, UTF_8), UTF_8);
         post(entity);
     }
 

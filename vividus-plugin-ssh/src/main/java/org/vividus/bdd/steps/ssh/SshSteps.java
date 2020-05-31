@@ -16,7 +16,6 @@
 
 package org.vividus.bdd.steps.ssh;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -125,12 +124,11 @@ public class SshSteps
      * @param filePath    File path of file for putting on server
      * @param destination Remote file destination
      * @param server      Server key matching any of configured ones
-     * @throws IOException if I/O exception occurs during file reading
      * @throws CommandExecutionException if any error happens during file creation
      */
     @When("I copy local file located at `$filePath` to path `$destination` on $server over SFTP")
     public void copyFileOverSftp(String filePath, String destination, String server)
-            throws IOException, CommandExecutionException
+            throws CommandExecutionException
     {
         executePutCommand(SftpCommand.PUT_FROM_FILE, List.of(filePath, destination), server);
     }
