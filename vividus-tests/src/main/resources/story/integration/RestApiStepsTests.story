@@ -7,7 +7,7 @@ Lifecycle:
 Before:
 Scope: STORY
 When I initialize the story variable `request-body` with value `{
-    "string": "string",
+    "string": "<, ', :, \"\"  symbols codes are &lt;, &#39;, &#58;, &#34;",
     "number": 42,
     "boolean": true
 }`
