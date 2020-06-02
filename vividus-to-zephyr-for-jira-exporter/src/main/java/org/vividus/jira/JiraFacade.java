@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-package org.vividus.http.exception;
+package org.vividus.jira;
 
 import java.io.IOException;
 
-public class HttpRequestBuildException extends IOException
-{
-    private static final long serialVersionUID = -6608317424407885307L;
+import org.vividus.util.json.JsonPathUtils;
 
-    public HttpRequestBuildException(Throwable cause)
+public class JiraFacade implements IJiraFacade
+{
+    private static final String GET_ISSUE_ID_ENDPOINT = "/rest/api/latest/issue/";
+    private static final String ISSUE_ID_JSON_PATH = "$.id";
+
+    private final IJiraClient client;
+
+    public JiraFacade(IJiraClient client)
     {
-        super(cause);
+        this.client = client;
+    }
+
+    @Override
+    public String getIssueId(String issueKey) throws IOException
+    {
+        String responseBody = client.executeGet(GET_ISSUE_ID_ENDPOINT + issueKey);
+        return JsonPathUtils.getData(responseBody, ISSUE_ID_JSON_PATH);
     }
 }

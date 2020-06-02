@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package org.vividus.http.exception;
+package org.vividus.validation;
 
-import java.io.IOException;
+import java.net.URI;
 
-public class HttpRequestBuildException extends IOException
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class NotBlankUriValidator implements ConstraintValidator<NotBlankUri, URI>
 {
-    private static final long serialVersionUID = -6608317424407885307L;
-
-    public HttpRequestBuildException(Throwable cause)
+    @Override
+    public boolean isValid(URI value, ConstraintValidatorContext context)
     {
-        super(cause);
+        return !value.toString().isBlank();
     }
 }

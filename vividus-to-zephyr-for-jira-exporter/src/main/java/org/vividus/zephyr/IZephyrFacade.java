@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.http.exception;
+package org.vividus.zephyr;
 
 import java.io.IOException;
 
-public class HttpRequestBuildException extends IOException
+public interface IZephyrFacade
 {
-    private static final long serialVersionUID = -6608317424407885307L;
+    ZephyrConfiguration prepareConfiguration() throws IOException;
 
-    public HttpRequestBuildException(Throwable cause)
-    {
-        super(cause);
-    }
+    Integer createExecution(String execution) throws IOException;
+
+    void updateExecutionStatus(int executionId, String executionBody) throws IOException;
 }

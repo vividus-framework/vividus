@@ -1,20 +1,23 @@
-apply from: 'spring-boot-library.gradle'
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath(group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: '2.3.0.RELEASE')
+    }
+}
+apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
+apply plugin: io.spring.gradle.dependencymanagement.DependencyManagementPlugin
 
 project.description = 'Vividus to Zephyr for Jira exporter'
 
 dependencies {
-    api platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: versions.jackson)
-    api(group: 'com.fasterxml.jackson.core', name: 'jackson-core')
-    api(group: 'com.fasterxml.jackson.core', name: 'jackson-databind')
-
     implementation project(':vividus-http-client')
     implementation project(':vividus-util')
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
     compileOnly(group: 'org.springframework.boot', name: 'spring-boot-devtools')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-    implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations')
-    implementation(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310')
-    implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
 

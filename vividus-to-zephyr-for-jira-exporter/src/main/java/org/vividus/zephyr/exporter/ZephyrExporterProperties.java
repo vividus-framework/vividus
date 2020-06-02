@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package org.vividus.http.exception;
+package org.vividus.zephyr.exporter;
 
-import java.io.IOException;
+import java.nio.file.Path;
 
-public class HttpRequestBuildException extends IOException
+public class ZephyrExporterProperties
 {
-    private static final long serialVersionUID = -6608317424407885307L;
+    private Path sourceDirectory;
 
-    public HttpRequestBuildException(Throwable cause)
+    public Path getSourceDirectory()
     {
-        super(cause);
+        return sourceDirectory;
+    }
+
+    public void setSourceDirectory(Path sourceDirectory)
+    {
+        this.sourceDirectory = sourceDirectory;
     }
 }

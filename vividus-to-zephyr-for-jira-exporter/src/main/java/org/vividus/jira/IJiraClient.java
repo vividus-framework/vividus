@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.http.exception;
+package org.vividus.jira;
 
 import java.io.IOException;
 
-public class HttpRequestBuildException extends IOException
+public interface IJiraClient
 {
-    private static final long serialVersionUID = -6608317424407885307L;
+    String executeGet(String relativeUrl) throws IOException;
 
-    public HttpRequestBuildException(Throwable cause)
-    {
-        super(cause);
-    }
+    String executePost(String relativeUrl, String requestBody) throws IOException;
+
+    String executePut(String relativeUrl, String requestBody) throws IOException;
 }

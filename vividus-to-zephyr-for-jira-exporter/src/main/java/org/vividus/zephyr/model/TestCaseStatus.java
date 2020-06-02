@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package org.vividus.http.exception;
+package org.vividus.zephyr.model;
 
-import java.io.IOException;
-
-public class HttpRequestBuildException extends IOException
+public enum TestCaseStatus
 {
-    private static final long serialVersionUID = -6608317424407885307L;
+    FAILED(2),
+    BROKEN(12),
+    PENDING(12),
+    UNKNOWN(10),
+    SKIPPED(-1),
+    PASSED(1);
 
-    public HttpRequestBuildException(Throwable cause)
+    private final int statusId;
+
+    TestCaseStatus(int statusId)
     {
-        super(cause);
+        this.statusId = statusId;
+    }
+
+    public int getStatusId()
+    {
+        return statusId;
     }
 }
