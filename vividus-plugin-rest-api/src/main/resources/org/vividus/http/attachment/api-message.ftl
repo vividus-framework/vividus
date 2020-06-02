@@ -83,14 +83,11 @@
                         </ul>
                         <div class="tab-content">
                              <#assign contentType = bodyContentType?split('/')?last>
-                             <#if contentType == "html">
-                                <#assign body = body?html>
-                             </#if>
                              <div id="pretty" class="tab-pane fade  in active">
-                               <pre><code id = "pretty-code" class="${contentType}">${body}</code></pre>
+                               <pre><code id = "pretty-code" class="${contentType}"><#outputformat "HTML">${body}</#outputformat></code></pre>
                              </div>
                              <div id="origin" class="tab-pane fade">
-                               <pre><code id = "original-code" class="${contentType}">${body}</code></pre>
+                               <pre><code id = "original-code" class="${contentType}"><#outputformat "HTML">${body}</#outputformat></code></pre>
                              </div>
                         </div>
                     </div>
