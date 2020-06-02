@@ -24,6 +24,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
@@ -134,6 +135,7 @@ public class CookieSteps
 
     /**
      * Adds certain cookies with parameters described in examples table
+     * You are able to add the cookies for the current domain only. Make sure you are at the right URL.
      * <p>
      * <b>cookieName</b> name of cookie to set
      * </p>
@@ -177,6 +179,8 @@ public class CookieSteps
     public void setAllCookies(ExamplesTable parameters)
     {
         String currentUrl = webDriverProvider.get().getCurrentUrl();
+        Validate.isTrue(null != currentUrl,
+                "Unable to get current URL. Please make sure you've navigated to the right URL");
         parameters.getRows().forEach(row ->
         {
             cookieManager.addCookie(row.get("cookieName"), row.get("cookieValue"), row.get("path"), currentUrl);

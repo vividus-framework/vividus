@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -135,6 +137,16 @@ class CookieStepsTests
         cookieSteps.setAllCookies(table);
         verify(cookieManager, times(2)).addCookie("hcpsid", "1", "/", TEST_URL);
         verify(navigateActions).refresh();
+    }
+
+    @Test
+    void shouldThrowAnExceptionIfCurrentURLIsNotDefined()
+    {
+        ExamplesTable table = mock(ExamplesTable.class);
+        when(webDriverProvider.get()).thenReturn(mock(WebDriver.class));
+        IllegalArgumentException iae =
+                assertThrows(IllegalArgumentException.class, () -> cookieSteps.setAllCookies(table));
+        assertEquals("Unable to get current URL. Please make sure you've navigated to the right URL", iae.getMessage());
     }
 
     @Test
