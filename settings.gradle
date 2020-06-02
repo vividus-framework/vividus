@@ -27,5 +27,6 @@ include 'vividus-plugin-visual'
 include 'vividus-plugin-web-app-to-rest-api'
 include 'vividus-plugin-web-app'
 include 'vividus-plugin-xml'
+include 'vividus-to-zephyr-for-jira-exporter'
 
 include 'vividus-tests'
