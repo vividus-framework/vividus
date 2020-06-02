@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+        xmlns="http://www.springframework.org/schema/beans"
+        xmlns:util="http://www.springframework.org/schema/util"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+        default-lazy-init="true">
+
+    <bean id="jiraConfiguration" class="org.vividus.facade.jira.JiraConfiguration">
+        <property name="username" value="${jira.username}" />
+        <property name="password" value="${jira.password}" />
+        <property name="endpoint" value="${jira.endpoint}" />
+    </bean>
+
+    <bean id="jiraFacade" class="org.vividus.facade.jira.JiraFacade">
+        <property name="client" ref="jiraClient" />
+        <property name="jiraConfiguration" ref="jiraConfiguration" />
+    </bean>
+
+    <bean id="zephyrFacade" class="org.vividus.facade.zephyr.ZephyrFacade">
+        <property name="client" ref="jiraClient" />
+        <property name="jiraConfiguration" ref="jiraConfiguration" />
+        <property name="zephyrConfiguration">
+            <bean class="org.vividus.facade.zephyr.ZephyrConfiguration">
+                <property name="projectKey" value="${zephyr.project-key}" />
+                <property name="versionName" value="${zephyr.version-name}" />
+                <property name="cycleName" value="${zephyr.cycle-name}" />
+                <property name="folderName" value="${zephyr.folder-name}" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="jiraClient" class="org.vividus.facade.jira.client.JiraClient">
+        <property name="httpClient" ref="httpClient-Jira" />
+    </bean>
+
+    <bean id="httpClient-Jira" class="org.vividus.http.client.HttpClient"
+          factory-bean="httpClientFactory" factory-method="buildHttpClient">
+        <constructor-arg>
+            <bean parent="httpClientConfig">
+                <property name="circularRedirectsAllowed" value="${http.circular-redirects-allowed}" />
+                <property name="connectionRequestTimeout" value="${http.connection-request-timeout}" />
+                <property name="connectTimeout" value="${http.connect-timeout}" />
+                <property name="maxTotalConnections" value="${http.max-total-connections}" />
+                <property name="maxConnectionsPerRoute" value="${http.max-connections-per-route}" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="zephyrExporter" class="org.vividus.facade.zephyr.exporter.ZephyrExporter">
+        <property name="jiraFacade" ref="jiraFacade" />
+        <property name="zephyrFacade" ref="zephyrFacade" />
+        <property name="zephyrExporterProperties">
+            <bean class="org.vividus.facade.zephyr.exporter.ZephyrExporterProperties">
+                <property name="sourceDirectory" value="${zephyr.exporter.source-directory}" />
+            </bean>
+        </property>
+    </bean>
+</beans>
