@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -40,6 +41,9 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -379,6 +383,35 @@ class ElementSearchActionTests
         assertEquals(0, foundElements.size());
         verify(element, Mockito.never()).getSize();
         verifyNoInteractions(waitActions);
+        assertThat(logger.getLoggingEvents().get(0), equalTo(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 1)));
+    }
+
+    private static Stream<Arguments> provideStaleElementTestData()
+    {
+        Answer<Boolean> elementStale = invocation -> {
+            throw new StaleElementReferenceException(EXCEPTION);
+        };
+        Answer<Boolean> elementDisplayed = invocation -> true;
+        return Stream.of(Arguments.of(elementStale, 0, 2), Arguments.of(elementDisplayed, 1, 2));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideStaleElementTestData")
+    void testStaleElementSearchRetry(Answer<Boolean> answer, int expectedSize,
+            int isDisplayedMethodInvocations)
+    {
+        elementSearchAction.setRetrySearchIfStale(true);
+        WebElement element = mock(WebElement.class);
+        List<WebElement> elements = List.of(element);
+        Mockito.doThrow(new StaleElementReferenceException(EXCEPTION)).doAnswer(answer)
+                .when(element).isDisplayed();
+        when(searchContext.findElements(locator)).thenReturn(elements);
+        List<WebElement> foundElements = elementSearchAction
+                .findElements(searchContext, locator, new SearchParameters().setWaitForElement(false));
+        assertEquals(expectedSize, foundElements.size());
+        verify(element, Mockito.never()).getSize();
+        verifyNoInteractions(waitActions);
+        verify(element, times(isDisplayedMethodInvocations)).isDisplayed();
         assertThat(logger.getLoggingEvents().get(0), equalTo(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 1)));
     }
 
