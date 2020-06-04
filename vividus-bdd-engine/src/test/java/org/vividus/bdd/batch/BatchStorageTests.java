@@ -117,14 +117,13 @@ class BatchStorageTests
     void shouldGetBatchExecutionConfigurationInitializedWithNonDefaultValues()
     {
         BatchExecutionConfiguration config = batchStorage.getBatchExecutionConfiguration(BATCH_KEYS.get(1));
-        assertAll(() ->
-        {
-            assertEquals(BATCH_2_NAME, config.getName());
-            assertEquals(BATCH_2_THREADS, config.getThreads());
-            assertEquals(BATCH_2_TIMEOUT, config.getStoryExecutionTimeout());
-            assertEquals(List.of(BATCH_2_META_FILTERS), config.getMetaFilters());
-            assertFalse(config.isIgnoreFailure());
-        });
+        assertAll(
+            () -> assertEquals(BATCH_2_NAME, config.getName()),
+            () -> assertEquals(BATCH_2_THREADS, config.getThreads()),
+            () -> assertEquals(BATCH_2_TIMEOUT, config.getStoryExecutionTimeout()),
+            () -> assertEquals(List.of(BATCH_2_META_FILTERS), config.getMetaFilters()),
+            () -> assertFalse(config.isIgnoreFailure())
+        );
     }
 
     @Test
@@ -136,12 +135,12 @@ class BatchStorageTests
     private void assertDefaultBatchExecutionConfiguration(String batchKey)
     {
         BatchExecutionConfiguration config = batchStorage.getBatchExecutionConfiguration(batchKey);
-        assertAll(() -> {
-            assertEquals(batchKey,  config.getName());
-            assertNull(config.getThreads());
-            assertEquals(Duration.ofSeconds(DEFAULT_TIMEOUT), config.getStoryExecutionTimeout());
-            assertEquals(DEFAULT_META_FILTERS, config.getMetaFilters());
-            assertTrue(config.isIgnoreFailure());
-        });
+        assertAll(
+            () -> assertEquals(batchKey,  config.getName()),
+            () -> assertNull(config.getThreads()),
+            () -> assertEquals(Duration.ofSeconds(DEFAULT_TIMEOUT), config.getStoryExecutionTimeout()),
+            () -> assertEquals(DEFAULT_META_FILTERS, config.getMetaFilters()),
+            () -> assertTrue(config.isIgnoreFailure())
+        );
     }
 }
