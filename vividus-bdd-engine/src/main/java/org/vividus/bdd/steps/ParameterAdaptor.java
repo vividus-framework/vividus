@@ -21,7 +21,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.DynamicVariable;
 
@@ -89,7 +90,7 @@ public class ParameterAdaptor
         this.bddVariableContext = bddVariableContext;
     }
 
-    @Autowired(required = false)
+    @Inject
     public void setDynamicVariables(Map<String, DynamicVariable> dynamicVariables)
     {
         this.dynamicVariables = dynamicVariables;

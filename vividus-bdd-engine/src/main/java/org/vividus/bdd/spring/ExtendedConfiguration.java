@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -37,7 +38,6 @@ import org.jbehave.core.steps.DelegatingStepMonitor;
 import org.jbehave.core.steps.ParameterControls;
 import org.jbehave.core.steps.ParameterConverters.ChainableParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.steps.ExpressionAdaptor;
@@ -104,13 +104,13 @@ public class ExtendedConfiguration extends Configuration
         useStoryReporterBuilder(storyReporterBuilder);
     }
 
-    @Autowired(required = false)
-    public void setViewGenerator(ViewGenerator viewGenerator)
+    @Inject
+    public void setViewGenerator(Optional<ViewGenerator> viewGenerator)
     {
-        useViewGenerator(viewGenerator);
+        viewGenerator.ifPresent(this::useViewGenerator);
     }
 
-    @Autowired
+    @Inject
     public void setStepMonitors(List<StepMonitor> stepMonitors)
     {
         this.stepMonitors = Collections.unmodifiableList(stepMonitors);
@@ -132,7 +132,7 @@ public class ExtendedConfiguration extends Configuration
         this.customConverters = Collections.unmodifiableList(customConverters);
     }
 
-    @Autowired
+    @Inject
     public void setCustomTableTransformers(Map<String, TableTransformer> customTableTransformers)
     {
         this.customTableTransformers = customTableTransformers;

@@ -22,9 +22,10 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.vividus.bdd.expression.IExpressionProcessor;
 
 public class ExpressionAdaptor
@@ -92,7 +93,7 @@ public class ExpressionAdaptor
         return expression;
     }
 
-    @Autowired
+    @Inject
     public void setProcessors(List<IExpressionProcessor> processors)
     {
         this.processors = processors;

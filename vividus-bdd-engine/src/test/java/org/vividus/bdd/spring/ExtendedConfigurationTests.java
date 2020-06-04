@@ -20,9 +20,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +34,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.jbehave.core.configuration.Keywords;
@@ -50,6 +53,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -173,7 +177,15 @@ public class ExtendedConfigurationTests
     public void testSetViewGenerator()
     {
         ViewGenerator viewGenerator = mock(ViewGenerator.class);
-        configuration.setViewGenerator(viewGenerator);
+        configuration.setViewGenerator(Optional.of(viewGenerator));
         assertEquals(viewGenerator, configuration.viewGenerator());
+    }
+
+    @Test
+    public void shouldNotSetViewGeneratorIfEmptyOptionalUsed()
+    {
+        ExtendedConfiguration spy = Mockito.spy(configuration);
+        configuration.setViewGenerator(Optional.empty());
+        verify(spy, never()).useViewGenerator(any());
     }
 }
