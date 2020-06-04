@@ -27,8 +27,6 @@ import static org.mockito.Mockito.when;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -55,9 +53,6 @@ import org.vividus.softassert.ISoftAssert;
 @ExtendWith(MockitoExtension.class)
 class WaitActionsTests
 {
-    private static final String VALUE_222 = "222";
-    private static final String OLD_URL = "oldUrl";
-    private static final String NEW_URL = "newUrl";
     private static final String COMPLETE = "complete";
     private static final String INTERACTIVE = "interactive";
     private static final String SCRIPT_READY_STATE = "return document.readyState";
@@ -213,77 +208,6 @@ class WaitActionsTests
     }
 
     @Test
-    void testWaitForNewWindowOpen()
-    {
-        mockDescriptiveWait(ChronoUnit.MILLIS);
-        Set<String> windowHandles = new HashSet<>();
-        windowHandles.add("111");
-        windowHandles.add(VALUE_222);
-        when(webDriver.getWindowHandles()).thenReturn(windowHandles);
-        waitActions.waitForNewWindowOpen(webDriver, 1, TIMEOUT_MILLIS, true);
-        verify(webDriver).getWindowHandles();
-    }
-
-    @Test
-    void testWaitForNewWindowOpenRecordNotSpecified()
-    {
-        spy = Mockito.spy(waitActions);
-        mockDescriptiveWait(ChronoUnit.MILLIS);
-        spy.waitForNewWindowOpen(webDriver, 1, TIMEOUT_MILLIS);
-        verify(spy).waitForNewWindowOpen(webDriver, 1, TIMEOUT_MILLIS, true);
-    }
-
-    @Test
-    void testWaitForNewWindowOpenWithDefaultTimeout()
-    {
-        configureWaitActions();
-        spy = Mockito.spy(waitActions);
-        mockDescriptiveWait(ChronoUnit.MILLIS);
-        spy.waitForNewWindowOpen(webDriver, 1, true);
-        verify(spy).waitForNewWindowOpen(webDriver, 1, TIMEOUT_MILLIS, true);
-    }
-
-    @Test
-    void testWaitForNewWindowOpenWithDefaultTimeoutRecordNotSpecified()
-    {
-        configureWaitActions();
-        spy = Mockito.spy(waitActions);
-        mockDescriptiveWait(ChronoUnit.MILLIS);
-        spy.waitForNewWindowOpen(webDriver, 1);
-        verify(spy).waitForNewWindowOpen(webDriver, 1, TIMEOUT_MILLIS, true);
-    }
-
-    @Test
-    void testWaitForNewWindowOpenNotRecordAssertion()
-    {
-        configureWaitActions();
-        spy = Mockito.spy(waitActions);
-        mockDescriptiveWait(ChronoUnit.MILLIS);
-        spy.waitForNewWindowOpen(webDriver, 1, false);
-        verify(spy).waitForNewWindowOpen(webDriver, 1, TIMEOUT_MILLIS, false);
-    }
-
-    @Test
-    void testWaitForNewPageOpen()
-    {
-        mockDescriptiveWait(ChronoUnit.MILLIS);
-        when(webDriver.getCurrentUrl()).thenReturn(NEW_URL);
-        waitActions.waitForPageOpen(webDriver, OLD_URL, TIMEOUT_MILLIS);
-        verify(webDriver).getCurrentUrl();
-    }
-
-    @Test
-    void testWaitForNewPageOpenWithDefaultTimeout()
-    {
-        configureWaitActions();
-        spy = Mockito.spy(waitActions);
-        mockDescriptiveWait(ChronoUnit.MILLIS);
-        when(webDriver.getCurrentUrl()).thenReturn(OLD_URL);
-        spy.waitForPageOpen(webDriver, OLD_URL);
-        verify(spy).waitForPageOpen(webDriver, OLD_URL, TIMEOUT_MILLIS);
-    }
-
-    @Test
     void testWaitForPageLoad()
     {
         mockDescriptiveWait(ChronoUnit.DAYS);
@@ -302,15 +226,6 @@ class WaitActionsTests
         Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(false);
         waitActions.waitForPageLoad();
         verify(targetLocator).defaultContent();
-    }
-
-    @Test
-    void testWaitForWindowToClose()
-    {
-        spy = Mockito.spy(waitActions);
-        mockDescriptiveWait(ChronoUnit.MILLIS);
-        spy.waitForWindowToClose(webDriver, VALUE_222);
-        verify(spy).wait(eq(webDriver), any());
     }
 
     @Test
@@ -405,8 +320,6 @@ class WaitActionsTests
 
     private void configureWaitActions()
     {
-        waitActions.setWindowOpenTimeout(TIMEOUT_MILLIS);
-        waitActions.setPageOpenTimeout(TIMEOUT_MILLIS);
         waitActions.setPageStartsToLoadTimeout(TIMEOUT_MILLIS);
     }
 }

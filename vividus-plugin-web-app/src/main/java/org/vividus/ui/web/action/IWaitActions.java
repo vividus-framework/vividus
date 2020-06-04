@@ -40,21 +40,5 @@ public interface IWaitActions
     <T, V> WaitResult<V> wait(T input, Duration timeout, Duration pollingPeriod, Function<T, V> isTrue,
             boolean recordAssertionIfTimeout);
 
-    WaitResult<Boolean> waitForNewWindowOpen(WebDriver webDriver, int alreadyOpenedWindowNumber, Duration timeout);
-
-    WaitResult<Boolean> waitForNewWindowOpen(WebDriver webDriver, int alreadyOpenedWindowNumber, Duration timeout,
-            boolean recordAssertionIfTimeout);
-
-    WaitResult<Boolean> waitForPageOpen(WebDriver webDriver, String oldUrl, Duration timeout);
-
-    WaitResult<Boolean> waitForNewWindowOpen(WebDriver webDriver, int alreadyOpenedWindowNumber);
-
-    WaitResult<Boolean> waitForNewWindowOpen(WebDriver webDriver, int alreadyOpenedWindowNumber,
-            boolean recordAssertionIfTimeout);
-
-    WaitResult<Boolean> waitForPageOpen(WebDriver webDriver, String oldUrl);
-
-    WaitResult<Boolean> waitForWindowToClose(WebDriver webDriver, String windowHandleToClose);
-
     void sleepForTimeout(Duration time);
 }

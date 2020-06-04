@@ -134,8 +134,6 @@
     <bean id="windowsActions" class="org.vividus.ui.web.action.WindowsActions" />
 
     <bean id="waitActions" class="org.vividus.ui.web.action.WaitActions">
-        <property name="pageOpenTimeout"  value="${web.wait.page-open-timeout}" />
-        <property name="windowOpenTimeout"  value="${web.wait.window-open-timeout}" />
         <property name="pageStartsToLoadTimeout" value="${web.wait.page-starts-to-load-timeout}" />
     </bean>
 
