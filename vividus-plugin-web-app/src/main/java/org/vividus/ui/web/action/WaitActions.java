@@ -48,8 +48,6 @@ public class WaitActions implements IWaitActions
     @Inject private IAlertActions alertActions;
     @Inject private IWebDriverManager webDriverManager;
 
-    private Duration pageOpenTimeout;
-    private Duration windowOpenTimeout;
     private Duration pageStartsToLoadTimeout;
 
     @Override
@@ -105,71 +103,6 @@ public class WaitActions implements IWaitActions
             webDriver.switchTo().defaultContent();
         }
         return "complete".equals(status) || isIExplore && "interactive".equals(status);
-    }
-
-    @Override
-    public WaitResult<Boolean> waitForNewWindowOpen(WebDriver webDriver, int alreadyOpenedWindowNumber)
-    {
-        return waitForNewWindowOpen(webDriver, alreadyOpenedWindowNumber, windowOpenTimeout, true);
-    }
-
-    @Override
-    public WaitResult<Boolean> waitForNewWindowOpen(WebDriver webDriver, int alreadyOpenedWindowNumber,
-            boolean recordAssertionIfTimeout)
-    {
-        return waitForNewWindowOpen(webDriver, alreadyOpenedWindowNumber, windowOpenTimeout, recordAssertionIfTimeout);
-    }
-
-    @Override
-    public WaitResult<Boolean> waitForNewWindowOpen(WebDriver webDriver, int alreadyOpenedWindowNumber,
-            Duration timeOut)
-    {
-        return waitForNewWindowOpen(webDriver, alreadyOpenedWindowNumber, timeOut, true);
-    }
-
-    @Override
-    public WaitResult<Boolean> waitForNewWindowOpen(WebDriver webDriver, int alreadyOpenedWindowNumber,
-            Duration timeOut, boolean recordAssertionIfTimeout)
-    {
-        return wait(webDriver, timeOut, new Function<>()
-        {
-            @Override
-            public Boolean apply(WebDriver webDriver)
-            {
-                return webDriver.getWindowHandles().size() > alreadyOpenedWindowNumber;
-            }
-
-            @Override
-            public String toString()
-            {
-                return "new window is opening";
-            }
-        }, recordAssertionIfTimeout);
-    }
-
-    @Override
-    public WaitResult<Boolean> waitForPageOpen(WebDriver webDriver, String oldUrl)
-    {
-        return waitForPageOpen(webDriver, oldUrl, pageOpenTimeout);
-    }
-
-    @Override
-    public WaitResult<Boolean> waitForPageOpen(WebDriver webDriver, String oldUrl, Duration timeout)
-    {
-        return wait(webDriver, timeout, new Function<>()
-        {
-            @Override
-            public Boolean apply(WebDriver webDriver)
-            {
-                return !oldUrl.equals(webDriver.getCurrentUrl());
-            }
-
-            @Override
-            public String toString()
-            {
-                return "new page is opening";
-            }
-        });
     }
 
     @Override
@@ -245,25 +178,6 @@ public class WaitActions implements IWaitActions
     }
 
     @Override
-    public WaitResult<Boolean> waitForWindowToClose(WebDriver webDriver, String windowHandleToClose)
-    {
-        return wait(webDriver, new Function<>()
-        {
-            @Override
-            public Boolean apply(WebDriver webDriver)
-            {
-                return !webDriver.getWindowHandles().contains(windowHandleToClose);
-            }
-
-            @Override
-            public String toString()
-            {
-                return "waiting for specified window to close";
-            }
-        });
-    }
-
-    @Override
     public void sleepForTimeout(Duration time)
     {
         Sleeper.sleep(time);
@@ -272,16 +186,6 @@ public class WaitActions implements IWaitActions
     private boolean recordFailedAssertion(Wait<?> wait, WebDriverException e)
     {
         return softAssert.recordFailedAssertion(wait + ". Error: " + e.getMessage());
-    }
-
-    public void setPageOpenTimeout(Duration pageOpenTimeout)
-    {
-        this.pageOpenTimeout = pageOpenTimeout;
-    }
-
-    public void setWindowOpenTimeout(Duration windowOpenTimeout)
-    {
-        this.windowOpenTimeout = windowOpenTimeout;
     }
 
     public void setPageStartsToLoadTimeout(Duration pageStartsToLoadTimeout)
