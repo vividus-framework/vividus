@@ -11,7 +11,7 @@
 
 ## Prerequisites
 #### Java
-- Install [JDK 13](https://jdk.java.net/13/)
+- The baseline is JDK 11. Latest [JDK 14](https://jdk.java.net/14/) is supported as well
 - Configure `JAVA_HOME` environment variable
 - Update `PATH` environment variable: add `$JAVA_HOME/bin`
 
