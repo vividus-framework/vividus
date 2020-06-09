@@ -216,6 +216,7 @@
     <bean id="abstractElementSearchAction" class="org.vividus.ui.web.action.search.AbstractElementSearchAction"
           abstract="true">
         <property name="waitForElementTimeout" value="${web.search.wait-for-element-timeout}" />
+        <property name="retrySearchIfStale" value="${web.search.retry-search-if-stale}" />
     </bean>
 
     <bean id="abstractStateFilter" class="org.vividus.ui.web.action.search.AbstractStateFilter"

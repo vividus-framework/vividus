@@ -51,27 +51,44 @@ public abstract class AbstractElementSearchAction
     @Inject private IWaitActions waitActions;
     @Inject private IExpectedConditions<By> expectedConditions;
     private Duration waitForElementTimeout;
+    private boolean retrySearchIfStale;
 
     public List<WebElement> findElements(SearchContext searchContext, By locator, SearchParameters parameters)
     {
         if (searchContext != null)
         {
-            List<WebElement> elements = parameters.isWaitForElement() ? waitForElement(searchContext, locator)
-                    : searchContext.findElements(locator);
-            boolean elementsFound = null != elements;
-            LOGGER.info("Total number of elements found {} is equal to {}", locator,
-                    elementsFound ? elements.size() : 0);
-            if (elementsFound)
+            return findElements(searchContext, locator, parameters, false);
+        }
+        return List.of();
+    }
+
+    private List<WebElement> findElements(SearchContext searchContext, By locator, SearchParameters parameters,
+            boolean retry)
+    {
+        List<WebElement> elements = parameters.isWaitForElement()
+                ? waitForElement(searchContext, locator)
+                : searchContext.findElements(locator);
+        boolean elementsFound = null != elements;
+        LOGGER.info("Total number of elements found {} is equal to {}", locator, elementsFound ? elements.size() : 0);
+        if (elementsFound)
+        {
+            Visibility visibility = parameters.getVisibility();
+            try
             {
-                Visibility visibility = parameters.getVisibility();
-                return Visibility.ALL == visibility ? elements : filterElementsByVisibility(elements,
-                        visibility == Visibility.VISIBLE);
+                return Visibility.ALL == visibility
+                        ? elements
+                        : filterElementsByVisibility(elements, visibility == Visibility.VISIBLE, retry);
+            }
+            catch (StaleElementReferenceException e)
+            {
+                return findElements(searchContext, locator, parameters, true);
             }
         }
         return List.of();
     }
 
-    private List<WebElement> filterElementsByVisibility(List<WebElement> elements, boolean visible)
+    private List<WebElement> filterElementsByVisibility(List<WebElement> elements, boolean visible,
+            boolean retry)
     {
         return elements.stream().filter(element -> {
             try
@@ -80,6 +97,10 @@ public abstract class AbstractElementSearchAction
             }
             catch (StaleElementReferenceException e)
             {
+                if (retrySearchIfStale && !retry)
+                {
+                    throw e;
+                }
                 LOGGER.warn(e.getMessage(), e);
                 return false;
             }
@@ -171,5 +192,10 @@ public abstract class AbstractElementSearchAction
     public void setWaitForElementTimeout(Duration waitForElementTimeout)
     {
         this.waitForElementTimeout = waitForElementTimeout;
+    }
+
+    public void setRetrySearchIfStale(boolean retrySearchIfStale)
+    {
+        this.retrySearchIfStale = retrySearchIfStale;
     }
 }
