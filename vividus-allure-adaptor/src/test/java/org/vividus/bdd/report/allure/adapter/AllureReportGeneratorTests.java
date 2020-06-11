@@ -196,6 +196,15 @@ public class AllureReportGeneratorTests
                     + "\",\"reportUrl\":\"" + executorInfo.getReportUrl()
                     + "\"}",
                 Files.readString(resultsDirectory.toPath().resolve("executor.json")));
+        assertEquals("["
+                        + "{\"name\":\"Test defects\","
+                        + "\"matchedStatuses\":[\"broken\"]},"
+                        + "{\"name\":\"Product defects\","
+                        + "\"matchedStatuses\":[\"failed\"]},"
+                        + "{\"name\":\"Known issues\","
+                        + "\"matchedStatuses\":[\"unknown\"]}"
+                        + "]",
+                Files.readString(resultsDirectory.toPath().resolve("categories.json")));
     }
 
     private Resource mockResource(String asString) throws IOException
