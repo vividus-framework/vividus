@@ -30,6 +30,7 @@ Then `${v.ar[0]}` is equal to `${v.ar[0]}`
 Then `${v:ar}` is equal to `${v:ar}`
 Then `${}` is equal to `${}`
 Then `${:default}` is equal to `default`
+Then `${a.b:NULL}` is equal to `NULL`
 
 When I initialize the scenario variable `vAr` with value `vAl`
 When I initialize the scenario variable `v.ar` with value `v.al`
@@ -38,6 +39,7 @@ When I initialize the scenario variable `v[0].ar` with value `v[0].al`
 When I initialize the scenario variable `v.ar[0]` with value `v.al[0]`
 When I initialize the scenario variable `v:ar` with value `v:al`
 When I initialize the scenario variable `` with value `val`
+When I initialize the scenario variable `a.b` with value `a.b-value`
 Then `${vAr}` is equal to `vAl`
 Then `${v.ar}` is equal to `v.al`
 Then `${var[0]}` is equal to `val[0]`
@@ -45,3 +47,5 @@ Then `${v[0].ar}` is equal to `v[0].al`
 Then `${v.ar[0]}` is equal to `v.al[0]`
 Then `${v:ar}` is equal to `v:al`
 Then `${}` is equal to `val`
+Then `${a.b:NULL}` is equal to `a.b-value`
+Then `${a.b}` is equal to `a.b-value`

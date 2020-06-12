@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.variable.IVariablesFactory;
@@ -117,6 +118,7 @@ public class BddVariableContext implements IBddVariableContext
     private Object getVariable(Map<String, Object> variables, String key)
     {
         return Optional.ofNullable(variables.get(key))
+                       .or(() -> Optional.ofNullable(variables.get(StringUtils.substringBefore(key, ":"))))
                        .or(() -> resolveAsComplexType(variables, key))
                        .orElse(null);
     }
