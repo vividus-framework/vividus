@@ -24,7 +24,7 @@ public enum StatusPriority
 {
     BROKEN(Status.BROKEN, io.qameta.allure.entity.Status.BROKEN, 0),
     FAILED(Status.FAILED, io.qameta.allure.entity.Status.FAILED, 1),
-    KNWON_ISSUES_ONLY(null, io.qameta.allure.entity.Status.UNKNOWN, 2),
+    KNOWN_ISSUES_ONLY(null, io.qameta.allure.entity.Status.UNKNOWN, 2),
     PENDING(Status.SKIPPED, io.qameta.allure.entity.Status.SKIPPED, 3),
     CANCELED(Status.SKIPPED, io.qameta.allure.entity.Status.SKIPPED, 4),
     PASSED(Status.PASSED, io.qameta.allure.entity.Status.PASSED, 5),

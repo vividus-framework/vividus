@@ -39,7 +39,7 @@ public class AllureAssertionFailureListener
     {
         SoftAssertionError softAssertionError = event.getSoftAssertionError();
         Status status = (softAssertionError.isKnownIssue() && !softAssertionError.getKnownIssue().isFixed()
-                ? StatusPriority.KNWON_ISSUES_ONLY : StatusPriority.FAILED).getStatusModel();
+                ? StatusPriority.KNOWN_ISSUES_ONLY : StatusPriority.FAILED).getStatusModel();
         allureStepReporter.updateStepStatus(status);
     }
 }
