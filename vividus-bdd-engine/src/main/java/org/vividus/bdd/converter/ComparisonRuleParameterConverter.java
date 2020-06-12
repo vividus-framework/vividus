@@ -21,15 +21,14 @@ import java.lang.reflect.Type;
 import javax.inject.Named;
 
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
-import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.vividus.bdd.steps.ComparisonRule;
 
 @Named
 public class ComparisonRuleParameterConverter extends AbstractParameterConverter<ComparisonRule>
 {
-    private final FluentEnumConverter fluentEnumConverter;
+    private final FluentTrimmedEnumConverter fluentEnumConverter;
 
-    public ComparisonRuleParameterConverter(FluentEnumConverter fluentEnumConverter)
+    public ComparisonRuleParameterConverter(FluentTrimmedEnumConverter fluentEnumConverter)
     {
         this.fluentEnumConverter = fluentEnumConverter;
     }

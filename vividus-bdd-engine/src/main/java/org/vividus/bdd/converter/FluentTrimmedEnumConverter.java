@@ -16,21 +16,18 @@
 
 package org.vividus.bdd.converter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.lang.reflect.Type;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.vividus.bdd.steps.ComparisonRule;
+import javax.inject.Named;
 
-class ComparisonRuleParameterConverterTests
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
+
+@Named
+public class FluentTrimmedEnumConverter extends FluentEnumConverter
 {
-    @ValueSource(strings = {">=", "greater than or equal to"})
-    @ParameterizedTest
-    void testConvertValue(String valueToConvert)
+    @Override
+    public Enum<?> convertValue(String value, Type type)
     {
-        ComparisonRuleParameterConverter converter =
-                new ComparisonRuleParameterConverter(new FluentTrimmedEnumConverter());
-        assertEquals(ComparisonRule.GREATER_THAN_OR_EQUAL_TO,
-                converter.convertValue(valueToConvert, ComparisonRule.class));
+        return super.convertValue(value.trim(), type);
     }
 }

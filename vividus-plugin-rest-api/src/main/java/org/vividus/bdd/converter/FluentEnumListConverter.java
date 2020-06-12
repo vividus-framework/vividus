@@ -21,18 +21,17 @@ import javax.inject.Named;
 
 import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.ParameterConverters.AbstractListParameterConverter;
-import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 
 @Named
 public class FluentEnumListConverter extends AbstractListParameterConverter<Enum<?>>
 {
     @Inject
-    public FluentEnumListConverter(FluentEnumConverter enumConverter)
+    public FluentEnumListConverter(FluentTrimmedEnumConverter enumConverter)
     {
         this(ParameterConverters.DEFAULT_COLLECTION_SEPARATOR, enumConverter);
     }
 
-    public FluentEnumListConverter(String valueSeparator, FluentEnumConverter enumConverter)
+    public FluentEnumListConverter(String valueSeparator, FluentTrimmedEnumConverter enumConverter)
     {
         super(valueSeparator, enumConverter);
     }
