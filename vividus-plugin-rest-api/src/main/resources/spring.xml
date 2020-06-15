@@ -65,6 +65,8 @@
 
     <bean id="httpClientInterceptor" class="org.vividus.http.HttpClientInterceptor" />
 
+    <bean id="httpCookieSteps" class="org.vividus.bdd.steps.api.HttpCookieSteps"/>
+
     <aop:config>
         <aop:aspect id="httpClientAspect" ref="httpClientInterceptor">
             <aop:after-returning method="attachResponse" returning="response" pointcut="bean(httpClient-RestApi) **and** execution(org.vividus.http.client.HttpResponse org.vividus.http.client.IHttpClient.*(..))" />
@@ -76,5 +78,6 @@
         <value>httpResponseValidationSteps</value>
         <value>jsonResponseValidationSteps</value>
         <value>cookieStoreProvider</value>
+        <value>httpCookieSteps</value>
     </util:list>
 </beans>
