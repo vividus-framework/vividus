@@ -104,9 +104,9 @@ public class AllureReportGenerator implements IAllureReportGenerator
     {
         wrap(() ->
         {
+            createDirectories(resultsDirectory, reportDirectory, historyDirectory);
             writeCategoriesInfo();
             writeExecutorInfo();
-            createDirectories(reportDirectory, historyDirectory);
             copyDirectory(historyDirectory, resolveHistoryDir(resultsDirectory));
             generateData();
             customizeReport();
@@ -206,10 +206,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
     {
         for (File directory : directories)
         {
-            if (!directory.exists())
-            {
-                FileUtils.forceMkdir(directory);
-            }
+            Files.createDirectories(directory.toPath());
         }
     }
 
