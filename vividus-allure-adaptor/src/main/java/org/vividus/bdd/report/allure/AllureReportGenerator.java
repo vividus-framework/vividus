@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.vividus.bdd.report.allure.model.AllureCategory;
 import org.vividus.util.property.IPropertyMapper;
 
 import io.qameta.allure.ConfigurationBuilder;
@@ -41,6 +42,7 @@ import io.qameta.allure.ReportGenerator;
 import io.qameta.allure.core.Configuration;
 import io.qameta.allure.duration.DurationTrendPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
+import io.qameta.allure.entity.Status;
 import io.qameta.allure.executor.ExecutorPlugin;
 import io.qameta.allure.history.HistoryTrendPlugin;
 import io.qameta.allure.summary.SummaryPlugin;
@@ -60,6 +62,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private final IPropertyMapper propertyMapper;
     private final ResourcePatternResolver resourcePatternResolver;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private boolean started;
 
@@ -101,6 +104,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
     {
         wrap(() ->
         {
+            writeCategoriesInfo();
             writeExecutorInfo();
             createDirectories(reportDirectory, historyDirectory);
             copyDirectory(historyDirectory, resolveHistoryDir(resultsDirectory));
@@ -111,14 +115,27 @@ public class AllureReportGenerator implements IAllureReportGenerator
         LOGGER.info("Allure report is successfully generated at: {}", reportDirectory.getAbsolutePath());
     }
 
+    private void writeCategoriesInfo() throws IOException
+    {
+        List<AllureCategory> categories = List.of(
+                new AllureCategory("Test defects", List.of(Status.BROKEN)),
+                new AllureCategory("Product defects", List.of(Status.FAILED)),
+                new AllureCategory("Known issues", List.of(Status.UNKNOWN)));
+        createJsonFileInResultsDirectory("categories.json", categories);
+    }
+
+    private void createJsonFileInResultsDirectory(String fileName, Object content) throws IOException
+    {
+        try (BufferedWriter writer = Files.newBufferedWriter(resultsDirectory.toPath().resolve(fileName)))
+        {
+            objectMapper.writeValue(writer, content);
+        }
+    }
+
     private void writeExecutorInfo() throws IOException
     {
         ExecutorInfo executorInfo = propertyMapper.readValue("allure.executor.", ExecutorInfo.class);
-
-        try (BufferedWriter writer = Files.newBufferedWriter(resultsDirectory.toPath().resolve("executor.json")))
-        {
-            new ObjectMapper().writeValue(writer, executorInfo);
-        }
+        createJsonFileInResultsDirectory("executor.json", executorInfo);
     }
 
     private File resolveHistoryDir(File root)
