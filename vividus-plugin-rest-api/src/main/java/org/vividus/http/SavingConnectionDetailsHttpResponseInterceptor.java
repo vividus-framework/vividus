@@ -34,7 +34,7 @@ public class SavingConnectionDetailsHttpResponseInterceptor implements HttpRespo
         ManagedHttpClientConnection routedConnection = (ManagedHttpClientConnection) context
                 .getAttribute(HttpCoreContext.HTTP_CONNECTION);
         // Connection may be stale, when no response body is returned
-        if (!routedConnection.isStale())
+        if (routedConnection.isOpen() && (response.getEntity() != null || !routedConnection.isStale()))
         {
             SSLSession sslSession = routedConnection.getSSLSession();
             boolean secure = sslSession != null;
