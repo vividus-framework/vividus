@@ -16,24 +16,21 @@
 
 package org.vividus.bdd.converter;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.vividus.bdd.steps.ComparisonRule;
 
-import net.javacrumbs.jsonunit.core.Option;
-import net.javacrumbs.jsonunit.core.internal.Options;
-
-class JsonComparisonOptionsConverterTests
+class FluentTrimmedEnumConverterTests
 {
-    @ValueSource(strings = { "ignoring extra fields, ignoring_extra_array_items",
-            "IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS" })
+    private final FluentTrimmedEnumConverter fluentTrimmedEnumConverter = new FluentTrimmedEnumConverter();
+
+    @ValueSource(strings = {"equal to ", " equal to "})
     @ParameterizedTest
-    void testConvertValue(String valueToConvert)
+    void testConversion(String valueToConvert)
     {
-        JsonComparisonOptionsConverter converter = new JsonComparisonOptionsConverter(
-                new FluentEnumListConverter(new FluentTrimmedEnumConverter()));
-        assertTrue(converter.convertValue(valueToConvert, Options.class).contains(Option.IGNORING_EXTRA_FIELDS));
-        assertTrue(converter.convertValue(valueToConvert, Options.class).contains(Option.IGNORING_EXTRA_ARRAY_ITEMS));
+        assertEquals(ComparisonRule.EQUAL_TO,
+                fluentTrimmedEnumConverter.convertValue(valueToConvert, ComparisonRule.class));
     }
 }

@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
-import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.junit.jupiter.api.Test;
 
 import net.javacrumbs.jsonunit.core.Option;
@@ -35,7 +34,7 @@ class FluentEnumListConverterTests
     @SuppressWarnings("rawtypes")
     void testConvertValue()
     {
-        FluentEnumListConverter fluentEnumListConverter = new FluentEnumListConverter(new FluentEnumConverter());
+        FluentEnumListConverter fluentEnumListConverter = new FluentEnumListConverter(new FluentTrimmedEnumConverter());
         Type type = new TypeLiteral<List<Option>>() { }.getType();
 
         assertTrue(fluentEnumListConverter.accept(type));
