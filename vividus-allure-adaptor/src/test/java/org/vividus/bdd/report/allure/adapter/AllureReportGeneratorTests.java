@@ -139,10 +139,25 @@ public class AllureReportGeneratorTests
         PowerMockito.verifyPrivate(spy, never()).invoke("generateReport");
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     @PrepareForTest({ReportGenerator.class, AllureReportGenerator.class, FileUtils.class})
-    public void testEnd() throws Exception
+    public void testEndWhenResultsDirectoryExists() throws Exception
+    {
+        testEnd();
+    }
+
+    @Test
+    @PrepareForTest({ReportGenerator.class, AllureReportGenerator.class, FileUtils.class})
+    public void testEndWhenResultsDirectoryDoesNotExist() throws Exception
+    {
+        resultsDirectory = new File(testFolder.getRoot(), "allure-results-to-be-created");
+        System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.getAbsolutePath());
+        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver);
+        testEnd();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void testEnd() throws Exception
     {
         File historyDirectory = testFolder.newFolder();
         allureReportGenerator.setHistoryDirectory(historyDirectory);
