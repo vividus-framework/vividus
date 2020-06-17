@@ -23,9 +23,8 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.hamcrest.Matcher;
@@ -84,30 +83,15 @@ class ComparisonRuleTests
 
     @ParameterizedTest
     @MethodSource("getComparisonRule")
-    void comparisonRuleParsePositiveTest(String sign, ComparisonRule rule)
-    {
-        assertEquals(ComparisonRule.parse(sign), rule);
-    }
-
-    @ParameterizedTest
-    @MethodSource("getComparisonRule")
     void comparisonRuleBySignTest(String sign, ComparisonRule rule)
     {
-        assertEquals(rule, ComparisonRule.bySign(sign).get());
+        assertEquals(rule, ComparisonRule.fromString(sign));
     }
 
     @Test
     void comparisonRuleBySignEmptyOptionalTest()
     {
-        assertEquals(Optional.empty(), ComparisonRule.bySign("==="));
-    }
-
-    @Test
-    void comparisonRuleParseNegativeTest()
-    {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> ComparisonRule.parse(INCORRECT_SIGN));
-        assertEquals("Unknown comparison sign: '" + INCORRECT_SIGN + "'", exception.getMessage());
+        assertNull(ComparisonRule.fromString("==="));
     }
 
     @ParameterizedTest

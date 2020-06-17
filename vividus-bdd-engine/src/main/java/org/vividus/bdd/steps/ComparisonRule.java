@@ -16,7 +16,6 @@
 
 package org.vividus.bdd.steps;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.hamcrest.Matcher;
@@ -81,17 +80,12 @@ public enum ComparisonRule implements IComparisonRule
         this.sign = sign;
     }
 
-    public static ComparisonRule parse(String sign)
-    {
-        return bySign(sign).orElseThrow(() ->
-            new IllegalArgumentException("Unknown comparison sign: '" + sign + "'"));
-    }
-
-    public static Optional<ComparisonRule> bySign(String sign)
+    public static ComparisonRule fromString(String sign)
     {
         return Stream.of(values())
-                .filter(comparisonRule -> sign.equalsIgnoreCase(comparisonRule.sign))
-                .findFirst();
+                     .filter(comparisonRule -> sign.equalsIgnoreCase(comparisonRule.sign))
+                     .findFirst()
+                     .orElse(null);
     }
 
     @Override
