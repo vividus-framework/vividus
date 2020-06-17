@@ -17,9 +17,11 @@
 package org.vividus.ui.web.action;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 public final class ExpectedSearchContextConditions extends AbstractExpectedConditions<By>
@@ -27,18 +29,44 @@ public final class ExpectedSearchContextConditions extends AbstractExpectedCondi
     @Override
     protected List<WebElement> findElements(SearchContext searchContext, By by)
     {
-        return searchContext.findElements(by);
+        return searchInforming(() -> searchContext.findElements(by));
     }
 
     @Override
     protected WebElement findElement(SearchContext searchContext, By by)
     {
-        return searchContext.findElement(by);
+        return searchInforming(() -> searchContext.findElement(by));
+    }
+
+    private <E> E searchInforming(Supplier<E> search)
+    {
+        try
+        {
+            return search.get();
+        }
+        catch (StaleElementReferenceException toWrap)
+        {
+            throw new StaleContextException(toWrap);
+        }
     }
 
     @Override
     protected String toStringParameters(By locator)
     {
         return "located by " + locator;
+    }
+
+    public static final class StaleContextException extends StaleElementReferenceException
+    {
+        private static final long serialVersionUID = 2449857900556530700L;
+
+        private StaleContextException(Throwable throwable)
+        {
+            super("Search context used for search is stale.\n"
+                + "Please double check the tests.\n"
+                + "You have a few options:\n"
+                + "1. Reset context;\n"
+                + "2. Synchronize the tests to wait for context's stabilization;", throwable);
+        }
     }
 }
