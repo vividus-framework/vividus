@@ -73,6 +73,12 @@ public enum HttpMethod
     PATCH
     {
         @Override
+        public HttpRequestBase createRequest(URI uri)
+        {
+            throw new IllegalStateException(generateExceptionMessage("must"));
+        }
+
+        @Override
         HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
         {
             return new HttpPatch(uri);
@@ -82,6 +88,12 @@ public enum HttpMethod
     {
         @Override
         HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
+        {
+            return new HttpPost(uri);
+        }
+
+        @Override
+        public HttpRequestBase createRequest(URI uri)
         {
             return new HttpPost(uri);
         }
@@ -117,10 +129,7 @@ public enum HttpMethod
         }
     };
 
-    public HttpRequestBase createRequest(URI uri)
-    {
-        throw new IllegalStateException(generateExceptionMessage("must"));
-    }
+    public abstract HttpRequestBase createRequest(URI uri);
 
     HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
     {
@@ -134,7 +143,7 @@ public enum HttpMethod
         return request;
     }
 
-    private String generateExceptionMessage(String verb)
+    protected String generateExceptionMessage(String verb)
     {
         return "HTTP " + name() + " request " + verb + " include body";
     }

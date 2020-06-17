@@ -36,6 +36,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.entity.StringEntity;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -44,7 +45,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 class HttpMethodTests
 {
     private static final URI URI_EXAMPLE = URI.create("https://any.example");
-    private static final String HTTP_METHOD = "HTTP ";
 
     static Stream<Arguments> successfulEmptyRequestCreation()
     {
@@ -54,6 +54,7 @@ class HttpMethodTests
                 Arguments.of(HttpMethod.DELETE, HttpDelete.class),
                 Arguments.of(HttpMethod.OPTIONS, HttpOptions.class),
                 Arguments.of(HttpMethod.TRACE, HttpTrace.class),
+                Arguments.of(HttpMethod.POST, HttpPost.class),
                 Arguments.of(HttpMethod.PUT, HttpPutWithoutBody.class),
                 Arguments.of(HttpMethod.DEBUG, HttpDebug.class)
         );
@@ -78,13 +79,12 @@ class HttpMethodTests
         assertEquals(URI_EXAMPLE, request.getURI());
     }
 
-    @ParameterizedTest
-    @EnumSource(value = HttpMethod.class, names = { "PATCH", "POST" })
-    void testFailedEmptyRequestCreation(HttpMethod httpMethod)
+    @Test
+    void testFailedEmptyRequestCreationForHttpPatch()
     {
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> httpMethod.createRequest(URI_EXAMPLE));
-        assertEquals(HTTP_METHOD + httpMethod + " request must include body", exception.getMessage());
+            () -> HttpMethod.PATCH.createRequest(URI_EXAMPLE));
+        assertEquals("HTTP PATCH request must include body", exception.getMessage());
     }
 
     @ParameterizedTest
@@ -105,6 +105,6 @@ class HttpMethodTests
     {
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> httpMethod.createEntityEnclosingRequest(URI_EXAMPLE));
-        assertEquals(HTTP_METHOD + httpMethod + " request can't include body", exception.getMessage());
+        assertEquals("HTTP " + httpMethod + " request can't include body", exception.getMessage());
     }
 }

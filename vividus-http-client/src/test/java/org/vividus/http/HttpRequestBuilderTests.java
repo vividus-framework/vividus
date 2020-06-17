@@ -90,10 +90,10 @@ class HttpRequestBuilderTests
     }
 
     @Test
-    void buildPostWithoutContent()
+    void buildPatchWithoutContent()
     {
         assertThrows(HttpRequestBuildException.class,
-            () -> builder.withHttpMethod(HttpMethod.POST).withEndpoint(ENDPOINT).build());
+            () -> builder.withHttpMethod(HttpMethod.PATCH).withEndpoint(ENDPOINT).build());
     }
 
     @Test
