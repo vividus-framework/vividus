@@ -137,10 +137,10 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestWithoutContent() throws IOException
     {
-        httpRequestExecutor.executeHttpRequest(HttpMethod.POST, URL, Optional.empty());
+        httpRequestExecutor.executeHttpRequest(HttpMethod.PATCH, URL, Optional.empty());
         verify(softAssert).recordFailedAssertion(
                 (Exception) argThat(arg -> arg instanceof HttpRequestBuildException
-                        && "java.lang.IllegalStateException: HTTP POST request must include body"
+                        && "java.lang.IllegalStateException: HTTP PATCH request must include body"
                         .equals(((Exception) arg).getMessage())));
         verify(httpTestContext).releaseRequestData();
     }

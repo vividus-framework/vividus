@@ -92,6 +92,13 @@ class HttpClientInterceptorTests
     }
 
     @Test
+    void testHttpRequestWithNullBodyIsAttachedSuccessfully()
+    {
+        HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(new Header[] {}, null);
+        testHttpRequestIsAttachedSuccessfully(httpRequest);
+    }
+
+    @Test
     void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsSet() throws IOException
     {
         Header contentTypeHeader = mockContentTypeHeader();
@@ -179,11 +186,16 @@ class HttpClientInterceptorTests
     {
         HttpEntity httpEntity = mock(HttpEntity.class);
         when(httpEntity.getContentType()).thenReturn(entityContentTypeHeader);
-        HttpContext httpContext = mock(HttpContext.class);
         HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(allRequestHeaders, httpEntity);
-        httpClientInterceptor.process(httpRequest, httpContext);
+        testHttpRequestIsAttachedSuccessfully(httpRequest);
         verify(httpEntity).getContentLength();
         verify(httpEntity).writeTo(any(ByteArrayOutputStream.class));
+    }
+
+    private void testHttpRequestIsAttachedSuccessfully(HttpEntityEnclosingRequest httpRequest)
+    {
+        HttpContext httpContext = mock(HttpContext.class);
+        httpClientInterceptor.process(httpRequest, httpContext);
         verifyPublishAttachment(REQUEST);
         verifyNoInteractions(httpContext);
         assertThat(logger.getLoggingEvents(), empty());

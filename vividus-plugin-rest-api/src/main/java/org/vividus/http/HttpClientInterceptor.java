@@ -59,18 +59,21 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
         {
             HttpEntityEnclosingRequest requestWithBody = (HttpEntityEnclosingRequest) request;
             HttpEntity entity = requestWithBody.getEntity();
-            mimeType = Optional.ofNullable(ContentType.getLenient(entity))
-                    .map(ContentType::getMimeType)
-                    .orElseGet(() -> getMimeType(requestWithBody.getAllHeaders()));
-            try (ByteArrayOutputStream baos = new ByteArrayOutputStream((int) entity.getContentLength()))
+            if (entity != null)
             {
-                // https://github.com/apache/httpcomponents-client/commit/09cefc2b8970eea56d81b1a886d9bb769a48daf3
-                entity.writeTo(baos);
-                body = baos.toByteArray();
-            }
-            catch (IOException e)
-            {
-                LOGGER.error("Error is occurred at HTTP message parsing", e);
+                mimeType = Optional.ofNullable(ContentType.getLenient(entity))
+                        .map(ContentType::getMimeType)
+                        .orElseGet(() -> getMimeType(requestWithBody.getAllHeaders()));
+                try (ByteArrayOutputStream baos = new ByteArrayOutputStream((int) entity.getContentLength()))
+                {
+                    // https://github.com/apache/httpcomponents-client/commit/09cefc2b8970eea56d81b1a886d9bb769a48daf3
+                    entity.writeTo(baos);
+                    body = baos.toByteArray();
+                }
+                catch (IOException e)
+                {
+                    LOGGER.error("Error is occurred at HTTP message parsing", e);
+                }
             }
         }
         RequestLine requestLine = request.getRequestLine();
