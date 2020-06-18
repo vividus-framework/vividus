@@ -18,12 +18,15 @@ package org.vividus.api;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import javax.net.ssl.SSLSession;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.conn.ManagedHttpClientConnection;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
@@ -50,15 +53,34 @@ class SavingConnectionDetailsHttpResponseInterceptorTests
         String protocol = "TLSv1.2";
         SSLSession sslSession = mock(SSLSession.class);
         when(sslSession.getProtocol()).thenReturn(protocol);
-        interceptor.process(null, mockHttpContextWithNonStaledConnection(sslSession));
+        intercept(mockHttpContextWithNonStaledConnection(sslSession));
         verify(httpTestContext).putConnectionDetails(argThat(connectionDetails -> connectionDetails.isSecure()
                 && protocol.equals(connectionDetails.getSecurityProtocol())));
     }
 
     @Test
+    void shouldSaveConnectionDetailsForSecuredConnectionAndDoNotCheckStalenessForResponsesWithEntity()
+    {
+        String protocol = "TLSv1.3";
+        SSLSession sslSession = mock(SSLSession.class);
+        when(sslSession.getProtocol()).thenReturn(protocol);
+        HttpContext context = mock(HttpContext.class);
+        ManagedHttpClientConnection connection = mock(ManagedHttpClientConnection.class);
+        when(context.getAttribute(HttpCoreContext.HTTP_CONNECTION)).thenReturn(connection);
+        when(connection.isOpen()).thenReturn(true);
+        when(connection.getSSLSession()).thenReturn(sslSession);
+        HttpResponse response = mock(HttpResponse.class);
+        when(response.getEntity()).thenReturn(mock(HttpEntity.class));
+        interceptor.process(response, context);
+        verify(httpTestContext).putConnectionDetails(argThat(connectionDetails -> connectionDetails.isSecure()
+                && protocol.equals(connectionDetails.getSecurityProtocol())));
+        verify(connection, never()).isStale();
+    }
+
+    @Test
     void shouldSaveConnectionDetailsForNonSecuredConnection()
     {
-        interceptor.process(null, mockHttpContextWithNonStaledConnection(null));
+        interceptor.process(mock(HttpResponse.class), mockHttpContextWithNonStaledConnection(null));
         verify(httpTestContext).putConnectionDetails(argThat(
             connectionDetails -> !connectionDetails.isSecure() && connectionDetails.getSecurityProtocol() == null));
     }
@@ -67,24 +89,42 @@ class SavingConnectionDetailsHttpResponseInterceptorTests
     void shouldSaveNoConnectionDetailsForStaleConnection()
     {
         HttpContext context = mock(HttpContext.class);
-        mockHttpConnection(Boolean.TRUE, context);
-        interceptor.process(null, context);
+        mockHttpConnection(Boolean.TRUE, context, Boolean.TRUE);
+        intercept(context);
         verifyNoInteractions(httpTestContext);
+    }
+
+    @Test
+    void shouldSaveNoConnectionDetailsIfConnectionClosed()
+    {
+        HttpContext context = mock(HttpContext.class);
+        ManagedHttpClientConnection connection = mock(ManagedHttpClientConnection.class);
+        when(connection.isOpen()).thenReturn(Boolean.FALSE);
+        when(context.getAttribute(HttpCoreContext.HTTP_CONNECTION)).thenReturn(connection);
+        intercept(context);
+        verifyNoInteractions(httpTestContext);
+        verify(connection, never()).isStale();
+    }
+
+    private void intercept(HttpContext context)
+    {
+        interceptor.process(mock(HttpResponse.class), context);
     }
 
     private static HttpContext mockHttpContextWithNonStaledConnection(SSLSession sslSession)
     {
         HttpContext context = mock(HttpContext.class);
-        ManagedHttpClientConnection connection = mockHttpConnection(Boolean.FALSE, context);
+        ManagedHttpClientConnection connection = mockHttpConnection(Boolean.FALSE, context, Boolean.TRUE);
         when(connection.getSSLSession()).thenReturn(sslSession);
         return context;
     }
 
-    private static ManagedHttpClientConnection mockHttpConnection(Boolean stale, HttpContext context)
+    private static ManagedHttpClientConnection mockHttpConnection(Boolean stale, HttpContext context, Boolean closed)
     {
         ManagedHttpClientConnection connection = mock(ManagedHttpClientConnection.class);
         when(connection.isStale()).thenReturn(stale);
         when(context.getAttribute(HttpCoreContext.HTTP_CONNECTION)).thenReturn(connection);
+        when(connection.isOpen()).thenReturn(closed);
         return connection;
     }
 }
