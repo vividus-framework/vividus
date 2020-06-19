@@ -16,9 +16,12 @@
 
 package org.vividus.ui.web.action;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -33,6 +36,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.web.action.ExpectedSearchContextConditions.StaleContextException;
 
 @SuppressWarnings("MethodCount")
 class ExpectedSearchContextConditionsTests
@@ -375,5 +379,20 @@ class ExpectedSearchContextConditionsTests
     {
         assertEquals("element to no longer be visible: located by " + XPATH_LOCATOR,
                 expectedConditions.invisibilityOfElement(XPATH_LOCATOR).toString());
+    }
+
+    @Test
+    void shouldWrapExpcetionWithAMessageInCaseOfStaleElementReferenceException()
+    {
+        SearchContext searchContext = mock(SearchContext.class);
+        when(searchContext.findElement(XPATH_LOCATOR)).thenThrow(StaleElementReferenceException.class);
+        var exception = assertThrows(StaleContextException.class,
+            () -> expectedConditions.findElement(searchContext, XPATH_LOCATOR));
+        assertEquals("Search context used for search is stale.\n"
+                   + "Please double check the tests.\n"
+                   + "You have a few options:\n"
+                   + "1. Reset context;\n"
+                   + "2. Synchronize the tests to wait for context's stabilization;", exception.getMessage());
+        assertThat(exception.getCause(), instanceOf(StaleElementReferenceException.class));
     }
 }
