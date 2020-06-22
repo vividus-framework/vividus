@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package org.vividus.jira;
+package org.vividus.jira.model;
 
-import java.io.IOException;
-
-public interface IJiraFacade
+public class Version extends JiraEntity
 {
-    String getIssueId(String issueKey) throws IOException;
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 }

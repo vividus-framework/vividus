@@ -26,12 +26,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.jira.model.JiraEntity;
 
 @ExtendWith(MockitoExtension.class)
 class JiraFacadeTests
 {
     @Mock
-    private IJiraClient client;
+    private JiraClient client;
 
     @InjectMocks
     private JiraFacade jiraFacade;
@@ -40,7 +41,7 @@ class JiraFacadeTests
     void testGetIssueId() throws IOException
     {
         when(client.executeGet("/rest/api/latest/issue/test")).thenReturn("{\"id\":\"123\"}");
-        String issueId = jiraFacade.getIssueId("test");
-        assertEquals("123", issueId);
+        JiraEntity issue = jiraFacade.getIssue("test");
+        assertEquals("123", issue.getId());
     }
 }

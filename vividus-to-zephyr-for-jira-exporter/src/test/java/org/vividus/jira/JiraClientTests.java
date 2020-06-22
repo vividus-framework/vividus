@@ -31,7 +31,6 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -42,7 +41,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpResponse;
@@ -62,8 +60,7 @@ class JiraClientTests
     @Mock
     private IHttpClient httpClient;
 
-    @InjectMocks
-    private final JiraClient jiraClient = new JiraClient(jiraConfiguration);
+    private JiraClient jiraClient;
 
     @BeforeEach
     void beforeEach()
@@ -71,6 +68,7 @@ class JiraClientTests
         jiraConfiguration.setPassword("password");
         jiraConfiguration.setUsername("username");
         jiraConfiguration.setEndpoint(JIRA_URI);
+        jiraClient = new JiraClient(jiraConfiguration, httpClient);
     }
 
     @Test
@@ -88,8 +86,7 @@ class JiraClientTests
     {
         String relativeUrl = "/testGetUnexpectedStatusCode";
         mockHttpMethodExecution(HttpGet.class, statusCode, relativeUrl);
-        ClientProtocolException exception = assertThrows(ClientProtocolException.class,
-            () -> jiraClient.executeGet(relativeUrl));
+        IOException exception = assertThrows(IOException.class, () -> jiraClient.executeGet(relativeUrl));
         assertEquals("Unexpected status code: " + statusCode,
                 exception.getMessage());
         assertEquals(2, testLogger.getLoggingEvents().size());

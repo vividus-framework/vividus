@@ -17,12 +17,12 @@
 package org.vividus.jira;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.AuthCache;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -38,31 +38,35 @@ import org.vividus.http.client.ClientBuilderUtils;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 
-public class JiraClient implements IJiraClient
+public class JiraClient
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(JiraClient.class);
 
-    private IHttpClient httpClient;
-    private final JiraConfiguration jiraConfiguration;
+    private final IHttpClient httpClient;
+    private final URI endpoint;
+    private final CredentialsProvider credentialsProvider;
+    private final AuthCache authCache;
 
-    public JiraClient(JiraConfiguration jiraConfiguration)
+    public JiraClient(JiraConfiguration jiraConfiguration, IHttpClient httpClient)
     {
-        this.jiraConfiguration = jiraConfiguration;
+        this.httpClient = httpClient;
+        endpoint = jiraConfiguration.getEndpoint();
+        credentialsProvider = ClientBuilderUtils.createCredentialsProvider(jiraConfiguration.getUsername(),
+                jiraConfiguration.getPassword());
+        authCache = new BasicAuthCache();
+        authCache.put(HttpHost.create(endpoint.toString()), new BasicScheme());
     }
 
-    @Override
     public String executeGet(String relativeUrl) throws IOException
     {
         return execute(HttpMethod.GET, relativeUrl, (HttpEntity) null);
     }
 
-    @Override
     public String executePost(String relativeUrl, String requestBody) throws IOException
     {
         return execute(HttpMethod.POST, relativeUrl, requestBody);
     }
 
-    @Override
     public String executePut(String relativeUrl, String requestBody) throws IOException
     {
         return execute(HttpMethod.PUT, relativeUrl, requestBody);
@@ -77,21 +81,15 @@ public class JiraClient implements IJiraClient
     {
         HttpRequestBase httpRequest = HttpRequestBuilder.create()
                 .withHttpMethod(method)
-                .withEndpoint(jiraConfiguration.getEndpoint().toString())
+                .withEndpoint(endpoint.toString())
                 .withRelativeUrl(relativeUrl)
                 .withContent(content)
                 .build();
-        if (LOGGER.isInfoEnabled())
-        {
-            LOGGER.atInfo().addArgument(httpRequest::getRequestLine).log("Jira request: {}");
-        }
 
-        AuthCache authCache = new BasicAuthCache();
-        authCache.put(HttpHost.create(jiraConfiguration.getEndpoint().toString()), new BasicScheme());
+        LOGGER.atInfo().addArgument(httpRequest::getRequestLine).log("Jira request: {}");
+
         HttpClientContext httpContext = HttpClientContext.create();
         httpContext.setAuthCache(authCache);
-        CredentialsProvider credentialsProvider = ClientBuilderUtils
-                .createCredentialsProvider(jiraConfiguration.getUsername(), jiraConfiguration.getPassword());
         httpContext.setCredentialsProvider(credentialsProvider);
         HttpResponse httpResponse = httpClient.execute(httpRequest, httpContext);
         int status = httpResponse.getStatusCode();
@@ -100,11 +98,6 @@ public class JiraClient implements IJiraClient
             return httpResponse.getResponseBodyAsString();
         }
         LOGGER.error("Jira response: {}", httpResponse);
-        throw new ClientProtocolException("Unexpected status code: " + status);
-    }
-
-    public void setHttpClient(IHttpClient httpClient)
-    {
-        this.httpClient = httpClient;
+        throw new IOException("Unexpected status code: " + status);
     }
 }

@@ -18,24 +18,36 @@ package org.vividus.jira;
 
 import java.io.IOException;
 
-import org.vividus.util.json.JsonPathUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JiraFacade implements IJiraFacade
+import org.vividus.jira.model.JiraEntity;
+import org.vividus.jira.model.Project;
+
+public class JiraFacade
 {
-    private static final String GET_ISSUE_ID_ENDPOINT = "/rest/api/latest/issue/";
-    private static final String ISSUE_ID_JSON_PATH = "$.id";
+    private static final String REST_API_ENDPOINT = "/rest/api/latest/";
 
-    private final IJiraClient client;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JiraClient client;
 
-    public JiraFacade(IJiraClient client)
+    public JiraFacade(JiraClient client)
     {
         this.client = client;
     }
 
-    @Override
-    public String getIssueId(String issueKey) throws IOException
+    public JiraEntity getIssue(String issueKey) throws IOException
     {
-        String responseBody = client.executeGet(GET_ISSUE_ID_ENDPOINT + issueKey);
-        return JsonPathUtils.getData(responseBody, ISSUE_ID_JSON_PATH);
+        return getJiraEntity("issue/", issueKey, JiraEntity.class);
+    }
+
+    public Project getProject(String projectKey) throws IOException
+    {
+        return getJiraEntity("project/", projectKey, Project.class);
+    }
+
+    private <T> T getJiraEntity(String relativeUrl, String entityKey, Class<T> entityType) throws IOException
+    {
+        String responseBody = client.executeGet(REST_API_ENDPOINT + relativeUrl + entityKey);
+        return objectMapper.readValue(responseBody, entityType);
     }
 }

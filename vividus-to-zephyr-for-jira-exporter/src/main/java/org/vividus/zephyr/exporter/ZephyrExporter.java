@@ -38,7 +38,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.jira.IJiraFacade;
+import org.vividus.jira.JiraFacade;
+import org.vividus.jira.model.JiraEntity;
 import org.vividus.zephyr.IZephyrFacade;
 import org.vividus.zephyr.ZephyrConfiguration;
 import org.vividus.zephyr.databind.TestCaseDeserializer;
@@ -51,7 +52,7 @@ public class ZephyrExporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZephyrExporter.class);
 
-    private IJiraFacade jiraFacade;
+    private JiraFacade jiraFacade;
     private IZephyrFacade zephyrFacade;
     private ZephyrExporterProperties zephyrExporterProperties;
 
@@ -130,8 +131,8 @@ public class ZephyrExporter
     private void createNewTestExecution(TestCase testCase, ZephyrConfiguration configuration, ObjectMapper objectMapper)
             throws IOException
     {
-        ZephyrExecution execution = new ZephyrExecution(configuration, jiraFacade.getIssueId(testCase.getKey()),
-                testCase.getStatus());
+        JiraEntity issue = jiraFacade.getIssue(testCase.getKey());
+        ZephyrExecution execution = new ZephyrExecution(configuration, issue.getId(), testCase.getStatus());
         try
         {
             String createExecution = objectMapper.writeValueAsString(execution);
@@ -147,7 +148,7 @@ public class ZephyrExporter
         }
     }
 
-    public void setJiraFacade(IJiraFacade jiraFacade)
+    public void setJiraFacade(JiraFacade jiraFacade)
     {
         this.jiraFacade = jiraFacade;
     }

@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package org.vividus.jira;
+package org.vividus.jira.model;
 
-import java.io.IOException;
+import java.util.List;
 
-public interface IJiraClient
+public class Project extends JiraEntity
 {
-    String executeGet(String relativeUrl) throws IOException;
+    private List<Version> versions;
 
-    String executePost(String relativeUrl, String requestBody) throws IOException;
+    public List<Version> getVersions()
+    {
+        return versions;
+    }
 
-    String executePut(String relativeUrl, String requestBody) throws IOException;
+    public void setVersions(List<Version> versions)
+    {
+        this.versions = versions;
+    }
 }

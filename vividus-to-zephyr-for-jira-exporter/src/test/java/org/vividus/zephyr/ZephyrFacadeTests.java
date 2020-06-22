@@ -22,25 +22,26 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.jira.IJiraClient;
+import org.vividus.jira.JiraClient;
+import org.vividus.jira.JiraFacade;
+import org.vividus.jira.model.Project;
+import org.vividus.jira.model.Version;
 
 @ExtendWith(MockitoExtension.class)
 class ZephyrFacadeTests
 {
-    private static final String GET_PROJECT_ID_AND_VERSION_ID_ENDPOINT = "/rest/api/latest/project/";
     private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";
     private static final String GET_CYCLE_ID_ENDPOINT = ZAPI_ENDPOINT + "cycle?projectId=%s&versionId=%s";
     private static final String GET_FOLDER_ID_ENDPOINT = ZAPI_ENDPOINT +  "cycle/%s/folders?projectId=%s&versionId=%s";
     private static final String CREATE_EXECUTION_ENDPOINT = ZAPI_ENDPOINT + "execution/";
     private static final String UPDATE_EXECUTION_STATUS_ENDPOINT = ZAPI_ENDPOINT + "execution/%s/execute";
-    private static final String GET_PROJECT_ID_AND_VERSION_ID_RESPONSE = "{\"id\":\"11111\",\"key\":\"test\","
-            + "\"versions\":[{\"id\":\"11112\",\"name\":\"test\"}]}";
     private static final String GET_CYCLE_ID_RESPONSE = "{\"11113\":{\"name\":\"test\"},\"recordsCount\":1}";
     private static final String PROJECT_ID = "11111";
     private static final String VERSION_ID = "11112";
@@ -49,7 +50,10 @@ class ZephyrFacadeTests
     private static final String TEST = "test";
 
     @Mock
-    private IJiraClient client;
+    private JiraFacade jiraFacade;
+
+    @Mock
+    private JiraClient client;
 
     @Mock
     private ZephyrConfiguration zephyrConfiguration;
@@ -121,20 +125,23 @@ class ZephyrFacadeTests
     void testFindProjectAndVersionIdDoesNotExist() throws IOException
     {
         setConfiguration();
-        when(client.executeGet(GET_PROJECT_ID_AND_VERSION_ID_ENDPOINT
-                + zephyrConfiguration.getProjectKey())).thenReturn("{\"id\":\"11110\",\"key\":\"test\","
-                + "\"versions\":[{\"id\":\"11112\",\"name\":\"test1\"}]}");
+        Version version = new Version();
+        version.setId(VERSION_ID);
+        version.setName("test1");
+        Project project = new Project();
+        project.setId("11110");
+        project.setVersions(List.of(version));
+        when(jiraFacade.getProject(zephyrConfiguration.getProjectKey())).thenReturn(project);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> zephyrFacade.prepareConfiguration());
-        assertEquals("Version by name 'test' does not exist", exception.getMessage());
+        assertEquals("Version with name 'test' does not exist", exception.getMessage());
     }
 
     @Test
     void testFindCycleIdDoesNotExist() throws IOException
     {
         setConfiguration();
-        when(client.executeGet(GET_PROJECT_ID_AND_VERSION_ID_ENDPOINT
-                + zephyrConfiguration.getProjectKey())).thenReturn(GET_PROJECT_ID_AND_VERSION_ID_RESPONSE);
+        mockJiraProjectRetrieve();
         when(zephyrConfiguration.getProjectId()).thenReturn(PROJECT_ID);
         when(zephyrConfiguration.getVersionId()).thenReturn(VERSION_ID);
         when(client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT,
@@ -142,15 +149,14 @@ class ZephyrFacadeTests
                 thenReturn("{\"-1\":{\"name\":\"test1\"},\"recordsCount\":1}");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> zephyrFacade.prepareConfiguration());
-        assertEquals("Cycle by name 'test' does not exist", exception.getMessage());
+        assertEquals("Cycle with name 'test' does not exist", exception.getMessage());
     }
 
     @Test
     void testFindFolderIdDoesNotExist() throws IOException
     {
         setConfiguration();
-        when(client.executeGet(GET_PROJECT_ID_AND_VERSION_ID_ENDPOINT
-                + zephyrConfiguration.getProjectKey())).thenReturn(GET_PROJECT_ID_AND_VERSION_ID_RESPONSE);
+        mockJiraProjectRetrieve();
         when(zephyrConfiguration.getProjectId()).thenReturn(PROJECT_ID);
         when(zephyrConfiguration.getVersionId()).thenReturn(VERSION_ID);
         when(client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT,
@@ -163,15 +169,14 @@ class ZephyrFacadeTests
                 thenReturn("[{\"folderId\":0,\"folderName\":\"test1\"}]");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> zephyrFacade.prepareConfiguration());
-        assertEquals("Folder by name 'test' does not exist", exception.getMessage());
+        assertEquals("Folder with name 'test' does not exist", exception.getMessage());
     }
 
     @Test
     void testPrepareConfiguration() throws IOException
     {
         setConfiguration();
-        when(client.executeGet(GET_PROJECT_ID_AND_VERSION_ID_ENDPOINT
-                + zephyrConfiguration.getProjectKey())).thenReturn(GET_PROJECT_ID_AND_VERSION_ID_RESPONSE);
+        mockJiraProjectRetrieve();
         when(zephyrConfiguration.getProjectId()).thenReturn(PROJECT_ID);
         when(zephyrConfiguration.getVersionId()).thenReturn(VERSION_ID);
         when(client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT,
@@ -188,6 +193,17 @@ class ZephyrFacadeTests
         assertEquals(VERSION_ID, zephyrConfiguration.getVersionId());
         assertEquals(CYCLE_ID, zephyrConfiguration.getCycleId());
         assertEquals(FOLDER_ID, zephyrConfiguration.getFolderId());
+    }
+
+    private void mockJiraProjectRetrieve() throws IOException
+    {
+        Version version = new Version();
+        version.setId(VERSION_ID);
+        version.setName(TEST);
+        Project project = new Project();
+        project.setId(PROJECT_ID);
+        project.setVersions(List.of(version));
+        when(jiraFacade.getProject(zephyrConfiguration.getProjectKey())).thenReturn(project);
     }
 
     private void setConfiguration()
