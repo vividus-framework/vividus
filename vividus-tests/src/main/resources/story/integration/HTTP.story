@@ -35,7 +35,7 @@ When I wait for response code `200` for `PT10S` duration retrying 10 times
 |When I issue a HTTP GET request for a resource with the URL '${vividus-test-site-url}/api/delayed-response?clientId=${uuid}'|
 Then `${responseCode}` is equal to `200`
 
-Scenario: Validate HTTP methods with missing optional request body
+Scenario: Validate HTTP methods with missing optional request body and zero content-length
 When I send HTTP <http-method> to the relative URL '/<http-method>'
 Then `${responseCode}` is equal to `200`
 Then a JSON element by the JSON path '$.json' is equal to 'null'
@@ -43,5 +43,12 @@ Then a JSON element by the JSON path '$.headers.Content-Length' is equal to '"0"
 Examples:
 |http-method|
 |post       |
+
+Scenario: Validate HTTP methods with missing optional request body
+When I send HTTP <http-method> to the relative URL '/<http-method>'
+Then `${responseCode}` is equal to `200`
+Then a JSON element by the JSON path '$.json' is equal to 'null'
+Examples:
+|http-method|
 |put        |
 |delete     |
