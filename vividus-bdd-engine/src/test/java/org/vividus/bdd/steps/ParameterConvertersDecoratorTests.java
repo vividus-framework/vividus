@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.jbehave.core.configuration.Configuration;
@@ -73,12 +74,36 @@ class ParameterConvertersDecoratorTests
         String value = "var${var}";
         String convertedValue = "Varvar\r\nVarvar2";
         Type type = String.class;
-        when(expressionAdaptor.process(convertedValue)).thenReturn(convertedValue);
         when(parameterAdaptor.convert(value)).thenReturn(convertedValue);
+        when(expressionAdaptor.process(convertedValue)).thenReturn(convertedValue);
+        when(parameterAdaptor.convert(convertedValue)).thenReturn(convertedValue);
         String actual = (String) parameterConverters.convert(value, type);
         assertEquals("Varvar" + System.lineSeparator() + "Varvar2", actual);
-        verify(stepMonitor).convertedValueOfType(convertedValue, type, actual,
-                new LinkedList<>(List.of(StringConverter.class)));
+        verify(stepMonitor).convertedValueOfType(convertedValue, type, actual, queueOf(StringConverter.class));
+    }
+
+    @Test
+    void shouldReplaceNestedVariablesAndExpressions()
+    {
+        String value = "${var#{eval(${nestedVar} + 1)}}";
+        Type type = String.class;
+        String valueWithNestedVarReplaced = "${var#{eval(2 + 1)}}";
+        when(parameterAdaptor.convert(value)).thenReturn(valueWithNestedVarReplaced);
+        String valueWithExpressionProcessed = "${var3}";
+        when(expressionAdaptor.process(valueWithNestedVarReplaced)).thenReturn(valueWithExpressionProcessed);
+        String valueWithExternalVarReplaced = "value";
+        when(parameterAdaptor.convert(valueWithExpressionProcessed)).thenReturn(valueWithExternalVarReplaced);
+        when(expressionAdaptor.process(valueWithExternalVarReplaced)).thenReturn(valueWithExternalVarReplaced);
+        when(parameterAdaptor.convert(valueWithExternalVarReplaced)).thenReturn(valueWithExternalVarReplaced);
+        String actual = (String) parameterConverters.convert(value, type);
+        assertEquals(valueWithExternalVarReplaced, actual);
+        verify(stepMonitor).convertedValueOfType(valueWithExternalVarReplaced, type, actual,
+                queueOf(StringConverter.class));
+    }
+
+    private Queue<Class<?>> queueOf(Class<?> clazz)
+    {
+        return new LinkedList<>(List.of(clazz));
     }
 
     @Test

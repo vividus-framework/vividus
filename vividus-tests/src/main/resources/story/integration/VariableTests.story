@@ -49,3 +49,12 @@ Then `${v:ar}` is equal to `v:al`
 Then `${}` is equal to `val`
 Then `${a.b:NULL}` is equal to `a.b-value`
 Then `${a.b}` is equal to `a.b-value`
+
+Scenario: Verify that expression can be used as a part of variable name and vice versa
+Meta:
+    @issueId 691
+When I initialize the scenario variable `var1` with value `2`
+When I initialize the scenario variable `var3` with value `3`
+Then `${var#{eval(${var#{eval(<iterator> + 1)}} + 1)}}` is = `3`
+Examples:
+{transformer=ITERATING, limit=1}
