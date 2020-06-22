@@ -111,7 +111,7 @@ class ZephyrExporterTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> zephyrExporter.exportResults());
         assertThat(exception.getMessage(), matchesRegex(
-                "Problem with reading values from json file /.*/emptyKey/test-cases/exception/readingException.json"));
+                "Problem with reading values from json file .*/emptyKey/test-cases/exception/readingException.json"));
         verifyNoInteractions(jiraFacade, zephyrFacade);
         List<File> files = List.of(sourceDirectory.resolve("readingException.json").toFile());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(JSON_FILES_STRING, files))));

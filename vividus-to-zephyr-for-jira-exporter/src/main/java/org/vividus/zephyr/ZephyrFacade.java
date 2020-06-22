@@ -35,7 +35,6 @@ import org.vividus.util.json.JsonPathUtils;
 public class ZephyrFacade implements IZephyrFacade
 {
     private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";
-    private static final String GET_CYCLE_ID_ENDPOINT = ZAPI_ENDPOINT + "cycle?projectId=%s&versionId=%s";
     private static final String CREATE_EXECUTION_ENDPOINT = ZAPI_ENDPOINT + "execution/";
     private static final String UPDATE_EXECUTION_STATUS_ENDPOINT = ZAPI_ENDPOINT + "execution/%s/execute";
 
@@ -74,27 +73,35 @@ public class ZephyrFacade implements IZephyrFacade
         notBlank(zephyrConfiguration.getVersionName(), "Property 'zephyr.version-name=' should not be empty");
         notBlank(zephyrConfiguration.getCycleName(), "Property 'zephyr.cycle-name=' should not be empty");
         notBlank(zephyrConfiguration.getFolderName(), "Property 'zephyr.folder-name=' should not be empty");
-        findProjectAndVersionId();
-        findCycleId();
-        findFolderId(zephyrConfiguration.getCycleId(), zephyrConfiguration.getProjectId(),
-                zephyrConfiguration.getVersionId());
+
+        Project project = jiraFacade.getProject(zephyrConfiguration.getProjectKey());
+        String projectId = project.getId();
+        zephyrConfiguration.setProjectId(projectId);
+
+        String versionId = findVersionId(project);
+        zephyrConfiguration.setVersionId(versionId);
+
+        String projectAndVersionUrlQuery = String.format("projectId=%s&versionId=%s", projectId, versionId);
+
+        String cycleId = findCycleId(projectAndVersionUrlQuery);
+        zephyrConfiguration.setCycleId(cycleId);
+
+        String folderId = findFolderId(cycleId, projectAndVersionUrlQuery);
+        zephyrConfiguration.setFolderId(folderId);
         return zephyrConfiguration;
     }
 
-    private void findProjectAndVersionId() throws IOException
+    private String findVersionId(Project project)
     {
-        Project project = jiraFacade.getProject(zephyrConfiguration.getProjectKey());
         Optional<Version> version = project.getVersions().stream().filter(
             v -> zephyrConfiguration.getVersionName().equals(v.getName())).findFirst();
         isTrue(version.isPresent(), "Version with name '%s' does not exist", zephyrConfiguration.getVersionName());
-        zephyrConfiguration.setProjectId(project.getId());
-        zephyrConfiguration.setVersionId(version.get().getId());
+        return version.get().getId();
     }
 
-    private void findCycleId() throws IOException
+    private String findCycleId(String projectAndVersionUrlQuery) throws IOException
     {
-        String json = client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT,
-                zephyrConfiguration.getProjectId(), zephyrConfiguration.getVersionId()));
+        String json = client.executeGet(ZAPI_ENDPOINT + "cycle?" + projectAndVersionUrlQuery);
         Map<String, Map<String, String>> cycles = JsonPathUtils.getData(json, "$");
         cycles.remove("recordsCount");
         Iterator<Map.Entry<String, Map<String, String>>> itr = cycles.entrySet().iterator();
@@ -109,16 +116,15 @@ public class ZephyrFacade implements IZephyrFacade
             }
         }
         notBlank(cycleId, "Cycle with name '%s' does not exist", zephyrConfiguration.getCycleName());
-        zephyrConfiguration.setCycleId(cycleId);
+        return cycleId;
     }
 
-    private void findFolderId(String cycleId, String projectId, String versionId) throws IOException
+    private String findFolderId(String cycleId, String projectAndVersionUrlQuery) throws IOException
     {
-        String json = client.executeGet(String.format(ZAPI_ENDPOINT +  "cycle/%s/folders?projectId=%s&versionId=%s",
-                cycleId, projectId, versionId));
+        String json = client.executeGet(ZAPI_ENDPOINT + "cycle/" + cycleId + "/folders?" + projectAndVersionUrlQuery);
         List<Integer> folderId = JsonPathUtils.getData(json, String.format(FOLDER_ID_JSON_PATH,
                 zephyrConfiguration.getFolderName()));
         notEmpty(folderId, "Folder with name '%s' does not exist", zephyrConfiguration.getFolderName());
-        zephyrConfiguration.setFolderId(folderId.get(0).toString());
+        return folderId.get(0).toString();
     }
 }
