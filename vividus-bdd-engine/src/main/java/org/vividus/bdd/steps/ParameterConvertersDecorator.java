@@ -46,7 +46,7 @@ public class ParameterConvertersDecorator extends ParameterConverters
         {
             return super.convert(value, type);
         }
-        Object adaptedValue = parameterAdaptor.convert(value);
+        Object adaptedValue = resolvePlaceholders(value, type);
         if (type == String.class || adaptedValue instanceof String)
         {
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
@@ -70,6 +70,20 @@ public class ParameterConvertersDecorator extends ParameterConverters
             }
         }
         return super.convert(convertedValue, type);
+    }
+
+    private Object resolvePlaceholders(String value, Type type)
+    {
+        Object adaptedValue = parameterAdaptor.convert(value);
+        if (type == String.class || String.class.isInstance(adaptedValue))
+        {
+            adaptedValue = processExpressions(String.valueOf(adaptedValue));
+            if (!value.equals(adaptedValue))
+            {
+                return resolvePlaceholders((String) adaptedValue, type);
+            }
+        }
+        return adaptedValue;
     }
 
     private boolean isAssignableFrom(ParameterizedType parameterizedType, Class<?> clazz)
