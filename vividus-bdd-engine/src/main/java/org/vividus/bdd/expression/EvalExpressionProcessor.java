@@ -46,7 +46,7 @@ public class EvalExpressionProcessor implements IExpressionProcessor
         {
             String expressionToEvaluate = expressionMatcher.group(EVAL_GROUP);
             JexlScript jexlScript = jexlEngine.get().createScript(expressionToEvaluate);
-            return Optional.of(jexlScript.execute(JexlEngine.EMPTY_CONTEXT).toString());
+            return Optional.of(String.valueOf(jexlScript.execute(JexlEngine.EMPTY_CONTEXT)));
         }
         return Optional.empty();
     }
