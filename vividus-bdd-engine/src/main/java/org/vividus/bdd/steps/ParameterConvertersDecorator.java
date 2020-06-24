@@ -78,7 +78,7 @@ public class ParameterConvertersDecorator extends ParameterConverters
         if (type == String.class || String.class.isInstance(adaptedValue))
         {
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
-            if (!value.equals(adaptedValue))
+            if (!value.equals(adaptedValue) && !((String) adaptedValue).contains(value))
             {
                 return resolvePlaceholders((String) adaptedValue, type);
             }

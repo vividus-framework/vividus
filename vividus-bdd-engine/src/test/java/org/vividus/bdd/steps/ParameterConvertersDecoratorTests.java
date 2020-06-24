@@ -18,8 +18,10 @@ package org.vividus.bdd.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
@@ -99,6 +101,23 @@ class ParameterConvertersDecoratorTests
         assertEquals(valueWithExternalVarReplaced, actual);
         verify(stepMonitor).convertedValueOfType(valueWithExternalVarReplaced, type, actual,
                 queueOf(StringConverter.class));
+    }
+
+    @Test
+    void shouldResolveCircularVariableReferences()
+    {
+        String value = "${value}";
+        Type type = String.class;
+        String resolvedVariable = "#{removeWrappingDoubleQuotes(${value})}";
+        when(parameterAdaptor.convert(value)).thenReturn(resolvedVariable);
+        when(expressionAdaptor.process(resolvedVariable)).thenReturn(resolvedVariable);
+        String actual = (String) parameterConverters.convert(value, type);
+        assertEquals(resolvedVariable, actual);
+        verify(stepMonitor).convertedValueOfType(resolvedVariable, type, actual, queueOf(StringConverter.class));
+        verify(parameterAdaptor).convert(value);
+        verifyNoMoreInteractions(parameterAdaptor);
+        verify(expressionAdaptor, times(2)).process(resolvedVariable);
+        verifyNoMoreInteractions(expressionAdaptor);
     }
 
     private Queue<Class<?>> queueOf(Class<?> clazz)

@@ -58,3 +58,9 @@ When I initialize the scenario variable `var3` with value `3`
 Then `${var#{eval(${var#{eval(<iterator> + 1)}} + 1)}}` is = `3`
 Examples:
 {transformer=ITERATING, limit=1}
+
+Scenario: Verify that circular variable references are resolved without StackOverflowError
+Meta:
+    @issueId 691
+When I initialize the scenario variable `value` with value `#{removeWrappingDoubleQuotes(${value})}`
+Then `${value}` is equal to `${value}`
