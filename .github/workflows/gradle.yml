@@ -66,13 +66,18 @@ jobs:
       run: |
         if [[ $MATRIX_PLATFORM = "ubuntu-latest" ]]; then
           if [[ -n $SONAR_TOKEN ]]; then
-            ./gradlew build sonarqube -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=vividus -Dsonar.projectKey=vividus-framework_vividus -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m"
+            ./gradlew build sonarqube -Dsonar.host.url=https://sonarcloud.io \
+                                      -Dsonar.organization=vividus \
+                                      -Dsonar.projectKey=vividus-framework_vividus \
+                                      -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m" \
+                                      -Ptest.testLogging.exceptionFormat=full
           else
             echo No SONAR_TOKEN, SonarQube analysis will be skipped
-            ./gradlew build -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m"
+            ./gradlew build -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m" \
+                            -Ptest.testLogging.exceptionFormat=full
           fi
         else
-          ./gradlew build --no-daemon
+          ./gradlew build -Ptest.testLogging.exceptionFormat=full --no-daemon
         fi
 
     - name: Publish unit and integration tests reports - ${{ matrix.platform }}
