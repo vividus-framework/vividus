@@ -602,6 +602,6 @@ class DatabaseStepsTests
 
     private void configureTimeout()
     {
-        databaseSteps.setDbQueryTimeout(Duration.ofSeconds(10));
+        databaseSteps.setDbQueryTimeout(Duration.ofSeconds(20));
     }
 }
