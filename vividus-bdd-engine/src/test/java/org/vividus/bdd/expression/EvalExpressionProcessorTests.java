@@ -35,6 +35,7 @@ class EvalExpressionProcessorTests
     private static Stream<Arguments> evalArguments()
     {
         return Stream.of(
+                Arguments.of("eval(null)", "null"),
                 Arguments.of("eval(16 + 2 * 6)", "28"),
                 Arguments.of("eval((16 + 2) * 6)", "108"),
                 Arguments.of("eval(100 / 5 - 16 * 2 + 6)", "-6"),
