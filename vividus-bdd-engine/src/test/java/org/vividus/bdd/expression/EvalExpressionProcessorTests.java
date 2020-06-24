@@ -17,19 +17,32 @@
 package org.vividus.bdd.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.apache.commons.jexl3.JexlException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.context.IBddVariableContext;
 
+@ExtendWith(MockitoExtension.class)
 class EvalExpressionProcessorTests
 {
+    private static final String TRUE = "true";
+    private static final String VALUE = "Value";
     private static final String FALSE = "false";
-    private final EvalExpressionProcessor processor = new EvalExpressionProcessor();
+
+    @Mock private IBddVariableContext bddVariableContext;
+    @InjectMocks private EvalExpressionProcessor processor;
 
     @SuppressWarnings("unused")
     private static Stream<Arguments> evalArguments()
@@ -39,7 +52,7 @@ class EvalExpressionProcessorTests
                 Arguments.of("eval(16 + 2 * 6)", "28"),
                 Arguments.of("eval((16 + 2) * 6)", "108"),
                 Arguments.of("eval(100 / 5 - 16 * 2 + 6)", "-6"),
-                Arguments.of("eval(`string\n1` == `string\n1`)", "true"),
+                Arguments.of("eval(`string\n1` == `string\n1`)", TRUE),
                 Arguments.of("eval(`string\n1` == `string1`)", FALSE),
                 Arguments.of("eval(`string\n1` == 'string1')", FALSE),
                 Arguments.of("eval(var t = 20; var s = function(x, y) {x + y + t}; t = 54; s(15, 7))", "42")
@@ -57,5 +70,42 @@ class EvalExpressionProcessorTests
     void testExecuteNonMatchingExpression()
     {
         assertEquals(Optional.empty(), processor.execute("evaluate(1+1)"));
+    }
+
+    @SuppressWarnings("unused")
+    private static Stream<Arguments> evalWithVars()
+    {
+        return Stream.of(
+                Arguments.of("eval(someKey + '=10')", "Value=10", VALUE),
+                Arguments.of("eval(someKey.length() + '')", "5", VALUE),
+                Arguments.of("eval((someKey.length() == 5) + '' )", TRUE, VALUE),
+                Arguments.of("eval(someKey = '1'; someKey + someKey)", "11", VALUE)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("evalWithVars")
+    void shouldResolveBddVariable(String expression, Object expectedValue, Object variable)
+    {
+        lenient().when(bddVariableContext.getVariable("someKey")).thenReturn(variable);
+        assertEquals(Optional.of(expectedValue), processor.execute(expression));
+    }
+
+    @Test
+    void shoudThrowAnExceptionInCaseOfMissingVariable()
+    {
+        JexlException.Variable exception = assertThrows(JexlException.Variable.class,
+            () -> processor.execute("eval(missingVar + 'val')"));
+        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.execute@1:1 undefined variable missingVar",
+                exception.getMessage());
+    }
+
+    @Test
+    void shoudThrowAnExceptionInCaseOfSyntaxError()
+    {
+        JexlException.Parsing exception = assertThrows(JexlException.Parsing.class,
+            () -> processor.execute("eval(var + 'val')"));
+        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.execute@1:5 parsing error in '+'",
+                exception.getMessage());
     }
 }
