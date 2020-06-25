@@ -26,6 +26,8 @@ import javax.inject.Named;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlScript;
+import org.apache.commons.jexl3.MapContext;
+import org.vividus.bdd.context.IBddVariableContext;
 
 @Named
 public class EvalExpressionProcessor implements IExpressionProcessor
@@ -38,6 +40,13 @@ public class EvalExpressionProcessor implements IExpressionProcessor
     private final ThreadLocal<JexlEngine> jexlEngine = ThreadLocal
             .withInitial(() -> new JexlBuilder().charset(StandardCharsets.UTF_8).create());
 
+    private IBddVariableContext bddVariableContext;
+
+    public EvalExpressionProcessor(IBddVariableContext bddVariableContext)
+    {
+        this.bddVariableContext = bddVariableContext;
+    }
+
     @Override
     public Optional<String> execute(String expression)
     {
@@ -46,8 +55,31 @@ public class EvalExpressionProcessor implements IExpressionProcessor
         {
             String expressionToEvaluate = expressionMatcher.group(EVAL_GROUP);
             JexlScript jexlScript = jexlEngine.get().createScript(expressionToEvaluate);
-            return Optional.of(String.valueOf(jexlScript.execute(JexlEngine.EMPTY_CONTEXT)));
+            return Optional.of(String.valueOf(jexlScript.execute(new JexlBddVariableContext(bddVariableContext))));
         }
         return Optional.empty();
+    }
+
+    private static final class JexlBddVariableContext extends MapContext
+    {
+        private final IBddVariableContext bddVariableContext;
+
+        private JexlBddVariableContext(IBddVariableContext bddVariableContext)
+        {
+            this.bddVariableContext = bddVariableContext;
+        }
+
+        @Override
+        public Object get(String name)
+        {
+            Object variable = super.get(name);
+            return variable == null ? bddVariableContext.getVariable(name) : variable;
+        }
+
+        @Override
+        public boolean has(String name)
+        {
+            return null != get(name);
+        }
     }
 }
