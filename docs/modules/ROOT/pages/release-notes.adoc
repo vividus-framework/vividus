@@ -1,0 +1,5 @@
+= What's new in Vividus?
+
+[TIP]
+How to get latest realease information?
+Navigate to https://github.com/vividus-framework/vividus/releases[Release Notes Page]
