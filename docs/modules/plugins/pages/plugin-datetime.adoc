@@ -1,0 +1,335 @@
+= Plugin Date Time
+
+== General Info
+
+The plugin provides functionality to generate, modify, or validate the date.
+
+== Installation
+
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-datetime', version: '0.2.0')
+----
+
+
+== Properties
+
+=== Required
+
+There are no required properties for the plugin.
+
+=== Optional
+
+`location.zone-id` - Defines time zone which will be used. The default is set to a system default timezone. https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html[Time zone format]
+
+
+== Steps
+
+=== Dates comparison
+
+==== *_Info_*
+
+Validates the difference between the current date and the date under test in seconds.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then the date '$date' is $comparisonRule current for $seconds seconds
+----
+
+==== *_Parameters_*
+
+. `$date` - the date in the {iso-date-format-link} format
+. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
+. `$seconds` - the quantity of seconds between current and the date.
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Validate the date is less than current for 10 seconds
+Then the date '2020-06-16T15:25:29.516580Z' is less than current for 10 seconds
+----
+
+
+=== Dates comparison with custom date format
+
+==== *_Info_*
+
+Validates the difference between the current date and the date under test in seconds using custom date format.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then the date '$date' in the format '$format' is $comparisonRule current for $seconds seconds
+----
+
+==== *_Parameters_*
+
+. `$date` - the date to validate
+. `$format` - the date in {java-date-time-formatter-link}
+. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
+. `$seconds` - the quantity of seconds between current and the date
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Validate the date is greater than current for 10 seconds
+Then the date '2020-06-25T00:19:58.890007Z' in the format 'uuuu-MM-dd'T'HH:mm:ss.nnnX' is > current for 10 seconds
+----
+
+
+== Expressions
+
+
+=== Date generation
+
+==== *_Info_*
+
+Generates the date relative to the current date.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+ #{generateDate(<period>, <outputFormat - optional>)}
+----
+
+==== *_Parameters_*
+
+. `period` - period in format {iso-date-format-link} - *required* parameter
+. `format` - the date in {java-date-time-formatter-link} - *optional* parameter
+
+==== *_Usage_*
+
+Let's consider the current date is `2020-11-23` and the time is `00:10:01`
+
+[cols="3,3,2", options="header"]
+|===
+|Expression
+|Result
+|Comment
+
+|#{generateDate(P)}
+|2020-11-23
+|Expression generates date value based on current date and period. Expression should be written in {java-date-time-formatter-link}
+
+|#{generateDate(P1DT2h)}
+|2020-11-24T02:10:01
+|Current date +1 day and +2 hours
+
+|#{generateDate(-P1D}
+|2020-11-23
+|Current date -1 day
+
+|#{generateDate(P1M)}
+|2020-12-23
+|Current date + 1 month
+
+|#{generateDate(-PT10M)}
+|2020-11-23T00:00:01
+|Current date time -10 mins
+
+|#{generateDate(P, YYYY-MM)}
+|2020-11
+|Current date with custom format
+
+|#{generateDate(P, MM/dd/YYYY)}
+|11/23/2020
+|Current date with a custom format
+
+|#{generateDate(P1D, YY-MM-dd)}
+|20-11-24
+|Current date +1 day with custom format
+
+|#{generateDate(P, yyyy-MM-dd'T'HH:mm:ssZ)}
+|2020-11-23'T'00:10:01+0300
+|Current date with custom format and timezone offset
+|===
+
+
+=== Date formatting
+
+==== *_Info_*
+
+The expression formats the input date to another format. Additionally, Time Zone can be changed for output result.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+#{formatDate(<inputDate>, <outputFormat>, <outputTimeZone - optional>)}
+----
+
+==== *_Parameters_*
+
+. `inputDate` - required parameter. Date that should be formatted. Date should be presented in {iso-date-format-link} format.
+. `outputFormat` - required parameter. Format can be described using standard Java {java-date-time-formatter-link}
+. `outputTimeZone` - optional parameter. Defines Time Zone for output result.
+
+==== *_Usage_*
+
+[cols="2,>1", options="header"] 
+|===
+|Expression
+|Result
+
+|#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSS)}
+|2017-01-13T09:00:42.862
+
+|#{formatDate(2017-01-13T09:00:42.862-05:00, yyyy-MM-dd'T'HH:mm:ss.SSS)}
+|2017-01-13T09:00:42.862
+
+|#{formatDate(2017-01-13T09:00:42.862-0500, yyyy-MM-dd'T'HH:mm:ss.SSS)}
+|Throw exception 
+
+|#{formatDate(2017-01-13T09:00:42.862, yyyy-MM-dd'T'HH:mm:ss)}
+|2017-01-13T09:00:42
+
+|#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss)}
+|2017-01-13T09:00:42+0000
+
+|#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ssZ)}
+|2017-01-13T09:00:42-05:00
+
+|#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd)}
+|2017-01-13
+
+|#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSSZ, -05:00)}
+|2017-01-13T04:00:42.862-0500
+
+|#{formatDate(2017-01-13T04:00:42.862-05:00, yyyy-MM-dd'T'HH:mm:ss.SSSZ, GMT)}
+|2017-01-13T09:00:42.862+0000
+
+|#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSSZ, America/New_York)}
+|2017-01-13T04:00:42.862-0500
+
+|#{formatDate(**2017:01:13T09:00:42.862Z**, yyyy-MM-dd'T'HH:mm:ss.SSS)}
+|Throws exception
+
+|#{formatDate(2017-01-13T09:00:42.862Z, **BBByyyy-MM-dd'T'HH:mm:ss.SSS**)}
+|Throws exception
+
+|#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSS, **ABCD**)}
+|Throws exception
+|===
+
+
+=== Date formatting with custom format
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+#{formatDateTo(<inputDate>, <inputDateFormat>, <desiredFormat>)}
+----
+
+==== *_Info_*
+
+The expression formats an input date to the desired format. The input date format should be described as the second parameter of the expression.
+
+==== *_Parameters_*
+
+. `inputDate` - required parameter. Date to format. Date can be in any format but this format should be described in second parameter. 
+. `inputDateFormat` - input date format. Format can be described using standard Java {java-date-time-formatter-link}
+. `desiredFormat` - output date format. Format can be described using standard Java {java-date-time-formatter-link}
+
+[IMPORTANT]
+Mind that, since parameters of expression comma-separated, meaningful comma as part of date format pattern should be escaped using "\" .
+
+==== *_Usage_*
+
+[cols="3,1", options="header"]
+|===
+|Expression
+|Result
+
+|#{formatDateTo("2017-03-31T07:20:43.808Z", "yyyy-MM-dd'T'HH:mm:ss.SSSVV", EEE\, dd MMM yyyy HH:mm:ss ZZZZ)}
+|Fri, 31 Mar 2017 07:20:43 GMT
+
+|#{formatDateTo(Fri\, 31 Mar 2017 07:20:43 GMT, EEE\, dd MMM yyyy HH:mm:ss zzz, yyyy-MM-dd'T'HH:mm:ss)}
+|2017-03-31T07:20:43
+|===
+
+
+=== Shift date
+
+==== *_Info_*
+
+This expression shifts the given input date for a given period in any direction (+/-).
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+#{shiftDate(<inputDate>, <format>, <period>)}
+----
+
+==== *_Parameters_*
+
+. `inputDate` - input date. Date can be in any format but this format should be described in second parameter.
+. `format` - input date format. Format can be described using standard Java {java-date-time-formatter-link}
+. `period` -  period by which the date will be shifted. It should be written in {iso-date-format-link}
+
+==== *_Usage_*
+
+[cols="3,>1", options="header"]
+|===
+
+|Expression
+|Result
+
+|#{shiftDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, -P1Y)}
+|2018-03-19 01:40:00
+
+|#{shiftDate(Wed\, 10 Apr 2019 07:20:43 GMT, EEE\, dd MMM yyyy HH:mm:ss zzz, P1MT2H)}
+|Fri, 10 May 2019 09:20:43 GMT
+
+|#{shiftDate("Wed\, 10 Apr\, 2019\, 07:20:43 GMT", "EEE\, dd MMM\, yyyy\, HH:mm:ss zzz", P1MT2H)}
+|"Fri, 10 May, 2019, 09:20:43 GMT"|
+|===
+
+
+=== Date diff
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+#{diffDate(<firstInputDate>, <firstInputFormat>, <secondInputDate>, <secondInputFormat>)}
+----
+
+==== *_Info_*
+
+This expression calculate difference between two dates with given formats and return result in {iso-date-format-link} format.
+
+==== *_Parameters_*
+
+. `firstInputDate` - first input date. Date can be in any format but this format should be described in second parameter.
+. `firstInputFormat` - first input date. Format can be described using standard Java {java-date-time-formatter-link}
+. `secondInputDate` - second input date. Date can be in any format but this format should be described in fourth parameter.
+. `secondInputFormat` - second input date format. Format can be described using standard Java {java-date-time-formatter-link}
+
+==== *_Usage_*
+
+[cols="3,>1", options="header"]
+|===
+
+|Expression
+|Result
+
+|#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 2019-03-19 03:40, yyyy-MM-dd HH:mm)}
+|PT0S
+
+|#{diffDate("Wed 10 Apr\, 2019\, 13:20:43 GMT", "EEE dd MMM\, yyyy\, HH:mm:ss zzz", "Wed 10 Apr\, 2019\, 09:20:43 America/New_York", "EEE dd MMM\, yyyy\, HH:mm:ss zzz")}
+|PT0S
+
+|#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 3020-03-19 03:39:20, yyyy-MM-dd HH:mm:ss)}
+|PT8774591H59M20S
+|===

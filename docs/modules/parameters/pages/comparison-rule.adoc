@@ -1,0 +1,42 @@
+= Comparison rule
+
+== Description
+
+Shows how parameters should be compared.
+
+== Possible values
+
+[cols="1,1,1", options="header"]
+|===
+
+|Plain
+|Readable
+|Mathematical
+
+|LESS_THAN
+|less than
+|<
+
+|LESS_THAN_OR_EQUAL_TO
+|less than or equal to
+|
++++
+<=
++++
+
+|GREATER_THAN
+|grater than
+|>
+
+|GREATER_THAN_OR_EQUAL_TO
+|greater than or equal to
+|>=
+
+|EQUAL_TO
+|equal to
+|=
+
+|NOT_EQUAL_TO
+|not equal to
+|!=
+|===

@@ -1,0 +1,2 @@
+.Parameter types
+* xref:comparison-rule.adoc[Comparison Rule]
