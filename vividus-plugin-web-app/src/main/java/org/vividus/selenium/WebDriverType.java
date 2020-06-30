@@ -81,7 +81,8 @@ public enum WebDriverType
         {
             // Workaround for IExplore:
             // https://stackoverflow.com/questions/50287435/actions-movetoelement-not-working-on-ie-11
-            desiredCapabilities.merge(new InternetExplorerOptions().requireWindowFocus());
+            // https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4403
+            desiredCapabilities.merge(new InternetExplorerOptions().requireWindowFocus().disableNativeEvents());
         }
 
         @Override

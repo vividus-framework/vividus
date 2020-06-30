@@ -18,6 +18,7 @@ package org.vividus.selenium;
 
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -103,6 +104,7 @@ public class WebDriverTypeTests
         assertEquals(expected, actual);
         Map<String, Object> options = (Map<String, Object>) desiredCapabilities.getCapability(IE_OPTIONS);
         assertTrue((boolean) options.get(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS));
+        assertFalse((boolean) options.get(InternetExplorerDriver.NATIVE_EVENTS));
         return desiredCapabilities;
     }
 
