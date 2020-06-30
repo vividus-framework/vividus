@@ -1,2 +1,3 @@
 .Parameter types
 * xref:comparison-rule.adoc[Comparison Rule]
+* xref:variable-scope.adoc[Variable Scope]
