@@ -64,3 +64,4 @@ Meta:
     @issueId 691
 When I initialize the scenario variable `value` with value `#{removeWrappingDoubleQuotes(${value})}`
 Then `${value}` is equal to `${value}`
+Then `before-${value}-after` is equal to `before-${value}-after`
