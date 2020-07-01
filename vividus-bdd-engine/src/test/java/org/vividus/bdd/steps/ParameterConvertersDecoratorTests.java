@@ -17,11 +17,11 @@
 package org.vividus.bdd.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
@@ -106,18 +107,27 @@ class ParameterConvertersDecoratorTests
     @Test
     void shouldResolveCircularVariableReferences()
     {
-        String value = "${value}";
+        String prefix = "before-";
+        String postfix = "-after";
+        int postfixLength = postfix.length();
+        int prefixLength = prefix.length();
+
+        String value = prefix + "${value}" + postfix;
         Type type = String.class;
-        String resolvedVariable = "#{removeWrappingDoubleQuotes(${value})}";
-        when(parameterAdaptor.convert(value)).thenReturn(resolvedVariable);
-        when(expressionAdaptor.process(resolvedVariable)).thenReturn(resolvedVariable);
+        when(parameterAdaptor.convert(any())).then((Answer<String>) invocation -> {
+            String arg = invocation.getArgument(0).toString();
+            int endIndex = arg.length() - postfixLength;
+            return arg.substring(0, prefixLength) + "#{removeWrappingDoubleQuotes(" + arg.substring(prefixLength,
+                    endIndex) + ")}" + arg.substring(endIndex);
+        });
+        when(expressionAdaptor.process(any())).then(
+                (Answer<String>) invocation -> invocation.getArgument(0));
         String actual = (String) parameterConverters.convert(value, type);
+        String resolvedVariable = prefix + "#{removeWrappingDoubleQuotes(${value})}" + postfix;
         assertEquals(resolvedVariable, actual);
         verify(stepMonitor).convertedValueOfType(resolvedVariable, type, actual, queueOf(StringConverter.class));
-        verify(parameterAdaptor).convert(value);
-        verifyNoMoreInteractions(parameterAdaptor);
-        verify(expressionAdaptor, times(2)).process(resolvedVariable);
-        verifyNoMoreInteractions(expressionAdaptor);
+        verify(parameterAdaptor, times(17)).convert(any());
+        verify(expressionAdaptor, times(17)).process(any());
     }
 
     private Queue<Class<?>> queueOf(Class<?> clazz)

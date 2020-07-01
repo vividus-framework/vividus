@@ -26,6 +26,8 @@ import org.jbehave.core.steps.ParameterConverters;
 
 public class ParameterConvertersDecorator extends ParameterConverters
 {
+    private static final int MAX_DEPTH = 16;
+
     private final ParameterAdaptor parameterAdaptor;
 
     private final ExpressionAdaptor expressionAdaptor;
@@ -46,7 +48,7 @@ public class ParameterConvertersDecorator extends ParameterConverters
         {
             return super.convert(value, type);
         }
-        Object adaptedValue = resolvePlaceholders(value, type);
+        Object adaptedValue = resolvePlaceholders(value, value, type, 1);
         if (type == String.class || adaptedValue instanceof String)
         {
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
@@ -72,15 +74,21 @@ public class ParameterConvertersDecorator extends ParameterConverters
         return super.convert(convertedValue, type);
     }
 
-    private Object resolvePlaceholders(String value, Type type)
+    private Object resolvePlaceholders(String originalValue, String value, Type type, int iteration)
     {
         Object adaptedValue = parameterAdaptor.convert(value);
         if (type == String.class || String.class.isInstance(adaptedValue))
         {
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
-            if (!value.equals(adaptedValue) && !((String) adaptedValue).contains(value))
+            if (!value.equals(adaptedValue))
             {
-                return resolvePlaceholders((String) adaptedValue, type);
+                if (iteration == MAX_DEPTH)
+                {
+                    // If we reached max depth, then we see circular reference or variables have more than MAX_DEPTH
+                    // nested levels, we need to fallback to one cycle of variable resolution and exit early
+                    return parameterAdaptor.convert(originalValue);
+                }
+                return resolvePlaceholders(originalValue, (String) adaptedValue, type, iteration + 1);
             }
         }
         return adaptedValue;
