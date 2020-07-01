@@ -1,0 +1,28 @@
+= Collection comparison rules
+
+== Description
+
+Defines how collections should be compared.
+
+== Possible values
+
+[cols="2,2,2", options="header"]
+|===
+
+|Plain
+|Readable
+|Description
+
+|CONTAIN
+|contain
+|Verify that collection contains elements from another collection in any order
+
+|ARE_EQUAL_TO
+|are equal to
+|Verify that collection contains all elements from another collection in any order
+
+|ARE_EQUAL_TO_ORDERED_COLLECTION
+|are equal to ordered collection
+|Verify that collection contains all elements from another collection in order
+
+|===

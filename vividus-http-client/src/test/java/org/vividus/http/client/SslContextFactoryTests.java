@@ -50,6 +50,12 @@ class SslContextFactoryTests
     private SslContextFactory sslContextFactory;
 
     @Test
+    void testGetDefaultSslContext() throws GeneralSecurityException
+    {
+        assertEquals(SSLContext.getDefault(), sslContextFactory.getDefaultSslContext());
+    }
+
+    @Test
     void testGetTrustingAllSslContext()
     {
         String protocol = SSLConnectionSocketFactory.SSL;

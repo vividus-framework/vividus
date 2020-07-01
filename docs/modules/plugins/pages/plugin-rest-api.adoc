@@ -1,1 +1,50 @@
-include::ROOT:page$under-construction.adoc[]
+= Plugin REST API
+
+== General Info
+* Validation of HTTP responses (headers, codes, content, etc.)
+* Validation of `application/json` content in response using JSON Path
+* Constructing and sending of HTTP requests
+
+== Installation
+
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '0.2.3')
+----
+
+
+== Properties
+
+[WARNING]
+To be implemented
+
+== Steps
+
+=== Verify secure protocols supported by server
+
+==== *_Info_*
+
+Checks that a server defined by the `hostname` supports secure protocols listed in the `protocols` parameter.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then server `$hostname` supports secure protocols that $rule `$protocols`
+----
+
+==== *_Parameters_*
+
+. `$hostname` - server hostname.
+. `$rule` - xref:parameters:collection-comparison-rule.adoc[Collection Comparison Rule]
+. `$protocols` - secure protocols that are expected to match specified `$rule`
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Verify that the server supports TLSv1.3 and TLSv1.2 protocols
+Then server `vividus-test-site.herokuapp.com` supports secure protocols that contain `TLSv1.3,TLSv1.2`
+----
