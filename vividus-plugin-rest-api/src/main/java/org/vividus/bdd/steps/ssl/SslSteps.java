@@ -17,13 +17,14 @@
 package org.vividus.bdd.steps.ssl;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.jbehave.core.annotations.Then;
 import org.vividus.bdd.steps.CollectionComparisonRule;
-import org.vividus.http.client.ISslContextFactory;
+import org.vividus.http.client.SslContextFactory;
 import org.vividus.softassert.ISoftAssert;
 
 public class SslSteps
@@ -31,9 +32,9 @@ public class SslSteps
     private static final int SSL_PORT = 443;
 
     private final ISoftAssert softAssert;
-    private final ISslContextFactory sslContextFactory;
+    private final SslContextFactory sslContextFactory;
 
-    public SslSteps(ISoftAssert softAssert, ISslContextFactory sslContextFactory)
+    public SslSteps(ISoftAssert softAssert, SslContextFactory sslContextFactory)
     {
         this.softAssert = softAssert;
         this.sslContextFactory = sslContextFactory;
@@ -47,10 +48,11 @@ public class SslSteps
      * @param rule one of the CONTAIN, ARE_EQUAL_TO, ARE_EQUAL_TO_ORDERED_COLLECTION rules
      * @param protocols comma separated list of protocols
      * @throws IOException If an input or output exception occurred
+     * @throws GeneralSecurityException If creation of SSL context fails
      */
     @Then("server `$hostname` supports secure protocols that $rule `$protocols`")
     public void checkSupportedSecureProtocols(String hostname, CollectionComparisonRule rule, String[] protocols)
-            throws IOException
+            throws IOException, GeneralSecurityException
     {
         SSLSocketFactory socketFactory = sslContextFactory.getDefaultSslContext().getSocketFactory();
         try (SSLSocket socket = (SSLSocket) socketFactory.createSocket(hostname, SSL_PORT))

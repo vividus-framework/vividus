@@ -35,7 +35,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.steps.CollectionComparisonRule;
-import org.vividus.http.client.ISslContextFactory;
+import org.vividus.http.client.SslContextFactory;
 import org.vividus.softassert.ISoftAssert;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +46,7 @@ class SslStepsTests
     private static final String TLS_V_1_2 = "TLSv1.2";
 
     @Mock private ISoftAssert softAssert;
-    @Mock private ISslContextFactory sslContextFactory;
+    @Mock private SslContextFactory sslContextFactory;
     @InjectMocks private SslSteps sslSteps;
 
     @Test
