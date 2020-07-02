@@ -58,6 +58,7 @@ import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -460,10 +461,9 @@ class AllureStoryReporterTests
     }
 
     @Test
-    void beforeScenarioShouldStopLifecycleBeforeStorySteps()
+    void afterBeforeStoryStepsShouldStopLifecycleBeforeStorySteps()
     {
-        BddRunContext bddRunContext = setupContext();
-        mockBatchExecutionConfiguration();
+        setupContext();
 
         when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS);
         when(allureRunContext.getScenarioExecutionStage()).thenReturn(ScenarioExecutionStage.IN_PROGRESS);
@@ -471,20 +471,39 @@ class AllureStoryReporterTests
         String currentScenarioId = LIFECYCLE_BEFORE_STORY;
         testContext.put(CURRENT_STEP_KEY, new LinkedQueueItem<>(currentScenarioId).attachItem(currentStepId));
 
-        RunningScenario runningScenario = putEmptyRunningScenario(bddRunContext);
-
-        allureStoryReporter.beforeScenario(runningScenario.getScenario());
+        allureStoryReporter.afterStorySteps(Stage.BEFORE);
 
         InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
-        verifyScenarioStop(ordered, currentScenarioId, currentStepId);
-        ordered.verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
-        ordered.verify(allureLifecycle).startTestCase(runningScenario.getUuid());
-        ordered.verify(allureRunContext).setStoryExecutionStage(StoryExecutionStage.BEFORE_SCENARIO);
-        ordered.verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
-        ordered.verify(next).beforeScenario(runningScenario.getScenario());
+        ordered.verify(next).afterStorySteps(Stage.BEFORE);
+        ordered.verify(allureLifecycle).updateStep(eq(currentStepId), anyStepResultConsumer());
+        ordered.verify(allureLifecycle).stopStep(currentStepId);
+        ordered.verify(allureLifecycle).updateTestCase(eq(currentScenarioId), anyTestResultConsumer());
+        ordered.verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.AFTER_STEPS);
+        ordered.verify(allureLifecycle).stopTestCase(currentScenarioId);
+        ordered.verify(allureLifecycle).writeTestCase(currentScenarioId);
+        ordered.verify(allureRunContext).resetScenarioExecutionStage();
         verifyNoMoreInteractions(next, allureLifecycle);
-        assertEquals(runningScenario.getUuid(), testContext.get(CURRENT_STEP_KEY, LinkedQueueItem.class).getValue());
-        assertEquals(runningScenario.getUuid(), testResultCaptor.getValue().getUuid());
+        assertNull(testContext.get(CURRENT_STEP_KEY, LinkedQueueItem.class));
+    }
+
+    @Test
+    void afterEmptyBeforeStorySteps()
+    {
+        when(allureRunContext.getStoryExecutionStage()).thenReturn(null);
+        allureStoryReporter.afterStorySteps(Stage.BEFORE);
+        InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
+        ordered.verify(next).afterStorySteps(Stage.BEFORE);
+        ordered.verify(allureRunContext).getStoryExecutionStage();
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void afterAfterStorySteps()
+    {
+        allureStoryReporter.afterStorySteps(Stage.AFTER);
+        InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
+        ordered.verify(next).afterStorySteps(Stage.AFTER);
+        ordered.verifyNoMoreInteractions();
     }
 
     private void assertTestResultLabel(LabelName labelName, String labelValue)
@@ -638,7 +657,13 @@ class AllureStoryReporterTests
         allureStoryReporter.afterStory(givenStory);
         InOrder ordered = inOrder(next, allureRunContext, allureLifecycle);
         ordered.verify(next).afterStory(givenStory);
-        verifyScenarioStop(ordered, currentScenarioId, currentStepId);
+        ordered.verify(allureLifecycle).updateStep(eq(currentStepId), anyStepResultConsumer());
+        ordered.verify(allureLifecycle).stopStep(currentStepId);
+        ordered.verify(allureLifecycle).updateTestCase(eq(currentScenarioId), anyTestResultConsumer());
+        ordered.verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.AFTER_STEPS);
+        ordered.verify(allureLifecycle).stopTestCase(currentScenarioId);
+        ordered.verify(allureLifecycle).writeTestCase(currentScenarioId);
+        ordered.verify(allureRunContext).resetScenarioExecutionStage();
         ordered.verify(allureRunContext).resetCurrentStoryLabels(givenStory);
         verifyNoMoreInteractions(next, allureLifecycle);
         assertNull(testContext.get(CURRENT_STEP_KEY));
@@ -1143,17 +1168,6 @@ class AllureStoryReporterTests
         runningStory.setRunningScenario(runningScenario);
         bddRunContext.putRunningStory(runningStory, false);
         return runningScenario;
-    }
-
-    private void verifyScenarioStop(InOrder ordered, String currentScenarioId, String currentStepId)
-    {
-        ordered.verify(allureLifecycle).updateStep(eq(currentStepId), anyStepResultConsumer());
-        ordered.verify(allureLifecycle).stopStep(currentStepId);
-        ordered.verify(allureLifecycle).updateTestCase(eq(currentScenarioId), anyTestResultConsumer());
-        ordered.verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.AFTER_STEPS);
-        ordered.verify(allureLifecycle).stopTestCase(currentScenarioId);
-        ordered.verify(allureLifecycle).writeTestCase(currentScenarioId);
-        ordered.verify(allureRunContext).resetScenarioExecutionStage();
     }
 
     private void mockRunningStory(boolean allowed)
