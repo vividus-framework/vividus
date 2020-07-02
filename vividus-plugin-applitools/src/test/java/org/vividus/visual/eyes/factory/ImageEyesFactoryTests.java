@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 
-import com.applitools.eyes.IServerConnector;
+import com.applitools.connectivity.ServerConnector;
 import com.applitools.eyes.LogHandler;
 import com.applitools.eyes.MatchLevel;
 import com.applitools.eyes.RectangleSize;
@@ -75,7 +75,7 @@ class ImageEyesFactoryTests
         ApplitoolsVisualCheck visualCheck = createVisualCheck(VisualActionType.ESTABLISH);
         Eyes eyes = imageEyesFactory.createEyes(visualCheck);
         Configuration configuration = eyes.getConfiguration();
-        IServerConnector readServerConnector = readServerConnector(eyes);
+        ServerConnector readServerConnector = readServerConnector(eyes);
         assertAll(
             () -> assertNull(configuration.getHostApp()),
             () -> assertNull(configuration.getHostOS()),
@@ -96,9 +96,9 @@ class ImageEyesFactoryTests
         return (RectangleSize) FieldUtils.readField(eyes, "viewportSize", true);
     }
 
-    private IServerConnector readServerConnector(Eyes eyes) throws IllegalAccessException
+    private ServerConnector readServerConnector(Eyes eyes) throws IllegalAccessException
     {
-        return (IServerConnector) FieldUtils.readField(eyes, "serverConnector", true);
+        return (ServerConnector) FieldUtils.readField(eyes, "serverConnector", true);
     }
 
     private ApplitoolsVisualCheck createVisualCheck(VisualActionType action)
@@ -121,7 +121,7 @@ class ImageEyesFactoryTests
         visualCheck.setViewportSize(VIEWPORT_SIZE);
         Eyes actual = imageEyesFactory.createEyes(visualCheck);
         Configuration configuration = actual.getConfiguration();
-        IServerConnector readServerConnector = readServerConnector(actual);
+        ServerConnector readServerConnector = readServerConnector(actual);
         assertAll(
             () -> assertEquals(HOST_APP, configuration.getHostApp()),
             () -> assertEquals(HOST_OS, configuration.getHostOS()),
