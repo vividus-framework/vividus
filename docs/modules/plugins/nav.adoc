@@ -9,7 +9,7 @@
 * xref:plugin-html.adoc[HTML*]
 * xref:plugin-mongodb.adoc[MongoDB*]
 * xref:plugin-parquet.adoc[Parquet*]
-* xref:plugin-rest-api.adoc[REST API*]
+* xref:plugin-rest-api.adoc[REST API]
 * xref:plugin-ssh.adoc[SSH*]
 * xref:plugin-visual.adoc[Visual Testing*]
 * xref:plugin-web-app-to-rest-api.adoc[WEB UI to REST API*]

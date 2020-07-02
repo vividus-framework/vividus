@@ -25,6 +25,7 @@ import javax.net.ssl.SSLContext;
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.vividus.http.keystore.IKeyStoreFactory;
+import org.vividus.util.function.CheckedSupplier;
 
 public class SslContextFactory implements ISslContextFactory
 {
@@ -32,18 +33,17 @@ public class SslContextFactory implements ISslContextFactory
     private String privateKeyPassword;
 
     @Override
+    public SSLContext getDefaultSslContext()
+    {
+        return wrapInvocation(SSLContext::getDefault);
+    }
+
+    @Override
     public SSLContext getTrustingAllSslContext(String protocol)
     {
-        try
-        {
-            return createBuilder(protocol)
-                    .loadTrustMaterial(TrustAllStrategy.INSTANCE)
-                    .build();
-        }
-        catch (GeneralSecurityException e)
-        {
-            throw new IllegalStateException(e);
-        }
+        return wrapInvocation(() -> createBuilder(protocol)
+                .loadTrustMaterial(TrustAllStrategy.INSTANCE)
+                .build());
     }
 
     @Override
@@ -62,21 +62,25 @@ public class SslContextFactory implements ISslContextFactory
         }
         if (keyStore.isPresent())
         {
-            return keyStore.map(k ->
+            return keyStore.map(k -> wrapInvocation(() ->
             {
-                try
-                {
-                    char[] privatePasswordKeyChars = privateKeyPassword != null ? privateKeyPassword.toCharArray()
-                            : null;
-                    return createBuilder(protocol).loadKeyMaterial(k, privatePasswordKeyChars).build();
-                }
-                catch (GeneralSecurityException e)
-                {
-                    throw new IllegalStateException(e);
-                }
-            });
+                char[] privatePasswordKeyChars = privateKeyPassword != null ? privateKeyPassword.toCharArray() : null;
+                return createBuilder(protocol).loadKeyMaterial(k, privatePasswordKeyChars).build();
+            }));
         }
         return Optional.empty();
+    }
+
+    private <T> T wrapInvocation(CheckedSupplier<T, GeneralSecurityException> supplier)
+    {
+        try
+        {
+            return supplier.get();
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static SSLContextBuilder createBuilder(String protocol)

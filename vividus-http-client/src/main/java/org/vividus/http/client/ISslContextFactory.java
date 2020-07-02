@@ -22,6 +22,8 @@ import javax.net.ssl.SSLContext;
 
 public interface ISslContextFactory
 {
+    SSLContext getDefaultSslContext();
+
     SSLContext getTrustingAllSslContext(String protocol);
 
     Optional<SSLContext> getSslContext(String protocol, boolean trustAll);

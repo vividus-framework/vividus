@@ -28,6 +28,8 @@
         <property name="jsonUtils" ref="jsonUtils-LowerCamelCase"/>
     </bean>
 
+    <bean id="sslSteps" class="org.vividus.bdd.steps.ssl.SslSteps" />
+
     <bean id="httpClient-RestApi" class="org.vividus.http.client.HttpClient"
         factory-bean="httpClientFactory"
         factory-method="buildHttpClient">
@@ -79,5 +81,6 @@
         <value>jsonResponseValidationSteps</value>
         <value>cookieStoreProvider</value>
         <value>httpCookieSteps</value>
+        <value>sslSteps</value>
     </util:list>
 </beans>
