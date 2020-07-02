@@ -62,7 +62,7 @@ class AnalyticsServiceTests
         }));
         analyticsService.setEnabled(true);
         analyticsService.onAnalyticEvent(analyticsEvent);
-        watcher.await(5000, TimeUnit.MILLISECONDS);
+        watcher.await(10, TimeUnit.SECONDS);
         verify(googleAnalyticsFacade).postEvent(analyticsEvent);
     }
 }
