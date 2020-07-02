@@ -42,6 +42,7 @@ import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.vividus.bdd.ChainedStoryReporter;
 import org.vividus.bdd.JBehaveFailureUnwrapper;
 import org.vividus.bdd.batch.BatchStorage;
@@ -174,12 +175,19 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     }
 
     @Override
-    public void beforeScenario(Scenario scenario)
+    public void afterStorySteps(Stage stage)
     {
-        if (allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS)
+        super.afterStorySteps(stage);
+        if (stage == Stage.BEFORE
+                && allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS)
         {
             stopTestCase();
         }
+    }
+
+    @Override
+    public void beforeScenario(Scenario scenario)
+    {
         RunningStory runningStory = bddRunContext.getRunningStory();
         if ((scenario.getExamplesTable().getRowCount() == 0 || scenario.getGivenStories().requireParameters())
                 && runningStory.getStory().getLifecycle().getExamplesTable().getRowCount() == 0)
