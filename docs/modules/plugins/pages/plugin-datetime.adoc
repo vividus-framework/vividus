@@ -136,15 +136,15 @@ Let's consider the current date is `2020-11-23` and the time is `00:10:01`
 |2020-11-23T00:00:01
 |Current date time -10 mins
 
-|#{generateDate(P, YYYY-MM)}
+|#{generateDate(P, yyyy-MM)}
 |2020-11
 |Current date with custom format
 
-|#{generateDate(P, MM/dd/YYYY)}
+|#{generateDate(P, MM/dd/yyyy)}
 |11/23/2020
 |Current date with a custom format
 
-|#{generateDate(P1D, YY-MM-dd)}
+|#{generateDate(P1D, yy-MM-dd)}
 |20-11-24
 |Current date +1 day with custom format
 
@@ -175,7 +175,7 @@ The expression formats the input date to another format. Additionally, Time Zone
 
 ==== *_Usage_*
 
-[cols="2,>1", options="header"] 
+[cols="2,>1", options="header"]
 |===
 |Expression
 |Result
@@ -187,7 +187,7 @@ The expression formats the input date to another format. Additionally, Time Zone
 |2017-01-13T09:00:42.862
 
 |#{formatDate(2017-01-13T09:00:42.862-0500, yyyy-MM-dd'T'HH:mm:ss.SSS)}
-|Throw exception 
+|Throw exception
 
 |#{formatDate(2017-01-13T09:00:42.862, yyyy-MM-dd'T'HH:mm:ss)}
 |2017-01-13T09:00:42
@@ -236,7 +236,7 @@ The expression formats an input date to the desired format. The input date forma
 
 ==== *_Parameters_*
 
-. `inputDate` - required parameter. Date to format. Date can be in any format but this format should be described in second parameter. 
+. `inputDate` - required parameter. Date to format. Date can be in any format but this format should be described in second parameter.
 . `inputDateFormat` - input date format. Format can be described using standard Java {java-date-time-formatter-link}
 . `desiredFormat` - output date format. Format can be described using standard Java {java-date-time-formatter-link}
 

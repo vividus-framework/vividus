@@ -39,7 +39,7 @@ public class DateExpressionProcessor implements IExpressionProcessor
             .compile("^generateDate\\(((-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*))(,\\s*(.*))?\\)$");
     private static final int GENERATE_DATE_FORMAT_GROUP = 6;
 
-    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss");
+    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private static final int MINUS_SIGN_GROUP = 2;
     private static final int PERIOD_GROUP = 3;

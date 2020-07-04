@@ -29,7 +29,7 @@ When I save a JSON element from response by JSON path '<jsonPath>' to scenario v
 Then `${numberOfBooks}` is equal to `<booksNumber>`
 
 Scenario: Verify step "Then a JSON element from '$json' by the JSON path '$jsonPath' is equal to '$expectedData'$options"
-When I initialize the scenario variable `current-date` with value `#{generateDate(P, YYYY-MM-DD)}`
+When I initialize the scenario variable `current-date` with value `#{generateDate(P, yyyy-MM-DD)}`
 Given I initialize the scenario variable `expected-json` using template `/data/json-validation-template.ftl` with parameters:
 |currentDate   |
 |${current-date}|
