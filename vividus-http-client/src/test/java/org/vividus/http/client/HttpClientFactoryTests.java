@@ -25,6 +25,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,12 +54,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.vividus.http.keystore.IKeyStoreFactory;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ HttpClientBuilder.class, ClientBuilderUtils.class, HttpClientFactory.class })
@@ -67,8 +69,8 @@ public class HttpClientFactoryTests
     private static final Map<String, String> HEADERS = Collections.singletonMap("header1", "value1");
     private static final String CREDS = "username:pass";
 
-    @Mock
-    private ISslContextFactory mockedSSLContextManager;
+    @Mock private SslContextFactory sslContextFactory;
+    @Mock private IKeyStoreFactory keyStoreFactory;
 
     private final HttpClientBuilder mockedHttpClientBuilder = PowerMockito.mock(HttpClientBuilder.class);
 
@@ -78,7 +80,6 @@ public class HttpClientFactoryTests
     @Mock
     private HttpClient mockedHttpClient;
 
-    @InjectMocks
     private HttpClientFactory httpClientFactory;
 
     @Mock
@@ -91,6 +92,8 @@ public class HttpClientFactoryTests
     {
         MockitoAnnotations.initMocks(this);
 
+        httpClientFactory = new HttpClientFactory(sslContextFactory, keyStoreFactory);
+
         PowerMockito.mockStatic(HttpClientBuilder.class);
         when(HttpClientBuilder.create()).thenReturn(mockedHttpClientBuilder);
         when(mockedHttpClientBuilder.build()).thenReturn(mockedApacheHttpClient);
@@ -100,7 +103,7 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildHttpClientWithHeaders()
+    public void testBuildHttpClientWithHeaders() throws GeneralSecurityException
     {
         config.setHeadersMap(HEADERS);
 
@@ -109,7 +112,7 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildHttpClientWithFullAuthentication()
+    public void testBuildHttpClientWithFullAuthentication() throws GeneralSecurityException
     {
         config.setCredentials(CREDS);
         config.setAuthScope(AUTH_SCOPE);
@@ -125,7 +128,7 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildHttpClientWithAuthentication()
+    public void testBuildHttpClientWithAuthentication() throws GeneralSecurityException
     {
         config.setCredentials(CREDS);
         prepareClientBuilderUtilsMock();
@@ -139,7 +142,7 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildHttpClientAuthenticationWithoutPass()
+    public void testBuildHttpClientAuthenticationWithoutPass() throws GeneralSecurityException
     {
         prepareClientBuilderUtilsMock();
 
@@ -152,21 +155,20 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildTrustedHttpClient()
+    public void testBuildTrustedHttpClient() throws GeneralSecurityException
     {
         config.setCredentials(CREDS);
         config.setSslCertificateCheckEnabled(false);
 
-        SSLContext mockedSSLContext = mock(SSLContext.class);
-        when(mockedSSLContextManager.getSslContext(SSLConnectionSocketFactory.SSL, true))
-                .thenReturn(Optional.of(mockedSSLContext));
+        SSLContext sslContext = mock(SSLContext.class);
+        when(sslContextFactory.getTrustingAllSslContext(SSLConnectionSocketFactory.SSL)).thenReturn(sslContext);
         testBuildHttpClientUsingConfig();
         verify(mockedHttpClientBuilder, never()).setDefaultCredentialsProvider(credentialsProvider);
-        verify(mockedHttpClientBuilder).setSSLContext(mockedSSLContext);
+        verify(mockedHttpClientBuilder).setSSLContext(sslContext);
     }
 
     @Test
-    public void testBuildHostnameVerifierHttpClient()
+    public void testBuildHostnameVerifierHttpClient() throws GeneralSecurityException
     {
         config.setCredentials(CREDS);
         config.setSslHostnameVerificationEnabled(false);
@@ -175,7 +177,7 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildDnsResolver()
+    public void testBuildDnsResolver() throws GeneralSecurityException
     {
         DnsResolver resolver = mock(DnsResolver.class);
         config.setDnsResolver(resolver);
@@ -184,7 +186,7 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildCircularRedirects()
+    public void testBuildCircularRedirects() throws GeneralSecurityException
     {
         config.setCircularRedirectsAllowed(true);
         prepareClientBuilderUtilsMock();
@@ -193,14 +195,14 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildHttpClientAllPossible()
+    public void testBuildHttpClientAllPossible() throws GeneralSecurityException
     {
         String baseUrl = "http://somewh.ere/";
         config.setBaseUrl(baseUrl);
         config.setHeadersMap(HEADERS);
         config.setCredentials(CREDS);
         config.setAuthScope(AUTH_SCOPE);
-        config.setSslCertificateCheckEnabled(false);
+        config.setSslCertificateCheckEnabled(true);
         config.setSkipResponseEntity(true);
         CookieStore cookieStore = new BasicCookieStore();
         config.setCookieStore(cookieStore);
@@ -208,9 +210,15 @@ public class HttpClientFactoryTests
         DnsResolver resolver = mock(DnsResolver.class);
         config.setDnsResolver(resolver);
 
-        SSLContext mockedSSLContext = mock(SSLContext.class);
-        when(mockedSSLContextManager.getSslContext(SSLConnectionSocketFactory.SSL, true))
-                .thenReturn(Optional.of(mockedSSLContext));
+        KeyStore keyStore = mock(KeyStore.class);
+        when(keyStoreFactory.getKeyStore()).thenReturn(Optional.of(keyStore));
+
+        String privateKeyPassword = "privateKeyPassword";
+        httpClientFactory.setPrivateKeyPassword(privateKeyPassword);
+
+        SSLContext sslContext = mock(SSLContext.class);
+        when(sslContextFactory.getSslContext(SSLConnectionSocketFactory.SSL, keyStore, privateKeyPassword)).thenReturn(
+                sslContext);
 
         prepareClientBuilderUtilsMock();
 
@@ -218,7 +226,7 @@ public class HttpClientFactoryTests
         verify(mockedHttpClientBuilder).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
         verify(mockedHttpClient).setHttpHost(HttpHost.create(baseUrl));
         verify(mockedHttpClient).setSkipResponseEntity(config.isSkipResponseEntity());
-        verify(mockedHttpClientBuilder).setSSLContext(mockedSSLContext);
+        verify(mockedHttpClientBuilder).setSSLContext(sslContext);
         verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
         verify(mockedHttpClientBuilder).setDefaultCookieStore(cookieStore);
         verify(mockedHttpClientBuilder).setDnsResolver(resolver);
@@ -227,7 +235,7 @@ public class HttpClientFactoryTests
         ClientBuilderUtils.createCredentialsProvider(AUTH_SCOPE, CREDS);
     }
 
-    private void testBuildHttpClientUsingConfig()
+    private void testBuildHttpClientUsingConfig() throws GeneralSecurityException
     {
         HttpClientConnectionManager connectionManager = mock(HttpClientConnectionManager.class);
         config.setConnectionManager(connectionManager);

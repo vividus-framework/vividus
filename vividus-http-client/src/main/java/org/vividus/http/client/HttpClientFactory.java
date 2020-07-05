@@ -16,7 +16,11 @@
 
 package org.vividus.http.client;
 
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.util.Optional;
+
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -27,13 +31,22 @@ import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.vividus.http.keystore.IKeyStoreFactory;
 
 public class HttpClientFactory implements IHttpClientFactory
 {
-    private ISslContextFactory sslContextFactory;
+    private final SslContextFactory sslContextFactory;
+    private final IKeyStoreFactory keyStoreFactory;
+    private String privateKeyPassword;
+
+    public HttpClientFactory(SslContextFactory sslContextFactory, IKeyStoreFactory keyStoreFactory)
+    {
+        this.sslContextFactory = sslContextFactory;
+        this.keyStoreFactory = keyStoreFactory;
+    }
 
     @Override
-    public IHttpClient buildHttpClient(HttpClientConfig config)
+    public IHttpClient buildHttpClient(HttpClientConfig config) throws GeneralSecurityException
     {
         HttpClientBuilder builder = HttpClientBuilder.create();
         builder.setDefaultHeaders(config.createHeaders());
@@ -50,8 +63,7 @@ public class HttpClientFactory implements IHttpClientFactory
             builder.setDefaultCredentialsProvider(credProvider);
         }
 
-        sslContextFactory.getSslContext(SSLConnectionSocketFactory.SSL, !config.isSslCertificateCheckEnabled())
-                .ifPresent(builder::setSSLContext);
+        createSslContext(config.isSslCertificateCheckEnabled()).ifPresent(builder::setSSLContext);
 
         if (!config.isSslHostnameVerificationEnabled())
         {
@@ -86,8 +98,23 @@ public class HttpClientFactory implements IHttpClientFactory
         return httpClient;
     }
 
-    public void setSslContextFactory(ISslContextFactory sslContextFactory)
+    private Optional<SSLContext> createSslContext(boolean sslCertificateCheckEnabled) throws GeneralSecurityException
     {
-        this.sslContextFactory = sslContextFactory;
+        String protocol = SSLConnectionSocketFactory.SSL;
+        if (!sslCertificateCheckEnabled)
+        {
+            return Optional.of(sslContextFactory.getTrustingAllSslContext(protocol));
+        }
+        Optional<KeyStore> keyStore = keyStoreFactory.getKeyStore();
+        if (keyStore.isPresent())
+        {
+            return Optional.of(sslContextFactory.getSslContext(protocol, keyStore.get(), privateKeyPassword));
+        }
+        return Optional.empty();
+    }
+
+    public void setPrivateKeyPassword(String privateKeyPassword)
+    {
+        this.privateKeyPassword = privateKeyPassword;
     }
 }

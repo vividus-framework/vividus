@@ -16,7 +16,9 @@
 
 package org.vividus.http.client;
 
+import java.security.GeneralSecurityException;
+
 public interface IHttpClientFactory
 {
-    IHttpClient buildHttpClient(HttpClientConfig config);
+    IHttpClient buildHttpClient(HttpClientConfig config) throws GeneralSecurityException;
 }

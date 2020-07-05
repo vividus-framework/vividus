@@ -16,13 +16,10 @@
         </constructor-arg>
     </bean>
 
-    <bean id="sslContextFactory" class="org.vividus.http.client.SslContextFactory" >
-        <property name="keyStoreFactory" ref="keyStoreFactory" />
-        <property name="privateKeyPassword" value="${http.ssl.private-key-password:#{null}}" />
-    </bean>
+    <bean id="sslContextFactory" class="org.vividus.http.client.SslContextFactory" />
 
     <bean id="httpClientFactory" class="org.vividus.http.client.HttpClientFactory">
-        <property name="sslContextFactory" ref="sslContextFactory" />
+        <property name="privateKeyPassword" value="${http.ssl.private-key-password:#{null}}" />
     </bean>
 
     <bean id="httpClient" class="org.vividus.http.client.HttpClient"

@@ -18,83 +18,33 @@ package org.vividus.http.client;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.util.Optional;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.vividus.http.keystore.IKeyStoreFactory;
-import org.vividus.util.function.CheckedSupplier;
 
-public class SslContextFactory implements ISslContextFactory
+public class SslContextFactory
 {
-    private IKeyStoreFactory keyStoreFactory;
-    private String privateKeyPassword;
-
-    @Override
-    public SSLContext getDefaultSslContext()
+    public SSLContext getDefaultSslContext() throws GeneralSecurityException
     {
-        return wrapInvocation(SSLContext::getDefault);
+        return SSLContext.getDefault();
     }
 
-    @Override
-    public SSLContext getTrustingAllSslContext(String protocol)
+    public SSLContext getTrustingAllSslContext(String protocol) throws GeneralSecurityException
     {
-        return wrapInvocation(() -> createBuilder(protocol)
-                .loadTrustMaterial(TrustAllStrategy.INSTANCE)
-                .build());
+        return createBuilder(protocol).loadTrustMaterial(TrustAllStrategy.INSTANCE).build();
     }
 
-    @Override
-    public Optional<SSLContext> getSslContext(String protocol, boolean trustAll)
+    public SSLContext getSslContext(String protocol, KeyStore keyStore, String privateKeyPassword)
+            throws GeneralSecurityException
     {
-        Optional<KeyStore> keyStore = keyStoreFactory.getKeyStore();
-        if (trustAll)
-        {
-            if (keyStore.isPresent())
-            {
-                throw new IllegalStateException(
-                        "Unable to use trusting all SSL context and custom SSL context together, "
-                                + "please disable SSL certificate check or loading of client certificates");
-            }
-            return Optional.of(getTrustingAllSslContext(protocol));
-        }
-        if (keyStore.isPresent())
-        {
-            return keyStore.map(k -> wrapInvocation(() ->
-            {
-                char[] privatePasswordKeyChars = privateKeyPassword != null ? privateKeyPassword.toCharArray() : null;
-                return createBuilder(protocol).loadKeyMaterial(k, privatePasswordKeyChars).build();
-            }));
-        }
-        return Optional.empty();
-    }
-
-    private <T> T wrapInvocation(CheckedSupplier<T, GeneralSecurityException> supplier)
-    {
-        try
-        {
-            return supplier.get();
-        }
-        catch (GeneralSecurityException e)
-        {
-            throw new IllegalStateException(e);
-        }
+        char[] privatePasswordKeyChars = privateKeyPassword != null ? privateKeyPassword.toCharArray() : null;
+        return createBuilder(protocol).loadKeyMaterial(keyStore, privatePasswordKeyChars).build();
     }
 
     private static SSLContextBuilder createBuilder(String protocol)
     {
         return SSLContextBuilder.create().setProtocol(protocol);
-    }
-
-    public void setKeyStoreFactory(IKeyStoreFactory keyStoreFactory)
-    {
-        this.keyStoreFactory = keyStoreFactory;
-    }
-
-    public void setPrivateKeyPassword(String privateKeyPassword)
-    {
-        this.privateKeyPassword = privateKeyPassword;
     }
 }

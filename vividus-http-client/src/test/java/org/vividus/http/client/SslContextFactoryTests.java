@@ -17,86 +17,47 @@
 package org.vividus.http.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.util.Optional;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.http.keystore.IKeyStoreFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-@ExtendWith(MockitoExtension.class)
 class SslContextFactoryTests
 {
-    @Mock
-    private IKeyStoreFactory keyStoreFactory;
-
-    @InjectMocks
-    private SslContextFactory sslContextFactory;
+    private final SslContextFactory sslContextFactory = new SslContextFactory();
 
     @Test
-    void testGetDefaultSslContext() throws GeneralSecurityException
+    void shouldReturnDefaultSslContext() throws GeneralSecurityException
     {
         assertEquals(SSLContext.getDefault(), sslContextFactory.getDefaultSslContext());
     }
 
     @Test
-    void testGetTrustingAllSslContext()
+    void shouldReturnTrustingAllSslContext() throws GeneralSecurityException
     {
         String protocol = SSLConnectionSocketFactory.SSL;
         SSLContext actualContext = sslContextFactory.getTrustingAllSslContext(protocol);
         assertEquals(protocol, actualContext.getProtocol());
     }
 
-    @Test
-    void testGetSslContext() throws GeneralSecurityException, IOException
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = "pass")
+    void shouldReturnSslContextWithoutUsingKeyPassword(String privateKeyPassword)
+            throws GeneralSecurityException, IOException
     {
+        String protocol = SSLConnectionSocketFactory.SSL;
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null);
-        when(keyStoreFactory.getKeyStore()).thenReturn(Optional.of(keyStore));
-        assertTrue(sslContextFactory.getSslContext(SSLConnectionSocketFactory.SSL, false).isPresent());
-    }
-
-    @Test
-    void testGetSslContextEmpty()
-    {
-        when(keyStoreFactory.getKeyStore()).thenReturn(Optional.empty());
-        assertFalse(sslContextFactory.getSslContext(SSLConnectionSocketFactory.SSL, false).isPresent());
-    }
-
-    @Test
-    void testGetTrustAllSslContextEmpty()
-    {
-        SSLContext sslContext = mock(SSLContext.class);
-        SslContextFactory spy = spy(sslContextFactory);
-        doReturn(sslContext).when(spy).getTrustingAllSslContext(SSLConnectionSocketFactory.SSL);
-        when(keyStoreFactory.getKeyStore()).thenReturn(Optional.empty());
-        assertEquals(Optional.of(sslContext), spy.getSslContext(SSLConnectionSocketFactory.SSL, true));
-    }
-
-    @Test
-    void testGetSslContextException()
-    {
-        KeyStore keyStore = mock(KeyStore.class);
-        when(keyStoreFactory.getKeyStore()).thenReturn(Optional.of(keyStore));
-        Exception exception = assertThrows(IllegalStateException.class,
-            () -> sslContextFactory.getSslContext(SSLConnectionSocketFactory.SSL, true));
-        assertEquals("Unable to use trusting all SSL context and custom SSL context together, please disable SSL"
-                + " certificate check or loading of client certificates", exception.getMessage());
+        SSLContext actualContext = sslContextFactory.getSslContext(protocol, keyStore, privateKeyPassword);
+        assertEquals(protocol, actualContext.getProtocol());
     }
 }
