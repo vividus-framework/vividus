@@ -40,15 +40,15 @@ import org.vividus.bdd.steps.mongodb.command.CommandType;
 import org.vividus.bdd.steps.mongodb.command.MongoCommand;
 import org.vividus.bdd.steps.mongodb.command.MongoCommandEntry;
 import org.vividus.bdd.variable.VariableScope;
-import org.vividus.util.json.IJsonUtils;
+import org.vividus.util.json.JsonUtils;
 
 public class MongoDbSteps
 {
     private final Map<String, String> connections;
-    private final IJsonUtils jsonUtils;
+    private final JsonUtils jsonUtils;
     private final IBddVariableContext bddVariableContext;
 
-    public MongoDbSteps(Map<String, String> connections, IJsonUtils jsonUtils, IBddVariableContext bddVariableContext)
+    public MongoDbSteps(Map<String, String> connections, JsonUtils jsonUtils, IBddVariableContext bddVariableContext)
     {
         this.connections = connections;
         this.jsonUtils = jsonUtils;

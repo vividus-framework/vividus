@@ -31,8 +31,6 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-
 import com.jayway.jsonpath.InvalidJsonException;
 import com.jayway.jsonpath.PathNotFoundException;
 
@@ -51,8 +49,8 @@ import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.json.IJsonUtils;
 import org.vividus.util.json.JsonPathUtils;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.util.wait.WaitMode;
 import org.vividus.util.wait.Waiter;
 
@@ -70,13 +68,23 @@ public class JsonResponseValidationSteps
             "(?=(?:" + join(PIPE, ASSERTION_BOUNDS) + ")).+?(?=(?:" + join(PIPE, ASSERTION_BOUNDS) + "|$))",
             Pattern.DOTALL);
 
-    private ISoftAssert softAssert;
-    private IJsonUtils jsonUtils;
+    private final HttpTestContext httpTestContext;
+    private final IBddVariableContext bddVariableContext;
+    private final IAttachmentPublisher attachmentPublisher;
+    private final HttpRequestExecutor httpRequestExecutor;
+    private final JsonUtils jsonUtils;
 
-    @Inject private HttpTestContext httpTestContext;
-    @Inject private IBddVariableContext bddVariableContext;
-    @Inject private IAttachmentPublisher attachmentPublisher;
-    @Inject private HttpRequestExecutor httpRequestExecutor;
+    private ISoftAssert softAssert;
+
+    public JsonResponseValidationSteps(HttpTestContext httpTestContext, IBddVariableContext bddVariableContext,
+            IAttachmentPublisher attachmentPublisher, HttpRequestExecutor httpRequestExecutor, JsonUtils jsonUtils)
+    {
+        this.httpTestContext = httpTestContext;
+        this.bddVariableContext = bddVariableContext;
+        this.attachmentPublisher = attachmentPublisher;
+        this.httpRequestExecutor = httpRequestExecutor;
+        this.jsonUtils = jsonUtils;
+    }
 
     /**
      * Checks if JSON contains the expected data by given JSON path
@@ -496,10 +504,5 @@ public class JsonResponseValidationSteps
     public void setSoftAssert(ISoftAssert softAssert)
     {
         this.softAssert = softAssert;
-    }
-
-    public void setJsonUtils(IJsonUtils jsonUtils)
-    {
-        this.jsonUtils = jsonUtils;
     }
 }

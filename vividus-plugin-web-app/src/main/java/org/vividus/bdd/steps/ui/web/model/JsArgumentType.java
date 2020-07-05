@@ -18,9 +18,6 @@ package org.vividus.bdd.steps.ui.web.model;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-
-import org.vividus.util.json.IJsonUtils;
 import org.vividus.util.json.JsonUtils;
 
 public enum JsArgumentType
@@ -35,7 +32,7 @@ public enum JsArgumentType
     },
     OBJECT
     {
-        private final transient IJsonUtils jsonUtils = new JsonUtils(PropertyNamingStrategy.LOWER_CAMEL_CASE);
+        private final transient JsonUtils jsonUtils = new JsonUtils();
 
         @Override
         public Object convert(String object)

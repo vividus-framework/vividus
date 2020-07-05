@@ -19,21 +19,21 @@ package org.vividus.util.json;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 
-public class JsonUtils implements IJsonUtils
+import org.apache.commons.lang3.StringUtils;
+import org.vividus.util.function.CheckedSupplier;
+
+public class JsonUtils
 {
     private final ObjectMapper mapper = new ObjectMapper();
 
     public JsonUtils()
     {
-        // Required, since non-default constructors are present as well
+        this(PropertyNamingStrategy.LOWER_CAMEL_CASE);
     }
 
     public JsonUtils(PropertyNamingStrategy namingStrategy)
@@ -41,61 +41,51 @@ public class JsonUtils implements IJsonUtils
         mapper.setPropertyNamingStrategy(namingStrategy);
     }
 
-    public JsonUtils(PropertyNamingStrategy namingStrategy, Map<SerializationFeature, Boolean> serializationFeatures)
-    {
-        this(namingStrategy);
-        serializationFeatures.forEach(mapper::configure);
-    }
-
-    @Override
-    public String toJson(Object object) throws JsonProcessingException
+    public String toJson(Object object)
     {
         return performOperation(() -> mapper.writeValueAsString(object));
     }
 
-    @Override
-    public String toPrettyJson(Object object) throws JsonProcessingException
+    public String toPrettyJson(Object object)
     {
         return performOperation(() -> mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object));
     }
 
-    @Override
-    public <T> T toObject(String json, Class<T> clazz) throws JsonProcessingException
+    public <T> T toObject(String json, Class<T> clazz)
     {
         return performOperation(() -> mapper.readValue(json, clazz));
     }
 
-    @Override
-    public <T> List<T> toObjectList(String json, Class<T> clazz) throws JsonProcessingException
+    public <T> List<T> toObjectList(String json, Class<T> clazz)
     {
         return performOperation(() -> mapper.readValue(json, constructListType(clazz)));
     }
 
-    @Override
-    public <T> T toObject(InputStream json, Class<T> clazz) throws JsonProcessingException
+    public <T> T toObject(InputStream json, Class<T> clazz)
     {
         return performOperation(() -> mapper.readValue(json, clazz));
     }
 
-    @Override
-    public <T> List<T> toObjectList(InputStream json, Class<T> clazz) throws JsonProcessingException
+    public <T> List<T> toObjectList(InputStream json, Class<T> clazz)
     {
         return performOperation(() -> mapper.readValue(json, constructListType(clazz)));
     }
 
-    @Override
-    public JsonNode toJson(String jsonString) throws JsonProcessingException
+    public boolean isJson(String str)
     {
-        return performOperation(() -> mapper.readTree(jsonString));
+        try
+        {
+            mapper.readTree(str);
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+        // Single number ("1") is valid JSON as well, but we can't guarantee that it's JSON actually
+        return StringUtils.startsWithAny(str.trim(), "[", "{");
     }
 
-    @Override
-    public JsonNode toJson(byte[] jsonBytes) throws JsonProcessingException
-    {
-        return performOperation(() -> mapper.readTree(jsonBytes));
-    }
-
-    private <T> T performOperation(JsonOperation<T> operation) throws JsonProcessingException
+    private <T> T performOperation(CheckedSupplier<T, IOException> operation)
     {
         try
         {
@@ -110,20 +100,5 @@ public class JsonUtils implements IJsonUtils
     private <T> CollectionType constructListType(Class<T> clazz)
     {
         return mapper.getTypeFactory().constructCollectionType(List.class, clazz);
-    }
-
-    public void setNamingStrategy(PropertyNamingStrategy namingStrategy)
-    {
-        mapper.setPropertyNamingStrategy(namingStrategy);
-    }
-
-    public void setSerializationFeature(SerializationFeature serializationFeature, boolean enable)
-    {
-        mapper.configure(serializationFeature, enable);
-    }
-
-    private interface JsonOperation<T>
-    {
-        T get() throws IOException;
     }
 }

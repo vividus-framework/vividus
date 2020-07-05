@@ -79,7 +79,6 @@
     <bean id="webDriverFactory" class="org.vividus.selenium.WebDriverFactory">
         <property name="webDriverType" value="${selenium.browser}" />
         <property name="remoteDriverUrl" value="${selenium.grid.url}" />
-        <property name="jsonUtils" ref="jsonUtils-LowerCamelCase" />
     </bean>
 
     <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory" />
@@ -293,11 +292,7 @@
     <bean id="alertSteps" class="org.vividus.bdd.steps.ui.web.AlertSteps" />
     <bean id="buttonSteps" class="org.vividus.bdd.steps.ui.web.RadioButtonSteps" />
     <bean id="codeSteps" class="org.vividus.bdd.steps.ui.web.CodeSteps" />
-
-    <bean id="cookieSteps" class="org.vividus.bdd.steps.ui.web.CookieSteps">
-        <property name="jsonUtils" ref="jsonUtils-LowerCamelCase"/>
-    </bean>
-
+    <bean id="cookieSteps" class="org.vividus.bdd.steps.ui.web.CookieSteps" />
     <bean id="checkboxSteps" class="org.vividus.bdd.steps.ui.web.CheckboxSteps" />
     <bean id="dropdownSteps" class="org.vividus.bdd.steps.ui.web.DropdownSteps" />
     <bean id="elementSteps" class="org.vividus.bdd.steps.ui.web.ElementSteps" />

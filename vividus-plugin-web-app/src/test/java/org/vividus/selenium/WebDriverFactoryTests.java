@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -52,7 +51,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
@@ -110,13 +108,13 @@ class WebDriverFactoryTests
     @Mock
     private IPropertyParser propertyParser;
 
-    @InjectMocks
     private WebDriverFactory webDriverFactory;
 
     @BeforeEach
     void beforeEach()
     {
-        webDriverFactory.setJsonUtils(new JsonUtils(PropertyNamingStrategy.LOWER_CASE));
+        webDriverFactory = new WebDriverFactory(remoteWebDriverFactory, timeoutConfigurer, propertyParser,
+                new JsonUtils());
     }
 
     @Test

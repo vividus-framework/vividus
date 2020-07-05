@@ -22,8 +22,6 @@ import static org.hamcrest.Matchers.nullValue;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -35,16 +33,27 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.ICookieManager;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.util.json.IJsonUtils;
+import org.vividus.util.json.JsonUtils;
 
 public class CookieSteps
 {
-    @Inject private ISoftAssert softAssert;
-    @Inject private ICookieManager cookieManager;
-    @Inject private INavigateActions navigateActions;
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IBddVariableContext bddVariableContext;
-    private IJsonUtils jsonUtils;
+    private final ISoftAssert softAssert;
+    private final ICookieManager cookieManager;
+    private final INavigateActions navigateActions;
+    private final IWebDriverProvider webDriverProvider;
+    private final IBddVariableContext bddVariableContext;
+    private final JsonUtils jsonUtils;
+
+    public CookieSteps(ISoftAssert softAssert, ICookieManager cookieManager, INavigateActions navigateActions,
+            IWebDriverProvider webDriverProvider, IBddVariableContext bddVariableContext, JsonUtils jsonUtils)
+    {
+        this.softAssert = softAssert;
+        this.cookieManager = cookieManager;
+        this.navigateActions = navigateActions;
+        this.webDriverProvider = webDriverProvider;
+        this.bddVariableContext = bddVariableContext;
+        this.jsonUtils = jsonUtils;
+    }
 
     /**
      * Removes all cookies from the current domain
@@ -207,10 +216,5 @@ public class CookieSteps
         Optional.ofNullable(cookieManager.getCookie(cookieName))
                 .map(Cookie::toJson)
                 .ifPresent(cam -> bddVariableContext.putVariable(scopes, variableName, jsonUtils.toJson(cam)));
-    }
-
-    public void setJsonUtils(IJsonUtils jsonUtils)
-    {
-        this.jsonUtils = jsonUtils;
     }
 }
