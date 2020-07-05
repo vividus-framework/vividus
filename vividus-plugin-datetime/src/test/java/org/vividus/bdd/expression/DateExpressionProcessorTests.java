@@ -72,14 +72,14 @@ class DateExpressionProcessorTests
     @ParameterizedTest
     @ValueSource(strings = {
             "-P1D",
-            "P1D(dd-MM-YYYY)",
+            "P1D(dd-MM-yyyy)",
             "P1Y2M3W4D",
             "-P20D",
             "P1DT20H",
             "P1MT10M",
             "PT10H",
             "generateDate(-P1D)",
-            "generateDate(P1D, dd-MM-YYYY)",
+            "generateDate(P1D, dd-MM-yyyy)",
             "generateDate(P1Y2M3W4D)",
             "generateDate(-P20D)",
             "generateDate(P1DT20H)",
@@ -113,9 +113,9 @@ class DateExpressionProcessorTests
     @ParameterizedTest
     @CsvSource(delimiter = ';', value = {
             "P5Y1M10D;                    1905-02-11;               P5Y1M10D; ''",
-            "P1Y1M1W(dd-MM-YYYY);         08-02-1901;               P1Y1M1W;  , dd-MM-YYYY",
+            "P1Y1M1W(dd-MM-yyyy);         08-02-1901;               P1Y1M1W;  , dd-MM-yyyy",
             "PT1H2M3S;                    1900-01-01T01:02:03;      PT1H2M3S; ''",
-            "PT61M63S(YYYY'T'HH-mm-ss);   1900T01-02-03;            PT61M63S; , YYYY'T'HH-mm-ss",
+            "PT61M63S(yyyy'T'HH-mm-ss);   1900T01-02-03;            PT61M63S; , yyyy'T'HH-mm-ss",
             "-P1MT1M;                     1899-11-30T23:59:00;      -P1MT1M;  ''",
             "P(MMM);                      Jan;                      P;        , MMM",
             "P(MMMM);                     January;                  P;        , MMMM",
@@ -138,9 +138,9 @@ class DateExpressionProcessorTests
     @ParameterizedTest
     @CsvSource(delimiter = ';', value = {
             "generateDate(P5Y1M10D);                    1905-02-11",
-            "generateDate(P1Y1M1W, dd-MM-YYYY);         08-02-1901",
+            "generateDate(P1Y1M1W, dd-MM-yyyy);         08-02-1901",
             "generateDate(PT1H2M3S);                    1900-01-01T01:02:03",
-            "generateDate(PT61M63S, YYYY'T'HH-mm-ss);   1900T01-02-03",
+            "generateDate(PT61M63S, yyyy'T'HH-mm-ss);   1900T01-02-03",
             "generateDate(-P1MT1M);                     1899-11-30T23:59:00",
             "generateDate(P, MMM);                      Jan",
             "generateDate(P, MMMM);                     January",
