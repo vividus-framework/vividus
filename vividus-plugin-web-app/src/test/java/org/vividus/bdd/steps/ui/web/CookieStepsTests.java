@@ -43,7 +43,7 @@ import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.action.CookieManager;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.util.json.IJsonUtils;
+import org.vividus.util.json.JsonUtils;
 
 @ExtendWith(MockitoExtension.class)
 class CookieStepsTests
@@ -70,7 +70,7 @@ class CookieStepsTests
     private IBddVariableContext bddVariableContext;
 
     @Mock
-    private IJsonUtils jsonUtils;
+    private JsonUtils jsonUtils;
 
     @InjectMocks
     private CookieSteps cookieSteps;

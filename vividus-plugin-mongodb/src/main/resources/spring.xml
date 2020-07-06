@@ -12,7 +12,6 @@
                 <constructor-arg value="mongodb.connection." />
             </bean>
         </constructor-arg>
-        <constructor-arg index="1" ref="jsonUtils-LowerCamelCase" />
     </bean>
 
     <util:list id="stepBeanNames-MongoDB">

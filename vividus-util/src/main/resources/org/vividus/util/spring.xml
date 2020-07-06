@@ -15,12 +15,6 @@
         </constructor-arg>
     </bean>
 
-    <bean id="jsonUtils-SnakeCase" class="org.vividus.util.json.JsonUtils">
-        <constructor-arg>
-            <util:constant static-field="com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE"/>
-        </constructor-arg>
-    </bean>
-
     <bean id="locationProvider" class="org.vividus.util.LocationProvider">
         <property name="locale" value="${location.locale:#{T(java.util.Locale).getDefault()}}" />
     </bean>

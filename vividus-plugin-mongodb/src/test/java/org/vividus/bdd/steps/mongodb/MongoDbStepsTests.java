@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -52,7 +51,6 @@ import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.mongodb.command.MongoCommand;
 import org.vividus.bdd.steps.mongodb.command.MongoCommandEntry;
 import org.vividus.bdd.variable.VariableScope;
-import org.vividus.util.json.IJsonUtils;
 import org.vividus.util.json.JsonUtils;
 
 @RunWith(PowerMockRunner.class)
@@ -69,7 +67,7 @@ public class MongoDbStepsTests
     @Mock
     private IBddVariableContext context;
 
-    private final IJsonUtils jsonUtils = new JsonUtils(PropertyNamingStrategy.LOWER_CAMEL_CASE);
+    private final JsonUtils jsonUtils = new JsonUtils();
 
     @Before
     public void init()

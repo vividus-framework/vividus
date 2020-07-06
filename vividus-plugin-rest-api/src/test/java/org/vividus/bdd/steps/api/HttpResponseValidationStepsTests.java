@@ -42,6 +42,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.model.ArchiveVariable;
@@ -56,6 +57,7 @@ import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
+import org.vividus.util.json.JsonUtils;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("checkstyle:MethodCount")
@@ -82,6 +84,9 @@ class HttpResponseValidationStepsTests
 
     @Mock
     private IBddVariableContext bddVariableContext;
+
+    @Spy
+    private final JsonUtils jsonUtils = new JsonUtils();
 
     @InjectMocks
     private HttpResponseValidationSteps httpResponseValidationSteps;

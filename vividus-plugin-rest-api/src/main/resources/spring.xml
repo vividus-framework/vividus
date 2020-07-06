@@ -25,7 +25,6 @@
 
     <bean id="jsonResponseValidationSteps" class="org.vividus.bdd.steps.api.JsonResponseValidationSteps">
         <property name="softAssert" ref="jsonSoftAssert" />
-        <property name="jsonUtils" ref="jsonUtils-LowerCamelCase"/>
     </bean>
 
     <bean id="sslSteps" class="org.vividus.bdd.steps.ssl.SslSteps" />

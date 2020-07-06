@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.tika.Tika;
@@ -50,7 +49,6 @@ import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
-import org.vividus.util.json.JsonProcessingException;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.zip.ZipUtils;
 
@@ -61,13 +59,15 @@ public class HttpResponseValidationSteps
     private final HttpTestContext httpTestContext;
     private final IBddVariableContext bddVariableContext;
     private final ISoftAssert softAssert;
+    private final JsonUtils jsonUtils;
 
     public HttpResponseValidationSteps(HttpTestContext httpTestContext, IBddVariableContext bddVariableContext,
-            ISoftAssert softAssert)
+            ISoftAssert softAssert, JsonUtils jsonUtils)
     {
         this.httpTestContext = httpTestContext;
         this.bddVariableContext = bddVariableContext;
         this.softAssert = softAssert;
+        this.jsonUtils = jsonUtils;
     }
 
     /**
@@ -120,7 +120,8 @@ public class HttpResponseValidationSteps
         {
             byte[] responseBody = response.getResponseBody();
             String actualContentType = TIKA.detect(responseBody);
-            if ("text/plain".equals(actualContentType) && isJson(responseBody))
+            if ("text/plain".equals(actualContentType) && jsonUtils.isJson(
+                    new String(responseBody, StandardCharsets.UTF_8)))
             {
                 actualContentType = "application/json";
             }
@@ -383,21 +384,6 @@ public class HttpResponseValidationSteps
     private byte[] getResponseBody()
     {
         return getResponse().getResponseBody();
-    }
-
-    private boolean isJson(byte[] responseBody)
-    {
-        try
-        {
-            new JsonUtils().toJson(responseBody);
-
-            // Single number ("1") is valid JSON as well, but we can't guarantee that it's really JSON
-            return StringUtils.startsWithAny(new String(responseBody, StandardCharsets.UTF_8).trim(), "[", "{");
-        }
-        catch (JsonProcessingException e)
-        {
-            return false;
-        }
     }
 
     private void performIfHttpResponseIsPresent(Consumer<HttpResponse> responseConsumer)

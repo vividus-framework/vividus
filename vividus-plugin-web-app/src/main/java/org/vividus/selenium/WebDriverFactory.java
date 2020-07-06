@@ -27,8 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import com.google.common.base.Suppliers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -45,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.selenium.manager.WebDriverManager;
-import org.vividus.util.json.IJsonUtils;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
 public class WebDriverFactory implements IWebDriverFactory
@@ -57,13 +55,13 @@ public class WebDriverFactory implements IWebDriverFactory
     private static final String SELENIUM_GRID_PROPERTY_PREFIX = "selenium.grid.capabilities.";
     private static final String LOCAL_DRIVER_PROPERTY_PREFIX = "selenium.capabilities.";
 
-    @Inject private IRemoteWebDriverFactory remoteWebDriverFactory;
-    @Inject private ITimeoutConfigurer timeoutConfigurer;
-    @Inject private IPropertyParser propertyParser;
+    private final IRemoteWebDriverFactory remoteWebDriverFactory;
+    private final ITimeoutConfigurer timeoutConfigurer;
+    private final IPropertyParser propertyParser;
+    private final JsonUtils jsonUtils;
+
     private WebDriverType webDriverType;
     private URL remoteDriverUrl;
-
-    private IJsonUtils jsonUtils;
 
     private final Supplier<DesiredCapabilities> seleniumGridDesiredCapabilities = Suppliers.memoize(
         () -> getCapabilitiesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX));
@@ -87,6 +85,15 @@ public class WebDriverFactory implements IWebDriverFactory
             });
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
+
+    public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, ITimeoutConfigurer timeoutConfigurer,
+            IPropertyParser propertyParser, JsonUtils jsonUtils)
+    {
+        this.remoteWebDriverFactory = remoteWebDriverFactory;
+        this.timeoutConfigurer = timeoutConfigurer;
+        this.propertyParser = propertyParser;
+        this.jsonUtils = jsonUtils;
+    }
 
     private DesiredCapabilities getCapabilitiesByPrefix(String prefix)
     {
@@ -227,10 +234,5 @@ public class WebDriverFactory implements IWebDriverFactory
     public void setRemoteDriverUrl(URL remoteDriverUrl)
     {
         this.remoteDriverUrl = remoteDriverUrl;
-    }
-
-    public void setJsonUtils(IJsonUtils jsonUtils)
-    {
-        this.jsonUtils = jsonUtils;
     }
 }

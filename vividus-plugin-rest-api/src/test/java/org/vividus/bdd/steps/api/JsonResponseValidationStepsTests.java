@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -37,7 +36,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import org.apache.http.ConnectionClosedException;
@@ -51,7 +49,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -66,7 +63,6 @@ import org.vividus.http.client.IHttpClient;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
-import org.vividus.util.json.IJsonUtils;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.util.json.JsonUtils;
 
@@ -77,7 +73,6 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 class JsonResponseValidationStepsTests
 {
     private static final int DURATION_DIVIDER = 10;
-    private static final String HTTP_REQUEST_EXECUTOR_FIELD = "httpRequestExecutor";
     private static final String GET = "GET";
     private static final String SOME_PATH = "$.some";
     private static final String RESPONSE_PATH = "$.response";
@@ -108,8 +103,6 @@ class JsonResponseValidationStepsTests
     private static final String HTML =
             "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\"/>";
 
-    private final IJsonUtils jsonUtils = new JsonUtils(PropertyNamingStrategy.LOWER_CAMEL_CASE);
-
     @Mock
     private IBddVariableContext bddVariableContext;
 
@@ -125,14 +118,16 @@ class JsonResponseValidationStepsTests
     @Mock
     private IAttachmentPublisher attachmentPublisher;
 
-    @InjectMocks
     private JsonResponseValidationSteps jsonResponseValidationSteps;
 
     @BeforeEach
     void beforeEach()
     {
-        jsonResponseValidationSteps.setJsonUtils(jsonUtils);
         JsonPathUtils.setJacksonConfiguration();
+        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
+        jsonResponseValidationSteps = new JsonResponseValidationSteps(httpTestContext, bddVariableContext,
+                attachmentPublisher, httpRequestExecutor, new JsonUtils());
+        jsonResponseValidationSteps.setSoftAssert(softAssert);
     }
 
     static Stream<Arguments> defaultDataProvider()
@@ -349,12 +344,8 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void shouldIgnoreInvalidBodyDuringTimeoutTest() throws IOException, NoSuchFieldException, IllegalAccessException
+    void shouldIgnoreInvalidBodyDuringTimeoutTest() throws IOException
     {
-        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
-        Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
-        executorField.setAccessible(true);
-        executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
         HttpResponse response = mock(HttpResponse.class);
         when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
                 argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
@@ -371,13 +362,8 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testFailedAssertionRecordingIfResponseDidNtContainJson() throws IOException, NoSuchFieldException,
-            IllegalAccessException
+    void testFailedAssertionRecordingIfResponseDidNtContainJson() throws IOException
     {
-        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
-        Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
-        executorField.setAccessible(true);
-        executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
         HttpResponse response = mock(HttpResponse.class);
         when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
                 argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
@@ -389,17 +375,13 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testWaitForJsonFieldAppearsHandledException() throws IOException, IllegalAccessException, NoSuchFieldException
+    void testWaitForJsonFieldAppearsHandledException() throws IOException
     {
         when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase
                 && base.getMethod().equals(GET)
                 && base.getURI().equals(URI.create(URL))),
                 argThat(context -> context instanceof HttpClientContext)))
             .thenThrow(new ConnectionClosedException());
-        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
-        Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
-        executorField.setAccessible(true);
-        executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
         jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
                 DURATION_DIVIDER);
         verify(softAssert).recordFailedAssertion(
@@ -436,13 +418,8 @@ class JsonResponseValidationStepsTests
         verifyNoInteractions(softAssert);
     }
 
-    private void testWaitForJsonFieldAppears(int elementsFound) throws IllegalAccessException, NoSuchFieldException,
-            IOException
+    private void testWaitForJsonFieldAppears(int elementsFound) throws IOException
     {
-        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
-        Field executorField = jsonResponseValidationSteps.getClass().getDeclaredField(HTTP_REQUEST_EXECUTOR_FIELD);
-        executorField.setAccessible(true);
-        executorField.set(jsonResponseValidationSteps, httpRequestExecutor);
         jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT2S"),
                 DURATION_DIVIDER);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH),

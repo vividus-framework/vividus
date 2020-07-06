@@ -22,14 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class JsonUtilsTests
 {
@@ -60,14 +60,6 @@ class JsonUtilsTests
     {
         String actualJson = jsonUtils.toPrettyJson(TEST_OBJECT);
         assertEquals(String.format("{%n  \"id\" : \"1\",%n  \"firstName\" : \"name\"%n}"), actualJson);
-    }
-
-    @Test
-    void testToJsonSuccessCamelCase()
-    {
-        jsonUtils.setNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-        String actualJson = jsonUtils.toJson(TEST_OBJECT);
-        assertEquals("{\"id\":\"1\",\"first_name\":\"name\"}", actualJson);
     }
 
     @Test
@@ -143,42 +135,17 @@ class JsonUtilsTests
         assertThrows(JsonProcessingException.class, () -> jsonUtils.toObjectList(jsonListStream, TestClass.class));
     }
 
-    @Test
-    void testStringToJsonNode()
+    @ParameterizedTest
+    @CsvSource({
+            "{},             true",
+            "[],             true",
+            "' {\"key\":1}', true",
+            "{',             false",
+            "1',             false"
+    })
+    void testIsJson(String str, boolean json)
     {
-        assertEquals(JSON_STRING, new JsonUtils().toJson(JSON_STRING).toString());
-    }
-
-    @Test
-    void testBytesToJsonNode()
-    {
-        assertEquals(JSON_STRING, new JsonUtils().toJson(JSON_STRING.getBytes(StandardCharsets.UTF_8)).toString());
-    }
-
-    @Test
-    void testStringToJsonNodeWithException()
-    {
-        assertThrows(JsonProcessingException.class, () -> jsonUtils.toJson("notJson"));
-    }
-
-    @Test
-    void testEnableSerializationFeature()
-    {
-        testSerializationFeature(new JsonUtils(PropertyNamingStrategy.LOWER_CAMEL_CASE,
-                Collections.singletonMap(SerializationFeature.WRAP_ROOT_VALUE, Boolean.TRUE)));
-    }
-
-    @Test
-    void testSetSerializationFeature()
-    {
-        jsonUtils.setSerializationFeature(SerializationFeature.WRAP_ROOT_VALUE, true);
-        testEnableSerializationFeature();
-    }
-
-    private static void testSerializationFeature(JsonUtils utils)
-    {
-        String actualJson = utils.toJson(TEST_OBJECT);
-        assertEquals("{\"TestClass\":{\"id\":\"1\",\"firstName\":\"name\"}}", actualJson);
+        assertEquals(json, jsonUtils.isJson(str));
     }
 
     public static class TestClass
