@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.steps;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -33,6 +35,9 @@ import java.util.Queue;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.configuration.Keywords;
+import org.jbehave.core.io.StoryLoader;
+import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.jbehave.core.steps.ParameterConverters.NumberConverter;
 import org.jbehave.core.steps.ParameterConverters.StringConverter;
@@ -50,17 +55,11 @@ class ParameterConvertersDecoratorTests
 {
     private static final String VALUE = "42";
 
-    @Mock
-    private StepMonitor stepMonitor;
-
-    @Mock
-    private Configuration configuration;
-
-    @Mock
-    private ParameterAdaptor parameterAdaptor;
-
-    @Mock
-    private ExpressionAdaptor expressionAdaptor;
+    @Mock private StepMonitor stepMonitor;
+    @Mock private StoryLoader storyLoader;
+    @Mock private Configuration configuration;
+    @Mock private ParameterAdaptor parameterAdaptor;
+    @Mock private ExpressionAdaptor expressionAdaptor;
 
     private ParameterConvertersDecorator parameterConverters;
 
@@ -68,6 +67,8 @@ class ParameterConvertersDecoratorTests
     void beforeEach()
     {
         when(configuration.stepMonitor()).thenReturn(stepMonitor);
+        when(configuration.keywords()).thenReturn(new Keywords());
+        when(configuration.storyLoader()).thenReturn(storyLoader);
         parameterConverters = new ParameterConvertersDecorator(configuration, parameterAdaptor, expressionAdaptor);
     }
 
@@ -235,5 +236,32 @@ class ParameterConvertersDecoratorTests
         parameterConverters.addConverters(new FunctionalParameterConverter<>(SubSteps.class, s -> subSteps));
         assertEquals(subSteps, parameterConverters.convert("sub-steps", SubSteps.class));
         verifyNoInteractions(parameterAdaptor, expressionAdaptor);
+    }
+
+    @Test
+    void shouldConvertToExamplesTableWithResolvedPlaceholders()
+    {
+        String expressionKey = "expression";
+        String expression = "#{expression}";
+        String expressionValue = "expressionValue";
+        String variableKey = "variable";
+        String variable = "${variable}";
+        String variableValue = "variableValue";
+        String pathToTable = "/table-with-expression-and-variable.table";
+        String tableAsString = String.format("|%s|%s|%n|%s|%s|", expressionKey, variableKey, expression, variable);
+        when(expressionAdaptor.process(pathToTable)).thenReturn(pathToTable);
+        when(parameterAdaptor.convert(pathToTable)).thenReturn(pathToTable);
+        when(parameterAdaptor.convert(expression)).thenReturn(expression);
+        when(expressionAdaptor.process(expression)).thenReturn(expressionValue);
+        when(parameterAdaptor.convert(expressionValue)).thenReturn(expressionValue);
+        when(expressionAdaptor.process(expressionValue)).thenReturn(expressionValue);
+        when(parameterAdaptor.convert(variable)).thenReturn(variableValue);
+        when(expressionAdaptor.process(variableValue)).thenReturn(variableValue);
+        when(parameterAdaptor.convert(variableValue)).thenReturn(variableValue);
+        when(storyLoader.loadResourceAsText(pathToTable)).thenReturn(tableAsString);
+        Object result = parameterConverters.convert(pathToTable, ExamplesTable.class);
+        assertThat(result, instanceOf(ExamplesTable.class));
+        ExamplesTable table = (ExamplesTable) result;
+        assertEquals(List.of(Map.of(expressionKey, expressionValue, variableKey, variableValue)), table.getRows());
     }
 }
