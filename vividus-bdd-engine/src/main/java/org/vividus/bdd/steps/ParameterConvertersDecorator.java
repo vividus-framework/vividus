@@ -18,10 +18,13 @@ package org.vividus.bdd.steps;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ParameterConverters;
 
 public class ParameterConvertersDecorator extends ParameterConverters
@@ -48,7 +51,7 @@ public class ParameterConvertersDecorator extends ParameterConverters
         {
             return super.convert(value, type);
         }
-        Object adaptedValue = resolvePlaceholders(value, value, type, 1);
+        Object adaptedValue = resolvePlaceholders(value, type);
         if (type == String.class || adaptedValue instanceof String)
         {
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
@@ -71,7 +74,29 @@ public class ParameterConvertersDecorator extends ParameterConverters
                         : Optional.of(super.convert(convertedValue, argType));
             }
         }
-        return super.convert(convertedValue, type);
+        Object result = super.convert(convertedValue, type);
+        resolvePlaceholdersAfterConversion(type, result);
+        return result;
+    }
+
+    private void resolvePlaceholdersAfterConversion(Type type, Object result)
+    {
+        if (type == ExamplesTable.class)
+        {
+            ExamplesTable examplesTable = (ExamplesTable) result;
+            List<Map<String, String>> rows = examplesTable.getRows();
+            rows.forEach(
+                row -> row.entrySet().forEach(
+                    cell -> cell.setValue((String) resolvePlaceholders(cell.getValue(), String.class))
+                )
+            );
+            examplesTable.withRows(rows);
+        }
+    }
+
+    private Object resolvePlaceholders(String value, Type type)
+    {
+        return resolvePlaceholders(value, value, type, 1);
     }
 
     private Object resolvePlaceholders(String originalValue, String value, Type type, int iteration)
