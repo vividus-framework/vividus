@@ -59,7 +59,7 @@ class DateExpressionProcessorTests
     @BeforeEach
     void beforeEach()
     {
-        dateExpressionProcessor.setLocale(Locale.getDefault());
+        dateExpressionProcessor.setLocale(Locale.ENGLISH);
     }
 
     private void mockGetCurrentDate()
