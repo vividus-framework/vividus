@@ -65,3 +65,11 @@ Meta:
 When I initialize the scenario variable `value` with value `#{removeWrappingDoubleQuotes(${value})}`
 Then `${value}` is equal to `${value}`
 Then `before-${value}-after` is equal to `before-${value}-after`
+
+Scenario: Verify that variables are resolved in examples table used as a parameter for a step
+Meta:
+    @issueId 692
+When I initialize the scenario variable `var` with value `val`
+Given I initialize the scenario variable `template-result` using template `/data/simple-template.ftl` with parameters:
+/data/table-with-scenario-level-variables.table
+Then `${template-result}` is equal to `passed: variable is resolved`

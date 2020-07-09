@@ -18,6 +18,7 @@ package org.vividus.bdd.expression;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,7 +54,8 @@ public class ShiftDateExpressionProcessor implements IExpressionProcessor
         Matcher expressionMatcher = SHIFT_DATE_PATTERN.matcher(expression);
         if (expressionMatcher.find())
         {
-            DateTimeFormatter format = DateTimeFormatter.ofPattern(normalize(expressionMatcher.group(FORMAT_GROUP)));
+            DateTimeFormatter format = DateTimeFormatter.ofPattern(normalize(expressionMatcher.group(FORMAT_GROUP)),
+                Locale.ENGLISH);
             ZonedDateTime zonedDateTime = dateUtils.parseDateTime(normalize(expressionMatcher.group(INPUT_DATE_GROUP)),
                     format);
             DateExpression dateExpression = new DateExpression(expressionMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,

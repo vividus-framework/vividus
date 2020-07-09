@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,7 +85,7 @@ public class DiffDateExpressionProcessor implements IExpressionProcessor
     private ZonedDateTime getZonedDateTime(Matcher expressionMatcher, int inputDateGroup, int inputFormatGroup)
     {
         DateTimeFormatter inputFormat = DateTimeFormatter
-                .ofPattern(normalize(expressionMatcher.group(inputFormatGroup)));
+                .ofPattern(normalize(expressionMatcher.group(inputFormatGroup)), Locale.ENGLISH);
         return dateUtils.parseDateTime(normalize(expressionMatcher.group(inputDateGroup)), inputFormat);
     }
 

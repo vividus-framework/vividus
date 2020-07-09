@@ -18,6 +18,7 @@ package org.vividus.bdd.expression;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,7 +52,7 @@ public class FormatDateToExpressionProcessor implements IExpressionProcessor
         {
             String inputDate = normalize(formatToExpressionMatcher.group(INPUT_DATE_GROUP));
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
-                    normalize(formatToExpressionMatcher.group(OLD_FORMAT_GROUP)));
+                    normalize(formatToExpressionMatcher.group(OLD_FORMAT_GROUP)), Locale.ENGLISH);
             ZonedDateTime zonedDate = dateUtils.parseDateTime(inputDate, dateTimeFormatter);
             return formatDate(zonedDate, normalize(formatToExpressionMatcher.group(NEW_FORMAT_GROUP)));
         }
@@ -60,7 +61,7 @@ public class FormatDateToExpressionProcessor implements IExpressionProcessor
 
     private Optional<String> formatDate(ZonedDateTime zonedDateTime, String outputFormat)
     {
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputFormat);
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputFormat, Locale.ENGLISH);
         return Optional.of(outputFormatter.format(zonedDateTime));
     }
 
