@@ -1,1 +1,193 @@
-include::ROOT:page$under-construction.adoc[]
+= Plugin Web App
+:proxy: This step requires proxy to be turned on. It can be done via setting properties or switching on @proxy metatag.
+
+== General Info
+
+The plugin provides functionality to interact with Web applications.
+
+== Installation
+
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '0.2.4')
+----
+
+
+== Properties
+
+=== Required
+
+There are no required properties for the plugin.
+
+=== Optional
+
+@proxy - Some steps requires proxy to be turned on. It can be done via setting properties or switching on @proxy metatag.
+
+== Steps
+
+=== Clear proxy log
+
+==== *_Info_*
+
+Clears the proxy log
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I clear proxy log
+----
+
+==== *_Usage_*
+
+.ProxyStepsTests.story
+[source,gherkin]
+----
+Scenario: Verify step When I clear proxy log
+Given I am on a page with the URL 'http:/httpbin.org/get'
+When I clear proxy log
+Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `0`
+----
+
+
+=== Check if the number of requests with given URL-pattern exist
+
+==== *_Info_*
+
+{proxy}
+Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
+If URLs are the same, there were calls with given URL-pattern, otherwise - weren't.
+If there weren't any calls matching requirements, HAR file with all calls will be attached to report.
+If response contains status code 302 - corresponding request will be filtered out.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then number of HTTP $httpMethod requests with URL pattern `$urlPattern` is $comparisonRule `$number`
+----
+
+==== *_Parameters_*
+
+. `$httpMethod` - HTTP method to filter by
+. `$urlPattern` - the string value of URL-pattern to filter by
+. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
+. `$number` - The number to compare with
+
+==== *_Usage_*
+
+.ProxyStepsTests.story
+[source,gherkin]
+----
+Scenario: Verify step When I clear proxy log
+Given I am on a page with the URL 'http:/httpbin.org/get'
+When I clear proxy log
+Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `0`
+----
+
+
+=== Saves the query string into the variable with specified name and scopes.
+
+==== *_Info_*
+
+{proxy}
+Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
+If there is one entry, it saves the query string from request as Map of keys and values into the variable with specified name and scopes.
+If there weren't any calls or more than one matching requirements, HAR file with all
+calls will be attached to report.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$httpMethod` - HTTP method to filter by
+. `$urlPattern` - the string value of URL-pattern to filter by
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - A variable name
+
+==== *_Usage_*
+
+.ProxyStepsTests.story
+[source,gherkin]
+----
+Scenario: Verify step When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`
+Given I am on a page with the URL 'http://httpbin.org/forms/post'
+When I click on element located `By.xpath(//button)`
+When I capture HTTP POST request with URL pattern `http://httpbin.org/post` and save URL query to SCENARIO variable `query`
+Then `${query}` is equal to `{}`
+----
+
+
+=== Saves the request data into the variable with specified name and scopes.
+
+==== *_Info_*
+
+{proxy}
+Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
+If there is one entry, it saves the query string from request as Map of keys and values into the variable with specified name and scopes.
+If there weren't any calls or more than one matching requirements, HAR file with all calls will be attached to report.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$httpMethod` - HTTP method to filter by
+. `$urlPattern` - the string value of URL-pattern to filter by
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - A variable name
+
+==== *_Usage_*
+
+.ProxyStepsTests.story
+[source,gherkin]
+----
+Scenario: Verify step When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
+Given I am on a page with the URL 'http://httpbin.org/forms/post'
+When I click on element located `By.xpath(//button)`
+When I capture HTTP POST request with URL pattern `http://httpbin.org/post` and save request data to SCENARIO variable `requestData`
+Then `${requestData.query}` is equal to `{}`
+Then `${requestData.requestBodyParameters}` is equal to `{delivery=, custtel=, comments=, custemail=, custname=}`
+Then `${requestData.requestBody}` is not equal to `null`
+Then `${requestData.responseStatus}` is equal to `200`
+----
+
+
+=== Waits for appearance of HTTP request matched httpMethod and urlPattern in proxy log
+
+==== *_Info_*
+
+Waits for appearance of HTTP request matched httpMethod and urlPattern in proxy log
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I wait until HTTP $httpMethod request with URL pattern `$urlPattern` exists in proxy log
+----
+
+==== *_Parameters_*
+
+. `$httpMethod` - HTTP method to filter by
+. `$urlPattern` - The string value of URL-pattern to filter by
+
+==== *_Usage_*
+
+.ProxyStepsTests.story
+[source,gherkin]
+----
+Scenario: Verify step When I wait until HTTP $httpMethod request with URL pattern `$urlPattern` exists in proxy log
+Given I am on a page with the URL 'http://httpbin.org/get'
+When I wait until HTTP GET request with URL pattern `http://httpbin.org/get` exists in proxy log
+Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `1`
+----
