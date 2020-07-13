@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.embedder.MatchingStepMonitor;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Scenario;
@@ -30,6 +31,8 @@ import org.vividus.bdd.spring.ExtendedConfiguration;
 
 public class StepExamplesTableParser implements IStepExamplesTableParser
 {
+    private static final String STEP_COLUMN_NAME = "step";
+
     private final ExtendedConfiguration configuration;
     private final InjectableStepsFactory stepsFactory;
 
@@ -42,8 +45,12 @@ public class StepExamplesTableParser implements IStepExamplesTableParser
     @Override
     public List<Step> parse(ExamplesTable stepsAsTable)
     {
+        Validate.isTrue(List.of(STEP_COLUMN_NAME).equals(stepsAsTable.getHeaders()),
+                "The steps examples table must have only one column with the name '%s', but got %s", STEP_COLUMN_NAME,
+                getErrorMessage(stepsAsTable.getHeaders()));
+
         String storyAsText = stepsAsTable.getRows().stream()
-                .map(p -> p.get("step"))
+                .map(p -> p.get(STEP_COLUMN_NAME))
                 .collect(Collectors.joining(System.lineSeparator()));
         List<String> stepsAsText = new ArrayList<>();
         if (!storyAsText.isEmpty())
@@ -54,5 +61,10 @@ public class StepExamplesTableParser implements IStepExamplesTableParser
         MatchingStepMonitor monitor = new MatchingStepMonitor(configuration.stepMonitor());
         return configuration.stepCollector().collectScenarioSteps(stepsFactory.createCandidateSteps(),
                 scenario, Map.of(), monitor);
+    }
+
+    private static String getErrorMessage(List<String> headers)
+    {
+        return headers.isEmpty() ? "empty table" : String.join(", ", headers);
     }
 }

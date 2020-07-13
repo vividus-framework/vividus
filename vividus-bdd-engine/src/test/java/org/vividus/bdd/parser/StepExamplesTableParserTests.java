@@ -16,12 +16,14 @@
 
 package org.vividus.bdd.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -49,6 +51,8 @@ import org.vividus.bdd.spring.ExtendedConfiguration;
 class StepExamplesTableParserTests
 {
     private static final String STEP = "When I do something";
+    private static final String ERROR_MESSAGE_PART = "The steps examples table must have only one column with the name"
+        + " 'step', but got ";
 
     @Mock
     private ExtendedConfiguration configuration;
@@ -60,12 +64,21 @@ class StepExamplesTableParserTests
     private StepExamplesTableParser stepExamplesTableParser;
 
     @Test
+    void testMoreThanOneColumnInStepsExampleTable()
+    {
+        ExamplesTable table = new ExamplesTable("|step|col2|col3|\n|val1|val2|val3|");
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> stepExamplesTableParser.parse(table));
+        assertEquals(ERROR_MESSAGE_PART + "step, col2, col3", exception.getMessage());
+        verifyNoInteractions(stepsFactory, configuration);
+    }
+
+    @Test
     void testGetListStepsNoStepsAsTable()
     {
-        mockStepCreation(arg -> arg.getSteps().isEmpty());
-        stepExamplesTableParser.parse(new ExamplesTable(""));
-        verify(configuration, never()).storyParser();
-        verify(configuration).stepMonitor();
+        Exception exception = assertThrows(IllegalArgumentException.class,
+            () -> stepExamplesTableParser.parse(ExamplesTable.EMPTY));
+        assertEquals(ERROR_MESSAGE_PART + "empty table", exception.getMessage());
+        verifyNoInteractions(stepsFactory, configuration);
     }
 
     @Test
