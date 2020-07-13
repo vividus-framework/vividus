@@ -84,13 +84,16 @@ public class ParameterConvertersDecorator extends ParameterConverters
         if (type == ExamplesTable.class)
         {
             ExamplesTable examplesTable = (ExamplesTable) result;
-            List<Map<String, String>> rows = examplesTable.getRows();
-            rows.forEach(
-                row -> row.entrySet().forEach(
-                    cell -> cell.setValue((String) resolvePlaceholders(cell.getValue(), String.class))
-                )
-            );
-            examplesTable.withRows(rows);
+            if (!examplesTable.isEmpty())
+            {
+                List<Map<String, String>> rows = examplesTable.getRows();
+                rows.forEach(
+                    row -> row.entrySet().forEach(
+                        cell -> cell.setValue((String) resolvePlaceholders(cell.getValue(), String.class))
+                    )
+                );
+                examplesTable.withRows(rows);
+            }
         }
     }
 

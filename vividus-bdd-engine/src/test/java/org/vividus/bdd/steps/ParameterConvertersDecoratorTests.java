@@ -19,11 +19,13 @@ package org.vividus.bdd.steps;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
@@ -263,5 +265,20 @@ class ParameterConvertersDecoratorTests
         assertThat(result, instanceOf(ExamplesTable.class));
         ExamplesTable table = (ExamplesTable) result;
         assertEquals(List.of(Map.of(expressionKey, expressionValue, variableKey, variableValue)), table.getRows());
+    }
+
+    @Test
+    void shouldConvertToEmptyExamplesTable()
+    {
+        String pathToTable = "/empty-example-table.table";
+        String tableAsString = "";
+        when(expressionAdaptor.process(pathToTable)).thenReturn(pathToTable);
+        when(parameterAdaptor.convert(pathToTable)).thenReturn(pathToTable);
+        when(storyLoader.loadResourceAsText(pathToTable)).thenReturn(tableAsString);
+        Object result = parameterConverters.convert(pathToTable, ExamplesTable.class);
+        assertThat(result, instanceOf(ExamplesTable.class));
+        ExamplesTable table = (ExamplesTable) result;
+        assertTrue(table.isEmpty());
+        verifyNoMoreInteractions(expressionAdaptor, parameterAdaptor);
     }
 }
