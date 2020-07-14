@@ -14,34 +14,36 @@
  * limitations under the License.
  */
 
-package org.vividus.util.wait;
+package org.vividus.bdd.email.model;
 
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
 
-public class WaitMode
+public class EmailServerConfiguration
 {
-    private final Duration duration;
-    private final int retryTimes;
+    private final String username;
+    private final String password;
+    private final Map<String, String> properties = new HashMap<>();
 
-    public WaitMode(Duration duration, int retryTimes)
+    public EmailServerConfiguration(String username, String password, Map<String, String> properties)
     {
-        this.duration = duration;
-        this.retryTimes = retryTimes;
+        this.username = username;
+        this.password = password;
+        this.properties.putAll(properties);
     }
 
-    public Duration getDuration()
+    public String getUsername()
     {
-        return duration;
+        return username;
     }
 
-    public int getRetryTimes()
+    public String getPassword()
     {
-        return retryTimes;
+        return password;
     }
 
-    public long calculatePollingTimeout(TimeUnit timeUnit)
+    public Map<String, String> getProperties()
     {
-        return timeUnit.convert(duration) / retryTimes;
+        return properties;
     }
 }

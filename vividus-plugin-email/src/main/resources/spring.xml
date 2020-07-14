@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+        default-lazy-init="true" >
+
+    <context:component-scan base-package="org.vividus.jackson.databind.email"/>
+    <context:component-scan base-package="org.vividus.bdd.email"/>
+
+    <bean id="emailSteps" class="org.vividus.bdd.email.steps.EmailSteps">
+        <constructor-arg index="0">
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="email.server." />
+                <constructor-arg value="org.vividus.bdd.email.model.EmailServerConfiguration" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean class="org.vividus.bdd.email.service.ImapFetchService">
+        <constructor-arg index="0" value="${email.imap.wait.duration}"/>
+        <constructor-arg index="1" value="${email.imap.wait.retry-times}"/>
+        <constructor-arg index="2" value="${email.imap.folder}"/>
+    </bean>
+
+    <util:list id="stepBeanNames-Email">
+        <value>emailSteps</value>
+    </util:list>
+</beans>

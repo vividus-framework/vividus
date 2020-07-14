@@ -14,34 +14,26 @@
  * limitations under the License.
  */
 
-package org.vividus.util.wait;
+package org.vividus.bdd.email.model;
 
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
-public class WaitMode
+public class EmailMessageTextContent
 {
-    private final Duration duration;
-    private final int retryTimes;
+    private final String contentType;
+    private final String content;
 
-    public WaitMode(Duration duration, int retryTimes)
+    public EmailMessageTextContent(String contentType, String content)
     {
-        this.duration = duration;
-        this.retryTimes = retryTimes;
+        this.contentType = contentType;
+        this.content = content;
     }
 
-    public Duration getDuration()
+    public String getContentType()
     {
-        return duration;
+        return contentType;
     }
 
-    public int getRetryTimes()
+    public String getContent()
     {
-        return retryTimes;
-    }
-
-    public long calculatePollingTimeout(TimeUnit timeUnit)
-    {
-        return timeUnit.convert(duration) / retryTimes;
+        return content;
     }
 }

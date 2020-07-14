@@ -19,29 +19,15 @@ package org.vividus.util.wait;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-public class WaitMode
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+class WaitModeTests
 {
-    private final Duration duration;
-    private final int retryTimes;
-
-    public WaitMode(Duration duration, int retryTimes)
+    @Test
+    void testCalculatePollingTimeout()
     {
-        this.duration = duration;
-        this.retryTimes = retryTimes;
-    }
-
-    public Duration getDuration()
-    {
-        return duration;
-    }
-
-    public int getRetryTimes()
-    {
-        return retryTimes;
-    }
-
-    public long calculatePollingTimeout(TimeUnit timeUnit)
-    {
-        return timeUnit.convert(duration) / retryTimes;
+        WaitMode mode = new WaitMode(Duration.ofMillis(30000), 5);
+        Assertions.assertEquals(6, mode.calculatePollingTimeout(TimeUnit.SECONDS));
     }
 }
