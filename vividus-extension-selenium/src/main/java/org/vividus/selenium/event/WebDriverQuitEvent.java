@@ -14,26 +14,8 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.event;
+package org.vividus.selenium.event;
 
-import org.openqa.selenium.WebDriver;
-
-public class WebDriverCreateEvent
+public class WebDriverQuitEvent
 {
-    private WebDriver webDriver;
-
-    public WebDriverCreateEvent(WebDriver webDriver)
-    {
-        this.webDriver = webDriver;
-    }
-
-    public WebDriver getWebDriver()
-    {
-        return webDriver;
-    }
-
-    public void setWebDriver(WebDriver webDriver)
-    {
-        this.webDriver = webDriver;
-    }
 }

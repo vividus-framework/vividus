@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.eventbus.EventBus;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.jbehave.core.model.Scenario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,23 +37,30 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WrapsDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.model.MetaWrapper;
+import org.vividus.bdd.model.RunningStory;
+import org.vividus.selenium.event.WebDriverCreateEvent;
+import org.vividus.selenium.event.WebDriverQuitEvent;
+import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
-import org.vividus.ui.web.event.WebDriverCreateEvent;
-import org.vividus.ui.web.event.WebDriverQuitEvent;
 
 @ExtendWith(MockitoExtension.class)
 class WebDriverProviderTests
 {
+    @Spy
     private final TestContext testContext = new SimpleTestContext();
 
     @Mock
-    private VividusWebDriverFactory vividusWebDriverFactory;
+    private TestVividusDriverFactory vividusDriverFactory;
 
     @Mock
     private RemoteWebDriver driver;
@@ -69,12 +76,6 @@ class WebDriverProviderTests
 
     @InjectMocks
     private WebDriverProvider webDriverProvider;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        webDriverProvider.setTestContext(testContext);
-    }
 
     @Test
     void testEnd()
@@ -107,7 +108,7 @@ class WebDriverProviderTests
     void testDestroy()
     {
         Mockito.doNothing().when(mockedEventBus).post(any(WebDriverCreateEvent.class));
-        when(vividusWebDriverFactory.create()).thenReturn(vividusWebDriver);
+        when(vividusDriverFactory.create()).thenReturn(vividusWebDriver);
         when(vividusWebDriver.getWrappedDriver()).thenReturn(driver);
         webDriverProvider.get();
         webDriverProvider.destroy();
@@ -137,5 +138,24 @@ class WebDriverProviderTests
         testContext.put(VividusWebDriver.class, vividusWebDriver);
         when(vividusWebDriver.getWrappedDriver()).thenReturn(wrapsDriver);
         assertThat(webDriverProvider.getUnwrapped(WrapsDriver.class), instanceOf(WrapsDriver.class));
+    }
+
+    private static class TestVividusDriverFactory extends AbstractVividusWebDriverFactory
+    {
+        TestVividusDriverFactory(IBddRunContext bddRunContext, IWebDriverManagerContext webDriverManagerContext)
+        {
+            super(bddRunContext, webDriverManagerContext);
+        }
+
+        @Override
+        protected void configureVividusWebDriver(VividusWebDriver vividusWebDriver)
+        {
+        }
+
+        @Override
+        protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities, RunningStory runningStory,
+                Scenario scenario, MetaWrapper metaWrapper)
+        {
+        }
     }
 }

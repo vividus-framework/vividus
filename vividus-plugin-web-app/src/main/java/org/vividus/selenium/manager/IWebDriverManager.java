@@ -16,49 +16,19 @@
 
 package org.vividus.selenium.manager;
 
-import java.util.Set;
-import java.util.function.Consumer;
-
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebDriver;
 import org.vividus.selenium.BrowserWindowSize;
 import org.vividus.selenium.WebDriverType;
 
-public interface IWebDriverManager
+public interface IWebDriverManager extends IGenericWebDriverManager
 {
-    String NATIVE_APP_CONTEXT = "NATIVE_APP";
-
     void resize(BrowserWindowSize browserWindowSize);
 
-    void resize(WebDriver toResize, BrowserWindowSize browserWindowSize);
+    void resize(WebDriver webDriver, BrowserWindowSize browserWindowSize);
 
-    Dimension getSize();
-
-    void performActionInNativeContext(Consumer<WebDriver> consumer);
-
-    boolean isMobile();
-
-    boolean isIOS();
-
-    boolean isAndroid();
+    boolean isElectronApp();
 
     boolean isTypeAnyOf(WebDriverType... webDriverTypes);
 
     WebDriverType detectType();
-
-    boolean isBrowserAnyOf(String... browserTypes);
-
-    boolean isIOSNativeApp();
-
-    boolean isAndroidNativeApp();
-
-    boolean isOrientation(ScreenOrientation orientation);
-
-    boolean isElectronApp();
-
-    Capabilities getCapabilities();
-
-    Set<String> getWindowHandles();
 }

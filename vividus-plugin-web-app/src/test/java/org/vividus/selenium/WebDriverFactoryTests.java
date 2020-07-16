@@ -21,10 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,7 +44,6 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,9 +72,6 @@ class WebDriverFactoryTests
     private static final String SELENIUM_CAPABILITIES = "selenium.capabilities.";
     private static final String SELENIUM_GRID_CAPABILITIES = "selenium.grid.capabilities.";
     private static final String FALSE = "false";
-    private static final String ARG = "arg";
-    private static final String KEY4 = "key4";
-    private static final String KEY3 = "key3";
     private static final String TRUE = "true";
     private static final String KEY2 = "key2";
     private static final String KEY1 = "key1";
@@ -91,7 +84,7 @@ class WebDriverFactoryTests
     private static final String ARG_2 = "--arg2";
     private static final String ARGS = ARG_1 + " " + ARG_2;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(WebDriverFactory.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractWebDriverFactory.class);
 
     @Mock(extraInterfaces = HasCapabilities.class)
     private WebDriver driver;
@@ -113,8 +106,8 @@ class WebDriverFactoryTests
     @BeforeEach
     void beforeEach()
     {
-        webDriverFactory = new WebDriverFactory(remoteWebDriverFactory, timeoutConfigurer, propertyParser,
-                new JsonUtils());
+        webDriverFactory = new WebDriverFactory(remoteWebDriverFactory, propertyParser,
+                new JsonUtils(), timeoutConfigurer);
     }
 
     @Test
@@ -355,55 +348,6 @@ class WebDriverFactoryTests
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
         assertLogger();
-    }
-
-    @Test
-    void shouldReturnConvertedRemoteDriverCapability()
-    {
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES))
-            .thenReturn(Map.of(KEY1, TRUE, KEY3, TRUE.toUpperCase(), KEY4, ARG));
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES))
-            .thenReturn(Map.of(KEY1, FALSE, KEY2, FALSE));
-        Assertions.assertAll(
-            () -> assertTrue((boolean) webDriverFactory.getCapability(KEY1, false)),
-            () -> assertFalse((boolean) webDriverFactory.getCapability(KEY2, false)),
-            () -> assertTrue((boolean) webDriverFactory.getCapability(KEY3, false)),
-            () -> assertEquals(ARG, webDriverFactory.getCapability(KEY4, false)),
-            () -> assertFalse((boolean) webDriverFactory.getCapability(KEY1, true)),
-            () -> assertFalse((boolean) webDriverFactory.getCapability(KEY2, true)),
-            () -> assertNull(webDriverFactory.getCapability(KEY3, true)),
-            () -> assertNull(webDriverFactory.getCapability(KEY4, true)));
-    }
-
-    @Test
-    void shouldMergeWebDriverCapabilitiesAndRemoteWebDriverCapabilitiesForRemoteDriver()
-    {
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES))
-            .thenReturn(Map.of(KEY1, FALSE, KEY2, FALSE, KEY3, ARG));
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES))
-            .thenReturn(Map.of(KEY1, TRUE, KEY2, TRUE));
-        String notExistingCapability = "some-name";
-        Assertions.assertAll(
-            () -> assertTrue((boolean) webDriverFactory.getCapability(KEY1, false)),
-            () -> assertTrue((boolean) webDriverFactory.getCapability(KEY2, false)),
-            () -> assertEquals(ARG, webDriverFactory.getCapability(KEY3, false)),
-            () -> assertNull(webDriverFactory.getCapability(notExistingCapability, false)),
-            () -> assertNull(webDriverFactory.getCapability(notExistingCapability, true)));
-    }
-
-    @Test
-    void shouldCacheCapabilities()
-    {
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES))
-            .thenReturn(Map.of(KEY1, FALSE, KEY2, FALSE, KEY3, ARG));
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES))
-            .thenReturn(Map.of(KEY1, TRUE, KEY2, TRUE));
-        Assertions.assertAll(
-            () -> assertTrue((boolean) webDriverFactory.getCapability(KEY1, false)),
-            () -> assertTrue((boolean) webDriverFactory.getCapability(KEY2, false)),
-            () -> assertEquals(ARG, webDriverFactory.getCapability(KEY3, false)));
-        verify(propertyParser).getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES);
-        verify(propertyParser).getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES);
     }
 
     private static void mockCapabilities(HasCapabilities hasCapabilities)

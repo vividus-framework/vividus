@@ -16,99 +16,34 @@
 
 package org.vividus.selenium;
 
-import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.StringUtils.equalsAnyIgnoreCase;
-
-import java.net.URL;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import com.google.common.base.Suppliers;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
-public class WebDriverFactory implements IWebDriverFactory
+public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDriverFactory
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebDriverFactory.class);
-
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
 
-    private static final String SELENIUM_GRID_PROPERTY_PREFIX = "selenium.grid.capabilities.";
-    private static final String LOCAL_DRIVER_PROPERTY_PREFIX = "selenium.capabilities.";
-
-    private final IRemoteWebDriverFactory remoteWebDriverFactory;
     private final ITimeoutConfigurer timeoutConfigurer;
-    private final IPropertyParser propertyParser;
-    private final JsonUtils jsonUtils;
-
     private WebDriverType webDriverType;
-    private URL remoteDriverUrl;
-
-    private final Supplier<DesiredCapabilities> seleniumGridDesiredCapabilities = Suppliers.memoize(
-        () -> getCapabilitiesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX));
-
-    private final Supplier<DesiredCapabilities> localDriverDesiredCapabilities = Suppliers.memoize(
-        () -> getCapabilitiesByPrefix(LOCAL_DRIVER_PROPERTY_PREFIX));
-
-    private final LoadingCache<Boolean, DesiredCapabilities> webDriverCapabilities = CacheBuilder.newBuilder()
-            .build(new CacheLoader<>()
-            {
-                @Override
-                public DesiredCapabilities load(Boolean local)
-                {
-                    DesiredCapabilities localCapabilities = localDriverDesiredCapabilities.get();
-                    if (Boolean.TRUE.equals(local))
-                    {
-                        return localCapabilities;
-                    }
-                    return merge(localCapabilities, seleniumGridDesiredCapabilities.get());
-                }
-            });
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
-    public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, ITimeoutConfigurer timeoutConfigurer,
-            IPropertyParser propertyParser, JsonUtils jsonUtils)
+    public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
+            JsonUtils jsonUtils, ITimeoutConfigurer timeoutConfigurer)
     {
-        this.remoteWebDriverFactory = remoteWebDriverFactory;
+        super(remoteWebDriverFactory, propertyParser, jsonUtils);
         this.timeoutConfigurer = timeoutConfigurer;
-        this.propertyParser = propertyParser;
-        this.jsonUtils = jsonUtils;
-    }
-
-    private DesiredCapabilities getCapabilitiesByPrefix(String prefix)
-    {
-        return propertyParser.getPropertyValuesTreeByPrefix(prefix)
-            .entrySet()
-            .stream()
-            .map(e -> isBoolean(e.getValue())
-                ? Map.entry(e.getKey(), Boolean.parseBoolean((String) e.getValue()))
-                : e)
-            .collect(Collectors.collectingAndThen(toMap(Entry::getKey, Entry::getValue), DesiredCapabilities::new));
-    }
-
-    private boolean isBoolean(Object value)
-    {
-        return value instanceof String && equalsAnyIgnoreCase((String) value, "true", "false");
     }
 
     @Override
@@ -125,38 +60,29 @@ public class WebDriverFactory implements IWebDriverFactory
                 configuration));
     }
 
-    @Override
-    public WebDriver getRemoteWebDriver(DesiredCapabilities desiredCapabilities)
+    protected DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities)
     {
-        DesiredCapabilities mergedDesiredCapabilities = getWebDriverCapabilities(false, desiredCapabilities);
-        WebDriverType webDriverType = WebDriverManager.detectType(mergedDesiredCapabilities);
+        WebDriverType webDriverType = WebDriverManager.detectType(desiredCapabilities);
 
-        Capabilities capabilities = mergedDesiredCapabilities;
+        Capabilities capabilities = desiredCapabilities;
         if (webDriverType != null)
         {
-            webDriverType.prepareCapabilities(mergedDesiredCapabilities);
+            webDriverType.prepareCapabilities(desiredCapabilities);
             if (webDriverType == WebDriverType.CHROME)
             {
                 WebDriverConfiguration configuration = getWebDriverConfiguration(webDriverType, false);
                 ChromeOptions chromeOptions = new ChromeOptions();
                 chromeOptions.addArguments(configuration.getCommandLineArguments());
                 configuration.getExperimentalOptions().forEach(chromeOptions::setExperimentalOption);
-                capabilities = chromeOptions.merge(mergedDesiredCapabilities);
+                capabilities = chromeOptions.merge(desiredCapabilities);
             }
         }
-        return createWebDriver(remoteWebDriverFactory.getRemoteWebDriver(remoteDriverUrl, capabilities));
+        return new DesiredCapabilities(capabilities);
     }
 
-    private WebDriver createWebDriver(WebDriver webDriver)
+    protected void configureWebDriver(WebDriver webDriver)
     {
-        WebDriver driver = new TextFormattingWebDriver(webDriver);
-        timeoutConfigurer.configure(driver.manage().timeouts());
-
-        LOGGER.atInfo()
-              .addArgument(() -> jsonUtils
-                      .toPrettyJson(WebDriverUtil.unwrap(driver, HasCapabilities.class).getCapabilities().asMap()))
-              .log("Session capabilities:\n{}");
-        return driver;
+        timeoutConfigurer.configure(webDriver.manage().timeouts());
     }
 
     private WebDriverConfiguration getWebDriverConfiguration(WebDriverType webDriverType, boolean localRun)
@@ -194,45 +120,19 @@ public class WebDriverFactory implements IWebDriverFactory
         configuration.setCommandLineArguments(
                 commandLineArguments.map(args -> StringUtils.split(args, ' ')).orElseGet(() -> new String[0]));
         getPropertyValue("experimental-options", webDriverType)
-                .map(options -> jsonUtils.toObject(options, Map.class))
+                .map(options -> getJsonUtils().toObject(options, Map.class))
                 .ifPresent(configuration::setExperimentalOptions);
         return configuration;
     }
 
     private Optional<String> getPropertyValue(String propertyKey, WebDriverType webDriverType)
     {
-        return Optional.ofNullable(propertyParser.getPropertyValue("web.driver." + webDriverType + "." + propertyKey));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getCapability(String capabilityName, boolean localRun)
-    {
-        return (T) getWebDriverCapabilities(localRun).getCapability(capabilityName);
-    }
-
-    private DesiredCapabilities getWebDriverCapabilities(boolean localRun)
-    {
-        return webDriverCapabilities.getUnchecked(localRun);
-    }
-
-    private DesiredCapabilities getWebDriverCapabilities(boolean localRun, DesiredCapabilities toMerge)
-    {
-        return merge(getWebDriverCapabilities(localRun), toMerge);
-    }
-
-    private DesiredCapabilities merge(DesiredCapabilities base, DesiredCapabilities toMerge)
-    {
-        return new DesiredCapabilities(base).merge(toMerge);
+        return Optional
+                .ofNullable(getPropertyParser().getPropertyValue("web.driver." + webDriverType + "." + propertyKey));
     }
 
     public void setWebDriverType(WebDriverType webDriverType)
     {
         this.webDriverType = webDriverType;
-    }
-
-    public void setRemoteDriverUrl(URL remoteDriverUrl)
-    {
-        this.remoteDriverUrl = remoteDriverUrl;
     }
 }

@@ -14,8 +14,33 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.event;
+package org.vividus.bdd.mobileapp.model;
 
-public class WebDriverQuitEvent
+import org.jbehave.core.annotations.AsParameters;
+
+@AsParameters
+public class DesiredCapability
 {
+    private String name;
+    private String value;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue(String value)
+    {
+        this.value = value;
+    }
 }

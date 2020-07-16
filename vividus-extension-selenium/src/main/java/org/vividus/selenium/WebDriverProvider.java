@@ -23,9 +23,9 @@ import javax.inject.Inject;
 import com.google.common.eventbus.EventBus;
 
 import org.openqa.selenium.WebDriver;
+import org.vividus.selenium.event.WebDriverCreateEvent;
+import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
-import org.vividus.ui.web.event.WebDriverCreateEvent;
-import org.vividus.ui.web.event.WebDriverQuitEvent;
 
 public class WebDriverProvider implements IWebDriverProvider
 {

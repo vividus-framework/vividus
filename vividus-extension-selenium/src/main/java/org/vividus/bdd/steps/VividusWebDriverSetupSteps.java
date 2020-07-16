@@ -16,8 +16,6 @@
 
 package org.vividus.bdd.steps;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.AfterStory;
 import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.BeforeStory;
@@ -30,9 +28,17 @@ import org.vividus.selenium.manager.IWebDriverManagerContext;
 
 public class VividusWebDriverSetupSteps
 {
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IWebDriverManagerContext webDriverManagerContext;
-    @Inject private IBddRunContext bddRunContext;
+    private final IWebDriverProvider webDriverProvider;
+    private final IWebDriverManagerContext webDriverManagerContext;
+    private final IBddRunContext bddRunContext;
+
+    public VividusWebDriverSetupSteps(IWebDriverProvider webDriverProvider,
+            IWebDriverManagerContext webDriverManagerContext, IBddRunContext bddRunContext)
+    {
+        this.webDriverProvider = webDriverProvider;
+        this.webDriverManagerContext = webDriverManagerContext;
+        this.bddRunContext = bddRunContext;
+    }
 
     @BeforeScenario(uponType = ScenarioType.ANY)
     public void beforeScenario()

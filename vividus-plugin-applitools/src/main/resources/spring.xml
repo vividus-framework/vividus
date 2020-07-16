@@ -13,6 +13,8 @@
     <context:annotation-config />
     <context:component-scan base-package="org.vividus.visual.eyes" />
 
+    <bean class="org.vividus.bdd.converter.ExamplesTableToApplitoolsVisualChecksConverter" />
+
     <bean id="visualTestingSteps" class="org.vividus.visual.eyes.VisualTestingSteps" />
 
     <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory" >
