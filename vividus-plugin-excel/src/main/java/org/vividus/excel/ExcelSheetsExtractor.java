@@ -72,7 +72,7 @@ public class ExcelSheetsExtractor implements IExcelSheetsExtractor
     @Override
     public Optional<Sheet> getSheet(int index)
     {
-        return sheets.size() < index ? Optional.empty() : Optional.of(sheets.get(index));
+        return sheets.size() <= index ? Optional.empty() : Optional.of(sheets.get(index));
     }
 
     @Override
