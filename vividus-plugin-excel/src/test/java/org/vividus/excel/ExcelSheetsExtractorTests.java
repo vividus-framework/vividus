@@ -29,47 +29,38 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
-
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import java.util.stream.Stream;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatchers;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
+import org.mockito.MockedStatic;
+import org.mockito.MockedStatic.Verification;
+import org.mockito.Mockito;
 import org.vividus.util.ResourceUtils;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(DataProviderRunner.class)
-@PowerMockIgnore({ "com.sun.org.apache.xerces.*", "com.sun.org.apache.xalan.*", "javax.xml.*",
-        "org.xml.*", "org.w3c.dom.*" })
-public class ExcelSheetsExtractorTests
+class ExcelSheetsExtractorTests
 {
     private static final String TEMPLATE_PATH = "/TestTemplate.xlsx";
-
-    private static final String EXCEPTION_MSG = "Unable to parse workbook";
 
     private static final int EXPECTED_SHEETS_COUNT = 3;
 
     @Test
-    public void testGetSheetsFromFile() throws WorkbookParsingException
+    void testGetSheetsFromFile() throws WorkbookParsingException
     {
         IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(TEMPLATE_PATH);
         assertThat(excelSheetsExtractor.getSheets().size(), Matchers.equalTo(EXPECTED_SHEETS_COUNT));
     }
 
     @Test
-    public void testGetSheetsFromBytes() throws WorkbookParsingException, IOException
+    void testGetSheetsFromBytes() throws WorkbookParsingException, IOException
     {
         File excelFile = ResourceUtils.loadFile(this.getClass(), TEMPLATE_PATH);
         IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(Files.readAllBytes(excelFile.toPath()));
@@ -77,7 +68,7 @@ public class ExcelSheetsExtractorTests
     }
 
     @Test
-    public void testGetSheetAtNumberSuccess() throws WorkbookParsingException
+    void testGetSheetAtNumberSuccess() throws WorkbookParsingException
     {
         IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(TEMPLATE_PATH);
         Optional<Sheet> sheetOpt = excelSheetsExtractor.getSheet(0);
@@ -85,19 +76,9 @@ public class ExcelSheetsExtractorTests
         assertThat("Mapping", Matchers.equalTo(sheetOpt.get().getSheetName()));
     }
 
-    @DataProvider
-    public static Object[][] numberDataProvider()
-    {
-        // @formatter:off
-        return new Object[][] {
-            { 0 },
-            { 1 }};
-        // @formatter:on
-    }
-
-    @Test
-    @UseDataProvider("numberDataProvider")
-    public void testGetSheetAtNumberOutOfRange(int number) throws WorkbookParsingException
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1})
+    void testGetSheetAtNumberOutOfRange(int number) throws WorkbookParsingException
     {
         IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(TEMPLATE_PATH);
         Optional<Sheet> sheetOpt = excelSheetsExtractor.getSheet(EXPECTED_SHEETS_COUNT + number);
@@ -105,7 +86,7 @@ public class ExcelSheetsExtractorTests
     }
 
     @Test
-    public void testGetSheetByNameSuccess() throws WorkbookParsingException
+    void testGetSheetByNameSuccess() throws WorkbookParsingException
     {
         IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(TEMPLATE_PATH);
         Optional<Sheet> sheetOpt = excelSheetsExtractor.getSheet("AsString");
@@ -113,7 +94,7 @@ public class ExcelSheetsExtractorTests
     }
 
     @Test
-    public void testGetSheetByNameNotExisted() throws WorkbookParsingException
+    void testGetSheetByNameNotExisted() throws WorkbookParsingException
     {
         IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(TEMPLATE_PATH);
         Optional<Sheet> sheetOpt = excelSheetsExtractor.getSheet("Taxonomies");
@@ -121,48 +102,44 @@ public class ExcelSheetsExtractorTests
     }
 
     @Test
-    public void testGetSheetsWithNames() throws WorkbookParsingException
+    void testGetSheetsWithNames() throws WorkbookParsingException
     {
         IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(TEMPLATE_PATH);
         Map<String, Sheet> actualMap = excelSheetsExtractor.getSheetsWithNames();
         actualMap.forEach((key, value) -> assertThat(key, Matchers.equalTo(value.getSheetName())));
     }
 
-    @DataProvider
-    public static Object[][] exceptionDataProvider()
+    static Stream<Class<? extends Throwable>> exceptionDataProvider()
     {
-        // @formatter:off
-        return new Object[][] {
-            { EncryptedDocumentException.class },
-            { IOException.class }};
-        // @formatter:on
+        return Stream.of(EncryptedDocumentException.class, IOException.class);
     }
 
-    @PrepareForTest({ WorkbookFactory.class, ResourceUtils.class, ExcelSheetsExtractor.class })
-    @Test
-    @UseDataProvider("exceptionDataProvider")
-    public void testCreateFromFileException(Class<? extends Throwable> exceptionClazz) throws IOException
+    @ParameterizedTest
+    @MethodSource("exceptionDataProvider")
+    void testCreateFromFileException(Class<? extends Throwable> exceptionClazz)
     {
-        PowerMockito.mockStatic(WorkbookFactory.class);
-        PowerMockito.when(WorkbookFactory.create(ArgumentMatchers.any(File.class))).thenThrow(exceptionClazz);
-        assertWorkbookParsingException(exceptionClazz, () -> new ExcelSheetsExtractor(TEMPLATE_PATH));
+        assertWorkbookParsingException(() -> WorkbookFactory.create(ArgumentMatchers.any(File.class)), exceptionClazz,
+            () -> new ExcelSheetsExtractor(TEMPLATE_PATH));
     }
 
-    @PrepareForTest({ WorkbookFactory.class, ResourceUtils.class, ExcelSheetsExtractor.class })
-    @Test
-    @UseDataProvider("exceptionDataProvider")
-    public void testCreateFromBytesException(Class<? extends Throwable> exceptionClazz) throws IOException
+    @ParameterizedTest
+    @MethodSource("exceptionDataProvider")
+    void testCreateFromBytesException(Class<? extends Throwable> exceptionClazz)
     {
-        PowerMockito.mockStatic(WorkbookFactory.class);
-        PowerMockito.when(WorkbookFactory.create(ArgumentMatchers.any(ByteArrayInputStream.class)))
-                .thenThrow(exceptionClazz);
-        assertWorkbookParsingException(exceptionClazz, () -> new ExcelSheetsExtractor(new byte[0]));
+        assertWorkbookParsingException(() -> WorkbookFactory.create(ArgumentMatchers.any(ByteArrayInputStream.class)),
+                exceptionClazz, () -> new ExcelSheetsExtractor(new byte[0]));
     }
 
-    private void assertWorkbookParsingException(Class<? extends Throwable> exceptionClazz, Executable executable)
+    private void assertWorkbookParsingException(Verification staticMethodMock,
+            Class<? extends Throwable> exceptionClazz, Executable executable)
     {
-        WorkbookParsingException workbookParsingException = assertThrows(WorkbookParsingException.class, executable);
-        assertEquals(EXCEPTION_MSG, workbookParsingException.getMessage());
-        assertThat(workbookParsingException.getCause(), instanceOf(exceptionClazz));
+        try (MockedStatic<WorkbookFactory> workbookFactory = Mockito.mockStatic(WorkbookFactory.class))
+        {
+            workbookFactory.when(staticMethodMock).thenThrow(exceptionClazz);
+            WorkbookParsingException workbookParsingException = assertThrows(WorkbookParsingException.class,
+                    executable);
+            assertEquals("Unable to parse workbook", workbookParsingException.getMessage());
+            assertThat(workbookParsingException.getCause(), instanceOf(exceptionClazz));
+        }
     }
 }
