@@ -31,19 +31,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.client.ClientBuilderUtils;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.util.InternetUtils;
 
 public class CookieManager implements ICookieManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(CookieManager.class);
-    private static final String JS_COOKIE_FORMAT = "document.cookie='%s=%s; path=%s; domain=%s'";
-    private static final String JS_DELETE_COOKIE_FORMAT = "document.cookie='%s=; expires=-1'";
 
     @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IJavascriptActions javascriptActions;
-    @Inject private IWebDriverManager webDriverManager;
 
     @Override
     public void addCookie(String cookieName, String cookieValue, String path, String urlAsString)
@@ -65,43 +59,24 @@ public class CookieManager implements ICookieManager
 
     private void executeAddCookieScript(String cookieName, String cookieValue, String path, String domain)
     {
-        String cookie = String.format(JS_COOKIE_FORMAT, cookieName, cookieValue, path, domain);
+        Cookie cookie = new Cookie.Builder(cookieName, cookieValue)
+                .domain("." + domain)
+                .path(path)
+                .build();
         LOGGER.debug("Adding cookie: {}", cookie);
-        javascriptActions.executeScript(cookie);
+        getOptions().addCookie(cookie);
     }
 
     @Override
     public void deleteAllCookies()
     {
-        if (webDriverManager.isTypeAnyOf(WebDriverType.SAFARI))
-        {
-            getCookies().forEach(cookie -> deleteCookieByScript(cookie.getName()));
-        }
-        else
-        {
-            getOptions().deleteAllCookies();
-        }
+        getOptions().deleteAllCookies();
     }
 
     @Override
     public void deleteCookie(String cookieName)
     {
-        if (webDriverManager.isTypeAnyOf(WebDriverType.SAFARI))
-        {
-            deleteCookieByScript(cookieName);
-        }
-        else
-        {
-            getOptions().deleteCookieNamed(cookieName);
-        }
-    }
-
-    private void deleteCookieByScript(String cookieName)
-    {
-        // Workaround for safari driver bug:
-        // https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/5212
-        String deleteScript = String.format(JS_DELETE_COOKIE_FORMAT, cookieName);
-        javascriptActions.executeScript(deleteScript);
+        getOptions().deleteCookieNamed(cookieName);
     }
 
     @Override

@@ -55,8 +55,6 @@ class CookieManagerTests
     private static final String COOKIE_NAME = "name";
     private static final String COOKIE_VALUE = "cookieValue";
     private static final String DOMAIN = "https://www.domain.com";
-    private static final String JS_DELETE_COOKIE_FORMAT = "document.cookie='name=; expires=-1'";
-    private static final String JS_COOKIE_FORMAT = "document.cookie='name=0; path=/; domain=domain.com'";
 
     @Mock
     private IJavascriptActions javascriptActions;
@@ -82,51 +80,35 @@ class CookieManagerTests
     }
 
     @Test
-    void testDeleteAllCookiesSafari()
-    {
-        configureMockedWebDriver();
-        mockIsSafari(true);
-        mockGetCookies(new Cookie(COOKIE_NAME, COOKIE_VALUE));
-        cookieManager.deleteAllCookies();
-        verify(javascriptActions).executeScript(JS_DELETE_COOKIE_FORMAT);
-    }
-
-    @Test
     void testAddCookie()
     {
+        configureMockedWebDriver();
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, DOMAIN);
-        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
+        verify(options).addCookie(new Cookie(COOKIE_NAME, ZERO));
     }
 
     @Test
     void testAddCookieUrl() throws MalformedURLException
     {
+        configureMockedWebDriver();
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, new URL(DOMAIN));
-        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
+        verify(options).addCookie(new Cookie(COOKIE_NAME, ZERO));
     }
 
     @Test
     void testAddCookieUri()
     {
+        configureMockedWebDriver();
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, URI.create(DOMAIN));
-        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
+        verify(options).addCookie(new Cookie(COOKIE_NAME, ZERO));
     }
 
     @Test
-    void testDeleteCookieNotSafari()
+    void testDeleteCookie()
     {
         configureMockedWebDriver();
-        mockIsSafari(false);
         cookieManager.deleteCookie(COOKIE_NAME);
         verify(options).deleteCookieNamed(COOKIE_NAME);
-    }
-
-    @Test
-    void testDeleteCookieSafari()
-    {
-        mockIsSafari(true);
-        cookieManager.deleteCookie(COOKIE_NAME);
-        verify(javascriptActions).executeScript(JS_DELETE_COOKIE_FORMAT);
     }
 
     @Test
