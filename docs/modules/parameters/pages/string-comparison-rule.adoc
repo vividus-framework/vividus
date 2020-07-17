@@ -1,0 +1,32 @@
+= String comparison rule
+
+== Description
+
+Defines how string values should be compared.
+
+== Possible values
+
+[cols="2,2,2", options="header"]
+|===
+
+|Plain
+|Readable
+|Description
+
+|IS_EQUAL_TO
+|is equal to
+|Verify that string value is equal to another string value
+
+|CONTAINS
+|contains
+|Verify that string value contains another string value
+
+|DOES_NOT_CONTAIN
+|does not contain
+|Verify that string value does not contain another string value
+
+|MATCHES
+|matchers
+|Verify that string value matches regular expression
+
+|===

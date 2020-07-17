@@ -137,3 +137,10 @@ Examples:
 |ABCDEFGXYZU     |
 |jhbdahjabw      |
 |738162378613896 |
+
+Scenario: Verify FROM_EXCEL transformer
+Meta:
+    @issueId 647
+Then `<joined>` is equal to `line 1 line 2 line 3`
+Examples:
+{transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=Sheet1, addresses=A1, column=joined, \{lineBreakReplacement|VERBATIM\}= }

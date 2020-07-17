@@ -19,6 +19,8 @@ When I initialize SCENARIO variable `testMap` with values:
 |value1|value2|
 Then `value1` is = `${testMap[0].key1}`
 Then `value2` is = `${testMap[0].key2}`
+When I initialize SCENARIO variable `testEmptyMap` with values:
+Then `` is = `${testEmptyMap[0].key:}`
 
 Scenario: Verify ability to use variables with names containing special characters
 !-- The following checks verify handling of non-initialized BDD variables
