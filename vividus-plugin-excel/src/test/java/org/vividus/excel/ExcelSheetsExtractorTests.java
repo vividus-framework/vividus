@@ -85,11 +85,22 @@ public class ExcelSheetsExtractorTests
         assertThat("Mapping", Matchers.equalTo(sheetOpt.get().getSheetName()));
     }
 
+    @DataProvider
+    public static Object[][] numberDataProvider()
+    {
+        // @formatter:off
+        return new Object[][] {
+            { 0 },
+            { 1 }};
+        // @formatter:on
+    }
+
     @Test
-    public void testGetSheetAtNumberOutOfRange() throws WorkbookParsingException
+    @UseDataProvider("numberDataProvider")
+    public void testGetSheetAtNumberOutOfRange(int number) throws WorkbookParsingException
     {
         IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(TEMPLATE_PATH);
-        Optional<Sheet> sheetOpt = excelSheetsExtractor.getSheet(EXPECTED_SHEETS_COUNT + 1);
+        Optional<Sheet> sheetOpt = excelSheetsExtractor.getSheet(EXPECTED_SHEETS_COUNT + number);
         assertFalse(sheetOpt.isPresent());
     }
 
