@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.util.List;
 import java.util.Map;
@@ -37,24 +36,23 @@ import com.mongodb.client.MongoDatabase;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.mongodb.command.MongoCommand;
 import org.vividus.bdd.steps.mongodb.command.MongoCommandEntry;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.util.json.JsonUtils;
 
-@RunWith(PowerMockRunner.class)
-public class MongoDbStepsTests
+@ExtendWith(MockitoExtension.class)
+class MongoDbStepsTests
 {
     private static final String LOCAL_KEY = "localKey";
     private static final Document COMMAND = Document.parse("{ listCollections: 1, nameOnly: true }");
@@ -62,21 +60,14 @@ public class MongoDbStepsTests
     private static final String CONNECTION_KEY = "mongodb://0.0.0.0:27017";
     private static final String COLLECTION_KEY = "collectionKey";
     private static final String DOCUMENT_JSON = "{\"id\":1}";
-    private static final Document DOCUMENT = Document.parse(DOCUMENT_JSON);
 
     @Mock
     private IBddVariableContext context;
 
     private final JsonUtils jsonUtils = new JsonUtils();
 
-    @Before
-    public void init()
-    {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testExecuteCommandNoConnection()
+    void testExecuteCommandNoConnection()
     {
         MongoDbSteps steps = new MongoDbSteps(Map.of(), jsonUtils, context);
         Exception exception = assertThrows(IllegalStateException.class,
@@ -84,39 +75,43 @@ public class MongoDbStepsTests
         assertEquals("Connection with key 'localKey' does not exist", exception.getMessage());
     }
 
-    @PrepareForTest(MongoClients.class)
     @Test
-    public void testExecuteCommand()
+    void testExecuteCommand()
     {
-        MongoDatabase database = mockDatabase();
-        when(database.runCommand(COMMAND)).thenReturn(DOCUMENT);
+        try (MockedStatic<MongoClients> mongoClients = Mockito.mockStatic(MongoClients.class))
+        {
+            MongoDatabase database = mockDatabase(mongoClients);
+            when(database.runCommand(COMMAND)).thenReturn(Document.parse(DOCUMENT_JSON));
 
-        MongoDbSteps steps = new MongoDbSteps(Map.of(LOCAL_KEY, CONNECTION_KEY), jsonUtils, context);
-        steps.executeCommand(COMMAND, LOCAL_KEY, LOCAL_KEY, Set.of(VariableScope.STORY), VARIABLE_KEY);
+            MongoDbSteps steps = new MongoDbSteps(Map.of(LOCAL_KEY, CONNECTION_KEY), jsonUtils, context);
+            steps.executeCommand(COMMAND, LOCAL_KEY, LOCAL_KEY, Set.of(VariableScope.STORY), VARIABLE_KEY);
 
-        verify(context).putVariable(Set.of(VariableScope.STORY), VARIABLE_KEY, Map.of("id", "1"));
+            verify(context).putVariable(Set.of(VariableScope.STORY), VARIABLE_KEY, Map.of("id", "1"));
+        }
     }
 
     @SuppressWarnings("unchecked")
-    @PrepareForTest(MongoClients.class)
     @Test
-    public void testExecuteCommands()
+    void testExecuteCommands()
     {
-        MongoDatabase database = mockDatabase();
-        MongoCollection<Document> collection = mock(MongoCollection.class);
-        when(database.getCollection(COLLECTION_KEY)).thenReturn(collection);
-        Bson argument = mock(Bson.class);
-        FindIterable<Document> findIterable = mock(FindIterable.class);
-        when(collection.find(argument)).thenReturn(findIterable);
-        when(findIterable.spliterator()).thenReturn(List.of(DOCUMENT).spliterator());
+        try (MockedStatic<MongoClients> mongoClients = Mockito.mockStatic(MongoClients.class))
+        {
+            MongoDatabase database = mockDatabase(mongoClients);
+            MongoCollection<Document> collection = mock(MongoCollection.class);
+            when(database.getCollection(COLLECTION_KEY)).thenReturn(collection);
+            Bson argument = mock(Bson.class);
+            FindIterable<Document> findIterable = mock(FindIterable.class);
+            when(collection.find(argument)).thenReturn(findIterable);
+            when(findIterable.spliterator()).thenReturn(List.of(Document.parse(DOCUMENT_JSON)).spliterator());
 
-        MongoDbSteps steps = new MongoDbSteps(Map.of(LOCAL_KEY, CONNECTION_KEY), jsonUtils, context);
+            MongoDbSteps steps = new MongoDbSteps(Map.of(LOCAL_KEY, CONNECTION_KEY), jsonUtils, context);
 
-        steps.executeCommands(List.of(
-            commandEntry(MongoCommand.FIND, argument),
-            commandEntry(MongoCommand.COLLECT, argument)
-            ), COLLECTION_KEY, LOCAL_KEY, LOCAL_KEY, Set.of(VariableScope.STORY), VARIABLE_KEY);
-        verify(context).putVariable(Set.of(VariableScope.STORY), VARIABLE_KEY, String.format("[%s]", DOCUMENT_JSON));
+            steps.executeCommands(
+                    List.of(commandEntry(MongoCommand.FIND, argument), commandEntry(MongoCommand.COLLECT, argument)),
+                    COLLECTION_KEY, LOCAL_KEY, LOCAL_KEY, Set.of(VariableScope.STORY), VARIABLE_KEY);
+            verify(context).putVariable(Set.of(VariableScope.STORY), VARIABLE_KEY,
+                    String.format("[%s]", DOCUMENT_JSON));
+        }
     }
 
     static Stream<Arguments> invalidCommandSequence()
@@ -155,13 +150,13 @@ public class MongoDbStepsTests
         return entry;
     }
 
-    private MongoDatabase mockDatabase()
+    @SuppressWarnings("PMD.CloseResource")
+    private MongoDatabase mockDatabase(MockedStatic<MongoClients> mongoClients)
     {
-        mockStatic(MongoClients.class);
         MongoClient client = mock(MongoClient.class);
-        MongoDatabase database = mock(MongoDatabase.class);
+        mongoClients.when(() -> MongoClients.create(CONNECTION_KEY)).thenReturn(client);
 
-        when(MongoClients.create(CONNECTION_KEY)).thenReturn(client);
+        MongoDatabase database = mock(MongoDatabase.class);
         when(client.getDatabase(LOCAL_KEY)).thenReturn(database);
 
         return database;
