@@ -32,7 +32,7 @@ public final class Waiter
     public Waiter(WaitMode waitMode)
     {
         durationInMillis = waitMode.getDuration().toMillis();
-        pollingTimeoutMillis = durationInMillis / waitMode.getRetryTimes();
+        pollingTimeoutMillis = waitMode.calculatePollingTimeout(TimeUnit.MILLISECONDS);
     }
 
     public <T, E extends Exception> T wait(CheckedSupplier<T, E> valueProvider, Predicate<T> stopCondition) throws E

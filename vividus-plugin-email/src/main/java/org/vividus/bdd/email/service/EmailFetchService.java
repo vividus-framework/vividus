@@ -14,34 +14,20 @@
  * limitations under the License.
  */
 
-package org.vividus.util.wait;
+package org.vividus.bdd.email.service;
 
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
-public class WaitMode
+import javax.mail.Message;
+import javax.mail.MessagingException;
+
+import org.vividus.bdd.email.model.EmailMessage;
+import org.vividus.bdd.email.model.EmailServerConfiguration;
+import org.vividus.bdd.email.service.ImapFetchService.EmailFetchServiceException;
+import org.vividus.util.function.CheckedPredicate;
+
+public interface EmailFetchService
 {
-    private final Duration duration;
-    private final int retryTimes;
-
-    public WaitMode(Duration duration, int retryTimes)
-    {
-        this.duration = duration;
-        this.retryTimes = retryTimes;
-    }
-
-    public Duration getDuration()
-    {
-        return duration;
-    }
-
-    public int getRetryTimes()
-    {
-        return retryTimes;
-    }
-
-    public long calculatePollingTimeout(TimeUnit timeUnit)
-    {
-        return timeUnit.convert(duration) / retryTimes;
-    }
+    List<EmailMessage> fetch(List<CheckedPredicate<Message, MessagingException>> messageFilters,
+            EmailServerConfiguration configuration) throws EmailFetchServiceException;
 }

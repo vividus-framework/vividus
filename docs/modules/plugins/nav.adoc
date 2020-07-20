@@ -5,6 +5,7 @@
 * xref:plugin-datetime.adoc[Date Time]
 * xref:plugin-db.adoc[Relational DB*]
 * xref:plugin-electron.adoc[Electron*]
+* xref:plugin-email.adoc[Email]
 * xref:plugin-excel.adoc[Excel*]
 * xref:plugin-html.adoc[HTML*]
 * xref:plugin-mongodb.adoc[MongoDB*]
