@@ -42,6 +42,7 @@ import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 
+import org.apache.commons.lang3.function.FailablePredicate;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -54,7 +55,6 @@ import org.vividus.bdd.email.model.EmailMessage;
 import org.vividus.bdd.email.model.EmailServerConfiguration;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.util.Sleeper;
-import org.vividus.util.function.CheckedPredicate;
 
 class ImapFetchServiceSystemTests
 {
@@ -103,17 +103,17 @@ class ImapFetchServiceSystemTests
     void testFetch(long deliveryDelay, long testTimeout) throws MessagingException
     {
         String subject = GreenMailUtil.random();
-        CheckedPredicate<Message, MessagingException> subjectPredicate = EmailParameterFilterFactory.SUBJECT
+        FailablePredicate<Message, MessagingException> subjectPredicate = EmailParameterFilterFactory.SUBJECT
                 .createFilter(ComparisonRule.EQUAL_TO.name(), subject);
 
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        CheckedPredicate<Message, MessagingException> sentDatePredicate = EmailParameterFilterFactory.SENT_DATE
+        FailablePredicate<Message, MessagingException> sentDatePredicate = EmailParameterFilterFactory.SENT_DATE
                 .createFilter(ComparisonRule.GREATER_THAN.name(), now.minus(1, ChronoUnit.MINUTES).toString());
 
-        CheckedPredicate<Message, MessagingException> receivedPredicate = EmailParameterFilterFactory.RECEIVED_DATE
+        FailablePredicate<Message, MessagingException> receivedPredicate = EmailParameterFilterFactory.RECEIVED_DATE
                 .createFilter(ComparisonRule.LESS_THAN.name(), now.plus(1, ChronoUnit.DAYS).toString());
 
-        List<CheckedPredicate<Message, MessagingException>> predicates = List.of(subjectPredicate, sentDatePredicate,
+        List<FailablePredicate<Message, MessagingException>> predicates = List.of(subjectPredicate, sentDatePredicate,
                 receivedPredicate);
 
         long testMessageDelay = deliveryDelay > 0 ? deliveryDelay / 2 : 0;
@@ -132,7 +132,7 @@ class ImapFetchServiceSystemTests
     void testFetchNoEmailReceived() throws MessagingException
     {
         String subject = GreenMailUtil.random();
-        CheckedPredicate<Message, MessagingException> subjectPredicate = EmailParameterFilterFactory.SUBJECT
+        FailablePredicate<Message, MessagingException> subjectPredicate = EmailParameterFilterFactory.SUBJECT
                 .createFilter(ComparisonRule.EQUAL_TO.name(), subject);
 
         List<EmailMessage> receivedMessages = new ArrayList<>();

@@ -21,13 +21,13 @@ import java.util.List;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
+import org.apache.commons.lang3.function.FailablePredicate;
 import org.vividus.bdd.email.model.EmailMessage;
 import org.vividus.bdd.email.model.EmailServerConfiguration;
 import org.vividus.bdd.email.service.ImapFetchService.EmailFetchServiceException;
-import org.vividus.util.function.CheckedPredicate;
 
 public interface EmailFetchService
 {
-    List<EmailMessage> fetch(List<CheckedPredicate<Message, MessagingException>> messageFilters,
+    List<EmailMessage> fetch(List<FailablePredicate<Message, MessagingException>> messageFilters,
             EmailServerConfiguration configuration) throws EmailFetchServiceException;
 }

@@ -38,6 +38,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.commons.lang3.function.FailablePredicate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -55,7 +56,6 @@ import org.vividus.bdd.email.service.EmailFetchService;
 import org.vividus.bdd.email.service.ImapFetchService.EmailFetchServiceException;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.function.CheckedPredicate;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class EmailStepsTests
@@ -74,7 +74,7 @@ class EmailStepsTests
     @Mock
     private EmailServerConfiguration configuration;
     @Mock
-    private CheckedPredicate<Message, MessagingException> filter;
+    private FailablePredicate<Message, MessagingException> filter;
 
     private EmailSteps steps;
 

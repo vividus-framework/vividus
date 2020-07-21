@@ -35,6 +35,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import org.apache.commons.lang3.function.FailablePredicate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -43,7 +44,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.util.function.CheckedPredicate;
 
 class EmailParameterFilterFactoryTests
 {
@@ -189,7 +189,7 @@ class EmailParameterFilterFactoryTests
     {
         Message message = Mockito.mock(Message.class);
         when(message.getSentDate()).thenReturn(Date.from(Instant.now()));
-        CheckedPredicate<Message, MessagingException> filter = EmailParameterFilterFactory.SENT_DATE.createFilter(rule,
+        FailablePredicate<Message, MessagingException> filter = EmailParameterFilterFactory.SENT_DATE.createFilter(rule,
                 Instant.now().toString());
         Exception exception = assertThrows(IllegalArgumentException.class, () -> filter.test(message));
         assertEquals(errorMessage, exception.getMessage());
@@ -200,7 +200,7 @@ class EmailParameterFilterFactoryTests
     {
         Message message = Mockito.mock(Message.class);
         when(message.getSentDate()).thenReturn(Date.from(Instant.now()));
-        CheckedPredicate<Message, MessagingException> filter = EmailParameterFilterFactory.SENT_DATE
+        FailablePredicate<Message, MessagingException> filter = EmailParameterFilterFactory.SENT_DATE
                 .createFilter(ComparisonRule.EQUAL_TO.name(), "11:11:11");
         Exception exception = assertThrows(IllegalArgumentException.class, () -> filter.test(message));
         assertThat(exception.getMessage(), matchesRegex(
@@ -215,7 +215,7 @@ class EmailParameterFilterFactoryTests
     private static void performTest(Message message, EmailParameterFilterFactory filterFactory, String rule,
             String input, boolean passed) throws MessagingException
     {
-        CheckedPredicate<Message, MessagingException> filter = filterFactory.createFilter(rule, input);
+        FailablePredicate<Message, MessagingException> filter = filterFactory.createFilter(rule, input);
         assertEquals(passed, filter.test(message));
     }
 
