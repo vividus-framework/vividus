@@ -174,12 +174,12 @@ class CodeStepsTests
 
     static Stream<Arguments> executeJavascriptWithArguments()
     {
+        // CHECKSTYLE:OFF
         return Stream.of(
-                // CHECKSTYLE:OFF
-                Arguments.of("document.querySelector(arguments[0])", createJsArgument(JsArgumentType.STRING, BODY),                        BODY                                        ),
-                Arguments.of("remote:throttle",                       createJsArgument(JsArgumentType.OBJECT, "{\"condition\": \"Wifi\"}"), Map.of("condition", "Wifi"))
-                // CHECKSTYLE:ON
-            );
+            Arguments.of("document.querySelector(arguments[0])", createJsArgument(JsArgumentType.STRING, BODY),                        BODY                       ),
+            Arguments.of("remote:throttle",                      createJsArgument(JsArgumentType.OBJECT, "{\"condition\": \"Wifi\"}"), Map.of("condition", "Wifi"))
+        );
+        // CHECKSTYLE:ON
     }
 
     @ParameterizedTest
