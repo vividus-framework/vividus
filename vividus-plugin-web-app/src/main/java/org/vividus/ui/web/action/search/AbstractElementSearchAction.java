@@ -41,9 +41,8 @@ public abstract class AbstractElementSearchAction
     protected static final String TRANSLATE_TO_LOWER_CASE = "translate(%s,"
             + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')";
     private static final String TRANSLATE_TO_LOWER_CASE_FORMATTED = String.format(TRANSLATE_TO_LOWER_CASE, ".");
-    private static final String ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE = "[text()["
-            + TRANSLATE_TO_LOWER_CASE_FORMATTED + "=%1$s] or @*[" + TRANSLATE_TO_LOWER_CASE_FORMATTED + "=%1$s] or *["
-            + TRANSLATE_TO_LOWER_CASE_FORMATTED + "=%1$s]]";
+    private static final String ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE = String
+            .format("[text()[%2$s=%1$s] or @*[%2$s=%1$s] or *[%2$s=%1$s]", "%1$s", TRANSLATE_TO_LOWER_CASE_FORMATTED);
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElementSearchAction.class);
 
     @Inject private IWebElementActions webElementActions;
@@ -139,11 +138,17 @@ public abstract class AbstractElementSearchAction
 
     protected static By generateCaseInsensitiveLocator(String text, String... tagNames)
     {
+        @SuppressWarnings("PMD.InsufficientStringBufferDeclaration")
         StringBuilder locator = new StringBuilder();
         for (String tagName : tagNames)
         {
-            locator.append(".//").append(tagName).append(ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE)
-                    .append('|');
+            locator.append(".//")
+                    .append(tagName)
+                    .append(ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE)
+                    .append(" and not(.//")
+                    .append(tagName)
+                    .append(ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE)
+                    .append("])]|");
         }
         return LocatorUtil.getXPathLocator(locator.substring(0, locator.length() - 1), text.toLowerCase());
     }

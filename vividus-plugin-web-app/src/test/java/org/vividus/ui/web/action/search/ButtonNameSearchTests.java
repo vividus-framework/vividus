@@ -48,14 +48,19 @@ class ButtonNameSearchTests
     private static final String BUTTON_WITH_ANY_ATTRIBUTE_NAME_PATTERN = "*[(local-name()='button' and "
             + "(@*=%1$s or text()=%1$s)) or (local-name()='input' and ((@type='submit' or "
             + "@type='button') and (@*=%1$s or text()=%1$s)))]";
-    private static final String BUTTON_WITH_TEXT_TRANSFORM_CSS_PROPERTY_PATTERN = ".//button[text()[normalize-space"
+    private static final String CASE_INSENSITIVE_LOCATOR = "[text()[normalize-space"
             + "(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=%1$s] or @*["
             + "normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=%1$s] or "
             + "*[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))"
-            + "=%1$s]]|.//input[text()[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', "
-            + "'abcdefghijklmnopqrstuvwxyz'))=%1$s] or @*[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', "
-            + "'abcdefghijklmnopqrstuvwxyz'))=%1$s] or *[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQ"
-            + "RSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=%1$s]]";
+            + "=%1$s]";
+    private static final String BUTTON_TEXT_LOCATOR = ".//button" + CASE_INSENSITIVE_LOCATOR;
+    private static final String INPUT_TEXT_LOCATOR = ".//input" + CASE_INSENSITIVE_LOCATOR;
+
+    private static final String AND_NOT = " and not(";
+    private static final String CLOSING_BRACKETS = "])]";
+    private static final String BUTTON_WITH_TEXT_TRANSFORM_CSS_PROPERTY_PATTERN =
+            BUTTON_TEXT_LOCATOR + AND_NOT + BUTTON_TEXT_LOCATOR + CLOSING_BRACKETS + "|"
+                    + INPUT_TEXT_LOCATOR + AND_NOT + INPUT_TEXT_LOCATOR + CLOSING_BRACKETS;
     private static final String BUTTON_WITH_ANY_ATTRIBUTE_NAME_XPATH = ".//" + BUTTON_WITH_ANY_ATTRIBUTE_NAME_PATTERN;
     private static final By BUTTON_LOCATOR = LocatorUtil.getXPathLocator(BUTTON_WITH_ANY_ATTRIBUTE_NAME_XPATH,
             VALUE);
