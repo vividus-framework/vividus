@@ -33,18 +33,18 @@ import javax.mail.MessagingException;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.function.FailableFunction;
+import org.apache.commons.lang3.function.FailablePredicate;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.IComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.util.function.CheckedFunction;
-import org.vividus.util.function.CheckedPredicate;
 
 public enum EmailParameterFilterFactory
 {
     SUBJECT
     {
         @Override
-        public CheckedPredicate<Message, MessagingException> createFilter(String rule, String variable)
+        public FailablePredicate<Message, MessagingException> createFilter(String rule, String variable)
         {
             return m -> apply(m.getSubject(), rule, variable);
         }
@@ -52,7 +52,7 @@ public enum EmailParameterFilterFactory
     SENT_DATE
     {
         @Override
-        public CheckedPredicate<Message, MessagingException> createFilter(String rule, String variable)
+        public FailablePredicate<Message, MessagingException> createFilter(String rule, String variable)
         {
             return checkDates(rule, variable, Message::getSentDate);
         }
@@ -60,7 +60,7 @@ public enum EmailParameterFilterFactory
     RECEIVED_DATE
     {
         @Override
-        public CheckedPredicate<Message, MessagingException> createFilter(String rule, String variable)
+        public FailablePredicate<Message, MessagingException> createFilter(String rule, String variable)
         {
             return checkDates(rule, variable, Message::getReceivedDate);
         }
@@ -68,7 +68,7 @@ public enum EmailParameterFilterFactory
     FROM
     {
         @Override
-        public CheckedPredicate<Message, MessagingException> createFilter(String rule, String variable)
+        public FailablePredicate<Message, MessagingException> createFilter(String rule, String variable)
         {
             return checkAddressees(rule, variable, Message::getFrom);
         }
@@ -76,7 +76,7 @@ public enum EmailParameterFilterFactory
     CC_RECIPIENTS
     {
         @Override
-        public CheckedPredicate<Message, MessagingException> createFilter(String rule, String variable)
+        public FailablePredicate<Message, MessagingException> createFilter(String rule, String variable)
         {
             return checkRecipients(rule, variable, RecipientType.CC);
         }
@@ -84,7 +84,7 @@ public enum EmailParameterFilterFactory
     BCC_RECIPIENTS
     {
         @Override
-        public CheckedPredicate<Message, MessagingException> createFilter(String rule, String variable)
+        public FailablePredicate<Message, MessagingException> createFilter(String rule, String variable)
         {
             return checkRecipients(rule, variable, RecipientType.BCC);
         }
@@ -92,7 +92,7 @@ public enum EmailParameterFilterFactory
     TO_RECIPIENTS
     {
         @Override
-        public CheckedPredicate<Message, MessagingException> createFilter(String rule, String variable)
+        public FailablePredicate<Message, MessagingException> createFilter(String rule, String variable)
         {
             return checkRecipients(rule, variable, RecipientType.TO);
         }
@@ -100,28 +100,28 @@ public enum EmailParameterFilterFactory
     REPLY_TO
     {
         @Override
-        public CheckedPredicate<Message, MessagingException> createFilter(String rule, String variable)
+        public FailablePredicate<Message, MessagingException> createFilter(String rule, String variable)
         {
             return checkAddressees(rule, variable, Message::getReplyTo);
         }
     };
 
-    public abstract CheckedPredicate<Message, MessagingException> createFilter(String rule, String variable);
+    public abstract FailablePredicate<Message, MessagingException> createFilter(String rule, String variable);
 
-    CheckedPredicate<Message, MessagingException> checkDates(String rule, String inputDate,
-            CheckedFunction<Message, Date, MessagingException> getter)
+    FailablePredicate<Message, MessagingException> checkDates(String rule, String inputDate,
+            FailableFunction<Message, Date, MessagingException> getter)
     {
         return m -> apply(getter.apply(m).toInstant(), rule, asISODateTime(inputDate));
     }
 
-    CheckedPredicate<Message, MessagingException> checkRecipients(String rule, String addressesAsString,
+    FailablePredicate<Message, MessagingException> checkRecipients(String rule, String addressesAsString,
             RecipientType type)
     {
         return checkAddressees(rule, addressesAsString, msg -> msg.getRecipients(type));
     }
 
-    CheckedPredicate<Message, MessagingException> checkAddressees(String rule, String addressesAsString,
-            CheckedFunction<Message, Address[], MessagingException> getter)
+    FailablePredicate<Message, MessagingException> checkAddressees(String rule, String addressesAsString,
+            FailableFunction<Message, Address[], MessagingException> getter)
     {
         return m ->
         {

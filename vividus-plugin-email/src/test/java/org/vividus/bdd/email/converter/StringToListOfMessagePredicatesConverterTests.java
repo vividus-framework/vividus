@@ -26,10 +26,10 @@ import java.util.List;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
+import org.apache.commons.lang3.function.FailablePredicate;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.vividus.util.function.CheckedPredicate;
 
 class StringToListOfMessagePredicatesConverterTests
 {
@@ -42,10 +42,10 @@ class StringToListOfMessagePredicatesConverterTests
         ExamplesTable table = new ExamplesTable("|parameter|rule|value|\n|SUBJECT|EQUAL_TO|Text|");
 
         StringToListOfMessagePredicatesConverter converter = new StringToListOfMessagePredicatesConverter();
-        List<CheckedPredicate<Message, MessagingException>> filters = converter.convertValue(table, null);
+        List<FailablePredicate<Message, MessagingException>> filters = converter.convertValue(table, null);
 
         assertThat(filters, hasSize(1));
-        CheckedPredicate<Message, MessagingException> filter = filters.get(0);
+        FailablePredicate<Message, MessagingException> filter = filters.get(0);
         Assertions.assertTrue(filter.test(message));
     }
 }

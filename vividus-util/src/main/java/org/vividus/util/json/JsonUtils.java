@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.type.CollectionType;
 
 import org.apache.commons.lang3.StringUtils;
-import org.vividus.util.function.CheckedSupplier;
+import org.apache.commons.lang3.function.FailableSupplier;
 
 public class JsonUtils
 {
@@ -85,7 +85,7 @@ public class JsonUtils
         return StringUtils.startsWithAny(str.trim(), "[", "{");
     }
 
-    private <T> T performOperation(CheckedSupplier<T, IOException> operation)
+    private <T> T performOperation(FailableSupplier<T, IOException> operation)
     {
         try
         {

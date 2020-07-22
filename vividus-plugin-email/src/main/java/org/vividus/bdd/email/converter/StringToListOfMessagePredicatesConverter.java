@@ -25,25 +25,25 @@ import javax.inject.Named;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
+import org.apache.commons.lang3.function.FailablePredicate;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ParameterConverters.AbstractChainableParameterConverter;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.email.factory.EmailParameterFilterFactory;
-import org.vividus.util.function.CheckedPredicate;
 
 @Named
 public class StringToListOfMessagePredicatesConverter
-        extends AbstractChainableParameterConverter<ExamplesTable, List<CheckedPredicate<Message, MessagingException>>>
+        extends AbstractChainableParameterConverter<ExamplesTable, List<FailablePredicate<Message, MessagingException>>>
 {
     @Override
-    public List<CheckedPredicate<Message, MessagingException>> convertValue(ExamplesTable table, Type type)
+    public List<FailablePredicate<Message, MessagingException>> convertValue(ExamplesTable table, Type type)
     {
         return table.getRowsAsParameters().stream()
                                           .map(asPredicate())
                                           .collect(Collectors.toList());
     }
 
-    private static Function<Parameters, CheckedPredicate<Message, MessagingException>> asPredicate()
+    private static Function<Parameters, FailablePredicate<Message, MessagingException>> asPredicate()
     {
         return p ->
         {

@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.function.FailableRunnable;
+import org.apache.commons.lang3.function.FailableSupplier;
 import org.vividus.util.Sleeper;
-import org.vividus.util.function.CheckedRunnable;
-import org.vividus.util.function.CheckedSupplier;
 
 public final class Waiter
 {
@@ -35,7 +35,7 @@ public final class Waiter
         pollingTimeoutMillis = waitMode.calculatePollingTimeout(TimeUnit.MILLISECONDS);
     }
 
-    public <T, E extends Exception> T wait(CheckedSupplier<T, E> valueProvider, Predicate<T> stopCondition) throws E
+    public <T, E extends Exception> T wait(FailableSupplier<T, E> valueProvider, Predicate<T> stopCondition) throws E
     {
         long endTime = System.currentTimeMillis() + durationInMillis;
 
@@ -49,7 +49,7 @@ public final class Waiter
         return value;
     }
 
-    public <E extends Exception> void wait(CheckedRunnable<E> runnable, BooleanSupplier stopCondition) throws E
+    public <E extends Exception> void wait(FailableRunnable<E> runnable, BooleanSupplier stopCondition) throws E
     {
         wait(
             () -> {

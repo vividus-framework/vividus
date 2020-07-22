@@ -33,6 +33,7 @@ import javax.mail.Message;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 
+import org.apache.commons.lang3.function.FailablePredicate;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,6 @@ import org.vividus.bdd.email.service.EmailFetchService;
 import org.vividus.bdd.email.service.ImapFetchService.EmailFetchServiceException;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.function.CheckedPredicate;
 
 public class EmailSteps
 {
@@ -135,8 +135,9 @@ public class EmailSteps
      */
     @When("I fetch email message from `$serverKey` server filtered by $filters and save message content to $scopes "
             + "variable `$variableName`")
-    public void saveMessageContent(String serverKey, List<CheckedPredicate<Message, MessagingException>> messageFilters,
-            Set<VariableScope> scopes, String variableName) throws EmailFetchServiceException, MessagingException
+    public void saveMessageContent(String serverKey,
+            List<FailablePredicate<Message, MessagingException>> messageFilters, Set<VariableScope> scopes,
+            String variableName) throws EmailFetchServiceException, MessagingException
     {
         EmailServerConfiguration config = serverConfigurations.get(serverKey);
         List<EmailMessage> messages = messageFetchService.fetch(messageFilters, config);

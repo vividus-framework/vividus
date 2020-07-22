@@ -44,13 +44,13 @@ import javax.mail.event.MessageCountEvent;
 import javax.mail.event.MessageCountListener;
 import javax.mail.search.SearchTerm;
 
+import org.apache.commons.lang3.function.FailablePredicate;
+import org.apache.commons.lang3.function.FailableSupplier;
 import org.vividus.bdd.email.factory.EmailMessageFactory;
 import org.vividus.bdd.email.factory.EmailMessageFactory.EmailMessageCreationException;
 import org.vividus.bdd.email.model.EmailMessage;
 import org.vividus.bdd.email.model.EmailServerConfiguration;
 import org.vividus.util.Sleeper;
-import org.vividus.util.function.CheckedPredicate;
-import org.vividus.util.function.CheckedSupplier;
 import org.vividus.util.wait.WaitMode;
 import org.vividus.util.wait.Waiter;
 
@@ -86,7 +86,7 @@ public class ImapFetchService implements EmailFetchService
     }
 
     @Override
-    public List<EmailMessage> fetch(List<CheckedPredicate<Message, MessagingException>> messageFilters,
+    public List<EmailMessage> fetch(List<FailablePredicate<Message, MessagingException>> messageFilters,
             EmailServerConfiguration configuration) throws EmailFetchServiceException
     {
         Authenticator authenticator = new PasswordAuthenticator(configuration.getUsername(),
@@ -162,7 +162,7 @@ public class ImapFetchService implements EmailFetchService
                 .collect(Collectors.toMap(e -> "mail." + PROTOCOL + "." + e.getKey(), Map.Entry::getValue));
     }
 
-    private <T> T interruptible(CheckedSupplier<T, InterruptedException> supplier)
+    private <T> T interruptible(FailableSupplier<T, InterruptedException> supplier)
     {
         try
         {
@@ -180,9 +180,9 @@ public class ImapFetchService implements EmailFetchService
         private static final long serialVersionUID = 1163386376061414046L;
 
         @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")
-        private final transient List<CheckedPredicate<Message, MessagingException>> messageFilters;
+        private final transient List<FailablePredicate<Message, MessagingException>> messageFilters;
 
-        private PredicateSearchTerm(List<CheckedPredicate<Message, MessagingException>> messageFilters)
+        private PredicateSearchTerm(List<FailablePredicate<Message, MessagingException>> messageFilters)
         {
             this.messageFilters = messageFilters;
         }
@@ -190,7 +190,7 @@ public class ImapFetchService implements EmailFetchService
         @Override
         public boolean match(Message msg)
         {
-            for (CheckedPredicate<Message, MessagingException> filter : messageFilters)
+            for (FailablePredicate<Message, MessagingException> filter : messageFilters)
             {
                 try
                 {
