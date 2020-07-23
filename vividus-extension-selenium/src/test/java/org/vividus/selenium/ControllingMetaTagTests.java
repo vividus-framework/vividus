@@ -19,12 +19,16 @@ package org.vividus.selenium;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
@@ -164,5 +168,23 @@ class ControllingMetaTagTests
         ControllingMetaTag.setDesiredCapabilitiesFromMeta(desiredCapabilities, metaWrapper);
         verify(metaWrapper).getOptionalPropertyValue(VERSION);
         verifyNoInteractions(desiredCapabilities);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void testSetDesiredCapabilitiesFromCapabilityMeta()
+    {
+        String prefix = ControllingMetaTag.CAPABILITY.getMetaTagName();
+        String acceptInsecureCerts = "acceptInsecureCerts";
+        when(metaWrapper.getPropertiesByKey(any(Predicate.class))).thenReturn(Map.of(
+                prefix + APPIUM_VERSION, VERSION_NUMBER,
+                prefix + VERSION, VERSION_NUMBER,
+                prefix + acceptInsecureCerts, "true"
+        ));
+        ControllingMetaTag.CAPABILITY.setCapability(desiredCapabilities, metaWrapper);
+        verify(desiredCapabilities).setCapability(APPIUM_VERSION, (Object) VERSION_NUMBER);
+        verify(desiredCapabilities).setCapability(acceptInsecureCerts, (Object) true);
+        verify(desiredCapabilities).setCapability(VERSION, (Object) VERSION_NUMBER);
+        verifyNoMoreInteractions(desiredCapabilities, metaWrapper);
     }
 }

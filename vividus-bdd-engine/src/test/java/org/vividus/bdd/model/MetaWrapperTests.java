@@ -21,6 +21,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -68,5 +69,18 @@ class MetaWrapperTests
     void testGetPropertyValuesForNonExistentMeta()
     {
         assertEquals(Set.of(), new MetaWrapper(new Meta()).getPropertyValues("non-existent"));
+    }
+
+    @Test
+    void testGetPropertiesByKey()
+    {
+        Map<String, String> values = Map.of(
+            "key-1", "value-1",
+            "key-2", "value-2");
+        Properties properties = new Properties();
+        properties.putAll(values);
+        properties.put("fn", "Bob");
+        Meta meta = new Meta(properties);
+        assertEquals(values, new MetaWrapper(meta).getPropertiesByKey(k -> k.startsWith("key")));
     }
 }

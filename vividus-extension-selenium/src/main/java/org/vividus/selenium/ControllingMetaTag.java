@@ -16,8 +16,11 @@
 
 package org.vividus.selenium;
 
+import static org.vividus.selenium.type.CapabilitiesValueTypeAdjuster.adjustType;
+
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -47,6 +50,16 @@ public enum ControllingMetaTag
         protected void setCapability(DesiredCapabilities capabilities, MetaWrapper meta)
         {
             // Nothing to do
+        }
+    },
+    CAPABILITY("capability.")
+    {
+        @Override
+        protected void setCapability(DesiredCapabilities capabilities, MetaWrapper meta)
+        {
+            meta.getPropertiesByKey(k -> k.startsWith(getMetaTagName()))
+                .forEach((k, v) -> capabilities.setCapability(StringUtils.substringAfter(k, getMetaTagName()),
+                    adjustType(v)));
         }
     };
 
