@@ -33,7 +33,6 @@ dependencies {
     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.1.0')
     implementation(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
     implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
-    implementation(group: 'xyz.rogfam', name : 'littleproxy', version : '2.0.0-beta-5')
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
     implementation(group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
