@@ -16,21 +16,27 @@
 
 package org.vividus.bdd.steps;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.ScenarioType;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.action.IWindowsActions;
 
-public class WebUiVividusSetupSteps extends VividusWebDriverSetupSteps
+public class WebUiVividusSetupSteps
 {
-    @Inject private IWindowsActions windowsActions;
+    private final IWindowsActions windowsActions;
+    private final IWebDriverProvider webDriverProvider;
     private WindowsStrategy windowsStrategy;
+
+    public WebUiVividusSetupSteps(IWebDriverProvider webDriverProvider, IWindowsActions windowsActions)
+    {
+        this.webDriverProvider = webDriverProvider;
+        this.windowsActions = windowsActions;
+    }
 
     @AfterScenario(uponType = ScenarioType.ANY)
     public void afterScenario()
     {
-        if (getWebDriverProvider().isWebDriverInitialized())
+        if (webDriverProvider.isWebDriverInitialized())
         {
             windowsStrategy.apply(windowsActions);
         }

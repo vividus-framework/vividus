@@ -26,8 +26,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
+import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.event.WebDriverCreateEvent;
 
 @ExtendWith(MockitoExtension.class)
 class BrowserWindowSizeListenerTests

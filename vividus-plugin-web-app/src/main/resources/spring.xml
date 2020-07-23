@@ -76,9 +76,8 @@
         <property name="asyncScriptTimeoutTimeUnit" value="${selenium.timeout.async-script-timeout-unit}" />
     </bean>
 
-    <bean id="webDriverFactory" class="org.vividus.selenium.WebDriverFactory">
+    <bean id="webDriverFactory" class="org.vividus.selenium.WebDriverFactory" parent="parentWebDriverFactory">
         <property name="webDriverType" value="${selenium.browser}" />
-        <property name="remoteDriverUrl" value="${selenium.grid.url}" />
     </bean>
 
     <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory" />
@@ -117,8 +116,7 @@
         <property name="webDriverProvider" ref="webDriverProvider" />
     </bean>
 
-    <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager">
-        <property name="nativeApp" value="${mobile-native-app}" />
+    <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager" parent="genericWebDriverManager" >
         <property name="electronApp" value="${desktop-electron-app}" />
     </bean>
 
@@ -325,10 +323,7 @@
 
     <bean id="actionSteps" class="org.vividus.bdd.steps.ui.web.ActionSteps" />
 
-    <bean id="vividusWebDriverSetupSteps" class="org.vividus.bdd.steps.VividusWebDriverSetupSteps" />
-
-    <bean id="webUiVividusSetupSteps" class="org.vividus.bdd.steps.WebUiVividusSetupSteps"
-          parent="vividusWebDriverSetupSteps">
+    <bean id="webUiVividusSetupSteps" class="org.vividus.bdd.steps.WebUiVividusSetupSteps">
         <property name="windowsStrategy" value="${selenium.windows-strategy}" />
     </bean>
 
@@ -349,15 +344,9 @@
         <property name="browserWindowSizeProvider" ref="browserWindowSizeProvider" />
     </bean>
 
-    <bean id="webDriverProvider" class="org.vividus.selenium.WebDriverProvider"
-          destroy-method="destroy">
-        <property name="vividusWebDriverFactory">
-            <bean class="org.vividus.selenium.VividusWebDriverFactory">
-                <property name="remoteExecution" value="${selenium.grid.enabled}" />
-                <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
-            </bean>
-        </property>
-        <property name="testContext" ref="testContext" />
+    <bean id="vividusWebDriverFactory" class="org.vividus.selenium.VividusWebDriverFactory">
+        <property name="remoteExecution" value="${selenium.grid.enabled}" />
+        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
     </bean>
 
     <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" />

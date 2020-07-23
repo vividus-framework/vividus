@@ -23,9 +23,7 @@ import java.util.List;
 
 import com.browserup.bup.client.ClientUtil;
 
-import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Story;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
@@ -38,16 +36,13 @@ import org.vividus.bdd.model.RunningStory;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
 
-public class VividusWebDriverFactory implements IVividusWebDriverFactory
+public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
 {
     private final IWebDriverFactory webDriverFactory;
-    private final IBddRunContext bddRunContext;
-    private final IWebDriverManagerContext webDriverManagerContext;
-    private final IProxy proxy;
     private final IBrowserWindowSizeProvider browserWindowSizeProvider;
     private final IWebDriverManager webDriverManager;
+    private final IProxy proxy;
 
     private boolean remoteExecution;
     private List<WebDriverEventListener> webDriverEventListeners;
@@ -56,43 +51,50 @@ public class VividusWebDriverFactory implements IVividusWebDriverFactory
         IWebDriverManagerContext webDriverManagerContext, IProxy proxy,
         IBrowserWindowSizeProvider browserWindowSizeProvider, IWebDriverManager webDriverManager)
     {
-        this.webDriverFactory = webDriverFactory;
-        this.bddRunContext = bddRunContext;
-        this.webDriverManagerContext = webDriverManagerContext;
+        super(bddRunContext, webDriverManagerContext);
         this.proxy = proxy;
+        this.webDriverFactory = webDriverFactory;
         this.browserWindowSizeProvider = browserWindowSizeProvider;
         this.webDriverManager = webDriverManager;
     }
 
     @Override
-    public VividusWebDriver create()
+    protected void configureVividusWebDriver(VividusWebDriver vividusWebDriver)
     {
-        VividusWebDriver vividusWebDriver = createVividusWebDriver(bddRunContext.getRunningStory());
-
-        WebDriver webDriver;
         DesiredCapabilities desiredCapabilities = vividusWebDriver.getDesiredCapabilities();
         if (proxy.isStarted())
         {
             desiredCapabilities.setCapability(CapabilityType.PROXY, createSeleniumProxy(remoteExecution));
             desiredCapabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
         }
-        if (remoteExecution)
-        {
-            webDriver = webDriverFactory.getRemoteWebDriver(desiredCapabilities);
-            vividusWebDriver.setRemote(true);
-        }
-        else
-        {
-            webDriver = webDriverFactory.getWebDriver(desiredCapabilities);
-        }
+
+        WebDriver webDriver = remoteExecution
+                ? webDriverFactory.getRemoteWebDriver(desiredCapabilities)
+                : webDriverFactory.getWebDriver(desiredCapabilities);
 
         EventFiringWebDriver eventFiringWebDriver = new EventFiringWebDriver(webDriver);
         webDriverEventListeners.forEach(eventFiringWebDriver::register);
 
+        webDriverManager.resize(webDriver, browserWindowSizeProvider.getBrowserWindowSize(remoteExecution));
         vividusWebDriver.setWebDriver(eventFiringWebDriver);
-        webDriverManager.resize(vividusWebDriver.getWrappedDriver(),
-                browserWindowSizeProvider.getBrowserWindowSize(remoteExecution));
-        return vividusWebDriver;
+        vividusWebDriver.setRemote(remoteExecution);
+    }
+
+    @Override
+    protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities, RunningStory runningStory,
+            Scenario scenario, MetaWrapper metaWrapper)
+    {
+        if (remoteExecution)
+        {
+            desiredCapabilities.setCapability(SauceLabsCapabilityType.NAME, runningStory.getName());
+        }
+        else
+        {
+            if (scenario != null)
+            {
+                ControllingMetaTag.BROWSER_NAME.setCapability(desiredCapabilities, metaWrapper);
+            }
+        }
     }
 
     private Proxy createSeleniumProxy(boolean remoteExecution)
@@ -106,46 +108,6 @@ public class VividusWebDriverFactory implements IVividusWebDriverFactory
         {
             throw new IllegalStateException(e);
         }
-    }
-
-    private VividusWebDriver createVividusWebDriver(RunningStory runningStory)
-    {
-        VividusWebDriver vividusWebDriver = new VividusWebDriver();
-        setBaseDesiredCapabilities(vividusWebDriver, runningStory);
-
-        return vividusWebDriver;
-    }
-
-    private void setBaseDesiredCapabilities(VividusWebDriver vividusWebDriver, RunningStory runningStory)
-    {
-        DesiredCapabilities desiredCapabilities = vividusWebDriver.getDesiredCapabilities();
-        desiredCapabilities.merge(webDriverManagerContext.getParameter(
-                WebDriverManagerParameter.DESIRED_CAPABILITIES));
-        webDriverManagerContext.reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
-        if (runningStory != null)
-        {
-            Scenario scenario = runningStory.getRunningScenario().getScenario();
-            Meta mergedMeta = mergeMeta(runningStory.getStory(), scenario);
-            MetaWrapper metaWrapper = new MetaWrapper(mergedMeta);
-            ControllingMetaTag.setDesiredCapabilitiesFromMeta(desiredCapabilities, metaWrapper);
-            if (remoteExecution)
-            {
-                desiredCapabilities.setCapability(SauceLabsCapabilityType.NAME, runningStory.getName());
-            }
-            else
-            {
-                if (scenario != null)
-                {
-                    ControllingMetaTag.BROWSER_NAME.setCapability(desiredCapabilities, metaWrapper);
-                }
-            }
-        }
-    }
-
-    private static Meta mergeMeta(Story story, Scenario scenario)
-    {
-        Meta storyMeta = story.getMeta();
-        return scenario == null ? storyMeta : scenario.getMeta().inheritFrom(storyMeta);
     }
 
     public void setRemoteExecution(boolean remoteExecution)

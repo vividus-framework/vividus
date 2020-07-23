@@ -18,8 +18,8 @@ package org.vividus.selenium;
 
 import com.google.common.eventbus.Subscribe;
 
+import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.event.WebDriverCreateEvent;
 
 public class BrowserWindowSizeListener
 {

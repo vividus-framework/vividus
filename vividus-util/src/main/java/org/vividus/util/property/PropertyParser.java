@@ -56,7 +56,7 @@ public class PropertyParser implements IPropertyParser
     }
 
     @SuppressWarnings("unchecked")
-    private static void putByPath(Map<String, Object> container, String path, String value)
+    public static void putByPath(Map<String, Object> container, String path, String value)
     {
         String[] paths = StringUtils.split(path, '.');
         int limit = paths.length - 1;

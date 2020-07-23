@@ -20,7 +20,7 @@ import java.net.URL;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.vividus.selenium.manager.WebDriverManager;
+import org.vividus.selenium.manager.GenericWebDriverManager;
 
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
@@ -30,11 +30,11 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
     @Override
     public RemoteWebDriver getRemoteWebDriver(URL url, Capabilities capabilities)
     {
-        if (WebDriverManager.isIOS(capabilities))
+        if (GenericWebDriverManager.isIOS(capabilities))
         {
             return new IOSDriver<>(url, capabilities);
         }
-        else if (WebDriverManager.isAndroid(capabilities))
+        else if (GenericWebDriverManager.isAndroid(capabilities))
         {
             return new AndroidDriver<>(url, capabilities);
         }

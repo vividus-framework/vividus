@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:util="http://www.springframework.org/schema/util"
+     xsi:schemaLocation="
+     http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+     default-lazy-init="true" profile="mobile_app">
+
+    <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
+
+    <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
+
+    <bean class="org.vividus.selenium.mobileapp.MobileAppDriverFactory"
+        parent="parentWebDriverFactory"/>
+
+    <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
+        <value>applicationSteps</value>
+    </util:list>
+</beans>
