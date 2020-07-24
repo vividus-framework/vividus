@@ -17,7 +17,7 @@
 package org.vividus.selenium;
 
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.StringUtils.equalsAnyIgnoreCase;
+import static org.vividus.selenium.type.CapabilitiesValueTypeAdjuster.adjustType;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -87,16 +87,11 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
         return propertyParser.getPropertyValuesTreeByPrefix(prefix)
                              .entrySet()
                              .stream()
-                             .map(e -> isBoolean(e.getValue())
-                                 ? Map.entry(e.getKey(), Boolean.parseBoolean((String) e.getValue()))
+                             .map(e -> e.getValue() instanceof String
+                                 ? Map.entry(e.getKey(), adjustType((String) e.getValue()))
                                  : e)
                              .collect(Collectors.collectingAndThen(toMap(Entry::getKey, Entry::getValue),
                                  DesiredCapabilities::new));
-    }
-
-    private boolean isBoolean(Object value)
-    {
-        return value instanceof String && equalsAnyIgnoreCase((String) value, "true", "false");
     }
 
     @Override
