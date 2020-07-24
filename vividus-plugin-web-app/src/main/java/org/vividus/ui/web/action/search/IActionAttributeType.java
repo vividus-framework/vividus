@@ -28,5 +28,5 @@ public interface IActionAttributeType
 
     Function<SearchParameters, By> getSearchLocatorBuilder();
 
-    ActionAttributeType getCompetingType();
+    IActionAttributeType getCompetingType();
 }
