@@ -144,3 +144,10 @@ Meta:
 Then `<joined>` is equal to `line 1 line 2 line 3`
 Examples:
 {transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=Sheet1, addresses=A1, column=joined, \{lineBreakReplacement|VERBATIM\}= }
+
+Scenario: Verify ExamplesTable property value with space
+Meta:
+    @issueId 767
+Then `<joined>` is equal to `line 1 line 2 line 3`
+Examples:
+{transformer=FROM_EXCEL, path=/data/excel with spaces in name.xlsx, sheet=Sheet1, addresses=A1, column=joined, \{lineBreakReplacement|VERBATIM\}= }
