@@ -82,8 +82,8 @@ class MergingTableTransformerTests
     {
         Properties properties = new Properties();
         properties.setProperty(MERGE_MODE, "invalidMode");
-        verifyIllegalArgumentException(properties,
-                "Value of ExamplesTable property '" + MERGE_MODE + "' must be from range [ROWS, COLUMNS]");
+        verifyIllegalArgumentException(properties, "Value of ExamplesTable property 'mergeMode' must be from range "
+                + "[ROWS, COLUMNS], but got 'invalidMode'");
     }
 
     @Test
