@@ -22,3 +22,16 @@ Then `${key-10}` is equal to `10`
 Then `${key-11}` is equal to `${key-11}`
 Then `${key-12}` is equal to `${key-12}`
 Then `${key-13}` is equal to `${key-13}`
+
+Scenario: Verify execution of the nested executable steps
+When I initialize the STORY variable `iterator` with value `0`
+When the condition `true` is true I do
+{headerSeparator=!, valueSeparator=!}
+!step                                                                                   !
+!Then `${iterator}` is = `0`                                                            !
+!When I initialize the STORY variable `iterator` with value `#{eval(${iterator} + 1)}`  !
+!When the condition 'true' is true I do                                                 !
+!|step                                                                                 |!
+!|Then `${iterator}` is = `1`                                                          |!
+!|When I initialize the STORY variable `iterator` with value `#{eval(${iterator} + 1)}`|!
+Then `${iterator}` is = `2`
