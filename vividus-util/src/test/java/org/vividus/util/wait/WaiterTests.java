@@ -26,9 +26,9 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.time.Duration;
 
+import org.apache.commons.lang3.function.FailableRunnable;
+import org.apache.commons.lang3.function.FailableSupplier;
 import org.junit.jupiter.api.Test;
-import org.vividus.util.function.CheckedRunnable;
-import org.vividus.util.function.CheckedSupplier;
 
 @SuppressWarnings("unchecked")
 class WaiterTests
@@ -36,7 +36,7 @@ class WaiterTests
     @Test
     void shouldReturnValueAfterReachingTimeout() throws IOException
     {
-        CheckedSupplier<Boolean, IOException> valueProvider = mock(CheckedSupplier.class);
+        FailableSupplier<Boolean, IOException> valueProvider = mock(FailableSupplier.class);
         when(valueProvider.get()).thenReturn(false);
         assertFalse(new Waiter(new WaitMode(Duration.ofMillis(500), 2)).wait(valueProvider, Boolean::booleanValue));
     }
@@ -44,7 +44,7 @@ class WaiterTests
     @Test
     void shouldReturnValueAfterReachingStopCondition() throws IOException
     {
-        CheckedSupplier<Boolean, IOException> valueProvider = mock(CheckedSupplier.class);
+        FailableSupplier<Boolean, IOException> valueProvider = mock(FailableSupplier.class);
         when(valueProvider.get()).thenReturn(false).thenReturn(true).thenReturn(false);
         assertTrue(new Waiter(new WaitMode(Duration.ofSeconds(1), 3)).wait(valueProvider, Boolean::booleanValue));
     }
@@ -52,8 +52,8 @@ class WaiterTests
     @Test
     void shouldInvokeRunnableOnceBeforeReachingStopCondition() throws IOException
     {
-        CheckedRunnable<IOException> checkedRunnable = mock(CheckedRunnable.class);
-        new Waiter(new WaitMode(Duration.ZERO, 1)).wait(checkedRunnable, Boolean.TRUE::booleanValue);
-        verify(checkedRunnable, times(1)).run();
+        FailableRunnable<IOException> failableRunnable = mock(FailableRunnable.class);
+        new Waiter(new WaitMode(Duration.ZERO, 1)).wait(failableRunnable, Boolean.TRUE::booleanValue);
+        verify(failableRunnable, times(1)).run();
     }
 }

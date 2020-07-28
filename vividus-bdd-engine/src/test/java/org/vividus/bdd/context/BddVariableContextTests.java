@@ -171,7 +171,7 @@ class BddVariableContextTests
             arguments("variableKey[0]",                  VARIABLE_KEY, List.of(Set.of(KEY)),        Set.of(KEY)),
             arguments("variableKey[7]",                  VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), null)
         );
-       //CHECKSTYLE:ON
+        //CHECKSTYLE:ON
     }
 
     @ParameterizedTest

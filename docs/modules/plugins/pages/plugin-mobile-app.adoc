@@ -1,0 +1,124 @@
+= Plugin Mobile App
+
+== General Info
+
+The plugin provides functionality to test mobile application on real devides, Android Emulators and iOS Simulators
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version: '{page-component-version}')
+----
+
+== Properties
+
+=== Required
+
+* `selenium.grid.device-name` - defines device name to run tests on
+
+See xref:ROOT:tests-configuration.adoc[Selenium Grid] properties to configure remote grid
+
+=== Optional
+
+* `selenium.grid.platform-name` - defines mobile OS to use, e.g. `Android` or `iOS`
+* `selenium.grid.automation-name` - defines automation engine to use, see <<automation-engines, automation engines>> table for details
+
+.[[automation-engines]]Automation engines
+[cols="1,2", options="header"]
+|===
+
+|Platform
+|Recommended engine
+
+|`Android`
+|http://appium.io/docs/en/drivers/android-uiautomator2/[UIAutomator2]
+
+|`iOS`
+|http://appium.io/docs/en/drivers/ios-xcuitest/[XCUITest]
+|===
+
+== Profiles
+
+=== iOS
+
+The profile can be enabled by adding `mobile_app/ios` to `configuration.profiles` property
+
+Default profile configuration
+[source,properties]
+----
+selenium.grid.platform-name=iOS
+selenium.grid.automation-name=XCUITest
+----
+
+=== Android
+
+The profile can be enabled by adding `mobile_app/android` to `configuration.profiles` property
+
+Default profile configuration
+[source,properties]
+----
+selenium.grid.platform-name=Android
+selenium.grid.automation-name=UIAutomator2
+----
+
+=== BrowserStack
+
+* The profile can be enabled by adding `browserstack/mobile_app` to `configuration.profiles` property
+* BrowserStack specific properties must be prepended with `selenium.grid.capabilities.bstack\:options.` prefix, meaning given a property `projectName` with a value `My Project` the resulting property will be `selenium.grid.capabilities.bstack\:options.projectName=My Project`
+* Appium specific properties in BrowserStack must be prepended with `selenium.grid.capabilities.appium\:options.` prefix, meaning given a property `clearSystemFiles` with a value `true` the resulting property will be `selenium.grid.capabilities.appium\:options.clearSystemFiles=true`
+* See https://www.browserstack.com/app-automate/capabilities[Platform Configurator] to setup configuration
+
+== Steps
+
+=== Start mobile application
+
+==== *_Info_*
+
+Starts mobile application with capabilities from user's `*.properties` files and profiles set by a user
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Given I start mobile application
+----
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Start mobile application
+Given I start mobile application
+----
+
+=== Start mobile application with capabilities
+
+==== *_Info_*
+
+Starts mobile application with capabilities from user's `*.properties` files and profiles set by a user, additionally step takes list of capabilities as an argument that override previously defined capabilities
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Given I start mobile application with capabilities:$capabilities
+----
+
+==== *_Parameters_*
+
+. `$capabilities` - capabilities to start application with, these capabilies have higher priority than capabilities defined in `*.properties` files and in profiles
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Start mobile application with capabilities
+Given I start mobile application with capabilities:
+|name                           |value|
+|bstack:options.networkLogs     |true |
+|appium:options.clearSystemFiles|false|
+----

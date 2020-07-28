@@ -120,7 +120,7 @@ public class VividusWebDriverFactoryTests
         verify(eventFiringWebDriver).register(webDriverEventListener);
         assertEquals(remoteExecution, vividusWebDriver.isRemote());
         verify(webDriverManagerContext).reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
-        verify(webDriverManager).resize(eventFiringWebDriver, windowSize);
+        verify(webDriverManager).resize(driver, windowSize);
     }
 
     private static RunningStory createRunningStory(String browserName)

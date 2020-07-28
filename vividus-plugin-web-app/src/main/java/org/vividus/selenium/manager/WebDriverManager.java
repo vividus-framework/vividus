@@ -16,45 +16,25 @@
 
 package org.vividus.selenium.manager;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.ContextAware;
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.HasCapabilities;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.Rotatable;
-import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Window;
-import org.openqa.selenium.remote.BrowserType;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.selenium.BrowserWindowSize;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.SauceLabsCapabilityType;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.WebDriverUtil;
 
-import io.appium.java_client.MobileDriver;
-import io.appium.java_client.MobileElement;
-import io.appium.java_client.remote.MobilePlatform;
-
-public class WebDriverManager implements IWebDriverManager
+public class WebDriverManager extends GenericWebDriverManager implements IWebDriverManager
 {
-    private static final String DESIREDCAPABILITIES_KEY = "desired";
-
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IWebDriverManagerContext webDriverManagerContext;
-    private boolean nativeApp;
     private boolean electronApp;
+
+    public WebDriverManager(IWebDriverProvider webDriverProvider, IWebDriverManagerContext webDriverManagerContext)
+    {
+        super(webDriverProvider, webDriverManagerContext);
+    }
 
     @Override
     public void resize(BrowserWindowSize browserWindowSize)
@@ -86,120 +66,6 @@ public class WebDriverManager implements IWebDriverManager
     }
 
     @Override
-    public Dimension getSize()
-    {
-        if (isMobile())
-        {
-            Dimension dimension =
-                    webDriverManagerContext.getParameter(WebDriverManagerParameter.SCREEN_SIZE);
-            if (dimension == null)
-            {
-                dimension = runInNativeContext(this::getSize);
-                webDriverManagerContext.putParameter(WebDriverManagerParameter.SCREEN_SIZE, dimension);
-            }
-            return isOrientation(ScreenOrientation.LANDSCAPE) ? new Dimension(dimension.height, dimension.width)
-                    : dimension;
-        }
-        return getSize(getWebDriver());
-    }
-
-    @Override
-    public void performActionInNativeContext(Consumer<WebDriver> consumer)
-    {
-        runInNativeContext(webDriver -> {
-            consumer.accept(webDriver);
-            return webDriver;
-        });
-    }
-
-    private Dimension getSize(WebDriver webDriver)
-    {
-        return webDriver.manage().window().getSize();
-    }
-
-    private <R> R runInNativeContext(Function<WebDriver, R> function)
-    {
-        if (isMobile())
-        {
-            @SuppressWarnings("unchecked")
-            MobileDriver<MobileElement> mobileDriver = webDriverProvider.getUnwrapped(MobileDriver.class);
-            String originalContext = mobileDriver.getContext();
-            if (!NATIVE_APP_CONTEXT.equals(originalContext))
-            {
-                switchToContext(mobileDriver, NATIVE_APP_CONTEXT);
-                try
-                {
-                    return function.apply(mobileDriver);
-                }
-                finally
-                {
-                    switchToContext(mobileDriver, originalContext);
-                }
-            }
-            return function.apply(mobileDriver);
-        }
-        return function.apply(getWebDriver());
-    }
-
-    private void switchToContext(ContextAware contextAwareDriver, String contextName)
-    {
-        if (contextAwareDriver.getContextHandles().contains(contextName))
-        {
-            contextAwareDriver.context(contextName);
-        }
-        else
-        {
-            throw new IllegalStateException("MobileDriver doesn't have context: " + contextName);
-        }
-    }
-
-    @Override
-    public boolean isMobile()
-    {
-        return isMobile(getCapabilities());
-    }
-
-    private static boolean isMobile(Capabilities capabilities)
-    {
-        return isIOS(capabilities) || isAndroid(capabilities);
-    }
-
-    @Override
-    public boolean isIOS()
-    {
-        return isIOS(getCapabilities());
-    }
-
-    public static boolean isIOS(Capabilities capabilities)
-    {
-        return isPlatformName(capabilities, MobilePlatform.IOS)
-                || isBrowserAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD)
-                || isDeviceAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD);
-    }
-
-    @Override
-    public boolean isAndroid()
-    {
-        return isAndroid(getCapabilities());
-    }
-
-    @SuppressWarnings("unchecked")
-    public static boolean isAndroid(Capabilities capabilities)
-    {
-        return checkCapabilities(capabilities, () ->
-        {
-            Capabilities capabilitiesToCheck = capabilities;
-            Object desiredCapabilities = capabilitiesToCheck.getCapability(DESIREDCAPABILITIES_KEY);
-            if (desiredCapabilities instanceof Map<?, ?>)
-            {
-                capabilitiesToCheck = new DesiredCapabilities((Map<String, ?>) desiredCapabilities);
-            }
-            return isPlatformName(capabilities, MobilePlatform.ANDROID)
-                    || isBrowserAnyOf(capabilitiesToCheck, BrowserType.ANDROID);
-        });
-    }
-
-    @Override
     public boolean isTypeAnyOf(WebDriverType... webDriverTypes)
     {
         return isTypeAnyOf(getWebDriver(), webDriverTypes);
@@ -224,126 +90,9 @@ public class WebDriverManager implements IWebDriverManager
     }
 
     @Override
-    public boolean isBrowserAnyOf(String... browserTypes)
-    {
-        return isBrowserAnyOf(getCapabilities(), browserTypes);
-    }
-
-    private static boolean isBrowserAnyOf(Capabilities capabilities, String... browserNames)
-    {
-        return checkCapabilities(capabilities, () ->
-        {
-            String capabilitiesBrowserName = capabilities.getBrowserName();
-            return Stream.of(browserNames).anyMatch(name -> name.equalsIgnoreCase(capabilitiesBrowserName));
-        });
-    }
-
-    private static boolean isPlatformName(Capabilities capabilities, String platformName)
-    {
-        return checkCapabilities(capabilities, () ->
-        {
-            Object platformNameFromCaps = capabilities.getCapability(CapabilityType.PLATFORM_NAME);
-            if (platformNameFromCaps instanceof String)
-            {
-                return platformNameFromCaps.equals(platformName);
-            }
-            if (platformNameFromCaps instanceof Platform)
-            {
-                return platformNameFromCaps == Platform.fromString(platformName);
-            }
-            return false;
-        });
-    }
-
-    private static boolean isDeviceAnyOf(Capabilities capabilities, String... devices)
-    {
-        return checkCapabilities(capabilities, () ->
-        {
-            String deviceCapability = (String) capabilities.getCapability(SauceLabsCapabilityType.DEVICE);
-            if (deviceCapability == null)
-            {
-                Object innerCapabilities = capabilities.getCapability(SauceLabsCapabilityType.CAPABILITIES);
-                if (innerCapabilities instanceof Map<?, ?>)
-                {
-                    deviceCapability = (String) ((Map<?, ?>) innerCapabilities).get(SauceLabsCapabilityType.DEVICE);
-                }
-            }
-            for (String device : devices)
-            {
-                if (device.equalsIgnoreCase(deviceCapability))
-                {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
-
-    @Override
-    public boolean isIOSNativeApp()
-    {
-        return nativeApp && isIOS();
-    }
-
-    @Override
-    public boolean isAndroidNativeApp()
-    {
-        return nativeApp && isAndroid();
-    }
-
-    @Override
-    public Capabilities getCapabilities()
-    {
-        return getCapabilities(getWebDriver());
-    }
-
-    private static Capabilities getCapabilities(WebDriver webDriver)
-    {
-        return WebDriverUtil.unwrap(webDriver, HasCapabilities.class).getCapabilities();
-    }
-
-    @Override
-    public Set<String> getWindowHandles()
-    {
-        return getWebDriver().getWindowHandles();
-    }
-
-    @Override
-    public boolean isOrientation(ScreenOrientation orientation)
-    {
-        if (!isMobile())
-        {
-            return false;
-        }
-        ScreenOrientation screenOrientation =
-                webDriverManagerContext.getParameter(WebDriverManagerParameter.ORIENTATION);
-        if (screenOrientation == null)
-        {
-            screenOrientation = webDriverProvider.getUnwrapped(Rotatable.class).getOrientation();
-            webDriverManagerContext.putParameter(WebDriverManagerParameter.ORIENTATION, screenOrientation);
-        }
-        return orientation == screenOrientation;
-    }
-
-    private static boolean checkCapabilities(Capabilities capabilities, BooleanSupplier supplier)
-    {
-        return capabilities != null && supplier.getAsBoolean();
-    }
-
-    @Override
     public boolean isElectronApp()
     {
         return electronApp;
-    }
-
-    private WebDriver getWebDriver()
-    {
-        return webDriverProvider.get();
-    }
-
-    public void setNativeApp(boolean nativeApp)
-    {
-        this.nativeApp = nativeApp;
     }
 
     public void setElectronApp(boolean electronApp)

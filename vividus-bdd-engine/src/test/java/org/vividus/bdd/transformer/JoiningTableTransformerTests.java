@@ -60,8 +60,8 @@ class JoiningTableTransformerTests
     {
         Properties properties = new Properties();
         properties.setProperty(JOIN_MODE, "invalidMode");
-        verifyIllegalArgumentException(properties,
-                "Value of ExamplesTable property '" + JOIN_MODE + "' must be from range [ROWS, COLUMNS]");
+        verifyIllegalArgumentException(properties, "Value of ExamplesTable property 'joinMode' must be from range "
+                + "[ROWS, COLUMNS], but got 'invalidMode'");
     }
 
     @Test

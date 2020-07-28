@@ -19,8 +19,11 @@ package org.vividus.bdd.model;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,5 +68,13 @@ public class MetaWrapper
         return Stream.of(StringUtils.split(meta.getProperty(propertyName), META_VALUES_SEPARATOR))
                 .map(StringUtils::trim)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public Map<String, String> getPropertiesByKey(Predicate<String> keyFilter)
+    {
+        return meta.getPropertyNames()
+                   .stream()
+                   .filter(keyFilter)
+                   .collect(Collectors.toMap(Function.identity(), meta::getProperty));
     }
 }

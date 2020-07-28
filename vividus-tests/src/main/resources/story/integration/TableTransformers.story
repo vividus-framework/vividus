@@ -144,3 +144,30 @@ Meta:
 Then `<joined>` is equal to `line 1 line 2 line 3`
 Examples:
 {transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=Sheet1, addresses=A1, column=joined, \{lineBreakReplacement|VERBATIM\}= }
+
+Scenario: Verify ExamplesTable property value with space
+Meta:
+    @issueId 767
+Then `<joined>` is equal to `line 1 line 2 line 3`
+Examples:
+{transformer=FROM_EXCEL, path=/data/excel with spaces in name.xlsx, sheet=Sheet1, addresses=A1, column=joined, \{lineBreakReplacement|VERBATIM\}= }
+
+Scenario: Verify nested transformers
+When I initialize the story variable `table-row-number` with value `#{eval(${table-row-number:0} + 1)}`
+Then `<repeated>` is equal to `/to/be/repeated/for/each/row/`
+Then `<repeated2>` is equal to `one-more-repeated-value`
+Then `<repeated3>` is equal to `we need more repetitions`
+Then `<number>` is equal to `${table-row-number}`
+Then `<name>` is equal to `Name ${table-row-number}`
+Examples:
+{transformer=MERGING, mergeMode=columns, fillerValue=/to/be/repeated/for/each/row/, tables=|repeated|;
+    \{transformer=MERGING\, mergeMode=columns\, fillerValue=one-more-repeated-value\, tables=|repeated2|\;
+        \\{transformer=MERGING\\, mergeMode=columns\\, fillerValue=we need more repetitions\\, tables=|repeated3|\\;
+            \\\{transformer=FROM_EXCEL\\\, path=/data/complex-data.xlsx\\\, sheet=data\\\, range=A4:A20\\\, increment=8\\\, column=number\\\}\\;
+            \\\{transformer=FROM_EXCEL\\\, path=/data/complex-data.xlsx\\\, sheet=data\\\, range=B4:B20\\\, increment=8\\\, column=name\\\}
+        \\}
+    \}
+}
+
+Scenario: Verify variable from nested transformers scenario
+Then `${table-row-number}` is equal to `3`

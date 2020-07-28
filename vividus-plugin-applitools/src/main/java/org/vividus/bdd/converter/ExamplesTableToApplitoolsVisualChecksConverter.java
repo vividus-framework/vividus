@@ -20,15 +20,12 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Named;
-
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ParameterConverters.AbstractChainableParameterConverter;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 
-@Named
 public class ExamplesTableToApplitoolsVisualChecksConverter
     extends AbstractChainableParameterConverter<ExamplesTable, List<ApplitoolsVisualCheck>>
 {

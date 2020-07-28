@@ -75,7 +75,7 @@ public enum ActionAttributeType implements IActionAttributeType
     private final String attributeName;
     private final Class<? extends IElementAction> actionClass;
     private final transient Function<SearchParameters, By> searchLocatorBuilder;
-    private ActionAttributeType competingType;
+    private IActionAttributeType competingType;
 
     ActionAttributeType(String attributeName, Class<? extends IElementAction> actionClass)
     {
@@ -133,7 +133,7 @@ public enum ActionAttributeType implements IActionAttributeType
     }
 
     @Override
-    public ActionAttributeType getCompetingType()
+    public IActionAttributeType getCompetingType()
     {
         return competingType;
     }

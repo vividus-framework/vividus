@@ -1,0 +1,31 @@
+project.description = 'Vividus extension for selenium'
+
+ ext {
+     seleniumVersion = '4.0.0-alpha-1'
+}
+
+
+ dependencies {
+     implementation project(':vividus-bdd-engine')
+     implementation project(':vividus-test-context')
+     implementation project(':vividus-util')
+
+     api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: seleniumVersion)
+     api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: seleniumVersion)
+     api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: seleniumVersion)
+     api(group: 'io.appium', name: 'java-client', version: '7.1.0') {
+         exclude module: 'selenium-java'
+     }
+
+     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.1.0')
+     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+
+     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+     testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
+     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
+     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+ }

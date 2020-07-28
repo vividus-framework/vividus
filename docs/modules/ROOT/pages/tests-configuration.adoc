@@ -1,0 +1,7 @@
+= Tests Configuration
+
+== Selenium Grid
+
+* `selenium.grid.username` - defines remote grid username
+* `selenium.grid.password` - defines remote grid password
+* `selenium.grid.host` - defines remote grid hostname

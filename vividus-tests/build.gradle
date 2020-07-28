@@ -9,6 +9,7 @@ dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-applitools')
     implementation project(':vividus-plugin-db')
+    implementation project(':vividus-plugin-mobile-app')
     implementation project(':vividus-plugin-mongodb')
     implementation project(':vividus-plugin-csv')
     implementation project(':vividus-plugin-datetime')

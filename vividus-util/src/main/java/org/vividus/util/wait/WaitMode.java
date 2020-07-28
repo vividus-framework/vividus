@@ -17,6 +17,7 @@
 package org.vividus.util.wait;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 public class WaitMode
 {
@@ -37,5 +38,10 @@ public class WaitMode
     public int getRetryTimes()
     {
         return retryTimes;
+    }
+
+    public long calculatePollingTimeout(TimeUnit timeUnit)
+    {
+        return timeUnit.convert(duration) / retryTimes;
     }
 }
