@@ -71,7 +71,8 @@ public class ExecutableSteps
      * @param name variable name to check
      * @param stepsToExecute steps to execute
      */
-    @When("variable '$name' is not set I do:$stepsToExecute")
+    @When("variable `$name` is not set I do:$stepsToExecute")
+    @Alias("variable '$name' is not set I do:$stepsToExecute")
     public void ifVariableNotSetPerformSteps(String name, SubSteps stepsToExecute)
     {
         if (bddVariableContext.getVariable(name) == null)
@@ -93,6 +94,7 @@ public class ExecutableSteps
      * @param stepsToExecute examples table with steps to execute <b>number</b> times
      */
     @When("I `$number` times do:$stepsToExecute")
+    @Alias("I '$number' times do:$stepsToExecute")
     public void performStepsNumberTimes(int number, SubSteps stepsToExecute)
     {
         int minimum = 0;
@@ -126,6 +128,8 @@ public class ExecutableSteps
      * @param stepsToExecute steps to execute
      */
     @When("I execute steps while counter is $comparisonRule `$limit` with increment `$increment` starting from `$seed`"
+            + ":$stepsToExecute")
+    @Alias("I execute steps while counter is $comparisonRule '$limit' with increment '$increment' starting from '$seed'"
             + ":$stepsToExecute")
     public void executeStepsWhileConditionIsTrueWithStep(ComparisonRule comparisonRule, int limit, int increment,
             int seed, SubSteps stepsToExecute)
