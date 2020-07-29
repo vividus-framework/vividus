@@ -55,8 +55,6 @@ import org.vividus.bdd.report.allure.model.ScenarioExecutionStage;
 import org.vividus.bdd.report.allure.model.StatusPriority;
 import org.vividus.bdd.report.allure.model.StoryExecutionStage;
 import org.vividus.reporter.event.AttachmentPublishEvent;
-import org.vividus.reporter.event.SubStepsPublishingFinishEvent;
-import org.vividus.reporter.event.SubStepsPublishingStartEvent;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.model.KnownIssue;
@@ -417,30 +415,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     {
         Attachment attachment = event.getAttachment();
         lifecycle.addAttachment(attachment.getTitle(), attachment.getContentType(), null, attachment.getContent());
-    }
-
-    @Subscribe
-    @AllowConcurrentEvents
-    public void onSubStepsPublishingStart(SubStepsPublishingStartEvent event)
-    {
-        startBddStep(null);
-    }
-
-    @Subscribe
-    @AllowConcurrentEvents
-    public void onSubStepsPublishingFinish(SubStepsPublishingFinishEvent event)
-    {
-        modifyStepTitle(event.getSubStepTitle());
-        Throwable throwable = event.getSubStepThrowable();
-        if (throwable == null)
-        {
-            updateStepStatus(Status.PASSED);
-            stopStep();
-        }
-        else
-        {
-            stopStep(StatusProvider.getStatus(throwable), getStatusDetailsFromThrowable(throwable));
-        }
     }
 
     private void startBddStep(String stepTitle)

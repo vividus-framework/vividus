@@ -16,15 +16,10 @@
 
 package org.vividus.bdd;
 
-import com.google.common.eventbus.AllowConcurrentEvents;
-import com.google.common.eventbus.Subscribe;
-
 import org.jbehave.core.model.Story;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ISubStepsListener;
 import org.vividus.bdd.variable.VariableScope;
-import org.vividus.reporter.event.SubStepsPublishingFinishEvent;
-import org.vividus.reporter.event.SubStepsPublishingStartEvent;
 
 public class BddVariableStoryReporter extends ChainedStoryReporter implements ISubStepsListener
 {
@@ -37,20 +32,6 @@ public class BddVariableStoryReporter extends ChainedStoryReporter implements IS
     {
         bddVariableContext.initVariables();
         super.beforeStory(story, givenStory);
-    }
-
-    @Subscribe
-    @AllowConcurrentEvents
-    public void onSubStepsPublishingStart(SubStepsPublishingStartEvent event)
-    {
-        setSubStepPublishing(Boolean.TRUE);
-    }
-
-    @Subscribe
-    @AllowConcurrentEvents
-    public void onSubStepsPublishingFinish(SubStepsPublishingFinishEvent event)
-    {
-        setSubStepPublishing(Boolean.FALSE);
     }
 
     @Override
