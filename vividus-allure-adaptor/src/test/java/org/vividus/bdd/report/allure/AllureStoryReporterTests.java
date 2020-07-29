@@ -86,8 +86,6 @@ import org.vividus.bdd.report.allure.adapter.IVerificationErrorAdapter;
 import org.vividus.bdd.report.allure.model.ScenarioExecutionStage;
 import org.vividus.bdd.report.allure.model.StatusPriority;
 import org.vividus.bdd.report.allure.model.StoryExecutionStage;
-import org.vividus.reporter.event.SubStepsPublishingFinishEvent;
-import org.vividus.reporter.event.SubStepsPublishingStartEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.testcontext.SimpleTestContext;
@@ -951,39 +949,6 @@ class AllureStoryReporterTests
         List<Label> labels = testResultCaptor.getValue().getLabels();
         assertEquals(1, labels.stream().filter(l -> TEST_CASE_ID.equals(l.getName())).count());
         assertEquals(1, labels.stream().filter(l -> REQUIREMENT_ID.equals(l.getName())).count());
-    }
-
-    @Test
-    void testFireSubStepsPublishingStartEvent()
-    {
-        mockStepUid();
-        allureStoryReporter.onSubStepsPublishingStart(new SubStepsPublishingStartEvent());
-        verify(allureLifecycle).startStep(eq(STEP_UID), eq(SUB_STEP_UID), any(StepResult.class));
-        verify(allureRunContext).setScenarioExecutionStage(ScenarioExecutionStage.IN_PROGRESS);
-    }
-
-    @Test
-    void testFireSubStepsPublishingFinishEvent()
-    {
-        mockStepUid();
-        allureStoryReporter.onSubStepsPublishingFinish(new SubStepsPublishingFinishEvent());
-        verify(allureLifecycle, times(2)).updateStep(eq(STEP_UID), anyStepResultConsumer());
-        verify(allureLifecycle).stopStep(STEP_UID);
-        verify(allureLifecycle, never()).updateTestCase(eq(SCENARIO_UID),
-                anyTestResultConsumer());
-    }
-
-    @Test
-    void testFireSubStepsPublishingFinishEventWithError()
-    {
-        mockStepUid();
-        SubStepsPublishingFinishEvent event = new SubStepsPublishingFinishEvent();
-        VerificationError verificationError = mock(VerificationError.class);
-        event.setSubStepThrowable(verificationError);
-        allureStoryReporter.onSubStepsPublishingFinish(event);
-        verify(allureLifecycle, times(2)).updateStep(eq(STEP_UID), anyStepResultConsumer());
-        verify(allureLifecycle).stopStep(STEP_UID);
-        verify(allureLifecycle).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
     }
 
     @ParameterizedTest
