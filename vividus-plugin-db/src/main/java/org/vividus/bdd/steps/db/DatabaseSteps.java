@@ -418,6 +418,7 @@ public class DatabaseSteps
                            .stream()
                            .map(map::get)
                            .filter(Objects::nonNull)
+                           .sorted()
                            .map(Object::toString)
                            .collect(Collectors.joining()), StandardCharsets.UTF_8);
     }
