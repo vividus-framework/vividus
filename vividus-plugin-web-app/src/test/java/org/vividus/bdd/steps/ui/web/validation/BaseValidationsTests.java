@@ -97,9 +97,6 @@ class BaseValidationsTests
     private ISearchActions searchActions;
 
     @Mock
-    private IElementValidations elementValidations;
-
-    @Mock
     private IHighlightingSoftAssert softAssert;
 
     @InjectMocks
@@ -189,8 +186,10 @@ class BaseValidationsTests
     {
         spy = Mockito.spy(baseValidations);
         List<WebElement> elements = Arrays.asList(mockedWebElement, mockedWebElement);
+        IDescriptiveSoftAssert descriptiveSoftAssert = mock(IDescriptiveSoftAssert.class);
+        when(softAssert.withHighlightedElements(elements)).thenReturn(descriptiveSoftAssert);
         assertNull(spy.assertIfElementExists(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, elements));
-        verify(elementValidations).assertElementNumber(eq(BUSINESS_DESCRIPTION), eq(SYSTEM_DESCRIPTION),
+        verify(descriptiveSoftAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(SYSTEM_DESCRIPTION),
                 eq(elements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
     }
 
@@ -271,8 +270,10 @@ class BaseValidationsTests
         SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH_INT);
         String systemDescription = String.format(PATTERN_ELEMENTS, INT_ARG, searchAttributes);
         when(searchActions.findElements(mockedSearchContext, searchAttributes)).thenReturn(webElements);
+        IDescriptiveSoftAssert descriptiveSoftAssert = mock(IDescriptiveSoftAssert.class);
+        when(softAssert.withHighlightedElements(webElements)).thenReturn(descriptiveSoftAssert);
         baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, searchAttributes, INT_ARG);
-        verify(elementValidations).assertElementNumber(eq(BUSINESS_DESCRIPTION), eq(systemDescription),
+        verify(descriptiveSoftAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription),
                 eq(webElements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
     }
 
@@ -282,8 +283,13 @@ class BaseValidationsTests
         when(webUiContext.getSearchContext()).thenReturn(mockedSearchContext);
         SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, searchAttributes)).thenReturn(webElements);
+        IDescriptiveSoftAssert descriptiveSoftAssert = mock(IDescriptiveSoftAssert.class);
+        when(softAssert.withHighlightedElements(webElements)).thenReturn(descriptiveSoftAssert);
+        String systemDescription = String.format(PATTERN_ELEMENTS, INT_ARG, searchAttributes);
         assertFalse(
                 baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, searchAttributes, INT_ARG));
+        verify(descriptiveSoftAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription),
+                eq(webElements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
     }
 
     @Test
@@ -319,10 +325,12 @@ class BaseValidationsTests
         when(webUiContext.getSearchContext()).thenReturn(mockedSearchContext);
         SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, searchAttributes)).thenReturn(webElements);
+        IDescriptiveSoftAssert descriptiveSoftAssert = mock(IDescriptiveSoftAssert.class);
+        when(softAssert.withHighlightedElements(webElements)).thenReturn(descriptiveSoftAssert);
         int leastCount = 1;
         String systemDescription = String.format("There are at least %d elements with attributes '%s'", leastCount,
                 searchAttributes);
-        when(elementValidations.assertElementNumber(eq(BUSINESS_DESCRIPTION), eq(systemDescription), eq(webElements),
+        when(descriptiveSoftAssert.assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription), eq(webElements),
                 argThat(e -> "number of elements is a value equal to or greater than <1>".equals(e.toString()))))
                         .thenReturn(assertionResult);
         return baseValidations.assertIfAtLeastNumberOfElementsExist(BUSINESS_DESCRIPTION, searchAttributes, leastCount);
