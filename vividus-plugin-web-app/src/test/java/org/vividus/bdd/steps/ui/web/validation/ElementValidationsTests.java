@@ -42,11 +42,9 @@ class ElementValidationsTests
 {
     private static final String TITLE = "title";
     private static final String ELEMENT_CONTAINS_TEXT = "Element contains text";
-    private static final String DESCRIPTION = "desc";
     private static final String STRING_ARG = "stringArg";
     private static final int DIMENSION_VALUE = 100;
     private static final int CORRECT_WIDTH_VALUE = 80;
-    private static final String BUSINESS_DESCRIPTION = "Test business description";
 
     @Mock
     private IHighlightingSoftAssert mockedIHighlightingSoftAssert;
@@ -65,18 +63,6 @@ class ElementValidationsTests
 
     @InjectMocks
     private ElementValidations elementValidations;
-
-    @Test
-    void testAssertElementNumber()
-    {
-        List<WebElement> mockedWebElements = List.of(mockedWebElement);
-        when(mockedIHighlightingSoftAssert.withHighlightedElements(mockedWebElements))
-                .thenReturn(descriptiveSoftAssert);
-        elementValidations.assertElementNumber(BUSINESS_DESCRIPTION, DESCRIPTION, mockedWebElements, any());
-        verify(descriptiveSoftAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(DESCRIPTION), eq(
-                mockedWebElements),
-                any());
-    }
 
     @Test
     void testAssertIfElementContainsTextOverload()

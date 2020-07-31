@@ -23,8 +23,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
@@ -47,11 +46,19 @@ public class BaseValidations implements IBaseValidations
 {
     private static final String AN_ELEMENT_WITH_ATTRIBUTES = "An element with attributes: '%s'";
 
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IWebUiContext webUiContext;
-    @Inject private ISearchActions searchActions;
-    @Inject private IElementValidations elementValidations;
-    @Inject private IHighlightingSoftAssert softAssert;
+    private final IWebDriverProvider webDriverProvider;
+    private final IWebUiContext webUiContext;
+    private final ISearchActions searchActions;
+    private final IHighlightingSoftAssert softAssert;
+
+    public BaseValidations(IWebDriverProvider webDriverProvider, IWebUiContext webUiContext,
+            ISearchActions searchActions, IHighlightingSoftAssert softAssert)
+    {
+        this.webDriverProvider = webDriverProvider;
+        this.webUiContext = webUiContext;
+        this.searchActions = searchActions;
+        this.softAssert = softAssert;
+    }
 
     @Override
     public boolean assertElementState(String businessDescription, IState state, WebElement element)
@@ -90,7 +97,7 @@ public class BaseValidations implements IBaseValidations
     public boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
             int number)
     {
-        return elementValidations.assertElementNumber(businessDescription, systemDescription, elements,
+        return assertElementNumber(businessDescription, systemDescription, elements,
                 elementNumber(Matchers.comparesEqualTo(number)));
     }
 
@@ -98,8 +105,15 @@ public class BaseValidations implements IBaseValidations
     public boolean assertLeastElementNumber(String businessDescription, String systemDescription,
             List<WebElement> elements, int leastNumber)
     {
-        return elementValidations.assertElementNumber(businessDescription, systemDescription, elements,
+        return assertElementNumber(businessDescription, systemDescription, elements,
                 elementNumber(Matchers.greaterThanOrEqualTo(leastNumber)));
+    }
+
+    private boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
+            Matcher<? super List<WebElement>> matcher)
+    {
+        return softAssert.withHighlightedElements(elements).assertThat(businessDescription, systemDescription,
+                elements, matcher);
     }
 
     @Override
