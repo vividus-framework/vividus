@@ -36,6 +36,8 @@ public final class UriUtils
     private static final char QUERY_SEPARATOR = '?';
     private static final char FRAGMENT_SEPARATOR = '#';
     private static final char SLASH = '/';
+    private static final String ENCODED_AMPERSAND = "%26";
+    private static final String DOUBLE_ENCODED_AMPERSAND = "%2526";
 
     private UriUtils()
     {
@@ -107,7 +109,7 @@ public final class UriUtils
     {
         try
         {
-            String decodedUrl = decode(url);
+            String decodedUrl = decodeUrl(url);
 
             int schemeSeparatorIndex = decodedUrl.indexOf(SCHEME_SEPARATOR);
             if (schemeSeparatorIndex < 0)
@@ -167,6 +169,13 @@ public final class UriUtils
         return data.replace("+", "%2B");
     }
 
+    private static String decodeUrl(String url)
+    {
+        String query = StringUtils.substringBeforeLast(StringUtils.substringAfter(url, QUERY_SEPARATOR), "#");
+        return decode(!query.isEmpty() ? url.replace(query, query.replace(ENCODED_AMPERSAND, DOUBLE_ENCODED_AMPERSAND))
+                : url);
+    }
+
     private static String decode(String data)
     {
         return URLDecoder.decode(encodePlusCharacter(data), StandardCharsets.UTF_8);
@@ -190,8 +199,8 @@ public final class UriUtils
     private static URI normalizeToRfc3986(URI uri)
     {
         StringBuilder normalizedUri = new StringBuilder(uri.toString());
-        encodeSpecialCharacters(normalizedUri, uri.getRawQuery());
-        encodeSpecialCharacters(normalizedUri, uri.getRawFragment());
+        recodeSpecialCharacters(normalizedUri, uri.getRawQuery(), true);
+        recodeSpecialCharacters(normalizedUri, uri.getRawFragment(), false);
         return URI.create(normalizedUri.toString());
     }
 
@@ -205,7 +214,8 @@ public final class UriUtils
         return url;
     }
 
-    private static void encodeSpecialCharacters(StringBuilder normalizedUri, String uriPart)
+    private static void recodeSpecialCharacters(StringBuilder normalizedUri, String uriPart,
+            boolean decodeDoubleEncodedAmpersand)
     {
         if (uriPart != null)
         {
@@ -213,6 +223,10 @@ public final class UriUtils
                     .replace("[", "%5B")
                     .replace("]", "%5D");
             encodedUriPart = encodePlusCharacter(encodedUriPart);
+            if (decodeDoubleEncodedAmpersand)
+            {
+                encodedUriPart = encodedUriPart.replace(DOUBLE_ENCODED_AMPERSAND, ENCODED_AMPERSAND);
+            }
             int indexOfUriPart = normalizedUri.indexOf(uriPart);
             normalizedUri.replace(indexOfUriPart, indexOfUriPart + uriPart.length(), encodedUriPart);
         }
