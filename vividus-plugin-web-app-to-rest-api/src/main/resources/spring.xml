@@ -63,6 +63,7 @@
                 <property name="skipResponseEntity" value="true" />
                 <property name="lastRequestInterceptor"><null/></property>
                 <property name="lastResponseInterceptor"><null/></property>
+                <property name="sslCertificateCheckEnabled" value="${resource-checker.http.ssl.check-certificate}" />
             </bean>
         </constructor-arg>
     </bean>
