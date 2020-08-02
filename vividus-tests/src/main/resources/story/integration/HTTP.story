@@ -17,6 +17,18 @@ Examples:
 |00:00:00+02:00       |
 |00:00:00%2B02:00     |
 
+Scenario: Verify handling of ampersand character in URL path
+When I send HTTP GET to the relative URL '/anything/path-with-&-ampersand'
+Then the response code is equal to '200'
+Then a JSON element by the JSON path '$.url' is equal to '${http-endpoint}anything/path-with-&-ampersand'
+
+Scenario: Verify handling of ampersand character in URL query
+When I send HTTP GET to the relative URL '/get?key=#{encodeUrl(a&b)}'
+Then the response code is equal to '200'
+Then a JSON element by the JSON path '$.url' is equal to '${http-endpoint}get?key=a%26b'
+Then a JSON element by the JSON path '$.args.length()' is equal to '1'
+Then a JSON element by the JSON path '$.args.key' is equal to 'a&b'
+
 Scenario: Set HTTP cookies
 When I send HTTP GET to the relative URL '/cookies/set?vividus-cookie=vividus'
 When I send HTTP GET to the relative URL '/cookies'
