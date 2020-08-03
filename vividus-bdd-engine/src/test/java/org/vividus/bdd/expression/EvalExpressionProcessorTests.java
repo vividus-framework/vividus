@@ -50,6 +50,8 @@ class EvalExpressionProcessorTests
         return Stream.of(
                 Arguments.of("eval(null)", "null"),
                 Arguments.of("eval(16 + 2 * 6)", "28"),
+                Arguments.of("eval(math:abs(-10))", "10"),
+                Arguments.of("eval(stringUtils:substringAfterLast('namescpaces are %here', '%'))", "here"),
                 Arguments.of("eval((16 + 2) * 6)", "108"),
                 Arguments.of("eval(100 / 5 - 16 * 2 + 6)", "-6"),
                 Arguments.of("eval(`string\n1` == `string\n1`)", TRUE),

@@ -40,14 +40,6 @@ public class ElementValidations implements IElementValidations
     @Inject private IHighlightingSoftAssert softAssert;
 
     @Override
-    public boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
-            Matcher<? super List<WebElement>> matcher)
-    {
-        return softAssert.withHighlightedElements(elements).assertThat(businessDescription, systemDescription,
-                elements, matcher);
-    }
-
-    @Override
     public boolean assertIfElementContainsText(WebElement element, String text, boolean isTrue)
     {
         if (element != null)

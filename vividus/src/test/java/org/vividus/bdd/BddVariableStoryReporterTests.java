@@ -59,23 +59,6 @@ class BddVariableStoryReporterTests
     }
 
     @Test
-    void testOnSubStepsPublishingStart()
-    {
-        bddVariableStoryReporter.onSubStepsPublishingStart(null);
-        bddVariableStoryReporter.successful(STEP);
-        verifyNoInteractions(bddVariableContext);
-    }
-
-    @Test
-    void testOnSubStepsPublishingFinish()
-    {
-        bddVariableStoryReporter.onSubStepsPublishingFinish(null);
-
-        bddVariableStoryReporter.successful(STEP);
-        verify(bddVariableContext).clearVariables(VariableScope.STEP);
-    }
-
-    @Test
     void testBeforeSubSteps()
     {
         bddVariableStoryReporter.beforeSubSteps();

@@ -166,8 +166,12 @@ class UriUtilsTests
         "http://somehost:8080/path?date=1980-09-26T00:00:00+02:00&country=US, http://somehost:8080/path?date=1980-09-26T00:00:00%2B02:00&country=US",
         "http://somehost:8080/path?date=1980-09-26T00%3A00%3A00%2B02%3A00&country=US, http://somehost:8080/path?date=1980-09-26T00:00:00%2B02:00&country=US",
         "http://somehost:8080/path?date=1980-09-26T00:00:00%2B02:00&country=US, http://somehost:8080/path?date=1980-09-26T00:00:00%2B02:00&country=US",
-        "http://somehost:8080/path#00:00:00%2B02:00, http://somehost:8080/path#00:00:00%2B02:00",
-        "http://somehost:8080/path#00:00:00+02:00, http://somehost:8080/path#00:00:00%2B02:00"
+        "http://somehost:8080/path#00:00:00%2B02:00,                  http://somehost:8080/path#00:00:00%2B02:00",
+        "http://somehost:8080/path#00:00:00+02:00,                    http://somehost:8080/path#00:00:00%2B02:00",
+        "http://somehost:8080/path?key=a%26b,                         http://somehost:8080/path?key=a%26b",
+        "http://somehost:8080/path?key=a&key2=b,                      http://somehost:8080/path?key=a&key2=b",
+        "http://somehost:8080/path-with-&-ampersand,                  http://somehost:8080/path-with-&-ampersand",
+        "http://somehost:8080/path-with-%26-ampersand,                http://somehost:8080/path-with-&-ampersand"
         // CHECKSTYLE:ON
     })
     void testCreateUri(String input, URI expected)

@@ -26,13 +26,17 @@ Scenario: Verify eval expression
 Then `#{<expression>}` is = `<expected>`
 
 Examples:
-|expected |expression                      |
-|null     |eval(null)                      |
-|28       |eval(16 + 2 * 6)                |
-|108      |eval((16 + 2) * 6)              |
-|-6       |eval(100 / 5 - 16 * 2 + 6)      |
-|true     |eval(`string\n1` == `string\n1`)|
-|false    |eval(`string\n1` == `string1`)  |
+|expected|expression                                                        |
+|null    |eval(null)                                                        |
+|28      |eval(16 + 2 * 6)                                                  |
+|10      |eval(math:abs(-10))                                               |
+|here    |eval(stringUtils:substringAfterLast('namescpaces are %here', '%'))|
+|108     |eval((16 + 2) * 6)                                                |
+|-6      |eval(100 / 5 - 16 * 2 + 6)                                        |
+|true    |eval(`string\n1` == `string\n1`)                                  |
+|false   |eval(`string\n1` == `string1`)                                    |
+
+
 
 
 Scenario: Verify eval has an access to a variable context
