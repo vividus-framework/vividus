@@ -373,13 +373,23 @@ class DatabaseStepsTests
         verifyNoInteractions(attachmentPublisher, softAssert);
     }
 
-    @Test
-    void shouldCompareDataVsExamplesTableAndNotPostReportIfDataEqual()
+    static Stream<Arguments> equalDataProvider()
+    {
+        return Stream.of(
+                Arguments.of(List.of(Map.of(COL1, VAL1)), new ExamplesTable("|col1|\n|val1|")),
+                Arguments.of(List.of(Map.of(COL1, VAL1, COL2, VAL2)), new ExamplesTable("|col2|col1|\n|val2|val1|"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("equalDataProvider")
+    void shouldCompareDataVsExamplesTableAndNotPostReportIfDataEqual(List<Map<String, Object>> data,
+            ExamplesTable table)
     {
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         mockRowsFilterAsNOOP();
         mockDataSource();
-        databaseSteps.compareData(List.of(Map.of(COL1, VAL1)), Set.of(), DB_KEY, new ExamplesTable("|col1|\n|val1|"));
+        databaseSteps.compareData(data, Set.of(), DB_KEY, table);
         verify(attachmentPublisher, never()).publishAttachment(eq(TEMPLATE_PATH), any(), any());
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
                 argThat(r -> {
