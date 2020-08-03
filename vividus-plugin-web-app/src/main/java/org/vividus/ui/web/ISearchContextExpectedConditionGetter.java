@@ -16,10 +16,11 @@
 
 package org.vividus.ui.web;
 
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.vividus.ui.web.action.IExpectedConditions;
+import org.vividus.ui.web.action.IExpectedSearchContextCondition;
 
-public interface IState
+public interface ISearchContextExpectedConditionGetter
 {
-    ExpectedCondition<?> getExpectedCondition(WebElement element);
+    <T> IExpectedSearchContextCondition<?> getExpectedCondition(IExpectedConditions<T> expectedConditions,
+            T searchCriteria);
 }

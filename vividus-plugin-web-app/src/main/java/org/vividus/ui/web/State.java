@@ -22,7 +22,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.vividus.ui.web.action.IExpectedConditions;
 import org.vividus.ui.web.action.IExpectedSearchContextCondition;
 
-public enum State implements IState
+public enum State implements IState, ISearchContextExpectedConditionGetter
 {
     ENABLED
     {
