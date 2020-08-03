@@ -19,8 +19,6 @@ package org.vividus.ui.web;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.ui.web.action.ExpectedConditions;
-import org.vividus.ui.web.action.IExpectedConditions;
-import org.vividus.ui.web.action.IExpectedSearchContextCondition;
 
 public enum DropDownState implements IState
 {
@@ -31,13 +29,6 @@ public enum DropDownState implements IState
         {
             return State.ENABLED.getExpectedCondition(element);
         }
-
-        @Override
-        public <T> IExpectedSearchContextCondition<?> getExpectedCondition(IExpectedConditions<T> expectedConditions,
-                T searchCriteria)
-        {
-            return State.ENABLED.getExpectedCondition(expectedConditions, searchCriteria);
-        }
     },
     DISABLED
     {
@@ -45,13 +36,6 @@ public enum DropDownState implements IState
         public ExpectedCondition<?> getExpectedCondition(WebElement element)
         {
             return State.DISABLED.getExpectedCondition(element);
-        }
-
-        @Override
-        public <T> IExpectedSearchContextCondition<?> getExpectedCondition(IExpectedConditions<T> expectedConditions,
-                T searchCriteria)
-        {
-            return State.DISABLED.getExpectedCondition(expectedConditions, searchCriteria);
         }
     },
     SELECTED
@@ -61,13 +45,6 @@ public enum DropDownState implements IState
         {
             return State.SELECTED.getExpectedCondition(element);
         }
-
-        @Override
-        public <T> IExpectedSearchContextCondition<?> getExpectedCondition(IExpectedConditions<T> expectedConditions,
-                T searchCriteria)
-        {
-            return State.SELECTED.getExpectedCondition(expectedConditions, searchCriteria);
-        }
     },
     NOT_SELECTED
     {
@@ -75,13 +52,6 @@ public enum DropDownState implements IState
         public ExpectedCondition<?> getExpectedCondition(WebElement element)
         {
             return State.NOT_SELECTED.getExpectedCondition(element);
-        }
-
-        @Override
-        public <T> IExpectedSearchContextCondition<?> getExpectedCondition(IExpectedConditions<T> expectedConditions,
-                T searchCriteria)
-        {
-            return State.NOT_SELECTED.getExpectedCondition(expectedConditions, searchCriteria);
         }
     },
     VISIBLE
@@ -91,13 +61,6 @@ public enum DropDownState implements IState
         {
             return State.VISIBLE.getExpectedCondition(element);
         }
-
-        @Override
-        public <T> IExpectedSearchContextCondition<?> getExpectedCondition(IExpectedConditions<T> expectedConditions,
-                T searchCriteria)
-        {
-            return State.VISIBLE.getExpectedCondition(expectedConditions, searchCriteria);
-        }
     },
     NOT_VISIBLE
     {
@@ -105,13 +68,6 @@ public enum DropDownState implements IState
         public ExpectedCondition<?> getExpectedCondition(WebElement element)
         {
             return State.NOT_VISIBLE.getExpectedCondition(element);
-        }
-
-        @Override
-        public <T> IExpectedSearchContextCondition<?> getExpectedCondition(IExpectedConditions<T> expectedConditions,
-                T searchCriteria)
-        {
-            return State.NOT_VISIBLE.getExpectedCondition(expectedConditions, searchCriteria);
         }
     },
     MULTI_SELECT
@@ -121,13 +77,6 @@ public enum DropDownState implements IState
         {
             return ExpectedConditions.isMultiSelectDropDown(element, true);
         }
-
-        @Override
-        public <T> IExpectedSearchContextCondition<?> getExpectedCondition(IExpectedConditions<T> expectedConditions,
-                T searchCriteria)
-        {
-            return expectedConditions.isMultiSelectDropDown(searchCriteria, true);
-        }
     },
     SINGLE_SELECT
     {
@@ -135,13 +84,6 @@ public enum DropDownState implements IState
         public ExpectedCondition<?> getExpectedCondition(WebElement element)
         {
             return ExpectedConditions.isMultiSelectDropDown(element, false);
-        }
-
-        @Override
-        public <T> IExpectedSearchContextCondition<?> getExpectedCondition(IExpectedConditions<T> expectedConditions,
-                T searchCriteria)
-        {
-            return expectedConditions.isMultiSelectDropDown(searchCriteria, false);
         }
     }
 }
