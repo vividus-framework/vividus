@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.util.HttpMessageContents;
+import com.browserup.bup.util.HttpMessageInfo;
 import com.browserup.harreader.model.Har;
 import com.browserup.harreader.model.HarCreatorBrowser;
 import com.browserup.harreader.model.HarEntry;
@@ -46,6 +48,7 @@ import com.browserup.harreader.model.HttpMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.HttpStatus;
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,12 +58,15 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
+import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.proxy.IProxy;
 import org.vividus.proxy.ProxyLog;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWaitActions;
+
+import io.netty.handler.codec.http.HttpRequest;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyStepsTests
@@ -259,6 +265,17 @@ class ProxyStepsTests
         verify(waitActions).wait(eq(URL_PATTERN),
                 argThat(e -> String.format("waiting for HTTP %s request with URL pattern %s",
                         httpMethod, URL_PATTERN).equals(e.toString())));
+    }
+
+    @Test
+    void testAddHeadersToProxyRequest()
+    {
+        HttpRequest request = mock(HttpRequest.class);
+        HttpMessageContents contents = mock(HttpMessageContents.class);
+        HttpMessageInfo message = mock(HttpMessageInfo.class);
+        ExamplesTable headers = new ExamplesTable("|name|value|\n|name1|value1|");
+        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL_PATTERN, headers);
+        verify(proxy).addRequestFilter(argThat(filter -> filter.filterRequest(request, contents, message) == null));
     }
 
     private byte[] mockProxyLog() throws IOException
