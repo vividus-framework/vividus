@@ -31,6 +31,7 @@ public class KnownIssueChecker implements IKnownIssueChecker
 
     private ITestInfoProvider testInfoProvider;
     private IIssueStateProvider issueStateProvider;
+    private boolean detectPotentiallyKnown;
 
     public KnownIssueChecker(IKnownIssueProvider knownIssueProvider, KnownIssueDataProvider knownIssueDataProvider)
     {
@@ -79,6 +80,11 @@ public class KnownIssueChecker implements IKnownIssueChecker
         this.issueStateProvider = issueStateProvider;
     }
 
+    public void setDetectPotentiallyKnown(boolean detectPotentiallyKnown)
+    {
+        this.detectPotentiallyKnown = detectPotentiallyKnown;
+    }
+
     private class CandidateIssue
     {
         private static final int ALL_PATTERNS = 3;
@@ -102,6 +108,10 @@ public class KnownIssueChecker implements IKnownIssueChecker
                 return false;
             }
             boolean potentiallyKnown = isPotentiallyKnown(candidate);
+            if (potentiallyKnown && !detectPotentiallyKnown)
+            {
+                return false;
+            }
             if (potentiallyKnown)
             {
                 resetCurrentPatternsMatched();

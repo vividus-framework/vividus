@@ -130,6 +130,7 @@ class KnownIssueCheckerTests
     void testGetKnownIssueIfPotentiallyKnownIsFalse(String testStep, String testCase, String testSuite,
             boolean isPotentiallyKnown)
     {
+        knownIssueChecker.setDetectPotentiallyKnown(true);
         mockKnownIssueIdentifiers();
         when(testInfoProvider.getTestInfo()).thenReturn(createTestInfo(testStep, testCase, testSuite));
         assertKnownIssue(isPotentiallyKnown, TEXT);
@@ -230,11 +231,24 @@ class KnownIssueCheckerTests
     @Test
     void testGetKnownIssueFirstWithMatchedAssertionPattern()
     {
+        knownIssueChecker.setDetectPotentiallyKnown(true);
         Map<String, KnownIssueIdentifier> identifierMap = new HashMap<>();
         identifierMap.put(FIRST_ISSUE, createIdentifierWithTestSuitePattern(NOT_MATCHING_ASSERTION, STEP, SUITE));
         identifierMap.put(SECOND_ISSUE, createIdentifierWithTestSuitePattern(PATTERN, NOT_MATCHING_STEP, SUITE));
         identifierMap.put(THIRD_ISSUE, createIdentifierWithTestSuitePattern(PATTERN, STEP, NOT_MATCHING_SUITE));
         testGetKnownIssueFromSeveralCandidates(identifierMap, true);
+    }
+
+    @Test
+    void shouldNotFindPotentiallyKnownIssueWhenFeatureDisabled()
+    {
+        Map<String, KnownIssueIdentifier> identifierMap = new HashMap<>();
+        identifierMap.put(FIRST_ISSUE, createIdentifierWithTestSuitePattern(NOT_MATCHING_ASSERTION, STEP, SUITE));
+        identifierMap.put(SECOND_ISSUE, createIdentifierWithTestSuitePattern(PATTERN, NOT_MATCHING_STEP, SUITE));
+        identifierMap.put(THIRD_ISSUE, createIdentifierWithTestSuitePattern(PATTERN, STEP, NOT_MATCHING_SUITE));
+        when(testInfoProvider.getTestInfo()).thenReturn(createTestInfo(STEP, CASE, SUITE));
+        doReturn(identifierMap).when(knownIssueProvider).getKnownIssueIdentifiers();
+        assertNull(knownIssueChecker.getKnownIssue(PATTERN));
     }
 
     @Test

@@ -24,6 +24,10 @@ JSON file should contain a valid JSON. If JSON is not valid known issues will be
 |known-issue-provider.fileName
 |known-issues.json
 |Defines the location of the known issues file
+
+|known-issue-provider.detect-potentially-known
+|true
+|Defines are potentially known issues detected
 |===
 
 === Known Issues file
