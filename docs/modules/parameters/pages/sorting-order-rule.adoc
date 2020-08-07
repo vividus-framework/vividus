@@ -1,0 +1,21 @@
+= Sorting order
+
+== Description
+
+Defines the sort order.
+
+== Possible order
+
+[cols="1,5", options="header"]
+|===
+
+|Name
+|Description
+
+|ASCENDING
+|The rule for sorting the list alphabetically.
+
+|DESCENDING
+|The rule for sorting the list reverse alphabetically.
+
+|===

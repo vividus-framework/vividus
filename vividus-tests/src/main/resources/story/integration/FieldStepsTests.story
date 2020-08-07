@@ -101,3 +101,7 @@ Then a field with the name '<inputId>' placeholder text 'noPlaceholderAtAll' doe
 
 Scenario: Step verification Then a [$state] field with the name '$fieldName' exists
 Then a [VISIBLE] field with the name '<inputId>' exists
+
+Scenario: Step verification Then elements located `$locator` are sorted by text in $sortingOrder order
+Given I am on a page with the URL '${vividus-test-site-url}/sortedListOfElement.html'
+Then elements located `By.xpath(//div//h3)` are sorted by text in ASCENDING order

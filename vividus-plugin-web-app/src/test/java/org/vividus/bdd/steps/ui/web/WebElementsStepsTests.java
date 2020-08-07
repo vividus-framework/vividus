@@ -19,11 +19,13 @@ package org.vividus.bdd.steps.ui.web;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,9 +38,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
+import org.vividus.bdd.steps.ui.web.model.SortingOrder;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.SearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -63,6 +67,9 @@ class WebElementsStepsTests
             + " is an element with text=text in the context";
     private static final String ELEMENT_TEXT = "1";
     private static final String PAGE_TEXT = "no";
+    private static final String FIELDS_BY_LOCATOR = "The elements to check the order: %s";
+    private static final String FIELD_CONTAINS_TEXT = "The element number %d contains empty text";
+    private static final String ELEMENTS_ARE_SORTED = "The elements are sorted in %s order";
 
     @Mock
     private IUiContext uiContext;
@@ -89,7 +96,7 @@ class WebElementsStepsTests
     private SearchActions searchActions;
 
     @Mock
-    private IDescriptiveSoftAssert softAssert;
+    private ISoftAssert softAssert;
 
     @Test
     void testCheckPageContainsTextThrowsWebDriverException()
@@ -266,5 +273,55 @@ class WebElementsStepsTests
                 .thenReturn(List.of(mockedWebElement));
         webElementsSteps.ifTextExists(TEXT.toUpperCase());
         verify(softAssert).assertTrue("There is an element with text=TEXT in the context", true);
+    }
+
+    @Test
+    void testAreElementSorted()
+    {
+        WebElement webElement = mock(WebElement.class);
+        List<WebElement> elements = List.of(webElement, webElement);
+        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
+        when(mockedBaseValidations.assertIfNumberOfElementsFound(String.format(FIELDS_BY_LOCATOR, locator),
+                locator, 2, ComparisonRule.GREATER_THAN_OR_EQUAL_TO)).thenReturn(elements);
+        when(mockedWebElementActions.getElementText(webElement)).thenReturn(TEXT);
+        when(softAssert.assertTrue(String.format(FIELD_CONTAINS_TEXT, 1), true)).thenReturn(true);
+        when(softAssert.assertTrue(String.format(FIELD_CONTAINS_TEXT, 2), true)).thenReturn(true);
+        webElementsSteps.areElementSorted(locator, SortingOrder.DESCENDING);
+        List<String> textOfElements = List.of(TEXT, TEXT);
+        verify(softAssert).assertEquals(String.format(ELEMENTS_ARE_SORTED, SortingOrder.DESCENDING),
+                textOfElements, textOfElements);
+    }
+
+    @Test
+    void testAreElementSortedWithNullList()
+    {
+        WebElement webElement = mock(WebElement.class);
+        List<WebElement> elements = List.of(webElement, webElement);
+        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
+        when(mockedBaseValidations.assertIfNumberOfElementsFound(String.format(FIELDS_BY_LOCATOR,
+                locator), locator, 2, ComparisonRule.GREATER_THAN_OR_EQUAL_TO)).thenReturn(elements);
+        when(mockedWebElementActions.getElementText(webElement)).thenReturn(null);
+        webElementsSteps.areElementSorted(locator, SortingOrder.ASCENDING);
+        verify(softAssert).assertTrue(String.format(FIELD_CONTAINS_TEXT, 1), false);
+        verify(softAssert).assertTrue(String.format(FIELD_CONTAINS_TEXT, 2), false);
+    }
+
+    @Test
+    void testAreElementSortedWithEmptyTexts()
+    {
+        WebElement webElement = mock(WebElement.class);
+        WebElement webElement2 = mock(WebElement.class);
+        List<WebElement> elements = List.of(webElement, webElement2);
+        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
+        when(mockedBaseValidations.assertIfNumberOfElementsFound(String.format(FIELDS_BY_LOCATOR, locator),
+                locator, 2, ComparisonRule.GREATER_THAN_OR_EQUAL_TO)).thenReturn(elements);
+        when(mockedWebElementActions.getElementText(webElement)).thenReturn(TEXT);
+        when(mockedWebElementActions.getElementText(webElement2)).thenReturn(StringUtils.EMPTY);
+        when(softAssert.assertTrue(String.format(FIELD_CONTAINS_TEXT, 1), true)).thenReturn(true);
+        when(softAssert.assertTrue(String.format(FIELD_CONTAINS_TEXT, 2), false)).thenReturn(false);
+        List<String> sortedTextOfElements = List.of(TEXT);
+        webElementsSteps.areElementSorted(locator, SortingOrder.ASCENDING);
+        verify(softAssert).assertEquals(String.format(ELEMENTS_ARE_SORTED, SortingOrder.ASCENDING),
+                sortedTextOfElements, sortedTextOfElements);
     }
 }

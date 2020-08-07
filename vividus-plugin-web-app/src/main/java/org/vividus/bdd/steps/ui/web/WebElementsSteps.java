@@ -16,11 +16,14 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
@@ -28,9 +31,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
+import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.web.model.SortingOrder;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.State;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -164,6 +170,74 @@ public class WebElementsSteps
         {
             return baseValidations.assertIfElementDoesNotExist(String.format("An element with text '%s'", text),
                     new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text));
+        }
+    }
+
+    /**
+     * Checks, if there is a frame with desired attribute on the context
+     * @param attributeType Type of tag attribute (for ex. 'name', 'id')
+     * @param attributeValue Value of the attribute
+     * @return Frame web element if it is found on the page
+     */
+    @Then("a frame with the attribute '$attributeType'='$attributeValue' exists")
+    public WebElement isFrameWithCertainAttributeFound(String attributeType, String attributeValue)
+    {
+        return baseValidations.assertIfElementExists(
+                String.format("A frame with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
+                new Locator(WebLocatorType.XPATH,
+                        LocatorUtil.getXPathByTagNameAndAttribute("iframe", attributeType, attributeValue)));
+    }
+
+    /**
+     * Checks, if there is a frame with desired attribute on the context
+     * and it has expected <b>state</b>
+     * @param state Enabled or Disabled
+     * @param attributeType Type of tag attribute (for ex. 'name', 'id')
+     * @param attributeValue Value of the attribute
+     */
+    @Then("a [$state] frame with the attribute '$attributeType'='$attributeValue' exists")
+    public void isFrameWithCertainAttributeFound(State state, String attributeType, String attributeValue)
+    {
+        WebElement element = isFrameWithCertainAttributeFound(attributeType, attributeValue);
+        baseValidations.assertElementState("The found frame is " + state, state, element);
+    }
+
+    /**
+     * Gets a list of elements by <b>locator</b> and checks that it is
+     * sorted by text with using <b>sortingOrder</b>.
+     * The list should have more than 1 element. If some elements don't
+     * contain text it will be broken.
+     * @param locator locator to locate elements
+     * @param sortingOrder sorting order<br>
+     * <i>Available rule:</i>
+     * <ul>
+     * <li><b>ASCENDING</b> - will check that the list is sorted alphabetically,
+     * <li><b>DESCENDING</b> - will check that the list is sorted reverse alphabetically
+     * </ul>
+     */
+    @Then("elements located `$locator` are sorted by text in $sortingOrder order")
+    public void areElementSorted(Locator locator, SortingOrder sortingOrder)
+    {
+        List<WebElement> elements = baseValidations.assertIfNumberOfElementsFound(String.format("The elements"
+                       + " to check the order: %s", locator), locator, 2, ComparisonRule.GREATER_THAN_OR_EQUAL_TO);
+        if (!elements.isEmpty())
+        {
+            List<String> textsOfElements = new ArrayList<>();
+
+            for (int i = 0; i < elements.size(); i++)
+            {
+                String textOfElement = webElementActions.getElementText(elements.get(i));
+                if (softAssert.assertTrue(String.format("The element number %d contains empty text",
+                        i + 1), StringUtils.isNotEmpty(textOfElement)))
+                {
+                    textsOfElements.add(textOfElement);
+                }
+            }
+
+            List<String> actualTextsOfElements = textsOfElements;
+            textsOfElements.sort((Comparator<String>) sortingOrder.getSortingType());
+            softAssert.assertEquals(String.format("The elements are sorted in %s order", sortingOrder),
+                    textsOfElements, actualTextsOfElements);
         }
     }
 
