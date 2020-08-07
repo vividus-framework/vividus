@@ -5,3 +5,60 @@
 * `selenium.grid.username` - defines remote grid username
 * `selenium.grid.password` - defines remote grid password
 * `selenium.grid.host` - defines remote grid hostname
+
+== Known Issues
+
+Known issues mechanism allows to distinguish failures from known issues presented in the system under test.
+
+[IMPORTANT]
+JSON file should contain a valid JSON. If JSON is not valid known issues will be ignored and warning about invalid file will be printed.
+
+=== Properties
+
+[cols="2,1,2", options="header"]
+|===
+|Property
+|Default value
+|Description
+
+|known-issue-provider.fileName
+|known-issues.json
+|Defines the location of the known issues file
+|===
+
+=== Known Issues file
+
+The file represents a collection of JSON elements describing known issues.
+
+.known-issues.json
+[source,json,subs=attributes+]
+----
+ {
+    "VVD-1": { <1>
+        "type": "Internal",<2>
+        "assertionPattern": "Expected: a value equal to 200, Actual: \\[404\\]" <3>
+        "storyPattern": "Validate the Math", <4>
+        "scenarioPattern": "Validate equality", <5>
+        "stepPattern": "Then `1` is = `2`.+", <6>
+        "variablePatterns": { <7>
+            "var":  "value-.*"
+        }
+    }
+}
+----
+<1> [Mandatory] *Identifier* (This could be an ID of the issue in your bug tracking system)
+<2> [Mandatory] *Issue type.* One of: INTERNAL (application issue), EXTERNAL (3rd party issue), AUTOMATION (test automation issue)
+<3> [Mandatory] *Assertion pattern* describes which failed assertions should be considered as known
+<4> Story pattern to match failed story name
+<5> Scenario pattern to match failed scenario name
+<6> Step pattern to match failed step.
+<7> Variable patterns. Patterns to match variables.
+
+[IMPORTANT]
+Use *\\* for escaping of special characters in regular expressions
+
+=== Examples
+
+* To consider failed assertion known or potentially-known *assertionPattern* should match assertion failure, if defined *variablePatterns* should match also.
+* If *assertionPattern*/*variablePatterns* matched and you have *story/scenario/step/Pattern* defined, to consider issue known all of them should match.
+* If *assertionPattern*/*variablePatterns* matched and you have *story/scenario/step/Pattern* defined, when at least one not matched issue is considered potentially known.
