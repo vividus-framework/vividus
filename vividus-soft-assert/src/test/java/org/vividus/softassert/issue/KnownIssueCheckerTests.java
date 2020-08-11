@@ -130,7 +130,7 @@ class KnownIssueCheckerTests
     void testGetKnownIssueIfPotentiallyKnownIsFalse(String testStep, String testCase, String testSuite,
             boolean isPotentiallyKnown)
     {
-        knownIssueChecker.setDetectPotentiallyKnown(true);
+        knownIssueChecker.setDetectPotentiallyKnownIssues(true);
         mockKnownIssueIdentifiers();
         when(testInfoProvider.getTestInfo()).thenReturn(createTestInfo(testStep, testCase, testSuite));
         assertKnownIssue(isPotentiallyKnown, TEXT);
@@ -231,7 +231,7 @@ class KnownIssueCheckerTests
     @Test
     void testGetKnownIssueFirstWithMatchedAssertionPattern()
     {
-        knownIssueChecker.setDetectPotentiallyKnown(true);
+        knownIssueChecker.setDetectPotentiallyKnownIssues(true);
         Map<String, KnownIssueIdentifier> identifierMap = new HashMap<>();
         identifierMap.put(FIRST_ISSUE, createIdentifierWithTestSuitePattern(NOT_MATCHING_ASSERTION, STEP, SUITE));
         identifierMap.put(SECOND_ISSUE, createIdentifierWithTestSuitePattern(PATTERN, NOT_MATCHING_STEP, SUITE));
