@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -42,24 +43,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SubStepsTests
 {
-    @Mock
-    private StoryReporter storyReporter;
-
-    @Mock
-    private Step step;
-
-    @Mock
-    private Configuration configuration;
-
-    @Mock
-    private ISubStepsListener subStepsListener;
-
+    @Mock private StoryReporter storyReporter;
+    @Mock private Step step;
+    @Mock private Configuration configuration;
     private SubSteps subSteps;
 
     @BeforeEach
     void beforeEach()
     {
-        subSteps = new SubSteps(configuration, storyReporter, List.of(step), subStepsListener);
+        subSteps = new SubSteps(configuration, storyReporter, List.of(step));
     }
 
     @Test
@@ -72,18 +64,17 @@ class SubStepsTests
         Step compositeStep = mock(Step.class);
         when(step.getComposedSteps()).thenReturn(List.of(compositeStep, compositeStep));
         when(compositeStep.perform(storyReporter, null)).thenReturn(stepResult);
-        InOrder ordered = inOrder(subStepsListener, step, parameterProvider, stepResult);
+        InOrder ordered = inOrder(step, parameterProvider, stepResult);
         when(step.perform(storyReporter, null)).thenReturn(stepResult);
         Keywords keywords = mock(Keywords.class);
         when(configuration.keywords()).thenReturn(keywords);
         when(step.asString(keywords)).thenReturn("step");
         subSteps.execute(Optional.of(parameterProvider));
 
-        ordered.verify(subStepsListener).beforeSubSteps();
         ordered.verify(parameterProvider).get();
         ordered.verify(stepResult).withParameterValues("step [parameters]");
-        ordered.verify(stepResult).describeTo(storyReporter);
-        ordered.verify(subStepsListener).afterSubSteps();
+        ordered.verify(stepResult,  times(3)).describeTo(storyReporter);
+        ordered.verify(stepResult).getFailure();
         ordered.verifyNoMoreInteractions();
     }
 
@@ -91,13 +82,12 @@ class SubStepsTests
     void shouldExecuteSubStepWithoutParameters()
     {
         StepResult stepResult = mock(StepResult.class);
-        InOrder ordered = inOrder(subStepsListener, step,  stepResult);
+        InOrder ordered = inOrder(step,  stepResult);
         when(step.perform(storyReporter, null)).thenReturn(stepResult);
         subSteps.execute(Optional.empty());
 
-        ordered.verify(subStepsListener).beforeSubSteps();
         ordered.verify(stepResult).describeTo(storyReporter);
-        ordered.verify(subStepsListener).afterSubSteps();
+        ordered.verify(stepResult).getFailure();
         ordered.verifyNoMoreInteractions();
     }
 
@@ -105,12 +95,11 @@ class SubStepsTests
     void shouldExecuteSubStepAndThrowWrappedInterruptedException()
     {
         StepResult stepResult = mock(StepResult.class);
-        InOrder ordered = inOrder(subStepsListener, step, stepResult);
+        InOrder ordered = inOrder(step, stepResult);
         when(step.perform(storyReporter, null)).thenReturn(stepResult);
         when(stepResult.getFailure()).thenReturn(new UUIDExceptionWrapper(new InterruptedException()));
         assertThrows(IllegalStateException.class, () -> subSteps.execute(Optional.empty()));
 
-        ordered.verify(subStepsListener).beforeSubSteps();
         ordered.verify(stepResult).describeTo(storyReporter);
         ordered.verify(stepResult).getFailure();
         ordered.verifyNoMoreInteractions();

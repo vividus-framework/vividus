@@ -43,7 +43,7 @@ Then a JSON element from '
 Scenario: Verify step "When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute"
 When I wait for presence of element by `$.json.iteration3` for `PT15S` duration retrying 3 times
 |step                                                                                          |
-|When I initialize the step variable `iteration` with value `#{eval(${iteration:0} + 1)}`      |
+|When I initialize the scenario variable `iteration` with value `#{eval(${iteration:0} + 1)}`  |
 |When I set request headers:                                                                   |
 |{headerSeparator=!,valueSeparator=!}                                                          |
 |!name         !value            !                                                             |

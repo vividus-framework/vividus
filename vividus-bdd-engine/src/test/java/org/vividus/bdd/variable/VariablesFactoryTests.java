@@ -17,45 +17,74 @@
 package org.vividus.bdd.variable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.IPropertyParser;
 
+@ExtendWith(MockitoExtension.class)
 class VariablesFactoryTests
 {
     private static final String GLOBAL_PROPERTY_PREFIX = "bdd.variables.global.";
     private static final String BATCH_PROPERTY_FAMILY = "bdd.variables.batch-";
-    private static final String SCOPE_KEY = "scopeKey";
+    private static final String KEY1 = "key1";
+    private static final String KEY2 = "key2";
+    private static final String KEY3 = "key3";
+
+    private static final String GLOBAL = "global";
     private static final String BATCH = "batch";
-    private static final String KEY = "key";
-    private static final String VALUE = "value";
+    private static final String NEXT_BATCHES = "next-batches";
+
+    private static final Map<String, String> GLOBAL_VARIABLES = Map.of(
+            KEY1, GLOBAL,
+            KEY2, GLOBAL,
+            KEY3, GLOBAL
+    );
+
+    @Mock private IPropertyParser propertyParser;
+    @Mock private IPropertyMapper propertyMapper;
+    @Mock private IBddRunContext bddRunContext;
+    @InjectMocks private VariablesFactory variablesFactory;
+
+    @BeforeEach
+    void beforeEach() throws IOException
+    {
+        Map<String, String> batches = Map.of(
+                KEY1, BATCH,
+                KEY2, BATCH
+        );
+
+        when(propertyParser.getPropertyValuesByPrefix(GLOBAL_PROPERTY_PREFIX)).thenReturn(GLOBAL_VARIABLES);
+        when(propertyMapper.readValues(BATCH_PROPERTY_FAMILY, Map.class)).thenReturn(Map.of("1", batches));
+    }
 
     @Test
-    void testFactoryInitialization() throws IOException
+    void shouldCreateVariables() throws IOException
     {
-        Map<String, String> globals = Map.of(KEY, VALUE, SCOPE_KEY, "global");
-        Map<String, String> batches = Map.of(SCOPE_KEY, BATCH);
-
-        IPropertyParser propertyParser = mock(IPropertyParser.class);
-        IPropertyMapper propertyMapper = mock(IPropertyMapper.class);
-        IBddRunContext bddRunContext = mock(IBddRunContext.class);
-
-        VariablesFactory variablesFactory = new VariablesFactory(propertyParser, propertyMapper, bddRunContext);
-        when(propertyParser.getPropertyValuesByPrefix(GLOBAL_PROPERTY_PREFIX)).thenReturn(globals);
-        when(propertyMapper.readValues(BATCH_PROPERTY_FAMILY, Map.class)).thenReturn(Map.of("1", batches));
-        when(bddRunContext.getRunningBatchKey()).thenReturn("batch-1");
         variablesFactory.init();
-        variablesFactory.addNextBatchesVariable(KEY, VALUE);
+        when(bddRunContext.getRunningBatchKey()).thenReturn("batch-1");
+        variablesFactory.addNextBatchesVariable(KEY1, NEXT_BATCHES);
         Variables variables = variablesFactory.createVariables();
 
-        assertEquals(Map.of(KEY, VALUE, SCOPE_KEY, BATCH), variables.getVariables(VariableScope.GLOBAL));
-        assertEquals(Map.of(KEY, VALUE), variables.getVariables(VariableScope.NEXT_BATCHES));
+        assertEquals(NEXT_BATCHES, variables.getVariable(KEY1));
+        assertEquals(BATCH, variables.getVariable(KEY2));
+        assertEquals(GLOBAL, variables.getVariable(KEY3));
+    }
+
+    @Test
+    void shouldProvideGlobalVariables() throws IOException
+    {
+        variablesFactory.init();
+        assertEquals(GLOBAL_VARIABLES, variablesFactory.getGlobalVariables());
     }
 }

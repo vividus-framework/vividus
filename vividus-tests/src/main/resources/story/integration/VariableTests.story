@@ -75,3 +75,31 @@ When I initialize the scenario variable `var` with value `val`
 Given I initialize the scenario variable `template-result` using template `/data/simple-template.ftl` with parameters:
 /data/table-with-scenario-level-variables.table
 Then `${template-result}` is equal to `passed: variable is resolved`
+
+Scenario: Verify that variables of different nesting step-levels are cleaned up only for the current level
+Meta:
+    @issueId 763
+When I execute steps while counter is <= `1` with increment `1` starting from `1`:
+|step                                                                             |
+|When I initialize the scenario variable `test1` with value `${iterationVariable}`|
+|When the condition 'true' is true I do                                           |
+|{headerSeparator=!,valueSeparator=!}                                             |
+|!step                                                             !              |
+|!When I initialize the scenario variable `value` with value `test`!              |
+|When I initialize the scenario variable `test2` with value `${iterationVariable}`|
+|Then `${test1}` is equal to `${test2}`                                           |
+
+Scenario: Verify that variables of different nesting step-levels don't affect each other
+Meta:
+    @issueId 763
+When I execute steps while counter is <= `1` with increment `1` starting from `1`:
+|step                                                                               |
+|When I initialize the scenario variable `test1` with value `${iterationVariable}`  |
+|When the condition 'true' is true I do                                             |
+|{headerSeparator=!,valueSeparator=!}                                               |
+|!step                                                                             !|
+|!Then `${test1}` is equal to `1`                                                  !|
+|!When I initialize the scenario variable `iterationVariable` with value `42`      !|
+|!When I initialize the scenario variable `test2` with value `${iterationVariable}`!|
+|Then `${test2}` is equal to `1`                                                    |
+Then `${iterationVariable}` is equal to `42`

@@ -42,7 +42,6 @@ import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
 import org.vividus.bdd.spring.ExtendedConfiguration;
-import org.vividus.bdd.steps.ISubStepsListener;
 import org.vividus.bdd.steps.SubSteps;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,8 +51,6 @@ class SubStepsConverterTests
     private ExtendedConfiguration configuration;
     @Mock
     private IBddRunContext bddRunContext;
-    @Mock
-    private ISubStepsListener subStepsListener;
     @Mock
     private IStepExamplesTableParser stepExamplesTableParser;
 
@@ -79,7 +76,6 @@ class SubStepsConverterTests
         assertEquals(1, actualStoryReporter.getDelegates().size());
         assertFalse(actualStoryReporter.getDelegates().iterator().next() instanceof ConcurrentStoryReporter);
         assertEquals(configuration, getFieldValue("configuration", executor));
-        assertEquals(subStepsListener, getFieldValue("subStepsListener", executor));
     }
 
     @SuppressWarnings("unchecked")

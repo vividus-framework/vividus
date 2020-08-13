@@ -111,7 +111,7 @@ class BatchedEmbedderTests
         ordered.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter),
                 argThat(failures -> failures.size() == 1 && failures.containsKey(key) && failures
                         .containsValue(throwable)));
-        ordered.verify(bddVariableContext).clearVariables();
+        ordered.verify(bddVariableContext).clearBatchVariables();
         ordered.verify(bddRunContext).removeRunningBatch();
         ordered.verifyNoMoreInteractions();
         verifyExecutorService(service.get(0));
@@ -136,7 +136,7 @@ class BatchedEmbedderTests
         ordered.verify(spy).useExecutorService(argThat(service::add));
         ordered.verify(bddRunContext).putRunningBatch(BATCH);
         ordered.verify(storyManager).runStoriesAsPaths(eq(testStoryPaths), eq(mockedFilter), any(BatchFailures.class));
-        ordered.verify(bddVariableContext).clearVariables();
+        ordered.verify(bddVariableContext).clearBatchVariables();
         ordered.verify(bddRunContext).removeRunningBatch();
         ordered.verify(spy).generateReportsView();
         ordered.verifyNoMoreInteractions();

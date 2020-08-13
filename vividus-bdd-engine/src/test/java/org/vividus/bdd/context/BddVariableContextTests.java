@@ -18,23 +18,17 @@ package org.vividus.bdd.context;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -44,78 +38,88 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.variable.IVariablesFactory;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.bdd.variable.Variables;
 import org.vividus.testcontext.SimpleTestContext;
+import org.vividus.testcontext.TestContext;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class BddVariableContextTests
 {
-    private static final String A_B = "a:b";
     private static final String SAVE_MESSAGE_TEMPLATE = "Saving a value '{}' into the '{}' variable '{}'";
     private static final String VARIABLE_KEY = "variableKey";
-    private static final String KEY = "key";
     private static final String VALUE = "value";
-    private static final String DEFAULT_VALUE = "defaultValue";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(BddVariableContext.class);
 
-    @Mock
-    private IVariablesFactory variablesFactory;
+    @Mock private IVariablesFactory variablesFactory;
+    @Spy private final TestContext testContext = new SimpleTestContext();
+    @InjectMocks private BddVariableContext bddVariableContext;
 
-    @InjectMocks
-    private BddVariableContext bddVariableContext;
-
-    @ParameterizedTest
-    @EnumSource(value = VariableScope.class, mode = Mode.EXCLUDE, names = {"NEXT_BATCHES", "GLOBAL"})
-    void testPutVariable(VariableScope variableScope)
+    @Test
+    void shouldInitVariables()
     {
-        bddVariableContext.setTestContext(new SimpleTestContext());
-        Variables variables = new Variables();
-        when(variablesFactory.createVariables()).thenReturn(variables);
-        bddVariableContext.putVariable(variableScope, VARIABLE_KEY, VALUE);
-        verifyScopedVariable(variableScope, variables);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(
-                info(SAVE_MESSAGE_TEMPLATE, VALUE, variableScope, VARIABLE_KEY))));
+        bddVariableContext.initVariables();
+        verify(variablesFactory).createVariables();
     }
 
-    private void verifyScopedVariable(VariableScope variableScope, Variables variables)
+    @ParameterizedTest
+    @EnumSource(value = VariableScope.class, mode = Mode.EXCLUDE, names = {"STEP", "NEXT_BATCHES"})
+    void shouldPutVariablePerScope(VariableScope variableScope)
     {
-        Map<String, Object> scopedVariables = variables.getVariables(variableScope);
-        assertThat(scopedVariables.entrySet(), hasSize(1));
-        assertEquals(VALUE, scopedVariables.get(VARIABLE_KEY));
+        Variables variables = new Variables(Map.of());
+        when(variablesFactory.createVariables()).thenReturn(variables);
+        bddVariableContext.putVariable(variableScope, VARIABLE_KEY, VALUE);
+        assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
+        assertThat(logger.getLoggingEvents(), equalTo(
+                List.of(info(SAVE_MESSAGE_TEMPLATE, VALUE, variableScope, VARIABLE_KEY))));
     }
 
     @Test
-    void shouldFailToSetGlobalVariable()
+    void shouldPutStepVariable()
     {
-        VariableScope variableScope = VariableScope.GLOBAL;
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> bddVariableContext.putVariable(variableScope, VARIABLE_KEY, VALUE));
-        assertEquals("Setting of GLOBAL variables is forbidden", exception.getMessage());
-        verifyNoInteractions(variablesFactory);
+        Variables variables = new Variables(Map.of());
+        when(variablesFactory.createVariables()).thenReturn(variables);
+        VariableScope variableScope = VariableScope.STEP;
+        bddVariableContext.initStepVariables();
+        bddVariableContext.putVariable(variableScope, VARIABLE_KEY, VALUE);
+        assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
+        assertThat(logger.getLoggingEvents(), equalTo(
+                List.of(info(SAVE_MESSAGE_TEMPLATE, VALUE, variableScope, VARIABLE_KEY))));
+    }
+
+    @Test
+    void shouldPutNextBatchesVariable()
+    {
+        Variables variables = new Variables(Map.of());
+        bddVariableContext.putVariable(VariableScope.NEXT_BATCHES, VARIABLE_KEY, VALUE);
+        verify(variablesFactory).addNextBatchesVariable(VARIABLE_KEY, VALUE);
+        assertNull(variables.getVariable(VARIABLE_KEY));
     }
 
     @Test
     void shouldPutVariablesIntoAllPassedScopes()
     {
-        bddVariableContext.setTestContext(new SimpleTestContext());
         Set<VariableScope> variableScopes = Set.of(VariableScope.STEP, VariableScope.SCENARIO, VariableScope.STORY,
                 VariableScope.NEXT_BATCHES);
-        Variables variables = new Variables();
+        Variables variables = new Variables(Map.of());
+        variables.initStepVariables();
         when(variablesFactory.createVariables()).thenReturn(variables);
         bddVariableContext.putVariable(variableScopes, VARIABLE_KEY, VALUE);
-        verifyScopedVariable(VariableScope.STEP, variables);
-        verifyScopedVariable(VariableScope.SCENARIO, variables);
-        verifyScopedVariable(VariableScope.STORY, variables);
+        assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
+        variables.clearStepVariables();
+        assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
+        variables.clearScenarioVariables();
+        assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
+        variables.clearStoryVariables();
+        assertNull(variables.getVariable(VARIABLE_KEY));
         List<LoggingEvent> loggingEvents = logger.getLoggingEvents();
         assertThat(loggingEvents, hasSize(4));
         assertThat(loggingEvents, hasItems(
@@ -123,129 +127,56 @@ class BddVariableContextTests
                 info(SAVE_MESSAGE_TEMPLATE, VALUE, VariableScope.SCENARIO, VARIABLE_KEY),
                 info(SAVE_MESSAGE_TEMPLATE, VALUE, VariableScope.STORY, VARIABLE_KEY),
                 info(SAVE_MESSAGE_TEMPLATE, VALUE, VariableScope.NEXT_BATCHES, VARIABLE_KEY)));
-        Map<String, Object> scopedVariables = variables.getVariables(VariableScope.NEXT_BATCHES);
         verify(variablesFactory).addNextBatchesVariable(VARIABLE_KEY, VALUE);
-        assertThat(scopedVariables.entrySet(), empty());
     }
 
     @Test
-    void testClearVariables()
+    void shouldClearBatchVariables()
     {
-        bddVariableContext.setTestContext(new SimpleTestContext());
-        VariableScope variableScope = VariableScope.SCENARIO;
-        Variables variables = putVariable(variableScope);
-        bddVariableContext.clearVariables(variableScope);
-        assertThat(variables.getVariables(variableScope).entrySet(), empty());
-    }
-
-    @ParameterizedTest
-    @EnumSource(VariableScope.class)
-    void testGetVariable(VariableScope variableScope)
-    {
-        bddVariableContext.setTestContext(new SimpleTestContext());
-        putVariable(variableScope);
-        assertEquals(VALUE, bddVariableContext.getVariable(VARIABLE_KEY));
-    }
-
-    @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
-    static Stream<Arguments> variablesProvider()
-    {
-        //CHECKSTYLE:OFF
-        return Stream.of(
-            arguments(VARIABLE_KEY,                      VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), List.of(Map.of(KEY, VALUE))),
-            arguments(VARIABLE_KEY,                      VARIABLE_KEY, null,                        null),
-            arguments("",                                VARIABLE_KEY, null,                        null),
-            arguments("variableKey:defaultValue",        VARIABLE_KEY, null,                        DEFAULT_VALUE),
-            arguments("variableKey[0]",                  VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), Map.of(KEY, VALUE)),
-            arguments("variableKey[0].key",              VARIABLE_KEY, Map.of(KEY, VALUE),          VALUE),
-            arguments("variableKey[0]",                  VARIABLE_KEY, null,                        null),
-            arguments("variableKey[0]:defaultValue",     VARIABLE_KEY, List.of(),                   DEFAULT_VALUE),
-            arguments("variableKey[0].key",              VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), VALUE),
-            arguments("variableKey[0].key:defaultValue", VARIABLE_KEY, List.of(),                   DEFAULT_VALUE),
-            arguments("variableKey.key",                 VARIABLE_KEY, Map.of(KEY, VALUE),          VALUE),
-            arguments("variableKey.key",                 VARIABLE_KEY, VALUE,                       VALUE),
-            arguments("variableKey.key",                 VARIABLE_KEY, null,                        null),
-            arguments("variableKey.key:defaultValue",    VARIABLE_KEY, Map.of(),                    DEFAULT_VALUE),
-            arguments("a.b:NULL",                        "a.b",        VALUE,                       VALUE),
-            arguments(A_B,                               A_B,          VALUE,                       VALUE),
-            arguments("variableKey[0]",                  VARIABLE_KEY, List.of(Set.of(KEY)),        Set.of(KEY)),
-            arguments("variableKey[7]",                  VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), null)
-        );
-        //CHECKSTYLE:ON
-    }
-
-    @ParameterizedTest
-    @MethodSource("variablesProvider")
-    void shouldReturnVariable(String key, String variableKey, Object variable, Object expectedValue)
-    {
-        bddVariableContext.setTestContext(new SimpleTestContext());
-        putVariable(VariableScope.STORY, variableKey, variable);
-        assertEquals(expectedValue, bddVariableContext.getVariable(key));
-    }
-
-    @Test
-    void shouldTryToReturnSystemPropertyIfPropertyByNameIsNotFoundInContext()
-    {
-        bddVariableContext.setTestContext(new SimpleTestContext());
-        putVariable(VariableScope.STORY, List.of());
-        assertNull(bddVariableContext.getVariable(KEY));
-        System.setProperty(KEY, VALUE);
-        assertEquals(VALUE, bddVariableContext.getVariable(KEY));
-        System.clearProperty(KEY);
-    }
-
-    @Test
-    void shouldReturnNullIfPropertyNotFound()
-    {
-        bddVariableContext.setTestContext(new SimpleTestContext());
-        putVariable(VariableScope.STORY, List.of());
-        assertNull(bddVariableContext.getVariable(KEY));
-    }
-
-    @Test
-    void testPutNextBatchesVariable()
-    {
-        Variables variables = new Variables();
-        bddVariableContext.putVariable(VariableScope.NEXT_BATCHES, VARIABLE_KEY, VALUE);
-        Map<String, Object> scopedVariables = variables.getVariables(VariableScope.NEXT_BATCHES);
-        verify(variablesFactory).addNextBatchesVariable(VARIABLE_KEY, VALUE);
-        assertTrue(scopedVariables.isEmpty());
-    }
-
-    @Test
-    void testInitVariables()
-    {
-        bddVariableContext.setTestContext(new SimpleTestContext());
-        bddVariableContext.initVariables();
-        verify(variablesFactory).createVariables();
-    }
-
-    @Test
-    void testClearAllVariables()
-    {
-        SimpleTestContext testContext = new SimpleTestContext();
         Class<Variables> key = Variables.class;
-        testContext.put(key, new Variables());
-        bddVariableContext.setTestContext(testContext);
-        bddVariableContext.clearVariables();
+        testContext.put(key, new Variables(Map.of()));
+        bddVariableContext.clearBatchVariables();
         assertNull(testContext.get(key));
     }
 
-    private Variables putVariable(VariableScope variableScope)
+    @Test
+    void shouldClearStoryVariables()
     {
-        return putVariable(variableScope, VALUE);
-    }
-
-    private Variables putVariable(VariableScope variableScope, Object variable)
-    {
-        return putVariable(variableScope, VARIABLE_KEY, variable);
-    }
-
-    private Variables putVariable(VariableScope variableScope, String variableKey, Object variable)
-    {
-        Variables variables = new Variables();
-        variables.getVariables(variableScope).put(variableKey, variable);
+        Variables variables = new Variables(Map.of());
+        variables.putStoryVariable(VARIABLE_KEY, VALUE);
         when(variablesFactory.createVariables()).thenReturn(variables);
-        return variables;
+        bddVariableContext.clearStoryVariables();
+        assertNull(variables.getVariable(VARIABLE_KEY));
+    }
+
+    @Test
+    void shouldClearScenarioVariables()
+    {
+        Variables variables = new Variables(Map.of());
+        variables.putScenarioVariable(VARIABLE_KEY, VALUE);
+        when(variablesFactory.createVariables()).thenReturn(variables);
+        bddVariableContext.clearScenarioVariables();
+        assertNull(variables.getVariable(VARIABLE_KEY));
+    }
+
+    @Test
+    void shouldClearStepVariables()
+    {
+        Variables variables = new Variables(Map.of());
+        variables.initStepVariables();
+        variables.putStepVariable(VARIABLE_KEY, VALUE);
+        when(variablesFactory.createVariables()).thenReturn(variables);
+        bddVariableContext.clearStepVariables();
+        assertNull(variables.getVariable(VARIABLE_KEY));
+    }
+
+    @Test
+    void shouldReturnStepVariable()
+    {
+        Variables variables = new Variables(Map.of());
+        variables.initStepVariables();
+        variables.putStepVariable(VARIABLE_KEY, VALUE);
+        when(variablesFactory.createVariables()).thenReturn(variables);
+        assertEquals(VALUE, bddVariableContext.getVariable(VARIABLE_KEY));
     }
 }

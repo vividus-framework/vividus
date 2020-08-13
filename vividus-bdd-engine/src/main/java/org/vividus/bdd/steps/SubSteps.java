@@ -34,22 +34,17 @@ public class SubSteps
     private final Configuration configuration;
     private final StoryReporter storyReporter;
     private final List<Step> steps;
-    private final ISubStepsListener subStepsListener;
 
-    public SubSteps(Configuration configuration, StoryReporter storyReporter, List<Step> steps,
-            ISubStepsListener subStepsListener)
+    public SubSteps(Configuration configuration, StoryReporter storyReporter, List<Step> steps)
     {
         this.configuration = configuration;
         this.storyReporter = storyReporter;
         this.steps = steps;
-        this.subStepsListener = subStepsListener;
     }
 
     public void execute(Optional<Supplier<String>> stepContextInfoProvider)
     {
-        subStepsListener.beforeSubSteps();
         steps.forEach(step -> executeStep(stepContextInfoProvider, step));
-        subStepsListener.afterSubSteps();
     }
 
     private void executeStep(Optional<Supplier<String>> stepContextInfoProvider, Step step)

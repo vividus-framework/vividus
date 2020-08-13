@@ -30,7 +30,13 @@ public interface IBddVariableContext
 
     void initVariables();
 
-    void clearVariables(VariableScope variableScope);
+    void initStepVariables();
 
-    void clearVariables();
+    void clearStepVariables();
+
+    void clearScenarioVariables();
+
+    void clearStoryVariables();
+
+    void clearBatchVariables();
 }
