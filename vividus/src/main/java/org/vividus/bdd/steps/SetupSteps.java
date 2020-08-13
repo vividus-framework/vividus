@@ -16,32 +16,11 @@
 
 package org.vividus.bdd.steps;
 
-import javax.inject.Inject;
-
-import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.AfterStories;
-import org.jbehave.core.annotations.AfterStory;
-import org.jbehave.core.annotations.ScenarioType;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
 import org.vividus.report.MetadataLogger;
 
 public class SetupSteps
 {
-    @Inject private IBddVariableContext bddVariableContext;
-
-    @AfterScenario(uponType = ScenarioType.ANY)
-    public void afterScenario()
-    {
-        bddVariableContext.clearVariables(VariableScope.SCENARIO);
-    }
-
-    @AfterStory
-    public void afterStory()
-    {
-        bddVariableContext.clearVariables(VariableScope.STORY);
-    }
-
     @AfterStories
     public void afterStories()
     {

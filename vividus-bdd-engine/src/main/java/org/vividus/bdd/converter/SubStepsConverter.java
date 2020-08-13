@@ -32,14 +32,13 @@ import org.jbehave.core.steps.Step;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
 import org.vividus.bdd.spring.ExtendedConfiguration;
-import org.vividus.bdd.steps.ISubStepsListener;
 import org.vividus.bdd.steps.SubSteps;
 
 @Named
 public class SubStepsConverter extends FunctionalParameterConverter<SubSteps>
 {
     public SubStepsConverter(ExtendedConfiguration configuration, IBddRunContext bddRunContext,
-            IStepExamplesTableParser stepExamplesTableParser, ISubStepsListener subStepsListener)
+            IStepExamplesTableParser stepExamplesTableParser)
     {
         super(subSteps -> {
             StoryReporter storyReporter = configuration.storyReporter(
@@ -54,7 +53,7 @@ public class SubStepsConverter extends FunctionalParameterConverter<SubSteps>
             }
             ExamplesTable subStepsTable = configuration.examplesTableFactory().createExamplesTable(subSteps);
             List<Step> steps = stepExamplesTableParser.parse(subStepsTable);
-            return new SubSteps(configuration, storyReporter, steps, subStepsListener);
+            return new SubSteps(configuration, storyReporter, steps);
         });
     }
 }
