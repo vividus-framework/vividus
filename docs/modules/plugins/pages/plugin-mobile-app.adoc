@@ -68,7 +68,7 @@ selenium.grid.automation-name=UIAutomator2
 * The profile can be enabled by adding `browserstack/mobile_app` to `configuration.profiles` property
 * BrowserStack specific properties must be prepended with `selenium.grid.capabilities.bstack\:options.` prefix, meaning given a property `projectName` with a value `My Project` the resulting property will be `selenium.grid.capabilities.bstack\:options.projectName=My Project`
 * Appium specific properties in BrowserStack must be prepended with `selenium.grid.capabilities.appium\:options.` prefix, meaning given a property `clearSystemFiles` with a value `true` the resulting property will be `selenium.grid.capabilities.appium\:options.clearSystemFiles=true`
-* See https://www.browserstack.com/app-automate/capabilities[Platform Configurator] to setup configuration
+* See https://www.browserstack.com/app-automate/capabilities?tag=w3c[Capabilities Builder] to setup configuration
 
 == Steps
 
