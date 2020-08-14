@@ -1,7 +1,7 @@
 Description: Integration tests for CheckboxSteps class.
 
 Meta:
-    @epic @epic vividus-plugin-web-app
+    @epic vividus-plugin-web-app
 
 Scenario: Set-Up
 Given I am on a page with the URL '${vividus-test-site-url}/checkboxes.html'
