@@ -18,52 +18,50 @@ package org.vividus.util.property;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
-class PropertyMappedDataProviderTests
+class PropertyMappedCollectionTests
 {
     private static final String KEY = "key";
     private static final String VALUE = "value";
+    private static final String UNKNOWN = "unknown";
 
-    @Mock
-    private IPropertyMapper propertyMapper;
+    private final PropertyMappedCollection<String> provider = new PropertyMappedCollection<>(Map.of(KEY, VALUE));
 
-    private PropertyMappedDataProvider<String> provider;
-
-    @BeforeEach
-    void beforeEach() throws IOException
+    @Test
+    void shouldReturnValueByKey()
     {
-        String propertyPrefix = "prefix";
-        when(propertyMapper.readValues(propertyPrefix, String.class)).thenReturn(Collections.singletonMap(KEY, VALUE));
-        provider = new PropertyMappedDataProvider<>(propertyMapper, propertyPrefix, String.class);
+        assertEquals(VALUE, provider.get(KEY, "Error message"));
     }
 
     @Test
-    void testSuccessfulGet()
+    void shouldReturnOptionalValueByKey()
     {
-        assertEquals(VALUE, provider.get(KEY));
+        assertEquals(Optional.of(VALUE), provider.getNullable(KEY));
     }
 
     @Test
-    void testFailedGet()
+    void shouldReturnEmptyOptionalWhenNoValueIsPresent()
     {
-        String key = "unknown";
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> provider.get(key));
-        assertEquals("No entry is found for key: " + key, exception.getMessage());
+        assertEquals(Optional.empty(), provider.getNullable(UNKNOWN));
     }
 
     @Test
-    void testGetData()
+    void shouldThrowExceptionWhenNoValueIsPresent()
+    {
+        String errorMessage = "No entry is found for key: ";
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> provider.get(UNKNOWN, errorMessage + "%s", UNKNOWN));
+        assertEquals(errorMessage + UNKNOWN, exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnAllData()
     {
         assertEquals(Collections.singletonMap(KEY, VALUE), provider.getData());
     }

@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.IPropertyParser;
+import org.vividus.util.property.PropertyMappedCollection;
 
 @ExtendWith(MockitoExtension.class)
 class VariablesFactoryTests
@@ -65,7 +66,8 @@ class VariablesFactoryTests
         );
 
         when(propertyParser.getPropertyValuesByPrefix(GLOBAL_PROPERTY_PREFIX)).thenReturn(GLOBAL_VARIABLES);
-        when(propertyMapper.readValues(BATCH_PROPERTY_FAMILY, Map.class)).thenReturn(Map.of("1", batches));
+        when(propertyMapper.readValues(BATCH_PROPERTY_FAMILY, Map.class)).thenReturn(
+                new PropertyMappedCollection<>(Map.of("1", batches)));
     }
 
     @Test

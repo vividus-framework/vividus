@@ -36,6 +36,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.vividus.util.property.IPropertyMapper;
+import org.vividus.util.property.PropertyMappedCollection;
 
 class BatchStorageTests
 {
@@ -86,9 +87,9 @@ class BatchStorageTests
 
         IPropertyMapper propertyMapper = mock(IPropertyMapper.class);
         when(propertyMapper.readValues("bdd.story-loader.batch-", BatchResourceConfiguration.class)).thenReturn(
-                batchResourceConfigurations);
+                new PropertyMappedCollection<>(batchResourceConfigurations));
         when(propertyMapper.readValues("bdd.batch-", BatchExecutionConfiguration.class)).thenReturn(
-                batchExecutionConfigurations);
+                new PropertyMappedCollection<>(batchExecutionConfigurations));
 
         batchStorage = new BatchStorage(propertyMapper, Long.toString(DEFAULT_TIMEOUT), DEFAULT_META_FILTERS, true);
     }

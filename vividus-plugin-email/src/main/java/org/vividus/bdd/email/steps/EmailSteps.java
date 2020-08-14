@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.hasSize;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,17 +44,18 @@ import org.vividus.bdd.email.service.EmailFetchService;
 import org.vividus.bdd.email.service.ImapFetchService.EmailFetchServiceException;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.property.PropertyMappedCollection;
 
 public class EmailSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailSteps.class);
 
-    private final Map<String, EmailServerConfiguration> serverConfigurations;
+    private final PropertyMappedCollection<EmailServerConfiguration> serverConfigurations;
     private final EmailFetchService messageFetchService;
     private final IBddVariableContext bddVariableContext;
     private final ISoftAssert softAssert;
 
-    public EmailSteps(Map<String, EmailServerConfiguration> serverConfigurations,
+    public EmailSteps(PropertyMappedCollection<EmailServerConfiguration> serverConfigurations,
             EmailFetchService messageFetchService, IBddVariableContext bddVariableContext, ISoftAssert softAssert)
     {
         this.messageFetchService = messageFetchService;
@@ -139,7 +139,8 @@ public class EmailSteps
             List<FailablePredicate<Message, MessagingException>> messageFilters, Set<VariableScope> scopes,
             String variableName) throws EmailFetchServiceException, MessagingException
     {
-        EmailServerConfiguration config = serverConfigurations.get(serverKey);
+        EmailServerConfiguration config = serverConfigurations.get(serverKey,
+                "Email server connection with key '%s' is not configured in properties", serverKey);
         List<EmailMessage> messages = messageFetchService.fetch(messageFilters, config);
 
         int size = messages.size();

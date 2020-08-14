@@ -57,6 +57,7 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
+import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.util.wait.WaitMode;
 import org.vividus.util.wait.Waiter;
 
@@ -67,7 +68,7 @@ public class DatabaseSteps
     private final IAttachmentPublisher attachmentPublisher;
     private final ISoftAssert softAssert;
     private HashFunction hashFunction;
-    private Map<String, DriverManagerDataSource> dataSources;
+    private PropertyMappedCollection<DriverManagerDataSource> dataSources;
     private Duration dbQueryTimeout;
     private RowsCollector rowsCollector;
     private int diffLimit;
@@ -99,7 +100,7 @@ public class DatabaseSteps
             String sqlState)
     {
         String actualSqlState = "00000";
-        try (Connection connection = dataSources.get(dbKey).getConnection(username, password))
+        try (Connection connection = getDataSourceByKey(dbKey).getConnection(username, password))
         {
             // empty statement
         }
@@ -424,10 +425,15 @@ public class DatabaseSteps
 
     private JdbcTemplate getJdbcTemplate(String dbKey)
     {
-        return jdbcTemplates.computeIfAbsent(dbKey, key -> new JdbcTemplate(dataSources.get(key)));
+        return jdbcTemplates.computeIfAbsent(dbKey, key -> new JdbcTemplate(getDataSourceByKey(key)));
     }
 
-    public void setDataSources(Map<String, DriverManagerDataSource> dataSources)
+    private DriverManagerDataSource getDataSourceByKey(String key)
+    {
+        return dataSources.get(key, "Database connection with key '%s' is not configured in properties", key);
+    }
+
+    public void setDataSources(PropertyMappedCollection<DriverManagerDataSource> dataSources)
     {
         this.dataSources = dataSources;
     }

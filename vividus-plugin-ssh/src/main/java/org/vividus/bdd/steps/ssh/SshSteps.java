@@ -34,13 +34,14 @@ import org.vividus.ssh.SingleCommand;
 import org.vividus.ssh.exec.SshOutput;
 import org.vividus.ssh.sftp.SftpCommand;
 import org.vividus.ssh.sftp.SftpOutput;
+import org.vividus.util.property.PropertyMappedCollection;
 
 public class SshSteps
 {
     private final IBddVariableContext bddVariableContext;
     private final Map<String, CommandExecutionManager<?>> commandExecutionManagers;
     private final SshTestContext sshTestContext;
-    private Map<String, ServerConfiguration> serverConfigurations;
+    private PropertyMappedCollection<ServerConfiguration> serverConfigurations;
 
     public SshSteps(IBddVariableContext bddVariableContext,
             Map<String, CommandExecutionManager<?>> commandExecutionManagers, SshTestContext sshTestContext)
@@ -66,7 +67,8 @@ public class SshSteps
     @When("I execute commands `$commands` on $server over $protocol")
     public Object executeCommands(Commands commands, String server, Protocol protocol) throws CommandExecutionException
     {
-        ServerConfiguration serverConfig = serverConfigurations.get(server);
+        ServerConfiguration serverConfig = serverConfigurations.get(server,
+                "SSH server connection with key '%s' is not configured in properties", server);
         CommandExecutionManager<?> commandExecutionManager = commandExecutionManagers.get(protocol.toString());
         Object output = commandExecutionManager.run(serverConfig, commands);
         sshTestContext.putSshOutput(Protocol.SSH == protocol ? (SshOutput) output : null);
@@ -147,7 +149,7 @@ public class SshSteps
         }, server, Protocol.SFTP);
     }
 
-    public void setServerConfigurations(Map<String, ServerConfiguration> serverConfigurations)
+    public void setServerConfigurations(PropertyMappedCollection<ServerConfiguration> serverConfigurations)
     {
         this.serverConfigurations = serverConfigurations;
     }

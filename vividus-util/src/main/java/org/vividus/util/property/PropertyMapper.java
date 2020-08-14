@@ -59,7 +59,7 @@ public class PropertyMapper implements IPropertyMapper
     }
 
     @Override
-    public <T> Map<String, T> readValues(String propertyPrefix, Class<T> valueType) throws IOException
+    public <T> PropertyMappedCollection<T> readValues(String propertyPrefix, Class<T> valueType) throws IOException
     {
         Map<String, String> properties = propertyParser.getPropertiesByPrefix(propertyPrefix);
         Set<String> keys = getKeys(properties.keySet(), propertyPrefix);
@@ -73,7 +73,7 @@ public class PropertyMapper implements IPropertyMapper
             T value = javaPropsMapper.readPropertiesAs(objectProps, valueType);
             result.put(key, value);
         }
-        return result;
+        return new PropertyMappedCollection<>(result);
     }
 
     @SuppressWarnings("unchecked")
