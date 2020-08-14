@@ -59,7 +59,7 @@ Then a checkbox with the attribute 'id'='one' exists
 When I switch back to the page
 
 
-Scenario: Validation of step: 'Then a [$state] checkbox with the attribute '$attributeType'='$attributeValue' exists' 
+Scenario: Validation of step: 'Then a [$state] checkbox with the attribute '$attributeType'='$attributeValue' exists'
 When I change context to element located `id(checked)`
 Then a [SELECTED] checkbox with the attribute 'id'='four' exists
 When I switch back to the page
