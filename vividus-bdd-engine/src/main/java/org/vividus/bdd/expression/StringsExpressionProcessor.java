@@ -18,7 +18,6 @@ package org.vividus.bdd.expression;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
@@ -63,7 +62,6 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor
             new UnaryExpressionProcessor("uncapitalize",      StringUtils::uncapitalize),
             new UnaryExpressionProcessor("generate",          input -> generate(locationProvider.getLocale(), input)),
             new UnaryExpressionProcessor("generateLocalized", generateLocalized()),
-            new UnaryExpressionProcessor("encodeUrl",         input -> URLEncoder.encode(input, UTF_8)),
             new UnaryExpressionProcessor("loadResource",      ResourceUtils::loadResource),
             new UnaryExpressionProcessor("resourceToBase64",  input -> Base64.getEncoder()
                     .encodeToString(ResourceUtils.loadResourceAsByteArray(input))),

@@ -22,12 +22,12 @@ When I send HTTP GET to the relative URL '/anything/path-with-&-ampersand'
 Then the response code is equal to '200'
 Then a JSON element by the JSON path '$.url' is equal to '${http-endpoint}anything/path-with-&-ampersand'
 
-Scenario: Verify handling of ampersand character in URL query
-When I send HTTP GET to the relative URL '/get?key=#{encodeUrl(a&b)}'
+Scenario: Verify handling of ampersand and space characters in URI query parameter
+When I send HTTP GET to the relative URL '/get?key=#{encodeUriQueryParameter(a & b)}'
 Then the response code is equal to '200'
-Then a JSON element by the JSON path '$.url' is equal to '${http-endpoint}get?key=a%26b'
+Then a JSON element by the JSON path '$.url' is equal to '${http-endpoint}get?key=a %26 b'
 Then a JSON element by the JSON path '$.args.length()' is equal to '1'
-Then a JSON element by the JSON path '$.args.key' is equal to 'a&b'
+Then a JSON element by the JSON path '$.args.key' is equal to 'a & b'
 
 Scenario: Set HTTP cookies
 When I send HTTP GET to the relative URL '/cookies/set?vividus-cookie=vividus'
