@@ -74,7 +74,7 @@ public class BatchStorage
     private <T> Map<String, T> readFromProperties(IPropertyMapper propertyMapper, String propertyPrefix,
             Class<T> valueType) throws IOException
     {
-        return propertyMapper.readValues(propertyPrefix, valueType).entrySet().stream()
+        return propertyMapper.readValues(propertyPrefix, valueType).getData().entrySet().stream()
                 .collect(Collectors.toMap(e -> BATCH + e.getKey(), Entry::getValue, (v1, v2) -> null,
                     () -> new TreeMap<>(getBatchKeyComparator())));
     }

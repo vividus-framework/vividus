@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -36,6 +35,7 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.util.property.PropertyMappedCollection;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.cropper.indent.IndentCropper;
@@ -58,7 +58,7 @@ public class ScreenshotTaker implements IScreenshotTaker
     private int indent;
     private HighlighterType highlighterType;
     private String shootingStrategy;
-    private Map<String, ScreenshotConfiguration> ashotConfigurations;
+    private PropertyMappedCollection<ScreenshotConfiguration> ashotConfigurations;
 
     @Override
     public Optional<Screenshot> takeScreenshot(String screenshotName)
@@ -149,7 +149,7 @@ public class ScreenshotTaker implements IScreenshotTaker
 
     private Optional<ScreenshotConfiguration> getConfiguration()
     {
-        return Optional.ofNullable(ashotConfigurations.get(shootingStrategy));
+        return ashotConfigurations.getNullable(shootingStrategy);
     }
 
     private Optional<Screenshot> createScreenshot(byte[] screenshotData, String screenshotName)
@@ -274,7 +274,7 @@ public class ScreenshotTaker implements IScreenshotTaker
         this.shootingStrategy = shootingStrategy;
     }
 
-    public void setAshotConfigurations(Map<String, ScreenshotConfiguration> ashotConfigurations)
+    public void setAshotConfigurations(PropertyMappedCollection<ScreenshotConfiguration> ashotConfigurations)
     {
         this.ashotConfigurations = ashotConfigurations;
     }

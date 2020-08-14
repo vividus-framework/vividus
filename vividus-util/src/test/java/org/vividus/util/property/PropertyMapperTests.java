@@ -77,7 +77,7 @@ class PropertyMapperTests
     {
         Map<String, String> properties = createObjectProperties(PROPERTY_PREFIX + ADMINISTRATOR + '.');
         when(propertyParser.getPropertiesByPrefix(PROPERTY_PREFIX)).thenReturn(properties);
-        Map<String, User> result = propertyMapper.readValues(PROPERTY_PREFIX, User.class);
+        Map<String, User> result = propertyMapper.readValues(PROPERTY_PREFIX, User.class).getData();
         assertEquals(1, result.size());
         User user = result.get(ADMINISTRATOR);
         assertNotNull(user);

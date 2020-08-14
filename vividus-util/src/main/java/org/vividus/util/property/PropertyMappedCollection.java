@@ -16,31 +16,42 @@
 
 package org.vividus.util.property;
 
-import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
-public class PropertyMappedDataProvider<T>
+import org.apache.commons.lang3.Validate;
+
+public class PropertyMappedCollection<T>
 {
     private final Map<String, T> data;
 
-    public PropertyMappedDataProvider(IPropertyMapper propertyMapper, String propertyPrefix, Class<T> valueType)
-            throws IOException
+    public PropertyMappedCollection(Map<String, T> data)
     {
-        data = propertyMapper.readValues(propertyPrefix, valueType);
+        this.data = data;
+    }
+
+    /**
+     * Provides data mapped from properties by key or empty {@code Optional} if no data is mapped
+     * @param key Identifier
+     * @return Value for key
+     */
+    public Optional<T> getNullable(String key)
+    {
+        return Optional.ofNullable(data.get(key));
     }
 
     /**
      * Provides data mapped from properties by key
      * @param key Identifier
+     * @param message the {@link String#format(String, Object...)} exception message if no data by key is found
+     * @param messageParams the optional values for the formatted exception message
+     * @throws IllegalArgumentException if no data is found by key
      * @return Value for key
      */
-    public T get(String key)
+    public T get(String key, String message, Object... messageParams)
     {
         T value = data.get(key);
-        if (value == null)
-        {
-            throw new IllegalArgumentException("No entry is found for key: " + key);
-        }
+        Validate.isTrue(value != null, message, messageParams);
         return value;
     }
 

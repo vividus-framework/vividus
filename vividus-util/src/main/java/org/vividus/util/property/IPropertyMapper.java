@@ -17,7 +17,6 @@
 package org.vividus.util.property;
 
 import java.io.IOException;
-import java.util.Map;
 
 public interface IPropertyMapper
 {
@@ -32,13 +31,13 @@ public interface IPropertyMapper
     <T> T readValue(String propertyPrefix, Class<T> resultType) throws IOException;
 
     /**
-     * Maps properties with specified prefix to the map with values representing objects created using property names
-     * and values
+     * Maps properties with specified prefix to the collection with values representing objects created
+     * using property names and their values
      * @param <T> type of resulting objects
      * @param propertyPrefix Prefix of properties
-     * @param valueType Map value type
-     * @return map with values representing objects created using property names and values
+     * @param valueType Collection value type
+     * @return collection with values representing objects created using property names and their values
      * @throws IOException if any error is occurred during mapping of properties to objects
      */
-    <T> Map<String, T> readValues(String propertyPrefix, Class<T> valueType) throws IOException;
+    <T> PropertyMappedCollection<T> readValues(String propertyPrefix, Class<T> valueType) throws IOException;
 }

@@ -68,6 +68,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.util.ResourceUtils;
+import org.vividus.util.property.PropertyMappedCollection;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.util.ImageTool;
@@ -126,7 +127,8 @@ public class ScreenshotTakerTests
         screenshotTaker.setHighlighterType(HighlighterType.DEFAULT);
         screenshotTaker.setIndent(1);
         screenshotTaker.setShootingStrategy(STRATEGY);
-        screenshotTaker.setAshotConfigurations(Map.of(STRATEGY, screenshotConfiguration));
+        screenshotTaker.setAshotConfigurations(
+                new PropertyMappedCollection<>(Map.of(STRATEGY, screenshotConfiguration)));
         when(screenshotConfiguration.getScrollableElement()).thenReturn(Optional::empty);
     }
 

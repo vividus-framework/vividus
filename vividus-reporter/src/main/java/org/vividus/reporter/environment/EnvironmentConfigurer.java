@@ -30,7 +30,6 @@ import org.apache.commons.text.WordUtils;
 import org.vividus.reporter.ModuleVersionProvider;
 import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.IPropertyParser;
-import org.vividus.util.property.PropertyMappedDataProvider;
 
 public class EnvironmentConfigurer
 {
@@ -55,8 +54,8 @@ public class EnvironmentConfigurer
     @SuppressWarnings("unchecked")
     public void init() throws IOException
     {
-        Collection<DynamicEnvironmentConfigurationProperty> values = new PropertyMappedDataProvider<>(propertyMapper,
-                DYNAMIC_PROPERTY_PREFIX, DynamicEnvironmentConfigurationProperty.class).getData().values();
+        Collection<DynamicEnvironmentConfigurationProperty> values = propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX,
+                DynamicEnvironmentConfigurationProperty.class).getData().values();
         for (DynamicEnvironmentConfigurationProperty property: values)
         {
             Pattern propertyRegex = property.getPropertyRegex();
@@ -71,7 +70,7 @@ public class EnvironmentConfigurer
             });
         }
 
-        propertyMapper.readValues(PROPERTY_PREFIX, Map.class).forEach((category, properties) ->
+        propertyMapper.readValues(PROPERTY_PREFIX, Map.class).getData().forEach((category, properties) ->
         {
             if (!DYNAMIC.equals(category))
             {

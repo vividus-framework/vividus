@@ -55,7 +55,8 @@ public class VariablesFactory implements IVariablesFactory
     public void init() throws IOException
     {
         globalVariables = propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX);
-        batchVariables = propertyMapper.readValues(BDD_VARIABLES_PREFIX + BATCH_PREFIX, Map.class).entrySet()
+        batchVariables = propertyMapper.readValues(BDD_VARIABLES_PREFIX + BATCH_PREFIX, Map.class).getData()
+            .entrySet()
             .stream()
             .map(e -> entry(BATCH_PREFIX + e.getKey(), e.getValue()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
