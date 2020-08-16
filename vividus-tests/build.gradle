@@ -22,5 +22,5 @@ dependencies {
     implementation project(':vividus-plugin-visual')
     implementation project(':vividus-plugin-excel')
 
-    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.14')
+    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.15')
 }
