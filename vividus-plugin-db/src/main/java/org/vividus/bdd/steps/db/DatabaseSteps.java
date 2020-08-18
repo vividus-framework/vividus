@@ -250,15 +250,17 @@ public class DatabaseSteps
     }
 
     /**
-     * Step waits until data received from SQL request is equal to data from examples table for some duration.
+     * The step waits until the <code>sqlQuery</code> returns the data equal to the examples table row
+     * The order of columns is ignored
      * Actions performed in the step:
      * <ul>
-     *     <li>executes provided SQL query against database</li>
-     *     <li>compares data received from SQL request against examples table</li>
-     *     <li>sleeps during calculated part of specified duration</li>
-     *     <li>repeats previous actions if data was not equal and seconds timeout not expired</li>
+     *     <li>run the <code>sqlQuery</code></li>
+     *     <li>compares the response with the examples table row</li>
+     *     <li>sleep for the <code>duration</code></li>
+     *     <li>repeat all of the above until there are no more retry attempts or the response is equal
+     *     to the examples table row</li>
      * </ul>
-     * @param duration Time duration to wait
+     * @param duration The time gap between two queries
      * @param retryTimes How many times request will be retried; duration/retryTimes=timeout between requests
      * @param sqlQuery SQL query to execute
      * @param dbKey Key identifying the database connection
@@ -313,7 +315,8 @@ public class DatabaseSteps
     }
 
     /**
-     * Step designed to compare data received from SQL request against examples table;
+     * The step designed to compare the data received from SQL request against the examples table row
+     * The order of columns is ignored.
      * Examples table could be build for example via GENERATE_FROM_CSV table transformer.
      * Consider complete example:
      * <br>When I execute SQL query `${source}` against `$dbKey` and save result to STORY variable `data`
@@ -420,6 +423,7 @@ public class DatabaseSteps
                            .map(map::get)
                            .filter(Objects::nonNull)
                            .map(Object::toString)
+                           .sorted()
                            .collect(Collectors.joining()), StandardCharsets.UTF_8);
     }
 
