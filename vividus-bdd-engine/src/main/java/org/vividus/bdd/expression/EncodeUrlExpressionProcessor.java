@@ -43,7 +43,10 @@ public class EncodeUrlExpressionProcessor extends UnaryExpressionProcessor
     @Override
     public Optional<String> execute(String expression)
     {
-        LOGGER.warn("#{encodeUrl(..)} expression is deprecated, use set of #{encodeUri<Part>(..)} expressions instead");
-        return super.execute(expression);
+        Optional<String> result = super.execute(expression);
+        result.ifPresent(v -> LOGGER
+                .warn("#{encodeUrl(..)} expression is deprecated, use set of #{encodeUri<Part>(..)} expressions "
+                        + "instead"));
+        return result;
     }
 }
