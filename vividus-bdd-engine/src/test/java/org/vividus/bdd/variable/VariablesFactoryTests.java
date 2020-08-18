@@ -21,17 +21,18 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.util.property.IPropertyMapper;
-import org.vividus.util.property.IPropertyParser;
-import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.util.property.PropertyMapper;
+import org.vividus.util.property.PropertyParser;
 
 @ExtendWith(MockitoExtension.class)
 class VariablesFactoryTests
@@ -52,22 +53,24 @@ class VariablesFactoryTests
             KEY3, GLOBAL
     );
 
-    @Mock private IPropertyParser propertyParser;
-    @Mock private IPropertyMapper propertyMapper;
+    @Mock private PropertyParser propertyParser;
     @Mock private IBddRunContext bddRunContext;
-    @InjectMocks private VariablesFactory variablesFactory;
+    private VariablesFactory variablesFactory;
 
     @BeforeEach
-    void beforeEach() throws IOException
+    void beforeEach()
     {
-        Map<String, String> batches = Map.of(
-                KEY1, BATCH,
-                KEY2, BATCH
-        );
+        MockitoAnnotations.initMocks(this);
+        IPropertyMapper propertyMapper = new PropertyMapper(propertyParser, Set.of());
+        variablesFactory = new VariablesFactory(propertyParser, propertyMapper, bddRunContext);
+
+        String batch1PropertyPrefix = BATCH_PROPERTY_FAMILY + "1.";
 
         when(propertyParser.getPropertyValuesByPrefix(GLOBAL_PROPERTY_PREFIX)).thenReturn(GLOBAL_VARIABLES);
-        when(propertyMapper.readValues(BATCH_PROPERTY_FAMILY, Map.class)).thenReturn(
-                new PropertyMappedCollection<>(Map.of("1", batches)));
+        when(propertyParser.getPropertiesByPrefix(BATCH_PROPERTY_FAMILY)).thenReturn(Map.of(
+            batch1PropertyPrefix + KEY1, BATCH,
+            batch1PropertyPrefix + KEY2, BATCH
+        ));
     }
 
     @Test
