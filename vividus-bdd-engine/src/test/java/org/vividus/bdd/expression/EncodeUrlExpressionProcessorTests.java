@@ -44,6 +44,7 @@ class EncodeUrlExpressionProcessorTests
     void testExecuteWithUnsupportedException()
     {
         assertEquals(Optional.empty(), processor.execute("encodeUri(value)"));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of()));
     }
 
     @ParameterizedTest(name = "{index}: for expression \"{0}\", result is \"{1}\"")
