@@ -22,7 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -42,7 +46,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PropertyMapperTests
 {
     private static final String PROPERTY_PREFIX = "user.";
-    private static final String ADMINISTRATOR = "administrator";
+    private static final String KEY_PREFIX = "key-prefix-";
+    private static final String ADMIN = "admin";
+    private static final String READER = "reader";
 
     private static final String FIRST_NAME = "John";
     private static final String MIDDLE_NAME = "Junior";
@@ -75,13 +81,45 @@ class PropertyMapperTests
     @Test
     void shouldMapPropertiesToCollectionOfObjects() throws IOException
     {
-        Map<String, String> properties = createObjectProperties(PROPERTY_PREFIX + ADMINISTRATOR + '.');
+        mockObjectProperties();
+        PropertyMappedCollection<User> result = propertyMapper.readValues(PROPERTY_PREFIX, User.class);
+        assertCollection(result, ADMIN);
+    }
+
+    @Test
+    void shouldMapPropertiesToCollectionOfObjectsWithUpdateKeys() throws IOException
+    {
+        mockObjectProperties();
+        PropertyMappedCollection<User> result = propertyMapper.readValues(PROPERTY_PREFIX, KEY_PREFIX::concat,
+                User.class);
+        assertCollection(result, KEY_PREFIX + ADMIN);
+    }
+
+    @Test
+    void shouldMapPropertiesToCollectionOfObjectsSortedByKey() throws IOException
+    {
+        Map<String, String> adminProperties = createObjectProperties(PROPERTY_PREFIX + ADMIN + '.');
+        Map<String, String> readerProperties = createObjectProperties(PROPERTY_PREFIX + READER + '.');
+        Map<String, String> allProperties = new HashMap<>(readerProperties);
+        allProperties.putAll(adminProperties);
+        when(propertyParser.getPropertiesByPrefix(PROPERTY_PREFIX)).thenReturn(allProperties);
+        PropertyMappedCollection<User> result = propertyMapper.readValues(PROPERTY_PREFIX, KEY_PREFIX::concat,
+                Comparator.naturalOrder(), User.class);
+        Map<String, User> data = result.getData();
+        assertEquals(2, data.size());
+        Iterator<Entry<String, User>> iterator = data.entrySet().iterator();
+        Entry<String, User> entry = iterator.next();
+        assertEquals(KEY_PREFIX + ADMIN, entry.getKey());
+        assertUser(entry.getValue());
+        entry = iterator.next();
+        assertEquals(KEY_PREFIX + READER, entry.getKey());
+        assertUser(entry.getValue());
+    }
+
+    private void mockObjectProperties()
+    {
+        Map<String, String> properties = createObjectProperties(PROPERTY_PREFIX + ADMIN + '.');
         when(propertyParser.getPropertiesByPrefix(PROPERTY_PREFIX)).thenReturn(properties);
-        Map<String, User> result = propertyMapper.readValues(PROPERTY_PREFIX, User.class).getData();
-        assertEquals(1, result.size());
-        User user = result.get(ADMINISTRATOR);
-        assertNotNull(user);
-        assertUser(user);
     }
 
     private Map<String, String> createObjectProperties(String objectPropertyPrefix)
@@ -95,8 +133,16 @@ class PropertyMapperTests
         );
     }
 
+    private void assertCollection(PropertyMappedCollection<User> collection, String objectKey)
+    {
+        Map<String, User> data = collection.getData();
+        assertEquals(1, data.size());
+        assertUser(data.get(objectKey));
+    }
+
     private void assertUser(User user)
     {
+        assertNotNull(user);
         assertAll(
             () -> assertEquals(FIRST_NAME, user.getFirstName()),
             () -> assertEquals(LAST_NAME, user.getLastName()),

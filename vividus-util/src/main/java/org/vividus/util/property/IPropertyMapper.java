@@ -17,6 +17,8 @@
 package org.vividus.util.property;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.function.UnaryOperator;
 
 public interface IPropertyMapper
 {
@@ -40,4 +42,31 @@ public interface IPropertyMapper
      * @throws IOException if any error is occurred during mapping of properties to objects
      */
     <T> PropertyMappedCollection<T> readValues(String propertyPrefix, Class<T> valueType) throws IOException;
+
+    /**
+     * Maps properties with specified prefix to the collection with values representing objects created
+     * using property names and their values
+     * @param <T> type of resulting objects
+     * @param propertyPrefix Prefix of properties
+     * @param keyMapper a mapping operator to change keys
+     * @param valueType Collection value type
+     * @return collection with values representing objects created using property names and their values
+     * @throws IOException if any error is occurred during mapping of properties to objects
+     */
+    <T> PropertyMappedCollection<T> readValues(String propertyPrefix, UnaryOperator<String> keyMapper,
+            Class<T> valueType) throws IOException;
+
+    /**
+     * Maps properties with specified prefix to the ordered collection with values representing objects created
+     * using property names and their values
+     * @param <T> type of resulting objects
+     * @param propertyPrefix Prefix of properties
+     * @param keyMapper a mapping operator to change keys
+     * @param keyComparator a comparator that will be used to order the resulting collection
+     * @param valueType Collection value type
+     * @return ordered collection with values representing objects created using property names and their values
+     * @throws IOException if any error is occurred during mapping of properties to objects
+     */
+    <T> PropertyMappedCollection<T> readValues(String propertyPrefix, UnaryOperator<String> keyMapper,
+            Comparator<String> keyComparator, Class<T> valueType) throws IOException;
 }
