@@ -44,8 +44,11 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
     private static final String BY_MAX_COLUMNS_PROPERTY = "byMaxColumns";
     private static final String BY_MAX_ROWS_PROPERTY = "byMaxRows";
     private static final String BY_COLUMNS_NAMES_PROPERTY = "byColumnNames";
+    private static final String BY_ROW_INDEXES_PROPERTY = "byRowIndexes";
     private static final String COLUMN_PREFIX = "column.";
     private static final String REGEX_FILTER_DECLARATION = COLUMN_PREFIX + "<regex placeholder>";
+    private static final String CONFLICTING_PROPERTIES_MESSAGE =
+            "Conflicting properties declaration found: '%s' and '%s'";
 
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties tableProperties)
@@ -55,31 +58,36 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
         String byMaxColumns = properties.getProperty(BY_MAX_COLUMNS_PROPERTY);
         String byMaxRows = properties.getProperty(BY_MAX_ROWS_PROPERTY);
         String byColumnNames = properties.getProperty(BY_COLUMNS_NAMES_PROPERTY);
+        String byRowIndexes = properties.getProperty(BY_ROW_INDEXES_PROPERTY);
         Set<String> columnFilters = findColumnFilters(properties);
 
-        isTrue(byMaxColumns != null || byMaxRows != null || byColumnNames != null || !columnFilters.isEmpty(),
-                "At least one of the following properties should be specified: '%s', '%s', '%s', '%s'",
-                BY_MAX_COLUMNS_PROPERTY, BY_MAX_ROWS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY, REGEX_FILTER_DECLARATION);
+        isTrue(byMaxColumns != null || byMaxRows != null || byColumnNames != null
+                        || !columnFilters.isEmpty() || byRowIndexes != null,
+                "At least one of the following properties should be specified: '%s', '%s', '%s', '%s', '%s'",
+                BY_MAX_COLUMNS_PROPERTY, BY_MAX_ROWS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY,
+                REGEX_FILTER_DECLARATION, BY_ROW_INDEXES_PROPERTY);
 
         TableRows tableRows = tableParsers.parseRows(tableAsString, tableProperties);
         if (!columnFilters.isEmpty())
         {
-            isTrue(byMaxColumns == null && byColumnNames == null && byMaxRows == null,
+            isTrue(byMaxColumns == null && byColumnNames == null && byMaxRows == null && byRowIndexes == null,
                     "Filtering by regex is not allowed to be used together with the following properties:"
-                    + " '%s', '%s', '%s'",
-                    BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY, BY_MAX_ROWS_PROPERTY);
+                    + " '%s', '%s', '%s', '%s'",
+                    BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY, BY_MAX_ROWS_PROPERTY, BY_ROW_INDEXES_PROPERTY);
 
             return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(),
                     filterRows(columnFilters, tableRows.getRows(), properties), tableProperties);
         }
 
-        isTrue(!(byMaxColumns != null && byColumnNames != null),
-                "Conflicting properties declaration found: '%s' and '%s'",
+        isTrue(!(byMaxColumns != null && byColumnNames != null), CONFLICTING_PROPERTIES_MESSAGE,
                 BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY);
+
+        isTrue(!(byMaxRows != null && byRowIndexes != null), CONFLICTING_PROPERTIES_MESSAGE,
+                BY_MAX_ROWS_PROPERTY, BY_ROW_INDEXES_PROPERTY);
 
         List<String> filteredColumns = getFilteredHeaders(byMaxColumns, byColumnNames, tableRows.getHeaders());
         List<Map<String, String>> result = filterByHeaders(filteredColumns,
-                getFilteredRows(byMaxRows, tableRows.getRows()));
+                getFilteredRows(byMaxRows, byRowIndexes, tableRows.getRows()));
 
         return ExamplesTableProcessor.buildExamplesTable(filteredColumns, result, tableProperties);
     }
@@ -90,13 +98,24 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
         return result;
     }
 
-    private List<Map<String, String>> getFilteredRows(String byMaxRows, List<Map<String, String>> list)
+    private List<Map<String, String>> getFilteredRows(String byMaxRows, String byRowIndexes,
+            List<Map<String, String>> list)
     {
-        return Optional.ofNullable(byMaxRows)
-                .map(Integer::parseInt)
-                .filter(m -> m < list.size())
-                .map(m -> list.subList(0, m))
-                .orElse(list);
+        if (byRowIndexes == null)
+        {
+            return Optional.ofNullable(byMaxRows)
+                    .map(Integer::parseInt)
+                    .filter(m -> m < list.size())
+                    .map(m -> list.subList(0, m))
+                    .orElse(list);
+        }
+        else
+        {
+            return Stream.of(StringUtils.split(byRowIndexes, ';'))
+                    .mapToInt(Integer::parseInt)
+                    .mapToObj(list::get)
+                    .collect(Collectors.toList());
+        }
     }
 
     private List<String> getFilteredHeaders(String byMaxColumns, String byColumnNames, List<String> headerValues)
