@@ -116,19 +116,20 @@ public class ActionSteps
      * <pre>
      * <code>
      * When I execute sequence of actions:
-     * <br> |type          |argument                                |
-     * <br> |DOUBLE_CLICK  |By.fieldText(Hello World)               |
-     * <br> |DOUBLE_CLICK  |                                        |
-     * <br> |CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas)|
-     * <br> |CLICK_AND_HOLD|                                        |
-     * <br> |MOVE_BY_OFFSET|(-300, 0)                               |
-     * <br> |RELEASE       |By.xpath(//signature-pad-control/canvas)|
-     * <br> |RELEASE       |                                        |
-     * <br> |ENTER_TEXT    |Text                                    |
-     * <br> |CLICK         |By.placeholder(Enter your password)     |
-     * <br> |CLICK         |                                        |
-     * <br> |PRESS_KEYS    |BACK_SPACE                              |
-     * <br> |MOVE_TO       |By.id(name)                             |
+     * <br> |type                     |argument                                |
+     * <br> |DOUBLE_CLICK             |By.fieldText(Hello World)               |
+     * <br> |DOUBLE_CLICK             |                                        |
+     * <br> |CLICK_AND_HOLD           |By.xpath(//signature-pad-control/canvas)|
+     * <br> |CLICK_AND_HOLD           |                                        |
+     * <br> |MOVE_BY_OFFSET           |(-300, 0)                               |
+     * <br> |RELEASE                  |By.xpath(//signature-pad-control/canvas)|
+     * <br> |RELEASE                  |                                        |
+     * <br> |ENTER_TEXT               |Text                                    |
+     * <br> |CLICK                    |By.placeholder(Enter your password)     |
+     * <br> |CLICK                    |                                        |
+     * <br> |PRESS_KEYS               |BACK_SPACE                              |
+     * <br> |PRESS_KEYS_SIMULTANEOUSLY|CONTROL,a,DELETE                        |
+     * <br> |MOVE_TO                  |By.id(name)                             |
      * </code>
      * </pre>
      * where
@@ -173,9 +174,13 @@ public class ActionSteps
      * </tr>
      * <tr>
      * <td>PRESS_KEYS</td>
-     * <td><a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
-     * </td>
+     * <td><a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a></td>
      * <td>BACK_SPACE</td>
+     * </tr>
+     * <tr>
+     * <td>PRESS_KEYS_SIMULTANEOUSLY</td>
+     * <td>press keys combination such as "control"/"command" + a + "delete" or "shift" + "any text" etc.</td>
+     * <td>CONTROL,a,DELETE</td>
      * </tr>
      * <tr>
      * <td>MOVE_TO</td>

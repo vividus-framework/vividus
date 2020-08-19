@@ -1,0 +1,77 @@
+= Action scope
+
+== Description
+
+Defines the scope of an action
+
+== Possible scopes
+
+[cols="1,5,3", options="header"]
+|===
+
+|Type
+|Argument
+|Example
+
+|DOUBLE_CLICK
+|Search attribute or empty value
+|By.linkUrl(http://httpbin.org)
+
+|CLICK_AND_HOLD
+|Search attribute or empty value
+|By.linkText(Click me)
+
+|MOVE_BY_OFFSET
+|Point
+|(10, 15) where *x* is 10 and *y* is 15
+
+|RELEASE
+|Search attribute or empty value
+|By.tagName(div)
+
+|ENTER_TEXT
+|Text
+|Minsk City
+
+|CLICK
+|Search attribute or empty value
+|By.caseSensitiveText(Done)
+
+|PRESS_KEYS
+|Press xref:https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
+|BACK_SPACE
+
+|PRESS_KEYS_SIMULTANEOUSLY
+|Press keys combination such as "control"/"command" + a + "delete" or "shift" + "any text" etc.
+|CONTROL,a,DELETE
+
+|MOVE_TO
+|Search attribute
+|By.id(username)
+
+|===
+
+==== *_Usage_*
+
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type                     |argument                                |
+|DOUBLE_CLICK             |By.fieldText(Hello World)               |
+|DOUBLE_CLICK             |                                        |
+|CLICK_AND_HOLD           |By.xpath(//signature-pad-control/canvas)|
+|CLICK_AND_HOLD           |                                        |
+|MOVE_BY_OFFSET           |(-300, 0)                               |
+|RELEASE                  |By.xpath(//signature-pad-control/canvas)|
+|RELEASE                  |                                        |
+|ENTER_TEXT               |Text                                    |
+|CLICK                    |By.placeholder(Enter your password)     |
+|CLICK                    |                                        |
+|PRESS_KEYS               |BACK_SPACE                              |
+|PRESS_KEYS_SIMULTANEOUSLY|CONTROL,a,DELETE                        |
+|MOVE_TO                  |By.id(name)                             |
+----
+
+== Notes
+[#TIP]
+* Scope types are case insensitive

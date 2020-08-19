@@ -123,3 +123,14 @@ When I find = `1` elements `By.xpath(//div[@id='output' and text()!='mark'])` an
 |!type      !argument   !                                        |
 |!PRESS_KEYS!BACK_SPACE !                                        |
 Then number of elements found by `By.xpath(//div[@id='output' and text()='mark'])` is equal to `1`
+
+Scenario: Action verification PRESS_KEYS_SIMULTANEOUSLY
+Given I am on a page with the URL '${vividus-test-site-url}/inputs.html'
+When I initialize the scenario variable `input` with value `mark#{generate(regexify '[a-z]{10}')}`
+When I enter `${input}` in field located `By.id(text)`
+Then the text '${input}' exists
+When I click on element located `By.xpath(//label[@for='text'])`
+When I execute sequence of actions:
+|type                     |argument                           |
+|PRESS_KEYS_SIMULTANEOUSLY|CONTROL,a,DELETE                   |
+Then the text '${input}' does not exist

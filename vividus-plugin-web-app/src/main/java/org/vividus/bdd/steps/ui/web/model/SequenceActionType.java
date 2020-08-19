@@ -16,12 +16,17 @@
 
 package org.vividus.bdd.steps.ui.web.model;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.notEmpty;
+
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -129,6 +134,31 @@ public enum SequenceActionType
             return argumentType;
         }
     },
+    PRESS_KEYS_SIMULTANEOUSLY(false)
+    {
+        private final Type argumentType = TypeUtils.parameterize(List.class, String.class);
+
+        @Override
+        public void addAction(Actions actions, Object argument)
+        {
+            perform(argument, (List<String> arg) -> {
+                notEmpty(arg, "At least one key should be provided. "
+                        + "The provided keys should start with of 'SHIFT', 'ALT' or 'CONTROL'/'COMMAND' key.");
+                List<String> args = new ArrayList<>(arg);
+                String firstKey = args.remove(0);
+                isTrue(EnumUtils.isValidEnum(Keys.class, firstKey), "The '%s' is not allowed as first key "
+                        + "and the provided key is none of 'SHIFT', 'ALT' or 'CONTROL'/'COMMAND'.", firstKey);
+                Keys pressedKey = Keys.valueOf(firstKey);
+                actions.keyDown(pressedKey).sendKeys(KeysUtils.keysToCharSequenceArray(args)).keyUp(pressedKey);
+            });
+        }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return argumentType;
+        }
+    },
     CLICK(true)
     {
         @Override
@@ -179,7 +209,7 @@ public enum SequenceActionType
         }
         else
         {
-            Validate.isTrue(TypeUtils.isAssignable(argument.getClass(), getArgumentType()),
+            isTrue(TypeUtils.isAssignable(argument.getClass(), getArgumentType()),
                     "Argument for %s action must be of type %s", name(), getArgumentType());
             argumentConsumer.accept((U) argument);
         }

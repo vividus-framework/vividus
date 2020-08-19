@@ -18,10 +18,13 @@ package org.vividus.bdd.steps.ui.web.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -31,6 +34,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -127,6 +131,42 @@ public class SequenceActionTypeTests
     {
         SequenceActionType.PRESS_KEYS.addAction(baseAction, List.of(VALUE));
         verify(baseAction).sendKeys(VALUE);
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testPressKeysSimultaneously()
+    {
+        when(baseAction.keyDown(any(Keys.class))).thenReturn(baseAction);
+        when(baseAction.sendKeys(anyString())).thenReturn(baseAction);
+
+        SequenceActionType.PRESS_KEYS_SIMULTANEOUSLY.addAction(baseAction, List.of("CONTROL", anyString()));
+        verify(baseAction).keyDown(Keys.CONTROL);
+        verify(baseAction).sendKeys(anyString());
+        verify(baseAction).keyUp(Keys.CONTROL);
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testPressKeysSimultaneouslyWrongKeysOrder()
+    {
+        String value = "a";
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                SequenceActionType.PRESS_KEYS_SIMULTANEOUSLY.addAction(baseAction, List.of(value)));
+        String expectedExceptionMessage = String.format("The '%s' is not allowed as first key and the provided key "
+                + "is none of 'SHIFT', 'ALT' or 'CONTROL'/'COMMAND'.", value);
+        assertEquals(expectedExceptionMessage, exception.getMessage());
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testPressKeysSimultaneouslyWithEmptyList()
+    {
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                SequenceActionType.PRESS_KEYS_SIMULTANEOUSLY.addAction(baseAction, List.of()));
+        String expectedExceptionMessage = "At least one key should be provided. "
+            + "The provided keys should start with of 'SHIFT', 'ALT' or 'CONTROL'/'COMMAND' key.";
+        assertEquals(expectedExceptionMessage, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
 

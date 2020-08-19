@@ -87,6 +87,40 @@ Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQ
 ----
 
 
+=== Execute sequence of actions
+
+==== *_Info_*
+
+Executes the sequence of web actions
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I execute sequence of actions: $actions
+----
+
+==== *_Parameters_*
+
+. `$actions` - xref:parameters:action-scope.adoc[table of actions to execute]
+
+==== *_Usage_*
+
+.ActionSteps.story
+[source,gherkin]
+----
+Scenario: Action verification CLICK with no argument
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+When I initialize the scenario variable `expectedText` with value `Good day!`
+Then the text '${expectedText}' does not exist
+When I execute sequence of actions:
+|type   |argument                             |
+|MOVE_TO|By.xpath(//button[text()='Click me'])|
+|CLICK  |                                     |
+Then the text '${expectedText}' exists
+----
+
+
 === Saves the query string into the variable with specified name and scopes.
 
 ==== *_Info_*
