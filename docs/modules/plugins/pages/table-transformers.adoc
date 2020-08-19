@@ -1,0 +1,326 @@
+= Table Transformers
+
+== General Info
+
+There are 3 default jbehave transformers: FROM_LANDSCAPE, FORMATTING, REPLACING and vividus specific transformers: SORTING, ITERATING, GENERATE_FROM_CSV, GENERATE_FROM_JSON, MERGING, FROM_SITEMAP, FROM_HEADLESS_CRAWLING, FROM_EXCEL. Chain of transformers can be defined. In this case the transformers are applied sequentially from top to bottom.
+
+=== FROM_LANDSCAPE
+
+`FROM_LANDSCAPE` table transformer is designed to transform the table from a landscape form.
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=FROM_LANDSCAPE}
+|key|value1|value2|value3|
+----
+
+=== FORMATTING
+
+`FORMATTING` table transformer is designed to format the table according to the max width of each column. And also this transformer removes the commented lines.
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=FORMATTING}
+|key|
+|value|
+|-- |value|
+|longValue|
+----
+
+=== REPLACING
+
+`REPLACING` table transformer is designed to replace all substrings inside table values with replacement according to the given parameters.
+
+==== *_Parameters_*
+
+. `replacing` - the sequence of char values inside table values to be replaced
+. `replacement` - the replacement sequence of char values
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=REPLACING, replacing=k, replacement=l}
+|key  |
+|vakue|
+----
+
+=== SORTING
+
+`SORTING` table transformer is designed to sort the table by columns.
+
+==== *_Parameters_*
+
+. `byColumns` - column names in order of priority for sorting through '|'
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=SORTING, byColumns=key|key1}
+|key   |key1  |
+|value3|value4|
+|value1|value2|
+----
+
+=== ITERATING
+
+`ITERATING` table transformer is designed to generate simple one-column table with key 'iterator' and values 0,1,2... till the given parameter.
+
+==== *_Parameters_*
+
+. `limit` - column names in order of priority for sorting through '|'
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=ITERATING, limit=5}
+----
+
+=== FILTERING
+
+FILTERING table transformer is designed to filter the table by different rules.
+
+==== *_Parameters_*
+
+. `byMaxColumns` - limiting amount of columns
+. `byMaxRows` - limiting amount of rows
+. `byColumnNames` - columns to remain in result table
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=FILTERING, byColumnNames=key1;key3, byMaxRows=1}
+|key1  |key2  |key3  |
+|value1|value2|value3|
+|value4|value5|value6|
+----
+
+[IMPORTANT]
+Please, note: `byMaxColumns` and `byColumnNames` are competing properties and only one can be specified.
+
+=== FROM_CSV
+
+`FROM_CSV` table transformer is designed to generate example table from CSV.
+
+==== *_Parameters_*
+
+. `csvPath` - relative path to csv file
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=FROM_CSV, csvPath=/story/example.csv}
+----
+
+=== MERGING
+
+`MERGING` table transformer is designed to merge tables.
+
+==== *_Parameters_*
+
+. `mergeMode` - _rows_ or _columns_
+. `tables` - paths to examples tables or transformers to merge
+. `fillerValue` - value to fill new cells when merge tables with different number of rows (in column mode) or columns (in rows mode)
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=MERGING, mergeMode=rows, tables=story/tables/test1.table;story/tables/test2.table}
+----
+
+----
+Examples:
+{transformer=MERGING, mergeMode=columns, tables=story/tables/test1.table;story/tables/test2.table;story/tables/test3.table}
+----
+
+----
+Examples:
+{transformer=MERGING, mergeMode=columns, fillerValue=null, tables=\{transformer=FROM_EXCEL\, path=TestTemplate.xlsx\, sheet=Data\, addresses=A2\;A3\, column=test1\};\{transformer=FROM_EXCEL\, path=TestTemplate.xlsx\, sheet=Data\, range=B2:B4\, column=test2\}}
+----
+
+----
+Examples:
+{
+ transformer=MERGING, 
+ mergeMode=rows, 
+ fillerValue=null, 
+ tables=
+ \{
+   transformer=MERGING\, 
+   mergeMode=columns\, 
+   tables=
+        \\{
+           transformer=FROM_EXCEL\\, 
+           path=TestTemplate.xlsx\\, 
+           sheet=Data\\, 
+           addresses=E6\\, 
+           column=text1
+        \\}
+        \;
+        \\{
+           transformer=FROM_EXCEL\\, 
+           path=TestTemplate.xlsx\\, 
+           sheet=Data\\, 
+           addresses=E7\\, 
+           column=text2
+        \\}
+ \}
+ ;
+ \{
+   transformer=FROM_EXCEL\, 
+   path=TestTemplate.xlsx\, 
+   sheet=Data\, 
+   addresses=E8\, 
+   column=text1
+ \}
+}
+----
+
+Starting from version 0.2.0 it's possible to merge table with body with other tables in files:
+
+----
+Examples:
+{transformer=MERGING, mergeMode=columns, tables=/data/some-table.table}
+|column1|
+|value1 |
+----
+
+[IMPORTANT]
+Please, note:
+* to merge tables with different number of rows or columns use `fillerValue` parameter to fill new cells
+* to merge tables in rows mode they must have the same numbers of columns + the same headers(keys)
+* to merge tables in columns mode they must have the same number of rows + unique headers(keys)
+* number of unique tables paths must be more than 1
+* when using transformers in `tables` parameter it is necessary to escape brackets, commas and semicolon in them: for unary nested- "", for double - "\" etc.
+
+=== JOINING
+
+`JOINING` table transformer is designed to join values from rows/columns of the table.
+
+==== *_Parameters_*
+
+. `joinMode` - _rows_ or _columns_
+. `joinedColumn` - [_columns_ mode only] name of new column with joined values
+. `columnsToJoin` - [_columns_ mode only] colon-separated list of the columns to join
+
+==== *_Usage_*
+
+----
+Scenario: Verify JOINING transformer in default columns mode
+Then `<joinedColumn>` is equal to `A B`
+Examples:
+{transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn}
+|column1|column2|
+|A      |B      |
+
+Scenario: Verify JOINING transformer in configured columns mode
+Then `<joinedColumn>` is equal to `B D`
+Examples:
+{transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn, columnsToJoin=column2;column4}
+|column1|column2|column3|column4|
+|A      |B      |C      |D      |
+
+Scenario: Verify JOINING transformer in default rows mode
+Then `<column1>` is equal to `A B`
+Then `<column2>` is equal to `C D`
+Examples:
+{transformer=JOINING, joinMode=rows}
+|column1|column2|
+|A      |C      |
+|B      |D      |
+----
+
+----
+Examples:
+{transformer=MERGING, mergeMode=columns, tables=
+\{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=A4:A5\, column=header1\, joinValues=true\};
+\{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=B4:B5\, column=header2\, joinValues=true\}}
+{transformer=JOINING, joinMode=columns, joinedColumn=header}
+----
+
+----
+Exmaples:
+{transformer=JOINING, joinMode=columns, joinedColumn=header}
+/test1.table
+----
+
+[IMPORTANT]
+Please, note: `JOINING` transformer will be last when joining columns/rows of table which created using another transformer.
+
+=== FROM_SITEMAP
+
+`FROM_SITEMAP` table transformer is designed to generate example table from SITEMAP.
+
+==== *_Parameters_*
+
+. `siteMapRelativeUrl` - relative url of sitemap.xml
+. `ignoreErrors` - ability to ignore errors (_true_ or _false_)
+. `column` - column name in generated example table
+
+==== *_Properties_*
+
+* `bdd.transformer.sitemap.ignore-errors` - (_true_ of _false_) - ability to ignore errors (_false_ by default)
+* `bdd.transformer.sitemap.filter-redirects` - (_true_ of _false_) - if `true` then urls that has redirect to the one that has already been included the table are excluded from the table (_false_ by default)
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=FROM_SITEMAP, siteMapRelativeUrl=/sitemap.xml, ignoreErrors=true, column=entered_site}
+----
+
+=== FROM_HEADLESS_CRAWLING
+
+`FROM_HEADLESS_CRAWLING` table transformer is designed to generate example table after work of CRAWLER.
+
+==== *_Parameters_*
+
+. `column` - column name in generated example table
+
+==== *_Properties_*
+
+* `bdd.transformer.headless.filter-redirects` - (_true_ of _false_) - ability to filter redirects (_false_ by default)
+* `bdd.transformer.headless.seed-relative-urls`
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=FROM_HEADLESS_CRAWLING, column=polls_page}
+----
+
+=== FROM_EXCEL
+
+`FROM_EXCEL` table transformer is designed to generate example table from EXCEL.
+
+==== *_Parameters_*
+
+. `path` - path to excel spreadsheet
+. `sheet` - sheet name from excel spreadsheet
+. `column` - column name in generated example table
+. `joinValues` - _true_ - if return as string (_false_ by default)
+. `range` - cells range to extract data, can not be used in parallel with addresses
+. `increment` - increment from start of range to extract data (_1_ by default)
+. `addresses` - cell address to extract data, can not be used in parallel with range
+. `lineBreakReplacement` - value for line break change (empty string by default)
+
+==== *_Usage_*
+
+----
+Examples:
+{transformer=FROM_EXCEL, path=/TestTemplate.xlsx, sheet=RepeatingData, range=A2:A7, lineBreakReplacement= , increment=2, column=test}
+----
+
+----
+Examples:
+{transformer=FROM_EXCEL, path=/TestTemplate.xlsx, sheet=RepeatingData, addresses=A2;B4;A7, column=test, joinValues=true}
+----
