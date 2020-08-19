@@ -91,6 +91,7 @@ FILTERING table transformer is designed to filter the table by different rules.
 . `byMaxColumns` - limiting amount of columns
 . `byMaxRows` - limiting amount of rows
 . `byColumnNames` - columns to remain in result table
+. `byRowIndexes` - indexes of rows to use in resulting table
 
 ==== *_Usage_*
 
@@ -102,8 +103,17 @@ Examples:
 |value4|value5|value6|
 ----
 
+----
+Examples:
+{transformer=FILTERING, byMaxColumns=2, byRowIndexes=0;2}
+|key1  |key2  |key3  |
+|value1|value2|value3|
+|value4|value5|value6|
+|value7|value8|value9|
+----
+
 [IMPORTANT]
-Please, note: `byMaxColumns` and `byColumnNames` are competing properties and only one can be specified.
+Please, note: `byMaxColumns` and `byColumnNames` are competing properties and only one can be specified. The same for properties `byMaxRows` and `byRowIndexes`.
 
 === FROM_CSV
 
