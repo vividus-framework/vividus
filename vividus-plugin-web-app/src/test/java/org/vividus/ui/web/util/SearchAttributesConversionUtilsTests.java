@@ -59,6 +59,15 @@ class SearchAttributesConversionUtilsTests
     }
 
     @Test
+    void testConvertToSearchAttributesInvalidFilterType()
+    {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> SearchAttributesConversionUtils
+                .convertToSearchAttributes("By.id(id)->filter.state(enabled).textPart(text).notFilter(any)"));
+        assertEquals("Unsupported filter type: notFilter", exception.getMessage());
+    }
+
+    @Test
     void testConvertToSearchAttributesInvalidLocatorFormat()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -137,7 +146,7 @@ class SearchAttributesConversionUtilsTests
                 Arguments.of(createAttributes(ActionAttributeType.ID, ID, Visibility.INVISIBLE,
                         ActionAttributeType.STATE, ENABLED).addFilter(ActionAttributeType.TEXT_PART, TEXT)
                         .addFilter(ActionAttributeType.CLASS_ATTRIBUTE_PART, "clas"),
-                        "By.id(id):i->filter.state(enabled).textPart(text).classattributepart(clas).notFilter(any)"));
+                        "By.id(id):i->filter.state(enabled).textPart(text).classattributepart(clas)"));
     }
 
     private static SearchAttributes createAttributes(ActionAttributeType type, String value, Visibility elementType)
