@@ -191,3 +191,51 @@ Given I am on a page with the URL 'http://httpbin.org/get'
 When I wait until HTTP GET request with URL pattern `http://httpbin.org/get` exists in proxy log
 Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `1`
 ----
+
+== Dynamic variables
+
+Dynamic variables is variables available out of the box using standard approach `$\{variable-name\}` Usually the data provided by dynamic variables calculated at runtime.
+
+
+=== Context element rectangle
+
+Provides possibility to access context element coordinates, width and height.
+
+[IMPORTANT]
+
+Variable uses contextual approach. So it is necessary to switch context to a target element.
+
+
+==== *Variable name*
+
+[cols="1,3", options="header"]
+|===
+
+|Variable name
+|Description
+
+|context-height
+|provided context element height
+
+|context-width
+|provided context element width
+
+|context-x-coordinate
+|provided context element absolute X coordinate
+
+|context-y-coordinate
+|provided context element absolute Y coordinate
+
+|===
+
+
+==== *Usage example*
+
+[source,gherkin]
+----
+When I change context to element located `tagName(img)`
+Then `${context-height}` is > `0`
+Then `${context-width}` is > `0`
+Then `${context-x-coordinate}` is > `0`
+Then `${context-y-coordinate}` is > `0`
+----
