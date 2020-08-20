@@ -6,6 +6,23 @@ Meta:
 Scenario: Set-Up
 Given I am on a page with the URL '${vividus-test-site-url}/checkboxes.html'
 
+Scenario: Validation of step: 'When I $checkboxAction checkbox located by `$searchAttributes`'
+When I change context to element located `id(single)`
+Then a [NOT_SELECTED] checkbox with the name 'One' exists
+When I CHECK checkbox located by `id(one)`
+Then a [SELECTED] checkbox with the name 'One' exists
+When I refresh the page
+
+
+Scenario: Validation of step 'When I $checkboxState all checkboxes located by `$checkboxesLocator`'
+When I change context to element located `id(double)`
+Then a [NOT_SELECTED] checkbox with the name 'Two' exists
+Then a [NOT_SELECTED] checkbox with the name 'Three' exists
+When I CHECK all checkboxes located by `xpath(.//input)`
+Then a [SELECTED] checkbox with the name 'Two' exists
+Then a [SELECTED] checkbox with the name 'Three' exists
+When I refresh the page
+
 
 Scenario: Validation of step: 'When I check a checkbox'
 When I change context to element located `id(single)`
