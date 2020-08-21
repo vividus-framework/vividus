@@ -45,9 +45,9 @@ class CheckboxNameSearchTests
     private static final String FOR = "for";
     private static final String VALUE = "value";
     private static final String ATTRIBUTE_VALUE = "checkBoxId";
-    private static final By ATTRIBUTE_LOCATOR = LocatorUtil.getXPathLocator("input[@type='checkbox' and @id=%s]",
+    private static final By ATTRIBUTE_LOCATOR = LocatorUtil.getXPathLocator(".//input[@type='checkbox' and @id=%s]",
             ATTRIBUTE_VALUE);
-    private static final By CHECKBOX_LABEL_LOCATOR = LocatorUtil.getXPathLocator("label[text()='" + VALUE
+    private static final By CHECKBOX_LABEL_LOCATOR = LocatorUtil.getXPathLocator(".//label[text()='" + VALUE
             + "' and (preceding-sibling::input or following-sibling::input or child::input)]");
     private static final By CHECKBOX_LABEL_DEEP_LOCATOR = LocatorUtil
             .getXPathLocator("label[preceding-sibling::input or following-sibling::input or child::input]");
