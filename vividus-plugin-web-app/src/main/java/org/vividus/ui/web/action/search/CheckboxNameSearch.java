@@ -29,7 +29,7 @@ public class CheckboxNameSearch extends AbstractElementSearchAction implements I
 {
     private static final String CHECKBOX_LOCATOR = "input[@type='checkbox']";
     private static final String PRECEDING_SIBLING_CHECKBOX_LOCATOR = "preceding-sibling::" + CHECKBOX_LOCATOR;
-    private static final String CHECKBOX_LABEL_FORMAT = "label[text()='%s'"
+    private static final String CHECKBOX_LABEL_FORMAT = ".//label[text()='%s'"
             + " and (preceding-sibling::input or following-sibling::input or child::input)]";
     private static final String CHECKBOX_LABEL_DEEP = "label[preceding-sibling::input or following-sibling::input"
             + " or child::input]";
@@ -75,7 +75,7 @@ public class CheckboxNameSearch extends AbstractElementSearchAction implements I
             if (checkBoxId != null)
             {
                 checkboxes = findElements(searchContext,
-                        getXPathLocator("input[@type='checkbox' and @id=%s]", checkBoxId), parameters);
+                        getXPathLocator(".//input[@type='checkbox' and @id=%s]", checkBoxId), parameters);
             }
             else
             {
