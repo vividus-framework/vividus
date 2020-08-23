@@ -17,7 +17,7 @@ project.description = 'Vividus extension for selenium'
          exclude module: 'selenium-java'
      }
 
-     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.1.0')
+     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.2.0')
      implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
      implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)

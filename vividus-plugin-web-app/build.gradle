@@ -25,7 +25,7 @@ dependencies {
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-safari-driver', version: seleniumVersion)
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-opera-driver', version: seleniumVersion)
     implementation(group: 'junit', name: 'junit', version: versions.junit4)
-    implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.1.0')
+    implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.2.0')
     implementation(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
     implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
