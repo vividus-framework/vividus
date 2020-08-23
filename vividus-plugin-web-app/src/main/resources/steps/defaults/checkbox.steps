@@ -1,0 +1,33 @@
+Composite: Then a checkbox with the name '$checkboxName' exists
+Then number of elements found by `checkboxName(<checkboxName>)` is = `1`
+
+Composite: Then a [$state] checkbox with the name '$checkboxName' exists
+Then number of elements found by `checkboxName(<checkboxName>)->filter.state(<state>)` is = `1`
+
+Composite: When I $checkBoxAction a checkbox with the name '$checkBoxName'
+Priority: 1
+When I <checkBoxAction> checkbox located `checkboxName(<checkBoxName>)`
+
+Composite: When I check a checkbox
+When I CHECK checkbox located `xpath(.//input[@type='checkbox'])`
+
+Composite: When I check all the checkboxes
+When I CHECK all checkboxes located `xpath(.//input[@type='checkbox'])`
+
+Composite: When I uncheck a checkbox with the attribute '$attributeType'='$attributeValue'
+When I UNCHECK checkbox located `xpath(.//input[@type='checkbox' and @<attributeType>='<attributeValue>'])`
+
+Composite: Then a checkbox with the attribute '$attributeType'='$attributeValue' exists
+Then number of elements found by `xpath(.//input[@type='checkbox' and @<attributeType>='<attributeValue>'])` is = `1`
+
+Composite: Then a [$state] checkbox with the attribute '$attributeType'='$attributeValue' exists
+Then number of elements found by `xpath(.//input[@type='checkbox' and @<attributeType>='<attributeValue>'])->filter.state(<state>)` is = `1`
+
+Composite: When I $checkBoxAction a checkbox by the xpath '$xpath'
+When I <checkBoxAction> checkbox located `xpath(<xpath>)`
+
+Composite: When I check a checkbox with the attribute '$attributeType'='$attributeValue'
+When I CHECK checkbox located `xpath(.//input[@type='checkbox' and @<attributeType>='<attributeValue>'])`
+
+Composite: Then a checkbox with the name '$checkBox' does not exist
+Then number of elements found by `checkboxName(<checkBox>)` is = `0`
