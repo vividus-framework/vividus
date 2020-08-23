@@ -1,0 +1,190 @@
+= Comparison rule
+
+== Description
+
+Describes elements locator. Should match regular expression: `(?:By\\.)?([a-zA-Z]+)\\((.+?)\\):?([a-zA-Z]*)?`
+
+== Syntax
+
+----
+By.<locatorType>(<locatorValue>):<visibility>->filter.<filterType>(<filterValue>)
+----
+
+[IMPORTANT]
+
+By. prefix is an optional.
+
+
+. `locatorType` - *[mandatory]* type of the locator
+. `locatorValue` - *[mandatory]* value of the locator
+. `visibility` - *[optional]* visibility of element (visible by default)
+. `filterType` - *[optional]* type of the filter
+. `filterValue` - *[required if filter type defined]* value of the filter
+
+
+== Locator types
+
+[cols="1,2,1", options="header"]
+|===
+
+|Locator type
+|Description
+|Example
+
+|linkText
+|text of the link
+|linkText(Google)
+
+|linkUrl
+|*href* attribute of the link element
+|linkUrl(/faq)
+
+|linkUrlPart
+|part of a *href* attribute of the link element
+|linkUrlPart(faq)
+
+|caseSensitiveText
+|case sensitive text of an element
+|caseSensitiveText(Description)
+
+|caseInsensitiveText
+|case insensitive text of an element
+|caseInsensitiveText(description)
+
+|xpath
+|xpath to an element
+|xpath(//a)
+
+|cssSelector
+|CSS selector to an element
+|cssSelector(.menu-item)
+
+|tagName
+|name of an element tagName
+|tagName(a)
+
+|imageSrc
+|shortcut to a *.//img[@src='<value>>']*
+|imgSrc(/images/kote.png)
+
+|imageSrcPart
+|shortcut to a *.//img[contains(@src,'<value>>')]']*
+|imgSrcPart(kote.png)
+
+|buttonName
+|elements of type button or input with text or any attribute value
+|buttonName(submit)
+
+|fieldName
+|input or textarea with text or any attribute value
+|fieldName(editor)
+
+|checkboxName
+|input element with @type="checkbox" and text value
+|checkboxName(allow)
+
+|id
+|id attribute of an element
+|id(submitForm)
+
+|className
+|CSS class name
+|className(bold)
+
+|elementName
+|Any attribute or text value
+|elementName(OK)
+
+|===
+
+== Visibility types
+
+[cols="1,1,3", options="header"]
+|===
+
+|Visibility type
+|Usage example
+|Description
+
+|VISIBLE
+|xpath(//a)
+|Default visibility option. Only visible elements will be found
+
+|INVISIBLE
+|xpath(//a):i
+|Only invisible elements will be found
+
+|all
+|xpath(//a):a
+|Either visible and invisible elements will be found
+
+|===
+
+== Filters
+
+Filter are applied after elements search via locator. Elements not matching filter condition will be sorted out without additional notice.
+
+
+=== Filter types
+
+[cols="1,2,3", options="header"]
+|===
+
+|Filter type
+|Description
+|Example
+
+|state
+|
+element xref:parameters:state.adoc[State]
+|id(v1)->filter.state(VISIBLE)
+
+|caseSensitiveText
+|element text should match case sensitively
+|id(v1)->filter.caseSensitiveText(text)
+
+|classAttributePart
+|class attribute should contain part
+|id(v1)->filter.classAttributePart(clazz)
+
+|linkUrl
+|*href* attribute of the link element
+|id(v1)->filter.linkUrl(/url)
+
+|linkUrlPart
+|part of *href* attribute of the link element
+|id(v1)->filter.linkUrlPart(/url)
+
+|tooltip
+|title attribute value
+|id(v1)->filter.tooltip(title)
+
+|imageSrcPart
+|src attribute should contain vvalue
+|id(v1)->filter.imageSrcPart(part)
+
+|textPart
+|text of an element should contain value
+|id(v1)->filter.textPart(part)
+
+|placeholder
+|Placeholder attribute should be equal to a value
+|id(v1)->filter.placeholder(placeholder-value)
+
+|validationIconSource
+|CSS property background-image should match
+|id(v1)->filter.validationIconSource(src)
+
+|fieldText
+|field text should match expected value
+|id(v1)->filter.fieldText(value)
+
+|fieldTextPart
+|field text should contain expected value
+|id(v1)->filter.fieldTextPart(value)
+
+|dropDownText
+|any of select options should be equal to a value
+|id(v1)->filter.dropDownText(value)
+
+|===

@@ -201,3 +201,7 @@ Given I am on a page with the URL 'http://demo.guru99.com/test/upload/'
 When I select an element with the 'id'='uploadfile_0' and upload the file '/data/file_for_upload_step.png'
 When I click on element located `By.name(send)`
 Then the text 'has been successfully uploaded' exists
+
+Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
+Given I am on a page with the URL '${vividus-test-site-url}'
+Then number of VISIBLE elements found by `tagName(img)` is = `1`
