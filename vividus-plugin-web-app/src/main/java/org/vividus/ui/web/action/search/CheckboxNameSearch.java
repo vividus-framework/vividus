@@ -37,16 +37,6 @@ public class CheckboxNameSearch extends AbstractElementSearchAction implements I
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
-        List<WebElement> checkboxLabels = searchCheckboxLabels(searchContext, parameters);
-        return checkboxLabels.isEmpty() ? findElements(searchContext, getXPathLocator(CHECKBOX_LOCATOR), parameters)
-                .stream()
-                .filter(c -> parameters.getValue().equals(getWebElementActions().getElementText(c)))
-                .map(Checkbox::new)
-                .collect(Collectors.toList()) : checkboxLabels;
-    }
-
-    private List<WebElement> searchCheckboxLabels(SearchContext searchContext, SearchParameters parameters)
-    {
         String checkBoxName = parameters.getValue();
         SearchParameters nonDisplayedParameters = new SearchParameters(parameters.getValue(), Visibility.ALL,
                 parameters.isWaitForElement());
