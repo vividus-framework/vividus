@@ -42,8 +42,10 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
@@ -61,6 +63,7 @@ import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
 import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.ClickResult;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.WebElementActions;
@@ -422,6 +425,22 @@ public class ElementStepsTests
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         elementSteps.uploadFile(searchAttributes, FILE_PATH);
         verify(webElement, never()).sendKeys(ABSOLUTE_PATH);
+    }
+
+    @Test
+    public void shouldVerifyIfAllTheElementsHasValidState()
+    {
+        ComparisonRule comparisonRule = ComparisonRule.EQUAL_TO;
+        int number = 1;
+        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH);
+        when(baseValidations.assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS,
+                searchAttributes, number, comparisonRule)).thenReturn(List.of(webElement, webElement, webElement));
+        State state = State.ENABLED;
+        InOrder ordered = Mockito.inOrder(baseValidations);
+        elementSteps.doesElementsNumberInStateExists(state, searchAttributes, comparisonRule, number);
+        ordered.verify(baseValidations).assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS,
+                searchAttributes, number, comparisonRule);
+        ordered.verify(baseValidations, times(3)).assertElementState("Element is ENABLED", state, webElement);
     }
 
     private void mockWebElementCssValue()

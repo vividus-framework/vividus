@@ -64,16 +64,26 @@ class FilteringTableTransformerTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform(TABLE, tableParsers, new TableProperties(new Properties())));
         assertEquals("At least one of the following properties should be specified: 'byMaxColumns', 'byMaxRows', "
-                + "'byColumnNames', 'column.<regex placeholder>'", exception.getMessage());
+                + "'byColumnNames', 'column.<regex placeholder>', 'byRowIndexes'", exception.getMessage());
     }
 
     @Test
-    void testFailOnConflictingProperties()
+    void testFailOnConflictingPropertiesForColumns()
     {
-        TableProperties tableProperties = new TableProperties(createProperties(1, null, "key2"));
+        TableProperties tableProperties = new TableProperties(createProperties(1, null, "key2", null));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform(TABLE, tableParsers, tableProperties));
         assertEquals("Conflicting properties declaration found: 'byMaxColumns' and 'byColumnNames'",
+                exception.getMessage());
+    }
+
+    @Test
+    void testFailOnConflictingPropertiesForRows()
+    {
+        TableProperties tableProperties = new TableProperties(createProperties(null, 1, null, "1;2"));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> transformer.transform(TABLE, tableParsers, tableProperties));
+        assertEquals("Conflicting properties declaration found: 'byMaxRows' and 'byRowIndexes'",
                 exception.getMessage());
     }
 
@@ -110,11 +120,12 @@ class FilteringTableTransformerTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform(TABLE, tableParsers, tableProperties));
         assertEquals("Filtering by regex is not allowed to be used together with the following properties:"
-                + " 'byMaxColumns', 'byColumnNames', 'byMaxRows'",
+                + " 'byMaxColumns', 'byColumnNames', 'byMaxRows', 'byRowIndexes'",
                 exception.getMessage());
     }
 
-    private static Properties createProperties(Integer columns, Integer byMaxRows, String byColumnNames)
+    private static Properties createProperties(Integer columns, Integer byMaxRows, String byColumnNames,
+                                               String byRowIndexes)
     {
         Properties properties = new Properties();
         if (columns != null)
@@ -129,20 +140,25 @@ class FilteringTableTransformerTests
         {
             properties.setProperty("byColumnNames", byColumnNames);
         }
+        if (byRowIndexes != null)
+        {
+            properties.setProperty("byRowIndexes", byRowIndexes);
+        }
         return properties;
     }
 
     // CHECKSTYLE:OFF
     static Stream<Arguments> tableSource() {
         return Stream.of(
-            Arguments.of(TABLE, createProperties(3, 3, null),           TABLE),
-            Arguments.of(TABLE, createProperties(3, 5, null),           TABLE),
-            Arguments.of(TABLE, createProperties(2, 2, null),           "|key1|key2|\n|1|2|\n|4|5|"),
-            Arguments.of(TABLE, createProperties(null, 2, null),        "|key1|key2|key3|\n|1|2|3|\n|4|5|6|"),
-            Arguments.of(TABLE, createProperties(2, null, null),        "|key1|key2|\n|1|2|\n|4|5|\n|7|8|"),
-            Arguments.of(TABLE, createProperties(null, 2, "key1;key3"), "|key1|key3|\n|1|3|\n|4|6|"),
-            Arguments.of(TABLE, createProperties(null, 5, "key3;key2"), "|key2|key3|\n|2|3|\n|5|6|\n|8|9|"),
-            Arguments.of(TABLE, createProperties(null, 1, "key1"),      "|key1|\n|1|")
+            Arguments.of(TABLE, createProperties(3, 3, null, null),           TABLE),
+            Arguments.of(TABLE, createProperties(3, 5, null, null),           TABLE),
+            Arguments.of(TABLE, createProperties(2, 2, null, null),           "|key1|key2|\n|1|2|\n|4|5|"),
+            Arguments.of(TABLE, createProperties(null, 2, null, null),        "|key1|key2|key3|\n|1|2|3|\n|4|5|6|"),
+            Arguments.of(TABLE, createProperties(2, null, null, null),        "|key1|key2|\n|1|2|\n|4|5|\n|7|8|"),
+            Arguments.of(TABLE, createProperties(null, 2, "key1;key3", null), "|key1|key3|\n|1|3|\n|4|6|"),
+            Arguments.of(TABLE, createProperties(null, 5, "key3;key2", null), "|key2|key3|\n|2|3|\n|5|6|\n|8|9|"),
+            Arguments.of(TABLE, createProperties(null, null, null, "0;2"),    "|key1|key2|key3|\n|1|2|3|\n|7|8|9|"),
+            Arguments.of(TABLE, createProperties(null, 1, "key1", null),      "|key1|\n|1|")
         );
     }
     // CHECKSTYLE:ON

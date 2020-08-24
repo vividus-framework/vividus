@@ -16,8 +16,9 @@
 
 package org.vividus.ui.web.action.search;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -41,19 +42,17 @@ import org.vividus.ui.web.util.LocatorUtil;
 @ExtendWith(MockitoExtension.class)
 class CheckboxNameSearchTests
 {
-    private static final String INPUT_PATTERN = "input[@type='checkbox']";
     private static final String FOR = "for";
     private static final String VALUE = "value";
     private static final String ATTRIBUTE_VALUE = "checkBoxId";
-    private static final By ATTRIBUTE_LOCATOR = LocatorUtil.getXPathLocator("input[@type='checkbox' and @id=%s]",
+    private static final By ATTRIBUTE_LOCATOR = LocatorUtil.getXPathLocator(".//input[@type='checkbox' and @id=%s]",
             ATTRIBUTE_VALUE);
-    private static final By CHECKBOX_LABEL_LOCATOR = LocatorUtil.getXPathLocator("label[text()='" + VALUE
+    private static final By CHECKBOX_LABEL_LOCATOR = LocatorUtil.getXPathLocator(".//label[text()='" + VALUE
             + "' and (preceding-sibling::input or following-sibling::input or child::input)]");
     private static final By CHECKBOX_LABEL_DEEP_LOCATOR = LocatorUtil
             .getXPathLocator("label[preceding-sibling::input or following-sibling::input or child::input]");
-    private static final By INPUT_LOCATOR = LocatorUtil.getXPathLocator(INPUT_PATTERN);
     private static final By PRECEDING_SIBLING_CHECKBOX_LOCATOR = LocatorUtil
-            .getXPathLocator("preceding-sibling::" + INPUT_PATTERN);
+            .getXPathLocator("preceding-sibling::input[@type='checkbox']");
 
     private final SearchParameters parameters = new SearchParameters(VALUE);
 
@@ -104,64 +103,16 @@ class CheckboxNameSearchTests
     }
 
     @Test
-    void testSearchSuccessByCheckboxLocator()
-    {
-        spy = Mockito.spy(checkboxNameSearch);
-        WebElement checkbox = mock(WebElement.class);
-        when(spy.findElements(eq(searchContext), eq(CHECKBOX_LABEL_LOCATOR), any(SearchParameters.class)))
-                .thenReturn(List.of());
-        when(spy.findElements(eq(searchContext), eq(CHECKBOX_LABEL_DEEP_LOCATOR), any(SearchParameters.class)))
-                .thenReturn(List.of());
-        when(spy.findElements(eq(searchContext), eq(INPUT_LOCATOR), any(SearchParameters.class)))
-                .thenReturn(List.of(checkbox));
-        when(webElementActions.getElementText(checkbox)).thenReturn(VALUE);
-        List<WebElement> foundElements = spy.search(searchContext, parameters);
-        assertEquals(1, foundElements.size());
-        Checkbox foundElement = (Checkbox) foundElements.get(0);
-        assertEquals(checkbox, foundElement.getWrappedElement());
-        assertNull(foundElement.getLabelElement());
-    }
-
-    @Test
-    void testSearchSuccessWrongText()
-    {
-        spy = Mockito.spy(checkboxNameSearch);
-        WebElement checkbox = mock(WebElement.class);
-        WebElement label = mock(WebElement.class);
-        when(spy.findElements(eq(searchContext), eq(CHECKBOX_LABEL_LOCATOR), any(SearchParameters.class)))
-                .thenReturn(List.of());
-        when(spy.findElements(eq(searchContext), eq(CHECKBOX_LABEL_DEEP_LOCATOR), any(SearchParameters.class)))
-                .thenReturn(List.of(label));
-        when(webElementActions.getElementText(label)).thenReturn("wrongText");
-        when(webElementActions.getElementText(checkbox)).thenReturn(VALUE);
-        when(spy.findElements(eq(searchContext), eq(INPUT_LOCATOR), any(SearchParameters.class)))
-                .thenReturn(List.of(checkbox));
-        List<WebElement> foundElements = spy.search(searchContext, parameters);
-        assertEquals(1, foundElements.size());
-        Checkbox foundElement = (Checkbox) foundElements.get(0);
-        assertEquals(checkbox, foundElement.getWrappedElement());
-        assertNull(foundElement.getLabelElement());
-    }
-
-    @Test
     void testSearchSuccessEmptySiblings()
     {
         spy = Mockito.spy(checkboxNameSearch);
-        WebElement checkbox = mock(WebElement.class);
         WebElement label = mock(WebElement.class);
         when(spy.findElements(eq(searchContext), eq(CHECKBOX_LABEL_LOCATOR), any(SearchParameters.class)))
                 .thenReturn(List.of(label));
         when(spy.findElements(eq(searchContext), eq(CHECKBOX_LABEL_DEEP_LOCATOR), any(SearchParameters.class)))
                 .thenReturn(List.of());
-        when(webElementActions.getElementText(checkbox)).thenReturn(VALUE);
         when(label.findElements(PRECEDING_SIBLING_CHECKBOX_LOCATOR)).thenReturn(List.of());
-        when(spy.findElements(eq(searchContext), eq(INPUT_LOCATOR), any(SearchParameters.class)))
-                .thenReturn(List.of(checkbox));
-        List<WebElement> foundElements = spy.search(searchContext, parameters);
-        assertEquals(1, foundElements.size());
-        Checkbox foundElement = (Checkbox) foundElements.get(0);
-        assertEquals(checkbox, foundElement.getWrappedElement());
-        assertNull(foundElement.getLabelElement());
+        assertThat(spy.search(searchContext, parameters), empty());
     }
 
     @Test

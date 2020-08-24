@@ -15,5 +15,5 @@
 * xref:plugin-ssh.adoc[SSH*]
 * xref:plugin-visual.adoc[Visual Testing*]
 * xref:plugin-web-app-to-rest-api.adoc[WEB UI to REST API*]
-* xref:plugin-web-app.adoc[WEB App*]
+* xref:plugin-web-app.adoc[WEB App]
 * xref:plugin-xml.adoc[XML*]

@@ -18,6 +18,7 @@ package org.vividus.ui.web.util;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -71,7 +72,7 @@ public final class SearchAttributesConversionUtils
                 Matcher filterMatcher = FILTER_PATTERN.matcher(filters);
                 while (filterMatcher.find())
                 {
-                    applyFilter(searchAttributes, filterMatcher.group(1).toLowerCase(), filterMatcher.group(2));
+                    applyFilter(searchAttributes, filterMatcher.group(1), filterMatcher.group(2));
                 }
             }
             return searchAttributes;
@@ -82,8 +83,8 @@ public final class SearchAttributesConversionUtils
 
     private static void applyFilter(SearchAttributes searchAttributes, String filterType, String filterValue)
     {
-        findActionAttributeType(ActionAttributeType.getFilterTypes(), filterType).ifPresent(
-            type -> searchAttributes.addFilter(type, filterValue));
+        createSearchAttributes(ActionAttributeType.getFilterTypes(),
+            type -> searchAttributes.addFilter(type, filterValue), "filter", filterType);
     }
 
     private static SearchAttributes convertToSearchAttributes(String searchType, String searchValue)
@@ -98,10 +99,18 @@ public final class SearchAttributesConversionUtils
             case "xpath":
                 return new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(searchValue));
             default:
-                return findActionAttributeType(ActionAttributeType.getSearchTypes(), searchType)
-                        .map(type -> new SearchAttributes(type, searchValue))
-                        .orElseThrow(() -> new IllegalArgumentException("Unsupported locator type: " + searchType));
+                return createSearchAttributes(ActionAttributeType.getSearchTypes(),
+                    type -> new SearchAttributes(type, searchValue), "locator", searchType);
         }
+    }
+
+    private static SearchAttributes createSearchAttributes(Set<ActionAttributeType> attributeTypes,
+            Function<ActionAttributeType, SearchAttributes> mapper, String operatorType, String searchType)
+    {
+        return findActionAttributeType(attributeTypes, searchType)
+                .map(mapper)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    String.format("Unsupported %s type: %s", operatorType, searchType)));
     }
 
     private static Optional<ActionAttributeType> findActionAttributeType(Set<ActionAttributeType> types, String type)

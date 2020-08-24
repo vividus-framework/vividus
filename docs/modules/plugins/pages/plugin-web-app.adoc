@@ -225,3 +225,88 @@ Given I am on a page with the URL 'http://httpbin.org/get'
 When I wait until HTTP GET request with URL pattern `http://httpbin.org/get` exists in proxy log
 Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `1`
 ----
+
+
+=== Verify elements state
+
+==== *_Info_*
+
+Verifies if the number of elements located by locator matches number condition and all of them are in desired state
+
+[IMPORTANT]
+
+If you describer number condition as equal to 5 in case if there are 10 elements by this locator and only 5 of them in the desired state. You will get two failed assertions.
+The first one about number condition violation. The second one about state check failure.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then number of $state elements found by `$locator` is $comparisonRule `$quantity`
+----
+
+==== *_Parameters_*
+
+. `$state` - xref:parameters:state.adoc[State]
+. `$locator` - xref:parameters:locator.adoc[Locator]
+. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
+. `$quantity` - expected number of elements
+
+==== *_Usage_*
+
+.VerifyState.story
+[source,gherkin]
+----
+Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
+Given I am on a page with the URL '${vividus-test-site-url}'
+Then number of VISIBLE elements found by `tagName(img)` is = `1`
+----
+
+
+== Dynamic variables
+
+Dynamic variables is variables available out of the box using standard approach `$\{variable-name\}` Usually the data provided by dynamic variables calculated at runtime.
+
+
+=== Context element rectangle
+
+Provides possibility to access context element coordinates, width and height.
+
+[IMPORTANT]
+
+Variable uses contextual approach. So it is necessary to switch context to a target element.
+
+
+==== *Variable name*
+
+[cols="1,3", options="header"]
+|===
+
+|Variable name
+|Description
+
+|context-height
+|provided context element height
+
+|context-width
+|provided context element width
+
+|context-x-coordinate
+|provided context element absolute X coordinate
+
+|context-y-coordinate
+|provided context element absolute Y coordinate
+
+|===
+
+
+==== *Usage example*
+
+[source,gherkin]
+----
+When I change context to element located `tagName(img)`
+Then `${context-height}` is > `0`
+Then `${context-width}` is > `0`
+Then `${context-x-coordinate}` is > `0`
+Then `${context-y-coordinate}` is > `0`
+----

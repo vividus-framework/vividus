@@ -16,56 +16,40 @@
 
 package org.vividus.bdd.steps.ui.web;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.WrapsElement;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.element.Checkbox;
-import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.CheckboxAction;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
 class CheckboxStepsTests
 {
-    private static final String CHECKBOXES_NUMBER = "Checkboxes number";
-    private static final String CHECKBOX_WITH_ATTR_VALUE = "Checkbox with the attribute '%1$s'='%2$s'";
     private static final String CHECKBOX = "Checkbox";
-    private static final String XPATH = "xpath";
-    private static final String CHECKBOX_NAME = "checkboxName";
-    private static final String CHECKBOX_ATTRIBUTE_TYPE = "attributeType";
-    private static final String CHECKBOX_ATTRIBUTE_VALUE = "attributeValue";
-    private static final String CHECKBOX_LOCATOR = "input[@type='checkbox']";
-    private static final String THE_FOUND_CHECKBOX_IS = "The found checkbox is ";
-    private static final String CHECKBOX_WITH_NAME = "Checkbox with name '%s'";
-    private static final String CHECKBOX_XPATH = LocatorUtil.getXPath(
-            "input[@type=\"checkbox\" and @" + CHECKBOX_ATTRIBUTE_TYPE + "=%s]", CHECKBOX_ATTRIBUTE_VALUE);
+    private static final SearchAttributes SEARCH_ATTRIBUTES = new SearchAttributes(
+            ActionAttributeType.XPATH, "input[@type='checkbox']");
 
     @Mock
     private IBaseValidations baseValidations;
 
     @Mock
-    private WebElement webElement;
+    private WebElement checkbox;
 
     @Mock
     private IMouseActions mouseActions;
@@ -74,208 +58,62 @@ class CheckboxStepsTests
     private CheckboxSteps checkboxSteps;
 
     @Test
-    void checkCheckBoxUnchecked()
+    void shouldChangeCheckboxState()
     {
-        when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(
-                ActionAttributeType.XPATH, LocatorUtil.getXPath(CHECKBOX_LOCATOR)))).thenReturn(webElement);
-        when(webElement.isSelected()).thenReturn(false);
-        when(webElement.isDisplayed()).thenReturn(true);
-        checkboxSteps.checkCheckBox();
-        verify(mouseActions).click(argThatCheckbox());
+        when(baseValidations.assertIfElementExists(CHECKBOX, SEARCH_ATTRIBUTES)).thenReturn(checkbox);
+        when(checkbox.isDisplayed()).thenReturn(true);
+        checkboxSteps.changeStateOfCheckbox(CheckboxAction.CHECK, SEARCH_ATTRIBUTES);
+        verify(mouseActions).click(verifyWrappedCheckbox());
     }
 
     @Test
-    void checkCheckBoxChecked()
+    void shouldNotCheckWhenNoElementFound()
     {
-        Mockito.lenient().when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(
-                ActionAttributeType.XPATH, CHECKBOX_LOCATOR))).thenReturn(webElement);
-        checkboxSteps.checkCheckBox();
-        verify(mouseActions, never()).click(argThatCheckbox());
+        checkboxSteps.changeStateOfCheckbox(CheckboxAction.CHECK, SEARCH_ATTRIBUTES);
+        verifyNoInteractions(mouseActions);
     }
 
     @Test
-    void checkCheckBoxCheckedNullCheckbox()
+    void shouldNotChangeCheckboxStateWhenWrappedElementNull()
     {
-        Mockito.lenient().when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(
-                ActionAttributeType.XPATH, CHECKBOX_LOCATOR))).thenReturn(null);
-        checkboxSteps.checkCheckBox();
-        Mockito.verifyNoInteractions(mouseActions);
+        when(baseValidations.assertIfElementExists(CHECKBOX, SEARCH_ATTRIBUTES)).thenReturn(new Checkbox(null));
+        checkboxSteps.changeStateOfCheckbox(CheckboxAction.CHECK, SEARCH_ATTRIBUTES);
+        verifyNoInteractions(mouseActions);
     }
 
     @Test
-    void checkAllCheckBoxes()
+    void shouldNotClickCheckboxIfItIsInDesiredState()
     {
-        when(baseValidations.assertIfElementsExist(CHECKBOXES_NUMBER,
-                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(CHECKBOX_LOCATOR))))
-                        .thenReturn(Arrays.asList(webElement, webElement));
-        when(webElement.isDisplayed()).thenReturn(true);
-        checkboxSteps.checkAllCheckboxes();
-        verify(mouseActions, times(2)).click(argThatCheckbox());
+        when(baseValidations.assertIfElementExists(CHECKBOX, SEARCH_ATTRIBUTES)).thenReturn(checkbox);
+        CheckboxAction action = CheckboxAction.CHECK;
+        when(checkbox.isSelected()).thenReturn(action.isSelected());
+        checkboxSteps.changeStateOfCheckbox(action, SEARCH_ATTRIBUTES);
+        verifyNoInteractions(mouseActions);
     }
 
     @Test
-    void checkAllCheckBoxesEmpty()
+    void shouldClickLabelIfCheckboxNotDisplayed()
     {
-        when(baseValidations.assertIfElementsExist(CHECKBOXES_NUMBER,
-                new SearchAttributes(ActionAttributeType.XPATH, LocatorUtil.getXPath(CHECKBOX_LOCATOR))))
-                        .thenReturn(List.of());
-        checkboxSteps.checkAllCheckboxes();
-        verify(mouseActions, never()).click(argThatCheckbox());
+        WebElement label = mock(WebElement.class);
+        Checkbox wrappedCheckbox = new Checkbox(checkbox, label);
+        when(baseValidations.assertIfElementExists(CHECKBOX, SEARCH_ATTRIBUTES)).thenReturn(wrappedCheckbox);
+        CheckboxAction action = CheckboxAction.CHECK;
+        checkboxSteps.changeStateOfCheckbox(action, SEARCH_ATTRIBUTES);
+        verify(mouseActions).click(label);
     }
 
     @Test
-    void checkCheckBoxElementNull()
+    void shouldCheckAllFoundCheckboxes()
     {
-        when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(CHECKBOX_LOCATOR)))).thenReturn(null);
-        checkboxSteps.checkCheckBox();
-        verify(mouseActions, never()).click(argThatCheckbox());
+        when(baseValidations.assertIfElementsExist("Checkboxes", SEARCH_ATTRIBUTES))
+            .thenReturn(List.of(checkbox, checkbox, checkbox));
+        when(checkbox.isDisplayed()).thenReturn(true);
+        checkboxSteps.changeStateOfAllCheckboxes(CheckboxAction.CHECK, SEARCH_ATTRIBUTES);
+        verify(mouseActions, times(3)).click(verifyWrappedCheckbox());
     }
 
-    @Test
-    void testUncheckCheckboxByXpath()
+    private WebElement verifyWrappedCheckbox()
     {
-        when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(
-                ActionAttributeType.XPATH, LocatorUtil.getXPath(XPATH)))).thenReturn(webElement);
-        when(webElement.isSelected()).thenReturn(true);
-        when(webElement.isDisplayed()).thenReturn(true);
-        checkboxSteps.processCheckboxByXpath(CheckboxAction.UNCHECK, XPATH);
-        verify(mouseActions).click(argThatCheckbox());
-    }
-
-    @Test
-    void testUncheckCheckboxItem()
-    {
-        when(baseValidations.assertIfElementExists(String.format(CHECKBOX_WITH_NAME, CHECKBOX_NAME),
-                new SearchAttributes(ActionAttributeType.CHECKBOX_NAME, CHECKBOX_NAME)))
-                        .thenReturn(new Checkbox(webElement));
-        when(webElement.isSelected()).thenReturn(true);
-        when(webElement.isDisplayed()).thenReturn(true);
-        checkboxSteps.processCheckboxItem(CheckboxAction.UNCHECK, CHECKBOX_NAME);
-        verify(mouseActions).click(argThatCheckbox());
-    }
-
-    @Test
-    void testUncheckCheckboxItemWithAttribute()
-    {
-        when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath("input[@type=\"checkbox\" and @type=\"value\"]")))).thenReturn(webElement);
-        when(webElement.isSelected()).thenReturn(true);
-        when(webElement.isDisplayed()).thenReturn(true);
-        checkboxSteps.uncheckCheckboxItem("type", "value");
-        verify(mouseActions).click(argThatCheckbox());
-    }
-
-    @Test
-    void testIfCheckboxWithAttributeExist()
-    {
-        checkboxSteps.ifCheckboxWithAttributeExists(CHECKBOX_ATTRIBUTE_TYPE, CHECKBOX_ATTRIBUTE_VALUE);
-        verify(baseValidations).assertIfElementExists(
-                String.format(CHECKBOX_WITH_ATTR_VALUE, CHECKBOX_ATTRIBUTE_TYPE, CHECKBOX_ATTRIBUTE_VALUE),
-                new SearchAttributes(ActionAttributeType.XPATH, CHECKBOX_XPATH));
-    }
-
-    @Test
-    void testIfCheckboxWithAttributeAndStateExist()
-    {
-        when(baseValidations.assertIfElementExists(
-                String.format(CHECKBOX_WITH_ATTR_VALUE, CHECKBOX_ATTRIBUTE_TYPE, CHECKBOX_ATTRIBUTE_VALUE),
-                new SearchAttributes(ActionAttributeType.XPATH, CHECKBOX_XPATH))).thenReturn(webElement);
-        checkboxSteps.ifCheckboxWithAttributeExists(State.ENABLED, CHECKBOX_ATTRIBUTE_TYPE, CHECKBOX_ATTRIBUTE_VALUE);
-        verify(baseValidations).assertElementState(THE_FOUND_CHECKBOX_IS + State.ENABLED, State.ENABLED,
-                (WrapsElement) new Checkbox(webElement));
-    }
-
-    @Test
-    void testIfCheckboxExist()
-    {
-        checkboxSteps.ifCheckboxExists(CHECKBOX_NAME);
-        verify(baseValidations).assertIfElementExists(String.format(CHECKBOX_WITH_NAME, CHECKBOX_NAME),
-                new SearchAttributes(ActionAttributeType.CHECKBOX_NAME, CHECKBOX_NAME));
-    }
-
-    @Test
-    void testIfStateCheckboxExist()
-    {
-        WebElement checkbox = mock(Checkbox.class);
-        when(baseValidations.assertIfElementExists(String.format(CHECKBOX_WITH_NAME, CHECKBOX_NAME),
-                new SearchAttributes(ActionAttributeType.CHECKBOX_NAME, CHECKBOX_NAME))).thenReturn(checkbox);
-        checkboxSteps.ifCheckboxExists(State.ENABLED, CHECKBOX_NAME);
-        verify(baseValidations).assertElementState(THE_FOUND_CHECKBOX_IS + State.ENABLED, State.ENABLED, checkbox);
-    }
-
-    @Test
-    void testDoesNotCheckboxExist()
-    {
-        checkboxSteps.doesNotCheckboxExist(CHECKBOX_NAME);
-        verify(baseValidations).assertIfElementDoesNotExist(String.format(CHECKBOX_WITH_NAME, CHECKBOX_NAME),
-                new SearchAttributes(ActionAttributeType.CHECKBOX_NAME,
-                        new SearchParameters(CHECKBOX_NAME).setWaitForElement(false)));
-    }
-
-    @Test
-    void testCheckCheckboxByXpath()
-    {
-        when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(XPATH)))).thenReturn(webElement);
-        when(webElement.isDisplayed()).thenReturn(true);
-        checkboxSteps.processCheckboxByXpath(CheckboxAction.CHECK, XPATH);
-        verify(mouseActions).click(argThatCheckbox());
-    }
-
-    @Test
-    void testCheckCheckboxItem()
-    {
-        when(baseValidations.assertIfElementExists(String.format(CHECKBOX_WITH_NAME, CHECKBOX_NAME),
-                new SearchAttributes(ActionAttributeType.CHECKBOX_NAME, CHECKBOX_NAME)))
-                        .thenReturn(new Checkbox(webElement));
-        when(webElement.isDisplayed()).thenReturn(true);
-        checkboxSteps.processCheckboxItem(CheckboxAction.CHECK, CHECKBOX_NAME);
-        verify(mouseActions).click(argThatCheckbox());
-    }
-
-    @Test
-    void testCheckCheckboxItemInvisibleCheckbox()
-    {
-        WebElement labelElement = mock(WebElement.class);
-        when(baseValidations.assertIfElementExists(String.format(CHECKBOX_WITH_NAME, CHECKBOX_NAME),
-                new SearchAttributes(ActionAttributeType.CHECKBOX_NAME, CHECKBOX_NAME)))
-                        .thenReturn(new Checkbox(webElement, labelElement));
-        when(webElement.isDisplayed()).thenReturn(false);
-        checkboxSteps.processCheckboxItem(CheckboxAction.CHECK, CHECKBOX_NAME);
-        verify(mouseActions).click(labelElement);
-    }
-
-    @Test
-    void testCheckCheckboxByXpath2()
-    {
-        String xpath = ".//*[contains(@style, 'width: 100%')]";
-        when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(xpath)))).thenReturn(webElement);
-        when(webElement.isDisplayed()).thenReturn(true);
-        checkboxSteps.processCheckboxByXpath(CheckboxAction.CHECK, xpath);
-        verify(mouseActions).click(argThatCheckbox());
-    }
-
-    @Test
-    void testCheckCheckboxItemWithAttribute()
-    {
-        when(baseValidations.assertIfElementExists(CHECKBOX, new SearchAttributes(ActionAttributeType.XPATH,
-                CHECKBOX_XPATH))).thenReturn(webElement);
-        when(webElement.isDisplayed()).thenReturn(true);
-        checkboxSteps.checkCheckboxItem(CHECKBOX_ATTRIBUTE_TYPE, CHECKBOX_ATTRIBUTE_VALUE);
-        verify(mouseActions).click(argThatCheckbox());
-    }
-
-    @Test
-    void testGetCheckboxXpathByAttributeAndValue()
-    {
-        assertEquals(CHECKBOX_XPATH,
-                checkboxSteps.getCheckboxXpathByAttributeAndValue(CHECKBOX_ATTRIBUTE_TYPE, CHECKBOX_ATTRIBUTE_VALUE));
-    }
-
-    private WebElement argThatCheckbox()
-    {
-        return argThat(e -> ((Checkbox) e).getWrappedElement().equals(webElement));
+        return argThat(e -> checkbox.equals(((Checkbox) e).getWrappedElement()));
     }
 }
