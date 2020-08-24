@@ -2,7 +2,7 @@ Composite: Then a checkbox with the name '$checkboxName' exists
 Then number of elements found by `checkboxName(<checkboxName>)` is = `1`
 
 Composite: Then a [$state] checkbox with the name '$checkboxName' exists
-Then number of elements found by `checkboxName(<checkboxName>)->filter.state(<state>)` is = `1`
+Then number of <state> elements found by `checkboxName(<checkboxName>)` is = `1`
 
 Composite: When I $checkBoxAction a checkbox with the name '$checkBoxName'
 Priority: 1
@@ -21,7 +21,7 @@ Composite: Then a checkbox with the attribute '$attributeType'='$attributeValue'
 Then number of elements found by `xpath(.//input[@type='checkbox' and @<attributeType>='<attributeValue>'])` is = `1`
 
 Composite: Then a [$state] checkbox with the attribute '$attributeType'='$attributeValue' exists
-Then number of elements found by `xpath(.//input[@type='checkbox' and @<attributeType>='<attributeValue>'])->filter.state(<state>)` is = `1`
+Then number of <state> elements found by `xpath(.//input[@type='checkbox' and @<attributeType>='<attributeValue>'])` is = `1`
 
 Composite: When I $checkBoxAction a checkbox by the xpath '$xpath'
 When I <checkBoxAction> checkbox located `xpath(<xpath>)`
