@@ -1,16 +1,14 @@
-= Plugin Web App
+= Web Application Plugin
 :proxy: This step requires proxy to be turned on. It can be done via setting properties or switching on @proxy metatag.
-
-== General Info
 
 The plugin provides functionality to interact with Web applications.
 
 == Installation
 
 .build.gradle
-[source,gradle]
+[source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '0.2.4')
+implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '{page-component-version}')
 ----
 
 
@@ -274,4 +272,4 @@ Then `${context-height}` is > `0`
 Then `${context-width}` is > `0`
 Then `${context-x-coordinate}` is > `0`
 Then `${context-y-coordinate}` is > `0`
-____
+----

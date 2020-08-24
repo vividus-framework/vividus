@@ -1,1 +1,31 @@
-include::ROOT:page$under-construction.adoc[]
+= Excel Plugin
+
+The plugin provides the ability to work with CSV files.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{page-component-version}')
+----
+
+== Table Transformers
+=== FROM_CSV
+
+`FROM_CSV` transformer generates table from the given CSV file.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`csvPath`
+|relative path to the CSV file
+|===
+
+.Usage example
+----
+Examples:
+{transformer=FROM_CSV, csvPath=/story/example.csv}
+----

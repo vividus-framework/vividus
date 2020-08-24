@@ -1,15 +1,13 @@
-= Plugin Date Time
+= Date/Time Plugin
 
-== General Info
-
-The plugin provides functionality to generate, modify, or validate the date.
+The plugin provides functionality to generate, modify and validate date/time.
 
 == Installation
 
 .build.gradle
-[source,gradle]
+[source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-datetime', version: '0.2.0')
+implementation(group: 'org.vividus', name: 'vividus-plugin-datetime', version: '{page-component-version}')
 ----
 
 

@@ -1,1 +1,70 @@
-include::ROOT:page$under-construction.adoc[]
+= Excel Plugin
+
+The plugin provides the ability to work with Excel documents.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-excel', version: '{page-component-version}')
+----
+
+== Table Transformers
+=== FROM_EXCEL
+
+`FROM_EXCEL` transformer generates table from the given Excel file.
+
+[cols="2,1,3", options="header"]
+|===
+|Parameter
+|Default
+|Description
+
+|`column`
+|
+|the resulting column name in the generated table
+
+|`path`
+|
+|the relative path to the Excel file
+
+|`sheet`
+|
+|the sheet name from the excel file
+
+|`range`
+|
+|the range of cells from the specified excel sheet
+
+|`addresses`
+|
+|the comma-separated collection of the cell addresses from the specified excel sheet
+
+|`increment`
+|`1`
+|the increment used to traverse the specified `range`
+
+|`joinValues`
+|`false`
+|defines whether cell values should be joined
+
+|`lineBreakReplacement`
+|empty string
+|value to substitute line breaks in cell values
+|===
+
+[IMPORTANT]
+`range` and `addresses` are competing parameters and only one can be specified in the transformer declaration at the same time.
+
+.Usage example
+----
+Examples:
+{transformer=FROM_EXCEL, path=/my-excel-file.xlsx, sheet=Data, range=A2:A7, lineBreakReplacement= , increment=2, column=test}
+----
+
+.Usage example
+----
+Examples:
+{transformer=FROM_EXCEL, path=/my-excel-file.xlsx, sheet=Data, addresses=A2;B4;A7, column=test, joinValues=true}
+----
