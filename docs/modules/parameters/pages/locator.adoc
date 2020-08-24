@@ -12,7 +12,7 @@ By.<locatorType>(<locatorValue>):<visibility>->filter.<filterType>(<filterValue>
 
 [IMPORTANT]
 
-By. prefix is an optional.
+By. prefix is optional.
 
 
 . `locatorType` - *[mandatory]* type of the locator
@@ -160,7 +160,7 @@ element xref:parameters:state.adoc[State]
 |id(v1)->filter.tooltip(title)
 
 |imageSrcPart
-|src attribute should contain vvalue
+|src attribute should contain value
 |id(v1)->filter.imageSrcPart(part)
 
 |textPart
