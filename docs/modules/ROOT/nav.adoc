@@ -1,2 +1,1 @@
 * xref:index.adoc[What is Vividus]
-* xref:release-notes.adoc[What's new in Vividus]

@@ -1,15 +1,13 @@
-= Plugin Email
-
-== General Info
+= Email Plugin
 
 The plugin provides functionality to interact with email servers over https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol[IMAPS protocol].
 
 == Installation
 
 .build.gradle
-[source, gradle]
+[source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-email', version: '<vividusVersion>')
+implementation(group: 'org.vividus', name: 'vividus-plugin-email', version: '{page-component-version}')
 ----
 
 == Properties
@@ -145,4 +143,3 @@ email.imap.wait.duration=PT15S
 email.imap.wait.retry-times=3
 email.imap.folder=Inbox
 ----
-

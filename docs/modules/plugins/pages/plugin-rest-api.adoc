@@ -1,16 +1,17 @@
-= Plugin REST API
+= REST API Plugin
 
-== General Info
-* Validation of HTTP responses (headers, codes, content, etc.)
-* Validation of `application/json` content in response using JSON Path
-* Constructing and sending of HTTP requests
+The plugin provides the following abilities:
+
+* build and send HTTP requests
+* validate HTTP responses (headers, status code, body)
+* validate JSON content of HTTP response bodies
 
 == Installation
 
 .build.gradle
-[source,gradle]
+[source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '0.2.3')
+implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '{page-component-version}')
 ----
 
 

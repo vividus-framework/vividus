@@ -1,8 +1,6 @@
-= Plugin Mobile App
+= Mobile Application Plugin
 
-== General Info
-
-The plugin provides functionality to test mobile application on real devides, Android Emulators and iOS Simulators
+The plugin provides functionality to test mobile application on real devices, Android Emulators and iOS Simulators
 
 == Installation
 
