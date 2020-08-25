@@ -1,4 +1,4 @@
-= Excel Plugin
+= CSV Plugin
 
 The plugin provides the ability to work with CSV files.
 
