@@ -318,41 +318,4 @@ public abstract class AbstractExpectedConditions<T> implements IExpectedConditio
             }
         };
     }
-
-    /**
-     * An expectation for checking drop-down's multi-select support.
-     * This is done by checking the value of the "multiple" attribute.
-     * @param searchCriteria used to find elements
-     * @param multiSelect given condition
-     * @return Output value with the logical opposite based on an input value.
-     */
-    @Override
-    public IExpectedSearchContextCondition<Boolean> isMultiSelectDropDown(final T searchCriteria, boolean multiSelect)
-    {
-        return new IExpectedSearchContextCondition<>()
-        {
-            @Override
-            @SuppressWarnings("checkstyle:returnnullinsteadofboolean")
-            @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
-            public Boolean apply(SearchContext searchContext)
-            {
-                try
-                {
-                    WebElement element = findElement(searchContext, searchCriteria);
-                    return ExpectedConditions.isMultiSelectDropDown(element, multiSelect).apply(null);
-                }
-                catch (NoSuchElementException e)
-                {
-                    return null;
-                }
-            }
-
-            @Override
-            public String toString()
-            {
-                return String.format("An element found by %s is %s select", searchCriteria,
-                        ExpectedConditions.multiSelectToString(multiSelect));
-            }
-        };
-    }
 }
