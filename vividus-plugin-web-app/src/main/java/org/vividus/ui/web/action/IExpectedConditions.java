@@ -96,13 +96,4 @@ public interface IExpectedConditions<T>
      * @return Output value with the logical opposite based on an input value.
      */
     IExpectedSearchContextCondition<Boolean> not(IExpectedSearchContextCondition<?> condition);
-
-    /**
-     * An expectation for checking drop-down's multi-select support.
-     * This is done by checking the value of the "multiple" attribute.
-     * @param searchCriteria used to find elements
-     * @param multiSelect given condition
-     * @return Output value with the logical opposite based on an input value.
-     */
-    IExpectedSearchContextCondition<Boolean> isMultiSelectDropDown(T searchCriteria, boolean multiSelect);
 }
