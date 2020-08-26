@@ -124,7 +124,7 @@
     <bean id="javascriptActions" class="org.vividus.ui.web.action.JavascriptActions" />
     <bean id="mouseActions" class="org.vividus.ui.web.action.MouseActions">
         <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
-        <property name="scrollIntoViewPort" value="${web.search.scroll-into-view-port}" />
+        <property name="scrollElementIntoViewportBeforeClick" value="${web.action.scroll-element-into-viewport-before-click}" />
     </bean>
     <bean id="navigateActions" class="org.vividus.ui.web.action.NavigateActions" />
     <bean id="videoPlayerActions" class="org.vividus.ui.web.action.VideoPlayerActions" />

@@ -500,4 +500,13 @@ class MouseActionsTests
         mouseActions.moveToElement(locatableWebElement);
         verify(javascriptActions).scrollIntoView(locatableWebElement, true);
     }
+
+    @Test
+    void testNoScrollElementIntoViewportBeforeClick()
+    {
+        mockBodySearch();
+        mouseActions.setScrollElementIntoViewportBeforeClick(false);
+        mouseActions.click(webElement);
+        verify(javascriptActions, never()).scrollElementIntoViewportCenter(webElement);
+    }
 }

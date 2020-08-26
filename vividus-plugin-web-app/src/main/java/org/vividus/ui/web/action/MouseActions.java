@@ -55,7 +55,7 @@ public class MouseActions implements IMouseActions
     @Inject private EventBus eventBus;
     @Inject private IWebUiContext webUiContext;
     private List<WebDriverEventListener> webDriverEventListeners;
-    private boolean scrollIntoViewPort;
+    private boolean scrollElementIntoViewportBeforeClick;
 
     @Override
     public ClickResult click(WebElement element)
@@ -73,7 +73,7 @@ public class MouseActions implements IMouseActions
             WebElement page = webDriver.findElement(BODY_XPATH_LOCATOR);
             try
             {
-              if (scrollIntoViewPort)
+              if (scrollElementIntoViewportBeforeClick)
               {
                   javascriptActions.scrollElementIntoViewportCenter(element);
               }
@@ -228,8 +228,8 @@ public class MouseActions implements IMouseActions
         this.webDriverEventListeners = Collections.unmodifiableList(webDriverEventListeners);
     }
 
-    public void setScrollIntoViewPort(boolean scrollIntoViewPort)
+    public void setScrollElementIntoViewportBeforeClick(boolean scrollElementIntoViewportBeforeClick)
     {
-        this.scrollIntoViewPort = scrollIntoViewPort;
+        this.scrollElementIntoViewportBeforeClick = scrollElementIntoViewportBeforeClick;
     }
 }
