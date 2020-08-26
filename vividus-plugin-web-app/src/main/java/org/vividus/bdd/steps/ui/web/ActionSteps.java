@@ -128,6 +128,8 @@ public class ActionSteps
      * <br> |CLICK         |By.placeholder(Enter your password)     |
      * <br> |CLICK         |                                        |
      * <br> |PRESS_KEYS    |BACK_SPACE                              |
+     * <br> |KEY_DOWN      |CONTROL,SHIFT                           |
+     * <br> |KEY_UP        |CONTROL,SHIFT                           |
      * <br> |MOVE_TO       |By.id(name)                             |
      * </code>
      * </pre>
@@ -173,9 +175,24 @@ public class ActionSteps
      * </tr>
      * <tr>
      * <td>PRESS_KEYS</td>
-     * <td><a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
-     * </td>
+     * <td><a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a></td>
      * <td>BACK_SPACE</td>
+     * </tr>
+     * <tr>
+     * <td>KEY_DOWN</td>
+     * <td>
+     *     key – Either <a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
+     *     SHIFT, ALT or CONTROL.
+     * </td>
+     * <td>CONTROL,SHIFT</td>
+     * </tr>
+     * <tr>
+     * <td>KEY_UP</td>
+     * <td>
+     *     key – Either <a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
+     *     SHIFT, ALT or CONTROL.
+     * </td>
+     * <td>CONTROL,SHIFT</td>
      * </tr>
      * <tr>
      * <td>MOVE_TO</td>

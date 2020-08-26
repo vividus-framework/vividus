@@ -31,6 +31,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -39,6 +40,10 @@ import org.openqa.selenium.interactions.Actions;
 public class SequenceActionTypeTests
 {
     private static final String VALUE = "value";
+    private static final String CHAR = "a";
+    private static final List<String> KEY_LIST = List.of("CONTROL");
+    private static final String EMPTY_KEY_LIST_EXCEPTION = "At least one key should be provided";
+    private static final String WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT = "The '%s' is not allowed as a key";
 
     @Mock
     private Actions baseAction;
@@ -127,6 +132,60 @@ public class SequenceActionTypeTests
     {
         SequenceActionType.PRESS_KEYS.addAction(baseAction, List.of(VALUE));
         verify(baseAction).sendKeys(VALUE);
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testKeyDown()
+    {
+        SequenceActionType.KEY_DOWN.addAction(baseAction, KEY_LIST);
+        verify(baseAction).keyDown(Keys.CONTROL);
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testKeyDownWrongKey()
+    {
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                SequenceActionType.KEY_DOWN.addAction(baseAction, List.of(CHAR)));
+        String expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, CHAR);
+        assertEquals(expectedExceptionMessage, exception.getMessage());
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testKeyDownWithEmptyList()
+    {
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                SequenceActionType.KEY_DOWN.addAction(baseAction, List.of()));
+        assertEquals(EMPTY_KEY_LIST_EXCEPTION, exception.getMessage());
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testKeyUp()
+    {
+        SequenceActionType.KEY_UP.addAction(baseAction, KEY_LIST);
+        verify(baseAction).keyUp(Keys.CONTROL);
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testKeyUpWrongKey()
+    {
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                SequenceActionType.KEY_UP.addAction(baseAction, List.of(CHAR)));
+        String expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, CHAR);
+        assertEquals(expectedExceptionMessage, exception.getMessage());
+        verifyNoMoreInteractions(baseAction);
+    }
+
+    @Test
+    void testKeyUpWithEmptyList()
+    {
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                SequenceActionType.KEY_UP.addAction(baseAction, List.of()));
+        assertEquals(EMPTY_KEY_LIST_EXCEPTION, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
 
