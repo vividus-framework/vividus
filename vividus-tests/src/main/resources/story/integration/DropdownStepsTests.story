@@ -3,7 +3,9 @@ Description: Integration tests for DropdownSteps class.
 Meta:
     @epic vividus-plugin-web-app
 
-Scenario: Set-Up
+Lifecycle:
+Before:
+Scope: STORY
 Given I am on a page with the URL '${vividus-test-site-url}/dropdowns.html'
 
 

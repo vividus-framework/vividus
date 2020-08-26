@@ -4,13 +4,12 @@ Meta:
     @epic vividus-plugin-applitools
 
 Lifecycle:
+Before:
+Scope: STORY
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/stickyHeader.html'
 Examples:
 |action         |firstP             |batchName           |
 |COMPARE_AGAINST|By.xpath((.//p)[1])|Vividus System Tests|
-
-
-Scenario: Set-Up
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/stickyHeader.html'
 
 
 Scenario: Validation of step: 'When I $actionType baseline `$testName` in batch `$batchName` with Applitools' for full page
