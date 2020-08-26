@@ -4,7 +4,9 @@ Meta:
     @epic vividus-plugin-web-app
     @feature dynamic-variables
 
-Scenario: Set-Up
+Lifecycle:
+Before:
+Scope: STORY
 Given I am on a page with the URL '${vividus-test-site-url}'
 
 
