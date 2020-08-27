@@ -200,7 +200,6 @@ public class ScreenshotTaker implements IScreenshotTaker
             {
                 screenshotData = takeScreenshotAsByteArrayImpl(webElements, viewportScreenshot);
             }
-            webElementHighlighter.clearAssertingWebElements();
             return screenshotData;
         });
     }

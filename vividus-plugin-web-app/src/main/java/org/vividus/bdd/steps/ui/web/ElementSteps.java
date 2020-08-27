@@ -37,8 +37,8 @@ import org.springframework.util.ResourceUtils;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.ClickResult;
@@ -60,7 +60,7 @@ public class ElementSteps implements ResourceLoaderAware
     private static final String THE_NUMBER_OF_FOUND_ELEMENTS = "The number of found elements";
 
     @Inject private IWebElementActions webElementActions;
-    @Inject private IHighlightingSoftAssert highlightingSoftAssert;
+    @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IBaseValidations baseValidations;
     @Inject private IWebUiContext webUiContext;
@@ -90,7 +90,7 @@ public class ElementSteps implements ResourceLoaderAware
         }
         File fileForUpload = ResourceUtils.isFileURL(resource.getURL()) ? resource.getFile()
                 : unpackFile(resource, filePath);
-        if (highlightingSoftAssert.assertTrue("File " + filePath + " exists", fileForUpload.exists()))
+        if (descriptiveSoftAssert.assertTrue("File " + filePath + " exists", fileForUpload.exists()))
         {
             String fullFilePath = fileForUpload.getAbsolutePath();
             if (isRemoteExecution())
@@ -129,7 +129,7 @@ public class ElementSteps implements ResourceLoaderAware
     {
         WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, searchAttributes);
         ClickResult clickResult = mouseActions.click(element);
-        highlightingSoftAssert.assertTrue(
+        descriptiveSoftAssert.assertTrue(
                 "Page has not been refreshed after clicking on the element located by" + searchAttributes,
                 !clickResult.isNewPageLoaded());
     }
@@ -197,7 +197,7 @@ public class ElementSteps implements ResourceLoaderAware
     {
         WebElement element = webUiContext.getSearchContext(WebElement.class);
         String actualCssValue = webElementActions.getCssValue(element, cssName);
-        highlightingSoftAssert.assertEquals("Element has correct css property value", cssValue,
+        descriptiveSoftAssert.assertEquals("Element has correct css property value", cssValue,
                 actualCssValue);
     }
 
@@ -211,7 +211,7 @@ public class ElementSteps implements ResourceLoaderAware
     {
         WebElement element = webUiContext.getSearchContext(WebElement.class);
         String actualCssValue = webElementActions.getCssValue(element, cssName);
-        highlightingSoftAssert.assertThat("Css property value part is correct",
+        descriptiveSoftAssert.assertThat("Css property value part is correct",
                 String.format("Element has CSS property '%1$s' containing value '%2$s'", cssName, cssValue),
                 actualCssValue, containsString(cssValue));
     }

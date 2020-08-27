@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 import org.hamcrest.Matcher;
@@ -97,7 +99,7 @@ class BaseValidationsTests
     private ISearchActions searchActions;
 
     @Mock
-    private IHighlightingSoftAssert softAssert;
+    private IDescriptiveSoftAssert softAssert;
 
     @InjectMocks
     private BaseValidations baseValidations;
@@ -186,10 +188,9 @@ class BaseValidationsTests
     {
         spy = Mockito.spy(baseValidations);
         List<WebElement> elements = Arrays.asList(mockedWebElement, mockedWebElement);
-        IDescriptiveSoftAssert descriptiveSoftAssert = mock(IDescriptiveSoftAssert.class);
-        when(softAssert.withHighlightedElements(elements)).thenReturn(descriptiveSoftAssert);
+        mockAssertingWebElements(elements);
         assertNull(spy.assertIfElementExists(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, elements));
-        verify(descriptiveSoftAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(SYSTEM_DESCRIPTION),
+        verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(SYSTEM_DESCRIPTION),
                 eq(elements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
     }
 
@@ -270,10 +271,9 @@ class BaseValidationsTests
         SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH_INT);
         String systemDescription = String.format(PATTERN_ELEMENTS, INT_ARG, searchAttributes);
         when(searchActions.findElements(mockedSearchContext, searchAttributes)).thenReturn(webElements);
-        IDescriptiveSoftAssert descriptiveSoftAssert = mock(IDescriptiveSoftAssert.class);
-        when(softAssert.withHighlightedElements(webElements)).thenReturn(descriptiveSoftAssert);
+        mockAssertingWebElements(webElements);
         baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, searchAttributes, INT_ARG);
-        verify(descriptiveSoftAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription),
+        verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription),
                 eq(webElements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
     }
 
@@ -283,12 +283,11 @@ class BaseValidationsTests
         when(webUiContext.getSearchContext()).thenReturn(mockedSearchContext);
         SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, searchAttributes)).thenReturn(webElements);
-        IDescriptiveSoftAssert descriptiveSoftAssert = mock(IDescriptiveSoftAssert.class);
-        when(softAssert.withHighlightedElements(webElements)).thenReturn(descriptiveSoftAssert);
         String systemDescription = String.format(PATTERN_ELEMENTS, INT_ARG, searchAttributes);
+        mockAssertingWebElements(webElements);
         assertFalse(
                 baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, searchAttributes, INT_ARG));
-        verify(descriptiveSoftAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription),
+        verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription),
                 eq(webElements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
     }
 
@@ -309,6 +308,7 @@ class BaseValidationsTests
     @Test
     void testAssertIfAtLeastNumberOfElementsExistSuccess()
     {
+        mockAssertingWebElements(webElements);
         List<WebElement> result = testAssertIfAtLeastNumberOfElementsExist(true);
         assertEquals(webElements, result);
     }
@@ -316,6 +316,7 @@ class BaseValidationsTests
     @Test
     void testAssertIfAtLeastNumberOfElementsExistFailed()
     {
+        mockAssertingWebElements(webElements);
         List<WebElement> result = testAssertIfAtLeastNumberOfElementsExist(false);
         assertTrue(result.isEmpty());
     }
@@ -325,12 +326,10 @@ class BaseValidationsTests
         when(webUiContext.getSearchContext()).thenReturn(mockedSearchContext);
         SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, searchAttributes)).thenReturn(webElements);
-        IDescriptiveSoftAssert descriptiveSoftAssert = mock(IDescriptiveSoftAssert.class);
-        when(softAssert.withHighlightedElements(webElements)).thenReturn(descriptiveSoftAssert);
         int leastCount = 1;
         String systemDescription = String.format("There are at least %d elements with attributes '%s'", leastCount,
                 searchAttributes);
-        when(descriptiveSoftAssert.assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription), eq(webElements),
+        when(softAssert.assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription), eq(webElements),
                 argThat(e -> "number of elements is a value equal to or greater than <1>".equals(e.toString()))))
                         .thenReturn(assertionResult);
         return baseValidations.assertIfAtLeastNumberOfElementsExist(BUSINESS_DESCRIPTION, searchAttributes, leastCount);
@@ -452,5 +451,14 @@ class BaseValidationsTests
                 eq("Number of elements found by ' XPath: './/xpath=1'; Visibility: VISIBLE;' is equal to 1"),
                 eq(foundElements), argThat(m -> EQUAL_TO_MATCHER.equals(m.toString())))).thenReturn(checkPassed);
         assertEquals(foundElements, actualCall.apply(attributes));
+    }
+
+    private void mockAssertingWebElements(List<WebElement> elements)
+    {
+        doAnswer(a ->
+        {
+            BooleanSupplier supplier = a.getArgument(1, BooleanSupplier.class);
+            return supplier.getAsBoolean();
+        }).when(webUiContext).withAssertingWebElements(eq(elements), any());
     }
 }

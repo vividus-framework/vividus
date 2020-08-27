@@ -33,7 +33,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
+import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.IWaitActions;
@@ -52,7 +52,7 @@ public class SetContextSteps
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IWebUiContext webUiContext;
     @Inject private IBaseValidations baseValidations;
-    @Inject private IHighlightingSoftAssert highlightingSoftAssert;
+    @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
     @Inject private IWindowsActions windowsActions;
     @Inject private IWaitActions waitActions;
 
@@ -208,7 +208,7 @@ public class SetContextSteps
     {
         String currentWindow = getWebDriver().getWindowHandle();
         String newWindow = windowsActions.switchToNewWindow(currentWindow);
-        if (highlightingSoftAssert.assertThat(String.format("New window '%s' is found", newWindow),
+        if (descriptiveSoftAssert.assertThat(String.format("New window '%s' is found", newWindow),
                 "New window is found", newWindow, not(equalTo(currentWindow))))
         {
             changeContextToPage();
@@ -239,7 +239,7 @@ public class SetContextSteps
         Matcher<String> matcher = comparisonRule.createMatcher(windowName);
         String titleAfterSwitch = windowsActions.switchToWindowWithMatchingTitle(matcher);
         resetContextIf(() ->
-            highlightingSoftAssert.assertThat("New window or browser tab name is ", "Window or tab name is ",
+            descriptiveSoftAssert.assertThat("New window or browser tab name is ", "Window or tab name is ",
                 titleAfterSwitch, matcher));
     }
 

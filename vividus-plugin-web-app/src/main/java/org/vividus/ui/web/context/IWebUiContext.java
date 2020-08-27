@@ -17,6 +17,7 @@
 package org.vividus.ui.web.context;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -37,7 +38,5 @@ public interface IWebUiContext
 
     List<WebElement> getAssertingWebElements();
 
-    void putAssertingWebElements(List<WebElement> elements);
-
-    void clearAssertingWebElements();
+    boolean withAssertingWebElements(List<WebElement> elements, BooleanSupplier asserter);
 }

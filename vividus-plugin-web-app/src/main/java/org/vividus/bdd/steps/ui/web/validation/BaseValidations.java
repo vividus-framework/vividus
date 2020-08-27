@@ -49,10 +49,10 @@ public class BaseValidations implements IBaseValidations
     private final IWebDriverProvider webDriverProvider;
     private final IWebUiContext webUiContext;
     private final ISearchActions searchActions;
-    private final IHighlightingSoftAssert softAssert;
+    private final IDescriptiveSoftAssert softAssert;
 
     public BaseValidations(IWebDriverProvider webDriverProvider, IWebUiContext webUiContext,
-            ISearchActions searchActions, IHighlightingSoftAssert softAssert)
+            ISearchActions searchActions, IDescriptiveSoftAssert softAssert)
     {
         this.webDriverProvider = webDriverProvider;
         this.webUiContext = webUiContext;
@@ -112,8 +112,8 @@ public class BaseValidations implements IBaseValidations
     private boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
             Matcher<? super List<WebElement>> matcher)
     {
-        return softAssert.withHighlightedElements(elements).assertThat(businessDescription, systemDescription,
-                elements, matcher);
+        return webUiContext.withAssertingWebElements(elements,
+            () -> softAssert.assertThat(businessDescription, systemDescription, elements, matcher));
     }
 
     @Override

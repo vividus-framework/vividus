@@ -35,7 +35,7 @@ class FocusValidationsTests
     private IJavascriptActions javascriptActions;
 
     @Mock
-    private IHighlightingSoftAssert softAssert;
+    private IDescriptiveSoftAssert softAssert;
 
     @Mock
     private WebElement webElement;

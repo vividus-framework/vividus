@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
+import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
@@ -73,7 +73,7 @@ public class PageSteps
     @Inject private IWaitActions waitActions;
     @Inject private IJavascriptActions javascriptActions;
     @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IHighlightingSoftAssert highlightingSoftAssert;
+    @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
     @Inject private IWebDriverManager webDriverManager;
     private IHttpClient httpClient;
 
@@ -133,11 +133,11 @@ public class PageSteps
         if (url.getPath() != null)
         {
             String expectedRelativeUrl = relativeURL.isEmpty() ? FORWARD_SLASH : relativeURL;
-            highlightingSoftAssert.assertEquals("Page has correct relative URL",
+            descriptiveSoftAssert.assertEquals("Page has correct relative URL",
                     UriUtils.buildNewUrl(getWebDriver().getCurrentUrl(), expectedRelativeUrl), url);
             return;
         }
-        highlightingSoftAssert.recordFailedAssertion("URL path component is null");
+        descriptiveSoftAssert.recordFailedAssertion("URL path component is null");
     }
 
     /**
@@ -156,7 +156,7 @@ public class PageSteps
     public void checkPageHost(String host)
     {
         URI url = UriUtils.createUri(getWebDriver().getCurrentUrl());
-        highlightingSoftAssert.assertEquals("Page has correct host", host, url.getHost());
+        descriptiveSoftAssert.assertEquals("Page has correct host", host, url.getHost());
     }
 
     /**
@@ -198,7 +198,7 @@ public class PageSteps
     @Then("the page load time should be less than '$pageLoadTimeThreshold' milliseconds")
     public void thenTheLoadTimeShouldBeLessThan(long pageLoadTimeThreshold)
     {
-        highlightingSoftAssert.assertThat("The page load time is less than load time threshold.",
+        descriptiveSoftAssert.assertThat("The page load time is less than load time threshold.",
                 String.format("The page load time is less than '%s'", pageLoadTimeThreshold),
                 navigateActions.getActualPageLoadTimeInMs(), lessThan(pageLoadTimeThreshold));
     }
@@ -213,7 +213,7 @@ public class PageSteps
     public void checkUriIsLoaded(String url)
     {
         String actualUrl = getWebDriver().getCurrentUrl();
-        highlightingSoftAssert.assertEquals("Page has correct URL", decodeUrl(url), decodeUrl(actualUrl));
+        descriptiveSoftAssert.assertEquals("Page has correct URL", decodeUrl(url), decodeUrl(actualUrl));
     }
 
     private String decodeUrl(String url)
@@ -252,7 +252,7 @@ public class PageSteps
         if (element != null)
         {
             boolean pageVisibleAreaScrolledToElement = webElementActions.isPageVisibleAreaScrolledToElement(element);
-            highlightingSoftAssert.assertTrue(String.format("The page is scrolled to an element with located by %s",
+            descriptiveSoftAssert.assertTrue(String.format("The page is scrolled to an element with located by %s",
                 locator), pageVisibleAreaScrolledToElement);
         }
     }
@@ -312,7 +312,7 @@ public class PageSteps
                 break;
             }
         }
-        highlightingSoftAssert.assertThat("Current window has been closed",
+        descriptiveSoftAssert.assertThat("Current window has been closed",
                 String.format("Current window '%s' has been closed", currentWindow), driver.getWindowHandles(),
                 not(contains(currentWindow)));
     }
@@ -336,7 +336,7 @@ public class PageSteps
     @Then("the page title $comparisonRule '$text'")
     public void assertPageTitle(StringComparisonRule comparisonRule, String text)
     {
-        highlightingSoftAssert.assertThat(PAGE_TITLE, getWebDriver().getTitle(), comparisonRule.createMatcher(text));
+        descriptiveSoftAssert.assertThat(PAGE_TITLE, getWebDriver().getTitle(), comparisonRule.createMatcher(text));
     }
 
     /**

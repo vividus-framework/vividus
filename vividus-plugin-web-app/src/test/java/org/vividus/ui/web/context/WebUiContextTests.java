@@ -22,11 +22,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -46,6 +53,7 @@ import org.vividus.testcontext.TestContext;
 class WebUiContextTests
 {
     private static final String EXPECTED_SEARCH_CONTEXT_OF_INTERFACE = "Expected search context of interface ";
+    private static final String ASSERTING_ELEMENTS_KEY = "AssertingElements";
 
     private final TestContext context = new SimpleTestContext()
     {
@@ -233,5 +241,30 @@ class WebUiContextTests
         stepContext.setTestContext(context);
         stepContext.clear();
         assertNull(stepContext.getSearchContext());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void testGetAssertingWebElements()
+    {
+        TestContext testContext = mock(TestContext.class);
+        stepContext.setTestContext(testContext);
+        stepContext.getAssertingWebElements();
+        verify(testContext).get(eq(ASSERTING_ELEMENTS_KEY), any(Supplier.class));
+        verifyNoMoreInteractions(testContext);
+    }
+
+    @Test
+    void testWithAssertingWebElements()
+    {
+        BooleanSupplier supplier = mock(BooleanSupplier.class);
+        when(supplier.getAsBoolean()).thenReturn(true);
+        TestContext testContext = mock(TestContext.class);
+        stepContext.setTestContext(testContext);
+        WebElement element = mock(WebElement.class);
+        assertTrue(stepContext.withAssertingWebElements(List.of(element), supplier));
+        verify(testContext).put(ASSERTING_ELEMENTS_KEY, List.of(element));
+        verify(testContext).put(ASSERTING_ELEMENTS_KEY, List.of());
+        verifyNoMoreInteractions(testContext);
     }
 }

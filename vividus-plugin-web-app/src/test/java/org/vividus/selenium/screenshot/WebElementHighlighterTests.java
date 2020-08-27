@@ -112,11 +112,4 @@ class WebElementHighlighterTests
         assertEquals(exceptionMessage, exception.getMessage());
         verify(javascriptActions).executeScript(DISABLE_HIGHLIGHT_SCRIPT, webElement);
     }
-
-    @Test
-    void testClearAssertingWebElements()
-    {
-        webElementHighlighter.clearAssertingWebElements();
-        verify(webUiContext).clearAssertingWebElements();
-    }
 }
