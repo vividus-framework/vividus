@@ -1,2 +1,4 @@
+= What is Vividus
+
 Vividus is all-in-one test automation accelerator.
 See the https://github.com/vividus-framework/vividus/releases[release history] to get the news.
