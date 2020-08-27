@@ -16,12 +16,15 @@
 
 package org.vividus.selenium;
 
+import java.util.Optional;
+
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.MetaWrapper;
+import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
@@ -64,7 +67,9 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
         webDriverManagerContext.reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
         if (runningStory != null)
         {
-            Scenario scenario = runningStory.getRunningScenario().getScenario();
+            Scenario scenario = Optional.ofNullable(runningStory.getRunningScenario())
+                                        .map(RunningScenario::getScenario)
+                                        .orElse(null);
             Meta mergedMeta = mergeMeta(runningStory.getStory(), scenario);
             MetaWrapper metaWrapper = new MetaWrapper(mergedMeta);
             ControllingMetaTag.setDesiredCapabilitiesFromMeta(desiredCapabilities, metaWrapper);

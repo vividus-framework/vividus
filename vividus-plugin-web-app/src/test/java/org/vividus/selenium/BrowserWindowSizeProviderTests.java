@@ -75,6 +75,18 @@ class BrowserWindowSizeProviderTests
     }
 
     @Test
+    void testGetBrowserWindowSizeWhenNoRunningScenario()
+    {
+        RunningStory runningStory = new RunningStory();
+        Story story = mock(Story.class);
+        runningStory.setStory(story);
+        when(story.getMeta()).thenReturn(new Meta(new Properties()));
+        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        BrowserWindowSize browserWindowSize = browserWindowSizeProvider.getBrowserWindowSize(true);
+        assertNull(browserWindowSize);
+    }
+
+    @Test
     void testGetBrowserWindowSizeWhenStoryMetaSet()
     {
         String storyBrowserWindowSize = SUCCESSFUL_DESIRED_RESOLUTION;

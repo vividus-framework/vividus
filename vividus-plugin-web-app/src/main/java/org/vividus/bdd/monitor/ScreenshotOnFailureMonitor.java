@@ -18,18 +18,21 @@ package org.vividus.bdd.monitor;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import org.jbehave.core.model.Scenario;
 import org.jbehave.core.steps.NullStepMonitor;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
@@ -123,8 +126,10 @@ public class ScreenshotOnFailureMonitor extends NullStepMonitor
 
     private boolean isScenarioHasNoScreenshotsOnFailureMeta()
     {
-        RunningStory runningStory = bddRunContext.getRunningStory();
-        return runningStory.getRunningScenario().getScenario().getMeta()
-                .hasProperty(NO_SCREENSHOT_ON_FAILURE_META_NAME);
+        return Optional.of(bddRunContext.getRunningStory())
+                       .map(RunningStory::getRunningScenario)
+                       .map(RunningScenario::getScenario)
+                       .map(Scenario::getMeta)
+                       .map(m -> m.hasProperty(NO_SCREENSHOT_ON_FAILURE_META_NAME)).orElse(Boolean.FALSE);
     }
 }

@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -94,7 +95,7 @@ class ScreenshotOnFailureMonitorTests
     @TestFactory
     Stream<DynamicTest> shouldProcessStepWithAnnotation() throws NoSuchMethodException
     {
-        return Stream.of(getClass().getDeclaredMethod(WHEN_STEP_METHOD),
+        return Stream.of(getTakingScreenshotMethod(),
                 TestSteps.class.getDeclaredMethod("innerWhenStep"))
                 .flatMap(method ->
                 {
@@ -109,6 +110,11 @@ class ScreenshotOnFailureMonitorTests
                 });
     }
 
+    private Method getTakingScreenshotMethod() throws NoSuchMethodException
+    {
+        return getClass().getDeclaredMethod(WHEN_STEP_METHOD);
+    }
+
     @TestFactory
     Stream<DynamicTest> shouldIgnoreStepWithoutAnnotation() throws NoSuchMethodException
     {
@@ -119,6 +125,16 @@ class ScreenshotOnFailureMonitorTests
                         dynamicTest("afterPerformingIgnoresStepWithoutAnnotation",
                             () -> monitor.afterPerforming(I_DO_ACTION, false, method))
                         ));
+    }
+
+    @Test
+    void shouldEnableScreenshotsIfNoRunningSceanario() throws NoSuchMethodException
+    {
+        RunningStory runningStory = mock(RunningStory.class);
+        mockStoryMeta(runningStory, EMPTY_META);
+        monitor.beforePerforming(I_DO_ACTION, false, getTakingScreenshotMethod());
+        monitor.onAssertionFailure(null);
+        verify(webDriverProvider).isWebDriverInitialized();
     }
 
     @Test

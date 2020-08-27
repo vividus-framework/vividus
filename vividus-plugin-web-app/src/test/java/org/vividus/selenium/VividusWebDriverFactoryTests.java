@@ -65,6 +65,7 @@ public class VividusWebDriverFactoryTests
     private static final String LOOPBACK_ADDRESS = "127.0.0.1:0";
     private static final String FIREFOX = "firefox";
     private static final String TEST = "Test";
+    private static final String STORY_FILE = TEST + ".story";
 
     @Mock
     private IBddRunContext bddRunContext;
@@ -101,10 +102,15 @@ public class VividusWebDriverFactoryTests
 
     private void runCreateTest(boolean remoteExecution, String browserName) throws Exception
     {
+        runCreateTest(remoteExecution, browserName, createRunningStory(browserName));
+    }
+
+    private void runCreateTest(boolean remoteExecution, String browserName, RunningStory runningStory) throws Exception
+    {
         vividusWebDriverFactory.setRemoteExecution(remoteExecution);
         vividusWebDriverFactory.setWebDriverEventListeners(List.of(webDriverEventListener));
 
-        when(bddRunContext.getRunningStory()).thenReturn(createRunningStory(browserName));
+        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
         EventFiringWebDriver eventFiringWebDriver = mock(EventFiringWebDriver.class);
         PowerMockito.whenNew(EventFiringWebDriver.class).withArguments(driver).thenReturn(eventFiringWebDriver);
         Options options = mock(Options.class);
@@ -130,7 +136,7 @@ public class VividusWebDriverFactoryTests
 
         RunningStory runningStory = new RunningStory();
         runningStory.setRunningScenario(runningScenario);
-        runningStory.setStory(new Story(TEST + ".story", null, new Meta(), null, null));
+        runningStory.setStory(new Story(STORY_FILE, null, new Meta(), null, null));
         return runningStory;
     }
 
@@ -191,6 +197,16 @@ public class VividusWebDriverFactoryTests
         when(proxy.isStarted()).thenReturn(false);
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(true, null);
+    }
+
+    @Test
+    public void testCreateWebDriverNoRunningScenario() throws Exception
+    {
+        when(proxy.isStarted()).thenReturn(false);
+        when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
+        RunningStory runningStory = new RunningStory();
+        runningStory.setStory(new Story(STORY_FILE, null, new Meta(), null, null));
+        runCreateTest(true, null, runningStory);
     }
 
     @Test
