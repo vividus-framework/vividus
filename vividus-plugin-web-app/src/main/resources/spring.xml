@@ -278,8 +278,6 @@
         <property name="webApplicationListeners" ref="delegatingWebApplicationListener-WebApplicationListeners" />
     </bean>
 
-    <bean id="highlightingSoftAssert" class="org.vividus.bdd.steps.ui.web.validation.HighlightingSoftAssert" />
-
     <bean id="descriptiveSoftAssert" class="org.vividus.bdd.steps.ui.web.validation.DescriptiveSoftAssert"
         parent="softAssert" />
 

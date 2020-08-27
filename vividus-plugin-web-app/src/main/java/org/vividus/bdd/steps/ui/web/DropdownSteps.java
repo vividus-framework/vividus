@@ -30,7 +30,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
+import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
 import org.vividus.ui.web.DropDownState;
 import org.vividus.ui.web.action.IFieldActions;
 import org.vividus.ui.web.action.IWebElementActions;
@@ -46,7 +46,7 @@ public class DropdownSteps
 
     @Inject private IWebElementActions webElementActions;
     @Inject private IBaseValidations baseValidations;
-    @Inject private IHighlightingSoftAssert highlightingSoftAssert;
+    @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
     @Inject private IFieldActions fieldActions;
 
     /**
@@ -112,17 +112,17 @@ public class DropdownSteps
         {
             List<WebElement> actualItems = dropDown.getOptions();
             List<Parameters> expectedItems = dropDownItems.getRowsAsParameters(true);
-            if (highlightingSoftAssert.assertEquals("Expected dropdown is of the same size as actual dropdown: ",
+            if (descriptiveSoftAssert.assertEquals("Expected dropdown is of the same size as actual dropdown: ",
                     expectedItems.size(), actualItems.size()))
             {
                 for (int i = 0; i < expectedItems.size(); i++)
                 {
                     WebElement option = actualItems.get(i);
                     Map<String, String> expectedRow = expectedItems.get(i).values();
-                    highlightingSoftAssert.assertEquals(
+                    descriptiveSoftAssert.assertEquals(
                             String.format("Text of actual item at position [%s]", i + 1), expectedRow.get("item"),
                             webElementActions.getElementText(option));
-                    highlightingSoftAssert.assertEquals(
+                    descriptiveSoftAssert.assertEquals(
                             String.format("State of actual item at position [%s]", i + 1),
                             Boolean.parseBoolean(expectedRow.get("state")), option.isSelected());
                 }
@@ -181,10 +181,10 @@ public class DropdownSteps
     public void ifDropDownWithNameExists(String dropDownName, String dropDownText)
     {
         Select dropDown = isDropDownWithNameFound(dropDownName);
-        if (dropDown != null && highlightingSoftAssert.assertTrue("Selected options are present in drop down",
+        if (dropDown != null && descriptiveSoftAssert.assertTrue("Selected options are present in drop down",
                 !dropDown.getAllSelectedOptions().isEmpty()))
         {
-            highlightingSoftAssert.assertEquals("Selected option in drop down", dropDownText,
+            descriptiveSoftAssert.assertEquals("Selected option in drop down", dropDownText,
                     dropDown.getFirstSelectedOption().getText().trim());
         }
     }

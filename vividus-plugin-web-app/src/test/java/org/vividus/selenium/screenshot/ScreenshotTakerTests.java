@@ -385,7 +385,6 @@ public class ScreenshotTakerTests
 
     private void assertScreenshotWithHighlighter(Optional<Screenshot> actualScreenshot) throws IOException
     {
-        verify(webElementHighlighter).clearAssertingWebElements();
         assertEquals(SCREENSHOT_NAME_GENERATED, actualScreenshot.get().getFileName());
         assertScreenshot(actualScreenshot);
     }

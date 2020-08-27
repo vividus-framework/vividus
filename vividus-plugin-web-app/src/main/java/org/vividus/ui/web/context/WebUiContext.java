@@ -17,6 +17,7 @@
 package org.vividus.ui.web.context;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import javax.inject.Inject;
 
@@ -109,15 +110,17 @@ public class WebUiContext implements IWebUiContext
     }
 
     @Override
-    public void putAssertingWebElements(List<WebElement> elements)
+    public boolean withAssertingWebElements(List<WebElement> elements, BooleanSupplier asserter)
     {
-        testContext.put(ASSERTING_ELEMENTS_KEY, elements);
-    }
-
-    @Override
-    public void clearAssertingWebElements()
-    {
-        testContext.put(ASSERTING_ELEMENTS_KEY, List.of());
+        try
+        {
+            testContext.put(ASSERTING_ELEMENTS_KEY, elements);
+            return asserter.getAsBoolean();
+        }
+        finally
+        {
+            testContext.put(ASSERTING_ELEMENTS_KEY, List.of());
+        }
     }
 
     public void setTestContext(TestContext testContext)

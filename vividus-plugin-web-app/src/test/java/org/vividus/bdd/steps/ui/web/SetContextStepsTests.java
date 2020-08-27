@@ -43,7 +43,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
+import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.IWaitActions;
@@ -101,7 +101,7 @@ class SetContextStepsTests
     private TargetLocator mockedTargetLocator;
 
     @Mock
-    private IHighlightingSoftAssert softAssert;
+    private IDescriptiveSoftAssert softAssert;
 
     @Mock
     private IWindowsActions windowsActions;

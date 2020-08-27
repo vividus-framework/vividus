@@ -65,12 +65,6 @@ public class WebElementHighlighter implements IWebElementHighlighter
         webUiContext.getAssertingWebElements().forEach(stateUpdater);
     }
 
-    @Override
-    public void clearAssertingWebElements()
-    {
-        webUiContext.clearAssertingWebElements();
-    }
-
     private void enableHighlighting(WebElement element)
     {
         executeJS(ENABLE_HIGHLIGHT_JS, element);

@@ -60,8 +60,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.ClickResult;
@@ -137,7 +137,7 @@ public class ElementStepsTests
     private ElementSteps elementSteps;
 
     @Mock
-    private IHighlightingSoftAssert softAssert;
+    private IDescriptiveSoftAssert softAssert;
 
     private List<WebElement> elementsList;
 

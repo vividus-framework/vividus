@@ -29,8 +29,8 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
 import org.vividus.ui.web.State;
 import org.vividus.ui.web.action.ISearchActions;
 import org.vividus.ui.web.action.IWebElementActions;
@@ -47,7 +47,7 @@ public class WebElementsSteps
     @Inject private IElementValidations elementValidations;
     @Inject private IWebUiContext webUiContext;
     @Inject private ISearchActions searchActions;
-    @Inject private IHighlightingSoftAssert highlightingSoftAssert;
+    @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
 
     /**
      * Checks if the text in context matches <b>regex</b>
@@ -81,7 +81,7 @@ public class WebElementsSteps
                 }
             }
         }
-        highlightingSoftAssert.assertTrue("The text in search context matches regular expression " + regex,
+        descriptiveSoftAssert.assertTrue("The text in search context matches regular expression " + regex,
                 assertCondition);
     }
 
@@ -143,7 +143,7 @@ public class WebElementsSteps
                 }
             }
 
-            highlightingSoftAssert.assertTrue("There is an element with text=" + text + " in the context",
+            descriptiveSoftAssert.assertTrue("There is an element with text=" + text + " in the context",
                     assertCondition);
         }
     }

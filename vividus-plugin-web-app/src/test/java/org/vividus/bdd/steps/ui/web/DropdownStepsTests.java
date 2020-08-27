@@ -41,7 +41,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.support.ui.Select;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
+import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
 import org.vividus.ui.web.DropDownState;
 import org.vividus.ui.web.action.IFieldActions;
 import org.vividus.ui.web.action.IWebElementActions;
@@ -77,7 +77,7 @@ class DropdownStepsTests
     private IBaseValidations baseValidations;
 
     @Mock
-    private IHighlightingSoftAssert softAssert;
+    private IDescriptiveSoftAssert softAssert;
 
     @Mock
     private WebElement webElement;

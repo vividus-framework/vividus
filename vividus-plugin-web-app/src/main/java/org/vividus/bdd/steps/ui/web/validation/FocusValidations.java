@@ -25,7 +25,7 @@ import org.vividus.ui.web.action.IJavascriptActions;
 public class FocusValidations implements IFocusValidations
 {
     @Inject private IJavascriptActions javascriptActions;
-    @Inject private IHighlightingSoftAssert softAssert;
+    @Inject private IDescriptiveSoftAssert softAssert;
 
     @Override
     public boolean isElementInFocusState(WebElement webElement, FocusState focusState)
