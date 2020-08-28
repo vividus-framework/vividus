@@ -48,12 +48,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.vividus.bdd.resource.ResourceLoadException;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.web.action.search.ActionAttributeType;
+import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.visual.engine.IVisualTestingEngine;
 import org.vividus.visual.model.VisualActionType;
@@ -64,9 +65,9 @@ import org.vividus.visual.screenshot.IgnoreStrategy;
 @ExtendWith(MockitoExtension.class)
 class VisualStepsTests
 {
-    private static final By DIV_LOCATOR = By.xpath("//div");
+    private static final SearchAttributes DIV_LOCATOR = new SearchAttributes(ActionAttributeType.XPATH, "//div");
 
-    private static final By A_LOCATOR = By.xpath(".//a");
+    private static final SearchAttributes A_LOCATOR = new SearchAttributes(ActionAttributeType.XPATH, ".//a");
 
     private static final String V = "v";
 
@@ -155,8 +156,8 @@ class VisualStepsTests
         Parameters row = mock(Parameters.class);
         when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
         when(table.getRowAsParameters(0)).thenReturn(row);
-        Set<By> elementsToIgnore = Set.of(A_LOCATOR);
-        Set<By> areasToIgnore = Set.of(DIV_LOCATOR);
+        Set<SearchAttributes> elementsToIgnore = Set.of(A_LOCATOR);
+        Set<SearchAttributes> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore);
         VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
@@ -176,8 +177,8 @@ class VisualStepsTests
         Parameters row = mock(Parameters.class);
         when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
         when(table.getRowAsParameters(0)).thenReturn(row);
-        Set<By> elementsToIgnore = Set.of(A_LOCATOR);
-        Set<By> areasToIgnore = Set.of(DIV_LOCATOR);
+        Set<SearchAttributes> elementsToIgnore = Set.of(A_LOCATOR);
+        Set<SearchAttributes> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore);
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
@@ -216,18 +217,18 @@ class VisualStepsTests
         verifyNoInteractions(softAssert, visualTestingEngine, attachmentPublisher);
     }
 
-    private static void mockRow(Parameters row, Set<By> elementIgnore, Set<By> areaIgnore)
+    private static void mockRow(Parameters row, Set<SearchAttributes> elementIgnore, Set<SearchAttributes> areaIgnore)
     {
         mockGettingValue(row, "ELEMENT", elementIgnore);
         mockGettingValue(row, "AREA", areaIgnore);
     }
 
-    private static void mockGettingValue(Parameters row, String name, Set<By> result)
+    private static void mockGettingValue(Parameters row, String name, Set<SearchAttributes> result)
     {
         doReturn(result).when(row).valueAs(eq(name),
                 argThat(t -> t instanceof ParameterizedType
                         && ((ParameterizedType) t).getRawType() == Set.class
-                        && ((ParameterizedType) t).getActualTypeArguments()[0] == By.class),
+                        && ((ParameterizedType) t).getActualTypeArguments()[0] == SearchAttributes.class),
                 eq(Set.of()));
     }
 

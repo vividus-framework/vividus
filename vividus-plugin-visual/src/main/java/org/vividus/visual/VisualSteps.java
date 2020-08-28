@@ -30,11 +30,11 @@ import com.google.gson.reflect.TypeToken;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
-import org.openqa.selenium.By;
 import org.vividus.bdd.resource.ResourceLoadException;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.visual.bdd.AbstractVisualSteps;
 import org.vividus.visual.engine.IVisualTestingEngine;
@@ -45,7 +45,7 @@ import org.vividus.visual.screenshot.IgnoreStrategy;
 
 public class VisualSteps extends AbstractVisualSteps
 {
-    private static final Type SET_BY = new TypeToken<Set<By>>() { }.getType();
+    private static final Type SET_BY = new TypeToken<Set<SearchAttributes>>() { }.getType();
 
     private final IVisualTestingEngine visualTestingEngine;
     private final ISoftAssert softAssert;
@@ -165,7 +165,7 @@ public class VisualSteps extends AbstractVisualSteps
             + rowsSize);
         }
         Parameters rowAsParameters = ignoredElements.getRowAsParameters(0);
-        Map<IgnoreStrategy, Set<By>> toIgnore = Stream.of(IgnoreStrategy.values())
+        Map<IgnoreStrategy, Set<SearchAttributes>> toIgnore = Stream.of(IgnoreStrategy.values())
                                                       .collect(Collectors.toMap(Function.identity(),
                                                           s -> getLocatorsSet(rowAsParameters, s)));
         performVisualAction(() -> {
@@ -175,7 +175,7 @@ public class VisualSteps extends AbstractVisualSteps
         });
     }
 
-    private Set<By> getLocatorsSet(Parameters rowAsParameters, IgnoreStrategy s)
+    private Set<SearchAttributes> getLocatorsSet(Parameters rowAsParameters, IgnoreStrategy s)
     {
         return rowAsParameters.valueAs(s.name(), SET_BY, Set.of());
     }
