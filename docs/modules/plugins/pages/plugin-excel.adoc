@@ -68,3 +68,8 @@ Examples:
 Examples:
 {transformer=FROM_EXCEL, path=/my-excel-file.xlsx, sheet=Data, addresses=A2;B4;A7, column=test, joinValues=true}
 ----
+
+=== ALLURE REPORT
+You can use specific excel column to show cell content the first in allure report (for example I want to see testcase name).
+Columns are shown in alphabetic order in Allure report. So all you need is to write column=a<ColumnName> in *.table:
+    \{transformer=FROM_EXCEL\, path=/content/rexulti/RexultiHCC_fullGridRevised_July2020_QA update.xlsx\, sheet=Key Actions\, range=D7:D9\, column=aUserAction\};
