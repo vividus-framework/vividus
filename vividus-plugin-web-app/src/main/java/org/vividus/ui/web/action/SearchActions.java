@@ -35,7 +35,6 @@ import org.vividus.ui.web.action.search.IElementFilterAction;
 import org.vividus.ui.web.action.search.IElementSearchAction;
 import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.action.search.Visibility;
 import org.vividus.ui.web.context.IWebUiContext;
 
 public class SearchActions implements ISearchActions
@@ -45,13 +44,6 @@ public class SearchActions implements ISearchActions
     @Inject private IWebUiContext webUiContext;
 
     private Map<IActionAttributeType, IElementAction> elementActions;
-
-    @Override
-    public List<WebElement> findElements(By locator)
-    {
-        return getDefaultSearchAction().findElements(webUiContext.getSearchContext(), locator,
-                new SearchParameters().setVisibility(Visibility.VISIBLE));
-    }
 
     @Override
     public List<WebElement> findElements(SearchContext searchContext, SearchAttributes searchAttributes)

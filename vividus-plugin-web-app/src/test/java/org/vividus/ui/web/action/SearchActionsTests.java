@@ -142,18 +142,6 @@ class SearchActionsTests
     }
 
     @Test
-    void shouldFindElementsUsingWebUiContext()
-    {
-        createAndSetElementActionsMap();
-        SearchParameters parameters = new SearchParameters();
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
-        when(defaultSearch.findElements(searchContext, ELEMENT_BY_TEXT_LOCATOR, parameters))
-                .thenReturn(List.of(webElement));
-        List<WebElement> foundElements = searchActions.findElements(ELEMENT_BY_TEXT_LOCATOR);
-        assertEquals(List.of(webElement), foundElements);
-    }
-
-    @Test
     void testFindElementsWithChildrenSearchAndFilter()
     {
         List<WebElement> webElements = new ArrayList<>();

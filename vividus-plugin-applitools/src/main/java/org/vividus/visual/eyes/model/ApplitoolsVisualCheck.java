@@ -22,7 +22,7 @@ import java.util.Set;
 
 import com.applitools.eyes.MatchLevel;
 
-import org.openqa.selenium.By;
+import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.screenshot.IgnoreStrategy;
@@ -39,8 +39,8 @@ public class ApplitoolsVisualCheck extends VisualCheck
     private String appName;
     private String batchName;
     private String baselineEnvName;
-    private Set<By> elementsToIgnore = Set.of();
-    private Set<By> areasToIgnore = Set.of();
+    private Set<SearchAttributes> elementsToIgnore = Set.of();
+    private Set<SearchAttributes> areasToIgnore = Set.of();
 
     public ApplitoolsVisualCheck()
     {
@@ -153,12 +153,12 @@ public class ApplitoolsVisualCheck extends VisualCheck
         this.viewportSize = viewportSize;
     }
 
-    public void setElementsToIgnore(Set<By> elementsToIgnore)
+    public void setElementsToIgnore(Set<SearchAttributes> elementsToIgnore)
     {
         this.elementsToIgnore = elementsToIgnore;
     }
 
-    public void setAreasToIgnore(Set<By> areasToIgnore)
+    public void setAreasToIgnore(Set<SearchAttributes> areasToIgnore)
     {
         this.areasToIgnore = areasToIgnore;
     }

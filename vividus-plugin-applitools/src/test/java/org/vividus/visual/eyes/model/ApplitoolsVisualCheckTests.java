@@ -22,7 +22,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
+import org.vividus.ui.web.action.search.ActionAttributeType;
+import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.visual.screenshot.IgnoreStrategy;
 
 class ApplitoolsVisualCheckTests
@@ -40,8 +41,8 @@ class ApplitoolsVisualCheckTests
     @Test
     void shouldFillElementsToIgnoreWithValues()
     {
-        Set<By> element = Set.of(By.id("element"));
-        Set<By> area = Set.of(By.id("area"));
+        Set<SearchAttributes> element = Set.of(new SearchAttributes(ActionAttributeType.ID, "element"));
+        Set<SearchAttributes> area = Set.of(new SearchAttributes(ActionAttributeType.ID, "area"));
         visualCheck.setElementsToIgnore(element);
         visualCheck.setAreasToIgnore(area);
         visualCheck.buildIgnores();

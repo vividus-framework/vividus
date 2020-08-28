@@ -19,15 +19,12 @@ package org.vividus.ui.web.action;
 import java.util.List;
 import java.util.Optional;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.web.action.search.SearchAttributes;
 
 public interface ISearchActions
 {
-    List<WebElement> findElements(By locator);
-
     List<WebElement> findElements(SearchContext searchContext, SearchAttributes searchAttributes);
 
     List<WebElement> findElements(SearchAttributes searchAttributes);
