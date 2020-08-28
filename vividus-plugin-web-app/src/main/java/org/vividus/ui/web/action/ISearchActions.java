@@ -26,8 +26,6 @@ import org.vividus.ui.web.action.search.SearchAttributes;
 
 public interface ISearchActions
 {
-    List<WebElement> findElements(SearchContext searchContext, By locator);
-
     List<WebElement> findElements(By locator);
 
     List<WebElement> findElements(SearchContext searchContext, SearchAttributes searchAttributes);
