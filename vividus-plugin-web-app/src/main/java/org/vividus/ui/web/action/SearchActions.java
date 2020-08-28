@@ -47,16 +47,10 @@ public class SearchActions implements ISearchActions
     private Map<IActionAttributeType, IElementAction> elementActions;
 
     @Override
-    public List<WebElement> findElements(SearchContext searchContext, By locator)
-    {
-        return getDefaultSearchAction().findElements(searchContext, locator,
-                new SearchParameters().setVisibility(Visibility.VISIBLE));
-    }
-
-    @Override
     public List<WebElement> findElements(By locator)
     {
-        return findElements(webUiContext.getSearchContext(), locator);
+        return getDefaultSearchAction().findElements(webUiContext.getSearchContext(), locator,
+                new SearchParameters().setVisibility(Visibility.VISIBLE));
     }
 
     @Override
