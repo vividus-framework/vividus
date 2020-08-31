@@ -16,25 +16,41 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.selenium.WebDriverType;
+import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IFieldActions;
-import org.vividus.ui.web.action.WebElementActions;
+import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.web.util.FormatUtil;
 
 @TakeScreenshotOnFailure
 public class FieldSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FieldSteps.class);
+
     private static final String A_FIELD_WITH_NAME = "A field with attributes%1$s";
+    private static final int TEXT_TYPING_ATTEMPTS_LIMIT = 5;
 
     @Inject private IBaseValidations baseValidations;
-    @Inject private WebElementActions webElementActions;
+    @Inject private IWebElementActions webElementActions;
     @Inject private IFieldActions fieldActions;
+    @Inject private ISoftAssert softAssert;
+    @Inject private IJavascriptActions javascriptActions;
+    @Inject private IWebDriverManager webDriverManager;
 
     /**
      * Clears an <b>element</b> located by <b>locator</b>
@@ -117,10 +133,63 @@ public class FieldSteps
      * @param text A text to type into the <b>element</b>
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
+    @SuppressWarnings("unchecked")
     @When("I enter `$text` in field located `$locator`")
     public void enterTextInField(String text, SearchAttributes locator)
     {
-        webElementActions.typeText(locator, text);
+        WebElement element = findElement(locator);
+        if (element != null)
+        {
+            String normalizedText = FormatUtil.normalizeLineEndings(text);
+            element.clear();
+            LOGGER.info("Entering text \"{}\" in element", normalizedText);
+            if (webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)
+                    && webElementActions.isElementContenteditable(element))
+            {
+                javascriptActions.executeScript("var element = arguments[0];element.innerHTML = arguments[1];", element,
+                        normalizedText);
+                return;
+            }
+            try
+            {
+                element.sendKeys(normalizedText);
+            }
+            catch (StaleElementReferenceException e)
+            {
+                LOGGER.info("An element is stale. One more attempt to type text into it");
+                element = findElement(locator);
+                element.sendKeys(normalizedText);
+            }
+            // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
+            if (webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE) && Boolean.TRUE.equals(
+                    ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(WebDriverType.IE_OPTIONS))
+                            .get("requireWindowFocus")))
+            {
+                int iterationsCounter = TEXT_TYPING_ATTEMPTS_LIMIT;
+                while (iterationsCounter > 0 && !isValueEqualTo(element, normalizedText))
+                {
+                    element.clear();
+                    LOGGER.info("Re-typing text \"{}\" to element", normalizedText);
+                    element.sendKeys(normalizedText);
+                    iterationsCounter--;
+                }
+                if (iterationsCounter == 0 && !isValueEqualTo(element, normalizedText))
+                {
+                    softAssert.recordFailedAssertion(String.format("The element is not filled correctly"
+                            + " after %d typing attempt(s)", TEXT_TYPING_ATTEMPTS_LIMIT + 1));
+                }
+            }
+        }
+    }
+
+    private WebElement findElement(SearchAttributes locator)
+    {
+        return baseValidations.assertIfElementExists(String.format("An element with attributes%1$s", locator), locator);
+    }
+
+    private boolean isValueEqualTo(WebElement element, String expectedValue)
+    {
+        return expectedValue.equals(javascriptActions.executeScript("return arguments[0].value;", element));
     }
 
     /**
