@@ -16,20 +16,35 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.selenium.WebDriverType;
+import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IFieldActions;
+import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.ActionAttributeType;
 import org.vividus.ui.web.action.search.SearchAttributes;
@@ -43,6 +58,8 @@ class FieldStepsTests
             "A field with attributes Field name: 'fieldName'; Visibility: VISIBLE;";
     private static final String FIELD_NAME = "fieldName";
     private static final String TEXT = "text";
+    private static final String GET_ELEMENT_VALUE_JS = "return arguments[0].value;";
+    private static final String ATTRIBUTES = "An element with attributes";
 
     @Mock
     private IBaseValidations baseValidations;
@@ -55,6 +72,15 @@ class FieldStepsTests
 
     @Mock
     private IFieldActions fieldActions;
+
+    @Mock
+    private IJavascriptActions javascriptActions;
+
+    @Mock
+    private IWebDriverManager webDriverManager;
+
+    @Mock
+    private ISoftAssert softAssert;
 
     @InjectMocks
     private FieldSteps fieldSteps;
@@ -79,11 +105,140 @@ class FieldStepsTests
     }
 
     @Test
-    void testEnterTextInFieldWithName()
+    void testEnterTextInFieldNotSafari()
     {
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.FIELD_NAME, FIELD_NAME);
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(false);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes))
+                .thenReturn(webElement);
         fieldSteps.enterTextInField(TEXT, searchAttributes);
-        verify(webElementActions).typeText(searchAttributes, TEXT);
+        verify(webElement).clear();
+        verify(webElement).sendKeys(TEXT);
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusFalse()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
+        mockRequireWindowFocusOption(false);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes))
+                .thenReturn(webElement);
+        fieldSteps.enterTextInField(TEXT, searchAttributes);
+        InOrder inOrder = inOrder(webElement);
+        inOrder.verify(webElement).clear();
+        inOrder.verify(webElement).sendKeys(TEXT);
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusTrueWithoutReentering()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
+        mockRequireWindowFocusOption(true);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes))
+                .thenReturn(webElement);
+        when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(TEXT);
+        fieldSteps.enterTextInField(TEXT, searchAttributes);
+        InOrder inOrder = inOrder(webElement);
+        inOrder.verify(webElement).clear();
+        inOrder.verify(webElement).sendKeys(TEXT);
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusTrueWithReentering()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
+        mockRequireWindowFocusOption(true);
+        when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY, TEXT);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes))
+                .thenReturn(webElement);
+        fieldSteps.enterTextInField(TEXT, searchAttributes);
+        verify(webElement, times(2)).clear();
+        verify(webElement, times(2)).sendKeys(TEXT);
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusTrueFieldNotFilledCorrectly()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
+        mockRequireWindowFocusOption(true);
+        when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes))
+                .thenReturn(webElement);
+        fieldSteps.enterTextInField(TEXT, searchAttributes);
+        verify(webElement, times(6)).clear();
+        verify(webElement, times(6)).sendKeys(TEXT);
+        verify(softAssert).recordFailedAssertion("The element is not filled correctly after 6 typing attempt(s)");
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusTrueFieldIsFilledCorrectlyAfter5Attempts()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
+        mockRequireWindowFocusOption(true);
+        when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, TEXT);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes))
+                .thenReturn(webElement);
+        fieldSteps.enterTextInField(TEXT, searchAttributes);
+        verify(webElement, times(6)).clear();
+        verify(webElement, times(6)).sendKeys(TEXT);
+        verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void testEnterTextInFieldSafariContentEditableFrame()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        when(webElementActions.isElementContenteditable(webElement)).thenReturn(true);
+        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(true);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes))
+                .thenReturn(webElement);
+        fieldSteps.enterTextInField(TEXT, searchAttributes);
+        verify(webElement).clear();
+        verify(javascriptActions).executeScript("var element = arguments[0];element.innerHTML = arguments[1];",
+                webElement, TEXT);
+        verify(webElement, never()).sendKeys(TEXT);
+    }
+
+    @Test
+    void testEnterTextInFieldSafariSimpleFrame()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        when(webElementActions.isElementContenteditable(webElement)).thenReturn(false);
+        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(true);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes))
+                .thenReturn(webElement);
+        fieldSteps.enterTextInField(TEXT, searchAttributes);
+        verify(webElement).clear();
+        verify(webElement).sendKeys(TEXT);
+    }
+
+    @Test
+    void testEnterTextInFieldInNullElement()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes)).thenReturn(null);
+        fieldSteps.enterTextInField(TEXT, searchAttributes);
+        verifyNoInteractions(webElementActions, fieldActions, javascriptActions, webDriverManager,
+                softAssert);
+    }
+
+    @Test
+    void testEnterTextInFieldInStaleElement()
+    {
+        SearchAttributes searchAttributes = mock(SearchAttributes.class);
+        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(false);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + searchAttributes, searchAttributes))
+                .thenReturn(webElement);
+        doThrow(StaleElementReferenceException.class).doNothing().when(webElement).sendKeys(TEXT);
+        fieldSteps.enterTextInField(TEXT, searchAttributes);
+        verify(webElement).clear();
+        verify(webElement, times(2)).sendKeys(TEXT);
     }
 
     @Test
@@ -135,5 +290,13 @@ class FieldStepsTests
     {
         fieldSteps.clearFieldLocatedByUsingKeyboard(mock(SearchAttributes.class));
         verify(webElement, never()).sendKeys(Keys.chord(Keys.CONTROL, "a") + Keys.BACK_SPACE);
+    }
+
+    private void mockRequireWindowFocusOption(boolean requireWindowFocus)
+    {
+        Map<String, Object> options = Map.of("requireWindowFocus", requireWindowFocus);
+        Capabilities capabilities = mock(Capabilities.class);
+        when(capabilities.getCapability("se:ieOptions")).thenReturn(options);
+        when(webDriverManager.getCapabilities()).thenReturn(capabilities);
     }
 }
