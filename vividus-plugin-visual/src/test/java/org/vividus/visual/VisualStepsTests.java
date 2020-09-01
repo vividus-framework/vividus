@@ -53,9 +53,9 @@ import org.vividus.bdd.resource.ResourceLoadException;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.visual.engine.IVisualTestingEngine;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
@@ -65,9 +65,9 @@ import org.vividus.visual.screenshot.IgnoreStrategy;
 @ExtendWith(MockitoExtension.class)
 class VisualStepsTests
 {
-    private static final SearchAttributes DIV_LOCATOR = new SearchAttributes(ActionAttributeType.XPATH, "//div");
+    private static final Locator DIV_LOCATOR = new Locator(WebLocatorType.XPATH, "//div");
 
-    private static final SearchAttributes A_LOCATOR = new SearchAttributes(ActionAttributeType.XPATH, ".//a");
+    private static final Locator A_LOCATOR = new Locator(WebLocatorType.XPATH, ".//a");
 
     private static final String V = "v";
 
@@ -90,7 +90,7 @@ class VisualStepsTests
     @Mock
     private IVisualCheckFactory visualCheckFactory;
     @Mock
-    private IWebUiContext webUiContext;
+    private IUiContext uiContext;
 
     @InjectMocks
     private VisualSteps visualSteps;
@@ -105,7 +105,7 @@ class VisualStepsTests
     void shouldAssertCheckResultForCompareAgainstActionAndPublishAttachment() throws IOException
     {
         VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
-        mockWebUiContext();
+        mockUiContext();
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE);
@@ -114,16 +114,16 @@ class VisualStepsTests
         verifyCheckResultPublish();
     }
 
-    private void mockWebUiContext()
+    private void mockUiContext()
     {
-        when(webUiContext.getSearchContext()).thenReturn(mock(SearchContext.class));
+        when(uiContext.getSearchContext()).thenReturn(mock(SearchContext.class));
     }
 
     @Test
     void shouldPerformVisualCheckWithCustomConfiguration() throws IOException
     {
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
-        mockWebUiContext();
+        mockUiContext();
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
         VisualCheck visualCheck = FACTORY.create(BASELINE, compareAgainst);
         when(visualCheckFactory.create(BASELINE, compareAgainst, screenshotConfiguration)).thenReturn(visualCheck);
@@ -139,7 +139,7 @@ class VisualStepsTests
     void shouldRecordFailedAssertionInCaseOfMissingBaseline() throws IOException
     {
         VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
-        mockWebUiContext();
+        mockUiContext();
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
         visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE);
         verify(softAssert, never()).assertTrue(VISUAL_CHECK_PASSED, false);
@@ -151,13 +151,13 @@ class VisualStepsTests
     @Test
     void shouldAssertCheckResultForCompareAgainstActionAndUseStepLevelExclusions() throws IOException
     {
-        mockWebUiContext();
+        mockUiContext();
         ExamplesTable table = mock(ExamplesTable.class);
         Parameters row = mock(Parameters.class);
         when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
         when(table.getRowAsParameters(0)).thenReturn(row);
-        Set<SearchAttributes> elementsToIgnore = Set.of(A_LOCATOR);
-        Set<SearchAttributes> areasToIgnore = Set.of(DIV_LOCATOR);
+        Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
+        Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore);
         VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
@@ -172,13 +172,13 @@ class VisualStepsTests
     @Test
     void shouldRunVisualTestWithStepLevelExclusionsAndCustomScreenshotConfiguration() throws IOException
     {
-        mockWebUiContext();
+        mockUiContext();
         ExamplesTable table = mock(ExamplesTable.class);
         Parameters row = mock(Parameters.class);
         when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
         when(table.getRowAsParameters(0)).thenReturn(row);
-        Set<SearchAttributes> elementsToIgnore = Set.of(A_LOCATOR);
-        Set<SearchAttributes> areasToIgnore = Set.of(DIV_LOCATOR);
+        Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
+        Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore);
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
@@ -217,25 +217,25 @@ class VisualStepsTests
         verifyNoInteractions(softAssert, visualTestingEngine, attachmentPublisher);
     }
 
-    private static void mockRow(Parameters row, Set<SearchAttributes> elementIgnore, Set<SearchAttributes> areaIgnore)
+    private static void mockRow(Parameters row, Set<Locator> elementIgnore, Set<Locator> areaIgnore)
     {
         mockGettingValue(row, "ELEMENT", elementIgnore);
         mockGettingValue(row, "AREA", areaIgnore);
     }
 
-    private static void mockGettingValue(Parameters row, String name, Set<SearchAttributes> result)
+    private static void mockGettingValue(Parameters row, String name, Set<Locator> result)
     {
         doReturn(result).when(row).valueAs(eq(name),
                 argThat(t -> t instanceof ParameterizedType
                         && ((ParameterizedType) t).getRawType() == Set.class
-                        && ((ParameterizedType) t).getActualTypeArguments()[0] == SearchAttributes.class),
+                        && ((ParameterizedType) t).getActualTypeArguments()[0] == Locator.class),
                 eq(Set.of()));
     }
 
     @Test
     void shouldNotAssertResultForEstablishAction() throws IOException
     {
-        mockWebUiContext();
+        mockUiContext();
         VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.ESTABLISH);
         when(visualTestingEngine.establish(visualCheck)).thenReturn(visualCheckResult);
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
@@ -262,7 +262,7 @@ class VisualStepsTests
     @MethodSource("exceptionsToCatch")
     void shouldRecordExceptions(Exception exception) throws IOException
     {
-        mockWebUiContext();
+        mockUiContext();
         shouldRecordException(exception);
     }
 

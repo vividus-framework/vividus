@@ -36,19 +36,19 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.web.State;
+import org.vividus.ui.State;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.ClickResult;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.action.search.Visibility;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
@@ -63,7 +63,7 @@ public class ElementSteps implements ResourceLoaderAware
     @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IBaseValidations baseValidations;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     @Inject private IElementValidations elementValidations;
     @Inject private IMouseActions mouseActions;
     private ResourceLoader resourceLoader;
@@ -81,7 +81,7 @@ public class ElementSteps implements ResourceLoaderAware
      * @throws IOException If an input or output exception occurred
      */
     @When("I select element located `$locator` and upload file `$filePath`")
-    public void uploadFile(SearchAttributes locator, String filePath) throws IOException
+    public void uploadFile(Locator locator, String filePath) throws IOException
     {
         Resource resource = resourceLoader.getResource(ResourceLoader.CLASSPATH_URL_PREFIX + filePath);
         if (!resource.exists())
@@ -122,15 +122,15 @@ public class ElementSteps implements ResourceLoaderAware
      * <li>Clicks on the element;</li>
      * <li>Assert that page has not been refreshed after click</li>
      * </ul>
-     * @param searchAttributes to locate element
+     * @param locator to locate element
      */
-    @When("I click on an element '$searchAttributes' then the page does not refresh")
-    public void clickElementPageNotRefresh(SearchAttributes searchAttributes)
+    @When("I click on an element '$locator' then the page does not refresh")
+    public void clickElementPageNotRefresh(Locator locator)
     {
-        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, searchAttributes);
+        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator);
         ClickResult clickResult = mouseActions.click(element);
         descriptiveSoftAssert.assertTrue(
-                "Page has not been refreshed after clicking on the element located by" + searchAttributes,
+                "Page has not been refreshed after clicking on the element located by" + locator,
                 !clickResult.isNewPageLoaded());
     }
 
@@ -144,7 +144,7 @@ public class ElementSteps implements ResourceLoaderAware
      * @param locator to locate the element
      */
     @When("I perform right click on element located `$locator`")
-    public void contextClickElementByLocator(SearchAttributes locator)
+    public void contextClickElementByLocator(Locator locator)
     {
         WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator);
         mouseActions.contextClick(element);
@@ -155,7 +155,7 @@ public class ElementSteps implements ResourceLoaderAware
      * @param locator to locate the element
      */
     @When("I hover mouse over element located `$locator`")
-    public void hoverMouseOverElement(SearchAttributes locator)
+    public void hoverMouseOverElement(Locator locator)
     {
         WebElement element = baseValidations.assertIfElementExists(
                 String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator), locator);
@@ -175,8 +175,8 @@ public class ElementSteps implements ResourceLoaderAware
      * @param childLocator locator for the child element
     */
     @Then("each element with locator `$elementLocator` has `$number` child elements with locator `$childLocator`")
-    public void doesEachElementByLocatorHaveChildWithLocator(SearchAttributes elementLocator, int number,
-            SearchAttributes childLocator)
+    public void doesEachElementByLocatorHaveChildWithLocator(Locator elementLocator, int number,
+            Locator childLocator)
     {
         List<WebElement> elements = baseValidations.assertIfElementsExist("The number of parent elements",
                 elementLocator);
@@ -195,7 +195,7 @@ public class ElementSteps implements ResourceLoaderAware
     @Then("the context element has the CSS property '$cssName'='$cssValue'")
     public void doesElementHaveRightCss(String cssName, String cssValue)
     {
-        WebElement element = webUiContext.getSearchContext(WebElement.class);
+        WebElement element = uiContext.getSearchContext(WebElement.class);
         String actualCssValue = webElementActions.getCssValue(element, cssName);
         descriptiveSoftAssert.assertEquals("Element has correct css property value", cssValue,
                 actualCssValue);
@@ -209,7 +209,7 @@ public class ElementSteps implements ResourceLoaderAware
     @Then("the context element has the CSS property '$cssName' containing '$cssValue'")
     public void doesElementHaveRightPartOfCssValue(String cssName, String cssValue)
     {
-        WebElement element = webUiContext.getSearchContext(WebElement.class);
+        WebElement element = uiContext.getSearchContext(WebElement.class);
         String actualCssValue = webElementActions.getCssValue(element, cssName);
         descriptiveSoftAssert.assertThat("Css property value part is correct",
                 String.format("Element has CSS property '%1$s' containing value '%2$s'", cssName, cssValue),
@@ -219,7 +219,7 @@ public class ElementSteps implements ResourceLoaderAware
     /**
      * Checks whether the context contains
      * exact amount of elements by locator
-     * @param searchAttributes to locate element
+     * @param locator to locate element
      * @param comparisonRule The rule to compare values
      * (<i>Possible values:<b> LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
      * EQUAL_TO</b></i>)
@@ -227,10 +227,10 @@ public class ElementSteps implements ResourceLoaderAware
      * @return list of Web elements
      */
     @Then("number of elements found by `$locator` is $comparisonRule `$quantity`")
-    public List<WebElement> thePageContainsQuantityElements(SearchAttributes searchAttributes,
-            ComparisonRule comparisonRule, int quantity)
+    public List<WebElement> thePageContainsQuantityElements(Locator locator, ComparisonRule comparisonRule,
+            int quantity)
     {
-        return baseValidations.assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS, searchAttributes, quantity,
+        return baseValidations.assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS, locator, quantity,
                 comparisonRule);
     }
 
@@ -257,7 +257,7 @@ public class ElementSteps implements ResourceLoaderAware
      * @return True if all elements have the same dimension, otherwise false
      */
     @Then("each element located `$locator` has same `$dimension`")
-    public boolean doesEachElementByLocatorHaveSameDimension(SearchAttributes locator, Dimension dimension)
+    public boolean doesEachElementByLocatorHaveSameDimension(Locator locator, Dimension dimension)
     {
         int minimalElementsQuantity = 2;
         List<WebElement> elements = baseValidations.assertIfAtLeastNumberOfElementsExist(THE_NUMBER_OF_FOUND_ELEMENTS,
@@ -274,9 +274,9 @@ public class ElementSteps implements ResourceLoaderAware
     @Then("the context has a width of '$widthInPerc'%")
     public void isElementHasRightWidth(int widthInPerc)
     {
-        WebElement webElement = webUiContext.getSearchContext(WebElement.class);
+        WebElement webElement = uiContext.getSearchContext(WebElement.class);
         WebElement bodyElement = baseValidations.assertIfElementExists("'Body' element", webDriverProvider.get(),
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         new SearchParameters(LocatorUtil.getXPath("//body"), Visibility.ALL)));
         elementValidations.assertIfElementHasWidthInPerc(bodyElement, webElement, widthInPerc);
     }
@@ -288,9 +288,9 @@ public class ElementSteps implements ResourceLoaderAware
     @Then("the context element has a width of '$widthInPerc'% relative to the parent element")
     public void isElementHasWidthRelativeToTheParentElement(int width)
     {
-        WebElement elementChild = webUiContext.getSearchContext(WebElement.class);
+        WebElement elementChild = uiContext.getSearchContext(WebElement.class);
         WebElement elementParent = baseValidations.assertIfElementExists("Parent element",
-                new SearchAttributes(ActionAttributeType.XPATH, "./.."));
+                new Locator(WebLocatorType.XPATH, "./.."));
         elementValidations.assertIfElementHasWidthInPerc(elementParent, elementChild, width);
     }
 
@@ -299,7 +299,7 @@ public class ElementSteps implements ResourceLoaderAware
      * @param locator to locate element
      */
     @When("I click on element located `$locator`")
-    public void clickOnElement(SearchAttributes locator)
+    public void clickOnElement(Locator locator)
     {
         WebElement webElement =
                 baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator), locator);
@@ -311,7 +311,7 @@ public class ElementSteps implements ResourceLoaderAware
      * @param locator to locate elements
      */
     @When("I click on all elements located `$locator`")
-    public void clickOnAllElements(SearchAttributes locator)
+    public void clickOnAllElements(Locator locator)
     {
         baseValidations.assertIfElementsExist("The elements to click", locator)
                 .forEach(e -> mouseActions.click(e));
@@ -329,7 +329,7 @@ public class ElementSteps implements ResourceLoaderAware
      * @param quantity Desired amount of elements
      */
     @Then("number of $state elements found by `$locator` is $comparisonRule `$quantity`")
-    public void doesElementsNumberInStateExists(State state, SearchAttributes locator, ComparisonRule comparisonRule,
+    public void doesElementsNumberInStateExists(State state, Locator locator, ComparisonRule comparisonRule,
             int quantity)
     {
         String description = "Element is " + state;

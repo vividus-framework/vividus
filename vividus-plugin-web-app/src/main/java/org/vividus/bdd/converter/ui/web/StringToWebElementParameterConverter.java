@@ -20,22 +20,28 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.SearchActions;
+import org.vividus.ui.action.SearchActions;
 import org.vividus.ui.web.util.ElementUtil;
 
 @Named
 public class StringToWebElementParameterConverter extends AbstractParameterConverter<Supplier<Optional<WebElement>>>
 {
-    @Inject private SearchActions searchActions;
+    private final SearchActions searchActions;
+    private final ElementUtil elementUtil;
+
+    public StringToWebElementParameterConverter(SearchActions searchActions, ElementUtil elementUtil)
+    {
+        this.searchActions = searchActions;
+        this.elementUtil = elementUtil;
+    }
 
     @Override
     public Supplier<Optional<WebElement>> convertValue(String value, Type type)
     {
-        return ElementUtil.getElement(value, searchActions);
+        return elementUtil.getElement(value, searchActions);
     }
 }

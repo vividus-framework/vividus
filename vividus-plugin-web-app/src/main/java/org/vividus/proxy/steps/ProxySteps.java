@@ -47,7 +47,7 @@ import org.vividus.proxy.IProxy;
 import org.vividus.proxy.ProxyLog;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.IWaitActions;
+import org.vividus.ui.web.action.IWebWaitActions;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 public class ProxySteps
@@ -58,7 +58,7 @@ public class ProxySteps
     @Inject private ISoftAssert softAssert;
     @Inject private IAttachmentPublisher attachmentPublisher;
     @Inject private IBddVariableContext bddVariableContext;
-    @Inject private IWaitActions waitActions;
+    @Inject private IWebWaitActions waitActions;
 
     private final ThreadLocal<Optional<ProxyLog>> externalProxyLog = ThreadLocal.withInitial(Optional::empty);
 

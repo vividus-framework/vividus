@@ -19,6 +19,7 @@ package org.vividus.bdd.steps.ui.web.validation;
 import javax.inject.Inject;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.FocusState;
 import org.vividus.ui.web.action.IJavascriptActions;
 

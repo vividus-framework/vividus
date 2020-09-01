@@ -19,14 +19,14 @@ package org.vividus.bdd.variable.ui.web;
 import javax.inject.Named;
 
 import org.openqa.selenium.Rectangle;
-import org.vividus.ui.web.context.WebUiContext;
+import org.vividus.ui.context.UiContext;
 
 @Named("context-height")
 public class SearchContextHeightDynamicVariable extends AbstractContextProvidingDynamicVariable
 {
-    public SearchContextHeightDynamicVariable(WebUiContext webUiContext)
+    public SearchContextHeightDynamicVariable(UiContext uiContext)
     {
-        super(webUiContext);
+        super(uiContext);
     }
 
     @Override

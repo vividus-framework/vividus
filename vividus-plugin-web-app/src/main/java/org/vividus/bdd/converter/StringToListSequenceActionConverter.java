@@ -34,13 +34,13 @@ import org.vividus.bdd.steps.ui.web.model.SequenceActionType;
 @Named
 public class StringToListSequenceActionConverter extends AbstractParameterConverter<List<SequenceAction>>
 {
-    private final StringToSearchAttributesConverter stringToSearchAttributesConverter;
+    private final StringToLocatorConverter stringToLocatorConverter;
     private final PointConverter pointConverter;
 
-    public StringToListSequenceActionConverter(StringToSearchAttributesConverter stringToSearchAttributesConverter,
+    public StringToListSequenceActionConverter(StringToLocatorConverter stringToLocatorConverter,
             PointConverter pointConverter)
     {
-        this.stringToSearchAttributesConverter = stringToSearchAttributesConverter;
+        this.stringToLocatorConverter = stringToLocatorConverter;
         this.pointConverter = pointConverter;
     }
 
@@ -72,7 +72,7 @@ public class StringToListSequenceActionConverter extends AbstractParameterConver
     {
         if (argumentType.equals(WebElement.class))
         {
-            return stringToSearchAttributesConverter.convertValue(argumentValue, null);
+            return stringToLocatorConverter.convertValue(argumentValue, null);
         }
         else if (argumentType.equals(Point.class))
         {

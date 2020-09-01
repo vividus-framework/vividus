@@ -56,7 +56,7 @@ class FieldActionsTests
     private ISoftAssert softAssert;
 
     @Mock
-    private IWaitActions waitActions;
+    private IWebWaitActions waitActions;
 
     @InjectMocks
     private FieldActions fieldActions;

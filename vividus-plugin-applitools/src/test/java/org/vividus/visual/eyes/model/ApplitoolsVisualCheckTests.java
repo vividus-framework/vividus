@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.visual.screenshot.IgnoreStrategy;
 
 class ApplitoolsVisualCheckTests
@@ -41,8 +41,8 @@ class ApplitoolsVisualCheckTests
     @Test
     void shouldFillElementsToIgnoreWithValues()
     {
-        Set<SearchAttributes> element = Set.of(new SearchAttributes(ActionAttributeType.ID, "element"));
-        Set<SearchAttributes> area = Set.of(new SearchAttributes(ActionAttributeType.ID, "area"));
+        Set<Locator> element = Set.of(new Locator(WebLocatorType.ID, "element"));
+        Set<Locator> area = Set.of(new Locator(WebLocatorType.ID, "area"));
         visualCheck.setElementsToIgnore(element);
         visualCheck.setAreasToIgnore(area);
         visualCheck.buildIgnores();

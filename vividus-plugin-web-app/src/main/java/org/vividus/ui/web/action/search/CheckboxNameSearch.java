@@ -24,8 +24,11 @@ import java.util.stream.Collectors;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.element.Checkbox;
+import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 
-public class CheckboxNameSearch extends AbstractElementSearchAction implements IElementSearchAction
+public class CheckboxNameSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
     private static final String CHECKBOX_LOCATOR = "input[@type='checkbox']";
     private static final String PRECEDING_SIBLING_CHECKBOX_LOCATOR = "preceding-sibling::" + CHECKBOX_LOCATOR;
@@ -33,6 +36,11 @@ public class CheckboxNameSearch extends AbstractElementSearchAction implements I
             + " and (preceding-sibling::input or following-sibling::input or child::input)]";
     private static final String CHECKBOX_LABEL_DEEP = "label[preceding-sibling::input or following-sibling::input"
             + " or child::input]";
+
+    public CheckboxNameSearch()
+    {
+        super(WebLocatorType.CHECKBOX_NAME);
+    }
 
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)

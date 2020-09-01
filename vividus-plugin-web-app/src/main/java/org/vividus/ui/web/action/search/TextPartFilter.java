@@ -25,6 +25,11 @@ public class TextPartFilter extends AbstractElementFilterAction
 {
     @Inject private IWebElementActions webElementActions;
 
+    public TextPartFilter()
+    {
+        super(WebLocatorType.TEXT_PART);
+    }
+
     @Override
     protected boolean matches(WebElement element, String textPart)
     {

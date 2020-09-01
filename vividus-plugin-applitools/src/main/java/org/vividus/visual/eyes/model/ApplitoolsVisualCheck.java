@@ -22,7 +22,7 @@ import java.util.Set;
 
 import com.applitools.eyes.MatchLevel;
 
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.screenshot.IgnoreStrategy;
@@ -39,8 +39,8 @@ public class ApplitoolsVisualCheck extends VisualCheck
     private String appName;
     private String batchName;
     private String baselineEnvName;
-    private Set<SearchAttributes> elementsToIgnore = Set.of();
-    private Set<SearchAttributes> areasToIgnore = Set.of();
+    private Set<Locator> elementsToIgnore = Set.of();
+    private Set<Locator> areasToIgnore = Set.of();
 
     public ApplitoolsVisualCheck()
     {
@@ -153,12 +153,12 @@ public class ApplitoolsVisualCheck extends VisualCheck
         this.viewportSize = viewportSize;
     }
 
-    public void setElementsToIgnore(Set<SearchAttributes> elementsToIgnore)
+    public void setElementsToIgnore(Set<Locator> elementsToIgnore)
     {
         this.elementsToIgnore = elementsToIgnore;
     }
 
-    public void setAreasToIgnore(Set<SearchAttributes> areasToIgnore)
+    public void setAreasToIgnore(Set<Locator> areasToIgnore)
     {
         this.areasToIgnore = areasToIgnore;
     }

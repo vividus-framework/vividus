@@ -23,10 +23,10 @@ import javax.inject.Inject;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.IVideoPlayerActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
@@ -69,8 +69,8 @@ public class VideoPlayerSteps
 
     private void findVideoPlayerAndExecuteAction(String videoPlayerName, Consumer<WebElement> actionConsumer)
     {
-        WebElement videoPlayer = baseValidations.assertIfElementExists("Video player", new SearchAttributes(
-                ActionAttributeType.XPATH, LocatorUtil.getXPath("//video[@*='%1$s']", videoPlayerName)));
+        WebElement videoPlayer = baseValidations.assertIfElementExists("Video player", new Locator(
+                WebLocatorType.XPATH, LocatorUtil.getXPath("//video[@*='%1$s']", videoPlayerName)));
         if (videoPlayer != null)
         {
             actionConsumer.accept(videoPlayer);

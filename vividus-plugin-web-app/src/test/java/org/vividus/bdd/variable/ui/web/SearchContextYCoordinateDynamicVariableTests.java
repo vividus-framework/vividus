@@ -27,13 +27,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.context.WebUiContext;
+import org.vividus.ui.context.UiContext;
 
 @ExtendWith(MockitoExtension.class)
 class SearchContextYCoordinateDynamicVariableTests
 {
     @Mock
-    private WebUiContext webUiContext;
+    private UiContext uiContext;
 
     @InjectMocks
     private SearchContextYCoordinateDynamicVariable yDynamicVariable;
@@ -42,7 +42,7 @@ class SearchContextYCoordinateDynamicVariableTests
     void shouldReturnElementHeight()
     {
         WebElement webElement = mock(WebElement.class);
-        when(webUiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         Rectangle rectangle = mock(Rectangle.class);
         when(webElement.getRect()).thenReturn(rectangle);
         when(rectangle.getY()).thenReturn(1870);

@@ -31,19 +31,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.selenium.element.Checkbox;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.CheckboxAction;
 import org.vividus.ui.web.action.IMouseActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith(MockitoExtension.class)
 class CheckboxStepsTests
 {
     private static final String CHECKBOX = "Checkbox";
-    private static final SearchAttributes SEARCH_ATTRIBUTES = new SearchAttributes(
-            ActionAttributeType.XPATH, "input[@type='checkbox']");
+    private static final Locator LOCATOR = new Locator(
+            WebLocatorType.XPATH, "input[@type='checkbox']");
 
     @Mock
     private IBaseValidations baseValidations;
@@ -60,34 +60,34 @@ class CheckboxStepsTests
     @Test
     void shouldChangeCheckboxState()
     {
-        when(baseValidations.assertIfElementExists(CHECKBOX, SEARCH_ATTRIBUTES)).thenReturn(checkbox);
+        when(baseValidations.assertIfElementExists(CHECKBOX, LOCATOR)).thenReturn(checkbox);
         when(checkbox.isDisplayed()).thenReturn(true);
-        checkboxSteps.changeStateOfCheckbox(CheckboxAction.CHECK, SEARCH_ATTRIBUTES);
+        checkboxSteps.changeStateOfCheckbox(CheckboxAction.CHECK, LOCATOR);
         verify(mouseActions).click(verifyWrappedCheckbox());
     }
 
     @Test
     void shouldNotCheckWhenNoElementFound()
     {
-        checkboxSteps.changeStateOfCheckbox(CheckboxAction.CHECK, SEARCH_ATTRIBUTES);
+        checkboxSteps.changeStateOfCheckbox(CheckboxAction.CHECK, LOCATOR);
         verifyNoInteractions(mouseActions);
     }
 
     @Test
     void shouldNotChangeCheckboxStateWhenWrappedElementNull()
     {
-        when(baseValidations.assertIfElementExists(CHECKBOX, SEARCH_ATTRIBUTES)).thenReturn(new Checkbox(null));
-        checkboxSteps.changeStateOfCheckbox(CheckboxAction.CHECK, SEARCH_ATTRIBUTES);
+        when(baseValidations.assertIfElementExists(CHECKBOX, LOCATOR)).thenReturn(new Checkbox(null));
+        checkboxSteps.changeStateOfCheckbox(CheckboxAction.CHECK, LOCATOR);
         verifyNoInteractions(mouseActions);
     }
 
     @Test
     void shouldNotClickCheckboxIfItIsInDesiredState()
     {
-        when(baseValidations.assertIfElementExists(CHECKBOX, SEARCH_ATTRIBUTES)).thenReturn(checkbox);
+        when(baseValidations.assertIfElementExists(CHECKBOX, LOCATOR)).thenReturn(checkbox);
         CheckboxAction action = CheckboxAction.CHECK;
         when(checkbox.isSelected()).thenReturn(action.isSelected());
-        checkboxSteps.changeStateOfCheckbox(action, SEARCH_ATTRIBUTES);
+        checkboxSteps.changeStateOfCheckbox(action, LOCATOR);
         verifyNoInteractions(mouseActions);
     }
 
@@ -96,19 +96,19 @@ class CheckboxStepsTests
     {
         WebElement label = mock(WebElement.class);
         Checkbox wrappedCheckbox = new Checkbox(checkbox, label);
-        when(baseValidations.assertIfElementExists(CHECKBOX, SEARCH_ATTRIBUTES)).thenReturn(wrappedCheckbox);
+        when(baseValidations.assertIfElementExists(CHECKBOX, LOCATOR)).thenReturn(wrappedCheckbox);
         CheckboxAction action = CheckboxAction.CHECK;
-        checkboxSteps.changeStateOfCheckbox(action, SEARCH_ATTRIBUTES);
+        checkboxSteps.changeStateOfCheckbox(action, LOCATOR);
         verify(mouseActions).click(label);
     }
 
     @Test
     void shouldCheckAllFoundCheckboxes()
     {
-        when(baseValidations.assertIfElementsExist("Checkboxes", SEARCH_ATTRIBUTES))
+        when(baseValidations.assertIfElementsExist("Checkboxes", LOCATOR))
             .thenReturn(List.of(checkbox, checkbox, checkbox));
         when(checkbox.isDisplayed()).thenReturn(true);
-        checkboxSteps.changeStateOfAllCheckboxes(CheckboxAction.CHECK, SEARCH_ATTRIBUTES);
+        checkboxSteps.changeStateOfAllCheckboxes(CheckboxAction.CHECK, LOCATOR);
         verify(mouseActions, times(3)).click(verifyWrappedCheckbox());
     }
 

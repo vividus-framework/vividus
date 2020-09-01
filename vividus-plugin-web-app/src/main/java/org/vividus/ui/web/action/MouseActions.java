@@ -36,8 +36,8 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.AlertActions.Action;
-import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.event.PageLoadEndEvent;
 
 public class MouseActions implements IMouseActions
@@ -50,10 +50,10 @@ public class MouseActions implements IMouseActions
     @Inject private IWebDriverManager webDriverManager;
     @Inject private ISoftAssert softAssert;
     @Inject private JavascriptActions javascriptActions;
-    @Inject private IWaitActions waitActions;
+    @Inject private IWebWaitActions waitActions;
     @Inject private IAlertActions alertActions;
     @Inject private EventBus eventBus;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     private List<WebDriverEventListener> webDriverEventListeners;
 
     @Override
@@ -178,7 +178,7 @@ public class MouseActions implements IMouseActions
             catch (@SuppressWarnings("unused") WebDriverException e)
             {
                 clickResult.setNewPageLoaded(true);
-                webUiContext.reset();
+                uiContext.reset();
             }
         }
     }

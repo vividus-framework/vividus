@@ -26,8 +26,8 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.context.IWebUiContext;
 
 public class WebElementHighlighter implements IWebElementHighlighter
 {
@@ -39,7 +39,7 @@ public class WebElementHighlighter implements IWebElementHighlighter
             + "arguments[0].style.boxShadow=\"\"";
 
     @Inject private IJavascriptActions javascriptActions;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
 
     @Override
     public <T> T takeScreenshotWithHighlights(Supplier<T> screenshotSupplier)
@@ -57,12 +57,12 @@ public class WebElementHighlighter implements IWebElementHighlighter
 
     private void changeState(Consumer<WebElement> stateUpdater)
     {
-        SearchContext searchContext = webUiContext.getSearchContext();
+        SearchContext searchContext = uiContext.getSearchContext();
         if (searchContext instanceof WebElement)
         {
             stateUpdater.accept((WebElement) searchContext);
         }
-        webUiContext.getAssertingWebElements().forEach(stateUpdater);
+        uiContext.getAssertingWebElements().forEach(stateUpdater);
     }
 
     private void enableHighlighting(WebElement element)

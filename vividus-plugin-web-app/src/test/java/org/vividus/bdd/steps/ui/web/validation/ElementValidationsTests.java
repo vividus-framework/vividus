@@ -36,9 +36,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.Dimension;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.WebElementActions;
-import org.vividus.ui.web.context.IWebUiContext;
 
 @ExtendWith(MockitoExtension.class)
 class ElementValidationsTests
@@ -62,7 +63,7 @@ class ElementValidationsTests
     private IDescriptiveSoftAssert descriptiveSoftAssert;
 
     @Mock
-    private IWebUiContext webUiContext;
+    private IUiContext uiContext;
 
     @InjectMocks
     private ElementValidations elementValidations;
@@ -220,6 +221,6 @@ class ElementValidationsTests
         {
             BooleanSupplier supplier = a.getArgument(1, BooleanSupplier.class);
             return supplier.getAsBoolean();
-        }).when(webUiContext).withAssertingWebElements(eq(elements), any());
+        }).when(uiContext).withAssertingWebElements(eq(elements), any());
     }
 }

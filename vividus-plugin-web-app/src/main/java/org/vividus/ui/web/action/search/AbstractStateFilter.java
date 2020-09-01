@@ -23,7 +23,8 @@ import javax.inject.Inject;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.web.IState;
+import org.vividus.ui.IState;
+import org.vividus.ui.action.search.LocatorType;
 
 public abstract class AbstractStateFilter<T extends Enum<T> & IState> extends AbstractElementFilterAction
 {
@@ -31,8 +32,9 @@ public abstract class AbstractStateFilter<T extends Enum<T> & IState> extends Ab
     @Inject private IWebDriverProvider webDriverProvider;
 
     @SuppressWarnings("unchecked")
-    public AbstractStateFilter()
+    public AbstractStateFilter(LocatorType locatorType)
     {
+        super(locatorType);
         this.enumType = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 

@@ -39,7 +39,7 @@ import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.IScreenshotTaker;
 import org.vividus.softassert.event.AssertionFailedEvent;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 
 public class ScreenshotOnFailureMonitor extends NullStepMonitor
 {
@@ -55,7 +55,7 @@ public class ScreenshotOnFailureMonitor extends NullStepMonitor
     @Inject private IBddRunContext bddRunContext;
 
     @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     @Inject private IScreenshotTaker screenshotTaker;
 
     @Override
@@ -82,9 +82,9 @@ public class ScreenshotOnFailureMonitor extends NullStepMonitor
     {
         if (takeScreenshotOnFailureEnabled.get() && webDriverProvider.isWebDriverInitialized())
         {
-            SearchContext searchContext = webUiContext.getSearchContext();
+            SearchContext searchContext = uiContext.getSearchContext();
             List<WebElement> webElements = searchContext instanceof WebElement ? List.of((WebElement) searchContext)
-                    : webUiContext.getAssertingWebElements();
+                    : uiContext.getAssertingWebElements();
             try
             {
                 screenshotTaker.takeScreenshot("Assertion_Failure", webElements).ifPresent(screenshot ->

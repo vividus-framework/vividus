@@ -21,20 +21,20 @@ import java.util.function.Function;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.variable.DynamicVariable;
-import org.vividus.ui.web.context.WebUiContext;
+import org.vividus.ui.context.UiContext;
 
 public abstract class AbstractContextProvidingDynamicVariable implements DynamicVariable
 {
-    private final WebUiContext webUiContext;
+    private final UiContext uiContext;
 
-    public AbstractContextProvidingDynamicVariable(WebUiContext webUiContext)
+    public AbstractContextProvidingDynamicVariable(UiContext uiContext)
     {
-        this.webUiContext = webUiContext;
+        this.uiContext = uiContext;
     }
 
     protected String getContextRectValue(Function<Rectangle, Integer> valueProvider)
     {
-        WebElement searchContext = webUiContext.getSearchContext(WebElement.class);
+        WebElement searchContext = uiContext.getSearchContext(WebElement.class);
         return String.valueOf(valueProvider.apply(searchContext.getRect()));
     }
 }

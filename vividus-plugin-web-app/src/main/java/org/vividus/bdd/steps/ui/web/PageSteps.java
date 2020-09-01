@@ -30,6 +30,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -39,19 +40,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.ui.web.action.IWaitActions;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
-import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.listener.IWebApplicationListener;
 import org.vividus.util.UriUtils;
 
@@ -63,14 +64,14 @@ public class PageSteps
     private static final String FORWARD_SLASH = "/";
     private static final String PAGE_TITLE = "Page title";
 
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     @Inject private SetContextSteps setContextSteps;
     @Inject private IWebElementActions webElementActions;
     @Inject private INavigateActions navigateActions;
     @Inject private IBaseValidations baseValidations;
     @Inject private WebApplicationConfiguration webApplicationConfiguration;
     @Inject private IWebApplicationListener webApplicationListener;
-    @Inject private IWaitActions waitActions;
+    @Inject private IWebWaitActions waitActions;
     @Inject private IJavascriptActions javascriptActions;
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
@@ -108,7 +109,7 @@ public class PageSteps
     @Given("I am on a page with the URL '$pageURL'")
     public void iAmOnPage(String pageURL)
     {
-        webUiContext.reset();
+        uiContext.reset();
         navigateActions.loadPage(pageURL);
     }
 
@@ -170,7 +171,7 @@ public class PageSteps
     @When("I refresh the page")
     public void refreshPage()
     {
-        webUiContext.reset();
+        uiContext.reset();
         navigateActions.refresh();
     }
 
@@ -228,7 +229,11 @@ public class PageSteps
     @Then("the page with the URL containing '$URLpart' is loaded")
     public void checkUrlPartIsLoaded(String urlPart)
     {
-        baseValidations.assertPageWithURLPartIsLoaded(urlPart);
+        URI actualUrl = UriUtils.createUri(getWebDriver().getCurrentUrl());
+        String actualDecodedUrl = actualUrl.toString();
+        descriptiveSoftAssert.assertThat(String.format("Page with the URLpart '%s' is loaded", urlPart),
+                String.format("Page url '%1$s' contains part '%2$s'", actualDecodedUrl, urlPart), actualDecodedUrl,
+                Matchers.containsString(urlPart));
     }
 
     /**
@@ -246,7 +251,7 @@ public class PageSteps
      * @param locator A locator to locate element
      */
     @Then("page is scrolled to element located `$locator`")
-    public void isPageScrolledToAnElement(SearchAttributes locator)
+    public void isPageScrolledToAnElement(Locator locator)
     {
         WebElement element = baseValidations.assertIfElementExists("Element to verify position", locator);
         if (element != null)

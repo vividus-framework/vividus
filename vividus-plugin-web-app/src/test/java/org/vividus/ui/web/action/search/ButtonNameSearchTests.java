@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -37,6 +38,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -69,7 +72,7 @@ class ButtonNameSearchTests
     private static final String TEXT_TRANSFORM = "text-transform";
     private static final String CAPITALIZE = "capitalize";
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementSearchAction.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractWebElementSearchAction.class);
 
     private List<WebElement> webElements;
     private SearchParameters buttonParameters;
@@ -91,8 +94,8 @@ class ButtonNameSearchTests
     void testSearchSuccess()
     {
         webElements = List.of(webElement);
-        buttonParameters = new SearchParameters(VALUE);
-        doReturn(webElements).when(buttonNameSearch).findElements(searchContext, BUTTON_LOCATOR, buttonParameters);
+        buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
+        when(searchContext.findElements(BUTTON_LOCATOR)).thenReturn(webElements);
         List<WebElement> foundElements = buttonNameSearch.search(searchContext, buttonParameters);
         assertEquals(webElements, foundElements);
     }
@@ -101,8 +104,8 @@ class ButtonNameSearchTests
     void testSearchByUpperDivSuccess()
     {
         webElements = List.of(webElement);
-        buttonParameters = new SearchParameters(VALUE);
-        doReturn(webElements).when(buttonNameSearch).findElements(searchContext, BUTTON_LOCATOR, buttonParameters);
+        buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
+        when(searchContext.findElements(BUTTON_LOCATOR)).thenReturn(webElements);
         List<WebElement> foundElements = buttonNameSearch.search(searchContext, buttonParameters);
         assertEquals(webElements, foundElements);
     }
@@ -110,10 +113,9 @@ class ButtonNameSearchTests
     @Test
     void testSearchByUpperDivNotFound()
     {
-        buttonParameters = new SearchParameters(VALUE);
-        doReturn(List.of()).when(buttonNameSearch).findElements(searchContext, BUTTON_LOCATOR, buttonParameters);
-        doReturn(List.of()).when(buttonNameSearch).findElements(searchContext,
-                BUTTON_LOCATOR_WITH_TEXT_TRANSFORM_CSS_PROPERTY, buttonParameters);
+        buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
+        when(searchContext.findElements(BUTTON_LOCATOR)).thenReturn(List.of());
+        when(searchContext.findElements(BUTTON_LOCATOR_WITH_TEXT_TRANSFORM_CSS_PROPERTY)).thenReturn(List.of());
         List<WebElement> foundElements = buttonNameSearch.search(searchContext, buttonParameters);
         assertEquals(List.of(), foundElements);
     }
@@ -131,18 +133,18 @@ class ButtonNameSearchTests
     void testSearchButtonsWithTextTransformCssProperty()
     {
         webElements = List.of(webElement);
-        buttonParameters = new SearchParameters(VALUE);
-        SearchParameters parametersWithCapitalLetter = new SearchParameters(VALUE_WITH_CAPITAL_LETTER);
+        buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
+        SearchParameters parametersWithCapitalLetter = new SearchParameters(VALUE_WITH_CAPITAL_LETTER, Visibility.ALL,
+                false);
         SearchParameters buttonParametersWithCapitalLetter = new SearchParameters(
-                parametersWithCapitalLetter.getValue());
-        doReturn(webElements).when(buttonNameSearch).findElements(searchContext, BUTTON_LOCATOR, buttonParameters);
+                parametersWithCapitalLetter.getValue(), Visibility.ALL, false);
+        when(searchContext.findElements(BUTTON_LOCATOR)).thenReturn(webElements);
         List<WebElement> foundElements = buttonNameSearch.search(searchContext, buttonParameters);
         doReturn(CAPITALIZE).when(webElementActions).getCssValue(webElement, TEXT_TRANSFORM);
-        doReturn(List.of()).when(buttonNameSearch).findElements(searchContext,
-                LocatorUtil.getXPathLocator(BUTTON_WITH_ANY_ATTRIBUTE_NAME_XPATH, VALUE_WITH_CAPITAL_LETTER),
-                buttonParametersWithCapitalLetter);
-        doReturn(webElements).when(buttonNameSearch).findElements(searchContext,
-                BUTTON_LOCATOR_WITH_TEXT_TRANSFORM_CSS_PROPERTY, buttonParametersWithCapitalLetter);
+        when(searchContext.findElements(
+                LocatorUtil.getXPathLocator(BUTTON_WITH_ANY_ATTRIBUTE_NAME_XPATH, VALUE_WITH_CAPITAL_LETTER)))
+                        .thenReturn(List.of());
+        when(searchContext.findElements(BUTTON_LOCATOR_WITH_TEXT_TRANSFORM_CSS_PROPERTY)).thenReturn(webElements);
         List<WebElement> elementsWithTextTransformCssProperty = buttonNameSearch.search(searchContext,
                 buttonParametersWithCapitalLetter);
         assertEquals(elementsWithTextTransformCssProperty, foundElements);

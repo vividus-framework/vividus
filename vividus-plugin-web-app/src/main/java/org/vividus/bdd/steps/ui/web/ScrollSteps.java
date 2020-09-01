@@ -18,21 +18,21 @@ package org.vividus.bdd.steps.ui.web;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.context.IWebUiContext;
 
 public class ScrollSteps
 {
-    private final IWebUiContext webUiContext;
+    private final IUiContext uiContext;
     private final IJavascriptActions javascriptActions;
     private final IBaseValidations baseValidaitons;
 
-    public ScrollSteps(IWebUiContext webUiContext, IJavascriptActions javascriptActions,
+    public ScrollSteps(IUiContext uiContext, IJavascriptActions javascriptActions,
             IBaseValidations baseValidations)
     {
-        this.webUiContext = webUiContext;
+        this.uiContext = uiContext;
         this.javascriptActions = javascriptActions;
         this.baseValidaitons = baseValidations;
     }
@@ -50,7 +50,7 @@ public class ScrollSteps
     @When("I scroll context to $scrollDirection edge")
     public void scrollContextIn(ScrollDirection scrollDirection)
     {
-        scrollDirection.scroll(webUiContext, javascriptActions);
+        scrollDirection.scroll(uiContext, javascriptActions);
     }
 
     /**
@@ -59,7 +59,7 @@ public class ScrollSteps
      * @param locator to locate an element
      */
     @When("I scroll element located `$locator` into view")
-    public void scrollIntoView(SearchAttributes locator)
+    public void scrollIntoView(Locator locator)
     {
         WebElement toScroll = baseValidaitons.assertIfAtLeastOneElementExists("Element to scroll into view", locator);
         if (null != toScroll)

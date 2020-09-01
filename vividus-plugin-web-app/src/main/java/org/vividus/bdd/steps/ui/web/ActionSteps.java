@@ -26,13 +26,13 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.model.Action;
 import org.vividus.bdd.steps.ui.web.model.ActionType;
 import org.vividus.bdd.steps.ui.web.model.SequenceAction;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
 
 @TakeScreenshotOnFailure
 public class ActionSteps
@@ -90,11 +90,11 @@ public class ActionSteps
             }
             else
             {
-                Optional<SearchAttributes> searchAttributes = action.getSearchAttributes();
+                Optional<Locator> locator = action.getSearchAttributes();
                 Optional<WebElement> element;
-                if (searchAttributes.isPresent())
+                if (locator.isPresent())
                 {
-                    element = findElement(searchAttributes.get());
+                    element = findElement(locator.get());
                     if (element.isEmpty())
                     {
                         return false;
@@ -211,9 +211,9 @@ public class ActionSteps
         performActions(actions, (builder, action) ->
         {
             Object argument = action.getArgument();
-            if (argument != null && argument.getClass().equals(SearchAttributes.class))
+            if (argument != null && argument.getClass().equals(Locator.class))
             {
-                Optional<WebElement> element = findElement((SearchAttributes) argument);
+                Optional<WebElement> element = findElement((Locator) argument);
                 if (element.isEmpty())
                 {
                     return false;
@@ -238,8 +238,8 @@ public class ActionSteps
         actions.build().perform();
     }
 
-    private Optional<WebElement> findElement(SearchAttributes searchAttributes)
+    private Optional<WebElement> findElement(Locator locator)
     {
-        return Optional.ofNullable(baseValidations.assertIfElementExists("Element for interaction", searchAttributes));
+        return Optional.ofNullable(baseValidations.assertIfElementExists("Element for interaction", locator));
     }
 }

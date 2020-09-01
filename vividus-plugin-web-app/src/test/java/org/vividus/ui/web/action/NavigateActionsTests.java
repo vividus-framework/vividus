@@ -67,7 +67,7 @@ class NavigateActionsTests
     private Navigation navigation;
 
     @Mock
-    private IWaitActions waitActions;
+    private IWebWaitActions waitActions;
 
     @Mock
     private ISoftAssert softAssert;

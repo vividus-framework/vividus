@@ -16,10 +16,28 @@
 
 package org.vividus.ui.web.action.search;
 
-import org.openqa.selenium.WebElement;
+import java.util.List;
 
-public class ImageWithSourcePartFilter extends AbstractElementFilterAction
+import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.web.util.LocatorUtil;
+
+public class ImageWithSourcePartFilter extends AbstractElementFilterAction implements IElementSearchAction
 {
+    public ImageWithSourcePartFilter()
+    {
+        super(WebLocatorType.IMAGE_SRC_PART);
+    }
+
+    @Override
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    {
+        return searchContext
+                .findElements(LocatorUtil.getXPathLocator(".//img[contains(@src,'%s')]", parameters.getValue()));
+    }
+
     @Override
     protected boolean matches(WebElement element, String imageSrcPart)
     {

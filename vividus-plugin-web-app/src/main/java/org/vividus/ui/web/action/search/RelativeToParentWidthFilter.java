@@ -22,6 +22,11 @@ import org.vividus.ui.web.util.ElementUtil;
 
 public class RelativeToParentWidthFilter extends AbstractElementFilterAction
 {
+    public RelativeToParentWidthFilter()
+    {
+        super(WebLocatorType.RELATIVE_TO_PARENT_WIDTH);
+    }
+
     @Override
     protected boolean matches(WebElement element, String relativeToParentWidth)
     {

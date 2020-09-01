@@ -25,11 +25,11 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.model.Location;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.action.search.SearchAttributes;
 
 @TakeScreenshotOnFailure
 public class DragAndDropSteps
@@ -62,7 +62,7 @@ public class DragAndDropSteps
      */
     @When("I drag element located `$draggable` and drop it at $location of element located `$target`")
     @SuppressWarnings("checkstyle:MagicNumber")
-    public void dragAndDropToTargetAtLocation(SearchAttributes draggable, Location location, SearchAttributes target)
+    public void dragAndDropToTargetAtLocation(Locator draggable, Location location, Locator target)
     {
         performDragAndDrop(draggable, target, (draggableElement, targetElement) ->
         {
@@ -108,7 +108,7 @@ public class DragAndDropSteps
      * @param target target element
      */
     @When("I simulate drag of element located `$draggable` and drop at element located `$target`")
-    public void simulateDragAndDrop(SearchAttributes draggable, SearchAttributes target)
+    public void simulateDragAndDrop(Locator draggable, Locator target)
     {
         performDragAndDrop(draggable, target, (draggableElement, targetElement) ->
                 // See gist for details: https://gist.github.com/valfirst/7f36c8755676cdf8943a8a8f08eab2e3
@@ -116,7 +116,7 @@ public class DragAndDropSteps
                         targetElement));
     }
 
-    private void performDragAndDrop(SearchAttributes draggable, SearchAttributes target,
+    private void performDragAndDrop(Locator draggable, Locator target,
             BiConsumer<WebElement, WebElement> dragAndDropExecutor)
     {
         WebElement draggableElement = baseValidations.assertIfElementExists("Draggable element", draggable);
