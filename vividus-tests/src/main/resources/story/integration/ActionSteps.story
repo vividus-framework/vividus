@@ -125,6 +125,8 @@ When I find = `1` elements `By.xpath(//div[@id='output' and text()!='mark'])` an
 Then number of elements found by `By.xpath(//div[@id='output' and text()='mark'])` is equal to `1`
 
 Scenario: Action verification KEY_DOWN and KEY_UP combiantion
+Meta:
+    @requirementId 686
 Given I am on a page with the URL 'https://mdn.mozillademos.org/en-US/docs/Web/HTML/Element/input$samples/caret-color'
 When I initialize the scenario variable `inputText` with value `mark#{generate(regexify '[a-z]{10}')}`
 When I initialize the scenario variable `inputLocator` with value `By.id(textInput)`
