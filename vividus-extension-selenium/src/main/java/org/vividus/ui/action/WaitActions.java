@@ -89,7 +89,7 @@ public class WaitActions implements IWaitActions
             {
                 V value = wait.until(isTrue);
                 result.setWaitPassed(true);
-                LOGGER.debug(wait.toString());
+                LOGGER.atDebug().log(wait::toString);
                 result.setData(value);
                 return result;
             }
