@@ -29,8 +29,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.web.validation.IFocusValidations;
+import org.vividus.ui.context.UiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.context.WebUiContext;
 
 @ExtendWith(MockitoExtension.class)
 class FocusStepsTests
@@ -41,7 +41,7 @@ class FocusStepsTests
     private WebElement webElement;
 
     @Mock
-    private WebUiContext webUiContext;
+    private UiContext uiContext;
 
     @Mock
     private IJavascriptActions javaScriptActions;
@@ -55,7 +55,7 @@ class FocusStepsTests
     @Test
     void testSetFocusPositive()
     {
-        when(webUiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         focusSteps.setFocus();
         verify(javaScriptActions).executeScript(JS_SCRIPT, webElement);
     }
@@ -63,7 +63,7 @@ class FocusStepsTests
     @Test
     void testSetFocusNullableElementToCheck()
     {
-        when(webUiContext.getSearchContext(WebElement.class)).thenReturn(null);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(null);
         focusSteps.setFocus();
         verifyNoInteractions(javaScriptActions);
     }
@@ -71,7 +71,7 @@ class FocusStepsTests
     @Test
     void testIsInFocusStatePositive()
     {
-        when(webUiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         mockJavaScriptActions(true);
         focusSteps.isElementInFocusState(FocusState.IN_FOCUS);
         verifyFocusValidations(webElement, FocusState.IN_FOCUS);
@@ -80,7 +80,7 @@ class FocusStepsTests
     @Test
     void testIsInFocusStateNegative()
     {
-        when(webUiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         mockJavaScriptActions(false);
         focusSteps.isElementInFocusState(FocusState.IN_FOCUS);
         verifyFocusValidations(webElement, FocusState.IN_FOCUS);
@@ -89,7 +89,7 @@ class FocusStepsTests
     @Test
     void testIsNotInFocusStatePositive()
     {
-        when(webUiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         mockJavaScriptActions(false);
         focusSteps.isElementInFocusState(FocusState.NOT_IN_FOCUS);
         verifyFocusValidations(webElement, FocusState.NOT_IN_FOCUS);
@@ -98,7 +98,7 @@ class FocusStepsTests
     @Test
     void testIsNotInFocusStateNegative()
     {
-        when(webUiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         mockJavaScriptActions(true);
         focusSteps.isElementInFocusState(FocusState.NOT_IN_FOCUS);
         verifyFocusValidations(webElement, FocusState.NOT_IN_FOCUS);

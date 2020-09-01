@@ -3,6 +3,7 @@ project.description = 'Vividus plugin for Applitools support'
 dependencies {
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-extension-visual-testing')
+    implementation project(':vividus-extension-selenium')
     implementation project(':vividus-http-client')
     implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-reporter')

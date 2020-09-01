@@ -26,9 +26,10 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matcher;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.Dimension;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.util.ElementUtil;
 
 public class ElementValidations implements IElementValidations
@@ -38,7 +39,7 @@ public class ElementValidations implements IElementValidations
 
     @Inject private IWebElementActions webElementActions;
     @Inject private IDescriptiveSoftAssert softAssert;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
 
     @Override
     public boolean assertIfElementContainsText(WebElement element, String text, boolean isTrue)
@@ -65,7 +66,7 @@ public class ElementValidations implements IElementValidations
             }
             String elementDescription = description.toString();
             String elementText = actualText;
-            return webUiContext.withAssertingWebElements(List.of(element),
+            return uiContext.withAssertingWebElements(List.of(element),
                 () -> softAssert.assertThat(elementDescription, elementText, matcher));
         }
         return false;
@@ -76,7 +77,7 @@ public class ElementValidations implements IElementValidations
     {
         if (element != null)
         {
-            return webUiContext.withAssertingWebElements(List.of(element),
+            return uiContext.withAssertingWebElements(List.of(element),
                 () -> softAssert.assertEquals("Element has correct tooltip", expectedTooltip,
                     element.getAttribute("title")));
         }
@@ -93,7 +94,7 @@ public class ElementValidations implements IElementValidations
             int currentIndex = i;
             WebElement element = elements.get(currentIndex);
             boolean currentResult = result;
-            result = webUiContext.withAssertingWebElements(elements, () -> softAssert.assertEquals(
+            result = uiContext.withAssertingWebElements(elements, () -> softAssert.assertEquals(
                     String.format("Element <%1$s:%2$s[%3$s]> has correct '%4$s'", element.getTagName(),
                             element.getText(), currentIndex, dimension),
                     firstElementDimension, dimension.getDimension(element.getSize())) && currentResult);
@@ -106,7 +107,7 @@ public class ElementValidations implements IElementValidations
     {
         if (parent != null && element != null)
         {
-            return webUiContext.withAssertingWebElements(List.of(parent, element),
+            return uiContext.withAssertingWebElements(List.of(parent, element),
                 () -> softAssert.assertEquals("Element has correct width", widthInPerc,
                         ElementUtil.getElementWidthInPerc(parent, element), ACCURACY));
         }

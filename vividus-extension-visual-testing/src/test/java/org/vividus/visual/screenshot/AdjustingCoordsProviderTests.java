@@ -35,7 +35,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.screenshot.IScrollbarHandler;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
 
@@ -58,7 +58,7 @@ class AdjustingCoordsProviderTests
     private IWebDriverManager webDriverManager;
 
     @Mock
-    private IWebUiContext webUiContext;
+    private IUiContext uiContext;
 
     @Mock
     private IScrollbarHandler scrollbarHandler;
@@ -98,7 +98,7 @@ class AdjustingCoordsProviderTests
         WebElement searchContext = mock(WebElement.class);
         when(searchContext.getLocation()).thenReturn(new Point(2, 3));
         when(searchContext.getSize()).thenReturn(new Dimension(5, 5));
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         when(webElement.getLocation()).thenReturn(new Point(X, Y));
         when(webElement.getSize()).thenReturn(new Dimension(4, 6));
         Coords coords = adjustingCoordsProvider.ofElement(webDriver, webElement);
@@ -114,7 +114,7 @@ class AdjustingCoordsProviderTests
         WebElement searchContext = mock(WebElement.class);
         when(searchContext.getLocation()).thenReturn(new Point(1, 1));
         when(searchContext.getSize()).thenReturn(new Dimension(5, 5));
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         when(webElement.getLocation()).thenReturn(new Point(2, 2));
         when(webElement.getSize()).thenReturn(new Dimension(WIDTH, HEIGHT));
         Coords coords = adjustingCoordsProvider.ofElement(webDriver, webElement);

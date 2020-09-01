@@ -35,7 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Point;
 import org.vividus.bdd.steps.ui.web.model.SequenceAction;
 import org.vividus.bdd.steps.ui.web.model.SequenceActionType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
 
 @ExtendWith(MockitoExtension.class)
 class StringToListSequenceActionConverterTests
@@ -43,7 +43,7 @@ class StringToListSequenceActionConverterTests
     private static final String TEXT = "text";
 
     @Mock
-    private StringToSearchAttributesConverter stringToSearchAttributesConverter;
+    private StringToLocatorConverter stringToLocatorConverter;
 
     @Mock
     private PointConverter pointConverter;
@@ -52,37 +52,37 @@ class StringToListSequenceActionConverterTests
     private StringToListSequenceActionConverter converter;
 
     @Test
-    void testConvertValueSearchAttributes()
+    void testConvertValueLocator()
     {
         String by = "By.caseSensitiveText(" + TEXT + ")";
-        SearchAttributes searchAttributes = mock(SearchAttributes.class);
-        when(stringToSearchAttributesConverter.convertValue(by, null)).thenReturn(searchAttributes);
+        Locator locator = mock(Locator.class);
+        when(stringToLocatorConverter.convertValue(by, null)).thenReturn(locator);
         String value = "|type        |argument                  |\n"
                      + "|CLICK       |By.caseSensitiveText(text)|\n"
                      + "|DOUBLE_CLICK|By.caseSensitiveText(text)|";
         List<SequenceAction> actions = converter.convertValue(value, null);
         assertThat(actions, hasSize(2));
-        verifySequenceAction(actions.get(0), SequenceActionType.CLICK, searchAttributes);
-        verifySequenceAction(actions.get(1), SequenceActionType.DOUBLE_CLICK, searchAttributes);
-        verify(stringToSearchAttributesConverter, times(2)).convertValue(by, null);
-        verifyNoMoreInteractions(stringToSearchAttributesConverter, pointConverter);
+        verifySequenceAction(actions.get(0), SequenceActionType.CLICK, locator);
+        verifySequenceAction(actions.get(1), SequenceActionType.DOUBLE_CLICK, locator);
+        verify(stringToLocatorConverter, times(2)).convertValue(by, null);
+        verifyNoMoreInteractions(stringToLocatorConverter, pointConverter);
     }
 
     @Test
     void testConvertNullableClick()
     {
         String by = "By.xpath(//button)";
-        SearchAttributes searchAttributes = mock(SearchAttributes.class);
-        when(stringToSearchAttributesConverter.convertValue(by, null)).thenReturn(searchAttributes);
+        Locator locator = mock(Locator.class);
+        when(stringToLocatorConverter.convertValue(by, null)).thenReturn(locator);
         String value = "|type   |argument          |\n"
                      + "|MOVE_TO|By.xpath(//button)|\n"
                      + "|CLICK  |                  |";
         List<SequenceAction> actions = converter.convertValue(value, null);
         assertThat(actions, hasSize(2));
-        verifySequenceAction(actions.get(0), SequenceActionType.MOVE_TO, searchAttributes);
+        verifySequenceAction(actions.get(0), SequenceActionType.MOVE_TO, locator);
         verifySequenceAction(actions.get(1), SequenceActionType.CLICK, null);
-        verify(stringToSearchAttributesConverter).convertValue(by, null);
-        verifyNoMoreInteractions(stringToSearchAttributesConverter, pointConverter);
+        verify(stringToLocatorConverter).convertValue(by, null);
+        verifyNoMoreInteractions(stringToLocatorConverter, pointConverter);
     }
 
     @Test
@@ -97,7 +97,7 @@ class StringToListSequenceActionConverterTests
         assertThat(actions, hasSize(1));
         verifySequenceAction(actions.get(0), SequenceActionType.MOVE_BY_OFFSET, point);
         verify(pointConverter).convertValue(pointAsString, null);
-        verifyNoMoreInteractions(stringToSearchAttributesConverter, pointConverter);
+        verifyNoMoreInteractions(stringToLocatorConverter, pointConverter);
     }
 
     @Test
@@ -108,7 +108,7 @@ class StringToListSequenceActionConverterTests
         List<SequenceAction> actions = converter.convertValue(value, null);
         assertThat(actions, hasSize(1));
         verifySequenceAction(actions.get(0), SequenceActionType.ENTER_TEXT, TEXT);
-        verifyNoMoreInteractions(stringToSearchAttributesConverter, pointConverter);
+        verifyNoMoreInteractions(stringToLocatorConverter, pointConverter);
     }
 
     @Test
@@ -119,7 +119,7 @@ class StringToListSequenceActionConverterTests
         List<SequenceAction> actions = converter.convertValue(value, null);
         assertThat(actions, hasSize(1));
         verifySequenceAction(actions.get(0), SequenceActionType.PRESS_KEYS, List.of("value1", "value2"));
-        verifyNoMoreInteractions(stringToSearchAttributesConverter, pointConverter);
+        verifyNoMoreInteractions(stringToLocatorConverter, pointConverter);
     }
 
     private static void verifySequenceAction(SequenceAction action, SequenceActionType expectedType,

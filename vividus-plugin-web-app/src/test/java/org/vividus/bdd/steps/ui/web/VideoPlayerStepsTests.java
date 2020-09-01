@@ -27,10 +27,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.IVideoPlayerActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +38,7 @@ class VideoPlayerStepsTests
 {
     private static final String VIDEO_PLAYER = "Video player";
     private static final String VIDEO_PLAYER_NAME = "video_player_name";
-    private static final SearchAttributes SEARCH_ATTRIBUTE = new SearchAttributes(ActionAttributeType.XPATH,
+    private static final Locator SEARCH_ATTRIBUTE = new Locator(WebLocatorType.XPATH,
             LocatorUtil.getXPath("//video[@*='%1$s']", VIDEO_PLAYER_NAME));
 
     @Mock

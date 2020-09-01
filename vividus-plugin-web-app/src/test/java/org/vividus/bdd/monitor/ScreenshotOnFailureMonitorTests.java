@@ -62,7 +62,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.IScreenshotTaker;
 import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.softassert.event.AssertionFailedEvent;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ScreenshotOnFailureMonitorTests
@@ -79,7 +79,7 @@ class ScreenshotOnFailureMonitorTests
     private IWebDriverProvider webDriverProvider;
 
     @Mock
-    private IWebUiContext webUiContext;
+    private IUiContext uiContext;
 
     @Mock
     private IScreenshotTaker screenshotTaker;
@@ -141,7 +141,7 @@ class ScreenshotOnFailureMonitorTests
     void shouldNotTakeScreenshotIfItIsNotEnabled()
     {
         monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
-        verifyNoInteractions(webDriverProvider, webUiContext, screenshotTaker);
+        verifyNoInteractions(webDriverProvider, uiContext, screenshotTaker);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -150,7 +150,7 @@ class ScreenshotOnFailureMonitorTests
     {
         enableScreenshotPublishing(false);
         monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
-        verifyNoInteractions(webUiContext, screenshotTaker);
+        verifyNoInteractions(uiContext, screenshotTaker);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -159,7 +159,7 @@ class ScreenshotOnFailureMonitorTests
     {
         enableScreenshotPublishing(true);
         WebElement searchContext = mock(WebElement.class);
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         String title = "2019-03-07_19-11-38_898-Assertion_Failure-chrome-1440x836";
         Screenshot screenshot = new Screenshot();
         screenshot.setData(new byte[] { 1 });
@@ -178,9 +178,9 @@ class ScreenshotOnFailureMonitorTests
     void shouldTakeScreenshotOfAssertedElementsISearchContextIsPage() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
-        when(webUiContext.getSearchContext()).thenReturn(mock(WebDriver.class));
+        when(uiContext.getSearchContext()).thenReturn(mock(WebDriver.class));
         List<WebElement> assertedWebElements = List.of(mock(WebElement.class));
-        when(webUiContext.getAssertingWebElements()).thenReturn(assertedWebElements);
+        when(uiContext.getAssertingWebElements()).thenReturn(assertedWebElements);
         when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, assertedWebElements)).thenReturn(
                 Optional.empty());
         monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
@@ -193,7 +193,7 @@ class ScreenshotOnFailureMonitorTests
     {
         enableScreenshotPublishing(true);
         WebElement searchContext = mock(WebElement.class);
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         IllegalStateException exception = new IllegalStateException();
         when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, List.of(searchContext))).thenThrow(
                 exception);

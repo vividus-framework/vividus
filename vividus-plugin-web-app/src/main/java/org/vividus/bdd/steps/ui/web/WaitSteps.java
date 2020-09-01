@@ -37,19 +37,19 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.State;
-import org.vividus.ui.web.action.IExpectedConditions;
+import org.vividus.ui.State;
+import org.vividus.ui.action.IExpectedConditions;
+import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.IWaitActions;
+import org.vividus.ui.action.WaitResult;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.ui.web.action.ISearchActions;
-import org.vividus.ui.web.action.IWaitActions;
-import org.vividus.ui.web.action.WaitResult;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
@@ -61,10 +61,10 @@ public class WaitSteps
     @Inject private IWaitActions waitActions;
     @Inject private ISearchActions searchActions;
     @Inject private INavigateActions navigateActions;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     @Inject private ISoftAssert softAssert;
     @Inject private IExpectedConditions<By> expectedSearchContextConditions;
-    @Inject private IExpectedConditions<SearchAttributes> expectedSearchActionsConditions;
+    @Inject private IExpectedConditions<Locator> expectedSearchActionsConditions;
     @Inject private IBaseValidations baseValidations;
     @Inject private IJavascriptActions javascriptActions;
 
@@ -107,7 +107,7 @@ public class WaitSteps
      */
     @When("I wait `$duration` with `$pollingDuration` polling until element located `$locator` becomes $state")
     public boolean waitDurationWithPollingDurationTillElementState(Duration duration, Duration pollingDuration,
-            SearchAttributes locator, State state)
+            Locator locator, State state)
     {
         return waitActions.wait(getSearchContext(), duration, pollingDuration,
                 state.getExpectedCondition(expectedSearchActionsConditions, locator)).isWaitPassed();
@@ -135,7 +135,7 @@ public class WaitSteps
     public void waitTillElementDisappears(String elementTag, String attributeType, String attributeValue)
     {
         String elementXpath = LocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue);
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.XPATH, elementXpath);
+        Locator attributes = new Locator(WebLocatorType.XPATH, elementXpath);
         String assertionDescription = "with the tag '%s' and attribute '%s'='%s'";
         waitForElementDisappearance(attributes, assertionDescription, elementTag, attributeType, attributeValue);
     }
@@ -203,7 +203,7 @@ public class WaitSteps
      * (<i>Possible values:</i> <b>ENABLED, DISABLED, SELECTED, NOT_SELECTED, VISIBLE, NOT_VISIBLE</b>)
      */
     @When("I wait until state of element located `$locator` is $state")
-    public void waitTillElementIsSelected(SearchAttributes locator, State state)
+    public void waitTillElementIsSelected(Locator locator, State state)
     {
         waitActions.wait(getSearchContext(), state.getExpectedCondition(expectedSearchActionsConditions, locator));
     }
@@ -249,7 +249,7 @@ public class WaitSteps
      * @param locator to locate element
      */
     @When("I wait until element located `$locator` is stale")
-    public void waitTillElementIsStale(SearchAttributes locator)
+    public void waitTillElementIsStale(Locator locator)
     {
         WebElement element = baseValidations.assertIfElementExists("Required element", locator);
         waitActions.wait(getWebDriver(), stalenessOf(element));
@@ -269,7 +269,7 @@ public class WaitSteps
      * @param text Desired text to be present in the element
      */
     @When("I wait until element located `$locator` contains text '$text'")
-    public void waitTillElementContainsText(SearchAttributes locator, String text)
+    public void waitTillElementContainsText(Locator locator, String text)
     {
         waitActions.wait(getSearchContext(),
               expectedSearchActionsConditions.textToBePresentInElementLocated(locator, text));
@@ -316,7 +316,7 @@ public class WaitSteps
     @When("I wait until elements with the name '$elementName' appear")
     public void waitTillElementsAreVisible(String elementName)
     {
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ELEMENT_NAME, elementName);
+        Locator attributes = new Locator(WebLocatorType.ELEMENT_NAME, elementName);
         waitForElementAppearance(attributes);
     }
 
@@ -337,7 +337,7 @@ public class WaitSteps
     @When("I wait until a frame with the name '$frameName' appears")
     public void waitTillFrameAppears(String frameName)
     {
-        WebDriver searchContext = webUiContext.getSearchContext(WebDriver.class);
+        WebDriver searchContext = uiContext.getSearchContext(WebDriver.class);
         waitForElementAppearance(searchContext, LocatorUtil
                 .getXPathLocator("*[(local-name()='frame' or local-name()='iframe') and @*='%s']", frameName));
     }
@@ -423,7 +423,7 @@ public class WaitSteps
      * @return true if element disappeared, false otherwise
      */
     @Then("element located '$locator' disappears in '$timeout'")
-    public boolean waitForElementDisappearance(SearchAttributes locator, Duration timeout)
+    public boolean waitForElementDisappearance(Locator locator, Duration timeout)
     {
         return waitActions.wait(getSearchContext(), timeout,
                 expectedSearchActionsConditions.invisibilityOfElement(locator)).isWaitPassed();
@@ -449,7 +449,7 @@ public class WaitSteps
      * @return true if element appeared, false otherwise
      */
     @When("I wait until element located `$locator` appears")
-    public boolean waitForElementAppearance(SearchAttributes locator)
+    public boolean waitForElementAppearance(Locator locator)
     {
         return waitActions.wait(getSearchContext(),
                 expectedSearchActionsConditions.visibilityOfElement(locator)).isWaitPassed();
@@ -461,7 +461,7 @@ public class WaitSteps
      * @return true if element disappeared, false otherwise
      */
     @When("I wait until element located `$locator` disappears")
-    public boolean waitForElementDisappearance(SearchAttributes locator)
+    public boolean waitForElementDisappearance(Locator locator)
     {
         return waitActions.wait(getSearchContext(), expectedSearchActionsConditions.invisibilityOfElement(locator))
                 .isWaitPassed();
@@ -497,8 +497,8 @@ public class WaitSteps
             public Boolean apply(WebDriver driver)
             {
                 navigateActions.refresh(driver);
-                SearchAttributes attributes = new SearchAttributes(ActionAttributeType.CASE_SENSITIVE_TEXT, textToFind);
-                List<WebElement> elements = searchActions.findElements(webUiContext.getSearchContext(WebDriver.class),
+                Locator attributes = new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, textToFind);
+                List<WebElement> elements = searchActions.findElements(uiContext.getSearchContext(WebDriver.class),
                         attributes);
                 return displayed == !elements.isEmpty();
             }
@@ -511,7 +511,7 @@ public class WaitSteps
         };
     }
 
-    private void waitForElementDisappearance(SearchAttributes attributes, String assertionDescription,
+    private void waitForElementDisappearance(Locator attributes, String assertionDescription,
             Object... specifiedValues)
     {
         List<WebElement> elements = searchActions.findElements(getSearchContext(), attributes);
@@ -531,6 +531,6 @@ public class WaitSteps
 
     private SearchContext getSearchContext()
     {
-        return webUiContext.getSearchContext();
+        return uiContext.getSearchContext();
     }
 }

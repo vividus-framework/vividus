@@ -22,15 +22,19 @@ import java.util.function.Supplier;
 import com.google.common.base.Suppliers;
 
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.SearchActions;
+import org.vividus.ui.action.SearchActions;
+import org.vividus.ui.util.LocatorConversionUtils;
 
-public final class ElementUtil
+public class ElementUtil
 {
     public static final int ACCURACY = 2;
     public static final double HUNDRED = 100;
 
-    private ElementUtil()
+    private final LocatorConversionUtils conversionUtils;
+
+    public ElementUtil(LocatorConversionUtils conversionUtils)
     {
+        this.conversionUtils = conversionUtils;
     }
 
     public static long getElementWidthInPerc(WebElement parent, WebElement element)
@@ -40,9 +44,8 @@ public final class ElementUtil
         return Math.round(elementWidth / parentWidth * HUNDRED);
     }
 
-    public static Supplier<Optional<WebElement>> getElement(String searchAttributes, SearchActions searchActions)
+    public Supplier<Optional<WebElement>> getElement(String locator, SearchActions searchActions)
     {
-        return Suppliers.memoize(() ->
-            searchActions.findElement(SearchAttributesConversionUtils.convertToSearchAttributes(searchAttributes)));
+        return Suppliers.memoize(() -> searchActions.findElement(conversionUtils.convertToLocator(locator)));
     }
 }

@@ -25,7 +25,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.web.action.AlertActions.Action;
 import org.vividus.ui.web.action.IAlertActions;
 

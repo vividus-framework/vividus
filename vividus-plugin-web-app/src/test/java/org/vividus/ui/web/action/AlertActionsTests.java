@@ -55,6 +55,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.web.action.AlertActions.Action;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
@@ -69,7 +70,7 @@ class AlertActionsTests
     private IWebDriverProvider webDriverProvider;
 
     @Mock
-    private IWaitActions waitActions;
+    private IWebWaitActions waitActions;
 
     @Mock
     private WebDriver webDriver;

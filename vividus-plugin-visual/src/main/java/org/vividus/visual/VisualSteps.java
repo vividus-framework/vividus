@@ -34,8 +34,8 @@ import org.vividus.bdd.resource.ResourceLoadException;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.visual.bdd.AbstractVisualSteps;
 import org.vividus.visual.engine.IVisualTestingEngine;
 import org.vividus.visual.model.VisualActionType;
@@ -45,16 +45,16 @@ import org.vividus.visual.screenshot.IgnoreStrategy;
 
 public class VisualSteps extends AbstractVisualSteps
 {
-    private static final Type SET_BY = new TypeToken<Set<SearchAttributes>>() { }.getType();
+    private static final Type SET_BY = new TypeToken<Set<Locator>>() { }.getType();
 
     private final IVisualTestingEngine visualTestingEngine;
     private final ISoftAssert softAssert;
     private final IVisualCheckFactory visualCheckFactory;
 
-    public VisualSteps(IWebUiContext webUiContext, IAttachmentPublisher attachmentPublisher,
+    public VisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher,
             IVisualTestingEngine visualTestingEngine, ISoftAssert softAssert, IVisualCheckFactory visualCheckFactory)
     {
-        super(webUiContext, attachmentPublisher);
+        super(uiContext, attachmentPublisher);
         this.visualTestingEngine = visualTestingEngine;
         this.softAssert = softAssert;
         this.visualCheckFactory = visualCheckFactory;
@@ -165,7 +165,7 @@ public class VisualSteps extends AbstractVisualSteps
             + rowsSize);
         }
         Parameters rowAsParameters = ignoredElements.getRowAsParameters(0);
-        Map<IgnoreStrategy, Set<SearchAttributes>> toIgnore = Stream.of(IgnoreStrategy.values())
+        Map<IgnoreStrategy, Set<Locator>> toIgnore = Stream.of(IgnoreStrategy.values())
                                                       .collect(Collectors.toMap(Function.identity(),
                                                           s -> getLocatorsSet(rowAsParameters, s)));
         performVisualAction(() -> {
@@ -175,7 +175,7 @@ public class VisualSteps extends AbstractVisualSteps
         });
     }
 
-    private Set<SearchAttributes> getLocatorsSet(Parameters rowAsParameters, IgnoreStrategy s)
+    private Set<Locator> getLocatorsSet(Parameters rowAsParameters, IgnoreStrategy s)
     {
         return rowAsParameters.valueAs(s.name(), SET_BY, Set.of());
     }

@@ -25,11 +25,11 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.ui.web.State;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.ui.State;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.IMouseActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
@@ -70,7 +70,7 @@ public class RadioButtonSteps
     {
         WebElement radioButtonLabel = baseValidations.assertIfElementExists(
                 String.format("A radio button label with text '%s'", radioOption),
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         LocatorUtil.getXPath(".//label[text()=%1$s or *=%1$s or @*=%1$s]", radioOption)));
         if (radioButtonLabel == null)
         {
@@ -79,11 +79,11 @@ public class RadioButtonSteps
         String labelForAtr = radioButtonLabel.getAttribute("for");
         if (StringUtils.isNotEmpty(labelForAtr))
         {
-            return baseValidations.assertIfElementExists(RADIO_BUTTON, new SearchAttributes(ActionAttributeType.XPATH,
+            return baseValidations.assertIfElementExists(RADIO_BUTTON, new Locator(WebLocatorType.XPATH,
                     LocatorUtil.getXPath(".//input[@type='radio' and @id=%s]", labelForAtr)));
         }
         return baseValidations.assertIfElementExists(RADIO_BUTTON, radioButtonLabel,
-                new SearchAttributes(ActionAttributeType.XPATH, "input[@type='radio']"));
+                new Locator(WebLocatorType.XPATH, "input[@type='radio']"));
     }
 
     /**

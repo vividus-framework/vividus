@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.action.IWaitActions;
 
 public class AlertActions implements IAlertActions
 {

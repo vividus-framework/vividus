@@ -19,14 +19,14 @@ package org.vividus.bdd.variable.ui.web;
 import javax.inject.Named;
 
 import org.openqa.selenium.Rectangle;
-import org.vividus.ui.web.context.WebUiContext;
+import org.vividus.ui.context.UiContext;
 
 @Named("context-width")
 public class SearchContextWidthDynamicVariable extends AbstractContextProvidingDynamicVariable
 {
-    public SearchContextWidthDynamicVariable(WebUiContext webUiContext)
+    public SearchContextWidthDynamicVariable(UiContext uiContext)
     {
-        super(webUiContext);
+        super(uiContext);
     }
 
     @Override

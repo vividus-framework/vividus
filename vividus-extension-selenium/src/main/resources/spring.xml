@@ -29,6 +29,38 @@
 
     <bean id="vividusWebDriverSetupSteps" class="org.vividus.bdd.steps.VividusWebDriverSetupSteps" />
 
+    <bean id="waitActions" class="org.vividus.ui.action.WaitActions" />
+
+    <bean class="org.vividus.ui.action.WaitFactory">
+        <property name="timeout" value="${ui.wait.timeout}" />
+        <property name="pollingPeriod" value="${ui.wait.polling-period}" />
+    </bean>
+
+    <bean class="org.vividus.ui.action.SearchActions" />
+
+    <bean id="abstractElementAction" class="org.vividus.ui.action.search.AbstractElementAction"
+          abstract="true">
+        <property name="waitForElementTimeout" value="${ui.search.wait-for-element-timeout}" />
+        <property name="retrySearchIfStale" value="${ui.search.retry-search-if-stale}" />
+    </bean>
+
+    <bean class="org.vividus.ui.action.ExpectedSearchActionsConditions" />
+    <bean class="org.vividus.ui.action.ExpectedSearchContextConditions" />
+
+    <bean id="uiContext" class="org.vividus.ui.context.UiContext">
+        <property name="testContext" ref="testContext" />
+    </bean>
+
+    <bean class="org.vividus.bdd.steps.ui.validation.DescriptiveSoftAssert" parent="softAssert" />
+
+    <bean class="org.vividus.bdd.steps.ui.validation.BaseValidations" />
+
+    <bean class="org.vividus.ui.action.search.ElementActionService"/>
+
+    <bean class="org.vividus.ui.util.LocatorConversionUtils" />
+
+    <bean class="org.vividus.ui.listener.UiContextListener" lazy-init="false" />
+
     <util:list id="stepBeanNames-Selenium" value-type="java.lang.String">
         <value>vividusWebDriverSetupSteps</value>
     </util:list>

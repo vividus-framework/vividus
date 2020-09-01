@@ -33,7 +33,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.web.validation.IFocusValidations;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 
 @ExtendWith(MockitoExtension.class)
 class KeyboardStepsTests
@@ -48,7 +48,7 @@ class KeyboardStepsTests
     private WebDriver webDriver;
 
     @Mock
-    private IWebUiContext webUiContext;
+    private IUiContext uiContext;
 
     @Mock
     private WebElement webElement;
@@ -62,7 +62,7 @@ class KeyboardStepsTests
     @Test
     void testPressKeysContextFocused()
     {
-        Mockito.lenient().when(webUiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        Mockito.lenient().when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         when(focusValidations.isElementInFocusState(webElement, FocusState.IN_FOCUS)).thenReturn(true);
         keyboardSteps.pressKeys(KEYS);
         Mockito.verify(webElement).sendKeys(Keys.CONTROL, A);
@@ -71,7 +71,7 @@ class KeyboardStepsTests
     @Test
     void testPressKeysContextNotFocused()
     {
-        Mockito.lenient().when(webUiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        Mockito.lenient().when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         keyboardSteps.pressKeys(KEYS);
         Mockito.verify(webElement, never()).sendKeys(Keys.CONTROL, A);
     }
@@ -80,7 +80,7 @@ class KeyboardStepsTests
     void testPressKeysContextBody()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webUiContext.getSearchContext()).thenReturn(webDriver);
+        when(uiContext.getSearchContext()).thenReturn(webDriver);
         when(focusValidations.isElementInFocusState(webElement, FocusState.IN_FOCUS)).thenReturn(true);
         when(webDriver.findElement(By.xpath("//body"))).thenReturn(webElement);
         keyboardSteps.pressKeys(KEYS);

@@ -27,14 +27,14 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.IFieldActions;
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.util.FormatUtil;
 
 @TakeScreenshotOnFailure
@@ -69,7 +69,7 @@ public class FieldSteps
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I clear field located `$locator`")
-    public WebElement clearFieldLocatedBy(SearchAttributes locator)
+    public WebElement clearFieldLocatedBy(Locator locator)
     {
         WebElement element = findFieldBy(locator);
         if (element != null)
@@ -97,7 +97,7 @@ public class FieldSteps
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I clear field located `$locator` using keyboard")
-    public WebElement clearFieldLocatedByUsingKeyboard(SearchAttributes locator)
+    public WebElement clearFieldLocatedByUsingKeyboard(Locator locator)
     {
         WebElement element = findFieldBy(locator);
         fieldActions.clearFieldUsingKeyboard(element);
@@ -121,7 +121,7 @@ public class FieldSteps
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
     @When("I add `$text` to field located `$locator`")
-    public void addTextToField(String text, SearchAttributes locator)
+    public void addTextToField(String text, Locator locator)
     {
         WebElement field = findFieldBy(locator);
         webElementActions.addText(field, text);
@@ -135,7 +135,7 @@ public class FieldSteps
      */
     @SuppressWarnings("unchecked")
     @When("I enter `$text` in field located `$locator`")
-    public void enterTextInField(String text, SearchAttributes locator)
+    public void enterTextInField(String text, Locator locator)
     {
         WebElement element = findElement(locator);
         if (element != null)
@@ -182,7 +182,7 @@ public class FieldSteps
         }
     }
 
-    private WebElement findElement(SearchAttributes locator)
+    private WebElement findElement(Locator locator)
     {
         return baseValidations.assertIfElementExists(String.format("An element with attributes%1$s", locator), locator);
     }
@@ -202,7 +202,7 @@ public class FieldSteps
      * @param locator to locate field
      */
     @Then("field located `$locator` does not exist")
-    public void doesNotFieldExist(SearchAttributes locator)
+    public void doesNotFieldExist(Locator locator)
     {
         baseValidations.assertIfElementDoesNotExist(String.format(A_FIELD_WITH_NAME, locator), locator);
     }
@@ -218,7 +218,7 @@ public class FieldSteps
      * @return WebElement
      */
     @Then("field located `$locator` exists")
-    public WebElement findFieldBy(SearchAttributes locator)
+    public WebElement findFieldBy(Locator locator)
     {
         return baseValidations.assertIfElementExists(String.format(A_FIELD_WITH_NAME, locator), locator);
     }

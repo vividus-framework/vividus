@@ -60,7 +60,7 @@ import org.vividus.proxy.IProxy;
 import org.vividus.proxy.ProxyLog;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.IWaitActions;
+import org.vividus.ui.web.action.IWebWaitActions;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyStepsTests
@@ -96,7 +96,7 @@ class ProxyStepsTests
     private IAttachmentPublisher attachmentPublisher;
 
     @Mock
-    private IWaitActions waitActions;
+    private IWebWaitActions waitActions;
 
     @InjectMocks
     private ProxySteps proxySteps;

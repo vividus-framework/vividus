@@ -29,14 +29,14 @@ import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IDescriptiveSoftAssert;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.web.DropDownState;
 import org.vividus.ui.web.action.IFieldActions;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.Visibility;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
@@ -137,9 +137,9 @@ public class DropdownSteps
     @Then("a drop down with the name '$dropDownName' does not exist")
     public void doesNotDropDownExist(String dropDownName)
     {
-        SearchAttributes searchAttributes = createSearchAttributes(dropDownName);
-        searchAttributes.getSearchParameters().setVisibility(Visibility.ALL);
-        baseValidations.assertIfElementDoesNotExist(String.format(DROP_DOWN_WITH_NAME, dropDownName), searchAttributes);
+        Locator locator = createLocator(dropDownName);
+        locator.getSearchParameters().setVisibility(Visibility.ALL);
+        baseValidations.assertIfElementDoesNotExist(String.format(DROP_DOWN_WITH_NAME, dropDownName), locator);
     }
 
     /**
@@ -251,13 +251,13 @@ public class DropdownSteps
      * @param locator Locator of a drop down element
      */
     @When("I select `$text` from drop down located `$locator`")
-    public void selectTextFromDropDownByLocator(String text, SearchAttributes locator)
+    public void selectTextFromDropDownByLocator(String text, Locator locator)
     {
         findDropDownList("A drop down", locator)
             .ifPresent(s -> fieldActions.selectItemInDropDownList(s, text, false));
     }
 
-    private Optional<Select> findDropDownList(String businessDescription, SearchAttributes locator)
+    private Optional<Select> findDropDownList(String businessDescription, Locator locator)
     {
         return Optional.ofNullable(baseValidations.assertIfElementExists(businessDescription, locator))
                 .map(Select::new);
@@ -266,7 +266,7 @@ public class DropdownSteps
     private Select findDropDownList(String dropDownListName)
     {
         WebElement element = baseValidations.assertIfElementExists(String.format(DROP_DOWN_WITH_NAME, dropDownListName),
-                createSearchAttributes(dropDownListName));
+                createLocator(dropDownListName));
         return element != null ? new Select(element) : null;
     }
 
@@ -276,9 +276,8 @@ public class DropdownSteps
         fieldActions.selectItemInDropDownList(select, text, isAddition);
     }
 
-    private SearchAttributes createSearchAttributes(String dropDownListName)
+    private Locator createLocator(String dropDownListName)
     {
-        return new SearchAttributes(ActionAttributeType.XPATH,
-                LocatorUtil.getXPath(".//select[@*=%s]", dropDownListName));
+        return new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(".//select[@*=%s]", dropDownListName));
     }
 }

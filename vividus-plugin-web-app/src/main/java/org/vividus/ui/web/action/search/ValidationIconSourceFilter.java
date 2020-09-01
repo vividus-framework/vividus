@@ -25,6 +25,11 @@ public class ValidationIconSourceFilter extends AbstractElementFilterAction
 {
     @Inject private IWebElementActions webElementActions;
 
+    public ValidationIconSourceFilter()
+    {
+        super(WebLocatorType.VALIDATION_ICON_SOURCE);
+    }
+
     @Override
     protected boolean matches(WebElement element, String validationIconSrc)
     {

@@ -48,9 +48,9 @@ import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.IScreenshotTaker;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
-import org.vividus.ui.web.action.ISearchActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.util.ResourceUtils;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
@@ -63,16 +63,16 @@ import ru.yandex.qatools.ashot.util.ImageTool;
 @ExtendWith(MockitoExtension.class)
 class AshotScreenshotProviderTests
 {
-    private static final SearchAttributes B_LOCATOR = new SearchAttributes(ActionAttributeType.XPATH, ".//b");
-    private static final SearchAttributes A_LOCATOR = new SearchAttributes(ActionAttributeType.XPATH, ".//a");
-    private static final SearchAttributes ELEMENT_LOCATOR = new SearchAttributes(ActionAttributeType.XPATH,
+    private static final Locator B_LOCATOR = new Locator(WebLocatorType.XPATH, ".//b");
+    private static final Locator A_LOCATOR = new Locator(WebLocatorType.XPATH, ".//a");
+    private static final Locator ELEMENT_LOCATOR = new Locator(WebLocatorType.XPATH,
             ".//img[@alt='Google']");
-    private static final SearchAttributes AREA_LOCATOR = new SearchAttributes(ActionAttributeType.XPATH,
+    private static final Locator AREA_LOCATOR = new Locator(WebLocatorType.XPATH,
             ".//form[@action='/search']");
 
-    private static final Map<IgnoreStrategy, Set<SearchAttributes>> STRATEGIES = createMap(IgnoreStrategy.ELEMENT,
+    private static final Map<IgnoreStrategy, Set<Locator>> STRATEGIES = createMap(IgnoreStrategy.ELEMENT,
             Set.of(ELEMENT_LOCATOR, A_LOCATOR), IgnoreStrategy.AREA, Set.of(B_LOCATOR));
-    private static final Map<IgnoreStrategy, Set<SearchAttributes>> STEP_LEVEL_STRATEGIES = Map
+    private static final Map<IgnoreStrategy, Set<Locator>> STEP_LEVEL_STRATEGIES = Map
             .of(IgnoreStrategy.ELEMENT, Set.of(A_LOCATOR), IgnoreStrategy.AREA, Set.of(B_LOCATOR, AREA_LOCATOR));
 
     private static final String BASELINE = "baseline";
@@ -90,10 +90,10 @@ class AshotScreenshotProviderTests
     @InjectMocks
     private AshotScreenshotProvider screenshotProvider;
 
-    private static Map<IgnoreStrategy, Set<SearchAttributes>> createMap(IgnoreStrategy key1,
-            Set<SearchAttributes> value1, IgnoreStrategy key2, Set<SearchAttributes> value2)
+    private static Map<IgnoreStrategy, Set<Locator>> createMap(IgnoreStrategy key1,
+            Set<Locator> value1, IgnoreStrategy key2, Set<Locator> value2)
     {
-        Map<IgnoreStrategy, Set<SearchAttributes>> map = new LinkedHashMap<>(2);
+        Map<IgnoreStrategy, Set<Locator>> map = new LinkedHashMap<>(2);
         map.put(key1, value1);
         map.put(key2, value2);
         return map;

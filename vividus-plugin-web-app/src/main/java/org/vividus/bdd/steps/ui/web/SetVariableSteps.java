@@ -31,17 +31,17 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.action.ISearchActions;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.Visibility;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 import org.vividus.util.UriUtils;
 
@@ -57,7 +57,7 @@ public class SetVariableSteps
 
     @Inject private IBddVariableContext bddVariableContext;
 
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     @Inject private IWebElementActions webElementActions;
     @Inject private IJavascriptActions javascriptActions;
 
@@ -208,7 +208,7 @@ public class SetVariableSteps
         List<WebElement> frames = getVideoIFrames(1);
         if (!frames.isEmpty())
         {
-            SearchAttributes attributes = new SearchAttributes(ActionAttributeType.LINK_TEXT, name);
+            Locator attributes = new Locator(WebLocatorType.LINK_TEXT, name);
             for (WebElement frame : frames)
             {
                 getWebDriver().switchTo().frame(frame);
@@ -245,7 +245,7 @@ public class SetVariableSteps
      * @param variableName A name under which the value should be saved
      */
     @When("I set the number of elements found `$locator` to $scopes variable `$variableName`")
-    public void getNumberOfElementsByXpathToVariable(SearchAttributes locator, Set<VariableScope> scopes,
+    public void getNumberOfElementsByXpathToVariable(Locator locator, Set<VariableScope> scopes,
             String variableName)
     {
         List<WebElement> elements = searchActions.findElements(getSearchContext(), locator);
@@ -276,9 +276,9 @@ public class SetVariableSteps
     public void getNumberOfElementsByAttributeValueToVariable(String attributeType, String attributeValue,
             Set<VariableScope> scopes, String variableName)
     {
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+        Locator locator = new Locator(WebLocatorType.XPATH,
                 LocatorUtil.getXPathByAttribute(attributeType, attributeValue));
-        List<WebElement> elements = searchActions.findElements(getSearchContext(), searchAttributes);
+        List<WebElement> elements = searchActions.findElements(getSearchContext(), locator);
         saveVariable(scopes, variableName, elements.size());
     }
 
@@ -407,7 +407,7 @@ public class SetVariableSteps
     public void saveTableToContext(Set<VariableScope> scopes, String variableName)
     {
         List<Map<String, Object>> table = javascriptActions.executeScriptFromResource(SetVariableSteps.class,
-                "parse-table.js", webUiContext.getSearchContext(WebElement.class));
+                "parse-table.js", uiContext.getSearchContext(WebElement.class));
         bddVariableContext.putVariable(scopes, variableName, table);
     }
 
@@ -431,7 +431,7 @@ public class SetVariableSteps
      * @param variableName A name under which the value should be saved
      */
     @When("I set '$attributeName' attribute value of the element by $locator to the $scopes variable '$variableName'")
-    public void setAttributeValueBySelectorToVariable(String attributeName, SearchAttributes locator,
+    public void setAttributeValueBySelectorToVariable(String attributeName, Locator locator,
             Set<VariableScope> scopes, String variableName)
     {
         locator.getSearchParameters().setVisibility(Visibility.ALL);
@@ -443,17 +443,17 @@ public class SetVariableSteps
 
     private List<WebElement> getVideoIFrames(int leastNumber)
     {
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+        Locator locator = new Locator(WebLocatorType.XPATH,
                 LocatorUtil.getXPath("div[contains(@class,'video')]/iframe"));
-        return baseValidations.assertIfAtLeastNumberOfElementsExist("The number of found video frames",
-                searchAttributes, leastNumber);
+        return baseValidations.assertIfAtLeastNumberOfElementsExist("The number of found video frames", locator,
+                leastNumber);
     }
 
     private void saveVariableIfContextElementPresent(Function<WebElement, Object> contextElementProcessor,
             Set<VariableScope> scopes, String variableName)
     {
         Object value = Optional.ofNullable(getSearchContext())
-                .map(context -> webUiContext.getSearchContext(WebElement.class)).map(contextElementProcessor)
+                .map(context -> uiContext.getSearchContext(WebElement.class)).map(contextElementProcessor)
                 .orElse(null);
         saveVariable(scopes, variableName, value);
     }
@@ -483,6 +483,6 @@ public class SetVariableSteps
 
     private SearchContext getSearchContext()
     {
-        return webUiContext.getSearchContext();
+        return uiContext.getSearchContext();
     }
 }

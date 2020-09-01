@@ -25,7 +25,7 @@ import org.jbehave.core.annotations.When;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.visual.bdd.AbstractVisualSteps;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
@@ -39,9 +39,9 @@ public class VisualTestingSteps extends AbstractVisualSteps
     @Inject private ISoftAssert softAssert;
     @Inject private ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
 
-    public VisualTestingSteps(IWebUiContext webUiContext, IAttachmentPublisher attachmentPublisher)
+    public VisualTestingSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher)
     {
-        super(webUiContext, attachmentPublisher);
+        super(uiContext, attachmentPublisher);
     }
 
     /**

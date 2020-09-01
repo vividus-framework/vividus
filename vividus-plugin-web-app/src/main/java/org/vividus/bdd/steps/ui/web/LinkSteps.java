@@ -16,7 +16,7 @@
 
 package org.vividus.bdd.steps.ui.web;
 
-import static org.vividus.ui.web.action.search.ActionAttributeType.LINK_URL;
+import static org.vividus.ui.web.action.search.WebLocatorType.LINK_URL;
 
 import javax.inject.Inject;
 
@@ -24,9 +24,9 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.web.action.search.WebLocatorType;
 
 @TakeScreenshotOnFailure
 public class LinkSteps
@@ -71,7 +71,7 @@ public class LinkSteps
         {
             String text = row.valueAs(TEXT, String.class);
             String url = row.valueAs("link", String.class);
-            SearchAttributes attributes = new SearchAttributes(ActionAttributeType.LINK_TEXT, text).addFilter(
+            Locator attributes = new Locator(WebLocatorType.LINK_TEXT, text).addFilter(
                     LINK_URL, url);
             baseValidations.assertIfElementExists("Link with attributes: " + attributes, attributes);
         }
@@ -105,7 +105,7 @@ public class LinkSteps
         expectedLinkItems.getRowsAsParameters(true).stream()
                 .<String>map(row -> row.valueAs(TEXT, String.class))
                 .forEach(text -> {
-                    SearchAttributes attributes = new SearchAttributes(ActionAttributeType.LINK_TEXT, text);
+                    Locator attributes = new Locator(WebLocatorType.LINK_TEXT, text);
                     baseValidations.assertIfElementExists(String.format("Link with text '%s'", text), attributes);
                 });
     }

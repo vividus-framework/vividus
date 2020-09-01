@@ -9,6 +9,7 @@ project.description = 'Vividus extension for selenium'
      implementation project(':vividus-bdd-engine')
      implementation project(':vividus-test-context')
      implementation project(':vividus-util')
+     implementation project(':vividus-soft-assert')
 
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: seleniumVersion)
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: seleniumVersion)
@@ -21,6 +22,8 @@ project.description = 'Vividus extension for selenium'
      implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
      implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+
+     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
      testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
      testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')

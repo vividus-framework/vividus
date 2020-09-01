@@ -21,11 +21,18 @@ import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
-public class LinkTextSearch extends AbstractElementSearchAction implements IElementSearchAction
+public class LinkTextSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
     private static final String LINK_WITH_ANY_ATTRIBUTE_OR_TEXT = ".//a[text()=%1$s or @*=%1$s or *=%1$s]";
+
+    public LinkTextSearch()
+    {
+        super(WebLocatorType.LINK_TEXT);
+    }
 
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)

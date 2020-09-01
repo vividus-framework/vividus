@@ -18,6 +18,8 @@ package org.vividus.ui.web;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.vividus.ui.IState;
+import org.vividus.ui.State;
 import org.vividus.ui.web.action.ExpectedConditions;
 
 public enum DropDownState implements IState

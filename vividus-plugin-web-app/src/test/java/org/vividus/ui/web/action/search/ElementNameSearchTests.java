@@ -24,23 +24,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.SearchParameters;
 
-@ExtendWith(MockitoExtension.class)
 class ElementNameSearchTests
 {
     private static final String ELEMENT_NAME = "Element name";
 
     private final SearchParameters searchParameters = new SearchParameters(ELEMENT_NAME);
 
-    @InjectMocks
-    private ElementNameSearch elementNameSearch;
+    private final ElementNameSearch elementNameSearch = new ElementNameSearch(WebLocatorType.ELEMENT_NAME);
 
     @Test
     void searchTest()
@@ -62,5 +58,11 @@ class ElementNameSearchTests
         ElementNameSearch spy = Mockito.spy(elementNameSearch);
         List<WebElement> foundElements = spy.search(null, searchParameters);
         assertEquals(List.of(), foundElements);
+    }
+
+    @Test
+    void testGetAttributeType()
+    {
+        assertEquals(WebLocatorType.ELEMENT_NAME, elementNameSearch.getType());
     }
 }

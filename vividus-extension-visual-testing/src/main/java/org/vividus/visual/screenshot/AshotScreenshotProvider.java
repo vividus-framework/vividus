@@ -27,8 +27,8 @@ import java.util.stream.Stream;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.IScreenshotTaker;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
-import org.vividus.ui.web.action.ISearchActions;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.model.VisualCheck;
 
 import ru.yandex.qatools.ashot.Screenshot;
@@ -43,7 +43,7 @@ public class AshotScreenshotProvider implements ScreenshotProvider
     private final CoordsProvider coordsProvider;
     private final IWebDriverProvider webDriverProvider;
 
-    private Map<IgnoreStrategy, Set<SearchAttributes>> ignoreStrategies;
+    private Map<IgnoreStrategy, Set<Locator>> ignoreStrategies;
 
     public AshotScreenshotProvider(IScreenshotTaker screenshotTaker, ISearchActions searchActions,
             ScreenshotDebugger screenshotDebugger, CoordsProvider coordsProvider, IWebDriverProvider webDrvierProvider)
@@ -61,8 +61,8 @@ public class AshotScreenshotProvider implements ScreenshotProvider
         Screenshot screenshot = screenshotTaker.takeAshotScreenshot(
                 visualCheck.getSearchContext(), visualCheck.getScreenshotConfiguration());
         BufferedImage original = screenshot.getImage();
-        Map<IgnoreStrategy, Set<SearchAttributes>> stepLevelElementsToIgnore = visualCheck.getElementsToIgnore();
-        for (Map.Entry<IgnoreStrategy, Set<SearchAttributes>> strategy : ignoreStrategies.entrySet())
+        Map<IgnoreStrategy, Set<Locator>> stepLevelElementsToIgnore = visualCheck.getElementsToIgnore();
+        for (Map.Entry<IgnoreStrategy, Set<Locator>> strategy : ignoreStrategies.entrySet())
         {
             IgnoreStrategy cropStrategy = strategy.getKey();
             Set<Coords> ignore = Stream.concat(
@@ -84,12 +84,12 @@ public class AshotScreenshotProvider implements ScreenshotProvider
         return screenshot;
     }
 
-    private Stream<SearchAttributes> getLocatorsStream(Set<SearchAttributes> locatorsSet)
+    private Stream<Locator> getLocatorsStream(Set<Locator> locatorsSet)
     {
         return Optional.ofNullable(locatorsSet).stream().flatMap(Collection::stream);
     }
 
-    public void setIgnoreStrategies(Map<IgnoreStrategy, Set<SearchAttributes>> ignoreStrategies)
+    public void setIgnoreStrategies(Map<IgnoreStrategy, Set<Locator>> ignoreStrategies)
     {
         this.ignoreStrategies = ignoreStrategies;
     }

@@ -21,11 +21,11 @@ import java.util.List;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.selenium.element.Checkbox;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.CheckboxAction;
 import org.vividus.ui.web.action.IMouseActions;
-import org.vividus.ui.web.action.search.SearchAttributes;
 
 @TakeScreenshotOnFailure
 public class CheckboxSteps
@@ -47,7 +47,7 @@ public class CheckboxSteps
      * @param checkboxesLocator Locator to locate checkboxes
      */
     @When("I $checkboxAction all checkboxes located by `$checkboxesLocator`")
-    public void changeStateOfAllCheckboxes(CheckboxAction checkBoxAction, SearchAttributes checkboxesLocator)
+    public void changeStateOfAllCheckboxes(CheckboxAction checkBoxAction, Locator checkboxesLocator)
     {
         List<WebElement> checkboxes = baseValidations.assertIfElementsExist("Checkboxes", checkboxesLocator);
         checkboxes.stream().map(this::createCheckbox).forEach(checkbox -> changeCheckboxState(checkbox,
@@ -60,7 +60,7 @@ public class CheckboxSteps
      * @param checkboxLocator Locator to locate checkboxes
      */
     @When(value = "I $checkBoxAction checkbox located by `$checkboxLocator`")
-    public void changeStateOfCheckbox(CheckboxAction checkBoxAction, SearchAttributes checkboxLocator)
+    public void changeStateOfCheckbox(CheckboxAction checkBoxAction, Locator checkboxLocator)
     {
         WebElement checkboxElement = baseValidations.assertIfElementExists(CHECKBOX, checkboxLocator);
         Checkbox checkbox = createCheckbox(checkboxElement);

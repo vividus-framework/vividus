@@ -20,6 +20,11 @@ import org.openqa.selenium.WebElement;
 
 public class FieldTextPartFilter extends AbstractElementFilterAction
 {
+    public FieldTextPartFilter()
+    {
+        super(WebLocatorType.FIELD_TEXT_PART);
+    }
+
     @Override
     protected boolean matches(WebElement element, String textPart)
     {

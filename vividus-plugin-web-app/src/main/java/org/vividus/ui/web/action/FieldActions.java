@@ -28,7 +28,7 @@ import org.vividus.softassert.ISoftAssert;
 public class FieldActions implements IFieldActions
 {
     @Inject private ISoftAssert softAssert;
-    @Inject private IWaitActions waitActions;
+    @Inject private IWebWaitActions waitActions;
     @Inject private IWebElementActions webElementActions;
 
     @Override

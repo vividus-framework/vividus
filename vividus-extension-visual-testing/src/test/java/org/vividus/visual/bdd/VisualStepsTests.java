@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
@@ -46,7 +46,7 @@ class VisualStepsTests
     private static final String TEMPLATE = "template";
 
     @Mock
-    private IWebUiContext webUiContext;
+    private IUiContext uiContext;
     @Mock
     private IAttachmentPublisher attachmentPublisher;
 
@@ -70,7 +70,7 @@ class VisualStepsTests
     {
         SearchContext searchContext = mock(SearchContext.class);
         VisualCheck visualCheck = mock(VisualCheck.class);
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> null;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
         assertNull(visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
@@ -84,7 +84,7 @@ class VisualStepsTests
         SearchContext searchContext = mock(SearchContext.class);
         VisualCheck visualCheck = mock(VisualCheck.class);
         VisualCheckResult visualCheckResult = mock(VisualCheckResult.class);
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> visualCheckResult;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
         assertSame(visualCheckResult, visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
@@ -95,9 +95,9 @@ class VisualStepsTests
 
     private static final class TestVisualSteps extends AbstractVisualSteps
     {
-        private TestVisualSteps(IWebUiContext webUiContext, IAttachmentPublisher attachmentPublisher)
+        private TestVisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher)
         {
-            super(webUiContext, attachmentPublisher);
+            super(uiContext, attachmentPublisher);
         }
     }
 }

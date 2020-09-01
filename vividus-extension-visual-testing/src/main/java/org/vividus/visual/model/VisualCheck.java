@@ -22,14 +22,14 @@ import java.util.Set;
 
 import org.openqa.selenium.SearchContext;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.screenshot.IgnoreStrategy;
 
 public class VisualCheck
 {
     private String baselineName;
     private VisualActionType action;
-    private Map<IgnoreStrategy, Set<SearchAttributes>> elementsToIgnore = Map.of();
+    private Map<IgnoreStrategy, Set<Locator>> elementsToIgnore = Map.of();
     private Optional<ScreenshotConfiguration> screenshotConfiguration = Optional.empty();
     private SearchContext searchContext;
 
@@ -49,12 +49,12 @@ public class VisualCheck
         return baselineName;
     }
 
-    public Map<IgnoreStrategy, Set<SearchAttributes>> getElementsToIgnore()
+    public Map<IgnoreStrategy, Set<Locator>> getElementsToIgnore()
     {
         return elementsToIgnore;
     }
 
-    public void setElementsToIgnore(Map<IgnoreStrategy, Set<SearchAttributes>> elementsToIgnore)
+    public void setElementsToIgnore(Map<IgnoreStrategy, Set<Locator>> elementsToIgnore)
     {
         this.elementsToIgnore = elementsToIgnore;
     }

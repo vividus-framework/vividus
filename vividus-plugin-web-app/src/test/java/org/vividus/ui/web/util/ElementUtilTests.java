@@ -25,22 +25,32 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.SearchActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.SearchActions;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.util.LocatorConversionUtils;
 
+@ExtendWith(MockitoExtension.class)
 class ElementUtilTests
 {
+    @Mock private LocatorConversionUtils conversionUtils;
+    @InjectMocks private ElementUtil util;
+
     @Test
     void shouldCreateMemoizedSupplierForWebElement()
     {
         Optional<WebElement> expected = Optional.of(mock(WebElement.class));
         SearchActions searchActions = mock(SearchActions.class);
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.ID, "id");
+        Locator attributes = mock(Locator.class);
         when(searchActions.findElement(attributes)).thenReturn(expected);
-        Supplier<Optional<WebElement>> elementSupplier = ElementUtil.getElement("By.id(id)", searchActions);
+        String value = "value";
+        when(conversionUtils.convertToLocator(value)).thenReturn(attributes);
+        Supplier<Optional<WebElement>> elementSupplier = util.getElement(value, searchActions);
         assertEquals(expected, elementSupplier.get());
         assertEquals(expected, elementSupplier.get());
         verify(searchActions).findElement(attributes);

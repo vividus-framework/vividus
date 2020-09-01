@@ -19,14 +19,14 @@ package org.vividus.bdd.variable.ui.web;
 import javax.inject.Named;
 
 import org.openqa.selenium.Rectangle;
-import org.vividus.ui.web.context.WebUiContext;
+import org.vividus.ui.context.UiContext;
 
 @Named("context-y-coordinate")
 public class SearchContextYCoordinateDynamicVariable extends AbstractContextProvidingDynamicVariable
 {
-    public SearchContextYCoordinateDynamicVariable(WebUiContext webUiContext)
+    public SearchContextYCoordinateDynamicVariable(UiContext uiContext)
     {
-        super(webUiContext);
+        super(uiContext);
     }
 
     @Override

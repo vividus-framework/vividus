@@ -23,13 +23,13 @@ import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.web.validation.IFocusValidations;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.context.IWebUiContext;
 
 @TakeScreenshotOnFailure
 public class FocusSteps
 {
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     @Inject private IJavascriptActions javascriptActions;
     @Inject private IFocusValidations focusValidations;
 
@@ -72,6 +72,6 @@ public class FocusSteps
 
     private WebElement getWebElementFromContext()
     {
-        return webUiContext.getSearchContext(WebElement.class);
+        return uiContext.getSearchContext(WebElement.class);
     }
 }
