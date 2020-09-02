@@ -21,12 +21,11 @@ import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
-public class FieldNameSearch extends AbstractElementAction implements IElementSearchAction
+public class FieldNameSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
     public FieldNameSearch()
     {

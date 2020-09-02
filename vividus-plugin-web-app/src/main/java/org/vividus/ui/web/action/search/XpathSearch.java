@@ -21,12 +21,11 @@ import java.util.List;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.How;
-import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
-public class XpathSearch extends AbstractElementAction implements IElementSearchAction
+public class XpathSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
     public XpathSearch()
     {
