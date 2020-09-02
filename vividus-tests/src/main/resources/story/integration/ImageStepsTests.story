@@ -14,16 +14,14 @@ When I hover a mouse over an image with the tooltip 'Avatar'
 Then an element by the xpath './/div[@class='textfade']' exists
 
 Scenario: Step verification When I click on an image with the src '$src'
-Given I am on a page with the URL 'https://www.w3schools.com/tags/tryit.asp?filename=tryhtml_link_image'
-When I switch to a frame with the attribute 'id'='iframeResult'
-When I click on an image with the src 'logo_w3s.gif'
-Then a link by By.xpath(.//a[@class='w3schools-logo' and @href='//www.w3schools.com']) exists
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/index.html'
+When I click on an image with the src 'img/vividus.png'
+Then a link by By.xpath(//a[@href='#ElementId']) exists
 
 Scenario: Step verification When I click on an image with the name '$imageName'
-Given I am on a page with the URL 'https://www.w3schools.com/tags/tryit.asp?filename=tryhtml_link_image'
-When I switch to a frame with the attribute 'id'='iframeResult'
-When I click on an image with the name 'W3Schools'
-Then a link by By.xpath(.//a[@class='w3schools-logo' and @href='//www.w3schools.com']) exists
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/index.html'
+When I click on an image with the name 'vividus-logo'
+Then a link by By.xpath(//a[@href='#ElementId']) exists
 
 Scenario: Step verification Then an image with the src '$src' exists
 Given I am on a page with the URL 'https://www.w3schools.com/howto/howto_css_image_overlay.asp'
