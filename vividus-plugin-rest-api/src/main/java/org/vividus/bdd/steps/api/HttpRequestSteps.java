@@ -41,8 +41,8 @@ import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
-import org.vividus.util.wait.Waiter;
 
 public class HttpRequestSteps
 {
@@ -227,7 +227,7 @@ public class HttpRequestSteps
     public void waitForResponseCode(int responseCode, Duration duration, int retryTimes,
             SubSteps stepsToExecute)
     {
-        new Waiter(new WaitMode(duration, retryTimes)).wait(
+        new DurationBasedWaiter(new WaitMode(duration, retryTimes)).wait(
                 () -> stepsToExecute.execute(Optional.empty()),
                 () -> isResponseCodeIsEqualToExpected(httpTestContext.getResponse(), responseCode)
         );

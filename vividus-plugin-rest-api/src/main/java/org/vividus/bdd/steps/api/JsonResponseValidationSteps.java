@@ -51,6 +51,8 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.util.json.JsonUtils;
+import org.vividus.util.wait.DurationBasedWaiter;
+import org.vividus.util.wait.RetryTimesBasedWaiter;
 import org.vividus.util.wait.WaitMode;
 import org.vividus.util.wait.Waiter;
 
@@ -308,9 +310,39 @@ public class JsonResponseValidationSteps
             + "$stepsToExecute")
     public void waitForJsonElement(String jsonPath, Duration duration, int retryTimes, SubSteps stepsToExecute)
     {
-        new Waiter(new WaitMode(duration, retryTimes)).wait(
-                () -> stepsToExecute.execute(Optional.empty()),
-                () -> isJsonElementSearchCompleted(httpTestContext.getResponse(), jsonPath)
+        waitForJsonElement(new DurationBasedWaiter(new WaitMode(duration, retryTimes)), jsonPath, stepsToExecute);
+    }
+
+    /**
+     * Execute steps a specified amount of retries using polling interval of time until
+     * HTTP response body contains an element by the specified JSON path.
+     * <p>
+     * <b>Actions performed:</b>
+     * </p>
+     * <ul>
+     * <li>Execute sub-steps</li>
+     * <li>Check if HTTP response is present and response body contains an element by JSON path</li>
+     * <li>Stop step execution if HTTP response is not present or JSON element is found, otherwise
+     * sleep for the calculated part of specified polling interval and repeat actions from the start</li>
+     * </ul>
+     * @param jsonPath JSON path of element to find
+     * @param pollingInterval Duration of time to wait
+     * @param retryTimes Number of attempts
+     * @param stepsToExecute Steps to execute at each wait iteration
+     */
+    @When("I wait for presence of element by `$jsonPath` with `$pollingInterval` polling interval "
+            + "retrying $retryTimes times$stepsToExecute")
+    public void waitForJsonElementWithPollingInterval(String jsonPath, Duration pollingInterval,
+                                                      int retryTimes, SubSteps stepsToExecute)
+    {
+        waitForJsonElement(new RetryTimesBasedWaiter(pollingInterval, retryTimes), jsonPath, stepsToExecute);
+    }
+
+    private void waitForJsonElement(Waiter waiter, String jsonPath, SubSteps stepsToExecute)
+    {
+        waiter.wait(
+            () -> stepsToExecute.execute(Optional.empty()),
+            () -> isJsonElementSearchCompleted(httpTestContext.getResponse(), jsonPath)
         );
         assertJsonElementExists(jsonPath);
     }

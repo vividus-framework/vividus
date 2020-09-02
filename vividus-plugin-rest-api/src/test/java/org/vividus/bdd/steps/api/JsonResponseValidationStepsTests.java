@@ -69,6 +69,7 @@ import org.vividus.util.json.JsonUtils;
 import net.javacrumbs.jsonunit.core.Option;
 import net.javacrumbs.jsonunit.core.internal.Options;
 
+@SuppressWarnings("MethodCount")
 @ExtendWith(MockitoExtension.class)
 class JsonResponseValidationStepsTests
 {
@@ -403,6 +404,24 @@ class JsonResponseValidationStepsTests
         jsonResponseValidationSteps.waitForJsonElement(STRING_PATH, Duration.ofSeconds(2), retryTimes, stepsToExecute);
         verify(stepsToExecute, atLeast(retryTimes - 1)).execute(Optional.empty());
         verify(stepsToExecute, atMost(retryTimes)).execute(Optional.empty());
+        verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH), eq(1),
+                verifyMatcher(1));
+    }
+
+    @Test
+    void shouldWaitForJsonElementWithPollingInterval()
+    {
+        SubSteps stepsToExecute = mock(SubSteps.class);
+        when(httpTestContext.getResponse())
+                .thenReturn(createHttpResponse(HTML))
+                .thenReturn(createHttpResponse(OBJECT_PATH_RESULT))
+                .thenReturn(new HttpResponse())
+                .thenReturn(createHttpResponse(JSON));
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
+        int retryTimes = 4;
+        jsonResponseValidationSteps.waitForJsonElementWithPollingInterval(STRING_PATH,
+                Duration.ofSeconds(1), retryTimes, stepsToExecute);
+        verify(stepsToExecute, times(retryTimes)).execute(Optional.empty());
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH), eq(1),
                 verifyMatcher(1));
     }

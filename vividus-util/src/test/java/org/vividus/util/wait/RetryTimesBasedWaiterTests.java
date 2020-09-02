@@ -30,15 +30,14 @@ import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("unchecked")
-class WaiterTests
+class RetryTimesBasedWaiterTests
 {
     @Test
-    void shouldReturnValueAfterReachingTimeout() throws IOException
+    void shouldReturnValueAfterReachingPollingRetries() throws IOException
     {
         FailableSupplier<Boolean, IOException> valueProvider = mock(FailableSupplier.class);
         when(valueProvider.get()).thenReturn(false);
-        assertFalse(new Waiter(new WaitMode(Duration.ofMillis(500), 2)).wait(valueProvider, Boolean::booleanValue));
+        assertFalse(new RetryTimesBasedWaiter(Duration.ofMillis(500), 2).wait(valueProvider, Boolean::booleanValue));
     }
 
     @Test
@@ -46,14 +45,14 @@ class WaiterTests
     {
         FailableSupplier<Boolean, IOException> valueProvider = mock(FailableSupplier.class);
         when(valueProvider.get()).thenReturn(false).thenReturn(true).thenReturn(false);
-        assertTrue(new Waiter(new WaitMode(Duration.ofSeconds(1), 3)).wait(valueProvider, Boolean::booleanValue));
+        assertTrue(new RetryTimesBasedWaiter(Duration.ofMillis(200), 3).wait(valueProvider, Boolean::booleanValue));
     }
 
     @Test
     void shouldInvokeRunnableOnceBeforeReachingStopCondition() throws IOException
     {
         FailableRunnable<IOException> failableRunnable = mock(FailableRunnable.class);
-        new Waiter(new WaitMode(Duration.ZERO, 1)).wait(failableRunnable, Boolean.TRUE::booleanValue);
+        new RetryTimesBasedWaiter(Duration.ofMillis(100), 1).wait(failableRunnable, Boolean.TRUE::booleanValue);
         verify(failableRunnable, times(1)).run();
     }
 }
