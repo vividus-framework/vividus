@@ -14,8 +14,6 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version:
 
 === Required
 
-* `selenium.grid.device-name` - defines device name to run tests on
-
 See xref:ROOT:tests-configuration.adoc[Selenium Grid] properties to configure remote grid
 
 === Optional
@@ -63,10 +61,28 @@ selenium.grid.automation-name=UIAutomator2
 
 === BrowserStack
 
+==== Info
+
 * The profile can be enabled by adding `browserstack/mobile_app` to `configuration.profiles` property
 * BrowserStack specific properties must be prepended with `selenium.grid.capabilities.bstack\:options.` prefix, meaning given a property `projectName` with a value `My Project` the resulting property will be `selenium.grid.capabilities.bstack\:options.projectName=My Project`
 * Appium specific properties in BrowserStack must be prepended with `selenium.grid.capabilities.appium\:options.` prefix, meaning given a property `clearSystemFiles` with a value `true` the resulting property will be `selenium.grid.capabilities.appium\:options.clearSystemFiles=true`
 * See https://www.browserstack.com/app-automate/capabilities?tag=w3c[Capabilities Builder] to setup configuration
+
+==== Required properties
+* `selenium.grid.device-name` - defines device name to run tests on
+
+=== SauceLabs
+
+==== Info
+
+* The profile can be enabled by adding `saucelabs/mobile_app` to `configuration.profiles` property
+* See https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/[Platform Configurator] to setup configuration
+
+==== Required properties
+
+* `selenium.grid.device-name` - defines device name
+* `selenium.grid.appium-version` - defines appium version
+* `selenium.grid.platform-version` - defines platform version
 
 == Steps
 
