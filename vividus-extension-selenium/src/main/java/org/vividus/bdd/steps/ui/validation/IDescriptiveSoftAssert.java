@@ -19,6 +19,7 @@ package org.vividus.bdd.steps.ui.validation;
 import org.hamcrest.Matcher;
 import org.vividus.softassert.ISoftAssert;
 
+@Deprecated(since = "0.2.8", forRemoval = true)
 public interface IDescriptiveSoftAssert extends ISoftAssert
 {
     /**

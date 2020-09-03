@@ -35,11 +35,14 @@ public interface IBaseValidations
 
     WebElement assertIfElementExists(String businessDescription, List<WebElement> elements);
 
+    @Deprecated(since = "0.2.8", forRemoval = true)
     WebElement assertIfElementExists(String businessDescription, String systemDescription, List<WebElement> elements);
 
+    @Deprecated(since = "0.2.8", forRemoval = true)
     boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
             int number);
 
+    @Deprecated(since = "0.2.8", forRemoval = true)
     boolean assertLeastElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
             int leastNumber);
 
@@ -89,14 +92,18 @@ public interface IBaseValidations
     boolean assertIfElementDoesNotExist(String businessDescription, SearchContext searchContext, Locator locator,
             boolean recordAssertionIfFail);
 
+    @Deprecated(since = "0.2.8", forRemoval = true)
     boolean assertIfElementDoesNotExist(String businessDescription, String systemDescription, Locator locator);
 
+    @Deprecated(since = "0.2.8", forRemoval = true)
     boolean assertIfElementDoesNotExist(String businessDescription, String systemDescription,
             SearchContext searchContext, Locator locator);
 
+    @Deprecated(since = "0.2.8", forRemoval = true)
     boolean assertIfElementDoesNotExist(String businessDescription, String systemDescription,
             Locator locator, boolean recordAssertionIfFail);
 
+    @Deprecated(since = "0.2.8", forRemoval = true)
     boolean assertIfElementDoesNotExist(String businessDescription, String systemDescription,
             SearchContext searchContext, Locator locator, boolean recordAssertionIfFail);
 }
