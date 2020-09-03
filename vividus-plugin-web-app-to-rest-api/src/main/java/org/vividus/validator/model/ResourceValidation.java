@@ -31,6 +31,7 @@ public class ResourceValidation implements Comparable<ResourceValidation>
 
     public ResourceValidation()
     {
+        //required for JBheave
     }
 
     public ResourceValidation(URI toCheck, String cssSelector, String pageURL)
