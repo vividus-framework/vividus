@@ -61,6 +61,7 @@ import org.vividus.validator.model.ResourceValidation;
 @ExtendWith(MockitoExtension.class)
 class ResourceCheckStepsTests
 {
+    private static final String UNCHECKED = "unchecked";
     private static final String LINK_SELECTOR = "a";
     private static final String FIRST_PAGE_TABLE = "|pages|\n|https://first.page|";
     private static final String SECOND_PAGE_URL = "https://second.page";
@@ -163,7 +164,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.checkResources("a, img", FIRST_PAGE);
 
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(9));
             Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
@@ -197,7 +198,7 @@ class ResourceCheckStepsTests
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(8));
             Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
@@ -229,7 +230,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.checkResources(LINK_SELECTOR + ", video", examplesTable);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, THIRD_PAGE_URL, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
             Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
@@ -254,7 +255,7 @@ class ResourceCheckStepsTests
                 new ExamplesTable(FIRST_PAGE_TABLE);
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
             ResourceValidation resourceValidation = validationsToReport.iterator().next();
@@ -284,7 +285,7 @@ class ResourceCheckStepsTests
                 new ExamplesTable("|pages|\n|https://second.page|");
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
             ResourceValidation resourceValidation = validationsToReport.iterator().next();
@@ -341,7 +342,7 @@ class ResourceCheckStepsTests
 
         resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(7));
             Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
