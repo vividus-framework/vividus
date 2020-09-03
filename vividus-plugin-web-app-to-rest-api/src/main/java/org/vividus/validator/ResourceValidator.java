@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.http.HttpStatus;
@@ -42,11 +41,9 @@ import org.vividus.validator.model.ResourceValidation;
 
 public class ResourceValidator
 {
-    @Inject
-    @Named("resourceValidator")
-    private IHttpClient httpClient;
+    private final IHttpClient httpClient;
 
-    @Inject private SoftAssert softAssert;
+    private final SoftAssert softAssert;
 
     private final Set<Integer> allowedStatusCodes = Set.of(HttpStatus.SC_OK);
     private final Set<Integer> notAllowedHeadStatusCodes = Set.of(HttpStatus.SC_METHOD_NOT_ALLOWED,
@@ -55,6 +52,12 @@ public class ResourceValidator
                                                                   HttpStatus.SC_NOT_IMPLEMENTED);
 
     private final Map<URI, ResourceValidation> cache = new ConcurrentHashMap<>();
+
+    public ResourceValidator(@Named("resourceValidator") IHttpClient httpClient, SoftAssert softAssert)
+    {
+        this.httpClient = httpClient;
+        this.softAssert = softAssert;
+    }
 
     public ResourceValidation perform(ResourceValidation resourceValidation)
     {
