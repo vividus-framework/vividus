@@ -17,6 +17,7 @@
 package org.vividus.bdd.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -44,8 +45,7 @@ class MetaWrapperTests
         properties.setProperty(propertyName, "propertyValue");
         Meta meta = new Meta(properties);
         MetaWrapper metaWrapper = new MetaWrapper(meta);
-        boolean hasProperty = true;
-        assertEquals(hasProperty, metaWrapper.hasProperty(propertyName));
+        assertTrue(metaWrapper.hasProperty(propertyName));
     }
 
     @Test
