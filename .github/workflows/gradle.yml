@@ -166,7 +166,7 @@ jobs:
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
             ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system/mobile_app/ios \
-                                                -Pvividus.configuration.suite=system/mobile_app/ios \
+                                                -Pvividus.configuration.suite=system/mobile_app \
                                                 -Pvividus.configuration.profiles=mobile_app/ios,browserstack/mobile_app \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
@@ -179,7 +179,8 @@ jobs:
                                                 -Pvividus.allure.executor.build-name="iOS System Tests ${GITHUB_RUN_ID}" \
                                                 -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                                -Pvividus.allure.executor.report-name="iOS System tests report"
+                                                -Pvividus.allure.executor.report-name="iOS System tests report" \
+                                                -Pvividus.bdd.variables.global.app-url=bs://444bd0308813ae0dc236f8cd461c02d3afa7901d
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY variables, System tests will be skipped
         fi
@@ -200,7 +201,7 @@ jobs:
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
             ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system/mobile_app/android \
-                                                -Pvividus.configuration.suite=system/mobile_app/android \
+                                                -Pvividus.configuration.suite=system/mobile_app \
                                                 -Pvividus.configuration.profiles=mobile_app/android,browserstack/mobile_app \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
@@ -213,7 +214,8 @@ jobs:
                                                 -Pvividus.allure.executor.build-name="Android System Tests ${GITHUB_RUN_ID}" \
                                                 -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                                -Pvividus.allure.executor.report-name="Android System tests report"
+                                                -Pvividus.allure.executor.report-name="Android System tests report" \
+                                                -Pvividus.bdd.variables.global.app-url=bs://c700ce60cf13ae8ed97705a55b8e022f13c5827c
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY variables, System tests will be skipped
         fi
