@@ -132,7 +132,8 @@ jobs:
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD ]]; then
-            ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system/web,system/db,system/mongo \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
+                                                -Pvividus.configuration.environments=system/web,system/db,system/mongo \
                                                 -Pvividus.configuration.suite=system \
                                                 -Pvividus.configuration.profiles=browserstack/web,web/desktop/chrome \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
@@ -165,7 +166,8 @@ jobs:
       shell: bash
       run: |
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
-            ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system/mobile_app/saucelabs/ios \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
+                                                -Pvividus.configuration.environments=system/mobile_app/saucelabs/ios \
                                                 -Pvividus.configuration.suite=system/mobile_app \
                                                 -Pvividus.configuration.profiles=mobile_app/ios,saucelabs/mobile_app \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
@@ -200,7 +202,8 @@ jobs:
       shell: bash
       run: |
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
-            ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system/mobile_app/saucelabs/android \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
+                                                -Pvividus.configuration.environments=system/mobile_app/saucelabs/android \
                                                 -Pvividus.configuration.suite=system/mobile_app \
                                                 -Pvividus.configuration.profiles=mobile_app/android,saucelabs/mobile_app \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
@@ -235,7 +238,8 @@ jobs:
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
-            ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system/mobile_app/browserstack/ios \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
+                                                -Pvividus.configuration.environments=system/mobile_app/browserstack/ios \
                                                 -Pvividus.configuration.suite=system/mobile_app \
                                                 -Pvividus.configuration.profiles=mobile_app/ios,browserstack/mobile_app \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
@@ -270,7 +274,8 @@ jobs:
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
-            ./gradlew :vividus-tests:runStories -Pvividus.configuration.environments=system/mobile_app/browserstack/android \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
+                                                -Pvividus.configuration.environments=system/mobile_app/browserstack/android \
                                                 -Pvividus.configuration.suite=system/mobile_app \
                                                 -Pvividus.configuration.profiles=mobile_app/android,browserstack/mobile_app \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
@@ -307,7 +312,8 @@ jobs:
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
           declare -a profiles=( iexplore chrome firefox edge )
           for profile in "${profiles[@]}"; do
-            ./gradlew runStories -Pvividus.configuration.environments=grid \
+            ./gradlew runStories -x testVividusInitialization \
+                                 -Pvividus.configuration.environments=grid \
                                  -Pvividus.configuration.suite=grid \
                                  -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \
                                  -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
@@ -327,7 +333,8 @@ jobs:
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
           declare -a profiles=( iexplore chrome firefox edge )
           for profile in "${profiles[@]}"; do
-            ./gradlew runStories -Pvividus.configuration.environments= \
+            ./gradlew runStories -x testVividusInitialization \
+                                 -Pvividus.configuration.environments= \
                                  -Pvividus.configuration.suite=grid \
                                  -Pvividus.configuration.profiles=saucelabs/web,web/desktop/${profile} \
                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
