@@ -1,4 +1,4 @@
-= Comparison rule
+= State
 
 == Description
 
