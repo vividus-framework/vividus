@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.selenium.LocatorFactory;
 import org.vividus.ui.action.search.ElementActionService;
-import org.vividus.ui.action.search.IElementAction;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.Visibility;
 
 public class LocatorConversionUtils
@@ -87,30 +87,30 @@ public class LocatorConversionUtils
 
     private void applyFilter(Locator locator, String filterType, String filterValue)
     {
-        createLocator(elementActionService.getFilterActions(),
-            type -> locator.addFilter(type.getType(), filterValue), "filter", filterType);
+        createLocator(elementActionService.getFilterLocatorTypes(),
+            type -> locator.addFilter(type, filterValue), "filter", filterType);
     }
 
     private Locator convertToLocator(String searchType, String searchValue)
     {
-        return createLocator(elementActionService.getSearchActions(),
-            type -> new Locator(type.getType(), searchValue), "locator", searchType);
+        return createLocator(elementActionService.getSearchLocatorTypes(),
+            type -> new Locator(type, searchValue), "locator", searchType);
     }
 
-    private static Locator createLocator(Set<IElementAction> actions, Function<IElementAction, Locator> mapper,
+    private static Locator createLocator(Set<LocatorType> locatorTypes, Function<LocatorType, Locator> mapper,
             String operatorType, String searchType)
     {
-        return findElementAction(actions, searchType)
+        return findLocatorType(locatorTypes, searchType)
                 .map(mapper)
                 .orElseThrow(() -> new IllegalArgumentException(
                     String.format("Unsupported %s type: %s", operatorType, searchType)));
     }
 
-    private static Optional<IElementAction> findElementAction(Set<IElementAction> actions, String type)
+    private static Optional<LocatorType> findLocatorType(Set<LocatorType> locatorTypes, String type)
     {
         String typeInLowerCase = type.toLowerCase();
-        return actions.stream()
-                    .filter(t -> StringUtils.replace(t.getType().getKey().toLowerCase(), "_", "")
+        return locatorTypes.stream()
+                    .filter(t -> StringUtils.replace(t.getKey().toLowerCase(), "_", "")
                             .equals(typeInLowerCase))
                     .findFirst();
     }
