@@ -35,7 +35,7 @@ public abstract class AbstractElementAction implements IElementAction
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElementAction.class);
 
-    @Inject private IWaitActions waitActions;
+    private IWaitActions waitActions;
     @Inject private IExpectedConditions<By> expectedConditions;
     private Duration waitForElementTimeout;
     private boolean retrySearchIfStale;
@@ -115,6 +115,11 @@ public abstract class AbstractElementAction implements IElementAction
     {
         return waitActions.wait(searchContext, waitForElementTimeout,
                 expectedConditions.presenceOfAllElementsLocatedBy(locator), false).getData();
+    }
+
+    public void setWaitActions(IWaitActions waitActions)
+    {
+        this.waitActions = waitActions;
     }
 
     public void setWaitForElementTimeout(Duration waitForElementTimeout)
