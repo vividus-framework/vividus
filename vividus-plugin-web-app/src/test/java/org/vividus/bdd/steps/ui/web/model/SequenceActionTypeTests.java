@@ -37,7 +37,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 @ExtendWith(MockitoExtension.class)
-public class SequenceActionTypeTests
+class SequenceActionTypeTests
 {
     private static final String VALUE = "value";
     private static final String CHAR = "a";

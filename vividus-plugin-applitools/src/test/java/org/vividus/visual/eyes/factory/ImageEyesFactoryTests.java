@@ -105,7 +105,7 @@ class ImageEyesFactoryTests
     }
 
     @Test
-    public void shouldCreateEyesWithAllParameters() throws IllegalAccessException
+    void shouldCreateEyesWithAllParameters() throws IllegalAccessException
     {
         ApplitoolsVisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         visualCheck.setBaselineEnvName(BASELINE_ENV_NAME);
@@ -133,7 +133,7 @@ class ImageEyesFactoryTests
     }
 
     @Test
-    public void shouldReuseBatchWithTheSameName()
+    void shouldReuseBatchWithTheSameName()
     {
         ApplitoolsVisualCheck visualCheck = createVisualCheck(VisualActionType.ESTABLISH);
         Eyes eyes1 = imageEyesFactory.createEyes(visualCheck);
