@@ -47,6 +47,7 @@ public abstract class AbstractElementAction implements IElementAction
         this.type = type;
     }
 
+    @Override
     public LocatorType getType()
     {
         return type;
