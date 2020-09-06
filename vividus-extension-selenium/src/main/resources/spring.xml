@@ -42,6 +42,7 @@
           abstract="true">
         <property name="waitForElementTimeout" value="${ui.search.wait-for-element-timeout}" />
         <property name="retrySearchIfStale" value="${ui.search.retry-search-if-stale}" />
+        <property name="waitActions" ref="waitActions" />
     </bean>
 
     <bean class="org.vividus.ui.action.ExpectedSearchActionsConditions" />
