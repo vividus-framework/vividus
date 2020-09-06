@@ -314,21 +314,21 @@ public class JsonResponseValidationSteps
     }
 
     /**
-     * Execute steps a specified amount of retries using polling interval of time until
-     * HTTP response body contains an element by the specified JSON path.
+     * Execute the provided sub-steps until the HTTP response body contains an element by the specified JSON path or
+     * until the maximum number of retries is reached. The maximum duration of the step execution is not limited.
      * <p>
-     * <b>Actions performed:</b>
+     * <b>The actions performed:</b>
      * </p>
      * <ul>
-     * <li>Execute sub-steps</li>
-     * <li>Check if HTTP response is present and response body contains an element by JSON path</li>
-     * <li>Stop step execution if HTTP response is not present or JSON element is found, otherwise
-     * sleep for the calculated part of specified polling interval and repeat actions from the start</li>
+     * <li>execute sub-steps</li>
+     * <li>wait for the polling interval</li>
+     * <li>if the required JSON element exists or the maximum number of retries is reached, then execution stops,
+     * otherwise the step actions are repeated</li>
      * </ul>
-     * @param jsonPath JSON path of element to find
-     * @param pollingInterval Duration of time to wait
-     * @param retryTimes Number of attempts
-     * @param stepsToExecute Steps to execute at each wait iteration
+     * @param jsonPath the JSON path of the element to find
+     * @param pollingInterval the duration to wait between retries
+     * @param retryTimes the maximum number of the retries
+     * @param stepsToExecute the sub-steps to execute at each iteration
      */
     @When("I wait for presence of element by `$jsonPath` with `$pollingInterval` polling interval "
             + "retrying $retryTimes times$stepsToExecute")
