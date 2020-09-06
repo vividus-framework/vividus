@@ -66,16 +66,15 @@ public enum WebLocatorType implements LocatorType
 
     static
     {
-        CASE_INSENSITIVE_TEXT.competingKeys = Set.of(WebLocatorType.TEXT_PART);
-        TEXT_PART.competingKeys = Set.of(WebLocatorType.CASE_INSENSITIVE_TEXT,
-            WebLocatorType.CASE_SENSITIVE_TEXT);
-        CASE_SENSITIVE_TEXT.competingKeys = Set.of(WebLocatorType.TEXT_PART);
-        IMAGE_SRC.competingKeys = Set.of(WebLocatorType.IMAGE_SRC_PART);
-        IMAGE_SRC_PART.competingKeys = Set.of(WebLocatorType.IMAGE_SRC);
-        LINK_URL.competingKeys = Set.of(WebLocatorType.LINK_URL_PART);
-        LINK_URL_PART.competingKeys = Set.of(WebLocatorType.LINK_URL);
-        FIELD_TEXT.competingKeys = Set.of(WebLocatorType.FIELD_TEXT_PART);
-        FIELD_TEXT_PART.competingKeys = Set.of(WebLocatorType.FIELD_TEXT);
+        CASE_INSENSITIVE_TEXT.competingKeys = Set.of(TEXT_PART);
+        TEXT_PART.competingKeys = Set.of(CASE_INSENSITIVE_TEXT, CASE_SENSITIVE_TEXT);
+        CASE_SENSITIVE_TEXT.competingKeys = Set.of(TEXT_PART);
+        IMAGE_SRC.competingKeys = Set.of(IMAGE_SRC_PART);
+        IMAGE_SRC_PART.competingKeys = Set.of(IMAGE_SRC);
+        LINK_URL.competingKeys = Set.of(LINK_URL_PART);
+        LINK_URL_PART.competingKeys = Set.of(LINK_URL);
+        FIELD_TEXT.competingKeys = Set.of(FIELD_TEXT_PART);
+        FIELD_TEXT_PART.competingKeys = Set.of(FIELD_TEXT);
     }
 
     @Override
