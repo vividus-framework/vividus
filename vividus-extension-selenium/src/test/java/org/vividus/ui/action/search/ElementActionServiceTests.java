@@ -17,7 +17,6 @@
 package org.vividus.ui.action.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,19 +38,15 @@ class ElementActionServiceTests
     ));
 
     @Test
-    void testGetSearchActions()
+    void shouldReturnSearchLocatorTypes()
     {
-        Set<IElementAction> searchActions = service.getSearchActions();
-        assertThat(searchActions, hasSize(1));
-        assertThat(searchActions.iterator().next(), instanceOf(TestElementSearch.class));
+        assertEquals(Set.of(TestLocatorType.SEARCH), service.getSearchLocatorTypes());
     }
 
     @Test
-    void testGetFilterActions()
+    void shouldReturnFilterLocatorTypes()
     {
-        Set<IElementAction> filterActions = service.getFilterActions();
-        assertThat(filterActions, hasSize(1));
-        assertThat(filterActions.iterator().next(), instanceOf(TestElementFilter.class));
+        assertEquals(Set.of(TestLocatorType.FILTER), service.getFilterLocatorTypes());
     }
 
     @CsvSource({

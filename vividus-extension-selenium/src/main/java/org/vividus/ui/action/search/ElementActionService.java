@@ -24,14 +24,14 @@ public class ElementActionService
 {
     private final Set<IElementAction> elementActions;
 
-    private final Set<IElementAction> searchActions;
-    private final Set<IElementAction> filterActions;
+    private final Set<LocatorType> searchLocatorTypes;
+    private final Set<LocatorType> filterLocatorTypes;
 
     public ElementActionService(Set<IElementAction> elementActions)
     {
         this.elementActions = elementActions;
-        this.searchActions = filterByActionClass(IElementSearchAction.class);
-        this.filterActions = filterByActionClass(IElementFilterAction.class);
+        this.searchLocatorTypes = collectTypesByActionClass(IElementSearchAction.class);
+        this.filterLocatorTypes = collectTypesByActionClass(IElementFilterAction.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -44,20 +44,21 @@ public class ElementActionService
                                  "There is no mapped element action for attribute: " + actionType.getAttributeName()));
     }
 
-    public Set<IElementAction> getSearchActions()
+    public Set<LocatorType> getSearchLocatorTypes()
     {
-        return searchActions;
+        return searchLocatorTypes;
     }
 
-    public Set<IElementAction> getFilterActions()
+    public Set<LocatorType> getFilterLocatorTypes()
     {
-        return filterActions;
+        return filterLocatorTypes;
     }
 
-    private Set<IElementAction> filterByActionClass(Class<? extends IElementAction> actionClass)
+    private Set<LocatorType> collectTypesByActionClass(Class<? extends IElementAction> actionClass)
     {
         return elementActions.stream()
                              .filter(t -> actionClass.isAssignableFrom(t.getClass()))
+                             .map(IElementAction::getType)
                              .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
     }
 }
