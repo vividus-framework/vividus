@@ -318,6 +318,128 @@ Then number of VISIBLE elements found by `tagName(img)` is = `1`
 ----
 
 
+=== Dropdown: verify available options.
+
+==== *_Info_*
+
+Verifies if dropdown located by locator exists and has expected list of options
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then dropdown located `$locator` contains options: $option
+----
+
+==== *_Parameters_*
+
+. `$locator` - xref:parameters:locator.adoc[Locator]
+. `$options` - examples table describing expected options
+
+==== *_Usage_*
+
+.Dropdown.story
+[source,gherkin]
+----
+Then a drop down with the name 'colors' contains the items:
+|state|item |
+|false|Red  |
+|false|Green|
+|true |Blue |
+----
+
+[IMPORTANT]
+
+Item - is an option. State - true/false describes if option selected
+
+
+=== Dropdown: verify first selected option
+
+==== *_Info_*
+
+Verifies if dropdown located by locator exists and first selected option.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then dropdown located `$locator` exists and selected option is `$option`
+----
+
+==== *_Parameters_*
+
+. `$locator` - xref:parameters:locator.adoc[Locator]
+. `$option` - first selected option
+
+==== *_Usage_*
+
+.Dropdown.story
+[source,gherkin]
+----
+Then dropdown located `id(colors)` exists and selected option is `Blue`
+----
+
+
+=== Dropdown: add text to a mutli-select
+
+==== *_Info_*
+
+Selects option in multi-select dropdown
+
+[IMPORTANT]
+Step will fail if target dropdown is not multi-select
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I add `$option` to selection in dropdown located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$option` - option to select
+. `$locator` - xref:parameters:locator.adoc[Locator]
+
+==== *_Usage_*
+
+.Dropdown.story
+[source,gherkin]
+----
+When I add `Two` to selection in dropdown located `id(numbers)`
+----
+
+
+=== Dropdown: select option
+
+==== *_Info_*
+
+Selects option in dropdown
+
+[IMPORTANT]
+Does not support multi-selection
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I select `$option` in dropdown located `$locator``
+----
+
+==== *_Parameters_*
+
+. `$option` - option to select
+. `$locator` - xref:parameters:locator.adoc[Locator]
+
+==== *_Usage_*
+
+.Dropdown.story
+[source,gherkin]
+----
+When I select `Red` in dropdown located `id(colors)`
+----
+
+
 == Dynamic variables
 
 Dynamic variables is variables available out of the box using standard approach `$\{variable-name\}` Usually the data provided by dynamic variables calculated at runtime.
