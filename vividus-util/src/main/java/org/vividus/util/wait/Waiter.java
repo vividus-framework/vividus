@@ -16,38 +16,23 @@
 
 package org.vividus.util.wait;
 
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.function.FailableSupplier;
-import org.vividus.util.Sleeper;
 
-public final class Waiter
+public abstract class Waiter
 {
-    private final long durationInMillis;
     private final long pollingTimeoutMillis;
 
-    public Waiter(WaitMode waitMode)
+    Waiter(long pollingTimeoutMillis)
     {
-        durationInMillis = waitMode.getDuration().toMillis();
-        pollingTimeoutMillis = waitMode.calculatePollingTimeout(TimeUnit.MILLISECONDS);
+        this.pollingTimeoutMillis = pollingTimeoutMillis;
     }
 
-    public <T, E extends Exception> T wait(FailableSupplier<T, E> valueProvider, Predicate<T> stopCondition) throws E
-    {
-        long endTime = System.currentTimeMillis() + durationInMillis;
-
-        T value;
-        do
-        {
-            value = valueProvider.get();
-            Sleeper.sleep(pollingTimeoutMillis, TimeUnit.MILLISECONDS);
-        }
-        while (!stopCondition.test(value) && System.currentTimeMillis() <= endTime);
-        return value;
-    }
+    public abstract  <T, E extends Exception> T wait(FailableSupplier<T, E> valueProvider, Predicate<T> stopCondition)
+            throws E;
 
     public <E extends Exception> void wait(FailableRunnable<E> runnable, BooleanSupplier stopCondition) throws E
     {
@@ -58,5 +43,10 @@ public final class Waiter
             },
             alwaysNull -> stopCondition.getAsBoolean()
         );
+    }
+
+    protected long getPollingTimeoutMillis()
+    {
+        return pollingTimeoutMillis;
     }
 }

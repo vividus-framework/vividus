@@ -50,6 +50,43 @@ Scenario: Verify that the server supports TLSv1.3 and TLSv1.2 protocols
 Then server `vividus-test-site.herokuapp.com` supports secure protocols that contain `TLSv1.3,TLSv1.2`
 ----
 
+=== Wait for JSON element to be returned in HTTP response
+
+==== *_Info_*
+
+Execute the provided sub-steps until the HTTP response body contains an element by the specified JSON path or until the maximum number of retries is reached. The maximum duration of the step execution is not limited. The actions of the step:
+. execute sub-steps
+. wait for the polling interval
+. if the required JSON element exists or the maximum number of retries is reached, then execution stops, otherwise the step actions are repeated
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I wait for presence of element by `$jsonPath` with `$pollingInterval` polling interval retrying $retryTimes times$stepsToExecute
+----
+
+==== *_Parameters_*
+
+. `jsonPath` - the JSON path of the element to find
+. `pollingInterval` - the duration to wait between retries
+. `retryTimes` - the maximum number of the retries
+. `stepsToExecute` - the sub-steps to execute at each iteration
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Wait for presence of element by JSON path $.data.testData
+When I wait for presence of element by `$.data.testData` with `PT5S` polling interval retrying 10 times
+|step                                  |
+|When I set request headers:           |
+|{headerSeparator=!,valueSeparator=!}  |
+|!name          !value                !|
+|!Authorization !${accessToken}       !|
+|When I issue a HTTP GET request for a resource with the URL '${requestUrl}'|
+----
 
 == Expressions
 

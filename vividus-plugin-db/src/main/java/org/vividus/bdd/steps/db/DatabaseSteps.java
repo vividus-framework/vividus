@@ -58,8 +58,8 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
 import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
-import org.vividus.util.wait.Waiter;
 
 public class DatabaseSteps
 {
@@ -276,7 +276,7 @@ public class DatabaseSteps
         Map<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table.getRows());
         statistics.getTarget().setRowsQuantity(sourceData.size());
 
-        Waiter waiter = new Waiter(new WaitMode(duration, retryTimes));
+        DurationBasedWaiter waiter = new DurationBasedWaiter(new WaitMode(duration, retryTimes));
         List<List<EntryComparisonResult>> comparisonResult = waiter.wait(
             () -> {
                 List<Map<String, Object>> data = jdbcTemplate.queryForList(sqlQuery);
