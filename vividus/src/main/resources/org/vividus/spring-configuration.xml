@@ -34,16 +34,6 @@
         </property>
     </bean>
 
-    <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
-        <property name="scopes">
-            <map>
-                <entry key="thread">
-                    <bean class="org.springframework.context.support.SimpleThreadScope"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
-
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="converters">
             <set>
