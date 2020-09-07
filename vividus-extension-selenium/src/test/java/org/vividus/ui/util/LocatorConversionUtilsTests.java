@@ -25,11 +25,14 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.testdouble.TestElementFilter;
 import org.vividus.testdouble.TestElementSearch;
 import org.vividus.testdouble.TestLocatorType;
@@ -39,6 +42,7 @@ import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 
+@ExtendWith(MockitoExtension.class)
 class LocatorConversionUtilsTests
 {
     private static final String VALUE = "value";
@@ -47,16 +51,11 @@ class LocatorConversionUtilsTests
     private static final char CLOSING_BRACKET = ']';
     private static final String INVALID_LOCATOR = "To.xpath(.a)";
 
-    private LocatorConversionUtils utils;
-
-    @BeforeEach
-    void init()
-    {
-        utils = new LocatorConversionUtils(new ElementActionService(Set.of(
-            new TestElementSearch(),
-            new TestElementFilter()
-        )));
-    }
+    @Spy private final ElementActionService service = new ElementActionService(Set.of(
+        new TestElementSearch(),
+        new TestElementFilter()
+    ));
+    @InjectMocks private LocatorConversionUtils utils;
 
     static Stream<Arguments> actionAttributeSource()
     {

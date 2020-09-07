@@ -23,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.selenium.LocatorFactory;
 import org.vividus.ui.action.search.ElementActionService;
@@ -41,12 +43,7 @@ public class LocatorConversionUtils
     private static final Pattern SEARCH_ATTRIBUTE_PATTERN = Pattern.compile(LOCATOR_FORMAT);
     private static final Pattern FILTER_PATTERN = Pattern.compile("([a-zA-Z]+)(?:\\()([^()]*)(?:\\))");
 
-    private final ElementActionService elementActionService;
-
-    public LocatorConversionUtils(ElementActionService elementActionService)
-    {
-        this.elementActionService = elementActionService;
-    }
+    @Inject private ElementActionService elementActionService;
 
     public Set<Locator> convertToLocatorSet(String locatorsAsString)
     {
