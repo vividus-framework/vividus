@@ -1,0 +1,62 @@
+=== Verify elements number
+
+==== *_Info_*
+
+Verifies if the number of elements located by locator matches desired number
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then number of elements found by `$locator` is $comparisonRule `$quantity`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
+. `$quantity` - expected number of elements
+
+==== *_Usage_*
+
+.VerifyNumber.story
+[source,gherkin]
+----
+Scenario: Step verification 'Then number of elements found by `$locator` is $comparisonRule `$quantity`'
+Then number of elements found by `tagName(img)` is equal to `5`
+----
+
+=== Verify elements state
+
+==== *_Info_*
+
+Verifies if the number of elements located by locator matches number condition and all of them are in desired state
+
+[IMPORTANT]
+
+If you describe number condition as equal to 5 in case if there are 10 elements by this locator and only 5 of them in the desired state. You will get two failed assertions.
+The first one about number condition violation. The second one about state check failure.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then number of $state elements found by `$locator` is $comparisonRule `$quantity`
+----
+
+==== *_Parameters_*
+
+. `$state` - xref:parameters:state.adoc[State]
+. `$locator` - <<_locator>>
+. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
+. `$quantity` - expected number of elements
+
+==== *_Usage_*
+
+.VerifyState.story
+[source,gherkin]
+----
+Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
+Given I am on a page with the URL '${vividus-test-site-url}'
+Then number of VISIBLE elements found by `tagName(img)` is = `1`
+----

@@ -1,0 +1,2 @@
+|mainViewHeaderTextXpath                |
+|//android.widget.TextView[@text='Home']|

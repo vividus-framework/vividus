@@ -35,12 +35,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.State;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
@@ -217,24 +215,6 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Checks whether the context contains
-     * exact amount of elements by locator
-     * @param locator to locate element
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
-     * EQUAL_TO</b></i>)
-     * @param quantity desired amount of elements
-     * @return list of Web elements
-     */
-    @Then("number of elements found by `$locator` is $comparisonRule `$quantity`")
-    public List<WebElement> thePageContainsQuantityElements(Locator locator, ComparisonRule comparisonRule,
-            int quantity)
-    {
-        return baseValidations.assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS, locator, quantity,
-                comparisonRule);
-    }
-
-    /**
      * Checks that all elements found on the page by the given <b>locator</b> have the same <i>dimension</i>:
      * <b>width / height.</b>
      * <p>
@@ -315,26 +295,6 @@ public class ElementSteps implements ResourceLoaderAware
     {
         baseValidations.assertIfElementsExist("The elements to click", locator)
                 .forEach(e -> mouseActions.click(e));
-    }
-
-    /**
-     * Verifies elements' located by locator state.
-     * Where state one of: ENABLED/DISABLED, SELECTED/NOT_SELECTED, VISIBLE/NOT_VISIBLE
-     * Step intended to verify strictly either number of elements and their state
-     * @param state Desired state of an element
-     * @param locator Locator to locate element
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
-     * EQUAL_TO</b></i>)
-     * @param quantity Desired amount of elements
-     */
-    @Then("number of $state elements found by `$locator` is $comparisonRule `$quantity`")
-    public void doesElementsNumberInStateExists(State state, Locator locator, ComparisonRule comparisonRule,
-            int quantity)
-    {
-        String description = "Element is " + state;
-        thePageContainsQuantityElements(locator, comparisonRule, quantity)
-                .forEach(e -> baseValidations.assertElementState(description, state, e));
     }
 
     @Override
