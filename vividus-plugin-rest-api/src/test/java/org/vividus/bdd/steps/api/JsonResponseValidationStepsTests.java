@@ -439,7 +439,7 @@ class JsonResponseValidationStepsTests
 
     private void testWaitForJsonFieldAppears(int elementsFound) throws IOException
     {
-        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT2S"),
+        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(2),
                 DURATION_DIVIDER);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH),
                 eq(elementsFound), verifyMatcher(1));

@@ -501,7 +501,7 @@ class DatabaseStepsTests
         when(dataSource.getConnection()).thenReturn(con);
 
         databaseSteps.waitForDataAppearance(
-                Duration.parse("PT2S"), 2, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
+                Duration.ofSeconds(2), 2, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
         String logMessage = "SQL result data is not equal to expected data in {} records";
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(logMessage, 1), info(logMessage, 1))));
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
