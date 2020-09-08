@@ -24,8 +24,6 @@
     <bean id="fileSteps" class="org.vividus.bdd.steps.FileSteps" />
     <bean id="setupSteps" class="org.vividus.bdd.steps.SetupSteps" />
 
-    <util:list id="stepBeanNames-Custom" />
-
     <util:list id="stepBeanNames-Vividus">
         <value>assertSteps</value>
         <value>bddVariableSteps</value>
