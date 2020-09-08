@@ -10,6 +10,27 @@ The plugin provides functionality to test mobile application on real devices, An
 implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version: '{page-component-version}')
 ----
 
+
+include::partial$locator-header.adoc[]
+
+=== Types
+
+[cols="1,2,2", options="header"]
+|===
+
+|Locator type
+|Description
+|Examples
+
+|XPath
+|Search the app XML source using xpath (not recommended, has http://appium.io/docs/en/commands/element/find-elements/index.html#selector-strategies[performance issues])
+|xpath(//android.widget.TextView[@text='Home']) or By.xpath(//XCUIElementTypeStaticText[@value='Home'])
+
+|===
+
+include::partial$visibility-types.adoc[]
+
+
 == Properties
 
 === Required
@@ -136,3 +157,5 @@ Given I start mobile application with capabilities:
 |bstack:options.networkLogs     |true |
 |appium:options.clearSystemFiles|false|
 ----
+
+include::partial$generic-ui-steps.adoc[]

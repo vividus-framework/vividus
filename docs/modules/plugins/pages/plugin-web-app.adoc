@@ -12,6 +12,152 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '{
 ----
 
 
+include::partial$locator-header.adoc[]
+
+=== Types
+
+[cols="1,2,1", options="header"]
+|===
+
+|Locator type
+|Description
+|Example
+
+|linkText
+|text of the link
+|linkText(Google)
+
+|linkUrl
+|*href* attribute of the link element
+|linkUrl(/faq)
+
+|linkUrlPart
+|part of a *href* attribute of the link element
+|linkUrlPart(faq)
+
+|caseSensitiveText
+|case sensitive text of an element
+|caseSensitiveText(Description)
+
+|caseInsensitiveText
+|case insensitive text of an element
+|caseInsensitiveText(description)
+
+|XPath
+|https://developer.mozilla.org/en-US/docs/Web/XPath[Xpath to locate an element]
+|xpath(//a)
+
+|cssSelector
+|CSS selector to an element
+|cssSelector(.menu-item)
+
+|tagName
+|name of an element tagName
+|tagName(a)
+
+|imageSrc
+|shortcut to a *.//img[@src='<value>>']*
+|imgSrc(/images/kote.png)
+
+|imageSrcPart
+|shortcut to a *.//img[contains(@src,'<value>>')]']*
+|imgSrcPart(kote.png)
+
+|buttonName
+|elements of type button or input with text or any attribute value
+|buttonName(submit)
+
+|fieldName
+|input or textarea with text or any attribute value
+|fieldName(editor)
+
+|checkboxName
+|input element with @type="checkbox" and text value
+|checkboxName(allow)
+
+|id
+|id attribute of an element
+|id(submitForm)
+
+|className
+|CSS class name
+|className(bold)
+
+|elementName
+|Any attribute or text value
+|elementName(OK)
+
+|===
+
+include::partial$visibility-types.adoc[]
+
+=== Filter types
+
+Filter are applied after elements search via locator. Elements not matching filter condition will be sorted out without additional notice.
+
+[cols="1,2,3", options="header"]
+|===
+
+|Filter type
+|Description
+|Example
+
+|state
+|
+element xref:parameters:state.adoc[State]
+|id(v1)->filter.state(VISIBLE)
+
+|caseSensitiveText
+|element text should match case sensitively
+|id(v1)->filter.caseSensitiveText(text)
+
+|classAttributePart
+|class attribute should contain part
+|id(v1)->filter.classAttributePart(clazz)
+
+|linkUrl
+|*href* attribute of the link element
+|id(v1)->filter.linkUrl(/url)
+
+|linkUrlPart
+|part of *href* attribute of the link element
+|id(v1)->filter.linkUrlPart(/url)
+
+|tooltip
+|title attribute value
+|id(v1)->filter.tooltip(title)
+
+|imageSrcPart
+|src attribute should contain value
+|id(v1)->filter.imageSrcPart(part)
+
+|textPart
+|text of an element should contain value
+|id(v1)->filter.textPart(part)
+
+|placeholder
+|Placeholder attribute should be equal to a value
+|id(v1)->filter.placeholder(placeholder-value)
+
+|validationIconSource
+|CSS property background-image should match
+|id(v1)->filter.validationIconSource(src)
+
+|fieldText
+|field text should match expected value
+|id(v1)->filter.fieldText(value)
+
+|fieldTextPart
+|field text should contain expected value
+|id(v1)->filter.fieldTextPart(value)
+
+|dropDownText
+|any of select options should be equal to a value
+|id(v1)->filter.dropDownText(value)
+
+|===
+
+
 == Properties
 
 === Required
@@ -282,41 +428,7 @@ When I wait until HTTP GET request with URL pattern `http://httpbin.org/get` exi
 Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `1`
 ----
 
-=== Verify elements state
-
-==== *_Info_*
-
-Verifies if the number of elements located by locator matches number condition and all of them are in desired state
-
-[IMPORTANT]
-
-If you describer number condition as equal to 5 in case if there are 10 elements by this locator and only 5 of them in the desired state. You will get two failed assertions.
-The first one about number condition violation. The second one about state check failure.
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-Then number of $state elements found by `$locator` is $comparisonRule `$quantity`
-----
-
-==== *_Parameters_*
-
-. `$state` - xref:parameters:state.adoc[State]
-. `$locator` - xref:parameters:locator.adoc[Locator]
-. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
-. `$quantity` - expected number of elements
-
-==== *_Usage_*
-
-.VerifyState.story
-[source,gherkin]
-----
-Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
-Given I am on a page with the URL '${vividus-test-site-url}'
-Then number of VISIBLE elements found by `tagName(img)` is = `1`
-----
-
+include::partial$generic-ui-steps.adoc[]
 
 === Dropdown: verify available options.
 
@@ -333,7 +445,7 @@ Then dropdown located `$locator` contains options: $option
 
 ==== *_Parameters_*
 
-. `$locator` - xref:parameters:locator.adoc[Locator]
+. `$locator` - <<_locator>>
 . `$options` - examples table describing expected options
 
 ==== *_Usage_*
@@ -368,7 +480,7 @@ Then dropdown located `$locator` exists and selected option is `$option`
 
 ==== *_Parameters_*
 
-. `$locator` - xref:parameters:locator.adoc[Locator]
+. `$locator` - <<_locator>>
 . `$option` - first selected option
 
 ==== *_Usage_*
@@ -399,7 +511,7 @@ When I add `$option` to selection in dropdown located `$locator`
 ==== *_Parameters_*
 
 . `$option` - option to select
-. `$locator` - xref:parameters:locator.adoc[Locator]
+. `$locator` - <<_locator>>
 
 ==== *_Usage_*
 
@@ -429,7 +541,7 @@ When I select `$option` in dropdown located `$locator``
 ==== *_Parameters_*
 
 . `$option` - option to select
-. `$locator` - xref:parameters:locator.adoc[Locator]
+. `$locator` - <<_locator>>
 
 ==== *_Usage_*
 

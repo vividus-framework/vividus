@@ -239,7 +239,7 @@ jobs:
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                                 -Pvividus.configuration.environments=system/mobile_app/browserstack/ios \
-                                                -Pvividus.configuration.suite=system/mobile_app \
+                                                -Pvividus.configuration.suite=system/mobile_app/healthcheck \
                                                 -Pvividus.configuration.profiles=mobile_app/ios,browserstack/mobile_app \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
@@ -275,7 +275,7 @@ jobs:
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                                 -Pvividus.configuration.environments=system/mobile_app/browserstack/android \
-                                                -Pvividus.configuration.suite=system/mobile_app \
+                                                -Pvividus.configuration.suite=system/mobile_app/healthcheck \
                                                 -Pvividus.configuration.profiles=mobile_app/android,browserstack/mobile_app \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \

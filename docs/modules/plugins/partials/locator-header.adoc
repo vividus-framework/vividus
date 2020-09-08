@@ -1,0 +1,22 @@
+== Locator
+
+=== Description
+
+Describes elements locator. Should match regular expression: `(?:By\\.)?([a-zA-Z]+)\\((.+?)\\):?([a-zA-Z]*)?`
+
+=== Syntax
+
+----
+By.<locatorType>(<locatorValue>):<visibility>->filter.<filterType>(<filterValue>)
+----
+
+[IMPORTANT]
+
+By. prefix is optional.
+
+
+. `locatorType` - *[mandatory]* type of the locator
+. `locatorValue` - *[mandatory]* value of the locator
+. `visibility` - *[optional]* visibility of element (visible by default)
+. `filterType` - *[optional]* type of the filter
+. `filterValue` - *[required if filter type defined]* value of the filter

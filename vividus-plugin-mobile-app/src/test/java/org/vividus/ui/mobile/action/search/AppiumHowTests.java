@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.action.search;
+package org.vividus.ui.mobile.action.search;
 
-import java.util.Set;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public interface LocatorType
+import org.junit.jupiter.api.Test;
+
+class AppiumHowTests
 {
-    Class<? extends IElementAction> getActionClass();
+    private static final String VALUE = "value";
 
-    String getAttributeName();
-
-    String getKey();
-
-    default Set<LocatorType> getCompetingTypes()
+    @Test
+    void testBuildBy()
     {
-        return Set.of();
+        assertEquals("By.xpath: " + VALUE, AppiumHow.XPATH.buildBy(VALUE).toString());
     }
 }

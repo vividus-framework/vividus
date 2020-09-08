@@ -42,10 +42,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
@@ -58,12 +56,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
-import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.State;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
@@ -101,7 +97,6 @@ public class ElementStepsTests
     private static final String ELEMENT_XPATH = "elementXpath";
     private static final String CHILD_XPATH = "childXpath";
     private static final String THE_NUMBER_OF_PARENT_ELEMENTS = "The number of parent elements";
-    private static final String THE_NUMBER_OF_FOUND_ELEMENTS = "The number of found elements";
 
     @Mock
     private IBaseValidations baseValidations;
@@ -242,17 +237,6 @@ public class ElementStepsTests
     }
 
     @Test
-    public void testThePageContainsQuantityElements()
-    {
-        ComparisonRule comparisonRule = ComparisonRule.EQUAL_TO;
-        int number = 1;
-        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
-        elementSteps.thePageContainsQuantityElements(locator, comparisonRule, number);
-        verify(baseValidations).assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS,
-                locator, number, comparisonRule);
-    }
-
-    @Test
     public void doesEachElementByLocatorHaveChildWithLocatorSuccess()
     {
         Locator elementLocator = new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(ELEMENT_XPATH));
@@ -283,7 +267,7 @@ public class ElementStepsTests
         elementsList.add(webElement);
         when(uiContext.getSearchContext()).thenReturn(searchContext);
         Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
-        when(baseValidations.assertIfAtLeastNumberOfElementsExist(THE_NUMBER_OF_FOUND_ELEMENTS, locator, 2))
+        when(baseValidations.assertIfAtLeastNumberOfElementsExist("The number of found elements", locator, 2))
                 .thenReturn(elementsList);
         elementSteps.doesEachElementByLocatorHaveSameDimension(locator, dimension);
         verify(elementValidations).assertAllWebElementsHaveEqualDimension(elementsList, dimension);
@@ -421,22 +405,6 @@ public class ElementStepsTests
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         elementSteps.uploadFile(locator, FILE_PATH);
         verify(webElement, never()).sendKeys(ABSOLUTE_PATH);
-    }
-
-    @Test
-    public void shouldVerifyIfAllTheElementsHasValidState()
-    {
-        ComparisonRule comparisonRule = ComparisonRule.EQUAL_TO;
-        int number = 1;
-        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
-        when(baseValidations.assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS,
-                locator, number, comparisonRule)).thenReturn(List.of(webElement, webElement, webElement));
-        State state = State.ENABLED;
-        InOrder ordered = Mockito.inOrder(baseValidations);
-        elementSteps.doesElementsNumberInStateExists(state, locator, comparisonRule, number);
-        ordered.verify(baseValidations).assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS,
-                locator, number, comparisonRule);
-        ordered.verify(baseValidations, times(3)).assertElementState("Element is ENABLED", state, webElement);
     }
 
     private void mockWebElementCssValue()

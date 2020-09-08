@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.action.search;
+package org.vividus.ui.mobile.action.search;
 
-import java.util.Set;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.How;
 
-public interface LocatorType
+public enum AppiumHow
 {
-    Class<? extends IElementAction> getActionClass();
-
-    String getAttributeName();
-
-    String getKey();
-
-    default Set<LocatorType> getCompetingTypes()
+    XPATH
     {
-        return Set.of();
-    }
+        @Override
+        public By buildBy(String value)
+        {
+            return How.XPATH.buildBy(value);
+        }
+    };
+
+    public abstract By buildBy(String value);
 }
