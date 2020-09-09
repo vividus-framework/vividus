@@ -36,29 +36,47 @@ include::partial$locator-header.adoc[]
 include::partial$visibility-types.adoc[]
 
 
-== Properties
 
-=== Required
+== Properties
 
 See xref:ROOT:tests-configuration.adoc[Selenium Grid] properties to configure remote grid
 
-=== Optional
-
-* `selenium.grid.platform-name` - defines mobile OS to use, e.g. `Android` or `iOS`
-* `selenium.grid.automation-name` - defines automation engine to use, see <<automation-engines, automation engines>> table for details
-
-.[[automation-engines]]Automation engines
-[cols="1,2", options="header"]
+:application-under-test: mobile application
+:session-scope-property-base: mobile-application
+[cols="6,3,2,6", options="header"]
 |===
+|Property Name
+|Acceptable values
+|Default
+|Description
 
-|Platform
-|Recommended engine
+include::partial$selenium-properties.adoc[]
 
-|`Android`
-|http://appium.io/docs/en/drivers/android-uiautomator2/[UIAutomator2]
+|`selenium.grid.platform-name`
+a|`Android`
 
-|`iOS`
-|http://appium.io/docs/en/drivers/ios-xcuitest/[XCUITest]
+`iOS`
+|Depends on the set profile
+|Defines the mobile OS to use
+
+|`selenium.grid.automation-name`
+a|`UIAutomator2`
+`XCUITest`
+|Depends on the set profile
+a|Defines automation engine to use
+[cols="1,2", options="header"]
+!===
+
+!Platform
+!Recommended engine
+
+!`Android`
+!http://appium.io/docs/en/drivers/android-uiautomator2/[UIAutomator2]
+
+!`iOS`
+!http://appium.io/docs/en/drivers/ios-xcuitest/[XCUITest]
+!===
+
 |===
 
 == Profiles

@@ -7,6 +7,10 @@
      http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
      default-lazy-init="true" profile="mobile_app">
 
+    <bean id="webDriverSetupSteps" class="org.vividus.bdd.steps.WebDriverSetupSteps">
+        <constructor-arg index="0" value="${mobile-application.session-scope}" />
+    </bean>
+
     <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
@@ -26,5 +30,6 @@
 
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
         <value>applicationSteps</value>
+        <value>webDriverSetupSteps</value>
     </util:list>
 </beans>

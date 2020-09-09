@@ -223,6 +223,10 @@
     <bean id="elementValidations" class="org.vividus.bdd.steps.ui.web.validation.ElementValidations" />
     <bean id="focusValidations" class="org.vividus.bdd.steps.ui.web.validation.FocusValidations" />
 
+    <bean id="webDriverSetupSteps" class="org.vividus.bdd.steps.WebDriverSetupSteps">
+        <constructor-arg index="0" value="${web-application.session-scope}" />
+    </bean>
+
     <bean id="alertSteps" class="org.vividus.bdd.steps.ui.web.AlertSteps" />
     <bean id="buttonSteps" class="org.vividus.bdd.steps.ui.web.RadioButtonSteps" />
     <bean id="codeSteps" class="org.vividus.bdd.steps.ui.web.CodeSteps" />
@@ -347,6 +351,7 @@
     <bean id="browserLogCleanningListener" class="org.vividus.bdd.steps.ui.web.listener.BrowserLogCleanningListener" />
 
     <util:list id="stepBeanNames-WebUi" value-type="java.lang.String">
+        <value>webDriverSetupSteps</value>
         <value>alertSteps</value>
         <value>cookieSteps</value>
         <value>scriptSteps</value>

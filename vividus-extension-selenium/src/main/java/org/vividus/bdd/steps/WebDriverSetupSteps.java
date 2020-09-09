@@ -16,6 +16,9 @@
 
 package org.vividus.bdd.steps;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
+import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.AfterStory;
 import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.BeforeStory;
@@ -26,15 +29,18 @@ import org.vividus.selenium.ControllingMetaTag;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 
-public class VividusWebDriverSetupSteps
+public class WebDriverSetupSteps
 {
+    private final WebDriverSessionScope webDriverSessionScope;
     private final IWebDriverProvider webDriverProvider;
     private final IWebDriverManagerContext webDriverManagerContext;
     private final IBddRunContext bddRunContext;
 
-    public VividusWebDriverSetupSteps(IWebDriverProvider webDriverProvider,
+    public WebDriverSetupSteps(WebDriverSessionScope webDriverSessionScope, IWebDriverProvider webDriverProvider,
             IWebDriverManagerContext webDriverManagerContext, IBddRunContext bddRunContext)
     {
+        isTrue(webDriverSessionScope != null, "Application session scope is not set");
+        this.webDriverSessionScope = webDriverSessionScope;
         this.webDriverProvider = webDriverProvider;
         this.webDriverManagerContext = webDriverManagerContext;
         this.bddRunContext = bddRunContext;
@@ -52,8 +58,25 @@ public class VividusWebDriverSetupSteps
         processMeta(bddRunContext.getRunningStory().getStory().getMeta());
     }
 
+    @AfterScenario(uponType = ScenarioType.ANY)
+    public void afterScenario()
+    {
+        if (webDriverSessionScope == WebDriverSessionScope.SCENARIO)
+        {
+            stopWebDriver();
+        }
+    }
+
     @AfterStory
     public void afterStory()
+    {
+        if (webDriverSessionScope == WebDriverSessionScope.STORY)
+        {
+            stopWebDriver();
+        }
+    }
+
+    private void stopWebDriver()
     {
         webDriverProvider.end();
         webDriverManagerContext.reset();
@@ -65,15 +88,5 @@ public class VividusWebDriverSetupSteps
         {
             webDriverProvider.end();
         }
-    }
-
-    protected IWebDriverProvider getWebDriverProvider()
-    {
-        return webDriverProvider;
-    }
-
-    protected IBddRunContext getBddRunContext()
-    {
-        return bddRunContext;
     }
 }
