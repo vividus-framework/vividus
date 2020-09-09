@@ -21,21 +21,41 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.testdouble.TestElementFilter;
 import org.vividus.testdouble.TestElementSearch;
 import org.vividus.testdouble.TestLocatorType;
 
+@ExtendWith(MockitoExtension.class)
 class ElementActionServiceTests
 {
-    private final ElementActionService service = new ElementActionService(Set.of(
-        new TestElementFilter(),
-        new TestElementSearch()
-    ));
+    @Spy private Set<IElementAction> elementActions = new HashSet<>();
+    @InjectMocks private ElementActionService service;
+
+    @BeforeEach
+    void init() throws IllegalArgumentException, IllegalAccessException
+    {
+        elementActions.add(new TestElementFilter());
+        elementActions.add(new TestElementSearch());
+        service.init();
+    }
+
+    @AfterEach
+    void cleanUp()
+    {
+        elementActions.clear();
+    }
 
     @Test
     void shouldReturnSearchLocatorTypes()

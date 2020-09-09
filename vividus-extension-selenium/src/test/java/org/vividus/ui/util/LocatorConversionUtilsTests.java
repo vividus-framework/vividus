@@ -18,6 +18,8 @@ package org.vividus.ui.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -31,10 +33,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.Spy;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.testdouble.TestElementFilter;
-import org.vividus.testdouble.TestElementSearch;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.action.search.ElementActionService;
 import org.vividus.ui.action.search.Locator;
@@ -51,10 +51,7 @@ class LocatorConversionUtilsTests
     private static final char CLOSING_BRACKET = ']';
     private static final String INVALID_LOCATOR = "To.xpath(.a)";
 
-    @Spy private final ElementActionService service = new ElementActionService(Set.of(
-        new TestElementSearch(),
-        new TestElementFilter()
-    ));
+    @Mock private ElementActionService service;
     @InjectMocks private LocatorConversionUtils utils;
 
     static Stream<Arguments> actionAttributeSource()
@@ -84,6 +81,8 @@ class LocatorConversionUtilsTests
     @MethodSource("actionAttributeSource")
     void testConvertToLocator(Locator expected, String testValue)
     {
+        lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        lenient().when(service.getFilterLocatorTypes()).thenReturn(Set.of(TestLocatorType.FILTER));
         assertEquals(expected, utils.convertToLocator(testValue));
     }
 
@@ -98,6 +97,8 @@ class LocatorConversionUtilsTests
     @Test
     void testConvertToLocatorInvalidFilterType()
     {
+        when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        when(service.getFilterLocatorTypes()).thenReturn(Set.of(TestLocatorType.FILTER));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> utils
                 .convertToLocator("By.search(id)->filter.filter(enabled).filter(text).notFilter(any)"));
@@ -123,6 +124,7 @@ class LocatorConversionUtilsTests
     @Test
     void testConvertToLocatorSet()
     {
+        when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
         Locator locatorId = new Locator(TestLocatorType.SEARCH, VALUE + 1);
         Locator locatorClassName = new Locator(TestLocatorType.SEARCH, VALUE + 2);
         assertEquals(new HashSet<>(Arrays.asList(locatorId, locatorClassName)),
