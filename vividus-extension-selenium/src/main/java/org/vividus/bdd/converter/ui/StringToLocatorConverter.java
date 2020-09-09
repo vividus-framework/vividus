@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.converter;
+package org.vividus.bdd.converter.ui;
 
 import javax.inject.Named;
 
