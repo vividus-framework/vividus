@@ -31,8 +31,6 @@
 
     <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" />
 
-    <bean id="vividusWebDriverSetupSteps" class="org.vividus.bdd.steps.VividusWebDriverSetupSteps" />
-
     <bean id="waitActions" class="org.vividus.ui.action.WaitActions" />
 
     <bean class="org.vividus.ui.action.WaitFactory">
@@ -67,10 +65,6 @@
     <bean class="org.vividus.ui.listener.UiContextListener" lazy-init="false" />
 
     <bean id="genericElementSteps" class="org.vividus.bdd.steps.ui.GenericElementSteps" />
-
-    <util:list id="stepBeanNames-Selenium" value-type="java.lang.String">
-        <value>vividusWebDriverSetupSteps</value>
-    </util:list>
 
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
         <idref bean="genericElementSteps" />

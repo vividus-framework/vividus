@@ -1,0 +1,12 @@
+|`{session-scope-property-base}.session-scope`
+a|`story`
+
+`scenario`
+|`story`
+a|Defines the test lifecycle of the {application-under-test}:
+
+* the {application-under-test} opens at the first step requiring {application-under-test} interaction
+* the {application-under-test} closes after `story` or `scenario` depending on the property value
+* each scenario-level examples table iteration is treated as a separate `scenario`
+
+An empty property value will lead to the error: "Application session scope is not set".

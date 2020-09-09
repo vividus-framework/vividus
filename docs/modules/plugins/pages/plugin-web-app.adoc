@@ -160,11 +160,19 @@ element xref:parameters:state.adoc[State]
 
 == Properties
 
-=== Required
+:application-under-test: browser
+:session-scope-property-base: web-application
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
 
-There are no required properties for the plugin.
+include::partial$selenium-properties.adoc[]
+|===
 
-=== Optional
+=== Meta Tags
 
 @proxy - Some steps requires proxy to be turned on. It can be done via setting properties or switching on @proxy metatag.
 
