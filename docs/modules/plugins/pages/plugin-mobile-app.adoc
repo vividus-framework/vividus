@@ -64,8 +64,9 @@ See xref:ROOT:tests-configuration.adoc[Selenium Grid] properties to configure re
 == Profiles
 
 === iOS
+:ios-profile: mobile_app/ios
 
-The profile can be enabled by adding `mobile_app/ios` to `configuration.profiles` property
+The profile can be enabled by adding `{ios-profile}` to `configuration.profiles` property
 
 Default profile configuration
 [source,properties]
@@ -75,8 +76,9 @@ selenium.grid.automation-name=XCUITest
 ----
 
 === Android
+:android-profile: mobile_app/android
 
-The profile can be enabled by adding `mobile_app/android` to `configuration.profiles` property
+The profile can be enabled by adding `{android-profile}` to `configuration.profiles` property
 
 Default profile configuration
 [source,properties]
@@ -90,6 +92,7 @@ selenium.grid.automation-name=UIAutomator2
 ==== Info
 
 * The profile can be enabled by adding `browserstack/mobile_app` to `configuration.profiles` property
+* The profile must be used together with either `{ios-profile}` or `{android-profile}` profiles
 * BrowserStack specific properties must be prepended with `selenium.grid.capabilities.bstack\:options.` prefix, meaning given a property `projectName` with a value `My Project` the resulting property will be `selenium.grid.capabilities.bstack\:options.projectName=My Project`
 * Appium specific properties in BrowserStack must be prepended with `selenium.grid.capabilities.appium\:options.` prefix, meaning given a property `clearSystemFiles` with a value `true` the resulting property will be `selenium.grid.capabilities.appium\:options.clearSystemFiles=true`
 * See https://www.browserstack.com/app-automate/capabilities?tag=w3c[Capabilities Builder] to setup configuration
@@ -102,6 +105,7 @@ selenium.grid.automation-name=UIAutomator2
 ==== Info
 
 * The profile can be enabled by adding `saucelabs/mobile_app` to `configuration.profiles` property
+* The profile must be used together with either `{ios-profile}` or `{android-profile}` profiles
 * See https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/[Platform Configurator] to setup configuration
 
 ==== Required properties
