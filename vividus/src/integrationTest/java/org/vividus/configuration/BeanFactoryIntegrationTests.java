@@ -56,9 +56,14 @@ class BeanFactoryIntegrationTests
         resetBeanFactory();
     }
 
+    @Test
+    void testBeanFactoryEmptyProfiles()
+    {
+        openBeanFactory("", new String[] {});
+    }
+
     @ParameterizedTest(name = "{0} profile")
     @ValueSource(strings = {
-            "",
             "web/desktop/chrome",
             "web/phone/iphone",
             "web/tablet/ipad",
@@ -68,9 +73,14 @@ class BeanFactoryIntegrationTests
     })
     void testBeanFactory(String profile)
     {
+        openBeanFactory(profile, new String[] { "web" });
+    }
+
+    private static void openBeanFactory(String profile, String[] springProfiles)
+    {
         System.setProperty(CONFIGURATION_PROFILE, profile);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, "integrationtest");
-        BeanFactory.open();
+        BeanFactory.open(springProfiles);
         for (String beanName : BeanFactory.getBeanDefinitionNames())
         {
             try
