@@ -14,6 +14,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version:
 include::partial$locator-header.adoc[]
 
 === Types
+:locator-strategy: https://appium.io/docs/en/commands/element/find-elements/index.html#selector-strategies
 
 [cols="1,2,2", options="header"]
 |===
@@ -23,8 +24,12 @@ include::partial$locator-header.adoc[]
 |Examples
 
 |XPath
-|Search the app XML source using xpath (not recommended, has http://appium.io/docs/en/commands/element/find-elements/index.html#selector-strategies[performance issues])
+|Search the app XML source using xpath (not recommended, has {locator-strategy}[performance issues])
 |xpath(//android.widget.TextView[@text='Home']) or By.xpath(//XCUIElementTypeStaticText[@value='Home'])
+
+|Accessibility ID
+|See {locator-strategy}[Accessibility ID] selector strategy
+|accessibilityId(menu-toggler) or By.accessibilityId(menu-toggler)
 
 |===
 

@@ -21,16 +21,21 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class AppiumLocatorTypeTests
 {
-    @Test
-    void testAppiumLocatorType()
+    @ParameterizedTest
+    @CsvSource({
+        "Appium XPath    , XPATH           ",
+        "Accessibility Id, ACCESSIBILITY_ID"
+    })
+    void testAppiumLocatorType(String attributeName, AppiumLocatorType locatorType)
     {
-        assertEquals("Appium XPath", AppiumLocatorType.XPATH.getAttributeName());
-        assertEquals(ByAppiumLocatorSearch.class, AppiumLocatorType.XPATH.getActionClass());
-        assertEquals("XPATH", AppiumLocatorType.XPATH.getKey());
-        assertThat(AppiumLocatorType.XPATH.getCompetingTypes(), is(empty()));
+        assertEquals(attributeName, locatorType.getAttributeName());
+        assertEquals(ByAppiumLocatorSearch.class, locatorType.getActionClass());
+        assertEquals(locatorType.name(), locatorType.getKey());
+        assertThat(locatorType.getCompetingTypes(), is(empty()));
     }
 }

@@ -21,7 +21,8 @@ import org.vividus.ui.action.search.LocatorType;
 
 public enum AppiumLocatorType implements LocatorType
 {
-    XPATH("Appium XPath", ByAppiumLocatorSearch.class);
+    XPATH("Appium XPath", ByAppiumLocatorSearch.class),
+    ACCESSIBILITY_ID("Accessibility Id", ByAppiumLocatorSearch.class);
 
     private final String attributeName;
     private final Class<? extends IElementAction> actionClass;

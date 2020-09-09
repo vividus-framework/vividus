@@ -19,5 +19,5 @@ Scenario: Verify step: 'Then number of $state elements found by `$locator` is $c
 Then number of elements found by `xpath(<mainViewHeaderTextXpath>)` is equal to `1`
 
 
-Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
-Then number of VISIBLE elements found by `xpath(<mainViewHeaderTextXpath>):a` is equal to `1`
+Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Accessibility Id Locator
+Then number of VISIBLE elements found by `accessibilityId(<togglerAccessibilityId>):a` is equal to `1`

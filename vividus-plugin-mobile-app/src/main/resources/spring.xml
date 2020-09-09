@@ -19,6 +19,11 @@
         <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).XPATH}" />
     </bean>
 
+    <bean class="org.vividus.ui.mobile.action.search.ByAppiumLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).ACCESSIBILITY_ID}" />
+        <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).ACCESSIBILITY_ID}" />
+    </bean>
+
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
         <value>applicationSteps</value>
     </util:list>

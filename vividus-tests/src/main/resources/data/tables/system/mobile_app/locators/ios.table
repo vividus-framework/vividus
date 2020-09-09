@@ -1,2 +1,3 @@
-|mainViewHeaderTextXpath                   |
-|//XCUIElementTypeStaticText[@value='Home']|
+{transformer=FROM_LANDSCAPE}
+|mainViewHeaderTextXpath|//XCUIElementTypeStaticText[@value='Home']|
+|togglerAccessibilityId |menu-toggler-testID                       |
