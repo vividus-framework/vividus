@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.converter;
+package org.vividus.bdd.converter.ui.web;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -33,6 +33,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Point;
+import org.vividus.bdd.converter.PointConverter;
+import org.vividus.bdd.converter.ui.StringToLocatorConverter;
 import org.vividus.bdd.steps.ui.web.model.SequenceAction;
 import org.vividus.bdd.steps.ui.web.model.SequenceActionType;
 import org.vividus.ui.action.search.Locator;

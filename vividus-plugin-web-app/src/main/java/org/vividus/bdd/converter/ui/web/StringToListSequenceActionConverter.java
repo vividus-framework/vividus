@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.converter;
+package org.vividus.bdd.converter.ui.web;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -28,6 +28,8 @@ import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.converter.PointConverter;
+import org.vividus.bdd.converter.ui.StringToLocatorConverter;
 import org.vividus.bdd.steps.ui.web.model.SequenceAction;
 import org.vividus.bdd.steps.ui.web.model.SequenceActionType;
 
