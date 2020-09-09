@@ -64,7 +64,9 @@ class BeanFactoryIntegrationTests
             "web/tablet/ipad",
             "web/desktop/chrome/mobile_emulation/phone",
             "web/desktop/chrome/mobile_emulation/tablet",
-            "web/desktop/chrome/mobile_emulation/responsive"
+            "web/desktop/chrome/mobile_emulation/responsive",
+            "mobile_app/ios",
+            "mobile_app/android"
     })
     void testBeanFactory(String profile)
     {
