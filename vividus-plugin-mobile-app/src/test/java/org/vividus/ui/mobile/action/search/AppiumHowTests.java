@@ -18,15 +18,21 @@ package org.vividus.ui.mobile.action.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Test;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class AppiumHowTests
 {
     private static final String VALUE = "value";
 
-    @Test
-    void testBuildBy()
+    @ParameterizedTest
+    @CsvSource({
+        "By.xpath:          , XPATH           ",
+        "By.AccessibilityId:, ACCESSIBILITY_ID"
+    })
+    void testBuildBy(String prefix, AppiumHow how)
     {
-        assertEquals("By.xpath: " + VALUE, AppiumHow.XPATH.buildBy(VALUE).toString());
+        assertEquals(prefix + StringUtils.SPACE +  VALUE, how.buildBy(VALUE).toString());
     }
 }

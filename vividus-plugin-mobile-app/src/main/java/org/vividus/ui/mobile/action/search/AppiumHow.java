@@ -19,6 +19,8 @@ package org.vividus.ui.mobile.action.search;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.How;
 
+import io.appium.java_client.MobileBy;
+
 public enum AppiumHow
 {
     XPATH
@@ -27,6 +29,14 @@ public enum AppiumHow
         public By buildBy(String value)
         {
             return How.XPATH.buildBy(value);
+        }
+    },
+    ACCESSIBILITY_ID
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return MobileBy.AccessibilityId(value);
         }
     };
 

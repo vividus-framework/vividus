@@ -1,2 +1,3 @@
-|mainViewHeaderTextXpath                |
-|//android.widget.TextView[@text='Home']|
+{transformer=FROM_LANDSCAPE}
+|mainViewHeaderTextXpath|//android.widget.TextView[@text='Home']  |
+|togglerAccessibilityId |menu-toggler-accessibilityLabel          |
