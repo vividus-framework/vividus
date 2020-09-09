@@ -20,16 +20,17 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 public class ElementActionService
 {
-    private final Set<IElementAction> elementActions;
+    @Inject private Set<IElementAction> elementActions;
 
-    private final Set<LocatorType> searchLocatorTypes;
-    private final Set<LocatorType> filterLocatorTypes;
+    private Set<LocatorType> searchLocatorTypes;
+    private Set<LocatorType> filterLocatorTypes;
 
-    public ElementActionService(Set<IElementAction> elementActions)
+    public void init()
     {
-        this.elementActions = elementActions;
         this.searchLocatorTypes = collectTypesByActionClass(IElementSearchAction.class);
         this.filterLocatorTypes = collectTypesByActionClass(IElementFilterAction.class);
     }

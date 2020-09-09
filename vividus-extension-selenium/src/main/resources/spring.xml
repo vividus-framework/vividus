@@ -58,7 +58,7 @@
 
     <bean class="org.vividus.bdd.steps.ui.validation.BaseValidations" />
 
-    <bean class="org.vividus.ui.action.search.ElementActionService"/>
+    <bean class="org.vividus.ui.action.search.ElementActionService" init-method="init"/>
 
     <bean class="org.vividus.ui.util.LocatorConversionUtils" />
 
