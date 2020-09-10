@@ -205,7 +205,6 @@ class ElementSearchActionTests
                 parameters, ANY_TEXT);
         assertEquals(List.of(), foundElements);
         verifyNoInteractions(waitActions);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of()));
     }
 
     @Test

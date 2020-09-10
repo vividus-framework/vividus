@@ -59,6 +59,7 @@ public abstract class AbstractElementAction implements IElementAction
         {
             return findElements(searchContext, locator, parameters, false);
         }
+        LOGGER.error("Unable to locate elements, because search context is not set");
         return List.of();
     }
 
