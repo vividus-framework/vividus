@@ -245,3 +245,6 @@ When I change context to element located `<locator>`
 
 Composite: When I wait '$duration' with '$pollingDuration' polling until an element located by $locator appears
 When I wait `<duration>` with `<pollingDuration>` polling until element located `<locator>` becomes VISIBLE
+
+Composite: When I wait until elements with the name '$elementName' appear
+When I wait until element located `By.elementName(<elementName>)` appears

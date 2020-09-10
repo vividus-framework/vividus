@@ -243,19 +243,6 @@ class WaitStepsTests
     }
 
     @Test
-    void testWaitTillElementsAreVisible()
-    {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
-        Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, NAME);
-        WaitResult<WebElement> waitResult = mock(WaitResult.class);
-        IExpectedSearchContextCondition<WebElement> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchActionsConditions.visibilityOfElement(locator)).thenReturn(condition);
-        when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
-        waitSteps.waitTillElementsAreVisible(NAME);
-        verify(waitResult).isWaitPassed();
-    }
-
-    @Test
     void testWaitDurationWithPollingDurationTillElementDisappears()
     {
         when(uiContext.getSearchContext()).thenReturn(webElement);
