@@ -20,11 +20,13 @@ import java.util.List;
 
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.search.Locator;
 
+@TakeScreenshotOnFailure
 public class GenericElementSteps
 {
     private final IBaseValidations baseValidations;
