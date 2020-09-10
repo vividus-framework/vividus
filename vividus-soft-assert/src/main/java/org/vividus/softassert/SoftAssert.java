@@ -64,13 +64,13 @@ public class SoftAssert implements ISoftAssert
     @Override
     public boolean assertTrue(final String description, final boolean condition)
     {
-        return recordAssertion(description, condition ? IS_TRUE : IS_FALSE, condition);
+        return recordAssertion(condition, description, condition ? IS_TRUE : IS_FALSE);
     }
 
     @Override
     public boolean assertFalse(final String description, final boolean condition)
     {
-        return recordAssertion(description, condition ? IS_TRUE : IS_FALSE, !condition);
+        return recordAssertion(!condition, description, condition ? IS_TRUE : IS_FALSE);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class SoftAssert implements ISoftAssert
     {
         if (expected == null && actual == null || expected != null && expected.equals(actual))
         {
-            return recordAssertion(description, createAssertionDescription(expected, actual), equals);
+            return recordAssertion(equals, description, createAssertionDescription(expected, actual));
         }
 
         String expectedString = String.valueOf(expected);
@@ -99,7 +99,7 @@ public class SoftAssert implements ISoftAssert
         StringBuilder assertionDescription = new StringBuilder();
         append(assertionDescription, EXPECTED, areValuesEqual, expected, expectedString);
         append(assertionDescription, ACTUAL, areValuesEqual, actual, actualString);
-        return recordAssertion(description, assertionDescription.toString(), !equals);
+        return recordAssertion(!equals, description, assertionDescription.toString());
     }
 
     private static void append(StringBuilder builder, String prompt, boolean areValuesEqual, final Object obj,
@@ -133,7 +133,7 @@ public class SoftAssert implements ISoftAssert
         String actualString = Double.toString(actual);
         if (Double.compare(expected, actual) == 0)
         {
-            return recordAssertion(description, createAssertionDescription(expectedString, actualString), equals);
+            return recordAssertion(equals, description, createAssertionDescription(expectedString, actualString));
         }
         boolean equalByDelta = Math.abs(expected - actual) <= delta;
         StringBuilder assertionDescription = new StringBuilder("|Expected ");
@@ -147,7 +147,7 @@ public class SoftAssert implements ISoftAssert
         }
         assertionDescription.append(" more than delta ");
         appendWrapped(assertionDescription, Double.toString(delta));
-        return recordAssertion(description, assertionDescription.toString(), equalByDelta == equals);
+        return recordAssertion(equalByDelta == equals, description, assertionDescription.toString());
     }
 
     @Override
@@ -165,7 +165,7 @@ public class SoftAssert implements ISoftAssert
     private boolean assertEquality(final String description, boolean equals, final long expected, final long actual)
     {
         String assertionDescription = createAssertionDescription(Long.toString(expected), Long.toString(actual));
-        return recordAssertion(description, assertionDescription, equals == (expected == actual));
+        return recordAssertion(equals == (expected == actual), description, assertionDescription);
     }
 
     @Override
@@ -184,21 +184,21 @@ public class SoftAssert implements ISoftAssert
             final boolean actual)
     {
         String assertionDescription = createAssertionDescription(Boolean.toString(expected), Boolean.toString(actual));
-        return recordAssertion(description, assertionDescription, equals == (expected == actual));
+        return recordAssertion(equals == (expected == actual), description, assertionDescription);
     }
 
     @Override
     public boolean assertNotNull(String description, final Object object)
     {
         boolean condition = object != null;
-        return recordAssertion(description, getNullAssertionDescription(object), condition);
+        return recordAssertion(condition, description, getNullAssertionDescription(object));
     }
 
     @Override
     public boolean assertNull(String description, final Object object)
     {
         boolean condition = object == null;
-        return recordAssertion(description, getNullAssertionDescription(object), condition);
+        return recordAssertion(condition, description, getNullAssertionDescription(object));
     }
 
     @Override
@@ -206,7 +206,7 @@ public class SoftAssert implements ISoftAssert
     {
         boolean matches = matcher.matches(actual);
         String matcherDescriptionString = getAssertionDescriptionString(actual, matcher);
-        return recordAssertion(description, matcherDescriptionString, matches);
+        return recordAssertion(matches, description, matcherDescriptionString);
     }
 
     protected String getNullAssertionDescription(final Object object)
@@ -233,26 +233,32 @@ public class SoftAssert implements ISoftAssert
     @Override
     public boolean recordPassedAssertion(String description)
     {
-        return recordAssertion(description, true);
+        return recordAssertion(true, description);
     }
 
     @Override
     public boolean recordFailedAssertion(String description)
     {
-        return recordAssertion(description, false);
+        return recordAssertion(false, description);
     }
 
     @Override
     public boolean recordFailedAssertion(Throwable exception)
     {
         String message = exception.getMessage();
-        return recordAssertion(message != null ? message : exception.toString(), false, exception);
+        return recordAssertion(false, message != null ? message : exception.toString(), exception);
     }
 
     @Override
     public boolean recordFailedAssertion(String description, Throwable exception)
     {
-        return recordAssertion(description, false, exception);
+        return recordAssertion(false, description, exception);
+    }
+
+    @Override
+    public boolean recordAssertion(boolean passed, String description)
+    {
+        return recordAssertion(passed, description, (Throwable) null);
     }
 
     @Override
@@ -307,17 +313,12 @@ public class SoftAssert implements ISoftAssert
         testContext.putInitValueSupplier(AssertionCollection.class, AssertionCollection::new);
     }
 
-    private boolean recordAssertion(String description, String assertionDescription, boolean passed)
+    private boolean recordAssertion(boolean passed, String description, String assertionDescription)
     {
-        return recordAssertion(format(description, assertionDescription), passed);
+        return recordAssertion(passed, format(description, assertionDescription));
     }
 
-    private boolean recordAssertion(String description, boolean passed)
-    {
-        return recordAssertion(description, passed, null);
-    }
-
-    private boolean recordAssertion(String description, boolean passed, Throwable cause)
+    private boolean recordAssertion(boolean passed, String description, Throwable cause)
     {
         if (passed)
         {
