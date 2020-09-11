@@ -49,7 +49,7 @@ public class ActionSteps
      * @param duration between an element is pressed and released in
      * <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
      */
-    @When("I tap on element located `$locator` with duration `$duration`")
+    @When(value = "I tap on element located `$locator` with duration `$duration`", priority = 1)
     public void tapByLocatorWithDuration(Locator locator, Duration duration)
     {
         findElementToTap(locator).ifPresent(e -> tapActions.tap(e, duration));
