@@ -185,4 +185,66 @@ Given I start mobile application with capabilities:
 |appium:options.clearSystemFiles|false|
 ----
 
+=== Tap on element with duration
+
+==== *_Info_*
+
+Taps on the element located by the locator with the specified duration.
+
+The atomic actions performed are:
+* press on the element
+* wait for the duration
+* release
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I tap on element located `$locator` with duration `$duration`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$duration` - duration between an element is pressed and released in {iso-date-format-link} format
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Tap on element with duration
+When I tap on element located `accessibilityId(menu-toggler)` with duration `PT0.5S`
+----
+
+=== Tap on element
+
+==== *_Info_*
+
+Taps on the element located by the locator.
+
+The atomic actions performed are:
+* press on the element
+* release
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I tap on element located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Tap on element
+When I tap on element located `accessibilityId(menu-toggler)`
+----
+
 include::partial$generic-ui-steps.adoc[]
