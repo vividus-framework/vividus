@@ -16,13 +16,12 @@
 
 package org.vividus.bdd.steps;
 
-import java.beans.PropertyEditorSupport;
+import org.vividus.beans.RelaxedEnumPropertyEditor;
 
-public class WebDriverSessionScopeEditor extends PropertyEditorSupport
+public class WebDriverSessionScopeEditor extends RelaxedEnumPropertyEditor<WebDriverSessionScope>
 {
-    @Override
-    public void setAsText(String text)
+    public WebDriverSessionScopeEditor()
     {
-        setValue(text.isBlank() ? null : Enum.valueOf(WebDriverSessionScope.class, text.toUpperCase()));
+        super(WebDriverSessionScope.class);
     }
 }
