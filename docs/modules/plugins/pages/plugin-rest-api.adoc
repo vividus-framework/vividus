@@ -88,6 +88,37 @@ When I wait for presence of element by `$.data.testData` with `PT5S` polling int
 |When I issue a HTTP GET request for a resource with the URL '${requestUrl}'|
 ----
 
+=== Adding headers to HTTP request
+
+==== *_Info_*
+
+Adds request headers to request
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I add request header with name `$name` and value `$value`
+----
+
+==== *_Parameters_*
+
+.  `name` - header name
+.  `value` - header value
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Verify possibility to add request header with name Accept-Language and value en-ru
+When I add request headers:
+|name           |value |
+|Accept-Language|en-ru |
+When I send HTTP GET to the relative URL '/get?name=Content'
+Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
+----
+
 == Expressions
 
 

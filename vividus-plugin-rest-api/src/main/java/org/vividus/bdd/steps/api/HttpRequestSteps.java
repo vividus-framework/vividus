@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.apache.http.Header;
 import org.apache.http.client.config.RequestConfig;
@@ -110,10 +111,18 @@ public class HttpRequestSteps
     @When("I set request headers:$headers")
     public void setUpRequestHeaders(ExamplesTable headers)
     {
-        List<Header> requestHeaders = headers.getRowsAsParameters(true).stream()
-                .map(row -> new BasicHeader(row.valueAs(NAME, String.class), row.valueAs(VALUE, String.class)))
-                .collect(toList());
-        httpTestContext.putRequestHeaders(requestHeaders);
+        performWithHeaders(headers, httpTestContext::putRequestHeaders);
+    }
+
+    /**
+     * Add request headers
+     * @param headers ExamplesTable representing list of headers with columns "name" and "value" specifying HTTP header
+     * names and values respectively
+     */
+    @When("I add request headers:$headers")
+    public void addRequestHeaders(ExamplesTable headers)
+    {
+        performWithHeaders(headers, httpTestContext::addRequestHeaders);
     }
 
     /**
@@ -232,6 +241,15 @@ public class HttpRequestSteps
                 () -> isResponseCodeIsEqualToExpected(httpTestContext.getResponse(), responseCode)
         );
     }
+
+    private void performWithHeaders(ExamplesTable headers, Consumer<List<Header>> headersConsumer)
+    {
+        List<Header> requestHeaders = headers.getRowsAsParameters(true).stream()
+                .map(row -> new BasicHeader(row.valueAs(NAME, String.class), row.valueAs(VALUE, String.class)))
+                .collect(toList());
+        headersConsumer.accept(requestHeaders);
+    }
+
 
     private boolean isResponseCodeIsEqualToExpected(HttpResponse response, int expectedResponseCode)
     {
