@@ -127,6 +127,34 @@ public class BaseValidations implements IBaseValidations
     }
 
     @Override
+    public Optional<WebElement> assertElementExists(String description, Locator locator)
+    {
+        List<WebElement> elements = searchActions.findElements(uiContext.getSearchContext(), locator);
+        if (elements.size() > 1)
+        {
+            String assertionFormat = "The number of elements found by the locator %s is %d, but expected 1";
+            softAssert.recordFailedAssertion(String.format(assertionFormat, locator, elements.size()));
+        }
+        else if (doesOnlyOneElementExist(description, locator, elements))
+        {
+            return Optional.of(elements.get(0));
+        }
+        return Optional.empty();
+    }
+
+    private boolean doesOnlyOneElementExist(String description, Locator locator, List<WebElement> elements)
+    {
+        boolean passed = elements.size() == 1;
+        StringBuilder assertionMessageBuilder = new StringBuilder(description).append(" is ");
+        if (!passed)
+        {
+            assertionMessageBuilder.append("not ");
+        }
+        assertionMessageBuilder.append("found by the locator ").append(locator);
+        return softAssert.recordAssertion(passed, assertionMessageBuilder.toString());
+    }
+
+    @Override
     public WebElement assertIfElementExists(String businessDescription, SearchContext searchContext, Locator locator)
     {
         List<WebElement> elements = searchActions.findElements(searchContext, locator);

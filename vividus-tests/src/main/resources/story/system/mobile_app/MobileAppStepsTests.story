@@ -21,3 +21,15 @@ Then number of elements found by `xpath(<mainViewHeaderTextXpath>)` is equal to 
 
 Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Accessibility Id Locator
 Then number of VISIBLE elements found by `accessibilityId(<togglerAccessibilityId>):a` is equal to `1`
+
+
+Scenario: Verify step: 'When I tap on element located `$locator` with duration `$duration`'
+Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `0`
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)` with duration `PT0.5S`
+Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `1`
+
+
+Scenario: Verify step: 'When I tap on element located `$locator`'
+Then number of elements found by `accessibilityId(<incrementAccessibilityId>)` is equal to `0`
+When I tap on element located `xpath(<menuButtonXpath>)`
+Then number of elements found by `accessibilityId(<incrementAccessibilityId>)` is equal to `1`

@@ -48,7 +48,23 @@ public interface IBaseValidations
 
     boolean assertExpectedCondition(String businessDescription, ExpectedCondition<?> expectedCondition);
 
+    /**
+     * Asserts that an element located by the <b>locator</b> exists
+     * @param businessDescription business description of the element being validated, must not be {@code null}
+     * @param locator locator to find element, must not be {@code null}
+     * @return the element being validated
+     * @deprecated Use {@link #assertElementExists(String, Locator)}
+     */
+    @Deprecated(since = "0.2.8", forRemoval = true)
     WebElement assertIfElementExists(String businessDescription, Locator locator);
+
+    /**
+     * Asserts that an element located by the <b>locator</b> exists
+     * @param description description of the element being validated, must not be {@code null}
+     * @param locator locator to find element, must not be {@code null}
+     * @return the element being validated wrapped in an {@link Optional}
+     */
+    Optional<WebElement> assertElementExists(String description, Locator locator);
 
     WebElement assertIfElementExists(String businessDescription, SearchContext searchContext, Locator locator);
 

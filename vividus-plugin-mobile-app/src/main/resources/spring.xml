@@ -11,7 +11,11 @@
         <constructor-arg index="0" value="${mobile-application.session-scope}" />
     </bean>
 
+    <bean class="org.vividus.mobileapp.action.TapActions" />
+
     <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
+
+    <bean id="actionSteps" class="org.vividus.bdd.mobileapp.steps.ActionSteps" />
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
 
@@ -31,5 +35,6 @@
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
         <value>applicationSteps</value>
         <value>webDriverSetupSteps</value>
+        <value>actionSteps</value>
     </util:list>
 </beans>

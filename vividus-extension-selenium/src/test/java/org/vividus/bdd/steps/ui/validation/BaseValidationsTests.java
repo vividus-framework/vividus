@@ -428,6 +428,46 @@ class BaseValidationsTests
                     attributes, 1, ComparisonRule.EQUAL_TO), false, List.of());
     }
 
+    @Test
+    void testAssertElementExists()
+    {
+        webElements = List.of(mockedWebElement);
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
+        when(softAssert.recordAssertion(true, BUSINESS_DESCRIPTION + " is found by the locator " + locator))
+                .thenReturn(true);
+        Optional<WebElement> element = baseValidations.assertElementExists(BUSINESS_DESCRIPTION, locator);
+        assertTrue(element.isPresent());
+        assertEquals(mockedWebElement, element.get());
+    }
+
+    @Test
+    void testAssertElementExistsMoreThanOne()
+    {
+        webElements = List.of(mockedWebElement, mockedWebElement);
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
+        Optional<WebElement> element = baseValidations.assertElementExists(BUSINESS_DESCRIPTION, locator);
+        assertTrue(element.isEmpty());
+        verify(softAssert).recordFailedAssertion(
+                "The number of elements found by the locator " + locator + " is 2, but expected 1");
+    }
+
+    @Test
+    void testAssertElementExistsEmptyElements()
+    {
+        List<WebElement> elements = List.of();
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(elements);
+        when(softAssert.recordAssertion(false,
+                BUSINESS_DESCRIPTION + " is not found by the locator " + locator.toString())).thenReturn(false);
+        Optional<WebElement> element = baseValidations.assertElementExists(BUSINESS_DESCRIPTION, locator);
+        assertTrue(element.isEmpty());
+    }
+
     private void testAssertIfNumberOfElementsFound(Function<Locator, List<WebElement>> actualCall,
             boolean checkPassed, List<WebElement> foundElements)
     {
