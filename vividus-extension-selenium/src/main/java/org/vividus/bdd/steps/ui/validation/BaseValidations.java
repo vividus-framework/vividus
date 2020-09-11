@@ -17,7 +17,7 @@
 package org.vividus.bdd.steps.ui.validation;
 
 import static org.hamcrest.Matchers.greaterThan;
-import static org.vividus.ui.validation.matcher.WebElementMatchers.elementNumber;
+import static org.vividus.ui.validation.matcher.ElementNumberMatcher.elementNumber;
 
 import java.util.List;
 import java.util.Optional;
