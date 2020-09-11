@@ -13,6 +13,8 @@
 
     <bean class="org.vividus.mobileapp.action.TapActions" />
 
+    <bean class="org.vividus.mobileapp.action.KeyboardActions" />
+
     <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
 
     <bean id="actionSteps" class="org.vividus.bdd.mobileapp.steps.ActionSteps" />

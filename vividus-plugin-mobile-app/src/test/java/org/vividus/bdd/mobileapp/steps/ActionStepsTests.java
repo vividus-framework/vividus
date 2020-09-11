@@ -32,23 +32,27 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.mobileapp.action.KeyboardActions;
 import org.vividus.mobileapp.action.TapActions;
 import org.vividus.ui.action.search.Locator;
 
 @ExtendWith(MockitoExtension.class)
 class ActionStepsTests
 {
+    private static final String TEXT = "text";
     private static final String ELEMENT_TO_TAP = "The element to tap";
+    private static final String ELEMENT_TO_TYPE_TEXT = "The element to type text";
 
     @Mock private IBaseValidations baseValidations;
     @Mock private TapActions tapActions;
+    @Mock private KeyboardActions keyboardActions;
     @Mock private Locator locator;
-    @InjectMocks private ActionSteps elementSteps;
+    @InjectMocks private ActionSteps actionSteps;
 
     @AfterEach
     void afterEach()
     {
-        verifyNoMoreInteractions(tapActions, baseValidations, locator);
+        verifyNoMoreInteractions(tapActions, keyboardActions, baseValidations, locator);
     }
 
     @Test
@@ -56,7 +60,7 @@ class ActionStepsTests
     {
         WebElement element = mock(WebElement.class);
         when(baseValidations.assertElementExists(ELEMENT_TO_TAP, locator)).thenReturn(Optional.of(element));
-        elementSteps.tapByLocatorWithDuration(locator, Duration.ZERO);
+        actionSteps.tapByLocatorWithDuration(locator, Duration.ZERO);
         verify(tapActions).tap(element, Duration.ZERO);
     }
 
@@ -64,7 +68,7 @@ class ActionStepsTests
     void testTapByLocatorWithDurationElementIsEmpty()
     {
         when(baseValidations.assertElementExists(ELEMENT_TO_TAP, locator)).thenReturn(Optional.empty());
-        elementSteps.tapByLocatorWithDuration(locator, Duration.ZERO);
+        actionSteps.tapByLocatorWithDuration(locator, Duration.ZERO);
     }
 
     @Test
@@ -72,7 +76,7 @@ class ActionStepsTests
     {
         WebElement element = mock(WebElement.class);
         when(baseValidations.assertElementExists(ELEMENT_TO_TAP, locator)).thenReturn(Optional.of(element));
-        elementSteps.tapByLocator(locator);
+        actionSteps.tapByLocator(locator);
         verify(tapActions).tap(element);
     }
 
@@ -80,6 +84,22 @@ class ActionStepsTests
     void testTapByLocatorElementIsEmpty()
     {
         when(baseValidations.assertElementExists(ELEMENT_TO_TAP, locator)).thenReturn(Optional.empty());
-        elementSteps.tapByLocator(locator);
+        actionSteps.tapByLocator(locator);
+    }
+
+    @Test
+    void testTypeTextInField()
+    {
+        WebElement element = mock(WebElement.class);
+        when(baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)).thenReturn(Optional.of(element));
+        actionSteps.typeTextInField(TEXT, locator);
+        verify(keyboardActions).typeText(element, TEXT);
+    }
+
+    @Test
+    void testTypeTextInFieldElementIsEmpty()
+    {
+        when(baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)).thenReturn(Optional.empty());
+        actionSteps.typeTextInField(TEXT, locator);
     }
 }
