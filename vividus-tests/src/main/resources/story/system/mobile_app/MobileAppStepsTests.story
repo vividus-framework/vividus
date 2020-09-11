@@ -33,3 +33,11 @@ Scenario: Verify step: 'When I tap on element located `$locator`'
 Then number of elements found by `accessibilityId(<incrementAccessibilityId>)` is equal to `0`
 When I tap on element located `xpath(<menuButtonXpath>)`
 Then number of elements found by `accessibilityId(<incrementAccessibilityId>)` is equal to `1`
+
+
+Scenario: Verify step: 'When I type `$text` in field located `$locator`'
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<menuInputXpath>)`
+When I initialize the scenario variable `text` with value `#{generate(regexify '[a-z]{10}')}`
+When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityId>)`
+Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`

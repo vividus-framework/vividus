@@ -22,17 +22,20 @@ import java.util.Optional;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.mobileapp.action.KeyboardActions;
 import org.vividus.mobileapp.action.TapActions;
 import org.vividus.ui.action.search.Locator;
 
 public class ActionSteps
 {
     private final TapActions tapActions;
+    private final KeyboardActions keyboardActions;
     private final IBaseValidations baseValidations;
 
-    public ActionSteps(TapActions tapActions, IBaseValidations baseValidations)
+    public ActionSteps(TapActions tapActions, KeyboardActions keyboardActions, IBaseValidations baseValidations)
     {
         this.tapActions = tapActions;
+        this.keyboardActions = keyboardActions;
         this.baseValidations = baseValidations;
     }
 
@@ -69,6 +72,24 @@ public class ActionSteps
     public void tapByLocator(Locator locator)
     {
         findElementToTap(locator).ifPresent(tapActions::tap);
+    }
+
+    /**
+     * Type <b>text</b> into the <b>element</b>
+     * <br>
+     * The atomic actions performed are:
+     * <ol>
+     * <li>type text into the element</li>
+     * <li>hide keyboard</li>
+     * </ol>
+     * @param text text to type into the element
+     * @param locator locator to find an element
+     */
+    @When("I type `$text` in field located `$locator`")
+    public void typeTextInField(String text, Locator locator)
+    {
+        baseValidations.assertElementExists("The element to type text", locator)
+                .ifPresent(e -> keyboardActions.typeText(e, text));
     }
 
     private Optional<WebElement> findElementToTap(Locator locator)

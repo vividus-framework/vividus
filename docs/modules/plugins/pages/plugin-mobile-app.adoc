@@ -247,4 +247,39 @@ Scenario: Tap on element
 When I tap on element located `accessibilityId(menu-toggler)`
 ----
 
+=== Type text
+
+==== *_Info_*
+
+Types the text into the element located by the locator.
+
+[WARNING]
+Existing text is re-written by the text passed into the step
+
+The atomic actions performed are:
+* type text into the element
+* hide keyboard
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I type `$text` in field located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$text` - text to type into the element
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Keyboard.story
+[source,gherkin]
+----
+Scenario: Type text
+When I type `Bob` in field located `accessibilityId(username)`
+----
+
+
 include::partial$generic-ui-steps.adoc[]
