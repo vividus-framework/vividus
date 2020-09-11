@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package org.vividus.http;
+package org.vividus.beans;
 
-import org.vividus.beans.RelaxedEnumPropertyEditor;
+import java.beans.PropertyEditorSupport;
 
-public class CookieStoreLevelEditor extends RelaxedEnumPropertyEditor<CookieStoreLevel>
+public class RelaxedEnumPropertyEditor<T extends Enum<T>> extends PropertyEditorSupport
 {
-    public CookieStoreLevelEditor()
+    private final Class<T> enumType;
+
+    public RelaxedEnumPropertyEditor(Class<T> enumType)
     {
-        super(CookieStoreLevel.class);
+        this.enumType = enumType;
+    }
+
+    @Override
+    public void setAsText(String text)
+    {
+        setValue(text.isBlank() ? null : Enum.valueOf(enumType, text.toUpperCase()));
     }
 }

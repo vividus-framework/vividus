@@ -16,13 +16,12 @@
 
 package org.vividus.selenium;
 
-import java.beans.PropertyEditorSupport;
+import org.vividus.beans.RelaxedEnumPropertyEditor;
 
-public class WebDriverTypeEditor extends PropertyEditorSupport
+public class WebDriverTypeEditor extends RelaxedEnumPropertyEditor<WebDriverType>
 {
-    @Override
-    public void setAsText(String text) throws IllegalArgumentException
+    public WebDriverTypeEditor()
     {
-        setValue(text.isBlank() ? null : Enum.valueOf(WebDriverType.class, text.toUpperCase()));
+        super(WebDriverType.class);
     }
 }
