@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 import static uk.org.lidalia.slf4jext.Level.ERROR;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -48,6 +49,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.event.AssertionPassedEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.formatter.IAssertionFormatter;
@@ -236,8 +238,31 @@ class SoftAssertTests
     @Test
     void testRecordFailedAssertion()
     {
+        testRecordFailedAssertion(softAssert::recordFailedAssertion);
+    }
+
+    @Test
+    void testRecordAssertionWithFailedFlag()
+    {
+        testRecordFailedAssertion(description -> softAssert.recordAssertion(false, description));
+    }
+
+    private void testRecordFailedAssertion(Predicate<String> testMethod)
+    {
         mockAssertionCollection();
-        assertFalse(softAssert.recordFailedAssertion("Failed"));
+        String description = "Failed";
+        assertFalse(testMethod.test(description));
+        verify(eventBus).post(argThat(event -> {
+            if (event instanceof AssertionFailedEvent)
+            {
+                AssertionFailedEvent failedEvent = (AssertionFailedEvent) event;
+                SoftAssertionError softAssertionError = failedEvent.getSoftAssertionError();
+                return softAssertionError != null && !softAssertionError.isKnownIssue()
+                        && softAssertionError.getError() != null;
+            }
+            return false;
+        }));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(error("Fail: {}", description))));
     }
 
     @Test
@@ -264,9 +289,22 @@ class SoftAssertTests
     @Test
     void testRecordPassedAssertion()
     {
+        testRecordPassedAssertion(softAssert::recordPassedAssertion);
+    }
+
+    @Test
+    void testRecordAssertionWithPassedFlag()
+    {
+        testRecordPassedAssertion(description -> softAssert.recordAssertion(true, description));
+    }
+
+    private void testRecordPassedAssertion(Predicate<String> testMethod)
+    {
         mockAssertionCollection();
-        assertTrue(softAssert.recordPassedAssertion("Passed"));
+        String description = "Passed";
+        assertTrue(testMethod.test(description));
         verify(eventBus).post(any(AssertionPassedEvent.class));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(info("Pass: {}", description))));
     }
 
     @Test
