@@ -343,20 +343,21 @@
     </bean>
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.VividusWebDriverFactory">
-        <property name="remoteExecution" value="${selenium.grid.enabled}" />
-        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
+        <property name="remoteExecution" value="${selenium.grid.enabled}"/>
+        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers"/>
     </bean>
 
     <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" />
 
     <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
-        <property name="next">
-            <bean class="org.vividus.bdd.ProxyAgentStoryReporter">
-                <property name="proxyEnabled" value="${proxy.enabled}" />
-                <property name="proxyRecordingEnabled" value="${proxy.recording.enabled}" />
-                <property name="next" ref="allureStoryReporter" />
-            </bean>
-        </property>
+        <property name="next" ref="proxyAgentStoryReporter" />
+    </bean>
+
+    <bean id="proxyAgentStoryReporter" class="org.vividus.bdd.ProxyAgentStoryReporter">
+        <property name="proxyEnabled" value="${proxy.enabled}" />
+        <property name="proxyRecordingEnabled" value="${proxy.recording.enabled}" />
+        <property name="next" ref="allureStoryReporter" />
+        <property name="eventBus" ref="eventBus" />
     </bean>
 
     <bean id="delegatingWebApplicationListener-WebApplicationListeners" class="org.vividus.spring.ListMergerFactoryBean">

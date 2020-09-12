@@ -21,7 +21,6 @@
 
     <bean id="webDriverProvider" class="org.vividus.selenium.WebDriverProvider"
           destroy-method="destroy">
-        <property name="vividusWebDriverFactory" ref="vividusWebDriverFactory" />
         <property name="testContext" ref="testContext" />
     </bean>
 

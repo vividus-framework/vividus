@@ -18,10 +18,13 @@ package org.vividus.bdd;
 
 import javax.inject.Inject;
 
+import com.google.common.eventbus.EventBus;
+
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.proxy.ProxyEvent;
 import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.ControllingMetaTag;
@@ -34,6 +37,7 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
     @Inject private IProxy proxy;
     @Inject private IBddRunContext bddRunContext;
     @Inject private ExtendedConfiguration configuration;
+    private EventBus eventBus;
 
     @Override
     public void beforeStory(Story story, boolean givenStory)
@@ -45,7 +49,7 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
             {
                 if (proxyEnabled || isProxyEnabledInStoryMeta())
                 {
-                    proxy.start();
+                    startProxy();
                 }
             }
         }
@@ -59,7 +63,7 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
         {
             if (!proxy.isStarted() && isProxyEnabled())
             {
-                proxy.start();
+                startProxy();
             }
             if (proxy.isStarted() && isProxyRecordingEnabled())
             {
@@ -100,9 +104,16 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
         }
     }
 
-    private void stopProxy()
+    public void startProxy()
+    {
+        proxy.start();
+        eventBus.post(new ProxyEvent(proxy));
+    }
+
+    public void stopProxy()
     {
         proxy.stop();
+        eventBus.post(new ProxyEvent(proxy));
     }
 
     private boolean isProxyRecordingEnabled()
@@ -138,5 +149,10 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
     public void setProxyRecordingEnabled(boolean proxyRecordingEnabled)
     {
         this.proxyRecordingEnabled = proxyRecordingEnabled;
+    }
+
+    public void setEventBus(EventBus eventBus)
+    {
+        this.eventBus = eventBus;
     }
 }

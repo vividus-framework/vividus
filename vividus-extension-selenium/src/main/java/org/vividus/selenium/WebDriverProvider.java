@@ -29,9 +29,9 @@ import org.vividus.testcontext.TestContext;
 
 public class WebDriverProvider implements IWebDriverProvider
 {
-    private IVividusWebDriverFactory vividusWebDriverFactory;
-    private final ConcurrentLinkedQueue<WebDriver> webDrivers = new ConcurrentLinkedQueue<>();
+    @Inject private IVividusWebDriverFactory vividusWebDriverFactory;
     @Inject private EventBus eventBus;
+    private final ConcurrentLinkedQueue<WebDriver> webDrivers = new ConcurrentLinkedQueue<>();
     private TestContext testContext;
 
     @Override
@@ -103,11 +103,6 @@ public class WebDriverProvider implements IWebDriverProvider
     public void destroy()
     {
         webDrivers.forEach(WebDriver::quit);
-    }
-
-    public void setVividusWebDriverFactory(IVividusWebDriverFactory vividusWebDriverFactory)
-    {
-        this.vividusWebDriverFactory = vividusWebDriverFactory;
     }
 
     public void setTestContext(TestContext testContext)

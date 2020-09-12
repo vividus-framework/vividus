@@ -16,6 +16,7 @@
 
 package org.vividus.bdd;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,6 +26,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+
+import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
@@ -41,6 +44,7 @@ import org.mockito.stubbing.Answer;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
+import org.vividus.bdd.proxy.ProxyEvent;
 import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.proxy.IProxy;
 
@@ -63,6 +67,9 @@ class ProxyAgentStoryReporterTests
     @Mock
     private StoryReporter next;
 
+    @Mock
+    private EventBus eventBus;
+
     @InjectMocks
     private ProxyAgentStoryReporter proxyAgentStoryReporter;
 
@@ -77,7 +84,7 @@ class ProxyAgentStoryReporterTests
     {
         RunningStory runningStory = mockRunningStoryWithName(STORY_NAME);
         proxyAgentStoryReporter.beforeStory(runningStory.getStory(), true);
-        verifyNoInteractions(proxy);
+        verifyNoInteractions(proxy, eventBus);
         verify(next).beforeStory(runningStory.getStory(), true);
     }
 
@@ -116,6 +123,7 @@ class ProxyAgentStoryReporterTests
         proxyAgentStoryReporter.setProxyEnabled(true);
         proxyAgentStoryReporter.beforeStory(runningStory.getStory(), false);
         verify(proxy).start();
+        verifyProxyEvent();
         verify(next).beforeStory(runningStory.getStory(), false);
     }
 
@@ -126,6 +134,7 @@ class ProxyAgentStoryReporterTests
         when(runningStory.getStory().getMeta()).thenReturn(new Meta(PROXY_META));
         proxyAgentStoryReporter.beforeStory(runningStory.getStory(), false);
         verify(proxy).start();
+        verifyProxyEvent();
         verify(next).beforeStory(runningStory.getStory(), false);
     }
 
@@ -159,6 +168,7 @@ class ProxyAgentStoryReporterTests
         verify(proxy).clearRequestFilters();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
+        verifyNoInteractions(eventBus);
     }
 
     @Test
@@ -171,6 +181,7 @@ class ProxyAgentStoryReporterTests
         verify(proxy).clearRequestFilters();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
+        verifyNoInteractions(eventBus);
     }
 
     @Test
@@ -183,6 +194,7 @@ class ProxyAgentStoryReporterTests
         verify(proxy, never()).clearRequestFilters();
         verify(proxy, never()).startRecording();
         verify(next).beforeScenario(scenario);
+        verifyNoInteractions(eventBus);
     }
 
     @Test
@@ -192,6 +204,7 @@ class ProxyAgentStoryReporterTests
         proxyAgentStoryReporter.beforeScenario(scenario);
         verify(proxy).start();
         verify(next).beforeScenario(scenario);
+        verifyProxyEvent();
     }
 
     @Test
@@ -201,6 +214,7 @@ class ProxyAgentStoryReporterTests
         proxyAgentStoryReporter.beforeScenario(scenario);
         verify(proxy, never()).start();
         verify(next).beforeScenario(scenario);
+        verifyNoInteractions(eventBus);
     }
 
     @Test
@@ -222,6 +236,7 @@ class ProxyAgentStoryReporterTests
         verify(proxy).clearRequestFilters();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
+        verifyProxyEvent();
     }
 
     @Test
@@ -231,6 +246,7 @@ class ProxyAgentStoryReporterTests
         proxyAgentStoryReporter.beforeScenario(scenario);
         verify(proxy).start();
         verify(next).beforeScenario(scenario);
+        verifyProxyEvent();
     }
 
     @Test
@@ -274,13 +290,14 @@ class ProxyAgentStoryReporterTests
         verify(proxy).stopRecording();
         verify(proxy).stop();
         verify(next).afterScenario();
+        verifyProxyEvent();
     }
 
     @Test
     void testAfterGivenStory()
     {
         proxyAgentStoryReporter.afterStory(true);
-        verifyNoInteractions(proxy);
+        verifyNoInteractions(proxy, eventBus);
         verify(next).afterStory(true);
     }
 
@@ -299,6 +316,7 @@ class ProxyAgentStoryReporterTests
         proxyAgentStoryReporter.afterStory(false);
         verify(proxy).stop();
         verify(next).afterStory(false);
+        verifyProxyEvent();
     }
 
     private RunningStory mockRunningStoryInBddRunContext(Story story)
@@ -342,6 +360,11 @@ class ProxyAgentStoryReporterTests
     private void verifyProxyInactivity()
     {
         verify(proxy).isStarted();
-        verifyNoMoreInteractions(proxy);
+        verifyNoMoreInteractions(proxy, eventBus);
+    }
+
+    private void verifyProxyEvent()
+    {
+        verify(eventBus).post(any(ProxyEvent.class));
     }
 }

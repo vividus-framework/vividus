@@ -104,4 +104,9 @@ public enum ControllingMetaTag
             controllingMetaTag.setCapability(capabilities, meta);
         }
     }
+
+    public static boolean isContainedIn(Meta meta, String metaName)
+    {
+        return new MetaWrapper(meta).getOptionalPropertyValue(metaName).isPresent();
+    }
 }

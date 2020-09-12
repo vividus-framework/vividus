@@ -62,12 +62,7 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
     protected void configureVividusWebDriver(VividusWebDriver vividusWebDriver)
     {
         DesiredCapabilities desiredCapabilities = vividusWebDriver.getDesiredCapabilities();
-        if (proxy.isStarted())
-        {
-            desiredCapabilities.setCapability(CapabilityType.PROXY, createSeleniumProxy(remoteExecution));
-            desiredCapabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-        }
-
+        configureProxy(desiredCapabilities);
         WebDriver webDriver = remoteExecution
                 ? webDriverFactory.getRemoteWebDriver(desiredCapabilities)
                 : webDriverFactory.getWebDriver(desiredCapabilities);
@@ -78,6 +73,15 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
         webDriverManager.resize(webDriver, browserWindowSizeProvider.getBrowserWindowSize(remoteExecution));
         vividusWebDriver.setWebDriver(eventFiringWebDriver);
         vividusWebDriver.setRemote(remoteExecution);
+    }
+
+    protected void configureProxy(DesiredCapabilities desiredCapabilities)
+    {
+        if (proxy.isStarted())
+        {
+            desiredCapabilities.setCapability(CapabilityType.PROXY, createSeleniumProxy(remoteExecution));
+            desiredCapabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+        }
     }
 
     @Override
@@ -97,7 +101,7 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
         }
     }
 
-    private Proxy createSeleniumProxy(boolean remoteExecution)
+    public Proxy createSeleniumProxy(boolean remoteExecution)
     {
         try
         {
