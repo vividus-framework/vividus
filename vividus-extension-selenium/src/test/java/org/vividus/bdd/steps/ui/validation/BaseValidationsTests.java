@@ -30,8 +30,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.vividus.testdouble.TestLocatorType.SEARCH;
+import static org.vividus.ui.action.search.IElementAction.NOT_SET_CONTEXT;
 
 import java.util.Arrays;
 import java.util.List;
@@ -63,6 +65,7 @@ import org.vividus.ui.validation.matcher.ExpectedConditionsMatcher;
 import org.vividus.ui.validation.matcher.NotExistsMatcher;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("MethodCount")
 class BaseValidationsTests
 {
     private static final String SOME_ELEMENT = "Some element";
@@ -118,6 +121,101 @@ class BaseValidationsTests
                 any(Matcher.class))).thenReturn(true);
         WebElement foundElement = baseValidations.assertIfElementExists(SOME_ELEMENT, attributes);
         assertEquals(mockedWebElement, foundElement);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionInCaseOfNullContext()
+    {
+        Locator attributes = mock(Locator.class);
+        assertNull(baseValidations.assertIfElementExists(SOME_ELEMENT, attributes));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfElementExists()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertNull(baseValidations.assertIfElementExists(BUSINESS_DESCRIPTION, null, locator));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfElementsExist()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(List.of(), baseValidations.assertIfElementsExist(BUSINESS_DESCRIPTION, null, locator));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfExactNumberOfElementsFound()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(false, baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, null,
+                locator, 1));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfAtLeastNumberOfElementsExist()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(List.of(), baseValidations.assertIfAtLeastNumberOfElementsExist(BUSINESS_DESCRIPTION, null,
+                locator, 1));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfAtLeastOneElementExists()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(null, baseValidations.assertIfAtLeastOneElementExists(BUSINESS_DESCRIPTION, null, locator));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfZeroOrOneElementFound()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(Optional.empty(), baseValidations.assertIfZeroOrOneElementFound(BUSINESS_DESCRIPTION,
+                null, locator));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfElementDoesNotExist()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertFalse(baseValidations.assertIfElementDoesNotExist(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, null, locator,
+                true));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfNumberOfElementsFound()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(List.of(), baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, null, locator, 0,
+                ComparisonRule.EQUAL_TO));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
     }
 
     @Test
@@ -389,6 +487,7 @@ class BaseValidationsTests
     void testAssertIfZeroOrOneElementFoundZero()
     {
         Locator attributes = new Locator(SEARCH, XPATH_INT);
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
         Optional<WebElement> element = baseValidations.assertIfZeroOrOneElementFound(BUSINESS_DESCRIPTION, attributes);
         verify(softAssert).recordPassedAssertion(SYSTEM_DESCRIPTION + " not found");
         assertEquals(Optional.empty(), element);
