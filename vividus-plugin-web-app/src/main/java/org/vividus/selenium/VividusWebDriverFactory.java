@@ -88,13 +88,6 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
         {
             desiredCapabilities.setCapability(SauceLabsCapabilityType.NAME, runningStory.getName());
         }
-        else
-        {
-            if (scenario != null)
-            {
-                ControllingMetaTag.BROWSER_NAME.setCapability(desiredCapabilities, metaWrapper);
-            }
-        }
     }
 
     private Proxy createSeleniumProxy(boolean remoteExecution)
