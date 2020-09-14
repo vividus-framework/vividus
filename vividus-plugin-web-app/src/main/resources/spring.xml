@@ -381,4 +381,12 @@
         <value>dragAndDropSteps</value>
         <value>scrollSteps</value>
     </util:list>
+
+    <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">
+        <entry key="org.vividus.selenium.WebDriverType">
+            <bean class="org.vividus.beans.RelaxedEnumPropertyEditor">
+                <constructor-arg value="org.vividus.selenium.WebDriverType" />
+            </bean>
+        </entry>
+    </util:map>
  </beans>

@@ -71,4 +71,12 @@
         <idref bean="genericElementSteps" />
         <idref bean="genericWaitSteps" />
     </util:list>
+
+    <util:map id="propertyEditors-UI" key-type="java.lang.Class">
+        <entry key="org.vividus.bdd.steps.WebDriverSessionScope">
+            <bean class="org.vividus.beans.RelaxedEnumPropertyEditor">
+                <constructor-arg value="org.vividus.bdd.steps.WebDriverSessionScope" />
+            </bean>
+        </entry>
+    </util:map>
  </beans>
