@@ -65,8 +65,10 @@
     <bean class="org.vividus.ui.listener.UiContextListener" lazy-init="false" />
 
     <bean id="genericElementSteps" class="org.vividus.bdd.steps.ui.GenericElementSteps" />
+    <bean id="genericWaitSteps" class="org.vividus.bdd.steps.ui.GenericWaitSteps" />
 
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
         <idref bean="genericElementSteps" />
+        <idref bean="genericWaitSteps" />
     </util:list>
  </beans>

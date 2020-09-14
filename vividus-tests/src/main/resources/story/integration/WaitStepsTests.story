@@ -49,3 +49,17 @@ Then number of elements found by `id(element-to-show)` is equal to `0`
 When I click on element located `id(button-show)`
 When I wait until elements with the name 'element-to-show' appear
 Then number of elements found by `id(element-to-show)` is equal to `1`
+
+Scenario: Verify step: 'When I wait until element located `$locator` appears'
+Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
+Then number of elements found by `id(element-to-show)` is equal to `0`
+When I click on element located `id(button-show)`
+When I wait until element located `id(element-to-show)` appears
+Then number of elements found by `id(element-to-show)` is equal to `1`
+
+Scenario: Verify step: 'When I wait until element located `$locator` disappears'
+Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
+Then number of elements found by `id(element-to-hide)` is equal to `1`
+When I click on element located `id(button-hide)`
+When I wait until element located `id(element-to-hide)` disappears
+Then number of elements found by `id(element-to-hide)` is equal to 01`

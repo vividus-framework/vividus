@@ -41,3 +41,19 @@ When I tap on element located `xpath(<menuInputXpath>)`
 When I initialize the scenario variable `text` with value `#{generate(regexify '[a-z]{10}')}`
 When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityId>)`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
+
+
+Scenario: Verify step: 'When I wait until element located `$locator` disappears'
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<menuWaitXpath>)`
+Then number of elements found by `accessibilityId(<pictureAccessibilityId>)` is equal to `1`
+When I tap on element located `accessibilityId(<hidePictureAccessibilityId>)`
+When I wait until element located `accessibilityId(<pictureAccessibilityId>)` disappears
+Then number of elements found by `accessibilityId(<pictureAccessibilityId>)` is equal to `0`
+
+
+Scenario: Verify step: 'When I wait until element located `$locator` appears'
+Then number of elements found by `accessibilityId(<pictureAccessibilityId>)` is equal to `0`
+When I tap on element located `accessibilityId(<showPictureAccessibilityId>)`
+When I wait until element located `accessibilityId(<pictureAccessibilityId>)` appears
+Then number of elements found by `accessibilityId(<pictureAccessibilityId>)` is equal to `1`
