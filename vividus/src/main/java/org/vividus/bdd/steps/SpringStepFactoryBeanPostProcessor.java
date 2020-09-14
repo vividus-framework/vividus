@@ -18,36 +18,27 @@ package org.vividus.bdd.steps;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.vividus.spring.BeanFactoryUtils;
 
 public class SpringStepFactoryBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware
 {
-    private static final String CUSTOM_STEPS_BEAN_PREFIX = "stepBeanNames-";
-
     private ApplicationContext applicationContext;
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
     {
-        if (!(bean instanceof SpringStepFactory))
+        if (bean instanceof SpringStepFactory)
         {
-            return bean;
-        }
-        List<String> allStepBeanNames = new LinkedList<>();
-        Stream.of(applicationContext.getBeanDefinitionNames())
-                .filter(bdn -> bdn.startsWith(CUSTOM_STEPS_BEAN_PREFIX))
-                .map(bdn -> applicationContext.getBean(bdn, Collection.class))
-                .forEach(allStepBeanNames::addAll);
+            List<String> stepBeanNames = BeanFactoryUtils.mergeLists(applicationContext, "stepBeanNames-");
 
-        List<Class<?>> stepTypes = allStepBeanNames.stream().map(applicationContext::getType).collect(toList());
-        ((SpringStepFactory) bean).setStepTypes(stepTypes);
+            ((SpringStepFactory) bean).setStepTypes(
+                    stepBeanNames.stream().map(applicationContext::getType).collect(toList()));
+        }
         return bean;
     }
 
