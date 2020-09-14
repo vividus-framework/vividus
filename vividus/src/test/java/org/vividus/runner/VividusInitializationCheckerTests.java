@@ -37,15 +37,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.beans.factory.BeanIsAbstractException;
+import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Vividus.class, BeanFactory.class })
-public class VividusInitializationCheckerTests
+@PowerMockIgnore({"javax.*", "org.xml.*", "org.w3c.*", "com.sun.*"})
+public class VividusInitializationCheckerTests extends SystemStreamTests
 {
     private static final String BEAN_1 = "bean1";
     private static final String BEAN_2 = "bean2";
@@ -64,6 +67,17 @@ public class VividusInitializationCheckerTests
     public void after()
     {
         TestLoggerFactory.clear();
+    }
+
+    @Test
+    public void testPrintHelp() throws Exception
+    {
+        VividusInitializationChecker.main(new String[] {"-h"});
+        assertOutput(List.of("usage: VividusInitializationChecker",
+                " -h,--help                print this message.",
+                " -i,--ignoreBeans <arg>   comma separated list of beans that are not",
+                "                          instantiated during check (e.g. bean1,bean2)"
+        ));
     }
 
     @Test

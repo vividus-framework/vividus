@@ -16,11 +16,15 @@
 
 package org.vividus;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -75,6 +79,13 @@ public class SystemStreamTests
         out.close();
         System.setErr(DEFAULT_ERR_STREAM);
         err.close();
+    }
+
+    protected void assertOutput(List<String> lines)
+    {
+        String lineSeparator = System.lineSeparator();
+        String expectedOutput = lines.stream().collect(Collectors.joining(lineSeparator, "", lineSeparator));
+        assertEquals(expectedOutput, getOutStreamContent());
     }
 
     private static PrintStream createPrintStream(ByteArrayOutputStream out)

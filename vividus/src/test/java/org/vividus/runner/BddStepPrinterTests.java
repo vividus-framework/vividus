@@ -16,7 +16,6 @@
 
 package org.vividus.runner;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -114,13 +113,6 @@ public class BddStepPrinterTests extends SystemStreamTests
         when(stepCandidate.getPatternAsString()).thenReturn(patternAsString);
         when(stepCandidate.getMethod()).thenReturn(method);
         return stepCandidate;
-    }
-
-    private void assertOutput(List<String> lines)
-    {
-        String lineSeparator = System.lineSeparator();
-        String expectedOutput = lines.stream().collect(Collectors.joining(lineSeparator, "", lineSeparator));
-        assertEquals(expectedOutput, getOutStreamContent());
     }
 
     @SuppressWarnings("unused")
