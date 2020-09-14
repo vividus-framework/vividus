@@ -60,3 +60,57 @@ Scenario: Step verification 'Then number of $state elements found by `$locator` 
 Given I am on a page with the URL '${vividus-test-site-url}'
 Then number of VISIBLE elements found by `tagName(img)` is = `1`
 ----
+
+
+=== Wait for element appearance
+
+==== *_Info_*
+
+Waits for appearance of an element by the locator
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I wait until element located `$locator` appears
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Wait.story
+[source,gherkin]
+----
+Scenario: Wait for element appearance
+When I wait until element located `name(welcome-image)` appears
+----
+
+
+=== Wait for element disappearance
+
+==== *_Info_*
+
+Waits for disappearance of an element by the locator
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I wait until element located `$locator` disappears
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Wait.story
+[source,gherkin]
+----
+Scenario: Wait for element disappearance
+When I wait until element located `name(welcome-image)` disappears
+----

@@ -147,19 +147,6 @@ class WaitStepsTests
     }
 
     @Test
-    void testWaitTillElementAppears()
-    {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
-        WaitResult<WebElement> waitResult = mock(WaitResult.class);
-        Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, NAME);
-        IExpectedSearchContextCondition<WebElement> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchActionsConditions.visibilityOfElement(locator)).thenReturn(condition);
-        when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
-        waitSteps.waitForElementAppearance(locator);
-        verify(waitResult).isWaitPassed();
-    }
-
-    @Test
     void testWaitTillElementWithTagAndAttributeAppears()
     {
         when(uiContext.getSearchContext()).thenReturn(webElement);
@@ -181,19 +168,6 @@ class WaitStepsTests
         when(expectedSearchActionsConditions.textToBePresentInElementLocated(locator, TEXT)).thenReturn(condition);
         waitSteps.waitTillElementContainsText(locator, TEXT);
         verify(waitActions).wait(webElement, condition);
-    }
-
-    @Test
-    void testWaitTillElementDisappears()
-    {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
-        WaitResult<Boolean> waitResult = mock(WaitResult.class);
-        Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, NAME);
-        IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchActionsConditions.invisibilityOfElement(locator)).thenReturn(condition);
-        when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
-        waitSteps.waitForElementDisappearance(locator);
-        verify(waitResult).isWaitPassed();
     }
 
     @Test

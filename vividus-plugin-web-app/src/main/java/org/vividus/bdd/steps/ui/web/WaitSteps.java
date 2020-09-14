@@ -417,38 +417,6 @@ public class WaitSteps
     }
 
     /**
-     * Waits for <b><i>an element</i></b> with the specified <b>locator</b> appearance
-     * in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><i>Finds</i> an element with the <b>specified locator</b> within search context
-     * <li><i>Waits</i> until this element becomes visible
-     * </ul>
-     * @param locator to locate element
-     * @return true if element appeared, false otherwise
-     */
-    @When("I wait until element located `$locator` appears")
-    public boolean waitForElementAppearance(Locator locator)
-    {
-        return waitActions.wait(getSearchContext(),
-                expectedSearchActionsConditions.visibilityOfElement(locator)).isWaitPassed();
-    }
-
-    /**
-     * Waits for element disappearance with timeout
-     * @param locator The locating mechanism to use
-     * @return true if element disappeared, false otherwise
-     */
-    @When("I wait until element located `$locator` disappears")
-    public boolean waitForElementDisappearance(Locator locator)
-    {
-        return waitActions.wait(getSearchContext(), expectedSearchActionsConditions.invisibilityOfElement(locator))
-                .isWaitPassed();
-    }
-
-    /**
      * Waits for the scroll finish; Could be useful for the cases when you have very slow scroll
      * and need to synchronize the tests with the scroll
      */
