@@ -20,16 +20,22 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jbehave.core.model.Scenario;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.softassert.exception.VerificationError;
 
 public class StatusStoryReporter extends ChainedStoryReporter implements IRunStatusProvider
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatusStoryReporter.class);
+
     private final AtomicReference<Optional<Status>> status = new AtomicReference<>(Optional.empty());
 
     @Override
     public Optional<Status> getRunStatus()
     {
-        return status.get();
+        Optional<Status> toReturn = status.get();
+        LOGGER.atError().addArgument(toReturn).log("Status to return: {}");
+        return toReturn;
     }
 
     @Override
@@ -77,9 +83,10 @@ public class StatusStoryReporter extends ChainedStoryReporter implements IRunSta
 
     private void changeStatus(Status newStatus)
     {
-        status.updateAndGet(
+        Optional<Status> updatedStatus = status.updateAndGet(
             currentStatus -> currentStatus.isEmpty() || currentStatus.get().getPriority() > newStatus.getPriority()
                     ? Optional.of(newStatus) : currentStatus);
+        LOGGER.atError().addArgument(updatedStatus).log("Status changed to: {}");
     }
 
     private static Status getStatus(Throwable throwable)

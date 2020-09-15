@@ -20,8 +20,8 @@ public enum Status
 {
     BROKEN(0),
     FAILED(1),
-    KNOWN_ISSUES_ONLY(2),
-    PENDING(3),
+    PENDING(2),
+    KNOWN_ISSUES_ONLY(3),
     SKIPPED(4),
     PASSED(5),
     NOT_COVERED(6);

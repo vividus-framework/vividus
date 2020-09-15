@@ -12,7 +12,7 @@ Composite: When I check a checkbox
 When I CHECK checkbox located by `xpath(.//input[@type='checkbox'])`
 
 Composite: When I check all the checkboxes
-When I CHECK all checkboxes located by `xpath(.//input[@type='checkbox'])`
+When I CHECK all checkboxezzz located by `xpath(.//input[@type='checkbox'])`
 
 Composite: When I uncheck a checkbox with the attribute '$attributeType'='$attributeValue'
 When I UNCHECK checkbox located by `xpath(.//input[@type='checkbox' and @<attributeType>='<attributeValue>'])`
