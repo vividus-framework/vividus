@@ -18,5 +18,7 @@ package org.vividus.ui.action.search;
 
 public interface IElementAction
 {
+    String NOT_SET_CONTEXT = "Unable to locate elements, because search context is not set";
+
     LocatorType getType();
 }

@@ -21,6 +21,7 @@ import static org.vividus.ui.validation.matcher.ElementNumberMatcher.elementNumb
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -32,6 +33,7 @@ import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.IState;
 import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.search.IElementAction;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.validation.matcher.ExistsMatcher;
@@ -129,17 +131,21 @@ public class BaseValidations implements IBaseValidations
     @Override
     public Optional<WebElement> assertElementExists(String description, Locator locator)
     {
-        List<WebElement> elements = searchActions.findElements(uiContext.getSearchContext(), locator);
-        if (elements.size() > 1)
+        SearchContext searchContext = uiContext.getSearchContext();
+        return runValidatingSearchContext(searchContext, () ->
         {
-            String assertionFormat = "The number of elements found by the locator %s is %d, but expected 1";
-            softAssert.recordFailedAssertion(String.format(assertionFormat, locator, elements.size()));
-        }
-        else if (doesOnlyOneElementExist(description, locator, elements))
-        {
-            return Optional.of(elements.get(0));
-        }
-        return Optional.empty();
+            List<WebElement> elements = searchActions.findElements(searchContext, locator);
+            if (elements.size() > 1)
+            {
+                String assertionFormat = "The number of elements found by the locator %s is %d, but expected 1";
+                softAssert.recordFailedAssertion(String.format(assertionFormat, locator, elements.size()));
+            }
+            else if (doesOnlyOneElementExist(description, locator, elements))
+            {
+                return Optional.of(elements.get(0));
+            }
+            return Optional.empty();
+        }, Optional.empty());
     }
 
     private boolean doesOnlyOneElementExist(String description, Locator locator, List<WebElement> elements)
@@ -157,9 +163,12 @@ public class BaseValidations implements IBaseValidations
     @Override
     public WebElement assertIfElementExists(String businessDescription, SearchContext searchContext, Locator locator)
     {
-        List<WebElement> elements = searchActions.findElements(searchContext, locator);
-        String systemDescription = String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator);
-        return assertIfElementExists(businessDescription, systemDescription, elements);
+        return runValidatingSearchContext(searchContext, () ->
+        {
+            List<WebElement> elements = searchActions.findElements(searchContext, locator);
+            String systemDescription = String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator);
+            return assertIfElementExists(businessDescription, systemDescription, elements);
+        }, null);
     }
 
     @Override
@@ -172,11 +181,13 @@ public class BaseValidations implements IBaseValidations
     public List<WebElement> assertIfElementsExist(String businessDescription, SearchContext searchContext,
             Locator locator)
     {
-        List<WebElement> elements = searchActions.findElements(searchContext, locator);
-        String systemDescription = String.format("There is at least one element with attributes '%s'",
-                locator);
-        softAssert.assertThat(businessDescription, systemDescription, elements, elementNumber(greaterThan(0)));
-        return elements;
+        return runValidatingSearchContext(searchContext, () ->
+        {
+            List<WebElement> elements = searchActions.findElements(searchContext, locator);
+            String systemDescription = String.format("There is at least one element with attributes '%s'", locator);
+            softAssert.assertThat(businessDescription, systemDescription, elements, elementNumber(greaterThan(0)));
+            return elements;
+        }, List.of());
     }
 
     @Override
@@ -189,9 +200,11 @@ public class BaseValidations implements IBaseValidations
     public boolean assertIfExactNumberOfElementsFound(String businessDescription, SearchContext searchContext,
             Locator locator, int number)
     {
-        List<WebElement> elements = searchActions.findElements(searchContext, locator);
-        String systemDescription = String.format("Number %d of elements found by '%s'", number, locator);
-        return assertElementNumber(businessDescription, systemDescription, elements, number);
+        return runValidatingSearchContext(searchContext, () -> {
+            List<WebElement> elements = searchActions.findElements(searchContext, locator);
+            String systemDescription = String.format("Number %d of elements found by '%s'", number, locator);
+            return assertElementNumber(businessDescription, systemDescription, elements, number);
+        }, false);
     }
 
     @Override
@@ -206,11 +219,25 @@ public class BaseValidations implements IBaseValidations
     public List<WebElement> assertIfAtLeastNumberOfElementsExist(String businessDescription,
             SearchContext searchContext, Locator locator, int leastNumber)
     {
-        List<WebElement> elements = searchActions.findElements(searchContext, locator);
-        String systemDescription = String.format("There are at least %d elements with attributes '%s'", leastNumber,
-                locator);
-        return assertLeastElementNumber(businessDescription, systemDescription, elements, leastNumber) ? elements
-                : List.of();
+        return runValidatingSearchContext(searchContext, () ->
+        {
+            List<WebElement> elements = searchActions.findElements(searchContext, locator);
+            String systemDescription = String.format("There are at least %d elements with attributes '%s'", leastNumber,
+                    locator);
+            return assertLeastElementNumber(businessDescription, systemDescription, elements, leastNumber) ? elements
+                    : List.of();
+        }, List.of());
+    }
+
+    public <E> E runValidatingSearchContext(SearchContext searchContext, Supplier<E> toRun,
+            E defaultValue)
+    {
+        if (searchContext == null)
+        {
+            softAssert.recordFailedAssertion(IElementAction.NOT_SET_CONTEXT);
+            return defaultValue;
+        }
+        return toRun.get();
     }
 
     @Override
@@ -223,8 +250,11 @@ public class BaseValidations implements IBaseValidations
     public WebElement assertIfAtLeastOneElementExists(String businessDescription, SearchContext searchContext,
             Locator locator)
     {
-        List<WebElement> elements = assertIfElementsExist(businessDescription, searchContext, locator);
-        return elements.isEmpty() ? null : elements.get(0);
+        return runValidatingSearchContext(searchContext, () ->
+        {
+            List<WebElement> elements = assertIfElementsExist(businessDescription, searchContext, locator);
+            return elements.isEmpty() ? null : elements.get(0);
+        }, null);
     }
 
     @Override
@@ -237,14 +267,17 @@ public class BaseValidations implements IBaseValidations
     public Optional<WebElement> assertIfZeroOrOneElementFound(String businessDescription, SearchContext searchContext,
             Locator locator)
     {
-        List<WebElement> elements = searchActions.findElements(searchContext, locator);
-        String systemDescription = String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator);
-        if (elements.isEmpty())
+        return runValidatingSearchContext(searchContext, () ->
         {
-            softAssert.recordPassedAssertion(systemDescription + " not found");
-            return Optional.empty();
-        }
-        return Optional.ofNullable(assertIfElementExists(businessDescription, systemDescription, elements));
+            List<WebElement> elements = searchActions.findElements(searchContext, locator);
+            String systemDescription = String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator);
+            if (elements.isEmpty())
+            {
+                softAssert.recordPassedAssertion(systemDescription + " not found");
+                return Optional.empty();
+            }
+            return Optional.ofNullable(assertIfElementExists(businessDescription, systemDescription, elements));
+        }, Optional.empty());
     }
 
     @Override
@@ -303,25 +336,31 @@ public class BaseValidations implements IBaseValidations
     public boolean assertIfElementDoesNotExist(String businessDescription, String systemDescription,
             SearchContext searchContext, Locator locator, boolean recordAssertionIfFail)
     {
-        locator.getSearchParameters().setWaitForElement(false);
-        List<WebElement> elements = searchActions.findElements(searchContext, locator);
-        boolean noElementsExist = elements.isEmpty();
-        if (noElementsExist || recordAssertionIfFail)
+        return runValidatingSearchContext(searchContext, () ->
         {
-            softAssert.assertThat(businessDescription, systemDescription, elements, NotExistsMatcher.notExists());
-        }
-        return noElementsExist;
+            locator.getSearchParameters().setWaitForElement(false);
+            List<WebElement> elements = searchActions.findElements(searchContext, locator);
+            boolean noElementsExist = elements.isEmpty();
+            if (noElementsExist || recordAssertionIfFail)
+            {
+                softAssert.assertThat(businessDescription, systemDescription, elements, NotExistsMatcher.notExists());
+            }
+            return noElementsExist;
+        }, false);
     }
 
     @Override
     public List<WebElement> assertIfNumberOfElementsFound(String businessDescription, SearchContext searchContext,
             Locator locator, int number, ComparisonRule comparisonRule)
     {
-        List<WebElement> elements = searchActions.findElements(searchContext, locator);
-        String systemDescription = String.format("Number of elements found by '%s' is %s %d", locator,
-                comparisonRule, number);
-        return softAssert.assertThat(businessDescription, systemDescription, elements,
-                elementNumber(comparisonRule.getComparisonRule(number))) ? elements : List.of();
+        return runValidatingSearchContext(searchContext, () ->
+        {
+            List<WebElement> elements = searchActions.findElements(searchContext, locator);
+            String systemDescription = String.format("Number of elements found by '%s' is %s %d", locator,
+                    comparisonRule, number);
+            return softAssert.assertThat(businessDescription, systemDescription, elements,
+                    elementNumber(comparisonRule.getComparisonRule(number))) ? elements : List.of();
+        }, List.of());
     }
 
     @Override
