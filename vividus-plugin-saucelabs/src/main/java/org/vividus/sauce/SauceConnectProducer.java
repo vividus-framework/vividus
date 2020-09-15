@@ -20,9 +20,10 @@ import com.google.common.eventbus.Subscribe;
 
 import org.jbehave.core.model.Meta;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.proxy.ProxyEvent;
-import org.vividus.selenium.ControllingMetaTag;
-import org.vividus.selenium.VividusWebDriverFactory;
+import org.vividus.bdd.model.MetaWrapper;
+import org.vividus.bdd.proxy.ProxyStartedEvent;
+import org.vividus.proxy.IProxy;
+import org.vividus.selenium.ProxyStarter;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 
 public class SauceConnectProducer
@@ -32,34 +33,35 @@ public class SauceConnectProducer
 
     private final WebApplicationConfiguration webApplicationConfiguration;
     private final IBddRunContext bddRunContext;
-    private final VividusWebDriverFactory vividusWebDriverFactory;
     private final SauceConnectManager sauceConnectManager;
+    private final IProxy proxy;
+    private final ProxyStarter proxyStarter;
 
     private boolean sauceConnectEnabled;
 
     public SauceConnectProducer(WebApplicationConfiguration webApplicationConfiguration, IBddRunContext bddRunContext,
-            VividusWebDriverFactory vividusWebDriverFactory, SauceConnectManager sauceConnectManager)
+          SauceConnectManager sauceConnectManager, IProxy proxy, ProxyStarter proxyStarter)
     {
         this.webApplicationConfiguration = webApplicationConfiguration;
         this.bddRunContext = bddRunContext;
-        this.vividusWebDriverFactory = vividusWebDriverFactory;
         this.sauceConnectManager = sauceConnectManager;
+        this.proxy = proxy;
+        this.proxyStarter = proxyStarter;
     }
 
     @Subscribe
-    public void handleProxyEvent(ProxyEvent event)
+    public void handleStartProxyEvent(ProxyStartedEvent event)
     {
-        if (event.isProxyStarted())
-        {
-            startSauceConnect();
-        }
-        else
-        {
-            sauceConnectManager.stop();
-        }
+        startSauceConnect();
     }
 
-    private void startSauceConnect()
+    @Subscribe
+    public void handleStoppedProxyEvent(ProxyStartedEvent event)
+    {
+        sauceConnectManager.stop();
+    }
+
+    public void startSauceConnect()
     {
         if (isSauceConnectEnabled() && !sauceConnectManager.isStarted())
         {
@@ -70,7 +72,10 @@ public class SauceConnectProducer
                 sauceConnectOptions.setPort(DEFAULT_HTTPS_PORT);
             }
             sauceConnectOptions.setBasicAuthUser(webApplicationConfiguration.getBasicAuthUser());
-            sauceConnectOptions.setProxy(vividusWebDriverFactory.createSeleniumProxy(false).getHttpProxy());
+            if (proxy.isStarted())
+            {
+                sauceConnectOptions.setProxy(proxyStarter.createSeleniumProxy(false).getHttpProxy());
+            }
             sauceConnectManager.start(sauceConnectOptions);
         }
     }
@@ -103,11 +108,16 @@ public class SauceConnectProducer
 
     private boolean isSauceConnectMetaTagContainedIn(Meta meta)
     {
-        return ControllingMetaTag.isContainedIn(meta, SAUCE_CONNECT_META_TAG);
+        return new MetaWrapper(meta).getOptionalPropertyValue(SAUCE_CONNECT_META_TAG).isPresent();
     }
 
     public void setSauceConnectEnabled(boolean sauceConnectEnabled)
     {
         this.sauceConnectEnabled = sauceConnectEnabled;
+    }
+
+    public SauceConnectManager getSauceConnectManager()
+    {
+        return sauceConnectManager;
     }
 }

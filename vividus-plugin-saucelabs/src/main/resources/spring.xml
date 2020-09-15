@@ -18,7 +18,6 @@
     <bean id="sauceLabsWebDriverFactory" class="org.vividus.sauce.SauceLabsWebDriverFactory"
           parent="vividusWebDriverFactory" primary="true">
         <property name="sauceConnectEnabled" value="${sauceLabs.sauce-connect.enabled}"/>
-        <property name="sauceConnectManager" ref="sauceConnectManager"/>
     </bean>
 
     <bean id="sauceConnectProducer" class="org.vividus.sauce.SauceConnectProducer">

@@ -30,8 +30,8 @@ import org.vividus.testcontext.TestContext;
 public class WebDriverProvider implements IWebDriverProvider
 {
     @Inject private IVividusWebDriverFactory vividusWebDriverFactory;
-    @Inject private EventBus eventBus;
     private final ConcurrentLinkedQueue<WebDriver> webDrivers = new ConcurrentLinkedQueue<>();
+    @Inject private EventBus eventBus;
     private TestContext testContext;
 
     @Override

@@ -24,7 +24,8 @@ import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.proxy.ProxyEvent;
+import org.vividus.bdd.proxy.ProxyStartedEvent;
+import org.vividus.bdd.proxy.ProxyStoppedEvent;
 import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.ControllingMetaTag;
@@ -107,13 +108,13 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
     public void startProxy()
     {
         proxy.start();
-        eventBus.post(new ProxyEvent(proxy));
+        eventBus.post(new ProxyStartedEvent());
     }
 
     public void stopProxy()
     {
         proxy.stop();
-        eventBus.post(new ProxyEvent(proxy));
+        eventBus.post(new ProxyStoppedEvent());
     }
 
     private boolean isProxyRecordingEnabled()

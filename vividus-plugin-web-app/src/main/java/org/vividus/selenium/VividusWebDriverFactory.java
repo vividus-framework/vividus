@@ -16,15 +16,10 @@
 
 package org.vividus.selenium;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 
-import com.browserup.bup.client.ClientUtil;
-
 import org.jbehave.core.model.Scenario;
-import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -43,19 +38,22 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
     private final IBrowserWindowSizeProvider browserWindowSizeProvider;
     private final IWebDriverManager webDriverManager;
     private final IProxy proxy;
+    private final ProxyStarter proxyStarter;
 
     private boolean remoteExecution;
     private List<WebDriverEventListener> webDriverEventListeners;
 
     public VividusWebDriverFactory(IWebDriverFactory webDriverFactory, IBddRunContext bddRunContext,
         IWebDriverManagerContext webDriverManagerContext, IProxy proxy,
-        IBrowserWindowSizeProvider browserWindowSizeProvider, IWebDriverManager webDriverManager)
+        IBrowserWindowSizeProvider browserWindowSizeProvider, IWebDriverManager webDriverManager,
+        ProxyStarter proxyStarter)
     {
         super(bddRunContext, webDriverManagerContext);
         this.proxy = proxy;
         this.webDriverFactory = webDriverFactory;
         this.browserWindowSizeProvider = browserWindowSizeProvider;
         this.webDriverManager = webDriverManager;
+        this.proxyStarter = proxyStarter;
     }
 
     @Override
@@ -79,7 +77,7 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
     {
         if (proxy.isStarted())
         {
-            desiredCapabilities.setCapability(CapabilityType.PROXY, createSeleniumProxy(remoteExecution));
+            desiredCapabilities.setCapability(CapabilityType.PROXY, proxyStarter.createSeleniumProxy(remoteExecution));
             desiredCapabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
         }
     }
@@ -98,19 +96,6 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
             {
                 ControllingMetaTag.BROWSER_NAME.setCapability(desiredCapabilities, metaWrapper);
             }
-        }
-    }
-
-    public Proxy createSeleniumProxy(boolean remoteExecution)
-    {
-        try
-        {
-            return ClientUtil.createSeleniumProxy(proxy.getProxyServer(),
-                    remoteExecution ? InetAddress.getLocalHost() : InetAddress.getLoopbackAddress());
-        }
-        catch (UnknownHostException e)
-        {
-            throw new IllegalStateException(e);
         }
     }
 

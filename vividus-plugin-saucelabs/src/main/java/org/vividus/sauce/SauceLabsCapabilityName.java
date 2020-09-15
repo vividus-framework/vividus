@@ -16,14 +16,14 @@
 
 package org.vividus.sauce;
 
-public enum SauceLabsOptionName
+public enum SauceLabsCapabilityName
 {
     NAME("name"),
     TUNNEL_IDENTIFIER("tunnelIdentifier");
 
     private final String optionName;
 
-    SauceLabsOptionName(String optionName)
+    SauceLabsCapabilityName(String optionName)
     {
         this.optionName = optionName;
     }

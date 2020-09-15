@@ -28,6 +28,7 @@ import org.vividus.bdd.model.RunningStory;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.IBrowserWindowSizeProvider;
 import org.vividus.selenium.IWebDriverFactory;
+import org.vividus.selenium.ProxyStarter;
 import org.vividus.selenium.VividusWebDriver;
 import org.vividus.selenium.VividusWebDriverFactory;
 import org.vividus.selenium.manager.IWebDriverManager;
@@ -37,15 +38,17 @@ public class SauceLabsWebDriverFactory extends VividusWebDriverFactory
 {
     private static final String SAUCE_OPTION = "sauce:options";
 
-    private ISauceConnectManager sauceConnectManager;
+    private final SauceConnectProducer sauceConnectProducer;
     private boolean sauceConnectEnabled;
 
     public SauceLabsWebDriverFactory(IWebDriverFactory webDriverFactory, IBddRunContext bddRunContext,
             IWebDriverManagerContext webDriverManagerContext, IProxy proxy,
-            IBrowserWindowSizeProvider browserWindowSizeProvider, IWebDriverManager webDriverManager)
+            IBrowserWindowSizeProvider browserWindowSizeProvider, IWebDriverManager webDriverManager,
+            ProxyStarter proxyStarter, SauceConnectProducer sauceConnectProducer)
     {
         super(webDriverFactory, bddRunContext, webDriverManagerContext, proxy, browserWindowSizeProvider,
-                webDriverManager);
+                webDriverManager, proxyStarter);
+        this.sauceConnectProducer = sauceConnectProducer;
     }
 
     @Override protected void configureProxy(DesiredCapabilities desiredCapabilities)
@@ -58,7 +61,13 @@ public class SauceLabsWebDriverFactory extends VividusWebDriverFactory
         DesiredCapabilities desiredCapabilities = vividusWebDriver.getDesiredCapabilities();
         if (sauceConnectEnabled)
         {
-            addSauceOption(desiredCapabilities, SauceLabsOptionName.TUNNEL_IDENTIFIER,
+            ISauceConnectManager sauceConnectManager = sauceConnectProducer.getSauceConnectManager();
+            if (!sauceConnectManager.isStarted())
+            {
+                sauceConnectProducer.startSauceConnect();
+            }
+
+            addSauceOption(desiredCapabilities, SauceLabsCapabilityName.TUNNEL_IDENTIFIER,
                     sauceConnectManager.getTunnelId());
         }
         super.configureVividusWebDriver(vividusWebDriver);
@@ -68,7 +77,7 @@ public class SauceLabsWebDriverFactory extends VividusWebDriverFactory
     protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities, RunningStory runningStory,
             Scenario scenario, MetaWrapper metaWrapper)
     {
-        addSauceOption(desiredCapabilities, SauceLabsOptionName.NAME, runningStory.getName());
+        addSauceOption(desiredCapabilities, SauceLabsCapabilityName.NAME, runningStory.getName());
     }
 
     /**
@@ -80,7 +89,7 @@ public class SauceLabsWebDriverFactory extends VividusWebDriverFactory
      */
     @SuppressWarnings("unchecked")
     private void addSauceOption(DesiredCapabilities desiredCapabilities,
-            SauceLabsOptionName key, Object value)
+            SauceLabsCapabilityName key, Object value)
     {
         // @formatter:off
         Optional.ofNullable((HashMap<String, Object>) desiredCapabilities.getCapability(SAUCE_OPTION))
@@ -90,16 +99,11 @@ public class SauceLabsWebDriverFactory extends VividusWebDriverFactory
         // @formatter:on
     }
 
-    private Map<String, Object> adjustNewSauceOptionsCapability(SauceLabsOptionName key, Object value)
+    private Map<String, Object> adjustNewSauceOptionsCapability(SauceLabsCapabilityName key, Object value)
     {
         Map<String, Object> sauceOptions = new HashMap<>();
         sauceOptions.put(key.getOptionName(), value);
         return sauceOptions;
-    }
-
-    public void setSauceConnectManager(ISauceConnectManager sauceConnectManager)
-    {
-        this.sauceConnectManager = sauceConnectManager;
     }
 
     public void setSauceConnectEnabled(boolean sauceConnectEnabled)
