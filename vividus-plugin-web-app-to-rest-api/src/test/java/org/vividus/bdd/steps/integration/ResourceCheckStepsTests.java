@@ -155,12 +155,11 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
         URI imageUri = URI.create("https://avatars0.githubusercontent.com/u/48793437?s=200&v=4");
         URI gifImageUri = URI.create("https://github.githubassets.com/images/spinners/octocat-spinner-32.gif");
-
+        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
         resourceCheckSteps.checkResources("a, img", FIRST_PAGE);
 
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
@@ -186,7 +185,6 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
         when(httpResponse.getResponseBodyAsString()).thenReturn(FIRST_PAGE, SECOND_PAGE);
@@ -194,6 +192,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.init();
         ExamplesTable examplesTable =
                 new ExamplesTable("|pages|\n|https://first.page|\n|https://second.page|");
+        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL, Optional.empty());
@@ -219,7 +218,6 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
         when(httpResponse.getResponseBodyAsString()).thenReturn(THIRD_PAGE);
@@ -245,7 +243,6 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         IOException ioException = new IOException();
         doThrow(ioException).when(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL,
                 Optional.empty());
@@ -276,7 +273,6 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
@@ -315,11 +311,6 @@ class ResourceCheckStepsTests
         verifyNoInteractions(httpTestContext, attachmentPublisher, resourceValidator);
     }
 
-    private void mockWebApplicationConfiguration()
-    {
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
-    }
-
     private void mockResourceValidator()
     {
         when(resourceValidator.perform(any(ResourceValidation.class)))
@@ -336,10 +327,9 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.of("^((?!https).)*"));
         resourceCheckSteps.init();
-
+        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
         resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
