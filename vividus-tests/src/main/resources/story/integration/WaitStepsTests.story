@@ -62,4 +62,4 @@ Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
 Then number of elements found by `id(element-to-hide)` is equal to `1`
 When I click on element located `id(button-hide)`
 When I wait until element located `id(element-to-hide)` disappears
-Then number of elements found by `id(element-to-hide)` is equal to 01`
+Then number of elements found by `id(element-to-hide)` is equal to `0`
