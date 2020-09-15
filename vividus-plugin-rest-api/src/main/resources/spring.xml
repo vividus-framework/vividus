@@ -82,4 +82,12 @@
         <value>httpCookieSteps</value>
         <value>sslSteps</value>
     </util:list>
+
+    <util:map id="propertyEditors-RestApi" key-type="java.lang.Class">
+        <entry key="org.vividus.http.CookieStoreLevel">
+            <bean class="org.vividus.beans.RelaxedEnumPropertyEditor">
+                <constructor-arg value="org.vividus.http.CookieStoreLevel" />
+            </bean>
+        </entry>
+    </util:map>
 </beans>
