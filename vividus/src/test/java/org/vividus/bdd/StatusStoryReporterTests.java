@@ -152,4 +152,17 @@ class StatusStoryReporterTests
         assertEquals(Optional.of(Status.BROKEN), statusStoryReporter.getRunStatus());
         verify(nextStoryReporter).failed(null, null);
     }
+
+    @Test
+    void shouldSwitchKnownIssuesOnlyToPending()
+    {
+        SoftAssertionError softAssertionError = new SoftAssertionError(null);
+        softAssertionError.setKnownIssue(new KnownIssue(null, KnownIssueType.AUTOMATION, false));
+        VerificationError verificationError = new VerificationError(null, List.of(softAssertionError));
+        UUIDExceptionWrapper throwable = new UUIDExceptionWrapper(verificationError);
+        statusStoryReporter.failed(null, throwable);
+        assertEquals(Optional.of(Status.KNOWN_ISSUES_ONLY), statusStoryReporter.getRunStatus());
+        statusStoryReporter.pending(null);
+        assertEquals(Optional.of(Status.PENDING), statusStoryReporter.getRunStatus());
+    }
 }
