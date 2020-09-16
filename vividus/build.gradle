@@ -93,4 +93,5 @@ dependencies {
     integrationTestImplementation project(':vividus-plugin-xml')
     integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    integrationTestCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugs.toolVersion)
 }

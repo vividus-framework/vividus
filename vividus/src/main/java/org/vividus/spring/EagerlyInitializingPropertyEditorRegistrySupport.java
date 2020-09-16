@@ -16,16 +16,15 @@
 
 package org.vividus.spring;
 
-import java.util.Locale;
+import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.LocaleUtils;
-import org.springframework.core.convert.converter.Converter;
+import org.springframework.beans.PropertyEditorRegistrySupport;
 
-public class StringToLocaleConverter implements Converter<String, Locale>
+public class EagerlyInitializingPropertyEditorRegistrySupport extends PropertyEditorRegistrySupport
 {
-    @Override
-    public Locale convert(String source)
+    public EagerlyInitializingPropertyEditorRegistrySupport()
     {
-        return LocaleUtils.toLocale(source);
+        registerDefaultEditors();
+        getDefaultEditor(Pattern.class);
     }
 }
