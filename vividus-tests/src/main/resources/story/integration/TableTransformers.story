@@ -171,3 +171,15 @@ Examples:
 
 Scenario: Verify variable from nested transformers scenario
 Then `${table-row-number}` is equal to `3`
+
+Scenario: Verify processing of tables with table separators in cells by table transformers
+Meta:
+    @issueId 951
+Then `<col1>` is equal to `A | B`
+Then `<col2>` is equal to `C ! D`
+Examples:
+{transformer=MERGING, mergeMode=columns, tables=
+    \{transformer=FROM_EXCEL\, path=/data/complex-data.xlsx\, sheet=with separators\, range=A1:A2\, column=col1\};
+    \{transformer=FROM_EXCEL\, path=/data/complex-data.xlsx\, sheet=with separators\, range=B1:B2\, column=col2\}
+}
+{transformer=FILTERING, column.col1=.+}
