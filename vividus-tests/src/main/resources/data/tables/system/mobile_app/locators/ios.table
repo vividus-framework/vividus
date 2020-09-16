@@ -1,12 +1,12 @@
 {transformer=FROM_LANDSCAPE}
 |mainViewHeaderTextXpath   |//XCUIElementTypeStaticText[@value='Home']  |
 |togglerAccessibilityId    |menu-toggler-testID                         |
-|menuButtonXpath           |//XCUIElementTypeButton[@name="Button"]     |
+|menuButtonXpath           |//XCUIElementTypeStaticText[@name="Button"] |
 |incrementAccessibilityId  |increment-testID                            |
-|menuInputXpath            |//XCUIElementTypeButton[@name="Input"]      |
+|menuInputXpath            |//XCUIElementTypeStaticText[@name="Input"]  |
 |nameInputAccessibilityId  |name-input-testID                           |
 |nameDisplayXpath          |//XCUIElementTypeTextField[@value='${text}']|
-|menuWaitXpath             |//XCUIElementTypeButton[@name="Wait"]       |
+|menuWaitXpath             |//XCUIElementTypeStaticText[@name="Wait"]   |
 |pictureAccessibilityId    |picture-testID                              |
 |hidePictureAccessibilityId|hide-picture-testID                         |
 |showPictureAccessibilityId|show-picture-testID                         |
