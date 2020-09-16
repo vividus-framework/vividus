@@ -16,7 +16,9 @@
 
 package org.vividus.http.exception;
 
-public class HttpRequestBuildException extends Exception
+import java.io.IOException;
+
+public class HttpRequestBuildException extends IOException
 {
     private static final long serialVersionUID = -6608317424407885307L;
 
