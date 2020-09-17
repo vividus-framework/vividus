@@ -250,7 +250,6 @@ public class HttpRequestSteps
         headersConsumer.accept(requestHeaders);
     }
 
-
     private boolean isResponseCodeIsEqualToExpected(HttpResponse response, int expectedResponseCode)
     {
         return response != null && response.getStatusCode() == expectedResponseCode;

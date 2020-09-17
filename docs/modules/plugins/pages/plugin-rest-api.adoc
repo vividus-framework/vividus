@@ -103,8 +103,8 @@ When I add request header with name `$name` and value `$value`
 
 ==== *_Parameters_*
 
-.  `name` - header name
-.  `value` - header value
+. `name` - header name
+. `value` - header value
 
 ==== *_Usage_*
 
