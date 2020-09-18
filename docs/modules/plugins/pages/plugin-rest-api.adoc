@@ -92,7 +92,7 @@ When I wait for presence of element by `$.data.testData` with `PT5S` polling int
 
 ==== *_Info_*
 
-Adds request headers to request
+Adds headers to HTTP request. See https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[standard request fields].
 
 ==== *_Wording_*
 
