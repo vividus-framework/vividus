@@ -45,6 +45,6 @@
     </bean>
 
     <util:list id="stepBeanNames-Eyes-Visual">
-        <value>visualTestingSteps</value>
+        <idref bean="visualTestingSteps" />
     </util:list>
 </beans>

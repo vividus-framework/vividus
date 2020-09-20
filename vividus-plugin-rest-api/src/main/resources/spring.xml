@@ -75,12 +75,12 @@
     </aop:config>
 
     <util:list id="stepBeanNames-Api" value-type="java.lang.String">
-        <value>apiSteps</value>
-        <value>httpResponseValidationSteps</value>
-        <value>jsonResponseValidationSteps</value>
-        <value>cookieStoreProvider</value>
-        <value>httpCookieSteps</value>
-        <value>sslSteps</value>
+        <idref bean="apiSteps" />
+        <idref bean="httpResponseValidationSteps" />
+        <idref bean="jsonResponseValidationSteps" />
+        <idref bean="cookieStoreProvider" />
+        <idref bean="httpCookieSteps" />
+        <idref bean="sslSteps" />
     </util:list>
 
     <util:map id="propertyEditors-RestApi" key-type="java.lang.Class">

@@ -28,6 +28,6 @@
     </bean>
 
     <util:list id="stepBeanNames-Email">
-        <value>emailSteps</value>
+        <idref bean="emailSteps" />
     </util:list>
 </beans>

@@ -19,6 +19,6 @@
     </bean>
 
     <util:list id="stepBeanNames-DateTime" value-type="java.lang.String">
-         <value>dateValidationSteps</value>
+         <idref bean="dateValidationSteps" />
     </util:list>
 </beans>

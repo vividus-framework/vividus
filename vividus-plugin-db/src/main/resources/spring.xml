@@ -22,6 +22,6 @@
     </bean>
 
     <util:list id="stepBeanNames-DB">
-        <value>databaseSteps</value>
+        <idref bean="databaseSteps" />
     </util:list>
 </beans>

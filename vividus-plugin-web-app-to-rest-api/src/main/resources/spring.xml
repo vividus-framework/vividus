@@ -68,7 +68,7 @@
     </bean>
 
     <util:list id="stepBeanNames-WebAppToRestApi" value-type="java.lang.String">
-        <value>httpRequestSteps</value>
-        <value>resourceCheckSteps</value>
+        <idref bean="httpRequestSteps" />
+        <idref bean="resourceCheckSteps" />
     </util:list>
  </beans>
