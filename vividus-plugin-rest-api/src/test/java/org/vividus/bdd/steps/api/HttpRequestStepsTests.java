@@ -127,6 +127,22 @@ class HttpRequestStepsTests
         }));
     }
 
+    @Test
+    void testAddRequestHeaders()
+    {
+        ExamplesTable headers = new ExamplesTable("|name|value|\n|newName|newValue|");
+        httpRequestSteps.addRequestHeaders(headers);
+        verify(httpTestContext).addRequestHeaders(argThat(actual ->
+        {
+            if (actual.size() == 1)
+            {
+                Header header = actual.get(0);
+                return "newName".equals(header.getName()) && "newValue".equals(header.getValue());
+            }
+            return false;
+        }));
+    }
+
     @ParameterizedTest
     @EnumSource(HttpMethod.class)
     void testWhenIIssueHttpRequest(HttpMethod method) throws IOException
