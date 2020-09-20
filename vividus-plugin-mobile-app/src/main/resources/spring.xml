@@ -35,8 +35,8 @@
     </bean>
 
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
-        <value>applicationSteps</value>
-        <value>webDriverSetupSteps</value>
-        <value>actionSteps</value>
+        <idref bean="applicationSteps" />
+        <idref bean="webDriverSetupSteps" />
+        <idref bean="actionSteps" />
     </util:list>
 </beans>

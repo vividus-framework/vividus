@@ -351,35 +351,35 @@
     <bean id="browserLogCleanningListener" class="org.vividus.bdd.steps.ui.web.listener.BrowserLogCleanningListener" />
 
     <util:list id="stepBeanNames-WebUi" value-type="java.lang.String">
-        <value>webDriverSetupSteps</value>
-        <value>alertSteps</value>
-        <value>cookieSteps</value>
-        <value>scriptSteps</value>
-        <value>codeSteps</value>
-        <value>waitSteps</value>
-        <value>setVariableSteps</value>
-        <value>setContextSteps</value>
-        <value>buttonSteps</value>
-        <value>checkboxSteps</value>
-        <value>dropdownSteps</value>
-        <value>elementSteps</value>
-        <value>fieldSteps</value>
-        <value>linkSteps</value>
-        <value>pageSteps</value>
-        <value>webElementsSteps</value>
-        <value>jsValidationSteps</value>
-        <value>focusSteps</value>
-        <value>keyboardSteps</value>
-        <value>sliderSteps</value>
-        <value>videoPlayerSteps</value>
-        <value>nestedSteps</value>
-        <value>actionSteps</value>
-        <value>webUiVividusSetupSteps</value>
-        <value>screenshotTakingSteps</value>
-        <value>localStorageSteps</value>
-        <value>proxySteps</value>
-        <value>dragAndDropSteps</value>
-        <value>scrollSteps</value>
+        <idref bean="webDriverSetupSteps" />
+        <idref bean="alertSteps" />
+        <idref bean="cookieSteps" />
+        <idref bean="scriptSteps" />
+        <idref bean="codeSteps" />
+        <idref bean="waitSteps" />
+        <idref bean="setVariableSteps" />
+        <idref bean="setContextSteps" />
+        <idref bean="buttonSteps" />
+        <idref bean="checkboxSteps" />
+        <idref bean="dropdownSteps" />
+        <idref bean="elementSteps" />
+        <idref bean="fieldSteps" />
+        <idref bean="linkSteps" />
+        <idref bean="pageSteps" />
+        <idref bean="webElementsSteps" />
+        <idref bean="jsValidationSteps" />
+        <idref bean="focusSteps" />
+        <idref bean="keyboardSteps" />
+        <idref bean="sliderSteps" />
+        <idref bean="videoPlayerSteps" />
+        <idref bean="nestedSteps" />
+        <idref bean="actionSteps" />
+        <idref bean="webUiVividusSetupSteps" />
+        <idref bean="screenshotTakingSteps" />
+        <idref bean="localStorageSteps" />
+        <idref bean="proxySteps" />
+        <idref bean="dragAndDropSteps" />
+        <idref bean="scrollSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">

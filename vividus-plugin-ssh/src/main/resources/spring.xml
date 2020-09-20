@@ -24,7 +24,7 @@
     </bean>
 
     <util:list id="stepBeanNames-Ssh" value-type="java.lang.String">
-        <value>org.vividus.bdd.steps.ssh.SshSteps</value>
+        <idref bean="org.vividus.bdd.steps.ssh.SshSteps" />
     </util:list>
 
 </beans>
