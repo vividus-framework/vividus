@@ -22,11 +22,11 @@ import java.nio.file.Paths;
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.selenium.screenshot.IScreenshotTaker;
+import org.vividus.selenium.screenshot.WebScreenshotTaker;
 
 public class ScreenshotTakingSteps
 {
-    @Inject private IScreenshotTaker screenshotTaker;
+    @Inject private WebScreenshotTaker screenshotTaker;
 
     /**
      * Takes a screenshot and saves it to the default location

@@ -41,9 +41,9 @@ import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.cropper.indent.IndentCropper;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
-public class ScreenshotTaker implements IScreenshotTaker
+public class WebScreenshotTaker implements ScreenshotTaker
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScreenshotTaker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebScreenshotTaker.class);
 
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IScreenshotFileNameGenerator screenshotFileNameGenerator;
@@ -66,38 +66,32 @@ public class ScreenshotTaker implements IScreenshotTaker
         return takeScreenshot(screenshotName, List.of());
     }
 
-    @Override
     public Optional<Screenshot> takeScreenshot(String screenshotName, boolean viewportScreenshot)
     {
         return takeScreenshot(screenshotName, List.of(), viewportScreenshot);
     }
 
-    @Override
     public Path takeScreenshotAsFile(String screenshotName) throws IOException
     {
         return takeScreenshot(() -> new File(screenshotDirectory, generateScreenshotFileName(screenshotName)).toPath(),
                 false);
     }
 
-    @Override
     public void takeScreenshot(Path screenshotFilePath) throws IOException
     {
         takeScreenshot(() -> screenshotFilePath, false);
     }
 
-    @Override
     public void takeScreenshot(Path screenshotFilePath, boolean viewportScreenshot) throws IOException
     {
         takeScreenshot(() -> screenshotFilePath, viewportScreenshot);
     }
 
-    @Override
     public Optional<Screenshot> takeScreenshot(String screenshotName, List<WebElement> webElementsToHighlight)
     {
         return takeScreenshot(screenshotName, webElementsToHighlight, false);
     }
 
-    @Override
     public Optional<Screenshot> takeScreenshot(String screenshotName, List<WebElement> webElementsToHighlight,
             boolean viewportScreenshot)
     {
@@ -105,7 +99,6 @@ public class ScreenshotTaker implements IScreenshotTaker
         return createScreenshot(screenshotData, screenshotName);
     }
 
-    @Override
     public Optional<Screenshot> takeScreenshot(String screenshotName, SearchContext searchContext)
     {
         byte[] screenshotData = takeScreenshotAsByteArray(() ->
@@ -137,7 +130,6 @@ public class ScreenshotTaker implements IScreenshotTaker
         return screenshot;
     }
 
-    @Override
     public ru.yandex.qatools.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
             Optional<ScreenshotConfiguration> screenshotConfiguration)
     {
@@ -154,14 +146,9 @@ public class ScreenshotTaker implements IScreenshotTaker
 
     private Optional<Screenshot> createScreenshot(byte[] screenshotData, String screenshotName)
     {
-        if (screenshotData.length > 0)
-        {
-            Screenshot screenshot = new Screenshot();
-            screenshot.setData(screenshotData);
-            screenshot.setFileName(generateScreenshotFileName(screenshotName));
-            return Optional.of(screenshot);
-        }
-        return Optional.empty();
+        return screenshotData.length > 0
+                ? Optional.of(new Screenshot(generateScreenshotFileName(screenshotName), screenshotData))
+                : Optional.empty();
     }
 
     private Path takeScreenshot(Supplier<Path> screenshotFilePathSupplier,

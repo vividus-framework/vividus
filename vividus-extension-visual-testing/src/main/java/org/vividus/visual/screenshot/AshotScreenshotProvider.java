@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.IScreenshotTaker;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
+import org.vividus.selenium.screenshot.WebScreenshotTaker;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.model.VisualCheck;
@@ -37,7 +37,7 @@ import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 
 public class AshotScreenshotProvider implements ScreenshotProvider
 {
-    private final IScreenshotTaker screenshotTaker;
+    private final WebScreenshotTaker screenshotTaker;
     private final ISearchActions searchActions;
     private final ScreenshotDebugger screenshotDebugger;
     private final CoordsProvider coordsProvider;
@@ -45,7 +45,7 @@ public class AshotScreenshotProvider implements ScreenshotProvider
 
     private Map<IgnoreStrategy, Set<Locator>> ignoreStrategies;
 
-    public AshotScreenshotProvider(IScreenshotTaker screenshotTaker, ISearchActions searchActions,
+    public AshotScreenshotProvider(WebScreenshotTaker screenshotTaker, ISearchActions searchActions,
             ScreenshotDebugger screenshotDebugger, CoordsProvider coordsProvider, IWebDriverProvider webDrvierProvider)
     {
         this.screenshotTaker = screenshotTaker;

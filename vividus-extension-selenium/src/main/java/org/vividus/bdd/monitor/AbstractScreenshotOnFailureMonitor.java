@@ -17,18 +17,13 @@
 package org.vividus.bdd.monitor;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Optional;
-
-import javax.inject.Inject;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.steps.NullStepMonitor;
-import org.openqa.selenium.SearchContext;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.context.IBddRunContext;
@@ -37,26 +32,28 @@ import org.vividus.bdd.model.RunningStory;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.IScreenshotTaker;
+import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.softassert.event.AssertionFailedEvent;
-import org.vividus.ui.context.IUiContext;
 
-public class ScreenshotOnFailureMonitor extends NullStepMonitor
+public abstract class AbstractScreenshotOnFailureMonitor extends NullStepMonitor
 {
     private static final String NO_SCREENSHOT_ON_FAILURE_META_NAME = "noScreenshotOnFailure";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScreenshotOnFailureMonitor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScreenshotOnFailureMonitor.class);
 
-    private final ThreadLocal<Boolean> takeScreenshotOnFailureEnabled = InheritableThreadLocal.withInitial(
-        () -> Boolean.FALSE);
+    private final ThreadLocal<Boolean> takeScreenshotOnFailureEnabled = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
-    @Inject private EventBus eventBus;
+    private final EventBus eventBus;
+    private final IBddRunContext bddRunContext;
+    private final IWebDriverProvider webDriverProvider;
 
-    @Inject private IBddRunContext bddRunContext;
-
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IUiContext uiContext;
-    @Inject private IScreenshotTaker screenshotTaker;
+    public AbstractScreenshotOnFailureMonitor(EventBus eventBus, IBddRunContext bddRunContext,
+            IWebDriverProvider webDriverProvider)
+    {
+        this.eventBus = eventBus;
+        this.bddRunContext = bddRunContext;
+        this.webDriverProvider = webDriverProvider;
+    }
 
     @Override
     public void beforePerforming(String step, boolean dryRun, Method method)
@@ -82,12 +79,9 @@ public class ScreenshotOnFailureMonitor extends NullStepMonitor
     {
         if (takeScreenshotOnFailureEnabled.get() && webDriverProvider.isWebDriverInitialized())
         {
-            SearchContext searchContext = uiContext.getSearchContext();
-            List<WebElement> webElements = searchContext instanceof WebElement ? List.of((WebElement) searchContext)
-                    : uiContext.getAssertingWebElements();
             try
             {
-                screenshotTaker.takeScreenshot("Assertion_Failure", webElements).ifPresent(screenshot ->
+                takeAssertionFailureScreenshot("Assertion_Failure").ifPresent(screenshot ->
                 {
                     Attachment attachment = new Attachment(screenshot.getData(), screenshot.getFileName());
                     eventBus.post(new AttachmentPublishEvent(attachment));
@@ -101,6 +95,8 @@ public class ScreenshotOnFailureMonitor extends NullStepMonitor
             // CHECKSTYLE:ON
         }
     }
+
+    protected abstract Optional<Screenshot> takeAssertionFailureScreenshot(String screenshotName);
 
     private static boolean takeScreenshotOnFailure(Method method)
     {
