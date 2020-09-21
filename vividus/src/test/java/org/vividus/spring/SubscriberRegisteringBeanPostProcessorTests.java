@@ -19,11 +19,15 @@ package org.vividus.spring;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.util.stream.Stream;
+
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,12 +41,20 @@ class SubscriberRegisteringBeanPostProcessorTests
     @InjectMocks
     private SubscriberRegisteringBeanPostProcessor beanPostProcessor;
 
-    @Test
-    void testProcessingSubscriberObject()
+    static Stream<Object> subscribers()
     {
-        Subscriber subscriber = new Subscriber();
-        beanPostProcessor.postProcessAfterInitialization(subscriber, null);
-        verify(eventBus).register(subscriber);
+        return Stream.of(
+            new Subscriber(),
+            new InheritedSubscriber()
+        );
+    }
+
+    @MethodSource("subscribers")
+    @ParameterizedTest
+    void testProcessingSubscriberObject(Object bean)
+    {
+        beanPostProcessor.postProcessAfterInitialization(bean, null);
+        verify(eventBus).register(bean);
     }
 
     @Test
@@ -59,6 +71,10 @@ class SubscriberRegisteringBeanPostProcessorTests
         {
             // Do nothing
         }
+    }
+
+    private static class InheritedSubscriber extends Subscriber
+    {
     }
 
     private static class NonSubscriber
