@@ -22,10 +22,14 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
@@ -43,6 +47,7 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -51,46 +56,36 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.IScreenshotTaker;
 import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.softassert.event.AssertionFailedEvent;
-import org.vividus.ui.context.IUiContext;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-class ScreenshotOnFailureMonitorTests
+class AbstractScreenshotOnFailureMonitorTests
 {
     private static final String I_DO_ACTION = "I do action";
     private static final String WHEN_STEP_METHOD = "whenStep";
     private static final Meta EMPTY_META = new Meta();
     private static final String ASSERTION_FAILURE = "Assertion_Failure";
+    private static final String NO_SCREENSHOT_ON_FAILURE = "noScreenshotOnFailure";
 
-    @Mock
-    private IBddRunContext bddRunContext;
+    @Mock private IBddRunContext bddRunContext;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private EventBus eventBus;
+    @InjectMocks private TestScreenshotOnFailureMonitor monitor;
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractScreenshotOnFailureMonitor.class);
 
-    @Mock
-    private IUiContext uiContext;
-
-    @Mock
-    private IScreenshotTaker screenshotTaker;
-
-    @Mock
-    private EventBus eventBus;
-
-    @InjectMocks
-    private ScreenshotOnFailureMonitor monitor;
-
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(ScreenshotOnFailureMonitor.class);
+    @AfterEach
+    void afterEach()
+    {
+        verifyNoMoreInteractions(eventBus, bddRunContext, webDriverProvider);
+    }
 
     @TestFactory
     Stream<DynamicTest> shouldProcessStepWithAnnotation() throws NoSuchMethodException
@@ -128,6 +123,27 @@ class ScreenshotOnFailureMonitorTests
     }
 
     @Test
+    void shouldNotTakeScreenshotIfMethodAnnotatedButStoryHasNoScreenshotOnFailure() throws NoSuchMethodException
+    {
+        RunningStory runningStory = mock(RunningStory.class);
+        mockStoryMeta(runningStory, new Meta(List.of(NO_SCREENSHOT_ON_FAILURE)));
+        monitor.beforePerforming(I_DO_ACTION, false, getTakingScreenshotMethod());
+        monitor.onAssertionFailure(null);
+        verifyNoInteractions(webDriverProvider);
+    }
+
+    @Test
+    void shouldNotTakeScreenshotIfMethodAnnotatedButScenarioHasNoScreenshotOnFailure() throws NoSuchMethodException
+    {
+        RunningStory runningStory = mock(RunningStory.class);
+        mockStoryMeta(runningStory, EMPTY_META);
+        mockScenarioMeta(runningStory, new Meta(List.of(NO_SCREENSHOT_ON_FAILURE)));
+        monitor.beforePerforming(I_DO_ACTION, false, getTakingScreenshotMethod());
+        monitor.onAssertionFailure(null);
+        verifyNoInteractions(webDriverProvider);
+    }
+
+    @Test
     void shouldEnableScreenshotsIfNoRunningSceanario() throws NoSuchMethodException
     {
         RunningStory runningStory = mock(RunningStory.class);
@@ -141,7 +157,6 @@ class ScreenshotOnFailureMonitorTests
     void shouldNotTakeScreenshotIfItIsNotEnabled()
     {
         monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
-        verifyNoInteractions(webDriverProvider, uiContext, screenshotTaker);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -150,7 +165,6 @@ class ScreenshotOnFailureMonitorTests
     {
         enableScreenshotPublishing(false);
         monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
-        verifyNoInteractions(uiContext, screenshotTaker);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -158,15 +172,11 @@ class ScreenshotOnFailureMonitorTests
     void shouldTakeScreenshotOfSearchContext() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
-        WebElement searchContext = mock(WebElement.class);
-        when(uiContext.getSearchContext()).thenReturn(searchContext);
         String title = "2019-03-07_19-11-38_898-Assertion_Failure-chrome-1440x836";
-        Screenshot screenshot = new Screenshot();
-        screenshot.setData(new byte[] { 1 });
-        screenshot.setFileName(title + ".png");
-        when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, List.of(searchContext))).thenReturn(
-                Optional.of(screenshot));
-        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
+        Screenshot screenshot = new Screenshot(title + ".png", new byte[] { 1 });
+        TestScreenshotOnFailureMonitor spy = spy(monitor);
+        doReturn(Optional.of(screenshot)).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
+        spy.onAssertionFailure(mock(AssertionFailedEvent.class));
         verify(eventBus).post(argThat((ArgumentMatcher<AttachmentPublishEvent>) event -> {
             Attachment attachment = event.getAttachment();
             return Arrays.equals(screenshot.getData(), attachment.getContent()) && title.equals(attachment.getTitle());
@@ -178,13 +188,9 @@ class ScreenshotOnFailureMonitorTests
     void shouldTakeScreenshotOfAssertedElementsISearchContextIsPage() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
-        when(uiContext.getSearchContext()).thenReturn(mock(WebDriver.class));
-        List<WebElement> assertedWebElements = List.of(mock(WebElement.class));
-        when(uiContext.getAssertingWebElements()).thenReturn(assertedWebElements);
-        when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, assertedWebElements)).thenReturn(
-                Optional.empty());
-        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
-        verifyNoInteractions(eventBus);
+        TestScreenshotOnFailureMonitor spy = spy(monitor);
+        doReturn(Optional.empty()).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
+        spy.onAssertionFailure(mock(AssertionFailedEvent.class));
         assertThat(logger.getLoggingEvents(), empty());
     }
 
@@ -192,13 +198,10 @@ class ScreenshotOnFailureMonitorTests
     void shouldLogErrorIfScreenshotTakingIsFailed() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
-        WebElement searchContext = mock(WebElement.class);
-        when(uiContext.getSearchContext()).thenReturn(searchContext);
         IllegalStateException exception = new IllegalStateException();
-        when(screenshotTaker.takeScreenshot(ASSERTION_FAILURE, List.of(searchContext))).thenThrow(
-                exception);
-        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
-        verifyNoInteractions(eventBus);
+        TestScreenshotOnFailureMonitor spy = spy(monitor);
+        doThrow(exception).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
+        spy.onAssertionFailure(mock(AssertionFailedEvent.class));
         assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception, "Unable to take a screenshot"))));
     }
 
@@ -249,6 +252,21 @@ class ScreenshotOnFailureMonitorTests
         void innerWhenStep()
         {
             // nothing to do
+        }
+    }
+
+    static class TestScreenshotOnFailureMonitor extends AbstractScreenshotOnFailureMonitor
+    {
+        TestScreenshotOnFailureMonitor(EventBus eventBus, IBddRunContext bddRunContext,
+                IWebDriverProvider webDriverProvider)
+        {
+            super(eventBus, bddRunContext, webDriverProvider);
+        }
+
+        @Override
+        protected Optional<Screenshot> takeAssertionFailureScreenshot(String screenshotName)
+        {
+            throw new UnsupportedOperationException("The method is supposed to be mocked");
         }
     }
 }

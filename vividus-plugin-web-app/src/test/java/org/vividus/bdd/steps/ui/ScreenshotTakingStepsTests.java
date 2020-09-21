@@ -26,7 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.selenium.screenshot.IScreenshotTaker;
+import org.vividus.selenium.screenshot.WebScreenshotTaker;
 
 @ExtendWith(MockitoExtension.class)
 class ScreenshotTakingStepsTests
@@ -34,7 +34,7 @@ class ScreenshotTakingStepsTests
     private static final String PATH = "path";
 
     @Mock
-    private IScreenshotTaker screenshotTaker;
+    private WebScreenshotTaker screenshotTaker;
 
     @InjectMocks
     private ScreenshotTakingSteps screenshotTakingSteps;

@@ -25,7 +25,7 @@ import javax.inject.Inject;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
-import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.selenium.manager.IGenericWebDriverManager;
 
 public class ScreenshotFileNameGenerator implements IScreenshotFileNameGenerator
 {
@@ -34,7 +34,7 @@ public class ScreenshotFileNameGenerator implements IScreenshotFileNameGenerator
     private static final ThreadLocal<DateFormat> DATE_FORMAT = ThreadLocal
             .withInitial(() -> new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_SSS", Locale.getDefault()));
 
-    @Inject private IWebDriverManager webDriverManager;
+    @Inject private IGenericWebDriverManager webDriverManager;
 
     @Override
     public String generateScreenshotFileName(String screenshotName)

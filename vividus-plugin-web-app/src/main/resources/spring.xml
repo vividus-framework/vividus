@@ -82,11 +82,9 @@
 
     <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory" />
 
-    <bean id="screenshotFileNameGenerator" class="org.vividus.selenium.screenshot.ScreenshotFileNameGenerator" />
-
     <bean id="elementUtil" class="org.vividus.ui.web.util.ElementUtil" />
 
-    <bean id="screenshotTaker" class="org.vividus.selenium.screenshot.ScreenshotTaker">
+    <bean class="org.vividus.selenium.screenshot.WebScreenshotTaker">
         <property name="screenshotDirectory">
             <bean class="java.io.File">
                 <constructor-arg value="${selenium.screenshot.directory}" />
@@ -271,7 +269,7 @@
 
     <bean id="proxySteps" class="org.vividus.proxy.steps.ProxySteps" />
 
-    <bean class="org.vividus.bdd.monitor.ScreenshotOnFailureMonitor" />
+    <bean class="org.vividus.bdd.monitor.WebScreenshotOnFailureMonitor" />
 
     <bean id="browserWindowSizeProvider" class="org.vividus.selenium.BrowserWindowSizeProvider" >
         <property name="remoteScreenResolution" value="${selenium.grid.screen-resolution}" />

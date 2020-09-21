@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
-import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.selenium.manager.IGenericWebDriverManager;
 
 @ExtendWith(MockitoExtension.class)
 class ScreenshotFileNameGeneratorTests
@@ -40,11 +40,8 @@ class ScreenshotFileNameGeneratorTests
     private static final int WIDTH = 100;
     private static final String WIDTH_X_HEIGHT_EXTENSION = SEPARATOR + WIDTH + "x" + HEIGHT + ".png";
 
-    @Mock
-    private IWebDriverManager webDriverManager;
-
-    @InjectMocks
-    private ScreenshotFileNameGenerator screenshotFileNameGenerator;
+    @Mock private IGenericWebDriverManager webDriverManager;
+    @InjectMocks private ScreenshotFileNameGenerator screenshotFileNameGenerator;
 
     @Test
     void testGenerateScreenshotFileNameWithoutBrowserName()

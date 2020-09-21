@@ -75,7 +75,7 @@ import ru.yandex.qatools.ashot.util.ImageTool;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ImageTool.class)
-public class ScreenshotTakerTests
+public class WebScreenshotTakerTests
 {
     private static final String SCREENSHOT_WAS_TAKEN = "Screenshot was taken: {}";
     private static final AShot ASHOT = mock(AShot.class);
@@ -85,7 +85,7 @@ public class ScreenshotTakerTests
     private static final ru.yandex.qatools.ashot.Screenshot SCREENSHOT =
             new ru.yandex.qatools.ashot.Screenshot(loadImage());
 
-    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(ScreenshotTaker.class);
+    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(WebScreenshotTaker.class);
 
     @Rule
     private final TemporaryFolder temp = new TemporaryFolder();
@@ -118,7 +118,7 @@ public class ScreenshotTakerTests
     private ScreenshotConfiguration screenshotConfiguration;
 
     @InjectMocks
-    private ScreenshotTaker screenshotTaker;
+    private WebScreenshotTaker screenshotTaker;
 
     @Before
     public void before()
@@ -149,7 +149,7 @@ public class ScreenshotTakerTests
     {
         try
         {
-            return ImageIO.read(ResourceUtils.loadFile(ScreenshotTakerTests.class, "screenshot.png"));
+            return ImageIO.read(ResourceUtils.loadFile(WebScreenshotTakerTests.class, "screenshot.png"));
         }
         catch (IOException e)
         {
@@ -248,7 +248,7 @@ public class ScreenshotTakerTests
     @Test
     public void testTakeViewportScreenshot()
     {
-        ScreenshotTaker spy = Mockito.spy(screenshotTaker);
+        WebScreenshotTaker spy = Mockito.spy(screenshotTaker);
         doReturn(Optional.of(mock(Screenshot.class))).when(spy).takeScreenshot(SCREENSHOT_NAME, List.of(), true);
         spy.takeScreenshot(SCREENSHOT_NAME, true);
         verify(spy).takeScreenshot(SCREENSHOT_NAME, List.of(), true);
@@ -317,7 +317,10 @@ public class ScreenshotTakerTests
         when(ashotFactory.create(true, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
         mockTakeScreenshotWithHighlights();
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
-        screenshotTaker.takeScreenshot(SCREENSHOT_NAME, List.of(), true);
+        Optional<Screenshot> takenScreenshot = screenshotTaker.takeScreenshot(SCREENSHOT_NAME, List.of(), true);
+        assertTrue(takenScreenshot.isPresent());
+        Screenshot screenshot = takenScreenshot.get();
+        assertEquals(SCREENSHOT_NAME_GENERATED, screenshot.getFileName());
     }
 
     @Test

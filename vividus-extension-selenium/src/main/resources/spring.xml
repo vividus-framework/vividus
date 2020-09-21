@@ -64,6 +64,8 @@
 
     <bean class="org.vividus.ui.listener.UiContextListener" lazy-init="false" />
 
+    <bean class="org.vividus.selenium.screenshot.ScreenshotFileNameGenerator" />
+
     <bean id="genericElementSteps" class="org.vividus.bdd.steps.ui.GenericElementSteps" />
     <bean id="genericWaitSteps" class="org.vividus.bdd.steps.ui.GenericWaitSteps" />
 

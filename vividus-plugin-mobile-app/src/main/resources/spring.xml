@@ -15,6 +15,10 @@
 
     <bean class="org.vividus.mobileapp.action.KeyboardActions" />
 
+    <bean class="org.vividus.bdd.monitor.GenericScreenshotOnFailureMonitor" />
+
+    <bean class="org.vividus.selenium.mobileapp.MobileAppScreenshotTaker" />
+
     <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
 
     <bean id="actionSteps" class="org.vividus.bdd.mobileapp.steps.ActionSteps" />

@@ -46,8 +46,8 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.IScreenshotTaker;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
+import org.vividus.selenium.screenshot.WebScreenshotTaker;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.search.WebLocatorType;
@@ -77,7 +77,7 @@ class AshotScreenshotProviderTests
 
     private static final String BASELINE = "baseline";
     @Mock
-    private IScreenshotTaker screenshotTaker;
+    private WebScreenshotTaker screenshotTaker;
     @Mock(lenient = true)
     private ISearchActions searchActions;
     @Mock

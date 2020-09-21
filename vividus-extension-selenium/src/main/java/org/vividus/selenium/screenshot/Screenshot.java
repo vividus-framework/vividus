@@ -18,17 +18,13 @@ package org.vividus.selenium.screenshot;
 
 public class Screenshot
 {
-    private byte[] data;
-    private String fileName;
+    private final String fileName;
+    private final byte[] data;
 
-    public byte[] getData()
-    {
-        return data.clone();
-    }
-
-    public void setData(byte[] data)
+    public Screenshot(String fileName, byte[] data)
     {
         this.data = data.clone();
+        this.fileName = fileName;
     }
 
     public String getFileName()
@@ -36,8 +32,8 @@ public class Screenshot
         return fileName;
     }
 
-    public void setFileName(String fileName)
+    public byte[] getData()
     {
-        this.fileName = fileName;
+        return data.clone();
     }
 }
