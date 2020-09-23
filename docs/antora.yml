@@ -4,6 +4,7 @@ prerelease: false
 title: Vividus
 asciidoc:
   attributes:
+    release-version: 'false'
     source-language: asciidoc@
     xrefstyle: short@
     listing-caption: Example@
@@ -15,3 +16,4 @@ nav:
 - modules/tests-development/nav.adoc
 - modules/plugins/nav.adoc
 - modules/parameters/nav.adoc
+- modules/integrations/nav.adoc

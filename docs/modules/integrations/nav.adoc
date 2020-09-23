@@ -1,0 +1,2 @@
+.Integrations
+* xref:xray-exporter.adoc[Xray Exporter]
