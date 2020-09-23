@@ -16,6 +16,7 @@
 
 package org.vividus.excel;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -223,6 +224,24 @@ public class ExcelSheetParser implements IExcelSheetParser
         }
         return Optional.ofNullable(row.getCell(cellReference.getCol())).map(CellUtils::getCellValueAsString)
                 .orElse(null);
+    }
+
+    public Map<String, List<String>> getDataAsTable(String range)
+    {
+        CellRangeAddress address = CellRangeAddress.valueOf(range);
+        Map<String, List<String>> data = new LinkedHashMap<>();
+        for (int colIndex = address.getFirstColumn(); colIndex <= address.getLastColumn(); colIndex++)
+        {
+            String columnName = sheet.getRow(address.getFirstRow()).getCell(colIndex).getStringCellValue();
+            List<String> columnsData = new ArrayList<>();
+            for (int rowIndex = address.getFirstRow() + 1; rowIndex <= address.getLastRow(); rowIndex++)
+            {
+                Row row = sheet.getRow(rowIndex);
+                columnsData.add(row.getCell(colIndex).getStringCellValue());
+            }
+            data.put(columnName, columnsData);
+        }
+        return data;
     }
 
     private static class SheetDataLimits
