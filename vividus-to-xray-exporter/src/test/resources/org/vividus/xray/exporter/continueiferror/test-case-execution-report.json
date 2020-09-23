@@ -1,0 +1,61 @@
+{
+  "path": "storyPath",
+  "title": "",
+  "lifecycle": {
+    "keyword": "Lifecycle:"
+  },
+  "beforeStorySteps": [],
+  "scenarios": [
+    {
+      "keyword": "Scenario:",
+      "title": "Dummy scenario",
+      "meta": [
+        {
+          "keyword": "@",
+          "name": "testCaseId",
+          "value": "STUB-ERROR"
+        }
+      ],
+      "steps": [
+        {
+          "outcome": "comment",
+          "value": "!-- Step: Step"
+        },
+        {
+          "outcome": "comment",
+          "value": "!-- Data: Data"
+        },
+        {
+          "outcome": "comment",
+          "value": "!-- Result: Result"
+        }
+      ]
+    },
+    {
+      "keyword": "Scenario:",
+      "title": "Dummy scenario",
+      "meta": [
+        {
+          "keyword": "@",
+          "name": "testCaseId",
+          "value": "STUB-0"
+        }
+      ],
+      "steps": [
+        {
+          "outcome": "comment",
+          "value": "!-- Step: Step"
+        },
+        {
+          "outcome": "comment",
+          "value": "!-- Data: Data"
+        },
+        {
+          "outcome": "comment",
+          "value": "!-- Result: Result"
+        }
+      ]
+    }
+  ],
+  "afterStorySteps": []
+}
