@@ -102,7 +102,7 @@ class XrayExporterTests
         verify(xrayFacade).updateTestCase(eq(ISSUE_ID), testCaseParametersCaptor.capture());
         verifyTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
                 Set.of("dummy-component-1", "dummy-component-2"));
-        validateLogs(jsonResultsUri, getExportingScenarioEvent());
+        validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }
 
     @Test
@@ -134,7 +134,7 @@ class XrayExporterTests
 
         xrayExporter.exportResults();
 
-        validateLogs(jsonResultsUri, info("Skip export of {} scenario", SCENARIO_TITLE));
+        validateLogs(jsonResultsUri, info("Skip export of {} scenario", SCENARIO_TITLE), getExportSuccessfulEvent());
     }
 
     @Test
@@ -162,7 +162,7 @@ class XrayExporterTests
         verify(xrayFacade).createTestsLink(ISSUE_ID, "STUB-REQ-0");
 
         verifyTestCaseParameters(Set.of(), Set.of());
-        validateLogs(jsonResultsUri, getExportingScenarioEvent());
+        validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }
 
     @Test
@@ -218,7 +218,13 @@ class XrayExporterTests
     private static LoggingEvent getReportErrorEvent(String error)
     {
         String errorFormat = "Error #1%1$sStory: storyPath%1$sScenario: Dummy scenario%1$sError: %2$s%1$s";
-        return error("Errors:{}{}", System.lineSeparator(), String.format(errorFormat, System.lineSeparator(), error));
+        return error("Export failed:{}{}", System.lineSeparator(),
+                String.format(errorFormat, System.lineSeparator(), error));
+    }
+
+    private static LoggingEvent getExportSuccessfulEvent()
+    {
+        return info("Export successful");
     }
 
     private static LoggingEvent getExportingScenarioEvent()
