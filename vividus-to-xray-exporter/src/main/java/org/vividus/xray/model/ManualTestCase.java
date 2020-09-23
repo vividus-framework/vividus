@@ -22,6 +22,7 @@ import java.util.Set;
 public class ManualTestCase
 {
     private String projectKey;
+    private String assignee;
     private String summary;
     private Set<String> labels;
     private Set<String> components;
@@ -35,6 +36,16 @@ public class ManualTestCase
     public void setProjectKey(String projectKey)
     {
         this.projectKey = projectKey;
+    }
+
+    public String getAssignee()
+    {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee)
+    {
+        this.assignee = assignee;
     }
 
     public String getSummary()

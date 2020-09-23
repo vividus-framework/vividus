@@ -3,6 +3,9 @@
     "project": {
       "key": "project key"
     },
+    "assignee": {
+      "name": "test-assignee"
+    },
     "issuetype": {
       "name": "Test"
     },

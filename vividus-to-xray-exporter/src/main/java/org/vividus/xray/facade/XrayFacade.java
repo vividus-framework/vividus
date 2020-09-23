@@ -36,16 +36,18 @@ public class XrayFacade
     private static final Logger LOGGER = LoggerFactory.getLogger(XrayFacade.class);
 
     private final String projectKey;
+    private final String assignee;
     private final List<String> editableStatuses;
     private final JiraFacade jiraFacade;
     private final ObjectMapper objectMapper;
 
-    public XrayFacade(String projectKey, List<String> editableStatuses, JiraFacade jiraFacade,
+    public XrayFacade(String projectKey, String assignee, List<String> editableStatuses, JiraFacade jiraFacade,
             ManualTestCaseSerializer manualTestSerializer)
     {
-        this.jiraFacade = jiraFacade;
         this.projectKey = projectKey;
+        this.assignee = assignee;
         this.editableStatuses = editableStatuses;
+        this.jiraFacade = jiraFacade;
         this.objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .registerModule(new SimpleModule().addSerializer(ManualTestCase.class, manualTestSerializer));
@@ -97,6 +99,7 @@ public class XrayFacade
     {
         ManualTestCase manualTest = new ManualTestCase();
         manualTest.setProjectKey(projectKey);
+        manualTest.setAssignee(assignee);
         manualTest.setSummary(testCaseParameters.getSummary());
         manualTest.setLabels(testCaseParameters.getLabels());
         manualTest.setComponents(testCaseParameters.getComponents());

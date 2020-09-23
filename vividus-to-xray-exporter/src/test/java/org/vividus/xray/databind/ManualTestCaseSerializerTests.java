@@ -56,6 +56,7 @@ class ManualTestCaseSerializerTests
     void shouldSerializeManualTest() throws IOException
     {
         ManualTestCase test = createBaseTest();
+        test.setAssignee("test-assignee");
         test.setLabels(new LinkedHashSet<>(List.of("label 1", "label 2")));
         test.setComponents(new LinkedHashSet<>(List.of("component 1", "component 2")));
         verifySerializedForm(test, "expected.json");

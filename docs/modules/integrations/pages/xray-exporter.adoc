@@ -30,6 +30,10 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |true
 |Key of a Jira project where new test cases should be created
 
+|`xray-exporter.assignee`
+|false
+|Username of Jira user that will be used as assignee for newly created test cases
+
 |`xray-exporter.editable-statuses`
 |false
 |Statuses of test cases allowed to update

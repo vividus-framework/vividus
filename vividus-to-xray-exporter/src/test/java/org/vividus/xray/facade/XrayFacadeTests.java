@@ -57,6 +57,7 @@ class XrayFacadeTests
     private static final String BODY = "{}";
     private static final String PROJECT_KEY = "project key";
     private static final String OPEN_STATUS = "Open";
+    private static final String ASSIGNEE = "test-assignee";
 
     @Captor private ArgumentCaptor<ManualTestCase> manualTestCaseCaptor;
 
@@ -140,6 +141,7 @@ class XrayFacadeTests
     {
         ManualTestCase manualTestCase = manualTestCaseCaptor.getValue();
         assertEquals(PROJECT_KEY, manualTestCase.getProjectKey());
+        assertEquals(ASSIGNEE, manualTestCase.getAssignee());
         assertEquals(parameters.getLabels(), manualTestCase.getLabels());
         assertEquals(parameters.getComponents(), manualTestCase.getComponents());
         assertEquals(parameters.getSummary(), manualTestCase.getSummary());
@@ -158,7 +160,7 @@ class XrayFacadeTests
 
     private void initializeFacade(List<String> editableStatuses)
     {
-        xrayFacade = new XrayFacade(PROJECT_KEY, editableStatuses, jiraFacade, manualTestSerializer);
+        xrayFacade = new XrayFacade(PROJECT_KEY, ASSIGNEE, editableStatuses, jiraFacade, manualTestSerializer);
     }
 
     private void mockSerialization() throws IOException
