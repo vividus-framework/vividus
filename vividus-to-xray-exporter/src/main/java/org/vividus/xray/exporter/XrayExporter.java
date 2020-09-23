@@ -140,8 +140,10 @@ public class XrayExporter
                                 .append("Error: ").append(errorEntry.getError()).append(lineSeparator());
                 });
                 return errorBuilder.toString();
-            }).log("Errors:{}{}");
+            }).log("Export failed:{}{}");
+            return;
         }
+        LOGGER.atInfo().log("Export successful");
     }
 
     private void createTestsLink(String testCaseId, List<Meta> scenarioMeta) throws IOException, SyntaxException
