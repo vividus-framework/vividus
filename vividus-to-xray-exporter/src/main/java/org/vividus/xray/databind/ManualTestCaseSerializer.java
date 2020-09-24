@@ -47,6 +47,12 @@ public class ManualTestCaseSerializer extends JsonSerializer<ManualTestCase>
 
         writeObjectWithField(generator, "project", "key", manualTest.getProjectKey());
 
+        String assignee = manualTest.getAssignee();
+        if (assignee != null)
+        {
+            writeObjectWithField(generator, "assignee", NAME, assignee);
+        }
+
         writeObjectWithField(generator, "issuetype", NAME, "Test");
 
         writeObjectWithField(generator, jiraFieldsMapping.getTestCaseType(), "value", "Manual");
