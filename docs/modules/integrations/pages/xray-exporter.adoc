@@ -38,6 +38,10 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |false
 |Statuses of test cases allowed to update
 
+|`xray-exporter.test-execution-key`
+|false
+|Key of a `Test Execution` to which exported test cases will be added
+
 |===
 
 == Jira Fields Mapping Properties
