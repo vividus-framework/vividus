@@ -1,0 +1,13 @@
+project.description = 'Vividus plugin for Sauce Labs'
+
+dependencies {
+    implementation project(':vividus-plugin-web-app')
+    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-extension-selenium')
+
+    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
+    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.149'){
+        exclude module: 'sauce-connect'
+        exclude group: 'com.google.collections', module: 'google-collections'
+    }
+}

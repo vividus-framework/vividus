@@ -25,7 +25,6 @@
 
     <bean id="webDriverProvider" class="org.vividus.selenium.WebDriverProvider"
           destroy-method="destroy">
-        <property name="vividusWebDriverFactory" ref="vividusWebDriverFactory" />
         <property name="testContext" ref="testContext" />
     </bean>
 
@@ -45,6 +44,41 @@
         <property name="waitForElementTimeout" value="${ui.search.wait-for-element-timeout}" />
         <property name="retrySearchIfStale" value="${ui.search.retry-search-if-stale}" />
         <property name="waitActions" ref="waitActions" />
+    </bean>
+
+<bean id="proxy" class="org.vividus.proxy.ThreadedProxy" >
+        <constructor-arg index="0" value="${proxy.host}" />
+        <constructor-arg index="1" value="${proxy.ports}" />
+        <constructor-arg index="2" >
+            <bean class="org.vividus.proxy.ProxyFactory" />
+        </constructor-arg>
+    </bean>
+
+    <bean id="mitmManagerFactory" class="org.vividus.proxy.mitm.MitmManagerFactory" />
+
+    <bean id="proxyServerFactory" class="org.vividus.proxy.ProxyServerFactory">
+        <property name="trustAllServers" value="${proxy.trust-all-servers}" />
+        <property name="mitmEnabled" value="${proxy.mitm.enabled}" />
+        <property name="mitmManagerFactory" ref="mitmManagerFactory" />
+        <property name="mitmManagerOptions">
+            <bean class="org.vividus.proxy.mitm.MitmManagerOptions" >
+                <constructor-arg index="0" value="${proxy.mitm.key-store.alias}" />
+                <constructor-arg index="1" value="${proxy.trust-all-servers}" />
+                <constructor-arg index="2" >
+                    <bean class="org.vividus.http.keystore.KeyStoreOptions">
+                        <constructor-arg index="0" value="${proxy.mitm.key-store.path}" />
+                        <constructor-arg index="1" value="${proxy.mitm.key-store.password}" />
+                        <constructor-arg index="2" value="${proxy.mitm.key-store.type}" />
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="advancedHostResolver">
+            <bean class="org.vividus.proxy.dns.HostNameResolver">
+                <property name="dnsMappingStorage" ref="localDnsStorage" />
+            </bean>
+        </property>
+        <property name="captureTypes" value="${proxy.capture-types}"/>
     </bean>
 
     <bean class="org.vividus.ui.action.ExpectedSearchActionsConditions" />
