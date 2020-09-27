@@ -64,20 +64,22 @@ public class XrayExporter
 
     public void exportResults() throws IOException
     {
+        List<String> testCaseIds = new ArrayList<>();
         for (Story story : readStories())
         {
             LOGGER.atInfo().addArgument(story::getPath).log("Exporting scenarios from {} story");
 
             for (Scenario scenario : story.getScenarios())
             {
-                exportScenario(story.getPath(), scenario);
+                exportScenario(story.getPath(), scenario).ifPresent(testCaseIds::add);
             }
         }
 
+        addTestCasesToTestExecution(testCaseIds);
         publishErrors();
     }
 
-    private void exportScenario(String storyTitle, Scenario scenario) throws IOException
+    private Optional<String> exportScenario(String storyTitle, Scenario scenario) throws IOException
     {
         String scenarioTitle = scenario.getTitle();
 
@@ -85,7 +87,7 @@ public class XrayExporter
         if (isSkipped(scenarioMeta))
         {
             LOGGER.atInfo().addArgument(scenarioTitle).log("Skip export of {} scenario");
-            return;
+            return Optional.empty();
         }
         LOGGER.atInfo().addArgument(scenarioTitle).log("Exporting {} scenario");
 
@@ -103,12 +105,14 @@ public class XrayExporter
                 testCaseId = xrayFacade.createTestCase(parameters);
             }
             createTestsLink(testCaseId, scenarioMeta);
+            return Optional.of(testCaseId);
         }
         catch (IOException | SyntaxException | NonEditableIssueStatusException e)
         {
             errors.add(new ErrorExportEntry(storyTitle, scenarioTitle, e.getMessage()));
             LOGGER.atError().setCause(e).log("Got an error while exporting");
         }
+        return Optional.empty();
     }
 
     private TestCaseParameters createTestCaseParameters(String storyTitle, Scenario scenario) throws SyntaxException
@@ -122,6 +126,15 @@ public class XrayExporter
         parameters.setSummary(scenarioTitle);
         parameters.setSteps(ManualStepConverter.convert(storyTitle, scenarioTitle, scenario.collectSteps()));
         return parameters;
+    }
+
+    private void addTestCasesToTestExecution(List<String> testCaseIds) throws IOException
+    {
+        String testExecutionKey = xrayExporterOptions.getTestExecutionKey();
+        if (testExecutionKey != null)
+        {
+            xrayFacade.updateTestExecution(testExecutionKey, testCaseIds);
+        }
     }
 
     private void publishErrors()

@@ -44,6 +44,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraFacade;
 import org.vividus.xray.databind.ManualTestCaseSerializer;
 import org.vividus.xray.facade.XrayFacade.NonEditableIssueStatusException;
@@ -63,6 +64,7 @@ class XrayFacadeTests
 
     @Mock private ManualTestCaseSerializer manualTestSerializer;
     @Mock private JiraFacade jiraFacade;
+    @Mock private JiraClient jiraClient;
     @Mock private ManualTestStep manualTestStep;
     private XrayFacade xrayFacade;
 
@@ -71,7 +73,7 @@ class XrayFacadeTests
     @AfterEach
     void afterEach()
     {
-        verifyNoMoreInteractions(jiraFacade);
+        verifyNoMoreInteractions(jiraFacade, jiraClient);
     }
 
     @Test
@@ -137,6 +139,19 @@ class XrayFacadeTests
         verifyManualTestCase(parameters);
     }
 
+    @Test
+    void shouldAddTestCasesToTestExecution() throws IOException
+    {
+        initializeFacade(List.of());
+        String testExecutionKey = "TEST-0";
+        xrayFacade.updateTestExecution(testExecutionKey, List.of(ISSUE_ID, ISSUE_ID));
+        verify(jiraClient).executePost("/rest/raven/1.0/api/testexec/" + testExecutionKey + "/test",
+                "{\"add\":[\"issue id\",\"issue id\"]}");
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info("Add {} test cases to {} test execution", ISSUE_ID + ", " + ISSUE_ID, testExecutionKey)
+        )));
+    }
+
     private void verifyManualTestCase(TestCaseParameters parameters)
     {
         ManualTestCase manualTestCase = manualTestCaseCaptor.getValue();
@@ -160,7 +175,8 @@ class XrayFacadeTests
 
     private void initializeFacade(List<String> editableStatuses)
     {
-        xrayFacade = new XrayFacade(PROJECT_KEY, ASSIGNEE, editableStatuses, jiraFacade, manualTestSerializer);
+        xrayFacade = new XrayFacade(PROJECT_KEY, ASSIGNEE, editableStatuses, jiraFacade, jiraClient,
+                manualTestSerializer);
     }
 
     private void mockSerialization() throws IOException

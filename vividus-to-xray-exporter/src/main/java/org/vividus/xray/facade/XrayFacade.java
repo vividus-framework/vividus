@@ -26,10 +26,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraFacade;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.xray.databind.ManualTestCaseSerializer;
 import org.vividus.xray.model.ManualTestCase;
+import org.vividus.xray.model.TestExecution;
 
 public class XrayFacade
 {
@@ -39,15 +41,17 @@ public class XrayFacade
     private final String assignee;
     private final List<String> editableStatuses;
     private final JiraFacade jiraFacade;
+    private final JiraClient jiraClient;
     private final ObjectMapper objectMapper;
 
     public XrayFacade(String projectKey, String assignee, List<String> editableStatuses, JiraFacade jiraFacade,
-            ManualTestCaseSerializer manualTestSerializer)
+            JiraClient jiraClient, ManualTestCaseSerializer manualTestSerializer)
     {
         this.projectKey = projectKey;
         this.assignee = assignee;
         this.editableStatuses = editableStatuses;
         this.jiraFacade = jiraFacade;
+        this.jiraClient = jiraClient;
         this.objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .registerModule(new SimpleModule().addSerializer(ManualTestCase.class, manualTestSerializer));
@@ -73,6 +77,17 @@ public class XrayFacade
                        .log("Updating Test Case with ID {}: {}");
         jiraFacade.updateIssue(testCaseKey, updateTestRequest);
         LOGGER.atInfo().addArgument(testCaseKey).log("Test with key {} has been updated");
+    }
+
+    public void updateTestExecution(String testExecutionKey, List<String> testCaseKeys) throws IOException
+    {
+        TestExecution testExecution = new TestExecution(testCaseKeys);
+        String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
+        LOGGER.atInfo()
+              .addArgument(() -> StringUtils.join(testCaseKeys, ", "))
+              .addArgument(testExecutionKey)
+              .log("Add {} test cases to {} test execution");
+        jiraClient.executePost("/rest/raven/1.0/api/testexec/" + testExecutionKey + "/test", testExecutionRequest);
     }
 
     private void checkIfIssueEditable(String issueKey) throws IOException, NonEditableIssueStatusException

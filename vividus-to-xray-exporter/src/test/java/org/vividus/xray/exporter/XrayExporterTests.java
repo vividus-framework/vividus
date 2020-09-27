@@ -96,12 +96,15 @@ class XrayExporterTests
     {
         URI jsonResultsUri = getJsonResultsUri("componentslabelsupdatabletci");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        String testExecutionKey = "TEST-0";
+        xrayExporterOptions.setTestExecutionKey(testExecutionKey);
 
         xrayExporter.exportResults();
 
         verify(xrayFacade).updateTestCase(eq(ISSUE_ID), testCaseParametersCaptor.capture());
         verifyTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
                 Set.of("dummy-component-1", "dummy-component-2"));
+        verify(xrayFacade).updateTestExecution(testExecutionKey, List.of(ISSUE_ID));
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }
 

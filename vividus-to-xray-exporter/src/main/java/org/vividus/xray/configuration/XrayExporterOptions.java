@@ -24,6 +24,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class XrayExporterOptions
 {
     private Path jsonResultsDirectory;
+    private String testExecutionKey;
 
     public Path getJsonResultsDirectory()
     {
@@ -33,5 +34,15 @@ public class XrayExporterOptions
     public void setJsonResultsDirectory(Path jsonResultsDirectory)
     {
         this.jsonResultsDirectory = jsonResultsDirectory;
+    }
+
+    public String getTestExecutionKey()
+    {
+        return testExecutionKey;
+    }
+
+    public void setTestExecutionKey(String testExecutionKey)
+    {
+        this.testExecutionKey = testExecutionKey;
     }
 }
