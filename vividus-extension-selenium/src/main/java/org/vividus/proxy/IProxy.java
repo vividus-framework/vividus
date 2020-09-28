@@ -21,6 +21,8 @@ import java.net.InetAddress;
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.filters.RequestFilter;
 
+import org.openqa.selenium.Proxy;
+
 public interface IProxy
 {
     void start();
@@ -42,4 +44,6 @@ public interface IProxy
     void addRequestFilter(RequestFilter requestFilter);
 
     void clearRequestFilters();
+
+    Proxy createSeleniumProxy();
 }

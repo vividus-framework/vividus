@@ -254,8 +254,6 @@
 
     <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" />
 
-    <bean id="seleniumProxyFactory" class="org.vividus.proxy.SeleniumProxyFactory"/>
-
     <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
         <property name="next" ref="proxyAgentStoryReporter" />
     </bean>

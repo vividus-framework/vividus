@@ -26,6 +26,7 @@ import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.filters.RequestFilter;
 
 import org.apache.commons.lang3.Validate;
+import org.openqa.selenium.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.model.IntegerRange;
@@ -150,6 +151,12 @@ public class ThreadedProxy implements IProxy
     public void clearRequestFilters()
     {
         proxy().clearRequestFilters();
+    }
+
+    @Override
+    public Proxy createSeleniumProxy()
+    {
+        return proxy().createSeleniumProxy();
     }
 
     private void logAvailablePorts()

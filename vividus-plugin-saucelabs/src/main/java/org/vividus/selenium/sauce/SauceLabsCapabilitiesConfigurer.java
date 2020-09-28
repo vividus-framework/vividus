@@ -26,7 +26,6 @@ import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.MetaWrapper;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.proxy.IProxy;
-import org.vividus.proxy.SeleniumProxyFactory;
 import org.vividus.selenium.DesiredCapabilitiesConfigurer;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -41,18 +40,15 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
     private final IBddRunContext bddRunContext;
     private final SauceConnectManager sauceConnectManager;
     private final IProxy proxy;
-    private final SeleniumProxyFactory seleniumProxyFactory;
     private boolean sauceConnectEnabled;
 
     public SauceLabsCapabilitiesConfigurer(WebApplicationConfiguration webApplicationConfiguration,
-            IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager, IProxy proxy,
-            SeleniumProxyFactory seleniumProxyFactory)
+            IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager, IProxy proxy)
     {
         this.webApplicationConfiguration = webApplicationConfiguration;
         this.bddRunContext = bddRunContext;
         this.sauceConnectManager = sauceConnectManager;
         this.proxy = proxy;
-        this.seleniumProxyFactory = seleniumProxyFactory;
     }
 
     @Subscribe
@@ -102,7 +98,7 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
         sauceConnectOptions.setBasicAuthUser(webApplicationConfiguration.getBasicAuthUser());
         if (proxy.isStarted())
         {
-            sauceConnectOptions.setProxy(seleniumProxyFactory.createSeleniumProxy().getHttpProxy());
+            sauceConnectOptions.setProxy(proxy.createSeleniumProxy().getHttpProxy());
         }
         return sauceConnectOptions;
     }

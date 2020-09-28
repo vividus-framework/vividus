@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.BrowserUpProxyServer;
+import com.browserup.bup.client.ClientUtil;
 import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.filters.RequestFilterAdapter.FilterSource;
 
@@ -135,6 +136,12 @@ public class Proxy implements IProxy
             }
         }
         ((BrowserUpProxyServer) proxyServer).getFilterFactories().removeAll(toRemove);
+    }
+
+    @Override
+    public org.openqa.selenium.Proxy createSeleniumProxy()
+    {
+        return ClientUtil.createSeleniumProxy(proxyServer, InetAddress.getLoopbackAddress());
     }
 
     public void setProxyServerFactory(IProxyServerFactory proxyServerFactory)
