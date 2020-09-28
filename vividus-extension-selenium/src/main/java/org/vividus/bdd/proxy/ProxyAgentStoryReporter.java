@@ -83,7 +83,7 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
             }
             if (!proxyEnabled && isProxyEnabledInScenarioMeta())
             {
-                proxy.stop();
+                stopProxy();
             }
         }
     }
@@ -96,9 +96,14 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
         {
             if (proxy.isStarted())
             {
-                proxy.stop();
+                stopProxy();
             }
         }
+    }
+
+    private void stopProxy()
+    {
+        proxy.stop();
     }
 
     private boolean isProxyRecordingEnabled()
