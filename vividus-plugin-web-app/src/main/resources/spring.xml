@@ -248,7 +248,7 @@
     </bean>
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.VividusWebDriverFactory">
-        <property name="remoteExecution" value="${selenium.grid.enabled}"/>
+        <constructor-arg index="0" value="${selenium.grid.enabled}"/>
         <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers"/>
     </bean>
 
@@ -264,7 +264,6 @@
         <property name="proxyEnabled" value="${proxy.enabled}" />
         <property name="proxyRecordingEnabled" value="${proxy.recording.enabled}" />
         <property name="next" ref="allureStoryReporter" />
-        <property name="eventBus" ref="eventBus" />
     </bean>
 
     <bean id="delegatingWebApplicationListener-WebApplicationListeners" class="org.vividus.spring.ListMergerFactoryBean">
@@ -303,7 +302,6 @@
                 <bean class="org.vividus.spring.StringToLocatorSetConverter" />
                 <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
                 <bean class="org.vividus.spring.StringToLocaleConverter"/>
-                <bean class="org.vividus.spring.StringToIntegerRangeConverter"/>
             </set>
         </property>
     </bean>

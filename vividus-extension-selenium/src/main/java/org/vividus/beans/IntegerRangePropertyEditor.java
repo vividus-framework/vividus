@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.vividus.spring;
+package org.vividus.beans;
 
+import java.beans.PropertyEditorSupport;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +27,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.springframework.core.convert.converter.Converter;
 import org.vividus.model.IntegerRange;
 
-public class StringToIntegerRangeConverter implements Converter<String, IntegerRange>
+public class IntegerRangePropertyEditor extends PropertyEditorSupport
 {
     private static final Map<Pattern, Function<Matcher, List<Integer>>> REGEX_HANDLERS = Map.of(
             Pattern.compile("(-?+\\d++)\\.\\.(-?+\\d++)"), parseRange(),
@@ -49,9 +49,9 @@ public class StringToIntegerRangeConverter implements Converter<String, IntegerR
     }
 
     @Override
-    public IntegerRange convert(String source)
+    public void setAsText(String source)
     {
-        return Stream.of(source.split(",")).map(value ->
+        IntegerRange intRange = Stream.of(source.split(",")).map(value ->
         {
             for (Map.Entry<Pattern, Function<Matcher, List<Integer>>> handler : REGEX_HANDLERS.entrySet())
             {
@@ -64,7 +64,8 @@ public class StringToIntegerRangeConverter implements Converter<String, IntegerR
             throw new IllegalArgumentException(
                     "Expected integers in format 'number' or 'number..number' but got: " + value);
         })
-        .flatMap(List::stream)
-        .collect(Collectors.collectingAndThen(Collectors.toCollection(LinkedHashSet::new), IntegerRange::new));
+            .flatMap(List::stream)
+            .collect(Collectors.collectingAndThen(Collectors.toCollection(LinkedHashSet::new), IntegerRange::new));
+        setValue(intRange);
     }
 }

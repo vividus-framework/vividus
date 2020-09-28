@@ -59,14 +59,14 @@ class BeanFactoryIntegrationTests
     @ParameterizedTest(name = "{0} profile")
     @ValueSource(strings = {
             "",
-            "web/desktop/chrome",
-            "web/phone/iphone",
-            "web/tablet/ipad",
-            "web/desktop/chrome/mobile_emulation/phone",
-            "web/desktop/chrome/mobile_emulation/tablet",
-            "web/desktop/chrome/mobile_emulation/responsive",
-            "mobile_app/ios",
-            "mobile_app/android"
+            "web/desktop/chrome,proxy",
+            "web/phone/iphone,proxy",
+            "web/tablet/ipad,proxy",
+            "web/desktop/chrome/mobile_emulation/phone,proxy",
+            "web/desktop/chrome/mobile_emulation/tablet,proxy",
+            "web/desktop/chrome/mobile_emulation/responsive,proxy",
+            "mobile_app/ios,proxy",
+            "mobile_app/android,proxy"
     })
     void testBeanFactory(String profile)
     {

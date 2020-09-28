@@ -27,6 +27,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Set;
+
 import com.google.common.eventbus.EventBus;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -45,8 +47,6 @@ import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.MetaWrapper;
-import org.vividus.bdd.model.RunningStory;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
@@ -144,19 +144,13 @@ class WebDriverProviderTests
     {
         TestVividusDriverFactory(IBddRunContext bddRunContext, IWebDriverManagerContext webDriverManagerContext)
         {
-            super(true, webDriverManagerContext, bddRunContext);
+            super(true, webDriverManagerContext, bddRunContext, Set.of());
         }
 
         @Override
         protected WebDriver createWebDriver(DesiredCapabilities desiredCapabilities)
         {
             throw new NotImplementedException();
-        }
-
-        @Override
-        protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities, RunningStory runningStory,
-                MetaWrapper metaWrapper)
-        {
         }
     }
 }

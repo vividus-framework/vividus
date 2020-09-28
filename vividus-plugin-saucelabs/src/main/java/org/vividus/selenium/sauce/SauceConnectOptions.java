@@ -137,7 +137,7 @@ public class SauceConnectOptions
     private static void appendOption(StringBuilder stringBuilder, String name, String... values)
     {
         stringBuilder.append("--").append(name).append(' ');
-        Arrays.stream(values).forEach(value -> stringBuilder.append(value).append(' '));
+        Stream.of(values).forEach(value -> stringBuilder.append(value).append(' '));
     }
 
     @Override

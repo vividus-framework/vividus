@@ -18,11 +18,8 @@ package org.vividus.selenium.mobileapp;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import org.jbehave.core.model.Scenario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,10 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.MetaWrapper;
-import org.vividus.bdd.model.RunningStory;
 import org.vividus.selenium.IGenericWebDriverFactory;
-import org.vividus.selenium.VividusWebDriver;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 
 @ExtendWith(MockitoExtension.class)

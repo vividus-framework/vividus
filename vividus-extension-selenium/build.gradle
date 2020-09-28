@@ -38,4 +38,5 @@ project.description = 'Vividus extension for selenium'
      testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
      testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
      testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+     testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
  }

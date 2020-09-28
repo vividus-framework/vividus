@@ -23,23 +23,21 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
-import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.client.ClientUtil;
 
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasCapabilities;
-import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Window;
@@ -50,10 +48,10 @@ import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
-import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
@@ -62,7 +60,6 @@ import org.vividus.selenium.manager.WebDriverManagerParameter;
 @PrepareForTest({ ClientUtil.class, InetAddress.class, VividusWebDriverFactory.class })
 public class VividusWebDriverFactoryTests
 {
-    private static final String LOOPBACK_ADDRESS = "127.0.0.1:0";
     private static final String FIREFOX = "firefox";
     private static final String TEST = "Test";
     private static final String STORY_FILE = TEST + ".story";
@@ -74,9 +71,6 @@ public class VividusWebDriverFactoryTests
     private IWebDriverManagerContext webDriverManagerContext;
 
     @Mock
-    private IProxy proxy;
-
-    @Mock
     private IWebDriverFactory webDriverFactory;
 
     @Mock
@@ -85,20 +79,20 @@ public class VividusWebDriverFactoryTests
     @Mock
     private IWebDriverManager webDriverManager;
 
-    @InjectMocks
-    private VividusWebDriverFactory vividusWebDriverFactory;
-
     @Mock(extraInterfaces = HasCapabilities.class)
     private WebDriver driver;
 
     @Mock
-    private BrowserUpProxy browserMobProxy;
-
-    @Mock
-    private Proxy seleniumProxy;
-
-    @Mock
     private WebDriverEventListener webDriverEventListener;
+
+    private VividusWebDriverFactory vividusWebDriverFactory;
+
+    @Before
+    public void beforeEach()
+    {
+        vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverManagerContext,
+                bddRunContext, Set.of(), webDriverFactory, webDriverManager, browserWindowSizeProvider);
+    }
 
     private void runCreateTest(boolean remoteExecution, String browserName) throws Exception
     {
@@ -107,7 +101,6 @@ public class VividusWebDriverFactoryTests
 
     private void runCreateTest(boolean remoteExecution, String browserName, RunningStory runningStory) throws Exception
     {
-        vividusWebDriverFactory.setRemoteExecution(remoteExecution);
         vividusWebDriverFactory.setWebDriverEventListeners(List.of(webDriverEventListener));
 
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
@@ -150,51 +143,16 @@ public class VividusWebDriverFactoryTests
         return new Scenario(TEST, new Meta(scenarioMetaProperties));
     }
 
-    private void mockSeleniumProxyCreation(boolean remote) throws UnknownHostException
-    {
-        when(proxy.isStarted()).thenReturn(true);
-        InetAddress inetAddress = mock(InetAddress.class);
-        PowerMockito.mockStatic(InetAddress.class);
-        if (remote)
-        {
-            when(InetAddress.getLocalHost()).thenReturn(inetAddress);
-        }
-        else
-        {
-            when(InetAddress.getLoopbackAddress()).thenReturn(inetAddress);
-        }
-        PowerMockito.mockStatic(ClientUtil.class);
-        when(ClientUtil.createSeleniumProxy(browserMobProxy, inetAddress)).thenReturn(seleniumProxy);
-    }
-
-    private void verifyProxyCreation(boolean remote) throws UnknownHostException
-    {
-        PowerMockito.verifyStatic(InetAddress.class);
-        if (remote)
-        {
-            InetAddress.getLocalHost();
-        }
-        else
-        {
-            InetAddress.getLoopbackAddress();
-        }
-    }
-
     @Test
     public void testCreateWebDriverRemoteWithProxy() throws Exception
     {
-        when(proxy.getProxyServer()).thenReturn(browserMobProxy);
-        mockSeleniumProxyCreation(true);
-        when(seleniumProxy.getHttpProxy()).thenReturn(LOOPBACK_ADDRESS);
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(true, null);
-        verifyProxyCreation(true);
     }
 
     @Test
     public void testCreateWebDriverRemoteNoProxy() throws Exception
     {
-        when(proxy.isStarted()).thenReturn(false);
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(true, null);
     }
@@ -202,7 +160,6 @@ public class VividusWebDriverFactoryTests
     @Test
     public void testCreateWebDriverNoRunningScenario() throws Exception
     {
-        when(proxy.isStarted()).thenReturn(false);
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         RunningStory runningStory = new RunningStory();
         runningStory.setStory(new Story(STORY_FILE, null, new Meta(), null, null));
@@ -212,16 +169,20 @@ public class VividusWebDriverFactoryTests
     @Test
     public void testCreateWebDriverLocalWithProxy() throws Exception
     {
-        mockSeleniumProxyCreation(false);
+        notRemoteExecution();
         when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(false, FIREFOX);
-        verifyProxyCreation(false);
+    }
+
+    private void notRemoteExecution()
+    {
+        Whitebox.setInternalState(vividusWebDriverFactory, "remoteExecution", false);
     }
 
     @Test
     public void testCreateWebDriverLocalNoProxy() throws Exception
     {
-        when(proxy.isStarted()).thenReturn(false);
+        notRemoteExecution();
         when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(false, FIREFOX);
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.spring;
+package org.vividus.beans;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,9 +29,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.vividus.model.IntegerRange;
 
-class StringToIntegerRangeConverterTests
+class IntegerRangePropertyEditorTests
 {
-    private final StringToIntegerRangeConverter converter = new StringToIntegerRangeConverter();
+    private final IntegerRangePropertyEditor editor = new IntegerRangePropertyEditor();
 
     static Stream<Arguments> rangeSource()
     {
@@ -47,14 +47,14 @@ class StringToIntegerRangeConverterTests
     @ParameterizedTest
     void testConvert(String rangeAsString, Set<Integer> expected)
     {
-        IntegerRange range = converter.convert(rangeAsString);
-        assertEquals(expected, range.getRange());
+        editor.setAsText(rangeAsString);
+        assertEquals(expected, ((IntegerRange) editor.getValue()).getRange());
     }
 
     @Test
     void testConvertIsFailed()
     {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> converter.convert("error"));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> editor.setAsText("error"));
         assertEquals("Expected integers in format 'number' or 'number..number' but got: error", exception.getMessage());
     }
 }
