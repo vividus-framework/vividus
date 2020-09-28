@@ -10,18 +10,13 @@
         <property name="sauceTunnelManager">
             <bean class="org.vividus.selenium.sauce.SynchronizedUnpackingSauceConnectTunnelManager">
                 <constructor-arg value="false"/>
-                <property name="useLatestSauceConnect" value="${sauceLabs.use-latest-sauce-connect}"/>
+                <property name="useLatestSauceConnect" value="${saucelabs.sauce-connect.use-latest-version}"/>
             </bean>
         </property>
     </bean>
 
-    <bean id="sauceLabsWebDriverFactory" class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer"
-          parent="vividusWebDriverFactory" primary="true">
-        <property name="sauceConnectEnabled" value="${sauceLabs.sauce-connect.enabled}"/>
-    </bean>
-
-    <bean id="sauceConnectProducer" class="org.vividus.selenium.sauce.SauceConnectProducer">
-        <property name="sauceConnectEnabled" value="${sauceLabs.sauce-connect.enabled}"/>
+    <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
+        <property name="sauceConnectEnabled" value="${saucelabs.sauce-connect.enabled}"/>
     </bean>
 
 </beans>

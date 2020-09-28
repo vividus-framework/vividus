@@ -143,16 +143,6 @@ public class SauceConnectManager implements ISauceConnectManager
         testContext.put(KEY, sauceConnectDescriptor);
     }
 
-    public String getSauceLabsUsername()
-    {
-        return sauceLabsUsername;
-    }
-
-    public String getSauceLabsAccessKey()
-    {
-        return sauceLabsAccessKey;
-    }
-
     class SauceConnectDescriptor
     {
         private final String tunnelId;

@@ -49,13 +49,13 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
     public VividusWebDriver create()
     {
         VividusWebDriver vividusWebDriver = new VividusWebDriver();
-        setBaseDesiredCapabilities(vividusWebDriver.getDesiredCapabilities());
+        setDesiredCapabilities(vividusWebDriver.getDesiredCapabilities());
         vividusWebDriver.setWebDriver(createWebDriver(vividusWebDriver.getDesiredCapabilities()));
         vividusWebDriver.setRemote(remoteExecution);
         return vividusWebDriver;
     }
 
-    private void setBaseDesiredCapabilities(DesiredCapabilities desiredCapabilities)
+    private void setDesiredCapabilities(DesiredCapabilities desiredCapabilities)
     {
         desiredCapabilitiesConfigurers.forEach(configurer -> configurer.addCapabilities(desiredCapabilities));
         desiredCapabilities.merge(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES));

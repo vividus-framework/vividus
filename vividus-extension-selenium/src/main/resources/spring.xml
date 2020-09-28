@@ -82,6 +82,16 @@
         <property name="captureTypes" value="${proxy.capture-types}"/>
     </bean>
 
+    <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
+        <property name="next">
+            <bean class="org.vividus.bdd.proxy.ProxyAgentStoryReporter">
+                <property name="proxyEnabled" value="${proxy.enabled}" />
+                <property name="proxyRecordingEnabled" value="${proxy.recording.enabled}" />
+                <property name="next" ref="allureStoryReporter" />
+            </bean>
+        </property>
+    </bean>
+
     <bean class="org.vividus.ui.action.ExpectedSearchActionsConditions" />
     <bean class="org.vividus.ui.action.ExpectedSearchContextConditions" />
 
@@ -100,6 +110,8 @@
     <bean class="org.vividus.ui.listener.UiContextListener" lazy-init="false" />
 
     <bean class="org.vividus.selenium.screenshot.ScreenshotFileNameGenerator" />
+
+    <bean class="org.vividus.selenium.ProxyCapabilitiesConfigurer" />
 
     <bean id="genericElementSteps" class="org.vividus.bdd.steps.ui.GenericElementSteps" />
     <bean id="genericWaitSteps" class="org.vividus.bdd.steps.ui.GenericWaitSteps" />
