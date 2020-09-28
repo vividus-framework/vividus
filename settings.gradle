@@ -33,5 +33,4 @@ include 'vividus-plugin-web-app'
 include 'vividus-plugin-xml'
 include 'vividus-to-xray-exporter'
 
-
 include 'vividus-tests'

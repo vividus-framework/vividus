@@ -16,6 +16,7 @@
 
 package org.vividus.selenium.mobileapp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -45,32 +46,13 @@ class VividusMobileAppDriverFactoryTests
     @InjectMocks private VividusMobileAppDriverFactory factory;
 
     @Test
-    void testConfigureVividusWebDriver()
+    void shouldCreateWebDriver()
     {
         DesiredCapabilities capabilities = mock(DesiredCapabilities.class);
         WebDriver webDriver = mock(WebDriver.class);
-        VividusWebDriver vividusWebDriver = mock(VividusWebDriver.class);
-
-        when(vividusWebDriver.getDesiredCapabilities()).thenReturn(capabilities);
         when(driverFactory.getRemoteWebDriver(capabilities)).thenReturn(webDriver);
 
-        factory.configureVividusWebDriver(vividusWebDriver);
-
-        verify(vividusWebDriver).setWebDriver(webDriver);
-        verify(vividusWebDriver).setRemote(true);
-    }
-
-    @Test
-    void testSetDesiredCapabilities()
-    {
-        DesiredCapabilities capabilities = mock(DesiredCapabilities.class);
-        RunningStory runningStory = mock(RunningStory.class);
-        Scenario scenario = mock(Scenario.class);
-        MetaWrapper metaWrapper = mock(MetaWrapper.class);
-
-        factory.setDesiredCapabilities(capabilities, runningStory, scenario, metaWrapper);
-
-        verifyNoInteractions(capabilities, runningStory, scenario, metaWrapper, driverFactory, webDriverManagerContext,
-                bddRunContext);
+        WebDriver actual = factory.createWebDriver(capabilities);
+        assertEquals(webDriver, actual);
     }
 }

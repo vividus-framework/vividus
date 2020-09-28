@@ -16,39 +16,30 @@
 
 package org.vividus.selenium.mobileapp;
 
-import org.jbehave.core.model.Scenario;
+import java.util.Set;
+
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.MetaWrapper;
-import org.vividus.bdd.model.RunningStory;
 import org.vividus.selenium.AbstractVividusWebDriverFactory;
+import org.vividus.selenium.DesiredCapabilitiesConfigurer;
 import org.vividus.selenium.IGenericWebDriverFactory;
-import org.vividus.selenium.VividusWebDriver;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 
 public class VividusMobileAppDriverFactory extends AbstractVividusWebDriverFactory
 {
     private final IGenericWebDriverFactory driverFactory;
 
-    public VividusMobileAppDriverFactory(IBddRunContext bddRunContext, IWebDriverManagerContext webDriverManagerContext,
-            IGenericWebDriverFactory driverFactory)
+    public VividusMobileAppDriverFactory(IWebDriverManagerContext webDriverManagerContext, IBddRunContext bddRunContext,
+            Set<DesiredCapabilitiesConfigurer> desiredCapabilitiesConfigurers, IGenericWebDriverFactory driverFactory)
     {
-        super(bddRunContext, webDriverManagerContext);
+        super(true, webDriverManagerContext, bddRunContext, desiredCapabilitiesConfigurers);
         this.driverFactory = driverFactory;
     }
 
     @Override
-    protected void configureVividusWebDriver(VividusWebDriver vividusWebDriver)
+    protected WebDriver createWebDriver(DesiredCapabilities desiredCapabilities)
     {
-        DesiredCapabilities capabilities = vividusWebDriver.getDesiredCapabilities();
-        vividusWebDriver.setWebDriver(driverFactory.getRemoteWebDriver(capabilities));
-        vividusWebDriver.setRemote(true);
-    }
-
-    @Override
-    protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities, RunningStory runningStory,
-            Scenario scenario, MetaWrapper metaWrapper)
-    {
-        // empty
+        return driverFactory.getRemoteWebDriver(desiredCapabilities);
     }
 }

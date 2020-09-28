@@ -46,20 +46,20 @@
         <property name="waitActions" ref="waitActions" />
     </bean>
 
-<bean id="proxy" class="org.vividus.proxy.ThreadedProxy" >
+    <bean id="proxy" class="org.vividus.proxy.ThreadedProxy" >
         <constructor-arg index="0" value="${proxy.host}" />
         <constructor-arg index="1" value="${proxy.ports}" />
-        <constructor-arg index="2" >
+        <constructor-arg index="2">
             <bean class="org.vividus.proxy.ProxyFactory" />
         </constructor-arg>
     </bean>
 
-    <bean id="mitmManagerFactory" class="org.vividus.proxy.mitm.MitmManagerFactory" />
-
     <bean id="proxyServerFactory" class="org.vividus.proxy.ProxyServerFactory">
         <property name="trustAllServers" value="${proxy.trust-all-servers}" />
         <property name="mitmEnabled" value="${proxy.mitm.enabled}" />
-        <property name="mitmManagerFactory" ref="mitmManagerFactory" />
+        <property name="mitmManagerFactory">
+            <bean class="org.vividus.proxy.mitm.MitmManagerFactory" />
+        </property>
         <property name="mitmManagerOptions">
             <bean class="org.vividus.proxy.mitm.MitmManagerOptions" >
                 <constructor-arg index="0" value="${proxy.mitm.key-store.alias}" />

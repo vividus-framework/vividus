@@ -254,13 +254,13 @@
 
     <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" />
 
-    <bean id="proxyStarter" class="org.vividus.selenium.ProxyStarter"/>
+    <bean id="seleniumProxyFactory" class="org.vividus.proxy.SeleniumProxyFactory"/>
 
     <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
         <property name="next" ref="proxyAgentStoryReporter" />
     </bean>
 
-    <bean id="proxyAgentStoryReporter" class="org.vividus.bdd.ProxyAgentStoryReporter">
+    <bean id="proxyAgentStoryReporter" class="org.vividus.bdd.proxy.ProxyAgentStoryReporter">
         <property name="proxyEnabled" value="${proxy.enabled}" />
         <property name="proxyRecordingEnabled" value="${proxy.recording.enabled}" />
         <property name="next" ref="allureStoryReporter" />

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.sauce;
+package org.vividus.selenium.sauce;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -28,11 +28,11 @@ import org.vividus.testcontext.TestContext;
 
 public class SauceConnectManager implements ISauceConnectManager
 {
-    private static final String DESCRIPTOR = "DESCRIPTOR";
-    private String sauceLabsUsername;
-    private String sauceLabsAccessKey;
+    private static final Object KEY = SauceConnectDescriptor.class;
 
     private SauceTunnelManager sauceTunnelManager;
+    private String sauceLabsUsername;
+    private String sauceLabsAccessKey;
 
     private final Map<SauceConnectOptions, SauceConnectDescriptor> activeConnections = new HashMap<>();
     private TestContext testContext;
@@ -69,7 +69,7 @@ public class SauceConnectManager implements ISauceConnectManager
             {
                 throw new IllegalStateException(e);
             }
-           putSauceConnectDescriptor(sauceConnectDescriptor);
+            putSauceConnectDescriptor(sauceConnectDescriptor);
         }
         else if (!currentConnectionDescriptor.equals(sauceConnectDescriptor))
         {
@@ -105,22 +105,12 @@ public class SauceConnectManager implements ISauceConnectManager
         return activeConnections.containsValue(getSauceConnectDescriptor());
     }
 
-    private void closeTunnelsForPlan(SauceConnectDescriptor desciptor)
+    private void closeTunnelsForPlan(SauceConnectDescriptor descriptor)
     {
         synchronized (sauceTunnelManager)
         {
-            sauceTunnelManager.closeTunnelsForPlan(sauceLabsUsername, desciptor.getOptions(), null);
+            sauceTunnelManager.closeTunnelsForPlan(sauceLabsUsername, descriptor.getOptions(), null);
         }
-    }
-
-    public SauceConnectDescriptor getSauceConnectDescriptor()
-    {
-        return testContext.get(DESCRIPTOR);
-    }
-
-    private void putSauceConnectDescriptor(SauceConnectDescriptor sauceConnectDescriptor)
-    {
-        testContext.put(DESCRIPTOR, sauceConnectDescriptor);
     }
 
     public void setSauceTunnelManager(SauceTunnelManager sauceTunnelManager)
@@ -138,18 +128,38 @@ public class SauceConnectManager implements ISauceConnectManager
         this.sauceLabsAccessKey = sauceLabsAccessKey;
     }
 
-    public void setContext(TestContext testContext)
+    public void setTestContext(TestContext testContext)
     {
         this.testContext = testContext;
     }
 
-    private static final class SauceConnectDescriptor
+    public SauceConnectDescriptor getSauceConnectDescriptor()
+    {
+        return testContext.get(KEY);
+    }
+
+    private void putSauceConnectDescriptor(SauceConnectDescriptor sauceConnectDescriptor)
+    {
+        testContext.put(KEY, sauceConnectDescriptor);
+    }
+
+    public String getSauceLabsUsername()
+    {
+        return sauceLabsUsername;
+    }
+
+    public String getSauceLabsAccessKey()
+    {
+        return sauceLabsAccessKey;
+    }
+
+    class SauceConnectDescriptor
     {
         private final String tunnelId;
         private final int port;
-        private String options;
+        private final String options;
 
-        private SauceConnectDescriptor(SauceConnectOptions sauceConnectOptions) throws IOException
+        SauceConnectDescriptor(SauceConnectOptions sauceConnectOptions) throws IOException
         {
             tunnelId = UUID.randomUUID().toString();
             options = sauceConnectOptions.build(tunnelId);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.sauce;
+package org.vividus.selenium.sauce;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,16 +31,18 @@ import org.apache.commons.io.FilenameUtils;
 public class SauceConnectOptions
 {
     private static final String PAC_FILE_CONTENT_FORMAT = "function FindProxyForURL(url, host) { "
-            + "if (shExpMatch(host, \"*.miso.saucelabs.com\") || shExpMatch(host, \"saucelabs.com\")) {"
-            + "return \"DIRECT\";}return \"PROXY %s\";}";
-
-    private static final String SAUCE_CONNECT_AUTH_FORMAT = "%s:%d:%s";
+            + "if (shExpMatch(host, \"*.miso.saucelabs.com\")"
+            + "|| shExpMatch(host, \"saucelabs.com\")"
+            + "|| shExpMatch(host, \"%1$s\")) {"
+            + "return \"DIRECT\";}return \"PROXY %2$s\";}";
+    private static final String SAUCECONNECT_AUTH_FORMAT = "%s:%d:%s";
     private static final int DEFAULT_HOST_PORT = 80;
-    private static final String LOCALHOST_IP = "127.0.0.1";
 
     private String proxy;
     private String host;
     private String basicAuthUser;
+    private String noSslBumpDomains;
+    private String skipProxyHostsPattern;
     private int port;
 
     /**
@@ -51,7 +53,7 @@ public class SauceConnectOptions
      */
     public void setProxy(String proxy)
     {
-        this.proxy = proxy.replace("localhost", LOCALHOST_IP);
+        this.proxy = proxy;
     }
 
     public void setHost(String host)
@@ -69,18 +71,33 @@ public class SauceConnectOptions
         this.port = port;
     }
 
+    public void setNoSslBumpDomains(String noSslBumpDomains)
+    {
+        this.noSslBumpDomains = noSslBumpDomains;
+    }
+
+    public void setSkipProxyHostsPattern(String skipProxyHostsPattern)
+    {
+        this.skipProxyHostsPattern = skipProxyHostsPattern;
+    }
+
     public String build(String tunnelIdentifier) throws IOException
     {
         StringBuilder options = new StringBuilder();
         if (tunnelIdentifier != null)
         {
-            appendOption(options, SauceConnectOptionName.TUNNEL_IDENTIFIER, tunnelIdentifier);
-            appendOption(options, SauceConnectOptionName.PID_FILE, createPidFile(tunnelIdentifier).toString());
+            appendOption(options, "tunnel-identifier", tunnelIdentifier);
+            appendOption(options, "pidfile", createPidFile(tunnelIdentifier).toString());
+        }
+        // Need to set this option, since we don't need hosts to be re-encrypted
+        if (noSslBumpDomains != null)
+        {
+            appendOption(options, "no-ssl-bump-domains", noSslBumpDomains);
         }
         if (host != null && basicAuthUser != null)
         {
-            appendOption(options, SauceConnectOptionName.AUTH,
-                    String.format(SAUCE_CONNECT_AUTH_FORMAT, host, port > 0 ? port : DEFAULT_HOST_PORT, basicAuthUser));
+            appendOption(options, "auth",
+                    String.format(SAUCECONNECT_AUTH_FORMAT, host, port > 0 ? port : DEFAULT_HOST_PORT, basicAuthUser));
         }
         if (proxy != null)
         {
@@ -88,18 +105,19 @@ public class SauceConnectOptions
              * Separators conversion added as workaround for SauceConnect bug (doesn't take into account windows like
              * PAC-file path delimiters). Sauce lab ticket link: https://support.saucelabs.com/hc/en-us/requests/38183
              * Affected SauceConnect version: 4.4.4 and above.
-             */
-            appendOption(options, SauceConnectOptionName.PAC,
+             * */
+            appendOption(options, "pac",
                     "file://" + FilenameUtils.separatorsToUnix(createPacFile(tunnelIdentifier).toString()));
         }
-        appendOption(options, SauceConnectOptionName.NO_REMOVE_COLLIDING_TUNNELS);
-        appendOption(options, SauceConnectOptionName.NO_PROXY_CASHING);
+        appendOption(options, "no-remove-colliding-tunnels");
+        appendOption(options, "no-proxy-caching");
         return options.length() > 0 ? options.substring(0, options.length() - 1) : "";
     }
 
     private Path createPacFile(String tunnelIdentifier) throws IOException
     {
-        return createTempFile("pac-" + tunnelIdentifier, ".js", String.format(PAC_FILE_CONTENT_FORMAT, proxy));
+        return createTempFile("pac-" + tunnelIdentifier, ".js",
+                String.format(PAC_FILE_CONTENT_FORMAT, skipProxyHostsPattern, proxy));
     }
 
     private Path createPidFile(String tunnelIdentifier) throws IOException
@@ -116,16 +134,16 @@ public class SauceConnectOptions
         return tempFilePath;
     }
 
-    private static void appendOption(StringBuilder stringBuilder, SauceConnectOptionName name, String... values)
+    private static void appendOption(StringBuilder stringBuilder, String name, String... values)
     {
-        stringBuilder.append("--").append(name.getOptionName()).append(' ');
-        Stream.of(values).forEach(value -> stringBuilder.append(value).append(' '));
+        stringBuilder.append("--").append(name).append(' ');
+        Arrays.stream(values).forEach(value -> stringBuilder.append(value).append(' '));
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(proxy, host, basicAuthUser, port);
+        return Objects.hash(proxy, host, basicAuthUser, noSslBumpDomains, skipProxyHostsPattern, port);
     }
 
     @Override
@@ -146,28 +164,7 @@ public class SauceConnectOptions
         SauceConnectOptions other = (SauceConnectOptions) obj;
         return Objects.equals(proxy, other.proxy) && Objects.equals(host, other.host)
                 && Objects.equals(basicAuthUser, other.basicAuthUser)
-                && port == other.port;
-    }
-
-    enum SauceConnectOptionName
-    {
-        TUNNEL_IDENTIFIER("tunnel-identifier"),
-        PID_FILE("pidfile"),
-        AUTH("auth"),
-        PAC("pac"),
-        NO_REMOVE_COLLIDING_TUNNELS("no-remove-colliding-tunnels"),
-        NO_PROXY_CASHING("no-proxy-caching");
-
-        private final String optionName;
-
-        SauceConnectOptionName(String optionName)
-        {
-            this.optionName = optionName;
-        }
-
-        public String getOptionName()
-        {
-            return optionName;
-        }
+                && Objects.equals(noSslBumpDomains, other.noSslBumpDomains)
+                && Objects.equals(skipProxyHostsPattern, other.skipProxyHostsPattern) && port == other.port;
     }
 }

@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.eventbus.EventBus;
 
-import org.jbehave.core.model.Scenario;
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -144,17 +144,18 @@ class WebDriverProviderTests
     {
         TestVividusDriverFactory(IBddRunContext bddRunContext, IWebDriverManagerContext webDriverManagerContext)
         {
-            super(bddRunContext, webDriverManagerContext);
+            super(true, webDriverManagerContext, bddRunContext);
         }
 
         @Override
-        protected void configureVividusWebDriver(VividusWebDriver vividusWebDriver)
+        protected WebDriver createWebDriver(DesiredCapabilities desiredCapabilities)
         {
+            throw new NotImplementedException();
         }
 
         @Override
         protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities, RunningStory runningStory,
-                Scenario scenario, MetaWrapper metaWrapper)
+                MetaWrapper metaWrapper)
         {
         }
     }

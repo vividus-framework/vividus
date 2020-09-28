@@ -4,23 +4,23 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
        profile="web">
 
-    <bean id="sauceConnectManager" class="org.vividus.sauce.SauceConnectManager">
+    <bean id="sauceConnectManager" class="org.vividus.selenium.sauce.SauceConnectManager">
         <property name="sauceLabsUsername" value="${selenium.grid.username}"/>
         <property name="sauceLabsAccessKey" value="${selenium.grid.password}"/>
         <property name="sauceTunnelManager">
-            <bean class="org.vividus.sauce.SynchronizedUnpackingSauceConnectTunnelManager">
+            <bean class="org.vividus.selenium.sauce.SynchronizedUnpackingSauceConnectTunnelManager">
                 <constructor-arg value="false"/>
                 <property name="useLatestSauceConnect" value="${sauceLabs.use-latest-sauce-connect}"/>
             </bean>
         </property>
     </bean>
 
-    <bean id="sauceLabsWebDriverFactory" class="org.vividus.sauce.SauceLabsWebDriverFactory"
+    <bean id="sauceLabsWebDriverFactory" class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer"
           parent="vividusWebDriverFactory" primary="true">
         <property name="sauceConnectEnabled" value="${sauceLabs.sauce-connect.enabled}"/>
     </bean>
 
-    <bean id="sauceConnectProducer" class="org.vividus.sauce.SauceConnectProducer">
+    <bean id="sauceConnectProducer" class="org.vividus.selenium.sauce.SauceConnectProducer">
         <property name="sauceConnectEnabled" value="${sauceLabs.sauce-connect.enabled}"/>
     </bean>
 

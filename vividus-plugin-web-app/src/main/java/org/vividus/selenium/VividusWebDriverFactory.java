@@ -18,17 +18,13 @@ package org.vividus.selenium;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
-import org.jbehave.core.model.Scenario;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.MetaWrapper;
-import org.vividus.bdd.model.RunningStory;
-import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 
@@ -37,64 +33,32 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
     private final IWebDriverFactory webDriverFactory;
     private final IBrowserWindowSizeProvider browserWindowSizeProvider;
     private final IWebDriverManager webDriverManager;
-    private final IProxy proxy;
-    private final ProxyStarter proxyStarter;
 
-    private boolean remoteExecution;
     private List<WebDriverEventListener> webDriverEventListeners;
 
-    public VividusWebDriverFactory(IWebDriverFactory webDriverFactory, IBddRunContext bddRunContext,
-        IWebDriverManagerContext webDriverManagerContext, IProxy proxy,
-        IBrowserWindowSizeProvider browserWindowSizeProvider, IWebDriverManager webDriverManager,
-        ProxyStarter proxyStarter)
+    public VividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
+            IBddRunContext bddRunContext, Set<DesiredCapabilitiesConfigurer> desiredCapabilitiesConfigurers,
+            IWebDriverFactory webDriverFactory, IWebDriverManager webDriverManager,
+            IBrowserWindowSizeProvider browserWindowSizeProvider)
     {
-        super(bddRunContext, webDriverManagerContext);
-        this.proxy = proxy;
+        super(remoteExecution, webDriverManagerContext, bddRunContext, desiredCapabilitiesConfigurers);
         this.webDriverFactory = webDriverFactory;
         this.browserWindowSizeProvider = browserWindowSizeProvider;
         this.webDriverManager = webDriverManager;
-        this.proxyStarter = proxyStarter;
     }
 
     @Override
-    protected void configureVividusWebDriver(VividusWebDriver vividusWebDriver)
+    protected WebDriver createWebDriver(DesiredCapabilities desiredCapabilities)
     {
-        DesiredCapabilities desiredCapabilities = vividusWebDriver.getDesiredCapabilities();
-        configureProxy(desiredCapabilities);
-        WebDriver webDriver = remoteExecution
+        WebDriver webDriver = isRemoteExecution()
                 ? webDriverFactory.getRemoteWebDriver(desiredCapabilities)
                 : webDriverFactory.getWebDriver(desiredCapabilities);
 
         EventFiringWebDriver eventFiringWebDriver = new EventFiringWebDriver(webDriver);
         webDriverEventListeners.forEach(eventFiringWebDriver::register);
 
-        webDriverManager.resize(webDriver, browserWindowSizeProvider.getBrowserWindowSize(remoteExecution));
-        vividusWebDriver.setWebDriver(eventFiringWebDriver);
-        vividusWebDriver.setRemote(remoteExecution);
-    }
-
-    protected void configureProxy(DesiredCapabilities desiredCapabilities)
-    {
-        if (proxy.isStarted())
-        {
-            desiredCapabilities.setCapability(CapabilityType.PROXY, proxyStarter.createSeleniumProxy(remoteExecution));
-            desiredCapabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-        }
-    }
-
-    @Override
-    protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities, RunningStory runningStory,
-            Scenario scenario, MetaWrapper metaWrapper)
-    {
-        if (remoteExecution)
-        {
-            desiredCapabilities.setCapability(SauceLabsCapabilityType.NAME, runningStory.getName());
-        }
-    }
-
-    public void setRemoteExecution(boolean remoteExecution)
-    {
-        this.remoteExecution = remoteExecution;
+        webDriverManager.resize(webDriver, browserWindowSizeProvider.getBrowserWindowSize(isRemoteExecution()));
+        return eventFiringWebDriver;
     }
 
     public void setWebDriverEventListeners(List<WebDriverEventListener> webDriverEventListeners)

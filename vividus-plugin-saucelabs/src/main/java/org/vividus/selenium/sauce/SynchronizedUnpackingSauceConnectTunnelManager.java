@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.sauce;
+package org.vividus.selenium.sauce;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,16 +31,19 @@ public class SynchronizedUnpackingSauceConnectTunnelManager extends SauceConnect
     }
 
     @Override
-    public File extractZipFile(File workingDirectory, SauceConnectFourManager.OperatingSystem operatingSystem)
-            throws IOException
+    public File extractZipFile(File workingDirectory, OperatingSystem operatingSystem) throws IOException
     {
-        synchronized (this)
+        if (extractedDirectory == null)
         {
-            if (extractedDirectory == null)
+            synchronized (this)
             {
-                extractedDirectory = super.extractZipFile(workingDirectory, operatingSystem);
-                extractedDirectory.deleteOnExit();
-                return extractedDirectory;
+                if (extractedDirectory == null)
+                {
+                    File extractedDirectory = super.extractZipFile(workingDirectory, operatingSystem);
+                    extractedDirectory.deleteOnExit();
+                    this.extractedDirectory = extractedDirectory;
+                    return extractedDirectory;
+                }
             }
         }
         return extractedDirectory;

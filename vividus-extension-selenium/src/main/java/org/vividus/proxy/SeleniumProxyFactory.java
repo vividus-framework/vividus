@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package org.vividus.sauce;
+package org.vividus.proxy;
 
-public interface ISauceConnectManager
+import java.net.InetAddress;
+
+import com.browserup.bup.client.ClientUtil;
+
+import org.openqa.selenium.Proxy;
+
+public class SeleniumProxyFactory
 {
-    void start(SauceConnectOptions options);
+    private final IProxy proxy;
 
-    void stop();
+    public SeleniumProxyFactory(IProxy proxy)
+    {
+        this.proxy = proxy;
+    }
 
-    String getTunnelId();
-
-    boolean isStarted();
+    public Proxy createSeleniumProxy()
+    {
+        return ClientUtil.createSeleniumProxy(proxy.getProxyServer(), InetAddress.getLoopbackAddress());
+    }
 }

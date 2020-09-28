@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.sauce;
+package org.vividus.selenium.sauce;
 
-public enum SauceLabsCapabilityName
+public interface ISauceConnectManager
 {
-    NAME("name"),
-    TUNNEL_IDENTIFIER("tunnelIdentifier");
+    void start(SauceConnectOptions options);
 
-    private final String optionName;
+    void stop();
 
-    SauceLabsCapabilityName(String optionName)
-    {
-        this.optionName = optionName;
-    }
+    String getTunnelId();
 
-    public String getOptionName()
-    {
-        return optionName;
-    }
+    boolean isStarted();
 }
