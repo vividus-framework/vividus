@@ -26,8 +26,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.eventbus.EventBus;
-
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -66,9 +64,6 @@ class ProxyAgentStoryReporterTests
     @Mock
     private StoryReporter next;
 
-    @Mock
-    private EventBus eventBus;
-
     @InjectMocks
     private ProxyAgentStoryReporter proxyAgentStoryReporter;
 
@@ -83,7 +78,7 @@ class ProxyAgentStoryReporterTests
     {
         RunningStory runningStory = mockRunningStoryWithName(STORY_NAME);
         proxyAgentStoryReporter.beforeStory(runningStory.getStory(), true);
-        verifyNoInteractions(proxy, eventBus);
+        verifyNoInteractions(proxy);
         verify(next).beforeStory(runningStory.getStory(), true);
     }
 
@@ -165,7 +160,6 @@ class ProxyAgentStoryReporterTests
         verify(proxy).clearRequestFilters();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
-        verifyNoInteractions(eventBus);
     }
 
     @Test
@@ -178,7 +172,6 @@ class ProxyAgentStoryReporterTests
         verify(proxy).clearRequestFilters();
         verify(proxy).startRecording();
         verify(next).beforeScenario(scenario);
-        verifyNoInteractions(eventBus);
     }
 
     @Test
@@ -191,7 +184,6 @@ class ProxyAgentStoryReporterTests
         verify(proxy, never()).clearRequestFilters();
         verify(proxy, never()).startRecording();
         verify(next).beforeScenario(scenario);
-        verifyNoInteractions(eventBus);
     }
 
     @Test
@@ -210,7 +202,6 @@ class ProxyAgentStoryReporterTests
         proxyAgentStoryReporter.beforeScenario(scenario);
         verify(proxy, never()).start();
         verify(next).beforeScenario(scenario);
-        verifyNoInteractions(eventBus);
     }
 
     @Test
@@ -290,7 +281,7 @@ class ProxyAgentStoryReporterTests
     void testAfterGivenStory()
     {
         proxyAgentStoryReporter.afterStory(true);
-        verifyNoInteractions(proxy, eventBus);
+        verifyNoInteractions(proxy);
         verify(next).afterStory(true);
     }
 
@@ -352,6 +343,6 @@ class ProxyAgentStoryReporterTests
     private void verifyProxyInactivity()
     {
         verify(proxy).isStarted();
-        verifyNoMoreInteractions(proxy, eventBus);
+        verifyNoMoreInteractions(proxy);
     }
 }
