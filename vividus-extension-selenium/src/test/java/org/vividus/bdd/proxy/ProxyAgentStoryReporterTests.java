@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd;
+package org.vividus.bdd.proxy;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -41,7 +41,6 @@ import org.mockito.stubbing.Answer;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
-import org.vividus.bdd.proxy.ProxyAgentStoryReporter;
 import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.proxy.IProxy;
 

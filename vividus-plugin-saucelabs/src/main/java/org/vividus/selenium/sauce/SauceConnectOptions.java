@@ -43,6 +43,7 @@ public class SauceConnectOptions
     private String basicAuthUser;
     private String noSslBumpDomains;
     private String skipProxyHostsPattern;
+    private String restUrl;
     private int port;
 
     /**
@@ -81,6 +82,11 @@ public class SauceConnectOptions
         this.skipProxyHostsPattern = skipProxyHostsPattern;
     }
 
+    public void setRestUrl(String restUrl)
+    {
+        this.restUrl = restUrl;
+    }
+
     public String build(String tunnelIdentifier) throws IOException
     {
         StringBuilder options = new StringBuilder();
@@ -108,6 +114,10 @@ public class SauceConnectOptions
              * */
             appendOption(options, "pac",
                     "file://" + FilenameUtils.separatorsToUnix(createPacFile(tunnelIdentifier).toString()));
+        }
+        if (restUrl != null)
+        {
+            appendOption(options, "rest-url", restUrl);
         }
         appendOption(options, "no-remove-colliding-tunnels");
         appendOption(options, "no-proxy-caching");

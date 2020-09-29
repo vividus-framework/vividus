@@ -41,6 +41,7 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
     private final SauceConnectManager sauceConnectManager;
     private final IProxy proxy;
     private boolean sauceConnectEnabled;
+    private String restUrl;
 
     public SauceLabsCapabilitiesConfigurer(WebApplicationConfiguration webApplicationConfiguration,
             IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager, IProxy proxy)
@@ -100,6 +101,7 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
         {
             sauceConnectOptions.setProxy(proxy.createSeleniumProxy().getHttpProxy());
         }
+        sauceConnectOptions.setRestUrl(restUrl);
         return sauceConnectOptions;
     }
 
@@ -112,5 +114,10 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
     public void setSauceConnectEnabled(boolean sauceConnectEnabled)
     {
         this.sauceConnectEnabled = sauceConnectEnabled;
+    }
+
+    public void setRestUrl(String restUrl)
+    {
+        this.restUrl = restUrl;
     }
 }
