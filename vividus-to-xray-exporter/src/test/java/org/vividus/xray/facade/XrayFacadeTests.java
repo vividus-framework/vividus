@@ -22,7 +22,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -30,6 +32,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -40,32 +43,34 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraFacade;
+import org.vividus.xray.databind.AbstractTestCaseSerializer;
+import org.vividus.xray.databind.CucumberTestCaseSerializer;
 import org.vividus.xray.databind.ManualTestCaseSerializer;
 import org.vividus.xray.facade.XrayFacade.NonEditableIssueStatusException;
+import org.vividus.xray.model.AbstractTestCase;
+import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.ManualTestStep;
+import org.vividus.xray.model.TestCaseType;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class XrayFacadeTests
 {
     private static final String ISSUE_ID = "issue id";
     private static final String BODY = "{}";
-    private static final String PROJECT_KEY = "project key";
     private static final String OPEN_STATUS = "Open";
-    private static final String ASSIGNEE = "test-assignee";
-
-    @Captor private ArgumentCaptor<ManualTestCase> manualTestCaseCaptor;
+    private static final String MANUAL_TYPE = "Manual";
+    private static final String CUCUMBER_TYPE = "Cucumber";
+    private static final String CREATE_RESPONSE = "{\"key\" : \"" + ISSUE_ID + "\"}";
 
     @Mock private ManualTestCaseSerializer manualTestSerializer;
+    @Mock private CucumberTestCaseSerializer cucumberTestSerializer;
     @Mock private JiraFacade jiraFacade;
     @Mock private JiraClient jiraClient;
-    @Mock private ManualTestStep manualTestStep;
     private XrayFacade xrayFacade;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(XrayFacade.class);
@@ -91,52 +96,66 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldUpdateTestCase() throws IOException, NonEditableIssueStatusException
+    void shouldUpdateManualTestCase() throws IOException, NonEditableIssueStatusException
     {
         initializeFacade(List.of(OPEN_STATUS));
-        mockSerialization();
-        TestCaseParameters parameters = createParameters();
+        ManualTestCase testCase = createManualTestCase();
+        mockSerialization(manualTestSerializer, testCase);
 
         when(jiraFacade.getIssueStatus(ISSUE_ID)).thenReturn(OPEN_STATUS);
 
-        xrayFacade.updateTestCase(ISSUE_ID, parameters);
+        xrayFacade.updateTestCase(ISSUE_ID, testCase);
 
         verify(jiraFacade).updateIssue(ISSUE_ID, BODY);
+        verifyUpdateLogs(MANUAL_TYPE);
+    }
+
+    @Test
+    void shouldUpdateCucumberTestCase() throws IOException, NonEditableIssueStatusException
+    {
+        initializeFacade(List.of(OPEN_STATUS));
+        CucumberTestCase testCase = createCucumberTestCase();
+        mockSerialization(cucumberTestSerializer, testCase);
+
+        when(jiraFacade.getIssueStatus(ISSUE_ID)).thenReturn(OPEN_STATUS);
+
+        xrayFacade.updateTestCase(ISSUE_ID, testCase);
+
+        verify(jiraFacade).updateIssue(ISSUE_ID, BODY);
+        verifyUpdateLogs(CUCUMBER_TYPE);
+    }
+
+    private void verifyUpdateLogs(String type)
+    {
         assertThat(logger.getLoggingEvents(), is(List.of(
-            info("Updating Test Case with ID {}: {}", ISSUE_ID, BODY),
-            info("Test with key {} has been updated", ISSUE_ID))));
-        verifyManualTestCase(parameters);
+            info("Updating {} Test Case with ID {}: {}", type, ISSUE_ID, BODY),
+            info("{} Test with key {} has been updated", type, ISSUE_ID))));
     }
 
     @Test
     void shouldUpdateTestCaseNotEditableStatus() throws IOException, NonEditableIssueStatusException
     {
         initializeFacade(List.of(OPEN_STATUS));
-        TestCaseParameters parameters = createParameters();
-
         String closedStatus = "Closed";
         when(jiraFacade.getIssueStatus(ISSUE_ID)).thenReturn(closedStatus);
 
         NonEditableIssueStatusException exception = assertThrows(NonEditableIssueStatusException.class,
-            () -> xrayFacade.updateTestCase(ISSUE_ID, parameters));
+            () -> xrayFacade.updateTestCase(ISSUE_ID, createManualTestCase()));
         assertEquals("Issue " + ISSUE_ID + " is in non-editable '" + closedStatus + "' status", exception.getMessage());
         assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
     @Test
-    void shouldCreateTestCase() throws IOException
+    void shouldCreateManualTestCase() throws IOException
     {
-        mockSerialization();
         initializeFacade(List.of());
-        TestCaseParameters parameters = createParameters();
-        when(jiraFacade.createIssue(BODY)).thenReturn("{\"key\" : \"" + ISSUE_ID + "\"}");
+        ManualTestCase testCase = createManualTestCase();
+        mockSerialization(manualTestSerializer, testCase);
+        when(jiraFacade.createIssue(BODY)).thenReturn(CREATE_RESPONSE);
 
-        xrayFacade.createTestCase(parameters);
+        xrayFacade.createTestCase(testCase);
 
-        assertThat(logger.getLoggingEvents(), is(List.of(
-                info("Creating Test Case: {}", BODY),
-                info("Test with key {} has been created", ISSUE_ID))));
-        verifyManualTestCase(parameters);
+        verifyCreateLogs(MANUAL_TYPE);
     }
 
     @Test
@@ -152,34 +171,62 @@ class XrayFacadeTests
         )));
     }
 
-    private void verifyManualTestCase(TestCaseParameters parameters)
+    @Test
+    void shouldCreateCucumberTestCase() throws IOException
     {
-        ManualTestCase manualTestCase = manualTestCaseCaptor.getValue();
-        assertEquals(PROJECT_KEY, manualTestCase.getProjectKey());
-        assertEquals(ASSIGNEE, manualTestCase.getAssignee());
-        assertEquals(parameters.getLabels(), manualTestCase.getLabels());
-        assertEquals(parameters.getComponents(), manualTestCase.getComponents());
-        assertEquals(parameters.getSummary(), manualTestCase.getSummary());
-        assertEquals(List.of(manualTestStep), manualTestCase.getManualTestSteps());
+        initializeFacade(List.of());
+        CucumberTestCase testCase = createCucumberTestCase();
+        mockSerialization(cucumberTestSerializer, testCase);
+        when(jiraFacade.createIssue(BODY)).thenReturn(CREATE_RESPONSE);
+
+        xrayFacade.createTestCase(testCase);
+
+        verifyCreateLogs(CUCUMBER_TYPE);
     }
 
-    private TestCaseParameters createParameters()
+    private void verifyCreateLogs(String type)
     {
-        TestCaseParameters parameters = new TestCaseParameters();
-        parameters.setSummary("scenarioTitle");
-        parameters.setSteps(List.of(manualTestStep));
-        parameters.setLabels(new LinkedHashSet<>(List.of("label")));
-        parameters.setComponents(new LinkedHashSet<>(List.of("component")));
-        return parameters;
+        assertThat(logger.getLoggingEvents(), is(List.of(
+            info("Creating {} Test Case: {}", type, BODY),
+            info("{} Test with key {} has been created", type, ISSUE_ID))));
+    }
+
+    private ManualTestCase createManualTestCase()
+    {
+        ManualTestCase testCase = createTestCase(TestCaseType.MANUAL, ManualTestCase::new);
+        ManualTestStep manualTestStep = mock(ManualTestStep.class);
+        testCase.setManualTestSteps(List.of(manualTestStep));
+        return testCase;
+    }
+
+    private CucumberTestCase createCucumberTestCase()
+    {
+        CucumberTestCase testCase = createTestCase(TestCaseType.CUCUMBER,
+                CucumberTestCase::new);
+        testCase.setScenarioType("scenario-type");
+        testCase.setScenario("scenario");
+        return testCase;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends AbstractTestCase> T createTestCase(TestCaseType type, Supplier<T> factory)
+    {
+        AbstractTestCase testCase = factory.get();
+        testCase.setType(type.getValue());
+        testCase.setSummary("scenarioTitle");
+        testCase.setLabels(new LinkedHashSet<>(List.of("label")));
+        testCase.setComponents(new LinkedHashSet<>(List.of("component")));
+        return (T) testCase;
     }
 
     private void initializeFacade(List<String> editableStatuses)
     {
-        xrayFacade = new XrayFacade(PROJECT_KEY, ASSIGNEE, editableStatuses, jiraFacade, jiraClient,
-                manualTestSerializer);
+        xrayFacade = new XrayFacade(editableStatuses, jiraFacade, jiraClient, manualTestSerializer,
+                cucumberTestSerializer);
     }
 
-    private void mockSerialization() throws IOException
+    private <T extends AbstractTestCase> void mockSerialization(AbstractTestCaseSerializer<T> serializer,
+            T testCase) throws IOException
     {
         doAnswer(a ->
         {
@@ -187,7 +234,6 @@ class XrayFacadeTests
             generator.writeStartObject();
             generator.writeEndObject();
             return null;
-        }).when(manualTestSerializer).serialize(manualTestCaseCaptor.capture(), any(JsonGenerator.class),
-                any(SerializerProvider.class));
+        }).when(serializer).serialize(eq(testCase), any(JsonGenerator.class), any(SerializerProvider.class));
     }
 }

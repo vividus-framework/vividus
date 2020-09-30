@@ -20,7 +20,18 @@ import java.util.List;
 
 public class Examples
 {
+    private Parameters parameters;
     private List<Example> examples;
+
+    public Parameters getParameters()
+    {
+        return parameters;
+    }
+
+    public void setParameters(Parameters parameters)
+    {
+        this.parameters = parameters;
+    }
 
     public List<Example> getExamples()
     {

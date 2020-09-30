@@ -33,6 +33,7 @@ dependencies {
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl')
 
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')

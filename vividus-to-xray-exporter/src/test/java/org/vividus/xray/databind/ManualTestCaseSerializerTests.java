@@ -16,17 +16,9 @@
 
 package org.vividus.xray.databind;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.LinkedHashSet;
 import java.util.List;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,10 +26,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.util.ResourceUtils;
 import org.vividus.xray.configuration.JiraFieldsMapping;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.ManualTestStep;
+import org.vividus.xray.model.TestCaseType;
+
+import test.util.JsonVerificationUtils;
 
 @ExtendWith(MockitoExtension.class)
 class ManualTestCaseSerializerTests
@@ -59,36 +53,19 @@ class ManualTestCaseSerializerTests
         test.setAssignee("test-assignee");
         test.setLabels(new LinkedHashSet<>(List.of("label 1", "label 2")));
         test.setComponents(new LinkedHashSet<>(List.of("component 1", "component 2")));
-        verifySerializedForm(test, "expected.json");
+        JsonVerificationUtils.verifySerializedForm(serializer, test, getClass(), "manual.json");
     }
 
     @Test
     void shouldSerializeManualTestWithNullLabelsAndComponents() throws IOException
     {
-        verifySerializedForm(createBaseTest(), "nullable.json");
-    }
-
-    private void verifySerializedForm(ManualTestCase test, String expectedJsonPath) throws IOException
-    {
-        try (StringWriter writer = new StringWriter())
-        {
-            JsonFactory factory = new JsonFactory();
-            JsonGenerator generator = factory.createGenerator(writer);
-
-            serializer.serialize(test, generator, null);
-
-            generator.close();
-
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode actual = mapper.readTree(writer.toString());
-            JsonNode expected = mapper.readTree(ResourceUtils.loadResource(getClass(), expectedJsonPath));
-            assertEquals(expected, actual);
-        }
+        JsonVerificationUtils.verifySerializedForm(serializer, createBaseTest(), getClass(), "nullable.json");
     }
 
     private static ManualTestCase createBaseTest()
     {
         ManualTestCase test = new ManualTestCase();
+        test.setType(TestCaseType.MANUAL.getValue());
         test.setProjectKey("project key");
         test.setSummary("summary");
         test.setManualTestSteps(List.of(

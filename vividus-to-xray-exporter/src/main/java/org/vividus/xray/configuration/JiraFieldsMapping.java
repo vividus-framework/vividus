@@ -23,6 +23,28 @@ public class JiraFieldsMapping
 {
     private String testCaseType;
     private String manualSteps;
+    private String cucumberScenarioType;
+    private String cucumberScenario;
+
+    public String getCucumberScenarioType()
+    {
+        return cucumberScenarioType;
+    }
+
+    public void setCucumberScenarioType(String cucumberScenarioType)
+    {
+        this.cucumberScenarioType = cucumberScenarioType;
+    }
+
+    public String getCucumberScenario()
+    {
+        return cucumberScenario;
+    }
+
+    public void setCucumberScenario(String cucumberScenario)
+    {
+        this.cucumberScenario = cucumberScenario;
+    }
 
     public String getTestCaseType()
     {

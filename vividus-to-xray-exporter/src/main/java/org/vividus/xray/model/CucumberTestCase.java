@@ -14,43 +14,30 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.model.jbehave;
+package org.vividus.xray.model;
 
-import java.util.List;
-
-public class Story
+public class CucumberTestCase extends AbstractTestCase
 {
-    private String path;
-    private Lifecycle lifecycle;
-    private List<Scenario> scenarios;
+    private String scenario;
+    private String scenarioType;
 
-    public String getPath()
+    public String getScenario()
     {
-        return path;
+        return scenario;
     }
 
-    public void setPath(String path)
+    public void setScenario(String scenario)
     {
-        this.path = path;
+        this.scenario = scenario;
     }
 
-    public Lifecycle getLifecycle()
+    public String getScenarioType()
     {
-        return lifecycle;
+        return scenarioType;
     }
 
-    public void setLifecycle(Lifecycle lifecycle)
+    public void setScenarioType(String scenarioType)
     {
-        this.lifecycle = lifecycle;
-    }
-
-    public List<Scenario> getScenarios()
-    {
-        return scenarios;
-    }
-
-    public void setScenarios(List<Scenario> scenarios)
-    {
-        this.scenarios = scenarios;
+        this.scenarioType = scenarioType;
     }
 }

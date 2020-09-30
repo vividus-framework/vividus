@@ -14,19 +14,48 @@
  * limitations under the License.
  */
 
-package org.vividus.xray.facade;
+package org.vividus.xray.model;
 
-import java.util.List;
 import java.util.Set;
 
-import org.vividus.xray.model.ManualTestStep;
-
-public class TestCaseParameters
+public abstract class AbstractTestCase
 {
+    private String type;
+    private String projectKey;
+    private String assignee;
     private String summary;
     private Set<String> labels;
     private Set<String> components;
-    private List<ManualTestStep> steps;
+
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+
+    public String getProjectKey()
+    {
+        return projectKey;
+    }
+
+    public void setProjectKey(String projectKey)
+    {
+        this.projectKey = projectKey;
+    }
+
+    public String getAssignee()
+    {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee)
+    {
+        this.assignee = assignee;
+    }
 
     public String getSummary()
     {
@@ -56,15 +85,5 @@ public class TestCaseParameters
     public void setComponents(Set<String> components)
     {
         this.components = components;
-    }
-
-    public List<ManualTestStep> getSteps()
-    {
-        return steps;
-    }
-
-    public void setSteps(List<ManualTestStep> steps)
-    {
-        this.steps = steps;
     }
 }
