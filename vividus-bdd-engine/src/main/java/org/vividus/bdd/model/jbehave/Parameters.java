@@ -18,39 +18,28 @@ package org.vividus.bdd.model.jbehave;
 
 import java.util.List;
 
-public class Story
+public class Parameters
 {
-    private String path;
-    private Lifecycle lifecycle;
-    private List<Scenario> scenarios;
+    private List<String> names;
+    private List<List<String>> values;
 
-    public String getPath()
+    public List<String> getNames()
     {
-        return path;
+        return names;
     }
 
-    public void setPath(String path)
+    public void setNames(List<String> names)
     {
-        this.path = path;
+        this.names = names;
     }
 
-    public Lifecycle getLifecycle()
+    public List<List<String>> getValues()
     {
-        return lifecycle;
+        return values;
     }
 
-    public void setLifecycle(Lifecycle lifecycle)
+    public void setValues(List<List<String>> values)
     {
-        this.lifecycle = lifecycle;
-    }
-
-    public List<Scenario> getScenarios()
-    {
-        return scenarios;
-    }
-
-    public void setScenarios(List<Scenario> scenarios)
-    {
-        this.scenarios = scenarios;
+        this.values = values;
     }
 }

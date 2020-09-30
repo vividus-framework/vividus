@@ -1,0 +1,108 @@
+{
+  "path": "storyPath",
+  "title": "",
+  "beforeStorySteps": [],
+  "scenarios": [
+    {
+      "keyword": "Scenario:",
+      "title": "Dummy scenario",
+      "meta": [
+        {
+          "keyword": "@",
+          "name": "testCaseId",
+          "value": ""
+        }
+      ],
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "Given I setup test environment",
+          "When I perform action on test environment",
+          "Then I verify changes on test environment"
+        ],
+        "parameters": {
+          "names": [
+            "parameter-key"
+          ],
+          "values": [
+            [
+              "parameter-value-1"
+            ],
+            [
+              "parameter-value-2"
+            ],
+            [
+              "parameter-value-3"
+            ]
+          ]
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "parameter-key": "parameter-value-1",
+              "testCaseId": ""
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "Given I setup test environment"
+              },
+              {
+                "outcome": "successful",
+                "value": "When I perform action on test environment"
+              },
+              {
+                "outcome": "successful",
+                "value": "Then I verify changes on test environment"
+              }
+            ]
+          },
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "parameter-key": "parameter-value-2",
+              "testCaseId": ""
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "Given I setup test environment"
+              },
+              {
+                "outcome": "successful",
+                "value": "When I perform action on test environment"
+              },
+              {
+                "outcome": "successful",
+                "value": "Then I verify changes on test environment"
+              }
+            ]
+          },
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "parameter-key": "parameter-value-3",
+              "testCaseId": ""
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "Given I setup test environment"
+              },
+              {
+                "outcome": "successful",
+                "value": "When I perform action on test environment"
+              },
+              {
+                "outcome": "successful",
+                "value": "Then I verify changes on test environment"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "afterStorySteps": []
+}

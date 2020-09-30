@@ -29,7 +29,10 @@ import org.slf4j.LoggerFactory;
 import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraFacade;
 import org.vividus.util.json.JsonPathUtils;
+import org.vividus.xray.databind.CucumberTestCaseSerializer;
 import org.vividus.xray.databind.ManualTestCaseSerializer;
+import org.vividus.xray.model.AbstractTestCase;
+import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.TestExecution;
 
@@ -37,46 +40,49 @@ public class XrayFacade
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(XrayFacade.class);
 
-    private final String projectKey;
-    private final String assignee;
     private final List<String> editableStatuses;
     private final JiraFacade jiraFacade;
     private final JiraClient jiraClient;
     private final ObjectMapper objectMapper;
 
-    public XrayFacade(String projectKey, String assignee, List<String> editableStatuses, JiraFacade jiraFacade,
-            JiraClient jiraClient, ManualTestCaseSerializer manualTestSerializer)
+    public XrayFacade(List<String> editableStatuses, JiraFacade jiraFacade,
+            JiraClient jiraClient, ManualTestCaseSerializer manualTestSerializer,
+            CucumberTestCaseSerializer cucumberTestSerializer)
     {
-        this.projectKey = projectKey;
-        this.assignee = assignee;
         this.editableStatuses = editableStatuses;
         this.jiraFacade = jiraFacade;
         this.jiraClient = jiraClient;
         this.objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .registerModule(new SimpleModule().addSerializer(ManualTestCase.class, manualTestSerializer));
+                .registerModule(new SimpleModule().addSerializer(ManualTestCase.class, manualTestSerializer)
+                                                  .addSerializer(CucumberTestCase.class, cucumberTestSerializer));
     }
 
-    public String createTestCase(TestCaseParameters testCaseParameters) throws IOException
+    public <T extends AbstractTestCase> String createTestCase(T testCase) throws IOException
     {
-        String createTestRequest = objectMapper.writeValueAsString(createManualTest(testCaseParameters));
-        LOGGER.atInfo().addArgument(createTestRequest).log("Creating Test Case: {}");
+        String createTestRequest = objectMapper.writeValueAsString(testCase);
+        LOGGER.atInfo().addArgument(testCase::getType).addArgument(createTestRequest).log("Creating {} Test Case: {}");
         String response = jiraFacade.createIssue(createTestRequest);
         String issueKey = JsonPathUtils.getData(response, "$.key");
-        LOGGER.atInfo().addArgument(issueKey).log("Test with key {} has been created");
+        LOGGER.atInfo().addArgument(testCase::getType)
+                       .addArgument(issueKey)
+                       .log("{} Test with key {} has been created");
         return issueKey;
     }
 
-    public void updateTestCase(String testCaseKey, TestCaseParameters testCaseParameters)
+    public <T extends AbstractTestCase> void updateTestCase(String testCaseKey, T testCase)
             throws IOException, NonEditableIssueStatusException
     {
         checkIfIssueEditable(testCaseKey);
-        String updateTestRequest = objectMapper.writeValueAsString(createManualTest(testCaseParameters));
-        LOGGER.atInfo().addArgument(testCaseKey)
+        String updateTestRequest = objectMapper.writeValueAsString(testCase);
+        LOGGER.atInfo().addArgument(testCase::getType)
+                       .addArgument(testCaseKey)
                        .addArgument(updateTestRequest)
-                       .log("Updating Test Case with ID {}: {}");
+                       .log("Updating {} Test Case with ID {}: {}");
         jiraFacade.updateIssue(testCaseKey, updateTestRequest);
-        LOGGER.atInfo().addArgument(testCaseKey).log("Test with key {} has been updated");
+        LOGGER.atInfo().addArgument(testCase::getType)
+                       .addArgument(testCaseKey)
+                       .log("{} Test with key {} has been updated");
     }
 
     public void updateTestExecution(String testExecutionKey, List<String> testCaseKeys) throws IOException
@@ -108,18 +114,6 @@ public class XrayFacade
                        .addArgument(requirementId)
                        .log("Create '{}' link from {} to {}");
         jiraFacade.createIssueLink(testCaseId, requirementId, linkType);
-    }
-
-    private ManualTestCase createManualTest(TestCaseParameters testCaseParameters)
-    {
-        ManualTestCase manualTest = new ManualTestCase();
-        manualTest.setProjectKey(projectKey);
-        manualTest.setAssignee(assignee);
-        manualTest.setSummary(testCaseParameters.getSummary());
-        manualTest.setLabels(testCaseParameters.getLabels());
-        manualTest.setComponents(testCaseParameters.getComponents());
-        manualTest.setManualTestSteps(testCaseParameters.getSteps());
-        return manualTest;
     }
 
     public static final class NonEditableIssueStatusException extends Exception

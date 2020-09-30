@@ -14,43 +14,23 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.model.jbehave;
+package org.vividus.xray.facade;
 
 import java.util.List;
 
-public class Story
+import org.vividus.xray.model.ManualTestStep;
+
+public class ManualTestCaseParameters extends AbstractTestCaseParameters
 {
-    private String path;
-    private Lifecycle lifecycle;
-    private List<Scenario> scenarios;
+    private List<ManualTestStep> steps;
 
-    public String getPath()
+    public List<ManualTestStep> getSteps()
     {
-        return path;
+        return steps;
     }
 
-    public void setPath(String path)
+    public void setSteps(List<ManualTestStep> steps)
     {
-        this.path = path;
-    }
-
-    public Lifecycle getLifecycle()
-    {
-        return lifecycle;
-    }
-
-    public void setLifecycle(Lifecycle lifecycle)
-    {
-        this.lifecycle = lifecycle;
-    }
-
-    public List<Scenario> getScenarios()
-    {
-        return scenarios;
-    }
-
-    public void setScenarios(List<Scenario> scenarios)
-    {
-        this.scenarios = scenarios;
+        this.steps = steps;
     }
 }

@@ -17,66 +17,10 @@
 package org.vividus.xray.model;
 
 import java.util.List;
-import java.util.Set;
 
-public class ManualTestCase
+public class ManualTestCase extends AbstractTestCase
 {
-    private String projectKey;
-    private String assignee;
-    private String summary;
-    private Set<String> labels;
-    private Set<String> components;
     private List<ManualTestStep> manualTestSteps;
-
-    public String getProjectKey()
-    {
-        return projectKey;
-    }
-
-    public void setProjectKey(String projectKey)
-    {
-        this.projectKey = projectKey;
-    }
-
-    public String getAssignee()
-    {
-        return assignee;
-    }
-
-    public void setAssignee(String assignee)
-    {
-        this.assignee = assignee;
-    }
-
-    public String getSummary()
-    {
-        return summary;
-    }
-
-    public void setSummary(String summary)
-    {
-        this.summary = summary;
-    }
-
-    public Set<String> getLabels()
-    {
-        return labels;
-    }
-
-    public void setLabels(Set<String> labels)
-    {
-        this.labels = labels;
-    }
-
-    public Set<String> getComponents()
-    {
-        return components;
-    }
-
-    public void setComponents(Set<String> components)
-    {
-        this.components = components;
-    }
 
     public List<ManualTestStep> getManualTestSteps()
     {

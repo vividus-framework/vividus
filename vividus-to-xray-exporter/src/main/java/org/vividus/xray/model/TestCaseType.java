@@ -14,43 +14,25 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.model.jbehave;
+package org.vividus.xray.model;
 
-import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.vividus.bdd.model.jbehave.Scenario;
+import org.vividus.bdd.model.jbehave.Step;
 
-public class Story
+public enum TestCaseType
 {
-    private String path;
-    private Lifecycle lifecycle;
-    private List<Scenario> scenarios;
+    MANUAL, CUCUMBER;
 
-    public String getPath()
+    public static TestCaseType getTestCaseType(Scenario scenario)
     {
-        return path;
+        return scenario.collectSteps().stream().map(Step::getOutcome).allMatch("comment"::equals)
+                  ? MANUAL
+                  : CUCUMBER;
     }
 
-    public void setPath(String path)
+    public String getValue()
     {
-        this.path = path;
-    }
-
-    public Lifecycle getLifecycle()
-    {
-        return lifecycle;
-    }
-
-    public void setLifecycle(Lifecycle lifecycle)
-    {
-        this.lifecycle = lifecycle;
-    }
-
-    public List<Scenario> getScenarios()
-    {
-        return scenarios;
-    }
-
-    public void setScenarios(List<Scenario> scenarios)
-    {
-        this.scenarios = scenarios;
+        return StringUtils.capitalize(name().toLowerCase());
     }
 }

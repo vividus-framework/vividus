@@ -18,6 +18,7 @@ package org.vividus.xray.exporter;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static java.lang.System.lineSeparator;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -63,10 +64,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.util.ResourceUtils;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.exception.SyntaxException;
-import org.vividus.xray.facade.TestCaseParameters;
+import org.vividus.xray.facade.AbstractTestCaseParameters;
+import org.vividus.xray.facade.CucumberTestCaseParameters;
+import org.vividus.xray.facade.ManualTestCaseParameters;
 import org.vividus.xray.facade.XrayFacade;
 import org.vividus.xray.facade.XrayFacade.NonEditableIssueStatusException;
+import org.vividus.xray.factory.TestCaseFactory;
+import org.vividus.xray.model.CucumberTestCase;
+import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.ManualTestStep;
+import org.vividus.xray.model.TestCaseType;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class XrayExporterTests
@@ -75,10 +82,15 @@ class XrayExporterTests
     private static final String SCENARIO_TITLE = "Dummy scenario";
     private static final String STORY_TITLE = "storyPath";
     private static final String ERROR_MESSAGE = "Got an error while exporting";
+    private static final String GIVEN_STEP = "Given I setup test environment";
+    private static final String WHEN_STEP = "When I perform action on test environment";
+    private static final String THEN_STEP = "Then I verify changes on test environment";
 
-    @Captor private ArgumentCaptor<TestCaseParameters> testCaseParametersCaptor;
+    @Captor private ArgumentCaptor<ManualTestCaseParameters> manualTestCaseParametersCaptor;
+    @Captor private ArgumentCaptor<CucumberTestCaseParameters> cucumberTestCaseParametersCaptor;
 
     @Spy private XrayExporterOptions xrayExporterOptions;
+    @Mock private TestCaseFactory testCaseFactory;
     @Mock private XrayFacade xrayFacade;
     @InjectMocks private XrayExporter xrayExporter;
 
@@ -87,7 +99,48 @@ class XrayExporterTests
     @AfterEach
     void afterEach()
     {
-        verifyNoMoreInteractions(xrayFacade);
+        verifyNoMoreInteractions(xrayFacade, testCaseFactory);
+    }
+
+    @Test
+    void shouldExportCucumberTestCaseWithoutTestCaseId() throws URISyntaxException, IOException
+    {
+        URI jsonResultsUri = getJsonResultsUri("createcucumber");
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        CucumberTestCase testCase = mock(CucumberTestCase.class);
+
+        when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
+        when(testCaseFactory.createCucumberTestCase(cucumberTestCaseParametersCaptor.capture())).thenReturn(testCase);
+
+        xrayExporter.exportResults();
+
+        String scenario = GIVEN_STEP + lineSeparator()
+            + WHEN_STEP + lineSeparator()
+            + THEN_STEP + lineSeparator()
+            + "Examples:" + lineSeparator()
+            + "|parameter-key|" + lineSeparator()
+            + "|parameter-value-1|" + lineSeparator()
+            + "|parameter-value-2|" + lineSeparator()
+            + "|parameter-value-3|" + lineSeparator();
+        verifyCucumberTestCaseParameters("Scenario Outline", scenario);
+        validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
+    }
+
+    @Test
+    void shouldUpdateExistingCucumberTestCase() throws URISyntaxException, IOException, NonEditableIssueStatusException
+    {
+        URI jsonResultsUri = getJsonResultsUri("updatecucumber");
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        CucumberTestCase testCase = mock(CucumberTestCase.class);
+
+        when(testCaseFactory.createCucumberTestCase(cucumberTestCaseParametersCaptor.capture())).thenReturn(testCase);
+
+        xrayExporter.exportResults();
+
+        verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
+        String scenario = GIVEN_STEP + lineSeparator() + WHEN_STEP + lineSeparator() + THEN_STEP;
+        verifyCucumberTestCaseParameters("Scenario", scenario);
+        validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }
 
     @Test
@@ -98,11 +151,14 @@ class XrayExporterTests
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
         String testExecutionKey = "TEST-0";
         xrayExporterOptions.setTestExecutionKey(testExecutionKey);
+        ManualTestCase testCase = mock(ManualTestCase.class);
+
+        when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
 
         xrayExporter.exportResults();
 
-        verify(xrayFacade).updateTestCase(eq(ISSUE_ID), testCaseParametersCaptor.capture());
-        verifyTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
+        verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
+        verifyManualTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
                 Set.of("dummy-component-1", "dummy-component-2"));
         verify(xrayFacade).updateTestExecution(testExecutionKey, List.of(ISSUE_ID));
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
@@ -119,12 +175,14 @@ class XrayExporterTests
 
         String errorMessage = "error message";
         when(exception.getMessage()).thenReturn(errorMessage);
-        doThrow(exception).when(xrayFacade).updateTestCase(eq(errorIssueId), any(TestCaseParameters.class));
+        doThrow(exception).when(xrayFacade).updateTestCase(eq(errorIssueId), any(ManualTestCase.class));
+        ManualTestCase testCase = mock(ManualTestCase.class);
+        when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
 
         xrayExporter.exportResults();
 
-        verify(xrayFacade).updateTestCase(eq(ISSUE_ID), testCaseParametersCaptor.capture());
-        verifyTestCaseParameters(Set.of(), Set.of());
+        verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
+        verifyManualTestCaseParameters(Set.of(), Set.of());
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), error(exception, ERROR_MESSAGE),
                 getExportingScenarioEvent(), getReportErrorEvent(errorMessage));
     }
@@ -157,14 +215,16 @@ class XrayExporterTests
     {
         URI jsonResultsUri = getJsonResultsUri("createandlink");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        ManualTestCase testCase = mock(ManualTestCase.class);
 
-        when(xrayFacade.createTestCase(testCaseParametersCaptor.capture())).thenReturn(ISSUE_ID);
+        when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
+        when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
 
         xrayExporter.exportResults();
 
         verify(xrayFacade).createTestsLink(ISSUE_ID, "STUB-REQ-0");
 
-        verifyTestCaseParameters(Set.of(), Set.of());
+        verifyManualTestCaseParameters(Set.of(), Set.of());
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }
 
@@ -188,17 +248,32 @@ class XrayExporterTests
         validateLogs(loggingEvents, jsonResultsUri, getExportingScenarioEvent(), getReportErrorEvent(errorMessage));
     }
 
-    private void verifyTestCaseParameters(Set<String> labels, Set<String> components)
+    private void verifyCucumberTestCaseParameters(String scenarioType, String scenario)
     {
-        TestCaseParameters parameters = testCaseParametersCaptor.getValue();
-        assertEquals(SCENARIO_TITLE, parameters.getSummary());
-        assertEquals(labels, parameters.getLabels());
-        assertEquals(components, parameters.getComponents());
+        CucumberTestCaseParameters parameters = cucumberTestCaseParametersCaptor.getValue();
+        assertEquals(scenarioType, parameters.getScenarioType());
+        assertEquals(scenario, parameters.getScenario());
+        verifyTestCaseParameters(parameters, Set.of(), Set.of(), TestCaseType.CUCUMBER);
+    }
+
+    private void verifyManualTestCaseParameters(Set<String> labels, Set<String> components)
+    {
+        ManualTestCaseParameters parameters = manualTestCaseParametersCaptor.getValue();
         assertThat(parameters.getSteps(), hasSize(1));
         ManualTestStep step = parameters.getSteps().get(0);
         assertEquals("Step", step.getAction());
         assertEquals("Data", step.getData());
         assertEquals("Result", step.getExpectedResult());
+        verifyTestCaseParameters(parameters, labels, components, TestCaseType.MANUAL);
+    }
+
+    private void verifyTestCaseParameters(AbstractTestCaseParameters testCase, Set<String> labels,
+            Set<String> components, TestCaseType type)
+    {
+        assertEquals(type, testCase.getType());
+        assertEquals(SCENARIO_TITLE, testCase.getSummary());
+        assertEquals(labels, testCase.getLabels());
+        assertEquals(components, testCase.getComponents());
     }
 
     private void validateLogs(URI jsonResultsUri, LoggingEvent... additionalEvents)
@@ -221,8 +296,7 @@ class XrayExporterTests
     private static LoggingEvent getReportErrorEvent(String error)
     {
         String errorFormat = "Error #1%1$sStory: storyPath%1$sScenario: Dummy scenario%1$sError: %2$s%1$s";
-        return error("Export failed:{}{}", System.lineSeparator(),
-                String.format(errorFormat, System.lineSeparator(), error));
+        return error("Export failed:{}{}", lineSeparator(), String.format(errorFormat, lineSeparator(), error));
     }
 
     private static LoggingEvent getExportSuccessfulEvent()

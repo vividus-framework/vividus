@@ -1,0 +1,33 @@
+{
+  "fields": {
+    "project": {
+      "key": "project-key"
+    },
+    "assignee": {
+      "name": "test-assignee"
+    },
+    "issuetype": {
+      "name": "Test"
+    },
+    "test-case-type-field": {
+      "value": "Cucumber"
+    },
+    "summary": "summary",
+    "labels": [
+      "label-1",
+      "label-2"
+    ],
+    "components": [
+      {
+        "name": "component-1"
+      },
+      {
+        "name": "component-2"
+      }
+    ],
+    "cucumber-scenario-type-field": {
+      "value": "scenario-type"
+    },
+    "cucumber-scenario-field": "scenario"
+  }
+}

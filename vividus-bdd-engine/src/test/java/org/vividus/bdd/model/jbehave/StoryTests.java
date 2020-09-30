@@ -36,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableBiConsumer;
 import org.jbehave.core.i18n.LocalizedKeywords;
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.Lifecycle;
 import org.jbehave.core.reporters.JsonOutput;
 import org.jbehave.core.reporters.StoryReporter;
 import org.junit.jupiter.api.Test;
@@ -54,6 +53,7 @@ class StoryTests
     private static final String STORY_PATH = "storyPath";
     private static final String SCENARIO_TITLE = "scenarioTitle";
     private static final String COMMENT = "comment";
+    private static final String TABLE_VALUE = "table-value-";
 
     private static final org.jbehave.core.model.Story TEST_STORY = new org.jbehave.core.model.Story(STORY_PATH);
     private static final org.jbehave.core.model.Scenario TEST_SCENARIO = new org.jbehave.core.model.Scenario(
@@ -74,6 +74,7 @@ class StoryTests
             reporter.afterStory(false);
 
             Story story = MAPPER.readValue(new String(out.toByteArray(), StandardCharsets.UTF_8), Story.class);
+            assertNull(story.getLifecycle());
             assertEquals(STORY_PATH, story.getPath());
             Scenario scenario = ensureSingleElement(story.getScenarios());
             assertEquals(SCENARIO_TITLE, scenario.getTitle());
@@ -88,13 +89,13 @@ class StoryTests
     {
         performTest((reporter, out) ->
         {
-            ExamplesTable table = new ExamplesTable("|key|\n|value|");
-            Lifecycle lifecycle = new Lifecycle(table);
+            ExamplesTable table = new ExamplesTable("|table-key|\n|table-value-1|\n|table-value-2|");
+            org.jbehave.core.model.Lifecycle jbehaveLifecycle = new org.jbehave.core.model.Lifecycle(table);
 
             reporter.beforeStory(TEST_STORY, false);
-            reporter.lifecyle(lifecycle);
+            reporter.lifecyle(jbehaveLifecycle);
             reporter.beforeScenario(TEST_SCENARIO);
-            reporter.beforeExamples(List.of(STEP), ExamplesTable.EMPTY);
+            reporter.beforeExamples(List.of(STEP), table);
             reporter.example(table.getRow(0), -1);
             reporter.beforeScenarioSteps(null);
             reporter.beforeStep(STEP);
@@ -106,15 +107,24 @@ class StoryTests
 
             Story story = MAPPER.readValue(new String(out.toByteArray(), StandardCharsets.UTF_8), Story.class);
             assertEquals(STORY_PATH, story.getPath());
+            Lifecycle lifecycle = story.getLifecycle();
+            verifyParameters(lifecycle.getParameters());
             Scenario scenario = ensureSingleElement(story.getScenarios());
             assertEquals(SCENARIO_TITLE, scenario.getTitle());
             assertNull(getStepsField(scenario));
             verifyMeta(ensureSingleElement(scenario.getMeta()), META_KEY, META_VALUE);
             Examples examples = scenario.getExamples();
+            verifyParameters(examples.getParameters());
             assertNotNull(examples);
             Example example = ensureSingleElement(examples.getExamples());
             verifyStep(ensureSingleElement(example.getSteps()), COMMENT, STEP);
         });
+    }
+
+    private void verifyParameters(Parameters parameters)
+    {
+        assertEquals(List.of("table-key"), parameters.getNames());
+        assertEquals(List.of(List.of(TABLE_VALUE + 1), List.of(TABLE_VALUE + 2)), parameters.getValues());
     }
 
     @SuppressWarnings("unchecked")
