@@ -52,6 +52,7 @@ import org.powermock.reflect.Whitebox;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
+import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
@@ -64,34 +65,21 @@ public class VividusWebDriverFactoryTests
     private static final String TEST = "Test";
     private static final String STORY_FILE = TEST + ".story";
 
-    @Mock
-    private IBddRunContext bddRunContext;
-
-    @Mock
-    private IWebDriverManagerContext webDriverManagerContext;
-
-    @Mock
-    private IWebDriverFactory webDriverFactory;
-
-    @Mock
-    private IBrowserWindowSizeProvider browserWindowSizeProvider;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
-
-    @Mock(extraInterfaces = HasCapabilities.class)
-    private WebDriver driver;
-
-    @Mock
-    private WebDriverEventListener webDriverEventListener;
-
+    @Mock private IBddRunContext bddRunContext;
+    @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private IWebDriverFactory webDriverFactory;
+    @Mock private IBrowserWindowSizeProvider browserWindowSizeProvider;
+    @Mock private IWebDriverManager webDriverManager;
+    @Mock private WebDriverEventListener webDriverEventListener;
+    @Mock(extraInterfaces = HasCapabilities.class) private WebDriver driver;
+    @Mock private IProxy proxy;
     private VividusWebDriverFactory vividusWebDriverFactory;
 
     @Before
     public void beforeEach()
     {
-        vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverManagerContext,
-                bddRunContext, Set.of(), webDriverFactory, webDriverManager, browserWindowSizeProvider);
+        vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverManagerContext, bddRunContext, Set.of(),
+                webDriverFactory, webDriverManager, browserWindowSizeProvider, proxy);
     }
 
     private void runCreateTest(boolean remoteExecution, String browserName) throws Exception

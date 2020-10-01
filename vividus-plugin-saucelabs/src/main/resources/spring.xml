@@ -16,7 +16,7 @@
                     <bean class="com.saucelabs.saucerest.SauceREST">
                         <constructor-arg index="0" value="${selenium.grid.username}" />
                         <constructor-arg index="1" value="${selenium.grid.password}" />
-                        <constructor-arg index="2" value="${saucelabs.sauce-connect.data-center}" />
+                        <constructor-arg index="2" value="${saucelabs.data-center}" />
                     </bean>
                 </property>
             </bean>
@@ -25,7 +25,8 @@
 
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
         <property name="sauceConnectEnabled" value="${saucelabs.sauce-connect.enabled}"/>
-        <property name="restUrl" value="${saucelabs.sauce-connect.rest-url}" />
+        <property name="sauceLabsEnabled" value="${selenium.grid.enabled}"/>
+        <property name="restUrl" value="${saucelabs.rest-url}" />
     </bean>
 
 </beans>

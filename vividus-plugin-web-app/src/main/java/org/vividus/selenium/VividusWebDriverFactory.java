@@ -21,30 +21,45 @@ import java.util.List;
 import java.util.Set;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 
 public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
 {
     private final IWebDriverFactory webDriverFactory;
-    private final IBrowserWindowSizeProvider browserWindowSizeProvider;
     private final IWebDriverManager webDriverManager;
+    private final IBrowserWindowSizeProvider browserWindowSizeProvider;
+    private final IProxy proxy;
 
     private List<WebDriverEventListener> webDriverEventListeners;
 
     public VividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
             IBddRunContext bddRunContext, Set<DesiredCapabilitiesConfigurer> desiredCapabilitiesConfigurers,
             IWebDriverFactory webDriverFactory, IWebDriverManager webDriverManager,
-            IBrowserWindowSizeProvider browserWindowSizeProvider)
+            IBrowserWindowSizeProvider browserWindowSizeProvider, IProxy proxy)
     {
         super(remoteExecution, webDriverManagerContext, bddRunContext, desiredCapabilitiesConfigurers);
         this.webDriverFactory = webDriverFactory;
         this.browserWindowSizeProvider = browserWindowSizeProvider;
         this.webDriverManager = webDriverManager;
+        this.proxy = proxy;
+    }
+
+    @Override
+    protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities)
+    {
+        if (proxy.isStarted())
+        {
+            desiredCapabilities.setCapability(CapabilityType.PROXY, proxy.createSeleniumProxy());
+            desiredCapabilities.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
+        }
+        super.setDesiredCapabilities(desiredCapabilities);
     }
 
     @Override

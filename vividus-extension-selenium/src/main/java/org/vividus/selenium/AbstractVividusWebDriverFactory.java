@@ -55,7 +55,7 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
         return vividusWebDriver;
     }
 
-    private void setDesiredCapabilities(DesiredCapabilities desiredCapabilities)
+    protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities)
     {
         desiredCapabilitiesConfigurers.forEach(configurer -> configurer.addCapabilities(desiredCapabilities));
         desiredCapabilities.merge(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES));

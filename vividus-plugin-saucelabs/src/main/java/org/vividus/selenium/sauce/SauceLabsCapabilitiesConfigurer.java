@@ -21,11 +21,11 @@ import java.util.Map;
 
 import com.google.common.eventbus.Subscribe;
 
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.MetaWrapper;
 import org.vividus.bdd.model.RunningStory;
-import org.vividus.proxy.IProxy;
 import org.vividus.selenium.DesiredCapabilitiesConfigurer;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -34,22 +34,20 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
 {
     private static final String SAUCE_OPTIONS = "sauce:options";
     private static final int DEFAULT_HTTPS_PORT = 443;
-    private static final String SAUCE_CONNECT_META_TAG = "sauceConnect";
 
     private final WebApplicationConfiguration webApplicationConfiguration;
     private final IBddRunContext bddRunContext;
     private final SauceConnectManager sauceConnectManager;
-    private final IProxy proxy;
+    private boolean sauceLabsEnabled;
     private boolean sauceConnectEnabled;
     private String restUrl;
 
     public SauceLabsCapabilitiesConfigurer(WebApplicationConfiguration webApplicationConfiguration,
-            IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager, IProxy proxy)
+            IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager)
     {
         this.webApplicationConfiguration = webApplicationConfiguration;
         this.bddRunContext = bddRunContext;
         this.sauceConnectManager = sauceConnectManager;
-        this.proxy = proxy;
     }
 
     @Subscribe
@@ -61,18 +59,21 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
     @Override
     public void addCapabilities(DesiredCapabilities desiredCapabilities)
     {
-        RunningStory runningStory = bddRunContext.getRunningStory();
-        if (sauceConnectEnabled || isSauceConnectEnabledInStoryMeta(runningStory))
+        if (sauceLabsEnabled)
         {
-            if (!sauceConnectManager.isStarted())
+            Proxy proxy = (Proxy) desiredCapabilities.getCapability(CapabilityType.PROXY);
+            if (sauceConnectEnabled || proxy != null)
             {
-                sauceConnectManager.start(createSauceConnectOptions());
+                SauceConnectOptions options = createSauceConnectOptions(proxy);
+                sauceConnectManager.start(options);
+                addSauceOption(desiredCapabilities, "tunnelIdentifier", sauceConnectManager.getTunnelId());
+                desiredCapabilities.setCapability(CapabilityType.PROXY, (Object) null);
             }
-            addSauceOption(desiredCapabilities, "tunnelIdentifier", sauceConnectManager.getTunnelId());
-        }
-        if (runningStory != null)
-        {
-            addSauceOption(desiredCapabilities, "name", runningStory.getName());
+            RunningStory runningStory = bddRunContext.getRunningStory();
+            if (runningStory != null)
+            {
+                addSauceOption(desiredCapabilities, "name", runningStory.getName());
+            }
         }
     }
 
@@ -88,7 +89,7 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
         sauceOptions.put(capabilityName, value);
     }
 
-    private SauceConnectOptions createSauceConnectOptions()
+    private SauceConnectOptions createSauceConnectOptions(Proxy proxy)
     {
         SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
         sauceConnectOptions.setHost(webApplicationConfiguration.getHost());
@@ -97,18 +98,17 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
             sauceConnectOptions.setPort(DEFAULT_HTTPS_PORT);
         }
         sauceConnectOptions.setBasicAuthUser(webApplicationConfiguration.getBasicAuthUser());
-        if (proxy.isStarted())
+        if (proxy != null)
         {
-            sauceConnectOptions.setProxy(proxy.createSeleniumProxy().getHttpProxy());
+            sauceConnectOptions.setProxy(proxy.getHttpProxy());
         }
         sauceConnectOptions.setRestUrl(restUrl);
         return sauceConnectOptions;
     }
 
-    private boolean isSauceConnectEnabledInStoryMeta(RunningStory runningStory)
+    public void setSauceLabsEnabled(boolean sauceLabsEnabled)
     {
-        return runningStory != null && new MetaWrapper(runningStory.getStory().getMeta()).getOptionalPropertyValue(
-                SAUCE_CONNECT_META_TAG).isPresent();
+        this.sauceLabsEnabled = sauceLabsEnabled;
     }
 
     public void setSauceConnectEnabled(boolean sauceConnectEnabled)

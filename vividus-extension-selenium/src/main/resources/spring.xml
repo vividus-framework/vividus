@@ -111,8 +111,6 @@
 
     <bean class="org.vividus.selenium.screenshot.ScreenshotFileNameGenerator" />
 
-    <bean class="org.vividus.selenium.ProxyCapabilitiesConfigurer" />
-
     <bean id="genericElementSteps" class="org.vividus.bdd.steps.ui.GenericElementSteps" />
     <bean id="genericWaitSteps" class="org.vividus.bdd.steps.ui.GenericWaitSteps" />
 
