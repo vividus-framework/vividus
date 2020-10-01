@@ -34,10 +34,10 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
     private final boolean remoteExecution;
     private final IWebDriverManagerContext webDriverManagerContext;
     private final IBddRunContext bddRunContext;
-    private final Set<DesiredCapabilitiesConfigurer> desiredCapabilitiesConfigurers;
+    private final  Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers;
 
     public AbstractVividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
-            IBddRunContext bddRunContext, Set<DesiredCapabilitiesConfigurer> desiredCapabilitiesConfigurers)
+            IBddRunContext bddRunContext, Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
     {
         this.remoteExecution = remoteExecution;
         this.webDriverManagerContext = webDriverManagerContext;
@@ -57,7 +57,8 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
 
     protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities)
     {
-        desiredCapabilitiesConfigurers.forEach(configurer -> configurer.addCapabilities(desiredCapabilities));
+        desiredCapabilitiesConfigurers.ifPresent(
+                configurers -> configurers.forEach(configurer -> configurer.addCapabilities(desiredCapabilities)));
         desiredCapabilities.merge(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES));
         webDriverManagerContext.reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
         RunningStory runningStory = bddRunContext.getRunningStory();
