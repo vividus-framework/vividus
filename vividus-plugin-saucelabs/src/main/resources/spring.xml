@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
-       profile="web">
+       profile="saucelabs" default-lazy-init="true">
 
     <bean id="sauceConnectManager" class="org.vividus.selenium.sauce.SauceConnectManager">
         <property name="sauceLabsUsername" value="${selenium.grid.username}"/>
