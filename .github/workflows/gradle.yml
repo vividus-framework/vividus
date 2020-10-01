@@ -168,7 +168,7 @@ jobs:
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                                 -Pvividus.configuration.environments=system/mobile_app/saucelabs/ios \
                                                 -Pvividus.configuration.suite=system/mobile_app \
-                                                -Pvividus.configuration.profiles=mobile_app/ios,saucelabs/mobile_app \
+                                                -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
                                                 -Pvividus.allure.history-directory=output/history/sl-ios-system-tests \
@@ -204,7 +204,7 @@ jobs:
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                                 -Pvividus.configuration.environments=system/mobile_app/saucelabs/android \
                                                 -Pvividus.configuration.suite=system/mobile_app \
-                                                -Pvividus.configuration.profiles=mobile_app/android,saucelabs/mobile_app \
+                                                -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
                                                 -Pvividus.allure.history-directory=output/history/sl-android-system-tests \

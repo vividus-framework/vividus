@@ -151,30 +151,27 @@ public class SauceConnectOptions
     }
 
     @Override
-    public int hashCode()
+    public boolean equals(Object o)
     {
-        return Objects.hash(proxy, host, basicAuthUser, noSslBumpDomains, skipProxyHostsPattern, port);
-    }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
+        if (this == o)
         {
             return true;
         }
-        if (obj == null)
+        if (!(o instanceof SauceConnectOptions))
         {
             return false;
         }
-        if (!(obj instanceof SauceConnectOptions))
-        {
-            return false;
-        }
-        SauceConnectOptions other = (SauceConnectOptions) obj;
-        return Objects.equals(proxy, other.proxy) && Objects.equals(host, other.host)
-                && Objects.equals(basicAuthUser, other.basicAuthUser)
-                && Objects.equals(noSslBumpDomains, other.noSslBumpDomains)
-                && Objects.equals(skipProxyHostsPattern, other.skipProxyHostsPattern) && port == other.port;
+        SauceConnectOptions that = (SauceConnectOptions) o;
+        return port == that.port && Objects.equals(proxy, that.proxy) && Objects.equals(host, that.host)
+                && Objects.equals(basicAuthUser, that.basicAuthUser)
+                && Objects.equals(noSslBumpDomains, that.noSslBumpDomains)
+                && Objects.equals(skipProxyHostsPattern, that.skipProxyHostsPattern)
+                && Objects.equals(restUrl, that.restUrl);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(proxy, host, basicAuthUser, noSslBumpDomains, skipProxyHostsPattern, restUrl, port);
     }
 }
