@@ -18,6 +18,7 @@ package org.vividus.selenium.sauce;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -317,7 +318,7 @@ public class SauceConnectOptionsTests
     @Test
     public void testNotEqualsToNull()
     {
-        assertNotEquals(createDefaultOptions(), null);
+        assertNotNull(createDefaultOptions());
     }
 
     @Test
