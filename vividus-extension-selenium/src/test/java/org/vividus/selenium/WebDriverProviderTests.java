@@ -27,7 +27,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Set;
+import java.util.Optional;
 
 import com.google.common.eventbus.EventBus;
 
@@ -144,7 +144,7 @@ class WebDriverProviderTests
     {
         TestVividusDriverFactory(IBddRunContext bddRunContext, IWebDriverManagerContext webDriverManagerContext)
         {
-            super(true, webDriverManagerContext, bddRunContext, Set.of());
+            super(true, webDriverManagerContext, bddRunContext, Optional.empty());
         }
 
         @Override

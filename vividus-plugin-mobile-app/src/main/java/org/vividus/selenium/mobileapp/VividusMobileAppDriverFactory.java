@@ -16,6 +16,7 @@
 
 package org.vividus.selenium.mobileapp;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.openqa.selenium.WebDriver;
@@ -31,7 +32,8 @@ public class VividusMobileAppDriverFactory extends AbstractVividusWebDriverFacto
     private final IGenericWebDriverFactory driverFactory;
 
     public VividusMobileAppDriverFactory(IWebDriverManagerContext webDriverManagerContext, IBddRunContext bddRunContext,
-            Set<DesiredCapabilitiesConfigurer> desiredCapabilitiesConfigurers, IGenericWebDriverFactory driverFactory)
+            Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers,
+            IGenericWebDriverFactory driverFactory)
     {
         super(true, webDriverManagerContext, bddRunContext, desiredCapabilitiesConfigurers);
         this.driverFactory = driverFactory;

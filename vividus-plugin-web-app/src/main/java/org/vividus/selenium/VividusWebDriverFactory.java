@@ -18,6 +18,7 @@ package org.vividus.selenium;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.openqa.selenium.WebDriver;
@@ -40,7 +41,7 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
     private List<WebDriverEventListener> webDriverEventListeners;
 
     public VividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
-            IBddRunContext bddRunContext, Set<DesiredCapabilitiesConfigurer> desiredCapabilitiesConfigurers,
+            IBddRunContext bddRunContext, Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers,
             IWebDriverFactory webDriverFactory, IWebDriverManager webDriverManager,
             IBrowserWindowSizeProvider browserWindowSizeProvider, IProxy proxy)
     {

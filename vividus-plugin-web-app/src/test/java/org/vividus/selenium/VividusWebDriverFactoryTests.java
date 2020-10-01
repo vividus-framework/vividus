@@ -24,8 +24,8 @@ import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
-import java.util.Set;
 
 import com.browserup.bup.client.ClientUtil;
 
@@ -80,8 +80,8 @@ public class VividusWebDriverFactoryTests
     @Before
     public void beforeEach()
     {
-        vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverManagerContext, bddRunContext, Set.of(),
-                webDriverFactory, webDriverManager, browserWindowSizeProvider, proxy);
+        vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverManagerContext, bddRunContext,
+                Optional.empty(), webDriverFactory, webDriverManager, browserWindowSizeProvider, proxy);
     }
 
     private void runCreateTest(boolean remoteExecution, String browserName) throws Exception
