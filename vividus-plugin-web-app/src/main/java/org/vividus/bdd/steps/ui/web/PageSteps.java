@@ -88,15 +88,7 @@ public class PageSteps
     @Given("I am on the main application page")
     public void iAmOnTheMainApplicationPage()
     {
-        URI mainApplicationPageUrl = webApplicationConfiguration.getMainApplicationPageUrl();
-        if (mainApplicationPageUrl != null)
-        {
-            loadApplicationPage(mainApplicationPageUrl);
-        }
-        else
-        {
-            throw new IllegalArgumentException("URL of the main application page should be non-blank");
-        }
+        loadApplicationPage(webApplicationConfiguration.getMainApplicationPageUrl());
     }
 
     /**

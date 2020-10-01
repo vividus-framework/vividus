@@ -59,8 +59,6 @@ public class ResourceCheckSteps
     private final WebApplicationConfiguration webApplicationConfiguration;
     private final ContextCopyingExecutor executor;
     private final HttpTestContext httpTestContext;
-
-    private URI mainApplicationPageURI;
     private Pattern excludeHrefsPattern;
 
     private Optional<String> uriToIgnoreRegex;
@@ -81,7 +79,6 @@ public class ResourceCheckSteps
 
     public void init()
     {
-        mainApplicationPageURI = webApplicationConfiguration.getMainApplicationPageUrl();
         excludeHrefsPattern = Pattern.compile(uriToIgnoreRegex.map(p -> p + "|" + EXCLUDE_PATTERN)
                                                            .orElse(EXCLUDE_PATTERN));
     }
@@ -175,7 +172,7 @@ public class ResourceCheckSteps
         {
             return uriToCheck;
         }
-        return UriUtils.buildNewUrl(mainApplicationPageURI, uriToCheck.getPath());
+        return UriUtils.buildNewUrl(webApplicationConfiguration.getMainApplicationPageUrl(), uriToCheck.getPath());
     }
 
     /**

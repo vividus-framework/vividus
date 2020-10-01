@@ -19,6 +19,7 @@ package org.vividus.ui.web.configuration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -63,8 +64,9 @@ class WebApplicationConfigurationTests
     void testGetMainApplicationPageUrlWithNullUrlAndNullAuthentication()
     {
         WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(null, null);
-        URI actualUrl = webApplicationConfiguration.getMainApplicationPageUrl();
-        assertNull(actualUrl);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> webApplicationConfiguration.getMainApplicationPageUrl());
+        assertEquals("URL of the main application page should be non-blank", exception.getMessage());
     }
 
     @Test
