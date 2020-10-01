@@ -339,6 +339,14 @@ jobs:
                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
           done
+          ./gradlew runStories -x testVividusInitialization \
+                               -Pvividus.configuration.environments= \
+                               -Pvividus.configuration.suite= \
+                               -Pvividus.configuration.profiles=saucelabs/web,web/desktop/chrome \
+                               -Pvividus.bdd.story-loader.batch-1.resource-location=story/integration \
+                               -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyStepsTests.story
+                               -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                               -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs integration tests will be skipped
         fi
