@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.proxy.IProxy;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -49,8 +50,9 @@ class SauceLabsCapabilitiesConfigurerTests
     void shouldDoNothingWhenSauceConnectDisabled()
     {
         when(bddRunContext.getRunningStory()).thenReturn(null);
+        configurer.setSauceLabsEnabled(true);
         configurer.setSauceConnectEnabled(false);
-        configurer.addCapabilities(null);
+        configurer.addCapabilities(new DesiredCapabilities());
         verifyNoInteractions(webApplicationConfiguration, sauceConnectManager, proxy);
     }
 }

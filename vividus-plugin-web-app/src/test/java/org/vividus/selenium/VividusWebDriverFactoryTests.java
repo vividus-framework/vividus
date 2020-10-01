@@ -71,9 +71,11 @@ public class VividusWebDriverFactoryTests
     @Mock private IBrowserWindowSizeProvider browserWindowSizeProvider;
     @Mock private IWebDriverManager webDriverManager;
     @Mock private WebDriverEventListener webDriverEventListener;
-    @Mock(extraInterfaces = HasCapabilities.class) private WebDriver driver;
     @Mock private IProxy proxy;
     private VividusWebDriverFactory vividusWebDriverFactory;
+
+    @Mock(extraInterfaces = HasCapabilities.class)
+    private WebDriver driver;
 
     @Before
     public void beforeEach()
