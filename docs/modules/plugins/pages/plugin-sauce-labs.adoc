@@ -1,0 +1,82 @@
+= Sauce Labs Plugin
+
+The plugin provides integration with continuous testing cloud https://saucelabs.com/[SauceLabs].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-saucelabs', version: '{page-component-version}')
+----
+
+== Profiles
+
+The plugin defines profiles with a set of the preconfigured properties.
+
+[cols="1,2"]
+|===
+
+|`saucelabs/web`
+|Use in conjunction with web application profiles.
+
+|`saucelabs/mobile_app`
+a|Use in conjunction with xref:plugins:plugin-mobile-app.adoc#_profiles[native mobile application profiles].
+
+Required properties:
+
+* `selenium.grid.device-name`
+* `selenium.grid.appium-version`
+* `selenium.grid.platform-version`
+|===
+
+Sauce Labs profiles can be enabled by adding the corresponding entry to `configuration.profiles` property.
+
+.Configure Chrome on Sauce Labs
+[source,properties,subs="attributes+"]
+----
+configuration.profiles=saucelabs/web,web/desktop/chrome
+----
+
+[IMPORTANT]
+Sauce Labs profile must be first.
+
+Explore https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/[Platform Configurator] to use advanced Sauce Labs configuration options.
+
+== Properties
+
+See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid] properties to configure generic options.
+
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|saucelabs.data-center=EU
+a|`US`
+
+`EU`
+`US_EAST`
+|
+|https://wiki.saucelabs.com/display/DOCS/Data+Center+Endpoints[Sauce Labs data center] to use
+
+|saucelabs.rest-url
+a|URL
+|
+|Sauce Labs REST endpoint (it must match to the selected data center)
+
+|saucelabs.sauce-connect.enabled
+a|`true`
+`false`
+|`false`
+|Enables https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy[Sauce Connect Proxy]
+
+|saucelabs.sauce-connect.use-latest-version
+a|`true`
+`false`
+|`true`
+|If `false`, then use embedded Sauce Connect (https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy+Version+4.6.2[4.6.2]), otherwise check and download newer version if available.
+
+|===

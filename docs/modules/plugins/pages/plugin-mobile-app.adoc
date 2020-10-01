@@ -39,7 +39,7 @@ include::partial$visibility-types.adoc[]
 
 == Properties
 
-See xref:ROOT:tests-configuration.adoc[Selenium Grid] properties to configure remote grid
+See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid] properties to configure remote grid
 
 :application-under-test: mobile application
 :session-scope-property-base: mobile-application
@@ -118,19 +118,6 @@ selenium.grid.automation-name=UIAutomator2
 ==== Required properties
 * `selenium.grid.device-name` - defines device name to run tests on
 
-=== SauceLabs
-
-==== Info
-
-* The profile can be enabled by adding `saucelabs/mobile_app` to `configuration.profiles` property
-* The profile must be used together with either `{ios-profile}` or `{android-profile}` profiles
-* See https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/[Platform Configurator] to setup configuration
-
-==== Required properties
-
-* `selenium.grid.device-name` - defines device name
-* `selenium.grid.appium-version` - defines appium version
-* `selenium.grid.platform-version` - defines platform version
 
 == Steps
 
