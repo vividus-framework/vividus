@@ -101,6 +101,14 @@ public class BaseValidations implements IBaseValidations
     }
 
     @Override
+    public boolean assertElementsNumber(String description, List<WebElement> elements, ComparisonRule comparisonRule,
+            int number)
+    {
+        return uiContext.withAssertingWebElements(elements,
+            () -> softAssert.assertThat(description, elements.size(), comparisonRule.getComparisonRule(number)));
+    }
+
+    @Override
     public boolean assertLeastElementNumber(String businessDescription, String systemDescription,
             List<WebElement> elements, int leastNumber)
     {
