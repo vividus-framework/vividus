@@ -125,8 +125,9 @@ class ThreadedProxyTests
     @Test
     void testAllocateIllegalPortsSequence()
     {
+        IntegerRange proxyPorts = range(0, 56_701);
         Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> new ThreadedProxy(LOCALHOST, range(0, 56_701), proxyFactory));
+            () -> new ThreadedProxy(LOCALHOST, proxyPorts, proxyFactory));
         assertEquals("Port 0 (ephemeral port selection) can not be used with custom ports", exception.getMessage());
         assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
     }
@@ -134,8 +135,9 @@ class ThreadedProxyTests
     @Test
     void testAllocateIllegalPortsNumbers()
     {
+        IntegerRange proxyPorts = range(-1);
         Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> new ThreadedProxy(LOCALHOST, range(-1), proxyFactory));
+            () -> new ThreadedProxy(LOCALHOST, proxyPorts, proxyFactory));
         assertEquals("Expected ports range is 1-65535 but got: -1", exception.getMessage());
         assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
     }
