@@ -107,8 +107,8 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
 
     private boolean isSauceConnectEnabledInStoryMeta(RunningStory runningStory)
     {
-        return new MetaWrapper(runningStory.getStory().getMeta()).getOptionalPropertyValue(SAUCE_CONNECT_META_TAG)
-                .isPresent();
+        return runningStory != null && new MetaWrapper(runningStory.getStory().getMeta()).getOptionalPropertyValue(
+                SAUCE_CONNECT_META_TAG).isPresent();
     }
 
     public void setSauceConnectEnabled(boolean sauceConnectEnabled)

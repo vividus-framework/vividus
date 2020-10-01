@@ -17,6 +17,7 @@
 package org.vividus.selenium.sauce;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,7 +27,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -54,6 +55,7 @@ public class SauceConnectOptionsTests
     private static final String PID_EXTENSION = ".pid";
     private static final String NO_REMOVE_COLLIDING_TUNNELS = "--no-remove-colliding-tunnels";
     private static final String NO_PROXY_CACHING = "--no-proxy-caching";
+    private static final String SAUCE_LABS_REST_URL = "https://saucelabs.com/rest/v1/";
 
     private static final String PID_FILE = "--pidfile";
 
@@ -215,7 +217,7 @@ public class SauceConnectOptionsTests
                         + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
                 sauceConnectOptions.build(TUNNEL_IDENTIFIER));
         PowerMockito.verifyStatic(FileUtils.class);
-        FileUtils.writeLines(file, StandardCharsets.UTF_8.toString(), Arrays.asList("function "
+        FileUtils.writeLines(file, StandardCharsets.UTF_8.toString(), List.of("function "
                 + "FindProxyForURL(url, host) { if (shExpMatch(host, \"*.miso.saucelabs.com\")"
                 + "|| shExpMatch(host, \"saucelabs.com\")|| shExpMatch(host, \"example.com\")) "
                 + "{return \"DIRECT\";}return \"PROXY test\";}"));
@@ -286,15 +288,92 @@ public class SauceConnectOptionsTests
     }
 
     @Test
+    public void testBuildWithRestUrl() throws IOException
+    {
+        sauceConnectOptions.setRestUrl(SAUCE_LABS_REST_URL);
+        assertEquals("--rest-url" + SPACE + SAUCE_LABS_REST_URL + SPACE + NO_REMOVE_COLLIDING_TUNNELS + SPACE
+                + NO_PROXY_CACHING, sauceConnectOptions.build(null));
+    }
+
+    @Test
     public void testHashCode()
     {
         assertEquals(createDefaultOptions().hashCode(), createDefaultOptions().hashCode());
     }
 
     @Test
-    public void testEquals()
+    public void testEqualsDifferentObjects()
     {
         assertEquals(createDefaultOptions(), createDefaultOptions());
+    }
+
+    @Test
+    public void testEqualsSameObjects()
+    {
+        SauceConnectOptions options = createDefaultOptions();
+        assertEquals(options, options);
+    }
+
+    @Test
+    public void testNotEqualsToNull()
+    {
+        assertNotEquals(createDefaultOptions(), null);
+    }
+
+    @Test
+    public void testNotEqualsProxy()
+    {
+        SauceConnectOptions options1 = createDefaultOptions();
+        options1.setProxy(null);
+        assertNotEquals(options1, createDefaultOptions());
+    }
+
+    @Test
+    public void testNotEqualsBasicAuthUser()
+    {
+        SauceConnectOptions options1 = createDefaultOptions();
+        options1.setBasicAuthUser(null);
+        assertNotEquals(options1, createDefaultOptions());
+    }
+
+    @Test
+    public void testNotEqualsHost()
+    {
+        SauceConnectOptions options1 = createDefaultOptions();
+        options1.setHost(null);
+        assertNotEquals(options1, createDefaultOptions());
+    }
+
+    @Test
+    public void testNotEqualsPort()
+    {
+        SauceConnectOptions options1 = createDefaultOptions();
+        options1.setPort(8888);
+        assertNotEquals(options1, createDefaultOptions());
+    }
+
+    @Test
+    public void testNotEqualsNoSslBumpDomains()
+    {
+        SauceConnectOptions options1 = createDefaultOptions();
+        options1.setNoSslBumpDomains(null);
+        assertNotEquals(options1, createDefaultOptions());
+    }
+
+    @Test
+    public void testNotEqualsSkipProxyHostsPattern()
+    {
+        SauceConnectOptions options1 = createDefaultOptions();
+        options1.setSkipProxyHostsPattern(null);
+        assertNotEquals(options1, createDefaultOptions());
+    }
+
+    @Test
+    public void testNotEqualsRestUrl()
+    {
+        SauceConnectOptions options1 = createDefaultOptions();
+        options1.setRestUrl(null);
+        assertNotEquals(options1, createDefaultOptions());
     }
 
     private static Path mockPidPath() throws IOException
@@ -313,7 +392,7 @@ public class SauceConnectOptionsTests
         options.setBasicAuthUser(USER);
         options.setNoSslBumpDomains("--no-ssl-bump-domains all");
         options.setSkipProxyHostsPattern("vividus\\.dev");
-        options.setRestUrl("https://saucelabs.com/rest/v1/");
+        options.setRestUrl(SAUCE_LABS_REST_URL);
         options.setPort(PORT);
         return options;
     }

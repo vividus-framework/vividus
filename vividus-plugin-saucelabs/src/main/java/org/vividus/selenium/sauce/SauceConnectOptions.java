@@ -121,7 +121,7 @@ public class SauceConnectOptions
         }
         appendOption(options, "no-remove-colliding-tunnels");
         appendOption(options, "no-proxy-caching");
-        return options.length() > 0 ? options.substring(0, options.length() - 1) : "";
+        return options.substring(0, options.length() - 1);
     }
 
     private Path createPacFile(String tunnelIdentifier) throws IOException
