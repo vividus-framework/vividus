@@ -230,6 +230,17 @@ class ProxyTests
         assertTrue(toRemove.size() == 1 && toRemove.contains(fsResponse));
     }
 
+    @Test
+    void shouldCreateSeleniumProxy()
+    {
+        configureProxy();
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        proxy.start();
+        when(browserMobProxy.getPort()).thenReturn(101);
+        org.openqa.selenium.Proxy seleniumProxy = proxy.createSeleniumProxy();
+        assertEquals(InetAddress.getLoopbackAddress().getHostName() + ":101", seleniumProxy.getHttpProxy());
+    }
+
     private void configureProxy()
     {
         proxy = new Proxy();
