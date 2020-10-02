@@ -344,7 +344,7 @@ jobs:
                                -Pvividus.configuration.suite= \
                                -Pvividus.configuration.profiles=saucelabs/web,web/desktop/chrome \
                                -Pvividus.bdd.story-loader.batch-1.resource-location=story/integration \
-                               -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyStepsTests.story
+                               -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyStepsTests.story \
                                -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
         else
