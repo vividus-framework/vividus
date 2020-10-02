@@ -28,24 +28,20 @@ import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.selenium.DesiredCapabilitiesConfigurer;
 import org.vividus.selenium.event.WebDriverQuitEvent;
-import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 
 public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfigurer
 {
     private static final String SAUCE_OPTIONS = "sauce:options";
-    private static final int DEFAULT_HTTPS_PORT = 443;
 
-    private final WebApplicationConfiguration webApplicationConfiguration;
     private final IBddRunContext bddRunContext;
     private final SauceConnectManager sauceConnectManager;
     private boolean sauceLabsEnabled;
     private boolean sauceConnectEnabled;
+    private String sauceConnectFlags;
     private String restUrl;
 
-    public SauceLabsCapabilitiesConfigurer(WebApplicationConfiguration webApplicationConfiguration,
-            IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager)
+    public SauceLabsCapabilitiesConfigurer(IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager)
     {
-        this.webApplicationConfiguration = webApplicationConfiguration;
         this.bddRunContext = bddRunContext;
         this.sauceConnectManager = sauceConnectManager;
     }
@@ -92,12 +88,7 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
     private SauceConnectOptions createSauceConnectOptions(Proxy proxy)
     {
         SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
-        sauceConnectOptions.setHost(webApplicationConfiguration.getHost());
-        if ("https".equals(webApplicationConfiguration.getMainApplicationPageUrl().getScheme()))
-        {
-            sauceConnectOptions.setPort(DEFAULT_HTTPS_PORT);
-        }
-        sauceConnectOptions.setBasicAuthUser(webApplicationConfiguration.getBasicAuthUser());
+        sauceConnectOptions.setCustomFlags(sauceConnectFlags);
         if (proxy != null)
         {
             sauceConnectOptions.setProxy(proxy.getHttpProxy());
@@ -119,5 +110,10 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
     public void setRestUrl(String restUrl)
     {
         this.restUrl = restUrl;
+    }
+
+    public void setSauceConnectFlags(String sauceConnectFlags)
+    {
+        this.sauceConnectFlags = sauceConnectFlags;
     }
 }

@@ -28,12 +28,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.proxy.IProxy;
-import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class SauceLabsCapabilitiesConfigurerTests
 {
-    @Mock private WebApplicationConfiguration webApplicationConfiguration;
     @Mock private IBddRunContext bddRunContext;
     @Mock private SauceConnectManager sauceConnectManager;
     @Mock private IProxy proxy;
@@ -53,6 +51,6 @@ class SauceLabsCapabilitiesConfigurerTests
         configurer.setSauceLabsEnabled(true);
         configurer.setSauceConnectEnabled(false);
         configurer.addCapabilities(new DesiredCapabilities());
-        verifyNoInteractions(webApplicationConfiguration, sauceConnectManager, proxy);
+        verifyNoInteractions(sauceConnectManager, proxy);
     }
 }

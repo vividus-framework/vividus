@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
@@ -35,16 +36,12 @@ public class SauceConnectOptions
             + "|| shExpMatch(host, \"saucelabs.com\")"
             + "|| shExpMatch(host, \"%1$s\")) {"
             + "return \"DIRECT\";}return \"PROXY %2$s\";}";
-    private static final String SAUCECONNECT_AUTH_FORMAT = "%s:%d:%s";
-    private static final int DEFAULT_HOST_PORT = 80;
 
     private String proxy;
-    private String host;
-    private String basicAuthUser;
     private String noSslBumpDomains;
     private String skipProxyHostsPattern;
     private String restUrl;
-    private int port;
+    private String customFlags;
 
     /**
      * Sets the proxy &lt;host:port&gt;.
@@ -55,21 +52,6 @@ public class SauceConnectOptions
     public void setProxy(String proxy)
     {
         this.proxy = proxy;
-    }
-
-    public void setHost(String host)
-    {
-        this.host = host;
-    }
-
-    public void setBasicAuthUser(String basicAuthUser)
-    {
-        this.basicAuthUser = basicAuthUser;
-    }
-
-    public void setPort(int port)
-    {
-        this.port = port;
     }
 
     public void setNoSslBumpDomains(String noSslBumpDomains)
@@ -89,7 +71,8 @@ public class SauceConnectOptions
 
     public String build(String tunnelIdentifier) throws IOException
     {
-        StringBuilder options = new StringBuilder();
+        StringBuilder options = Optional.ofNullable(customFlags).map(flags -> new StringBuilder(flags).append(' '))
+                .orElseGet(StringBuilder::new);
         if (tunnelIdentifier != null)
         {
             appendOption(options, "tunnel-identifier", tunnelIdentifier);
@@ -99,11 +82,6 @@ public class SauceConnectOptions
         if (noSslBumpDomains != null)
         {
             appendOption(options, "no-ssl-bump-domains", noSslBumpDomains);
-        }
-        if (host != null && basicAuthUser != null)
-        {
-            appendOption(options, "auth",
-                    String.format(SAUCECONNECT_AUTH_FORMAT, host, port > 0 ? port : DEFAULT_HOST_PORT, basicAuthUser));
         }
         if (proxy != null)
         {
@@ -162,8 +140,7 @@ public class SauceConnectOptions
             return false;
         }
         SauceConnectOptions that = (SauceConnectOptions) o;
-        return port == that.port && Objects.equals(proxy, that.proxy) && Objects.equals(host, that.host)
-                && Objects.equals(basicAuthUser, that.basicAuthUser)
+        return Objects.equals(proxy, that.proxy)
                 && Objects.equals(noSslBumpDomains, that.noSslBumpDomains)
                 && Objects.equals(skipProxyHostsPattern, that.skipProxyHostsPattern)
                 && Objects.equals(restUrl, that.restUrl);
@@ -172,6 +149,11 @@ public class SauceConnectOptions
     @Override
     public int hashCode()
     {
-        return Objects.hash(proxy, host, basicAuthUser, noSslBumpDomains, skipProxyHostsPattern, restUrl, port);
+        return Objects.hash(proxy, noSslBumpDomains, skipProxyHostsPattern, restUrl);
+    }
+
+    public void setCustomFlags(String customFlags)
+    {
+        this.customFlags = customFlags;
     }
 }

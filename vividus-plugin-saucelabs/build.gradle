@@ -1,7 +1,6 @@
 project.description = 'Vividus plugin for Sauce Labs'
 
 dependencies {
-    implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-extension-selenium')
 

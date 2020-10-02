@@ -48,11 +48,6 @@ public class SauceConnectOptionsTests
     private static final String TUNNEL_IDENTIFIER = "test-tunnel";
     private static final String PID_FILE_NAME = "sc_client-" + TUNNEL_IDENTIFIER + "-";
     private static final String TUNNEL_IDENTIFIER_OPTION = "--tunnel-identifier" + SPACE + TUNNEL_IDENTIFIER;
-    private static final String HOST = "host";
-    private static final String USER = "user:pass";
-    private static final int PORT = 9999;
-    private static final int DEFAULT_HOST_PORT = 80;
-    private static final String AUTH_FORMAT = "--auth %s:%d:%s";
     private static final String PID_EXTENSION = ".pid";
     private static final String NO_REMOVE_COLLIDING_TUNNELS = "--no-remove-colliding-tunnels";
     private static final String NO_PROXY_CACHING = "--no-proxy-caching";
@@ -110,9 +105,8 @@ public class SauceConnectOptionsTests
     public void testBuildWithProxyWithAuth() throws Exception
     {
         sauceConnectOptions.setProxy(PROXY);
-        sauceConnectOptions.setHost(HOST);
-        sauceConnectOptions.setBasicAuthUser(USER);
-        sauceConnectOptions.setPort(PORT);
+        String customFlags = "--auth host:9999:user:pass";
+        sauceConnectOptions.setCustomFlags(customFlags);
         File file = mock(File.class);
         Path pacPath = mock(Path.class);
         PowerMockito.mockStatic(Files.class);
@@ -123,77 +117,9 @@ public class SauceConnectOptionsTests
         when(Files.createTempFile(PID_FILE_NAME, PID_EXTENSION)).thenReturn(pidPath);
         File pidFile = mock(File.class);
         when(pidPath.toFile()).thenReturn(pidFile);
-        assertEquals(TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + String
-                        .format(AUTH_FORMAT, HOST, PORT, USER) + SPACE + PAC_FILE + pacPath + SPACE
-                        + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
-                sauceConnectOptions.build(TUNNEL_IDENTIFIER));
-        verify(pidFile).deleteOnExit();
-    }
-
-    @Test
-    @PrepareForTest({ SauceConnectOptions.class, Files.class, FileUtils.class })
-    public void testBuildWithProxyWithAuthNoPort() throws Exception
-    {
-        sauceConnectOptions.setProxy(PROXY);
-        sauceConnectOptions.setHost(HOST);
-        sauceConnectOptions.setBasicAuthUser(USER);
-        File file = mock(File.class);
-        Path pacPath = mock(Path.class);
-        PowerMockito.mockStatic(Files.class);
-        PowerMockito.mockStatic(FileUtils.class);
-        when(Files.createTempFile(PAC_TEST_TUNNEL, DOT_JS)).thenReturn(pacPath);
-        when(pacPath.toFile()).thenReturn(file);
-        Path pidPath = mock(Path.class);
-        when(Files.createTempFile(PID_FILE_NAME, PID_EXTENSION)).thenReturn(pidPath);
-        File pidFile = mock(File.class);
-        when(pidPath.toFile()).thenReturn(pidFile);
-        assertEquals(TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + String
-                        .format(AUTH_FORMAT, HOST, DEFAULT_HOST_PORT, USER) + SPACE + PAC_FILE + pacPath + SPACE
-                        + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
-                sauceConnectOptions.build(TUNNEL_IDENTIFIER));
-        verify(pidFile).deleteOnExit();
-    }
-
-    @Test
-    @PrepareForTest({ SauceConnectOptions.class, Files.class, FileUtils.class })
-    public void testBuildWithProxyWithAuthNoHost() throws Exception
-    {
-        sauceConnectOptions.setProxy(PROXY);
-        sauceConnectOptions.setBasicAuthUser(USER);
-        File file = mock(File.class);
-        Path pacPath = mock(Path.class);
-        PowerMockito.mockStatic(Files.class);
-        PowerMockito.mockStatic(FileUtils.class);
-        when(Files.createTempFile(PAC_TEST_TUNNEL, DOT_JS)).thenReturn(pacPath);
-        when(pacPath.toFile()).thenReturn(file);
-        Path pidPath = mock(Path.class);
-        when(Files.createTempFile(PID_FILE_NAME, PID_EXTENSION)).thenReturn(pidPath);
-        File pidFile = mock(File.class);
-        when(pidPath.toFile()).thenReturn(pidFile);
-        assertEquals(TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
-                        + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
-                sauceConnectOptions.build(TUNNEL_IDENTIFIER));
-        verify(pidFile).deleteOnExit();
-    }
-
-    @Test
-    @PrepareForTest({ SauceConnectOptions.class, Files.class, FileUtils.class })
-    public void testBuildWithProxyWithAuthNoUser() throws Exception
-    {
-        sauceConnectOptions.setProxy(PROXY);
-        sauceConnectOptions.setHost(HOST);
-        File file = mock(File.class);
-        Path pacPath = mock(Path.class);
-        PowerMockito.mockStatic(Files.class);
-        PowerMockito.mockStatic(FileUtils.class);
-        when(Files.createTempFile(PAC_TEST_TUNNEL, DOT_JS)).thenReturn(pacPath);
-        when(pacPath.toFile()).thenReturn(file);
-        Path pidPath = mock(Path.class);
-        when(Files.createTempFile(PID_FILE_NAME, PID_EXTENSION)).thenReturn(pidPath);
-        File pidFile = mock(File.class);
-        when(pidPath.toFile()).thenReturn(pidFile);
-        assertEquals(TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
-                        + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
+        assertEquals(
+                customFlags + SPACE + TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE
+                        + pacPath + SPACE + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
                 sauceConnectOptions.build(TUNNEL_IDENTIFIER));
         verify(pidFile).deleteOnExit();
     }
@@ -257,35 +183,9 @@ public class SauceConnectOptionsTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectOptions.class, Files.class, FileUtils.class })
-    public void testBuildWOProxyWithAuth() throws IOException
-    {
-        sauceConnectOptions.setHost(HOST);
-        sauceConnectOptions.setBasicAuthUser(USER);
-        Path pidPath = mockPidPath();
-        File pidFile = mock(File.class);
-        PowerMockito.mockStatic(FileUtils.class);
-        when(pidPath.toFile()).thenReturn(pidFile);
-        assertEquals(TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + String
-                        .format(AUTH_FORMAT, HOST, DEFAULT_HOST_PORT, USER) + SPACE + NO_REMOVE_COLLIDING_TUNNELS
-                        + SPACE + NO_PROXY_CACHING,
-                sauceConnectOptions.build(TUNNEL_IDENTIFIER));
-        verify(pidFile).deleteOnExit();
-    }
-
-    @Test
     public void testBuildWOProxyNullOption() throws IOException
     {
         assertEquals(NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING, sauceConnectOptions.build(null));
-    }
-
-    @Test
-    public void testBuildWOProxyNullOptionWithAuth() throws IOException
-    {
-        sauceConnectOptions.setHost(HOST);
-        sauceConnectOptions.setBasicAuthUser(USER);
-        assertEquals(String.format(AUTH_FORMAT, HOST, DEFAULT_HOST_PORT, USER) + SPACE + NO_REMOVE_COLLIDING_TUNNELS
-                + SPACE + NO_PROXY_CACHING, sauceConnectOptions.build(null));
     }
 
     @Test
@@ -324,57 +224,33 @@ public class SauceConnectOptionsTests
     @Test
     public void testNotEqualsProxy()
     {
-        SauceConnectOptions options1 = createDefaultOptions();
-        options1.setProxy(null);
-        assertNotEquals(options1, createDefaultOptions());
-    }
-
-    @Test
-    public void testNotEqualsBasicAuthUser()
-    {
-        SauceConnectOptions options1 = createDefaultOptions();
-        options1.setBasicAuthUser(null);
-        assertNotEquals(options1, createDefaultOptions());
-    }
-
-    @Test
-    public void testNotEqualsHost()
-    {
-        SauceConnectOptions options1 = createDefaultOptions();
-        options1.setHost(null);
-        assertNotEquals(options1, createDefaultOptions());
-    }
-
-    @Test
-    public void testNotEqualsPort()
-    {
-        SauceConnectOptions options1 = createDefaultOptions();
-        options1.setPort(8888);
-        assertNotEquals(options1, createDefaultOptions());
+        SauceConnectOptions options = createDefaultOptions();
+        options.setProxy(null);
+        assertNotEquals(options, createDefaultOptions());
     }
 
     @Test
     public void testNotEqualsNoSslBumpDomains()
     {
-        SauceConnectOptions options1 = createDefaultOptions();
-        options1.setNoSslBumpDomains(null);
-        assertNotEquals(options1, createDefaultOptions());
+        SauceConnectOptions options = createDefaultOptions();
+        options.setNoSslBumpDomains(null);
+        assertNotEquals(options, createDefaultOptions());
     }
 
     @Test
     public void testNotEqualsSkipProxyHostsPattern()
     {
-        SauceConnectOptions options1 = createDefaultOptions();
-        options1.setSkipProxyHostsPattern(null);
-        assertNotEquals(options1, createDefaultOptions());
+        SauceConnectOptions options = createDefaultOptions();
+        options.setSkipProxyHostsPattern(null);
+        assertNotEquals(options, createDefaultOptions());
     }
 
     @Test
     public void testNotEqualsRestUrl()
     {
-        SauceConnectOptions options1 = createDefaultOptions();
-        options1.setRestUrl(null);
-        assertNotEquals(options1, createDefaultOptions());
+        SauceConnectOptions options = createDefaultOptions();
+        options.setRestUrl(null);
+        assertNotEquals(options, createDefaultOptions());
     }
 
     private static Path mockPidPath() throws IOException
@@ -389,12 +265,10 @@ public class SauceConnectOptionsTests
     {
         SauceConnectOptions options = new SauceConnectOptions();
         options.setProxy(PROXY);
-        options.setHost(HOST);
-        options.setBasicAuthUser(USER);
         options.setNoSslBumpDomains("--no-ssl-bump-domains all");
         options.setSkipProxyHostsPattern("vividus\\.dev");
         options.setRestUrl(SAUCE_LABS_REST_URL);
-        options.setPort(PORT);
+        options.setCustomFlags("--verbose");
         return options;
     }
 }
