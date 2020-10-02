@@ -46,7 +46,7 @@ class MitmManagerFactoryTests
         MitmManagerOptions options = new MitmManagerOptions(null, true,
                 new KeyStoreOptions(null, null, null));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> factory.createMitmManager(options));
+            () -> factory.createMitmManager(options));
         assertEquals("key store path parameter must be set", exception.getMessage());
     }
 }
