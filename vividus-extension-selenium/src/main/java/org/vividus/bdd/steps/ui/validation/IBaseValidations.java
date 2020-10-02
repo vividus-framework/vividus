@@ -42,6 +42,19 @@ public interface IBaseValidations
     boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
             int number);
 
+    /**
+     * Assert that the number of elements in <b>elements</b> collection is <b>comparisonRule</b> <b>number</b>
+     * @param description description of elements in the <b>elements</b> collection
+     * @param elements collection being verified
+     * @param comparisonRule The rule to compare values
+     * (&lt;i&gt;Possible values:&lt;b&gt; LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
+     * EQUAL_TO&lt;/b&gt;&lt;/i&gt;)
+     * @param number expected number of elements in the <b>element</b> collection
+     * @return whether the number of elements in <b>elements</b> is equal to <b>number</b>
+     */
+    boolean assertElementsNumber(String description, List<WebElement> elements, ComparisonRule comparisonRule,
+            int number);
+
     @Deprecated(since = "0.2.8", forRemoval = true)
     boolean assertLeastElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
             int leastNumber);

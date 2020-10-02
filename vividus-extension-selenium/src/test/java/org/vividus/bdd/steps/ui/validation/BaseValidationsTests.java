@@ -542,6 +542,16 @@ class BaseValidationsTests
     }
 
     @Test
+    void testAssertElementsNumber()
+    {
+        List<WebElement> elements = List.of(mockedWebElement);
+        mockAssertingWebElements(elements);
+        when(softAssert.assertThat(eq(BUSINESS_DESCRIPTION), eq(elements.size()),
+                argThat(e -> "a value equal to <1>".equals(e.toString())))).thenReturn(true);
+        assertTrue(baseValidations.assertElementsNumber(BUSINESS_DESCRIPTION, elements, ComparisonRule.EQUAL_TO, 1));
+    }
+
+    @Test
     void testAssertElementExistsMoreThanOne()
     {
         webElements = List.of(mockedWebElement, mockedWebElement);
