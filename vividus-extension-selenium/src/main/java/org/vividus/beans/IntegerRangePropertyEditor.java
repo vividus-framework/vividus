@@ -51,21 +51,22 @@ public class IntegerRangePropertyEditor extends PropertyEditorSupport
     @Override
     public void setAsText(String source)
     {
-        IntegerRange intRange = Stream.of(source.split(",")).map(value ->
-        {
-            for (Map.Entry<Pattern, Function<Matcher, List<Integer>>> handler : REGEX_HANDLERS.entrySet())
-            {
-                Matcher matcher = handler.getKey().matcher(value);
-                if (matcher.matches())
+        setValue(Stream.of(source.split(","))
+                .map(value ->
                 {
-                    return handler.getValue().apply(matcher);
-                }
-            }
-            throw new IllegalArgumentException(
-                    "Expected integers in format 'number' or 'number..number' but got: " + value);
-        })
-        .flatMap(List::stream)
-        .collect(Collectors.collectingAndThen(Collectors.toCollection(LinkedHashSet::new), IntegerRange::new));
-        setValue(intRange);
+                    for (Map.Entry<Pattern, Function<Matcher, List<Integer>>> handler : REGEX_HANDLERS.entrySet())
+                    {
+                        Matcher matcher = handler.getKey().matcher(value);
+                        if (matcher.matches())
+                        {
+                            return handler.getValue().apply(matcher);
+                        }
+                    }
+                    throw new IllegalArgumentException(
+                            "Expected integers in format 'number' or 'number..number' but got: " + value);
+                })
+                .flatMap(List::stream)
+                .collect(Collectors.collectingAndThen(Collectors.toCollection(LinkedHashSet::new), IntegerRange::new))
+        );
     }
 }
