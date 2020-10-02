@@ -34,7 +34,7 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
     private final boolean remoteExecution;
     private final IWebDriverManagerContext webDriverManagerContext;
     private final IBddRunContext bddRunContext;
-    private final  Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers;
+    private final Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers;
 
     public AbstractVividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
             IBddRunContext bddRunContext, Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
