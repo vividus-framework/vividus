@@ -40,8 +40,7 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
     public void beforeStory(Story story, boolean givenStory)
     {
         String name = bddRunContext.getRunningStory().getName();
-        if (!configuration.dryRun() && !givenStory && !"BeforeStories".equals(name) && !"AfterStories".equals(name)
-                && (proxyEnabled || isProxyEnabledInStoryMeta()))
+        if (!configuration.dryRun() && !givenStory && isNotSystemStory(name) && isProxyEnabled())
         {
             proxy.start();
         }
@@ -53,7 +52,7 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
     {
         if (!configuration.dryRun())
         {
-            if (!proxy.isStarted() && isProxyEnabled())
+            if (!proxy.isStarted() && isProxyEnabledInMeta())
             {
                 proxy.start();
             }
@@ -93,12 +92,22 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
         }
     }
 
+    private boolean isNotSystemStory(String name)
+    {
+        return !"BeforeStories".equals(name) && !"AfterStories".equals(name);
+    }
+
+    private boolean isProxyEnabled()
+    {
+        return proxyEnabled || isProxyEnabledInStoryMeta();
+    }
+
     private boolean isProxyRecordingEnabled()
     {
         return proxyRecordingEnabled || isProxyEnabledInStoryMeta() || isProxyEnabledInScenarioMeta();
     }
 
-    private boolean isProxyEnabled()
+    private boolean isProxyEnabledInMeta()
     {
         return isProxyEnabledInStoryMeta() || isProxyEnabledInScenarioMeta();
     }
