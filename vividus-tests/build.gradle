@@ -15,6 +15,7 @@ dependencies {
     implementation project(':vividus-plugin-datetime')
     implementation project(':vividus-plugin-html')
     implementation project(':vividus-plugin-rest-api')
+    implementation project(':vividus-plugin-saucelabs')
     implementation project(':vividus-plugin-ssh')
     implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-plugin-web-app-to-rest-api')

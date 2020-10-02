@@ -18,7 +18,6 @@ package org.vividus.selenium;
 
 public interface SauceLabsCapabilityType
 {
-    String NAME = "name";
     String SCREEN_RESOLUTION = "screen-resolution";
     String DEVICE_ORIENTATION = "device-orientation";
     String IEDRIVER_VERSION = "iedriver-version";

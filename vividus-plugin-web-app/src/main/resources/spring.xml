@@ -34,41 +34,6 @@
         <property name="followRedirects" value="${sitemap.parser.follow-redirects}" />
     </bean>
 
-    <bean id="proxy" class="org.vividus.proxy.ThreadedProxy" >
-        <constructor-arg index="0" value="${proxy.host}" />
-        <constructor-arg index="1" value="${proxy.ports}" />
-        <constructor-arg index="2" >
-            <bean class="org.vividus.proxy.ProxyFactory" />
-        </constructor-arg>
-    </bean>
-
-    <bean id="mitmManagerFactory" class="org.vividus.proxy.mitm.MitmManagerFactory" />
-
-    <bean id="proxyServerFactory" class="org.vividus.proxy.ProxyServerFactory">
-        <property name="trustAllServers" value="${proxy.trust-all-servers}" />
-        <property name="mitmEnabled" value="${proxy.mitm.enabled}" />
-        <property name="mitmManagerFactory" ref="mitmManagerFactory" />
-        <property name="mitmManagerOptions">
-            <bean class="org.vividus.proxy.mitm.MitmManagerOptions" >
-                <constructor-arg index="0" value="${proxy.mitm.key-store.alias}" />
-                <constructor-arg index="1" value="${proxy.trust-all-servers}" />
-                <constructor-arg index="2" >
-                    <bean class="org.vividus.http.keystore.KeyStoreOptions">
-                        <constructor-arg index="0" value="${proxy.mitm.key-store.path}" />
-                        <constructor-arg index="1" value="${proxy.mitm.key-store.password}" />
-                        <constructor-arg index="2" value="${proxy.mitm.key-store.type}" />
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </property>
-        <property name="advancedHostResolver">
-            <bean class="org.vividus.proxy.dns.HostNameResolver">
-                <property name="dnsMappingStorage" ref="localDnsStorage" />
-            </bean>
-        </property>
-        <property name="captureTypes" value="${proxy.capture-types}"/>
-    </bean>
-
     <bean id="timeoutConfigurer" class="org.vividus.selenium.TimeoutConfigurer">
         <property name="pageLoadTimeout" value="${selenium.timeout.page-load-timeout}" />
         <property name="pageLoadTimeoutTimeUnit" value="${selenium.timeout.page-load-timeout-unit}" />
@@ -283,21 +248,11 @@
     </bean>
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.VividusWebDriverFactory">
-        <property name="remoteExecution" value="${selenium.grid.enabled}" />
-        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
+        <constructor-arg index="0" value="${selenium.grid.enabled}"/>
+        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers"/>
     </bean>
 
     <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" />
-
-    <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
-        <property name="next">
-            <bean class="org.vividus.bdd.ProxyAgentStoryReporter">
-                <property name="proxyEnabled" value="${proxy.enabled}" />
-                <property name="proxyRecordingEnabled" value="${proxy.recording.enabled}" />
-                <property name="next" ref="allureStoryReporter" />
-            </bean>
-        </property>
-    </bean>
 
     <bean id="delegatingWebApplicationListener-WebApplicationListeners" class="org.vividus.spring.ListMergerFactoryBean">
         <property name="lists">
@@ -335,7 +290,6 @@
                 <bean class="org.vividus.spring.StringToLocatorSetConverter" />
                 <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
                 <bean class="org.vividus.spring.StringToLocaleConverter"/>
-                <bean class="org.vividus.spring.StringToIntegerRangeConverter"/>
             </set>
         </property>
     </bean>

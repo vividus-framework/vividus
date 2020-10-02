@@ -86,6 +86,7 @@ dependencies {
     integrationTestImplementation project(':vividus-plugin-html')
     integrationTestImplementation project(':vividus-plugin-mobile-app')
     integrationTestImplementation project(':vividus-plugin-rest-api')
+    integrationTestImplementation project(':vividus-plugin-saucelabs')
     integrationTestImplementation project(':vividus-plugin-ssh')
     integrationTestImplementation project(':vividus-plugin-visual')
     integrationTestImplementation project(':vividus-plugin-web-app-to-rest-api')

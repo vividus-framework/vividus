@@ -4,8 +4,8 @@ Meta:
     @proxy
 
 Scenario: Verify step Then number of HTTP $httpMethod requests with URL pattern `$urlPattern` is $comparisonRule `$number`
-Given I am on a page with the URL 'http://httpbin.org/get'
-Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `1`
+Given I am on a page with the URL 'https://httpbin.org/get'
+Then number of HTTP GET requests with URL pattern `https://httpbin.org/get` is EQUAL TO `1`
 
 Scenario: Verify step When I clear proxy log
 Given I am on a page with the URL 'http:/httpbin.org/get'

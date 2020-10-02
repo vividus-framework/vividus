@@ -2,12 +2,14 @@ project.description = 'Vividus extension for selenium'
 
  ext {
      seleniumVersion = '4.0.0-alpha-1'
+     browserupProxyVersion = '2.1.1'
 }
 
 
  dependencies {
      implementation project(':vividus-bdd-engine')
      implementation project(':vividus-reporter')
+     implementation project(':vividus-http-client')
      implementation project(':vividus-test-context')
      implementation project(':vividus-util')
      implementation project(':vividus-soft-assert')
@@ -23,13 +25,20 @@ project.description = 'Vividus extension for selenium'
      implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
      implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+     implementation(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
+     implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
 
      compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
      testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
      testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+     testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
+     testCompileOnly(group: 'junit', name: 'junit', version: versions.junit4)
      testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
      testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+     testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
+     testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
      testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
      testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+     testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
  }

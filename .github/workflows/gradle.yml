@@ -166,9 +166,9 @@ jobs:
       run: |
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
-                                                -Pvividus.configuration.environments=system/mobile_app/saucelabs/ios \
+                                                -Pvividus.configuration.environments=system/saucelabs/mobile_app/ios \
                                                 -Pvividus.configuration.suite=system/mobile_app \
-                                                -Pvividus.configuration.profiles=mobile_app/ios,saucelabs/mobile_app \
+                                                -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
                                                 -Pvividus.allure.history-directory=output/history/sl-ios-system-tests \
@@ -202,9 +202,9 @@ jobs:
       run: |
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
-                                                -Pvividus.configuration.environments=system/mobile_app/saucelabs/android \
+                                                -Pvividus.configuration.environments=system/saucelabs/mobile_app/android \
                                                 -Pvividus.configuration.suite=system/mobile_app \
-                                                -Pvividus.configuration.profiles=mobile_app/android,saucelabs/mobile_app \
+                                                -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
                                                 -Pvividus.allure.history-directory=output/history/sl-android-system-tests \
@@ -333,12 +333,20 @@ jobs:
           declare -a profiles=( iexplore chrome firefox edge )
           for profile in "${profiles[@]}"; do
             ./gradlew runStories -x testVividusInitialization \
-                                 -Pvividus.configuration.environments= \
+                                 -Pvividus.configuration.environments=system/saucelabs \
                                  -Pvividus.configuration.suite=grid \
                                  -Pvividus.configuration.profiles=saucelabs/web,web/desktop/${profile} \
                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
           done
+          ./gradlew runStories -x testVividusInitialization \
+                               -Pvividus.configuration.environments=system/saucelabs \
+                               -Pvividus.configuration.suite= \
+                               -Pvividus.configuration.profiles=saucelabs/web,web/desktop/chrome \
+                               -Pvividus.bdd.story-loader.batch-1.resource-location=story/integration \
+                               -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyStepsTests.story \
+                               -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                               -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs integration tests will be skipped
         fi
