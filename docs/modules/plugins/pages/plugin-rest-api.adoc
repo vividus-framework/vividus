@@ -98,13 +98,12 @@ Adds headers to HTTP request. See https://en.wikipedia.org/wiki/List_of_HTTP_hea
 
 [source,gherkin]
 ----
-When I add request header with name `$name` and value `$value`
+When I add request headers:$headers
 ----
 
 ==== *_Parameters_*
 
-. `name` - header name
-. `value` - header value
+. `headers` - ExamplesTable representing list of headers with columns `name` and `value` specifying HTTP header
 
 ==== *_Usage_*
 
