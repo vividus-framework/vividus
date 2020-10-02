@@ -160,6 +160,14 @@ class ThreadedProxyTests
     }
 
     @Test
+    void shouldCreateSeleniumProxy() throws UnknownHostException
+    {
+        defaultInit();
+        threadedProxy.createSeleniumProxy();
+        verify(proxy).createSeleniumProxy();
+    }
+
+    @Test
     void testStartOnPort() throws UnknownHostException
     {
         threadedProxy = new ThreadedProxy(LOCALHOST, range(1), proxyFactory);
