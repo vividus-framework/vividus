@@ -27,7 +27,7 @@
         <property name="sauceConnectEnabled" value="${saucelabs.sauce-connect.enabled}"/>
         <property name="sauceLabsEnabled" value="${selenium.grid.enabled}"/>
         <property name="restUrl" value="${saucelabs.rest-url}" />
-        <property name="sauceConnectFlags" value="${saucelabs.sauce-connect.flags}" />
+        <property name="sauceConnectArguments" value="${saucelabs.sauce-connect.command-line-arguments}" />
     </bean>
 
 </beans>

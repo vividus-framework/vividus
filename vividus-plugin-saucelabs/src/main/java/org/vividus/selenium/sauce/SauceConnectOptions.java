@@ -41,7 +41,7 @@ public class SauceConnectOptions
     private String noSslBumpDomains;
     private String skipProxyHostsPattern;
     private String restUrl;
-    private String customFlags;
+    private String customArguments;
 
     /**
      * Sets the proxy &lt;host:port&gt;.
@@ -71,7 +71,7 @@ public class SauceConnectOptions
 
     public String build(String tunnelIdentifier) throws IOException
     {
-        StringBuilder options = Optional.ofNullable(customFlags).map(flags -> new StringBuilder(flags).append(' '))
+        StringBuilder options = Optional.ofNullable(customArguments).map(args -> new StringBuilder(args).append(' '))
                 .orElseGet(StringBuilder::new);
         if (tunnelIdentifier != null)
         {
@@ -152,8 +152,8 @@ public class SauceConnectOptions
         return Objects.hash(proxy, noSslBumpDomains, skipProxyHostsPattern, restUrl);
     }
 
-    public void setCustomFlags(String customFlags)
+    public void setCustomArguments(String customArguments)
     {
-        this.customFlags = customFlags;
+        this.customArguments = customArguments;
     }
 }

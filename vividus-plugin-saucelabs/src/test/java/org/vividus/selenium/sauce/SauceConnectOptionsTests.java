@@ -106,7 +106,7 @@ public class SauceConnectOptionsTests
     {
         sauceConnectOptions.setProxy(PROXY);
         String customFlags = "--auth host:9999:user:pass";
-        sauceConnectOptions.setCustomFlags(customFlags);
+        sauceConnectOptions.setCustomArguments(customFlags);
         File file = mock(File.class);
         Path pacPath = mock(Path.class);
         PowerMockito.mockStatic(Files.class);
@@ -268,7 +268,7 @@ public class SauceConnectOptionsTests
         options.setNoSslBumpDomains("--no-ssl-bump-domains all");
         options.setSkipProxyHostsPattern("vividus\\.dev");
         options.setRestUrl(SAUCE_LABS_REST_URL);
-        options.setCustomFlags("--verbose");
+        options.setCustomArguments("--verbose");
         return options;
     }
 }

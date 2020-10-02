@@ -37,7 +37,7 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
     private final SauceConnectManager sauceConnectManager;
     private boolean sauceLabsEnabled;
     private boolean sauceConnectEnabled;
-    private String sauceConnectFlags;
+    private String sauceConnectArguments;
     private String restUrl;
 
     public SauceLabsCapabilitiesConfigurer(IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager)
@@ -88,7 +88,7 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
     private SauceConnectOptions createSauceConnectOptions(Proxy proxy)
     {
         SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
-        sauceConnectOptions.setCustomFlags(sauceConnectFlags);
+        sauceConnectOptions.setCustomArguments(sauceConnectArguments);
         if (proxy != null)
         {
             sauceConnectOptions.setProxy(proxy.getHttpProxy());
@@ -112,8 +112,8 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
         this.restUrl = restUrl;
     }
 
-    public void setSauceConnectFlags(String sauceConnectFlags)
+    public void setSauceConnectArguments(String sauceConnectArguments)
     {
-        this.sauceConnectFlags = sauceConnectFlags;
+        this.sauceConnectArguments = sauceConnectArguments;
     }
 }
