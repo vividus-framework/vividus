@@ -99,7 +99,7 @@ class VividusWebDriverFactoryTests
         VividusWebDriver vividusWebDriver = factory.create();
 
         assertTrue(vividusWebDriver.isRemote());
-        assertEquals(Map.of(KEY1, valueWebDriverManager1,
+        assertEquals(Map.of(KEY1,   valueWebDriverManager1,
                             KEY2,   "valueFromStoryMeta2",
                             KEY3,   VALUE_FROM_CONFIGURER3,
                             KEY4,   "valueFromStoryMeta4",

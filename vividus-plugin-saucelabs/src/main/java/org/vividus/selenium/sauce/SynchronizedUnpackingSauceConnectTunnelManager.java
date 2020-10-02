@@ -39,10 +39,10 @@ public class SynchronizedUnpackingSauceConnectTunnelManager extends SauceConnect
             {
                 if (extractedDirectory == null)
                 {
-                    File extractedDirectory = super.extractZipFile(workingDirectory, operatingSystem);
-                    extractedDirectory.deleteOnExit();
-                    this.extractedDirectory = extractedDirectory;
-                    return extractedDirectory;
+                    File temporaryExtractedDirectory = super.extractZipFile(workingDirectory, operatingSystem);
+                    temporaryExtractedDirectory.deleteOnExit();
+                    this.extractedDirectory = temporaryExtractedDirectory;
+                    return temporaryExtractedDirectory;
                 }
             }
         }
