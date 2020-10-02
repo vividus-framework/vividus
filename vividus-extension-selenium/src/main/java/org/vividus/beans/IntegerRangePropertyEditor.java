@@ -64,8 +64,8 @@ public class IntegerRangePropertyEditor extends PropertyEditorSupport
             throw new IllegalArgumentException(
                     "Expected integers in format 'number' or 'number..number' but got: " + value);
         })
-            .flatMap(List::stream)
-            .collect(Collectors.collectingAndThen(Collectors.toCollection(LinkedHashSet::new), IntegerRange::new));
+        .flatMap(List::stream)
+        .collect(Collectors.collectingAndThen(Collectors.toCollection(LinkedHashSet::new), IntegerRange::new));
         setValue(intRange);
     }
 }

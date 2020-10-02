@@ -47,7 +47,7 @@
         <property name="waitActions" ref="waitActions" />
     </bean>
 
-    <bean id="proxy" class="org.vividus.proxy.ThreadedProxy" >
+    <bean class="org.vividus.proxy.ThreadedProxy" >
         <constructor-arg index="0" value="${proxy.host}" />
         <constructor-arg index="1" value="${proxy.ports}" />
         <constructor-arg index="2">
@@ -125,7 +125,7 @@
                 <constructor-arg value="org.vividus.bdd.steps.WebDriverSessionScope" />
             </bean>
         </entry>
-        <entry key ="org.vividus.model.IntegerRange">
+        <entry key="org.vividus.model.IntegerRange">
             <bean class="org.vividus.beans.IntegerRangePropertyEditor" />
         </entry>
     </util:map>
