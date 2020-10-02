@@ -18,6 +18,8 @@ package org.vividus.proxy.mitm;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.browserup.bup.mitm.manager.ImpersonatingMitmManager;
 
@@ -27,13 +29,24 @@ import org.vividus.http.keystore.KeyStoreOptions;
 
 class MitmManagerFactoryTests
 {
+    private IMitmManagerFactory factory = new MitmManagerFactory();
+
     @Test
     void testCreateMitmManager()
     {
-        IMitmManagerFactory factory = new MitmManagerFactory();
         MitmManagerOptions options = new MitmManagerOptions("alias", true,
                 new KeyStoreOptions("bundle.p12", "password", "PKCS12"));
         MitmManager mitmManager = factory.createMitmManager(options);
         assertThat(mitmManager, instanceOf(ImpersonatingMitmManager.class));
+    }
+
+    @Test
+    void testCreateMitmManagerWithInvalidParameters()
+    {
+        MitmManagerOptions options = new MitmManagerOptions(null, true,
+                new KeyStoreOptions(null, null, null));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> factory.createMitmManager(options));
+        assertEquals("key store path parameter must be set", exception.getMessage());
     }
 }
