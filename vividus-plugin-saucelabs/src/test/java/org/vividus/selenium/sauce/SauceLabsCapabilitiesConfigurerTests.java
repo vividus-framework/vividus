@@ -16,25 +16,43 @@
 
 package org.vividus.selenium.sauce;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jbehave.core.model.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.proxy.IProxy;
+import org.vividus.bdd.model.RunningStory;
 
 @ExtendWith(MockitoExtension.class)
 class SauceLabsCapabilitiesConfigurerTests
 {
+    private static final String SAUCE_OPTIONS = "sauce:options";
+
+    private static final String NAME_CAPABILITY = "name";
+    private static final String STORY_NAME = "my";
+
+    private static final String TUNNEL_IDENTIFIER_CAPABILITY = "tunnelIdentifier";
+    private static final String TUNNEL_ID = "tunnelId";
+
+    private static final String STORY_PATH = STORY_NAME + ".story";
+
     @Mock private IBddRunContext bddRunContext;
     @Mock private SauceConnectManager sauceConnectManager;
-    @Mock private IProxy proxy;
     @InjectMocks private SauceLabsCapabilitiesConfigurer configurer;
 
     @Test
@@ -45,12 +63,78 @@ class SauceLabsCapabilitiesConfigurerTests
     }
 
     @Test
-    void shouldDoNothingWhenSauceConnectDisabled()
+    void shouldDoNothingWhenSauceLabsIsDisabled()
+    {
+        configurer.setSauceLabsEnabled(false);
+        configurer.setSauceConnectEnabled(true);
+        configurer.configure(null);
+        verifyNoInteractions(bddRunContext, sauceConnectManager);
+    }
+
+    @Test
+    void shouldDoNothingWhenSauceConnectIsDisabledAndNoProxy()
+    {
+        mockRunningStory();
+        configurer.setSauceLabsEnabled(true);
+        configurer.setSauceConnectEnabled(false);
+        DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(null, null);
+        configurer.configure(desiredCapabilities);
+        verify(desiredCapabilities).setCapability(SAUCE_OPTIONS, Map.of(NAME_CAPABILITY, STORY_NAME));
+        verifyNoInteractions(sauceConnectManager);
+    }
+
+    @Test
+    void shouldStartSauceConnectWhenSauceConnectIsEnabled()
+    {
+        mockRunningStory();
+        configurer.setSauceLabsEnabled(true);
+        configurer.setSauceConnectEnabled(true);
+        Map<String, Object> sauceOptions = new HashMap<>();
+        DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(null, sauceOptions);
+        when(sauceConnectManager.getTunnelId()).thenReturn(TUNNEL_ID);
+        configurer.configure(desiredCapabilities);
+        verify(sauceConnectManager).start(new SauceConnectOptions());
+        assertEquals(Map.of(NAME_CAPABILITY, STORY_NAME, TUNNEL_IDENTIFIER_CAPABILITY, TUNNEL_ID), sauceOptions);
+    }
+
+    @Test
+    void shouldStartSauceConnectWhenSauceConnectIsDisabledButProxyIsStarted()
     {
         when(bddRunContext.getRunningStory()).thenReturn(null);
         configurer.setSauceLabsEnabled(true);
         configurer.setSauceConnectEnabled(false);
-        configurer.configure(new DesiredCapabilities());
-        verifyNoInteractions(sauceConnectManager, proxy);
+        String restUrl = "http://eu-central-1.saucelabs.com/rest/v1";
+        configurer.setRestUrl(restUrl);
+        String sauceConnectArguments = "--verbose";
+        configurer.setSauceConnectArguments(sauceConnectArguments);
+        Proxy proxy = mock(Proxy.class);
+        String httpProxy = "http-proxy:8080";
+        when(proxy.getHttpProxy()).thenReturn(httpProxy);
+        Map<String, Object> sauceOptions = new HashMap<>();
+        DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(proxy, sauceOptions);
+        when(sauceConnectManager.getTunnelId()).thenReturn(TUNNEL_ID);
+        configurer.configure(desiredCapabilities);
+        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
+        sauceConnectOptions.setProxy(httpProxy);
+        sauceConnectOptions.setRestUrl(restUrl);
+        sauceConnectOptions.setCustomArguments(sauceConnectArguments);
+        verify(sauceConnectManager).start(sauceConnectOptions);
+        assertEquals(Map.of(TUNNEL_IDENTIFIER_CAPABILITY, TUNNEL_ID), sauceOptions);
+    }
+
+    private void mockRunningStory()
+    {
+        Story story = new Story(STORY_PATH, List.of());
+        RunningStory runningStory = new RunningStory();
+        runningStory.setStory(story);
+        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+    }
+
+    private DesiredCapabilities mockDesiredCapabilities(Proxy proxy, Map<String, Object> sauceOptions)
+    {
+        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        when(desiredCapabilities.getCapability(CapabilityType.PROXY)).thenReturn(proxy);
+        when(desiredCapabilities.getCapability(SAUCE_OPTIONS)).thenReturn(sauceOptions);
+        return desiredCapabilities;
     }
 }
