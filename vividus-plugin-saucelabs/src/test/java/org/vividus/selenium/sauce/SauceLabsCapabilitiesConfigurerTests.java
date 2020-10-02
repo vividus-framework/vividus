@@ -50,7 +50,7 @@ class SauceLabsCapabilitiesConfigurerTests
         when(bddRunContext.getRunningStory()).thenReturn(null);
         configurer.setSauceLabsEnabled(true);
         configurer.setSauceConnectEnabled(false);
-        configurer.addCapabilities(new DesiredCapabilities());
+        configurer.configure(new DesiredCapabilities());
         verifyNoInteractions(sauceConnectManager, proxy);
     }
 }

@@ -53,7 +53,7 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
     }
 
     @Override
-    public void addCapabilities(DesiredCapabilities desiredCapabilities)
+    public void configure(DesiredCapabilities desiredCapabilities)
     {
         if (sauceLabsEnabled)
         {

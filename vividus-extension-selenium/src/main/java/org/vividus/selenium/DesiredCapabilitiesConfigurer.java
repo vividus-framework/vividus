@@ -20,5 +20,5 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 public interface DesiredCapabilitiesConfigurer
 {
-    void addCapabilities(DesiredCapabilities desiredCapabilities);
+    void configure(DesiredCapabilities desiredCapabilities);
 }
