@@ -16,7 +16,9 @@
 
 package org.vividus.bdd.monitor;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Optional;
 
 import com.google.common.eventbus.EventBus;
@@ -40,6 +42,8 @@ public abstract class AbstractScreenshotOnFailureMonitor extends NullStepMonitor
     private static final String NO_SCREENSHOT_ON_FAILURE_META_NAME = "noScreenshotOnFailure";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScreenshotOnFailureMonitor.class);
+
+    private List<String> debugModes;
 
     private final ThreadLocal<Boolean> takeScreenshotOnFailureEnabled = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
@@ -98,10 +102,21 @@ public abstract class AbstractScreenshotOnFailureMonitor extends NullStepMonitor
 
     protected abstract Optional<Screenshot> takeAssertionFailureScreenshot(String screenshotName);
 
-    private static boolean takeScreenshotOnFailure(Method method)
+    private boolean takeScreenshotOnFailure(Method method)
     {
-        return method != null && (method.isAnnotationPresent(TakeScreenshotOnFailure.class) || method
-                .getDeclaringClass().isAnnotationPresent(TakeScreenshotOnFailure.class));
+        if (method != null)
+        {
+            AnnotatedElement annotatedElement = method.isAnnotationPresent(TakeScreenshotOnFailure.class) ? method
+                    : method.getDeclaringClass();
+            TakeScreenshotOnFailure annotation = annotatedElement.getAnnotation(TakeScreenshotOnFailure.class);
+            if (annotation != null)
+            {
+                String debugModeProperty = annotation.onlyInDebugMode();
+                return debugModeProperty.isEmpty() || (debugModes != null
+                                                       && debugModes.stream().anyMatch(debugModeProperty::equals));
+            }
+        }
+        return false;
     }
 
     private void enableScreenshotOnFailure()
@@ -127,5 +142,10 @@ public abstract class AbstractScreenshotOnFailureMonitor extends NullStepMonitor
                        .map(RunningScenario::getScenario)
                        .map(Scenario::getMeta)
                        .map(m -> m.hasProperty(NO_SCREENSHOT_ON_FAILURE_META_NAME)).orElse(Boolean.FALSE);
+    }
+
+    public void setDebugModes(List<String> debugModes)
+    {
+        this.debugModes = debugModes;
     }
 }

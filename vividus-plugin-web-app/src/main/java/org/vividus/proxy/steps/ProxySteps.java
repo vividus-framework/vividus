@@ -44,6 +44,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
@@ -56,6 +57,7 @@ import org.vividus.ui.web.action.IWebWaitActions;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 
 @SuppressWarnings("PMD.ExcessiveImports")
+@TakeScreenshotOnFailure(onlyInDebugMode = "proxy")
 public class ProxySteps
 {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
