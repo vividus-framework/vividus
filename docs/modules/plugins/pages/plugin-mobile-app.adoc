@@ -268,5 +268,39 @@ Scenario: Type text
 When I type `Bob` in field located `accessibilityId(username)`
 ----
 
+=== Swipe to an element
+
+==== *_Info_*
+
+Swipes to an element in either UP or DOWN direction with the specified duration
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I swipe $direction to element located `$locator` with duration $swipeDuration
+----
+
+==== Properties
+
+* `mobile-application.swipe.limit` - defines max numbers of swipes to perform (if it's reached the swipe process is stopped and the error is thrown)
+* `mobile-application.swipe.stabilization-duration` - defines a duration to wait after swipe until view becomes stable
+
+==== *_Parameters_*
+
+. `$direction` - direction to swipe, either UP or DOWN
+. `$locator` - <<_locator>>
+. `$duration` - swipe duration in {iso-date-format-link} format
+
+==== *_Usage_*
+
+.Swipe.story
+[source,gherkin]
+----
+Scenario: Swipe to element
+Then number of elements found by `accessibilityId(end-of-screen)` is equal to `0`
+When I swipe UP to element located `accessibilityId(end-of-screen)` with duration PT1S
+Then number of elements found by `accessibilityId(end-of-screen)` is equal to `1`
+----
 
 include::partial$generic-ui-steps.adoc[]

@@ -56,10 +56,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -117,13 +115,13 @@ public class WebScreenshotTakerTests
     @Mock
     private ScreenshotConfiguration screenshotConfiguration;
 
-    @InjectMocks
     private WebScreenshotTaker screenshotTaker;
 
     @Before
     public void before()
     {
-        MockitoAnnotations.initMocks(this);
+        screenshotTaker = new WebScreenshotTaker(webDriverProvider, screenshotFileNameGenerator, webElementHighlighter,
+                eventBus, scrollbarHandler, ashotFactory, screenshotDebugger);
         screenshotTaker.setHighlighterType(HighlighterType.DEFAULT);
         screenshotTaker.setIndent(1);
         screenshotTaker.setShootingStrategy(STRATEGY);

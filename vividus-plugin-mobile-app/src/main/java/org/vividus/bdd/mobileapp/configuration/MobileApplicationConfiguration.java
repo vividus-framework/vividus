@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.screenshot;
+package org.vividus.bdd.mobileapp.configuration;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.Optional;
+import java.time.Duration;
 
-public interface ScreenshotTaker
+public class MobileApplicationConfiguration
 {
-    Optional<Screenshot> takeScreenshot(String screenshotName);
+    private final Duration swipeStabilizationDuration;
+    private final int swipeLimit;
 
-    BufferedImage takeViewportScreenshot() throws IOException;
+    public MobileApplicationConfiguration(Duration swipeStabilizationDuration, int swipeLimit)
+    {
+        this.swipeStabilizationDuration = swipeStabilizationDuration;
+        this.swipeLimit = swipeLimit;
+    }
+
+    public Duration getSwipeStabilizationDuration()
+    {
+        return swipeStabilizationDuration;
+    }
+
+    public int getSwipeLimit()
+    {
+        return swipeLimit;
+    }
 }

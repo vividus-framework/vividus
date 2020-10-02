@@ -17,26 +17,33 @@
 package org.vividus.bdd.mobileapp.steps;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.mobileapp.model.SwipeDirection;
+import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.mobileapp.action.KeyboardActions;
-import org.vividus.mobileapp.action.TapActions;
+import org.vividus.mobileapp.action.TouchActions;
+import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 
-public class ActionSteps
+public class TouchSteps
 {
-    private final TapActions tapActions;
+    private final TouchActions touchActions;
     private final KeyboardActions keyboardActions;
     private final IBaseValidations baseValidations;
+    private final ISearchActions searchActions;
 
-    public ActionSteps(TapActions tapActions, KeyboardActions keyboardActions, IBaseValidations baseValidations)
+    public TouchSteps(TouchActions touchActions, KeyboardActions keyboardActions, IBaseValidations baseValidations,
+            ISearchActions searchActions)
     {
-        this.tapActions = tapActions;
+        this.touchActions = touchActions;
         this.keyboardActions = keyboardActions;
         this.baseValidations = baseValidations;
+        this.searchActions = searchActions;
     }
 
     /**
@@ -55,7 +62,7 @@ public class ActionSteps
     @When(value = "I tap on element located `$locator` with duration `$duration`", priority = 1)
     public void tapByLocatorWithDuration(Locator locator, Duration duration)
     {
-        findElementToTap(locator).ifPresent(e -> tapActions.tap(e, duration));
+        findElementToTap(locator).ifPresent(e -> touchActions.tap(e, duration));
     }
 
     /**
@@ -71,7 +78,7 @@ public class ActionSteps
     @When("I tap on element located `$locator`")
     public void tapByLocator(Locator locator)
     {
-        findElementToTap(locator).ifPresent(tapActions::tap);
+        findElementToTap(locator).ifPresent(touchActions::tap);
     }
 
     /**
@@ -90,6 +97,31 @@ public class ActionSteps
     {
         baseValidations.assertElementExists("The element to type text", locator)
                 .ifPresent(e -> keyboardActions.typeText(e, text));
+    }
+
+    /**
+     * Swipes to element in <b>direction</b> direction with duration <b>duration</b>
+     * @param direction direction to swipe, either <b>UP</b> or <b>DOWN</b>
+     * @param locator locator to find an element
+     * @param duration swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
+     */
+    @When("I swipe $direction to element located `$locator` with duration $swipeDuration")
+    public void swipeToElement(SwipeDirection direction, Locator locator, Duration duration)
+    {
+        locator.getSearchParameters().setWaitForElement(false);
+
+        List<WebElement> elements = searchActions.findElements(locator);
+        if (elements.isEmpty())
+        {
+            touchActions.swipeUntil(direction, duration, () ->
+            {
+                elements.addAll(searchActions.findElements(locator));
+                return !elements.isEmpty();
+            });
+        }
+
+        baseValidations.assertElementsNumber(String.format("The element by locator %s exists", locator), elements,
+                ComparisonRule.EQUAL_TO, 1);
     }
 
     private Optional<WebElement> findElementToTap(Locator locator)

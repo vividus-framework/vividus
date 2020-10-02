@@ -14,7 +14,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
 
-    api(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: '1.5.4')
+    api(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: versions.ashot)
     api(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.1')
     api(group: 'edu.uci.ics', name: 'crawler4j', version: '4.4.0')
 
