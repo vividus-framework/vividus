@@ -333,7 +333,7 @@ jobs:
           declare -a profiles=( iexplore chrome firefox edge )
           for profile in "${profiles[@]}"; do
             ./gradlew runStories -x testVividusInitialization \
-                                 -Pvividus.configuration.environments= \
+                                 -Pvividus.configuration.environments=system/saucelabs \
                                  -Pvividus.configuration.suite=grid \
                                  -Pvividus.configuration.profiles=saucelabs/web,web/desktop/${profile} \
                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
