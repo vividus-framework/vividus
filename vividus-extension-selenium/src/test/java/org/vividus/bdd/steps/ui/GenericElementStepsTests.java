@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.steps.ui;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,6 +27,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -36,6 +40,8 @@ import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.State;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 
 @ExtendWith(MockitoExtension.class)
 class GenericElementStepsTests
@@ -72,5 +78,19 @@ class GenericElementStepsTests
         ordered.verify(baseValidations).assertIfNumberOfElementsFound(THE_NUMBER_OF_FOUND_ELEMENTS,
                 locator, number, comparisonRule);
         ordered.verify(baseValidations, times(3)).assertElementState("Element is ENABLED", state, webElement);
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "VISIBLE, VISIBLE", "INVISIBLE, NOT_VISIBLE" })
+    void shouldThrowAnExceptionIfLocatorVisibilityAndStateToCheckAreTheSame(Visibility visibility, State state)
+    {
+        SearchParameters searchParameter = new SearchParameters(VALUE, visibility);
+        Locator locator = new Locator(TestLocatorType.SEARCH, searchParameter);
+        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
+            () -> elementSteps.assertElementsNumberInState(state, locator, ComparisonRule.EQUAL_TO, 0));
+        assertEquals(String.format(
+                "Locator visibility: %s and the state: %s to validate are the same."
+                        + " This makes no sense. Please consider validation of elements size instead.",
+                visibility, state), iae.getMessage());
     }
 }

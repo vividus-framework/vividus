@@ -204,4 +204,4 @@ Then the text 'has been successfully uploaded' exists
 
 Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
 Given I am on a page with the URL '${vividus-test-site-url}'
-Then number of VISIBLE elements found by `tagName(img)` is = `1`
+Then number of VISIBLE elements found by `tagName(img):a` is = `1`

@@ -26,7 +26,9 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.vividus.ui.State;
 
 class VisibilityTests
 {
@@ -44,6 +46,13 @@ class VisibilityTests
             () -> Visibility.getElementType("some random stuff"));
         assertThat(illegalArgumentException.getMessage(),
                 containsString("Illegal visibility type 'some random stuff'. Expected one of visible, invisible, all"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "VISIBLE, VISIBLE", "INVISIBLE, NOT_VISIBLE", "ALL, "})
+    void shouldReturnCorrectState(Visibility visibility, State expectedState)
+    {
+        assertEquals(visibility.getState(), expectedState);
     }
 
     static Stream<Arguments> elementTypeSource()
