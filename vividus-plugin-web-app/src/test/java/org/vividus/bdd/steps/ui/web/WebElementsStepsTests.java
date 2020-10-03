@@ -39,7 +39,6 @@ import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
-import org.vividus.ui.State;
 import org.vividus.ui.action.SearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -189,23 +188,6 @@ class WebElementsStepsTests
         when(mockedBaseValidations.assertIfElementDoesNotExist("An element with text 'text'",
                 new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, TEXT))).thenReturn(true);
         assertTrue(webElementsSteps.textDoesNotExist(TEXT));
-    }
-
-    @Test
-    void testIsFrameWithCertainAttributeFound()
-    {
-        webElementsSteps.isFrameWithCertainAttributeFound(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verify(mockedBaseValidations).assertIfElementExists(A_FRAME_WITH_THE_ATTRIBUTE_ATTRIBUTE_TYPE_ATTRIBUTE_VALUE,
-                new Locator(WebLocatorType.XPATH, XPATH));
-    }
-
-    @Test
-    void testIsStateFrameWithCertainAttributeFound()
-    {
-        when(mockedBaseValidations.assertIfElementExists(A_FRAME_WITH_THE_ATTRIBUTE_ATTRIBUTE_TYPE_ATTRIBUTE_VALUE,
-                new Locator(WebLocatorType.XPATH, XPATH))).thenReturn(mockedWebElement);
-        webElementsSteps.isFrameWithCertainAttributeFound(State.ENABLED, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verify(mockedBaseValidations).assertElementState("The found frame is ENABLED", State.ENABLED, mockedWebElement);
     }
 
     @Test
