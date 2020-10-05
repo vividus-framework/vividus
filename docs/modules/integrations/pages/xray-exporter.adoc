@@ -184,7 +184,7 @@ Any scenario that doesn't correspons to the <<_rules_2, manual test case rules>>
 [source,gherkin]
 ----
 Scenario: Verify link
-Meta: @testCaseID TEST-231
+Meta: @testCaseId TEST-231
       @requirementId STORY-783
       @xray.labels link
       @xray.components web
@@ -203,7 +203,7 @@ Examples:
 [source,gherkin]
 ----
 Scenario: Verify link
-Meta: @testCaseID TEST-566
+Meta: @testCaseId TEST-566
       @requirementId STORY-983
       @xray.labels link
       @xray.components web
@@ -237,7 +237,7 @@ Examples:
 [source,gherkin]
 ----
 Scenario: Buy an item
-Meta: @testCaseID TEST-435
+Meta: @testCaseId TEST-435
       @requirementId STORY-234
       @xray.labels shopping; payment
       @xray.components web
