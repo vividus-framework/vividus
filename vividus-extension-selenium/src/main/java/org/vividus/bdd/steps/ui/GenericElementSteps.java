@@ -18,6 +18,7 @@ package org.vividus.bdd.steps.ui;
 
 import java.util.List;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
@@ -25,6 +26,7 @@ import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.Visibility;
 
 @TakeScreenshotOnFailure
 public class GenericElementSteps
@@ -67,6 +69,10 @@ public class GenericElementSteps
     @Then("number of $state elements found by `$locator` is $comparisonRule `$quantity`")
     public void assertElementsNumberInState(State state, Locator locator, ComparisonRule comparisonRule, int quantity)
     {
+        Visibility visibility = locator.getSearchParameters().getVisibility();
+        Validate.isTrue(state != visibility.getState(),
+            "Locator visibility: %s and the state: %s to validate are the same."
+            + " This makes no sense. Please consider validation of elements size instead.", visibility, state);
         String description = "Element is " + state;
         assertElementsNumber(locator, comparisonRule, quantity)
                 .forEach(e -> baseValidations.assertElementState(description, state, e));
