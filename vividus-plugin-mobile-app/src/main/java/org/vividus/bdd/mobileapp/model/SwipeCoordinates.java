@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.screenshot;
+package org.vividus.bdd.mobileapp.model;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.Optional;
+import org.openqa.selenium.Point;
 
-public interface ScreenshotTaker
+public class SwipeCoordinates
 {
-    Optional<Screenshot> takeScreenshot(String screenshotName);
+    private final Point start;
+    private final Point end;
 
-    BufferedImage takeViewportScreenshot() throws IOException;
+    public SwipeCoordinates(int startX, int startY, int endX, int endY)
+    {
+        this.start = new Point(startX, startY);
+        this.end = new Point(endX, endY);
+    }
+
+    public Point getStart()
+    {
+        return start;
+    }
+
+    public Point getEnd()
+    {
+        return end;
+    }
 }

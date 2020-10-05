@@ -18,22 +18,19 @@ package org.vividus.selenium.mobileapp;
 
 import java.util.Optional;
 
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.screenshot.AbstractScreenshotTaker;
 import org.vividus.selenium.screenshot.IScreenshotFileNameGenerator;
 import org.vividus.selenium.screenshot.Screenshot;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
 
-public class MobileAppScreenshotTaker implements ScreenshotTaker
+public class MobileAppScreenshotTaker extends AbstractScreenshotTaker
 {
-    private final IWebDriverProvider webDriverProvider;
     private final IScreenshotFileNameGenerator screenshotFileNameGenerator;
 
     public MobileAppScreenshotTaker(IWebDriverProvider webDriverProvider,
             IScreenshotFileNameGenerator screenshotFileNameGenerator)
     {
-        this.webDriverProvider = webDriverProvider;
+        super(webDriverProvider);
         this.screenshotFileNameGenerator = screenshotFileNameGenerator;
     }
 
@@ -41,7 +38,6 @@ public class MobileAppScreenshotTaker implements ScreenshotTaker
     public Optional<Screenshot> takeScreenshot(String screenshotName)
     {
         String fileName = screenshotFileNameGenerator.generateScreenshotFileName(screenshotName);
-        byte[] data = webDriverProvider.getUnwrapped(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
-        return Optional.of(new Screenshot(fileName, data));
+        return Optional.of(new Screenshot(fileName, getScreenshotBytes()));
     }
 }

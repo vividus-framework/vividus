@@ -11,7 +11,7 @@
         <constructor-arg index="0" value="${mobile-application.session-scope}" />
     </bean>
 
-    <bean class="org.vividus.mobileapp.action.TapActions" />
+    <bean class="org.vividus.mobileapp.action.TouchActions" />
 
     <bean class="org.vividus.mobileapp.action.KeyboardActions" />
 
@@ -21,9 +21,14 @@
 
     <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
 
-    <bean id="actionSteps" class="org.vividus.bdd.mobileapp.steps.ActionSteps" />
+    <bean id="touchSteps" class="org.vividus.bdd.mobileapp.steps.TouchSteps" />
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
+
+    <bean class="org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration" >
+        <constructor-arg index="0" value="${mobile-application.swipe.stabilization-duration}" />
+        <constructor-arg index="1" value="${mobile-application.swipe.limit}" />
+    </bean>
 
     <bean class="org.vividus.selenium.mobileapp.MobileAppDriverFactory"
         parent="parentWebDriverFactory"/>
@@ -41,6 +46,6 @@
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
         <idref bean="applicationSteps" />
         <idref bean="webDriverSetupSteps" />
-        <idref bean="actionSteps" />
+        <idref bean="touchSteps" />
     </util:list>
 </beans>

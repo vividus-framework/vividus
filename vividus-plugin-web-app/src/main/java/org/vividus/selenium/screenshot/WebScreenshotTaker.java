@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
-
 import com.google.common.eventbus.EventBus;
 
 import org.apache.commons.io.FileUtils;
@@ -41,17 +39,16 @@ import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.cropper.indent.IndentCropper;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
-public class WebScreenshotTaker implements ScreenshotTaker
+public class WebScreenshotTaker extends AbstractScreenshotTaker
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebScreenshotTaker.class);
 
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IScreenshotFileNameGenerator screenshotFileNameGenerator;
-    @Inject private IWebElementHighlighter webElementHighlighter;
-    @Inject private EventBus eventBus;
-    @Inject private IScrollbarHandler scrollbarHandler;
-    @Inject private IAshotFactory ashotFactory;
-    @Inject private ScreenshotDebugger screenshotDebugger;
+    private final IScreenshotFileNameGenerator screenshotFileNameGenerator;
+    private final IWebElementHighlighter webElementHighlighter;
+    private final EventBus eventBus;
+    private final IScrollbarHandler scrollbarHandler;
+    private final IAshotFactory ashotFactory;
+    private final ScreenshotDebugger screenshotDebugger;
 
     private File screenshotDirectory;
     private boolean fullPageScreenshots;
@@ -59,6 +56,20 @@ public class WebScreenshotTaker implements ScreenshotTaker
     private HighlighterType highlighterType;
     private String shootingStrategy;
     private PropertyMappedCollection<ScreenshotConfiguration> ashotConfigurations;
+
+    public WebScreenshotTaker(IWebDriverProvider webDriverProvider,
+            IScreenshotFileNameGenerator screenshotFileNameGenerator, IWebElementHighlighter webElementHighlighter,
+            EventBus eventBus, IScrollbarHandler scrollbarHandler, IAshotFactory ashotFactory,
+            ScreenshotDebugger screenshotDebugger)
+    {
+        super(webDriverProvider);
+        this.screenshotFileNameGenerator = screenshotFileNameGenerator;
+        this.webElementHighlighter = webElementHighlighter;
+        this.eventBus = eventBus;
+        this.scrollbarHandler = scrollbarHandler;
+        this.ashotFactory = ashotFactory;
+        this.screenshotDebugger = screenshotDebugger;
+    }
 
     @Override
     public Optional<Screenshot> takeScreenshot(String screenshotName)
@@ -120,7 +131,7 @@ public class WebScreenshotTaker implements ScreenshotTaker
     {
         Supplier<ru.yandex.qatools.ashot.Screenshot> screenshotTaker = () -> searchContext instanceof WebDriver
                 ? aShot.takeScreenshot((WebDriver) searchContext)
-                : aShot.takeScreenshot(webDriverProvider.get(), (WebElement) searchContext);
+                : aShot.takeScreenshot(getWebDriverProvider().get(), (WebElement) searchContext);
 
         ru.yandex.qatools.ashot.Screenshot screenshot =
                 scrollableElement.map(e -> scrollbarHandler.performActionWithHiddenScrollbars(screenshotTaker, e))
@@ -193,7 +204,7 @@ public class WebScreenshotTaker implements ScreenshotTaker
 
     private byte[] takeScreenshotAsByteArray(Supplier<byte[]> screenshotDataSupplier)
     {
-        if (webDriverProvider.isWebDriverInitialized())
+        if (getWebDriverProvider().isWebDriverInitialized())
         {
             return screenshotDataSupplier.get();
         }
@@ -203,7 +214,7 @@ public class WebScreenshotTaker implements ScreenshotTaker
 
     private byte[] takeScreenshotAsByteArrayImpl(List<WebElement> webElements, boolean viewportScreenshot)
     {
-        WebDriver webDriver = webDriverProvider.get();
+        WebDriver webDriver = getWebDriverProvider().get();
         try
         {
             AShot aShot = createAShot(viewportScreenshot);

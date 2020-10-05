@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.mobileapp;
+package org.vividus.selenium.screenshot;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
@@ -33,39 +33,46 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.IScreenshotFileNameGenerator;
-import org.vividus.selenium.screenshot.Screenshot;
+import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
-class MobileAppScreenshotTakerTests
+class AbstractScreenshotTakerTests
 {
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private TakesScreenshot takesScreenshot;
-    @InjectMocks private MobileAppScreenshotTaker screenshotTaker;
+    @InjectMocks private TestScreenshotTaker testScreenshotTaker;
 
     @AfterEach
     void afterEach()
     {
-        verifyNoMoreInteractions(webDriverProvider, screenshotFileNameGenerator, takesScreenshot);
+        verifyNoMoreInteractions(webDriverProvider, takesScreenshot);
     }
 
     @Test
-    void shouldTakeScreenshot()
+    void shouldTakeViewportScreenshot() throws IOException
     {
-        String screenshotName = "screenshot-name";
-        String fileName = "file-name";
-        byte[] data = { 0 };
+        byte[] bytes = ResourceUtils.loadResourceAsByteArray(getClass(), "image.png");
 
-        when(screenshotFileNameGenerator.generateScreenshotFileName(screenshotName)).thenReturn(fileName);
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
-        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(data);
+        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(bytes);
 
-        Optional<Screenshot> takenScreenshot = screenshotTaker.takeScreenshot(screenshotName);
-        assertTrue(takenScreenshot.isPresent());
-        Screenshot screenshot = takenScreenshot.get();
-        assertEquals(fileName, screenshot.getFileName());
-        assertArrayEquals(data, screenshot.getData());
-        verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
+        BufferedImage image = testScreenshotTaker.takeViewportScreenshot();
+
+        assertEquals(400, image.getWidth());
+        assertEquals(600, image.getHeight());
+    }
+
+    private static class TestScreenshotTaker extends AbstractScreenshotTaker
+    {
+        TestScreenshotTaker(IWebDriverProvider webDriverProvider)
+        {
+            super(webDriverProvider);
+        }
+
+        @Override
+        public Optional<Screenshot> takeScreenshot(String screenshotName)
+        {
+            throw new UnsupportedOperationException();
+        }
     }
 }
