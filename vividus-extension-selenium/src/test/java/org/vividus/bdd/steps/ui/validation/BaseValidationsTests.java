@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -44,6 +45,8 @@ import java.util.function.Function;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -577,15 +580,56 @@ class BaseValidationsTests
         assertTrue(element.isEmpty());
     }
 
+    @Test
+    void shouldFailIfExpectedNumberOfElementsIsLessThanZero()
+    {
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> baseValidations
+                .assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, null, 0, ComparisonRule.LESS_THAN));
+        assertEquals("Invalid input rule: the number of elements can not be less than 0", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "EQUAL_TO, number of elements is a value equal to <0>, is equal to 0",
+        "LESS_THAN_OR_EQUAL_TO, number of elements is a value less than or equal to <0>, is less than or equal to 0"
+    })
+    void shouldNotWaitForElementsIfExpectedNumberOfElementsIsEqualToOrLessThanOrEqualToZero(ComparisonRule rule,
+            String matcherAsString, String comparison)
+    {
+        testAssertIfNumberOfElementsFound(
+            attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, mockedSearchContext,
+                attributes, 0, rule), false, List.of(), comparison, matcherAsString, false);
+    }
+
+    @Test
+    void shouldWaitForElementIfExpectedNumberOfElementsIsGreaterThanOrEqualToZero()
+    {
+        testAssertIfNumberOfElementsFound(
+            attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, mockedSearchContext,
+                    attributes, 0, ComparisonRule.GREATER_THAN_OR_EQUAL_TO),
+            true, List.of(), "is greater than or equal to 0",
+            "number of elements is a value equal to or greater than <0>", true);
+    }
+
+    private void testAssertIfNumberOfElementsFound(Function<Locator, List<WebElement>> actualCall, boolean checkPassed,
+            List<WebElement> foundElements)
+    {
+        testAssertIfNumberOfElementsFound(actualCall, checkPassed, foundElements, "is equal to 1", EQUAL_TO_MATCHER,
+                true);
+    }
+
     private void testAssertIfNumberOfElementsFound(Function<Locator, List<WebElement>> actualCall,
-            boolean checkPassed, List<WebElement> foundElements)
+            boolean checkPassed, List<WebElement> foundElements, String comparison, String marcher, boolean wait)
     {
         Locator attributes = new Locator(SEARCH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(foundElements);
         when(softAssert.assertThat(eq(BUSINESS_DESCRIPTION),
-                eq("Number of elements found by ' Search: './/xpath=1'; Visibility: VISIBLE;' is equal to 1"),
-                eq(foundElements), argThat(m -> EQUAL_TO_MATCHER.equals(m.toString())))).thenReturn(checkPassed);
+                eq("Number of elements found by ' Search: './/xpath=1'; Visibility: VISIBLE;' " + comparison),
+                eq(foundElements), argThat(m -> marcher.equals(m.toString())))).thenReturn(checkPassed);
+        assertTrue(attributes.getSearchParameters().isWaitForElement());
         assertEquals(foundElements, actualCall.apply(attributes));
+        assertEquals(wait, attributes.getSearchParameters().isWaitForElement());
     }
 
     private void mockAssertingWebElements(List<WebElement> elements)

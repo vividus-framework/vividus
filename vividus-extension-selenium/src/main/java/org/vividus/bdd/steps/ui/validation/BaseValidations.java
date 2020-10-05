@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.steps.ui.validation;
 
+import static org.apache.commons.lang3.Validate.isTrue;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.vividus.ui.validation.matcher.ElementNumberMatcher.elementNumber;
 
@@ -363,6 +364,15 @@ public class BaseValidations implements IBaseValidations
     {
         return runValidatingSearchContext(searchContext, () ->
         {
+            if (number == 0)
+            {
+                isTrue(ComparisonRule.LESS_THAN != comparisonRule,
+                        "Invalid input rule: the number of elements can not be less than 0");
+                if (ComparisonRule.EQUAL_TO == comparisonRule || ComparisonRule.LESS_THAN_OR_EQUAL_TO == comparisonRule)
+                {
+                    locator.getSearchParameters().setWaitForElement(false);
+                }
+            }
             List<WebElement> elements = searchActions.findElements(searchContext, locator);
             String systemDescription = String.format("Number of elements found by '%s' is %s %d", locator,
                     comparisonRule, number);
