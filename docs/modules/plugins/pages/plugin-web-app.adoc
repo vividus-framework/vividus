@@ -647,3 +647,4 @@ Then a JSON element from '${response}' by the JSON path '$.headers' is equal to 
     "Testname2": "testValue2"
 }
 'IGNORING_EXTRA
+----
