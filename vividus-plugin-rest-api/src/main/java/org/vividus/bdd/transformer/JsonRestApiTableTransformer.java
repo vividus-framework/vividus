@@ -54,8 +54,8 @@ public class JsonRestApiTableTransformer implements ExtendedTableTransformer
                 entry("url", this::getJsonByUrl),
                 entry("variable", bddVariableContext::getVariable));
 
-
-        Map<String, String> columnsPerJsonPaths = Splitter.on(';').withKeyValueSeparator('=').split(columns);
+        Map<String, String> columnsPerJsonPaths = Splitter.on(';').withKeyValueSeparator(Splitter.on('=').limit(2))
+                .split(columns);
 
         List<List<String>> values = JsonPathUtils.getData(jsonData, columnsPerJsonPaths.values()).stream().map(e ->
         {

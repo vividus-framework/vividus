@@ -48,6 +48,7 @@ class JsonRestApiTableTransformerTests
     private static final String URL = "url";
     private static final String URL_VALUE = "https://example.com/";
     private static final String COLUMNS = "columns";
+    private static final String VARIABLE = "variable";
 
     @Mock
     private IBddVariableContext bddVariableContext;
@@ -72,7 +73,7 @@ class JsonRestApiTableTransformerTests
     {
         String varName = "varName";
         when(bddVariableContext.getVariable(varName)).thenReturn(JSON_DATA);
-        testTransform(Map.entry("variable", varName));
+        testTransform(Map.entry(VARIABLE, varName));
     }
 
     private void testTransform(Entry<String, String> source)
@@ -82,6 +83,18 @@ class JsonRestApiTableTransformerTests
         Map<String, String> keyToJsonPathValue = Map.ofEntries(columns, source);
         String expectedTable = "|column_code|column_codeSystem|column_type|\n|107214|VIVIDUS|A|\n|107224|VIVIDUS|B|"
                 + "\n|107314|VIVIDUS|C|\n|107324|VIVIDUS|D|\n|107XX4|VIVIDUS|E|\n|1|true|F|";
+        String table = jsonTableGenerator.transform(StringUtils.EMPTY, null, createProperties(keyToJsonPathValue));
+        assertEquals(expectedTable, table);
+    }
+
+    @Test
+    void testTransformFromVariableWithComplexJsonPath()
+    {
+        String varName = "varWithJson";
+        when(bddVariableContext.getVariable(varName)).thenReturn(JSON_DATA);
+        Entry<String, String> columns = Map.entry(COLUMNS, "type=$..[?(@.codes[0].code==\"107214\")].type");
+        Map<String, String> keyToJsonPathValue = Map.ofEntries(columns, Map.entry(VARIABLE, varName));
+        String expectedTable = "|type|\n|A|";
         String table = jsonTableGenerator.transform(StringUtils.EMPTY, null, createProperties(keyToJsonPathValue));
         assertEquals(expectedTable, table);
     }
