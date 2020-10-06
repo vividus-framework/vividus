@@ -6,3 +6,9 @@ When I switch to frame located `xpath(.//*[(local-name()='frame' or local-name()
 
 Composite: When I switch to a frame number '$numberValue' with the attribute '$attributeType'='$attributeValue'
 When I switch to frame located `xpath((.//*[(local-name()='frame' or local-name()='iframe') and @<attributeType>='<attributeValue>'])[<numberValue>]):a`
+
+Composite: Then a frame with the attribute '$attributeType'='$attributeValue' exists
+Then number of elements found by `xpath(.//iframe[@<attributeType>='<attributeValue>'])` is = `1`
+
+Composite: Then a [$state] frame with the attribute '$attributeType'='$attributeValue' exists
+Then number of elements found by `xpath(.//iframe[@<attributeType>='<attributeValue>'])->filter.state(<state>)` is = `1`

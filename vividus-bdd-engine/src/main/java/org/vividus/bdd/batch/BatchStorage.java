@@ -21,9 +21,6 @@ import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.property.IPropertyMapper;
@@ -74,9 +71,7 @@ public class BatchStorage
     private <T> Map<String, T> readFromProperties(IPropertyMapper propertyMapper, String propertyPrefix,
             Class<T> valueType) throws IOException
     {
-        return propertyMapper.readValues(propertyPrefix, valueType).entrySet().stream()
-                .collect(Collectors.toMap(e -> BATCH + e.getKey(), Entry::getValue, (v1, v2) -> null,
-                    () -> new TreeMap<>(getBatchKeyComparator())));
+        return propertyMapper.readValues(propertyPrefix, BATCH::concat, getBatchKeyComparator(), valueType).getData();
     }
 
     private Comparator<String> getBatchKeyComparator()

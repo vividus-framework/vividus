@@ -31,13 +31,14 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.SearchActions;
+import org.vividus.ui.action.SearchActions;
 import org.vividus.ui.web.util.ElementUtil;
 
 @Named
 public class WebElementDeserializer extends JsonDeserializer<Supplier<?>> implements ContextualDeserializer
 {
     @Inject private SearchActions searchActions;
+    @Inject private ElementUtil elementUtil;
 
     @Override
     public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
@@ -51,6 +52,6 @@ public class WebElementDeserializer extends JsonDeserializer<Supplier<?>> implem
     public Supplier<Optional<WebElement>> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
     {
         String locator = p.getText();
-        return ElementUtil.getElement(locator, searchActions);
+        return elementUtil.getElement(locator, searchActions);
     }
 }

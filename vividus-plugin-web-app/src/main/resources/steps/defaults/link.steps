@@ -42,7 +42,7 @@ Then number of elements found by `By.linkText(<text>)->filter().linkURl(<URL>)` 
 
 Composite: Then a link with the text '$text' and URL '$URL' and tooltip '$tooltip' does not exist
 Priority: 2
-Then number of elements found by `By.linkUrl(<URL>)->filter.linkText(<text>).tooltip(<tooltip>)` is equal to `0`
+Then number of elements found by `By.xpath(//a[text()='<text>' and @href='<URL>' and @title='<tooltip>'])` is equal to `0`
 
 Composite: Then a link with the text '$text' exists
 Then number of elements found by `By.linkText(<text>)` is equal to `1`

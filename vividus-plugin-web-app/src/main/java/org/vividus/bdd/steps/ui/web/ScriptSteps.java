@@ -20,11 +20,11 @@ import javax.inject.Inject;
 
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.action.search.Visibility;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 public class ScriptSteps
@@ -51,7 +51,7 @@ public class ScriptSteps
     public WebElement thenJavascriptFileWithNameIsIncludedInTheSourceCode(String jsFileName)
     {
         return baseValidations.assertIfElementExists(String.format("Script with the name '%s'", jsFileName),
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         new SearchParameters(LocatorUtil.getXPath(".//script[contains(@src, %s)]", jsFileName),
                                 Visibility.ALL)));
     }
@@ -76,7 +76,7 @@ public class ScriptSteps
     public WebElement thenJavascriptFileWithTextIsIncludedInTheSourceCode(String jsText)
     {
         return baseValidations.assertIfElementExists(String.format("Script with text '%s'", jsText),
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         new SearchParameters(LocatorUtil.getXPath(".//script[text()=%s]", jsText), Visibility.ALL)));
     }
 
@@ -100,7 +100,7 @@ public class ScriptSteps
     public WebElement thenJavascriptWithTextPartIsIncludedInTheSourceCode(String jsTextPart)
     {
         return baseValidations.assertIfElementExists(String.format("Script with the text part '%s'", jsTextPart),
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         new SearchParameters(LocatorUtil.getXPath(".//script[contains(text(),%s)]", jsTextPart),
                                 Visibility.ALL)));
     }

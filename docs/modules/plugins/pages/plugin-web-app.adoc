@@ -1,26 +1,178 @@
-= Plugin Web App
+= Web Application Plugin
 :proxy: This step requires proxy to be turned on. It can be done via setting properties or switching on @proxy metatag.
-
-== General Info
 
 The plugin provides functionality to interact with Web applications.
 
 == Installation
 
 .build.gradle
-[source,gradle]
+[source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '0.2.4')
+implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '{page-component-version}')
 ----
+
+
+include::partial$locator-header.adoc[]
+
+=== Types
+
+[cols="1,2,1", options="header"]
+|===
+
+|Locator type
+|Description
+|Example
+
+|linkText
+|text of the link
+|linkText(Google)
+
+|linkUrl
+|*href* attribute of the link element
+|linkUrl(/faq)
+
+|linkUrlPart
+|part of a *href* attribute of the link element
+|linkUrlPart(faq)
+
+|caseSensitiveText
+|case sensitive text of an element
+|caseSensitiveText(Description)
+
+|caseInsensitiveText
+|case insensitive text of an element
+|caseInsensitiveText(description)
+
+|XPath
+|https://developer.mozilla.org/en-US/docs/Web/XPath[Xpath to locate an element]
+|xpath(//a)
+
+|cssSelector
+|CSS selector to an element
+|cssSelector(.menu-item)
+
+|tagName
+|name of an element tagName
+|tagName(a)
+
+|imageSrc
+|shortcut to a *.//img[@src='<value>>']*
+|imgSrc(/images/kote.png)
+
+|imageSrcPart
+|shortcut to a *.//img[contains(@src,'<value>>')]']*
+|imgSrcPart(kote.png)
+
+|buttonName
+|elements of type button or input with text or any attribute value
+|buttonName(submit)
+
+|fieldName
+|input or textarea with text or any attribute value
+|fieldName(editor)
+
+|checkboxName
+|input element with @type="checkbox" and text value
+|checkboxName(allow)
+
+|id
+|id attribute of an element
+|id(submitForm)
+
+|className
+|CSS class name
+|className(bold)
+
+|elementName
+|Any attribute or text value
+|elementName(OK)
+
+|===
+
+include::partial$visibility-types.adoc[]
+
+=== Filter types
+
+Filter are applied after elements search via locator. Elements not matching filter condition will be sorted out without additional notice.
+
+[cols="1,2,3", options="header"]
+|===
+
+|Filter type
+|Description
+|Example
+
+|state
+|
+element xref:parameters:state.adoc[State]
+|id(v1)->filter.state(VISIBLE)
+
+|caseSensitiveText
+|element text should match case sensitively
+|id(v1)->filter.caseSensitiveText(text)
+
+|classAttributePart
+|class attribute should contain part
+|id(v1)->filter.classAttributePart(clazz)
+
+|linkUrl
+|*href* attribute of the link element
+|id(v1)->filter.linkUrl(/url)
+
+|linkUrlPart
+|part of *href* attribute of the link element
+|id(v1)->filter.linkUrlPart(/url)
+
+|tooltip
+|title attribute value
+|id(v1)->filter.tooltip(title)
+
+|imageSrcPart
+|src attribute should contain value
+|id(v1)->filter.imageSrcPart(part)
+
+|textPart
+|text of an element should contain value
+|id(v1)->filter.textPart(part)
+
+|placeholder
+|Placeholder attribute should be equal to a value
+|id(v1)->filter.placeholder(placeholder-value)
+
+|validationIconSource
+|CSS property background-image should match
+|id(v1)->filter.validationIconSource(src)
+
+|fieldText
+|field text should match expected value
+|id(v1)->filter.fieldText(value)
+
+|fieldTextPart
+|field text should contain expected value
+|id(v1)->filter.fieldTextPart(value)
+
+|dropDownText
+|any of select options should be equal to a value
+|id(v1)->filter.dropDownText(value)
+
+|===
 
 
 == Properties
 
-=== Required
+:application-under-test: browser
+:session-scope-property-base: web-application
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
 
-There are no required properties for the plugin.
+include::partial$selenium-properties.adoc[]
+|===
 
-=== Optional
+=== Meta Tags
 
 @proxy - Some steps requires proxy to be turned on. It can be done via setting properties or switching on @proxy metatag.
 
@@ -84,6 +236,98 @@ Scenario: Verify step When I clear proxy log
 Given I am on a page with the URL 'http:/httpbin.org/get'
 When I clear proxy log
 Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `0`
+----
+
+
+=== Execute sequence of actions
+
+==== *_Info_*
+
+Executes the sequence of web actions
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I execute sequence of actions: $actions
+----
+
+==== *_Parameters_*
+
+. `$actions` - table of actions to execute
+
+==== Possible actions
+
+[cols="1,5,3", options="header"]
+|===
+
+|Type
+|Argument
+|Example
+
+|DOUBLE_CLICK
+|Search attribute or empty value
+|By.linkUrl(http://httpbin.org)
+
+|CLICK_AND_HOLD
+|Search attribute or empty value
+|By.linkText(Click me)
+
+|MOVE_BY_OFFSET
+|Point
+|(10, 15) where *x* is 10 and *y* is 15
+
+|RELEASE
+|Search attribute or empty value
+|By.tagName(div)
+
+|ENTER_TEXT
+|Text
+|Minsk City
+
+|CLICK
+|Search attribute or empty value
+|By.caseSensitiveText(Done)
+
+|PRESS_KEYS
+|Press xref:https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
+|BACK_SPACE
+
+|KEY_DOWN
+|Press xref:https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
+|CONTROL,SHIFT,ALT
+
+|KEY_UP
+|Release xref:https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
+|CONTROL,SHIFT,ALT
+
+|MOVE_TO
+|Search attribute
+|By.id(username)
+
+|===
+
+==== *_Usage_*
+
+.ActionSteps.story
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type          |argument                                |
+|DOUBLE_CLICK  |By.fieldText(Hello World)               |
+|DOUBLE_CLICK  |                                        |
+|CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas)|
+|CLICK_AND_HOLD|                                        |
+|MOVE_BY_OFFSET|(-300, 0)                               |
+|RELEASE       |By.xpath(//signature-pad-control/canvas)|
+|RELEASE       |                                        |
+|ENTER_TEXT    |Text                                    |
+|CLICK         |By.placeholder(Enter your password)     |
+|CLICK         |                                        |
+|PRESS_KEYS    |BACK_SPACE                              |
+|KEY_DOWN      |CONTROL,SHIFT                           |
+|KEY_UP        |CONTROL,SHIFT                           |
+|MOVE_TO       |By.id(name)                             |
 ----
 
 
@@ -192,6 +436,178 @@ When I wait until HTTP GET request with URL pattern `http://httpbin.org/get` exi
 Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `1`
 ----
 
+include::partial$generic-ui-steps.adoc[]
+
+=== Dropdown: verify available options.
+
+==== *_Info_*
+
+Verifies if dropdown located by locator exists and has expected list of options
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then dropdown located `$locator` contains options: $option
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$options` - examples table describing expected options
+
+==== *_Usage_*
+
+.Dropdown.story
+[source,gherkin]
+----
+Then a drop down with the name 'colors' contains the items:
+|state|item |
+|false|Red  |
+|false|Green|
+|true |Blue |
+----
+
+[IMPORTANT]
+
+Item - is an option. State - true/false describes if option selected
+
+
+=== Dropdown: verify first selected option
+
+==== *_Info_*
+
+Verifies if dropdown located by locator exists and first selected option.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then dropdown located `$locator` exists and selected option is `$option`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$option` - first selected option
+
+==== *_Usage_*
+
+.Dropdown.story
+[source,gherkin]
+----
+Then dropdown located `id(colors)` exists and selected option is `Blue`
+----
+
+
+=== Dropdown: add text to a mutli-select
+
+==== *_Info_*
+
+Selects option in multi-select dropdown
+
+[IMPORTANT]
+Step will fail if target dropdown is not multi-select
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I add `$option` to selection in dropdown located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$option` - option to select
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Dropdown.story
+[source,gherkin]
+----
+When I add `Two` to selection in dropdown located `id(numbers)`
+----
+
+
+=== Dropdown: select option
+
+==== *_Info_*
+
+Selects option in dropdown
+
+[IMPORTANT]
+Does not support multi-selection
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I select `$option` in dropdown located `$locator``
+----
+
+==== *_Parameters_*
+
+. `$option` - option to select
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Dropdown.story
+[source,gherkin]
+----
+When I select `Red` in dropdown located `id(colors)`
+----
+
+
+== Dynamic variables
+
+Dynamic variables is variables available out of the box using standard approach `$\{variable-name\}` Usually the data provided by dynamic variables calculated at runtime.
+
+
+=== Context element rectangle
+
+Provides possibility to access context element coordinates, width and height.
+
+[IMPORTANT]
+
+Variable uses contextual approach. So it is necessary to switch context to a target element.
+
+
+==== *Variable name*
+
+[cols="1,3", options="header"]
+|===
+
+|Variable name
+|Description
+
+|context-height
+|provided context element height
+
+|context-width
+|provided context element width
+
+|context-x-coordinate
+|provided context element absolute X coordinate
+
+|context-y-coordinate
+|provided context element absolute Y coordinate
+
+|===
+
+
+==== *Usage example*
+
+[source,gherkin]
+----
+When I change context to element located `tagName(img)`
+Then `${context-height}` is > `0`
+Then `${context-width}` is > `0`
+Then `${context-x-coordinate}` is > `0`
+Then `${context-y-coordinate}` is > `0`
+----
+
 
 === Adds headers to proxy request
 
@@ -230,5 +646,4 @@ Then a JSON element from '${response}' by the JSON path '$.headers' is equal to 
     "Testname1": "testValue1",
     "Testname2": "testValue2"
 }
-'IGNORING_EXTRA_FIELDS
-----
+'IGNORING_EXTRA

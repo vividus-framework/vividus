@@ -7,14 +7,45 @@
      http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
      default-lazy-init="true" profile="mobile_app">
 
+    <bean id="webDriverSetupSteps" class="org.vividus.bdd.steps.WebDriverSetupSteps">
+        <constructor-arg index="0" value="${mobile-application.session-scope}" />
+    </bean>
+
+    <bean class="org.vividus.mobileapp.action.TouchActions" />
+
+    <bean class="org.vividus.mobileapp.action.KeyboardActions" />
+
+    <bean class="org.vividus.bdd.monitor.GenericScreenshotOnFailureMonitor" />
+
+    <bean class="org.vividus.selenium.mobileapp.MobileAppScreenshotTaker" />
+
     <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
 
+    <bean id="touchSteps" class="org.vividus.bdd.mobileapp.steps.TouchSteps" />
+
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
+
+    <bean class="org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration" >
+        <constructor-arg index="0" value="${mobile-application.swipe.stabilization-duration}" />
+        <constructor-arg index="1" value="${mobile-application.swipe.limit}" />
+    </bean>
 
     <bean class="org.vividus.selenium.mobileapp.MobileAppDriverFactory"
         parent="parentWebDriverFactory"/>
 
+    <bean class="org.vividus.ui.mobile.action.search.ByAppiumLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).XPATH}" />
+        <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).XPATH}" />
+    </bean>
+
+    <bean class="org.vividus.ui.mobile.action.search.ByAppiumLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).ACCESSIBILITY_ID}" />
+        <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).ACCESSIBILITY_ID}" />
+    </bean>
+
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
-        <value>applicationSteps</value>
+        <idref bean="applicationSteps" />
+        <idref bean="webDriverSetupSteps" />
+        <idref bean="touchSteps" />
     </util:list>
 </beans>

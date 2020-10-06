@@ -28,7 +28,7 @@ public final class LocatorUtil
     private static final String ANY = "*";
     private static final String CONCAT = "(| )((concat\\([^)]*\\))|('(?!')[^']*')|(\"(?!\\\")[^\"]*\"))";
     private static final Pattern ATTR_VALUE_PATTERN = Pattern
-            .compile("((([\\s])([*]))|([.])|(@[\\w.\\-_(?!normalize-space)]*))(| )=" + CONCAT);
+            .compile("((([\\s])([*]))|([.])|(@[\\w.\\-_]*))(| )=" + CONCAT);
     private static final Pattern ATTR_VALUE_TRANSLATE_PATTERN = Pattern
             .compile("(translate\\([^)]*\\))(| )=" + CONCAT);
     private static final Pattern ANY_ATTR_OR_TEXT_VALUE_PATTERN = Pattern.compile("((@[*])|(text\\(\\)))(| )="

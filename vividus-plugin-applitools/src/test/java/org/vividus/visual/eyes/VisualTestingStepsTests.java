@@ -35,7 +35,7 @@ import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
@@ -52,16 +52,16 @@ class VisualTestingStepsTests
     @Mock private VisualTestingService visualTestingService;
     @Mock private ISoftAssert softAssert;
     @Mock private ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
-    private final IWebUiContext webUiContext = mock(IWebUiContext.class);
+    private final IUiContext uiContext = mock(IUiContext.class);
     private final IAttachmentPublisher attachmentPublisher = mock(IAttachmentPublisher.class);
 
-    @InjectMocks private final VisualTestingSteps visualTestingSteps = new VisualTestingSteps(webUiContext,
+    @InjectMocks private final VisualTestingSteps visualTestingSteps = new VisualTestingSteps(uiContext,
             attachmentPublisher);
 
     @BeforeEach
     void setUp()
     {
-        when(webUiContext.getSearchContext()).thenReturn(mock(SearchContext.class));
+        when(uiContext.getSearchContext()).thenReturn(mock(SearchContext.class));
     }
 
     @Test

@@ -16,40 +16,24 @@
 
 package org.vividus.bdd.issue;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.vividus.softassert.issue.IKnownIssueDataProvider;
+import org.vividus.spring.BeanFactoryUtils;
 
 public class KnownIssueCheckerBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware
 {
-    private static final String DATA_PROVIDER_PREFIX = "knownIssueChecker-";
     private ApplicationContext applicationContext;
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
     {
-        if (!(bean instanceof DelegatingKnownIssueDataProvider))
+        if (bean instanceof DelegatingKnownIssueDataProvider)
         {
-            return bean;
+            ((DelegatingKnownIssueDataProvider) bean).setKnownIssueDataProviders(
+                    BeanFactoryUtils.mergeMaps(applicationContext, "knownIssueChecker-"));
         }
-        DelegatingKnownIssueDataProvider issueChecker = (DelegatingKnownIssueDataProvider) bean;
-        issueChecker.setKnownIssueDataProviders(getDataProviders());
-        return issueChecker;
-    }
-
-    private Map<String, IKnownIssueDataProvider> getDataProviders()
-    {
-        Map<String, IKnownIssueDataProvider> allDataProviders = new HashMap<>();
-        Stream.of(applicationContext.getBeanNamesForType(Map.class))
-                .filter(name -> name.startsWith(DATA_PROVIDER_PREFIX))
-                .map(name -> applicationContext.getBean(name, Map.class))
-                .forEach(allDataProviders::putAll);
-        return allDataProviders;
+        return bean;
     }
 
     @Override

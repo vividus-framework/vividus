@@ -20,6 +20,11 @@ import org.openqa.selenium.WebElement;
 
 public class ClassAttributePartFilter extends AbstractElementFilterAction
 {
+    public ClassAttributePartFilter()
+    {
+        super(WebLocatorType.CLASS_ATTRIBUTE_PART);
+    }
+
     @Override
     protected boolean matches(WebElement element, String text)
     {

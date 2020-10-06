@@ -16,8 +16,12 @@
 
 package org.vividus.ui.web.action.search;
 
-import org.vividus.ui.web.State;
+import org.vividus.ui.State;
 
 public class StateFilter extends AbstractStateFilter<State>
 {
+    public StateFilter()
+    {
+        super(WebLocatorType.STATE);
+    }
 }

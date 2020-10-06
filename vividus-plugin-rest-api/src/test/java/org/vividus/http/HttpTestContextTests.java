@@ -104,6 +104,14 @@ class HttpTestContextTests
     }
 
     @Test
+    void tesAddRequestHeaders()
+    {
+        List<Header> headers = List.of(mock(Header.class));
+        httpTestContext.addRequestHeaders(headers);
+        assertEquals(headers, httpTestContext.getRequestHeaders());
+    }
+
+    @Test
     void testPutJsonContext()
     {
         HttpResponse response = new HttpResponse();

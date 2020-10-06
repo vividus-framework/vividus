@@ -20,10 +20,18 @@ import java.util.List;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.LocatorType;
+import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
-public class ElementNameSearch extends AbstractElementSearchAction implements IElementSearchAction
+public class ElementNameSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
+    public ElementNameSearch(LocatorType elementActionType)
+    {
+        super(elementActionType);
+    }
+
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {

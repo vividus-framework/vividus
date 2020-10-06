@@ -33,7 +33,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
-public class MetadataLoggerTests
+class MetadataLoggerTests
 {
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(MetadataLogger.class);
     private static final String VALUE = "value";

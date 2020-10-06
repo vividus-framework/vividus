@@ -17,10 +17,12 @@
 package org.vividus.bdd.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -35,6 +37,29 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class MetaWrapperTests
 {
+    @Test
+    void testHasProperty()
+    {
+        String propertyName = "propertyName";
+        Properties properties = new Properties();
+        properties.setProperty(propertyName, "propertyValue");
+        Meta meta = new Meta(properties);
+        MetaWrapper metaWrapper = new MetaWrapper(meta);
+        assertTrue(metaWrapper.hasProperty(propertyName));
+    }
+
+    @Test
+    void toTagsTest()
+    {
+        String propertyName = "name2";
+        List<String> list = List.of("name1=value1", propertyName);
+        Properties properties = new Properties();
+        properties.setProperty("name1", "value1");
+        properties.setProperty(propertyName, "");
+        Meta meta = new Meta(properties);
+        assertEquals(list, new MetaWrapper(meta).toTags());
+    }
+
     @Test
     void testGetOptionalPropertyValue()
     {

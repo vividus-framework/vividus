@@ -53,8 +53,8 @@ public interface ExtendedTableTransformer extends TableTransformer
     {
         String propertyValueStr = properties.getProperties().getProperty(propertyName);
         E propertyValue = EnumUtils.getEnumIgnoreCase(enumClass, propertyValueStr);
-        isTrue(propertyValue != null, "Value of ExamplesTable property '%s' must be from range %s", propertyName,
-                Arrays.toString(enumClass.getEnumConstants()));
+        isTrue(propertyValue != null, "Value of ExamplesTable property '%s' must be from range %s, but got '%s'",
+                propertyName, Arrays.toString(enumClass.getEnumConstants()), propertyValueStr);
         return propertyValue;
     }
 

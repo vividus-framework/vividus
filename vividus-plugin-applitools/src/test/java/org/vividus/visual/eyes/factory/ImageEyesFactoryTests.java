@@ -84,16 +84,11 @@ class ImageEyesFactoryTests
             () -> assertTrue(configuration.getSaveFailedTests()),
             () -> assertTrue(configuration.getSaveNewTests()),
             () -> assertEquals(BATCH_NAME, configuration.getBatch().getName()),
-            () -> assertNull(readViewportSize(eyes)),
+            () -> assertNull(configuration.getViewportSize()),
             () -> assertEquals(SERVER_URI, readServerConnector.getServerUrl()),
             () -> assertEquals(EXECUTE_API_KEY, readServerConnector.getApiKey()),
             () -> assertSame(logHandler, eyes.getLogHandler())
         );
-    }
-
-    private RectangleSize readViewportSize(Eyes eyes) throws IllegalAccessException
-    {
-        return (RectangleSize) FieldUtils.readField(eyes, "viewportSize", true);
     }
 
     private ServerConnector readServerConnector(Eyes eyes) throws IllegalAccessException
@@ -110,7 +105,7 @@ class ImageEyesFactoryTests
     }
 
     @Test
-    public void shouldCreateEyesWithAllParameters() throws IllegalAccessException
+    void shouldCreateEyesWithAllParameters() throws IllegalAccessException
     {
         ApplitoolsVisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         visualCheck.setBaselineEnvName(BASELINE_ENV_NAME);
@@ -130,7 +125,7 @@ class ImageEyesFactoryTests
             () -> assertFalse(configuration.getSaveFailedTests()),
             () -> assertFalse(configuration.getSaveNewTests()),
             () -> assertEquals(BATCH_NAME, configuration.getBatch().getName()),
-            () -> assertEquals(new RectangleSize(7680, 4320), readViewportSize(actual)),
+            () -> assertEquals(new RectangleSize(7680, 4320), configuration.getViewportSize()),
             () -> assertEquals(SERVER_URI, readServerConnector.getServerUrl()),
             () -> assertEquals(EXECUTE_API_KEY, readServerConnector.getApiKey()),
             () -> assertSame(logHandler, actual.getLogHandler())
@@ -138,7 +133,7 @@ class ImageEyesFactoryTests
     }
 
     @Test
-    public void shouldReuseBatchWithTheSameName()
+    void shouldReuseBatchWithTheSameName()
     {
         ApplitoolsVisualCheck visualCheck = createVisualCheck(VisualActionType.ESTABLISH);
         Eyes eyes1 = imageEyesFactory.createEyes(visualCheck);

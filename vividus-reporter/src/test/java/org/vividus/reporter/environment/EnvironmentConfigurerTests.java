@@ -17,7 +17,6 @@
 package org.vividus.reporter.environment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -33,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.IPropertyParser;
+import org.vividus.util.property.PropertyMappedCollection;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentConfigurerTests
@@ -67,12 +67,13 @@ class EnvironmentConfigurerTests
     void testInit() throws Exception
     {
         PropertyCategory category = PropertyCategory.VIVIDUS;
-        doReturn(Map.of()).when(propertyMapper).readValues(DYNAMIC_PROPERTY_PREFIX,
-                DynamicEnvironmentConfigurationProperty.class);
-        doReturn(Map.of(
-                PropertyCategory.VIVIDUS.toString(), Map.of("some-key", VALUE),
-                DYNAMIC, Map.of(DYNAMIC, VALUE)
-        )).when(propertyMapper).readValues(PREFIX, Map.class);
+        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicEnvironmentConfigurationProperty.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of()));
+        when(propertyMapper.readValues(PREFIX, Map.class)).thenReturn(new PropertyMappedCollection<>(
+                Map.of(
+                        PropertyCategory.VIVIDUS.toString(), Map.of("some-key", VALUE),
+                        DYNAMIC, Map.of(DYNAMIC, VALUE))
+        ));
         environmentConfigurer.init();
         Map<String, String> vividusProps = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(category);
         assertEquals(Map.of("Some Key", VALUE), vividusProps);
@@ -90,8 +91,8 @@ class EnvironmentConfigurerTests
         dynamicProperty.setDescriptionPattern(descriptionPattern);
         dynamicProperty.setPropertyRegex(propertyWithoutRegex);
         when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicEnvironmentConfigurationProperty.class))
-                .thenReturn(Map.of(VALUE, dynamicProperty));
-
+                .thenReturn(new PropertyMappedCollection<>(Map.of(VALUE, dynamicProperty)));
+        when(propertyMapper.readValues(PREFIX, Map.class)).thenReturn(new PropertyMappedCollection<>(Map.of()));
         when(propertyParser.getPropertiesByRegex(propertyWithoutRegex)).thenReturn(Map.of(propertyKey, VALUE));
         environmentConfigurer.init();
         Map<String, String> vividusProps = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(category);
@@ -112,7 +113,8 @@ class EnvironmentConfigurerTests
         dynamicProperty.setDescriptionPattern(descriptionPattern);
         dynamicProperty.setPropertyRegex(propertyRegex);
         when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicEnvironmentConfigurationProperty.class))
-                .thenReturn(Map.of(VALUE, dynamicProperty));
+                .thenReturn(new PropertyMappedCollection<>(Map.of(VALUE, dynamicProperty)));
+        when(propertyMapper.readValues(PREFIX, Map.class)).thenReturn(new PropertyMappedCollection<>(Map.of()));
         String index = "123";
         when(propertyParser.getPropertiesByRegex(propertyRegex)).thenReturn(
                 Map.of("property" + index + "regex", VALUE));

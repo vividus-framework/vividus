@@ -17,6 +17,7 @@
 package org.vividus.bdd.expression;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,7 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.lang3.StringUtils;
 import org.vividus.bdd.context.IBddVariableContext;
 
 @Named
@@ -35,10 +37,11 @@ public class EvalExpressionProcessor implements IExpressionProcessor
     private static final Pattern EVAL_PATTERN = Pattern.compile("^eval\\((.*)\\)$", Pattern.CASE_INSENSITIVE
             | Pattern.DOTALL);
     private static final int EVAL_GROUP = 1;
+    private static final Map<String, Object> NAMESPACES = Map.of("math", Math.class, "stringUtils", StringUtils.class);
 
     // ThreadLocal is used as workaround for not released fix of issue https://issues.apache.org/jira/browse/JEXL-241
     private final ThreadLocal<JexlEngine> jexlEngine = ThreadLocal
-            .withInitial(() -> new JexlBuilder().charset(StandardCharsets.UTF_8).create());
+            .withInitial(() -> new JexlBuilder().charset(StandardCharsets.UTF_8).namespaces(NAMESPACES).create());
 
     private IBddVariableContext bddVariableContext;
 

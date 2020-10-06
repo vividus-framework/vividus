@@ -18,17 +18,21 @@ package org.vividus.ui.web.action.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 
 @ExtendWith(MockitoExtension.class)
 class LinkTextSearchTests
@@ -39,8 +43,6 @@ class LinkTextSearchTests
     private static final By LINK_TEXT_LOCATOR = By.xpath(".//a[text()[normalize-space()=\"" + LINK_TEXT
             + "\"] or @*[normalize-space()=\"" + LINK_TEXT + "\"] or *[normalize-space()=\"" + LINK_TEXT + "\"]]");
 
-    private LinkTextSearch search;
-
     private List<WebElement> webElements;
 
     @Mock
@@ -49,13 +51,16 @@ class LinkTextSearchTests
     @Mock
     private SearchContext searchContext;
 
+    @InjectMocks
+    private LinkTextSearch search;
+
     @Test
     void testFindLinksByTextByLinkTextNull()
     {
         search = new LinkTextSearch();
         LinkTextSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(LINK_TEXT);
-        doReturn(List.of()).when(spy).findElements(searchContext, DEFAULT_LOCATOR, parameters);
+        SearchParameters parameters = new SearchParameters(LINK_TEXT, Visibility.ALL, false);
+        when(searchContext.findElements(DEFAULT_LOCATOR)).thenReturn(List.of());
         doReturn(List.of()).when(spy).findElementsByText(searchContext, LINK_TEXT_LOCATOR, parameters, LINK_TAG);
         List<WebElement> foundElements = spy.search(searchContext, parameters);
         assertEquals(List.of(), foundElements);
@@ -66,10 +71,9 @@ class LinkTextSearchTests
     {
         search = new LinkTextSearch();
         webElements = List.of(webElement);
-        LinkTextSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(LINK_TEXT);
-        doReturn(webElements).when(spy).findElements(searchContext, DEFAULT_LOCATOR, parameters);
-        List<WebElement> foundElements = spy.search(searchContext, parameters);
+        SearchParameters parameters = new SearchParameters(LINK_TEXT, Visibility.ALL, false);
+        when(searchContext.findElements(DEFAULT_LOCATOR)).thenReturn(webElements);
+        List<WebElement> foundElements = search.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
     }
 
@@ -78,8 +82,8 @@ class LinkTextSearchTests
     {
         search = new LinkTextSearch();
         LinkTextSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(LINK_TEXT);
-        doReturn(List.of()).when(spy).findElements(searchContext, DEFAULT_LOCATOR, parameters);
+        SearchParameters parameters = new SearchParameters(LINK_TEXT, Visibility.ALL, false);
+        when(searchContext.findElements(DEFAULT_LOCATOR)).thenReturn(List.of());
         doReturn(webElements).when(spy).findElementsByText(searchContext, LINK_TEXT_LOCATOR, parameters, LINK_TAG);
         List<WebElement> foundElements = spy.search(searchContext, parameters);
         assertEquals(webElements, foundElements);

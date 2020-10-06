@@ -16,16 +16,8 @@
 
 package org.vividus.bdd.context;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.variable.IVariablesFactory;
@@ -35,13 +27,6 @@ import org.vividus.testcontext.TestContext;
 
 public class BddVariableContext implements IBddVariableContext
 {
-    private static final int VARIABLE_NAME_GROUP = 1;
-    private static final int LIST_INDEX_GROUP = 2;
-    private static final int MAP_KEY_GROUP = 3;
-    private static final Pattern COMPLEX_VARIABLE_PATTERN = Pattern.compile(
-            "([^\\[\\]\\.:]+):?(?:\\[(\\d+)\\])?:?(?:\\.([^:]+))?:?");
-    private static final char COLON = ':';
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BddVariableContext.class);
     private static final Class<Variables> VARIABLES_KEY = Variables.class;
 
@@ -52,14 +37,7 @@ public class BddVariableContext implements IBddVariableContext
     @SuppressWarnings("unchecked")
     public <T> T getVariable(String variableKey)
     {
-        Variables variables = getVariables();
-        return (T) Stream.of(VariableScope.STEP, VariableScope.SCENARIO, VariableScope.STORY,
-                VariableScope.NEXT_BATCHES, VariableScope.GLOBAL)
-                .map(scope -> getVariable(variables.getVariables(scope), variableKey))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .or(() -> getDefault(variableKey))
-                .orElseGet(() -> getSystem(variableKey));
+        return (T) getVariables().getVariable(variableKey);
     }
 
     @Override
@@ -68,32 +46,26 @@ public class BddVariableContext implements IBddVariableContext
         variableScopes.forEach(s -> putVariable(s, variableKey, variableValue));
     }
 
-    private Optional<String> getDefault(String key)
-    {
-        int colonIndex = key.lastIndexOf(COLON);
-        return colonIndex >= 0 ? Optional.of(key.substring(colonIndex + 1)) : Optional.empty();
-    }
-
-    private Object getSystem(String variableKey)
-    {
-        return variableKey.isBlank() ? null : System.getProperty(variableKey);
-    }
-
     @Override
     public void putVariable(VariableScope variableScope, String variableKey, Object variableValue)
     {
-        if (variableScope == VariableScope.GLOBAL)
-        {
-            throw new IllegalArgumentException("Setting of GLOBAL variables is forbidden");
-        }
         LOGGER.info("Saving a value '{}' into the '{}' variable '{}'", variableValue, variableScope, variableKey);
-        if (variableScope == VariableScope.NEXT_BATCHES)
+        switch (variableScope)
         {
-            variablesFactory.addNextBatchesVariable(variableKey, variableValue);
-        }
-        else
-        {
-            getVariables().getVariables(variableScope).put(variableKey, variableValue);
+            case NEXT_BATCHES:
+                variablesFactory.addNextBatchesVariable(variableKey, variableValue);
+                break;
+            case STORY:
+                getVariables().putStoryVariable(variableKey, variableValue);
+                break;
+            case SCENARIO:
+                getVariables().putScenarioVariable(variableKey, variableValue);
+                break;
+            case STEP:
+                getVariables().putStepVariable(variableKey, variableValue);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported variable scope: " + variableScope);
         }
     }
 
@@ -104,59 +76,33 @@ public class BddVariableContext implements IBddVariableContext
     }
 
     @Override
-    public void clearVariables(VariableScope variableScope)
+    public void initStepVariables()
     {
-        getVariables().getVariables(variableScope).clear();
+        getVariables().initStepVariables();
     }
 
     @Override
-    public void clearVariables()
+    public void clearStepVariables()
+    {
+        getVariables().clearStepVariables();
+    }
+
+    @Override
+    public void clearScenarioVariables()
+    {
+        getVariables().clearScenarioVariables();
+    }
+
+    @Override
+    public void clearStoryVariables()
+    {
+        getVariables().clearStoryVariables();
+    }
+
+    @Override
+    public void clearBatchVariables()
     {
         testContext.remove(VARIABLES_KEY);
-    }
-
-    private Object getVariable(Map<String, Object> variables, String key)
-    {
-        return Optional.ofNullable(variables.get(key))
-                       .or(() -> Optional.ofNullable(variables.get(StringUtils.substringBefore(key, ":"))))
-                       .or(() -> resolveAsComplexType(variables, key))
-                       .orElse(null);
-    }
-
-    private Optional<Object> resolveAsComplexType(Map<String, Object> variables, String key)
-    {
-        Matcher variableMatcher = COMPLEX_VARIABLE_PATTERN.matcher(key);
-        if (!variableMatcher.find())
-        {
-            return Optional.empty();
-        }
-        String variableKey = variableMatcher.group(VARIABLE_NAME_GROUP);
-        return Optional.ofNullable(variables.get(variableKey))
-                       .map(v -> resolveAsListItem(variableMatcher, v))
-                       .map(v -> resolveAsMapItem(variableMatcher, v));
-    }
-
-    @SuppressWarnings("unchecked")
-    private Object resolveAsMapItem(Matcher variableMatcher, Object variable)
-    {
-        String mapKey = variableMatcher.group(MAP_KEY_GROUP);
-        if (mapKey != null && variable instanceof Map)
-        {
-            return ((Map<String, ?>) variable).get(mapKey);
-        }
-        return variable;
-    }
-
-    private Object resolveAsListItem(Matcher variableMatcher, Object variable)
-    {
-        String listIndex = variableMatcher.group(LIST_INDEX_GROUP);
-        if (listIndex != null && variable instanceof List)
-        {
-            List<?> listVariable = (List<?>) variable;
-            int elementIndex = Integer.parseInt(listIndex);
-            return elementIndex < listVariable.size() ? listVariable.get(elementIndex) : null;
-        }
-        return variable;
     }
 
     private Variables getVariables()

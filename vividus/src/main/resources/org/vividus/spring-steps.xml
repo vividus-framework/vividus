@@ -24,14 +24,12 @@
     <bean id="fileSteps" class="org.vividus.bdd.steps.FileSteps" />
     <bean id="setupSteps" class="org.vividus.bdd.steps.SetupSteps" />
 
-    <util:list id="stepBeanNames-Custom" />
-
     <util:list id="stepBeanNames-Vividus">
-        <value>assertSteps</value>
-        <value>bddVariableSteps</value>
-        <value>fileSteps</value>
-        <value>executableSteps</value>
-        <value>setupSteps</value>
+        <idref bean="assertSteps" />
+        <idref bean="bddVariableSteps" />
+        <idref bean="fileSteps" />
+        <idref bean="executableSteps" />
+        <idref bean="setupSteps" />
     </util:list>
 
 </beans>

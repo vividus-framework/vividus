@@ -22,7 +22,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.screenshot.IScrollbarHandler;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
 import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
@@ -35,14 +35,14 @@ public class AdjustingCoordsProvider extends WebDriverCoordsProvider
 
     private final transient IScrollbarHandler scrollbarHandler;
 
-    private final transient IWebUiContext webUiContext;
+    private final transient IUiContext uiContext;
 
     public AdjustingCoordsProvider(IWebDriverManager webDriverManager, IScrollbarHandler scrollbarHandler,
-            IWebUiContext webUiContext)
+            IUiContext uiContext)
     {
         this.webDriverManager = webDriverManager;
         this.scrollbarHandler = scrollbarHandler;
-        this.webUiContext = webUiContext;
+        this.uiContext = uiContext;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class AdjustingCoordsProvider extends WebDriverCoordsProvider
 
     private Coords adjustToSearchContext(WebDriver driver, Coords coords)
     {
-        SearchContext searchContext = webUiContext.getSearchContext();
+        SearchContext searchContext = uiContext.getSearchContext();
         if (searchContext instanceof WebElement)
         {
             Coords searchContextCoords = super.ofElement(driver, (WebElement) searchContext);

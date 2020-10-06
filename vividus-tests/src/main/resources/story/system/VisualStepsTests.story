@@ -4,13 +4,12 @@ Meta:
     @epic vividus-plugin-visual
 
 Lifecycle:
+Before:
+Scope: STORY
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/stickyHeader.html'
 Examples:
 |action         |firstP             |
 |COMPARE_AGAINST|By.xpath((.//p)[1])|
-
-
-Scenario: Set-Up
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/stickyHeader.html'
 
 
 Scenario: Validation of step When I $actionType baseline with `$name` for full page

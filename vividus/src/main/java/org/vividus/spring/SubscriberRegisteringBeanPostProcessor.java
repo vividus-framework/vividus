@@ -18,8 +18,6 @@ package org.vividus.spring;
 
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
@@ -27,12 +25,17 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 
 public class SubscriberRegisteringBeanPostProcessor implements BeanPostProcessor
 {
-    @Inject private EventBus eventBus;
+    private final EventBus eventBus;
+
+    public SubscriberRegisteringBeanPostProcessor(EventBus eventBus)
+    {
+        this.eventBus = eventBus;
+    }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
     {
-        if (Stream.of(bean.getClass().getDeclaredMethods()).anyMatch(m -> m.isAnnotationPresent(Subscribe.class)))
+        if (Stream.of(bean.getClass().getMethods()).anyMatch(m -> m.isAnnotationPresent(Subscribe.class)))
         {
             eventBus.register(bean);
         }

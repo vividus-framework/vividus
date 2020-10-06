@@ -1,0 +1,273 @@
+= Xray Exporter
+
+Xray Exporter is a tool used to export test cases into Jira Xray Plugin. 
+
+Features:
+
+* Create and update https://docs.getxray.app/display/XRAY/Test#Test-ManualTests[manual] and https://docs.getxray.app/display/XRAY/Test#Test-AutomatedTests[cucumber] test cases
+* Set Jira labels for test cases
+* Set Jira components for test cases
+* Link test cases to stories they belong to
+
+== Xray Export Properties
+
+[cols="2,1,3", options="header"]
+|===
+
+|Property
+|Required
+|Description
+
+|`xray-exporter.json-results-directory`
+|true
+a|Path to directory with test execution JSON results.
+
+The path is managed by the `bdd.report-directory` property which default value is `output/reports/jbehave` relatively to the tests directory.
+
+Please make sure that the `bdd.configuration.formats` property includes JSON value in order to generate test execution results.
+
+|`xray-exporter.project-key`
+|true
+|Key of a Jira project where new test cases should be created
+
+|`xray-exporter.assignee`
+|false
+|Username of Jira user that will be used as assignee for newly created test cases
+
+|`xray-exporter.editable-statuses`
+|false
+|Statuses of test cases allowed to update
+
+|`xray-exporter.test-execution-key`
+|false
+|Key of a `Test Execution` to which exported test cases will be added
+
+|===
+
+== Jira Fields Mapping
+
+The Xray is a Jira plugin that uses custom Jira fields for it's data, one of the ways to find out custom field names for particular field used by Xray on Jira UI (if access to Jira configuration is prohibited) is to request description of some issue like https://jira.example.com/rest/api/latest/issue/DUMMY-1.
+
+=== Manual Test Case Properties
+
+image::manual.png[Manual test case view]
+
+[cols="1,3,3", options="header"]
+|===
+
+|Index
+|Property
+|Description
+
+|<<#_manual_test_case_view, 1>>
+|`jira.fields-mapping.test-case-type`
+|Key of a field containing test case type
+
+|<<#_manual_test_case_view, 2>>
+|`jira.fields-mapping.manual-steps`
+|Key of a field containing collection of manual steps
+
+|===
+
+=== Cucumber Test Case Properties
+
+image::cucumber.png[Cucumber test case view]
+
+[cols="1,3,3", options="header"]
+|===
+
+|Index
+|Property
+|Description
+
+|<<#_cucumber_test_case_view, 1>>
+|`jira.fields-mapping.test-case-type`
+|Key of a field containing test case type
+
+|<<#_cucumber_test_case_view, 2>>
+|`jira.fields-mapping.cucumber-scenario-type`
+|Key of a field containing type of cucumer scenario
+
+|<<#_cucumber_test_case_view, 3>>
+|`jira.fields-mapping.cucumber-scenario`
+|Key of a field containing body of cucumber scenario 
+
+|===
+
+== Authorization
+
+[cols="1,2", options="header"]
+|===
+
+|Name
+|Description
+
+|[#noop-link]`noop`
+|Used if Jira endpoint is hidden behind SSO and the only way to access the endpoint is to use custom authorization flows or cookies
+
+|[#caching-credentials-link]`caching-credentials`
+|Authorize in Jira using client username and password
+
+|===
+
+== Jira properties
+
+[cols="1,1,1,3", options="header"]
+|===
+
+|Property
+|Required
+|Acceptable values
+|Description
+
+|jira.username
+|Required for `caching-credentials` auth
+|`string`
+|Jira username used to export test cases
+
+|jira.password
+|Required for `caching-credentials` auth
+|`string`
+|Jira password used to export test cases
+
+|jira.endpoint
+|true
+|https://en.wikipedia.org/wiki/URL[URL]
+|Jira URL e.g. `https://jira.example.com/`
+
+|jira.http.context-type
+|false
+a|<<caching-credentials-link, caching-credentials>>
+
+<<noop-link, noop>>
+
+|defined Jira <<_authorization>> mechanism, default value is <<caching-credentials-link, caching-credentials>>
+
+|===
+
+== Scenario Meta Attributes
+
+[cols="2,2,3", options="header"]
+|===
+
+|Name
+|Example
+|Description
+
+|`testCaseId`
+|`@testCaseId STUB-0`
+|Map scenario to Jira test case in 1 to 1 relation
+
+|`requirementId`
+|`@requirementId STUB-0`
+|Link scenario to Jira issue with "Tests" link type in 1 to 1 relation
+
+|`xray.labels`
+|`@xray.labels label-1;label-2`
+|Set labels to the exported test case
+
+|`xray.components`
+|`@xray.components component-1;component-2`
+|Set components to the exported test case
+
+|`xray.skip-export`
+|`@xray.skip-export`
+|Skip test case while exporting
+
+|===
+
+== Cucumber Test Cases
+
+Any scenario that doesn't correspons to the <<_rules_2, manual test case rules>> is considered as cucumber test case
+
+.Cucumber.story
+[source,gherkin]
+----
+Scenario: Verify link
+Meta: @testCaseId TEST-231
+      @requirementId STORY-783
+      @xray.labels link
+      @xray.components web
+
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+When I wait until the page has the title 'Links'
+Then number of elements found by `<locator>` is equal to `1`
+Examples:
+|locator                        |
+|By.linkUrl(#ElementId)         |
+|By.linkUrlPart(Element)        |
+|By.linkText(Link to an element)|
+----
+
+.CucumberWithManualPart.story
+[source,gherkin]
+----
+Scenario: Verify link
+Meta: @testCaseId TEST-566
+      @requirementId STORY-983
+      @xray.labels link
+      @xray.components web
+
+!-- Step: Open main app page
+!-- Step: Wait for page with title is loaded
+!-- Step: Verify number of links
+!-- Data: * link url is '#ElementId'
+!-- * link url part is 'Element'
+!-- * link text is 'Link to an element'
+!-- Result: The number of links for all locators is equal to 1
+
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+When I wait until the page has the title 'Links'
+Then number of elements found by `<locator>` is equal to `1`
+Examples:
+|locator                        |
+|By.linkUrl(#ElementId)         |
+|By.linkUrlPart(Element)        |
+|By.linkText(Link to an element)|
+----
+
+== Manual Test Cases
+
+* Scenario is considered as `Manual Test Case` if all of its lines start with `!--` prefix.
+* The `Manual Test Case` step must start with `Step:` used to specify action to perform and can optionally contain `Data:` and `Result:` for specifying action data and action expected result respectively.
+* The `Manual Test Case` step parts are allowed to have multilines.
+* The `JBehave Keywords` values (e.g. `Given`, `When`, `Then` ...) on new lines not prefixed with `Step:`, `Data:` or `Result` must be escaped with `-` sign.
+
+.Manual.story
+[source,gherkin]
+----
+Scenario: Buy an item
+Meta: @testCaseId TEST-435
+      @requirementId STORY-234
+      @xray.labels shopping; payment
+      @xray.components web
+
+!-- Step: Go to the test item with the following id
+!-- Data: 39914061
+!-- Result: The current stock is 1
+
+!-- Step: Add the item to the shopping cart
+!-- Result: Shopping cart now displays one 39914061 item and no items in stock
+
+!-- Step: In the backoffice app update the stock to 0 on item
+
+!-- Step: Back in the browser, proceed to checkout.
+!-- Go through all the steps and confirm the payment method.
+!-- Result: Then you should get an error message mentioning that there are no more items in the stock.
+!-- - Then payment method was not made
+----
+
+== Export
+ifeval::["{release-version}" == "false"]
+:jar-link: https://oss.jfrog.org/oss-snapshot-local/org/vividus/vividus-to-xray-exporter/{page-component-version}/vividus-to-xray-exporter-{page-component-version}.jar
+endif::[]
+ifeval::["{release-version}" == "true"]
+:jar-link: https://jcenter.bintray.com/org/vividus/vividus-to-xray-exporter/{page-component-version}/vividus-to-xray-exporter-{page-component-version}.jar
+endif::[]
+
+* Download {jar-link}[Exporter JAR]
+* Create a file called `application.properties` and put there all necessary properties
+* Run the following command with replacing `<jar name>` with existing jar name previously downloaded
+```bash
+java -jar <jar name> -Dspring.config.location=classpath:/application.properties,./application.properties
+```

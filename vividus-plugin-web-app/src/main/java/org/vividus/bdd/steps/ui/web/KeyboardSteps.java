@@ -27,12 +27,12 @@ import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.web.validation.IFocusValidations;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.KeysUtils;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 
 public class KeyboardSteps
 {
     @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     @Inject private IFocusValidations focusValidations;
 
     /**
@@ -44,9 +44,9 @@ public class KeyboardSteps
     @When("I press $keys on keyboard")
     public void pressKeys(List<String> keys)
     {
-        WebElement element = webUiContext.getSearchContext() instanceof WebDriver
+        WebElement element = uiContext.getSearchContext() instanceof WebDriver
                 ? webDriverProvider.get().findElement(By.xpath("//body"))
-                : webUiContext.getSearchContext(WebElement.class);
+                : uiContext.getSearchContext(WebElement.class);
         if (focusValidations.isElementInFocusState(element, FocusState.IN_FOCUS))
         {
             element.sendKeys(KeysUtils.keysToCharSequenceArray(keys));

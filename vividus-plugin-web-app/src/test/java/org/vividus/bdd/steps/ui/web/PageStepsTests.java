@@ -20,11 +20,10 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -43,6 +42,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.http.client.protocol.HttpClientContext;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -55,23 +55,23 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.ui.web.action.IWaitActions;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.action.search.Visibility;
+import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
-import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.listener.IWebApplicationListener;
 import org.vividus.ui.web.util.LocatorUtil;
 import org.vividus.util.UriUtils;
@@ -97,7 +97,7 @@ class PageStepsTests
     private WebDriver driver;
 
     @Mock
-    private IHighlightingSoftAssert softAssert;
+    private IDescriptiveSoftAssert softAssert;
 
     @Mock
     private IBaseValidations mockedBaseValidations;
@@ -109,7 +109,7 @@ class PageStepsTests
     private IJavascriptActions javascriptActions;
 
     @Mock
-    private IWebUiContext webUiContext;
+    private IUiContext uiContext;
 
     @Mock
     private IWebElementActions webElementActions;
@@ -124,7 +124,7 @@ class PageStepsTests
     private SetContextSteps setContextSteps;
 
     @Mock
-    private IWaitActions waitActions;
+    private IWebWaitActions waitActions;
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -201,21 +201,25 @@ class PageStepsTests
     @Test
     void testPageWithURLpartIsLoaded()
     {
-        String urlPart = "//somePartURL";
-        pageSteps.checkUrlPartIsLoaded(urlPart);
-        verify(mockedBaseValidations).assertPageWithURLPartIsLoaded(urlPart);
+        when(webDriverProvider.get()).thenReturn(driver);
+        String urlValue = "http://example.com/";
+        when(driver.getCurrentUrl()).thenReturn(urlValue);
+        pageSteps.checkUrlPartIsLoaded(urlValue);
+        verify(softAssert).assertThat(eq("Page with the URLpart '" + urlValue + "' is loaded"),
+                eq("Page url '" + urlValue + "' contains part '" + urlValue + "'"), eq(urlValue),
+                (Matcher<String>) isA(Matcher.class));
     }
 
     @Test
     void testIsElementAtTheTop()
     {
         WebElement webElement = mock(WebElement.class);
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+        Locator locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE), Visibility.ALL));
-        when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, searchAttributes))
+        when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator))
                 .thenReturn(webElement);
         when(webElementActions.isPageVisibleAreaScrolledToElement(webElement)).thenReturn(true);
-        pageSteps.isPageScrolledToAnElement(searchAttributes);
+        pageSteps.isPageScrolledToAnElement(locator);
         verify(softAssert).assertTrue("The page is scrolled to an element with located by  XPath: "
                 + "'.//*[normalize-space(@id)=\"value\"]'; Visibility: ALL;", true);
     }
@@ -223,11 +227,11 @@ class PageStepsTests
     @Test
     void testIsElementAtTheTopElementNull()
     {
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH,
+        Locator locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE)));
-        when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, searchAttributes))
+        when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator))
                 .thenReturn(null);
-        pageSteps.isPageScrolledToAnElement(searchAttributes);
+        pageSteps.isPageScrolledToAnElement(locator);
         verifyNoInteractions(softAssert);
     }
 
@@ -320,7 +324,7 @@ class PageStepsTests
     {
         pageSteps.refreshPage();
         verify(navigateActions).refresh();
-        verify(webUiContext).reset();
+        verify(uiContext).reset();
     }
 
     @Test
@@ -407,15 +411,6 @@ class PageStepsTests
         pageSteps.iAmOnTheMainApplicationPage();
         assertThat(logger.getLoggingEvents(),
                 is(List.of(error("HTTP request for '{}' failed with the exception: {}", mainPage, exceptionMessage))));
-    }
-
-    @Test
-    void testIAmOnTheMainApplicationPageNull()
-    {
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(null);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> pageSteps.iAmOnTheMainApplicationPage());
-        assertEquals("URL of the main application page should be non-blank", exception.getMessage());
     }
 
     @Test

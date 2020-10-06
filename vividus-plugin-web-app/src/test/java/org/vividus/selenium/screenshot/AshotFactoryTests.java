@@ -35,10 +35,10 @@ import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebElement;
 import org.powermock.reflect.Whitebox;
 import org.vividus.selenium.IWebDriverFactory;
-import org.vividus.selenium.SauceLabsCapabilityType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.action.IJavascriptActions;
 
+import io.appium.java_client.remote.MobileCapabilityType;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
 import ru.yandex.qatools.ashot.shooting.ScalingDecorator;
@@ -87,7 +87,7 @@ class AshotFactoryTests
     private void mockDeviceAndOrientation()
     {
         String deviceName = "Google pixel 3";
-        when(webDriverFactory.getCapability(SauceLabsCapabilityType.DEVICE_NAME, false)).thenReturn(deviceName);
+        when(webDriverFactory.getCapability(MobileCapabilityType.DEVICE_NAME, false)).thenReturn(deviceName);
         when(webDriverManager.isOrientation(ScreenOrientation.LANDSCAPE)).thenReturn(true);
     }
 

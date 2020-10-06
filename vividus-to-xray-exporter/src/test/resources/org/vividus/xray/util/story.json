@@ -1,0 +1,330 @@
+{
+  "path": "",
+  "title": "",
+  "lifecycle": {
+    "keyword": "Lifecycle:",
+    "parameters": {
+      "names": [
+        "lifecycle-key-1",
+        "lifecycle-key-2"
+      ],
+      "values": [
+        [
+          "lifecycle-val-11",
+          "lifecycle-val-21"
+        ],
+        [
+          "lifecycle-val-12",
+          "lifecycle-val-22"
+        ]
+      ]
+    }
+  },
+  "beforeStorySteps": [],
+  "scenarios": [
+    {
+      "keyword": "Scenario:",
+      "title": "No scenario example [1]",
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "When I perform action"
+        ],
+        "parameters": {
+          "names": [],
+          "values": []
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-21",
+              "lifecycle-key-1": "lifecycle-val-11"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "keyword": "Scenario:",
+      "title": "Single scenario example [1]",
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "When I perform action"
+        ],
+        "parameters": {
+          "names": [
+            "scenario-key-1",
+            "scenario-key-2"
+          ],
+          "values": [
+            [
+              "scenario-val-11",
+              "scenario-val-21"
+            ]
+          ]
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-21",
+              "lifecycle-key-1": "lifecycle-val-11",
+              "scenario-key-1": "scenario-val-11",
+              "scenario-key-2": "scenario-val-21"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "keyword": "Scenario:",
+      "title": "Multiple scenario example [1]",
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "When I perform action"
+        ],
+        "parameters": {
+          "names": [
+            "scenario-key-1",
+            "scenario-key-2"
+          ],
+          "values": [
+            [
+              "scenario-val-11",
+              "scenario-val-21"
+            ],
+            [
+              "scenario-val-12",
+              "scenario-val-22"
+            ],
+            [
+              "scenario-val-13",
+              "scenario-val-23"
+            ]
+          ]
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-21",
+              "lifecycle-key-1": "lifecycle-val-11",
+              "scenario-key-1": "scenario-val-11",
+              "scenario-key-2": "scenario-val-21"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          },
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-21",
+              "lifecycle-key-1": "lifecycle-val-11",
+              "scenario-key-1": "scenario-val-12",
+              "scenario-key-2": "scenario-val-22"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          },
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-21",
+              "lifecycle-key-1": "lifecycle-val-11",
+              "scenario-key-1": "scenario-val-13",
+              "scenario-key-2": "scenario-val-23"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "keyword": "Scenario:",
+      "title": "No scenario example [2]",
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "When I perform action"
+        ],
+        "parameters": {
+          "names": [],
+          "values": []
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-22",
+              "lifecycle-key-1": "lifecycle-val-12"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "keyword": "Scenario:",
+      "title": "Single scenario example [2]",
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "When I perform action"
+        ],
+        "parameters": {
+          "names": [
+            "scenario-key-1",
+            "scenario-key-2"
+          ],
+          "values": [
+            [
+              "scenario-val-11",
+              "scenario-val-21"
+            ]
+          ]
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-22",
+              "lifecycle-key-1": "lifecycle-val-12",
+              "scenario-key-1": "scenario-val-11",
+              "scenario-key-2": "scenario-val-21"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "keyword": "Scenario:",
+      "title": "Multiple scenario example [2]",
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "When I perform action",
+          "When I perform action"
+        ],
+        "parameters": {
+          "names": [
+            "scenario-key-1",
+            "scenario-key-2"
+          ],
+          "values": [
+            [
+              "scenario-val-11",
+              "scenario-val-21"
+            ],
+            [
+              "scenario-val-12",
+              "scenario-val-22"
+            ],
+            [
+              "scenario-val-13",
+              "scenario-val-23"
+            ]
+          ]
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-22",
+              "lifecycle-key-1": "lifecycle-val-12",
+              "scenario-key-1": "scenario-val-11",
+              "scenario-key-2": "scenario-val-21"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              },
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          },
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-22",
+              "lifecycle-key-1": "lifecycle-val-12",
+              "scenario-key-1": "scenario-val-12",
+              "scenario-key-2": "scenario-val-22"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              },
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          },
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-22",
+              "lifecycle-key-1": "lifecycle-val-12",
+              "scenario-key-1": "scenario-val-13",
+              "scenario-key-2": "scenario-val-23"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              },
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "afterStorySteps": []
+}

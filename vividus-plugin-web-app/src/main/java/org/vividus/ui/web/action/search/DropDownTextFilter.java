@@ -21,6 +21,11 @@ import org.openqa.selenium.support.ui.Select;
 
 public class DropDownTextFilter extends AbstractElementFilterAction
 {
+    public DropDownTextFilter()
+    {
+        super(WebLocatorType.DROP_DOWN_TEXT);
+    }
+
     @Override
     protected boolean matches(WebElement element, String text)
     {

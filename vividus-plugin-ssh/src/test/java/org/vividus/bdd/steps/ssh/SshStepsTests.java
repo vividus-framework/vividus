@@ -46,6 +46,7 @@ import org.vividus.ssh.SingleCommand;
 import org.vividus.ssh.exec.SshOutput;
 import org.vividus.ssh.sftp.SftpCommand;
 import org.vividus.ssh.sftp.SftpOutput;
+import org.vividus.util.property.PropertyMappedCollection;
 
 @ExtendWith(MockitoExtension.class)
 class SshStepsTests
@@ -69,7 +70,7 @@ class SshStepsTests
     @BeforeEach
     void beforeEach()
     {
-        sshSteps.setServerConfigurations(Map.of(SERVER, SERVER_CONFIGURATION));
+        sshSteps.setServerConfigurations(new PropertyMappedCollection<>(Map.of(SERVER, SERVER_CONFIGURATION)));
     }
 
     @Test

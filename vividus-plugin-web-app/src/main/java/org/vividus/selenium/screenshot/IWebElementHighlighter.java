@@ -21,6 +21,4 @@ import java.util.function.Supplier;
 public interface IWebElementHighlighter
 {
     <T> T takeScreenshotWithHighlights(Supplier<T> screenshotSupplier);
-
-    void clearAssertingWebElements();
 }

@@ -34,16 +34,6 @@
         </property>
     </bean>
 
-    <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
-        <property name="scopes">
-            <map>
-                <entry key="thread">
-                    <bean class="org.springframework.context.support.SimpleThreadScope"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
-
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="converters">
             <set>
@@ -52,6 +42,8 @@
             </set>
         </property>
     </bean>
+
+    <bean class="org.vividus.spring.VividusEditorConfigurer" />
 
     <bean id="assertionManager" class="org.vividus.softassert.AssertionManager">
         <property name="failFast" value="${soft-assert.fail-fast}" />

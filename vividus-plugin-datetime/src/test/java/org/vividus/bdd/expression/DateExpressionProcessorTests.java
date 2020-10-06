@@ -103,6 +103,7 @@ class DateExpressionProcessorTests
             "generateDate(PT1)",
             "generateDate(P10M12)",
             "generateDate(P10)",
+            "generateDate(P10S)",
             "generateDate(T10M)"
     })
     void shouldNotAccept(String expression)

@@ -22,7 +22,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -50,11 +49,14 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.web.action.IExpectedConditions;
-import org.vividus.ui.web.action.IExpectedSearchContextCondition;
+import org.vividus.ui.action.IExpectedConditions;
+import org.vividus.ui.action.IExpectedSearchContextCondition;
+import org.vividus.ui.action.WaitResult;
+import org.vividus.ui.action.search.AbstractElementAction;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.web.action.JavascriptActions;
-import org.vividus.ui.web.action.WaitActions;
-import org.vividus.ui.web.action.WaitResult;
+import org.vividus.ui.web.action.WebWaitActions;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class LinkUrlSearchTests
@@ -76,7 +78,7 @@ class LinkUrlSearchTests
             + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=\"" + URL.toLowerCase() + "\"" + "]");
     private static final Duration TIMEOUT = Duration.ofSeconds(0);
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementSearchAction.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
     @Mock
     private WebDriver webDriver;
@@ -91,7 +93,7 @@ class LinkUrlSearchTests
     private SearchContext searchContext;
 
     @Mock
-    private WaitActions waitActions;
+    private WebWaitActions waitActions;
 
     @Mock
     private IExpectedConditions<By> expectedSearchContextConditions;
@@ -145,9 +147,9 @@ class LinkUrlSearchTests
     {
         search.setCaseSensitiveSearch(true);
         LinkUrlSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(URL);
+        SearchParameters parameters = new SearchParameters(URL, Visibility.ALL, false);
         List<WebElement> webElements = List.of(webElement);
-        doReturn(webElements).when(spy).findElements(searchContext, LOCATOR, parameters);
+        when(searchContext.findElements(LOCATOR)).thenReturn(webElements);
         List<WebElement> foundElements = spy.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
     }
@@ -157,9 +159,9 @@ class LinkUrlSearchTests
     {
         search.setCaseSensitiveSearch(false);
         LinkUrlSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(URL);
+        SearchParameters parameters = new SearchParameters(URL, Visibility.ALL, false);
         List<WebElement> webElements = List.of(webElement);
-        doReturn(webElements).when(spy).findElements(searchContext, LINK_URL_LOCATOR_CASE_INSENSITIVE, parameters);
+        when(searchContext.findElements(LINK_URL_LOCATOR_CASE_INSENSITIVE)).thenReturn(webElements);
         List<WebElement> foundElements = spy.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
     }

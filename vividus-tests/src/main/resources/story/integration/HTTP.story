@@ -17,6 +17,18 @@ Examples:
 |00:00:00+02:00       |
 |00:00:00%2B02:00     |
 
+Scenario: Verify handling of ampersand character in URL path
+When I send HTTP GET to the relative URL '/anything/path-with-&-ampersand'
+Then the response code is equal to '200'
+Then a JSON element by the JSON path '$.url' is equal to '${http-endpoint}anything/path-with-&-ampersand'
+
+Scenario: Verify handling of ampersand and space characters in URI query parameter
+When I send HTTP GET to the relative URL '/get?key=#{encodeUriQueryParameter(a & b)}'
+Then the response code is equal to '200'
+Then a JSON element by the JSON path '$.url' is equal to '${http-endpoint}get?key=a %26 b'
+Then a JSON element by the JSON path '$.args.length()' is equal to '1'
+Then a JSON element by the JSON path '$.args.key' is equal to 'a & b'
+
 Scenario: Set HTTP cookies
 When I send HTTP GET to the relative URL '/cookies/set?vividus-cookie=vividus'
 When I send HTTP GET to the relative URL '/cookies'
@@ -52,3 +64,15 @@ Examples:
 |http-method|
 |put        |
 |delete     |
+
+Scenario: Verify step "I add request headers:$headers"
+When I set request headers:
+|name         |value          |
+|Content-Type|application/json|
+When I add request headers:
+|name    |value|
+|Language|en-ru|
+When I send HTTP GET to the relative URL '/get?name=Content'
+Then `${responseCode}` is equal to `200`
+Then a JSON element by the JSON path '$.headers.Content-Type' is equal to '"application/json"'
+Then a JSON element by the JSON path '$.headers.Language' is equal to '"en-ru"'

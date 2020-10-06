@@ -10,6 +10,6 @@
     <bean id="xmlSteps" class="org.vividus.bdd.steps.xml.XmlSteps" />
 
     <util:list id="stepBeanNames-Xml" value-type="java.lang.String">
-        <value>xmlSteps</value>
+        <idref bean="xmlSteps" />
     </util:list>
 </beans>

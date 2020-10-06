@@ -56,6 +56,7 @@ import org.vividus.bdd.email.service.EmailFetchService;
 import org.vividus.bdd.email.service.ImapFetchService.EmailFetchServiceException;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.property.PropertyMappedCollection;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class EmailStepsTests
@@ -83,7 +84,8 @@ class EmailStepsTests
     @BeforeEach
     void init()
     {
-        Map<String, EmailServerConfiguration> configs = Map.of(CONFIG_KEY, configuration);
+        PropertyMappedCollection<EmailServerConfiguration> configs = new PropertyMappedCollection<>(
+                Map.of(CONFIG_KEY, configuration));
         steps = new EmailSteps(configs, messageFetchService, bddVariableContext, softAssert);
     }
 

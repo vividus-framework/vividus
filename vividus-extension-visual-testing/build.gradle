@@ -2,8 +2,8 @@ project.description = 'Vividus extension for Visual Testing'
 
 dependencies {
     implementation project(':vividus-bdd-engine')
-    implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-extension-selenium')
+    implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-reporter')
     implementation project(':vividus-util')
 

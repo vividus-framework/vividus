@@ -198,6 +198,15 @@ public interface ISoftAssert
     boolean recordFailedAssertion(String description, Throwable exception);
 
     /**
+     * If the flag {@code passed} is true, then logs information about passed assertion, otherwise adds a new assertion
+     * error to the collection.
+     * @param passed The flag defining which assertion (passed or failed) to record
+     * @param description The assertion description
+     * @return Always returns the value of the input parameter {@code passed}
+     */
+    boolean recordAssertion(boolean passed, String description);
+
+    /**
      * Verifies if there is any assertion error. Throws exception if assertion error exists
      * @throws VerificationError If there were any assertion errors collected
      */

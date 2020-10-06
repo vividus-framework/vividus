@@ -16,12 +16,16 @@
 
 package org.vividus.bdd.steps.ui.web.model;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.notEmpty;
+
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -129,6 +133,38 @@ public enum SequenceActionType
             return argumentType;
         }
     },
+    KEY_DOWN(false)
+    {
+        private final Type argumentType = TypeUtils.parameterize(List.class, String.class);
+
+        @Override
+        public void addAction(Actions actions, Object argument)
+        {
+            perform(argument, (List<String> args) -> buildKeysActions(args, actions::keyDown));
+        }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return argumentType;
+        }
+    },
+    KEY_UP(false)
+    {
+        private final Type argumentType = TypeUtils.parameterize(List.class, String.class);
+
+        @Override
+        public void addAction(Actions actions, Object argument)
+        {
+            perform(argument, (List<String> args) -> buildKeysActions(args, actions::keyUp));
+        }
+
+        @Override
+        public Type getArgumentType()
+        {
+            return argumentType;
+        }
+    },
     CLICK(true)
     {
         @Override
@@ -179,9 +215,18 @@ public enum SequenceActionType
         }
         else
         {
-            Validate.isTrue(TypeUtils.isAssignable(argument.getClass(), getArgumentType()),
+            isTrue(TypeUtils.isAssignable(argument.getClass(), getArgumentType()),
                     "Argument for %s action must be of type %s", name(), getArgumentType());
             argumentConsumer.accept((U) argument);
         }
+    }
+
+    private static void buildKeysActions(List<String> keys, Consumer<CharSequence> actionBuilder)
+    {
+        notEmpty(keys, "At least one key should be provided");
+        keys.stream()
+            .peek(key -> isTrue(EnumUtils.isValidEnum(Keys.class, key), "The '%s' is not allowed as a key", key))
+            .map(Keys::valueOf)
+            .forEach(actionBuilder);
     }
 }

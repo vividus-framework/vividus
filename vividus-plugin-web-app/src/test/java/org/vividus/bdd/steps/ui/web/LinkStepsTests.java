@@ -24,9 +24,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith(MockitoExtension.class)
 class LinkStepsTests
@@ -45,9 +45,8 @@ class LinkStepsTests
     {
         ExamplesTable expectedLinkItems = new ExamplesTable("|text|link|\n|Home|/|\n");
         webUiLinkSteps.ifLinkItemsWithTextAndLink(expectedLinkItems);
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.LINK_TEXT, HOME).addFilter(
-                ActionAttributeType.LINK_URL, SLASH);
-        verify(baseValidations).assertIfElementExists("Link with attributes: " + attributes, attributes);
+        Locator locator = new Locator(WebLocatorType.LINK_TEXT, HOME).addFilter(WebLocatorType.LINK_URL, SLASH);
+        verify(baseValidations).assertIfElementExists("Link with attributes: " + locator, locator);
     }
 
     @Test
@@ -55,7 +54,7 @@ class LinkStepsTests
     {
         ExamplesTable expectedLinkItems = new ExamplesTable("|text|\n|Home|\n|");
         webUiLinkSteps.ifLinkItemsWithTextExists(expectedLinkItems);
-        SearchAttributes attributes = new SearchAttributes(ActionAttributeType.LINK_TEXT, HOME);
-        verify(baseValidations).assertIfElementExists("Link with text '" + HOME + "'", attributes);
+        Locator locator = new Locator(WebLocatorType.LINK_TEXT, HOME);
+        verify(baseValidations).assertIfElementExists("Link with text '" + HOME + "'", locator);
     }
 }

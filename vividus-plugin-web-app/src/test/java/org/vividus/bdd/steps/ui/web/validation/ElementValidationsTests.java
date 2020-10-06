@@ -22,11 +22,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +36,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.Dimension;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.WebElementActions;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,14 +46,9 @@ class ElementValidationsTests
 {
     private static final String TITLE = "title";
     private static final String ELEMENT_CONTAINS_TEXT = "Element contains text";
-    private static final String DESCRIPTION = "desc";
     private static final String STRING_ARG = "stringArg";
     private static final int DIMENSION_VALUE = 100;
     private static final int CORRECT_WIDTH_VALUE = 80;
-    private static final String BUSINESS_DESCRIPTION = "Test business description";
-
-    @Mock
-    private IHighlightingSoftAssert mockedIHighlightingSoftAssert;
 
     @Mock
     private WebElementActions webElementActions;
@@ -63,20 +62,11 @@ class ElementValidationsTests
     @Mock
     private IDescriptiveSoftAssert descriptiveSoftAssert;
 
+    @Mock
+    private IUiContext uiContext;
+
     @InjectMocks
     private ElementValidations elementValidations;
-
-    @Test
-    void testAssertElementNumber()
-    {
-        List<WebElement> mockedWebElements = List.of(mockedWebElement);
-        when(mockedIHighlightingSoftAssert.withHighlightedElements(mockedWebElements))
-                .thenReturn(descriptiveSoftAssert);
-        elementValidations.assertElementNumber(BUSINESS_DESCRIPTION, DESCRIPTION, mockedWebElements, any());
-        verify(descriptiveSoftAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(DESCRIPTION), eq(
-                mockedWebElements),
-                any());
-    }
 
     @Test
     void testAssertIfElementContainsTextOverload()
@@ -88,9 +78,9 @@ class ElementValidationsTests
     @Test
     void testAssertIfElementContainsTextSuccess()
     {
-        when(mockedIHighlightingSoftAssert.withHighlightedElement(mockedWebElement)).thenReturn(descriptiveSoftAssert);
         when(mockedWebElement.getText()).thenReturn(STRING_ARG);
         when(descriptiveSoftAssert.assertThat(eq(ELEMENT_CONTAINS_TEXT), eq(STRING_ARG), any())).thenReturn(true);
+        mockAssertingWebElements(List.of(mockedWebElement));
         boolean result = elementValidations.assertIfElementContainsText(mockedWebElement, STRING_ARG, true);
         assertTrue(result);
     }
@@ -98,10 +88,10 @@ class ElementValidationsTests
     @Test
     void testAssertIfElementContainsTextSuccessInPseudoElement()
     {
-        when(mockedIHighlightingSoftAssert.withHighlightedElement(mockedWebElement)).thenReturn(descriptiveSoftAssert);
         when(mockedWebElement.getText()).thenReturn("");
         when(descriptiveSoftAssert.assertThat(eq(ELEMENT_CONTAINS_TEXT), eq(STRING_ARG), any())).thenReturn(true);
         when(webElementActions.getPseudoElementContent(mockedWebElement)).thenReturn(STRING_ARG);
+        mockAssertingWebElements(List.of(mockedWebElement));
         boolean result = elementValidations.assertIfElementContainsText(mockedWebElement, STRING_ARG, true);
         assertTrue(result);
     }
@@ -116,9 +106,9 @@ class ElementValidationsTests
     @Test
     void testAssertIfElementDoesNotContainTextMatches()
     {
-        when(mockedIHighlightingSoftAssert.withHighlightedElement(mockedWebElement)).thenReturn(descriptiveSoftAssert);
         when(mockedWebElement.getText()).thenReturn(STRING_ARG);
         when(webElementActions.getPseudoElementContent(mockedWebElement)).thenReturn("''");
+        mockAssertingWebElements(List.of(mockedWebElement));
         boolean result = elementValidations.assertIfElementContainsText(mockedWebElement, STRING_ARG, false);
         assertFalse(result);
     }
@@ -130,9 +120,8 @@ class ElementValidationsTests
         when(mockedWebElement.getSize()).thenReturn(seleniumDimension);
         when(seleniumDimension.getHeight()).thenReturn(DIMENSION_VALUE);
         Dimension dimension = Dimension.HEIGHT;
-        when(mockedIHighlightingSoftAssert.withHighlightedElements(mockedWebElements))
-                .thenReturn(descriptiveSoftAssert);
         when(descriptiveSoftAssert.assertEquals(anyString(), anyLong(), anyLong())).thenReturn(true);
+        mockAssertingWebElements(mockedWebElements);
         boolean result = elementValidations.assertAllWebElementsHaveEqualDimension(mockedWebElements, dimension);
         assertTrue(result);
     }
@@ -193,8 +182,8 @@ class ElementValidationsTests
     @Test
     void testAssertIfElementContainsTooltipEquals()
     {
-        when(mockedIHighlightingSoftAssert.withHighlightedElement(mockedWebElement)).thenReturn(descriptiveSoftAssert);
         when(mockedWebElement.getAttribute(TITLE)).thenReturn(STRING_ARG);
+        mockAssertingWebElements(List.of(mockedWebElement));
         elementValidations.assertIfElementContainsTooltip(mockedWebElement, STRING_ARG);
         verify(descriptiveSoftAssert).assertEquals("Element has correct tooltip", STRING_ARG, STRING_ARG);
     }
@@ -202,9 +191,9 @@ class ElementValidationsTests
     @Test
     void testAssertIfElementContainsTextFailed()
     {
-        when(mockedIHighlightingSoftAssert.withHighlightedElement(mockedWebElement)).thenReturn(descriptiveSoftAssert);
         when(mockedWebElement.getText()).thenReturn(STRING_ARG);
         when(webElementActions.getPseudoElementContent(mockedWebElement)).thenReturn("");
+        mockAssertingWebElements(List.of(mockedWebElement));
         boolean result = elementValidations.assertIfElementContainsText(mockedWebElement, "String", true);
         assertFalse(result);
     }
@@ -215,15 +204,23 @@ class ElementValidationsTests
         WebElement mockedChildElement = mock(WebElement.class);
         org.openqa.selenium.Dimension mockedParentDimension = mock(org.openqa.selenium.Dimension.class);
         org.openqa.selenium.Dimension mockedChildDimension = mock(org.openqa.selenium.Dimension.class);
-        when(mockedIHighlightingSoftAssert.withHighlightedElements(List.of(mockedParentElement, mockedChildElement)))
-                .thenReturn(descriptiveSoftAssert);
         when(mockedParentElement.getSize()).thenReturn(mockedParentDimension);
         when(mockedChildElement.getSize()).thenReturn(mockedChildDimension);
         when(mockedParentDimension.getWidth()).thenReturn(1000);
         when(mockedChildDimension.getWidth()).thenReturn(800);
         when(descriptiveSoftAssert.assertEquals("Element has correct width", CORRECT_WIDTH_VALUE,
                 CORRECT_WIDTH_VALUE, 2)).thenReturn(elementHasCorrectWidth);
+        mockAssertingWebElements(List.of(mockedParentElement, mockedChildElement));
         return elementValidations.assertIfElementHasWidthInPerc(mockedParentElement, mockedChildElement,
                 CORRECT_WIDTH_VALUE);
+    }
+
+    private void mockAssertingWebElements(List<WebElement> elements)
+    {
+        doAnswer(a ->
+        {
+            BooleanSupplier supplier = a.getArgument(1, BooleanSupplier.class);
+            return supplier.getAsBoolean();
+        }).when(uiContext).withAssertingWebElements(eq(elements), any());
     }
 }

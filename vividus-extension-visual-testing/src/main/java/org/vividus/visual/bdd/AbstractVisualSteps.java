@@ -23,25 +23,25 @@ import java.util.function.Supplier;
 import org.apache.commons.lang3.Validate;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
 public abstract class AbstractVisualSteps
 {
-    private final IWebUiContext webUiContext;
+    private final IUiContext uiContext;
     private final IAttachmentPublisher attachmentPublisher;
 
-    public AbstractVisualSteps(IWebUiContext webUiContext, IAttachmentPublisher attachmentPublisher)
+    public AbstractVisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher)
     {
-        this.webUiContext = webUiContext;
+        this.uiContext = uiContext;
         this.attachmentPublisher = attachmentPublisher;
     }
 
     protected <T extends VisualCheck> VisualCheckResult
         execute(Function<T, VisualCheckResult> checkResultProvider, Supplier<T> visualCheckFactory, String templateName)
     {
-        SearchContext searchContext = webUiContext.getSearchContext();
+        SearchContext searchContext = uiContext.getSearchContext();
         Validate.validState(searchContext != null, "Search context is null, please check is browser session started");
         T visualCheck = visualCheckFactory.get();
         visualCheck.setSearchContext(searchContext);

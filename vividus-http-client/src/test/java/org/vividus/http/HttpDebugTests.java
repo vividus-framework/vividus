@@ -23,7 +23,7 @@ import java.net.URI;
 
 import org.junit.jupiter.api.Test;
 
-public class HttpDebugTests
+class HttpDebugTests
 {
     private static final String RESOURCE_URI = "http://somewh.ere/";
 

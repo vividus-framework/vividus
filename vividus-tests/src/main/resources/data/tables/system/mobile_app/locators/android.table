@@ -1,0 +1,15 @@
+{transformer=FROM_LANDSCAPE}
+|mainViewHeaderTextXpath    |//android.widget.TextView[@text='Home']       |
+|togglerAccessibilityId     |menu-toggler-accessibilityLabel               |
+|menuButtonXpath            |//android.widget.TextView[@text='Button']     |
+|incrementAccessibilityId   |increment-accessibilityLabel                  |
+|menuInputXpath             |//android.widget.TextView[@text='Input']      |
+|nameInputAccessibilityId   |name-input-accessibilityLabel                 |
+|nameDisplayXpath           |//android.widget.TextView[@text='${text}']    |
+|menuWaitXpath              |//android.widget.TextView[@text='Wait']       |
+|pictureAccessibilityId     |picture-accessibilityLabel                    |
+|hidePictureAccessibilityId |hide-picture-accessibilityLabel               |
+|showPictureAccessibilityId |show-picture-accessibilityLabel               |
+|menuScrollViewXpath        |//android.widget.TextView[@text='Scroll View']|
+|startElementAccessibilityId|history-start-accessibilityLabel              |
+|endElementAccessibilityId  |history-end-accessibilityLabel                |

@@ -61,6 +61,7 @@ import org.vividus.validator.model.ResourceValidation;
 @ExtendWith(MockitoExtension.class)
 class ResourceCheckStepsTests
 {
+    private static final String UNCHECKED = "unchecked";
     private static final String LINK_SELECTOR = "a";
     private static final String FIRST_PAGE_TABLE = "|pages|\n|https://first.page|";
     private static final String SECOND_PAGE_URL = "https://second.page";
@@ -154,16 +155,15 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
         URI imageUri = URI.create("https://avatars0.githubusercontent.com/u/48793437?s=200&v=4");
         URI gifImageUri = URI.create("https://github.githubassets.com/images/spinners/octocat-spinner-32.gif");
-
+        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
         resourceCheckSteps.checkResources("a, img", FIRST_PAGE);
 
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(9));
             Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
@@ -185,7 +185,6 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
         when(httpResponse.getResponseBodyAsString()).thenReturn(FIRST_PAGE, SECOND_PAGE);
@@ -193,11 +192,12 @@ class ResourceCheckStepsTests
         resourceCheckSteps.init();
         ExamplesTable examplesTable =
                 new ExamplesTable("|pages|\n|https://first.page|\n|https://second.page|");
+        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(8));
             Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
@@ -218,7 +218,6 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
         when(httpResponse.getResponseBodyAsString()).thenReturn(THIRD_PAGE);
@@ -229,7 +228,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.checkResources(LINK_SELECTOR + ", video", examplesTable);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, THIRD_PAGE_URL, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
             Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
@@ -244,7 +243,6 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         IOException ioException = new IOException();
         doThrow(ioException).when(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL,
                 Optional.empty());
@@ -254,7 +252,7 @@ class ResourceCheckStepsTests
                 new ExamplesTable(FIRST_PAGE_TABLE);
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
             ResourceValidation resourceValidation = validationsToReport.iterator().next();
@@ -275,7 +273,6 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
@@ -284,7 +281,7 @@ class ResourceCheckStepsTests
                 new ExamplesTable("|pages|\n|https://second.page|");
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
             ResourceValidation resourceValidation = validationsToReport.iterator().next();
@@ -314,11 +311,6 @@ class ResourceCheckStepsTests
         verifyNoInteractions(httpTestContext, attachmentPublisher, resourceValidator);
     }
 
-    private void mockWebApplicationConfiguration()
-    {
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
-    }
-
     private void mockResourceValidator()
     {
         when(resourceValidator.perform(any(ResourceValidation.class)))
@@ -335,13 +327,12 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        mockWebApplicationConfiguration();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.of("^((?!https).)*"));
         resourceCheckSteps.init();
-
+        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
         resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(UNCHECKED)
             Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
             assertThat(validationsToReport, hasSize(7));
             Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();

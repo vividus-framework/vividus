@@ -57,8 +57,9 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
+import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
-import org.vividus.util.wait.Waiter;
 
 public class DatabaseSteps
 {
@@ -67,7 +68,7 @@ public class DatabaseSteps
     private final IAttachmentPublisher attachmentPublisher;
     private final ISoftAssert softAssert;
     private HashFunction hashFunction;
-    private Map<String, DriverManagerDataSource> dataSources;
+    private PropertyMappedCollection<DriverManagerDataSource> dataSources;
     private Duration dbQueryTimeout;
     private RowsCollector rowsCollector;
     private int diffLimit;
@@ -99,7 +100,7 @@ public class DatabaseSteps
             String sqlState)
     {
         String actualSqlState = "00000";
-        try (Connection connection = dataSources.get(dbKey).getConnection(username, password))
+        try (Connection connection = getDataSourceByKey(dbKey).getConnection(username, password))
         {
             // empty statement
         }
@@ -249,15 +250,17 @@ public class DatabaseSteps
     }
 
     /**
-     * Step waits until data received from SQL request is equal to data from examples table for some duration.
+     * The step waits until the <code>sqlQuery</code> returns the data equal to the examples table row
+     * The order of columns is ignored
      * Actions performed in the step:
      * <ul>
-     *     <li>executes provided SQL query against database</li>
-     *     <li>compares data received from SQL request against examples table</li>
-     *     <li>sleeps during calculated part of specified duration</li>
-     *     <li>repeats previous actions if data was not equal and seconds timeout not expired</li>
+     *     <li>run the <code>sqlQuery</code></li>
+     *     <li>compares the response with the examples table row</li>
+     *     <li>sleep for the <code>duration</code></li>
+     *     <li>repeat all of the above until there are no more retry attempts or the response is equal
+     *     to the examples table row</li>
      * </ul>
-     * @param duration Time duration to wait
+     * @param duration The time gap between two queries
      * @param retryTimes How many times request will be retried; duration/retryTimes=timeout between requests
      * @param sqlQuery SQL query to execute
      * @param dbKey Key identifying the database connection
@@ -273,7 +276,7 @@ public class DatabaseSteps
         Map<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table.getRows());
         statistics.getTarget().setRowsQuantity(sourceData.size());
 
-        Waiter waiter = new Waiter(new WaitMode(duration, retryTimes));
+        DurationBasedWaiter waiter = new DurationBasedWaiter(new WaitMode(duration, retryTimes));
         List<List<EntryComparisonResult>> comparisonResult = waiter.wait(
             () -> {
                 List<Map<String, Object>> data = jdbcTemplate.queryForList(sqlQuery);
@@ -312,7 +315,8 @@ public class DatabaseSteps
     }
 
     /**
-     * Step designed to compare data received from SQL request against examples table;
+     * The step designed to compare the data received from SQL request against the examples table row
+     * The order of columns is ignored.
      * Examples table could be build for example via GENERATE_FROM_CSV table transformer.
      * Consider complete example:
      * <br>When I execute SQL query `${source}` against `$dbKey` and save result to STORY variable `data`
@@ -419,15 +423,21 @@ public class DatabaseSteps
                            .map(map::get)
                            .filter(Objects::nonNull)
                            .map(Object::toString)
+                           .sorted()
                            .collect(Collectors.joining()), StandardCharsets.UTF_8);
     }
 
     private JdbcTemplate getJdbcTemplate(String dbKey)
     {
-        return jdbcTemplates.computeIfAbsent(dbKey, key -> new JdbcTemplate(dataSources.get(key)));
+        return jdbcTemplates.computeIfAbsent(dbKey, key -> new JdbcTemplate(getDataSourceByKey(key)));
     }
 
-    public void setDataSources(Map<String, DriverManagerDataSource> dataSources)
+    private DriverManagerDataSource getDataSourceByKey(String key)
+    {
+        return dataSources.get(key, "Database connection with key '%s' is not configured in properties", key);
+    }
+
+    public void setDataSources(PropertyMappedCollection<DriverManagerDataSource> dataSources)
     {
         this.dataSources = dataSources;
     }

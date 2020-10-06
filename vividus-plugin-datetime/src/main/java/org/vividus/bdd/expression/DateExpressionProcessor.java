@@ -31,12 +31,14 @@ public class DateExpressionProcessor implements IExpressionProcessor
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(DateExpressionProcessor.class);
 
+    private static final String DATE_TIME_REGEX_PART = "((-)?P((?:\\d+[YMWD])*)(T(?:\\d+[HMS])+)?)";
+
     private static final Pattern ISO_DURATION_PATTERN_WITH_FORMAT_PATTERN = Pattern
-            .compile("^((-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*))(?:\\((.*)\\))?$");
+            .compile("^" + DATE_TIME_REGEX_PART + "(?:\\((.*)\\))?$");
     private static final int FORMAT_GROUP = 5;
 
     private static final Pattern GENERATE_DATE_PATTERN = Pattern
-            .compile("^generateDate\\(((-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*))(,\\s*(.*))?\\)$");
+            .compile("^generateDate\\(" + DATE_TIME_REGEX_PART + "(,\\s*(.*))?\\)$");
     private static final int GENERATE_DATE_FORMAT_GROUP = 6;
 
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");

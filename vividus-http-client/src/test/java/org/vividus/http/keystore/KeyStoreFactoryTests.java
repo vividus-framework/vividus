@@ -28,7 +28,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-public class KeyStoreFactoryTests
+class KeyStoreFactoryTests
 {
     private static final String PASSWORD = "password";
     private static final String JKS_PATH = "/org/vividus/http/keystore/client.jks";

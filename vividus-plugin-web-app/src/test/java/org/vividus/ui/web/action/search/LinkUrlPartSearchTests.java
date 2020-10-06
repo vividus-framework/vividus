@@ -21,7 +21,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -36,12 +35,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.AbstractElementAction;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -56,7 +57,7 @@ class LinkUrlPartSearchTests
     private static final String LINK_WITH_PART_URL_PATTERN = ".//a[contains(@href, %s)]";
     private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is equal to {}";
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementSearchAction.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
     private List<WebElement> webElements;
 
@@ -65,9 +66,6 @@ class LinkUrlPartSearchTests
 
     @Mock
     private SearchContext searchContext;
-
-    @Mock
-    private SearchParameters parameters;
 
     @Spy
     private LinkUrlPartSearch spy;
@@ -117,31 +115,29 @@ class LinkUrlPartSearchTests
     @Test
     void testSearchContextCaseSensitive()
     {
-        when(parameters.getValue()).thenReturn(URL_PART);
+        SearchParameters parameters = new SearchParameters(URL_PART, Visibility.ALL, false);
         search.setCaseSensitiveSearch(true);
-        spy = Mockito.spy(search);
-        spy.search(searchContext, parameters);
         By locator = LocatorUtil.getXPathLocator(LINK_WITH_PART_URL_PATTERN, URL_PART);
-        verify(spy).findElements(searchContext, locator, parameters);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 0))));
+        when(searchContext.findElements(locator)).thenReturn(webElements);
+        assertEquals(webElements, search.search(searchContext, parameters));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 1))));
     }
 
     @Test
     void testSearchContextCaseInsensitive()
     {
-        when(parameters.getValue()).thenReturn(URL_PART);
+        SearchParameters parameters = new SearchParameters(URL_PART, Visibility.ALL, false);
         search.setCaseSensitiveSearch(false);
-        spy = Mockito.spy(search);
-        spy.search(searchContext, parameters);
-        verify(spy).findElements(searchContext, LINK_URL_PART_LOCATOR, parameters);
+        when(searchContext.findElements(LINK_URL_PART_LOCATOR)).thenReturn(webElements);
+        assertEquals(webElements, search.search(searchContext, parameters));
         assertThat(logger.getLoggingEvents(),
-                equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, LINK_URL_PART_LOCATOR, 0))));
+                equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, LINK_URL_PART_LOCATOR, 1))));
     }
 
     @Test
     void testSearchContextNull()
     {
-        when(parameters.getValue()).thenReturn(URL_PART);
+        SearchParameters parameters = new SearchParameters(URL_PART);
         List<WebElement> foundElements = search.search(null, parameters);
         assertTrue(foundElements.isEmpty());
     }
