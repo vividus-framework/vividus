@@ -13,7 +13,9 @@
 
     <bean class="org.vividus.mobileapp.action.TouchActions" />
 
-    <bean class="org.vividus.mobileapp.action.KeyboardActions" />
+    <bean class="org.vividus.mobileapp.action.KeyboardActions" >
+        <constructor-arg index="0" value="${mobile-environment.real-device}" />
+    </bean>
 
     <bean class="org.vividus.bdd.monitor.GenericScreenshotOnFailureMonitor" />
 
