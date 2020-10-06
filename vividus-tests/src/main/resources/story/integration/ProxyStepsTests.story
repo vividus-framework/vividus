@@ -31,3 +31,20 @@ Scenario: Verify step When I wait until HTTP $httpMethod request with URL patter
 Given I am on a page with the URL 'http://httpbin.org/get'
 When I wait until HTTP GET request with URL pattern `http://httpbin.org/get` exists in proxy log
 Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `1`
+
+Scenario: Verify step When I add headers to proxied requests with URL pattern which $comparisonRule `$urlPattern`:$headers
+Meta:
+    @requirementId 603
+When I add headers to proxied requests with URL pattern which is equal to `http://httpbin.org/headers`:
+|name     |value     |
+|testName1|testValue1|
+|testName2|testValue2|
+Given I am on a page with the URL 'http://httpbin.org/headers'
+When I change context to element located `xpath(//pre)`
+When I set the text found in search context to the 'SCENARIO' variable 'response'
+Then a JSON element from '${response}' by the JSON path '$.headers' is equal to '
+{
+    "Testname1": "testValue1",
+    "Testname2": "testValue2"
+}
+'IGNORING_EXTRA_FIELDS

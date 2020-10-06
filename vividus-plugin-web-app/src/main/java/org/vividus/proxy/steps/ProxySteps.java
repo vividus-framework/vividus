@@ -38,16 +38,21 @@ import com.browserup.harreader.model.HttpMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.HttpStatus;
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
+import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.proxy.IProxy;
 import org.vividus.proxy.ProxyLog;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWebWaitActions;
+
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 public class ProxySteps
@@ -235,6 +240,32 @@ public class ProxySteps
             {
                 return String.format("waiting for HTTP %s request with URL pattern %s", httpMethod, urlPattern);
             }
+        });
+    }
+
+    /**
+     * Add headers to proxy request that will be used while sending request with given urlPattern
+     * @param headers ExamplesTable representing list of headers with columns "name" and "value" specifying HTTP header
+     * names and values respectively
+     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain"
+     * @param urlPattern The string value of URL-pattern to filter by
+     */
+    @When("I add headers to proxied requests with URL pattern which $comparisonRule `$urlPattern`:$headers")
+    public void addHeadersToProxyRequest(StringComparisonRule comparisonRule, String urlPattern, ExamplesTable headers)
+    {
+        DefaultHttpHeaders httpHeaders = new DefaultHttpHeaders();
+        headers.getRowsAsParameters(true)
+                .forEach(row -> httpHeaders.add(
+                        row.valueAs("name", String.class),
+                        (Object) row.valueAs("value", String.class)
+                ));
+        Matcher<String> expected = comparisonRule.createMatcher(urlPattern);
+        proxy.addRequestFilter((request, contents, messageInfo) -> {
+            if (expected.matches(messageInfo.getUrl()))
+            {
+                request.headers().add(httpHeaders);
+            }
+            return null;
         });
     }
 
