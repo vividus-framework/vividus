@@ -16,6 +16,7 @@
 
 package org.vividus.proxy.steps;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -33,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.util.HttpMessageContents;
+import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.util.HttpMessageInfo;
 import com.browserup.harreader.model.Har;
 import com.browserup.harreader.model.HarCreatorBrowser;
@@ -52,6 +53,7 @@ import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -66,6 +68,8 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWebWaitActions;
 
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -85,6 +89,7 @@ class ProxyStepsTests
     private static final String MIME_TYPE = "mimeType";
     private static final String TEXT = "text";
     private static final String COMMENT = "comment";
+    private static final ExamplesTable HEADERS = new ExamplesTable("|name|value|\n|name1|value1|");
 
     @Mock
     private ISoftAssert nonFailingAssert;
@@ -268,14 +273,27 @@ class ProxyStepsTests
     }
 
     @Test
-    void testAddHeadersToProxyRequest()
+    void shouldAddHeadersToProxyRequestIfUrlMatches()
     {
+        HttpHeaders httpHeaders = mock(HttpHeaders.class);
         HttpRequest request = mock(HttpRequest.class);
-        HttpMessageContents contents = mock(HttpMessageContents.class);
-        HttpMessageInfo message = mock(HttpMessageInfo.class);
-        ExamplesTable headers = new ExamplesTable("|name|value|\n|name1|value1|");
-        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL_PATTERN, headers);
-        verify(proxy).addRequestFilter(argThat(filter -> filter.filterRequest(request, contents, message) == null));
+        when(request.headers()).thenReturn(httpHeaders);
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        when(messageInfo.getUrl()).thenReturn(URL_PATTERN);
+        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL_PATTERN, HEADERS);
+        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
+        verify(proxy).addRequestFilter(filterCaptor.capture());
+        assertNull(filterCaptor.getValue().filterRequest(request, null, messageInfo));
+        verify(httpHeaders).add(argThat(headers ->
+                headers instanceof DefaultHttpHeaders && headers.size() == 1 && VALUE1.equals(headers.get("name1"))));
+    }
+
+    @Test
+    void shouldNotAddHeadersToProxyRequestIfUrlDoesNotMatch()
+    {
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL_PATTERN, HEADERS);
+        verify(proxy).addRequestFilter(argThat(filter -> filter.filterRequest(null, null, messageInfo) == null));
     }
 
     private byte[] mockProxyLog() throws IOException
