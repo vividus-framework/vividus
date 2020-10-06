@@ -18,16 +18,32 @@ package org.vividus.mobileapp.action;
 
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.manager.GenericWebDriverManager;
+import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.mobile.action.search.AppiumLocatorType;
 
 import io.appium.java_client.HidesKeyboard;
 
 public class KeyboardActions
 {
+    private final TouchActions touchActions;
     private final IWebDriverProvider webDriverProvider;
+    private final GenericWebDriverManager genericWebDriverManager;
+    private final ISearchActions searchActions;
+    private final boolean realDevice;
 
-    public KeyboardActions(IWebDriverProvider webDriverProvider)
+    public KeyboardActions(boolean realDevice, TouchActions touchActions,
+            IWebDriverProvider webDriverProvider, GenericWebDriverManager genericWebDriverManager,
+            ISearchActions searchActions)
     {
+        this.realDevice = realDevice;
+        this.touchActions = touchActions;
         this.webDriverProvider = webDriverProvider;
+        this.genericWebDriverManager = genericWebDriverManager;
+        this.searchActions = searchActions;
     }
 
     /**
@@ -44,6 +60,19 @@ public class KeyboardActions
     public void typeText(WebElement element, String text)
     {
         element.sendKeys(text);
-        webDriverProvider.getUnwrapped(HidesKeyboard.class).hideKeyboard();
+        // https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
+        if (genericWebDriverManager.isIOSNativeApp() && realDevice)
+        {
+            Locator keyboardReturnLocator = new Locator(AppiumLocatorType.XPATH, new SearchParameters(
+                    "//XCUIElementTypeKeyboard//XCUIElementTypeButton[@name='Return']", Visibility.VISIBLE, false));
+            searchActions.findElement(keyboardReturnLocator).ifPresentOrElse(touchActions::tap, () ->
+            {
+                throw new IllegalStateException("Unable to find 'Return' button to close the keyboard");
+            });
+        }
+        else
+        {
+            webDriverProvider.getUnwrapped(HidesKeyboard.class).hideKeyboard();
+        }
     }
 }

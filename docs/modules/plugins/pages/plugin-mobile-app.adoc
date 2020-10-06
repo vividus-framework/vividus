@@ -77,6 +77,31 @@ a|Defines automation engine to use
 !http://appium.io/docs/en/drivers/ios-xcuitest/[XCUITest]
 !===
 
+|`mobile-environment.real-device`
+a|`true`
+
+`false`
+
+|Depends on the set profile
+
+a|Defines whether the tests run on real device
+[cols="2,1", options="header"]
+!===
+
+!Profile
+!Value
+
+!`browserstack/mobile_app`
+!`true`
+
+!`mobile_app/ios`
+!`false`
+
+!`mobile_app/android`
+!`false`
+
+!===
+
 |===
 
 == Profiles
