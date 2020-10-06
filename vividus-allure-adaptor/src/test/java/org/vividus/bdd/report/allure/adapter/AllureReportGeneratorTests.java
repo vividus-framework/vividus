@@ -37,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -54,6 +55,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.report.allure.AllureReportGenerator;
+import org.vividus.reporter.environment.EnvironmentConfigurer;
+import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
@@ -94,6 +97,7 @@ public class AllureReportGeneratorTests
     public void after()
     {
         System.clearProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY);
+        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(Map::clear);
     }
 
     @Test
@@ -178,6 +182,12 @@ public class AllureReportGeneratorTests
         Resource folder = mockResource("/allure-customization/folder/");
         Resource[] resources = { resource, folder };
         when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
+        Map<PropertyCategory, Map<String, String>> environmentConfiguration =
+                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION;
+        environmentConfiguration.get(PropertyCategory.CONFIGURATION).put("Suite", "allure-test");
+        environmentConfiguration.get(PropertyCategory.PROFILE).put("Operating System", "Mac OS X");
+        environmentConfiguration.get(PropertyCategory.SUITE).put("Global Meta Filters", "groovy: !skip");
+        environmentConfiguration.get(PropertyCategory.ENVIRONMENT).put("Main Application Page", "https://vividus.dev/");
         ExecutorInfo executorInfo = new ExecutorInfo();
         executorInfo.setName("Jenkins");
         executorInfo.setType("jenkins");
@@ -200,6 +210,12 @@ public class AllureReportGeneratorTests
         FileUtils.copyDirectory(argThat(arg -> arg.getAbsolutePath().equals(resolveTrendsDir(reportDirectory))),
                 eq(historyDirectory));
         verify(reportGenerator).generate(any(Path.class), any(List.class));
+        assertEquals(
+                      "Suite=allure-test\n"
+                    + "Operating\\ System=Mac OS X\n"
+                    + "Global\\ Meta\\ Filters=groovy: !skip\n"
+                    + "Main\\ Application\\ Page=https://vividus.dev/\n",
+                Files.readString(resultsDirectory.toPath().resolve("environment.properties")));
         assertEquals("{"
                     + "\"name\":\"" + executorInfo.getName()
                     + "\",\"type\":\"" + executorInfo.getType()

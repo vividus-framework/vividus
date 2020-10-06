@@ -23,9 +23,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -33,6 +37,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.report.allure.model.AllureCategory;
+import org.vividus.reporter.environment.EnvironmentConfigurer;
+import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.IPropertyMapper;
 
 import io.qameta.allure.ConfigurationBuilder;
@@ -105,6 +111,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
         wrap(() ->
         {
             createDirectories(resultsDirectory, reportDirectory, historyDirectory);
+            writeEnvironmentProperties();
             writeCategoriesInfo();
             writeExecutorInfo();
             copyDirectory(historyDirectory, resolveHistoryDir(resultsDirectory));
@@ -136,6 +143,18 @@ public class AllureReportGenerator implements IAllureReportGenerator
     {
         ExecutorInfo executorInfo = propertyMapper.readValue("allure.executor.", ExecutorInfo.class);
         createJsonFileInResultsDirectory("executor.json", executorInfo);
+    }
+
+    private void writeEnvironmentProperties() throws IOException
+    {
+        Map<String, String> testExecutionProperties = new LinkedHashMap<>();
+        Map<PropertyCategory, Map<String, String>> environmentConfig = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION;
+        testExecutionProperties.putAll(environmentConfig.get(PropertyCategory.CONFIGURATION));
+        testExecutionProperties.putAll(environmentConfig.get(PropertyCategory.PROFILE));
+        testExecutionProperties.putAll(environmentConfig.get(PropertyCategory.SUITE));
+        testExecutionProperties.putAll(environmentConfig.get(PropertyCategory.ENVIRONMENT));
+        File targetFile = Paths.get(resultsDirectory.getPath(), "environment.properties").toFile();
+        new JavaPropsMapper().writeValue(targetFile, testExecutionProperties);
     }
 
     private File resolveHistoryDir(File root)
