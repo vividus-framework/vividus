@@ -33,6 +33,8 @@ When I wait until HTTP GET request with URL pattern `http://httpbin.org/get` exi
 Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `1`
 
 Scenario: Verify step When I add headers to proxied requests with URL pattern which $comparisonRule `$urlPattern`:$headers
+Meta:
+    @requirementId 603
 When I add headers to proxied requests with URL pattern which is equal to `http://httpbin.org/headers`:
 |name     |value     |
 |testName1|testValue1|
