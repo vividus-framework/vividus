@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -243,11 +244,11 @@ public class AllureReportGenerator implements IAllureReportGenerator
         }
     }
 
-    private static void wrap(IOExecutable executable)
+    private static void wrap(FailableRunnable<IOException> runnable)
     {
         try
         {
-            executable.execute();
+            runnable.run();
         }
         catch (IOException e)
         {
@@ -263,10 +264,5 @@ public class AllureReportGenerator implements IAllureReportGenerator
     public void setHistoryDirectory(File historyDirectory)
     {
         this.historyDirectory = historyDirectory;
-    }
-
-    private interface IOExecutable
-    {
-        void execute() throws IOException;
     }
 }
