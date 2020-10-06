@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.function.FailableFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -134,14 +135,15 @@ class SshStepsTests
         verify(sshTestContext).putSshOutput(null);
     }
 
-    private SftpOutput testSftpExecution(CommandExecutor commandExecutor) throws CommandExecutionException
+    private SftpOutput testSftpExecution(FailableFunction<Commands, Object, CommandExecutionException> commandExecutor)
+            throws CommandExecutionException
     {
         CommandExecutionManager<SftpOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SFTP);
         Commands commands = new Commands("sftp-command");
         SftpOutput output = new SftpOutput();
         output.setResult("sftp-output");
         when(executionManager.run(SERVER_CONFIGURATION, commands)).thenReturn(output);
-        Object actual = commandExecutor.execute(commands);
+        Object actual = commandExecutor.apply(commands);
         assertEquals(output, actual);
         verify(sshTestContext).putSshOutput(null);
         return output;
@@ -153,12 +155,6 @@ class SshStepsTests
         CommandExecutionManager commandExecutionManager = mock(CommandExecutionManager.class);
         when(commandExecutionManagers.get(protocol.toString())).thenReturn(commandExecutionManager);
         return commandExecutionManager;
-    }
-
-    @FunctionalInterface
-    private interface CommandExecutor
-    {
-        Object execute(Commands commands) throws CommandExecutionException;
     }
 
     @FunctionalInterface
