@@ -167,7 +167,7 @@ jobs:
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                                 -Pvividus.configuration.environments=system/saucelabs/mobile_app/ios \
-                                                -Pvividus.configuration.suite=system/mobile_app \
+                                                -Pvividus.configuration.suite=system/mobile_app/ios \
                                                 -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
@@ -203,7 +203,7 @@ jobs:
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                                 -Pvividus.configuration.environments=system/saucelabs/mobile_app/android \
-                                                -Pvividus.configuration.suite=system/mobile_app \
+                                                -Pvividus.configuration.suite=system/mobile_app/android \
                                                 -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
