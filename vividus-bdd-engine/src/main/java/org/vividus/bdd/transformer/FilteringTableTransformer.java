@@ -19,7 +19,6 @@ package org.vividus.bdd.transformer;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.Validate.isTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,13 +38,13 @@ import org.jbehave.core.model.TableParsers;
 import org.vividus.bdd.util.ExamplesTableProcessor;
 
 @Named("FILTERING")
-public class FilteringTableTransformer implements ExtendedTableTransformer
+public class FilteringTableTransformer extends AbstractFilteringTableTransformer
 {
     private static final String BY_MAX_COLUMNS_PROPERTY = "byMaxColumns";
     private static final String BY_MAX_ROWS_PROPERTY = "byMaxRows";
-    private static final String BY_COLUMNS_NAMES_PROPERTY = "byColumnNames";
     private static final String BY_ROW_INDEXES_PROPERTY = "byRowIndexes";
     private static final String COLUMN_PREFIX = "column.";
+
     private static final String REGEX_FILTER_DECLARATION = COLUMN_PREFIX + "<regex placeholder>";
     private static final String CONFLICTING_PROPERTIES_MESSAGE =
             "Conflicting properties declaration found: '%s' and '%s'";
@@ -79,61 +78,50 @@ public class FilteringTableTransformer implements ExtendedTableTransformer
                     filterRows(columnFilters, tableRows.getRows(), properties), tableProperties);
         }
 
-        isTrue(!(byMaxColumns != null && byColumnNames != null), CONFLICTING_PROPERTIES_MESSAGE,
+        isTrue(byMaxColumns == null || byColumnNames == null, CONFLICTING_PROPERTIES_MESSAGE,
                 BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY);
 
-        isTrue(!(byMaxRows != null && byRowIndexes != null), CONFLICTING_PROPERTIES_MESSAGE,
+        isTrue(byMaxRows == null || byRowIndexes == null, CONFLICTING_PROPERTIES_MESSAGE,
                 BY_MAX_ROWS_PROPERTY, BY_ROW_INDEXES_PROPERTY);
 
-        List<String> filteredColumns = getFilteredHeaders(byMaxColumns, byColumnNames, tableRows.getHeaders());
-        List<Map<String, String>> result = filterByHeaders(filteredColumns,
-                getFilteredRows(byMaxRows, byRowIndexes, tableRows.getRows()));
+        List<String> filteredColumnNames = filterColumnNames(byMaxColumns, byColumnNames, tableRows.getHeaders());
+        List<Map<String, String>> filteredRows = filterRows(byMaxRows, byRowIndexes, tableRows.getRows());
+        filterRowsByColumnNames(filteredRows, filteredColumnNames);
 
-        return ExamplesTableProcessor.buildExamplesTable(filteredColumns, result, tableProperties);
+        return ExamplesTableProcessor.buildExamplesTable(filteredColumnNames, filteredRows, tableProperties);
     }
 
-    private List<Map<String, String>> filterByHeaders(List<String> filteredColumns, List<Map<String, String>> result)
-    {
-        result.stream().map(m -> m.keySet().retainAll(filteredColumns)).collect(Collectors.toList());
-        return result;
-    }
-
-    private List<Map<String, String>> getFilteredRows(String byMaxRows, String byRowIndexes,
-            List<Map<String, String>> list)
+    private List<Map<String, String>> filterRows(String byMaxRows, String byRowIndexes, List<Map<String, String>> rows)
     {
         if (byRowIndexes == null)
         {
             return Optional.ofNullable(byMaxRows)
                     .map(Integer::parseInt)
-                    .filter(m -> m < list.size())
-                    .map(m -> list.subList(0, m))
-                    .orElse(list);
+                    .filter(m -> m < rows.size())
+                    .map(m -> rows.subList(0, m))
+                    .orElse(rows);
         }
         else
         {
             return Stream.of(StringUtils.split(byRowIndexes, ';'))
                     .mapToInt(Integer::parseInt)
-                    .mapToObj(list::get)
+                    .mapToObj(rows::get)
                     .collect(Collectors.toList());
         }
     }
 
-    private List<String> getFilteredHeaders(String byMaxColumns, String byColumnNames, List<String> headerValues)
+    private List<String> filterColumnNames(String byMaxColumns, String byColumnNames, List<String> allColumnNames)
     {
-        int columnsLimit = byMaxColumns == null
-                ? headerValues.size() : Math.min(headerValues.size(), Integer.parseInt(byMaxColumns));
-        List<String> filteredColumns = new ArrayList<>(headerValues);
-        if (byColumnNames == null)
+        if (byColumnNames != null)
         {
-            filteredColumns = filteredColumns.subList(0, columnsLimit);
+            return filterColumnNames(allColumnNames, byColumnNames);
         }
-        else
+        if (byMaxColumns != null)
         {
-            List<String> columnNames = Stream.of(StringUtils.split(byColumnNames, ';'))
-                    .map(String::trim).collect(Collectors.toList());
-            filteredColumns.retainAll(columnNames);
+            int columnsLimit = Math.min(allColumnNames.size(), Integer.parseInt(byMaxColumns));
+            return allColumnNames.subList(0, columnsLimit);
         }
-        return filteredColumns;
+        return allColumnNames;
     }
 
     private static Set<String> findColumnFilters(Properties properties)
