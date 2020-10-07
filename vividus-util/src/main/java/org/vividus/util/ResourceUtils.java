@@ -26,7 +26,6 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.function.FailableFunction;
 
 public final class ResourceUtils
 {
@@ -116,17 +115,21 @@ public final class ResourceUtils
         return StringUtils.prependIfMissing(resourceName, "/");
     }
 
-    private static <T> T loadResource(Class<?> clazz, String resourceName,
-            FailableFunction<URL, T, IOException> resourceReader)
+    private static <T> T loadResource(Class<?> clazz, String resourceName, ResourceReader<T> resourceReader)
     {
         URL resource = findResource(clazz, resourceName);
         try
         {
-            return resourceReader.apply(resource);
+            return resourceReader.read(resource);
         }
         catch (IOException e)
         {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private interface ResourceReader<R>
+    {
+        R read(URL resource) throws IOException;
     }
 }
