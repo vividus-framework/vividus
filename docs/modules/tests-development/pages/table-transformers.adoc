@@ -6,9 +6,8 @@ Vividus provides a set of pre-registered table transformers. Also Vividus plugin
 
 `FROM_LANDSCAPE` transformer is designed to transform the table from a landscape form.
 
-.Usage example
+.Usage of FROM_LANDSCAPE transformer
 ----
-Examples:
 {transformer=FROM_LANDSCAPE}
 |header 1|value 11| ... | value m1|
 ...
@@ -19,9 +18,8 @@ Examples:
 
 `FORMATTING` transformer formats the table according to the max width of each column. Also this transformer removes the commented lines.
 
-.Usage example
+.Usage of FORMATTING transformer
 ----
-Examples:
 {transformer=FORMATTING}
 |key|
 |value|
@@ -45,9 +43,8 @@ Examples:
 |the replacing sequence of chars
 |===
 
-.Usage example
+.Usage of REPLACING transformer
 ----
-Examples:
 {transformer=REPLACING, replacing=k, replacement=l}
 |key  |
 |vakue|
@@ -68,9 +65,8 @@ the columns.
 |===
 
 
-.Usage example
+.Usage of SORTING transformer
 ----
-Examples:
 {transformer=SORTING, byColumns=key|key1}
 |key   |key1  |
 |value3|value4|
@@ -90,9 +86,8 @@ Examples:
 |threshold value, so values are generated from 0 to (`limit` - 1)
 |===
 
-.Usage example
+.Usage of ITERATING transformer
 ----
-Examples:
 {transformer=ITERATING, limit=5}
 ----
 
@@ -121,18 +116,16 @@ Examples:
 [IMPORTANT]
 `byMaxColumns` and `byColumnNames` are competing properties and only one can be specified at the same time. The same restriction is applied to the properties `byMaxRows` and `byRowIndexes`.
 
-.Usage example
+.Usage of FILTERING transformer with filtering by column names and by max number of rows
 ----
-Examples:
 {transformer=FILTERING, byColumnNames=key1;key3, byMaxRows=1}
 |key1  |key2  |key3  |
 |value1|value2|value3|
 |value4|value5|value6|
 ----
 
-.Usage example
+.Usage of FILTERING transformer with filtering by max number of columns and by row indexes
 ----
-Examples:
 {transformer=FILTERING, byMaxColumns=2, byRowIndexes=0;2}
 |key1  |key2  |key3  |
 |value1|value2|value3|
@@ -168,27 +161,23 @@ Examples:
 * when using transformers in `tables` parameter it is necessary to escape brackets, commas and semicolon in them: for unary nested- "", for double - "\" etc.
 ====
 
-.Usage example
+.Usage of MERGING transformer with 'rows' merge mode
 ----
-Examples:
 {transformer=MERGING, mergeMode=rows, tables=story/tables/test1.table;story/tables/test2.table}
 ----
 
-.Usage example
+.Usage of MERGING transformer with 'columns' merge mode
 ----
-Examples:
 {transformer=MERGING, mergeMode=columns, tables=story/tables/test1.table;story/tables/test2.table;story/tables/test3.table}
 ----
 
-.Usage example
+.Usage of MERGING transformer with nested tables
 ----
-Examples:
 {transformer=MERGING, mergeMode=columns, fillerValue=null, tables=\{transformer=FROM_EXCEL\, path=TestTemplate.xlsx\, sheet=Data\, addresses=A2\;A3\, column=test1\};\{transformer=FROM_EXCEL\, path=TestTemplate.xlsx\, sheet=Data\, range=B2:B4\, column=test2\}}
 ----
 
-.Usage example
+.Usage of nested MERGING transformers
 ----
-Examples:
 {
  transformer=MERGING,
  mergeMode=rows,
@@ -225,9 +214,8 @@ Examples:
 }
 ----
 
-.Usage example
+.Usage of MERGING transformer with table body
 ----
-Examples:
 {transformer=MERGING, mergeMode=columns, tables=/data/some-table.table}
 |column1|
 |value1 |
@@ -255,7 +243,7 @@ Examples:
 [IMPORTANT]
 `JOINING` transformer should be the last while joining columns/rows of the table which created using another transformer.
 
-.Usage examples
+.Usage of JOINING transformer with 'columns' join mode
 ----
 Scenario: Verify JOINING transformer in default columns mode
 Then `<joinedColumn>` is equal to `A B`
@@ -263,14 +251,21 @@ Examples:
 {transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn}
 |column1|column2|
 |A      |B      |
+----
 
+
+.Usage of JOINING transformer with 'columns' join mode and definition of columns to join
+----
 Scenario: Verify JOINING transformer in configured columns mode
 Then `<joinedColumn>` is equal to `B D`
 Examples:
 {transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn, columnsToJoin=column2;column4}
 |column1|column2|column3|column4|
 |A      |B      |C      |D      |
+----
 
+.Usage of JOINING transformer with 'rows' join mode
+----
 Scenario: Verify JOINING transformer in default rows mode
 Then `<column1>` is equal to `A B`
 Then `<column2>` is equal to `C D`
@@ -281,9 +276,8 @@ Examples:
 |B      |D      |
 ----
 
-.Usage example
+.Usage of JOINING transformer in the chain of transformers
 ----
-Examples:
 {transformer=MERGING, mergeMode=columns, tables=
   \{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=A4:A5\, column=header1\, joinValues=true\};
   \{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=B4:B5\, column=header2\, joinValues=true\}
@@ -291,9 +285,8 @@ Examples:
 {transformer=JOINING, joinMode=columns, joinedColumn=header}
 ----
 
-.Usage example
+.Usage of JOINING transformer with table body containing path to table file
 ----
-Examples:
 {transformer=JOINING, joinMode=columns, joinedColumn=header}
 /test1.table
 ----
