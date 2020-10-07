@@ -1,1 +1,2 @@
 * xref:index.adoc[What is Vividus]
+* xref:tests-configuration.adoc[Configuration]

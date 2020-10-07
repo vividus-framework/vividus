@@ -1,0 +1,55 @@
+= Steps available out of the box
+
+== Description
+
+Here one could find description of the steps that are delivered with Vividus itself without any plugins required.
+
+=== While-like steps executor
+
+==== *_Info_*
+
+Executes steps until condition or iteration limit reached.
+
+[IMPORTANT]
+If iteration limit is reached no failure or exception will occur.
+
+==== *_Wording_*
+
+Main:
+
+[source,gherkin]
+----
+When I execute steps at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
+----
+
+Alias:
+
+[source,gherkin]
+----
+When I execute steps at most $max times while variable '$variableName' is $comparisonRule '$expectedValue':$stepsToExecute
+----
+
+==== *_Parameters_*
+
+. `$max` - defines how many iteration could be executed
+. `$variableName` - a name of the variable to check
+. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
+. `$expectedValue` - expected value of the variable
+. `$stepsToExecute` - examples table with a single column containing the steps
+
+==== *_Usage_*
+
+.ExecuteWhile.story
+[source,gherkin]
+----
+Scenario: Click button 5 times
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/mouseEvents.html'
+When I execute steps at most 5 times while variable `var` is < `3`:
+|step                                                                                                                   |
+|When I click on element located `id(counter)`                                                                          |
+|When I find <= `1` elements by `xpath(//div[@id='clickResult' and (text()='3' or text()='4')])` and for each element do|
+|{headerSeparator=!,valueSeparator=!}                                                                                   |
+|!step!                                                                                                                 |
+|!When I set the text found in search context to the 'scenario' variable 'var'!                                         |
+Then `${var}` is = `3`
+----
