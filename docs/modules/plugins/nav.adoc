@@ -13,7 +13,7 @@
 * xref:plugin-parquet.adoc[Parquet*]
 * xref:plugin-rest-api.adoc[REST API]
 * xref:plugin-sauce-labs.adoc[Sauce Labs]
-* xref:plugin-ssh.adoc[SSH*]
+* xref:plugin-ssh.adoc[SSH]
 * xref:plugin-visual.adoc[Visual Testing*]
 * xref:plugin-web-app-to-rest-api.adoc[Web Application & REST API Integration]
 * xref:plugin-web-app.adoc[Web Application]

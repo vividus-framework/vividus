@@ -64,6 +64,7 @@ class SshExecutorTests
         when(channel.getExitStatus()).thenReturn(exitStatus);
         ServerConfiguration serverConfiguration = new ServerConfiguration();
         serverConfiguration.setAgentForwarding(true);
+        serverConfiguration.setPseudoTerminalEnabled(true);
         String commands = "ssh-command";
         SshOutput sshOutput = sshExecutor.executeCommand(serverConfiguration, new Commands(commands), channel);
         assertEquals(commandOutput + commandOutput, sshOutput.getOutputStream());
@@ -71,6 +72,7 @@ class SshExecutorTests
         assertEquals(exitStatus, sshOutput.getExitStatus());
         InOrder ordered = inOrder(channel);
         ordered.verify(channel).setAgentForwarding(serverConfiguration.isAgentForwarding());
+        ordered.verify(channel).setPty(serverConfiguration.isPseudoTerminalEnabled());
         ordered.verify(channel).setCommand(commands);
         ordered.verify(channel).connect();
         ordered.verify(channel, times(3)).isClosed();

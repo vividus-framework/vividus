@@ -42,10 +42,11 @@ public class SshExecutor extends JSchExecutor<ChannelExec, SshOutput>
     }
 
     @Override
-    protected SshOutput executeCommand(ServerConfiguration serverConfig, Commands commands, ChannelExec channel)
+    protected SshOutput executeCommand(ServerConfiguration serverConfiguration, Commands commands, ChannelExec channel)
             throws JSchException, IOException
     {
-        channel.setAgentForwarding(serverConfig.isAgentForwarding());
+        channel.setAgentForwarding(serverConfiguration.isAgentForwarding());
+        channel.setPty(serverConfiguration.isPseudoTerminalEnabled());
         SshOutput executionOutput = new SshOutput();
         try (ByteArrayOutputStream errorStream = new ByteArrayOutputStream())
         {

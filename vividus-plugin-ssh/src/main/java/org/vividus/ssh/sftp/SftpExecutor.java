@@ -48,6 +48,7 @@ public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>
             throws JSchException, IOException
     {
         channel.setAgentForwarding(serverConfiguration.isAgentForwarding());
+        channel.setPty(serverConfiguration.isPseudoTerminalEnabled());
         channel.connect();
         SftpOutput executionOutput = new SftpOutput();
         StringBuilder output = new StringBuilder();
