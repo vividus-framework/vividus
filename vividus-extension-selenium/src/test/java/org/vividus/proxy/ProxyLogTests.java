@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.browserup.harreader.model.Har;
 import com.browserup.harreader.model.HarContent;
@@ -46,6 +47,8 @@ class ProxyLogTests
 {
     private static final String URL = "url";
     private static final String TEXT = "text";
+    private static final Pattern URL_PATTERN = Pattern.compile(URL);
+    private static final Pattern TEXT_PATTERN = Pattern.compile(TEXT);
 
     @Mock
     private Har har;
@@ -81,7 +84,7 @@ class ProxyLogTests
     void testGetRequestUrlsMatchPattern()
     {
         mockHarLog(getRequest(), null);
-        List<String> requestUrls = proxyLog.getRequestUrls(URL);
+        List<String> requestUrls = proxyLog.getRequestUrls(URL_PATTERN);
         assertEquals(Collections.singletonList(URL), requestUrls);
     }
 
@@ -89,7 +92,7 @@ class ProxyLogTests
     void testGetRequestUrlsDontMatchPattern()
     {
         mockHarLog(getRequest(), null);
-        List<String> requestUrls = proxyLog.getRequestUrls(TEXT);
+        List<String> requestUrls = proxyLog.getRequestUrls(TEXT_PATTERN);
         assertTrue(requestUrls.isEmpty());
     }
 
@@ -97,7 +100,7 @@ class ProxyLogTests
     void testGetRequestUrl()
     {
         mockHarLog(getRequest(), null);
-        String requestUrl = proxyLog.getRequestUrl(URL);
+        String requestUrl = proxyLog.getRequestUrl(URL_PATTERN);
         assertEquals(URL, requestUrl);
     }
 
@@ -105,7 +108,7 @@ class ProxyLogTests
     void testGetLogEntries()
     {
         HarEntry harEntry = mockHarLog(getRequest(), null);
-        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(URL);
+        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(URL_PATTERN);
         assertEquals(Collections.singletonList(harEntry), actualHarEntries);
     }
 
@@ -115,7 +118,7 @@ class ProxyLogTests
         HttpMethod httpMethod = HttpMethod.POST;
         HarEntry harEntry = mockHarLog(getRequest(), null);
         harEntry.getRequest().setMethod(httpMethod);
-        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(httpMethod, URL);
+        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(httpMethod, URL_PATTERN);
         assertEquals(Collections.singletonList(harEntry), actualHarEntries);
     }
 
@@ -123,7 +126,7 @@ class ProxyLogTests
     void testGetLogEntriesDontMatchPattern()
     {
         mockHarLog(getRequest(), null);
-        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(TEXT);
+        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(TEXT_PATTERN);
         assertTrue(actualHarEntries.isEmpty());
     }
 
@@ -132,7 +135,7 @@ class ProxyLogTests
     {
         HarEntry harEntry = mockHarLog(getRequest(), null);
         harEntry.getRequest().setMethod(HttpMethod.GET);
-        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(HttpMethod.POST, URL);
+        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(HttpMethod.POST, URL_PATTERN);
         assertTrue(actualHarEntries.isEmpty());
     }
 
@@ -142,7 +145,7 @@ class ProxyLogTests
         HttpMethod httpMethod = HttpMethod.POST;
         HarEntry harEntry = mockHarLog(getRequest(), null);
         harEntry.getRequest().setMethod(httpMethod);
-        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(httpMethod, TEXT);
+        List<HarEntry> actualHarEntries = proxyLog.getLogEntries(httpMethod, TEXT_PATTERN);
         assertTrue(actualHarEntries.isEmpty());
     }
 
@@ -150,7 +153,7 @@ class ProxyLogTests
     void testGetResponsesMatchUrlPattern()
     {
         mockHarLog(getRequest(), mockGetResponse(URL, TEXT));
-        List<String> actualResponses = proxyLog.getResponses(URL);
+        List<String> actualResponses = proxyLog.getResponses(URL_PATTERN);
         assertEquals(Collections.singletonList(URL), actualResponses);
     }
 
@@ -159,7 +162,7 @@ class ProxyLogTests
     {
         HarResponse response = Mockito.mock(HarResponse.class);
         mockHarLog(getRequest(), response);
-        List<String> actualResponses = proxyLog.getResponses(TEXT);
+        List<String> actualResponses = proxyLog.getResponses(TEXT_PATTERN);
         assertTrue(actualResponses.isEmpty());
     }
 
@@ -169,7 +172,7 @@ class ProxyLogTests
         HarResponse response = Mockito.mock(HarResponse.class);
         mockHarLog(getRequest(), response);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> proxyLog.getResponse(TEXT));
+            () -> proxyLog.getResponse(TEXT_PATTERN));
         assertEquals("Response is not found by URL pattern: " + TEXT, exception.getMessage());
     }
 
@@ -177,7 +180,7 @@ class ProxyLogTests
     void testGetResponse()
     {
         mockHarLog(getRequest(), mockGetResponse(URL, TEXT));
-        String actual = proxyLog.getResponse(URL);
+        String actual = proxyLog.getResponse(URL_PATTERN);
         assertEquals(URL, actual);
     }
 
@@ -194,7 +197,7 @@ class ProxyLogTests
     {
         mockHarLog(getRequest(), null);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> proxyLog.getRequestUrl(TEXT));
+            () -> proxyLog.getRequestUrl(TEXT_PATTERN));
         assertEquals("Request URL is not found by pattern: " + TEXT, exception.getMessage());
     }
 
