@@ -19,6 +19,8 @@
 
     <bean class="org.vividus.mobileapp.action.DeviceActions" />
 
+    <bean class="org.vividus.mobileapp.listener.PublishingSourceOnFailureListener" lazy-init="false" />
+
     <bean class="org.vividus.bdd.monitor.GenericScreenshotOnFailureMonitor" />
 
     <bean class="org.vividus.selenium.mobileapp.MobileAppScreenshotTaker" />

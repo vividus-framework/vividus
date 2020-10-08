@@ -4,6 +4,8 @@ project.description = 'Vividus plugin for testing mobile applications'
      implementation project(':vividus-extension-selenium')
      implementation project(':vividus-bdd-engine')
      implementation project(':vividus-util')
+     implementation project(':vividus-reporter')
+     implementation project(':vividus-soft-assert')
 
      implementation(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: versions.ashot)
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
