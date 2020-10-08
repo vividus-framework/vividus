@@ -70,3 +70,32 @@ Then number of elements found by `accessibilityId(<endElementAccessibilityId>)` 
 When I swipe DOWN to element located `accessibilityId(<startElementAccessibilityId>)` with duration PT1S
 Then number of elements found by `accessibilityId(<startElementAccessibilityId>)` is equal to `1`
 Then number of elements found by `accessibilityId(<endElementAccessibilityId>)` is equal to `0`
+
+
+Scenario: [Android] Verify step: 'When I upload file `$filePath` to device'
+Meta:
+    @targetPlatform android
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(//android.widget.TextView[@text='Image'])`
+When I upload file `/data/mobile-upload-image.png` to device
+When I tap on element located `accessibilityId(select-image-accessibilityLabel)`
+When I tap on element located `xpath(//android.widget.TextView[@text='Choose from Library…'])`
+When I tap on element located `xpath(//android.widget.Button[@text='Allow'])`
+When I wait until element located `xpath(//android.widget.TextView[@text='Pictures'])` appears
+When I tap on element located `xpath(//android.widget.TextView[@text='Pictures'])`
+When I tap on element located `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
+Then number of elements found by `xpath(//android.widget.TextView[@text='228x228'])` is equal to `1`
+
+
+Scenario: [iOS] Verify step: 'When I upload file `$filePath` to device'
+Meta:
+    @targetPlatform ios
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(//XCUIElementTypeButton[@name="Image"])`
+When I upload file `/data/mobile-upload-image.png` to device
+When I tap on element located `accessibilityId(select-image-testID)`
+When I tap on element located `accessibilityId(Choose from Library…)`
+When I wait until element located `accessibilityId(Recents)` appears
+When I tap on element located `accessibilityId(Recents)`
+When I tap on element located `xpath((//XCUIElementTypeCell[contains(@name, "Photo")])[last()])`
+Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`

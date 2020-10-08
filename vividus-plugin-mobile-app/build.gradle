@@ -13,4 +13,6 @@ project.description = 'Vividus plugin for testing mobile applications'
      testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
      testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
      testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+
+     testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
  }
