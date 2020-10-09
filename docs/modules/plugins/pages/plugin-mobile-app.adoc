@@ -16,20 +16,28 @@ include::partial$locator-header.adoc[]
 === Types
 :locator-strategy: https://appium.io/docs/en/commands/element/find-elements/index.html#selector-strategies
 
-[cols="1,2,2", options="header"]
+[cols="1,1,2,2", options="header"]
 |===
 
 |Locator type
+|Platform
 |Description
 |Examples
 
 |XPath
+|any
 |Search the app XML source using xpath (not recommended, has {locator-strategy}[performance issues])
 |xpath(//android.widget.TextView[@text='Home']) or By.xpath(//XCUIElementTypeStaticText[@value='Home'])
 
 |Accessibility ID
+|any
 |See {locator-strategy}[Accessibility ID] selector strategy
 |accessibilityId(menu-toggler) or By.accessibilityId(menu-toggler)
+
+|iOS Class Chain
+|`iOS`
+|See https://github.com/facebookarchive/WebDriverAgent/wiki/Class-Chain-Queries-Construction-Rules[Class Chain Queries] for more details
+|+iosClassChain(**/XCUIElementTypeCell[$name BEGINSWITH "A"$])+ or +By.iosClassChain(**/XCUIElementTypeCell[$name BEGINSWITH "B"$])+
 
 |===
 

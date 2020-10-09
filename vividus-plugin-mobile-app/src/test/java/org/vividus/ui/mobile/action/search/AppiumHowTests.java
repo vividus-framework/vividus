@@ -29,7 +29,8 @@ class AppiumHowTests
     @ParameterizedTest
     @CsvSource({
         "By.xpath:          , XPATH           ",
-        "By.AccessibilityId:, ACCESSIBILITY_ID"
+        "By.AccessibilityId:, ACCESSIBILITY_ID",
+        "By.IosClassChain:  , IOS_CLASS_CHAIN "
     })
     void testBuildBy(String prefix, AppiumHow how)
     {
