@@ -330,6 +330,39 @@ When I execute sequence of actions:
 |MOVE_TO       |By.id(name)                             |
 ----
 
+=== Save the request URL
+
+==== *_Info_*
+
+{proxy}
+
+Saves the captured request URL into scoped variable.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$httpMethod` - HTTP method to filter by
+. `$urlPattern` - the string value of URL-pattern to filter by
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - A variable name
+
+==== *_Usage_*
+
+.ProxyStepsTests.story
+[source,gherkin]
+----
+Scenario: Verify step When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
+Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
+When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL to SCENARIO variable `URL`
+Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
+----
+
 
 === Saves the query string into the variable with specified name and scopes.
 
