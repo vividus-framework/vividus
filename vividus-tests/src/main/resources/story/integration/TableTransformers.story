@@ -201,3 +201,13 @@ Examples:
 |b      |y      |a      |
 |b      |x      |b      |
 |b      |y      |b      |
+
+Scenario: Verify possibility to use the range of ALL cells
+Meta:
+    @requirementId 919
+Then `<date1>` is equal to `line1 line4`
+Then `<date2>` is equal to `line2 line5`
+Then `<date3>` is equal to `line3 line6`
+Examples:
+{transformer=FROM_EXCEL, path=/data/complex-data.xlsx, sheet=range-all-cells, range=B2:D4}
+{transformer=JOINING, joinMode=rows}

@@ -23,7 +23,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-excel', version: '{pa
 
 |`column`
 |
-|the resulting column name in the generated table
+|the resulting column name in the generated table. If it's missing in properties then the first row is used for the column headings.
 
 |`path`
 |
@@ -67,4 +67,10 @@ Examples:
 ----
 Examples:
 {transformer=FROM_EXCEL, path=/my-excel-file.xlsx, sheet=Data, addresses=A2;B4;A7, column=test, joinValues=true}
+----
+
+.Usage FROM_EXCEL transformer with full-table range
+----
+Examples:
+{transformer=FROM_EXCEL, path=/my-excel-file.xlsx, sheet=Data, range=A2:B4}
 ----

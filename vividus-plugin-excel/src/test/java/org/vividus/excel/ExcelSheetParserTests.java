@@ -19,6 +19,7 @@ package org.vividus.excel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,6 +41,8 @@ class ExcelSheetParserTests
     private static final String TITLE_KEY_PRICE = "Price";
     private static final String AS_STRING_SHEET = "AsString";
     private static final String SHEET_NAME = "RepeatingData";
+    private static final String OPEN_STATUS = "OPEN";
+    private static final String NAME = "name";
 
     private static final int TITLE_ROW_NUMBER = 2;
 
@@ -193,7 +196,7 @@ class ExcelSheetParserTests
         sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
         List<CellValue> dataFromRange = sheetParser.getDataFromRange("B2:B7");
         assertEquals(6, dataFromRange.size());
-        String openStatus = "OPEN";
+        String openStatus = OPEN_STATUS;
         String closedStatus = "CLOSED";
         assertCellValue(dataFromRange.get(0), openStatus, "B2");
         assertCellValue(dataFromRange.get(1), openStatus, "B3");
@@ -201,6 +204,17 @@ class ExcelSheetParserTests
         assertCellValue(dataFromRange.get(3), "PENDING", "B5");
         assertCellValue(dataFromRange.get(4), closedStatus, "B6");
         assertCellValue(dataFromRange.get(5), closedStatus, "B7");
+    }
+
+    @Test
+    void testGetDataFromTableRange()
+    {
+        sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
+        Map<String, List<String>> data = sheetParser.getDataAsTable("A1:B3");
+        Map<String, List<String>> expectedData = new HashMap<>();
+        expectedData.put(NAME, List.of("First", "Second"));
+        expectedData.put("status", List.of(OPEN_STATUS, OPEN_STATUS));
+        assertEquals(expectedData, data);
     }
 
     private static void assertCellValue(CellValue actual, String value, String address)
@@ -213,7 +227,7 @@ class ExcelSheetParserTests
     void testGetDataFromCell()
     {
         sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
-        assertEquals("name", sheetParser.getDataFromCell("A1"));
+        assertEquals(NAME, sheetParser.getDataFromCell("A1"));
     }
 
     @Test
