@@ -23,6 +23,7 @@ import java.util.Optional;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.mobileapp.model.SwipeDirection;
+import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.mobileapp.action.KeyboardActions;
@@ -30,6 +31,7 @@ import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 
+@TakeScreenshotOnFailure
 public class TouchSteps
 {
     private final TouchActions touchActions;
