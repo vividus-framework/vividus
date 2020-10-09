@@ -185,6 +185,21 @@ class ProxyStepsTests
         }));
     }
 
+    @Test
+    void shouldSaveUrlFromCapturedHar() throws IOException
+    {
+        ProxySteps spy = spy(proxySteps);
+        HarEntry harEntry = mock(HarEntry.class);
+        doReturn(List.of(harEntry)).when(spy).checkNumberOfRequests(HTTP_METHOD, URL_PATTERN,
+                ComparisonRule.EQUAL_TO, 1);
+        HarRequest harRequest = mock(HarRequest.class);
+        when(harEntry.getRequest()).thenReturn(harRequest);
+        when(harRequest.getUrl()).thenReturn(URL);
+        Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
+        spy.captureRequestAndSaveURL(HTTP_METHOD, URL_PATTERN, variableScopes, VARIABLE_NAME);
+        verify(bddVariableContext).putVariable(variableScopes, VARIABLE_NAME, URL);
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     void checkCaptureRequestDataFromHarEntry() throws IOException

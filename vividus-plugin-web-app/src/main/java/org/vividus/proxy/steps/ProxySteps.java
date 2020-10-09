@@ -144,11 +144,50 @@ public class ProxySteps
     public void captureRequestAndSaveURLQuery(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
+        saveHarEntryFieldInTheScope(httpMethod, urlPattern, scopes, variableName, this::getQueryParameters);
+    }
+
+    /**
+     * Saves the URL from request with given URL-pattern into the variable
+     * with specified name and scopes.
+     * <p>
+     * This step requires proxy to be turned on.
+     * It can be done via setting properties or switching on <b>@proxy</b> metatag inside the story file.
+     * Step gets proxy's log, extract from contained requests URLs and match them with URL-pattern
+     * If there is one entry, it saves the query string from request as Map of keys and values
+     * into the variable with specified name and scopes.
+     * If there weren't any calls or more than one matching requirements, HAR file with all
+     * calls will be attached to report.
+     * </p>
+     * @param httpMethod HTTP method to filter by
+     * @param urlPattern The string value of URL-pattern to filter by
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName A variable name
+     * @throws IOException If any error happens during operation
+     */
+    @When("I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL to $scopes "
+            + "variable `$variableName`")
+    public void captureRequestAndSaveURL(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
+            String variableName) throws IOException
+    {
+        saveHarEntryFieldInTheScope(httpMethod, urlPattern, scopes, variableName, HarRequest::getUrl);
+    }
+
+    private void saveHarEntryFieldInTheScope(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
+            String variableName, Function<HarRequest, Object> valueExtractor) throws IOException
+    {
         List<HarEntry> harEntries = checkNumberOfRequests(httpMethod, urlPattern, ComparisonRule.EQUAL_TO, 1);
         if (harEntries.size() == 1)
         {
             HarEntry harEntry = harEntries.get(0);
-            bddVariableContext.putVariable(scopes, variableName, getQueryParameters(harEntry.getRequest()));
+            bddVariableContext.putVariable(scopes, variableName, valueExtractor.apply(harEntry.getRequest()));
         }
     }
 
