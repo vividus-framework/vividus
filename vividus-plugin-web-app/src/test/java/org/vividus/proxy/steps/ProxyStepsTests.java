@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.filters.RequestFilter;
@@ -76,7 +77,7 @@ import io.netty.handler.codec.http.HttpRequest;
 class ProxyStepsTests
 {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final String URL_PATTERN = "www.test.com";
+    private static final String URL = "www.test.com";
     private static final String REQUESTS_MATCHING_URL_ASSERTION_PATTERN = "Number of HTTP %s requests matching URL "
             + "pattern '%s'";
     private static final String ATTACHMENT_FILENAME = "har.har";
@@ -90,6 +91,7 @@ class ProxyStepsTests
     private static final String TEXT = "text";
     private static final String COMMENT = "comment";
     private static final ExamplesTable HEADERS = new ExamplesTable("|name|value|\n|name1|value1|");
+    private static final Pattern URL_PATTERN = Pattern.compile(URL);
 
     @Mock
     private ISoftAssert nonFailingAssert;
@@ -132,7 +134,7 @@ class ProxyStepsTests
         when(harResponse.getStatus()).thenReturn(HttpStatus.SC_OK);
         long callsNumber = 1;
         ComparisonRule rule = ComparisonRule.EQUAL_TO;
-        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL_PATTERN);
+        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
         mockSizeAssertion(message, callsNumber, rule, callsNumber);
         proxySteps.checkNumberOfRequests(httpMethod, URL_PATTERN, rule, callsNumber);
         verifySizeAssertion(message, callsNumber, rule, callsNumber);
@@ -148,7 +150,7 @@ class ProxyStepsTests
         long callsNumber = 1;
         ComparisonRule rule = ComparisonRule.EQUAL_TO;
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod,
-                URL_PATTERN);
+                URL);
         byte[] data = mockProxyLog();
         proxySteps.checkNumberOfRequests(httpMethod, URL_PATTERN, rule, callsNumber);
         verifySizeAssertion(message, 0, rule, callsNumber);
@@ -268,8 +270,7 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         proxySteps.waitRequestInProxyLog(httpMethod, URL_PATTERN);
         verify(waitActions).wait(eq(URL_PATTERN),
-                argThat(e -> String.format("waiting for HTTP %s request with URL pattern %s",
-                        httpMethod, URL_PATTERN).equals(e.toString())));
+                argThat(e -> "waiting for HTTP POST request with URL pattern www.test.com".equals(e.toString())));
     }
 
     @Test
@@ -279,8 +280,8 @@ class ProxyStepsTests
         HttpRequest request = mock(HttpRequest.class);
         when(request.headers()).thenReturn(httpHeaders);
         HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
-        when(messageInfo.getUrl()).thenReturn(URL_PATTERN);
-        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL_PATTERN, HEADERS);
+        when(messageInfo.getUrl()).thenReturn(URL);
+        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL, HEADERS);
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
         assertNull(filterCaptor.getValue().filterRequest(request, null, messageInfo));
@@ -292,7 +293,7 @@ class ProxyStepsTests
     void shouldNotAddHeadersToProxyRequestIfUrlDoesNotMatch()
     {
         HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
-        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL_PATTERN, HEADERS);
+        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL, HEADERS);
         verify(proxy).addRequestFilter(argThat(filter -> filter.filterRequest(null, null, messageInfo) == null));
     }
 

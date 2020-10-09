@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toList;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import com.browserup.harreader.model.Har;
@@ -67,9 +68,9 @@ public class ProxyLog
      * @param urlPattern Pattern of the URL
      * @return List of URLs that are matched the URL pattern
      */
-    public List<String> getRequestUrls(String urlPattern)
+    public List<String> getRequestUrls(Pattern urlPattern)
     {
-        return getRequestUrlStream().filter(url -> url.matches(urlPattern)).collect(toList());
+        return getRequestUrlStream().filter(urlPattern.asMatchPredicate()).collect(toList());
     }
 
     /**
@@ -77,7 +78,7 @@ public class ProxyLog
      * @param urlPattern Pattern of the URL
      * @return Requested URL that is matched the URL pattern
      */
-    public String getRequestUrl(String urlPattern)
+    public String getRequestUrl(Pattern urlPattern)
     {
         List<String> urls = getRequestUrls(urlPattern);
         if (urls.isEmpty())
@@ -101,7 +102,7 @@ public class ProxyLog
      * @param urlPattern Pattern of the URL
      * @return List of responses found by URL pattern
      */
-    public List<HarEntry> getLogEntries(String urlPattern)
+    public List<HarEntry> getLogEntries(Pattern urlPattern)
     {
         return getFilteredHarEntriesStream(urlPattern).collect(toList());
     }
@@ -112,7 +113,7 @@ public class ProxyLog
      * @param urlPattern Pattern of the URL
      * @return List of responses found by URL pattern
      */
-    public List<HarEntry> getLogEntries(HttpMethod httpMethod, String urlPattern)
+    public List<HarEntry> getLogEntries(HttpMethod httpMethod, Pattern urlPattern)
     {
         return getFilteredHarEntriesStream(urlPattern)
                 .filter(entry -> httpMethod.equals(entry.getRequest().getMethod()))
@@ -133,7 +134,7 @@ public class ProxyLog
      * @param urlPattern Pattern of the URL
      * @return List of responses found by URL pattern
      */
-    public List<String> getResponses(String urlPattern)
+    public List<String> getResponses(Pattern urlPattern)
     {
         return getFilteredHarEntriesStream(urlPattern).map(ProxyLog::getResponse).collect(toList());
     }
@@ -143,7 +144,7 @@ public class ProxyLog
      * @param urlPattern Pattern of the URL
      * @return Response that is matched the URL pattern
      */
-    public String getResponse(String urlPattern)
+    public String getResponse(Pattern urlPattern)
     {
         List<String> responses = getResponses(urlPattern);
         if (responses.isEmpty())
@@ -175,9 +176,10 @@ public class ProxyLog
         return response;
     }
 
-    private Stream<HarEntry> getFilteredHarEntriesStream(String urlPattern)
+    private Stream<HarEntry> getFilteredHarEntriesStream(Pattern urlPattern)
     {
-        return getHarEntriesStream().filter(entry -> decodeUrl(entry.getRequest().getUrl()).matches(urlPattern));
+        return getHarEntriesStream()
+                .filter(entry -> urlPattern.matcher(decodeUrl(entry.getRequest().getUrl())).matches());
     }
 
     private static String decodeUrl(String encodedUrl)

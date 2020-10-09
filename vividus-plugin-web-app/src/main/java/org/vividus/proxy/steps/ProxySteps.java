@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -96,7 +97,7 @@ public class ProxySteps
      * @return Filtered HAR entries
      */
     @Then("number of HTTP $httpMethod requests with URL pattern `$urlPattern` is $comparisonRule `$number`")
-    public List<HarEntry> checkNumberOfRequests(HttpMethod httpMethod, String urlPattern,
+    public List<HarEntry> checkNumberOfRequests(HttpMethod httpMethod, Pattern urlPattern,
             ComparisonRule comparisonRule, long number) throws IOException
     {
         List<HarEntry> harEntries = getHarEntries(httpMethod, urlPattern);
@@ -105,7 +106,7 @@ public class ProxySteps
         return harEntries;
     }
 
-    private List<HarEntry> getHarEntries(HttpMethod httpMethod, String urlPattern)
+    private List<HarEntry> getHarEntries(HttpMethod httpMethod, Pattern urlPattern)
     {
         return getProxyLog().getLogEntries(httpMethod, urlPattern)
                 .stream()
@@ -140,7 +141,7 @@ public class ProxySteps
      */
     @When("I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL query to $scopes "
             + "variable `$variableName`")
-    public void captureRequestAndSaveURLQuery(HttpMethod httpMethod, String urlPattern, Set<VariableScope> scopes,
+    public void captureRequestAndSaveURLQuery(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
         List<HarEntry> harEntries = checkNumberOfRequests(httpMethod, urlPattern, ComparisonRule.EQUAL_TO, 1);
@@ -178,7 +179,7 @@ public class ProxySteps
      */
     @When("I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save request data to $scopes "
             + "variable `$variableName`")
-    public void captureRequestAndSaveRequestData(HttpMethod httpMethod, String urlPattern, Set<VariableScope> scopes,
+    public void captureRequestAndSaveRequestData(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
         List<HarEntry> harEntries = checkNumberOfRequests(httpMethod, urlPattern, ComparisonRule.EQUAL_TO, 1);
@@ -224,12 +225,12 @@ public class ProxySteps
      * @param urlPattern The string value of URL-pattern to filter by
      */
     @When("I wait until HTTP $httpMethod request with URL pattern `$urlPattern` exists in proxy log")
-    public void waitRequestInProxyLog(HttpMethod httpMethod, String urlPattern)
+    public void waitRequestInProxyLog(HttpMethod httpMethod, Pattern urlPattern)
     {
         waitActions.wait(urlPattern, new Function<>()
         {
             @Override
-            public Boolean apply(String urlPattern)
+            public Boolean apply(Pattern urlPattern)
             {
                 List<HarEntry> entries = getHarEntries(httpMethod, urlPattern);
                 return !entries.isEmpty();
