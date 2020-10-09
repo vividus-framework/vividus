@@ -9,7 +9,7 @@
         <property name="sauceLabsAccessKey" value="${selenium.grid.password}"/>
         <property name="testContext" ref="testContext"/>
         <property name="sauceTunnelManager">
-            <bean class="org.vividus.selenium.sauce.SynchronizedUnpackingSauceConnectTunnelManager">
+            <bean class="com.saucelabs.ci.sauceconnect.SauceConnectFourManager">
                 <constructor-arg value="false"/>
                 <property name="useLatestSauceConnect" value="${saucelabs.sauce-connect.use-latest-version}"/>
                 <property name="sauceRest">
