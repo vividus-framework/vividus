@@ -23,6 +23,7 @@ public class ServerConfiguration
     private String host;
     private int port;
     private boolean agentForwarding;
+    private boolean pseudoTerminalEnabled;
     private String privateKey;
     private String publicKey;
     private String passphrase;
@@ -75,6 +76,16 @@ public class ServerConfiguration
     public void setAgentForwarding(boolean agentForwarding)
     {
         this.agentForwarding = agentForwarding;
+    }
+
+    public boolean isPseudoTerminalEnabled()
+    {
+        return pseudoTerminalEnabled;
+    }
+
+    public void setPseudoTerminalEnabled(boolean pseudoTerminalEnabled)
+    {
+        this.pseudoTerminalEnabled = pseudoTerminalEnabled;
     }
 
     public String getPrivateKey()

@@ -1,1 +1,82 @@
-include::ROOT:page$under-construction.adoc[]
+= SSH Plugin
+
+The plugin provides functionality to execute commands via https://tools.ietf.org/html/rfc4254[Secure Shell (SSH) connection protocol].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-ssh', version: '{page-component-version}')
+----
+
+== Properties
+
+It's allowed to configure unlimited number of SSH connections via mechanism of the dynamic properties. The properties prefix example is:
+```properties
+ssh.server.my-server
+```
+where `my-server` is a key used to refer SSH connection in the steps. The key is defined by users, must be unique and can't contain dots.
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|[subs=+quotes]`*ssh.server.<key>.username*`
+|<string>
+|
+|The name of the user logging in
+
+|[subs=+quotes]`*ssh.server.<key>.host*`
+|hostname or IP
+|
+|The remote host
+
+|[subs=+quotes]`*ssh.server.<key>.port*`
+|0..65535
+|
+|The remote port (The standard TCP port for SSH is 22)
+
+
+|`ssh.server.<key>.agent-forwarding`
+a|`true`
+`false`
+|`false`
+|Enable forwarding of the authentication agent connection
+
+|`ssh.server.<key>.pseudo-terminal-enabled`
+a|`true`
+`false`
+|`false`
+|Allocate a https://tools.ietf.org/html/rfc4254#section-6.2[Pseudo-Terminal]
+
+4+^.^|_The following properties are used only for the password-based authentication_
+
+|[subs=+quotes]`*ssh.server.<key>.password*`
+|<string>
+|
+|The password
+
+4+^.^|_The following properties are used only for the public key authentication_
+
+|[subs=+quotes]`*ssh.server.<key>.private-key*`
+|<string>
+|
+|The private key
+
+|[subs=+quotes]`*ssh.server.<key>.public-key*`
+|<string>
+|
+|The public key
+
+|`ssh.server.<key>.passphrase`
+|<string>
+|
+|The passphrase for the private key
+
+|===
