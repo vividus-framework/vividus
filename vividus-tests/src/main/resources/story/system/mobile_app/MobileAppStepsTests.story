@@ -87,11 +87,11 @@ When I tap on element located `xpath((//android.view.ViewGroup[contains(@content
 Then number of elements found by `xpath(//android.widget.TextView[@text='228x228'])` is equal to `1`
 
 
-Scenario: [iOS] Verify step: 'When I upload file `$filePath` to device'
+Scenario: [iOS] Verify step: 'When I upload file `$filePath` to device' AND 'iosClassChain' locator
 Meta:
     @targetPlatform ios
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
-When I tap on element located `xpath(//XCUIElementTypeButton[@name="Image"])`
+When I tap on element located `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located `accessibilityId(select-image-testID)`
 When I tap on element located `accessibilityId(Choose from Library…)`

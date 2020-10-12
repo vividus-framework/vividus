@@ -29,7 +29,8 @@ class AppiumLocatorTypeTests
     @ParameterizedTest
     @CsvSource({
         "Appium XPath    , XPATH           ",
-        "Accessibility Id, ACCESSIBILITY_ID"
+        "Accessibility Id, ACCESSIBILITY_ID",
+        "iOS Class Chain , IOS_CLASS_CHAIN "
     })
     void testAppiumLocatorType(String attributeName, AppiumLocatorType locatorType)
     {
