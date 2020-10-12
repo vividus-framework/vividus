@@ -14,28 +14,34 @@
  * limitations under the License.
  */
 
-package org.vividus.ssh.sftp;
+package org.vividus.ssh.exec;
 
 import javax.inject.Named;
 
-import org.vividus.ssh.CommandExecutionManager;
-import org.vividus.ssh.CommandExecutor;
+import com.jcraft.jsch.ChannelExec;
+
+import org.vividus.ssh.Commands;
 import org.vividus.ssh.ServerConfiguration;
 
-@Named("SFTP")
-public class SftpExecutionManager extends CommandExecutionManager<SftpOutput>
+@Named
+public class SshExecExecutor extends SshExecutor<ChannelExec>
 {
-    private final SftpExecutor sftpExecutor;
-
-    public SftpExecutionManager(SftpExecutor sftpExecutor, SftpOutputPublisher outputPublisher)
+    @Override
+    public String getChannelType()
     {
-        super(outputPublisher);
-        this.sftpExecutor = sftpExecutor;
+        return "exec";
     }
 
     @Override
-    protected CommandExecutor<SftpOutput> getCommandExecutor(ServerConfiguration serverConfiguration)
+    protected void configureChannel(ChannelExec channel, ServerConfiguration serverConfiguration)
     {
-        return sftpExecutor;
+        channel.setAgentForwarding(serverConfiguration.isAgentForwarding());
+        channel.setPty(serverConfiguration.isPseudoTerminalEnabled());
+    }
+
+    @Override
+    protected void setupCommands(ChannelExec channel, Commands commands)
+    {
+        channel.setCommand(commands.getJoinedCommands());
     }
 }

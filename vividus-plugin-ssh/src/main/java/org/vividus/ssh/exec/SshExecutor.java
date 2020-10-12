@@ -24,7 +24,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSchException;
 
 import org.apache.commons.io.IOUtils;
@@ -33,25 +33,18 @@ import org.vividus.ssh.JSchExecutor;
 import org.vividus.ssh.ServerConfiguration;
 import org.vividus.util.Sleeper;
 
-public class SshExecutor extends JSchExecutor<ChannelExec, SshOutput>
+public abstract class SshExecutor<T extends Channel> extends JSchExecutor<T, SshOutput>
 {
     @Override
-    protected String getChannelType()
-    {
-        return "exec";
-    }
-
-    @Override
-    protected SshOutput executeCommand(ServerConfiguration serverConfiguration, Commands commands, ChannelExec channel)
+    protected SshOutput executeCommand(ServerConfiguration serverConfiguration, Commands commands, T channel)
             throws JSchException, IOException
     {
-        channel.setAgentForwarding(serverConfiguration.isAgentForwarding());
-        channel.setPty(serverConfiguration.isPseudoTerminalEnabled());
+        configureChannel(channel, serverConfiguration);
         SshOutput executionOutput = new SshOutput();
         try (ByteArrayOutputStream errorStream = new ByteArrayOutputStream())
         {
-            channel.setCommand(commands.getJoinedCommands());
-            channel.setErrStream(errorStream);
+            setupCommands(channel, commands);
+            channel.setExtOutputStream(errorStream);
             channel.connect();
             executionOutput.setOutputStream(readChannelInputStream(channel));
             executionOutput.setErrorStream(new String(errorStream.toByteArray(), StandardCharsets.UTF_8));
@@ -60,7 +53,11 @@ public class SshExecutor extends JSchExecutor<ChannelExec, SshOutput>
         return executionOutput;
     }
 
-    private String readChannelInputStream(ChannelExec channel) throws IOException
+    protected abstract void configureChannel(T channel, ServerConfiguration serverConfiguration);
+
+    protected abstract void setupCommands(T channel, Commands commands);
+
+    private String readChannelInputStream(T channel) throws IOException
     {
         try (InputStream in = channel.getInputStream();
                 InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);

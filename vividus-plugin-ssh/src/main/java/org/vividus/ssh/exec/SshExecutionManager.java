@@ -16,15 +16,34 @@
 
 package org.vividus.ssh.exec;
 
+import java.util.List;
+
 import javax.inject.Named;
 
+import com.jcraft.jsch.Channel;
+
 import org.vividus.ssh.CommandExecutionManager;
+import org.vividus.ssh.CommandExecutor;
+import org.vividus.ssh.ServerConfiguration;
 
 @Named("SSH")
 public class SshExecutionManager extends CommandExecutionManager<SshOutput>
 {
-    public SshExecutionManager(SshOutputPublisher outputPublisher)
+    private final List<SshExecutor<? extends Channel>> sshExecutors;
+
+    public SshExecutionManager(List<SshExecutor<? extends Channel>> sshExecutors, SshOutputPublisher outputPublisher)
     {
-        super(new SshExecutor(), outputPublisher);
+        super(outputPublisher);
+        this.sshExecutors = sshExecutors;
+    }
+
+    @Override
+    protected CommandExecutor<SshOutput> getCommandExecutor(ServerConfiguration serverConfiguration)
+    {
+        String channelType = serverConfiguration.getChannelType().orElse("exec");
+        return sshExecutors.stream()
+                           .filter(e -> channelType.equals(e.getChannelType()))
+                           .findFirst()
+                           .orElseThrow(() -> new IllegalArgumentException("Unsupported channel type: " + channelType));
     }
 }

@@ -14,32 +14,46 @@
  * limitations under the License.
  */
 
-package org.vividus.ssh.sftp;
+package org.vividus.ssh.exec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+
+import com.jcraft.jsch.ChannelExec;
 
 import org.junit.jupiter.api.Test;
-import org.vividus.ssh.CommandExecutionException;
 import org.vividus.ssh.Commands;
 import org.vividus.ssh.ServerConfiguration;
 
-class SftpExecutionManagerTests
+class SshExecExecutorTests
 {
+    private final SshExecExecutor sshExecExecutor = new SshExecExecutor();
+
     @Test
-    void shouldRunExecution() throws CommandExecutionException
+    void shouldReturnExecChannelType()
     {
-        SftpExecutor executor = mock(SftpExecutor.class);
+        assertEquals("exec", sshExecExecutor.getChannelType());
+    }
+
+    @Test
+    void shouldConfigureChannel()
+    {
+        ChannelExec channel = mock(ChannelExec.class);
         ServerConfiguration serverConfiguration = new ServerConfiguration();
-        Commands commands = new Commands("sftp-command");
-        SftpOutput sftpOutput = new SftpOutput();
-        when(executor.execute(serverConfiguration, commands)).thenReturn(sftpOutput);
-        SftpOutputPublisher outputPublisher = mock(SftpOutputPublisher.class);
-        SftpExecutionManager executionManager = new SftpExecutionManager(executor, outputPublisher);
-        SftpOutput actual = executionManager.run(serverConfiguration, commands);
-        assertEquals(sftpOutput, actual);
-        verify(outputPublisher).publishOutput(sftpOutput);
+        serverConfiguration.setAgentForwarding(true);
+        serverConfiguration.setPseudoTerminalEnabled(true);
+        sshExecExecutor.configureChannel(channel, serverConfiguration);
+        verify(channel).setAgentForwarding(true);
+        verify(channel).setPty(true);
+    }
+
+    @Test
+    void shouldSetupCommands()
+    {
+        ChannelExec channel = mock(ChannelExec.class);
+        String joinedCommands = "commands";
+        sshExecExecutor.setupCommands(channel, new Commands(joinedCommands));
+        verify(channel).setCommand(joinedCommands);
     }
 }

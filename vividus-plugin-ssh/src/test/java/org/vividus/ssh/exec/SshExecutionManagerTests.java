@@ -17,36 +17,64 @@
 package org.vividus.ssh.exec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import java.nio.channels.Channel;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.vividus.ssh.CommandExecutionException;
 import org.vividus.ssh.Commands;
 import org.vividus.ssh.ServerConfiguration;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(SshExecutionManager.class)
-public class SshExecutionManagerTests
+class SshExecutionManagerTests
 {
-    @Test
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    public void shouldRunExecution() throws Exception
+    private static final Commands COMMANDS = new Commands("ssh-command");
+
+    @ParameterizedTest
+    @CsvSource({
+            ",      org.vividus.ssh.exec.SshExecExecutor",
+            "exec,  org.vividus.ssh.exec.SshExecExecutor",
+            "shell, org.vividus.ssh.exec.SshShellExecutor"
+    })
+    void shouldRunExecution(String channelType, Class<SshExecutor<? extends Channel>> executorClass)
+            throws CommandExecutionException
     {
-        SshExecutor executor = mock(SshExecutor.class);
-        whenNew(SshExecutor.class).withNoArguments().thenReturn(executor);
+        SshExecutor<? extends Channel> executor = mock(executorClass);
+        when(executor.getChannelType()).thenCallRealMethod();
         ServerConfiguration serverConfiguration = new ServerConfiguration();
-        Commands commands = new Commands("ssh-command");
+        serverConfiguration.setChannelType(Optional.ofNullable(channelType));
+
         SshOutput sshOutput = new SshOutput();
-        when(executor.execute(serverConfiguration, commands)).thenReturn(sshOutput);
+        when(executor.execute(serverConfiguration, COMMANDS)).thenReturn(sshOutput);
         SshOutputPublisher outputPublisher = mock(SshOutputPublisher.class);
-        SshExecutionManager executionManager = new SshExecutionManager(outputPublisher);
-        SshOutput actual = executionManager.run(serverConfiguration, commands);
+        SshExecutionManager executionManager = new SshExecutionManager(List.of(executor), outputPublisher);
+        SshOutput actual = executionManager.run(serverConfiguration, COMMANDS);
         assertEquals(sshOutput, actual);
         verify(outputPublisher).publishOutput(sshOutput);
+    }
+
+    @Test
+    void shouldThrowErrorWhenChannelTypeIsNotSupported() throws CommandExecutionException
+    {
+        SshShellExecutor executor = mock(SshShellExecutor.class);
+        when(executor.getChannelType()).thenReturn("invalid");
+        ServerConfiguration serverConfiguration = new ServerConfiguration();
+
+        SshOutput sshOutput = new SshOutput();
+        when(executor.execute(serverConfiguration, COMMANDS)).thenReturn(sshOutput);
+        SshOutputPublisher outputPublisher = mock(SshOutputPublisher.class);
+        SshExecutionManager executionManager = new SshExecutionManager(List.of(executor), outputPublisher);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> executionManager.run(serverConfiguration, COMMANDS));
+        assertEquals("Unsupported channel type: exec", exception.getMessage());
+        verifyNoInteractions(outputPublisher);
     }
 }

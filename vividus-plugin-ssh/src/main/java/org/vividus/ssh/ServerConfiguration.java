@@ -16,12 +16,15 @@
 
 package org.vividus.ssh;
 
+import java.util.Optional;
+
 public class ServerConfiguration
 {
     private String username;
     private String password;
     private String host;
     private int port;
+    private Optional<String> channelType = Optional.empty();
     private boolean agentForwarding;
     private boolean pseudoTerminalEnabled;
     private String privateKey;
@@ -116,5 +119,15 @@ public class ServerConfiguration
     public void setPassphrase(String passphrase)
     {
         this.passphrase = passphrase;
+    }
+
+    public Optional<String> getChannelType()
+    {
+        return channelType;
+    }
+
+    public void setChannelType(Optional<String> channelType)
+    {
+        this.channelType = channelType;
     }
 }
