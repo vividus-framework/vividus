@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8">
     <title>Visual tests result table</title>
-    <link rel="stylesheet" href="../../css/external.css"/>
     <link rel="stylesheet" href="../../styles.css"/>
     <link rel="stylesheet" href="../../webjars/bootstrap/3.3.6/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="../../webjars/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css">
