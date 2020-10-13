@@ -41,3 +41,4 @@ Then `#{round(-5.5, 0, half_even)}` is equal to `-6`
 Then `#{round(-2.5, 0, half_even)}` is equal to `-2`
 Then `#{round(-1.5, 0, half_even)}` is equal to `-2`
 Then `#{round(-1.1, 2, unnecessary)}` is equal to `-1.1`
+Then `#{round(0.15237E2, 2)}` is equal to `15.24`

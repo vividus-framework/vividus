@@ -49,7 +49,8 @@ class RoundExpressionProcessorTests
         "'round(1,2,half_down)',  true",
         "'round(1,2,half_even)',  true",
         "'round(1,2,unnecessary)',true",
-        "'round(1,2,left)',       false"
+        "'round(1,2,left)',       false",
+        "'round(0.15237E2, 0)',   true"
     })
     void testApply(String expression, boolean expected)
     {
@@ -137,7 +138,8 @@ class RoundExpressionProcessorTests
         "'round(-1.4444, 3, half_up)',  -1.444",
         "'round(-1.4444, 3, half_down)',-1.444",
         "'round(-1.4444, 3, half_even)',-1.444",
-        "'round(-1.1, 2, unnecessary)', -1.1"
+        "'round(-1.1, 2, unnecessary)', -1.1",
+        "'round(0.15237E3, 0)', 152"
     })
     void testRound(String expression, String expected)
     {
