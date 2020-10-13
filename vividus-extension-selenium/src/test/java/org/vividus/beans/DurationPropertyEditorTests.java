@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package org.vividus.spring;
+package org.vividus.beans;
 
-import org.springframework.core.convert.converter.Converter;
-import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.util.LocatorConversionUtils;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class StringToLocatorConverter implements Converter<String, Locator>
+import java.time.Duration;
+
+import org.junit.jupiter.api.Test;
+
+class DurationPropertyEditorTests
 {
-    private final LocatorConversionUtils conversionUtils;
-
-    public StringToLocatorConverter(LocatorConversionUtils conversionUtils)
+    @Test
+    void shouldConvertToADuration()
     {
-        this.conversionUtils = conversionUtils;
-    }
-
-    @Override
-    public Locator convert(String source)
-    {
-        return conversionUtils.convertToLocator(source);
+        DurationPropertyEditor editor = new DurationPropertyEditor();
+        editor.setAsText("PT1S");
+        assertEquals(Duration.ofSeconds(1), editor.getValue());
     }
 }
