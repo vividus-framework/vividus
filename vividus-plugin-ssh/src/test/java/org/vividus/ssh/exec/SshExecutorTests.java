@@ -38,13 +38,26 @@ import org.vividus.ssh.ServerConfiguration;
 
 class SshExecutorTests
 {
-    private final SshExecutor sshExecutor = new SshExecutor();
-
-    @Test
-    void shouldReturnExecChannelType()
+    private final SshExecutor<ChannelExec> sshExecutor = new SshExecutor<ChannelExec>()
     {
-        assertEquals("exec", sshExecutor.getChannelType());
-    }
+        @Override
+        public String getChannelType()
+        {
+            return "any";
+        }
+
+        @Override
+        protected void configureChannel(ChannelExec channel, ServerConfiguration serverConfiguration)
+        {
+            channel.setPty(true);
+        }
+
+        @Override
+        protected void setupCommands(ChannelExec channel, Commands commands)
+        {
+            channel.setCommand(commands.getJoinedCommands());
+        }
+    };
 
     @Test
     void testExecuteCommandsViaSshSuccessfully() throws Exception
@@ -63,16 +76,13 @@ class SshExecutorTests
         int exitStatus = 1;
         when(channel.getExitStatus()).thenReturn(exitStatus);
         ServerConfiguration serverConfiguration = new ServerConfiguration();
-        serverConfiguration.setAgentForwarding(true);
-        serverConfiguration.setPseudoTerminalEnabled(true);
         String commands = "ssh-command";
         SshOutput sshOutput = sshExecutor.executeCommand(serverConfiguration, new Commands(commands), channel);
         assertEquals(commandOutput + commandOutput, sshOutput.getOutputStream());
         assertEquals(errorOutput, sshOutput.getErrorStream());
         assertEquals(exitStatus, sshOutput.getExitStatus());
         InOrder ordered = inOrder(channel);
-        ordered.verify(channel).setAgentForwarding(serverConfiguration.isAgentForwarding());
-        ordered.verify(channel).setPty(serverConfiguration.isPseudoTerminalEnabled());
+        ordered.verify(channel).setPty(true);
         ordered.verify(channel).setCommand(commands);
         ordered.verify(channel).connect();
         ordered.verify(channel, times(3)).isClosed();
@@ -89,7 +99,7 @@ class SshExecutorTests
 
     private void mockErrorStream(String errorOutput, ChannelExec channel)
     {
-        doNothing().when(channel).setErrStream(argThat(out -> {
+        doNothing().when(channel).setExtOutputStream(argThat(out -> {
             try
             {
                 out.write(errorOutput.getBytes(StandardCharsets.UTF_8));

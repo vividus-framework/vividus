@@ -18,6 +18,8 @@ package org.vividus.ssh.sftp;
 
 import java.io.IOException;
 
+import javax.inject.Named;
+
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -28,6 +30,7 @@ import org.vividus.ssh.JSchExecutor;
 import org.vividus.ssh.ServerConfiguration;
 import org.vividus.ssh.SingleCommand;
 
+@Named
 public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>
 {
     private final ISoftAssert softAssert;
@@ -38,7 +41,7 @@ public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>
     }
 
     @Override
-    protected String getChannelType()
+    public String getChannelType()
     {
         return "sftp";
     }

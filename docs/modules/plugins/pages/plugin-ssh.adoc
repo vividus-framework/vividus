@@ -79,4 +79,17 @@ a|`true`
 |
 |The passphrase for the private key
 
+4+^.^|_The following properties are not applicable for SFTP_
+
+|`ssh.server.<key>.channel-type`
+a|`exec`
+`shell`
+|`exec`
+a|In common *nix OpenSSH server:
+
+* The `shell` channel executes a login shell (as if you login with SSH terminal client).
+* The `exec` command takes a command as an "argument" and executes it in an isolated environment &ndash; still via user's default shell, but not as a "login" shell, what may cause significant differences in the command execution.
+
+With https://stackoverflow.com/a/56713547/2067574[less common SSH servers], the difference can be even more significant. Some servers may even not support one of the channels. It is also quite common that they seemingly support both, but one of them (typically the `exec`) is completely broken.
+
 |===

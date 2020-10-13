@@ -16,21 +16,21 @@
 
 package org.vividus.ssh;
 
-public class CommandExecutionManager<R>
+public abstract class CommandExecutionManager<R>
 {
-    private final CommandExecutor<R> commandExecutor;
     private final OutputPublisher<R> outputPublisher;
 
-    public CommandExecutionManager(CommandExecutor<R> commandExecutor, OutputPublisher<R> outputPublisher)
+    protected CommandExecutionManager(OutputPublisher<R> outputPublisher)
     {
-        this.commandExecutor = commandExecutor;
         this.outputPublisher = outputPublisher;
     }
 
     public R run(ServerConfiguration serverConfiguration, Commands commands) throws CommandExecutionException
     {
-        R executionOutput = commandExecutor.execute(serverConfiguration, commands);
+        R executionOutput = getCommandExecutor(serverConfiguration).execute(serverConfiguration, commands);
         outputPublisher.publishOutput(executionOutput);
         return executionOutput;
     }
+
+    protected abstract CommandExecutor<R> getCommandExecutor(ServerConfiguration serverConfiguration);
 }

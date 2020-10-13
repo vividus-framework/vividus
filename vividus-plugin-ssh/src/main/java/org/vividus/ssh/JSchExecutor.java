@@ -82,7 +82,7 @@ public abstract class JSchExecutor<T extends Channel, R> implements CommandExecu
         }
     }
 
-    protected abstract String getChannelType();
+    public abstract String getChannelType();
 
     protected abstract R executeCommand(ServerConfiguration serverConfig, Commands commands, T channel)
             throws JSchException, IOException;
