@@ -1,6 +1,6 @@
 .Plugins
 * xref:plugin-applitools.adoc[Applitools*]
-* xref:plugin-aws-s3.adoc[AWS S3*]
+* xref:plugin-aws-s3.adoc[AWS S3]
 * xref:plugin-csv.adoc[CSV]
 * xref:plugin-datetime.adoc[Date/Time]
 * xref:plugin-db.adoc[Relational DB*]

@@ -16,9 +16,6 @@
 
 package org.vividus.aws.s3;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
@@ -28,10 +25,8 @@ public final class AmazonS3ClientFactory
     {
     }
 
-    public static AmazonS3 create(String s3AccessKey, String s3SecretKey, String region)
+    public static AmazonS3 create(String region)
     {
-        AWSCredentials credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
-        return AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withRegion(region).build();
+        return AmazonS3ClientBuilder.standard().withRegion(region).build();
     }
 }

@@ -27,10 +27,8 @@ class AmazonS3ClientFactoryTests
     @Test
     void shouldCreateNewClientInstance()
     {
-        String s3AccessKey = "s3AccessKey";
-        String s3SecretKey = "s3SecretKey";
         String region = "us-east-1";
-        AmazonS3 client = AmazonS3ClientFactory.create(s3AccessKey, s3SecretKey, region);
+        AmazonS3 client = AmazonS3ClientFactory.create(region);
         assertEquals(region, client.getRegionName());
     }
 }
