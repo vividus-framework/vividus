@@ -17,6 +17,6 @@
     </bean>
 
     <util:list id="stepBeanNames-Visual">
-        <value>visualSteps</value>
+        <idref bean="visualSteps" />
     </util:list>
 </beans>

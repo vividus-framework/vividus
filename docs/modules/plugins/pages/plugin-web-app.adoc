@@ -330,6 +330,39 @@ When I execute sequence of actions:
 |MOVE_TO       |By.id(name)                             |
 ----
 
+=== Save the request URL
+
+==== *_Info_*
+
+{proxy}
+
+Saves the captured request URL into scoped variable.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$httpMethod` - HTTP method to filter by
+. `$urlPattern` - the string value of URL-pattern to filter by
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - A variable name
+
+==== *_Usage_*
+
+.ProxyStepsTests.story
+[source,gherkin]
+----
+Scenario: Verify step When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
+Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
+When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL to SCENARIO variable `URL`
+Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
+----
+
 
 === Saves the query string into the variable with specified name and scopes.
 
@@ -606,4 +639,45 @@ Then `${context-height}` is > `0`
 Then `${context-width}` is > `0`
 Then `${context-x-coordinate}` is > `0`
 Then `${context-y-coordinate}` is > `0`
+----
+
+
+=== Adds headers to proxy request
+
+==== *_Info_*
+
+Add headers to proxy request that will be used while sending request with given urlPattern
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I add headers to proxied requests with URL pattern which $comparisonRule `$urlPattern`:$headers
+----
+
+==== *_Parameters_*
+
+. `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison Rule]
+. `$urlPattern` - The string value of URL-pattern to filter by
+. `$headers` - ExamplesTable representing list of headers with columns "name" and "value" specifying HTTP header names and values respectively
+
+==== *_Usage_*
+
+.ProxyStepsTests.story
+[source,gherkin]
+----
+Scenario: Verify step When I add headers to proxied requests with URL pattern which $comparisonRule `$urlPattern`:$headers
+When I add headers to proxied requests with URL pattern which is equal to `http://httpbin.org/headers`:
+|name     |value     |
+|testName1|testValue1|
+|testName2|testValue2|
+Given I am on a page with the URL 'http://httpbin.org/headers'
+When I change context to element located `xpath(//pre)`
+When I set the text found in search context to the 'SCENARIO' variable 'response'
+Then a JSON element from '${response}' by the JSON path '$.headers' is equal to '
+{
+    "Testname1": "testValue1",
+    "Testname2": "testValue2"
+}
+'IGNORING_EXTRA
 ----

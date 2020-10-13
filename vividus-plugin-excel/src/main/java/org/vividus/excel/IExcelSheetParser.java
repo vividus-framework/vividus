@@ -41,4 +41,6 @@ public interface IExcelSheetParser
     List<CellValue> getDataFromRange(String range);
 
     String getDataFromCell(String cellAddress);
+
+    Map<String, List<String>> getDataAsTable(String range);
 }

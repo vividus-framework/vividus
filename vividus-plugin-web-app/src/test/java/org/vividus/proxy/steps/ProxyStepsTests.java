@@ -16,6 +16,7 @@
 
 package org.vividus.proxy.steps;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -31,8 +32,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.filters.RequestFilter;
+import com.browserup.bup.util.HttpMessageInfo;
 import com.browserup.harreader.model.Har;
 import com.browserup.harreader.model.HarCreatorBrowser;
 import com.browserup.harreader.model.HarEntry;
@@ -46,15 +50,18 @@ import com.browserup.harreader.model.HttpMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.HttpStatus;
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
+import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.proxy.IProxy;
 import org.vividus.proxy.ProxyLog;
@@ -62,11 +69,15 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWebWaitActions;
 
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpRequest;
+
 @ExtendWith(MockitoExtension.class)
 class ProxyStepsTests
 {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final String URL_PATTERN = "www.test.com";
+    private static final String URL = "www.test.com";
     private static final String REQUESTS_MATCHING_URL_ASSERTION_PATTERN = "Number of HTTP %s requests matching URL "
             + "pattern '%s'";
     private static final String ATTACHMENT_FILENAME = "har.har";
@@ -79,6 +90,8 @@ class ProxyStepsTests
     private static final String MIME_TYPE = "mimeType";
     private static final String TEXT = "text";
     private static final String COMMENT = "comment";
+    private static final ExamplesTable HEADERS = new ExamplesTable("|name|value|\n|name1|value1|");
+    private static final Pattern URL_PATTERN = Pattern.compile(URL);
 
     @Mock
     private ISoftAssert nonFailingAssert;
@@ -121,7 +134,7 @@ class ProxyStepsTests
         when(harResponse.getStatus()).thenReturn(HttpStatus.SC_OK);
         long callsNumber = 1;
         ComparisonRule rule = ComparisonRule.EQUAL_TO;
-        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL_PATTERN);
+        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
         mockSizeAssertion(message, callsNumber, rule, callsNumber);
         proxySteps.checkNumberOfRequests(httpMethod, URL_PATTERN, rule, callsNumber);
         verifySizeAssertion(message, callsNumber, rule, callsNumber);
@@ -137,7 +150,7 @@ class ProxyStepsTests
         long callsNumber = 1;
         ComparisonRule rule = ComparisonRule.EQUAL_TO;
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod,
-                URL_PATTERN);
+                URL);
         byte[] data = mockProxyLog();
         proxySteps.checkNumberOfRequests(httpMethod, URL_PATTERN, rule, callsNumber);
         verifySizeAssertion(message, 0, rule, callsNumber);
@@ -170,6 +183,21 @@ class ProxyStepsTests
                     && map.containsKey(KEY2)
                     && VALUE2.equals(map.get(KEY2));
         }));
+    }
+
+    @Test
+    void shouldSaveUrlFromCapturedHar() throws IOException
+    {
+        ProxySteps spy = spy(proxySteps);
+        HarEntry harEntry = mock(HarEntry.class);
+        doReturn(List.of(harEntry)).when(spy).checkNumberOfRequests(HTTP_METHOD, URL_PATTERN,
+                ComparisonRule.EQUAL_TO, 1);
+        HarRequest harRequest = mock(HarRequest.class);
+        when(harEntry.getRequest()).thenReturn(harRequest);
+        when(harRequest.getUrl()).thenReturn(URL);
+        Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
+        spy.captureRequestAndSaveURL(HTTP_METHOD, URL_PATTERN, variableScopes, VARIABLE_NAME);
+        verify(bddVariableContext).putVariable(variableScopes, VARIABLE_NAME, URL);
     }
 
     @SuppressWarnings("unchecked")
@@ -257,8 +285,31 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         proxySteps.waitRequestInProxyLog(httpMethod, URL_PATTERN);
         verify(waitActions).wait(eq(URL_PATTERN),
-                argThat(e -> String.format("waiting for HTTP %s request with URL pattern %s",
-                        httpMethod, URL_PATTERN).equals(e.toString())));
+                argThat(e -> "waiting for HTTP POST request with URL pattern www.test.com".equals(e.toString())));
+    }
+
+    @Test
+    void shouldAddHeadersToProxyRequestIfUrlMatches()
+    {
+        HttpHeaders httpHeaders = mock(HttpHeaders.class);
+        HttpRequest request = mock(HttpRequest.class);
+        when(request.headers()).thenReturn(httpHeaders);
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        when(messageInfo.getUrl()).thenReturn(URL);
+        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL, HEADERS);
+        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
+        verify(proxy).addRequestFilter(filterCaptor.capture());
+        assertNull(filterCaptor.getValue().filterRequest(request, null, messageInfo));
+        verify(httpHeaders).add(argThat(headers ->
+                headers instanceof DefaultHttpHeaders && headers.size() == 1 && VALUE1.equals(headers.get("name1"))));
+    }
+
+    @Test
+    void shouldNotAddHeadersToProxyRequestIfUrlDoesNotMatch()
+    {
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL, HEADERS);
+        verify(proxy).addRequestFilter(argThat(filter -> filter.filterRequest(null, null, messageInfo) == null));
     }
 
     private byte[] mockProxyLog() throws IOException

@@ -26,15 +26,17 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.model.MetaWrapper;
 
+import io.appium.java_client.remote.MobileCapabilityType;
+
 public enum ControllingMetaTag
 {
     BROWSER_NAME(CapabilityType.BROWSER_NAME),
     VERSION(CapabilityType.VERSION),
     SCREEN_RESOLUTION(SauceLabsCapabilityType.SCREEN_RESOLUTION),
-    APPIUM_VERSION(SauceLabsCapabilityType.APPIUM_VERSION),
-    DEVICE_NAME(SauceLabsCapabilityType.DEVICE_NAME),
+    APPIUM_VERSION(MobileCapabilityType.APPIUM_VERSION),
+    DEVICE_NAME(MobileCapabilityType.DEVICE_NAME),
     DEVICE_ORIENTATION(SauceLabsCapabilityType.DEVICE_ORIENTATION),
-    PLATFORM_VERSION(SauceLabsCapabilityType.PLATFORM_VERSION),
+    PLATFORM_VERSION(MobileCapabilityType.PLATFORM_VERSION),
     PLATFORM_NAME(CapabilityType.PLATFORM_NAME),
     IEDRIVER_VERSION(SauceLabsCapabilityType.IEDRIVER_VERSION),
     SELENIUM_VERSION(SauceLabsCapabilityType.SELENIUM_VERSION),

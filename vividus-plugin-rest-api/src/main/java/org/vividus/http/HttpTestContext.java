@@ -48,6 +48,11 @@ public class HttpTestContext
         getData().requestHeaders = requestHeaders;
     }
 
+    public void addRequestHeaders(List<Header> requestHeaders)
+    {
+        getData().requestHeaders.addAll(requestHeaders);
+    }
+
     public void putCookieStore(CookieStore cookieStore)
     {
         getData().cookieStore = cookieStore;

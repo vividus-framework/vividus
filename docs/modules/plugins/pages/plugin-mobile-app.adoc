@@ -16,20 +16,28 @@ include::partial$locator-header.adoc[]
 === Types
 :locator-strategy: https://appium.io/docs/en/commands/element/find-elements/index.html#selector-strategies
 
-[cols="1,2,2", options="header"]
+[cols="1,1,2,2", options="header"]
 |===
 
 |Locator type
+|Platform
 |Description
 |Examples
 
 |XPath
+|any
 |Search the app XML source using xpath (not recommended, has {locator-strategy}[performance issues])
 |xpath(//android.widget.TextView[@text='Home']) or By.xpath(//XCUIElementTypeStaticText[@value='Home'])
 
 |Accessibility ID
+|any
 |See {locator-strategy}[Accessibility ID] selector strategy
 |accessibilityId(menu-toggler) or By.accessibilityId(menu-toggler)
+
+|iOS Class Chain
+|`iOS`
+|See https://github.com/facebookarchive/WebDriverAgent/wiki/Class-Chain-Queries-Construction-Rules[Class Chain Queries] for more details
+|+iosClassChain(**/XCUIElementTypeCell[$name BEGINSWITH "A"$])+ or +By.iosClassChain(**/XCUIElementTypeCell[$name BEGINSWITH "B"$])+
 
 |===
 
@@ -39,7 +47,7 @@ include::partial$visibility-types.adoc[]
 
 == Properties
 
-See xref:ROOT:tests-configuration.adoc[Selenium Grid] properties to configure remote grid
+See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid] properties to configure remote grid
 
 :application-under-test: mobile application
 :session-scope-property-base: mobile-application
@@ -75,6 +83,51 @@ a|Defines automation engine to use
 
 !`iOS`
 !http://appium.io/docs/en/drivers/ios-xcuitest/[XCUITest]
+!===
+
+|`mobile-environment.real-device`
+a|`true`
+
+`false`
+
+|Depends on the set profile
+
+a|Defines whether the tests run on real device
+[cols="2,1", options="header"]
+!===
+
+!Profile
+!Value
+
+!`browserstack/mobile_app`
+!`true`
+
+!`mobile_app/ios`
+!`false`
+
+!`mobile_app/android`
+!`false`
+
+!===
+
+|`mobile-environment.device.folder-for-file-upload`
+|`string`
+
+|Depends on the set profile
+
+a|Defines a destination folder on a device for a file being uploaded
+[cols="1,1", options="header"]
+!===
+
+!Profile
+!Value
+
+!`mobile_app/ios`
+!`/private/var/mobile/Media/DCIM/`
+
+!`mobile_app/android`
+!`/sdcard/Pictures`
+
 !===
 
 |===
@@ -118,19 +171,6 @@ selenium.grid.automation-name=UIAutomator2
 ==== Required properties
 * `selenium.grid.device-name` - defines device name to run tests on
 
-=== SauceLabs
-
-==== Info
-
-* The profile can be enabled by adding `saucelabs/mobile_app` to `configuration.profiles` property
-* The profile must be used together with either `{ios-profile}` or `{android-profile}` profiles
-* See https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/[Platform Configurator] to setup configuration
-
-==== Required properties
-
-* `selenium.grid.device-name` - defines device name
-* `selenium.grid.appium-version` - defines appium version
-* `selenium.grid.platform-version` - defines platform version
 
 == Steps
 
@@ -183,6 +223,164 @@ Given I start mobile application with capabilities:
 |name                           |value|
 |bstack:options.networkLogs     |true |
 |appium:options.clearSystemFiles|false|
+----
+
+=== Tap on element with duration
+
+==== *_Info_*
+
+Taps on the element located by the locator with the specified duration.
+
+The atomic actions performed are:
+* press on the element
+* wait for the duration
+* release
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I tap on element located `$locator` with duration `$duration`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$duration` - duration between an element is pressed and released in {iso-date-format-link} format
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Tap on element with duration
+When I tap on element located `accessibilityId(menu-toggler)` with duration `PT0.5S`
+----
+
+=== Tap on element
+
+==== *_Info_*
+
+Taps on the element located by the locator.
+
+The atomic actions performed are:
+* press on the element
+* release
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I tap on element located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Tap on element
+When I tap on element located `accessibilityId(menu-toggler)`
+----
+
+=== Type text
+
+==== *_Info_*
+
+Types the text into the element located by the locator.
+
+[WARNING]
+Existing text is re-written by the text passed into the step
+
+The atomic actions performed are:
+* type text into the element
+* hide keyboard
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I type `$text` in field located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$text` - text to type into the element
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Keyboard.story
+[source,gherkin]
+----
+Scenario: Type text
+When I type `Bob` in field located `accessibilityId(username)`
+----
+
+=== Swipe to an element
+
+==== *_Info_*
+
+Swipes to an element in either UP or DOWN direction with the specified duration
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I swipe $direction to element located `$locator` with duration $swipeDuration
+----
+
+==== Properties
+
+* `mobile-application.swipe.limit` - defines max numbers of swipes to perform (if it's reached the swipe process is stopped and the error is thrown)
+* `mobile-application.swipe.stabilization-duration` - defines a duration to wait after swipe until view becomes stable
+
+==== *_Parameters_*
+
+. `$direction` - direction to swipe, either UP or DOWN
+. `$locator` - <<_locator>>
+. `$duration` - swipe duration in {iso-date-format-link} format
+
+==== *_Usage_*
+
+.Swipe.story
+[source,gherkin]
+----
+Scenario: Swipe to element
+Then number of elements found by `accessibilityId(end-of-screen)` is equal to `0`
+When I swipe UP to element located `accessibilityId(end-of-screen)` with duration PT1S
+Then number of elements found by `accessibilityId(end-of-screen)` is equal to `1`
+----
+
+=== Upload a file to a device
+
+==== *_Info_*
+
+Uploads a file to a device
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I upload file `$filePath` to device
+----
+
+==== *_Parameters_*
+
+. `$filePath` - path of the file to upload to a device
+
+==== *_Usage_*
+
+.Upload.story
+[source,gherkin]
+----
+Scenario: Upload file
+When I upload file `images/avatar.png` to device
+Then the avatar icon is displayed with the uploaded image
 ----
 
 include::partial$generic-ui-steps.adoc[]

@@ -18,12 +18,8 @@ package org.vividus.selenium;
 
 public interface SauceLabsCapabilityType
 {
-    String NAME = "name";
     String SCREEN_RESOLUTION = "screen-resolution";
-    String APPIUM_VERSION = "appiumVersion";
-    String DEVICE_NAME = "deviceName";
     String DEVICE_ORIENTATION = "device-orientation";
-    String PLATFORM_VERSION = "platformVersion";
     String IEDRIVER_VERSION = "iedriver-version";
     String DEVICE = "device";
     String CAPABILITIES = "capabilities";

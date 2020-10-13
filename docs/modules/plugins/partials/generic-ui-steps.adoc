@@ -37,6 +37,9 @@ Verifies if the number of elements located by locator matches number condition a
 If you describe number condition as equal to 5 in case if there are 10 elements by this locator and only 5 of them in the desired state. You will get two failed assertions.
 The first one about number condition violation. The second one about state check failure.
 
+[WARNING]
+In case when locator's visibility and checked state are equal (For an example :i and NOT_VISIBLE) exception will be thrown. In such cases please use step: <<_verify_elements_number>>
+
 ==== *_Wording_*
 
 [source,gherkin]
@@ -59,4 +62,58 @@ Then number of $state elements found by `$locator` is $comparisonRule `$quantity
 Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
 Given I am on a page with the URL '${vividus-test-site-url}'
 Then number of VISIBLE elements found by `tagName(img)` is = `1`
+----
+
+
+=== Wait for element appearance
+
+==== *_Info_*
+
+Waits for appearance of an element by the locator
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I wait until element located `$locator` appears
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Wait.story
+[source,gherkin]
+----
+Scenario: Wait for element appearance
+When I wait until element located `name(welcome-image)` appears
+----
+
+
+=== Wait for element disappearance
+
+==== *_Info_*
+
+Waits for disappearance of an element by the locator
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I wait until element located `$locator` disappears
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Wait.story
+[source,gherkin]
+----
+Scenario: Wait for element disappearance
+When I wait until element located `name(welcome-image)` disappears
 ----

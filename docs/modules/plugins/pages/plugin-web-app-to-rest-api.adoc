@@ -48,7 +48,8 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-web-app-to-rest-api',
 |`false`
 |defines whether urls that has redirect to the one that has already been included in the table are excluded from the table
 |===
-
+==== Required properties
+* `web-application.main-page-url` - defines main application page URL
 
 .Usage example
 ----
@@ -86,6 +87,8 @@ Examples:
 |`false`
 |defines whether urls that has redirect to the one that has already been included in the table are excluded from the table
 |===
+==== Required properties
+* `web-application.main-page-url` - defines main application page URL
 
 .Usage example
 ----

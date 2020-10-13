@@ -1,0 +1,11 @@
+{
+  "type": {
+    "name": "link-type"
+  },
+  "inwardIssue": {
+    "key": "inward-key"
+  },
+  "outwardIssue": {
+    "key": "outward-key"
+  }
+}

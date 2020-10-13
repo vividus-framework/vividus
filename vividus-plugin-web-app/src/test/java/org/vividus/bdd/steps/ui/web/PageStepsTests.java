@@ -20,8 +20,6 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -413,15 +411,6 @@ class PageStepsTests
         pageSteps.iAmOnTheMainApplicationPage();
         assertThat(logger.getLoggingEvents(),
                 is(List.of(error("HTTP request for '{}' failed with the exception: {}", mainPage, exceptionMessage))));
-    }
-
-    @Test
-    void testIAmOnTheMainApplicationPageNull()
-    {
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(null);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> pageSteps.iAmOnTheMainApplicationPage());
-        assertEquals("URL of the main application page should be non-blank", exception.getMessage());
     }
 
     @Test

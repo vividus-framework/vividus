@@ -81,6 +81,22 @@ class ExecutableStepsTests
     }
 
     @Test
+    void shouldPerformTheStepsAndWhenVariableValueFitsExit()
+    {
+        String three = "3";
+        when(bddVariableContext.getVariable(KEY)).thenReturn(null).thenReturn("1").thenReturn("2").thenReturn(three);
+        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, three, subSteps);
+        verify(subSteps, times(3)).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldPerformTheStepsAndExitWhenLimitReached()
+    {
+        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, KEY, subSteps);
+        verify(subSteps, times(10)).execute(Optional.empty());
+    }
+
+    @Test
     void testPerformStepsNumberTimes()
     {
         executableSteps.performStepsNumberTimes(2, subSteps);

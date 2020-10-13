@@ -59,6 +59,7 @@ public abstract class AbstractElementAction implements IElementAction
         {
             return findElements(searchContext, locator, parameters, false);
         }
+        LOGGER.error(IElementAction.NOT_SET_CONTEXT);
         return List.of();
     }
 

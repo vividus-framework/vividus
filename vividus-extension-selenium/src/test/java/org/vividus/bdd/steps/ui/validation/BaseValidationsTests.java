@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -30,8 +31,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.vividus.testdouble.TestLocatorType.SEARCH;
+import static org.vividus.ui.action.search.IElementAction.NOT_SET_CONTEXT;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,6 +45,8 @@ import java.util.function.Function;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -63,6 +68,7 @@ import org.vividus.ui.validation.matcher.ExpectedConditionsMatcher;
 import org.vividus.ui.validation.matcher.NotExistsMatcher;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("MethodCount")
 class BaseValidationsTests
 {
     private static final String SOME_ELEMENT = "Some element";
@@ -118,6 +124,101 @@ class BaseValidationsTests
                 any(Matcher.class))).thenReturn(true);
         WebElement foundElement = baseValidations.assertIfElementExists(SOME_ELEMENT, attributes);
         assertEquals(mockedWebElement, foundElement);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionInCaseOfNullContext()
+    {
+        Locator attributes = mock(Locator.class);
+        assertNull(baseValidations.assertIfElementExists(SOME_ELEMENT, attributes));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfElementExists()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertNull(baseValidations.assertIfElementExists(BUSINESS_DESCRIPTION, null, locator));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfElementsExist()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(List.of(), baseValidations.assertIfElementsExist(BUSINESS_DESCRIPTION, null, locator));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfExactNumberOfElementsFound()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(false, baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, null,
+                locator, 1));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfAtLeastNumberOfElementsExist()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(List.of(), baseValidations.assertIfAtLeastNumberOfElementsExist(BUSINESS_DESCRIPTION, null,
+                locator, 1));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfAtLeastOneElementExists()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(null, baseValidations.assertIfAtLeastOneElementExists(BUSINESS_DESCRIPTION, null, locator));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfZeroOrOneElementFound()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(Optional.empty(), baseValidations.assertIfZeroOrOneElementFound(BUSINESS_DESCRIPTION,
+                null, locator));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfElementDoesNotExist()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertFalse(baseValidations.assertIfElementDoesNotExist(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, null, locator,
+                true));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
+    }
+
+    @Test
+    void shouldNotSearchIfContextNullAssertIfNumberOfElementsFound()
+    {
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        assertEquals(List.of(), baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, null, locator, 0,
+                ComparisonRule.EQUAL_TO));
+        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
+        verifyNoMoreInteractions(softAssert);
+        verifyNoInteractions(searchActions);
     }
 
     @Test
@@ -389,6 +490,7 @@ class BaseValidationsTests
     void testAssertIfZeroOrOneElementFoundZero()
     {
         Locator attributes = new Locator(SEARCH, XPATH_INT);
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
         Optional<WebElement> element = baseValidations.assertIfZeroOrOneElementFound(BUSINESS_DESCRIPTION, attributes);
         verify(softAssert).recordPassedAssertion(SYSTEM_DESCRIPTION + " not found");
         assertEquals(Optional.empty(), element);
@@ -428,15 +530,106 @@ class BaseValidationsTests
                     attributes, 1, ComparisonRule.EQUAL_TO), false, List.of());
     }
 
+    @Test
+    void testAssertElementExists()
+    {
+        webElements = List.of(mockedWebElement);
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
+        when(softAssert.recordAssertion(true, BUSINESS_DESCRIPTION + " is found by the locator " + locator))
+                .thenReturn(true);
+        Optional<WebElement> element = baseValidations.assertElementExists(BUSINESS_DESCRIPTION, locator);
+        assertTrue(element.isPresent());
+        assertEquals(mockedWebElement, element.get());
+    }
+
+    @Test
+    void testAssertElementsNumber()
+    {
+        List<WebElement> elements = List.of(mockedWebElement);
+        mockAssertingWebElements(elements);
+        when(softAssert.assertThat(eq(BUSINESS_DESCRIPTION), eq(elements.size()),
+                argThat(e -> "a value equal to <1>".equals(e.toString())))).thenReturn(true);
+        assertTrue(baseValidations.assertElementsNumber(BUSINESS_DESCRIPTION, elements, ComparisonRule.EQUAL_TO, 1));
+    }
+
+    @Test
+    void testAssertElementExistsMoreThanOne()
+    {
+        webElements = List.of(mockedWebElement, mockedWebElement);
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
+        Optional<WebElement> element = baseValidations.assertElementExists(BUSINESS_DESCRIPTION, locator);
+        assertTrue(element.isEmpty());
+        verify(softAssert).recordFailedAssertion(
+                "The number of elements found by the locator " + locator + " is 2, but expected 1");
+    }
+
+    @Test
+    void testAssertElementExistsEmptyElements()
+    {
+        List<WebElement> elements = List.of();
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        Locator locator = new Locator(SEARCH, XPATH_INT);
+        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(elements);
+        when(softAssert.recordAssertion(false,
+                BUSINESS_DESCRIPTION + " is not found by the locator " + locator.toString())).thenReturn(false);
+        Optional<WebElement> element = baseValidations.assertElementExists(BUSINESS_DESCRIPTION, locator);
+        assertTrue(element.isEmpty());
+    }
+
+    @Test
+    void shouldFailIfExpectedNumberOfElementsIsLessThanZero()
+    {
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> baseValidations
+                .assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, null, 0, ComparisonRule.LESS_THAN));
+        assertEquals("Invalid input rule: the number of elements can not be less than 0", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "EQUAL_TO, number of elements is a value equal to <0>, is equal to 0",
+        "LESS_THAN_OR_EQUAL_TO, number of elements is a value less than or equal to <0>, is less than or equal to 0"
+    })
+    void shouldNotWaitForElementsIfExpectedNumberOfElementsIsEqualToOrLessThanOrEqualToZero(ComparisonRule rule,
+            String matcherAsString, String comparison)
+    {
+        testAssertIfNumberOfElementsFound(
+            attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, mockedSearchContext,
+                attributes, 0, rule), false, List.of(), comparison, matcherAsString, false);
+    }
+
+    @Test
+    void shouldWaitForElementIfExpectedNumberOfElementsIsGreaterThanOrEqualToZero()
+    {
+        testAssertIfNumberOfElementsFound(
+            attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, mockedSearchContext,
+                    attributes, 0, ComparisonRule.GREATER_THAN_OR_EQUAL_TO),
+            true, List.of(), "is greater than or equal to 0",
+            "number of elements is a value equal to or greater than <0>", true);
+    }
+
+    private void testAssertIfNumberOfElementsFound(Function<Locator, List<WebElement>> actualCall, boolean checkPassed,
+            List<WebElement> foundElements)
+    {
+        testAssertIfNumberOfElementsFound(actualCall, checkPassed, foundElements, "is equal to 1", EQUAL_TO_MATCHER,
+                true);
+    }
+
     private void testAssertIfNumberOfElementsFound(Function<Locator, List<WebElement>> actualCall,
-            boolean checkPassed, List<WebElement> foundElements)
+            boolean checkPassed, List<WebElement> foundElements, String comparison, String marcher, boolean wait)
     {
         Locator attributes = new Locator(SEARCH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(foundElements);
         when(softAssert.assertThat(eq(BUSINESS_DESCRIPTION),
-                eq("Number of elements found by ' Search: './/xpath=1'; Visibility: VISIBLE;' is equal to 1"),
-                eq(foundElements), argThat(m -> EQUAL_TO_MATCHER.equals(m.toString())))).thenReturn(checkPassed);
+                eq("Number of elements found by ' Search: './/xpath=1'; Visibility: VISIBLE;' " + comparison),
+                eq(foundElements), argThat(m -> marcher.equals(m.toString())))).thenReturn(checkPassed);
+        assertTrue(attributes.getSearchParameters().isWaitForElement());
         assertEquals(foundElements, actualCall.apply(attributes));
+        assertEquals(wait, attributes.getSearchParameters().isWaitForElement());
     }
 
     private void mockAssertingWebElements(List<WebElement> elements)

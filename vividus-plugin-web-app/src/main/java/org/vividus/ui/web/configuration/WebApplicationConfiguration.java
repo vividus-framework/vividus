@@ -16,7 +16,12 @@
 
 package org.vividus.ui.web.configuration;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
 import java.net.URI;
+import java.util.function.Supplier;
+
+import com.google.common.base.Suppliers;
 
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.util.UriUtils;
@@ -114,6 +119,11 @@ public class WebApplicationConfiguration
         private AuthenticationMode authenticationMode;
         private String mainApplicationPageUrl;
         private String basicAuthUser;
+        private final Supplier<URI> mainApplicationPageUriSupplier = Suppliers.memoize(() ->
+        {
+            isTrue(mainApplicationPageUri != null, "URL of the main application page should be non-blank");
+            return mainApplicationPageUri;
+        });
 
         ConfigurationStorage(String mainApplicationPageUrl, AuthenticationMode authenticationMode)
         {
@@ -128,7 +138,7 @@ public class WebApplicationConfiguration
 
         private URI getMainApplicationPageUri()
         {
-            return mainApplicationPageUri;
+            return mainApplicationPageUriSupplier.get();
         }
 
         private void setAuthenticationMode(AuthenticationMode authenticationMode)

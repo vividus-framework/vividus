@@ -73,3 +73,10 @@ When I `1` times do:
 !|Then `${iterator}` is = `1`                                                          |!
 !|When I initialize the STORY variable `iterator` with value `#{eval(${iterator} + 1)}`|!
 Then `${iterator}` is = `2`
+
+Scenario: Verify step: When I execute steps at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExeute
+When I initialize the scenario variable `var` with value `0`
+When I execute steps at most 5 times while variable `var` is < `3`:
+|step                                                                          |
+|When I initialize the scenario variable `var` with value `#{eval(${var} + 1)}`|
+Then `${var}` is = `3`

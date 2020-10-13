@@ -42,13 +42,42 @@ public interface IBaseValidations
     boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
             int number);
 
+    /**
+     * Assert that the number of elements in <b>elements</b> collection is <b>comparisonRule</b> <b>number</b>
+     * @param description description of elements in the <b>elements</b> collection
+     * @param elements collection being verified
+     * @param comparisonRule The rule to compare values
+     * (&lt;i&gt;Possible values:&lt;b&gt; LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
+     * EQUAL_TO&lt;/b&gt;&lt;/i&gt;)
+     * @param number expected number of elements in the <b>element</b> collection
+     * @return whether the number of elements in <b>elements</b> is equal to <b>number</b>
+     */
+    boolean assertElementsNumber(String description, List<WebElement> elements, ComparisonRule comparisonRule,
+            int number);
+
     @Deprecated(since = "0.2.8", forRemoval = true)
     boolean assertLeastElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
             int leastNumber);
 
     boolean assertExpectedCondition(String businessDescription, ExpectedCondition<?> expectedCondition);
 
+    /**
+     * Asserts that an element located by the <b>locator</b> exists
+     * @param businessDescription business description of the element being validated, must not be {@code null}
+     * @param locator locator to find element, must not be {@code null}
+     * @return the element being validated
+     * @deprecated Use {@link #assertElementExists(String, Locator)}
+     */
+    @Deprecated(since = "0.2.8", forRemoval = true)
     WebElement assertIfElementExists(String businessDescription, Locator locator);
+
+    /**
+     * Asserts that an element located by the <b>locator</b> exists
+     * @param description description of the element being validated, must not be {@code null}
+     * @param locator locator to find element, must not be {@code null}
+     * @return the element being validated wrapped in an {@link Optional}
+     */
+    Optional<WebElement> assertElementExists(String description, Locator locator);
 
     WebElement assertIfElementExists(String businessDescription, SearchContext searchContext, Locator locator);
 

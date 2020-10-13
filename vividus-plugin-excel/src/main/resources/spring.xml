@@ -10,6 +10,6 @@
     <bean id="excelResponseValidationSteps" class="org.vividus.bdd.steps.ExcelResponseValidationSteps" />
 
     <util:list id="stepBeanNames-Excel" value-type="java.lang.String">
-        <value>excelResponseValidationSteps</value>
+        <idref bean="excelResponseValidationSteps" />
     </util:list>
 </beans>

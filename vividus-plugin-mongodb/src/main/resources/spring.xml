@@ -15,6 +15,6 @@
     </bean>
 
     <util:list id="stepBeanNames-MongoDB">
-        <value>mongoDbSteps</value>
+        <idref bean="mongoDbSteps" />
     </util:list>
 </beans>

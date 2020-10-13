@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
@@ -41,10 +39,14 @@ import org.vividus.util.ResourceUtils;
 
 public class S3BucketSteps
 {
-    @Inject
-    private AmazonS3 amazonS3Client;
-    @Inject
-    private IBddVariableContext bddVariableContext;
+    private final AmazonS3 amazonS3Client;
+    private final IBddVariableContext bddVariableContext;
+
+    public S3BucketSteps(AmazonS3 amazonS3Client, IBddVariableContext bddVariableContext)
+    {
+        this.amazonS3Client = amazonS3Client;
+        this.bddVariableContext = bddVariableContext;
+    }
 
     /**
      * Uploads <b>resource</b> into S3 given bucket by the <b>objectKey</b>

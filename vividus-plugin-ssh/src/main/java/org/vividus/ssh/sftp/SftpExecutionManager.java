@@ -18,14 +18,24 @@ package org.vividus.ssh.sftp;
 
 import javax.inject.Named;
 
-import org.vividus.softassert.ISoftAssert;
 import org.vividus.ssh.CommandExecutionManager;
+import org.vividus.ssh.CommandExecutor;
+import org.vividus.ssh.ServerConfiguration;
 
 @Named("SFTP")
 public class SftpExecutionManager extends CommandExecutionManager<SftpOutput>
 {
-    public SftpExecutionManager(SftpOutputPublisher outputPublisher, ISoftAssert softAssert)
+    private final SftpExecutor sftpExecutor;
+
+    public SftpExecutionManager(SftpExecutor sftpExecutor, SftpOutputPublisher outputPublisher)
     {
-        super(new SftpExecutor(softAssert), outputPublisher);
+        super(outputPublisher);
+        this.sftpExecutor = sftpExecutor;
+    }
+
+    @Override
+    protected CommandExecutor<SftpOutput> getCommandExecutor(ServerConfiguration serverConfiguration)
+    {
+        return sftpExecutor;
     }
 }

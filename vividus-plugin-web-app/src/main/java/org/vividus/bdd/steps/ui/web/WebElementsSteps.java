@@ -29,9 +29,8 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
-import org.vividus.ui.State;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -47,7 +46,7 @@ public class WebElementsSteps
     @Inject private IElementValidations elementValidations;
     @Inject private IUiContext uiContext;
     @Inject private ISearchActions searchActions;
-    @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
+    @Inject private ISoftAssert softAssert;
 
     /**
      * Checks if the text in context matches <b>regex</b>
@@ -81,7 +80,7 @@ public class WebElementsSteps
                 }
             }
         }
-        descriptiveSoftAssert.assertTrue("The text in search context matches regular expression " + regex,
+        softAssert.assertTrue("The text in search context matches regular expression " + regex,
                 assertCondition);
     }
 
@@ -143,7 +142,7 @@ public class WebElementsSteps
                 }
             }
 
-            descriptiveSoftAssert.assertTrue("There is an element with text=" + text + " in the context",
+            softAssert.assertTrue("There is an element with text=" + text + " in the context",
                     assertCondition);
         }
     }
@@ -166,35 +165,6 @@ public class WebElementsSteps
             return baseValidations.assertIfElementDoesNotExist(String.format("An element with text '%s'", text),
                     new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text));
         }
-    }
-
-    /**
-     * Checks, if there is a frame with desired attribute on the context
-     * @param attributeType Type of tag attribute (for ex. 'name', 'id')
-     * @param attributeValue Value of the attribute
-     * @return Frame web element if it is found on the page
-     */
-    @Then("a frame with the attribute '$attributeType'='$attributeValue' exists")
-    public WebElement isFrameWithCertainAttributeFound(String attributeType, String attributeValue)
-    {
-        return baseValidations.assertIfElementExists(
-                String.format("A frame with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
-                new Locator(WebLocatorType.XPATH,
-                        LocatorUtil.getXPathByTagNameAndAttribute("iframe", attributeType, attributeValue)));
-    }
-
-    /**
-     * Checks, if there is a frame with desired attribute on the context
-     * and it has expected <b>state</b>
-     * @param state Enabled or Disabled
-     * @param attributeType Type of tag attribute (for ex. 'name', 'id')
-     * @param attributeValue Value of the attribute
-     */
-    @Then("a [$state] frame with the attribute '$attributeType'='$attributeValue' exists")
-    public void isFrameWithCertainAttributeFound(State state, String attributeType, String attributeValue)
-    {
-        WebElement element = isFrameWithCertainAttributeFound(attributeType, attributeValue);
-        baseValidations.assertElementState("The found frame is " + state, state, element);
     }
 
     protected SearchContext getSearchContext()

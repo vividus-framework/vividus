@@ -16,6 +16,7 @@
 
 package org.vividus.ui.action.search;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -97,6 +98,8 @@ class AbstractElementSearchActionTests
         SearchParameters parameters = mock(SearchParameters.class);
         List<WebElement> elements = elementSearchAction.findElements(null, locator, parameters);
         assertThat(elements, empty());
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+                error("Unable to locate elements, because search context is not set"))));
     }
 
     @SuppressWarnings("unchecked")

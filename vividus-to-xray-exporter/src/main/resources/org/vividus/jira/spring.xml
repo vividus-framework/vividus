@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-lazy-init="true">
+
+    <bean id="caching-credentials" class="org.vividus.http.context.CachingCredentialsHttpContextFactory" >
+        <constructor-arg index="0" value="${jira.username}"/>
+        <constructor-arg index="1" value="${jira.password}"/>
+        <constructor-arg index="2" value="${jira.endpoint}"/>
+    </bean>
+
+    <bean id="noop" class="org.vividus.http.context.NoopHttpContextFactory" />
+
+    <bean class="org.vividus.jira.JiraFacade" />
+
+    <bean class="org.vividus.jira.JiraClient">
+        <constructor-arg index="0" value="${jira.endpoint}" />
+        <constructor-arg index="1">
+            <bean class="org.vividus.http.client.HttpClient" factory-bean="httpClientFactory"
+                  factory-method="buildHttpClient">
+                <constructor-arg>
+                    <bean parent="httpClientConfig">
+                        <property name="headersMap">
+                            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
+                                <constructor-arg value="jira.http.header." />
+                            </bean>
+                        </property>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+        <constructor-arg index="2" ref="${jira.http.context-type}" />
+    </bean>
+
+    <bean class="org.vividus.xray.facade.XrayFacade">
+        <constructor-arg index="0" value="${xray-exporter.editable-statuses}" />
+    </bean>
+
+    <bean class="org.vividus.xray.factory.TestCaseFactory">
+        <constructor-arg index="0" value="${xray-exporter.project-key}" />
+        <constructor-arg index="1" value="${xray-exporter.assignee}" />
+    </bean>
+</beans>

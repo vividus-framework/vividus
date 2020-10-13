@@ -15,6 +15,7 @@ dependencies {
     implementation project(':vividus-plugin-datetime')
     implementation project(':vividus-plugin-html')
     implementation project(':vividus-plugin-rest-api')
+    implementation project(':vividus-plugin-saucelabs')
     implementation project(':vividus-plugin-ssh')
     implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-plugin-web-app-to-rest-api')
@@ -22,5 +23,5 @@ dependencies {
     implementation project(':vividus-plugin-visual')
     implementation project(':vividus-plugin-excel')
 
-    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.16')
+    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.17')
 }

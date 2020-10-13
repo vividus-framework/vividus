@@ -38,6 +38,14 @@ public enum AppiumHow
         {
             return MobileBy.AccessibilityId(value);
         }
+    },
+    IOS_CLASS_CHAIN
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return MobileBy.iOSClassChain(value);
+        }
     };
 
     public abstract By buildBy(String value);

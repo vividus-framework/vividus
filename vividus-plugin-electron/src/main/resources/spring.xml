@@ -9,6 +9,6 @@
     <bean id="applicationSteps" class="org.vividus.electron.ApplicationSteps" />
 
     <util:list id="stepBeanNames-Electron">
-        <value>applicationSteps</value>
+        <idref bean="applicationSteps" />
     </util:list>
 </beans>

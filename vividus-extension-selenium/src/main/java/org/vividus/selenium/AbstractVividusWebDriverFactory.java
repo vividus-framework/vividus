@@ -17,10 +17,10 @@
 package org.vividus.selenium;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.jbehave.core.model.Meta;
-import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Story;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.MetaWrapper;
@@ -31,58 +31,53 @@ import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriverFactory
 {
-    private final IBddRunContext bddRunContext;
+    private final boolean remoteExecution;
     private final IWebDriverManagerContext webDriverManagerContext;
+    private final IBddRunContext bddRunContext;
+    private final Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers;
 
-    public AbstractVividusWebDriverFactory(IBddRunContext bddRunContext,
-            IWebDriverManagerContext webDriverManagerContext)
+    public AbstractVividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
+            IBddRunContext bddRunContext, Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
     {
-        this.bddRunContext = bddRunContext;
+        this.remoteExecution = remoteExecution;
         this.webDriverManagerContext = webDriverManagerContext;
+        this.bddRunContext = bddRunContext;
+        this.desiredCapabilitiesConfigurers = desiredCapabilitiesConfigurers;
     }
 
     @Override
     public VividusWebDriver create()
     {
-        VividusWebDriver vividusWebDriver = createVividusWebDriver(bddRunContext.getRunningStory());
-        configureVividusWebDriver(vividusWebDriver);
-        return vividusWebDriver;
-    }
-
-    protected abstract void configureVividusWebDriver(VividusWebDriver vividusWebDriver);
-
-    private VividusWebDriver createVividusWebDriver(RunningStory runningStory)
-    {
         VividusWebDriver vividusWebDriver = new VividusWebDriver();
-        setBaseDesiredCapabilities(vividusWebDriver, runningStory);
-
+        setDesiredCapabilities(vividusWebDriver.getDesiredCapabilities());
+        vividusWebDriver.setWebDriver(createWebDriver(vividusWebDriver.getDesiredCapabilities()));
+        vividusWebDriver.setRemote(remoteExecution);
         return vividusWebDriver;
     }
 
-    private void setBaseDesiredCapabilities(VividusWebDriver vividusWebDriver, RunningStory runningStory)
+    protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities)
     {
-        DesiredCapabilities desiredCapabilities = vividusWebDriver.getDesiredCapabilities();
-        desiredCapabilities.merge(webDriverManagerContext.getParameter(
-                WebDriverManagerParameter.DESIRED_CAPABILITIES));
+        desiredCapabilitiesConfigurers.ifPresent(
+            configurers -> configurers.forEach(configurer -> configurer.configure(desiredCapabilities)));
+        desiredCapabilities.merge(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES));
         webDriverManagerContext.reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
+        RunningStory runningStory = bddRunContext.getRunningStory();
         if (runningStory != null)
         {
-            Scenario scenario = Optional.ofNullable(runningStory.getRunningScenario())
+            Meta storyMeta = runningStory.getStory().getMeta();
+            Meta mergedMeta = Optional.ofNullable(runningStory.getRunningScenario())
                                         .map(RunningScenario::getScenario)
-                                        .orElse(null);
-            Meta mergedMeta = mergeMeta(runningStory.getStory(), scenario);
+                                        .map(scenario -> scenario.getMeta().inheritFrom(storyMeta))
+                                        .orElse(storyMeta);
             MetaWrapper metaWrapper = new MetaWrapper(mergedMeta);
             ControllingMetaTag.setDesiredCapabilitiesFromMeta(desiredCapabilities, metaWrapper);
-            setDesiredCapabilities(desiredCapabilities, runningStory, scenario, metaWrapper);
         }
     }
 
-    protected abstract void setDesiredCapabilities(DesiredCapabilities desiredCapabilities, RunningStory runningStory,
-            Scenario scenario, MetaWrapper metaWrapper);
+    protected abstract WebDriver createWebDriver(DesiredCapabilities desiredCapabilities);
 
-    private static Meta mergeMeta(Story story, Scenario scenario)
+    protected boolean isRemoteExecution()
     {
-        Meta storyMeta = story.getMeta();
-        return scenario == null ? storyMeta : scenario.getMeta().inheritFrom(storyMeta);
+        return remoteExecution;
     }
 }

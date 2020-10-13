@@ -11,9 +11,34 @@
         <constructor-arg index="0" value="${mobile-application.session-scope}" />
     </bean>
 
+    <bean class="org.vividus.mobileapp.action.TouchActions" />
+
+    <bean class="org.vividus.mobileapp.action.KeyboardActions" >
+        <constructor-arg index="0" value="${mobile-environment.real-device}" />
+    </bean>
+
+    <bean class="org.vividus.mobileapp.action.DeviceActions" />
+
+    <bean class="org.vividus.mobileapp.listener.PublishingSourceOnFailureListener" lazy-init="false" />
+
+    <bean class="org.vividus.bdd.monitor.GenericScreenshotOnFailureMonitor" />
+
+    <bean class="org.vividus.selenium.mobileapp.MobileAppScreenshotTaker" />
+
     <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
 
+    <bean id="touchSteps" class="org.vividus.bdd.mobileapp.steps.TouchSteps" />
+
+    <bean id="deviceSteps" class="org.vividus.bdd.mobileapp.steps.DeviceSteps" >
+        <constructor-arg index="0" value="${mobile-environment.device.folder-for-file-upload}" />
+    </bean>
+
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
+
+    <bean class="org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration" >
+        <constructor-arg index="0" value="${mobile-application.swipe.stabilization-duration}" />
+        <constructor-arg index="1" value="${mobile-application.swipe.limit}" />
+    </bean>
 
     <bean class="org.vividus.selenium.mobileapp.MobileAppDriverFactory"
         parent="parentWebDriverFactory"/>
@@ -28,8 +53,15 @@
         <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).ACCESSIBILITY_ID}" />
     </bean>
 
+    <bean class="org.vividus.ui.mobile.action.search.ByAppiumLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).IOS_CLASS_CHAIN}" />
+        <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).IOS_CLASS_CHAIN}" />
+    </bean>
+
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
-        <value>applicationSteps</value>
-        <value>webDriverSetupSteps</value>
+        <idref bean="applicationSteps" />
+        <idref bean="webDriverSetupSteps" />
+        <idref bean="touchSteps" />
+        <idref bean="deviceSteps" />
     </util:list>
 </beans>

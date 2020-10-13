@@ -205,7 +205,7 @@ public class JSchExecutorTests
     {
         @Override
         @SuppressWarnings("checkstyle:SimpleAccessorNameNotation")
-        protected String getChannelType()
+        public String getChannelType()
         {
             return EXEC;
         }

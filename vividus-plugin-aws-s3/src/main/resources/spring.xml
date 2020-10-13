@@ -19,6 +19,6 @@
     </bean>
 
     <util:list id="stepBeanNames-AWS-S3" value-type="java.lang.String">
-        <value>org.vividus.aws.s3.steps.S3BucketSteps</value>
+        <idref bean="org.vividus.aws.s3.steps.S3BucketSteps" />
     </util:list>
 </beans>

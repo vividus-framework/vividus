@@ -59,11 +59,13 @@ class SftpExecutorTests
         when(channel.pwd()).thenReturn(pwd).thenReturn(pwd);
         ServerConfiguration serverConfiguration = new ServerConfiguration();
         serverConfiguration.setAgentForwarding(true);
+        serverConfiguration.setPseudoTerminalEnabled(true);
         Commands commands = new Commands("pwd; cd ~; pwd");
         SftpOutput sftpOutput = sftpExecutor.executeCommand(serverConfiguration, commands, channel);
         assertEquals(pwd + System.lineSeparator() + pwd, sftpOutput.getResult());
         InOrder ordered = inOrder(channel);
         ordered.verify(channel).setAgentForwarding(serverConfiguration.isAgentForwarding());
+        ordered.verify(channel).setPty(serverConfiguration.isPseudoTerminalEnabled());
         ordered.verify(channel).connect();
         ordered.verify(channel).pwd();
         ordered.verify(channel).cd("~");
@@ -80,10 +82,12 @@ class SftpExecutorTests
         doThrow(sftpException).when(channel).pwd();
         ServerConfiguration serverConfiguration = new ServerConfiguration();
         serverConfiguration.setAgentForwarding(true);
+        serverConfiguration.setPseudoTerminalEnabled(true);
         SftpOutput sftpOutput = sftpExecutor.executeCommand(serverConfiguration, new Commands("pwd"), channel);
         assertEquals("", sftpOutput.getResult());
         InOrder ordered = inOrder(channel, softAssert);
         ordered.verify(channel).setAgentForwarding(serverConfiguration.isAgentForwarding());
+        ordered.verify(channel).setPty(serverConfiguration.isPseudoTerminalEnabled());
         ordered.verify(channel).connect();
         ordered.verify(channel).pwd();
         ordered.verify(softAssert).recordFailedAssertion("SFTP command error", sftpException);

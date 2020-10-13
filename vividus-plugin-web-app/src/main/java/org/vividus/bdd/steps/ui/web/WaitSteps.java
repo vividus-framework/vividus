@@ -302,25 +302,6 @@ public class WaitSteps
     }
 
     /**
-     * Waits for <b>the appearance</b> of an element with the specified <b>name</b>
-     * in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><i>Finds</i> an element with the <b>specified name</b> within search context
-     * <li><i>Waits</i> until this element becomes visible
-     * </ul>
-     * @param elementName Any attribute value or text value of the element
-     */
-    @When("I wait until elements with the name '$elementName' appear")
-    public void waitTillElementsAreVisible(String elementName)
-    {
-        Locator attributes = new Locator(WebLocatorType.ELEMENT_NAME, elementName);
-        waitForElementAppearance(attributes);
-    }
-
-    /**
      * Waits for <b><i>a frame</i></b> with specified <b>name</b> becomes appearance on the page
      * <p>
      * <b>Frame</b> is a block (part) of the page concluded in the tag <i>&lt;iframe&gt;</i>
@@ -433,38 +414,6 @@ public class WaitSteps
     {
         return waitActions.wait(searchContext,
                 expectedSearchContextConditions.visibilityOfAllElementsLocatedBy(by)).isWaitPassed();
-    }
-
-    /**
-     * Waits for <b><i>an element</i></b> with the specified <b>locator</b> appearance
-     * in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><i>Finds</i> an element with the <b>specified locator</b> within search context
-     * <li><i>Waits</i> until this element becomes visible
-     * </ul>
-     * @param locator to locate element
-     * @return true if element appeared, false otherwise
-     */
-    @When("I wait until element located `$locator` appears")
-    public boolean waitForElementAppearance(Locator locator)
-    {
-        return waitActions.wait(getSearchContext(),
-                expectedSearchActionsConditions.visibilityOfElement(locator)).isWaitPassed();
-    }
-
-    /**
-     * Waits for element disappearance with timeout
-     * @param locator The locating mechanism to use
-     * @return true if element disappeared, false otherwise
-     */
-    @When("I wait until element located `$locator` disappears")
-    public boolean waitForElementDisappearance(Locator locator)
-    {
-        return waitActions.wait(getSearchContext(), expectedSearchActionsConditions.invisibilityOfElement(locator))
-                .isWaitPassed();
     }
 
     /**

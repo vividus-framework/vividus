@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+       profile="saucelabs" default-lazy-init="true">
+
+    <bean id="sauceConnectManager" class="org.vividus.selenium.sauce.SauceConnectManager">
+        <property name="sauceLabsUsername" value="${selenium.grid.username}"/>
+        <property name="sauceLabsAccessKey" value="${selenium.grid.password}"/>
+        <property name="testContext" ref="testContext"/>
+        <property name="sauceTunnelManager">
+            <bean class="com.saucelabs.ci.sauceconnect.SauceConnectFourManager">
+                <constructor-arg value="false"/>
+                <property name="useLatestSauceConnect" value="${saucelabs.sauce-connect.use-latest-version}"/>
+                <property name="sauceRest">
+                    <bean class="com.saucelabs.saucerest.SauceREST">
+                        <constructor-arg index="0" value="${selenium.grid.username}" />
+                        <constructor-arg index="1" value="${selenium.grid.password}" />
+                        <constructor-arg index="2" value="${saucelabs.data-center}" />
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
+        <property name="sauceConnectEnabled" value="${saucelabs.sauce-connect.enabled}"/>
+        <property name="sauceLabsEnabled" value="${selenium.grid.enabled}"/>
+        <property name="restUrl" value="${saucelabs.rest-url}" />
+        <property name="sauceConnectArguments" value="${saucelabs.sauce-connect.command-line-arguments}" />
+    </bean>
+
+</beans>

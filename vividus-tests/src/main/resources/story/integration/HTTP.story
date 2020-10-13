@@ -64,3 +64,15 @@ Examples:
 |http-method|
 |put        |
 |delete     |
+
+Scenario: Verify step "I add request headers:$headers"
+When I set request headers:
+|name         |value          |
+|Content-Type|application/json|
+When I add request headers:
+|name    |value|
+|Language|en-ru|
+When I send HTTP GET to the relative URL '/get?name=Content'
+Then `${responseCode}` is equal to `200`
+Then a JSON element by the JSON path '$.headers.Content-Type' is equal to '"application/json"'
+Then a JSON element by the JSON path '$.headers.Language' is equal to '"en-ru"'

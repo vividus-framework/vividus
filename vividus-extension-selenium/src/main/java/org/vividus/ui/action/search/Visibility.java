@@ -18,11 +18,25 @@ package org.vividus.ui.action.search;
 
 import java.util.stream.Stream;
 
+import org.vividus.ui.State;
+
 public enum Visibility
 {
-    VISIBLE,
-    INVISIBLE,
-    ALL;
+    VISIBLE(State.VISIBLE),
+    INVISIBLE(State.NOT_VISIBLE),
+    ALL(null);
+
+    private final State state;
+
+    Visibility(State state)
+    {
+        this.state = state;
+    }
+
+    public State getState()
+    {
+        return state;
+    }
 
     public static Visibility getElementType(String input)
     {

@@ -1,9 +1,10 @@
 name: vividus
-version: 0.2.8-SNAPSHOT
+version: 0.2.9-SNAPSHOT
 prerelease: false
 title: Vividus
 asciidoc:
   attributes:
+    release-version: 'false'
     source-language: asciidoc@
     xrefstyle: short@
     listing-caption: Example@
@@ -12,6 +13,7 @@ asciidoc:
     java-date-time-formatter-link: 'https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html[date-time format]'
 nav:
 - modules/ROOT/nav.adoc
-- modules/tests-development/nav.adoc
+- modules/commons/nav.adoc
 - modules/plugins/nav.adoc
 - modules/parameters/nav.adoc
+- modules/integrations/nav.adoc

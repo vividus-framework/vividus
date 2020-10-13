@@ -1,0 +1,62 @@
+{
+  "path": "",
+  "title": "",
+  "lifecycle": {
+    "keyword": "Lifecycle:",
+    "parameters": {
+      "names": [
+        "lifecycle-key-1",
+        "lifecycle-key-2"
+      ],
+      "values": [
+        [
+          "lifecycle-val-11",
+          "lifecycle-val-21"
+        ]
+      ]
+    }
+  },
+  "beforeStorySteps": [],
+  "scenarios": [
+    {
+      "keyword": "Scenario:",
+      "title": "Simple scenario [1]",
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "When I perform action"
+        ],
+        "parameters": {
+          "names": [
+            "scenario-key-1",
+            "scenario-key-2"
+          ],
+          "values": [
+            [
+              "scenario-val-11",
+              "scenario-val-21"
+            ]
+          ]
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "lifecycle-key-2": "lifecycle-val-21",
+              "lifecycle-key-1": "lifecycle-val-11",
+              "scenario-key-1": "scenario-val-11",
+              "scenario-key-2": "scenario-val-21"
+            },
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "When I perform action"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "afterStorySteps": []
+}
