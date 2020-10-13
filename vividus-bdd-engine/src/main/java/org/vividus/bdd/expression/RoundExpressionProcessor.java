@@ -38,8 +38,8 @@ public class RoundExpressionProcessor implements IExpressionProcessor
     {
         String roundingModes = Stream.of(RoundingMode.values()).map(e -> e.name().toLowerCase())
                 .collect(Collectors.joining("|"));
-        String pattern = String.format("^round(?:\\((-?\\d+(?:\\.\\d*)?[Ee]?-?\\+?\\d*)"
-                        + "(?:,\\s*(\\d+))?(?:,\\s*(%s))?\\))$", roundingModes);
+        String pattern = String.format("^round(?:\\((-?\\d+(?:\\.\\d*)?(?:[Ee]+-?\\d+)?)(?:,\\s*(\\d+))?"
+                + "(?:,\\s*(%s))?\\))$", roundingModes);
         ROUND_EXPRESSION_PATTERN = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
     }
 
