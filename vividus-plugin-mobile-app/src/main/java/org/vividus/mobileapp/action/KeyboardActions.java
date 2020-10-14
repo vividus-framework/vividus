@@ -59,7 +59,28 @@ public class KeyboardActions
      */
     public void typeText(WebElement element, String text)
     {
-        element.sendKeys(text);
+        performWithHideKeyboard(() -> element.sendKeys(text));
+    }
+
+    /**
+     * Clear the <b>element</b>'s text
+     * <br>
+     * The atomic actions performed are:
+     * <ol>
+     * <li>clear the element's text</li>
+     * <li>hide keyboard</li>
+     * </ol>
+     * @param element element to clear, must not be {@code null}
+     */
+    public void clearText(WebElement element)
+    {
+        performWithHideKeyboard(element::clear);
+    }
+
+    private void performWithHideKeyboard(Runnable runnable)
+    {
+        runnable.run();
+
         // https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
         if (genericWebDriverManager.isIOSNativeApp() && realDevice)
         {

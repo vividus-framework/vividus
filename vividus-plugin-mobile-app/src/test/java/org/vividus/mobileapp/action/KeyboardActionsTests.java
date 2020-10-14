@@ -109,6 +109,19 @@ class KeyboardActionsTests
         assertEquals("Unable to find 'Return' button to close the keyboard", exception.getMessage());
     }
 
+    @Test
+    void shouldClearText()
+    {
+        init(false);
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
+
+        keyboardActions.clearText(element);
+
+        verify(element).clear();
+        verify(hidesKeyboard).hideKeyboard();
+    }
+
     void init(boolean realDevice)
     {
         keyboardActions = new KeyboardActions(realDevice, touchActions, webDriverProvider,

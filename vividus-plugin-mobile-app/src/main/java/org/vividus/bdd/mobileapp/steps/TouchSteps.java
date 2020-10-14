@@ -102,6 +102,22 @@ public class TouchSteps
     }
 
     /**
+     * Clear a field located by the <b>locator</b>
+     * <br>
+     * The atomic actions performed are:
+     * <ol>
+     * <li>clear the field</li>
+     * <li>hide keyboard</li>
+     * </ol>
+     * @param locator locator to find a field
+     */
+    @When("I clear field located `$locator`")
+    public void clearTextInField(Locator locator)
+    {
+        baseValidations.assertElementExists("The element to clear", locator).ifPresent(keyboardActions::clearText);
+    }
+
+    /**
      * Swipes to element in <b>direction</b> direction with duration <b>duration</b>
      * @param direction direction to swipe, either <b>UP</b> or <b>DOWN</b>
      * @param locator locator to find an element

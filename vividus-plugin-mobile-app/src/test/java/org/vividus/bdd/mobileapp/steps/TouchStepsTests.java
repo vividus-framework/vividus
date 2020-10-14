@@ -115,6 +115,15 @@ class TouchStepsTests
     }
 
     @Test
+    void shouldClearTextInField()
+    {
+        WebElement element = mock(WebElement.class);
+        when(baseValidations.assertElementExists("The element to clear", locator)).thenReturn(Optional.of(element));
+        touchSteps.clearTextInField(locator);
+        verify(keyboardActions).clearText(element);
+    }
+
+    @Test
     void shouldSwipeToElement()
     {
         SearchParameters parameters = initSwipeMocks();

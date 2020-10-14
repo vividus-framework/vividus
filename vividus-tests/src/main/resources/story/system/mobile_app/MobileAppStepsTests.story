@@ -43,6 +43,11 @@ When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityI
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
+Scenario: Verify step: 'When I clear field located `$locator`'
+When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
+Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
+
+
 Scenario: Verify step: 'When I wait until element located `$locator` disappears'
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `xpath(<menuWaitXpath>)`
