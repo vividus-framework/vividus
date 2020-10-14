@@ -128,5 +128,8 @@
         <entry key="org.vividus.model.IntegerRange">
             <bean class="org.vividus.beans.IntegerRangePropertyEditor" />
         </entry>
+        <entry key="java.time.Duration">
+            <bean class="org.vividus.beans.DurationPropertyEditor" />
+        </entry>
     </util:map>
  </beans>
