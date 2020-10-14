@@ -321,6 +321,36 @@ Scenario: Type text
 When I type `Bob` in field located `accessibilityId(username)`
 ----
 
+=== Clear field
+
+==== *_Info_*
+
+Clears a field located by the locator.
+
+The atomic actions performed are:
+* clear the field
+* hide keyboard
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I clear field located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Keyboard.story
+[source,gherkin]
+----
+Scenario: Type text
+When I clear field located `accessibilityId(username)`
+----
+
 === Swipe to an element
 
 ==== *_Info_*
