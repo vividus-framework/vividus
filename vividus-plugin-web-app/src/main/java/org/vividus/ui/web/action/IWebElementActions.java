@@ -19,8 +19,9 @@ package org.vividus.ui.web.action;
 import java.util.List;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.ElementActions;
 
-public interface IWebElementActions
+public interface IWebElementActions extends ElementActions
 {
     /**
      * Gets css value and removes all occurrences of quotes and apostrophes
@@ -65,14 +66,6 @@ public interface IWebElementActions
      * or empty string if no content found
      */
     String getPageText();
-
-    /**
-     * Gets the text content from element
-     * @param element Any element to get text from
-     * @return the inner text from element
-     * or empty string if no content found
-     */
-    String getElementText(WebElement element);
 
     /**
      * Checks that the content of the element is editable
