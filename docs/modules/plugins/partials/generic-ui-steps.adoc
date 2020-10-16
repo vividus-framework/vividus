@@ -209,3 +209,57 @@ When I save `$attributeName` attribute value of element located `$locator` to $s
 Scenario: Save attribute value of element
 When I save `innerText` attribute value of element located `By.id(username)` to SCENARIO variable `username`
 ----
+
+=== Change context
+
+==== *_Info_*
+
+Changes the context to an element located by locator for limiting area of subsequent UI interactions
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I change context to element located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.ChangeContext.story
+[source,gherkin]
+----
+Scenario: Change context
+Then number of elements found by `By.xpath(html)` is equal to `1`
+When I change context to element located `By.xpath(//body)`
+Then number of elements found by `By.xpath(html)` is equal to `0`
+----
+
+=== Reset context
+
+==== *_Info_*
+
+Resets the context
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I reset context
+----
+
+==== *_Usage_*
+
+.ResetContext.story
+[source,gherkin]
+----
+Scenario: Reset context
+Then number of elements found by `By.xpath(html)` is equal to `1`
+When I change context to element located `By.xpath(//body)`
+Then number of elements found by `By.xpath(html)` is equal to `0`
+When I reset context
+Then number of elements found by `By.xpath(html)` is equal to `1`
+----

@@ -114,11 +114,13 @@
     <bean id="genericElementSteps" class="org.vividus.bdd.steps.ui.GenericElementSteps" />
     <bean id="genericWaitSteps" class="org.vividus.bdd.steps.ui.GenericWaitSteps" />
     <bean id="genericSetVariableSteps" class="org.vividus.bdd.steps.ui.GenericSetVariableSteps" />
+    <bean id="genericSetContextSteps" class="org.vividus.bdd.steps.ui.GenericSetContextSteps" />
 
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
         <idref bean="genericElementSteps" />
         <idref bean="genericWaitSteps" />
         <idref bean="genericSetVariableSteps" />
+        <idref bean="genericSetContextSteps" />
     </util:list>
 
     <util:map id="propertyEditors-UI" key-type="java.lang.Class">
