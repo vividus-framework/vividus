@@ -83,3 +83,17 @@ return [];
 When I switch to a frame number '1' with the attribute 'id'='parent'
 When I switch to a frame number '1' with the attribute 'id'='exampleCom'
 When I click on element located `By.xpath(//a)`
+
+
+Scenario: Verify step: "When I change context to the page" AND "When I change context to element located `$locator`"
+When I change context to element located `By.xpath(//body)`
+Then number of elements found by `By.xpath(html)` is equal to `0`
+When I change context to the page
+Then number of elements found by `By.xpath(html)` is equal to `1`
+
+
+Scenario: Verify step: "When I reset context"
+When I change context to element located `By.xpath(//body)`
+Then number of elements found by `By.xpath(html)` is equal to `0`
+When I reset context
+Then number of elements found by `By.xpath(html)` is equal to `1`

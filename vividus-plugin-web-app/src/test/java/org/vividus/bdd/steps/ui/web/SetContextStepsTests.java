@@ -112,13 +112,6 @@ class SetContextStepsTests
     @InjectMocks
     private SetContextSteps setContextSteps;
 
-    @Test
-    void testChangeContextToPage()
-    {
-        setContextSteps.changeContextToPage();
-        verify(uiContext).reset();
-    }
-
     private void verifyContextSetting(WebElement element)
     {
         verify(uiContext).reset();
@@ -150,17 +143,6 @@ class SetContextStepsTests
     {
         setContextSteps.changeContextToStateElementWithAttribute(State.ENABLED, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verifyContextSetting(null);
-    }
-
-    @Test
-    void testChangeContextToElement()
-    {
-        Locator locator = new Locator(WebLocatorType.XPATH,
-                LocatorUtil.getXPath(XPATH));
-        when(mockedBaseValidations.assertIfElementExists(
-                "Element to set context", locator)).thenReturn(mockedWebElement);
-        setContextSteps.changeContextToElement(locator);
-        verifyContextSetting(mockedWebElement);
     }
 
     @Test
