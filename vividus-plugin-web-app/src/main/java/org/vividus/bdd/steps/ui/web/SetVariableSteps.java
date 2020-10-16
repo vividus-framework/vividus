@@ -18,12 +18,8 @@ package org.vividus.bdd.steps.ui.web;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
-
-import javax.inject.Inject;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.SearchContext;
@@ -37,10 +33,8 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 import org.vividus.util.UriUtils;
@@ -48,18 +42,26 @@ import org.vividus.util.UriUtils;
 @TakeScreenshotOnFailure
 public class SetVariableSteps
 {
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private ISoftAssert softAssert;
+    private final IWebDriverProvider webDriverProvider;
+    private final ISoftAssert softAssert;
+    private final ISearchActions searchActions;
+    private final IBaseValidations baseValidations;
+    private final IBddVariableContext bddVariableContext;
+    private final IUiContext uiContext;
+    private final IJavascriptActions javascriptActions;
 
-    @Inject private ISearchActions searchActions;
-
-    @Inject private IBaseValidations baseValidations;
-
-    @Inject private IBddVariableContext bddVariableContext;
-
-    @Inject private IUiContext uiContext;
-    @Inject private IWebElementActions webElementActions;
-    @Inject private IJavascriptActions javascriptActions;
+    public SetVariableSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert, ISearchActions searchActions,
+            IBaseValidations baseValidations, IBddVariableContext bddVariableContext, IUiContext uiContext,
+            IJavascriptActions javascriptActions)
+    {
+        this.webDriverProvider = webDriverProvider;
+        this.softAssert = softAssert;
+        this.searchActions = searchActions;
+        this.baseValidations = baseValidations;
+        this.bddVariableContext = bddVariableContext;
+        this.uiContext = uiContext;
+        this.javascriptActions = javascriptActions;
+    }
 
     /**
      * Gets an expected <b>value</b> from the <b>URL</b>
@@ -283,55 +285,6 @@ public class SetVariableSteps
     }
 
     /**
-     * Extracts the <b>text</b> of element found by the specified <b>name</b> in the context
-     * and saves it into the <b>variable</b> with the specified <b>variable name</b>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Saves the text of element into the <i>variable name</i>
-     * </ul>
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A name under which the value should be saved
-     */
-    @When("I set the text found in search context to the '$scopes' variable '$variableName'")
-    public void
-            getTextOfContentToVariable(Set<VariableScope> scopes, String variableName)
-    {
-        saveVariableIfContextElementPresent(webElementActions::getElementText, scopes, variableName);
-    }
-
-    /**
-     * Extracts the value of <b>attribute</b> of element found in the context and saves it
-     * to the <b>variable</b> with the specified <b>variable name</b>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Saves the value of attribute with name <i>attributeName</i> to the <i>variableName</i>
-     * </ul>
-     * @param attributeName the name of the attribute (for ex. 'name', 'id')
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A name under which the value should be saved
-     */
-    @When("I set '$attributeName' attribute value of the context element to the '$scopes' variable '$variableName'")
-    public void setAttributeValueToVariable(String attributeName, Set<VariableScope> scopes, String variableName)
-    {
-        saveVariableIfContextElementPresent(contextElement -> getAssertedAttributeValue(contextElement, attributeName),
-                scopes, variableName);
-    }
-
-    /**
      * Performs passed javascript code on the opened page
      * and saves returned value into the <b>variable</b>
      * <p>
@@ -411,51 +364,12 @@ public class SetVariableSteps
         bddVariableContext.putVariable(scopes, variableName, table);
     }
 
-    /**
-     * Extracts the value of <b>attribute</b> of element found by <b>locator</b> and saves it
-     * to the <b>variable</b> with the specified <b>variable name</b>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Saves the value of attribute with name <i>attributeName</i> to the <i>variableName</i>
-     * </ul>
-     * @param attributeName the name of the attribute (for ex. 'name', 'id')
-     * @param locator to search for elements
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A name under which the value should be saved
-     */
-    @When("I set '$attributeName' attribute value of the element by $locator to the $scopes variable '$variableName'")
-    public void setAttributeValueBySelectorToVariable(String attributeName, Locator locator,
-            Set<VariableScope> scopes, String variableName)
-    {
-        locator.getSearchParameters().setVisibility(Visibility.ALL);
-        Optional.ofNullable(baseValidations
-                .assertIfElementExists("The element to extract the attribute", locator))
-                .map(element -> getAssertedAttributeValue(element, attributeName))
-                .ifPresent(attributeValue -> bddVariableContext.putVariable(scopes, variableName, attributeValue));
-    }
-
     private List<WebElement> getVideoIFrames(int leastNumber)
     {
         Locator locator = new Locator(WebLocatorType.XPATH,
                 LocatorUtil.getXPath("div[contains(@class,'video')]/iframe"));
         return baseValidations.assertIfAtLeastNumberOfElementsExist("The number of found video frames", locator,
                 leastNumber);
-    }
-
-    private void saveVariableIfContextElementPresent(Function<WebElement, Object> contextElementProcessor,
-            Set<VariableScope> scopes, String variableName)
-    {
-        Object value = Optional.ofNullable(getSearchContext())
-                .map(context -> uiContext.getSearchContext(WebElement.class)).map(contextElementProcessor)
-                .orElse(null);
-        saveVariable(scopes, variableName, value);
     }
 
     private void saveSrcAttributeValueToVariable(WebElement element, Set<VariableScope> scopes, String variableName)

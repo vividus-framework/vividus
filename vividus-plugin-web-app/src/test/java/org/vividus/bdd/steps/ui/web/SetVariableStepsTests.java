@@ -45,8 +45,6 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.IWebElementActions;
@@ -69,12 +67,10 @@ class SetVariableStepsTests
     private static final String NUMBER_BY_XPATH = "numberByXpath";
     private static final Locator VIDEO_IFRAME_SEARCH = new Locator(WebLocatorType.XPATH,
             LocatorUtil.getXPath("div[contains(@class,'video')]/iframe"));
-    private static final String TEXT = "text";
     private static final String VARIABLE_NAME = "variableName";
     private static final String XPATH = "xpath";
     private static final String SRC = "src";
     private static final String NUMBER_FOUND_VIDEO_MESSAGE = "The number of found video frames";
-    private static final String THE_ELEMENT_TO_EXTRACT_THE_ATTRIBUTE = "The element to extract the attribute";
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -269,40 +265,6 @@ class SetVariableStepsTests
     }
 
     @Test
-    void testGetTextOfContentToVariable()
-    {
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        WebElement webElement = mock(WebElement.class);
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
-        when(webElementActions.getElementText(webElement)).thenReturn(TEXT);
-        setVariableSteps.getTextOfContentToVariable(VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, TEXT);
-    }
-
-    @Test
-    void testGetTextOfContentToVariableNoContext()
-    {
-        when(uiContext.getSearchContext()).thenReturn(null);
-        setVariableSteps.getTextOfContentToVariable(VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, null);
-    }
-
-    @Test
-    void testSetAttributeValueToVariable()
-    {
-        WebElement webElement = mock(WebElement.class);
-        when(uiContext.getSearchContext()).thenReturn(webElement);
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
-        String attributeName = "attribute";
-        String attributeValue = TEXT;
-        when(webElement.getAttribute(attributeName)).thenReturn(attributeValue);
-        when(softAssert.assertNotNull("The '" + attributeName + "' attribute value was found", attributeValue))
-                .thenReturn(Boolean.TRUE);
-        setVariableSteps.setAttributeValueToVariable(attributeName, VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, attributeValue);
-    }
-
-    @Test
     void testGettingValueFromJS()
     {
         when(javascriptActions.executeScript(JS_CODE)).thenReturn(VALUE);
@@ -370,21 +332,5 @@ class SetVariableStepsTests
                 .thenReturn(listOfTables);
         setVariableSteps.saveTableToContext(VARIABLE_SCOPE, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, listOfTables);
-    }
-
-    @Test
-    void testSetAttributeValueBySelectorToVariable()
-    {
-        Locator locator = mock(Locator.class);
-        SearchParameters searchParameters = mock(SearchParameters.class);
-        WebElement webElement = mock(WebElement.class);
-        when(baseValidations.assertIfElementExists(THE_ELEMENT_TO_EXTRACT_THE_ATTRIBUTE,
-                locator)).thenReturn(webElement);
-        when(locator.getSearchParameters()).thenReturn(searchParameters);
-        when(searchParameters.setVisibility(Visibility.ALL)).thenReturn(searchParameters);
-        when(webElement.getAttribute(NAME)).thenReturn(VALUE);
-        setVariableSteps.setAttributeValueBySelectorToVariable(NAME, locator,
-                VARIABLE_SCOPE, NAME);
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, NAME, VALUE);
     }
 }

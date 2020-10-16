@@ -1,0 +1,10 @@
+Composite: When I set the text found in search context to the '$scopes' variable '$variableName'
+When I save text of context element to <scopes> variable `<variableName>`
+
+
+Composite: When I set '$attributeName' attribute value of the context element to the '$scopes' variable '$variableName'
+When I save `<attributeName>` attribute value of context element to <scopes> variable `<variableName>`
+
+
+Composite: When I set '$attributeName' attribute value of the element by $locator to the $scopes variable '$variableName'
+When I save `<attributeName>` attribute value of element located `<locator>` to <scopes> variable `<variableName>`

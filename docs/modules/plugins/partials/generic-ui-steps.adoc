@@ -117,3 +117,95 @@ When I wait until element located `$locator` disappears
 Scenario: Wait for element disappearance
 When I wait until element located `name(welcome-image)` disappears
 ----
+
+=== Save text of context element
+
+==== *_Info_*
+
+Saves text of a context element into a variable
+
+[WARNING]
+Step will throw an error if the context element is not set
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I save text of context element to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - name of a variable
+
+==== *_Usage_*
+
+.SaveText.story
+[source,gherkin]
+----
+Scenario: Save text of context element
+When I change context to element located `By.id(username)`
+When I save text of context element to SCENARIO variable `username`
+----
+
+=== Save attribute value of context element
+
+==== *_Info_*
+
+Saves attribute value of a context element into a variable
+
+[WARNING]
+Step will throw an error if the context element is not set
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I save `$attributeName` attribute value of context element to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$attributeName` - name of an element's attribute
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - name of a variable
+
+==== *_Usage_*
+
+.SaveAttributeValue.story
+[source,gherkin]
+----
+Scenario: Save attribute value of context element
+When I change context to element located `By.id(username)`
+When I save `innerText` attribute value of context element to SCENARIO variable `username`
+----
+
+=== Save attribute value of element
+
+==== *_Info_*
+
+Saves attribute value of an element located by locator into a variable
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I save `$attributeName` attribute value of element located `$locator` to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$attributeName` - name of an element's attribute
+. `$locator` - <<_locator>>
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - name of a variable
+
+==== *_Usage_*
+
+.SaveAttributeValue.story
+[source,gherkin]
+----
+Scenario: Save attribute value of element
+When I save `innerText` attribute value of element located `By.id(username)` to SCENARIO variable `username`
+----
