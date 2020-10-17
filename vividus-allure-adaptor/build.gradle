@@ -9,6 +9,7 @@ dependencies {
     implementation(group: 'io.qameta.allure', name: 'allure-java-commons', version: versions.allure)
     implementation(group: 'io.qameta.allure', name: 'allure-generator', version: versions.allure)
     implementation(group: 'io.qameta.allure', name: 'allure-plugin-api', version: versions.allure)
+    implementation(group: 'io.qameta.allure.plugins', name: 'behaviors-plugin', version: versions.allure)
 
     implementation(group: 'org.springframework', name: 'spring-core', version: versions.spring)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
