@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
-    implementation(group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.875')
+    implementation(group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.882')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
