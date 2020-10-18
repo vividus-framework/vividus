@@ -27,6 +27,7 @@ import java.util.Set;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -96,22 +97,22 @@ public class S3BucketSteps
     }
 
     /**
-     * Get CSV <b>file</b> from S3 given bucket by the <b>objectKey</b> and
-     * save it to <b>scope</b> variable with name <b>variableName</b>
-     * <br>
+     * Retrieve the CSV object by key from the provided S3 bucket and save it to <b>scopes</b> variable with name
+     * <b>variableName</b>.<br>
      * Usage example:
-     * <code><br>When I fetch CSV object with key `file.csv` from S3 bucket `myTestBucket`
-     *  and save result to SCENARIO variable `csvFileFromS3`</code>
-     * @param objectKey Key on which the content is placed in S3 bucket
-     * @param bucketName S3 bucket to get the file
-     * @param scopes The scopes of the variable
-     * (<i>Possible values:</i>
+     * <code><br>When I fetch CSV object with key `file.csv` from S3 bucket `myTestBucket` and save result to scenario
+     *  variable `csv-from-s3`</code>
+     * @param objectKey The key under which the desired object is stored
+     * @param bucketName The name of the bucket containing the desired object
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variables scopes<br>
+     * <i>Available scopes:</i>
      * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
      * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
      * <li><b>STORY</b> - the variable will be available within the whole story,
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
-     * @param variableName variable name
+     * @param variableName the variable name
      * @throws IOException in case of IO error during returned file processing
      */
     @When("I fetch CSV object with key `$objectKey` from S3 bucket `$bucketName` "
@@ -119,11 +120,45 @@ public class S3BucketSteps
     public void fetchCsvObject(String objectKey, String bucketName, Set<VariableScope> scopes, String variableName)
             throws IOException
     {
-        String csvString = IOUtils.toString(
-                amazonS3Client.getObject(bucketName, StringUtils.appendIfMissing(objectKey, ".csv")).getObjectContent(),
-                StandardCharsets.UTF_8);
+        String csvString = fetchObject(bucketName, StringUtils.appendIfMissing(objectKey, ".csv"));
         List<Map<String, String>> csv = new CsvReader().readCsvString(csvString);
         bddVariableContext.putVariable(scopes, variableName, csv);
+    }
+
+    /**
+     * Retrieve the object by key from the provided S3 bucket and save its content to <b>scopes</b> variables with name
+     * <b>variableName</b>.<br>
+     * Usage example:
+     * <code><br>When I fetch object with key `file.json` from S3 bucket `myTestBucket` and save result to scenario
+     *  variable `json-from-s3`</code>
+     * @param objectKey The key under which the desired object is stored
+     * @param bucketName The name of the bucket containing the desired object
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variables scopes<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName the variable name
+     * @throws IOException in case of IO error during returned file processing
+     */
+    @When("I fetch object with key `$objectKey` from S3 bucket `$bucketName` and save result to $scopes variable"
+            + " `$variableName`")
+    public void fetchObject(String objectKey, String bucketName, Set<VariableScope> scopes, String variableName)
+            throws IOException
+    {
+        String content = fetchObject(bucketName, objectKey);
+        bddVariableContext.putVariable(scopes, variableName, content);
+    }
+
+    private String fetchObject(String bucketName, String key) throws IOException
+    {
+        try (S3ObjectInputStream objectContent = amazonS3Client.getObject(bucketName, key).getObjectContent())
+        {
+            return IOUtils.toString(objectContent, StandardCharsets.UTF_8);
+        }
     }
 
     /**

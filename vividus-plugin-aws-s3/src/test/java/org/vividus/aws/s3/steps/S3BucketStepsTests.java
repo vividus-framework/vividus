@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -51,17 +52,12 @@ class S3BucketStepsTests
     private static final String S3_BUCKET_NAME = "bucketName";
     private static final String S3_OBJECT_KEY = "objectKey";
 
-    @Mock
-    private AmazonS3Client amazonS3Client;
-
-    @Mock
-    private IBddVariableContext bddVariableContext;
-
-    @InjectMocks
-    private S3BucketSteps steps;
+    @Mock private AmazonS3Client amazonS3Client;
+    @Mock private IBddVariableContext bddVariableContext;
+    @InjectMocks private S3BucketSteps steps;
 
     @Test
-    void uploadResourceTest()
+    void shouldUploadResource()
     {
         byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
         steps.uploadResource(CSV_FILE_PATH, S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME);
@@ -69,7 +65,7 @@ class S3BucketStepsTests
     }
 
     @Test
-    void uploadFileTest() throws IOException
+    void shouldUploadFile() throws IOException
     {
         byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
         steps.uploadFile(ResourceUtils.loadFile(getClass(), CSV_FILE_PATH),
@@ -95,25 +91,43 @@ class S3BucketStepsTests
     }
 
     @Test
-    void fetchCsvFileTest() throws IOException
+    void shouldFetchCsvObject() throws IOException
     {
-        String objectKey = S3_OBJECT_KEY + ".csv";
         byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
 
-        S3Object s3Object = mock(S3Object.class);
-        S3ObjectInputStream s3ObjectInputStream = new S3ObjectInputStream(new ByteArrayInputStream(csv), null);
-        when(s3Object.getObjectContent()).thenReturn(s3ObjectInputStream);
-        when(amazonS3Client.getObject(S3_BUCKET_NAME, objectKey)).thenReturn(s3Object);
+        mockGetObject(S3_OBJECT_KEY + ".csv", csv);
 
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        String variableName = "varName";
-        steps.fetchCsvObject(objectKey, S3_BUCKET_NAME, scopes, variableName);
-        verify(amazonS3Client).getObject(S3_BUCKET_NAME, objectKey);
+        String variableName = "csvVar";
+        steps.fetchCsvObject(S3_OBJECT_KEY, S3_BUCKET_NAME, scopes, variableName);
         verify(bddVariableContext).putVariable(scopes, variableName, List.of(Map.of("id", "1")));
     }
 
     @Test
-    void deleteFileTest()
+    void shouldFetchObject() throws IOException
+    {
+        String objectKey = S3_OBJECT_KEY + ".json";
+        String data = "data";
+
+        mockGetObject(objectKey, data.getBytes(StandardCharsets.UTF_8));
+
+        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
+        String variableName = "jsonVar";
+        steps.fetchObject(objectKey, S3_BUCKET_NAME, scopes, variableName);
+        verify(amazonS3Client).getObject(S3_BUCKET_NAME, objectKey);
+        verify(bddVariableContext).putVariable(scopes, variableName, data);
+    }
+
+    private void mockGetObject(String objectKey, byte[] data)
+    {
+        S3ObjectInputStream s3ObjectInputStream = new S3ObjectInputStream(new ByteArrayInputStream(data), null);
+        S3Object s3Object = mock(S3Object.class);
+        when(s3Object.getObjectContent()).thenReturn(s3ObjectInputStream);
+        when(amazonS3Client.getObject(S3_BUCKET_NAME, objectKey)).thenReturn(s3Object);
+    }
+
+    @Test
+    void shouldDeleteObject()
     {
         steps.deleteObject(S3_OBJECT_KEY, S3_BUCKET_NAME);
         verify(amazonS3Client).deleteObject(S3_BUCKET_NAME, S3_OBJECT_KEY);
