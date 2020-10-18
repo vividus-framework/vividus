@@ -16,7 +16,9 @@
                     <bean class="com.saucelabs.saucerest.SauceREST">
                         <constructor-arg index="0" value="${selenium.grid.username}" />
                         <constructor-arg index="1" value="${selenium.grid.password}" />
-                        <constructor-arg index="2" value="${saucelabs.data-center}" />
+
+                        <!-- Workaround for: https://github.com/saucelabs/saucerest-java/pull/127 -->
+                        <constructor-arg index="2" value="#{'${saucelabs.data-center}'.toUpperCase()}" />
                     </bean>
                 </property>
             </bean>
