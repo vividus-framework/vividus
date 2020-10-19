@@ -24,3 +24,26 @@ The plugin will search for credentials using https://docs.aws.amazon.com/sdk-for
 . In the _instance profile credentials_, which exist within the instance metadata associated with the IAM role for the EC2 instance. This step is available only when running your application on an Amazon EC2 instance, but provides the greatest ease of use and best security when working with Amazon EC2 instances.
 
 See the official https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html#credentials-default["Working with AWS Credentials"] guide to get more details.
+
+== Steps
+
+=== Download S3 object
+
+Retrieve the object by key from the provided S3 bucket and save its content to a variable. The specified bucket and object key must exist, or an error will result.
+
+
+[source,gherkin]
+----
+When I fetch object with key `$objectKey` from S3 bucket `$bucketName` and save result to $scopes variable `$variableName`
+----
+
+- `$objectKey` - the key under which the desired object is stored
+- `$bucketName` - the name of the bucket containing the desired object
+- `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes]
+- `$variableName` - the variable name
+
+.Download S3 object
+[source,gherkin]
+----
+When I fetch object with key `/path/file.json` from S3 bucket `some-bucket-name` and save result to scenario variable `my-json-var`
+----
