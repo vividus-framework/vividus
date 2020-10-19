@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.report.allure.adapter;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,6 +47,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -59,9 +61,17 @@ import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.PropertyMapper;
 
+import io.qameta.allure.Aggregator;
 import io.qameta.allure.Constants;
 import io.qameta.allure.ReportGenerator;
+import io.qameta.allure.behaviors.BehaviorsPlugin;
+import io.qameta.allure.core.Configuration;
+import io.qameta.allure.core.Plugin;
+import io.qameta.allure.duration.DurationTrendPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
+import io.qameta.allure.executor.ExecutorPlugin;
+import io.qameta.allure.history.HistoryTrendPlugin;
+import io.qameta.allure.summary.SummaryPlugin;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.xml.*")
@@ -167,8 +177,7 @@ public class AllureReportGeneratorTests
         allureReportGenerator.setHistoryDirectory(historyDirectory);
         File reportDirectory = testFolder.getRoot();
         allureReportGenerator.setReportDirectory(reportDirectory);
-        ReportGenerator reportGenerator = PowerMockito.mock(ReportGenerator.class);
-        PowerMockito.whenNew(ReportGenerator.class).withAnyArguments().thenReturn(reportGenerator);
+        ReportGenerator reportGenerator = mockReportGenerator();
         PowerMockito.mockStatic(FileUtils.class);
         PowerMockito.doAnswer(a ->
         {
@@ -236,6 +245,25 @@ public class AllureReportGeneratorTests
                         + "\"matchedStatuses\":[\"unknown\"]}"
                         + "]",
                 Files.readString(resultsDirectory.toPath().resolve("categories.json")));
+    }
+
+    private ReportGenerator mockReportGenerator() throws Exception
+    {
+        ReportGenerator reportGenerator = PowerMockito.mock(ReportGenerator.class);
+        PowerMockito.whenNew(ReportGenerator.class).withArguments(argThat((ArgumentMatcher<Configuration>) config -> {
+            List<Plugin> plugins = config.getPlugins();
+
+            List<Class<? extends Aggregator>> aggregators = List.of(
+                    SummaryPlugin.class,
+                    HistoryTrendPlugin.class,
+                    DurationTrendPlugin.class,
+                    ExecutorPlugin.class
+            );
+            return config.getAggregators().stream().map(Object::getClass).collect(toList()).containsAll(aggregators)
+                    && plugins.size() == 1
+                    && BehaviorsPlugin.class.equals(plugins.get(0).getExtensions().get(0).getClass());
+        })).thenReturn(reportGenerator);
+        return reportGenerator;
     }
 
     private Resource mockResource(String asString) throws IOException
