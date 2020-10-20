@@ -17,6 +17,7 @@
 package org.vividus.visual.eyes.logger;
 
 import com.applitools.eyes.NullLogHandler;
+import com.applitools.eyes.logging.TraceLevel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +32,24 @@ public class EyesLogHandler extends NullLogHandler
     }
 
     @Override
-    public void onMessage(boolean verbose, String logString)
+    public void onMessage(TraceLevel level, String message)
     {
-        if (verbose)
+        TraceLevel actualLevel = level == null ? TraceLevel.Notice : level;
+        switch (actualLevel)
         {
-            logger.debug(logString);
-        }
-        else
-        {
-            logger.info(logString);
+            case Debug:
+                logger.debug(message);
+                break;
+            case Warn:
+                logger.warn(message);
+                break;
+            case Error:
+                logger.error(message);
+                break;
+            case Info:
+            case Notice:
+            default:
+                logger.info(message);
         }
     }
 }
