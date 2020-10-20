@@ -186,6 +186,50 @@ jobs:
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs integration tests will be skipped
         fi
 
+    - name: SauceLabs - Tablet - Web - System tests
+      if: matrix.platform == 'ubuntu-latest'
+      env:
+        SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
+        SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
+          declare -a profiles=( ipad )
+          for profile in "${profiles[@]}"; do
+            ./gradlew runStories -x testVividusInitialization \
+                                 -Pvividus.configuration.environments=system/saucelabs \
+                                 -Pvividus.configuration.suite=grid \
+                                 -Pvividus.bdd.all-meta-filters=groovy:!skip \
+                                 -Pvividus.configuration.profiles=saucelabs/web,web/tablet/${profile} \
+                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
+          done
+        else
+            echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
+        fi
+
+    - name: SauceLabs - Phone - Web - System tests
+      if: matrix.platform == 'ubuntu-latest'
+      env:
+        SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
+        SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
+          declare -a profiles=( iphone )
+          for profile in "${profiles[@]}"; do
+            ./gradlew runStories -x testVividusInitialization \
+                                 -Pvividus.configuration.environments=system/saucelabs \
+                                 -Pvividus.configuration.suite=grid \
+                                 -Pvividus.bdd.all-meta-filters=groovy:!skip \
+                                 -Pvividus.configuration.profiles=saucelabs/web,web/phone/${profile} \
+                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
+          done
+        else
+            echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
+        fi
+
     - name: SauceLabs - iOS - Mobile App - Run system tests
       if: matrix.platform == 'ubuntu-latest'
       env:

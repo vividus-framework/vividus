@@ -42,4 +42,11 @@ class CapabilitiesValueTypeAdjusterTests
         String value = "value";
         assertEquals(value, CapabilitiesValueTypeAdjuster.adjustType(value));
     }
+
+    @Test
+    void testAdjustTypeAsInt()
+    {
+        String value = "20";
+        assertEquals(20, CapabilitiesValueTypeAdjuster.adjustType(value));
+    }
 }

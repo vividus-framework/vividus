@@ -182,9 +182,9 @@ class ControllingMetaTagTests
                 prefix + acceptInsecureCerts, "true"
         ));
         ControllingMetaTag.CAPABILITY.setCapability(desiredCapabilities, metaWrapper);
-        verify(desiredCapabilities).setCapability(APPIUM_VERSION, (Object) VERSION_NUMBER);
+        verify(desiredCapabilities).setCapability(APPIUM_VERSION, Integer.parseInt(VERSION_NUMBER));
         verify(desiredCapabilities).setCapability(acceptInsecureCerts, (Object) true);
-        verify(desiredCapabilities).setCapability(VERSION, (Object) VERSION_NUMBER);
+        verify(desiredCapabilities).setCapability(VERSION, Integer.parseInt(VERSION_NUMBER));
         verifyNoMoreInteractions(desiredCapabilities, metaWrapper);
     }
 }

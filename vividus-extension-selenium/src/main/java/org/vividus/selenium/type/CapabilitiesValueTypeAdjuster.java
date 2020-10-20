@@ -26,6 +26,14 @@ public final class CapabilitiesValueTypeAdjuster
 
     public static Object adjustType(String value)
     {
-        return StringUtils.equalsAnyIgnoreCase(value, "true", "false") ? Boolean.parseBoolean(value) : value;
+        if (StringUtils.equalsAnyIgnoreCase(value, "true", "false"))
+        {
+            return Boolean.parseBoolean(value);
+        }
+        else if (StringUtils.isNumeric(value))
+        {
+            return Integer.parseInt(value);
+        }
+        return value;
     }
 }
