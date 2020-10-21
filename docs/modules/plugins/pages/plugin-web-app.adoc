@@ -170,6 +170,10 @@ element xref:parameters:state.adoc[State]
 |Description
 
 include::partial$selenium-properties.adoc[]
+|screenshot.on-failure.debug-modes
+|proxy
+|empty
+|Provides possibility to attach screenshot for failed proxy steps
 |===
 
 === Meta Tags

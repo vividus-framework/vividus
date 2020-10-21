@@ -52,6 +52,9 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -68,6 +71,7 @@ import org.vividus.softassert.event.AssertionFailedEvent;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AbstractScreenshotOnFailureMonitorTests
 {
+    private static final String INNER_WHEN_MODE_STEP = "innerWhenModeStep";
     private static final String I_DO_ACTION = "I do action";
     private static final String WHEN_STEP_METHOD = "whenStep";
     private static final Meta EMPTY_META = new Meta();
@@ -195,6 +199,45 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
+    void shouldTakeScreenshotOfAssertedElementsWithDebugMode() throws NoSuchMethodException
+    {
+        mockScenarioAndStoryMeta(EMPTY_META);
+        monitor.setDebugModes(Arrays.asList("mode", "ui"));
+        monitor.beforePerforming(I_DO_ACTION, false, TestWithModeSteps.class.getDeclaredMethod(INNER_WHEN_MODE_STEP));
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+        TestScreenshotOnFailureMonitor spy = spy(monitor);
+        doReturn(Optional.empty()).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
+        spy.onAssertionFailure(mock(AssertionFailedEvent.class));
+        assertThat(logger.getLoggingEvents(), empty());
+    }
+
+    static Stream<Arguments> debugMode()
+    {
+        return Stream.of(Arguments.of(Arrays.asList("another")), null);
+    }
+
+    @ParameterizedTest
+    @MethodSource("debugMode")
+    void shouldNotTakeScreenshotOfAssertedElementsWithDebugModeMethod(List<String> mode) throws NoSuchMethodException
+    {
+        monitor.setDebugModes(mode);
+        monitor.beforePerforming(I_DO_ACTION, false, getClass().getDeclaredMethod("whenDebugStep"));
+        monitor.onAssertionFailure(null);
+        verifyNoInteractions(webDriverProvider);
+    }
+
+    @Test
+    void shouldTakeScreenshotOfAssertedElementsWithoutDebugModeInAnnotation() throws NoSuchMethodException
+    {
+        monitor.setDebugModes(Arrays.asList("anymode"));
+        enableScreenshotPublishing(true);
+        TestScreenshotOnFailureMonitor spy = spy(monitor);
+        doReturn(Optional.empty()).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
+        spy.onAssertionFailure(mock(AssertionFailedEvent.class));
+        assertThat(logger.getLoggingEvents(), empty());
+    }
+
+    @Test
     void shouldLogErrorIfScreenshotTakingIsFailed() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
@@ -245,11 +288,28 @@ class AbstractScreenshotOnFailureMonitorTests
         // nothing to do
     }
 
+    @TakeScreenshotOnFailure(onlyInDebugMode = "mode")
+    @When(I_DO_ACTION)
+    void whenDebugStep()
+    {
+        // nothing to do
+    }
+
     @TakeScreenshotOnFailure
     static class TestSteps
     {
         @When(I_DO_ACTION)
         void innerWhenStep()
+        {
+            // nothing to do
+        }
+    }
+
+    @TakeScreenshotOnFailure(onlyInDebugMode = "mode")
+    static class TestWithModeSteps
+    {
+        @When(I_DO_ACTION)
+        void innerWhenModeStep()
         {
             // nothing to do
         }
