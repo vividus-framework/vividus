@@ -16,11 +16,18 @@
 
 package org.vividus.bdd.steps.ui;
 
+import java.time.Duration;
+
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.IWaitActions;
+import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 
@@ -30,13 +37,15 @@ public class GenericWaitSteps
     private final IWaitActions waitActions;
     private final IUiContext uiContext;
     private final IExpectedConditions<Locator> expectedSearchActionsConditions;
+    private final ISoftAssert softAssert;
 
     public GenericWaitSteps(IWaitActions waitActions, IUiContext uiContext,
-            IExpectedConditions<Locator> expectedSearchActionsConditions)
+            IExpectedConditions<Locator> expectedSearchActionsConditions, ISoftAssert softAssert)
     {
         this.waitActions = waitActions;
         this.uiContext = uiContext;
         this.expectedSearchActionsConditions = expectedSearchActionsConditions;
+        this.softAssert = softAssert;
     }
 
     /**
@@ -57,6 +66,44 @@ public class GenericWaitSteps
     public void waitForElementDisappearance(Locator locator)
     {
         waitForCondition(expectedSearchActionsConditions.invisibilityOfElement(locator));
+    }
+
+    /**
+     * Checks that element located by <b>locator</b> exists during the <b>duration</b>
+     * @param locator locator to find an element
+     * @param duration total waiting time according to <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>
+     * standard
+     */
+    @Then("element located `$locator` exists for `$duration` duration")
+    public void doesElementByLocatorExistsForDuration(Locator locator, Duration duration)
+    {
+        String prettyDuration = formatDuration(duration);
+
+        WaitResult<Boolean> result = waitActions.wait(uiContext.getSearchContext(), duration,
+                expectedSearchActionsConditions
+                        .not(expectedSearchActionsConditions.presenceOfAllElementsLocatedBy(locator)), false);
+
+        String assertionMessage = String.format("Element located by locator %s has existed for %s",
+                locator.toHumanReadableString(), prettyDuration);
+        softAssert.assertFalse(assertionMessage, result.isWaitPassed());
+    }
+
+    private String formatDuration(Duration duration)
+    {
+        StringBuilder durationBuilder = new StringBuilder();
+        appendIf(duration.toMinutesPart() != 0, "m' minutes' ", durationBuilder);
+        appendIf(duration.toSecondsPart() != 0, "s' seconds' ", durationBuilder);
+        appendIf(duration.toMillisPart() != 0, "S' millis'", durationBuilder);
+        Validate.isTrue(durationBuilder.length() > 0, "Unable to convert duration %s", duration);
+        return DurationFormatUtils.formatDuration(duration.toMillis(), durationBuilder.toString().strip());
+    }
+
+    private static void appendIf(boolean outcome, String value, StringBuilder builder)
+    {
+        if (outcome)
+        {
+            builder.append(value);
+        }
     }
 
     private void waitForCondition(IExpectedSearchContextCondition<?> condition)

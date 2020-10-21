@@ -263,3 +263,30 @@ Then number of elements found by `By.xpath(html)` is equal to `0`
 When I reset context
 Then number of elements found by `By.xpath(html)` is equal to `1`
 ----
+
+=== Element exists for duration
+
+==== *_Info_*
+
+Verifies that an element located by locator exists for given duration
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then element located `$locator` exists for `$duration` duration
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$duration` - duration in {iso-date-format-link} format
+
+==== *_Usage_*
+
+.ElementExistence.story
+[source,gherkin]
+----
+Scenario: Element should exists for 5 second
+Then element located 'id(banner)' exists for 'PT5S' duration
+----
