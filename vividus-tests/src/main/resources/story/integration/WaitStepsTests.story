@@ -63,3 +63,7 @@ Then number of elements found by `id(element-to-hide)` is equal to `1`
 When I click on element located `id(button-hide)`
 When I wait until element located `id(element-to-hide)` disappears
 Then number of elements found by `id(element-to-hide)` is equal to `0`
+
+Scenario: Verify step: 'Then element located `$locator` exists for `$duration` duration'
+Then element located `id(button-hide)` exists for `PT1S` duration
+Then number of elements found by `id(button-hide)` is equal to `1`

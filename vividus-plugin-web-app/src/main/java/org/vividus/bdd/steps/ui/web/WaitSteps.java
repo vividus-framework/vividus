@@ -338,9 +338,11 @@ public class WaitSteps
 
     /**
      * Checks that element exists during the timeout
+     * @deprecated Use <code>Then element located `$locator` exists for `$duration` duration</code>
      * @param seconds timeout in seconds
      * @param xpath XPath value of the element
      */
+    @Deprecated(forRemoval = true, since = "0.2.9")
     @Then("the element with the xpath '$xpath' exists for '$seconds' seconds")
     public void doesElementExistsForTimePeriod(String xpath, long seconds)
     {

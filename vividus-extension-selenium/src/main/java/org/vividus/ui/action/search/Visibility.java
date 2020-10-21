@@ -22,20 +22,27 @@ import org.vividus.ui.State;
 
 public enum Visibility
 {
-    VISIBLE(State.VISIBLE),
-    INVISIBLE(State.NOT_VISIBLE),
-    ALL(null);
+    VISIBLE(State.VISIBLE, "visible"),
+    INVISIBLE(State.NOT_VISIBLE, "invisible"),
+    ALL(null, "visible or invisible");
 
     private final State state;
+    private final String description;
 
-    Visibility(State state)
+    Visibility(State state, String description)
     {
         this.state = state;
+        this.description = description;
     }
 
     public State getState()
     {
         return state;
+    }
+
+    public String getDescription()
+    {
+        return description;
     }
 
     public static Visibility getElementType(String input)
