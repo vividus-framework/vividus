@@ -25,3 +25,6 @@ Then a JSON element from '
 ]
 '
 IGNORING_ARRAY_ORDER
+
+Scenario: Known issue should be detected and matched by step pattern with composite step
+When I use composite step in known-issues

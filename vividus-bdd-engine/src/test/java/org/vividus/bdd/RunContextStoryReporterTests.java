@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
@@ -99,7 +100,7 @@ class RunContextStoryReporterTests
         String step = "step";
         RunningStory runningStory = mockGetRunningStory();
         runContextStoryReporter.beforeStep(step);
-        assertEquals(step, runningStory.getRunningStep());
+        assertEquals(step, runningStory.removeRunningStep());
         verify(next).beforeStep(step);
     }
 
@@ -108,8 +109,9 @@ class RunContextStoryReporterTests
     {
         String step = "successful";
         RunningStory runningStory = mockGetRunningStory();
+        runContextStoryReporter.beforeStep(step);
         runContextStoryReporter.successful(step);
-        assertNull(runningStory.getRunningStep());
+        assertEquals(List.of(), runningStory.getRunningSteps());
         verify(next).successful(step);
     }
 
@@ -119,49 +121,10 @@ class RunContextStoryReporterTests
         String step = "failed";
         Throwable cause = mock(Throwable.class);
         RunningStory runningStory = mockGetRunningStory();
+        runContextStoryReporter.beforeStep(step);
         runContextStoryReporter.failed(step, cause);
-        assertNull(runningStory.getRunningStep());
+        assertEquals(List.of(), runningStory.getRunningSteps());
         verify(next).failed(step, cause);
-    }
-
-    @Test
-    void testIgnorable()
-    {
-        String step = "ignorable";
-        RunningStory runningStory = mockGetRunningStory();
-        runContextStoryReporter.ignorable(step);
-        assertNull(runningStory.getRunningStep());
-        verify(next).ignorable(step);
-    }
-
-    @Test
-    void testComment()
-    {
-        String step = "comment";
-        RunningStory runningStory = mockGetRunningStory();
-        runContextStoryReporter.comment(step);
-        assertNull(runningStory.getRunningStep());
-        verify(next).comment(step);
-    }
-
-    @Test
-    void testPending()
-    {
-        String step = "pending";
-        RunningStory runningStory = mockGetRunningStory();
-        runContextStoryReporter.pending(step);
-        assertNull(runningStory.getRunningStep());
-        verify(next).pending(step);
-    }
-
-    @Test
-    void testNotPerformed()
-    {
-        String step = "notPerformed";
-        RunningStory runningStory = mockGetRunningStory();
-        runContextStoryReporter.notPerformed(step);
-        assertNull(runningStory.getRunningStep());
-        verify(next).notPerformed(step);
     }
 
     @Test

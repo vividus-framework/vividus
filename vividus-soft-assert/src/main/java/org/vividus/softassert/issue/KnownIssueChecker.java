@@ -142,8 +142,11 @@ public class KnownIssueChecker implements IKnownIssueChecker
             return testInfo != null && (
                     isPotentiallyKnown(testInfo.getTestSuite(), knownIssueIdentifier.getTestSuiteCompiledPattern())
                             || isPotentiallyKnown(testInfo.getTestCase(),
-                            knownIssueIdentifier.getTestCaseCompiledPattern()) || isPotentiallyKnown(
-                            testInfo.getTestStep(), knownIssueIdentifier.getTestStepCompiledPattern()));
+                            knownIssueIdentifier.getTestCaseCompiledPattern())
+                            || !testInfo.getTestSteps()
+                                    .stream()
+                                    .anyMatch(s ->
+                                        !isPotentiallyKnown(s, knownIssueIdentifier.getTestStepCompiledPattern())));
         }
 
         boolean isPotentiallyKnown(String testInfo, Pattern pattern)
