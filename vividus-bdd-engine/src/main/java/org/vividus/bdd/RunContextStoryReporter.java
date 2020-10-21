@@ -67,7 +67,7 @@ public class RunContextStoryReporter extends ChainedStoryReporter
     @Override
     public void beforeStep(String step)
     {
-        bddRunContext.getRunningStory().setRunningStep(step);
+        bddRunContext.getRunningStory().putRunningStep(step);
         super.beforeStep(step);
     }
 
@@ -75,7 +75,7 @@ public class RunContextStoryReporter extends ChainedStoryReporter
     public void successful(String step)
     {
         super.successful(step);
-        finishStep();
+        bddRunContext.getRunningStory().removeRunningStep();
     }
 
     @Override
@@ -83,35 +83,7 @@ public class RunContextStoryReporter extends ChainedStoryReporter
     {
         super.failed(step, cause);
         bddRunContext.getRunningStory().fail();
-        finishStep();
-    }
-
-    @Override
-    public void ignorable(String step)
-    {
-        super.ignorable(step);
-        finishStep();
-    }
-
-    @Override
-    public void comment(String step)
-    {
-        super.comment(step);
-        finishStep();
-    }
-
-    @Override
-    public void pending(String step)
-    {
-        super.pending(step);
-        finishStep();
-    }
-
-    @Override
-    public void notPerformed(String step)
-    {
-        super.notPerformed(step);
-        finishStep();
+        bddRunContext.getRunningStory().removeRunningStep();
     }
 
     @Override
@@ -135,10 +107,5 @@ public class RunContextStoryReporter extends ChainedStoryReporter
     public void dryRun()
     {
         bddRunContext.setDryRun(true);
-    }
-
-    private void finishStep()
-    {
-        bddRunContext.getRunningStory().setRunningStep(null);
     }
 }

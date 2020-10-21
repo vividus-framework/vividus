@@ -16,11 +16,13 @@
 
 package org.vividus.softassert.issue;
 
+import java.util.Deque;
+
 public class TestInfo
 {
     private String testSuite;
     private String testCase;
-    private String testStep;
+    private Deque<String> testSteps;
 
     public String getTestSuite()
     {
@@ -42,13 +44,13 @@ public class TestInfo
         this.testCase = testCase;
     }
 
-    public String getTestStep()
+    public Deque<String> getTestSteps()
     {
-        return testStep;
+        return testSteps;
     }
 
-    public void setTestStep(String testStep)
+    public void setTestSteps(Deque<String> testSteps)
     {
-        this.testStep = testStep;
+        this.testSteps = testSteps;
     }
 }
