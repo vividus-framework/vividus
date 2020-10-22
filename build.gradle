@@ -85,7 +85,6 @@ ext {
         spring:                 '5.2.9.RELEASE',
         tika:                   '1.24.1',
         junit:                  '5.7.0',
-        junit4Dataprovider:     '2.6',
         mockito:                '3.3.3',
         mockitoWithStatic:      '3.5.7',
         powermock:              '2.0.7',

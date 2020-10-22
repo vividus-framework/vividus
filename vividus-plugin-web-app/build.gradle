@@ -39,7 +39,7 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
     testCompileOnly(group: 'junit', name: 'junit', version: versions.junit4)
-    testImplementation(group: 'com.tngtech.junit.dataprovider', name: 'junit4-dataprovider', version: versions.junit4Dataprovider)
+    testImplementation(group: 'com.tngtech.junit.dataprovider', name: 'junit4-dataprovider', version: '2.6')
     testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
