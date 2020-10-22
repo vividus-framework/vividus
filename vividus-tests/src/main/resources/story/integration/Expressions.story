@@ -36,9 +36,6 @@ Examples:
 |true    |eval(`string\n1` == `string\n1`)                                  |
 |false   |eval(`string\n1` == `string1`)                                    |
 
-
-
-
 Scenario: Verify eval has an access to a variable context
 Meta:
     @requirementId 696
@@ -53,3 +50,11 @@ Examples:
 |2       |eval(someVar = 1; someVar + someVar)|1         |
 |VALUE   |eval(someVar.toUpperCase())         |value     |
 |123     |eval(someVar.replaceAll('\D', ''))  |va1lu2e3  |
+
+Scenario: Verify groovy expression
+When I initialize Scenario variable `listOfMaps` with values:
+|key|
+|2  |
+|1  |
+|3  |
+Then `1-2-3` is = `#{evalGroovy(return listOfMaps.collect{it['key']}.sort().join('-'))}`
