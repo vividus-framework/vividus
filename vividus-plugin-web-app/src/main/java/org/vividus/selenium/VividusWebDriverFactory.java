@@ -28,27 +28,21 @@ import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.proxy.IProxy;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 
 public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
 {
     private final IWebDriverFactory webDriverFactory;
-    private final IWebDriverManager webDriverManager;
-    private final IBrowserWindowSizeProvider browserWindowSizeProvider;
     private final IProxy proxy;
 
     private List<WebDriverEventListener> webDriverEventListeners;
 
     public VividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
             IBddRunContext bddRunContext, Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers,
-            IWebDriverFactory webDriverFactory, IWebDriverManager webDriverManager,
-            IBrowserWindowSizeProvider browserWindowSizeProvider, IProxy proxy)
+            IWebDriverFactory webDriverFactory, IProxy proxy)
     {
         super(remoteExecution, webDriverManagerContext, bddRunContext, desiredCapabilitiesConfigurers);
         this.webDriverFactory = webDriverFactory;
-        this.browserWindowSizeProvider = browserWindowSizeProvider;
-        this.webDriverManager = webDriverManager;
         this.proxy = proxy;
     }
 
@@ -72,8 +66,6 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
 
         EventFiringWebDriver eventFiringWebDriver = new EventFiringWebDriver(webDriver);
         webDriverEventListeners.forEach(eventFiringWebDriver::register);
-
-        webDriverManager.resize(webDriver, browserWindowSizeProvider.getBrowserWindowSize(isRemoteExecution()));
         return eventFiringWebDriver;
     }
 
