@@ -165,7 +165,7 @@ jobs:
       shell: bash
       run: |
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge )
+          declare -a profiles=( iexplore chrome firefox edge safari )
           for profile in "${profiles[@]}"; do
             ./gradlew runStories -x testVividusInitialization \
                                  -Pvividus.configuration.environments=system/saucelabs \
@@ -266,7 +266,7 @@ jobs:
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge )
+          declare -a profiles=( iexplore chrome firefox edge safari )
           for profile in "${profiles[@]}"; do
             ./gradlew runStories -x testVividusInitialization \
                                  -Pvividus.configuration.suite=grid \
