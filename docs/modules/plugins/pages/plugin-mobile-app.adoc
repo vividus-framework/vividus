@@ -13,13 +13,13 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version:
 
 include::partial$locator-header.adoc[]
 
-=== Types
+=== Locator Types
 :locator-strategy: https://appium.io/docs/en/commands/element/find-elements/index.html#selector-strategies
 
 [cols="1,1,2,2", options="header"]
 |===
 
-|Locator type
+|Type
 |Platform
 |Description
 |Examples
