@@ -121,6 +121,8 @@
     <bean id="genericSetVariableSteps" class="org.vividus.bdd.steps.ui.GenericSetVariableSteps" />
     <bean id="genericSetContextSteps" class="org.vividus.bdd.steps.ui.GenericSetContextSteps" />
 
+    <bean class="org.vividus.ui.action.search.IndexElementFilter" />
+
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
         <idref bean="genericElementSteps" />
         <idref bean="genericWaitSteps" />

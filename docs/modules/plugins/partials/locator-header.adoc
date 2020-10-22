@@ -20,3 +20,19 @@ By. prefix is optional.
 . `visibility` - *[optional]* visibility of element (visible by default)
 . `filterType` - *[optional]* type of the filter
 . `filterValue` - *[required if filter type defined]* value of the filter
+
+
+=== Filter Types
+
+[cols="1,1,2,2", options="header"]
+|===
+
+|Type
+|Description
+|Examples
+
+|index
+|Get an element by the specified index from a collection of elements found by a locator. Indexes start from 1.
+|tagName(div)->filter.index(2)
+
+|===

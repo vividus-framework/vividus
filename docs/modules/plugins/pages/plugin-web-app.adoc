@@ -14,12 +14,12 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '{
 
 include::partial$locator-header.adoc[]
 
-=== Types
+=== Locator Types
 
 [cols="1,2,1", options="header"]
 |===
 
-|Locator type
+|Type
 |Description
 |Example
 
