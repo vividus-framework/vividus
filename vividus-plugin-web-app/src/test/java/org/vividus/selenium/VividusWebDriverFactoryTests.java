@@ -46,7 +46,6 @@ import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.proxy.IProxy;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
@@ -60,8 +59,6 @@ class VividusWebDriverFactoryTests
     @Mock private IBddRunContext bddRunContext;
     @Mock private IWebDriverManagerContext webDriverManagerContext;
     @Mock private IWebDriverFactory webDriverFactory;
-    @Mock private IBrowserWindowSizeProvider browserWindowSizeProvider;
-    @Mock private IWebDriverManager webDriverManager;
     @Mock private WebDriverEventListener webDriverEventListener;
     @Mock private IProxy proxy;
     private VividusWebDriverFactory vividusWebDriverFactory;
@@ -73,30 +70,26 @@ class VividusWebDriverFactoryTests
     public void beforeEach()
     {
         vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverManagerContext, bddRunContext,
-                Optional.empty(), webDriverFactory, webDriverManager, browserWindowSizeProvider, proxy);
+                Optional.empty(), webDriverFactory, proxy);
     }
 
-    private void runCreateTest(boolean remoteExecution, String browserName) throws Exception
+    private void runCreateTest(boolean remoteExecution, String browserName)
     {
-        runCreateTest(remoteExecution, browserName, createRunningStory(browserName));
+        runCreateTest(remoteExecution, createRunningStory(browserName));
     }
 
-    private void runCreateTest(boolean remoteExecution, String browserName, RunningStory runningStory) throws Exception
+    private void runCreateTest(boolean remoteExecution, RunningStory runningStory)
     {
         List<WebDriverEventListener> eventListeners = List.of(webDriverEventListener);
         vividusWebDriverFactory.setWebDriverEventListeners(eventListeners);
 
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
-        BrowserWindowSize windowSize = new BrowserWindowSize("1920x1080");
-        when(browserWindowSizeProvider.getBrowserWindowSize(remoteExecution))
-                .thenReturn(windowSize);
         VividusWebDriver vividusWebDriver = vividusWebDriverFactory.create();
         WebDriver eventFiringDriver = vividusWebDriver.getWrappedDriver();
         assertEquals(driver, ((WrapsDriver) eventFiringDriver).getWrappedDriver());
         assertEquals(eventListeners, Whitebox.getInternalState(eventFiringDriver, "eventListeners"));
         assertEquals(remoteExecution, vividusWebDriver.isRemote());
         verify(webDriverManagerContext).reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
-        verify(webDriverManager).resize(driver, windowSize);
     }
 
     private static RunningStory createRunningStory(String browserName)
@@ -121,30 +114,30 @@ class VividusWebDriverFactoryTests
     }
 
     @Test
-    void testCreateWebDriverRemoteWithProxy() throws Exception
+    void testCreateWebDriverRemoteWithProxy()
     {
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
-        runCreateTest(true, null);
+        runCreateTest(true, (String) null);
     }
 
     @Test
-    void testCreateWebDriverRemoteNoProxy() throws Exception
+    void testCreateWebDriverRemoteNoProxy()
     {
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
-        runCreateTest(true, null);
+        runCreateTest(true, (String) null);
     }
 
     @Test
-    void testCreateWebDriverNoRunningScenario() throws Exception
+    void testCreateWebDriverNoRunningScenario()
     {
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         RunningStory runningStory = new RunningStory();
         runningStory.setStory(new Story(STORY_FILE, null, new Meta(), null, null));
-        runCreateTest(true, null, runningStory);
+        runCreateTest(true, runningStory);
     }
 
     @Test
-    void testCreateWebDriverLocalWithProxy() throws Exception
+    void testCreateWebDriverLocalWithProxy()
     {
         notRemoteExecution();
         when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
@@ -157,7 +150,7 @@ class VividusWebDriverFactoryTests
     }
 
     @Test
-    void testCreateWebDriverLocalNoProxy() throws Exception
+    void testCreateWebDriverLocalNoProxy()
     {
         notRemoteExecution();
         when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
