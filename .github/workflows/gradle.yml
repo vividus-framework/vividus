@@ -269,11 +269,13 @@ jobs:
           declare -a profiles=( iexplore chrome firefox edge )
           for profile in "${profiles[@]}"; do
             ./gradlew runStories -x testVividusInitialization \
-                                 -Pvividus.configuration.environments=grid \
                                  -Pvividus.configuration.suite=grid \
                                  -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \
                                  -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
-                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY}
+                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
+                                 -Pvividus.selenium.grid.capabilities.bstack\:options.projectName=Vividus \
+                                 -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="Vividus BrowserStack Integration Tests"
+
           done
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY, Browserstack integration tests will be skipped
