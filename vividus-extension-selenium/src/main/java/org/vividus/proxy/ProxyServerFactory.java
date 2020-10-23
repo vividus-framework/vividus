@@ -18,7 +18,6 @@ package org.vividus.proxy;
 
 import java.util.Set;
 
-import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.BrowserUpProxyServer;
 import com.browserup.bup.proxy.CaptureType;
 import com.browserup.bup.proxy.dns.AdvancedHostResolver;
@@ -38,7 +37,7 @@ public class ProxyServerFactory implements IProxyServerFactory
     private Set<CaptureType> captureTypes;
 
     @Override
-    public BrowserUpProxy createProxyServer()
+    public BrowserUpProxyServer createProxyServer()
     {
         BrowserUpProxyServer proxyServer = new BrowserUpProxyServer();
         proxyServer.setHostNameResolver(advancedHostResolver);
