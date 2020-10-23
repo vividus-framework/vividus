@@ -26,10 +26,8 @@ public class ProxyFactory implements IProxyFactory
     }
 
     @Override
-    public IProxy createProxy()
+    public Proxy createProxy()
     {
-        Proxy proxy = new Proxy();
-        proxy.setProxyServerFactory(proxyServerFactory);
-        return proxy;
+        return new Proxy(proxyServerFactory);
     }
 }

@@ -22,11 +22,10 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.filters.RequestFilter;
+import com.browserup.harreader.model.Har;
 
 import org.apache.commons.lang3.Validate;
-import org.openqa.selenium.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.model.IntegerRange;
@@ -38,7 +37,7 @@ public class ThreadedProxy implements IProxy
     private final InetAddress proxyHost;
     private final Queue<Integer> proxyPorts;
     private final boolean useEphemeralPort;
-    private final ThreadLocal<IProxy> proxy;
+    private final ThreadLocal<Proxy> proxy;
 
     public ThreadedProxy(String proxyHost, IntegerRange proxyPorts, IProxyFactory proxyFactory)
             throws UnknownHostException
@@ -80,15 +79,15 @@ public class ThreadedProxy implements IProxy
     }
 
     @Override
-    public void start(int port, InetAddress address)
-    {
-        proxy().start(port, address);
-    }
-
-    @Override
     public void startRecording()
     {
         proxy().startRecording();
+    }
+
+    @Override
+    public void clearRecordedData()
+    {
+        proxy().clearRecordedData();
     }
 
     @Override
@@ -130,15 +129,9 @@ public class ThreadedProxy implements IProxy
     }
 
     @Override
-    public BrowserUpProxy getProxyServer()
+    public Har getRecordedData()
     {
-        return proxy().getProxyServer();
-    }
-
-    @Override
-    public ProxyLog getLog()
-    {
-        return proxy().getLog();
+        return proxy().getRecordedData();
     }
 
     @Override
@@ -154,7 +147,7 @@ public class ThreadedProxy implements IProxy
     }
 
     @Override
-    public Proxy createSeleniumProxy()
+    public org.openqa.selenium.Proxy createSeleniumProxy()
     {
         return proxy().createSeleniumProxy();
     }
@@ -164,7 +157,7 @@ public class ThreadedProxy implements IProxy
         LOGGER.atInfo().addArgument(proxyPorts::toString).log("Available ports for proxies in the pool: {}");
     }
 
-    private IProxy proxy()
+    private Proxy proxy()
     {
         return proxy.get();
     }

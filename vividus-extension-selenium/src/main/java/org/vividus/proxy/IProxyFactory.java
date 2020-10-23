@@ -18,5 +18,5 @@ package org.vividus.proxy;
 
 public interface IProxyFactory
 {
-    IProxy createProxy();
+    Proxy createProxy();
 }

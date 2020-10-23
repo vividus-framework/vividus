@@ -16,12 +16,12 @@
 
 package org.vividus.proxy.steps;
 
-import java.io.ByteArrayOutputStream;
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.browserup.harreader.model.Har;
 import com.browserup.harreader.model.HarEntry;
 import com.browserup.harreader.model.HarPostData;
 import com.browserup.harreader.model.HarPostDataParam;
@@ -49,7 +48,6 @@ import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.proxy.IProxy;
-import org.vividus.proxy.ProxyLog;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWebWaitActions;
@@ -68,15 +66,13 @@ public class ProxySteps
     @Inject private IBddVariableContext bddVariableContext;
     @Inject private IWebWaitActions waitActions;
 
-    private final ThreadLocal<Optional<ProxyLog>> externalProxyLog = ThreadLocal.withInitial(Optional::empty);
-
     /**
      * Clears the proxy log
      */
     @When("I clear proxy log")
     public void clearProxyLog()
     {
-        proxy.getLog().clear();
+        proxy.clearRecordedData();
     }
 
     /**
@@ -102,18 +98,10 @@ public class ProxySteps
     public List<HarEntry> checkNumberOfRequests(HttpMethod httpMethod, Pattern urlPattern,
             ComparisonRule comparisonRule, long number) throws IOException
     {
-        List<HarEntry> harEntries = getHarEntries(httpMethod, urlPattern);
+        List<HarEntry> harEntries = getLogEntries(httpMethod, urlPattern);
         assertSize(String.format("Number of HTTP %s requests matching URL pattern '%s'", httpMethod, urlPattern),
                 harEntries, comparisonRule, number);
         return harEntries;
-    }
-
-    private List<HarEntry> getHarEntries(HttpMethod httpMethod, Pattern urlPattern)
-    {
-        return getProxyLog().getLogEntries(httpMethod, urlPattern)
-                .stream()
-                .filter(h -> h.getResponse().getStatus() != HttpStatus.SC_MOVED_TEMPORARILY)
-                .collect(Collectors.toList());
     }
 
     /**
@@ -146,7 +134,8 @@ public class ProxySteps
     public void captureRequestAndSaveURLQuery(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
-        saveHarEntryFieldInTheScope(httpMethod, urlPattern, scopes, variableName, this::getQueryParameters);
+        saveHarEntryFieldInTheScope(httpMethod, urlPattern, scopes, variableName,
+                harEntry -> getQueryParameters(harEntry.getRequest()));
     }
 
     /**
@@ -179,18 +168,8 @@ public class ProxySteps
     public void captureRequestAndSaveURL(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
-        saveHarEntryFieldInTheScope(httpMethod, urlPattern, scopes, variableName, HarRequest::getUrl);
-    }
-
-    private void saveHarEntryFieldInTheScope(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
-            String variableName, Function<HarRequest, Object> valueExtractor) throws IOException
-    {
-        List<HarEntry> harEntries = checkNumberOfRequests(httpMethod, urlPattern, ComparisonRule.EQUAL_TO, 1);
-        if (harEntries.size() == 1)
-        {
-            HarEntry harEntry = harEntries.get(0);
-            bddVariableContext.putVariable(scopes, variableName, valueExtractor.apply(harEntry.getRequest()));
-        }
+        saveHarEntryFieldInTheScope(httpMethod, urlPattern, scopes, variableName,
+                harEntry -> harEntry.getRequest().getUrl());
     }
 
     /**
@@ -223,20 +202,30 @@ public class ProxySteps
     public void captureRequestAndSaveRequestData(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
+        saveHarEntryFieldInTheScope(httpMethod, urlPattern, scopes, variableName, this::extractFullRequestData);
+    }
+
+    private void saveHarEntryFieldInTheScope(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
+            String variableName, Function<HarEntry, Object> valueExtractor) throws IOException
+    {
         List<HarEntry> harEntries = checkNumberOfRequests(httpMethod, urlPattern, ComparisonRule.EQUAL_TO, 1);
         if (harEntries.size() == 1)
         {
             HarEntry harEntry = harEntries.get(0);
-            HarRequest request = harEntry.getRequest();
-            HarPostData postData = request.getPostData();
-            Map<String, Object> requestData = Map.of(
-                    "query", getQueryParameters(request),
-                    "requestBody", getRequestBody(postData),
-                    "requestBodyParameters", getRequestBodyParameters(postData),
-                    "responseStatus", harEntry.getResponse().getStatus()
-            );
-            bddVariableContext.putVariable(scopes, variableName, requestData);
+            bddVariableContext.putVariable(scopes, variableName, valueExtractor.apply(harEntry));
         }
+    }
+
+    private Map<String, Object> extractFullRequestData(HarEntry harEntry)
+    {
+        HarRequest request = harEntry.getRequest();
+        HarPostData postData = request.getPostData();
+        return Map.of(
+                "query", getQueryParameters(request),
+                "requestBody", getRequestBody(postData),
+                "requestBodyParameters", getRequestBodyParameters(postData),
+                "responseStatus", harEntry.getResponse().getStatus()
+        );
     }
 
     private Map<String, String> getRequestBody(HarPostData postData)
@@ -273,8 +262,7 @@ public class ProxySteps
             @Override
             public Boolean apply(Pattern urlPattern)
             {
-                List<HarEntry> entries = getHarEntries(httpMethod, urlPattern);
-                return !entries.isEmpty();
+                return !getLogEntries(httpMethod, urlPattern).isEmpty();
             }
 
             @Override
@@ -311,30 +299,29 @@ public class ProxySteps
         });
     }
 
-    private boolean assertSize(String assertionDescription, Collection<?> collection, ComparisonRule comparisonRule,
+    private void assertSize(String assertionDescription, Collection<?> collection, ComparisonRule comparisonRule,
             long expectedSize) throws IOException
     {
-        boolean assertionPassed = softAssert.assertThat(assertionDescription, (long) collection.size(),
-                comparisonRule.getComparisonRule(expectedSize));
-        if (!assertionPassed)
+        if (!softAssert.assertThat(assertionDescription, (long) collection.size(),
+                comparisonRule.getComparisonRule(expectedSize)))
         {
             publishHar();
         }
-        return assertionPassed;
     }
 
     private void publishHar() throws IOException
     {
-        Har har = proxy.getProxyServer().getHar();
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream())
-        {
-            OBJECT_MAPPER.writeValue(byteArrayOutputStream, har);
-            attachmentPublisher.publishAttachment(byteArrayOutputStream.toByteArray(), "har.har");
-        }
+        byte[] harBytes = OBJECT_MAPPER.writeValueAsBytes(proxy.getRecordedData());
+        attachmentPublisher.publishAttachment(harBytes, "har.har");
     }
 
-    private ProxyLog getProxyLog()
+    private List<HarEntry> getLogEntries(HttpMethod httpMethod, Pattern urlPattern)
     {
-        return externalProxyLog.get().orElse(proxy.getLog());
+        return proxy.getRecordedData().getLog()
+                .findEntries(urlPattern)
+                .stream()
+                .filter(entry -> entry.getResponse().getStatus() != HttpStatus.SC_MOVED_TEMPORARILY
+                        && httpMethod.equals(entry.getRequest().getMethod()))
+                .collect(toList());
     }
 }

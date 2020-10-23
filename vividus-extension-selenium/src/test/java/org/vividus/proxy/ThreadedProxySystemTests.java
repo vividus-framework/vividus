@@ -62,8 +62,8 @@ class ThreadedProxySystemTests
         ThreadedProxy threadedProxy = new ThreadedProxy(host, range, proxyFactory);
 
         ExecutorService executor = Executors.newFixedThreadPool(3);
-        Map<String, IProxy> localProxies = mockLocalProxy(3);
-        Supplier<IProxy> proxyGetter = () -> localProxies.get(Thread.currentThread().getName());
+        Map<String, Proxy> localProxies = mockLocalProxy(3);
+        Supplier<Proxy> proxyGetter = () -> localProxies.get(Thread.currentThread().getName());
         when(proxyFactory.createProxy()).thenAnswer(inv -> proxyGetter.get());
 
         int tasksCount = 50;
@@ -72,7 +72,7 @@ class ThreadedProxySystemTests
         {
             try
             {
-                IProxy localProxy = proxyGetter.get();
+                Proxy localProxy = proxyGetter.get();
                 BrowserUpProxy mobProxy = mock(BrowserUpProxy.class);
                 ArgumentCaptor<Integer> portCapturer = ArgumentCaptor.forClass(Integer.class);
 
@@ -100,7 +100,7 @@ class ThreadedProxySystemTests
         }
     }
 
-    private Map<String, IProxy> mockLocalProxy(int numberOfThreads)
+    private Map<String, Proxy> mockLocalProxy(int numberOfThreads)
     {
         String defaultThreadPrefix = "pool-1-thread-";
         return IntStream.range(0, numberOfThreads)
@@ -108,6 +108,6 @@ class ThreadedProxySystemTests
             .boxed()
             .map(String::valueOf)
             .map(defaultThreadPrefix::concat)
-            .collect(Collectors.toMap(Function.identity(), tn -> mock(IProxy.class)));
+            .collect(Collectors.toMap(Function.identity(), tn -> mock(Proxy.class)));
     }
 }

@@ -16,10 +16,8 @@
 
 package org.vividus.proxy;
 
-import java.net.InetAddress;
-
-import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.filters.RequestFilter;
+import com.browserup.harreader.model.Har;
 
 import org.openqa.selenium.Proxy;
 
@@ -27,19 +25,22 @@ public interface IProxy
 {
     void start();
 
-    void start(int port, InetAddress address);
-
     void startRecording();
+
+    /**
+     * Retrieves the current HAR.
+     *
+     * @return current HAR, or null if proxy recording was not enabled
+     */
+    Har getRecordedData();
+
+    void clearRecordedData();
 
     void stopRecording();
 
     void stop();
 
     boolean isStarted();
-
-    BrowserUpProxy getProxyServer();
-
-    ProxyLog getLog();
 
     void addRequestFilter(RequestFilter requestFilter);
 

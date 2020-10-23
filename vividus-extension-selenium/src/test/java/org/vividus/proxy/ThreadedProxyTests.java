@@ -39,6 +39,8 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -65,7 +67,7 @@ class ThreadedProxyTests
     }
 
     @Mock
-    private IProxy proxy;
+    private Proxy proxy;
 
     @Mock
     private IProxyFactory proxyFactory;
@@ -93,7 +95,6 @@ class ThreadedProxyTests
         threadedProxy.stop();
 
         order.verify(proxy).start(port, INET_ADDR);
-        order.verify(proxy).getProxyServer();
         order.verify(proxy).stop();
         order.verifyNoMoreInteractions();
 
@@ -132,13 +133,14 @@ class ThreadedProxyTests
         assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
     }
 
-    @Test
-    void testAllocateIllegalPortsNumbers()
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 65_536})
+    void testAllocateIllegalPortsNumbers(int invalidPort)
     {
-        IntegerRange proxyPorts = range(-1);
+        IntegerRange proxyPorts = range(invalidPort);
         Exception exception = assertThrows(IllegalArgumentException.class,
             () -> new ThreadedProxy(LOCALHOST, proxyPorts, proxyFactory));
-        assertEquals("Expected ports range is 1-65535 but got: -1", exception.getMessage());
+        assertEquals("Expected ports range is 1-65535 but got: " + invalidPort, exception.getMessage());
         assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
     }
 
@@ -168,14 +170,6 @@ class ThreadedProxyTests
     }
 
     @Test
-    void testStartOnPort() throws UnknownHostException
-    {
-        threadedProxy = new ThreadedProxy(LOCALHOST, range(1), proxyFactory);
-        threadedProxy.start(1, INET_ADDR);
-        verify(proxy).start(1, INET_ADDR);
-    }
-
-    @Test
     void testStopRecording() throws UnknownHostException
     {
         defaultInit();
@@ -189,6 +183,14 @@ class ThreadedProxyTests
         defaultInit();
         threadedProxy.startRecording();
         verify(proxy).startRecording();
+    }
+
+    @Test
+    void testClearRecordedData() throws UnknownHostException
+    {
+        defaultInit();
+        threadedProxy.clearRecordedData();
+        verify(proxy).clearRecordedData();
     }
 
     @Test
@@ -208,19 +210,11 @@ class ThreadedProxyTests
     }
 
     @Test
-    void testGetProxyServer() throws UnknownHostException
+    void testGetHar() throws UnknownHostException
     {
         defaultInit();
-        threadedProxy.getProxyServer();
-        verify(proxy).getProxyServer();
-    }
-
-    @Test
-    void testGetLog() throws UnknownHostException
-    {
-        defaultInit();
-        threadedProxy.getLog();
-        verify(proxy).getLog();
+        threadedProxy.getRecordedData();
+        verify(proxy).getRecordedData();
     }
 
     @Test
