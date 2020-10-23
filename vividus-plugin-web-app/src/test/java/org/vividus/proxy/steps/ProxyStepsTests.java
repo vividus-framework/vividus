@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,9 +123,9 @@ class ProxyStepsTests
         mockHar(httpMethod, HttpStatus.SC_OK);
         long callsNumber = 1;
         ComparisonRule rule = ComparisonRule.EQUAL_TO;
-        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
+        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, "GET, POST", URL);
         mockSizeAssertion(message, callsNumber, rule, callsNumber);
-        proxySteps.checkNumberOfRequests(httpMethod, URL_PATTERN, rule, callsNumber);
+        proxySteps.checkNumberOfRequests(EnumSet.of(httpMethod, HttpMethod.GET), URL_PATTERN, rule, callsNumber);
         verifySizeAssertion(message, callsNumber, rule, callsNumber);
         verifyNoInteractions(attachmentPublisher);
     }
@@ -140,7 +141,8 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         byte[] data = mockHar(httpMethodInHar, statusCode);
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
-        proxySteps.captureRequestAndSaveURL(httpMethod, URL_PATTERN, Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, Set.of(VariableScope.SCENARIO),
+                VARIABLE_NAME);
         verifySizeAssertion(message, 0, ComparisonRule.EQUAL_TO, 1);
         verify(attachmentPublisher).publishAttachment(data, "har.har");
         verifyNoInteractions(bddVariableContext);
@@ -153,7 +155,7 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         mockHar(httpMethod, HttpStatus.SC_OK);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
-        proxySteps.captureRequestAndSaveURLQuery(httpMethod, URL_PATTERN, variableScopes, VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveURLQuery(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value -> {
             Map<String, String> map = (Map<String, String>) value;
             return map.size() == 2 && map.containsKey(KEY1) && VALUE1.equals(map.get(KEY1)) && map.containsKey(KEY2)
@@ -167,7 +169,7 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         mockHar(httpMethod, HttpStatus.SC_OK);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
-        proxySteps.captureRequestAndSaveURL(httpMethod, URL_PATTERN, variableScopes, VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(variableScopes, VARIABLE_NAME, URL);
     }
 
@@ -179,7 +181,7 @@ class ProxyStepsTests
         int statusCode = HttpStatus.SC_OK;
         mockHar(httpMethod, statusCode);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
-        proxySteps.captureRequestAndSaveRequestData(httpMethod, URL_PATTERN, variableScopes, VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveRequestData(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value -> {
             Map<String, Object> map = (Map<String, Object>) value;
             Map<String, String> urlQuery = (Map<String, String>) map.get("query");
@@ -205,7 +207,7 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         ProxySteps spy = spy(proxySteps);
         Mockito.lenient().doReturn(List.of(mock(HarEntry.class), mock(HarEntry.class))).when(spy).checkNumberOfRequests(
-                httpMethod, URL_PATTERN, ComparisonRule.EQUAL_TO, 1);
+                EnumSet.of(httpMethod), URL_PATTERN, ComparisonRule.EQUAL_TO, 1);
         verifyNoInteractions(bddVariableContext);
     }
 
@@ -217,10 +219,20 @@ class ProxyStepsTests
     void testWaitRequestInProxyLog(HttpMethod actualHttpMethod, boolean waitSuccessful) throws IOException
     {
         mockHar(actualHttpMethod, HttpStatus.SC_OK);
-        proxySteps.waitRequestInProxyLog(HttpMethod.POST, URL_PATTERN);
+        proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST), URL_PATTERN);
         verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
                 "waiting for HTTP POST request with URL pattern www.test.com".equals(e.toString())
                         && e.apply(URL_PATTERN) == waitSuccessful));
+    }
+
+    @Test
+    void testWaitAnyOfRequestInProxyLog() throws IOException
+    {
+        mockHar(HttpMethod.PUT, HttpStatus.SC_OK);
+        proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST, HttpMethod.PUT), URL_PATTERN);
+        verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
+                "waiting for HTTP POST or PUT request with URL pattern www.test.com".equals(e.toString())
+                        && e.apply(URL_PATTERN)));
     }
 
     @Test

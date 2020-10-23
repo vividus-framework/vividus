@@ -1,5 +1,6 @@
 = Web Application Plugin
-:proxy: This step requires proxy to be turned on. It can be done via setting properties or switching on @proxy metatag.
+:proxy: This step requires proxy to be turned on: it can be done by setting the corresponding properties or by switching on @proxy meta tag at story level.
+:har-attached: In case of failure the full HTTP archive (HAR) is attached to the report.
 
 The plugin provides functionality to interact with Web applications.
 
@@ -178,87 +179,20 @@ include::partial$selenium-properties.adoc[]
 
 === Meta Tags
 
-@proxy - Some steps requires proxy to be turned on. It can be done via setting properties or switching on @proxy metatag.
+`@proxy` - some steps require proxy to be turned on: it can be done by setting the corresponding properties or by switching on this meta tag at story level.
+
 
 == Steps
 
-=== Clear proxy log
-
-==== *_Info_*
-
-Clears the proxy log
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I clear proxy log
-----
-
-==== *_Usage_*
-
-.ProxyStepsTests.story
-[source,gherkin]
-----
-Scenario: Verify step When I clear proxy log
-Given I am on a page with the URL 'http:/httpbin.org/get'
-When I clear proxy log
-Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `0`
-----
-
-
-=== Check if the number of requests with given URL-pattern exist
-
-==== *_Info_*
-
-{proxy}
-Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
-If URLs are the same, there were calls with given URL-pattern, otherwise - weren't.
-If there weren't any calls matching requirements, HAR file with all calls will be attached to report.
-If response contains status code 302 - corresponding request will be filtered out.
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-Then number of HTTP $httpMethod requests with URL pattern `$urlPattern` is $comparisonRule `$number`
-----
-
-==== *_Parameters_*
-
-. `$httpMethod` - HTTP method to filter by
-. `$urlPattern` - the string value of URL-pattern to filter by
-. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
-. `$number` - The number to compare with
-
-==== *_Usage_*
-
-.ProxyStepsTests.story
-[source,gherkin]
-----
-Scenario: Verify step When I clear proxy log
-Given I am on a page with the URL 'http:/httpbin.org/get'
-When I clear proxy log
-Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `0`
-----
-
-
 === Execute sequence of actions
 
-==== *_Info_*
-
 Executes the sequence of web actions
-
-==== *_Wording_*
 
 [source,gherkin]
 ----
 When I execute sequence of actions: $actions
 ----
-
-==== *_Parameters_*
-
-. `$actions` - table of actions to execute
+* `$actions` - table of actions to execute
 
 ==== Possible actions
 
@@ -311,8 +245,6 @@ When I execute sequence of actions: $actions
 
 |===
 
-==== *_Usage_*
-
 .ActionSteps.story
 [source,gherkin]
 ----
@@ -334,166 +266,18 @@ When I execute sequence of actions:
 |MOVE_TO       |By.id(name)                             |
 ----
 
-=== Save the request URL
-
-==== *_Info_*
-
-{proxy}
-
-Saves the captured request URL into scoped variable.
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
-----
-
-==== *_Parameters_*
-
-. `$httpMethod` - HTTP method to filter by
-. `$urlPattern` - the string value of URL-pattern to filter by
-. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
-. `$variableName` - A variable name
-
-==== *_Usage_*
-
-.ProxyStepsTests.story
-[source,gherkin]
-----
-Scenario: Verify step When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
-Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
-When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL to SCENARIO variable `URL`
-Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
-----
-
-
-=== Saves the query string into the variable with specified name and scopes.
-
-==== *_Info_*
-
-{proxy}
-Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
-If there is one entry, it saves the query string from request as Map of keys and values into the variable with specified name and scopes.
-If there weren't any calls or more than one matching requirements, HAR file with all
-calls will be attached to report.
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`
-----
-
-==== *_Parameters_*
-
-. `$httpMethod` - HTTP method to filter by
-. `$urlPattern` - the string value of URL-pattern to filter by
-. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
-. `$variableName` - A variable name
-
-==== *_Usage_*
-
-.ProxyStepsTests.story
-[source,gherkin]
-----
-Scenario: Verify step When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`
-Given I am on a page with the URL 'http://httpbin.org/forms/post'
-When I click on element located `By.xpath(//button)`
-When I capture HTTP POST request with URL pattern `http://httpbin.org/post` and save URL query to SCENARIO variable `query`
-Then `${query}` is equal to `{}`
-----
-
-
-=== Saves the request data into the variable with specified name and scopes.
-
-==== *_Info_*
-
-{proxy}
-Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
-If there is one entry, it saves the query string from request as Map of keys and values into the variable with specified name and scopes.
-If there weren't any calls or more than one matching requirements, HAR file with all calls will be attached to report.
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
-----
-
-==== *_Parameters_*
-
-. `$httpMethod` - HTTP method to filter by
-. `$urlPattern` - the string value of URL-pattern to filter by
-. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
-. `$variableName` - A variable name
-
-==== *_Usage_*
-
-.ProxyStepsTests.story
-[source,gherkin]
-----
-Scenario: Verify step When I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
-Given I am on a page with the URL 'http://httpbin.org/forms/post'
-When I click on element located `By.xpath(//button)`
-When I capture HTTP POST request with URL pattern `http://httpbin.org/post` and save request data to SCENARIO variable `requestData`
-Then `${requestData.query}` is equal to `{}`
-Then `${requestData.requestBodyParameters}` is equal to `{delivery=, custtel=, comments=, custemail=, custname=}`
-Then `${requestData.requestBody}` is not equal to `null`
-Then `${requestData.responseStatus}` is equal to `200`
-----
-
-
-=== Waits for appearance of HTTP request matched httpMethod and urlPattern in proxy log
-
-==== *_Info_*
-
-Waits for appearance of HTTP request matched httpMethod and urlPattern in proxy log
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I wait until HTTP $httpMethod request with URL pattern `$urlPattern` exists in proxy log
-----
-
-==== *_Parameters_*
-
-. `$httpMethod` - HTTP method to filter by
-. `$urlPattern` - The string value of URL-pattern to filter by
-
-==== *_Usage_*
-
-.ProxyStepsTests.story
-[source,gherkin]
-----
-Scenario: Verify step When I wait until HTTP $httpMethod request with URL pattern `$urlPattern` exists in proxy log
-Given I am on a page with the URL 'http://httpbin.org/get'
-When I wait until HTTP GET request with URL pattern `http://httpbin.org/get` exists in proxy log
-Then number of HTTP GET requests with URL pattern `http://httpbin.org/get` is EQUAL TO `1`
-----
-
 include::partial$generic-ui-steps.adoc[]
 
 === Dropdown: verify available options.
 
-==== *_Info_*
-
 Verifies if dropdown located by locator exists and has expected list of options
-
-==== *_Wording_*
 
 [source,gherkin]
 ----
 Then dropdown located `$locator` contains options: $option
 ----
-
-==== *_Parameters_*
-
-. `$locator` - <<_locator>>
-. `$options` - examples table describing expected options
-
-==== *_Usage_*
+* `$locator` - <<_locator>>
+* `$options` - examples table describing expected options
 
 .Dropdown.story
 [source,gherkin]
@@ -512,23 +296,14 @@ Item - is an option. State - true/false describes if option selected
 
 === Dropdown: verify first selected option
 
-==== *_Info_*
-
 Verifies if dropdown located by locator exists and first selected option.
-
-==== *_Wording_*
 
 [source,gherkin]
 ----
 Then dropdown located `$locator` exists and selected option is `$option`
 ----
-
-==== *_Parameters_*
-
-. `$locator` - <<_locator>>
-. `$option` - first selected option
-
-==== *_Usage_*
+* `$locator` - <<_locator>>
+* `$option` - first selected option
 
 .Dropdown.story
 [source,gherkin]
@@ -539,26 +314,17 @@ Then dropdown located `id(colors)` exists and selected option is `Blue`
 
 === Dropdown: add text to a mutli-select
 
-==== *_Info_*
-
 Selects option in multi-select dropdown
 
 [IMPORTANT]
 Step will fail if target dropdown is not multi-select
 
-==== *_Wording_*
-
 [source,gherkin]
 ----
 When I add `$option` to selection in dropdown located `$locator`
 ----
-
-==== *_Parameters_*
-
-. `$option` - option to select
-. `$locator` - <<_locator>>
-
-==== *_Usage_*
+* `$option` - option to select
+* `$locator` - <<_locator>>
 
 .Dropdown.story
 [source,gherkin]
@@ -569,31 +335,221 @@ When I add `Two` to selection in dropdown located `id(numbers)`
 
 === Dropdown: select option
 
-==== *_Info_*
-
 Selects option in dropdown
 
 [IMPORTANT]
 Does not support multi-selection
 
-==== *_Wording_*
-
 [source,gherkin]
 ----
 When I select `$option` in dropdown located `$locator``
 ----
-
-==== *_Parameters_*
-
-. `$option` - option to select
-. `$locator` - <<_locator>>
-
-==== *_Usage_*
+* `$option` - option to select
+* `$locator` - <<_locator>>
 
 .Dropdown.story
 [source,gherkin]
 ----
 When I select `Red` in dropdown located `id(colors)`
+----
+
+
+=== Proxy - Check the number of HTTP requests
+
+{proxy}
+The actions preformed by the step:
+
+* extract HTTP messages from the recorded proxy archive
+* filter out the HTTP messages with response status code `302 Moved Temporarily`
+* find HTTP requests matching the provided HTTP methods and URL regular expression
+* check that total number of the found HTTP messages satisfies the desired condition
+
+{har-attached}
+
+[source,gherkin]
+----
+Then number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $comparisonRule `$number`
+----
+* `$httpMethods` - the comma-separated HTTP methods to filter by
+* `$urlPattern` - the regular expression to match HTTP request URL
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
+* `$number` - The number to compare with
+
+.Check the number of HTTP GET and POST requests matching URL regurlar expression is equal to 1
+[source,gherkin]
+----
+Then number of HTTP GET, POST requests with URL pattern `http://httpbin\.org/get` is equal to `1`
+----
+
+
+=== Proxy - Save the HTTP request URL
+
+{proxy}
+The actions preformed by the step:
+
+* extract HTTP messages from the recorded proxy archive
+* filter out the HTTP messages with response status code `302 Moved Temporarily`
+* find HTTP requests matching the provided HTTP methods and URL regular expression
+* check that total number of the found HTTP messages is equal to 1
+* save the HTTP request URL to the specified variable
+
+{har-attached}
+
+[source,gherkin]
+----
+When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
+----
+* `$httpMethods` - the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
+* `$urlPattern` - the regular expression to match HTTP request URL
+* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+* `$variableName` - the variable name
+
+.Save the URL of the matching HTTP request to the variable
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
+When I capture HTTP GET or POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
+Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
+----
+
+
+=== Proxy - Save the HTTP request URL query
+
+{proxy}
+The actions preformed by the step:
+
+* extract HTTP messages from the recorded proxy archive
+* filter out the HTTP messages with response status code `302 Moved Temporarily`
+* find HTTP requests matching the provided HTTP methods and URL regular expression
+* check that total number of the found HTTP messages is equal to 1
+* save the HTTP request URL query to the specified variable
+
+{har-attached}
+
+[source,gherkin]
+----
+When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`
+----
+* `$httpMethods` - the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
+* `$urlPattern` - the regular expression to match HTTP request URL
+* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+* `$variableName` - the variable name
+
+.Save the URL query of the matching HTTP request to the variable
+[source,gherkin]
+----
+Given I am on a page with the URL 'http://httpbin.org/forms/post'
+When I click on element located `By.xpath(//button)`
+When I capture HTTP POST request with URL pattern `http://httpbin\.org/post` and save URL query to scenario variable `query`
+Then `${query}` is equal to `{}`
+----
+
+
+=== Proxy - Save the HTTP message data
+
+{proxy}
+The actions preformed by the step:
+
+* extract HTTP messages from the recorded proxy archive
+* filter out the HTTP messages with response status code `302 Moved Temporarily`
+* find HTTP requests matching the provided HTTP methods and URL regular expression
+* check that total number of the found HTTP messages is equal to 1
+* save the HTTP message data to the specified variable
+
+{har-attached}
+
+[source,gherkin]
+----
+When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
+----
+* `$httpMethods` - the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
+* `$urlPattern` - the regular expression to match HTTP request URL
+* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+* `$variableName` - the variable name
+
+.Save the data from the matching HTTP message to the variable
+[source,gherkin]
+----
+Given I am on a page with the URL 'http://httpbin.org/forms/post'
+When I click on element located `By.xpath(//button)`
+When I capture GET or HTTP POST request with URL pattern `http://httpbin\.org/post` and save request data to scenario variable `data`
+Then `${data.query}` is equal to `{}`
+Then `${data.requestBodyParameters}` is equal to `{delivery=, custtel=, comments=, custemail=, custname=}`
+Then `${data.requestBody}` is not equal to `null`
+Then `${data.responseStatus}` is equal to `200`
+----
+
+
+=== Proxy - Wait for the HTTP request
+
+{proxy}
+Waits for the HTTP requests matching the provided HTTP methods and URL regular expression.
+If no HTTP request is sent and wait timeout is reached, then the step will fail.
+
+[source,gherkin]
+----
+When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log
+----
+* `$httpMethods` - the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
+* `$urlPattern` - the regular expression to match HTTP request URL
+
+.Wait for the HTTP request
+[source,gherkin]
+----
+Given I am on a page with the URL 'http://httpbin.org/get'
+When I wait until HTTP GET or POST request with URL pattern `http://httpbin\.org/get` exists in proxy log
+Then number of HTTP GET or POST requests with URL pattern `http://httpbin\.org/get` is equal to `1`
+----
+
+
+=== Proxy - Add headers to the HTTP request
+
+{proxy}
+Add headers to the proxied HTTP request satisfying the desired condition
+
+[source,gherkin]
+----
+When I add headers to proxied requests with URL pattern which $comparisonRule `$url`:$headers
+----
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
+* `$url` - the input value of URL to filter by
+* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
+
+.Add headers to the proxied HTTP request
+[source,gherkin]
+----
+When I add headers to proxied requests with URL pattern which is equal to `http://httpbin.org/headers`:
+|name     |value     |
+|testName1|testValue1|
+|testName2|testValue2|
+Given I am on a page with the URL 'http://httpbin.org/headers'
+When I change context to element located `xpath(//pre)`
+When I set the text found in search context to the 'SCENARIO' variable 'response'
+Then a JSON element from '${response}' by the JSON path '$.headers' is equal to '
+{
+    "Testname1": "testValue1",
+    "Testname2": "testValue2"
+}
+'ignoring extra fields
+----
+
+
+=== Proxy - Clear
+
+{proxy}
+The step clears the HTTP requests and responses recorded by the proxy
+
+[source,gherkin]
+----
+When I clear proxy log
+----
+
+.Clear the data recorded by the proxy
+[source,gherkin]
+----
+Given I am on a page with the URL 'http:/httpbin.org/get'
+When I clear proxy log
+Then number of HTTP GET requests with URL pattern `http://httpbin\.org/get` is equal to `0`
 ----
 
 
@@ -643,45 +599,4 @@ Then `${context-height}` is > `0`
 Then `${context-width}` is > `0`
 Then `${context-x-coordinate}` is > `0`
 Then `${context-y-coordinate}` is > `0`
-----
-
-
-=== Adds headers to proxy request
-
-==== *_Info_*
-
-Add headers to proxy request that will be used while sending request with given urlPattern
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I add headers to proxied requests with URL pattern which $comparisonRule `$urlPattern`:$headers
-----
-
-==== *_Parameters_*
-
-. `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison Rule]
-. `$urlPattern` - The string value of URL-pattern to filter by
-. `$headers` - ExamplesTable representing list of headers with columns "name" and "value" specifying HTTP header names and values respectively
-
-==== *_Usage_*
-
-.ProxyStepsTests.story
-[source,gherkin]
-----
-Scenario: Verify step When I add headers to proxied requests with URL pattern which $comparisonRule `$urlPattern`:$headers
-When I add headers to proxied requests with URL pattern which is equal to `http://httpbin.org/headers`:
-|name     |value     |
-|testName1|testValue1|
-|testName2|testValue2|
-Given I am on a page with the URL 'http://httpbin.org/headers'
-When I change context to element located `xpath(//pre)`
-When I set the text found in search context to the 'SCENARIO' variable 'response'
-Then a JSON element from '${response}' by the JSON path '$.headers' is equal to '
-{
-    "Testname1": "testValue1",
-    "Testname2": "testValue2"
-}
-'IGNORING_EXTRA
 ----
