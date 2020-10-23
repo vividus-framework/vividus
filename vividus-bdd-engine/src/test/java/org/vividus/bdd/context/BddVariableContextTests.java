@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -178,5 +179,14 @@ class BddVariableContextTests
         variables.putStepVariable(VARIABLE_KEY, VALUE);
         when(variablesFactory.createVariables()).thenReturn(variables);
         assertEquals(VALUE, bddVariableContext.getVariable(VARIABLE_KEY));
+    }
+
+    @Test
+    void shoulReturnVariables()
+    {
+        Variables variables = mock(Variables.class);
+        when(variablesFactory.createVariables()).thenReturn(variables);
+        bddVariableContext.getVariables();
+        verify(variables).getVariables();
     }
 }

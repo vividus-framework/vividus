@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.context;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.vividus.bdd.variable.VariableScope;
@@ -23,6 +24,8 @@ import org.vividus.bdd.variable.VariableScope;
 public interface IBddVariableContext
 {
     <T> T getVariable(String variableKey);
+
+    Map<String, Object> getVariables();
 
     void putVariable(VariableScope variableScope, String variableKey, Object variableValue);
 

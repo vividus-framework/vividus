@@ -32,6 +32,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class VariablesTests
 {
+    private static final String STEP = "step";
+    private static final String KEY3 = "key3";
+    private static final String STORY = "story";
+    private static final String KEY2 = "key2";
+    private static final String SCENARIO = "scenario";
+    private static final String KEY1 = "key1";
     private static final String A_B = "a:b";
     private static final String VARIABLE_KEY = "variableKey";
     private static final String KEY = "key";
@@ -141,5 +147,19 @@ class VariablesTests
         Variables variables = new Variables(Map.of());
         variables.clearStepVariables();
         assertNull(variables.getVariable(VARIABLE_KEY));
+    }
+
+    @Test
+    void shouldReturnMergedVariables()
+    {
+        Variables variables = new Variables(Map.of());
+        variables.initStepVariables();
+        variables.putScenarioVariable(KEY1, SCENARIO);
+        variables.putScenarioVariable(KEY2, SCENARIO);
+        variables.putScenarioVariable(KEY3, SCENARIO);
+        variables.putStoryVariable(KEY2, STORY);
+        variables.putStoryVariable(KEY3, STORY);
+        variables.putStoryVariable(KEY3, STEP);
+        assertEquals(Map.of(KEY1, SCENARIO, KEY2, STORY, KEY3, STEP), variables.getVariables());
     }
 }

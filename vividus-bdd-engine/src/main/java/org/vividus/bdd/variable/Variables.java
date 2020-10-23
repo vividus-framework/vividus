@@ -21,9 +21,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -51,14 +54,26 @@ public class Variables
     public Object getVariable(String variableKey)
     {
         VariableKey key = new VariableKey(variableKey);
-        return Stream.concat(
-                    StreamSupport.stream(stepVariables.spliterator(), false),
-                    Stream.of(scenarioVariables, storyVariables, batchVariables))
+        return concatedVariables()
                 .map(scopedVariables -> getVariable(scopedVariables, key))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .or(() -> key.defaultValue)
                 .orElseGet(() -> getSystem(variableKey));
+    }
+
+    private Stream<Map<String, Object>> concatedVariables()
+    {
+        return Stream.concat(
+                    StreamSupport.stream(stepVariables.spliterator(), false),
+                    Stream.of(scenarioVariables, storyVariables, batchVariables));
+    }
+
+    public Map<String, Object> getVariables()
+    {
+        return concatedVariables().map(Map::entrySet)
+                                  .flatMap(Set::stream)
+                                  .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (k1, k2) -> k2));
     }
 
     private Optional<Object> getVariable(Map<String, Object> variables, VariableKey variableKey)

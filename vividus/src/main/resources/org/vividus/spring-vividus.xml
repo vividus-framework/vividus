@@ -67,6 +67,9 @@
         </property>
     </bean>
 
+
+    <bean class="org.vividus.bdd.groovy.VariableContextAwareGroovyScriptEvaluator" />
+
     <util:list id="storyReporters" />
 
 </beans>
