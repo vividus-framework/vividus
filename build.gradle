@@ -75,7 +75,7 @@ ext {
         commonsText:            '1.8',
         commonsCollections4:    '4.4',
         groovy:                 '3.0.6',
-        guava:                  '29.0-jre',
+        guava:                  '30.0-jre',
         hamcrest:               '2.2',
         httpclient:             '4.5.13',
         javaxInject:            '1',
