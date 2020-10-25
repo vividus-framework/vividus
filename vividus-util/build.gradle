@@ -10,7 +10,7 @@ dependencies {
 
     implementation(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
-    implementation(group: 'commons-io', name: 'commons-io', version: versions.commonsIo)
+    implementation(group: 'commons-io', name: 'commons-io', version: '2.8.0')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
     implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
