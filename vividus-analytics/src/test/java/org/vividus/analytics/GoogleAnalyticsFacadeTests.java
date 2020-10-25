@@ -17,6 +17,7 @@
 package org.vividus.analytics;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -34,10 +35,9 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,8 +53,6 @@ import org.vividus.http.client.IHttpClient;
 class GoogleAnalyticsFacadeTests
 {
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(GoogleAnalyticsFacade.class);
-
-    private static final String EMPTY = "";
 
     private static final String VALUE = "v%";
 
@@ -111,11 +109,12 @@ class GoogleAnalyticsFacadeTests
         googleAnalyticsFacade.postEvent(analyticsEvent);
         verify(httpClient).execute(argThat(r -> {
             HttpPost request = (HttpPost) r;
-            Assertions.assertAll(
+            assertAll(
                 () -> assertEquals("User-Agent: ", r.getFirstHeader("User-Agent").toString()),
                 () -> assertEquals("POST https://analytics.google.com/collect HTTP/1.1", r.getRequestLine().toString()),
                 () -> assertEquals("v=1&t=event&tid=UA-123456789-1&cid=b1a66498-4c8e-3fe7-86c8-a55d68007da6&k=v%25",
-                    toString(request)));
+                        EntityUtils.toString(request.getEntity(), StandardCharsets.UTF_8))
+            );
             return true;
         }));
     }
@@ -130,18 +129,5 @@ class GoogleAnalyticsFacadeTests
         when(httpClient.execute(any(HttpPost.class))).thenThrow(ioException);
         googleAnalyticsFacade.postEvent(analyticsEvent);
         assertEquals(List.of(info(ioException, "Unable to send analytics")), LOGGER.getAllLoggingEvents());
-    }
-
-    private static String toString(HttpPost post)
-    {
-        try
-        {
-            return IOUtils.toString(post.getEntity().getContent(), StandardCharsets.UTF_8);
-        }
-        catch (UnsupportedOperationException | IOException e)
-        {
-            new IllegalStateException(e);
-        }
-        return EMPTY;
     }
 }
