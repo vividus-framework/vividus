@@ -16,9 +16,6 @@
 
 package org.vividus.selenium.sauce;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.common.eventbus.Subscribe;
 
 import org.openqa.selenium.Proxy;
@@ -26,10 +23,10 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
-import org.vividus.selenium.DesiredCapabilitiesConfigurer;
+import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 
-public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfigurer
+public class SauceLabsCapabilitiesConfigurer extends AbstractDesiredCapabilitiesConfigurer
 {
     private static final String SAUCE_OPTIONS = "sauce:options";
 
@@ -62,27 +59,16 @@ public class SauceLabsCapabilitiesConfigurer implements DesiredCapabilitiesConfi
             {
                 SauceConnectOptions options = createSauceConnectOptions(proxy);
                 sauceConnectManager.start(options);
-                addSauceOption(desiredCapabilities, "tunnelIdentifier", sauceConnectManager.getTunnelId());
+                putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelIdentifier",
+                        sauceConnectManager.getTunnelId());
                 desiredCapabilities.setCapability(CapabilityType.PROXY, (Object) null);
             }
             RunningStory runningStory = bddRunContext.getRunningStory();
             if (runningStory != null)
             {
-                addSauceOption(desiredCapabilities, "name", runningStory.getName());
+                putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "name", runningStory.getName());
             }
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void addSauceOption(DesiredCapabilities desiredCapabilities, String capabilityName, Object value)
-    {
-        Map<String, Object> sauceOptions = (Map<String, Object>) desiredCapabilities.getCapability(SAUCE_OPTIONS);
-        if (sauceOptions == null)
-        {
-            sauceOptions = new HashMap<>();
-            desiredCapabilities.setCapability(SAUCE_OPTIONS, sauceOptions);
-        }
-        sauceOptions.put(capabilityName, value);
     }
 
     private SauceConnectOptions createSauceConnectOptions(Proxy proxy)

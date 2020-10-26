@@ -1,0 +1,48 @@
+= Browser Stack Plugin
+
+The plugin provides integration with continuous testing cloud https://www.browserstack.com/[BrowserStack].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-browserstack', version: '{page-component-version}')
+----
+
+== Profiles
+
+The plugin defines profiles with a set of the preconfigured properties.
+
+[cols="1,2"]
+|===
+
+|`browserstack/web`
+|Use in conjunction with web application profiles.
+
+|`browserstack/mobile_app`
+a|Use in conjunction with xref:plugins:plugin-mobile-app.adoc#_profiles[native mobile application profiles].
+
+Required properties:
+
+* `selenium.grid.device-name`
+|===
+
+Browser Stack profiles can be enabled by adding the corresponding entry to `configuration.profiles` property.
+
+.Configure Chrome on Browser Labs
+[source,properties,subs="attributes+"]
+----
+configuration.profiles=browserstack/web,web/desktop/chrome
+----
+
+[IMPORTANT]
+Browser Stack profile must be first.
+
+Explore https://www.browserstack.com/app-automate/capabilities?tag=w3c[Capabilities Builder] for more fine-grained Browser Stack configuration.
+
+== Properties
+
+* See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid] properties to configure generic options.
+* Browser Stack specific properties must be prepended with `selenium.grid.capabilities.bstack\:options.` prefix, meaning given a property `projectName` with a value `My Project` the resulting property will be `selenium.grid.capabilities.bstack\:options.projectName=My Project`
+* Appium specific properties in Browser Stack must be prepended with `selenium.grid.capabilities.appium\:options.` prefix, meaning given a property `clearSystemFiles` with a value `true` the resulting property will be `selenium.grid.capabilities.appium\:options.clearSystemFiles=true`

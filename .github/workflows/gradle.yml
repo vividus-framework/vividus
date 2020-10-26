@@ -292,7 +292,7 @@ jobs:
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                                 -Pvividus.configuration.environments=system/mobile_app/browserstack/ios \
                                                 -Pvividus.configuration.suite=system/mobile_app/healthcheck \
-                                                -Pvividus.configuration.profiles=mobile_app/ios,browserstack/mobile_app \
+                                                -Pvividus.configuration.profiles=browserstack/mobile_app,mobile_app/ios \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                 -Pvividus.allure.history-directory=output/history/bs-ios-system-tests \
@@ -328,7 +328,7 @@ jobs:
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                                 -Pvividus.configuration.environments=system/mobile_app/browserstack/android \
                                                 -Pvividus.configuration.suite=system/mobile_app/healthcheck \
-                                                -Pvividus.configuration.profiles=mobile_app/android,browserstack/mobile_app \
+                                                -Pvividus.configuration.profiles=browserstack/mobile_app,mobile_app/android \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                 -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                 -Pvividus.allure.history-directory=output/history/bs-android-system-tests \
