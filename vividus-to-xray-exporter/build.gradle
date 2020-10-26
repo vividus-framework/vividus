@@ -45,3 +45,4 @@ dependencies {
 
 tasks.artifactoryPublish.enabled = false
 tasks.publish.enabled = false
+tasks.publishMavenPublicationToMavenLocal.enabled = false
