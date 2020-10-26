@@ -8,6 +8,7 @@ runStories.treatKnownIssuesOnlyAsPassed = true
 dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-applitools')
+    implementation project(':vividus-plugin-browserstack')
     implementation project(':vividus-plugin-db')
     implementation project(':vividus-plugin-mobile-app')
     implementation project(':vividus-plugin-mongodb')
