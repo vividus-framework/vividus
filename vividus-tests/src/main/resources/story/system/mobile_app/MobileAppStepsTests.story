@@ -29,7 +29,13 @@ When I tap on element located `accessibilityId(<togglerAccessibilityId>)` with d
 Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `1`
 
 
+Scenario: Verify step: 'When I navigate back'
+When I navigate back
+Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `0`
+
+
 Scenario: Verify step: 'When I tap on element located `$locator`'
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)` with duration `PT0.5S`
 Then number of elements found by `accessibilityId(<incrementAccessibilityId>)` is equal to `0`
 When I tap on element located `xpath(<menuButtonXpath>)`
 Then number of elements found by `accessibilityId(<incrementAccessibilityId>)` is equal to `1`

@@ -399,4 +399,28 @@ When I upload file `images/avatar.png` to device
 Then the avatar icon is displayed with the uploaded image
 ----
 
+=== Navigate back
+
+==== *_Info_*
+
+Navigates back in the mobile application
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I navigate back
+----
+
+==== *_Usage_*
+
+.NavigateBack.story
+[source,gherkin]
+----
+Scenario: Go back from login page
+Then number of elements found by `accessibilityId(login)` is equal to `1`
+When I navigate back
+Then number of elements found by `accessibilityId(login)` is equal to `0`
+----
+
 include::partial$generic-ui-steps.adoc[]

@@ -19,7 +19,9 @@ package org.vividus.bdd.mobileapp.steps;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -33,7 +35,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Navigation;
 import org.vividus.mobileapp.action.DeviceActions;
+import org.vividus.selenium.IWebDriverProvider;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -44,6 +49,7 @@ class DeviceStepsTests
     private static final String DEVICE_FOLDER = "/device/folder";
 
     @Mock private DeviceActions deviceActions;
+    @Mock private IWebDriverProvider webDriverProvider;
     private DeviceSteps deviceSteps;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DeviceSteps.class);
@@ -51,7 +57,7 @@ class DeviceStepsTests
     @BeforeEach
     void init()
     {
-        deviceSteps = new DeviceSteps(DEVICE_FOLDER, deviceActions);
+        deviceSteps = new DeviceSteps(DEVICE_FOLDER, deviceActions, webDriverProvider);
     }
 
     @Test
@@ -66,5 +72,19 @@ class DeviceStepsTests
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Uploading file '{}' to a device at '{}' folder", filePath, DEVICE_FOLDER)
         )));
+    }
+
+    @Test
+    void shoudNavigateBack()
+    {
+        WebDriver webDriver = mock(WebDriver.class);
+        Navigation navigation = mock(Navigation.class);
+
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.navigate()).thenReturn(navigation);
+
+        deviceSteps.navigateBack();
+
+        verify(navigation).back();
     }
 }

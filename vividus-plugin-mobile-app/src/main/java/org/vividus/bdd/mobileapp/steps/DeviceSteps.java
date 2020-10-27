@@ -23,18 +23,21 @@ import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.mobileapp.action.DeviceActions;
+import org.vividus.selenium.IWebDriverProvider;
 
 public class DeviceSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceSteps.class);
 
     private final DeviceActions deviceActions;
+    private final IWebDriverProvider webDriverProvider;
     private final String folderForFileUpload;
 
-    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions)
+    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions, IWebDriverProvider webDriverProvider)
     {
         this.folderForFileUpload = folderForFileUpload;
         this.deviceActions = deviceActions;
+        this.webDriverProvider = webDriverProvider;
     }
 
     /**
@@ -50,5 +53,14 @@ public class DeviceSteps
 
         String fileName = FilenameUtils.getName(filePath);
         deviceActions.pushFile(Paths.get(folderForFileUpload, fileName).toString(), filePath);
+    }
+
+    /**
+     * Moves back a single "item" in the mobile application
+     */
+    @When("I navigate back")
+    public void navigateBack()
+    {
+        webDriverProvider.get().navigate().back();
     }
 }
