@@ -22,6 +22,11 @@ The commit messages that accompany your code changes are an important piece of d
 * We are using [Checkstyle](http://checkstyle.sourceforge.net/), [SpotBugs](https://spotbugs.github.io/), [Spotless](https://github.com/diffplug/spotless) to enforce a common code style. The check is integrated into the default build - so, make sure, you can build Vividus without errors.
 * After you submit your pull request, a Vividus core developer will review it. It is normal that this takes several iterations, so don't get discouraged by change requests. They ensure the high quality that we all enjoy.
 
+## Coding Conventions
+### Unit testing
+
+* Business logic that is related to unit tests must not be placed within methods annotated with `@BeforeEach` and `@AfterEach` annotations, such methods can only be used for common logic such as initializing mock service for testing, clean up filesystem resources etc.
+
 ## Bug reports
 
 We use the issue tracker on Github. Please report new bugs at <https://github.com/vividus-framework/vividus/issues/new/choose>.
