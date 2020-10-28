@@ -81,7 +81,7 @@ ext {
         jbehave:                '4.8.0-alpha.3',
         junit4:                 '4.13',
         slf4j:                  '2.0.0-alpha1',
-        spring:                 '5.2.9.RELEASE',
+        spring:                 '5.3.0',
         tika:                   '1.24.1',
         junit:                  '5.7.0',
         mockito:                '3.3.3',
