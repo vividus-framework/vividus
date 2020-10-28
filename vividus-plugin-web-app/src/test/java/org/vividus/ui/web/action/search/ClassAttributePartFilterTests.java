@@ -79,4 +79,10 @@ class ClassAttributePartFilterTests
         assertEquals(classAttributePartFilter.filter(elementsList, ""), elementsList);
         verify(element, never()).getAttribute(CLASS_ATTRIBUTE);
     }
+
+    @Test
+    void shouldReturnLocatorType()
+    {
+        assertEquals(WebLocatorType.CLASS_ATTRIBUTE_PART, classAttributePartFilter.getType());
+    }
 }

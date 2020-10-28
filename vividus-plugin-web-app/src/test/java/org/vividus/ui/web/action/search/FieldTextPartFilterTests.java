@@ -78,4 +78,10 @@ class FieldTextPartFilterTests
         assertEquals(filteredText, webElements);
         verifyNoInteractions(javascriptActions);
     }
+
+    @Test
+    void shouldReturnLocatorType()
+    {
+        assertEquals(WebLocatorType.FIELD_TEXT_PART, filter.getType());
+    }
 }

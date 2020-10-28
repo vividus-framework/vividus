@@ -16,6 +16,7 @@
 
 package org.vividus.ui.mobile.action.search;
 
+import org.vividus.ui.action.search.GenericTextPartFilter;
 import org.vividus.ui.action.search.IElementAction;
 import org.vividus.ui.action.search.LocatorType;
 
@@ -23,7 +24,8 @@ public enum AppiumLocatorType implements LocatorType
 {
     XPATH("Appium XPath", ByAppiumLocatorSearch.class),
     ACCESSIBILITY_ID("Accessibility Id", ByAppiumLocatorSearch.class),
-    IOS_CLASS_CHAIN("iOS Class Chain", ByAppiumLocatorSearch.class);
+    IOS_CLASS_CHAIN("iOS Class Chain", ByAppiumLocatorSearch.class),
+    TEXT_PART("Text part", GenericTextPartFilter.class);
 
     private final String attributeName;
     private final Class<? extends IElementAction> actionClass;

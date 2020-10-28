@@ -39,4 +39,10 @@ public class IndexElementFilter implements IElementFilterAction
         isTrue(index >= 0, "Index must be greater than zero");
         return index < elements.size() ? List.of(elements.get(index)) : List.of();
     }
+
+    @Override
+    public boolean matches(WebElement element, String value)
+    {
+        throw new UnsupportedOperationException();
+    }
 }

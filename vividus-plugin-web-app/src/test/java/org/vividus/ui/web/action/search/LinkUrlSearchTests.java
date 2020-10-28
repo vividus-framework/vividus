@@ -302,6 +302,12 @@ class LinkUrlSearchTests
         verify(javascriptActions, never()).scrollIntoView(webElement, true);
     }
 
+    @Test
+    void shouldThrowExceptionIfMatchesIsInvoked()
+    {
+        assertThrows(UnsupportedOperationException.class, () -> search.matches(null, null));
+    }
+
     private void mockGetCurrentUrl()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);

@@ -84,6 +84,12 @@ class FieldTextFilterTests
         testTextFilterEmptyOrNull("");
     }
 
+    @Test
+    void shouldReturnLocatorType()
+    {
+        assertEquals(WebLocatorType.FIELD_TEXT, fieldTextFilter.getType());
+    }
+
     private void testTextFilterEmptyOrNull(String text)
     {
         List<WebElement> filteredText = fieldTextFilter.filter(webElements, text);

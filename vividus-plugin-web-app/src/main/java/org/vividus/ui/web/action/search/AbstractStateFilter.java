@@ -24,22 +24,24 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.IState;
+import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.LocatorType;
 
-public abstract class AbstractStateFilter<T extends Enum<T> & IState> extends AbstractElementFilterAction
+public abstract class AbstractStateFilter<T extends Enum<T> & IState> implements IElementFilterAction
 {
     private final Class<T> enumType;
+    private final LocatorType locatorType;
     @Inject private IWebDriverProvider webDriverProvider;
 
     @SuppressWarnings("unchecked")
     public AbstractStateFilter(LocatorType locatorType)
     {
-        super(locatorType);
+        this.locatorType = locatorType;
         this.enumType = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
     @Override
-    protected boolean matches(WebElement element, String stateName)
+    public boolean matches(WebElement element, String stateName)
     {
         T state = Enum.valueOf(enumType, stateName);
         return matches(state.getExpectedCondition(element));
@@ -49,5 +51,11 @@ public abstract class AbstractStateFilter<T extends Enum<T> & IState> extends Ab
     {
         Object result = expectedCondition.apply(webDriverProvider.get());
         return result instanceof Boolean ? (boolean) result : result != null;
+    }
+
+    @Override
+    public LocatorType getType()
+    {
+        return locatorType;
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.action.search;
+package org.vividus.ui.action.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -26,38 +26,34 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.IWebElementActions;
+import org.vividus.testdouble.TestLocatorType;
+import org.vividus.ui.action.ElementActions;
 
 @ExtendWith(MockitoExtension.class)
-class TextPartFilterTests
+class GenericTextPartFilterTests
 {
     private static final String SOME_TEXT = "Some text";
 
     private List<WebElement> webElements;
 
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private IWebElementActions webElementActions;
-
-    @InjectMocks
-    private TextPartFilter filter;
+    @Mock private WebElement webElement;
+    @Mock private ElementActions elementActions;
+    private GenericTextPartFilter filter;
 
     @BeforeEach
     void beforeEach()
     {
         webElements = List.of(webElement);
+        filter = new GenericTextPartFilter(TestLocatorType.FILTER, elementActions);
     }
 
     @Test
     void testTextFilter()
     {
-        when(webElementActions.getElementText(webElement)).thenReturn(SOME_TEXT);
+        when(elementActions.getElementText(webElement)).thenReturn(SOME_TEXT);
         List<WebElement> foundElements = filter.filter(webElements, "text");
         assertEquals(webElements, foundElements);
     }
@@ -65,7 +61,7 @@ class TextPartFilterTests
     @Test
     void testTextElementFilteredOut()
     {
-        when(webElementActions.getElementText(webElement)).thenReturn(SOME_TEXT);
+        when(elementActions.getElementText(webElement)).thenReturn(SOME_TEXT);
         List<WebElement> foundElements = filter.filter(webElements, "any");
         assertNotEquals(webElements, foundElements);
     }
@@ -74,6 +70,12 @@ class TextPartFilterTests
     void testTextFilterNull()
     {
         filter.filter(webElements, null);
-        verifyNoInteractions(webElementActions);
+        verifyNoInteractions(elementActions);
+    }
+
+    @Test
+    void shouldReturnLocatorType()
+    {
+        assertEquals(TestLocatorType.FILTER, filter.getType());
     }
 }

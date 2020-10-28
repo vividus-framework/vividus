@@ -70,4 +70,10 @@ class IndexElementFilterTests
             () -> filter.filter(List.of(), "Java"));
         assertEquals("Index must be a positive number", exception.getMessage());
     }
+
+    @Test
+    void shouldThrowExceptionIfMatchesIsInvoked()
+    {
+        assertThrows(UnsupportedOperationException.class, () -> filter.matches(null, null));
+    }
 }

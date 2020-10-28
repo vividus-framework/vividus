@@ -17,10 +17,21 @@
 package org.vividus.ui.action.search;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebElement;
 
 public interface IElementFilterAction extends IElementAction
 {
-    List<WebElement> filter(List<WebElement> elements, String value);
+    default List<WebElement> filter(List<WebElement> elements, String value)
+    {
+        if (StringUtils.isNotEmpty(value))
+        {
+            return elements.stream().filter(element -> matches(element, value)).collect(Collectors.toList());
+        }
+        return elements;
+    }
+
+    boolean matches(WebElement element, String value);
 }
