@@ -120,6 +120,7 @@
     <bean id="genericWaitSteps" class="org.vividus.bdd.steps.ui.GenericWaitSteps" />
     <bean id="genericSetVariableSteps" class="org.vividus.bdd.steps.ui.GenericSetVariableSteps" />
     <bean id="genericSetContextSteps" class="org.vividus.bdd.steps.ui.GenericSetContextSteps" />
+    <bean id="navigationSteps" class="org.vividus.bdd.steps.ui.NavigationSteps" />
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />
 
@@ -128,6 +129,7 @@
         <idref bean="genericWaitSteps" />
         <idref bean="genericSetVariableSteps" />
         <idref bean="genericSetContextSteps" />
+        <idref bean="navigationSteps" />
     </util:list>
 
     <util:map id="propertyEditors-UI" key-type="java.lang.Class">
