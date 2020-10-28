@@ -35,6 +35,15 @@ When I tap on element located `xpath(<menuButtonXpath>)`
 Then number of elements found by `accessibilityId(<incrementAccessibilityId>)` is equal to `1`
 
 
+Scenario: Verify step: 'When I navigate back'
+Meta:
+    @targetPlatform android
+
+!-- The step doesn't work with newer version of iOS due to absence of navigation controls on the screen
+When I navigate back
+Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `0`
+
+
 Scenario: Verify step: 'When I type `$text` in field located `$locator`'
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `xpath(<menuInputXpath>)`

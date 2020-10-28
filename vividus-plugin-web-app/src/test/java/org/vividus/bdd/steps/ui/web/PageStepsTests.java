@@ -454,17 +454,6 @@ class PageStepsTests
     }
 
     @Test
-    void testNavigateBack()
-    {
-        WebDriver driver = mock(WebDriver.class);
-        when(webDriverProvider.get()).thenReturn(driver);
-        WebDriver.Navigation navigation = mock(WebDriver.Navigation.class);
-        when(driver.navigate()).thenReturn(navigation);
-        pageSteps.navigateBack();
-        verify(navigation).back();
-    }
-
-    @Test
     void testPageTitleContainsText()
     {
         String text = "text";

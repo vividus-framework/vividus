@@ -315,15 +315,6 @@ public class PageSteps
     }
 
     /**
-     * Loads the previous URL in the browser history list
-     */
-    @When("I navigate back")
-    public void navigateBack()
-    {
-        webDriverProvider.get().navigate().back();
-    }
-
-    /**
      * Checks that the page's <b>title</b> matches to <b>text</b> according to the provided string validation rule
      * <p>
      * A <b>title</b> is a text within a {@literal <title>} tag.
