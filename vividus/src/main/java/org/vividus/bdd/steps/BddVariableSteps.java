@@ -147,18 +147,7 @@ public class BddVariableSteps
     @Then("`$variable1` is $comparisonRule `$variable2`")
     public boolean compareVariables(Object variable1, ComparisonRule condition, Object variable2)
     {
-        if (variable1 instanceof String && variable2 instanceof String)
-        {
-            String variable1AsString = (String) variable1;
-            String variable2AsString = (String) variable2;
-            if (NumberUtils.isCreatable(variable1AsString) && NumberUtils.isCreatable(variable2AsString))
-            {
-                BigDecimal number1 = NumberUtils.createBigDecimal(variable1AsString);
-                BigDecimal number2 = NumberUtils.createBigDecimal(variable2AsString);
-                return compare(number1, condition, number2);
-            }
-        }
-        else if (ComparisonRule.EQUAL_TO.equals(condition))
+        if (ComparisonRule.EQUAL_TO.equals(condition))
         {
             if (isEmptyOrListOfMaps(variable1) && isEmptyOrListOfMaps(variable2))
             {
@@ -169,7 +158,15 @@ public class BddVariableSteps
                 return compareListsOfMaps(List.of(variable1), List.of(variable2));
             }
         }
-        return compare(variable1.toString(), condition, variable2.toString());
+        String variable1AsString = variable1.toString();
+        String variable2AsString = variable2.toString();
+        if (NumberUtils.isCreatable(variable1AsString) && NumberUtils.isCreatable(variable2AsString))
+        {
+            BigDecimal number1 = NumberUtils.createBigDecimal(variable1AsString);
+            BigDecimal number2 = NumberUtils.createBigDecimal(variable2AsString);
+            return compare(number1, condition, number2);
+        }
+        return compare(variable1AsString, condition, variable2AsString);
     }
 
     /**
