@@ -9,8 +9,6 @@
     <bean id="org.vividus.aws.s3.AmazonS3Client"
         class="org.vividus.aws.s3.AmazonS3ClientFactory"
         factory-method="create">
-        <constructor-arg name="s3AccessKey" value="${aws.s3.access-key}" />
-        <constructor-arg name="s3SecretKey" value="${aws.s3.secret-key}" />
         <constructor-arg name="region" value="${aws.s3.region}" />
     </bean>
 
