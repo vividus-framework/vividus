@@ -8,7 +8,7 @@ Here one could find description of the steps that are delivered with Vividus its
 
 ==== *_Info_*
 
-Executes steps until condition or iteration limit reached.
+Executes steps until condition is met or iteration limit is reached.
 
 [IMPORTANT]
 If iteration limit is reached no failure or exception will occur.
@@ -34,7 +34,7 @@ When I execute steps at most $max times while variable '$variableName' is $compa
 . `$max` - defines how many iteration could be executed
 . `$variableName` - a name of the variable to check
 . `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
-. `$expectedValue` - expected value of the variable
+. `$expectedValue` - expected value of the variable (it must be a number)
 . `$stepsToExecute` - examples table with a single column containing the steps
 
 ==== *_Usage_*

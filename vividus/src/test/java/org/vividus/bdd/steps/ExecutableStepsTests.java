@@ -42,14 +42,9 @@ class ExecutableStepsTests
     private static final String KEY = "key";
     private static final String ITERATION_VARIABLE = "iterationVariable";
 
-    @Mock
-    private IBddVariableContext bddVariableContext;
-
-    @Mock
-    private SubSteps subSteps;
-
-    @InjectMocks
-    private ExecutableSteps executableSteps;
+    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private SubSteps subSteps;
+    @InjectMocks private ExecutableSteps executableSteps;
 
     @Test
     void testTrue()
@@ -83,17 +78,26 @@ class ExecutableStepsTests
     @Test
     void shouldPerformTheStepsAndWhenVariableValueFitsExit()
     {
-        String three = "3";
-        when(bddVariableContext.getVariable(KEY)).thenReturn(null).thenReturn("1").thenReturn("2").thenReturn(three);
-        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, three, subSteps);
+        when(bddVariableContext.getVariable(KEY)).thenReturn(null).thenReturn("1").thenReturn(2).thenReturn("3");
+        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, 3, subSteps);
         verify(subSteps, times(3)).execute(Optional.empty());
     }
 
     @Test
     void shouldPerformTheStepsAndExitWhenLimitReached()
     {
-        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, KEY, subSteps);
+        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, 1, subSteps);
         verify(subSteps, times(10)).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldNotPerformTheStepsInWhileIfVariableValueIsNotNumber()
+    {
+        String value = "this is a string";
+        when(bddVariableContext.getVariable(KEY)).thenReturn(value);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, 1, subSteps));
+        assertEquals("Value of 'key' variable is not a number: " + value, exception.getMessage());
     }
 
     @Test

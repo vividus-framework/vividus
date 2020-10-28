@@ -82,36 +82,31 @@ public class ExecutableSteps
     }
 
     /**
-     * Executes the steps while variable doesn't have a value fitting defined rules or limit is reached.
-     * <br>
-     * <b>Example:</b>
-     * <br>
+     * Executes the steps while variable doesn't match to the coparison rule or until the maximum number of iterations
+     * is reached.<br>
+     * <b>Example:</b><br>
      * <code>
-     * When I execute steps at most 5 times while `var` is &lt; `3`:
-     * <br>
-     * |step                                                                        |
-     * <br>
-     * |When I click on element located `id(counter)`                               |
-     * <br>
-     * |When I set the text found in search context to the 'scenario' variable 'var'|
-     * <br>
+     * When I execute steps at most 5 times while `var` is &lt; `3`:<br>
+     * |step                                                                        |<br>
+     * |When I click on element located `id(counter)`                               |<br>
+     * |When I set the text found in search context to the 'scenario' variable 'var'|<br>
      * </code>
-     * @param max Maximum iteration number
+     * @param max Maximum number of iterations
      * @param name Variable name to check
      * @param comparisonRule The rule to compare values
      * (&lt;i&gt;Possible values:&lt;b&gt; LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
      * EQUAL_TO&lt;/b&gt;&lt;/i&gt;)
-     * @param expectedValue The expected value of the variable
+     * @param expectedValue The expected value of the variable (it must be a number)
      * @param stepsToExecute The examples table with the steps to execute
      */
     @When("I execute steps at most $max times while variable "
-            + "`$variableName` is $comparisonRule `$expectedValue`:$stepsToExeute")
+            + "`$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute")
     @Alias("I execute steps at most $max times while variable "
-            + "'$variableName' is $comparisonRule '$expectedValue':$stepsToExeute")
-    public void executeStepsWhile(int max, String name, ComparisonRule comparisonRule, String expectedValue,
+            + "'$variableName' is $comparisonRule '$expectedValue':$stepsToExecute")
+    public void executeStepsWhile(int max, String name, ComparisonRule comparisonRule, int expectedValue,
             SubSteps stepsToExecute)
     {
-        Matcher<String> valueVerifier = comparisonRule.getComparisonRule(expectedValue);
+        Matcher<Integer> valueVerifier = comparisonRule.getComparisonRule(expectedValue);
         int iterationsLeft = max;
         while (iterationsLeft > 0 && doesVariableValueMatch(name, valueVerifier))
         {
@@ -120,10 +115,17 @@ public class ExecutableSteps
         }
     }
 
-    private boolean doesVariableValueMatch(String name, Matcher<String> verifier)
+    private boolean doesVariableValueMatch(String name, Matcher<Integer> verifier)
     {
-        String variable = bddVariableContext.getVariable(name);
-        return variable == null || verifier.matches(variable);
+        Object variable = bddVariableContext.getVariable(name);
+        try
+        {
+            return variable == null || verifier.matches(Integer.parseInt(String.valueOf(variable)));
+        }
+        catch (NumberFormatException e)
+        {
+            throw new IllegalArgumentException("Value of '" + name + "' variable is not a number: " + variable + "", e);
+        }
     }
 
     /**
