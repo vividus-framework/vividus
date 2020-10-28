@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.action.search;
-
-import javax.inject.Inject;
+package org.vividus.ui.action.search;
 
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.IWebElementActions;
+import org.vividus.ui.action.ElementActions;
 
-public class TextPartFilter extends AbstractElementFilterAction
+public class GenericTextPartFilter implements IElementFilterAction
 {
-    @Inject private IWebElementActions webElementActions;
+    private final LocatorType locatorType;
+    private final ElementActions elementActions;
 
-    public TextPartFilter()
+    public GenericTextPartFilter(LocatorType locatorType, ElementActions elementActions)
     {
-        super(WebLocatorType.TEXT_PART);
+        this.locatorType = locatorType;
+        this.elementActions = elementActions;
     }
 
     @Override
-    protected boolean matches(WebElement element, String textPart)
+    public boolean matches(WebElement element, String textPart)
     {
-        return webElementActions.getElementText(element).contains(textPart);
+        return elementActions.getElementText(element).contains(textPart);
+    }
+
+    @Override
+    public LocatorType getType()
+    {
+        return locatorType;
     }
 }

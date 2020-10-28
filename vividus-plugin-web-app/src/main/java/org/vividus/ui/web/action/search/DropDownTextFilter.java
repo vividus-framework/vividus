@@ -18,20 +18,23 @@ package org.vividus.ui.web.action.search;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
+import org.vividus.ui.action.search.IElementFilterAction;
+import org.vividus.ui.action.search.LocatorType;
 
-public class DropDownTextFilter extends AbstractElementFilterAction
+public class DropDownTextFilter implements IElementFilterAction
 {
-    public DropDownTextFilter()
-    {
-        super(WebLocatorType.DROP_DOWN_TEXT);
-    }
-
     @Override
-    protected boolean matches(WebElement element, String text)
+    public boolean matches(WebElement element, String text)
     {
         return new Select(element).getAllSelectedOptions().stream()
                 .map(WebElement::getText)
                 .map(String::trim)
                 .anyMatch(text::equals);
+    }
+
+    @Override
+    public LocatorType getType()
+    {
+        return WebLocatorType.DROP_DOWN_TEXT;
     }
 }

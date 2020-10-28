@@ -20,11 +20,13 @@ import java.util.List;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
-public class ImageWithSourcePartFilter extends AbstractElementFilterAction implements IElementSearchAction
+public class ImageWithSourcePartFilter extends AbstractWebElementSearchAction
+        implements IElementSearchAction, IElementFilterAction
 {
     public ImageWithSourcePartFilter()
     {
@@ -39,7 +41,7 @@ public class ImageWithSourcePartFilter extends AbstractElementFilterAction imple
     }
 
     @Override
-    protected boolean matches(WebElement element, String imageSrcPart)
+    public boolean matches(WebElement element, String imageSrcPart)
     {
         return element.getAttribute("src").contains(imageSrcPart);
     }

@@ -80,4 +80,10 @@ class PlaceholderFilterTests
         verifyNoInteractions(webElement);
         assertEquals(webElements, foundElements);
     }
+
+    @Test
+    void shoudReturnLocatorType()
+    {
+        assertEquals(WebLocatorType.PLACEHOLDER, filter.getType());
+    }
 }

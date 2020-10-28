@@ -69,4 +69,10 @@ public class LinkUrlPartSearch extends AbstractWebElementSearchAction
     {
         this.caseSensitiveSearch = caseSensitiveSearch;
     }
+
+    @Override
+    public boolean matches(WebElement element, String value)
+    {
+        throw new UnsupportedOperationException();
+    }
 }

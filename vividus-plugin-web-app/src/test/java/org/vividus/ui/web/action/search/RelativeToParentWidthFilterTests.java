@@ -117,6 +117,12 @@ class RelativeToParentWidthFilterTests
         assertEquals(List.of(), foundElements);
     }
 
+    @Test
+    void shouldReturnLocatorType()
+    {
+        assertEquals(WebLocatorType.RELATIVE_TO_PARENT_WIDTH, filter.getType());
+    }
+
     private void mockWebElementWidth(WebElement webElement, String webElementWidth, Dimension dimension)
     {
         when(webElement.getSize()).thenReturn(dimension);

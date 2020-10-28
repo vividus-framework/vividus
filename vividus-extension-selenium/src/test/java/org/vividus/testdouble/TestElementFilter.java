@@ -35,4 +35,10 @@ public class TestElementFilter implements IElementFilterAction
     {
         return TestLocatorType.FILTER;
     }
+
+    @Override
+    public boolean matches(WebElement element, String value)
+    {
+        throw new UnsupportedOperationException();
+    }
 }

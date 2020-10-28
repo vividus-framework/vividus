@@ -15,8 +15,8 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
-Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Appium XPath Locator
-Then number of elements found by `xpath(<mainViewHeaderTextXpath>)` is equal to `1`
+Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Text Part Filter
+Then number of elements found by `xpath(<textElementXpath>)->filter.textPart(Home)` is equal to `1`
 
 
 Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Accessibility Id Locator
@@ -43,7 +43,7 @@ When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityI
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
-Scenario: Verify step: 'When I clear field located `$locator`'
+Scenario: Verify step: 'When I clear field located `$locator`' and Appium XPath Locator
 When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
 Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
 
