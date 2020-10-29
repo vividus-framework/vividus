@@ -16,6 +16,9 @@
 
 package org.vividus.mobileapp.action;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -23,7 +26,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +51,7 @@ import org.vividus.ui.mobile.action.search.AppiumLocatorType;
 
 import io.appium.java_client.HidesKeyboard;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class KeyboardActionsTests
 {
     private static final String TEXT = "text";
@@ -58,6 +66,8 @@ class KeyboardActionsTests
     @Mock private HidesKeyboard hidesKeyboard;
 
     private KeyboardActions keyboardActions;
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(KeyboardActions.class);
 
     @AfterEach
     void afterEach()
@@ -78,6 +88,7 @@ class KeyboardActionsTests
 
         verify(element).sendKeys(TEXT);
         verify(hidesKeyboard).hideKeyboard();
+        assertThat(logger.getLoggingEvents(), is(List.of(info("Typing text '{}' into the field", TEXT))));
     }
 
     @Test

@@ -17,6 +17,8 @@
 package org.vividus.mobileapp.action;
 
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.ui.action.ISearchActions;
@@ -29,6 +31,8 @@ import io.appium.java_client.HidesKeyboard;
 
 public class KeyboardActions
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyboardActions.class);
+
     private final TouchActions touchActions;
     private final IWebDriverProvider webDriverProvider;
     private final GenericWebDriverManager genericWebDriverManager;
@@ -59,6 +63,7 @@ public class KeyboardActions
      */
     public void typeText(WebElement element, String text)
     {
+        LOGGER.atInfo().addArgument(text).log("Typing text '{}' into the field");
         performWithHideKeyboard(() -> element.sendKeys(text));
     }
 
