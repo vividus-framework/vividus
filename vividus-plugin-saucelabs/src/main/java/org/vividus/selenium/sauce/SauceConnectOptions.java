@@ -95,10 +95,7 @@ public class SauceConnectOptions
         }
         if (restUrl != null)
         {
-            // Workaround for https://github.com/saucelabs/ci-sauce/pull/74
-            String trimmedRestUrl = restUrl.trim();
-
-            appendOption(options, "rest-url", trimmedRestUrl);
+            appendOption(options, "rest-url", restUrl);
         }
         appendOption(options, "no-remove-colliding-tunnels");
         appendOption(options, "no-proxy-caching");
