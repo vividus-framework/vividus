@@ -24,6 +24,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -42,14 +44,9 @@ class ExecutableStepsTests
     private static final String KEY = "key";
     private static final String ITERATION_VARIABLE = "iterationVariable";
 
-    @Mock
-    private IBddVariableContext bddVariableContext;
-
-    @Mock
-    private SubSteps subSteps;
-
-    @InjectMocks
-    private ExecutableSteps executableSteps;
+    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private SubSteps subSteps;
+    @InjectMocks private ExecutableSteps executableSteps;
 
     @Test
     void testTrue()
@@ -81,18 +78,26 @@ class ExecutableStepsTests
     }
 
     @Test
-    void shouldPerformTheStepsAndWhenVariableValueFitsExit()
+    void shouldPerformTheStepsAndStopWhenSimpleVariableValueMatches()
     {
-        String three = "3";
-        when(bddVariableContext.getVariable(KEY)).thenReturn(null).thenReturn("1").thenReturn("2").thenReturn(three);
-        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, three, subSteps);
+        when(bddVariableContext.getVariable(KEY)).thenReturn(null).thenReturn("1").thenReturn(2).thenReturn("3");
+        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, 3, subSteps);
         verify(subSteps, times(3)).execute(Optional.empty());
     }
 
     @Test
-    void shouldPerformTheStepsAndExitWhenLimitReached()
+    void shouldPerformTheStepsAndStopWhenMapVariableValueMatches()
     {
-        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, KEY, subSteps);
+        Map<String, String> expectedValue = Map.of("x", "y");
+        when(bddVariableContext.getVariable(KEY)).thenReturn(List.of(expectedValue)).thenReturn(List.of());
+        executableSteps.executeStepsWhile(3, KEY, ComparisonRule.EQUAL_TO, List.of(expectedValue), subSteps);
+        verify(subSteps, times(1)).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldPerformTheStepsAndStopWhenLimitReached()
+    {
+        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, 1, subSteps);
         verify(subSteps, times(10)).execute(Optional.empty());
     }
 
