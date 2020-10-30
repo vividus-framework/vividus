@@ -191,7 +191,7 @@ public class SauceConnectOptionsTests
     @Test
     public void testBuildWithRestUrl() throws IOException
     {
-        sauceConnectOptions.setRestUrl(SPACE + SAUCE_LABS_REST_URL + SPACE);
+        sauceConnectOptions.setRestUrl(SAUCE_LABS_REST_URL);
         assertEquals("--rest-url" + SPACE + SAUCE_LABS_REST_URL + SPACE + NO_REMOVE_COLLIDING_TUNNELS + SPACE
                 + NO_PROXY_CACHING, sauceConnectOptions.build(null));
     }
