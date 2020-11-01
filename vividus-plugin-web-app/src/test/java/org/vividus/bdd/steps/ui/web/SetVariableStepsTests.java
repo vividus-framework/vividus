@@ -230,28 +230,6 @@ class SetVariableStepsTests
     }
 
     @Test
-    void testGetNumberOfElementsByXpathToScenarioVariable()
-    {
-        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        WebElement webElement = mock(WebElement.class);
-        when(searchActions.findElements(webDriver, locator)).thenReturn(Collections.singletonList(webElement));
-        setVariableSteps.getNumberOfElementsByXpathToVariable(locator, VARIABLE_SCOPE, NUMBER_BY_XPATH);
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, NUMBER_BY_XPATH, 1);
-    }
-
-    @Test
-    void testGetNumberOfElementsByXpathToScenarioVariable2()
-    {
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
-        WebElement webElement = mock(WebElement.class);
-        when(searchActions.findElements(webDriver, locator)).thenReturn(Collections.singletonList(webElement));
-        setVariableSteps.getNumberOfElementsByXpathToVariable(locator, VARIABLE_SCOPE, NUMBER_BY_XPATH);
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, NUMBER_BY_XPATH, 1);
-    }
-
-    @Test
     void testGetNumberOfElementsByAttributeValueToStoryVariable()
     {
         when(uiContext.getSearchContext()).thenReturn(webDriver);

@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.steps.ui;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -28,6 +29,7 @@ import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ElementActions;
+import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
@@ -40,15 +42,18 @@ public class GenericSetVariableSteps
     private final IBddVariableContext bddVariableContext;
     private final ElementActions elementActions;
     private final IUiContext uiContext;
+    private final ISearchActions searchActions;
 
     public GenericSetVariableSteps(ISoftAssert softAssert, IBaseValidations baseValidations,
-            IBddVariableContext bddVariableContext, ElementActions elementActions, IUiContext uiContext)
+            IBddVariableContext bddVariableContext, ElementActions elementActions, IUiContext uiContext,
+            ISearchActions searchActions)
     {
         this.softAssert = softAssert;
         this.baseValidations = baseValidations;
         this.bddVariableContext = bddVariableContext;
         this.elementActions = elementActions;
         this.uiContext = uiContext;
+        this.searchActions = searchActions;
     }
 
     /**
@@ -127,6 +132,33 @@ public class GenericSetVariableSteps
         Optional<Object> value = baseValidations.assertElementExists("The element to extract the attribute", locator)
                                                 .map(element -> getAssertedAttributeValue(element, attributeName));
         putVariable(scopes, variableName, value);
+    }
+
+    /**
+     * Extracts the <b>number</b> of elements found by <b>locator</b> and saves it to the <b>variable</b> with the
+     * specified <b>variableName</b>
+     * Actions performed at this step:
+     * <ul>
+     * <li>Finds the elements by <b>locator</b>
+     * <li>Saves the number of found elements into the <i>variable</i>
+     * </ul>
+     * @param locator locator to locate elements
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName A name under which the value should be saved
+     */
+    @When("I save number of elements located `$locator` to $scopes variable `$variableName`")
+    public void saveNumberOfElementsToVariable(Locator locator, Set<VariableScope> scopes,
+            String variableName)
+    {
+        List<WebElement> elements = searchActions.findElements(locator);
+        putVariable(scopes, variableName, Optional.of(elements.size()));
     }
 
     private void saveVariableIfContextElementPresent(Function<WebElement, Object> contextElementProcessor,
