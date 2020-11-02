@@ -113,3 +113,10 @@ When I wait until element located `accessibilityId(Recents)` appears
 When I tap on element located `accessibilityId(Recents)`
 When I tap on element located `xpath((//XCUIElementTypeCell[contains(@name, "Photo")])[last()])`
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`
+
+
+Scenario: Verify step: 'When I activate application with bundle identifier `$bundleId`'
+When I activate application with bundle identifier `${browser-app}`
+When I wait until element located `accessibilityId(<togglerAccessibilityId>)` disappears
+When I activate application with bundle identifier `${main-app}`
+When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears
