@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.Given;
+import org.jbehave.core.annotations.When;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,7 @@ import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.util.property.PropertyParser;
 
 import io.appium.java_client.HasSessionDetails;
+import io.appium.java_client.InteractsWithApps;
 
 public class ApplicationSteps
 {
@@ -72,5 +75,19 @@ public class ApplicationSteps
         LOGGER.atInfo()
               .addArgument(() -> details.getSessionDetail("app"))
               .log("Started application located at {}");
+    }
+
+    /**
+     * Activates the application if it's installed, but not running or if it is running in the
+     * background.
+     * @param bundleId bundle identifier of the application to activate.
+     */
+    @When("I activate application with bundle identifier `$bundleId`")
+    public void activateApp(String bundleId)
+    {
+        InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
+        Validate.isTrue(interactor.isAppInstalled(bundleId),
+                "Application with the bundle identifier '%s' is not installed on the device", bundleId);
+        interactor.activateApp(bundleId);
     }
 }
