@@ -40,3 +40,13 @@ When I change context to the page
 Scenario: Verify step: "When I save `$attributeName` attribute value of element located `$locator` to $scopes variable `$variableName`"
 When I save `name` attribute value of element located `By.id(text)` to SCENARIO variable `variableName`
 Then `text` is equal to `${variableName}`
+
+
+Scenario: Verify save number of elements steps
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+When I save number of elements located `tagName(a)` to SCENARIO variable `numberOfLinks`
+Then `${numberOfLinks}` is equal to `1`
+When I set the number of elements found `tagName(a)` to SCENARIO variable `numberOfLinks`
+Then `${numberOfLinks}` is equal to `1`
+When I set the number of elements found by xpath '//a' to the 'SCENARIO' variable 'numberOfLinks'
+Then `${numberOfLinks}` is equal to `1`

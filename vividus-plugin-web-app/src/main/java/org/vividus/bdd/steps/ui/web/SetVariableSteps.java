@@ -228,33 +228,6 @@ public class SetVariableSteps
     }
 
     /**
-     * Extracts the <b>number</b> of elements found by specified <b>XPath</b> in the context
-     * and saves it into the <b>variable</b> with the specified <b>name</b>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Finds the elements by <b>xpath</b>
-     * <li>Saves the number of found elements into the <i>variable</i>
-     * </ul>
-     * @param locator to locate elements
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A name under which the value should be saved
-     */
-    @When("I set the number of elements found `$locator` to $scopes variable `$variableName`")
-    public void getNumberOfElementsByXpathToVariable(Locator locator, Set<VariableScope> scopes,
-            String variableName)
-    {
-        List<WebElement> elements = searchActions.findElements(getSearchContext(), locator);
-        saveVariable(scopes, variableName, elements.size());
-    }
-
-    /**
      * Extracts the <b>number</b> of elements found by the specified <b>attribute value</b> in the context
      * and saves it into the <b>variable</b> with the specified <b>name</b>
      * Actions performed at this step:

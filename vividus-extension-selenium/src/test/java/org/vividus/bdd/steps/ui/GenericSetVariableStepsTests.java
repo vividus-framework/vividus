@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -40,6 +41,7 @@ import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ElementActions;
+import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
@@ -59,6 +61,7 @@ class GenericSetVariableStepsTests
     @Mock private IBddVariableContext bddVariableContext;
     @Mock private ElementActions elementActions;
     @Mock private IUiContext uiContext;
+    @Mock private ISearchActions searchActions;
     @InjectMocks private GenericSetVariableSteps genericSetVariableSteps;
 
     @AfterEach
@@ -117,5 +120,17 @@ class GenericSetVariableStepsTests
         genericSetVariableSteps.saveAttributeValueOfElementByLocatorToVariable(ATTRIBUTE_NAME, locator, VARIABLE_SCOPE,
                 VARIABLE_NAME);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, value);
+    }
+
+    @Test
+    void shouldSaveNumberOfElementsToVariable()
+    {
+        Locator locator = mock(Locator.class);
+        WebElement webElement = mock(WebElement.class);
+        when(searchActions.findElements(locator)).thenReturn(List.of(webElement));
+
+        genericSetVariableSteps.saveNumberOfElementsToVariable(locator, VARIABLE_SCOPE, VARIABLE_NAME);
+
+        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, 1);
     }
 }
