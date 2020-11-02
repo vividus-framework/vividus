@@ -17,23 +17,27 @@
 package org.vividus.ui.action.search;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.ui.action.ElementActions;
 
-public class GenericTextPartFilter implements IElementFilterAction
+public class GenericTextFilter implements IElementFilterAction
 {
     private final LocatorType locatorType;
+    private final StringComparisonRule comparisonRule;
     private final ElementActions elementActions;
 
-    public GenericTextPartFilter(LocatorType locatorType, ElementActions elementActions)
+    public GenericTextFilter(LocatorType locatorType, StringComparisonRule comparisonRule,
+            ElementActions elementActions)
     {
         this.locatorType = locatorType;
         this.elementActions = elementActions;
+        this.comparisonRule = comparisonRule;
     }
 
     @Override
-    public boolean matches(WebElement element, String textPart)
+    public boolean matches(WebElement element, String text)
     {
-        return elementActions.getElementText(element).contains(textPart);
+        return comparisonRule.createMatcher(text).matches(elementActions.getElementText(element));
     }
 
     @Override

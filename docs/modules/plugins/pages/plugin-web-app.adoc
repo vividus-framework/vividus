@@ -15,6 +15,21 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '{
 
 include::partial$locator-header.adoc[]
 
+
+=== Filter Types
+
+[cols="1,2,2", options="header"]
+|===
+
+|Type
+|Description
+|Examples
+
+include::partial$common-filters.adoc[]
+
+|===
+
+
 === Locator Types
 
 [cols="1,2,1", options="header"]

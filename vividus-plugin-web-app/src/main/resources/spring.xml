@@ -133,8 +133,9 @@
     <bean class="org.vividus.ui.web.action.search.TooltipFilter" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.StateFilter" parent="abstractStateFilter" />
     <bean class="org.vividus.ui.web.action.search.RelativeToParentWidthFilter"/>
-    <bean class="org.vividus.ui.action.search.GenericTextPartFilter" >
+    <bean class="org.vividus.ui.action.search.GenericTextFilter" >
         <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).TEXT_PART}" />
+        <constructor-arg index="1" value="#{T(org.vividus.bdd.steps.StringComparisonRule).CONTAINS}" />
     </bean>
     <bean class="org.vividus.ui.web.action.search.ValidationIconSourceFilter" />
     <bean class="org.vividus.ui.web.action.search.PlaceholderFilter" />
