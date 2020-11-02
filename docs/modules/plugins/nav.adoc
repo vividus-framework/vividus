@@ -9,6 +9,7 @@
 * xref:plugin-email.adoc[Email]
 * xref:plugin-excel.adoc[Excel]
 * xref:plugin-html.adoc[HTML*]
+* xref:plugin-kafka.adoc[Kafka]
 * xref:plugin-mobile-app.adoc[Mobile Application]
 * xref:plugin-mongodb.adoc[MongoDB*]
 * xref:plugin-parquet.adoc[Parquet*]

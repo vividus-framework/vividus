@@ -14,6 +14,7 @@ dependencies {
     implementation project(':vividus-plugin-mongodb')
     implementation project(':vividus-plugin-csv')
     implementation project(':vividus-plugin-datetime')
+    implementation project(':vividus-plugin-kafka')
     implementation project(':vividus-plugin-html')
     implementation project(':vividus-plugin-rest-api')
     implementation project(':vividus-plugin-saucelabs')
