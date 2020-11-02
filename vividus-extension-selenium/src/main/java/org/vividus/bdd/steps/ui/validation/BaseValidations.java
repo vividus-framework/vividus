@@ -359,26 +359,44 @@ public class BaseValidations implements IBaseValidations
     }
 
     @Override
+    public List<WebElement> assertNumberOfElementsFound(String description, Locator locator, int number,
+            ComparisonRule comparisonRule)
+    {
+        return runValidatingSearchContext(uiContext.getSearchContext(), () ->
+        {
+            validateRule(locator, number, comparisonRule);
+            List<WebElement> elements = searchActions.findElements(uiContext.getSearchContext(), locator);
+            assertElementsNumber(description, elements, comparisonRule, number);
+            return elements;
+        }, List.of());
+    }
+
+    @Override
     public List<WebElement> assertIfNumberOfElementsFound(String businessDescription, SearchContext searchContext,
             Locator locator, int number, ComparisonRule comparisonRule)
     {
         return runValidatingSearchContext(searchContext, () ->
         {
-            if (number == 0)
-            {
-                isTrue(ComparisonRule.LESS_THAN != comparisonRule,
-                        "Invalid input rule: the number of elements can not be less than 0");
-                if (ComparisonRule.EQUAL_TO == comparisonRule || ComparisonRule.LESS_THAN_OR_EQUAL_TO == comparisonRule)
-                {
-                    locator.getSearchParameters().setWaitForElement(false);
-                }
-            }
+            validateRule(locator, number, comparisonRule);
             List<WebElement> elements = searchActions.findElements(searchContext, locator);
             String systemDescription = String.format("Number of elements found by '%s' is %s %d", locator,
                     comparisonRule, number);
             return softAssert.assertThat(businessDescription, systemDescription, elements,
                     elementNumber(comparisonRule.getComparisonRule(number))) ? elements : List.of();
         }, List.of());
+    }
+
+    private static void validateRule(Locator locator, int number, ComparisonRule comparisonRule)
+    {
+        if (number == 0)
+        {
+            isTrue(ComparisonRule.LESS_THAN != comparisonRule,
+                    "Invalid input rule: the number of elements can not be less than 0");
+            if (ComparisonRule.EQUAL_TO == comparisonRule || ComparisonRule.LESS_THAN_OR_EQUAL_TO == comparisonRule)
+            {
+                locator.getSearchParameters().setWaitForElement(false);
+            }
+        }
     }
 
     @Override
