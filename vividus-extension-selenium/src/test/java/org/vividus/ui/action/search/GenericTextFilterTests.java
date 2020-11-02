@@ -29,11 +29,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.action.ElementActions;
 
 @ExtendWith(MockitoExtension.class)
-class GenericTextPartFilterTests
+class GenericTextFilterTests
 {
     private static final String SOME_TEXT = "Some text";
 
@@ -41,13 +42,13 @@ class GenericTextPartFilterTests
 
     @Mock private WebElement webElement;
     @Mock private ElementActions elementActions;
-    private GenericTextPartFilter filter;
+    private GenericTextFilter filter;
 
     @BeforeEach
     void beforeEach()
     {
         webElements = List.of(webElement);
-        filter = new GenericTextPartFilter(TestLocatorType.FILTER, elementActions);
+        filter = new GenericTextFilter(TestLocatorType.FILTER, StringComparisonRule.CONTAINS, elementActions);
     }
 
     @Test

@@ -15,8 +15,9 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
-Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Text Part Filter
-Then number of elements found by `xpath(<textElementXpath>)->filter.textPart(Home)` is equal to `1`
+Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Text Part Filter and Text Filter
+Then number of elements found by `xpath(<textElementXpath>)->filter.textPart(om)` is equal to `1`
+Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `1`
 
 
 Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Accessibility Id Locator

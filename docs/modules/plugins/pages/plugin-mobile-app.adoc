@@ -13,6 +13,25 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version:
 
 include::partial$locator-header.adoc[]
 
+
+=== Filter Types
+
+[cols="1,2,2", options="header"]
+|===
+
+|Type
+|Description
+|Examples
+
+include::partial$common-filters.adoc[]
+
+|text
+|Filter elements by their exact text.
+|tagName(android.widget.EditText)->filter.text(Welcome)
+
+|===
+
+
 === Locator Types
 :locator-strategy: https://appium.io/docs/en/commands/element/find-elements/index.html#selector-strategies
 

@@ -18,7 +18,7 @@ package org.vividus.ui.web.action.search;
 
 import java.util.Set;
 
-import org.vividus.ui.action.search.GenericTextPartFilter;
+import org.vividus.ui.action.search.GenericTextFilter;
 import org.vividus.ui.action.search.IElementAction;
 import org.vividus.ui.action.search.LocatorType;
 
@@ -35,7 +35,7 @@ public enum WebLocatorType implements LocatorType
     IMAGE_SRC_PART("Image source part", ImageWithSourcePartFilter.class),
     BUTTON_NAME("Button name", ButtonNameSearch.class),
     FIELD_NAME("Field name", FieldNameSearch.class),
-    TEXT_PART("Text part", GenericTextPartFilter.class),
+    TEXT_PART("Text part", GenericTextFilter.class),
     PLACEHOLDER("Placeholder", PlaceholderFilter.class),
     STATE("State", StateFilter.class),
     DROP_DOWN_STATE("Drop down state", DropDownStateFilter.class),
