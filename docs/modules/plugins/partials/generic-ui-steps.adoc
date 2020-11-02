@@ -343,3 +343,32 @@ Then element located 'id(banner)' exists for 'PT5S' duration
  When I navigate back
  Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `0`
  ----
+
+=== Verify elements order
+
+==== *_Info_*
+
+Gets a collection of elements by locator and checks that they are sorted by their text in the specified order. The collection should have more than 1 element with not empty text, otherwise the step fails.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then elements located `$locator` are sorted by text in $sortingOrder order
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$sortingOrder` - either https://www.computerhope.com/jargon/a/ascendin.htm[ASCENDING] or https://www.computerhope.com/jargon/d/descorde.htm[DESCENDING] order
+
+==== *_Usage_*
+
+.OrderVerification.story
+[source,gherkin]
+----
+Scenario: Check items are sorted
+Given I am on a page with the URL 'https://grocery.by'
+When I click on element located `By.id(a-z)`
+Then elements located `By.xpath(//span[@id='item-to-purchase'])` are sorted by text in ascending order
+----
