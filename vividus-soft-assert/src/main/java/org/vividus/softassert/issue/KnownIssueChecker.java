@@ -119,7 +119,7 @@ public class KnownIssueChecker implements IKnownIssueChecker
             if (issue == null || bestPatternsMatched < currentPatternsMatched)
             {
                 bestPatternsMatched = currentPatternsMatched;
-                issue = new KnownIssue(candidateId, candidate.getType(), potentiallyKnown);
+                issue = new KnownIssue(candidateId, candidate, potentiallyKnown);
                 return bestPatternsMatched == ALL_PATTERNS;
             }
             return false;

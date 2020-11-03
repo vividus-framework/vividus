@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.report.allure.IAllureStepReporter;
 import org.vividus.softassert.event.AssertionFailedEvent;
+import org.vividus.softassert.issue.KnownIssueIdentifier;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
 
@@ -54,7 +55,7 @@ class AllureAssertionFailureListenerTests
     @Test
     void testOnAssertionFailureKnownIssue()
     {
-        mockSoftAssertionError(new KnownIssue(null, null, false));
+        mockSoftAssertionError(new KnownIssue(null, new KnownIssueIdentifier(), false));
         listener.onAssertionFailure(assertionFailedEvent);
         verify(allureStepReporter).updateStepStatus(null);
     }
@@ -62,7 +63,7 @@ class AllureAssertionFailureListenerTests
     @Test
     void testOnAssertionFailureKnownIssueFixed()
     {
-        KnownIssue knownIssue = new KnownIssue(null, null, false);
+        KnownIssue knownIssue = new KnownIssue(null, new KnownIssueIdentifier(), false);
         knownIssue.setStatus("Closed");
         knownIssue.setResolution("Fixed");
         mockSoftAssertionError(knownIssue);

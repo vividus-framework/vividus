@@ -28,6 +28,8 @@ public class KnownIssueIdentifier
     private Pattern testCaseCompiledPattern;
     private Pattern testStepCompiledPattern;
     private Pattern assertionCompiledPattern;
+    private boolean failTestCaseFast;
+    private boolean failTestSuiteFast;
     private Map<String, Pattern> additionalCompiledPatterns = Collections.emptyMap();
     private Map<String, Pattern> dynamicCompiledPatterns = Collections.emptyMap();
     private Map<String, Pattern> runtimeDataPatterns = Map.of();
@@ -60,6 +62,26 @@ public class KnownIssueIdentifier
     public void setAssertionPattern(String assertionPattern)
     {
         this.assertionCompiledPattern = Pattern.compile(assertionPattern, Pattern.DOTALL);
+    }
+
+    public boolean isFailTestCaseFast()
+    {
+        return failTestCaseFast;
+    }
+
+    public void setFailTestCaseFast(boolean failTestCaseFast)
+    {
+        this.failTestCaseFast = failTestCaseFast;
+    }
+
+    public boolean isFailTestSuiteFast()
+    {
+        return failTestSuiteFast;
+    }
+
+    public void setFailTestSuiteFast(boolean failTestSuiteFast)
+    {
+        this.failTestSuiteFast = failTestSuiteFast;
     }
 
     public Map<String, Pattern> getAdditionalCompiledPatterns()
