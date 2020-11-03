@@ -44,6 +44,7 @@ import org.apache.commons.io.FileUtils;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -51,7 +52,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
@@ -61,6 +62,7 @@ import org.vividus.util.freemarker.FreemarkerProcessor;
 
 import freemarker.template.TemplateException;
 
+@ExtendWith(MockitoExtension.class)
 class BddVariableStepsTests
 {
     private static final String TABLES_ASSERT_MESSAGE = "Tables comparison result";
@@ -80,7 +82,6 @@ class BddVariableStepsTests
     @BeforeEach
     void beforeEach()
     {
-        MockitoAnnotations.initMocks(this);
         bddVariableSteps.setFreemarkerProcessor(freemarkerProcessor);
     }
 

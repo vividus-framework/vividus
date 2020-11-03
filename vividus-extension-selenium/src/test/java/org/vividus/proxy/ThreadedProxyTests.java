@@ -36,17 +36,16 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.model.IntegerRange;
 
-@ExtendWith(TestLoggerFactoryExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ThreadedProxyTests
 {
     private static final TestLogger TEST_LOGGER = TestLoggerFactory.getTestLogger(ThreadedProxy.class);
@@ -66,25 +65,15 @@ class ThreadedProxyTests
         }
     }
 
-    @Mock
-    private Proxy proxy;
-
-    @Mock
-    private IProxyFactory proxyFactory;
-
+    @Mock private Proxy proxy;
+    @Mock private IProxyFactory proxyFactory;
     private ThreadedProxy threadedProxy;
-
-    @BeforeEach
-    void before()
-    {
-        MockitoAnnotations.initMocks(this);
-        when(proxyFactory.createProxy()).thenReturn(proxy);
-    }
 
     @Test
     void testAllocatePort() throws UnknownHostException
     {
         int port = 55_389;
+        when(proxyFactory.createProxy()).thenReturn(proxy);
         BrowserUpProxy mobProxy = mock(BrowserUpProxy.class);
         when(proxy.getProxyServer()).thenReturn(mobProxy);
         when(mobProxy.getPort()).thenReturn(port);
@@ -147,6 +136,7 @@ class ThreadedProxyTests
     @Test
     void testAllocateNoPortsAvailable() throws UnknownHostException
     {
+        when(proxyFactory.createProxy()).thenReturn(proxy);
         threadedProxy = new ThreadedProxy(LOCALHOST, range(54_786), proxyFactory);
         threadedProxy.start();
         Exception exception = assertThrows(IllegalArgumentException.class, threadedProxy::start);
@@ -237,6 +227,7 @@ class ThreadedProxyTests
     private void defaultInit() throws UnknownHostException
     {
         threadedProxy = new ThreadedProxy(LOCALHOST, range(0), proxyFactory);
+        when(proxyFactory.createProxy()).thenReturn(proxy);
     }
 
     private IntegerRange range(Integer... numbers)

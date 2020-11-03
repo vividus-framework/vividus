@@ -73,7 +73,7 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.internal.configuration.plugins.Plugins;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.batch.BatchExecutionConfiguration;
 import org.vividus.bdd.batch.BatchStorage;
@@ -192,10 +192,10 @@ class AllureStoryReporterTests
     }
 
     @BeforeEach
-    void beforeEach() throws NoSuchFieldException
+    void beforeEach() throws NoSuchFieldException, IllegalAccessException
     {
-        FieldSetter.setField(allureStoryReporter, allureStoryReporter.getClass().
-                getDeclaredField("lifecycle"), allureLifecycle);
+        Plugins.getMemberAccessor().set(allureStoryReporter.getClass().getDeclaredField("lifecycle"),
+                allureStoryReporter, allureLifecycle);
         linkedQueueItem = new LinkedQueueItem<>(SCENARIO_UID);
         allureStoryReporter.setNext(next);
     }
