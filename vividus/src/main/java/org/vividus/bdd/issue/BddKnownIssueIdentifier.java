@@ -44,4 +44,14 @@ public class BddKnownIssueIdentifier extends KnownIssueIdentifier
     {
         setRuntimeDataPatterns(patterns);
     }
+
+    public void setFailStoryFast(boolean failStoryFast)
+    {
+        setFailTestSuiteFast(failStoryFast);
+    }
+
+    public void setFailScenarioFast(boolean failScenarioFast)
+    {
+        setFailTestCaseFast(failScenarioFast);
+    }
 }

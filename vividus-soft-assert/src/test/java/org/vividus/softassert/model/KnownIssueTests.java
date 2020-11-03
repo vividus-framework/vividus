@@ -18,13 +18,23 @@ package org.vividus.softassert.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.vividus.softassert.issue.KnownIssueIdentifier;
 import org.vividus.softassert.issue.KnownIssueType;
 
 class KnownIssueTests
 {
-    private final KnownIssue knownIssue = new KnownIssue("id", KnownIssueType.AUTOMATION, false);
+    private KnownIssue knownIssue;
+
+    @BeforeEach
+    void beforeEach()
+    {
+        KnownIssueIdentifier identifier = new KnownIssueIdentifier();
+        identifier.setType(KnownIssueType.AUTOMATION);
+        knownIssue = new KnownIssue("id", identifier, false);
+    }
 
     @ParameterizedTest
     @CsvSource({

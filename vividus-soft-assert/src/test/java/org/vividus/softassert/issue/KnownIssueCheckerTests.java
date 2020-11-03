@@ -17,6 +17,7 @@
 package org.vividus.softassert.issue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -339,5 +340,7 @@ class KnownIssueCheckerTests
         assertEquals(KnownIssueType.AUTOMATION, actual.getType());
         assertEquals(status, actual.getStatus());
         assertEquals(resolution, actual.getResolution());
+        assertFalse(actual.isFailTestCaseFast());
+        assertFalse(actual.isFailTestSuiteFast());
     }
 }
