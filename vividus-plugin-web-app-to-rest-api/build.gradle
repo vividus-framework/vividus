@@ -14,7 +14,6 @@ dependencies {
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
     testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)

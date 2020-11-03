@@ -27,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.util.property.IPropertyMapper;
@@ -60,7 +59,6 @@ class VariablesFactoryTests
     @BeforeEach
     void beforeEach()
     {
-        MockitoAnnotations.initMocks(this);
         IPropertyMapper propertyMapper = new PropertyMapper(propertyParser, Set.of());
         variablesFactory = new VariablesFactory(propertyParser, propertyMapper, bddRunContext);
 
