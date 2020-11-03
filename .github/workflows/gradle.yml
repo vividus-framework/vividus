@@ -128,11 +128,12 @@ jobs:
         APPLITOOLS_READ_KEY: ${{ secrets.APPLITOOLS_READ_KEY }}
         MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
         MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+        KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
       shell: bash
       run: |
-        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD ]]; then
+        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD && -n $KAFKA_PASSWORD ]]; then
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
-                                                -Pvividus.configuration.environments=system/web,system/db,system/mongo \
+                                                -Pvividus.configuration.environments=system/web,system/api \
                                                 -Pvividus.configuration.suite=system \
                                                 -Pvividus.configuration.profiles=browserstack/web,web/desktop/chrome \
                                                 -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
@@ -147,7 +148,7 @@ jobs:
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-name="System tests report"
         else
-            echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY and/or APPLITOOLS_EXECUTE_KEY and/or APPLITOOLS_READ_KEY and/or MONGODB_USERNAME and/or MONGODB_PASSWORD variables, System tests will be skipped
+            echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY and/or APPLITOOLS_EXECUTE_KEY and/or APPLITOOLS_READ_KEY and/or MONGODB_USERNAME and/or MONGODB_PASSWORD variables and/or KAFKA_PASSWORD, System tests will be skipped
         fi
 
     - name: Publish system tests report

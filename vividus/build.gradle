@@ -83,6 +83,7 @@ dependencies {
 
     integrationTestImplementation project(':vividus-plugin-csv')
     integrationTestImplementation project(':vividus-plugin-excel')
+    integrationTestImplementation project(':vividus-plugin-kafka')
     integrationTestImplementation project(':vividus-plugin-html')
     integrationTestImplementation project(':vividus-plugin-mobile-app')
     integrationTestImplementation project(':vividus-plugin-rest-api')

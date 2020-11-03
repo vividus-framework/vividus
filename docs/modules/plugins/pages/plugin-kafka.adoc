@@ -1,0 +1,48 @@
+= Kafka Plugin
+
+The plugin provides integration with an open-source distributed event streaming platform https://kafka.apache.org/[Apache Kafka].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-kafka', version: '{page-component-version}')
+----
+
+== Properties
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="3,2,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|[subs=+quotes]`*kafka.bootstrap.servers*`
+|`<host>:<port>`
+|
+|A comma-separated list of host and port pairs that are the addresses of the Kafka brokers in a "bootstrap" Kafka cluster that a Kafka client connects to initially to bootstrap itself.
+
+|===
+
+== Steps
+
+=== Send the data
+
+Sends the data to the provided topic with no key or partition.
+
+[source,gherkin]
+----
+When I send data `$data` to Kafka topic `$topic`
+----
+* `$data` the data to send
+* `$topic` the topic name
+
+.Send the data to Kafka topic
+[source,gherkin]
+----
+When I send data `my-data` to Kafka topic `my-topic`
+----
