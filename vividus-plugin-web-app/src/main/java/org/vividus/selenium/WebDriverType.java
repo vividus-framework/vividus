@@ -60,9 +60,8 @@ public enum WebDriverType
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
             prepareCapabilities(desiredCapabilities);
-            configuration.getBinaryPath()
-                    .ifPresent(binaryPath -> desiredCapabilities.setCapability(FirefoxDriver.BINARY, binaryPath));
             FirefoxOptions options = new FirefoxOptions(desiredCapabilities);
+            configuration.getBinaryPath().ifPresent(options::setBinary);
             options.addArguments(configuration.getCommandLineArguments());
             return new FirefoxDriver(options);
         }
