@@ -90,9 +90,9 @@ public enum WebDriverType
             prepareCapabilities(desiredCapabilities);
             InternetExplorerOptions options = new InternetExplorerOptions(desiredCapabilities);
             String[] switches = configuration.getCommandLineArguments();
-            options.addCommandSwitches(switches);
             if (switches.length > 0)
             {
+                options.addCommandSwitches(switches);
                 options.useCreateProcessApiToLaunchIe();
             }
             return new InternetExplorerDriver(options);
