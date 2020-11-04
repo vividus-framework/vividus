@@ -19,21 +19,21 @@ package org.vividus.selenium;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -48,134 +48,105 @@ import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(DataProviderRunner.class)
-@PowerMockIgnore("io.github.lukehutch.fastclasspathscanner.classpath.*")
-public class WebDriverTypeTests
+class WebDriverTypeTests
 {
     private static final String OPTION_VALUE = "iPhone 8";
     private static final String OPTION_KEY = "deviceName";
     private static final String MOBILE_EMULATION = "mobileEmulation";
     private static final String ARGUMENT = "allow-external-pages";
     private static final String PATH = "path";
-    private static final String IE_OPTIONS = "se:ieOptions";
 
-    @SuppressWarnings("unchecked")
-    private static DesiredCapabilities testGetFirefoxWebDriver(WebDriverConfiguration configuration) throws Exception
+    @Test
+    void testGetFirefoxWebDriver()
     {
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        FirefoxOptions firefoxOptions = new FirefoxOptions();
-        whenNew(FirefoxOptions.class).withArguments(desiredCapabilities).thenReturn(firefoxOptions);
-        whenNew(FirefoxOptions.class).withNoArguments().thenReturn(firefoxOptions);
-        FirefoxDriver expected = mock(FirefoxDriver.class);
-        whenNew(FirefoxDriver.class).withParameterTypes(FirefoxOptions.class).withArguments(firefoxOptions)
-                .thenReturn(expected);
-        WebDriver actual = WebDriverType.FIREFOX.getWebDriver(desiredCapabilities, configuration);
-        assertEquals(expected, actual);
-        Map<String, Object> options = (Map<String, Object>) desiredCapabilities
-                .getCapability(FirefoxOptions.FIREFOX_OPTIONS);
-        Map<String, Object> prefs = (Map<String, Object>) options.get("prefs");
-        assertEquals("about:blank", prefs.get("startup.homepage_welcome_url.additional"));
-        return desiredCapabilities;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static DesiredCapabilities testGetIExploreWebDriver(WebDriverConfiguration configuration) throws Exception
-    {
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        InternetExplorerOptions internetExplorerOptions = new InternetExplorerOptions();
-        whenNew(InternetExplorerOptions.class).withArguments(desiredCapabilities).thenReturn(internetExplorerOptions);
-        whenNew(InternetExplorerOptions.class).withNoArguments().thenReturn(internetExplorerOptions);
-        InternetExplorerDriver expected = mock(InternetExplorerDriver.class);
-        whenNew(InternetExplorerDriver.class)
-                .withParameterTypes(InternetExplorerOptions.class)
-                .withArguments(internetExplorerOptions)
-                .thenReturn(expected);
-        WebDriver actual = WebDriverType.IEXPLORE.getWebDriver(desiredCapabilities, configuration);
-        assertEquals(expected, actual);
-        Map<String, Object> options = (Map<String, Object>) desiredCapabilities.getCapability(IE_OPTIONS);
-        assertTrue((boolean) options.get(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS));
-        return desiredCapabilities;
-    }
-
-    private static void testGetChromeWebDriver(WebDriverConfiguration configuration, ChromeOptions chromeOptions)
-            throws Exception
-    {
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        ChromeDriver expected = mock(ChromeDriver.class);
-        whenNew(ChromeDriver.class).withParameterTypes(ChromeOptions.class).withArguments(chromeOptions)
-                .thenReturn(expected);
-        WebDriver actual = WebDriverType.CHROME.getWebDriver(desiredCapabilities, configuration);
-        assertEquals(expected, actual);
+        testGetFirefoxWebDriver(new WebDriverConfiguration(), new FirefoxOptions());
     }
 
     @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$1")
-    public void testGetFirefoxWebDriver() throws Exception
-    {
-        testGetFirefoxWebDriver(new WebDriverConfiguration());
-    }
-
-    @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$1")
-    public void testGetFirefoxWebDriverWithBinaryPath() throws Exception
+    void testGetFirefoxWebDriverWithBinaryPath()
     {
         WebDriverConfiguration configuration = new WebDriverConfiguration();
         configuration.setBinaryPath(Optional.of(PATH));
-        DesiredCapabilities desiredCapabilities = testGetFirefoxWebDriver(configuration);
-        assertEquals(PATH, desiredCapabilities.getCapability(FirefoxDriver.BINARY));
+        FirefoxOptions expected = new FirefoxOptions();
+        expected.setBinary(PATH);
+        testGetFirefoxWebDriver(configuration, expected);
     }
 
     @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$1")
-    public void testGetFirefoxWebDriverWithCommandLineArguments() throws Exception
+    void testGetFirefoxWebDriverWithCommandLineArguments()
     {
         String argument = "headless";
         WebDriverConfiguration configuration = new WebDriverConfiguration();
-        DesiredCapabilities desiredCapabilities = testGetFirefoxWebDriver(configuration);
+        configuration.setCommandLineArguments(new String[] { argument });
         FirefoxOptions expected = new FirefoxOptions();
         expected.addArguments(argument);
-        assertEquals(expected.asMap(), desiredCapabilities.asMap());
+        testGetFirefoxWebDriver(configuration, expected);
     }
 
-    @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$2")
-    public void testGetIExploreWebDriver() throws Exception
+    private static void testGetFirefoxWebDriver(WebDriverConfiguration configuration, FirefoxOptions expected)
     {
-        testGetIExploreWebDriver(new WebDriverConfiguration());
+        try (MockedConstruction<FirefoxDriver> firefoxDriverMock = mockConstruction(FirefoxDriver.class,
+                (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    expected.addPreference("startup.homepage_welcome_url.additional", "about:blank");
+                    assertEquals(List.of(expected), context.arguments());
+                }))
+        {
+            DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+            WebDriver actual = WebDriverType.FIREFOX.getWebDriver(desiredCapabilities, configuration);
+            assertEquals(firefoxDriverMock.constructed().get(0), actual);
+        }
     }
 
     @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$2")
-    @SuppressWarnings("unchecked")
-    public void testGetIExploreWebDriverWithCommandLineArguments() throws Exception
+    void testGetIExploreWebDriver()
+    {
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        InternetExplorerOptions expected = new InternetExplorerOptions(
+                desiredCapabilities.merge(new InternetExplorerOptions().requireWindowFocus()));
+        testGetIExploreWebDriver(new WebDriverConfiguration(), expected);
+    }
+
+    @Test
+    void testGetIExploreWebDriverWithCommandLineArguments()
     {
         String argument = "private";
         WebDriverConfiguration configuration = new WebDriverConfiguration();
         configuration.setCommandLineArguments(new String[] { argument });
-        DesiredCapabilities desiredCapabilities = testGetIExploreWebDriver(configuration);
-        Map<String, Object> options = (Map<String, Object>) desiredCapabilities.getCapability(IE_OPTIONS);
-        assertEquals(argument, options.get(InternetExplorerDriver.IE_SWITCHES));
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        InternetExplorerOptions expected = new InternetExplorerOptions(
+                desiredCapabilities.merge(new InternetExplorerOptions().requireWindowFocus()));
+        expected.addCommandSwitches(argument);
+        expected.useCreateProcessApiToLaunchIe();
+        testGetIExploreWebDriver(configuration, expected);
+    }
+
+    private static void testGetIExploreWebDriver(WebDriverConfiguration configuration, InternetExplorerOptions expected)
+    {
+        try (MockedConstruction<InternetExplorerDriver> internetExplorerDriverMock = mockConstruction(
+                InternetExplorerDriver.class, (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    expected.requireWindowFocus();
+                    assertEquals(List.of(expected), context.arguments());
+                }))
+        {
+            DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+            WebDriver actual = WebDriverType.IEXPLORE.getWebDriver(desiredCapabilities, configuration);
+            assertEquals(internetExplorerDriverMock.constructed().get(0), actual);
+        }
     }
 
     @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$3")
-    public void testGetChromeWebDriver() throws Exception
+    void testGetChromeWebDriver()
     {
         testGetChromeWebDriver(new WebDriverConfiguration(), new ChromeOptions());
     }
 
     @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$3")
-    public void testGetChromeWebDriverWithAdditionalOptions() throws Exception
+    void testGetChromeWebDriverWithAdditionalOptions()
     {
         Map<String, String> experimentalOptionValue = singletonMap(OPTION_KEY, OPTION_VALUE);
         WebDriverConfiguration configuration = new WebDriverConfiguration();
@@ -189,66 +160,77 @@ public class WebDriverTypeTests
         testGetChromeWebDriver(configuration, chromeOptions);
     }
 
-    @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$4")
-    public void testGetSafariWebDriver() throws Exception
+    private static void testGetChromeWebDriver(WebDriverConfiguration configuration, ChromeOptions chromeOptions)
     {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        SafariDriver expected = mock(SafariDriver.class);
-        whenNew(SafariDriver.class).withParameterTypes(SafariOptions.class)
-                .withArguments(SafariOptions.fromCapabilities(desiredCapabilities)).thenReturn(expected);
-        WebDriver actual = WebDriverType.SAFARI.getWebDriver(desiredCapabilities, new WebDriverConfiguration());
-        assertEquals(expected, actual);
+        try (MockedConstruction<ChromeDriver> chromeDriverMock = mockConstruction(ChromeDriver.class,
+                (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    assertEquals(List.of(chromeOptions), context.arguments());
+                }))
+        {
+            WebDriver actual = WebDriverType.CHROME.getWebDriver(desiredCapabilities, configuration);
+            assertEquals(chromeDriverMock.constructed().get(0), actual);
+        }
     }
 
     @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$5")
-    public void testGetEdgeWebDriver() throws Exception
+    void testGetSafariWebDriver()
+    {
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        try (MockedConstruction<SafariDriver> safariDriverMock = mockConstruction(SafariDriver.class,
+                (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    assertEquals(List.of(SafariOptions.fromCapabilities(desiredCapabilities)), context.arguments());
+                }))
+        {
+            WebDriver actual = WebDriverType.SAFARI.getWebDriver(desiredCapabilities, new WebDriverConfiguration());
+            assertEquals(safariDriverMock.constructed().get(0), actual);
+        }
+    }
+
+    @Test
+    void testGetEdgeWebDriver()
     {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         EdgeOptions edgeOptions = new EdgeOptions();
         edgeOptions.merge(desiredCapabilities);
         edgeOptions.setCapability("ms:inPrivate", true);
-        EdgeDriver expected = mock(EdgeDriver.class);
-        whenNew(EdgeDriver.class).withParameterTypes(EdgeOptions.class).withArguments(edgeOptions).thenReturn(expected);
-        WebDriver actual = WebDriverType.EDGE.getWebDriver(desiredCapabilities, new WebDriverConfiguration());
-        assertEquals(expected, actual);
+        try (MockedConstruction<EdgeDriver> edgeDriverMock = mockConstruction(EdgeDriver.class, (mock, context) -> {
+            assertEquals(1, context.getCount());
+            assertEquals(List.of(edgeOptions), context.arguments());
+        }))
+        {
+            WebDriver actual = WebDriverType.EDGE.getWebDriver(desiredCapabilities, new WebDriverConfiguration());
+            assertEquals(edgeDriverMock.constructed().get(0), actual);
+        }
     }
 
     @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$7")
-    public void testGetEdgeChromiumWebDriver() throws Exception
+    void testGetEdgeChromiumWebDriver()
     {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         EdgeOptions edgeOptions = new EdgeOptions();
         edgeOptions.merge(desiredCapabilities);
-        EdgeDriver expected = mock(EdgeDriver.class);
-        whenNew(EdgeDriver.class).withParameterTypes(EdgeOptions.class).withArguments(edgeOptions).thenReturn(expected);
-        WebDriver actual = WebDriverType.EDGE_CHROMIUM.getWebDriver(desiredCapabilities, new WebDriverConfiguration());
-        assertEquals(expected, actual);
+        try (MockedConstruction<EdgeDriver> edgeDriverMock = mockConstruction(EdgeDriver.class, (mock, context) -> {
+            assertEquals(1, context.getCount());
+            assertEquals(List.of(edgeOptions), context.arguments());
+        }))
+        {
+            WebDriver actual = WebDriverType.EDGE_CHROMIUM.getWebDriver(desiredCapabilities,
+                    new WebDriverConfiguration());
+            assertEquals(edgeDriverMock.constructed().get(0), actual);
+        }
     }
 
     @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$6")
-    public void testGetOperaWebDriver() throws Exception
+    void testGetOperaWebDriver()
     {
         testGetOperaWebDriver(new WebDriverConfiguration(), new OperaOptions());
     }
 
-    private static void testGetOperaWebDriver(WebDriverConfiguration configuration, OperaOptions operaOptions)
-            throws Exception
-    {
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        OperaDriver expected = mock(OperaDriver.class);
-        whenNew(OperaDriver.class).withParameterTypes(OperaOptions.class).withArguments(operaOptions)
-                .thenReturn(expected);
-        WebDriver actual = WebDriverType.OPERA.getWebDriver(desiredCapabilities, configuration);
-        assertEquals(expected, actual);
-    }
-
     @Test
-    @PrepareForTest(fullyQualifiedNames = "org.vividus.selenium.WebDriverType$6")
-    public void testGetOperaWebDriverWithAdditionalOptions() throws Exception
+    void testGetOperaWebDriverWithAdditionalOptions()
     {
         Map<String, String> experimentalOptionValue = singletonMap(OPTION_KEY, OPTION_VALUE);
         WebDriverConfiguration configuration = new WebDriverConfiguration();
@@ -262,8 +244,21 @@ public class WebDriverTypeTests
         testGetOperaWebDriver(configuration, operaOptions);
     }
 
-    @Test
-    @DataProvider({
+    private static void testGetOperaWebDriver(WebDriverConfiguration configuration, OperaOptions operaOptions)
+    {
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        try (MockedConstruction<OperaDriver> operaDriverMock = mockConstruction(OperaDriver.class, (mock, context) -> {
+            assertEquals(1, context.getCount());
+            assertEquals(List.of(operaOptions), context.arguments());
+        }))
+        {
+            WebDriver actual = WebDriverType.OPERA.getWebDriver(desiredCapabilities, configuration);
+            assertEquals(operaDriverMock.constructed().get(0), actual);
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
         "FIREFOX,       true",
         "IEXPLORE,      false",
         "CHROME,        true",
@@ -271,14 +266,14 @@ public class WebDriverTypeTests
         "EDGE,          false",
         "EDGE_CHROMIUM, false",
         "OPERA,         true"
-        })
-    public void testIsBinaryPathSupported(WebDriverType type, boolean binaryPathSupported)
+    })
+    void testIsBinaryPathSupported(WebDriverType type, boolean binaryPathSupported)
     {
         assertEquals(binaryPathSupported, type.isBinaryPathSupported());
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @CsvSource({
         "FIREFOX,       true",
         "IEXPLORE,      true",
         "CHROME,        true",
@@ -286,102 +281,96 @@ public class WebDriverTypeTests
         "EDGE,          false",
         "EDGE_CHROMIUM, false",
         "OPERA,         true"
-        })
-    public void testIsCommandLineArgumentsSupported(WebDriverType type, boolean commandLineArgumentsSupported)
+    })
+    void testIsCommandLineArgumentsSupported(WebDriverType type, boolean commandLineArgumentsSupported)
     {
         assertEquals(commandLineArgumentsSupported, type.isCommandLineArgumentsSupported());
     }
 
-    @Test
-    @DataProvider({
-            "FIREFOX,       true",
-            "IEXPLORE,      true",
-            "CHROME,        false",
-            "SAFARI,        false",
-            "EDGE,          false",
-            "EDGE_CHROMIUM, false",
-            "OPERA,         false"
+    @ParameterizedTest
+    @CsvSource({
+        "FIREFOX,       true",
+        "IEXPLORE,      true",
+        "CHROME,        false",
+        "SAFARI,        false",
+        "EDGE,          false",
+        "EDGE_CHROMIUM, false",
+        "OPERA,         false"
     })
-    public void testIsUseW3C(WebDriverType type, boolean useW3C)
+    void testIsUseW3C(WebDriverType type, boolean useW3C)
     {
         assertEquals(useW3C, type.isUseW3C());
     }
 
-    @Test
-    @DataProvider({
-            "FIREFOX,       false",
-            "IEXPLORE,      false",
-            "CHROME,        false",
-            "SAFARI,        false",
-            "EDGE,          true",
-            "EDGE_CHROMIUM, true",
-            "OPERA,         false"
+    @ParameterizedTest
+    @CsvSource({
+        "FIREFOX,       false",
+        "IEXPLORE,      false",
+        "CHROME,        false",
+        "SAFARI,        false",
+        "EDGE,          true",
+        "EDGE_CHROMIUM, true",
+        "OPERA,         false"
     })
-    public void testGetDriverSpecificCapabilities(WebDriverType type, boolean empty)
+    void testGetDriverSpecificCapabilities(WebDriverType type, boolean empty)
     {
         assertEquals(type.getDriverSpecificCapabilities().isEmpty(), empty);
     }
 
-    @Test
-    @DataProvider({
+    @ParameterizedTest
+    @CsvSource({
         "FIREFOX,       webdriver.gecko.driver",
         "IEXPLORE,      webdriver.ie.driver",
         "CHROME,        webdriver.chrome.driver",
         "EDGE,          webdriver.edge.driver",
         "EDGE_CHROMIUM, webdriver.edge.driver",
         "OPERA,         webdriver.opera.driver"
-        })
-    public void testSetDriverExecutablePath(WebDriverType type, String propertyName)
+    })
+    void testSetDriverExecutablePath(WebDriverType type, String propertyName)
     {
         type.setDriverExecutablePath(Optional.of(PATH));
         assertEquals(PATH, System.getProperty(propertyName));
     }
 
     @Test
-    @DataProvider("SAFARI")
-    public void testSetNonNullDriverExecutablePathWhenUnsupported(WebDriverType type)
+    void testSetNonNullDriverExecutablePathWhenUnsupported()
     {
-        assertThrows(UnsupportedOperationException.class, () -> type.setDriverExecutablePath(Optional.of(PATH)));
+        Optional<String> path = Optional.of(PATH);
+        assertThrows(UnsupportedOperationException.class, () -> WebDriverType.SAFARI.setDriverExecutablePath(path));
     }
 
     @Test
-    @DataProvider("SAFARI")
-    public void testSetNullDriverExecutablePathWhenUnsupported(WebDriverType type)
+    void testSetNullDriverExecutablePathWhenUnsupported()
     {
-        type.setDriverExecutablePath(Optional.empty());
+        WebDriverType.SAFARI.setDriverExecutablePath(Optional.empty());
     }
 
     @Test
-    @PrepareForTest(value = WebDriverManager.class, fullyQualifiedNames = "org.vividus.selenium.WebDriverType$1")
-    public void testSetFirefoxDriverExecutablePathViaAutomaticManager()
+    void testSetFirefoxDriverExecutablePathViaAutomaticManager()
     {
         testSetDriverExecutablePathViaAutomaticManager(WebDriverType.FIREFOX, WebDriverManager::firefoxdriver);
     }
 
     @Test
-    @PrepareForTest(value = WebDriverManager.class, fullyQualifiedNames = "org.vividus.selenium.WebDriverType$2")
-    public void testSetIExploreDriverExecutablePathViaAutomaticManager()
+    void testSetIExploreDriverExecutablePathViaAutomaticManager()
     {
         testSetDriverExecutablePathViaAutomaticManager(WebDriverType.IEXPLORE, WebDriverManager::iedriver);
     }
 
     @Test
-    @PrepareForTest(value = WebDriverManager.class, fullyQualifiedNames = "org.vividus.selenium.WebDriverType$3")
-    public void testSetChromeDriverExecutablePathViaAutomaticManager()
+    void testSetChromeDriverExecutablePathViaAutomaticManager()
     {
         testSetDriverExecutablePathViaAutomaticManager(WebDriverType.CHROME, WebDriverManager::chromedriver);
     }
 
     @Test
-    @PrepareForTest(value = WebDriverManager.class, fullyQualifiedNames = "org.vividus.selenium.WebDriverType$6")
-    public void testSetOperaDriverExecutablePathViaAutomaticManager()
+    void testSetOperaDriverExecutablePathViaAutomaticManager()
     {
         testSetDriverExecutablePathViaAutomaticManager(WebDriverType.OPERA, WebDriverManager::operadriver);
     }
 
     @Test
-    @PrepareForTest(value = WebDriverManager.class, fullyQualifiedNames = "org.vividus.selenium.WebDriverType$5")
-    public void testSetEdgeDriverExecutablePathViaAutomaticManager()
+    void testSetEdgeDriverExecutablePathViaAutomaticManager()
     {
         testSetDriverExecutablePathViaAutomaticManager(WebDriverType.EDGE, WebDriverManager::edgedriver);
     }
@@ -389,10 +378,12 @@ public class WebDriverTypeTests
     private static void testSetDriverExecutablePathViaAutomaticManager(WebDriverType type,
             Supplier<WebDriverManager> managerSupplier)
     {
-        WebDriverManager webDriverManager = mock(WebDriverManager.class);
-        PowerMockito.mockStatic(WebDriverManager.class);
-        when(managerSupplier.get()).thenReturn(webDriverManager);
-        type.setDriverExecutablePath(Optional.empty());
-        verify(webDriverManager).setup();
+        try (MockedStatic<WebDriverManager> webDriverManagerMock = mockStatic(WebDriverManager.class))
+        {
+            WebDriverManager webDriverManager = mock(WebDriverManager.class);
+            webDriverManagerMock.when(() -> managerSupplier.get()).thenReturn(webDriverManager);
+            type.setDriverExecutablePath(Optional.empty());
+            verify(webDriverManager).setup();
+        }
     }
 }

@@ -18,33 +18,31 @@ package org.vividus.runner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Properties;
 
 import com.github.valfirst.jbehave.junit.monitoring.JUnitReportingRunner;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.Description;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.runners.model.InitializationError;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Vividus.class, BeanFactory.class, BddScenariosCounter.class })
-@PowerMockIgnore({ "javax.*", "com.sun.*", "jdk.*", "org.xml.*", "org.w3c.*" })
-public class BddScenariosCounterTests extends SystemStreamTests
+class BddScenariosCounterTests extends SystemStreamTests
 {
     private static final String DEFAULT_STORY_LOCATION = "story";
     private static final String DIR_VALUE = "story/bvt";
@@ -60,14 +58,9 @@ public class BddScenariosCounterTests extends SystemStreamTests
     private static final String BEFORE = "before description";
     private static final String RESOURCE_LOCATION = "bdd.story-loader.batch1.resource-location";
 
-    @Before
-    public void before()
-    {
-        PowerMockito.mockStatic(Vividus.class);
-    }
-
     @Test
-    public void testCounterIgnoresDescriptionsWithMethodNames() throws Exception
+    void testCounterIgnoresDescriptionsWithMethodNames()
+            throws ParseException, ReflectiveOperationException, InitializationError
     {
         Description root = Description.createSuiteDescription(ROOT);
         Description beforeStories = Description.createTestDescription(Object.class, BEFORE);
@@ -80,19 +73,15 @@ public class BddScenariosCounterTests extends SystemStreamTests
         story.addChild(beforeStory);
         story.addChild(scenario);
 
-        Properties properties = mockPropertiesBeanInstantiation();
-        mockJUnitReportingRunnerInstantiation(root);
+        testCounter(new String[0], root, DEFAULT_STORY_LOCATION);
 
-        BddScenariosCounter.main(new String[0]);
-
-        verify(properties).put(RESOURCE_LOCATION, DEFAULT_STORY_LOCATION);
         assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + STORIES));
         assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + SCENARIOS));
         assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + SCENARIOS_WITH_EXAMPLES));
     }
 
     @Test
-    public void testMultipleChildDescriptions() throws Exception
+    void testMultipleChildDescriptions() throws ParseException, ReflectiveOperationException, InitializationError
     {
         Description root = Description.createSuiteDescription(ROOT);
         Description story = Description.createSuiteDescription(STORY);
@@ -106,10 +95,7 @@ public class BddScenariosCounterTests extends SystemStreamTests
         scenario.addChild(example);
         scenario.addChild(example);
 
-        mockPropertiesBeanInstantiation();
-        mockJUnitReportingRunnerInstantiation(root);
-
-        BddScenariosCounter.main(new String[0]);
+        testCounter(new String[0], root, DEFAULT_STORY_LOCATION);
 
         assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + STORIES));
         assertThat(getOutStreamContent(), containsString(2 + SEPARATOR + SCENARIOS));
@@ -117,40 +103,59 @@ public class BddScenariosCounterTests extends SystemStreamTests
     }
 
     @Test
-    public void testDirectoryOptionIsPresent() throws Exception
+    void testDirectoryOptionIsPresent() throws ParseException, ReflectiveOperationException, InitializationError
     {
-        Properties properties = mockPropertiesBeanInstantiation();
-        mockJUnitReportingRunnerInstantiation(Description.createSuiteDescription(ROOT));
-        BddScenariosCounter.main(new String[] {"--dir", DIR_VALUE});
-        verify(properties).put(RESOURCE_LOCATION, DIR_VALUE);
+        Description root = Description.createSuiteDescription(ROOT);
+
+        testCounter(new String[] { "--dir", DIR_VALUE }, root, DIR_VALUE);
     }
 
     @Test
-    public void testUnknownOptionIsPresent()
+    void testUnknownOptionIsPresent()
     {
-        assertThrows(UnrecognizedOptionException.class, () ->
-                BddScenariosCounter.main(new String[] { "--any", DIR_VALUE}));
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        {
+            assertThrows(UnrecognizedOptionException.class,
+                    () -> BddScenariosCounter.main(new String[] { "--any", DIR_VALUE }));
+            vividus.verify(Vividus::init);
+        }
     }
 
     @Test
-    public void testHelpOptionIsPresent() throws Exception
+    void testHelpOptionIsPresent() throws ParseException, ReflectiveOperationException, InitializationError
     {
-        BddScenariosCounter.main(new String[] {"--help"});
-        assertThat(getOutStreamContent(), containsString("usage: BddScenariosCounter"));
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        {
+            BddScenariosCounter.main(new String[] { "--help" });
+            vividus.verify(Vividus::init);
+            assertThat(getOutStreamContent(), containsString("usage: BddScenariosCounter"));
+        }
     }
 
-    private Properties mockPropertiesBeanInstantiation()
+    private void testCounter(String[] args, Description root, String dir)
+            throws ParseException, InitializationError, ReflectiveOperationException
+    {
+        try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
+                MockedConstruction<JUnitReportingRunner> ignored = mockConstruction(JUnitReportingRunner.class,
+                        (runner, context) -> {
+                            assertEquals(1, context.getCount());
+                            assertEquals(List.of(StoriesRunner.class), context.arguments());
+                            when(runner.getDescription()).thenReturn(root);
+                        }))
+        {
+            Properties properties = mockPropertiesBeanInstantiation(beanFactory);
+
+            BddScenariosCounter.main(args);
+
+            beanFactory.verify(BeanFactory::open);
+            verify(properties).put(RESOURCE_LOCATION, dir);
+        }
+    }
+
+    private Properties mockPropertiesBeanInstantiation(MockedStatic<BeanFactory> beanFactory)
     {
         Properties properties = mock(Properties.class);
-        PowerMockito.mockStatic(BeanFactory.class);
-        when(BeanFactory.getBean(PROPERTIES, Properties.class)).thenReturn(properties);
+        beanFactory.when(() -> BeanFactory.getBean(PROPERTIES, Properties.class)).thenReturn(properties);
         return properties;
-    }
-
-    private void mockJUnitReportingRunnerInstantiation(Description root) throws Exception
-    {
-        JUnitReportingRunner runner = mock(JUnitReportingRunner.class);
-        whenNew(JUnitReportingRunner.class).withArguments(StoriesRunner.class).thenReturn(runner);
-        when(runner.getDescription()).thenReturn(root);
     }
 }

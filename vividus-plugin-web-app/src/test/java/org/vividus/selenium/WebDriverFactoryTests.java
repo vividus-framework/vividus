@@ -44,6 +44,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,7 +62,6 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.powermock.reflect.Whitebox;
 import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
@@ -111,7 +111,7 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetWebDriverWithWebDriverType() throws Exception
+    void testGetWebDriverWithWebDriverType() throws IllegalAccessException
     {
         mockCapabilities((HasCapabilities) driver);
         WebDriverType webDriverType = mock(WebDriverType.class);
@@ -133,7 +133,7 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetWebDriverWithWebDriverTypeWOBinary() throws Exception
+    void testGetWebDriverWithWebDriverTypeWOBinary() throws IllegalAccessException
     {
         mockCapabilities((HasCapabilities) driver);
         WebDriverConfiguration configuration = new WebDriverConfiguration();
@@ -378,9 +378,10 @@ class WebDriverFactoryTests
     }
 
     private void injectConfigurations(WebDriverType webDriverType, WebDriverConfiguration configuration)
+            throws IllegalAccessException
     {
         Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
         configurations.put(webDriverType, configuration);
-        Whitebox.setInternalState(webDriverFactory, "configurations", configurations);
+        FieldUtils.writeField(webDriverFactory, "configurations", configurations, true);
     }
 }

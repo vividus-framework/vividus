@@ -21,10 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.Scenario;
@@ -33,15 +37,11 @@ import org.jbehave.core.parsers.StoryParser;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.SystemStreamTests;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.PathFinder;
@@ -50,9 +50,8 @@ import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Vividus.class, BeanFactory.class })
-public class BddStepsCounterTests extends SystemStreamTests
+@ExtendWith(MockitoExtension.class)
+class BddStepsCounterTests extends SystemStreamTests
 {
     private static final String STEP_PATTERN = "%s I do something with '%s'";
     private static final String AND = "And";
@@ -76,51 +75,12 @@ public class BddStepsCounterTests extends SystemStreamTests
     private static final String ONE_OCCURRENCE = "1";
 
     @Mock
-    private PathFinder pathFinder;
-
-    @Mock
-    private StoryLoader storyLoader;
-
-    @Mock
-    private StoryParser storyParser;
-
-    @Mock
-    private ExtendedConfiguration configuration;
-
-    @Mock
-    private Story story;
-
-    @Mock
-    private Scenario scenario;
-
-    @Mock
-    private CandidateSteps candidateSteps;
-
-    @Mock
-    private InjectableStepsFactory stepFactory;
-
-    @Mock
     private StepCandidate stepCandidate;
 
-    @Mock
-    private Keywords keywords;
-
-    @InjectMocks
-    private BddStepsCounter bddStepsCounter;
-
-    @Before
-    public void before()
-    {
-        MockitoAnnotations.initMocks(this);
-        PowerMockito.mockStatic(Vividus.class);
-        PowerMockito.mockStatic(BeanFactory.class);
-    }
-
     @Test
-    public void testNoMatchedSteps() throws Exception
+    void testNoMatchedSteps() throws IOException, ParseException
     {
-        mockStepsAndCandidates(DEFAULT_STORY_LOCATION, List.of(WHEN_STEP), List.of(stepCandidate));
-        BddStepsCounter.main(new String[0]);
+        testCounter(new String[0], DEFAULT_STORY_LOCATION, List.of(WHEN_STEP), List.of(stepCandidate));
         String output = getOutStreamContent();
         assertTrue(output.contains(NO_MATCHED_STEPS));
         assertTrue(output.contains(NO_STEP_CANDIDATES));
@@ -130,39 +90,40 @@ public class BddStepsCounterTests extends SystemStreamTests
     }
 
     @Test
-    public void testCommentedSteps() throws Exception
+    void testCommentedSteps() throws IOException, ParseException
     {
-        mockStepsAndCandidates(DEFAULT_STORY_LOCATION, List.of(COMMENT + WHEN_STEP), List.of(stepCandidate));
-        BddStepsCounter.main(new String[0]);
+        testCounter(new String[0], DEFAULT_STORY_LOCATION, List.of(COMMENT + WHEN_STEP), List.of(stepCandidate));
         String output = getOutStreamContent();
         assertTrue(output.contains(NO_MATCHED_STEPS));
         assertFalse(output.contains(NO_STEP_CANDIDATES));
     }
 
     @Test
-    public void testDirectoryOptionIsPresent() throws Exception
+    void testDirectoryOptionIsPresent() throws IOException, ParseException
     {
-        mockStepsAndCandidates(DIR_VALUE, List.of(), List.of());
-        BddStepsCounter.main(new String[] { DIR_OPT_NAME, DIR_VALUE });
+        testCounter(new String[] { DIR_OPT_NAME, DIR_VALUE }, DIR_VALUE, List.of(), List.of());
     }
 
     @Test
-    public void testUnknownOptionIsPresent()
+    void testUnknownOptionIsPresent()
     {
-        assertThrows(UnrecognizedOptionException.class,
-            () ->  BddStepsCounter.main(new String[] { "--any", DIR_VALUE }));
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        {
+            assertThrows(UnrecognizedOptionException.class,
+                    () -> BddStepsCounter.main(new String[] { "--any", DIR_VALUE }));
+            vividus.verify(Vividus::init);
+        }
     }
 
     @Test
-    public void testLimitOptionIsPresent() throws Exception
+    void testLimitOptionIsPresent() throws IOException, ParseException
     {
-        mockStepsAndCandidates(DEFAULT_STORY_LOCATION, List.of(THEN_STEP, THEN_STEP, WHEN_STEP),
-                List.of(stepCandidate));
         when(stepCandidate.matches(THEN_STEP, null)).thenReturn(true);
         when(stepCandidate.matches(WHEN_STEP, null)).thenReturn(true);
         when(stepCandidate.getStartingWord()).thenReturn(THEN).thenReturn(THEN).thenReturn(WHEN);
         when(stepCandidate.getPatternAsString()).thenReturn(CANDIDATE_STRING);
-        BddStepsCounter.main(new String[] { "--top", ONE_OCCURRENCE });
+        testCounter(new String[] { "--top", ONE_OCCURRENCE }, DEFAULT_STORY_LOCATION,
+                List.of(THEN_STEP, THEN_STEP, WHEN_STEP), List.of(stepCandidate));
         String output = getOutStreamContent();
         assertTrue(output.contains(String.format(STEP_PATTERN, THEN, VARIABLE)));
         assertFalse(output.contains(String.format(STEP_PATTERN, WHEN, VARIABLE)));
@@ -171,15 +132,13 @@ public class BddStepsCounterTests extends SystemStreamTests
     }
 
     @Test
-    public void testAndStep() throws Exception
+    void testAndStep() throws IOException, ParseException
     {
-        mockStepsAndCandidates(DEFAULT_STORY_LOCATION, List.of(WHEN_STEP, AND_STEP),
-                List.of(stepCandidate));
         when(stepCandidate.matches(WHEN_STEP, null)).thenReturn(true);
         when(stepCandidate.matches(AND_STEP, WHEN_STEP)).thenReturn(true);
         when(stepCandidate.getStartingWord()).thenReturn(WHEN);
         when(stepCandidate.getPatternAsString()).thenReturn(CANDIDATE_STRING);
-        BddStepsCounter.main(new String[0]);
+        testCounter(new String[0], DEFAULT_STORY_LOCATION, List.of(WHEN_STEP, AND_STEP), List.of(stepCandidate));
         String output = getOutStreamContent();
         assertTrue(output.contains(TOP_STEPS));
         assertTrue(output.contains(OCCURRENCES));
@@ -188,28 +147,42 @@ public class BddStepsCounterTests extends SystemStreamTests
         assertTrue(output.contains(TWO_OCCURRENCES));
     }
 
-    private void mockStepsAndCandidates(String resourceLocation, List<String> steps, List<StepCandidate> stepCandidates)
-            throws Exception
+    private void testCounter(String[] args, String resourceLocation, List<String> steps,
+            List<StepCandidate> stepCandidates) throws IOException, ParseException
     {
-        PowerMockito.whenNew(BddStepsCounter.class).withNoArguments().thenReturn(bddStepsCounter);
-        PowerMockito.doNothing().when(Vividus.class, "init");
-        when(BeanFactory.getBean(StoryLoader.class)).thenReturn(storyLoader);
-        when(BeanFactory.getBean(IPathFinder.class)).thenReturn(pathFinder);
-        when(BeanFactory.getBean(ExtendedConfiguration.class)).thenReturn(configuration);
-        when(configuration.keywords()).thenReturn(keywords);
-        when(keywords.and()).thenReturn(AND);
-        when(keywords.ignorable()).thenReturn(COMMENT);
-        when(configuration.storyParser()).thenReturn(storyParser);
-        String path = "";
-        when(pathFinder.findPaths(argThat(arg -> resourceLocation.equals(arg.getResourceLocation())))).thenReturn(
-                List.of(path));
-        String storyText = "";
-        when(storyLoader.loadResourceAsText(path)).thenReturn(storyText);
-        when(storyParser.parseStory(any(String.class))).thenReturn(story);
-        when(story.getScenarios()).thenReturn(List.of(scenario));
-        when(scenario.getSteps()).thenReturn(steps);
-        when(BeanFactory.getBean(InjectableStepsFactory.class)).thenReturn(stepFactory);
-        when(stepFactory.createCandidateSteps()).thenReturn(List.of(candidateSteps));
-        when(candidateSteps.listCandidates()).thenReturn(stepCandidates);
+        try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        {
+            String path = "";
+            StoryLoader storyLoader = mock(StoryLoader.class);
+            when(storyLoader.loadResourceAsText(path)).thenReturn("");
+            beanFactory.when(() -> BeanFactory.getBean(StoryLoader.class)).thenReturn(storyLoader);
+
+            PathFinder pathFinder = mock(PathFinder.class);
+            when(pathFinder.findPaths(argThat(arg -> resourceLocation.equals(arg.getResourceLocation())))).thenReturn(
+                    List.of(path));
+            beanFactory.when(() -> BeanFactory.getBean(IPathFinder.class)).thenReturn(pathFinder);
+
+            Scenario scenario = new Scenario(steps);
+            Story story = new Story(path, List.of(scenario));
+
+            StoryParser storyParser = mock(StoryParser.class);
+            when(storyParser.parseStory(any(String.class))).thenReturn(story);
+
+            ExtendedConfiguration configuration = new ExtendedConfiguration();
+            configuration.useKeywords(new Keywords());
+            configuration.useStoryParser(storyParser);
+            beanFactory.when(() -> BeanFactory.getBean(ExtendedConfiguration.class)).thenReturn(configuration);
+
+            InjectableStepsFactory stepFactory = mock(InjectableStepsFactory.class);
+            beanFactory.when(() -> BeanFactory.getBean(InjectableStepsFactory.class)).thenReturn(stepFactory);
+
+            CandidateSteps candidateSteps = mock(CandidateSteps.class);
+            when(candidateSteps.listCandidates()).thenReturn(stepCandidates);
+            when(stepFactory.createCandidateSteps()).thenReturn(List.of(candidateSteps));
+
+            BddStepsCounter.main(args);
+
+            beanFactory.verify(BeanFactory::open);
+        }
     }
 }

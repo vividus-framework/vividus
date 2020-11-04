@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -41,7 +42,6 @@ import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.WebDriverEventListener;
-import org.powermock.reflect.Whitebox;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
@@ -73,12 +73,12 @@ class VividusWebDriverFactoryTests
                 Optional.empty(), webDriverFactory, proxy);
     }
 
-    private void runCreateTest(boolean remoteExecution, String browserName)
+    private void runCreateTest(boolean remoteExecution, String browserName) throws IllegalAccessException
     {
         runCreateTest(remoteExecution, createRunningStory(browserName));
     }
 
-    private void runCreateTest(boolean remoteExecution, RunningStory runningStory)
+    private void runCreateTest(boolean remoteExecution, RunningStory runningStory) throws IllegalAccessException
     {
         List<WebDriverEventListener> eventListeners = List.of(webDriverEventListener);
         vividusWebDriverFactory.setWebDriverEventListeners(eventListeners);
@@ -87,7 +87,7 @@ class VividusWebDriverFactoryTests
         VividusWebDriver vividusWebDriver = vividusWebDriverFactory.create();
         WebDriver eventFiringDriver = vividusWebDriver.getWrappedDriver();
         assertEquals(driver, ((WrapsDriver) eventFiringDriver).getWrappedDriver());
-        assertEquals(eventListeners, Whitebox.getInternalState(eventFiringDriver, "eventListeners"));
+        assertEquals(eventListeners, FieldUtils.readField(eventFiringDriver, "eventListeners", true));
         assertEquals(remoteExecution, vividusWebDriver.isRemote());
         verify(webDriverManagerContext).reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
     }
@@ -114,21 +114,21 @@ class VividusWebDriverFactoryTests
     }
 
     @Test
-    void testCreateWebDriverRemoteWithProxy()
+    void testCreateWebDriverRemoteWithProxy() throws IllegalAccessException
     {
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(true, (String) null);
     }
 
     @Test
-    void testCreateWebDriverRemoteNoProxy()
+    void testCreateWebDriverRemoteNoProxy() throws IllegalAccessException
     {
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(true, (String) null);
     }
 
     @Test
-    void testCreateWebDriverNoRunningScenario()
+    void testCreateWebDriverNoRunningScenario() throws IllegalAccessException
     {
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         RunningStory runningStory = new RunningStory();
@@ -137,20 +137,20 @@ class VividusWebDriverFactoryTests
     }
 
     @Test
-    void testCreateWebDriverLocalWithProxy()
+    void testCreateWebDriverLocalWithProxy() throws IllegalAccessException
     {
         notRemoteExecution();
         when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(false, FIREFOX);
     }
 
-    private void notRemoteExecution()
+    private void notRemoteExecution() throws IllegalAccessException
     {
-        Whitebox.setInternalState(vividusWebDriverFactory, "remoteExecution", false);
+        FieldUtils.writeField(vividusWebDriverFactory, "remoteExecution", false, true);
     }
 
     @Test
-    void testCreateWebDriverLocalNoProxy()
+    void testCreateWebDriverLocalNoProxy() throws IllegalAccessException
     {
         notRemoteExecution();
         when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);

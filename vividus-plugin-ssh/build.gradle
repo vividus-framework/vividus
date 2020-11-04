@@ -14,9 +14,6 @@ dependencies {
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
-    testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
 }
