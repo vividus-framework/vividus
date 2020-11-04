@@ -16,6 +16,9 @@
 
 package org.vividus.http.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mockConstruction;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,46 +31,42 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
 
-@RunWith(PowerMockRunner.class)
-public class ClientBuilderUtilsTests
+class ClientBuilderUtilsTests
 {
     private static final AuthScope DEFAULT_AUTH_SCOPE = AuthScope.ANY;
 
     @Test
-    public void testCreateUrlEncodedFormEntity() throws IOException
+    void testCreateUrlEncodedFormEntity() throws IOException
     {
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("param1", "value1"));
         params.add(new BasicNameValuePair("param2", "value2"));
         UrlEncodedFormEntity expectedEntity = new UrlEncodedFormEntity(params);
         UrlEncodedFormEntity actualEntity = ClientBuilderUtils.createUrlEncodedFormEntity(params);
-        Assertions.assertEquals(expectedEntity.getContentLength(), actualEntity.getContentLength());
+        assertEquals(expectedEntity.getContentLength(), actualEntity.getContentLength());
     }
 
     @Test
-    public void testCreateUrlEncodedFormEntityThrowingException() throws IOException
+    void testCreateUrlEncodedFormEntityThrowingException() throws IOException
     {
         UrlEncodedFormEntity expectedEntity = new UrlEncodedFormEntity(new ArrayList<>());
         UrlEncodedFormEntity actualEntity = ClientBuilderUtils.createUrlEncodedFormEntity(new ArrayList<>());
-        Assertions.assertEquals(expectedEntity.getContentLength(), actualEntity.getContentLength());
+        assertEquals(expectedEntity.getContentLength(), actualEntity.getContentLength());
     }
 
     @Test
-    public void testCreateCredentialsProviderSplit()
+    void testCreateCredentialsProviderSplit()
     {
         CredentialsProvider actualProvider = ClientBuilderUtils.createCredentialsProvider("user:pass");
         verifyProvider(actualProvider, DEFAULT_AUTH_SCOPE, "user", "pass");
     }
 
     @Test
-    public void testCreateCredentialsProviderSplitWithScope()
+    void testCreateCredentialsProviderSplitWithScope()
     {
         final AuthScope authScope = new AuthScope("host1", 1);
         CredentialsProvider actualProvider = ClientBuilderUtils.createCredentialsProvider(authScope, "user13:pass13");
@@ -75,7 +74,7 @@ public class ClientBuilderUtilsTests
     }
 
     @Test
-    public void testCreateCredentialsProviderSimple()
+    void testCreateCredentialsProviderSimple()
     {
         String user = "user2";
         String pass = "pass123";
@@ -84,7 +83,7 @@ public class ClientBuilderUtilsTests
     }
 
     @Test
-    public void testCreateCredentialsProviderSimpleWithScope()
+    void testCreateCredentialsProviderSimpleWithScope()
     {
         String user = "user23";
         String pass = "pass1234";
@@ -94,21 +93,22 @@ public class ClientBuilderUtilsTests
     }
 
     @Test
-    public void testCreateCookieStore()
+    void testCreateCookieStore()
     {
         Cookie cookie = new BasicClientCookie("name", "value");
         List<Cookie> result = ClientBuilderUtils.createCookieStore(Collections.singleton(cookie)).getCookies();
         Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(result.get(0), cookie);
+        assertEquals(result.get(0), cookie);
     }
 
     @Test
-    @PrepareForTest({ CookieStoreCollector.class, ClientBuilderUtils.class })
-    public void testToCookieStore() throws Exception
+    void testToCookieStore()
     {
-        CookieStoreCollector cookieStoreCollector = new CookieStoreCollector();
-        PowerMockito.whenNew(CookieStoreCollector.class).withNoArguments().thenReturn(cookieStoreCollector);
-        Assertions.assertEquals(cookieStoreCollector, ClientBuilderUtils.toCookieStore());
+        try (MockedConstruction<CookieStoreCollector> cookieStoreCollector = mockConstruction(
+                CookieStoreCollector.class))
+        {
+            assertEquals(cookieStoreCollector.constructed(), List.of(ClientBuilderUtils.toCookieStore()));
+        }
     }
 
     private static void verifyProvider(CredentialsProvider actualProvider, AuthScope expectedAuthScope,
@@ -116,7 +116,7 @@ public class ClientBuilderUtilsTests
     {
         String actualName = actualProvider.getCredentials(expectedAuthScope).getUserPrincipal().getName();
         String actualPass = actualProvider.getCredentials(expectedAuthScope).getPassword();
-        Assertions.assertEquals(expectedUser, actualName);
-        Assertions.assertEquals(expectedPass, actualPass);
+        assertEquals(expectedUser, actualName);
+        assertEquals(expectedPass, actualPass);
     }
 }

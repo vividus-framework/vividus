@@ -24,13 +24,13 @@ import com.epam.reportportal.jbehave.JBehaveContext;
 import com.epam.reportportal.jbehave.JBehaveContext.Story;
 import com.epam.reportportal.listeners.Statuses;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.vividus.softassert.event.AssertionFailedEvent;
 
-public class AssertionFailureListenerTests
+class AssertionFailureListenerTests
 {
     @Test
-    public void testOnAssertionFailure()
+    void testOnAssertionFailure()
     {
         AssertionFailureListener listener = new AssertionFailureListener();
         AssertionFailedEvent event = mock(AssertionFailedEvent.class);

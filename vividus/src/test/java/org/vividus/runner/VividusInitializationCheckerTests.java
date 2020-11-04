@@ -21,114 +21,121 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import java.util.List;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Vividus.class, BeanFactory.class })
-@PowerMockIgnore({"javax.*", "org.xml.*", "org.w3c.*", "com.sun.*"})
-public class VividusInitializationCheckerTests extends SystemStreamTests
+@ExtendWith(TestLoggerFactoryExtension.class)
+class VividusInitializationCheckerTests extends SystemStreamTests
 {
     private static final String BEAN_1 = "bean1";
     private static final String BEAN_2 = "bean2";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(VividusInitializationChecker.class);
 
-    @Before
-    public void before()
+    @Test
+    void testPrintHelp() throws ParseException
     {
-        PowerMockito.mockStatic(Vividus.class);
-        PowerMockito.mockStatic(BeanFactory.class);
-        when(BeanFactory.getBeanDefinitionNames()).thenReturn(new String[] { BEAN_1, BEAN_2 });
-    }
-
-    @After
-    public void after()
-    {
-        TestLoggerFactory.clear();
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        {
+            VividusInitializationChecker.main(new String[] {"-h"});
+            assertOutput(List.of("usage: VividusInitializationChecker",
+                    " -h,--help                print this message.",
+                    " -i,--ignoreBeans <arg>   comma separated list of beans that are not",
+                    "                          instantiated during check (e.g. bean1,bean2)"
+            ));
+            vividus.verify(Vividus::init);
+        }
     }
 
     @Test
-    public void testPrintHelp() throws Exception
+    void testNoArguments() throws ParseException
     {
-        VividusInitializationChecker.main(new String[] {"-h"});
-        assertOutput(List.of("usage: VividusInitializationChecker",
-                " -h,--help                print this message.",
-                " -i,--ignoreBeans <arg>   comma separated list of beans that are not",
-                "                          instantiated during check (e.g. bean1,bean2)"
-        ));
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
+                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        {
+            beanFactory.when(BeanFactory::getBeanDefinitionNames).thenReturn(new String[] { BEAN_1, BEAN_2 });
+            VividusInitializationChecker.main(new String[0]);
+            vividus.verify(Vividus::init);
+            beanFactory.verify(() -> {
+                BeanFactory.getBean(BEAN_1);
+                BeanFactory.getBean(BEAN_2);
+            });
+        }
     }
 
     @Test
-    public void testNoArguments() throws ParseException
+    void shouldIgnoreAbstractBeans() throws ParseException
     {
-        VividusInitializationChecker.main(new String[0]);
-        verifyStatic(BeanFactory.class);
-        BeanFactory.getBean(BEAN_1);
-        verifyStatic(BeanFactory.class);
-        BeanFactory.getBean(BEAN_2);
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
+                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        {
+            beanFactory.when(BeanFactory::getBeanDefinitionNames).thenReturn(new String[] { BEAN_1, BEAN_2 });
+            beanFactory.when(() -> BeanFactory.getBean(BEAN_1)).thenThrow(new BeanIsAbstractException(BEAN_1));
+            VividusInitializationChecker.main(new String[0]);
+            vividus.verify(Vividus::init);
+            beanFactory.verify(() -> {
+                BeanFactory.getBean(BEAN_1);
+                BeanFactory.getBean(BEAN_2);
+            });
+        }
     }
 
     @Test
-    public void shouldIgnoreAbstractBeans() throws ParseException
+    void shouldFailInCaseOfException()
     {
-        when(BeanFactory.getBean(BEAN_1)).thenThrow(new BeanIsAbstractException(BEAN_1));
-        VividusInitializationChecker.main(new String[0]);
-        verifyStatic(BeanFactory.class);
-        BeanFactory.getBean(BEAN_1);
-        verifyStatic(BeanFactory.class);
-        BeanFactory.getBean(BEAN_2);
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
+                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        {
+            beanFactory.when(BeanFactory::getBeanDefinitionNames).thenReturn(new String[] { BEAN_1, BEAN_2 });
+            IllegalStateException exception = new IllegalStateException();
+            beanFactory.when(() -> BeanFactory.getBean(BEAN_2)).thenThrow(exception);
+            RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                    () -> VividusInitializationChecker.main(new String[0]));
+            assertEquals("Initialization of beans has been failed", runtimeException.getMessage());
+            vividus.verify(Vividus::init);
+            beanFactory.verify(() -> BeanFactory.getBean(BEAN_1));
+            assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception.toString()))));
+        }
     }
 
     @Test
-    public void shouldFailInCaseOfException()
+    void testIgnoreBeansOptionIsPresent() throws ParseException
     {
-        IllegalStateException exception = new IllegalStateException();
-        when(BeanFactory.getBean(BEAN_2)).thenThrow(exception);
-        RuntimeException runtimeException = assertThrows(RuntimeException.class,
-            () -> VividusInitializationChecker.main(new String[0]));
-        assertEquals("Initialization of beans has been failed", runtimeException.getMessage());
-        verifyStatic(BeanFactory.class);
-        BeanFactory.getBean(BEAN_1);
-        verifyStatic(BeanFactory.class);
-        BeanFactory.getBean(BEAN_2);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception.toString()))));
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
+                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        {
+            beanFactory.when(BeanFactory::getBeanDefinitionNames).thenReturn(new String[] { BEAN_1, BEAN_2 });
+            VividusInitializationChecker.main(new String[] { "--ignoreBeans", BEAN_2 });
+            vividus.verify(Vividus::init);
+            beanFactory.verify(() -> BeanFactory.getBean(BEAN_1));
+            beanFactory.verify(never(), () -> BeanFactory.getBean(BEAN_2));
+        }
     }
 
     @Test
-    public void testIgnoreBeansOptionIsPresent() throws ParseException
+    void testUnknownOptionIsPresent()
     {
-        VividusInitializationChecker.main(new String[] { "--ignoreBeans", BEAN_2 });
-        verifyStatic(BeanFactory.class);
-        BeanFactory.getBean(BEAN_1);
-        verifyStatic(BeanFactory.class, never());
-        BeanFactory.getBean(BEAN_2);
-    }
-
-    @Test(expected = UnrecognizedOptionException.class)
-    public void testUnknownOptionIsPresent() throws ParseException
-    {
-        VividusInitializationChecker.main(new String[] { "--any" });
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        {
+            assertThrows(UnrecognizedOptionException.class,
+                    () -> VividusInitializationChecker.main(new String[] { "--any" }));
+            vividus.verify(Vividus::init);
+        }
     }
 }

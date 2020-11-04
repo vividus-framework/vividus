@@ -17,7 +17,6 @@
 package org.vividus.proxy.dns;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,88 +24,79 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@PrepareForTest(HostNameResolver.class)
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(MockitoJUnitRunner.class)
-public class HostNameResolverTests
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+class HostNameResolverTests
 {
-    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(HostNameResolver.class);
-
     private static final String HOST = "host";
     private static final String IP_ADDRESS = "1.1.1.1";
 
-    @Mock
-    private InetAddress inetAddress;
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(HostNameResolver.class);
 
-    @InjectMocks
-    private HostNameResolver hostNameResolver;
+    @Mock private InetAddress inetAddress;
+    @InjectMocks private HostNameResolver hostNameResolver;
 
-    @After
-    public void clearLoggers()
+    @Test
+    void testResolve()
     {
-        TestLoggerFactory.clear();
+        hostNameResolver.setDnsMappingStorage(Map.of(HOST, IP_ADDRESS));
+        try (MockedStatic<InetAddress> inetAddressMock = mockStatic(InetAddress.class))
+        {
+            inetAddressMock.when(() -> InetAddress.getByName(IP_ADDRESS)).thenReturn(inetAddress);
+            assertEquals(List.of(inetAddress), hostNameResolver.resolve(HOST));
+            assertTrue(logger.getLoggingEvents().isEmpty());
+            inetAddressMock.verify(never(), () -> InetAddress.getAllByName(any()));
+        }
     }
 
     @Test
-    public void testResolve() throws Exception
+    void testResolveHostsAreEmpty()
     {
-        hostNameResolver.setDnsMappingStorage(Collections.singletonMap(HOST, IP_ADDRESS));
-        PowerMockito.mockStatic(InetAddress.class);
-        when(InetAddress.getByName(IP_ADDRESS)).thenReturn(inetAddress);
-        assertEquals(singletonList(inetAddress), hostNameResolver.resolve(HOST));
-        assertTrue(LOGGER.getLoggingEvents().isEmpty());
-        PowerMockito.verifyStatic(InetAddress.class, never());
-        InetAddress.getAllByName(any());
-    }
-
-    @Test
-    public void testResolveHostsAreEmpty() throws Exception
-    {
-        hostNameResolver.setDnsMappingStorage(Collections.emptyMap());
+        hostNameResolver.setDnsMappingStorage(Map.of());
         HostNameResolver spyHostNameResolver = spy(hostNameResolver);
         doReturn(HOST).when(spyHostNameResolver).applyRemapping(HOST);
-        doReturn(singletonList(inetAddress)).when(spyHostNameResolver).resolveRemapped(HOST);
-        PowerMockito.mockStatic(InetAddress.class);
-        assertEquals(singletonList(inetAddress), spyHostNameResolver.resolve(HOST));
-        assertTrue(LOGGER.getLoggingEvents().isEmpty());
-        PowerMockito.verifyStatic(InetAddress.class, never());
-        InetAddress.getByName(any());
+        doReturn(List.of(inetAddress)).when(spyHostNameResolver).resolveRemapped(HOST);
+        try (MockedStatic<InetAddress> inetAddressMock = mockStatic(InetAddress.class))
+        {
+            assertEquals(List.of(inetAddress), spyHostNameResolver.resolve(HOST));
+            assertTrue(logger.getLoggingEvents().isEmpty());
+            inetAddressMock.verify(never(), () -> InetAddress.getByName(any()));
+        }
     }
 
     @Test
-    public void testResolveException() throws Exception
+    void testResolveException()
     {
         UnknownHostException exception = mock(UnknownHostException.class);
-        hostNameResolver.setDnsMappingStorage(Collections.singletonMap(HOST, IP_ADDRESS));
+        hostNameResolver.setDnsMappingStorage(Map.of(HOST, IP_ADDRESS));
         HostNameResolver spyHostNameResolver = spy(hostNameResolver);
-        PowerMockito.mockStatic(InetAddress.class);
-        when(InetAddress.getByName(IP_ADDRESS)).thenThrow(exception);
-        doReturn(HOST).when(spyHostNameResolver).applyRemapping(HOST);
-        doReturn(singletonList(inetAddress)).when(spyHostNameResolver).resolveRemapped(HOST);
-        assertEquals(singletonList(inetAddress), spyHostNameResolver.resolve(HOST));
-        assertThat(LOGGER.getLoggingEvents(),
-                is(singletonList(warn(exception, "Unable to determine hostname by ip address"))));
+        try (MockedStatic<InetAddress> inetAddressMock = mockStatic(InetAddress.class))
+        {
+            inetAddressMock.when(() -> InetAddress.getByName(IP_ADDRESS)).thenThrow(exception);
+            doReturn(HOST).when(spyHostNameResolver).applyRemapping(HOST);
+            doReturn(List.of(inetAddress)).when(spyHostNameResolver).resolveRemapped(HOST);
+            assertEquals(List.of(inetAddress), spyHostNameResolver.resolve(HOST));
+            assertThat(logger.getLoggingEvents(),
+                    is(List.of(warn(exception, "Unable to determine hostname by ip address"))));
+        }
     }
 }

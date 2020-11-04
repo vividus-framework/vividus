@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.Maps;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jbehave.core.failures.BeforeOrAfterFailed;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.ExamplesTable;
@@ -73,7 +74,6 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.configuration.plugins.Plugins;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.batch.BatchExecutionConfiguration;
 import org.vividus.bdd.batch.BatchStorage;
@@ -192,10 +192,9 @@ class AllureStoryReporterTests
     }
 
     @BeforeEach
-    void beforeEach() throws NoSuchFieldException, IllegalAccessException
+    void beforeEach() throws IllegalAccessException
     {
-        Plugins.getMemberAccessor().set(allureStoryReporter.getClass().getDeclaredField("lifecycle"),
-                allureStoryReporter, allureLifecycle);
+        FieldUtils.writeField(allureStoryReporter, "lifecycle", allureLifecycle, true);
         linkedQueueItem = new LinkedQueueItem<>(SCENARIO_UID);
         allureStoryReporter.setNext(next);
     }
