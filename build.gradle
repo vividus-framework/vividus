@@ -71,7 +71,7 @@ ext {
         allure:                 '2.13.6',
         ashot:                  '1.5.4',
         commonsLang3:           '3.11',
-        commonsText:            '1.8',
+        commonsText:            '1.9',
         commonsCollections4:    '4.4',
         groovy:                 '3.0.6',
         guava:                  '30.0-jre',
