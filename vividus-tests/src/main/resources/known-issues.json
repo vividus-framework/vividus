@@ -52,5 +52,13 @@
     "stepPattern": "Then `vividus` matches.*",
     "failTestCaseFast": true,
     "failTestSuiteFast": true
+  },
+  "VVD-9": {
+    "type": "Internal",
+    "assertionPattern": ".*",
+    "scenarioPattern": "Known issue should be detected in sub-steps",
+    "storyPattern": "KnownIssues",
+    "stepPattern": "When I use composite step in known-issues",
+    "failTestCaseFast": true
   }
 }

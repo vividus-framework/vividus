@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
+import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.reporters.ConcurrentStoryReporter;
 import org.jbehave.core.reporters.DelegatingStoryReporter;
@@ -37,7 +38,7 @@ import org.vividus.bdd.steps.SubSteps;
 @Named
 public class SubStepsConverter extends FunctionalParameterConverter<SubSteps>
 {
-    public SubStepsConverter(ExtendedConfiguration configuration, IBddRunContext bddRunContext,
+    public SubStepsConverter(ExtendedConfiguration configuration, IBddRunContext bddRunContext, Embedder embedder,
             IStepExamplesTableParser stepExamplesTableParser)
     {
         super(subSteps -> {
@@ -53,7 +54,7 @@ public class SubStepsConverter extends FunctionalParameterConverter<SubSteps>
             }
             ExamplesTable subStepsTable = configuration.examplesTableFactory().createExamplesTable(subSteps);
             List<Step> steps = stepExamplesTableParser.parse(subStepsTable);
-            return new SubSteps(configuration, storyReporter, steps);
+            return new SubSteps(configuration, storyReporter, embedder, steps);
         });
     }
 }

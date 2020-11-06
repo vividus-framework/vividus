@@ -78,7 +78,7 @@ ext {
         hamcrest:               '2.2',
         httpclient:             '4.5.13',
         javaxInject:            '1',
-        jbehave:                '4.8.0-alpha.4',
+        jbehave:                '4.8.0-alpha.5',
         junit4:                 '4.13',
         slf4j:                  '2.0.0-alpha1',
         spring:                 '5.3.0',
