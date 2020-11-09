@@ -39,11 +39,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.mobileapp.model.DesiredCapability;
+import org.vividus.bdd.mobileapp.model.NamedEntry;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
+import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.HasSessionDetails;
 import io.appium.java_client.InteractsWithApps;
 
@@ -56,6 +57,8 @@ class ApplicationStepsTests
     private static final String CAPABILITY_VALUE = "capabilityValue";
     private static final String APP = "app";
     private static final String APP_NAME = "vividus-mobile.app";
+    private static final String SET_SETTINGS = "setSettings";
+    private static final String SETTINGS = "settings";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ApplicationSteps.class);
 
@@ -84,7 +87,7 @@ class ApplicationStepsTests
         when(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES))
                 .thenReturn(desiredCapabilities);
 
-        DesiredCapability capability = new DesiredCapability();
+        NamedEntry capability = new NamedEntry();
         capability.setName(CAPABILITY_NAME);
         capability.setValue(CAPABILITY_VALUE);
 
@@ -128,6 +131,27 @@ class ApplicationStepsTests
         assertEquals(
             String.format("Application with the bundle identifier '%s' is not installed on the device", bundleId),
             exception.getMessage());
+    }
+
+    @Test
+    void shouldChangeAppiumSettings()
+    {
+        ExecutesMethod executesMethod = mock(ExecutesMethod.class);
+        when(webDriverProvider.getUnwrapped(ExecutesMethod.class)).thenReturn(executesMethod);
+
+        applicationSteps.changeAppiumSettings(List.of(
+                createSetting(KEY + 1, "50"),
+                createSetting(KEY + 2, VALUE)));
+
+        verify(executesMethod).execute(SET_SETTINGS, Map.of(SETTINGS, Map.of(KEY + 1, 50L, KEY + 2, VALUE)));
+    }
+
+    private static NamedEntry createSetting(String settingName, String settingValue)
+    {
+        NamedEntry setting = new NamedEntry();
+        setting.setName(settingName);
+        setting.setValue(settingValue);
+        return setting;
     }
 
     private InteractsWithApps mockInteractingWithAppsDriver()

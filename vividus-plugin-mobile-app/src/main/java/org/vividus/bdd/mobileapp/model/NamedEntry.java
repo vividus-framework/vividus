@@ -19,7 +19,7 @@ package org.vividus.bdd.mobileapp.model;
 import org.jbehave.core.annotations.AsParameters;
 
 @AsParameters
-public class DesiredCapability
+public class NamedEntry
 {
     private String name;
     private String value;

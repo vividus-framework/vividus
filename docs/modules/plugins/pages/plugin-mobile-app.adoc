@@ -445,3 +445,34 @@ When I activate application with bundle identifier `com.apple.mobilesafari`
 ----
 
 include::partial$generic-ui-steps.adoc[]
+
+
+=== Change session settings
+
+==== *_Info_*
+
+Changes the behavior of the Appium session
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I change Appium session settings:$settings
+----
+
+==== *_Parameters_*
+
+. `$settings` - https://appium.io/docs/en/advanced-concepts/settings/#settings[Settings]
+
+==== *_Usage_*
+
+.Settings.story
+[source,gherkin]
+----
+Scenario: Show invisible elements
+When I change Appium session settings:
+|name                  |value|
+|allowInvisibleElements|true |
+----
+
+include::partial$generic-ui-steps.adoc[]
