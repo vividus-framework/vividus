@@ -20,104 +20,6 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '
 [WARNING]
 To be implemented
 
-== Steps
-
-=== Verify secure protocols supported by server
-
-==== *_Info_*
-
-Checks that a server defined by the `hostname` supports secure protocols listed in the `protocols` parameter.
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-Then server `$hostname` supports secure protocols that $rule `$protocols`
-----
-
-==== *_Parameters_*
-
-. `$hostname` - server hostname.
-. `$rule` - xref:parameters:collection-comparison-rule.adoc[Collection Comparison Rule]
-. `$protocols` - secure protocols that are expected to match specified `$rule`
-
-==== *_Usage_*
-
-.Sample.story
-[source,gherkin]
-----
-Scenario: Verify that the server supports TLSv1.3 and TLSv1.2 protocols
-Then server `vividus-test-site.herokuapp.com` supports secure protocols that contain `TLSv1.3,TLSv1.2`
-----
-
-=== Wait for JSON element to be returned in HTTP response
-
-==== *_Info_*
-
-Execute the provided sub-steps until the HTTP response body contains an element by the specified JSON path or until the maximum number of retries is reached. The maximum duration of the step execution is not limited. The actions of the step:
-. execute sub-steps
-. wait for the polling interval
-. if the required JSON element exists or the maximum number of retries is reached, then execution stops, otherwise the step actions are repeated
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I wait for presence of element by `$jsonPath` with `$pollingInterval` polling interval retrying $retryTimes times$stepsToExecute
-----
-
-==== *_Parameters_*
-
-. `jsonPath` - the JSON path of the element to find
-. `pollingInterval` - the duration to wait between retries
-. `retryTimes` - the maximum number of the retries
-. `stepsToExecute` - the sub-steps to execute at each iteration
-
-==== *_Usage_*
-
-.Sample.story
-[source,gherkin]
-----
-Scenario: Wait for presence of element by JSON path $.data.testData
-When I wait for presence of element by `$.data.testData` with `PT5S` polling interval retrying 10 times
-|step                                  |
-|When I set request headers:           |
-|{headerSeparator=!,valueSeparator=!}  |
-|!name          !value                !|
-|!Authorization !${accessToken}       !|
-|When I issue a HTTP GET request for a resource with the URL '${requestUrl}'|
-----
-
-=== Adding headers to HTTP request
-
-==== *_Info_*
-
-Adds headers to HTTP request. See https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[standard request fields].
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I add request headers:$headers
-----
-
-==== *_Parameters_*
-
-. `headers` - ExamplesTable representing list of headers with columns `name` and `value` specifying HTTP header
-
-==== *_Usage_*
-
-.Sample.story
-[source,gherkin]
-----
-Scenario: Verify possibility to add request header with name Accept-Language and value en-ru
-When I add request headers:
-|name           |value |
-|Accept-Language|en-ru |
-When I send HTTP GET to the relative URL '/get?name=Content'
-Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
-----
-
 == Expressions
 
 
@@ -182,3 +84,103 @@ https://www.ietf.org/rfc/rfc3986.txt[RFC 3986].
 |frag%20ment
 
 |===
+
+== Steps
+
+=== Init multipart HTTP request
+
+Sets https://tools.ietf.org/html/rfc7578[multipart] request entity that will be used while executing HTTP requests.
+
+[source,gherkin]
+----
+Given multipart request:$requestParts
+----
+
+where `requestParts` - `ExamplesTable` representing the list of the request parts with the following columns:
+
+* `type` - one of request part types: `STRING`, `FILE`, `BINARY`
+* `name` - the request part name
+* `value` - the path to the resource with the content for `FILE` part type and the actual content for `STRING` and `BINARY` part types
+* `contentType` - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type[the content type]
+* `fileName` - the name of the file contained in this request part. The parameter is not allowed for `STRING` part type, but it's required for `BINARY` one and optional for `FILE` part type
+
+.Init HTTP request consisting of 4 different parts
+[source,gherkin]
+----
+Given multipart request:
+|type  |name      |value         |contentType|fileName       |
+|file  |file-key  |/data/file.txt|           |anotherName.txt|
+|file  |file-key2 |/data/file.txt|text/plain |               |
+|string|string-key|string1       |text/plain |               |
+|binary|binary-key|raw           |text/plain |raw.txt        |
+----
+
+=== Add HTTP headers to the request
+
+Adds https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[HTTP headers] to the HTTP request.
+
+[source,gherkin]
+----
+When I add request headers:$headers
+----
+
+* `headers` - `ExamplesTable` representing the list of the headers with columns `name` and `value` specifying HTTP header
+
+.Add request header with name Accept-Language and value en-ru
+[source,gherkin]
+----
+When I add request headers:
+|name           |value |
+|Accept-Language|en-ru |
+When I send HTTP GET to the relative URL '/get?name=Content'
+Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
+----
+
+=== Wait for JSON element in the HTTP response
+
+Executes the provided sub-steps until the HTTP response body contains an element by the specified JSON path or the maximum number of retries is reached. The maximum duration of the step execution is not limited. The actions of the step:
+
+. execute sub-steps
+. wait the polling interval
+. if the required JSON element exists or the maximum number of retries is reached, then the execution stops, otherwise the step actions are repeated
+
+[source,gherkin]
+----
+When I wait for presence of element by `$jsonPath` with `$pollingInterval` polling interval retrying $retryTimes times$stepsToExecute
+----
+
+* `jsonPath` - the JSON path of the element to find
+* `pollingInterval` - the duration to wait between retries
+* `retryTimes` - the maximum number of the retries
+* `stepsToExecute` - the sub-steps to execute at each iteration
+
+.Wait for presence of element by JSON path $.data.testData
+[source,gherkin]
+----
+When I wait for presence of element by `$.data.testData` with `PT5S` polling interval retrying 10 times
+|step                                  |
+|When I set request headers:           |
+|{headerSeparator=!,valueSeparator=!}  |
+|!name          !value                !|
+|!Authorization !${accessToken}       !|
+|When I issue a HTTP GET request for a resource with the URL '${requestUrl}'|
+----
+
+=== Validate secure protocols supported by server
+
+Checks that a server defined by the `hostname` supports secure protocols listed in the `protocols` parameter.
+
+[source,gherkin]
+----
+Then server `$hostname` supports secure protocols that $rule `$protocols`
+----
+
+* `$hostname` - the server hostname
+* `$rule` - xref:parameters:collection-comparison-rule.adoc[the collection comparison rule]
+* `$protocols` - the secure protocols that are expected to match specified `$rule`
+
+.Validate the server supports TLSv1.2 and TLSv1.3 protocols
+[source,gherkin]
+----
+Then server `vividus-test-site.herokuapp.com` supports secure protocols that contain `TLSv1.2,TLSv1.3`
+----

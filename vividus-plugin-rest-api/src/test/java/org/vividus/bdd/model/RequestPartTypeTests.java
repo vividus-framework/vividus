@@ -16,84 +16,80 @@
 
 package org.vividus.bdd.model;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.stream.Stream;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.apache.http.entity.mime.content.AbstractContentBody;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.junit.jupiter.api.Test;
 
 class RequestPartTypeTests
 {
-    private static final String CR_LF = "\r\n";
-    private static final String CONTENT_TYPE = "contentType";
+    private static final ContentType CONTENT_TYPE = ContentType.APPLICATION_JSON;
+    private static final String FILE_CONTENT = "{body}";
 
-    // CHECKSTYLE:OFF
-    static Stream<Arguments> stringContentTypes()
+    @Test
+    void shouldCreateStringPart() throws IOException
     {
-        return Stream.of(
-                Arguments.of(Optional.empty(),          ContentType.TEXT_PLAIN),
-                Arguments.of(Optional.of(CONTENT_TYPE), ContentType.parse(CONTENT_TYPE))
-                );
-    }
-    // CHECKSTYLE:ON
-
-    @MethodSource("stringContentTypes")
-    @ParameterizedTest
-    void testAddStringPart(Optional<String> contentTypeAsString, ContentType contentType)
-            throws IOException
-    {
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        String name = "stringKey";
         String value = "stringValue";
-        RequestPartType.STRING.addPart(builder, name, value, contentTypeAsString);
-        assertHttpEntity(builder, buildExpectedEntity(name, contentType, "8bit", value));
+        StringBody part = (StringBody) RequestPartType.STRING.createPart(value, CONTENT_TYPE);
+        assertRequestPart(part, value, null);
     }
 
-    // CHECKSTYLE:OFF
-    static Stream<Arguments> fileContentTypes()
+    @Test
+    void shouldNotCreateStringPartWithFileName()
     {
-        return Stream.of(
-                Arguments.of(Optional.empty(),          ContentType.APPLICATION_OCTET_STREAM),
-                Arguments.of(Optional.of(CONTENT_TYPE), ContentType.parse(CONTENT_TYPE))
-                );
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> RequestPartType.STRING.createPart(null, CONTENT_TYPE, "string-filename"));
+        assertEquals("'fileName' parameter is not allowed for STRING request part type", exception.getMessage());
     }
-    // CHECKSTYLE:ON
 
-    @MethodSource("fileContentTypes")
-    @ParameterizedTest
-    void testAddFilePart(Optional<String> contentTypeAsString, ContentType contentType) throws IOException
+    @Test
+    void shouldCreateFilePartWithDefaultFileName() throws IOException
     {
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        String name = "fileKey";
         String fileName = "requestBody.txt";
-        RequestPartType.FILE.addPart(builder, name, "/" + fileName, contentTypeAsString);
-        assertHttpEntity(builder, buildExpectedEntity(name + "\"; filename=\"" + fileName,
-                contentType, "binary", "{body}"));
+        ByteArrayBody part = (ByteArrayBody) RequestPartType.FILE.createPart("/" + fileName, CONTENT_TYPE);
+        assertRequestPart(part, FILE_CONTENT, fileName);
     }
 
-    private void assertHttpEntity(MultipartEntityBuilder builder, String expectedEntity) throws IOException
+    @Test
+    void shouldCreateFilePartWithCustomFileName() throws IOException
     {
-        assertThat(IOUtils.toString(builder.build().getContent(), StandardCharsets.UTF_8),
-                containsString(expectedEntity));
+        String fileName = "file.txt";
+        ByteArrayBody part = (ByteArrayBody) RequestPartType.FILE.createPart("/requestBody.txt", CONTENT_TYPE,
+                fileName);
+        assertRequestPart(part, FILE_CONTENT, fileName);
     }
 
-    private String buildExpectedEntity(String name, ContentType contentType, String contentTransferEncoding,
-            String content)
+    @Test
+    void shouldCreateBinaryPart() throws IOException
     {
-        // @formatter:off
-        return "Content-Disposition: form-data; name=\"" + name + "\"" + CR_LF
-                + "Content-Type: " + contentType + CR_LF
-                + "Content-Transfer-Encoding: " + contentTransferEncoding
-                + CR_LF + CR_LF + content + CR_LF;
-        // @formatter:on
+        String data = "data";
+        String fileName = "binary.txt";
+        ByteArrayBody part = (ByteArrayBody) RequestPartType.BINARY.createPart(data, CONTENT_TYPE, fileName);
+        assertRequestPart(part, data, fileName);
+    }
+
+    @Test
+    void shouldNotCreateBinaryPartWithoutFileName()
+    {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> RequestPartType.BINARY.createPart(null, CONTENT_TYPE));
+        assertEquals("'fileName' parameter is required for BINARY request part type", exception.getMessage());
+    }
+
+    private void assertRequestPart(AbstractContentBody part, String data, String fileName) throws IOException
+    {
+        assertEquals(CONTENT_TYPE, part.getContentType());
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        part.writeTo(byteArrayOutputStream);
+        assertEquals(data, byteArrayOutputStream.toString(StandardCharsets.UTF_8));
+        assertEquals(fileName, part.getFilename());
     }
 }

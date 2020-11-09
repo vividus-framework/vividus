@@ -76,3 +76,19 @@ When I send HTTP GET to the relative URL '/get?name=Content'
 Then `${responseCode}` is equal to `200`
 Then a JSON element by the JSON path '$.headers.Content-Type' is equal to '"application/json"'
 Then a JSON element by the JSON path '$.headers.Language' is equal to '"en-ru"'
+
+Scenario: Verify step "Given multipart request:$requestParts"
+Given multipart request:
+|type  |name      |value         |contentType|fileName       |
+|file  |file-key  |/data/file.txt|           |anotherName.txt|
+|file  |file-key2 |/data/file.txt|text/plain |               |
+|string|string-key|string1       |text/plain |               |
+|binary|binary-key|raw           |text/plain |raw.txt        |
+When I send HTTP POST to the relative URL '/post'
+Then `${responseCode}` is equal to `200`
+Then a JSON element by the JSON path '$.files.file-key' is equal to '"#{loadResource(/data/file.txt)}"'
+Then a JSON element by the JSON path '$.files.file-key2' is equal to '"#{loadResource(/data/file.txt)}"'
+Then a JSON element by the JSON path '$.form.string-key' is equal to '"string1"'
+Then a JSON element by the JSON path '$.files.binary-key' is equal to '"raw"'
+Then a JSON element by the JSON path '$.headers.Content-Type' is equal to '"${json-unit.regex}multipart/form-data; boundary=[A-Za-z0-9-_]+"'
+Then a JSON element by the JSON path '$.json' is equal to 'null'
