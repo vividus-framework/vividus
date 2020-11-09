@@ -16,22 +16,29 @@
 
 package org.vividus.bdd.mobileapp.steps;
 
+import static io.appium.java_client.CommandExecutionHelper.execute;
+import static io.appium.java_client.MobileCommand.prepareArguments;
+import static java.util.Map.entry;
+import static org.vividus.selenium.type.CapabilitiesValueTypeAdjuster.adjustType;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.mobileapp.model.DesiredCapability;
+import org.vividus.bdd.mobileapp.model.NamedEntry;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.util.property.PropertyParser;
 
+import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.HasSessionDetails;
 import io.appium.java_client.InteractsWithApps;
 
@@ -54,7 +61,7 @@ public class ApplicationSteps
      * @param capabilities capabilities to start mobile application with
      */
     @Given("I start mobile application with capabilities:$capabilities")
-    public void startMobileApplicationWithCapabilities(List<DesiredCapability> capabilities)
+    public void startMobileApplicationWithCapabilities(List<NamedEntry> capabilities)
     {
         DesiredCapabilities desiredCapabilities = webDriverManagerContext
                 .getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES);
@@ -89,5 +96,31 @@ public class ApplicationSteps
         Validate.isTrue(interactor.isAppInstalled(bundleId),
                 "Application with the bundle identifier '%s' is not installed on the device", bundleId);
         interactor.activateApp(bundleId);
+    }
+
+    /**
+     * Change the behavior of the Appium session
+     * @param settings Appium session settings
+     * <br><a href="https://appium.io/docs/en/advanced-concepts/settings/#settings">Settings</a> example:
+     * <code>
+     * <br>|name                  |value|
+     * <br>|ignoreUnimportantViews|true |
+     * <br>|snapshotMaxDepth      |100  |
+     * </code>
+     */
+    @When("I change Appium session settings:$settings")
+    public void changeAppiumSettings(List<NamedEntry> settings)
+    {
+        ExecutesMethod executesMethod = webDriverProvider.getUnwrapped(ExecutesMethod.class);
+
+        String[] params = settings.stream()
+                                  .map(NamedEntry::getName)
+                                  .toArray(String[]::new);
+        Object[] values = settings.stream()
+                                  .map(NamedEntry::getValue)
+                                  .map(v -> NumberUtils.isDigits(v) ? Long.valueOf(v) : adjustType(v))
+                                  .toArray();
+
+        execute(executesMethod, entry("setSettings", prepareArguments("settings", prepareArguments(params, values))));
     }
 }

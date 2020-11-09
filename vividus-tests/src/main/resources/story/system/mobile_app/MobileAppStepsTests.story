@@ -15,6 +15,34 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
+Scenario: [Android] Verify step: 'When I change Appium session settings:$settings'
+Meta:
+    @targetPlatform android
+Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `0`
+When I change Appium session settings:
+|name                  |value|
+|allowInvisibleElements|true |
+Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `1`
+When I change Appium session settings:
+|name                  |value|
+|allowInvisibleElements|false|
+Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `0`
+
+
+Scenario: [iOS] Verify step: 'When I change Appium session settings:$settings'
+Meta:
+    @targetPlatform ios
+Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `1`
+When I change Appium session settings:
+|name            |value|
+|snapshotMaxDepth|1    |
+Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `0`
+When I change Appium session settings:
+|name            |value     |
+|snapshotMaxDepth|50        |
+Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `1`
+
+
 Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Text Part Filter and Text Filter
 Then number of elements found by `xpath(<textElementXpath>)->filter.textPart(om)` is equal to `1`
 Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `1`
