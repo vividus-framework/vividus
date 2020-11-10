@@ -11,8 +11,3 @@ dependencies {
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'org.springframework.kafka', name: 'spring-kafka-test', version: '2.6.2')
 }
-
-artifactoryPublish {
-    // The publishing is skipped due to bintray restrictions: https://stackoverflow.com/questions/60602428/unable-to-add-bintray-package-to-jcenter-and-oss-jfrog
-    skip = true
-}
