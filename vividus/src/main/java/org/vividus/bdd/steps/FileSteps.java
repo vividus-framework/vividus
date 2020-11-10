@@ -60,4 +60,16 @@ public class FileSteps
         FileUtils.writeStringToFile(temporaryFile, content, StandardCharsets.UTF_8);
         bddVariableContext.putVariable(scopes, pathVariable, temporaryFile.getAbsolutePath());
     }
+
+    /**
+     * Saves content to file with specified pathname
+     * @param pathname Fully qualified file name with parent folders and extension (e.g. temp/some_file.txt)
+     * @param fileContent Content to be saved to file
+     * @throws IOException If an I/O error has occurred
+     */
+    @When("I create a file with the pathname `$pathname` and the content `$fileContent`")
+    public void createFile(String pathname, String fileContent) throws IOException
+    {
+        FileUtils.writeStringToFile(new File(pathname), fileContent, StandardCharsets.UTF_8);
+    }
 }
