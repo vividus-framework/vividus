@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
-public enum ComparisonRule implements IComparisonRule
+public enum ComparisonRule
 {
     LESS_THAN("<")
     {
@@ -87,6 +87,8 @@ public enum ComparisonRule implements IComparisonRule
                      .findFirst()
                      .orElse(null);
     }
+
+    public abstract <T extends Comparable<T>> Matcher<T> getComparisonRule(T variable);
 
     @Override
     public String toString()
