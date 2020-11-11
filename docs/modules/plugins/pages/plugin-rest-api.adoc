@@ -22,43 +22,43 @@ To be implemented
 
 == Expressions
 
+NOTE: The expression parameters marked with *bold* are mandatory.
 
-=== URI Encoding
+=== `encodeUriXyz`
 
-`${encodeUriXyz(..)}` is a family of expressions that encode specific URI components (e.g. path, query)
+`#{encodeUriXyz(..)}` is a family of expressions that encode specific URI components (e.g. path, query)
 by percent encoding illegal characters, which includes non-US-ASCII characters, and also characters that
 are otherwise illegal within the given URI component type, as defined in
 https://www.ietf.org/rfc/rfc3986.txt[RFC 3986].
 
-[cols="3,2", options="header"]
+[cols="3,2", options="header", subs="+quotes"]
 |===
 |Syntax
 |Description
 
-|`#{encodeUriUserInfo($userInfo)}`
-|Encode the given URI user info
+|`#{encodeUriUserInfo(*$userInfo*)}`
+|encodes the given URI user info
 
-|`#{encodeUriHost($host)}`
-|Encode the given URI host
+|`#{encodeUriHost(*$host*)}`
+|encodes the given URI host
 
-|`#{encodeUriPath($path)}`
-|Encode the given URI path
+|`#{encodeUriPath(*$path*)}`
+|encodes the given URI path
 
-|`#{encodeUriPathSegment($segment)}`
-|Encode the given URI path segment
+|`#{encodeUriPathSegment(*$segment*)}`
+|encodes the given URI path segment
 
-|`#{encodeUriQuery($query)}`
-|Encode the given URI query
+|`#{encodeUriQuery(*$query*)}`
+|encodes the given URI query
 
-|`#{encodeUriQueryParameter($queryParameter)}`
-|Encode the given URI query parameter
+|`#{encodeUriQueryParameter(*$queryParameter*)}`
+|encodes the given URI query parameter
 
-|`#{encodeUriFragment($fragment)}`
-|Encode the given URI fragment
+|`#{encodeUriFragment(*$fragment*)}`
+|encode the given URI fragment
 |===
 
-==== Examples
-
+.Examples of the expressions encoding URI parts
 |===
 |Expression |Result
 

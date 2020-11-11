@@ -1,38 +1,30 @@
 = Expressions available out of the box
 
-== Description
-
 Here one could find description of the expressions that are delivered with Vividus itself without any plugins required.
 
-=== Groovy
+NOTE: The expression parameters marked with *bold* are mandatory.
 
-==== *_Info_*
+== `evalGroovy`
 
-Executes groovy script and converts result to a string.
+Evaluates groovy script and converts result to a string.
 
-==== *_Wording_*
+[source, subs="+quotes"]
+----
+#{evalGroovy(*$script*)}
+----
 
+* *`$script`* - valid https://groovy-lang.org/index.html[Groovy] script to be evaluated
+
+[TIP]
+====
+* Any Vividus variable is accessible in the groovy script by its name
+* One could use any of online groovy evaluators to verify the script. For example see: https://groovy-playground.appspot.com/[Evaluator]
+====
+
+
+.Evaluate Groovy script
 [source,gherkin]
 ----
-#{evalGroovy(script)}
-----
-
-==== *_Parameters_*
-
-. `$script` - valid https://groovy-lang.org/index.html[groovy] script
-
-[IMPORTANT]
-Any context variable available in the groovy script by its name
-
-[IMPORTANT]
-One could use any of online groovy evaluators to verify the script. For example see: https://groovy-playground.appspot.com/[Evaluator]
-
-==== *_Usage_*
-
-.TryGroovy.story
-[source,gherkin]
-----
-Scenario: Click button 5 times
 When I initialize Scenario variable `listOfMaps` with values:
 |key|
 |2  |
