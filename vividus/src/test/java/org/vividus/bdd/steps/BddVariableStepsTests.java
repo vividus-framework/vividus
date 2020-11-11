@@ -28,11 +28,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,12 +38,10 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -331,15 +327,6 @@ class BddVariableStepsTests
         bddVariableSteps.initVariableUsingTemplate(scopes, variableName, templatePath,
                 new ExamplesTable("").withRows(List.of(dataModel)));
         verify(bddVariableContext).putVariable(scopes, variableName, VALUE);
-    }
-
-    @Test
-    void testSaveStringVariableToFile(@TempDir Path tempDir) throws IOException
-    {
-        String tempFilePath = tempDir.resolve("temp").resolve("test.txt").toString();
-        String fileContent = "file-content";
-        bddVariableSteps.saveVariableToFile(tempFilePath, fileContent);
-        assertEquals(fileContent, FileUtils.readFileToString(new File(tempFilePath), StandardCharsets.UTF_8));
     }
 
     @Test

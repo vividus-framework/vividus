@@ -18,7 +18,6 @@ package org.vividus.bdd.steps;
 
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -217,19 +215,6 @@ public class BddVariableSteps
     {
         softAssert.assertThat(String.format("Value '%s' matches pattern '%s'", value, pattern.pattern()), value,
                 matchesPattern(pattern));
-    }
-
-    /**
-     * Saves content to file with specified pathname
-     * @param pathname Fully qualified file name with parent folders and extension
-     * (e.g. temp/some_file.txt)
-     * @param fileContent Content to be saved to file
-     * @throws IOException If an I/O exception of some sort has occurred
-     */
-    @When("I create a file with the pathname `$pathname` and the content `$fileContent`")
-    public void saveVariableToFile(String pathname, String fileContent) throws IOException
-    {
-        FileUtils.writeStringToFile(new File(pathname), fileContent, StandardCharsets.UTF_8);
     }
 
     /**
