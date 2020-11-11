@@ -1,6 +1,8 @@
 Description: Integration tests for ProxySteps class.
 
 Meta:
+    @epic vividus-plugin-web-app
+    @feature proxy
     @proxy
 
 Scenario: Verify step Then number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $comparisonRule `$number`
