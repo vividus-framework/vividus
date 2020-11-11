@@ -32,7 +32,7 @@ public class CssSelectorFactory implements ICssSelectorFactory
 {
     private static final String CSS_SELECTOR_FACTORY_SCRIPT_FILENAME = "css-selector-factory.js";
 
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
 
     @Override
     public String getCssSelector(WebElement element)

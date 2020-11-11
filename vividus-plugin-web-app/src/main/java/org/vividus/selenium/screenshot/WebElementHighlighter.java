@@ -27,7 +27,7 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 public class WebElementHighlighter implements IWebElementHighlighter
 {
@@ -38,7 +38,7 @@ public class WebElementHighlighter implements IWebElementHighlighter
     private static final String DISABLE_HIGHLIGHT_JS = "arguments[0].style.border=\"\";"
             + "arguments[0].style.boxShadow=\"\"";
 
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IUiContext uiContext;
 
     @Override

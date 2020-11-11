@@ -46,8 +46,8 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.IWebElementActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -94,7 +94,7 @@ class SetVariableStepsTests
     private IWebElementActions webElementActions;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private WebDriver webDriver;

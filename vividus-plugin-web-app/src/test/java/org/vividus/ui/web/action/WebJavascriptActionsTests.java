@@ -42,7 +42,7 @@ import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
-class JavascriptActionsTests
+class WebJavascriptActionsTests
 {
     private static final String SCROLL_TO_END_OF_PAGE = "scroll-to-end-of-page.js";
     private static final String TEXT = "text";
@@ -71,7 +71,7 @@ class JavascriptActionsTests
     private WebDriver webDriver;
 
     @InjectMocks
-    private JavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @BeforeEach
     void beforeEach()
@@ -80,29 +80,19 @@ class JavascriptActionsTests
     }
 
     @Test
-    void testExecuteSript()
-    {
-        String script = "someScript";
-        String arg1 = "arg1";
-        String arg2 = "arg2";
-        javascriptActions.executeScript(script, arg1, arg2);
-        verify((JavascriptExecutor) webDriver).executeScript(script, arg1, arg2);
-    }
-
-    @Test
     void testExecuteScriptFromResource()
     {
-        javascriptActions.executeScriptFromResource(JavascriptActions.class, SCROLL_TO_END_OF_PAGE);
+        javascriptActions.executeScriptFromResource(WebJavascriptActions.class, SCROLL_TO_END_OF_PAGE);
         verify((JavascriptExecutor) webDriver)
-                .executeScript(ResourceUtils.loadResource(JavascriptActions.class, SCROLL_TO_END_OF_PAGE));
+                .executeScript(ResourceUtils.loadResource(WebJavascriptActions.class, SCROLL_TO_END_OF_PAGE));
     }
 
     @Test
     void testExecuteAsyncScriptFromResource()
     {
-        javascriptActions.executeAsyncScriptFromResource(JavascriptActions.class, SCROLL_TO_END_OF_PAGE);
+        javascriptActions.executeAsyncScriptFromResource(WebJavascriptActions.class, SCROLL_TO_END_OF_PAGE);
         verify((JavascriptExecutor) webDriver)
-                .executeAsyncScript(ResourceUtils.loadResource(JavascriptActions.class, SCROLL_TO_END_OF_PAGE));
+                .executeAsyncScript(ResourceUtils.loadResource(WebJavascriptActions.class, SCROLL_TO_END_OF_PAGE));
     }
 
     @Test
@@ -130,7 +120,7 @@ class JavascriptActionsTests
         WebElement webElement = mock(WebElement.class);
         javascriptActions.scrollElementIntoViewportCenter(webElement);
         verify((JavascriptExecutor) webDriver).executeAsyncScript(
-                ResourceUtils.loadResource(JavascriptActionsTests.class, "scroll-element-into-viewport-center.js"),
+                ResourceUtils.loadResource(WebJavascriptActionsTests.class, "scroll-element-into-viewport-center.js"),
                 webElement);
     }
 
@@ -139,7 +129,7 @@ class JavascriptActionsTests
     {
         javascriptActions.scrollToEndOfPage();
         verify((JavascriptExecutor) webDriver).executeAsyncScript(
-                ResourceUtils.loadResource(JavascriptActionsTests.class, SCROLL_TO_END_OF_PAGE));
+                ResourceUtils.loadResource(WebJavascriptActionsTests.class, SCROLL_TO_END_OF_PAGE));
     }
 
     @Test
@@ -305,7 +295,7 @@ class JavascriptActionsTests
     {
         javascriptActions.waitUntilScrollFinished();
         verify((JavascriptExecutor) webDriver).executeAsyncScript(
-                ResourceUtils.loadResource(JavascriptActionsTests.class, "wait-for-scroll.js"));
+                ResourceUtils.loadResource(WebJavascriptActionsTests.class, "wait-for-scroll.js"));
     }
 
     private void mockScriptExecution(String script, Object result)

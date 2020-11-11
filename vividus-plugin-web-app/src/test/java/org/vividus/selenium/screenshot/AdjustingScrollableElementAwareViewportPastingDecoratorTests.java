@@ -31,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
@@ -44,7 +44,7 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
     private WebElement scrollableElement;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private ScreenshotConfiguration screenshotConfiguration;

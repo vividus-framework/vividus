@@ -29,6 +29,8 @@
 
     <bean id="touchSteps" class="org.vividus.bdd.mobileapp.steps.TouchSteps" />
 
+    <bean id="elementSteps" class="org.vividus.bdd.mobileapp.steps.ElementSteps" />
+
     <bean id="deviceSteps" class="org.vividus.bdd.mobileapp.steps.DeviceSteps" >
         <constructor-arg index="0" value="${mobile-environment.device.folder-for-file-upload}" />
     </bean>
@@ -75,5 +77,6 @@
         <idref bean="webDriverSetupSteps" />
         <idref bean="touchSteps" />
         <idref bean="deviceSteps" />
+        <idref bean="elementSteps" />
     </util:list>
 </beans>

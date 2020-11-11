@@ -34,7 +34,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith(MockitoExtension.class)
 class WebElementHighlighterTests
@@ -48,7 +48,7 @@ class WebElementHighlighterTests
     private IUiContext uiContext;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private WebElement webElement;

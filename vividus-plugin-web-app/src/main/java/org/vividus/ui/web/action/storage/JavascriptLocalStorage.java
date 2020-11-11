@@ -20,13 +20,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.openqa.selenium.html5.LocalStorage;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 public class JavascriptLocalStorage implements LocalStorage
 {
-    private final IJavascriptActions javascriptActions;
+    private final WebJavascriptActions javascriptActions;
 
-    JavascriptLocalStorage(IJavascriptActions javascriptActions)
+    JavascriptLocalStorage(WebJavascriptActions javascriptActions)
     {
         this.javascriptActions = javascriptActions;
     }

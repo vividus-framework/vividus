@@ -21,15 +21,15 @@ import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 public class ScrollSteps
 {
     private final IUiContext uiContext;
-    private final IJavascriptActions javascriptActions;
+    private final WebJavascriptActions javascriptActions;
     private final IBaseValidations baseValidaitons;
 
-    public ScrollSteps(IUiContext uiContext, IJavascriptActions javascriptActions,
+    public ScrollSteps(IUiContext uiContext, WebJavascriptActions javascriptActions,
             IBaseValidations baseValidations)
     {
         this.uiContext = uiContext;

@@ -47,8 +47,8 @@ import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.INavigateActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -66,7 +66,7 @@ public class WaitSteps
     @Inject private IExpectedConditions<By> expectedSearchContextConditions;
     @Inject private IExpectedConditions<Locator> expectedSearchActionsConditions;
     @Inject private IBaseValidations baseValidations;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
 
     public boolean waitTillElementWithTextDisappearsPageRefresh(String text, Duration timeout)
     {

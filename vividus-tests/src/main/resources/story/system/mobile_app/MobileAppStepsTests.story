@@ -149,3 +149,15 @@ When I activate application with bundle identifier `${browser-app}`
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` disappears
 When I activate application with bundle identifier `${main-app}`
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears
+
+Scenario: [iOS] Verify step: 'When I select $direction value with `$offset` offset in picker wheel located `$locator`'
+Meta:
+    @targetPlatform ios
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(//XCUIElementTypeButton[@name="Date Picker"])`
+When I change context to element located `accessibilityId(dateTimePicker)`
+When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(1)`
+When I select previous value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(2)`
+When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(3)`
+When I reset context
+Then number of elements found by `accessibilityId(dateInput)->filter.textPart(1/10/2012)` is equal to `1`

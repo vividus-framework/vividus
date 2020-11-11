@@ -33,8 +33,8 @@ import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.IFieldActions;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.IWebElementActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.util.FormatUtil;
 
 @TakeScreenshotOnFailure
@@ -49,7 +49,7 @@ public class FieldSteps
     @Inject private IWebElementActions webElementActions;
     @Inject private IFieldActions fieldActions;
     @Inject private ISoftAssert softAssert;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverManager webDriverManager;
 
     /**

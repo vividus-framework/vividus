@@ -47,8 +47,8 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.web.action.IFieldActions;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.WebElementActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,7 +74,7 @@ class FieldStepsTests
     private IFieldActions fieldActions;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private IWebDriverManager webDriverManager;

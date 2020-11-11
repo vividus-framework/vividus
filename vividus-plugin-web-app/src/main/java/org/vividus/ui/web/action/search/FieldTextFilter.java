@@ -19,13 +19,13 @@ package org.vividus.ui.web.action.search;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.LocatorType;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 public class FieldTextFilter implements IElementFilterAction
 {
-    private final IJavascriptActions javascriptActions;
+    private final WebJavascriptActions javascriptActions;
 
-    public FieldTextFilter(IJavascriptActions javascriptActions)
+    public FieldTextFilter(WebJavascriptActions javascriptActions)
     {
         this.javascriptActions = javascriptActions;
     }

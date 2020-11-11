@@ -88,7 +88,7 @@ class MouseActionsTests
     private WebDriver webDriver;
 
     @Mock
-    private JavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private ISoftAssert softAssert;

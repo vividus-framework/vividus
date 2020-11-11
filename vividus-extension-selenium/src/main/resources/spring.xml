@@ -39,6 +39,7 @@
     </bean>
 
     <bean class="org.vividus.ui.action.SearchActions" />
+    <bean class="org.vividus.ui.action.JavascriptActions" />
 
     <bean id="abstractElementAction" class="org.vividus.ui.action.search.AbstractElementAction"
           abstract="true">

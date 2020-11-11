@@ -66,7 +66,7 @@ class WebElementActionsTests
     private static final String TEXT = "text";
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private WebElement webElement;

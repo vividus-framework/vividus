@@ -22,7 +22,7 @@ import org.openqa.selenium.WebElement;
 
 public class VideoPlayerActions implements IVideoPlayerActions
 {
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
 
     @Override
     public void rewind(WebElement videoPlayer, int seconds)

@@ -59,7 +59,7 @@ class CookieManagerTests
     private static final String JS_COOKIE_FORMAT = "document.cookie='name=0; path=/; domain=domain.com'";
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private IWebDriverProvider webDriverProvider;

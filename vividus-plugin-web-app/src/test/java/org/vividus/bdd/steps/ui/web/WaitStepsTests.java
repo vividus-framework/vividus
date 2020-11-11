@@ -47,8 +47,8 @@ import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -100,7 +100,7 @@ class WaitStepsTests
     private ISearchActions searchActions;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @InjectMocks
     private WaitSteps waitSteps;
