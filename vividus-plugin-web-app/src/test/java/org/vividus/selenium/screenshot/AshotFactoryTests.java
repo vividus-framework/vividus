@@ -36,7 +36,7 @@ import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverFactory;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 import io.appium.java_client.remote.MobileCapabilityType;
 import ru.yandex.qatools.ashot.AShot;
@@ -56,7 +56,7 @@ class AshotFactoryTests
     @Mock private ShootingStrategy baseShootingStrategy;
     @Mock private IWebDriverFactory webDriverFactory;
     @Mock private IWebDriverManager webDriverManager;
-    @Mock private IJavascriptActions javascriptActions;
+    @Mock private WebJavascriptActions javascriptActions;
     @Mock private ScreenshotDebugger screenshotDebugger;
     @InjectMocks private AshotFactory ashotFactory;
 

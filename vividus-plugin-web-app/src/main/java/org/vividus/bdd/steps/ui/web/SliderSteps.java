@@ -27,7 +27,7 @@ import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -36,7 +36,7 @@ public class SliderSteps
 {
     @Inject private IBaseValidations baseValidations;
     @Inject private ISoftAssert softAssert;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
 
     /**
      * Step sets value of slider (input element with type = "range")

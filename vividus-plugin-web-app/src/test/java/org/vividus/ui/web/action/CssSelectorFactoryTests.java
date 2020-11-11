@@ -43,7 +43,7 @@ class CssSelectorFactoryTests
     private static final String CSS_SELECTOR_FACTORY_JS = "css-selector-factory.js";
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @InjectMocks
     private CssSelectorFactory cssSelectorFactory;

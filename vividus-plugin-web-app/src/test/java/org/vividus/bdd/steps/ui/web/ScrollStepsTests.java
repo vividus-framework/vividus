@@ -34,7 +34,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith(MockitoExtension.class)
 class ScrollStepsTests
@@ -44,7 +44,7 @@ class ScrollStepsTests
     @Mock
     private IUiContext uiContext;
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
     @Mock
     private IBaseValidations baseValiation;
 

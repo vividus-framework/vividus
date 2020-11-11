@@ -29,8 +29,8 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.IWebElementActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.util.LocatorUtil;
 
 public abstract class AbstractWebElementSearchAction extends AbstractElementAction
@@ -42,7 +42,7 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
             .format("[text()[%2$s=%1$s] or @*[%2$s=%1$s] or *[%2$s=%1$s]", "%1$s", TRANSLATE_TO_LOWER_CASE_FORMATTED);
 
     @Inject private IWebElementActions webElementActions;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
 
     public AbstractWebElementSearchAction(LocatorType elementActionType)
     {
@@ -132,7 +132,7 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
         return this.webElementActions;
     }
 
-    protected IJavascriptActions getJavascriptActions()
+    protected WebJavascriptActions getJavascriptActions()
     {
         return this.javascriptActions;
     }

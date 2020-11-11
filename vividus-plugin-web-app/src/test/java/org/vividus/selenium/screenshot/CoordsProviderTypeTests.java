@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
@@ -37,7 +37,7 @@ import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
 class CoordsProviderTypeTests
 {
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     private static Stream<Arguments> coordsProviderSource()
     {

@@ -37,7 +37,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -46,7 +46,7 @@ public class CodeSteps
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Inject private IBaseValidations baseValidations;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private ISoftAssert softAssert;
 
     /**
@@ -160,7 +160,7 @@ public class CodeSteps
                     locator, quantity, comparisonRule);
     }
 
-    public void setJavascriptActions(IJavascriptActions javascriptActions)
+    public void setJavascriptActions(WebJavascriptActions javascriptActions)
     {
         this.javascriptActions = javascriptActions;
     }

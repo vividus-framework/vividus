@@ -73,7 +73,7 @@ class NavigateActionsTests
     private ISoftAssert softAssert;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @InjectMocks
     private NavigateActions navigateActions;

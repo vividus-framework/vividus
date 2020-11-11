@@ -42,7 +42,7 @@ public class CookieManager implements ICookieManager
     private static final String JS_DELETE_COOKIE_FORMAT = "document.cookie='%s=; expires=-1'";
 
     @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverManager webDriverManager;
 
     @Override

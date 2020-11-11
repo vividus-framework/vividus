@@ -22,14 +22,14 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 public enum ScrollDirection
 {
     TOP
     {
         @Override
-        public void scroll(IUiContext uiContext, IJavascriptActions javascriptActions)
+        public void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions)
         {
             scrollContext(javascriptActions::scrollToStartOfPage, javascriptActions::scrollToStartOf, uiContext);
         }
@@ -37,7 +37,7 @@ public enum ScrollDirection
     BOTTOM
     {
         @Override
-        public void scroll(IUiContext uiContext, IJavascriptActions javascriptActions)
+        public void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions)
         {
             scrollContext(javascriptActions::scrollToEndOfPage, javascriptActions::scrollToEndOf, uiContext);
         }
@@ -45,7 +45,7 @@ public enum ScrollDirection
     LEFT
     {
         @Override
-        public void scroll(IUiContext uiContext, IJavascriptActions javascriptActions)
+        public void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions)
         {
             scrollContext(ScrollDirection::unsupportedScroll, javascriptActions::scrollToLeftOf,
                     uiContext);
@@ -54,14 +54,14 @@ public enum ScrollDirection
     RIGHT
     {
         @Override
-        public void scroll(IUiContext uiContext, IJavascriptActions javascriptActions)
+        public void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions)
         {
             scrollContext(ScrollDirection::unsupportedScroll, javascriptActions::scrollToRightOf,
                     uiContext);
         }
     };
 
-    public abstract void scroll(IUiContext uiContext, IJavascriptActions javascriptActions);
+    public abstract void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions);
 
     private static void scrollContext(Runnable pageScroller, Consumer<WebElement> elementScroller,
             IUiContext uiContext)

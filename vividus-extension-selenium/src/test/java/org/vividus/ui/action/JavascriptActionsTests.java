@@ -14,47 +14,36 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.action;
+package org.vividus.ui.action;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.vividus.selenium.IWebDriverProvider;
 
 @ExtendWith(MockitoExtension.class)
-class VideoPlayerActionsTests
+class JavascriptActionsTests
 {
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private WebJavascriptActions javascriptActions;
-
-    @InjectMocks
-    private VideoPlayerActions videoPlayerActions;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock(extraInterfaces = JavascriptExecutor.class)
+    private WebDriver webDriver;
+    @InjectMocks private JavascriptActions javascriptActions;
 
     @Test
-    void testRewind()
+    void shouldExecuteSript()
     {
-        videoPlayerActions.rewind(webElement, 1);
-        verify(javascriptActions).executeScript("arguments[0].currentTime=arguments[1];", webElement, 1);
-    }
-
-    @Test
-    void testPlay()
-    {
-        videoPlayerActions.play(webElement);
-        verify(javascriptActions).executeScript("arguments[0].play();", webElement);
-    }
-
-    @Test
-    void testPause()
-    {
-        videoPlayerActions.pause(webElement);
-        verify(javascriptActions).executeScript("arguments[0].pause();", webElement);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        String script = "script";
+        String arg1 = "arg1";
+        String arg2 = "arg2";
+        javascriptActions.executeScript(script, arg1, arg2);
+        verify((JavascriptExecutor) webDriver).executeScript(script, arg1, arg2);
     }
 }

@@ -55,7 +55,7 @@ import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
-import org.vividus.ui.web.action.JavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.WebWaitActions;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
@@ -298,7 +298,7 @@ class LinkUrlSearchTests
         when(result.getData()).thenReturn(List.of(webElement));
         search.setCaseSensitiveSearch(true);
         search.search(searchContext, new SearchParameters(URL));
-        JavascriptActions javascriptActions = mock(JavascriptActions.class);
+        WebJavascriptActions javascriptActions = mock(WebJavascriptActions.class);
         verify(javascriptActions, never()).scrollIntoView(webElement, true);
     }
 

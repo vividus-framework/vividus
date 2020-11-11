@@ -28,7 +28,7 @@ import com.google.common.base.Suppliers;
 import org.openqa.selenium.ScreenOrientation;
 import org.vividus.selenium.IWebDriverFactory;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 import io.appium.java_client.remote.MobileCapabilityType;
 import ru.yandex.qatools.ashot.AShot;
@@ -43,7 +43,7 @@ public class AshotFactory implements IAshotFactory
 
     @Inject private IWebDriverFactory webDriverFactory;
     @Inject private IWebDriverManager webDriverManager;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private ScreenshotDebugger screenshotDebugger;
 
     private final Supplier<ShootingStrategy> baseShootingStrategy = Suppliers.memoize(

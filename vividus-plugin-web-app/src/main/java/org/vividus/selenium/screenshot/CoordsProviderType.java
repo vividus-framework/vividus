@@ -16,7 +16,7 @@
 
 package org.vividus.selenium.screenshot;
 
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
@@ -26,7 +26,7 @@ public enum CoordsProviderType
     CEILING
     {
         @Override
-        CoordsProvider create(IJavascriptActions javascriptActions)
+        CoordsProvider create(WebJavascriptActions javascriptActions)
         {
             return CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
         }
@@ -34,11 +34,11 @@ public enum CoordsProviderType
     WEB_DRIVER
     {
         @Override
-        CoordsProvider create(IJavascriptActions javascriptActions)
+        CoordsProvider create(WebJavascriptActions javascriptActions)
         {
             return new WebDriverCoordsProvider();
         }
     };
 
-    abstract CoordsProvider create(IJavascriptActions javascriptActions);
+    abstract CoordsProvider create(WebJavascriptActions javascriptActions);
 }

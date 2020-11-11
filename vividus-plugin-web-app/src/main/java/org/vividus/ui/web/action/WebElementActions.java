@@ -35,7 +35,7 @@ public class WebElementActions implements IWebElementActions
     private static final char APOSTROPHE = '\'';
     private static final char QUOTE = '"';
 
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverManager webDriverManager;
 
     @Override

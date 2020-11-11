@@ -29,16 +29,16 @@ import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.model.Location;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 @TakeScreenshotOnFailure
 public class DragAndDropSteps
 {
     private final IWebDriverProvider webDriverProvider;
-    private final IJavascriptActions javascriptActions;
+    private final WebJavascriptActions javascriptActions;
     private final IBaseValidations baseValidations;
 
-    public DragAndDropSteps(IWebDriverProvider webDriverProvider, IJavascriptActions javascriptActions,
+    public DragAndDropSteps(IWebDriverProvider webDriverProvider, WebJavascriptActions javascriptActions,
             IBaseValidations baseValidations)
     {
         this.webDriverProvider = webDriverProvider;

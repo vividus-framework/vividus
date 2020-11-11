@@ -475,4 +475,35 @@ When I change Appium session settings:
 |allowInvisibleElements|true |
 ----
 
+=== Select date in date picker
+
+==== *_Info_*
+
+Selects a next or previous picker wheel value in date picker
+
+[WARNING]
+* Only `iOS` platform is supported
+* Target element must be of type `XCUIElementTypePickerWheel`
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I select $direction value with `$offset` offset in picker wheel located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$direction` - next value to select, either `NEXT` or `PREVIOUS`
+. `$offset` - offset for pick from a middle of a wheel, see https://appium.io/docs/en/writing-running-appium/ios/ios-xctest-mobile-gestures/index.html#mobile-selectpickerwheelvalue[Select Picker Wheel Value]
+. `$locator` - locator to locate `XCUIElementTypePickerWheel` element
+
+==== *_Usage_*
+
+.Select next item in the picker wheel
+[source,gherkin]
+----
+When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(3)`
+----
+
 include::partial$generic-ui-steps.adoc[]

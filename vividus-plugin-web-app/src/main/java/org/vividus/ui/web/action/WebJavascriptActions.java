@@ -19,22 +19,21 @@ package org.vividus.ui.web.action;
 import java.util.Map;
 
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.TextUtils;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.action.JavascriptActions;
 import org.vividus.ui.web.listener.IWebApplicationListener;
 import org.vividus.util.ResourceUtils;
 
-public class JavascriptActions implements IJavascriptActions, IWebApplicationListener
+public class WebJavascriptActions extends JavascriptActions implements IWebApplicationListener
 {
     private static final String TRIGGER_EVENT_FORMAT = "if(document.createEvent){var evObj = document"
             + ".createEvent('MouseEvents');evObj.initEvent('%1$s', true, false); arguments[0].dispatchEvent(evObj);} "
             + "else if(document.createEventObject) { arguments[0].fireEvent('on%1$s');}";
 
-    private final IWebDriverProvider webDriverProvider;
     private final IWebDriverManager webDriverManager;
 
     private final ThreadLocal<BrowserConfig> browserConfig = ThreadLocal.withInitial(() -> {
@@ -49,51 +48,57 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
         return new BrowserConfig(userAgent, devicePixelRatio);
     });
 
-    public JavascriptActions(IWebDriverProvider webDriverProvider, IWebDriverManager webDriverManager)
+    public WebJavascriptActions(IWebDriverProvider webDriverProvider, IWebDriverManager webDriverManager)
     {
-        this.webDriverProvider = webDriverProvider;
+        super(webDriverProvider);
         this.webDriverManager = webDriverManager;
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T executeScript(String script, Object... args)
-    {
-        return (T) getJavascriptExecutor().executeScript(script, args);
-    }
-
-    @Override
+    /**
+     * Loads script from resource, executes it and returns result
+     * @param <T> the type of the returned result
+     * @param clazz Class to search resource relatively
+     * @param jsResourceName script input parameters
+     * @param args script input parameters
+     * @return result of the script execution
+     */
     public <T> T executeScriptFromResource(Class<?> clazz, String jsResourceName, Object... args)
     {
         return executeScript(ResourceUtils.loadResource(clazz, jsResourceName), args);
     }
 
-    @Override
     @SuppressWarnings("unchecked")
     public <T> T executeAsyncScript(String script, Object... args)
     {
         return (T) getJavascriptExecutor().executeAsyncScript(script, args);
     }
 
-    @Override
+    /**
+     * Loads an asynchronous script from resource, executes it and returns result
+     * @param <T> the type of returned result
+     * @param clazz Class to search resource relatively
+     * @param jsResourceName script input parameters
+     * @param args script input parameters
+     * @return result of the script execution
+     */
     public <T> T executeAsyncScriptFromResource(Class<?> clazz, String jsResourceName, Object... args)
     {
         return executeAsyncScript(ResourceUtils.loadResource(clazz, jsResourceName), args);
     }
 
-    @Override
     public void scrollIntoView(WebElement webElement, boolean alignedToTheTop)
     {
         executeScript("arguments[0].scrollIntoView(arguments[1])", webElement, alignedToTheTop);
     }
 
-    @Override
     public void scrollElementIntoViewportCenter(WebElement webElement)
     {
         executeAsyncScriptFromResource("scroll-element-into-viewport-center.js", webElement);
     }
 
-    @Override
+    /**
+     * Scrolls to the end of the page with dynamically loading content upon scrolling
+     */
     public void scrollToEndOfPage()
     {
         executeAsyncScriptFromResource("scroll-to-end-of-page.js");
@@ -101,34 +106,36 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
 
     private void executeAsyncScriptFromResource(String resource, Object... args)
     {
-        executeAsyncScriptFromResource(JavascriptActions.class, resource, args);
+        executeAsyncScriptFromResource(WebJavascriptActions.class, resource, args);
     }
 
-    @Override
+    /**
+     * Scrolls page to the top (0, 0)
+     */
     public void scrollToStartOfPage()
     {
         executeScript("if (window.PageYOffset || document.documentElement.scrollTop > 0){ window.scrollTo(0,0);}");
     }
 
-    @Override
     public void scrollToEndOf(WebElement element)
     {
         executeScript("arguments[0].scrollTop = arguments[0].scrollHeight", element);
     }
 
-    @Override
     public void scrollToStartOf(WebElement element)
     {
         executeScript("arguments[0].scrollTop = 0", element);
     }
 
-    @Override
+    /**
+     * Opens page URL in a new window
+     * @param pageUrl An absolute URL of the page
+     */
     public void openPageUrlInNewWindow(String pageUrl)
     {
         executeScript("window.open(arguments[0])", pageUrl);
     }
 
-    @Override
     public void triggerMouseEvents(WebElement webElement, String... eventTypes)
     {
         StringBuilder script = new StringBuilder();
@@ -144,13 +151,11 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
         executeScript("arguments[0].click()", webElement);
     }
 
-    @Override
     public String getElementText(WebElement webElement)
     {
         return getFormattedInnerText("arguments[0]", webElement);
     }
 
-    @Override
     public String getPageText()
     {
         return getFormattedInnerText("document.body");
@@ -163,31 +168,26 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
         return TextUtils.normalizeText(executeScript(innerTextJs, args));
     }
 
-    @Override
     public String getElementValue(WebElement webElement)
     {
         return executeScript("return arguments[0].value", webElement);
     }
 
-    @Override
     public void onLoad()
     {
         browserConfig.get();
     }
 
-    @Override
     public String getUserAgent()
     {
         return browserConfig.get().userAgent;
     }
 
-    @Override
     public double getDevicePixelRatio()
     {
         return browserConfig.get().devicePixelRatio;
     }
 
-    @Override
     public Map<String, String> getElementAttributes(WebElement webElement)
     {
         return executeScript("var attributes = arguments[0].attributes; var map = new Object();"
@@ -195,7 +195,13 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
                 webElement);
     }
 
-    @Override
+    /**
+     * Sets the top position of a positioned element.
+     * @param top specifies the top position of the element including padding, scrollbar, border and margin
+     *  for a given WebElement
+     * @param webElement WebElement to set top for
+     * @return origin top position of webElement
+     */
     public int setElementTopPosition(WebElement webElement, int top)
     {
         Long originTop = executeScript(String.format("var originTop = arguments[0].getBoundingClientRect().top;"
@@ -203,7 +209,6 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
         return originTop.intValue();
     }
 
-    @Override
     public Dimension getViewportSize()
     {
         Map<String, Long> result = executeScript(
@@ -212,27 +217,22 @@ public class JavascriptActions implements IJavascriptActions, IWebApplicationLis
         return new Dimension(result.get("width").intValue(), result.get("height").intValue());
     }
 
-    @Override
     public void scrollToLeftOf(WebElement element)
     {
         executeScript("arguments[0].scrollLeft=0;", element);
     }
 
-    @Override
     public void scrollToRightOf(WebElement element)
     {
         executeScript("arguments[0].scrollLeft=arguments[0].scrollWidth;", element);
     }
 
-    @Override
+    /**
+     * Waits for the scroll events finish via async JS script execution;
+     */
     public void waitUntilScrollFinished()
     {
         executeAsyncScriptFromResource("wait-for-scroll.js");
-    }
-
-    private JavascriptExecutor getJavascriptExecutor()
-    {
-        return (JavascriptExecutor) webDriverProvider.get();
     }
 
     private static final class BrowserConfig

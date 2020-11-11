@@ -65,10 +65,10 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -106,7 +106,7 @@ class PageStepsTests
     private INavigateActions navigateActions;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private IUiContext uiContext;

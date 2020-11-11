@@ -34,7 +34,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 import org.vividus.util.UriUtils;
@@ -48,11 +48,11 @@ public class SetVariableSteps
     private final IBaseValidations baseValidations;
     private final IBddVariableContext bddVariableContext;
     private final IUiContext uiContext;
-    private final IJavascriptActions javascriptActions;
+    private final WebJavascriptActions javascriptActions;
 
     public SetVariableSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert, ISearchActions searchActions,
             IBaseValidations baseValidations, IBddVariableContext bddVariableContext, IUiContext uiContext,
-            IJavascriptActions javascriptActions)
+            WebJavascriptActions javascriptActions)
     {
         this.webDriverProvider = webDriverProvider;
         this.softAssert = softAssert;
