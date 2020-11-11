@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,7 +63,7 @@ class StringToListSequenceActionConverterTests
         String value = "|type        |argument                  |\n"
                      + "|CLICK       |By.caseSensitiveText(text)|\n"
                      + "|DOUBLE_CLICK|By.caseSensitiveText(text)|";
-        List<SequenceAction> actions = converter.convertValue(value, null);
+        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
         assertThat(actions, hasSize(2));
         verifySequenceAction(actions.get(0), SequenceActionType.CLICK, locator);
         verifySequenceAction(actions.get(1), SequenceActionType.DOUBLE_CLICK, locator);
@@ -79,7 +80,7 @@ class StringToListSequenceActionConverterTests
         String value = "|type   |argument          |\n"
                      + "|MOVE_TO|By.xpath(//button)|\n"
                      + "|CLICK  |                  |";
-        List<SequenceAction> actions = converter.convertValue(value, null);
+        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
         assertThat(actions, hasSize(2));
         verifySequenceAction(actions.get(0), SequenceActionType.MOVE_TO, locator);
         verifySequenceAction(actions.get(1), SequenceActionType.CLICK, null);
@@ -95,7 +96,7 @@ class StringToListSequenceActionConverterTests
         when(pointConverter.convertValue(pointAsString, null)).thenReturn(point);
         String value = "|type          |argument  |\n"
                      + "|MOVE_BY_OFFSET|(100, 100)|";
-        List<SequenceAction> actions = converter.convertValue(value, null);
+        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
         assertThat(actions, hasSize(1));
         verifySequenceAction(actions.get(0), SequenceActionType.MOVE_BY_OFFSET, point);
         verify(pointConverter).convertValue(pointAsString, null);
@@ -107,7 +108,7 @@ class StringToListSequenceActionConverterTests
     {
         String value = "|type      |argument|\n"
                      + "|ENTER_TEXT|text    |";
-        List<SequenceAction> actions = converter.convertValue(value, null);
+        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
         assertThat(actions, hasSize(1));
         verifySequenceAction(actions.get(0), SequenceActionType.ENTER_TEXT, TEXT);
         verifyNoMoreInteractions(stringToLocatorConverter, pointConverter);
@@ -118,7 +119,7 @@ class StringToListSequenceActionConverterTests
     {
         String value = "|type      |argument     |\n"
                      + "|PRESS_KEYS|value1,value2|";
-        List<SequenceAction> actions = converter.convertValue(value, null);
+        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
         assertThat(actions, hasSize(1));
         verifySequenceAction(actions.get(0), SequenceActionType.PRESS_KEYS, List.of("value1", "value2"));
         verifyNoMoreInteractions(stringToLocatorConverter, pointConverter);
