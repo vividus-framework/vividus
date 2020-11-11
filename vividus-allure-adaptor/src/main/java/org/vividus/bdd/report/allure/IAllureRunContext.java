@@ -46,4 +46,10 @@ public interface IAllureRunContext
     void setScenarioExecutionStage(ScenarioExecutionStage stage);
 
     void resetScenarioExecutionStage();
+
+    void startStep();
+
+    boolean isStepInProgress();
+
+    void stopStep();
 }

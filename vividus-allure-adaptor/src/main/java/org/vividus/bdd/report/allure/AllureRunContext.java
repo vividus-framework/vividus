@@ -120,6 +120,29 @@ public class AllureRunContext implements IAllureRunContext
         setScenarioExecutionStage(null);
     }
 
+    @Override
+    public void startStep()
+    {
+        changeStepState(true);
+    }
+
+    @Override
+    public boolean isStepInProgress()
+    {
+        return getExecutionStages().peek().stepInProgress;
+    }
+
+    @Override
+    public void stopStep()
+    {
+        changeStepState(false);
+    }
+
+    private void changeStepState(boolean stepInProgress)
+    {
+        getExecutionStages().peek().stepInProgress = stepInProgress;
+    }
+
     private Deque<List<Label>> getGivenStoriesLabels()
     {
         return testContext.get(GIVEN_STORY_LABELS, LinkedList::new);
@@ -134,5 +157,6 @@ public class AllureRunContext implements IAllureRunContext
     {
         private StoryExecutionStage storyStage;
         private ScenarioExecutionStage scenarioStage;
+        private boolean stepInProgress;
     }
 }

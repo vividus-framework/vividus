@@ -17,7 +17,9 @@
 package org.vividus.bdd.report.allure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -106,6 +108,7 @@ class AllureRunContextTests
         allureRunContext.initExecutionStages();
         assertNull(allureRunContext.getStoryExecutionStage());
         assertNull(allureRunContext.getScenarioExecutionStage());
+        assertFalse(allureRunContext.isStepInProgress());
     }
 
     @Test
@@ -121,17 +124,34 @@ class AllureRunContextTests
     {
         assertNull(allureRunContext.getScenarioExecutionStage());
         allureRunContext.initExecutionStages();
-        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.IN_PROGRESS);
-        assertEquals(ScenarioExecutionStage.IN_PROGRESS, allureRunContext.getScenarioExecutionStage());
+        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
+        assertEquals(ScenarioExecutionStage.BEFORE_STEPS, allureRunContext.getScenarioExecutionStage());
+    }
+
+    @Test
+    void shouldStartStep()
+    {
+        allureRunContext.initExecutionStages();
+        allureRunContext.startStep();
+        assertTrue(allureRunContext.isStepInProgress());
     }
 
     @Test
     void resetScenarioExecutionStage()
     {
         allureRunContext.initExecutionStages();
-        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.IN_PROGRESS);
+        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
         allureRunContext.resetScenarioExecutionStage();
         assertNull(allureRunContext.getScenarioExecutionStage());
+    }
+
+    @Test
+    void shouldStopStep()
+    {
+        allureRunContext.initExecutionStages();
+        allureRunContext.startStep();
+        allureRunContext.stopStep();
+        assertFalse(allureRunContext.isStepInProgress());
     }
 
     @Test
@@ -150,11 +170,11 @@ class AllureRunContextTests
     void setScenarioExecutionStageForGivenStory()
     {
         allureRunContext.initExecutionStages();
-        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.IN_PROGRESS);
-        allureRunContext.initExecutionStages();
         allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
-        assertEquals(ScenarioExecutionStage.BEFORE_STEPS, allureRunContext.getScenarioExecutionStage());
+        allureRunContext.initExecutionStages();
+        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.AFTER_STEPS);
+        assertEquals(ScenarioExecutionStage.AFTER_STEPS, allureRunContext.getScenarioExecutionStage());
         allureRunContext.resetExecutionStages();
-        assertEquals(ScenarioExecutionStage.IN_PROGRESS, allureRunContext.getScenarioExecutionStage());
+        assertEquals(ScenarioExecutionStage.BEFORE_STEPS, allureRunContext.getScenarioExecutionStage());
     }
 }

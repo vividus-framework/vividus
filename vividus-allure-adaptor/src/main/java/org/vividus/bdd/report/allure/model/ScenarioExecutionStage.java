@@ -18,5 +18,5 @@ package org.vividus.bdd.report.allure.model;
 
 public enum ScenarioExecutionStage
 {
-    BEFORE_STEPS, IN_PROGRESS, AFTER_STEPS
+    BEFORE_STEPS, AFTER_STEPS
 }

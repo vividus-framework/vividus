@@ -230,6 +230,27 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     }
 
     @Override
+    public void beforeScenarioSteps(Stage stage)
+    {
+        if (stage == Stage.BEFORE)
+        {
+            allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
+        }
+        else if (stage == Stage.AFTER)
+        {
+            allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.AFTER_STEPS);
+        }
+        super.beforeScenarioSteps(stage);
+    }
+
+    @Override
+    public void afterScenarioSteps(Stage stage)
+    {
+        super.afterScenarioSteps(stage);
+        allureRunContext.resetScenarioExecutionStage();
+    }
+
+    @Override
     public void beforeStep(String step)
     {
         startBddStep(step);
@@ -420,7 +441,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     private void startBddStep(String stepTitle)
     {
         startStep(stepTitle);
-        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.IN_PROGRESS);
     }
 
     private void startStep(String stepTitle)
@@ -448,6 +468,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         String childStepId = parentStepId + "-" + Thread.currentThread().getId();
         lifecycle.startStep(parentStepId, childStepId, stepResult);
         putCurrentStepId(childStepId);
+        allureRunContext.startStep();
     }
 
     private void stopBddStep(Status status)
@@ -456,12 +477,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     }
 
     private void stopBddStep(Status status, StatusDetails statusDetails)
-    {
-        stopStep(status, statusDetails);
-        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.AFTER_STEPS);
-    }
-
-    private void stopStep(Status status, StatusDetails statusDetails)
     {
         LinkedQueueItem<String> step = getLinkedStep();
         while (step != null && !step.isRootItem())
@@ -477,6 +492,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     {
         lifecycle.stopStep(getCurrentStepId());
         switchToParent();
+        allureRunContext.stopStep();
     }
 
     private void modifyStepTitle(String stepTitle)
@@ -537,7 +553,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
             startStep(runningScenario.getTitle());
         }
         allureRunContext.setStoryExecutionStage(storyExecutionStage);
-        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
     }
 
     private String getHistoryId(RunningStory runningStory, RunningScenario runningScenario)
@@ -562,8 +577,9 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
 
     private void stopTestCase()
     {
-        if (allureRunContext.getScenarioExecutionStage() == ScenarioExecutionStage.IN_PROGRESS)
+        if (allureRunContext.isStepInProgress())
         {
+            // Stop @AfterScenario step
             stopBddStep(StatusPriority.getLowest().getStatusModel());
         }
 
@@ -584,7 +600,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
 
         lifecycle.stopTestCase(id);
         lifecycle.writeTestCase(id);
-        allureRunContext.resetScenarioExecutionStage();
         switchToParent();
     }
 
