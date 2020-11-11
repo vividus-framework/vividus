@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import javax.inject.Named;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.AbstractChainableParameterConverter;
 import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
@@ -34,7 +34,8 @@ import org.vividus.bdd.steps.ui.web.model.SequenceAction;
 import org.vividus.bdd.steps.ui.web.model.SequenceActionType;
 
 @Named
-public class StringToListSequenceActionConverter extends AbstractParameterConverter<List<SequenceAction>>
+public class StringToListSequenceActionConverter
+        extends AbstractChainableParameterConverter<ExamplesTable, List<SequenceAction>>
 {
     private final StringToLocatorConverter stringToLocatorConverter;
     private final PointConverter pointConverter;
@@ -47,9 +48,9 @@ public class StringToListSequenceActionConverter extends AbstractParameterConver
     }
 
     @Override
-    public List<SequenceAction> convertValue(String value, Type type)
+    public List<SequenceAction> convertValue(ExamplesTable value, Type type)
     {
-        return new ExamplesTable(value).getRowsAsParameters().stream()
+        return value.getRowsAsParameters().stream()
             .map(params ->
             {
                 SequenceActionType actionType = params.valueAs("type", SequenceActionType.class);
