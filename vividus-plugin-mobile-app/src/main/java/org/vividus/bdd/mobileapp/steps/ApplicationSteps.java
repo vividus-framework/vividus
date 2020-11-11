@@ -85,6 +85,15 @@ public class ApplicationSteps
     }
 
     /**
+     * Closes mobile application
+     */
+    @When("I close mobile application")
+    public void closeMobileApplication()
+    {
+        webDriverProvider.end();
+    }
+
+    /**
      * Activates the application if it's installed, but not running or if it is running in the
      * background.
      * @param bundleId bundle identifier of the application to activate.

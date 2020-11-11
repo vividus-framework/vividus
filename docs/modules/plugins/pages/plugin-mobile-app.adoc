@@ -230,6 +230,27 @@ Given I start mobile application with capabilities:
 |appium:options.clearSystemFiles|false|
 ----
 
+=== Close mobile application
+
+==== *_Info_*
+
+Closes a mobile application and quits the session
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I close mobile application
+----
+
+==== *_Usage_*
+
+.Close mobile application
+[source,gherkin]
+----
+When I close mobile application
+----
+
 === Tap on element with duration
 
 ==== *_Info_*
