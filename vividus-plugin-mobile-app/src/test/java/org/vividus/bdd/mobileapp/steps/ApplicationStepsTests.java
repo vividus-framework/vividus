@@ -111,6 +111,15 @@ class ApplicationStepsTests
     }
 
     @Test
+    void shouldCloseMobileApplication()
+    {
+        applicationSteps.closeMobileApplication();
+
+        verify(webDriverProvider).end();
+        verifyNoMoreInteractions(webDriverProvider);
+    }
+
+    @Test
     void shouldActivateApp()
     {
         InteractsWithApps driver = mockInteractingWithAppsDriver();

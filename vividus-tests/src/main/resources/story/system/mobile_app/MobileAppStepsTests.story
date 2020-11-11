@@ -150,6 +150,7 @@ When I wait until element located `accessibilityId(<togglerAccessibilityId>)` di
 When I activate application with bundle identifier `${main-app}`
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears
 
+
 Scenario: [iOS] Verify step: 'When I select $direction value with `$offset` offset in picker wheel located `$locator`'
 Meta:
     @targetPlatform ios
@@ -161,3 +162,7 @@ When I select previous value with `0.1` offset in picker wheel located `xpath(//
 When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(3)`
 When I reset context
 Then number of elements found by `accessibilityId(dateInput)->filter.textPart(1/10/2012)` is equal to `1`
+
+
+Scenario: Verify step: 'When I close mobile application'
+When I close mobile application
