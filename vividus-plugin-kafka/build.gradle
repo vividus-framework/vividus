@@ -4,7 +4,7 @@ dependencies {
     api project(':vividus-bdd-engine')
     implementation project(':vividus-util')
 
-    implementation(group: 'org.springframework.kafka', name: 'spring-kafka', version: '2.6.2')
+    implementation(group: 'org.springframework.kafka', name: 'spring-kafka', version: '2.6.3')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
