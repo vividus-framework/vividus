@@ -1,3 +1,6 @@
+Meta:
+    @epic vividus-plugin-rest-api
+
 Lifecycle:
 Before:
 Scope: STORY
