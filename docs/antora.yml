@@ -10,7 +10,6 @@ asciidoc:
     listing-caption: Example@
     example-caption: false
     iso-date-format-link: 'https://en.wikipedia.org/wiki/ISO_8601[ISO-8601]'
-    java-date-time-formatter-link: 'https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html[date-time format]'
 nav:
 - modules/ROOT/nav.adoc
 - modules/commons/nav.adoc
