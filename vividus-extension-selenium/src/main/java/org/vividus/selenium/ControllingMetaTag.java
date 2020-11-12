@@ -16,11 +16,14 @@
 
 package org.vividus.selenium;
 
+import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.vividus.selenium.type.CapabilitiesValueTypeAdjuster.adjustType;
+import static org.vividus.util.property.PropertyParser.putByPath;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -59,9 +62,10 @@ public enum ControllingMetaTag
         @Override
         protected void setCapability(DesiredCapabilities capabilities, MetaWrapper meta)
         {
-            meta.getPropertiesByKey(k -> k.startsWith(getMetaTagName()))
-                .forEach((k, v) -> capabilities.setCapability(StringUtils.substringAfter(k, getMetaTagName()),
-                    adjustType(v)));
+            Map<String, Object> capabilitiesContainer = new HashMap<>(capabilities.asMap());
+            meta.getPropertiesByKey(k -> k.startsWith(getMetaTagName())).forEach(
+                    (k, v) -> putByPath(capabilitiesContainer, substringAfter(k, getMetaTagName()), adjustType(v)));
+            capabilitiesContainer.forEach(capabilities::setCapability);
         }
     };
 
