@@ -229,6 +229,7 @@ class HttpClientFactoryTests
             verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
             verify(mockedHttpClientBuilder).setDefaultCookieStore(cookieStore);
             verify(mockedHttpClientBuilder).setDnsResolver(resolver);
+            verify(mockedHttpClientBuilder).useSystemProperties();
             verifyDefaultHeaderSetting(HEADERS.entrySet().iterator().next());
         }
     }
