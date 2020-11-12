@@ -87,6 +87,7 @@ public class HttpClientFactory implements IHttpClientFactory
                 .setSoTimeout(config.getSocketTimeout())
                 .build());
         builder.setDnsResolver(config.getDnsResolver());
+        builder.useSystemProperties();
 
         HttpClient httpClient = new HttpClient();
         httpClient.setCloseableHttpClient(builder.build());
