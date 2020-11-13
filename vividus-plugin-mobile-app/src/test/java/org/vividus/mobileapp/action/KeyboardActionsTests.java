@@ -40,6 +40,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
@@ -96,10 +97,12 @@ class KeyboardActionsTests
     {
         init(true);
 
+        WebDriver context = mock(WebDriver.class);
         WebElement returnButton = mock(WebElement.class);
 
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
-        when(searchActions.findElement(KEYBOARD_RETURN_LOCATOR)).thenReturn(Optional.of(returnButton));
+        when(webDriverProvider.get()).thenReturn(context);
+        when(searchActions.findElement(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(Optional.of(returnButton));
 
         keyboardActions.typeText(element, TEXT);
 
@@ -112,8 +115,11 @@ class KeyboardActionsTests
     {
         init(true);
 
+        WebDriver context = mock(WebDriver.class);
+
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
-        when(searchActions.findElement(KEYBOARD_RETURN_LOCATOR)).thenReturn(Optional.empty());
+        when(webDriverProvider.get()).thenReturn(context);
+        when(searchActions.findElement(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(Optional.empty());
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> keyboardActions.typeText(element, TEXT));

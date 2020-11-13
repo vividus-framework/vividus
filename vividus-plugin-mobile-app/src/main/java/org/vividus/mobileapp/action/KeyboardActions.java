@@ -91,10 +91,11 @@ public class KeyboardActions
         {
             Locator keyboardReturnLocator = new Locator(AppiumLocatorType.XPATH, new SearchParameters(
                     "//XCUIElementTypeKeyboard//XCUIElementTypeButton[@name='Return']", Visibility.VISIBLE, false));
-            searchActions.findElement(keyboardReturnLocator).ifPresentOrElse(touchActions::tap, () ->
-            {
-                throw new IllegalStateException("Unable to find 'Return' button to close the keyboard");
-            });
+            searchActions.findElement(webDriverProvider.get(), keyboardReturnLocator).ifPresentOrElse(touchActions::tap,
+                () ->
+                {
+                    throw new IllegalStateException("Unable to find 'Return' button to close the keyboard");
+                });
         }
         else
         {
