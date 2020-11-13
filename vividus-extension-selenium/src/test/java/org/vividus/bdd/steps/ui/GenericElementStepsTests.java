@@ -117,8 +117,8 @@ class GenericElementStepsTests
         when(baseValidations.assertNumberOfElementsFound(ELEMENTS_TO_CHECK, locator, 1, ComparisonRule.GREATER_THAN))
                 .thenReturn(elements);
         when(elementActions.getElementText(webElement)).thenReturn(A_LETTER)
-                                                       .thenReturn(B_LETTER)
-                                                       .thenReturn(C_LETTER);
+                                                       .thenReturn(C_LETTER)
+                                                       .thenReturn(B_LETTER);
 
 
         when(softAssert.assertTrue(String.format(ELEMENT_CONTAINS_TEXT, 1), true)).thenReturn(true);
@@ -129,7 +129,7 @@ class GenericElementStepsTests
 
         verify(softAssert).assertEquals("The elements are sorted in ascending order",
                 List.of(A_LETTER, B_LETTER, C_LETTER),
-                List.of(A_LETTER, B_LETTER, C_LETTER));
+                List.of(A_LETTER, C_LETTER, B_LETTER));
         verifyNoMoreInteractions(baseValidations, softAssert, elementActions);
     }
 
