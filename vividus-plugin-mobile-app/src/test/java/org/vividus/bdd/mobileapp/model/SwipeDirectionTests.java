@@ -25,7 +25,7 @@ import org.openqa.selenium.Point;
 
 class SwipeDirectionTests
 {
-    private static final int MID_X = 540;
+    private static final int SWIPE_X = 1;
 
     @CsvSource({
         "UP,   1436, 358 ",
@@ -38,8 +38,8 @@ class SwipeDirectionTests
 
         SwipeCoordinates coordinates = direction.calculateCoordinates(dimension);
 
-        assertPoint(coordinates.getStart(), MID_X, fromY);
-        assertPoint(coordinates.getEnd(), MID_X, toY);
+        assertPoint(coordinates.getStart(), SWIPE_X, fromY);
+        assertPoint(coordinates.getEnd(), SWIPE_X, toY);
     }
 
     private static void assertPoint(Point point, int x, int y)

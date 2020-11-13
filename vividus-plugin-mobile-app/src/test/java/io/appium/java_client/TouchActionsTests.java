@@ -62,9 +62,9 @@ class TouchActionsTests
     private static final String RELEASE = "{action=release, options={}}";
     private static final Duration DURATION = Duration.ofSeconds(1);
     private static final String SCROLL_UP = ACTIONS_OPEN
-            + "{action=press, options={x=300, y=640}}, "
+            + "{action=press, options={x=1, y=640}}, "
             + WAIT
-            + "{action=moveTo, options={x=300, y=160}}, "
+            + "{action=moveTo, options={x=1, y=160}}, "
             + RELEASE
             + ACTIONS_CLOSE;
     private static final String BLACK_IMAGE = "black.png";
