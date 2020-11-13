@@ -21,8 +21,10 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,6 +48,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.SessionId;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.event.WebDriverQuitEvent;
@@ -56,17 +59,16 @@ import org.vividus.testcontext.TestContext;
 @ExtendWith(MockitoExtension.class)
 class WebDriverProviderTests
 {
+    private static final String SESSION_ID = "sessionId";
+
     @Spy
     private final TestContext testContext = new SimpleTestContext();
 
     @Mock
     private TestVividusDriverFactory vividusDriverFactory;
 
-    @Mock
-    private RemoteWebDriver driver;
-
     @Mock(extraInterfaces = WrapsDriver.class)
-    private WebDriver wrapsDriver;
+    private RemoteWebDriver remoteWebDriver;
 
     @Mock
     private VividusWebDriver vividusWebDriver;
@@ -80,28 +82,34 @@ class WebDriverProviderTests
     @Test
     void testEnd()
     {
+        SessionId sessionId = mock(SessionId.class);
         testContext.put(VividusWebDriver.class, vividusWebDriver);
-        when(vividusWebDriver.getWrappedDriver()).thenReturn(wrapsDriver);
+        when(vividusWebDriver.getWrappedDriver()).thenReturn(remoteWebDriver);
+        when(remoteWebDriver.getSessionId()).thenReturn(sessionId);
+        when(sessionId.toString()).thenReturn(SESSION_ID);
         webDriverProvider.end();
-        verify(wrapsDriver).quit();
-        verify(mockedEventBus).post(any(WebDriverQuitEvent.class));
+        verify(remoteWebDriver).quit();
+        verify(mockedEventBus).post(argThat(e -> SESSION_ID.equals(((WebDriverQuitEvent) e).getSessionId())));
     }
 
     @Test
     void testEndWebDriveException()
     {
+        SessionId sessionId = mock(SessionId.class);
         testContext.put(VividusWebDriver.class, vividusWebDriver);
-        when(vividusWebDriver.getWrappedDriver()).thenReturn(wrapsDriver);
-        doThrow(new WebDriverException()).when(wrapsDriver).quit();
+        when(vividusWebDriver.getWrappedDriver()).thenReturn(remoteWebDriver);
+        when(remoteWebDriver.getSessionId()).thenReturn(sessionId);
+        when(sessionId.toString()).thenReturn(SESSION_ID);
+        doThrow(new WebDriverException()).when(remoteWebDriver).quit();
         assertThrows(WebDriverException.class, webDriverProvider :: end);
-        verify(mockedEventBus).post(any(WebDriverQuitEvent.class));
+        verify(mockedEventBus).post(argThat(e -> SESSION_ID.equals(((WebDriverQuitEvent) e).getSessionId())));
     }
 
     @Test
     void testEndNoWebDriver()
     {
         webDriverProvider.end();
-        verify(mockedEventBus).post(any(WebDriverQuitEvent.class));
+        verify(mockedEventBus).post(argThat(e -> ((WebDriverQuitEvent) e).getSessionId() == null));
     }
 
     @Test
@@ -109,10 +117,10 @@ class WebDriverProviderTests
     {
         Mockito.doNothing().when(mockedEventBus).post(any(WebDriverCreateEvent.class));
         when(vividusDriverFactory.create()).thenReturn(vividusWebDriver);
-        when(vividusWebDriver.getWrappedDriver()).thenReturn(driver);
+        when(vividusWebDriver.getWrappedDriver()).thenReturn(remoteWebDriver);
         webDriverProvider.get();
         webDriverProvider.destroy();
-        verify(driver).quit();
+        verify(remoteWebDriver).quit();
     }
 
     @ParameterizedTest
@@ -136,7 +144,7 @@ class WebDriverProviderTests
     void testGetUnwrapped()
     {
         testContext.put(VividusWebDriver.class, vividusWebDriver);
-        when(vividusWebDriver.getWrappedDriver()).thenReturn(wrapsDriver);
+        when(vividusWebDriver.getWrappedDriver()).thenReturn(remoteWebDriver);
         assertThat(webDriverProvider.getUnwrapped(WrapsDriver.class), instanceOf(WrapsDriver.class));
     }
 

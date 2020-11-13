@@ -7,9 +7,8 @@ Lifecycle:
 Examples:
 /data/tables/system/mobile_app/locators/${target-platform}.table
 
+
 Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
-Meta:
-    @healthCheck
 Given I start mobile application with capabilities:
 |name|value     |
 |app |${app-url}|

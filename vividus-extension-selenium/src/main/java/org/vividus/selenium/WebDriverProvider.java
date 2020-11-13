@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import com.google.common.eventbus.EventBus;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
@@ -72,6 +73,7 @@ public class WebDriverProvider implements IWebDriverProvider
         if (isWebDriverInitialized())
         {
             WebDriver webDriver = getVividusWebDriver().getWrappedDriver();
+            String sessionId = WebDriverUtil.unwrap(webDriver, RemoteWebDriver.class).getSessionId().toString();
             try
             {
                 webDriver.quit();
@@ -79,19 +81,19 @@ public class WebDriverProvider implements IWebDriverProvider
             finally
             {
                 webDrivers.remove(webDriver);
-                reset();
+                reset(sessionId);
             }
         }
         else
         {
-            reset();
+            reset(null);
         }
     }
 
-    private void reset()
+    private void reset(String sessionId)
     {
         testContext.remove(VividusWebDriver.class);
-        eventBus.post(new WebDriverQuitEvent());
+        eventBus.post(new WebDriverQuitEvent(sessionId));
     }
 
     @Override

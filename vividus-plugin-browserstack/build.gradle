@@ -2,7 +2,10 @@ project.description = 'Vividus plugin for Browser Stack'
 
 dependencies {
     implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
+
+    implementation(group: 'com.browserstack', name: 'automate-client-java', version: '0.6')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
