@@ -122,8 +122,8 @@ public class GenericElementSteps
             if (requiredSizeMatcher.matches(texts.size()))
             {
                 softAssert.assertEquals(
-                        String.format("The elements are sorted in %s order", sortingOrder.name().toLowerCase()), texts,
-                        texts.stream().sorted(sortingOrder.getSortingType()).collect(toList()));
+                        String.format("The elements are sorted in %s order", sortingOrder.name().toLowerCase()),
+                        texts.stream().sorted(sortingOrder.getSortingType()).collect(toList()), texts);
             }
             else
             {
