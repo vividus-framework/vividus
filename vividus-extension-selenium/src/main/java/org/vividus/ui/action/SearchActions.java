@@ -83,7 +83,13 @@ public class SearchActions implements ISearchActions
     @Override
     public Optional<WebElement> findElement(Locator attributes)
     {
-        List<WebElement> elements = findElements(uiContext.getSearchContext(), attributes);
+        return findElement(uiContext.getSearchContext(), attributes);
+    }
+
+    @Override
+    public Optional<WebElement> findElement(SearchContext searchContext, Locator attributes)
+    {
+        List<WebElement> elements = findElements(searchContext, attributes);
         return elements.isEmpty() ? Optional.empty() : Optional.of(elements.get(0));
     }
 }

@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.testdouble.TestElementFilter;
 import org.vividus.testdouble.TestElementSearch;
@@ -119,6 +121,19 @@ class SearchActionsTests
         when(uiContext.getSearchContext()).thenReturn(searchContext);
         Locator attributes = new Locator(TestLocatorType.SEARCH, VALUE);
         assertEquals(Optional.of(element1), searchActions.findElement(attributes));
+    }
+
+    @Test
+    void shouldFindElementInSearchContext()
+    {
+        WebDriver webDriver = mock(WebDriver.class);
+        WebElement element = mock(WebElement.class);
+
+        when(testSearch.search(eq(webDriver), any(SearchParameters.class))).thenReturn(List.of(element));
+
+        Locator attributes = new Locator(TestLocatorType.SEARCH, VALUE);
+        assertEquals(Optional.of(element), searchActions.findElement(webDriver, attributes));
+        verifyNoInteractions(uiContext, searchContext);
     }
 
     @Test

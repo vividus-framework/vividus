@@ -30,4 +30,6 @@ public interface ISearchActions
     List<WebElement> findElements(Locator locator);
 
     Optional<WebElement> findElement(Locator locator);
+
+    Optional<WebElement> findElement(SearchContext searchContext, Locator locator);
 }
