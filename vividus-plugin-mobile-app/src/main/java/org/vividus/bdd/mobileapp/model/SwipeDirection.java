@@ -25,9 +25,8 @@ public enum SwipeDirection
         @Override
         public SwipeCoordinates calculateCoordinates(Dimension dimension)
         {
-            int centerX = dimension.getWidth() / 2;
             int indent = dimension.getHeight() / VERTICAL_INDENT_COEFFICIENT;
-            return new SwipeCoordinates(centerX, dimension.getHeight() - indent, centerX, indent);
+            return new SwipeCoordinates(SWIPE_X, dimension.getHeight() - indent, SWIPE_X, indent);
         }
     },
     DOWN
@@ -35,13 +34,13 @@ public enum SwipeDirection
         @Override
         public SwipeCoordinates calculateCoordinates(Dimension dimension)
         {
-            int centerX = dimension.getWidth() / 2;
             int indent = dimension.getHeight() / VERTICAL_INDENT_COEFFICIENT;
-            return new SwipeCoordinates(centerX, indent, centerX, dimension.getHeight() - indent);
+            return new SwipeCoordinates(SWIPE_X, indent, SWIPE_X, dimension.getHeight() - indent);
         }
     };
 
     private static final int VERTICAL_INDENT_COEFFICIENT = 5;
+    private static final int SWIPE_X = 1;
 
     public abstract SwipeCoordinates calculateCoordinates(Dimension dimension);
 }
