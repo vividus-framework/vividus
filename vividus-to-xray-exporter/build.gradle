@@ -3,7 +3,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath(group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: '2.3.5.RELEASE')
+        classpath(group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: '2.4.0')
     }
 }
 apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
