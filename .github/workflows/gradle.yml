@@ -221,7 +221,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: SauceLabs - System Tests - Allure report - iOS
-        path: vividus-tests/output/history/sl-ios-system-tests
+        path: vividus-tests/output/reports/sl-ios-allure
 
     - name: SauceLabs - Android - Mobile App - Run system tests
       if: matrix.platform == 'ubuntu-latest'
@@ -257,7 +257,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: SauceLabs - System Tests - Allure report - Android
-        path: vividus-tests/output/history/sl-android-system-tests
+        path: vividus-tests/output/reports/sl-android-allure
 
     - name: BrowserStack - Desktop - Web - System tests
       if: matrix.platform == 'macos-latest'
@@ -316,7 +316,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: BrowserStack - System Tests - Allure report - iOS
-        path: vividus-tests/output/history/bs-ios-system-tests
+        path: vividus-tests/output/reports/bs-ios-allure
 
     - name: BrowserStack - Android - Mobile App - Run system tests
       if: matrix.platform == 'macos-latest'
@@ -352,7 +352,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: BrowserStack - System Tests - Allure report - Android
-        path: vividus-tests/output/history/bs-android-system-tests
+        path: vividus-tests/output/reports/bs-android-allure
 
     - name: Publish snapshot artifacts
       if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
