@@ -47,6 +47,13 @@ When I wait for response code `200` for `PT10S` duration retrying 10 times
 |When I issue a HTTP GET request for a resource with the URL '${vividus-test-site-url}/api/delayed-response?clientId=${uuid}'|
 Then `${responseCode}` is equal to `200`
 
+Scenario: Validate HTTP retry on service unavailability
+Meta:
+    @requirementId 214
+When I initialize the scenario variable `uuid` with value `#{generate(Internet.uuid)}`
+When I issue a HTTP GET request for a resource with the URL '${vividus-test-site-url}/api/teapot?clientId=${uuid}'
+Then `${responseCode}` is equal to `200`
+
 Scenario: Validate HTTP methods with missing optional request body and zero content-length
 When I send HTTP <http-method> to the relative URL '/<http-method>'
 Then `${responseCode}` is equal to `200`
