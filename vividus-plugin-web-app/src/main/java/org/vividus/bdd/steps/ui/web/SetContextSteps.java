@@ -30,7 +30,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.steps.ui.GenericSetContextSteps;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
@@ -44,23 +43,27 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
-public class SetContextSteps extends GenericSetContextSteps
+public class SetContextSteps
 {
     private static final String AN_ELEMENT_WITH_THE_ATTRIBUTE = "An element with the attribute '%1$s'='%2$s'";
 
+    private final IUiContext uiContext;
     private final IWebDriverProvider webDriverProvider;
     private final IDescriptiveSoftAssert descriptiveSoftAssert;
     private final IWindowsActions windowsActions;
     private final IWaitActions waitActions;
+    private final IBaseValidations baseValidations;
 
-    public SetContextSteps(IUiContext uiContext, IWebDriverProvider webDriverProvider, IBaseValidations baseValidations,
-            IDescriptiveSoftAssert descriptiveSoftAssert, IWindowsActions windowsActions, IWaitActions waitActions)
+    public SetContextSteps(IUiContext uiContext, IWebDriverProvider webDriverProvider,
+            IDescriptiveSoftAssert descriptiveSoftAssert, IWindowsActions windowsActions, IWaitActions waitActions,
+            IBaseValidations baseValidations)
     {
-        super(uiContext, baseValidations);
+        this.uiContext = uiContext;
         this.webDriverProvider = webDriverProvider;
         this.descriptiveSoftAssert = descriptiveSoftAssert;
         this.windowsActions = windowsActions;
         this.waitActions = waitActions;
+        this.baseValidations = baseValidations;
     }
 
     /**
@@ -74,11 +77,11 @@ public class SetContextSteps extends GenericSetContextSteps
     public void changeContextToElementWithName(State state, String name)
     {
         resetContext();
-        WebElement element = getBaseValidations().assertIfElementExists(
+        WebElement element = baseValidations.assertIfElementExists(
                 String.format("An element with the name '%1$s'", name),
                 new Locator(WebLocatorType.ELEMENT_NAME, name)
                         .addFilter(WebLocatorType.STATE, state.toString()));
-        getUiContext().putSearchContext(element, () -> changeContextToElementWithName(state, name));
+        uiContext.putSearchContext(element, () -> changeContextToElementWithName(state, name));
     }
 
     /**
@@ -92,11 +95,11 @@ public class SetContextSteps extends GenericSetContextSteps
     {
         resetContext();
 
-        WebElement element = getBaseValidations().assertIfElementExists(
+        WebElement element = baseValidations.assertIfElementExists(
                 String.format(AN_ELEMENT_WITH_THE_ATTRIBUTE, attributeType, attributeValue),
                 new Locator(WebLocatorType.XPATH,
                         LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-        getUiContext().putSearchContext(element, () -> changeContextToElementWithAttribute(attributeType,
+        uiContext.putSearchContext(element, () -> changeContextToElementWithAttribute(attributeType,
                 attributeValue));
     }
 
@@ -112,14 +115,14 @@ public class SetContextSteps extends GenericSetContextSteps
     public void changeContextToStateElementWithAttribute(State state, String attributeType, String attributeValue)
     {
         resetContext();
-        WebElement element = getBaseValidations().assertIfElementExists(String.format(AN_ELEMENT_WITH_THE_ATTRIBUTE,
+        WebElement element = baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_THE_ATTRIBUTE,
                 attributeType, attributeValue), new Locator(WebLocatorType.XPATH,
                         LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-        if (!getBaseValidations().assertElementState("The found element is " + state, state, element))
+        if (!baseValidations.assertElementState("The found element is " + state, state, element))
         {
             element = null;
         }
-        getUiContext().putSearchContext(element, () -> changeContextToStateElementWithAttribute(state,
+        uiContext.putSearchContext(element, () -> changeContextToStateElementWithAttribute(state,
                 attributeType, attributeValue));
     }
 
@@ -165,7 +168,7 @@ public class SetContextSteps extends GenericSetContextSteps
     public void switchingToFrame(Locator locator)
     {
         resetContext();
-        WebElement element = getBaseValidations().assertIfElementExists("A frame", locator);
+        WebElement element = baseValidations.assertIfElementExists("A frame", locator);
         switchToFrame(element);
     }
 
@@ -291,5 +294,10 @@ public class SetContextSteps extends GenericSetContextSteps
     private WebDriver getWebDriver()
     {
         return webDriverProvider.get();
+    }
+
+    private void resetContext()
+    {
+        uiContext.reset();
     }
 }
