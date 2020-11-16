@@ -17,8 +17,33 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '
 
 == Properties
 
-[WARNING]
-To be implemented
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+4+^.^|_Configuration of HTTP retries on service unavailability_
+
+|`http.service-unavailable-retry.max-retries`
+|`1`
+|`integer`
+|The maximum number of allowed retries if the server responds with a HTTP code from the retry code set defined below
+
+|`http.service-unavailable-retry.status-codes`
+|<empty>
+|set of integers
+|The set of HTTP status codes to be retried. If it's empty, no retries will be performed
+
+|`http.service-unavailable-retry.retry-interval`
+|`PT1S`
+|{iso-date-format-link}
+|The retry interval between subsequent requests
+
+|===
 
 == Expressions
 

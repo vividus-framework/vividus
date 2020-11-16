@@ -47,6 +47,7 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.RedirectStrategy;
+import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.DnsResolver;
 import org.apache.http.conn.HttpClientConnectionManager;
@@ -263,6 +264,8 @@ class HttpClientFactoryTests
         config.setCookieSpec(cookieSpec);
         HttpRequestRetryHandler handler = mock(HttpRequestRetryHandler.class);
         config.setHttpRequestRetryHandler(handler);
+        ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy = mock(ServiceUnavailableRetryStrategy.class);
+        config.setServiceUnavailableRetryStrategy(serviceUnavailableRetryStrategy);
         try (MockedStatic<HttpClientBuilder> httpClientBuilder = mockStatic(HttpClientBuilder.class);
                 MockedConstruction<HttpClient> httpClient = mockConstruction(HttpClient.class))
         {
@@ -276,6 +279,7 @@ class HttpClientFactoryTests
             httpClientVerifier.accept((HttpClient) actualClient);
             verify(mockedHttpClientBuilder).build();
             verify(mockedHttpClientBuilder).setRetryHandler(handler);
+            verify(mockedHttpClientBuilder).setServiceUnavailableRetryStrategy(serviceUnavailableRetryStrategy);
             verify(mockedHttpClientBuilder).setConnectionManager(connectionManager);
             verify(mockedHttpClientBuilder).setMaxConnTotal(maxTotalConnections);
             verify(mockedHttpClientBuilder).setMaxConnPerRoute(maxConnectionsPerRoute);

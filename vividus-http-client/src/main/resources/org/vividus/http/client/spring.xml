@@ -46,6 +46,13 @@
                 </property>
             </bean>
         </property>
+        <property name="serviceUnavailableRetryStrategy">
+            <bean class="org.vividus.http.client.ConfigurableServiceUnavailableRetryStrategy">
+                <constructor-arg index="0" value="${http.service-unavailable-retry.max-retries}" />
+                <constructor-arg index="1" value="${http.service-unavailable-retry.retry-interval}" />
+                <constructor-arg index="2" value="${http.service-unavailable-retry.status-codes}" />
+            </bean>
+        </property>
     </bean>
 
     <bean id="localDnsStorage" factory-bean="propertyParser"
