@@ -17,12 +17,14 @@
 package org.vividus.mobileapp.action;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -137,6 +139,22 @@ class KeyboardActionsTests
 
         verify(element).clear();
         verify(hidesKeyboard).hideKeyboard();
+    }
+
+    @Test
+    void shouldClearTextButNotCloseKeyboardIfElementIsTypeTextView()
+    {
+        init(true);
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        String typeTextView = "XCUIElementTypeTextView";
+        when(element.getTagName()).thenReturn(typeTextView);
+
+        keyboardActions.clearText(element);
+
+        verify(element).clear();
+        verifyNoInteractions(hidesKeyboard);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn("Skip hiding keyboard for {}. Use the tap step to tap"
+            + " outside the {} to hide the keyboard", typeTextView))));
     }
 
     void init(boolean realDevice)
