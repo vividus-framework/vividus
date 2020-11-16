@@ -16,6 +16,8 @@
 
 package org.vividus.mobileapp.action;
 
+import java.util.function.Consumer;
+
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +66,7 @@ public class KeyboardActions
     public void typeText(WebElement element, String text)
     {
         LOGGER.atInfo().addArgument(text).log("Typing text '{}' into the field");
-        performWithHideKeyboard(() -> element.sendKeys(text));
+        performWithHideKeyboard(element, e -> e.sendKeys(text));
     }
 
     /**
@@ -79,16 +81,27 @@ public class KeyboardActions
      */
     public void clearText(WebElement element)
     {
-        performWithHideKeyboard(element::clear);
+        performWithHideKeyboard(element, WebElement::clear);
     }
 
-    private void performWithHideKeyboard(Runnable runnable)
+    private void performWithHideKeyboard(WebElement webElement, Consumer<WebElement> performOnElement)
     {
-        runnable.run();
+        performOnElement.accept(webElement);
 
         // https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
         if (genericWebDriverManager.isIOSNativeApp() && realDevice)
         {
+            String tagName = webElement.getTagName();
+            /**
+             * Tap on 'Return' doesn't close the keyboard for XCUIElementTypeTextView element, the only way to close the
+             * keyboard is to tap on any element outside the text view.
+             */
+            if ("XCUIElementTypeTextView".equals(tagName))
+            {
+                LOGGER.atWarn().addArgument(tagName).log("Skip hiding keyboard for {}. Use the tap step to tap outside"
+                        + " the {} to hide the keyboard");
+                return;
+            }
             Locator keyboardReturnLocator = new Locator(AppiumLocatorType.XPATH, new SearchParameters(
                     "//XCUIElementTypeKeyboard//XCUIElementTypeButton[@name='Return']", Visibility.VISIBLE, false));
             searchActions.findElement(webDriverProvider.get(), keyboardReturnLocator).ifPresentOrElse(touchActions::tap,

@@ -326,6 +326,9 @@ The atomic actions performed are:
 * type text into the element
 * hide keyboard
 
+[WARNING]
+For `iOS` real devices the hide keyboard action works only for `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView` elements, in case of `XCUIElementTypeTextView` element tap outside the text view to close the keyboard.
+
 ==== *_Wording_*
 
 [source,gherkin]
@@ -356,6 +359,9 @@ Clears a field located by the locator.
 The atomic actions performed are:
 * clear the field
 * hide keyboard
+
+[WARNING]
+For `iOS` real devices the hide keyboard action works only for `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView` elements, in case of `XCUIElementTypeTextView` element tap outside the text view to close the keyboard.
 
 ==== *_Wording_*
 
