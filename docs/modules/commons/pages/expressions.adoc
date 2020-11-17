@@ -4,7 +4,182 @@ Here one could find description of the expressions that are delivered with Vivid
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
-== `evalGroovy`
+== String transformations
+
+=== `toLowerCase`
+
+Converts an input string to lower case.
+
+[source, subs="+quotes"]
+----
+#{toLowerCase(*$input*)}
+----
+
+* *`$input`* - any string to be converted lower case
+
+.Examples of the expressions converting strings to lower case
+|===
+|Expression |Result
+
+|`#{toLowerCase(aBc)}`
+|`abc`
+|===
+
+=== `toUpperCase`
+
+Converts an input string to upper case.
+
+[source, subs="+quotes"]
+----
+#{toUpperCase(*$input*)}
+----
+
+* *`$input`* - any string to be converted upper case
+
+.Examples of the expressions converting strings to upper case
+|===
+|Expression |Result
+
+|`#{toUpperCase(aBc)}`
+|`ABC`
+|===
+
+=== `capitalize`
+
+Capitalizes an input string, changing the first character to title case. No other characters are changed.
+
+[source, subs="+quotes"]
+----
+#{capitalize(*$input*)}
+----
+
+* *`$input`* - any string to be capitalized
+
+.Examples of the expressions capitalizing strings
+|===
+|Expression |Result
+
+|`#{capitalize(aBc)}`
+|`ABc`
+|===
+
+=== `uncapitalize`
+
+Uncapitalizes an input string, changing the first character to lower case. No other characters are changed.
+
+[source, subs="+quotes"]
+----
+#{uncapitalize(*$input*)}
+----
+
+* *`$input`* - any string to be uncapitalized
+
+.Examples of the expressions uncapitalizing strings
+|===
+|Expression |Result
+
+|`#{uncapitalize(ABc)}`
+|`aBc`
+|===
+
+=== `trim`
+
+Trims an input string (removes control characters (chars with code less than or equal to 32) from both ends).
+
+[source, subs="+quotes"]
+----
+#{trim(*$input*)}
+----
+
+* *`$input`* - any string to be trimmed
+
+.Examples of the expressions trimming strings
+|===
+|Expression |Result
+
+|`#{trim( a b c )}`
+|`a b c`
+|===
+
+=== `encodeToBase64`
+
+Encode the input string to Base64 format
+
+[source, subs="+quotes"]
+----
+#{encodeToBase64(*$input*)}
+----
+
+* *`$input`* - any string to be encoded to Base64 format
+
+.Examples of the expressions encoding to Base64
+|===
+|Expression |Result
+
+|`#{encodeToBase64(vividus)}`
+|`dml2aWR1cw==`
+|===
+
+=== `decodeFromBase64`
+
+Decodes the input string from Base64 format to the regular string
+
+[source, subs="+quotes"]
+----
+#{decodeFromBase64(*$input*)}
+----
+
+* *`$input`* - Base64 string to decode
+
+.Examples of the expressions decoding Base64
+|===
+|Expression |Result
+
+|`#{decodeFromBase64(dml2aWR1cw==)}`
+|`vividus`
+|===
+
+== Resources
+:path-parameter: pass:quotes[*`$pathToResource`* - the path to the resource to load. It must be relative to the project, meaning `src/main/resources` is left out of it. Therefore, if the file is located at `my-tests/src/main/resources/data/body.txt`, then it's required to put only relative resource part: `/data/body.txt`]
+
+=== `loadResource`
+
+Loads the resource found at the provided path and replaces the expression with the content of the resource.
+
+[source, subs="+quotes"]
+----
+#{loadResource(*$pathToResource*)}
+----
+
+* {path-parameter}
+
+.Load data from the project resource
+[source,gherkin]
+----
+When I initialize the scenario variable `my-data` with value `#{loadResource(/data/body.txt)}`
+----
+
+=== `resourceToBase64`
+
+Finds the resource at the provided path and replaces the expression with the content of the resource in Base64 format.
+
+[source, subs="+quotes"]
+----
+#{resourceToBase64(*$pathToResource*)}
+----
+
+[subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
+* {path-parameter}
+
+.Load data as Base64 from the project resource
+[source,gherkin]
+----
+When I initialize the scenario variable `my-data` with value `#{resourceToBase64(/data/body.txt)}`
+----
+
+== Script evaluation
+
+=== `evalGroovy`
 
 Evaluates groovy script and converts result to a string.
 
