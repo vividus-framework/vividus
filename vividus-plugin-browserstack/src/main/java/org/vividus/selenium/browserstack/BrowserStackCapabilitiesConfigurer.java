@@ -38,7 +38,7 @@ public class BrowserStackCapabilitiesConfigurer extends AbstractDesiredCapabilit
     {
         if (browserStackEnabled)
         {
-            Optional.ofNullable(bddRunContext.getRunningStory())
+            Optional.ofNullable(bddRunContext.getRootRunningStory())
                     .map(RunningStory::getName)
                     .ifPresent(name -> putNestedCapability(desiredCapabilities, "bstack:options", "sessionName", name));
         }

@@ -58,7 +58,7 @@ class BrowserStackCapabilitiesConfigurerTests
         Map<String, Object> bstackMap = new HashMap<>();
         RunningStory runningStory = mock(RunningStory.class);
 
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
         when(runningStory.getName()).thenReturn(name);
         when(desiredCapabilities.getCapability(bstackKey)).thenReturn(bstackMap);
 
@@ -74,7 +74,7 @@ class BrowserStackCapabilitiesConfigurerTests
         configurer.setBrowserStackEnabled(true);
         RunningStory runningStory = mock(RunningStory.class);
 
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
         when(runningStory.getName()).thenReturn(null);
 
         configurer.configure(desiredCapabilities);
