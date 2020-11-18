@@ -44,6 +44,7 @@ import org.littleshoot.proxy.HttpFiltersSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Proxy.ProxyType;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyTests
@@ -221,5 +222,19 @@ class ProxyTests
         when(browserUpProxyServer.getPort()).thenReturn(101);
         org.openqa.selenium.Proxy seleniumProxy = proxy.createSeleniumProxy();
         assertEquals(InetAddress.getLoopbackAddress().getHostName() + ":101", seleniumProxy.getHttpProxy());
+    }
+
+    @Test
+    void shouldUseProvidedHostForASeleniumProxy()
+    {
+        Proxy proxy = new Proxy(proxyServerFactory, "host.docker.internal");
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
+        proxy.start();
+        when(browserUpProxyServer.getPort()).thenReturn(101);
+        org.openqa.selenium.Proxy seleniumProxy = proxy.createSeleniumProxy();
+        String proxyHostAndPort = "host.docker.internal:101";
+        assertEquals(proxyHostAndPort, seleniumProxy.getHttpProxy());
+        assertEquals(proxyHostAndPort, seleniumProxy.getSslProxy());
+        assertEquals(ProxyType.MANUAL, seleniumProxy.getProxyType());
     }
 }

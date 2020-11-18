@@ -19,6 +19,7 @@ package org.vividus.proxy;
 public class ProxyFactory implements IProxyFactory
 {
     private final IProxyServerFactory proxyServerFactory;
+    private String proxyHost;
 
     public ProxyFactory(IProxyServerFactory proxyServerFactory)
     {
@@ -28,6 +29,11 @@ public class ProxyFactory implements IProxyFactory
     @Override
     public Proxy createProxy()
     {
-        return new Proxy(proxyServerFactory);
+        return new Proxy(proxyServerFactory, proxyHost);
+    }
+
+    public void setProxyHost(String proxyHost)
+    {
+        this.proxyHost = proxyHost;
     }
 }

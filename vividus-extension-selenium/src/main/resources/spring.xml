@@ -57,7 +57,9 @@
         <constructor-arg index="0" value="${proxy.host}" />
         <constructor-arg index="1" value="${proxy.ports}" />
         <constructor-arg index="2">
-            <bean class="org.vividus.proxy.ProxyFactory" />
+            <bean class="org.vividus.proxy.ProxyFactory">
+                <property name="proxyHost" value="${proxy.connectable-host}"/>
+            </bean>
         </constructor-arg>
     </bean>
 
