@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Amazion S3'
+project.description = 'Vividus plugin for Amazon S3'
 
 dependencies {
     api project(':vividus-bdd-engine')
