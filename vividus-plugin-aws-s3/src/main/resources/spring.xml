@@ -6,9 +6,7 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="org.vividus.aws.s3.AmazonS3Client"
-        class="org.vividus.aws.s3.AmazonS3ClientFactory"
-        factory-method="create">
+    <bean class="org.vividus.aws.s3.AmazonS3ClientFactory" factory-method="create">
         <constructor-arg name="region" value="${aws.s3.region}" />
     </bean>
 
