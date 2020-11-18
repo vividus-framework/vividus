@@ -137,6 +137,12 @@ class AllureRunContextTests
     }
 
     @Test
+    void shouldHandleStepInProgressCheckIfNothingIsInitialized()
+    {
+        assertFalse(allureRunContext.isStepInProgress());
+    }
+
+    @Test
     void resetScenarioExecutionStage()
     {
         allureRunContext.initExecutionStages();

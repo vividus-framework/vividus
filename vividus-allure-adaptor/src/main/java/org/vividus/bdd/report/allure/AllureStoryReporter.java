@@ -385,15 +385,18 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
 
     private void checkForBeforeAfterScenarioSteps()
     {
-        ScenarioExecutionStage scenarioExecutionStage = allureRunContext.getScenarioExecutionStage();
-        if (ScenarioExecutionStage.BEFORE_STEPS == scenarioExecutionStage)
+        if (!allureRunContext.isStepInProgress())
         {
-            startBddStep("@BeforeScenario");
-        }
-        else if (ScenarioExecutionStage.AFTER_STEPS == scenarioExecutionStage && getLinkedStep().isRootItem())
-        {
-            startBddStep("@AfterScenario");
-            updateStepStatus(Status.PASSED);
+            ScenarioExecutionStage scenarioExecutionStage = allureRunContext.getScenarioExecutionStage();
+            if (ScenarioExecutionStage.BEFORE_STEPS == scenarioExecutionStage)
+            {
+                startBddStep("@BeforeScenario");
+            }
+            else if (ScenarioExecutionStage.AFTER_STEPS == scenarioExecutionStage && getLinkedStep().isRootItem())
+            {
+                startBddStep("@AfterScenario");
+                updateStepStatus(Status.PASSED);
+            }
         }
     }
 

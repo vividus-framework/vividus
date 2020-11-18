@@ -129,7 +129,8 @@ public class AllureRunContext implements IAllureRunContext
     @Override
     public boolean isStepInProgress()
     {
-        return getExecutionStages().peek().stepInProgress;
+        ExecutionStages executionStages = getExecutionStages().peek();
+        return executionStages != null && executionStages.stepInProgress;
     }
 
     @Override
