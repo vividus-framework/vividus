@@ -708,16 +708,28 @@ class AllureStoryReporterTests
     }
 
     @Test
-    void testAddLogBeforeStep()
+    void testAddLogBeforeAnyScenarioStepIsStarted()
     {
         mockStepUid();
+        when(allureRunContext.isStepInProgress()).thenReturn(false);
         mockAddLogStep(ScenarioExecutionStage.BEFORE_STEPS);
         verify(allureLifecycle).startStep(eq(STEP_UID), eq(SUB_STEP_UID),
                 argThat(s -> "@BeforeScenario".equals(s.getName())));
         verify(allureRunContext).startStep();
-        verify(allureLifecycle).startStep(eq(STEP_UID), anyString(),
-                argThat(s -> LOG_ENTRY.equals(s.getName())));
+        verify(allureLifecycle).startStep(eq(STEP_UID), anyString(), argThat(s -> LOG_ENTRY.equals(s.getName())));
         verify(allureLifecycle).stopStep(anyString());
+        verifyNoMoreInteractions(allureLifecycle);
+    }
+
+    @Test
+    void testAddLogInBeforeScenarioStep()
+    {
+        mockStepUid();
+        when(allureRunContext.isStepInProgress()).thenReturn(true);
+        allureStoryReporter.addLogStep("INFO", LOG_ENTRY);
+        verify(allureLifecycle).startStep(eq(STEP_UID), anyString(), argThat(s -> LOG_ENTRY.equals(s.getName())));
+        verify(allureLifecycle).stopStep(anyString());
+        verifyNoMoreInteractions(allureLifecycle);
     }
 
     @Test
@@ -732,18 +744,30 @@ class AllureStoryReporterTests
     }
 
     @Test
-    void testAddLogAfterStepRoot()
+    void testAddLogAfterAllScenarioStepsAreFinished()
     {
         mockScenarioUid(false);
+        when(allureRunContext.isStepInProgress()).thenReturn(false);
         when(allureRunContext.getScenarioExecutionStage()).thenReturn(ScenarioExecutionStage.AFTER_STEPS);
         when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
         allureStoryReporter.addLogStep("DEBUG", LOG_ENTRY);
         verify(allureRunContext).startStep();
         verify(allureLifecycle).startStep(eq(SCENARIO_UID), eq(STEP_UID),
                 argThat(s -> "@AfterScenario".equals(s.getName())));
-        verify(allureLifecycle).startStep(eq(SCENARIO_UID), anyString(),
-                argThat(s -> LOG_ENTRY.equals(s.getName())));
+        verify(allureLifecycle).startStep(eq(SCENARIO_UID), anyString(), argThat(s -> LOG_ENTRY.equals(s.getName())));
         verify(allureLifecycle).stopStep(anyString());
+        verifyNoMoreInteractions(allureLifecycle);
+    }
+
+    @Test
+    void testAddLogInAfterScenaioStep()
+    {
+        mockScenarioUid(false);
+        when(allureRunContext.isStepInProgress()).thenReturn(true);
+        allureStoryReporter.addLogStep("ERROR", LOG_ENTRY);
+        verify(allureLifecycle).startStep(eq(SCENARIO_UID), anyString(), argThat(s -> LOG_ENTRY.equals(s.getName())));
+        verify(allureLifecycle).stopStep(anyString());
+        verifyNoMoreInteractions(allureLifecycle);
     }
 
     @Test
