@@ -13,8 +13,7 @@
 
     <bean class="org.vividus.bdd.context.SshTestContext" />
 
-    <bean id="org.vividus.bdd.steps.ssh.SshSteps"
-        class="org.vividus.bdd.steps.ssh.SshSteps">
+    <bean id="sshSteps" class="org.vividus.bdd.steps.ssh.SshSteps">
         <property name="serverConfigurations">
             <bean factory-bean="propertyMapper" factory-method="readValues">
                 <constructor-arg value="ssh.server." />
@@ -24,7 +23,7 @@
     </bean>
 
     <util:list id="stepBeanNames-Ssh" value-type="java.lang.String">
-        <idref bean="org.vividus.bdd.steps.ssh.SshSteps" />
+        <idref bean="sshSteps" />
     </util:list>
 
 </beans>

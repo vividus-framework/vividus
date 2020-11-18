@@ -10,11 +10,9 @@
         <constructor-arg name="region" value="${aws.s3.region}" />
     </bean>
 
-    <bean id="org.vividus.aws.s3.steps.S3BucketSteps"
-        class="org.vividus.aws.s3.steps.S3BucketSteps">
-    </bean>
+    <bean id="s3BucketSteps" class="org.vividus.aws.s3.steps.S3BucketSteps" />
 
     <util:list id="stepBeanNames-AWS-S3" value-type="java.lang.String">
-        <idref bean="org.vividus.aws.s3.steps.S3BucketSteps" />
+        <idref bean="s3BucketSteps" />
     </util:list>
 </beans>
