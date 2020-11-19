@@ -49,6 +49,43 @@ NOTE: The properties marked with *bold* are mandatory.
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
+=== `removeWrappingDoubleQuotes`
+
+When REST API providing the data in JSON format is used it may be required to extract some values from JSON messages.
+String values are usually wrapped into double quotes, but sometimes only the value without quotes is needed.
+This expression allows to remove wrapping double quotes and use the value as is.
+
+[source, subs="+quotes"]
+----
+#{removeWrappingDoubleQuotes(*$input*)}
+----
+
+* *`$input`* - any string to remove wrapping double quotes
+
+.Extracting ID from JSON data and using it in HTTP GET
+[source,gherkin]
+----
+When I save a JSON element from '${response}' by JSON path '$.id' to story variable 'id'
+When I send HTTP GET to the relative URL 'rest/#{removeWrappingDoubleQuotes(${id})}'
+----
+
+.Examples of the expressions removing wrapping double quotes
+|===
+|Expression |Result
+
+|`#{removeWrappingDoubleQuotes("value")}`  |`value`
+|`#{removeWrappingDoubleQuotes(value)}`    |`value`
+|`#{removeWrappingDoubleQuotes()}`         |`<empty>`
+|`#{removeWrappingDoubleQuotes("")}`       |`<empty>`
+|`#{removeWrappingDoubleQuotes(""")}`      |`"`
+|`#{removeWrappingDoubleQuotes("value)}`   |`"value`
+|`#{removeWrappingDoubleQuotes(v"alu"e)}`  |`v"alu"e`
+|`#{removeWrappingDoubleQuotes("va"lu"e")}`|`va"lu"e`
+|`#{removeWrappingDoubleQuotes("va"lu"e)}` |`"va"lu"e`
+|`#{removeWrappingDoubleQuotes("va"lue)}`  |`"va"lue`
+|`#{removeWrappingDoubleQuotes(va"lue")}`  |`va"lue"`
+|===
+
 === `encodeUriXyz`
 
 `#{encodeUriXyz(..)}` is a family of expressions that encode specific URI components (e.g. path, query)
