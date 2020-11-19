@@ -259,10 +259,10 @@ Meta: @testCaseId TEST-435
 
 == Export
 ifeval::["{release-version}" == "false"]
-:jar-link: https://oss.jfrog.org/oss-snapshot-local/org/vividus/vividus-to-xray-exporter/{page-component-version}/vividus-to-xray-exporter-{page-component-version}.jar
+:jar-link: https://oss.jfrog.org/oss-snapshot-local/org/vividus/vividus-to-xray-exporter/{current-version}/vividus-to-xray-exporter-{current-version}.jar
 endif::[]
 ifeval::["{release-version}" == "true"]
-:jar-link: https://jcenter.bintray.com/org/vividus/vividus-to-xray-exporter/{page-component-version}/vividus-to-xray-exporter-{page-component-version}.jar
+:jar-link: https://jcenter.bintray.com/org/vividus/vividus-to-xray-exporter/{current-version}/vividus-to-xray-exporter-{current-version}.jar
 endif::[]
 
 * Download {jar-link}[Exporter JAR]

@@ -7,7 +7,7 @@ The plugin provides integration with an open-source distributed event streaming 
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-kafka', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-kafka', version: '{current-version}')
 ----
 
 == Properties

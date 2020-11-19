@@ -7,7 +7,7 @@ The plugin provides integration with continuous testing cloud https://www.browse
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-browserstack', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-browserstack', version: '{current-version}')
 ----
 
 == Profiles

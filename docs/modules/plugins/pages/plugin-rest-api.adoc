@@ -11,7 +11,7 @@ The plugin provides the following abilities:
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '{current-version}')
 ----
 
 

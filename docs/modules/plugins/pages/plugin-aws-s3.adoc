@@ -7,7 +7,7 @@ The plugin provides functionality to interact with https://aws.amazon.com/s3/[Am
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-aws-s3', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-aws-s3', version: '{current-version}')
 ----
 
 == Configuration

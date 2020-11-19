@@ -9,7 +9,7 @@ The plugin provides functionality to interact with Web applications.
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '{current-version}')
 ----
 
 

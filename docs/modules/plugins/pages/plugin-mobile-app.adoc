@@ -7,7 +7,7 @@ The plugin provides functionality to test mobile application on real devices, An
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version: '{current-version}')
 ----
 
 

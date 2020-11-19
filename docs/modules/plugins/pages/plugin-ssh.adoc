@@ -7,7 +7,7 @@ The plugin provides functionality to execute commands via https://tools.ietf.org
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-ssh', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-ssh', version: '{current-version}')
 ----
 
 == Properties
