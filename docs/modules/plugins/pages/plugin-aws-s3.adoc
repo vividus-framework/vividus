@@ -27,6 +27,26 @@ See the official https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/cre
 
 == Steps
 
+=== Upload data
+
+Upload the specified data to Amazon S3 under the specified bucket and key name.
+
+[source,gherkin]
+----
+When I upload data `$data` with key `$objectKey` and content type `$contentType` to S3 bucket `$bucketName`
+----
+
+- `$data` - the data to be uploaded
+- `$objectKey` - the key under which to store the specified data
+- `$contentType` - the MIME type of data
+- `$bucketName` - the name of an existing bucket
+
+.Upload data to Amazon S3
+[source,gherkin]
+----
+When I upload data `{"my":"json"}` with key `folder/name.json` and content type `application/json` to S3 bucket `testBucket`
+----
+
 === Download S3 object
 
 Retrieve the object by key from the provided S3 bucket and save its content to a variable. The specified bucket and object key must exist, or an error will result.
