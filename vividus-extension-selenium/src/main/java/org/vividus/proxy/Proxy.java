@@ -17,6 +17,7 @@
 package org.vividus.proxy;
 
 import java.net.InetAddress;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -30,11 +31,13 @@ import com.browserup.harreader.model.Har;
 public class Proxy implements IProxy
 {
     private final IProxyServerFactory proxyServerFactory;
+    private final String proxyHost;
     private BrowserUpProxyServer proxyServer;
 
-    public Proxy(IProxyServerFactory proxyServerFactory)
+    public Proxy(IProxyServerFactory proxyServerFactory, String proxyHost)
     {
         this.proxyServerFactory = proxyServerFactory;
+        this.proxyHost = proxyHost;
     }
 
     @Override
@@ -112,7 +115,17 @@ public class Proxy implements IProxy
     @Override
     public org.openqa.selenium.Proxy createSeleniumProxy()
     {
-        return ClientUtil.createSeleniumProxy(proxyServer, InetAddress.getLoopbackAddress());
+        return Optional.ofNullable(proxyHost)
+                       .map(this::createSeleniumProxy)
+                       .orElseGet(() -> ClientUtil.createSeleniumProxy(proxyServer, InetAddress.getLoopbackAddress()));
+    }
+
+    private org.openqa.selenium.Proxy createSeleniumProxy(String hostName)
+    {
+        String proxyAddress = hostName + ':' + proxyServer.getPort();
+        return new org.openqa.selenium.Proxy().setHttpProxy(proxyAddress)
+                                              .setSslProxy(proxyAddress)
+                                              .setProxyType(org.openqa.selenium.Proxy.ProxyType.MANUAL);
     }
 
     BrowserUpProxy getProxyServer()

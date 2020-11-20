@@ -16,8 +16,10 @@
 
 package org.vividus.proxy;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,8 +36,12 @@ class ProxyFactoryTests
     private ProxyFactory proxyFactory;
 
     @Test
-    void testCreateProxy()
+    void testCreateProxy() throws IllegalArgumentException, IllegalAccessException
     {
-        assertNotNull(proxyFactory.createProxy());
+        String proxyHost = "somehost";
+        proxyFactory.setProxyHost(proxyHost);
+        Proxy actualProxy = proxyFactory.createProxy();
+        assertNotNull(actualProxy);
+        assertEquals(proxyHost, FieldUtils.getField(Proxy.class, "proxyHost", true).get(actualProxy));
     }
 }
