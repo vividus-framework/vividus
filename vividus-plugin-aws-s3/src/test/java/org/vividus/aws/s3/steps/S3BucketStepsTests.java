@@ -57,6 +57,14 @@ class S3BucketStepsTests
     @InjectMocks private S3BucketSteps steps;
 
     @Test
+    void shouldUploadData()
+    {
+        String csv = ResourceUtils.loadResource(CSV_FILE_PATH);
+        steps.uploadData(csv, S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME);
+        verifyContentUploaded(csv.getBytes(StandardCharsets.UTF_8), CONTENT_TYPE);
+    }
+
+    @Test
     void shouldUploadResource()
     {
         byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);

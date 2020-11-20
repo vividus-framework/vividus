@@ -50,6 +50,23 @@ public class S3BucketSteps
     }
 
     /**
+     * Uploads <b>data</b> into S3 given bucket by the <b>objectKey</b>
+     * <br>
+     * Usage example:
+     * <code><br>When I upload data `{"my":"json"}` with key `folder/name.json` and content type `application/json`
+     * to S3 bucket `testBucket`</code>
+     * @param data The data to be uploaded to Amazon S3
+     * @param objectKey Key on which the content is added to S3 bucket
+     * @param contentType Mime type of object for upload (see <a href="https://en.wikipedia.org/wiki/MIME">MIME</a>)
+     * @param bucketName S3 bucket to upload
+     */
+    @When("I upload data `$data` with key `$objectKey` and content type `$contentType` to S3 bucket `$bucketName`")
+    public void uploadData(String data, String objectKey, String contentType, String bucketName)
+    {
+        uploadContent(bucketName, objectKey, data.getBytes(StandardCharsets.UTF_8), contentType);
+    }
+
+    /**
      * Uploads <b>resource</b> into S3 given bucket by the <b>objectKey</b>
      * <br>
      * Usage example:
