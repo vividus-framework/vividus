@@ -33,8 +33,12 @@ Then `${v:ar}` is equal to `${v:ar}`
 Then `${}` is equal to `${}`
 Then `${:default}` is equal to `default`
 Then `${a.b:NULL}` is equal to `NULL`
+Then `${foo:${bar}}` is equal to `${foo:${bar}}`
+Then `${baz#{eval(0 + 2)}:${foo#{eval(0 + 1)}}}` is equal to `${baz2:${foo1}}`
 
 When I initialize the scenario variable `vAr` with value `vAl`
+When I initialize the scenario variable `foo` with value `foo`
+When I initialize the scenario variable `foo1` with value `foo1`
 When I initialize the scenario variable `v.ar` with value `v.al`
 When I initialize the scenario variable `var[0]` with value `val[0]`
 When I initialize the scenario variable `v[0].ar` with value `v[0].al`
@@ -42,15 +46,18 @@ When I initialize the scenario variable `v.ar[0]` with value `v.al[0]`
 When I initialize the scenario variable `v:ar` with value `v:al`
 When I initialize the scenario variable `` with value `val`
 When I initialize the scenario variable `a.b` with value `a.b-value`
-Then `${vAr}` is equal to `vAl`
-Then `${v.ar}` is equal to `v.al`
-Then `${var[0]}` is equal to `val[0]`
-Then `${v[0].ar}` is equal to `v[0].al`
-Then `${v.ar[0]}` is equal to `v.al[0]`
-Then `${v:ar}` is equal to `v:al`
-Then `${}` is equal to `val`
-Then `${a.b:NULL}` is equal to `a.b-value`
-Then `${a.b}` is equal to `a.b-value`
+Then `${vAr}`                      is equal to `vAl`
+Then `${v.ar}`                     is equal to `v.al`
+Then `${var[0]}`                   is equal to `val[0]`
+Then `${v[0].ar}`                  is equal to `v[0].al`
+Then `${v.ar[0]}`                  is equal to `v.al[0]`
+Then `${v:ar}`                     is equal to `v:al`
+Then `${}`                         is equal to `val`
+Then `${a.b:NULL}`                 is equal to `a.b-value`
+Then `${a.b}`                      is equal to `a.b-value`
+Then `${foo:${bar}}`               is equal to `foo`
+Then `${baz:${foo}}`               is equal to `foo`
+Then `${baz:${foo#{eval(0 + 1)}}}` is equal to `foo1`
 
 Scenario: Verify that expression can be used as a part of variable name and vice versa
 Meta:
