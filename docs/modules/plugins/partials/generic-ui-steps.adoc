@@ -322,27 +322,27 @@ Then element located 'id(banner)' exists for 'PT5S' duration
 
 === Navigate back
 
- ==== *_Info_*
+==== *_Info_*
 
- Navigates back to the previous view
+Navigates back to the previous view
 
- ==== *_Wording_*
+==== *_Wording_*
 
- [source,gherkin]
- ----
- When I navigate back
- ----
+[source,gherkin]
+----
+When I navigate back
+----
 
- ==== *_Usage_*
+==== *_Usage_*
 
- .Navigate back
- [source,gherkin]
- ----
- Scenario: Navigate back
- Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `1`
- When I navigate back
- Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `0`
- ----
+.Navigate back
+[source,gherkin]
+----
+Scenario: Navigate back
+Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `1`
+When I navigate back
+Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `0`
+----
 
 === Verify elements order
 
