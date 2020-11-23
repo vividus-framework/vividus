@@ -184,4 +184,11 @@ class ParameterAdaptorTests
         Object actualValue = parameterAdaptor.convert(null);
         assertNull(actualValue);
     }
+
+    @Test
+    void shouldResolveDefaultValueWithAVariable()
+    {
+        when(bddVariableContext.getVariable("var:${var1}")).thenReturn(VAR1_VARIABLE);
+        assertEquals(VAR1_VARIABLE, parameterAdaptor.convert("${var:${var1}}"));
+    }
 }
