@@ -1,0 +1,54 @@
+= AWS Lambda Plugin
+
+The plugin provides functionality to interact with https://aws.amazon.com/lambda/[AWS Lambda].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-aws-lambda', version: '{current-version}')
+----
+
+include::partial$aws.adoc[]
+
+== Steps
+
+=== Invoke AWS Lambda function
+
+Invoke AWS Lambda function by providing the function name and the payload to pass to the Lambda function.
+
+[source,gherkin]
+----
+When I invoke AWS Lambda function `$functionName` with payload `$payload` and save result to $scopes variable `$variableName`
+----
+
+* `$functionName` - The name of AWS Lambda function, version, or alias. The value can be retrieved by looking at the function in the AWS Console.
+Supported name formats:
+** Function name: `my-function` (name-only), `my-function:v1` (with alias).
+** Function ARN: `arn:aws:lambda:us-west-2:123456789012:function:my-function`.
+** Partial ARN: `123456789012:function:my-function`.
++
+It's allowed to append a version number or alias to any of the formats. The length constraint applies only to the full ARN.
+If only the function name is specified, it is limited to 64 characters in length.
++
+* `$payload` - The JSON that to provide to AWS Lambda function as input. Vividus performs a Base64 encoding on this field before sending this request to the AWS service. Users should not perform Base64 encoding on this field.
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results. If the variable name is `my-var`, the following variables will be created:
+** `${my-var.payload}` - the response from the function, or an error object
+** `${my-var.status-code}` - the HTTP status code is in the 200 range for a successful request
+** `${my-var.log-result}` - the last 4 KB of the execution log
+** `${my-var.executed-version}` - the version of the function that executed, when it's invoked a function with an alias, this indicates which version the alias resolved to
+** `${my-var.function-error}` - if present, indicates that an error occurred during function execution, details about the error are included in the response payload
+
+
+.Invoke AWS Lambda
+[source,gherkin]
+----
+When I invoke AWS Lambda function `arn:aws:lambda:us-west-2:123456789012:function:my-function` with payload `
+{
+  "Hello ": "Paris",
+  "countryCode": "FR"
+}
+` and save result to scenario variable `my-function-result`
+----
