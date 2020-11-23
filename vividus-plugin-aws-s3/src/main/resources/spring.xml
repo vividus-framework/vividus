@@ -6,10 +6,6 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean class="org.vividus.aws.s3.AmazonS3ClientFactory" factory-method="create">
-        <constructor-arg name="region" value="${aws.s3.region}" />
-    </bean>
-
     <bean id="s3BucketSteps" class="org.vividus.aws.s3.steps.S3BucketSteps" />
 
     <util:list id="stepBeanNames-AWS-S3" value-type="java.lang.String">
