@@ -1,0 +1,16 @@
+project.description = 'Vividus plugin for AWS Lambda'
+
+dependencies {
+    api project(':vividus-bdd-engine')
+    implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.11.906')
+    implementation(group: 'com.amazonaws', name: 'aws-java-sdk-lambda')
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+}
+
+artifactoryPublish {
+    // The publishing is skipped due to bintray restrictions: https://stackoverflow.com/questions/60602428/unable-to-add-bintray-package-to-jcenter-and-oss-jfrog
+    skip = true
+}
