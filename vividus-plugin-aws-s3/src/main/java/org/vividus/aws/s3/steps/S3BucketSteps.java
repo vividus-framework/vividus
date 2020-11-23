@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
@@ -43,9 +44,9 @@ public class S3BucketSteps
     private final AmazonS3 amazonS3Client;
     private final IBddVariableContext bddVariableContext;
 
-    public S3BucketSteps(AmazonS3 amazonS3Client, IBddVariableContext bddVariableContext)
+    public S3BucketSteps(IBddVariableContext bddVariableContext)
     {
-        this.amazonS3Client = amazonS3Client;
+        this.amazonS3Client = AmazonS3ClientBuilder.defaultClient();
         this.bddVariableContext = bddVariableContext;
     }
 
