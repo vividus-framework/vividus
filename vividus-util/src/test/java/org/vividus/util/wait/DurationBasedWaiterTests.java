@@ -55,7 +55,7 @@ class DurationBasedWaiterTests
     void shouldInvokeRunnableOnceBeforeReachingStopCondition() throws IOException
     {
         FailableRunnable<IOException> failableRunnable = mock(FailableRunnable.class);
-        new DurationBasedWaiter(new WaitMode(Duration.ZERO, 1)).wait(failableRunnable, Boolean.TRUE::booleanValue);
+        new DurationBasedWaiter(Duration.ZERO, Duration.ZERO).wait(failableRunnable, Boolean.TRUE::booleanValue);
         verify(failableRunnable, times(1)).run();
     }
 }
