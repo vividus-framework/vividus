@@ -16,68 +16,85 @@
 
 package org.vividus.bdd.steps.kafka;
 
-import static java.util.stream.Collectors.toMap;
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.kafka.test.utils.KafkaTestUtils;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.kafka.listener.GenericMessageListenerContainer;
+import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.softassert.SoftAssert;
+import org.vividus.testcontext.TestContext;
 import org.vividus.util.property.IPropertyParser;
 
-@EmbeddedKafka(topics = KafkaStepsTests.TOPIC)
-@ExtendWith({ MockitoExtension.class, SpringExtension.class })
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class KafkaStepsTests
 {
-    static final String TOPIC = "test-topic";
-
-    @Autowired
-    private EmbeddedKafkaBroker embeddedKafkaBroker;
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(KafkaSteps.class);
 
     @Mock private IPropertyParser propertyParser;
+    @Mock private TestContext testContext;
+    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private SoftAssert softAssert;
+    private KafkaSteps kafkaSteps;
 
-    @Test
-    void testSendData() throws InterruptedException, ExecutionException, TimeoutException
+    @BeforeEach
+    void beforeEach()
     {
-        Map<String, String> configs = KafkaTestUtils.producerProps(embeddedKafkaBroker).entrySet().stream()
-                .filter(e -> e.getValue() instanceof String)
-                .collect(toMap(Entry::getKey, e -> (String) e.getValue()));
+        Map<String, String> producerConfigs = Map.of();
+        Map<String, String> consumerConfigs = Map.of();
 
-        when(propertyParser.getPropertyValuesByPrefix("kafka.")).thenReturn(configs);
-        KafkaSteps kafkaSteps = new KafkaSteps(propertyParser);
-        String data = "any-data";
-        kafkaSteps.sendData(data, TOPIC);
-        assertRecord(data);
+        when(propertyParser.getPropertyValuesByPrefix("kafka.producer.")).thenReturn(producerConfigs);
+        when(propertyParser.getPropertyValuesByPrefix("kafka.consumer.")).thenReturn(consumerConfigs);
+        kafkaSteps = new KafkaSteps(propertyParser, testContext, bddVariableContext, softAssert);
     }
 
-    private void assertRecord(String data)
+    @Test
+    void shouldThrowExceptionWhenTryingToStopNotRunningListener()
     {
-        Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("testGroup", "true", embeddedKafkaBroker);
-        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        ConsumerFactory<Integer, String> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
-        Consumer<Integer, String> consumer = cf.createConsumer();
-        embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, TOPIC);
-        ConsumerRecords<Integer, String> records = KafkaTestUtils.getRecords(consumer);
-        assertEquals(1, records.count());
-        ConsumerRecord<Integer, String> record = records.iterator().next();
-        assertEquals(data, record.value());
-        assertEquals(TOPIC, record.topic());
+        when(testContext.get(GenericMessageListenerContainer.class)).thenReturn(null);
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                kafkaSteps::stopKafkaListener);
+        assertEquals("No Kafka message listener is running, did you forget to start consuming messages?",
+                exception.getMessage());
+    }
+
+    @Test
+    void shouldStopListenerInAfterStory()
+    {
+        @SuppressWarnings("rawtypes")
+        GenericMessageListenerContainer container = mock(GenericMessageListenerContainer.class);
+        Class<?> key = GenericMessageListenerContainer.class;
+        when(testContext.get(key)).thenReturn(container);
+        kafkaSteps.cleanUp();
+        verify(container).stop();
+        verify(testContext).remove(key);
+        assertThat(logger.getLoggingEvents(), is(List.of(info("Kafka message listener is stopped"))));
+    }
+
+    @Test
+    void shouldDoNothingInAfterStoryWhenListenerIsStopped()
+    {
+        when(testContext.get(GenericMessageListenerContainer.class)).thenReturn(null);
+        kafkaSteps.cleanUp();
+        verifyNoMoreInteractions(testContext);
+        assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 }

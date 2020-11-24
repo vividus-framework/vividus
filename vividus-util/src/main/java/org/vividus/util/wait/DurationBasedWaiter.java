@@ -16,6 +16,7 @@
 
 package org.vividus.util.wait;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -30,6 +31,12 @@ public final class DurationBasedWaiter extends Waiter
     {
         super(waitMode.calculatePollingTimeout(TimeUnit.MILLISECONDS));
         durationInMillis = waitMode.getDuration().toMillis();
+    }
+
+    public DurationBasedWaiter(Duration timeout, Duration pollingTimeout)
+    {
+        super(pollingTimeout.toMillis());
+        durationInMillis = timeout.toMillis();
     }
 
     @Override
