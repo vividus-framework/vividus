@@ -97,11 +97,10 @@ public class SauceConnectManagerTests
     {
         mockSocket();
         startConnection();
-        String tunnelId = sauceConnectManager.getTunnelId();
-        sauceConnectManager.start(options);
+        String tunnelId = sauceConnectManager.start(options);
         verify(sauceTunnelManager, times(1)).openConnection(USERNAME, USERKEY, 1, null, OPTIONS, null, Boolean.TRUE,
                 null);
-        assertEquals(tunnelId, sauceConnectManager.getTunnelId());
+        assertEquals(tunnelId, sauceConnectManager.start(options));
     }
 
     @Test

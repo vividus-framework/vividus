@@ -58,9 +58,8 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractDesiredCapabilities
             if (sauceConnectEnabled || proxy != null)
             {
                 SauceConnectOptions options = createSauceConnectOptions(proxy);
-                sauceConnectManager.start(options);
-                putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelIdentifier",
-                        sauceConnectManager.getTunnelId());
+                String tunnelId = sauceConnectManager.start(options);
+                putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelIdentifier", tunnelId);
                 desiredCapabilities.setCapability(CapabilityType.PROXY, (Object) null);
             }
             RunningStory runningStory = bddRunContext.getRunningStory();
