@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -91,10 +92,13 @@ class SauceLabsCapabilitiesConfigurerTests
         configurer.setSauceConnectEnabled(true);
         Map<String, Object> sauceOptions = new HashMap<>();
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(null, sauceOptions);
-        when(sauceConnectManager.getTunnelId()).thenReturn(TUNNEL_ID);
+        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
+        when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_ID);
+
         configurer.configure(desiredCapabilities);
-        verify(sauceConnectManager).start(new SauceConnectOptions());
+
         assertEquals(Map.of(NAME_CAPABILITY, STORY_NAME, TUNNEL_IDENTIFIER_CAPABILITY, TUNNEL_ID), sauceOptions);
+        verifyNoMoreInteractions(sauceConnectManager);
     }
 
     @Test
@@ -112,14 +116,16 @@ class SauceLabsCapabilitiesConfigurerTests
         when(proxy.getHttpProxy()).thenReturn(httpProxy);
         Map<String, Object> sauceOptions = new HashMap<>();
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(proxy, sauceOptions);
-        when(sauceConnectManager.getTunnelId()).thenReturn(TUNNEL_ID);
-        configurer.configure(desiredCapabilities);
         SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
         sauceConnectOptions.setProxy(httpProxy);
         sauceConnectOptions.setRestUrl(restUrl);
         sauceConnectOptions.setCustomArguments(sauceConnectArguments);
-        verify(sauceConnectManager).start(sauceConnectOptions);
+        when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_ID);
+
+        configurer.configure(desiredCapabilities);
+
         assertEquals(Map.of(TUNNEL_IDENTIFIER_CAPABILITY, TUNNEL_ID), sauceOptions);
+        verifyNoMoreInteractions(sauceConnectManager);
     }
 
     private void mockRunningStory()

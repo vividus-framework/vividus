@@ -18,11 +18,9 @@ package org.vividus.selenium.sauce;
 
 public interface ISauceConnectManager
 {
-    void start(SauceConnectOptions options);
+    String start(SauceConnectOptions options);
 
     void stop();
-
-    String getTunnelId();
 
     boolean isStarted();
 }

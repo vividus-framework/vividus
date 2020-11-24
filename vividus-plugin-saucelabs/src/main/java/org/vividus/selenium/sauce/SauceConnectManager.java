@@ -38,7 +38,7 @@ public class SauceConnectManager implements ISauceConnectManager
     private TestContext testContext;
 
     @Override
-    public void start(SauceConnectOptions sauceConnectOptions)
+    public String start(SauceConnectOptions sauceConnectOptions)
     {
         SauceConnectDescriptor sauceConnectDescriptor = activeConnections.get(sauceConnectOptions);
         SauceConnectDescriptor currentConnectionDescriptor = getSauceConnectDescriptor();
@@ -75,6 +75,7 @@ public class SauceConnectManager implements ISauceConnectManager
         {
             throw new IllegalArgumentException("Only one SauceConnect tunnel is allowed within one thread");
         }
+        return sauceConnectDescriptor.getTunnelId();
     }
 
     @Override
@@ -91,12 +92,6 @@ public class SauceConnectManager implements ISauceConnectManager
                 }
             }
         }
-    }
-
-    @Override
-    public String getTunnelId()
-    {
-        return getSauceConnectDescriptor().getTunnelId();
     }
 
     @Override
