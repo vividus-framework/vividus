@@ -104,7 +104,6 @@ class SauceLabsCapabilitiesConfigurerTests
     @Test
     void shouldStartSauceConnectWhenSauceConnectIsDisabledButProxyIsStarted()
     {
-        when(bddRunContext.getRunningStory()).thenReturn(null);
         configurer.setSauceLabsEnabled(true);
         configurer.setSauceConnectEnabled(false);
         String restUrl = "http://eu-central-1.saucelabs.com/rest/v1";
@@ -133,7 +132,7 @@ class SauceLabsCapabilitiesConfigurerTests
         Story story = new Story(STORY_PATH, List.of());
         RunningStory runningStory = new RunningStory();
         runningStory.setStory(story);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
     }
 
     private DesiredCapabilities mockDesiredCapabilities(Proxy proxy, Map<String, Object> sauceOptions)

@@ -18,11 +18,21 @@ package org.vividus.selenium;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.model.RunningStory;
 
 public abstract class AbstractDesiredCapabilitiesConfigurer implements DesiredCapabilitiesConfigurer
 {
+    private final IBddRunContext bddRunContext;
+
+    protected AbstractDesiredCapabilitiesConfigurer(IBddRunContext bddRunContext)
+    {
+        this.bddRunContext = bddRunContext;
+    }
+
     @SuppressWarnings("unchecked")
     protected void putNestedCapability(DesiredCapabilities capabilities, String outerKey, String innerKey, Object value)
     {
@@ -33,5 +43,12 @@ public abstract class AbstractDesiredCapabilitiesConfigurer implements DesiredCa
             capabilities.setCapability(outerKey, nestedOptions);
         }
         nestedOptions.put(innerKey, value);
+    }
+
+    protected void configureTestName(DesiredCapabilities desiredCapabilities, String parentKey, String testNameKey)
+    {
+        Optional.ofNullable(bddRunContext.getRootRunningStory())
+                .map(RunningStory::getName)
+                .ifPresent(name -> putNestedCapability(desiredCapabilities, parentKey, testNameKey, name));
     }
 }
