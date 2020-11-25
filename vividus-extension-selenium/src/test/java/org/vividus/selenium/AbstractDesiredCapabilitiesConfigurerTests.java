@@ -19,21 +19,31 @@ package org.vividus.selenium;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.model.RunningStory;
 
+@ExtendWith(MockitoExtension.class)
 class AbstractDesiredCapabilitiesConfigurerTests
 {
     private static final String OUTER_KEY = "outer-key";
     private static final String INNER_KEY = "inner-key";
     private static final String VALUE = "value";
 
-    private TestAbstractDesiredCapabilitiesConfigurer configurer = new TestAbstractDesiredCapabilitiesConfigurer();
+    @Mock private IBddRunContext bddRunContext;
+    @InjectMocks private TestAbstractDesiredCapabilitiesConfigurer configurer;
 
     @Test
     void shouldPutNestedCapability()
@@ -60,8 +70,43 @@ class AbstractDesiredCapabilitiesConfigurerTests
         verify(capabilities).setCapability(OUTER_KEY, Map.of(INNER_KEY, VALUE));
     }
 
+    @Test
+    void shouldConfigureTestName()
+    {
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        RunningStory runningStory = mock(RunningStory.class);
+
+        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
+        when(runningStory.getName()).thenReturn(VALUE);
+
+        configurer.configureTestName(desiredCapabilities, OUTER_KEY, INNER_KEY);
+
+        assertEquals(Map.of(OUTER_KEY, Map.of(INNER_KEY, VALUE)), desiredCapabilities.asMap());
+        verifyNoMoreInteractions(bddRunContext, runningStory);
+    }
+
+    @Test
+    void shouldNotConfigureTestNameIfStoryIsNull()
+    {
+        RunningStory runningStory = mock(RunningStory.class);
+        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+
+        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
+        when(runningStory.getName()).thenReturn(null);
+
+        configurer.configureTestName(desiredCapabilities, OUTER_KEY, INNER_KEY);
+
+        verifyNoMoreInteractions(bddRunContext, runningStory);
+        verifyNoInteractions(desiredCapabilities);
+    }
+
     private static final class TestAbstractDesiredCapabilitiesConfigurer extends AbstractDesiredCapabilitiesConfigurer
     {
+        TestAbstractDesiredCapabilitiesConfigurer(IBddRunContext bddRunContext)
+        {
+            super(bddRunContext);
+        }
+
         @Override
         public void configure(DesiredCapabilities desiredCapabilities)
         {

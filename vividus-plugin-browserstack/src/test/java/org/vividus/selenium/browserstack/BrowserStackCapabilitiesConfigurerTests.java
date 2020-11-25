@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -38,48 +37,32 @@ import org.vividus.bdd.model.RunningStory;
 class BrowserStackCapabilitiesConfigurerTests
 {
     @Mock private IBddRunContext bddRunContext;
-    @Mock private DesiredCapabilities desiredCapabilities;
     @InjectMocks private BrowserStackCapabilitiesConfigurer configurer;
 
     @Test
     void shouldNotConfigureCapabilitiesIfBrowserStackInDisabled()
     {
+        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         configurer.setBrowserStackEnabled(false);
         configurer.configure(desiredCapabilities);
         verifyNoInteractions(bddRunContext, desiredCapabilities);
     }
 
     @Test
-    void shouldAddRunningStoryNameAsSessionName()
+    void shouldConfigureTestName()
     {
         configurer.setBrowserStackEnabled(true);
         String name = "name";
         String bstackKey = "bstack:options";
-        Map<String, Object> bstackMap = new HashMap<>();
         RunningStory runningStory = mock(RunningStory.class);
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
 
         when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
         when(runningStory.getName()).thenReturn(name);
-        when(desiredCapabilities.getCapability(bstackKey)).thenReturn(bstackMap);
 
         configurer.configure(desiredCapabilities);
 
-        assertEquals(Map.of("sessionName", name), bstackMap);
-        verifyNoMoreInteractions(bddRunContext, desiredCapabilities, runningStory);
-    }
-
-    @Test
-    void shouldNotAddRunningStoryNameItItsNull()
-    {
-        configurer.setBrowserStackEnabled(true);
-        RunningStory runningStory = mock(RunningStory.class);
-
-        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
-        when(runningStory.getName()).thenReturn(null);
-
-        configurer.configure(desiredCapabilities);
-
+        assertEquals(Map.of(bstackKey, Map.of("sessionName", name)), desiredCapabilities.asMap());
         verifyNoMoreInteractions(bddRunContext, runningStory);
-        verifyNoInteractions(desiredCapabilities);
     }
 }

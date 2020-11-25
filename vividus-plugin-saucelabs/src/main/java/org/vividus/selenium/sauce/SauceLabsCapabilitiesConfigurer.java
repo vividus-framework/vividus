@@ -22,7 +22,6 @@ import org.openqa.selenium.Proxy;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningStory;
 import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 
@@ -30,7 +29,6 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractDesiredCapabilities
 {
     private static final String SAUCE_OPTIONS = "sauce:options";
 
-    private final IBddRunContext bddRunContext;
     private final SauceConnectManager sauceConnectManager;
     private boolean sauceLabsEnabled;
     private boolean sauceConnectEnabled;
@@ -39,7 +37,7 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractDesiredCapabilities
 
     public SauceLabsCapabilitiesConfigurer(IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager)
     {
-        this.bddRunContext = bddRunContext;
+        super(bddRunContext);
         this.sauceConnectManager = sauceConnectManager;
     }
 
@@ -62,11 +60,8 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractDesiredCapabilities
                 putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelIdentifier", tunnelId);
                 desiredCapabilities.setCapability(CapabilityType.PROXY, (Object) null);
             }
-            RunningStory runningStory = bddRunContext.getRunningStory();
-            if (runningStory != null)
-            {
-                putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "name", runningStory.getName());
-            }
+
+            configureTestName(desiredCapabilities, SAUCE_OPTIONS, "name");
         }
     }
 

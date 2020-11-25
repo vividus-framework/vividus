@@ -16,21 +16,17 @@
 
 package org.vividus.selenium.browserstack;
 
-import java.util.Optional;
-
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningStory;
 import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
 
 public class BrowserStackCapabilitiesConfigurer extends AbstractDesiredCapabilitiesConfigurer
 {
-    private final IBddRunContext bddRunContext;
     private boolean browserStackEnabled;
 
     public BrowserStackCapabilitiesConfigurer(IBddRunContext bddRunContext)
     {
-        this.bddRunContext = bddRunContext;
+        super(bddRunContext);
     }
 
     @Override
@@ -38,9 +34,7 @@ public class BrowserStackCapabilitiesConfigurer extends AbstractDesiredCapabilit
     {
         if (browserStackEnabled)
         {
-            Optional.ofNullable(bddRunContext.getRootRunningStory())
-                    .map(RunningStory::getName)
-                    .ifPresent(name -> putNestedCapability(desiredCapabilities, "bstack:options", "sessionName", name));
+            configureTestName(desiredCapabilities, "bstack:options", "sessionName");
         }
     }
 
