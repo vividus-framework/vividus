@@ -35,7 +35,11 @@
         <property name="cleanableDirectories" value="${start-context-listener.cleanable-directories}" />
     </bean>
 
-    <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
+    <bean id="storyReporter" class="org.vividus.bdd.TestContextStoryReporter">
+        <property name="next" ref="runContextStoryReporter" />
+    </bean>
+
+    <bean id="runContextStoryReporter" class="org.vividus.bdd.RunContextStoryReporter">
         <property name="next" ref="allureStoryReporter" />
     </bean>
 

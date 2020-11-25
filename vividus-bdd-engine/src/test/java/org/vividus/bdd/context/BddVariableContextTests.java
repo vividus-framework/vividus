@@ -141,16 +141,6 @@ class BddVariableContextTests
     }
 
     @Test
-    void shouldClearStoryVariables()
-    {
-        Variables variables = new Variables(Map.of());
-        variables.putStoryVariable(VARIABLE_KEY, VALUE);
-        when(variablesFactory.createVariables()).thenReturn(variables);
-        bddVariableContext.clearStoryVariables();
-        assertNull(variables.getVariable(VARIABLE_KEY));
-    }
-
-    @Test
     void shouldClearScenarioVariables()
     {
         Variables variables = new Variables(Map.of());

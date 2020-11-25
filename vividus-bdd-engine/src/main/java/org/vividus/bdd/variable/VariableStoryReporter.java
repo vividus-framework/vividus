@@ -66,14 +66,4 @@ public class VariableStoryReporter extends ChainedStoryReporter
         super.afterScenario();
         bddVariableContext.clearScenarioVariables();
     }
-
-    @Override
-    public void afterStory(boolean givenStory)
-    {
-        super.afterStory(givenStory);
-        if (!givenStory)
-        {
-            bddVariableContext.clearStoryVariables();
-        }
-    }
 }

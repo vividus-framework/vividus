@@ -90,7 +90,7 @@
         <property name="captureTypes" value="${proxy.capture-types}"/>
     </bean>
 
-    <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
+    <bean id="runContextStoryReporter" class="org.vividus.bdd.RunContextStoryReporter">
         <property name="next">
             <bean class="org.vividus.bdd.proxy.ProxyAgentStoryReporter">
                 <property name="proxyEnabled" value="${proxy.enabled}" />
