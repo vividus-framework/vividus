@@ -25,13 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.util.MapUtils;
 import org.vividus.bdd.variable.VariableScope;
@@ -232,11 +230,9 @@ public class BddVariableSteps
      */
     @When("I initialize $scopes variable `$variableName` with values:$examplesTable")
     public void initVariableWithGivenValues(Set<VariableScope> scopes, String variableName,
-                ExamplesTable examplesTable)
+            List<Map<String, String>> examplesTable)
     {
-        List<Map<String, String>> listOfMaps = examplesTable.getRowsAsParameters()
-                .stream().map(Parameters::values).collect(Collectors.toList());
-        bddVariableContext.putVariable(scopes, variableName, listOfMaps);
+        bddVariableContext.putVariable(scopes, variableName, examplesTable);
     }
 
     private void publishMapComparisonResults(List<List<EntryComparisonResult>> results)
