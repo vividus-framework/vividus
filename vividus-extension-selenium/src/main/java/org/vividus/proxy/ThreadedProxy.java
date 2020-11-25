@@ -29,6 +29,7 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.model.IntegerRange;
+import org.vividus.testcontext.TestContext;
 
 public class ThreadedProxy implements IProxy
 {
@@ -37,11 +38,14 @@ public class ThreadedProxy implements IProxy
     private final InetAddress proxyHost;
     private final Queue<Integer> proxyPorts;
     private final boolean useEphemeralPort;
-    private final ThreadLocal<Proxy> proxy;
+    private final IProxyFactory proxyFactory;
+    private final TestContext testContext;
 
-    public ThreadedProxy(String proxyHost, IntegerRange proxyPorts, IProxyFactory proxyFactory)
+    public ThreadedProxy(String proxyHost, IntegerRange proxyPorts, IProxyFactory proxyFactory, TestContext testContext)
             throws UnknownHostException
     {
+        this.proxyFactory = proxyFactory;
+        this.testContext = testContext;
         Set<Integer> proxyPortsRange = proxyPorts.getRange();
         if (proxyPortsRange.contains(0))
         {
@@ -55,7 +59,6 @@ public class ThreadedProxy implements IProxy
             proxyPortsRange.forEach(ThreadedProxy::validatePort);
         }
         this.proxyPorts = new LinkedList<>(proxyPortsRange);
-        this.proxy = ThreadLocal.withInitial(proxyFactory::createProxy);
         this.proxyHost = InetAddress.getByName(proxyHost);
     }
 
@@ -159,6 +162,6 @@ public class ThreadedProxy implements IProxy
 
     private Proxy proxy()
     {
-        return proxy.get();
+        return testContext.get(Proxy.class, proxyFactory::createProxy);
     }
 }
