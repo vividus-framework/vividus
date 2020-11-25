@@ -110,3 +110,13 @@ When I execute steps while counter is <= `1` with increment `1` starting from `1
 |!When I initialize the scenario variable `test2` with value `${iterationVariable}`!|
 |Then `${test2}` is equal to `1`                                                    |
 Then `${iterationVariable}` is equal to `42`
+
+Scenario: Pass ExamplesTable as variable to composite step accepting ExamplesTable
+Meta:
+    @issueId 1136
+When I initialize scenario variable `table` with values:
+|column |
+|value  |
+When I run composite step with table:${table}
+Then `${table[0].column}` is equal to `value`
+Then `${table-from-composite-step[0].column}` is equal to `value`

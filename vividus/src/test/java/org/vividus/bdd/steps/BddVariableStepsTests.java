@@ -342,9 +342,8 @@ class BddVariableStepsTests
     void testInitVariableWithGivenValues()
     {
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        ExamplesTable table = new ExamplesTable("|key0|key1|\n|value0|value1|");
-        bddVariableSteps.initVariableWithGivenValues(scopes, VALUE, table);
         List<Map<String, String>> listOfMaps = List.of(Map.of("key0", "value0", "key1", "value1"));
+        bddVariableSteps.initVariableWithGivenValues(scopes, VALUE, listOfMaps);
         verify(bddVariableContext).putVariable(scopes, VALUE, listOfMaps);
     }
 }
