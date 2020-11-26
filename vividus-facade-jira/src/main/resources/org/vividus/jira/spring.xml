@@ -6,9 +6,9 @@
        default-lazy-init="true">
 
     <bean id="caching-credentials" class="org.vividus.http.context.CachingCredentialsHttpContextFactory" >
-        <constructor-arg index="0" value="${jira.username}"/>
-        <constructor-arg index="1" value="${jira.password}"/>
-        <constructor-arg index="2" value="${jira.endpoint}"/>
+        <constructor-arg index="0" value="${jira.endpoint}"/>
+        <constructor-arg index="1" value="${jira.username}"/>
+        <constructor-arg index="2" value="${jira.password}"/>
     </bean>
 
     <bean id="noop" class="org.vividus.http.context.NoopHttpContextFactory" />
@@ -32,14 +32,5 @@
             </bean>
         </constructor-arg>
         <constructor-arg index="2" ref="${jira.http.context-type}" />
-    </bean>
-
-    <bean class="org.vividus.xray.facade.XrayFacade">
-        <constructor-arg index="0" value="${xray-exporter.editable-statuses}" />
-    </bean>
-
-    <bean class="org.vividus.xray.factory.TestCaseFactory">
-        <constructor-arg index="0" value="${xray-exporter.project-key}" />
-        <constructor-arg index="1" value="${xray-exporter.assignee}" />
     </bean>
 </beans>
