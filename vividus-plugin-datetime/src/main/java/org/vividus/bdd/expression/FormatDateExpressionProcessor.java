@@ -28,7 +28,7 @@ import javax.inject.Named;
 import org.vividus.util.DateUtils;
 
 @Named
-public class FormatDateExpressionProcessor implements IExpressionProcessor
+public class FormatDateExpressionProcessor implements IExpressionProcessor<String>
 {
     private static final Pattern FORMAT_PATTERN = Pattern
             .compile("^formatDate\\(([^,]*),\\s*([^,]*)(?:,\\s*(.*))?\\)$", Pattern.CASE_INSENSITIVE);

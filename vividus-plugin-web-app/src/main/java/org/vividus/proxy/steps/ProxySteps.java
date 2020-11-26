@@ -19,6 +19,7 @@ package org.vividus.proxy.steps;
 import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +41,6 @@ import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
@@ -51,7 +51,15 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWebWaitActions;
 
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @TakeScreenshotOnFailure(onlyInDebugMode = "proxy")
@@ -287,19 +295,89 @@ public class ProxySteps
      * HTTP header names and values respectively
      */
     @When("I add headers to proxied requests with URL pattern which $comparisonRule `$url`:$headers")
-    public void addHeadersToProxyRequest(StringComparisonRule comparisonRule, String url, ExamplesTable headers)
+    public void addHeadersToProxyRequest(StringComparisonRule comparisonRule, String url, DefaultHttpHeaders headers)
     {
-        DefaultHttpHeaders httpHeaders = new DefaultHttpHeaders();
-        headers.getRowsAsParameters(true)
-                .forEach(row -> httpHeaders.add(
-                        row.valueAs("name", String.class),
-                        (Object) row.valueAs("value", String.class)
-                ));
+        applyUrlFilter(comparisonRule, url, request -> {
+            request.headers().add(headers);
+            return null;
+        });
+    }
+
+    /**
+     * The step allows to mock HTTP request, and provide within response status code, headers and content.
+     * Once the request is matched by URL comparison rule response will be returned. In this case no actual request will
+     * be executed.
+     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
+     * @param url The string value of URL to match comparison rule
+     * @param responseCode The code will be used in response
+     * @param content The content will be used in the response
+     * @param headers ExamplesTable representing the list of the headers with columns "name" and "value" specifying
+     * HTTP header names and values respectively
+     */
+    @When(value = "I mock HTTP responses with request URL which $comparisonRule `$url` using"
+            + " response code `$responseCode`, content `$payload` and headers:$headers", priority = 1)
+    public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode, Object content,
+            DefaultHttpHeaders headers)
+    {
+        byte[] contentBytes = getBytes(content);
+        applyUrlFilter(comparisonRule, url, request -> {
+            HttpResponseStatus responseStatus = HttpResponseStatus.valueOf(responseCode);
+            HttpVersion protocolVersion = request.protocolVersion();
+
+            DefaultFullHttpResponse mockedRequest =
+                new DefaultFullHttpResponse(protocolVersion, responseStatus, Unpooled.wrappedBuffer(contentBytes));
+
+            HttpHeaders httpHeaders = mockedRequest.headers();
+            httpHeaders.add("Content-Length", contentBytes.length);
+            httpHeaders.add(headers);
+            return mockedRequest;
+        });
+    }
+
+    /**
+     * The step allows to mock HTTP request, and provide within response status code and headers.
+     * Once the request is matched by URL comparison rule response will be returned. In this case no actual request will
+     * be executed.
+     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
+     * @param url The string value of URL to match comparison rule
+     * @param responseCode The code will be used in response
+     * @param headers ExamplesTable representing the list of the headers with columns "name" and "value" specifying
+     * HTTP header names and values respectively
+     */
+    @When("I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`"
+            + " and headers:$headers")
+    public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode,
+            DefaultHttpHeaders headers)
+    {
+        applyUrlFilter(comparisonRule, url, request -> {
+            DefaultHttpResponse mockedRequest =
+                new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.valueOf(responseCode));
+            mockedRequest.headers().add(headers);
+            return mockedRequest;
+        });
+    }
+
+    private byte[] getBytes(Object content)
+    {
+        if (content instanceof String)
+        {
+            return ((String) content).getBytes(StandardCharsets.UTF_8);
+        }
+        else if (content instanceof byte[])
+        {
+            return (byte[]) content;
+        }
+        throw new IllegalArgumentException("Unsupported content type: " + content.getClass());
+    }
+
+    private void applyUrlFilter(StringComparisonRule comparisonRule, String url,
+            Function<HttpRequest, HttpResponse> requestProcessor)
+    {
         Matcher<String> expected = comparisonRule.createMatcher(url);
         proxy.addRequestFilter((request, contents, messageInfo) -> {
             if (expected.matches(messageInfo.getUrl()))
             {
-                request.headers().add(httpHeaders);
+                return requestProcessor.apply(request);
             }
             return null;
         });

@@ -26,7 +26,7 @@ import javax.inject.Named;
 import org.springframework.web.util.UriUtils;
 
 @Named
-public class UriEncodingExpressionProcessors extends DelegatingExpressionProcessor
+public class UriEncodingExpressionProcessors extends DelegatingExpressionProcessor<String>
 {
     public UriEncodingExpressionProcessors()
     {
@@ -44,6 +44,7 @@ public class UriEncodingExpressionProcessors extends DelegatingExpressionProcess
     private static UnaryExpressionProcessor createEncodingExpression(String functionName,
             BiFunction<String, Charset, String> transformer)
     {
-        return new UnaryExpressionProcessor(functionName, input -> transformer.apply(input, StandardCharsets.UTF_8));
+        return new UnaryExpressionProcessor(functionName,
+            input -> transformer.apply(input, StandardCharsets.UTF_8));
     }
 }

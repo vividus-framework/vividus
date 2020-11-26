@@ -588,6 +588,61 @@ Then number of HTTP GET requests with URL pattern `http://httpbin\.org/get` is e
 ----
 
 
+=== Proxy - Mock response with content
+
+{proxy}
+Mocks HTTP response with a provided content
+
+[IMPORTANT]
+No actual request will be executed. Short-circuited response will be returned.
+
+[source,gherkin]
+----
+When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers
+----
+
+* `$rule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
+* `$url` - the input value of URL to filter by
+* `$code` - response status code
+* `$content` - content to send within a response
+* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
+
+.Hijack a page
+[source,gherkin]
+----
+When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `200`, content `#{loadResourceAsByteArray(page.html)}` and headers:
+|name        |value    |
+|Content-Type|text/html|
+----
+
+
+=== Proxy - Mock response without content
+
+{proxy}
+Mocks HTTP response
+
+[IMPORTANT]
+No actual request will be executed. Short-circuited response will be returned.
+
+[source,gherkin]
+----
+When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode` and headers:$headers
+----
+
+* `$rule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
+* `$url` - the input value of URL to filter by
+* `$code` - response status code
+* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
+
+.404 page
+[source,gherkin]
+----
+When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `404` and headers:
+|name          |value|
+|Content-Length|0    |
+----
+
+
 == Dynamic variables
 
 Dynamic variables is variables available out of the box using standard approach `$\{variable-name\}` Usually the data provided by dynamic variables calculated at runtime.

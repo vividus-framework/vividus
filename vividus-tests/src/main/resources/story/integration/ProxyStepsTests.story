@@ -55,3 +55,45 @@ Then a JSON element from '${response}' by the JSON path '$.headers' is equal to 
     "Testname2": "testValue2"
 }
 'IGNORING_EXTRA_FIELDS
+
+Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers with binary data
+Meta:
+    @requirementId 1104
+Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+When I switch to frame located `<frameId>`
+Then number of elements found by `<elementId>` is = `0`
+When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `200`, content `#{loadBinaryResource(page.html)}` and headers:
+|name        |value    |
+|Content-Type|text/html|
+When I refresh the page
+When I switch to frame located `<frameId>`
+Then number of elements found by `<elementId>` is = `1`
+Examples:
+|frameId       |elementId|
+|id(exampleCom)|id(sw)   |
+
+Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers
+
+Meta:
+    @requirementId 1104
+When I mock HTTP responses with request URL which CONTAINS `frames.html` using response code `200`, content `#{loadResource(page.html)}` and headers:
+|name        |value    |
+|Content-Type|text/html|
+Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+Then number of elements found by `id(sw)` is = `1`
+
+Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode` and headers:$headers
+Meta:
+    @requirementId 1104
+Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+When I switch to frame located `<frameId>`
+Then number of elements found by `<elementSelector>` is = `1`
+When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `404` and headers:
+|name          |value|
+|Content-Length|0    |
+When I refresh the page
+When I switch to frame located `<frameId>`
+Then number of elements found by `<elementSelector>` is = `0`
+Examples:
+|frameId       |elementSelector|
+|id(exampleCom)|cssSelector(h1)|

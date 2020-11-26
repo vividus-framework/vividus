@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.bdd.context.IBddVariableContext;
 
 @Named
-public class EvalExpressionProcessor implements IExpressionProcessor
+public class EvalExpressionProcessor implements IExpressionProcessor<String>
 {
     private static final Pattern EVAL_PATTERN = Pattern.compile("^eval\\((.*)\\)$", Pattern.CASE_INSENSITIVE
             | Pattern.DOTALL);

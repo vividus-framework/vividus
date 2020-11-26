@@ -281,4 +281,14 @@ class ParameterConvertersDecoratorTests
         assertTrue(table.isEmpty());
         verifyNoMoreInteractions(expressionAdaptor, parameterAdaptor);
     }
+
+    @Test
+    void shouldReturnValueAsIsIfExpressionsResolvedToNotAStringType()
+    {
+        when(parameterAdaptor.convert(VALUE)).thenReturn(VALUE);
+        Type type = Object.class;
+        Integer expected = Integer.valueOf(42);
+        when(expressionAdaptor.process(VALUE)).thenReturn(expected);
+        assertEquals(expected, parameterConverters.convert(VALUE, type));
+    }
 }

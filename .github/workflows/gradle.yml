@@ -182,7 +182,8 @@ jobs:
                                -Pvividus.bdd.story-loader.batch-1.resource-location=story/integration \
                                -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyStepsTests.story \
                                -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
-                               -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
+                               -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                               -Pvividus.saucelabs.sauce-connect.command-line-arguments="--no-ssl-bump-domains example.com"
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs integration tests will be skipped
         fi

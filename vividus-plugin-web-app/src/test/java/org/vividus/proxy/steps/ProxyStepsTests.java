@@ -19,6 +19,7 @@ package org.vividus.proxy.steps;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -28,12 +29,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.util.HttpMessageInfo;
@@ -50,11 +53,12 @@ import com.browserup.harreader.model.HttpMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.HttpStatus;
-import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -70,12 +74,17 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWebWaitActions;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyStepsTests
 {
+    private static final String CONTENT_LENGTH = "Content-Length";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String URL = "www.test.com";
     private static final String REQUESTS_MATCHING_URL_ASSERTION_PATTERN =
@@ -88,7 +97,7 @@ class ProxyStepsTests
     private static final String MIME_TYPE = "mimeType";
     private static final String TEXT = "text";
     private static final String COMMENT = "comment";
-    private static final ExamplesTable HEADERS = new ExamplesTable("|name|value|\n|name1|value1|");
+    private static final DefaultHttpHeaders HEADERS = new DefaultHttpHeaders();
     private static final Pattern URL_PATTERN = Pattern.compile(URL);
 
     @Mock
@@ -247,9 +256,7 @@ class ProxyStepsTests
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
         assertNull(filterCaptor.getValue().filterRequest(request, null, messageInfo));
-        verify(httpHeaders).add(
-                argThat(headers -> headers instanceof DefaultHttpHeaders && headers.size() == 1 && VALUE1
-                        .equals(headers.get("name1"))));
+        verify(httpHeaders).add(HEADERS);
     }
 
     @Test
@@ -258,6 +265,62 @@ class ProxyStepsTests
         HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
         proxySteps.addHeadersToProxyRequest(StringComparisonRule.IS_EQUAL_TO, URL, HEADERS);
         verify(proxy).addRequestFilter(argThat(filter -> filter.filterRequest(null, null, messageInfo) == null));
+    }
+
+    static Stream<Arguments> contentSource()
+    {
+        return Stream.of(Arguments.of(VALUE1), Arguments.of(VALUE1.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("contentSource")
+    void shouldMockARequestWithTheContent(Object content)
+    {
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        when(messageInfo.getUrl()).thenReturn(URL);
+        HttpRequest request = mock(HttpRequest.class);
+        when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
+        DefaultHttpHeaders headers = new DefaultHttpHeaders();
+        headers.add(KEY1, VALUE2);
+        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, content, headers);
+
+        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
+        verify(proxy).addRequestFilter(filterCaptor.capture());
+        FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
+                messageInfo);
+        assertEquals(HttpResponseStatus.OK, response.status());
+        assertEquals(VALUE1, response.content().toString(StandardCharsets.UTF_8));
+        assertEquals(VALUE2, response.headers().get(KEY1));
+        assertEquals("6", response.headers().get(CONTENT_LENGTH));
+        assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
+    }
+
+    @Test
+    void shouldThrowAnExceptionIfInvalidContentTypeIsUsed()
+    {
+        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
+                () -> proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, Class.class, null));
+        assertEquals("Unsupported content type: class java.lang.Class", iae.getMessage());
+    }
+
+    @Test
+    void shouldMockARequestWithoutAContent()
+    {
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        when(messageInfo.getUrl()).thenReturn(URL);
+        HttpRequest request = mock(HttpRequest.class);
+        when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
+        DefaultHttpHeaders headers = new DefaultHttpHeaders();
+        headers.add(KEY1, VALUE2);
+        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, headers);
+
+        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
+        verify(proxy).addRequestFilter(filterCaptor.capture());
+        HttpResponse response = filterCaptor.getValue().filterRequest(request, null, messageInfo);
+        assertEquals(HttpResponseStatus.OK, response.status());
+        assertEquals(VALUE2, response.headers().get(KEY1));
+        assertNull(response.headers().get(CONTENT_LENGTH));
+        assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
     }
 
     private void verifySizeAssertion(String message, int actualMatchedEntriesNumber, ComparisonRule rule,

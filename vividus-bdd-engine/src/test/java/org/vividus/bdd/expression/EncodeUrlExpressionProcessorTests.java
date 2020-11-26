@@ -36,7 +36,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 @ExtendWith(TestLoggerFactoryExtension.class)
 class EncodeUrlExpressionProcessorTests
 {
-    private final IExpressionProcessor processor = new EncodeUrlExpressionProcessor();
+    private final IExpressionProcessor<String> processor = new EncodeUrlExpressionProcessor();
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(EncodeUrlExpressionProcessor.class);
 

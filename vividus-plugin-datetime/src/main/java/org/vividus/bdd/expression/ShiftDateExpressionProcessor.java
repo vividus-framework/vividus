@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
 @Named
-public class ShiftDateExpressionProcessor implements IExpressionProcessor
+public class ShiftDateExpressionProcessor implements IExpressionProcessor<String>
 {
     private static final Pattern SHIFT_DATE_PATTERN = Pattern.compile(
             "^shiftDate\\((.+?),(?<!\\\\,)(.+?),\\s*(-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*)\\)$",
