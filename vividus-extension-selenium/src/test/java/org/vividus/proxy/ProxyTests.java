@@ -31,6 +31,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import com.browserup.bup.BrowserUpProxyServer;
 import com.browserup.bup.filters.RequestFilter;
@@ -40,6 +42,8 @@ import com.browserup.bup.filters.ResponseFilterAdapter;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.littleshoot.proxy.HttpFiltersSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -49,8 +53,6 @@ import org.openqa.selenium.Proxy.ProxyType;
 @ExtendWith(MockitoExtension.class)
 class ProxyTests
 {
-    private static final String PROXY_NOT_STARTED = "Proxy is not started";
-
     @Mock private IProxyServerFactory proxyServerFactory;
     @Mock private BrowserUpProxyServer browserUpProxyServer;
     @InjectMocks private Proxy proxy;
@@ -127,28 +129,12 @@ class ProxyTests
     }
 
     @Test
-    void testClearRecordedDataWhenProxyIsNotStarted()
-    {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, proxy::clearRecordedData);
-        assertEquals(PROXY_NOT_STARTED, exception.getMessage());
-        verifyNoInteractions(browserUpProxyServer);
-    }
-
-    @Test
     void testClearRecordedData()
     {
         when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
         proxy.clearRecordedData();
         verify(browserUpProxyServer).newHar();
-    }
-
-    @Test
-    void testGetRecordedDataWhenProxyIsNotStarted()
-    {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, proxy::getRecordedData);
-        assertEquals(PROXY_NOT_STARTED, exception.getMessage());
-        verifyNoInteractions(browserUpProxyServer);
     }
 
     @Test
@@ -161,14 +147,6 @@ class ProxyTests
     }
 
     @Test
-    void testStartRecordingWhenProxyIsNotStarted()
-    {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, proxy::startRecording);
-        assertEquals(PROXY_NOT_STARTED, exception.getMessage());
-        verifyNoInteractions(browserUpProxyServer);
-    }
-
-    @Test
     void testStopRecording()
     {
         when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
@@ -176,14 +154,6 @@ class ProxyTests
         proxy.startRecording();
         proxy.stopRecording();
         verify(browserUpProxyServer).endHar();
-    }
-
-    @Test
-    void testStopRecordingWhenProxyIsNotStarted()
-    {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, proxy::stopRecording);
-        assertEquals(PROXY_NOT_STARTED, exception.getMessage());
-        verifyNoInteractions(browserUpProxyServer);
     }
 
     @Test
@@ -236,5 +206,27 @@ class ProxyTests
         assertEquals(proxyHostAndPort, seleniumProxy.getHttpProxy());
         assertEquals(proxyHostAndPort, seleniumProxy.getSslProxy());
         assertEquals(ProxyType.MANUAL, seleniumProxy.getProxyType());
+    }
+
+    static Stream<Consumer<Proxy>> proxyActions()
+    {
+        return Stream.of(
+                Proxy::startRecording,
+                Proxy::stopRecording,
+                Proxy::getRecordedData,
+                Proxy::clearRecordedData,
+                Proxy::clearRequestFilters,
+                Proxy::createSeleniumProxy,
+                proxy -> proxy.addRequestFilter(mock(RequestFilter.class))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("proxyActions")
+    void shouldNotRunProxyActionWhenProxyIsNotStarted(Consumer<Proxy> proxyAction)
+    {
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> proxyAction.accept(proxy));
+        assertEquals("Proxy is not started", exception.getMessage());
+        verifyNoInteractions(browserUpProxyServer);
     }
 }

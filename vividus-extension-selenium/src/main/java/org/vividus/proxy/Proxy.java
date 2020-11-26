@@ -63,7 +63,7 @@ public class Proxy implements IProxy
     @Override
     public void startRecording()
     {
-        executeIfProxyStarted(BrowserUpProxy::newHar);
+        getIfProxyStarted(BrowserUpProxy::newHar);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class Proxy implements IProxy
     @Override
     public void stopRecording()
     {
-        executeIfProxyStarted(BrowserUpProxy::endHar);
+        getIfProxyStarted(BrowserUpProxy::endHar);
     }
 
     @Override
@@ -97,32 +97,34 @@ public class Proxy implements IProxy
     @Override
     public Har getRecordedData()
     {
-        return executeIfProxyStarted(BrowserUpProxy::getHar);
+        return getIfProxyStarted(BrowserUpProxy::getHar);
     }
 
     @Override
     public void addRequestFilter(RequestFilter requestFilter)
     {
-        proxyServer.addRequestFilter(requestFilter);
+        executeIfProxyStarted(proxy -> proxy.addRequestFilter(requestFilter));
     }
 
     @Override
     public void clearRequestFilters()
     {
-        proxyServer.getFilterFactories().removeIf(source -> source instanceof FilterSource);
+        executeIfProxyStarted(proxy -> proxy.getFilterFactories().removeIf(source -> source instanceof FilterSource));
     }
 
     @Override
     public org.openqa.selenium.Proxy createSeleniumProxy()
     {
-        return Optional.ofNullable(proxyHost)
-                       .map(this::createSeleniumProxy)
-                       .orElseGet(() -> ClientUtil.createSeleniumProxy(proxyServer, InetAddress.getLoopbackAddress()));
+        return getIfProxyStarted(proxy ->
+                Optional.ofNullable(proxyHost)
+                       .map(hostName -> createSeleniumProxy(hostName, proxy.getPort()))
+                       .orElseGet(() -> ClientUtil.createSeleniumProxy(proxy, InetAddress.getLoopbackAddress()))
+        );
     }
 
-    private org.openqa.selenium.Proxy createSeleniumProxy(String hostName)
+    private org.openqa.selenium.Proxy createSeleniumProxy(String hostName, int port)
     {
-        String proxyAddress = hostName + ':' + proxyServer.getPort();
+        String proxyAddress = hostName + ':' + port;
         return new org.openqa.selenium.Proxy().setHttpProxy(proxyAddress)
                                               .setSslProxy(proxyAddress)
                                               .setProxyType(org.openqa.selenium.Proxy.ProxyType.MANUAL);
@@ -133,7 +135,15 @@ public class Proxy implements IProxy
         return proxyServer;
     }
 
-    private <R> R executeIfProxyStarted(Function<BrowserUpProxy, R> proxyAction)
+    private void executeIfProxyStarted(Consumer<BrowserUpProxyServer> proxyAction)
+    {
+        getIfProxyStarted(proxy -> {
+            proxyAction.accept(proxy);
+            return null;
+        });
+    }
+
+    private <R> R getIfProxyStarted(Function<BrowserUpProxyServer, R> proxyAction)
     {
         if (isStarted())
         {
