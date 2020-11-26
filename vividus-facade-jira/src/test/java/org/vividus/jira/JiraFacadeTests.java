@@ -29,6 +29,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.jira.model.JiraEntity;
+import org.vividus.jira.model.Project;
 
 @ExtendWith(MockitoExtension.class)
 class JiraFacadeTests
@@ -78,5 +80,28 @@ class JiraFacadeTests
         when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID))
                 .thenReturn("{\"fields\":{\"status\": {\"name\" : \"Open\"}}}");
         assertEquals("Open", jiraFacade.getIssueStatus(ISSUE_ID));
+    }
+
+    @Test
+    void shouldGetIssue() throws IOException
+    {
+        when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID)).thenReturn("{\"id\":\"001\"}");
+        JiraEntity issue = jiraFacade.getIssue(ISSUE_ID);
+        assertEquals("001", issue.getId());
+    }
+
+    @Test
+    void shouldGetProject() throws IOException
+    {
+        when(jiraClient.executeGet("/rest/api/latest/project/TEST")).thenReturn("{\"id\": \"002\", \"key\": \"TEST\", "
+                + "\"versions\": [{\"id\": \"0021\", \"name\": \"Release 1.0\"}, "
+                + "{\"id\": \"0022\", \"name\": \"Release 2.0\"}]}");
+        Project project = jiraFacade.getProject("TEST");
+        assertEquals("002", project.getId());
+        assertEquals(2, project.getVersions().size());
+        assertEquals("0021", project.getVersions().get(0).getId());
+        assertEquals("Release 1.0", project.getVersions().get(0).getName());
+        assertEquals("0022", project.getVersions().get(1).getId());
+        assertEquals("Release 2.0", project.getVersions().get(1).getName());
     }
 }
