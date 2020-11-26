@@ -44,6 +44,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.model.IntegerRange;
+import org.vividus.testcontext.SimpleTestContext;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ThreadedProxyTests
@@ -77,7 +78,7 @@ class ThreadedProxyTests
         BrowserUpProxy mobProxy = mock(BrowserUpProxy.class);
         when(proxy.getProxyServer()).thenReturn(mobProxy);
         when(mobProxy.getPort()).thenReturn(port);
-        threadedProxy = new ThreadedProxy(LOCALHOST, range(port), proxyFactory);
+        threadedProxy = new ThreadedProxy(LOCALHOST, range(port), proxyFactory, new SimpleTestContext());
         InOrder order = inOrder(proxy);
 
         threadedProxy.start();
@@ -116,8 +117,9 @@ class ThreadedProxyTests
     void testAllocateIllegalPortsSequence()
     {
         IntegerRange proxyPorts = range(0, 56_701);
+        SimpleTestContext testContext = new SimpleTestContext();
         Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> new ThreadedProxy(LOCALHOST, proxyPorts, proxyFactory));
+            () -> new ThreadedProxy(LOCALHOST, proxyPorts, proxyFactory, testContext));
         assertEquals("Port 0 (ephemeral port selection) can not be used with custom ports", exception.getMessage());
         assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
     }
@@ -127,8 +129,9 @@ class ThreadedProxyTests
     void testAllocateIllegalPortsNumbers(int invalidPort)
     {
         IntegerRange proxyPorts = range(invalidPort);
+        SimpleTestContext testContext = new SimpleTestContext();
         Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> new ThreadedProxy(LOCALHOST, proxyPorts, proxyFactory));
+            () -> new ThreadedProxy(LOCALHOST, proxyPorts, proxyFactory, testContext));
         assertEquals("Expected ports range is 1-65535 but got: " + invalidPort, exception.getMessage());
         assertTrue(TEST_LOGGER.getLoggingEvents().isEmpty());
     }
@@ -137,7 +140,7 @@ class ThreadedProxyTests
     void testAllocateNoPortsAvailable() throws UnknownHostException
     {
         when(proxyFactory.createProxy()).thenReturn(proxy);
-        threadedProxy = new ThreadedProxy(LOCALHOST, range(54_786), proxyFactory);
+        threadedProxy = new ThreadedProxy(LOCALHOST, range(54_786), proxyFactory, new SimpleTestContext());
         threadedProxy.start();
         Exception exception = assertThrows(IllegalArgumentException.class, threadedProxy::start);
         assertEquals("There are no available ports in the ports pool", exception.getMessage());
@@ -226,7 +229,7 @@ class ThreadedProxyTests
 
     private void defaultInit() throws UnknownHostException
     {
-        threadedProxy = new ThreadedProxy(LOCALHOST, range(0), proxyFactory);
+        threadedProxy = new ThreadedProxy(LOCALHOST, range(0), proxyFactory, new SimpleTestContext());
         when(proxyFactory.createProxy()).thenReturn(proxy);
     }
 
