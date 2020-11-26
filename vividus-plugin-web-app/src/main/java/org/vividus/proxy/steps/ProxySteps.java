@@ -19,7 +19,6 @@ package org.vividus.proxy.steps;
 import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,11 +95,16 @@ public class ProxySteps
      */
     @Then("number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $comparisonRule `$number`")
     public List<HarEntry> checkNumberOfRequests(Set<HttpMethod> httpMethods, Pattern urlPattern,
-            ComparisonRule comparisonRule, long number) throws IOException
+            ComparisonRule comparisonRule, int number) throws IOException
     {
         List<HarEntry> harEntries = getLogEntries(httpMethods, urlPattern);
-        assertSize(String.format("Number of HTTP %s requests matching URL pattern '%s'",
-                methodsToString(httpMethods, ", "), urlPattern), harEntries, comparisonRule, number);
+        String description = String.format("Number of HTTP %s requests matching URL pattern '%s'",
+                methodsToString(httpMethods, ", "), urlPattern);
+        if (!softAssert.assertThat(description, harEntries.size(), comparisonRule.getComparisonRule(number)))
+        {
+            byte[] harBytes = OBJECT_MAPPER.writeValueAsBytes(proxy.getRecordedData());
+            attachmentPublisher.publishAttachment(harBytes, "har.har");
+        }
         return harEntries;
     }
 
@@ -299,22 +303,6 @@ public class ProxySteps
             }
             return null;
         });
-    }
-
-    private void assertSize(String assertionDescription, Collection<?> collection, ComparisonRule comparisonRule,
-            long expectedSize) throws IOException
-    {
-        if (!softAssert.assertThat(assertionDescription, (long) collection.size(),
-                comparisonRule.getComparisonRule(expectedSize)))
-        {
-            publishHar();
-        }
-    }
-
-    private void publishHar() throws IOException
-    {
-        byte[] harBytes = OBJECT_MAPPER.writeValueAsBytes(proxy.getRecordedData());
-        attachmentPublisher.publishAttachment(harBytes, "har.har");
     }
 
     private List<HarEntry> getLogEntries(Set<HttpMethod> httpMethods, Pattern urlPattern)

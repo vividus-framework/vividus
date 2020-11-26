@@ -121,7 +121,7 @@ class ProxyStepsTests
     {
         HttpMethod httpMethod = HttpMethod.POST;
         mockHar(httpMethod, HttpStatus.SC_OK);
-        long callsNumber = 1;
+        int callsNumber = 1;
         ComparisonRule rule = ComparisonRule.EQUAL_TO;
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, "GET, POST", URL);
         mockSizeAssertion(message, callsNumber, rule, callsNumber);
@@ -260,16 +260,15 @@ class ProxyStepsTests
         verify(proxy).addRequestFilter(argThat(filter -> filter.filterRequest(null, null, messageInfo) == null));
     }
 
-    private void verifySizeAssertion(String message, long actualMatchedEntriesNumber, ComparisonRule rule,
-            long callsNumber)
+    private void verifySizeAssertion(String message, int actualMatchedEntriesNumber, ComparisonRule rule,
+            int callsNumber)
     {
         verify(nonFailingAssert).assertThat(eq(message), eq(actualMatchedEntriesNumber),
                 argThat(object -> object != null && object.toString()
                         .equals(rule.getComparisonRule(callsNumber).toString())));
     }
 
-    private void mockSizeAssertion(String message, long actualMatchedEntriesNumber, ComparisonRule rule,
-            long callsNumber)
+    private void mockSizeAssertion(String message, int actualMatchedEntriesNumber, ComparisonRule rule, int callsNumber)
     {
         when(nonFailingAssert.assertThat(eq(message), eq(actualMatchedEntriesNumber),
                 argThat(object -> object != null && object.toString()
