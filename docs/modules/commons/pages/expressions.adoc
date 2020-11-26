@@ -4,7 +4,41 @@ Here one could find description of the expressions that are delivered with Vivid
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
-== String transformations
+== Data generation
+
+=== `randomInt`
+
+Generates a random integer value between the specified origin (`minInclusive`) and the specified bound (`maxInclusive`).
+
+[source, subs="+quotes"]
+----
+#{randomInt(*$minInclusive*, *$maxInclusive*)}
+----
+
+* *`$minInclusive`* - the least value
+* *`$maxInclusive`* - the upper bound
+
+.Examples of the expressions generating random integer value
+|===
+|Expression |Result
+
+|`#{randomInt(1, 10)}`
+|An integer between 1 and 10
+
+|`#{randomInt(100, 999)}`
+|An integer between 100 and 999
+
+|`#{randomInt(-5, 5)}`
+|An integer between -5 and 5
+
+|`#{randomInt(-5, -2)}`
+|An integer between -5 and -2
+
+|`#{randomInt(1, 1)}`
+|`1`
+|===
+
+== String manipulations
 
 === `toLowerCase`
 
