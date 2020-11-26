@@ -95,12 +95,6 @@ public class BddVariableContext implements IBddVariableContext
     }
 
     @Override
-    public void clearStoryVariables()
-    {
-        getScopedVariables().clearStoryVariables();
-    }
-
-    @Override
     public void clearBatchVariables()
     {
         testContext.remove(VARIABLES_KEY);

@@ -71,10 +71,6 @@ public class AllureRunContext implements IAllureRunContext
         {
             getGivenStoriesLabels().pop();
         }
-        else
-        {
-            testContext.remove(STORY_LABELS);
-        }
     }
 
     @Override

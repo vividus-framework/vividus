@@ -14,30 +14,26 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.context;
+package org.vividus.bdd;
 
-import java.util.Map;
-import java.util.Set;
+import org.vividus.testcontext.TestContext;
 
-import org.vividus.bdd.variable.VariableScope;
-
-public interface IBddVariableContext
+public class TestContextStoryReporter extends ChainedStoryReporter
 {
-    <T> T getVariable(String variableKey);
+    private final TestContext testContext;
 
-    Map<String, Object> getVariables();
+    public TestContextStoryReporter(TestContext testContext)
+    {
+        this.testContext = testContext;
+    }
 
-    void putVariable(VariableScope variableScope, String variableKey, Object variableValue);
-
-    void putVariable(Set<VariableScope> variableScopes, String variableKey, Object variableValue);
-
-    void initVariables();
-
-    void initStepVariables();
-
-    void clearStepVariables();
-
-    void clearScenarioVariables();
-
-    void clearBatchVariables();
+    @Override
+    public void afterStory(boolean givenStory)
+    {
+        super.afterStory(givenStory);
+        if (!givenStory)
+        {
+            testContext.clear();
+        }
+    }
 }
