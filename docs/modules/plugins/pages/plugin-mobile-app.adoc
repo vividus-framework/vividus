@@ -533,4 +533,44 @@ When I select $direction value with `$offset` offset in picker wheel located `$l
 When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(3)`
 ----
 
+=== Switch to web view
+
+Switches context to a web view by the index, it starts from 1.
+
+See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+
+[source,gherkin]
+----
+When I switch to web view with index `$index`
+----
+
+. `$index` - index of a web view
+
+.Switch to web view
+[source,gherkin]
+----
+Then number of elements found by `xpath(html)` is equal to `0`
+When I switch to web view with index `1`
+Then number of elements found by `xpath(html)` is equal to `1`
+----
+
+=== Switch to native context
+
+Switches context to a mobile native context.
+
+See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+
+[source,gherkin]
+----
+When I switch to native context
+----
+
+.Switch to native context
+[source,gherkin]
+----
+Then number of elements found by `xpath(html)` is equal to `1`
+When I switch to native context
+Then number of elements found by `xpath(html)` is equal to `0`
+----
+
 include::partial$generic-ui-steps.adoc[]

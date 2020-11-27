@@ -29,6 +29,8 @@
 
     <bean id="touchSteps" class="org.vividus.bdd.mobileapp.steps.TouchSteps" />
 
+    <bean id="setContextSteps" class="org.vividus.bdd.mobileapp.steps.SetContextSteps" />
+
     <bean id="elementSteps" class="org.vividus.bdd.mobileapp.steps.ElementSteps" />
 
     <bean id="deviceSteps" class="org.vividus.bdd.mobileapp.steps.DeviceSteps" >
@@ -78,5 +80,6 @@
         <idref bean="touchSteps" />
         <idref bean="deviceSteps" />
         <idref bean="elementSteps" />
+        <idref bean="setContextSteps" />
     </util:list>
 </beans>
