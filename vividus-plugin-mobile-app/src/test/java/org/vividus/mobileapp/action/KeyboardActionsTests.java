@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -58,8 +57,8 @@ import io.appium.java_client.HidesKeyboard;
 class KeyboardActionsTests
 {
     private static final String TEXT = "text";
-    private static final Locator KEYBOARD_RETURN_LOCATOR = new Locator(AppiumLocatorType.XPATH, new SearchParameters(
-        "//XCUIElementTypeKeyboard//XCUIElementTypeButton[@name='Return']", Visibility.VISIBLE, false));
+    private static final Locator KEYBOARD_RETURN_LOCATOR = new Locator(AppiumLocatorType.XPATH,
+            new SearchParameters("//XCUIElementTypeKeyboard//XCUIElementTypeButton", Visibility.VISIBLE, false));
 
     @Mock private TouchActions touchActions;
     @Mock private IWebDriverProvider webDriverProvider;
@@ -104,7 +103,7 @@ class KeyboardActionsTests
 
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(context);
-        when(searchActions.findElement(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(Optional.of(returnButton));
+        when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
 
         keyboardActions.typeText(element, TEXT);
 
@@ -121,11 +120,11 @@ class KeyboardActionsTests
 
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(context);
-        when(searchActions.findElement(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(Optional.empty());
+        when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of());
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> keyboardActions.typeText(element, TEXT));
-        assertEquals("Unable to find 'Return' button to close the keyboard", exception.getMessage());
+        assertEquals("Unable to find a button to close the keyboard", exception.getMessage());
     }
 
     @Test
