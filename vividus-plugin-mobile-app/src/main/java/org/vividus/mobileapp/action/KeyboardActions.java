@@ -16,6 +16,9 @@
 
 package org.vividus.mobileapp.action;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.openqa.selenium.WebElement;
@@ -102,13 +105,16 @@ public class KeyboardActions
                         + " the {} to hide the keyboard");
                 return;
             }
-            Locator keyboardReturnLocator = new Locator(AppiumLocatorType.XPATH, new SearchParameters(
-                    "//XCUIElementTypeKeyboard//XCUIElementTypeButton[@name='Return']", Visibility.VISIBLE, false));
-            searchActions.findElement(webDriverProvider.get(), keyboardReturnLocator).ifPresentOrElse(touchActions::tap,
-                () ->
-                {
-                    throw new IllegalStateException("Unable to find 'Return' button to close the keyboard");
-                });
+            /**
+             * Handle closing the keyboard as it's done in appium
+             * https://github.com/appium/appium-xcuitest-driver/blob/master/lib/commands/general.js#L199
+             */
+            Locator keyboardButtonsLocator = new Locator(AppiumLocatorType.XPATH, new SearchParameters(
+                    "//XCUIElementTypeKeyboard//XCUIElementTypeButton", Visibility.VISIBLE, false));
+            List<WebElement> buttons = searchActions.findElements(webDriverProvider.get(), keyboardButtonsLocator);
+            int size = buttons.size();
+            isTrue(size > 0, "Unable to find a button to close the keyboard");
+            touchActions.tap(buttons.get(--size));
         }
         else
         {
