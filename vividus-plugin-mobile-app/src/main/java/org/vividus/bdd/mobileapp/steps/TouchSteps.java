@@ -17,6 +17,7 @@
 package org.vividus.bdd.mobileapp.steps;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,7 +129,7 @@ public class TouchSteps
     {
         locator.getSearchParameters().setWaitForElement(false);
 
-        List<WebElement> elements = searchActions.findElements(locator);
+        List<WebElement> elements = new ArrayList<>(searchActions.findElements(locator));
         if (elements.isEmpty())
         {
             touchActions.swipeUntil(direction, duration, () ->
