@@ -8,8 +8,10 @@
     default-lazy-init="true">
 
     <bean id="excelResponseValidationSteps" class="org.vividus.bdd.steps.ExcelResponseValidationSteps" />
+    <bean id="excelFileSteps" class="org.vividus.bdd.steps.ExcelFileSteps" />
 
     <util:list id="stepBeanNames-Excel" value-type="java.lang.String">
         <idref bean="excelResponseValidationSteps" />
+        <idref bean="excelFileSteps" />
     </util:list>
 </beans>
