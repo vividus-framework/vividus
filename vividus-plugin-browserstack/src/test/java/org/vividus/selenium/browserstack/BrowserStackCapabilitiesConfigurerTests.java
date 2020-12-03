@@ -26,17 +26,27 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
+import org.vividus.selenium.tunnel.TunnelException;
+import org.vividus.selenium.tunnel.TunnelOptions;
 
 @ExtendWith(MockitoExtension.class)
 class BrowserStackCapabilitiesConfigurerTests
 {
+    private static final String BSTACK_OPTIONS = "bstack:options";
+
+    @Captor private ArgumentCaptor<TunnelOptions> optionsCaptor;
     @Mock private IBddRunContext bddRunContext;
+    @Mock private BrowserStackLocalManager browserStackLocalManager;
     @InjectMocks private BrowserStackCapabilitiesConfigurer configurer;
 
     @Test
@@ -53,7 +63,6 @@ class BrowserStackCapabilitiesConfigurerTests
     {
         configurer.setBrowserStackEnabled(true);
         String name = "name";
-        String bstackKey = "bstack:options";
         RunningStory runningStory = mock(RunningStory.class);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
 
@@ -62,7 +71,30 @@ class BrowserStackCapabilitiesConfigurerTests
 
         configurer.configure(desiredCapabilities);
 
-        assertEquals(Map.of(bstackKey, Map.of("sessionName", name)), desiredCapabilities.asMap());
+        assertEquals(Map.of(BSTACK_OPTIONS, Map.of("sessionName", name)), desiredCapabilities.asMap());
         verifyNoMoreInteractions(bddRunContext, runningStory);
+    }
+
+    @Test
+    void shouldConfigureTunnel() throws TunnelException
+    {
+        configurer.setBrowserStackEnabled(true);
+        configurer.setTunnellingEnabled(true);
+        String proxyHost = "localhost:52745";
+        String localIdentifier = "local-identifier";
+
+        Proxy proxy = mock(Proxy.class);
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+
+        when(proxy.getHttpProxy()).thenReturn(proxyHost);
+        desiredCapabilities.setCapability(CapabilityType.PROXY, proxy);
+        when(browserStackLocalManager.start(optionsCaptor.capture())).thenReturn(localIdentifier);
+
+        configurer.configure(desiredCapabilities);
+
+        TunnelOptions options = optionsCaptor.getValue();
+        assertEquals(Map.of(BSTACK_OPTIONS, Map.of("localIdentifier", localIdentifier, "local", true)),
+                desiredCapabilities.asMap());
+        assertEquals(proxyHost, options.getProxy());
     }
 }

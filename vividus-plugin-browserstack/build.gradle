@@ -5,9 +5,12 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
 
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'com.browserstack', name: 'automate-client-java', version: '0.6')
+    implementation(group: 'com.browserstack', name: 'browserstack-local-java', version: '1.0.3')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
 }

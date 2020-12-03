@@ -16,35 +16,21 @@
 
 package org.vividus.selenium.sauce;
 
-import com.google.common.eventbus.Subscribe;
-
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
-import org.vividus.selenium.event.WebDriverQuitEvent;
+import org.vividus.selenium.tunnel.AbstractTunnellingCapabilitiesConfigurer;
 
-public class SauceLabsCapabilitiesConfigurer extends AbstractDesiredCapabilitiesConfigurer
+public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilitiesConfigurer<SauceConnectOptions>
 {
     private static final String SAUCE_OPTIONS = "sauce:options";
 
-    private final SauceConnectManager sauceConnectManager;
     private boolean sauceLabsEnabled;
-    private boolean sauceConnectEnabled;
     private String sauceConnectArguments;
     private String restUrl;
 
     public SauceLabsCapabilitiesConfigurer(IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager)
     {
-        super(bddRunContext);
-        this.sauceConnectManager = sauceConnectManager;
-    }
-
-    @Subscribe
-    public void stopSauceConnect(WebDriverQuitEvent event)
-    {
-        sauceConnectManager.stop();
+        super(bddRunContext, sauceConnectManager);
     }
 
     @Override
@@ -52,27 +38,18 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractDesiredCapabilities
     {
         if (sauceLabsEnabled)
         {
-            Proxy proxy = (Proxy) desiredCapabilities.getCapability(CapabilityType.PROXY);
-            if (sauceConnectEnabled || proxy != null)
-            {
-                SauceConnectOptions options = createSauceConnectOptions(proxy);
-                String tunnelId = sauceConnectManager.start(options);
-                putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelIdentifier", tunnelId);
-                desiredCapabilities.setCapability(CapabilityType.PROXY, (Object) null);
-            }
+            configureTunnel(desiredCapabilities,
+                    tunnelId -> putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelIdentifier", tunnelId));
 
             configureTestName(desiredCapabilities, SAUCE_OPTIONS, "name");
         }
     }
 
-    private SauceConnectOptions createSauceConnectOptions(Proxy proxy)
+    @Override
+    protected SauceConnectOptions createOptions()
     {
         SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
         sauceConnectOptions.setCustomArguments(sauceConnectArguments);
-        if (proxy != null)
-        {
-            sauceConnectOptions.setProxy(proxy.getHttpProxy());
-        }
         sauceConnectOptions.setRestUrl(restUrl);
         return sauceConnectOptions;
     }
@@ -80,11 +57,6 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractDesiredCapabilities
     public void setSauceLabsEnabled(boolean sauceLabsEnabled)
     {
         this.sauceLabsEnabled = sauceLabsEnabled;
-    }
-
-    public void setSauceConnectEnabled(boolean sauceConnectEnabled)
-    {
-        this.sauceConnectEnabled = sauceConnectEnabled;
     }
 
     public void setRestUrl(String restUrl)

@@ -24,9 +24,10 @@ import java.util.UUID;
 
 import com.saucelabs.ci.sauceconnect.SauceTunnelManager;
 
+import org.vividus.selenium.tunnel.TunnelManager;
 import org.vividus.testcontext.TestContext;
 
-public class SauceConnectManager implements ISauceConnectManager
+public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
 {
     private static final Object KEY = SauceConnectDescriptor.class;
 

@@ -38,6 +38,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
+import org.vividus.selenium.tunnel.TunnelException;
 
 @ExtendWith(MockitoExtension.class)
 class SauceLabsCapabilitiesConfigurerTests
@@ -57,9 +58,9 @@ class SauceLabsCapabilitiesConfigurerTests
     @InjectMocks private SauceLabsCapabilitiesConfigurer configurer;
 
     @Test
-    void shouldStopSauceConnectOnWebDriverQuit()
+    void shouldStopSauceConnectOnWebDriverQuit() throws TunnelException
     {
-        configurer.stopSauceConnect(null);
+        configurer.stopTunnel(null);
         verify(sauceConnectManager).stop();
     }
 
@@ -67,7 +68,7 @@ class SauceLabsCapabilitiesConfigurerTests
     void shouldDoNothingWhenSauceLabsIsDisabled()
     {
         configurer.setSauceLabsEnabled(false);
-        configurer.setSauceConnectEnabled(true);
+        configurer.setTunnellingEnabled(true);
         configurer.configure(null);
         verifyNoInteractions(bddRunContext, sauceConnectManager);
     }
@@ -77,7 +78,7 @@ class SauceLabsCapabilitiesConfigurerTests
     {
         mockRunningStory();
         configurer.setSauceLabsEnabled(true);
-        configurer.setSauceConnectEnabled(false);
+        configurer.setTunnellingEnabled(false);
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(null, null);
         configurer.configure(desiredCapabilities);
         verify(desiredCapabilities).setCapability(SAUCE_OPTIONS, Map.of(NAME_CAPABILITY, STORY_NAME));
@@ -89,7 +90,7 @@ class SauceLabsCapabilitiesConfigurerTests
     {
         mockRunningStory();
         configurer.setSauceLabsEnabled(true);
-        configurer.setSauceConnectEnabled(true);
+        configurer.setTunnellingEnabled(true);
         Map<String, Object> sauceOptions = new HashMap<>();
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(null, sauceOptions);
         SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
@@ -105,7 +106,7 @@ class SauceLabsCapabilitiesConfigurerTests
     void shouldStartSauceConnectWhenSauceConnectIsDisabledButProxyIsStarted()
     {
         configurer.setSauceLabsEnabled(true);
-        configurer.setSauceConnectEnabled(false);
+        configurer.setTunnellingEnabled(false);
         String restUrl = "http://eu-central-1.saucelabs.com/rest/v1";
         configurer.setRestUrl(restUrl);
         String sauceConnectArguments = "--verbose";

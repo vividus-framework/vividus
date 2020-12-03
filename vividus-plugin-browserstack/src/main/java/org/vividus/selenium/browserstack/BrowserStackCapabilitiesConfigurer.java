@@ -18,15 +18,20 @@ package org.vividus.selenium.browserstack;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
+import org.vividus.selenium.tunnel.AbstractTunnellingCapabilitiesConfigurer;
+import org.vividus.selenium.tunnel.TunnelOptions;
 
-public class BrowserStackCapabilitiesConfigurer extends AbstractDesiredCapabilitiesConfigurer
+public class BrowserStackCapabilitiesConfigurer
+        extends AbstractTunnellingCapabilitiesConfigurer<TunnelOptions>
 {
+    private static final String BSTACK_OPTIONS = "bstack:options";
+
     private boolean browserStackEnabled;
 
-    public BrowserStackCapabilitiesConfigurer(IBddRunContext bddRunContext)
+    public BrowserStackCapabilitiesConfigurer(IBddRunContext bddRunContext,
+            BrowserStackLocalManager browserStackLocalManager)
     {
-        super(bddRunContext);
+        super(bddRunContext, browserStackLocalManager);
     }
 
     @Override
@@ -34,8 +39,20 @@ public class BrowserStackCapabilitiesConfigurer extends AbstractDesiredCapabilit
     {
         if (browserStackEnabled)
         {
-            configureTestName(desiredCapabilities, "bstack:options", "sessionName");
+            configureTunnel(desiredCapabilities, tunnelId ->
+            {
+                putNestedCapability(desiredCapabilities, BSTACK_OPTIONS, "local", true);
+                putNestedCapability(desiredCapabilities, BSTACK_OPTIONS, "localIdentifier", tunnelId);
+            });
+
+            configureTestName(desiredCapabilities, BSTACK_OPTIONS, "sessionName");
         }
+    }
+
+    @Override
+    protected TunnelOptions createOptions()
+    {
+        return new TunnelOptions();
     }
 
     public void setBrowserStackEnabled(boolean browserStackEnabled)

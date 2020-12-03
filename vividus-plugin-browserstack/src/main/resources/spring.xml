@@ -9,6 +9,7 @@
 
     <bean class="org.vividus.selenium.browserstack.BrowserStackCapabilitiesConfigurer" >
         <property name="browserStackEnabled" value="${selenium.grid.enabled}"/>
+        <property name="tunnellingEnabled" value="${browserstack.browserstack-local.enabled}"/>
     </bean>
 
     <bean class="org.vividus.browserstack.BrowserStackAutomateClient">
@@ -18,6 +19,10 @@
     </bean>
 
     <bean id="debugSteps" class="org.vividus.bdd.browserstack.steps.DebugSteps" />
+
+    <bean class="org.vividus.selenium.browserstack.BrowserStackLocalManager" >
+         <constructor-arg index="0" value="${selenium.grid.password}" />
+     </bean>
 
     <util:list id="stepBeanNames-BrowserStack" value-type="java.lang.String">
         <idref bean="debugSteps" />

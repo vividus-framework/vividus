@@ -16,20 +16,18 @@
 
 package org.vividus.selenium.sauce;
 
-import java.io.File;
+import static org.vividus.util.ResourceUtils.createTempFile;
+
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.vividus.selenium.tunnel.TunnelOptions;
 
-public class SauceConnectOptions
+public class SauceConnectOptions extends TunnelOptions
 {
     private static final String PAC_FILE_CONTENT_FORMAT = "function FindProxyForURL(url, host) { "
             + "if (shExpMatch(host, \"*.miso.saucelabs.com\")"
@@ -37,22 +35,10 @@ public class SauceConnectOptions
             + "|| shExpMatch(host, \"%1$s\")) {"
             + "return \"DIRECT\";}return \"PROXY %2$s\";}";
 
-    private String proxy;
     private String noSslBumpDomains;
     private String skipProxyHostsPattern;
     private String restUrl;
     private String customArguments;
-
-    /**
-     * Sets the proxy &lt;host:port&gt;.
-     * <br>
-     * Make sure that the format is the following, if the proxy is running on a local machine: <b>127.0.0.1:port</b>
-     * @param proxy Proxy <b>host:port</b>
-     */
-    public void setProxy(String proxy)
-    {
-        this.proxy = proxy;
-    }
 
     public void setNoSslBumpDomains(String noSslBumpDomains)
     {
@@ -83,7 +69,7 @@ public class SauceConnectOptions
         {
             appendOption(options, "no-ssl-bump-domains", noSslBumpDomains);
         }
-        if (proxy != null)
+        if (getProxy() != null)
         {
             /*
              * Separators conversion added as workaround for SauceConnect bug (doesn't take into account windows like
@@ -104,22 +90,13 @@ public class SauceConnectOptions
 
     private Path createPacFile(String tunnelIdentifier) throws IOException
     {
-        return createTempFile("pac-" + tunnelIdentifier, ".js",
-                String.format(PAC_FILE_CONTENT_FORMAT, skipProxyHostsPattern, proxy));
+        return createTempFile("pac-saucelabs-" + tunnelIdentifier, ".js",
+                String.format(PAC_FILE_CONTENT_FORMAT, skipProxyHostsPattern, getProxy()));
     }
 
     private Path createPidFile(String tunnelIdentifier) throws IOException
     {
-        return createTempFile("sc_client-" + tunnelIdentifier + "-", ".pid");
-    }
-
-    private Path createTempFile(String prefix, String suffix, String... lines) throws IOException
-    {
-        Path tempFilePath = Files.createTempFile(prefix, suffix);
-        File tempFile = tempFilePath.toFile();
-        FileUtils.writeLines(tempFile, StandardCharsets.UTF_8.toString(), Arrays.asList(lines));
-        tempFile.deleteOnExit();
-        return tempFilePath;
+        return createTempFile("sc_client-" + tunnelIdentifier + "-", ".pid", null);
     }
 
     private static void appendOption(StringBuilder stringBuilder, String name, String... values)
@@ -135,21 +112,21 @@ public class SauceConnectOptions
         {
             return true;
         }
-        if (!(o instanceof SauceConnectOptions))
+        if (!super.equals(o) || !(o instanceof SauceConnectOptions))
         {
             return false;
         }
         SauceConnectOptions that = (SauceConnectOptions) o;
-        return Objects.equals(proxy, that.proxy)
-                && Objects.equals(noSslBumpDomains, that.noSslBumpDomains)
+        return Objects.equals(noSslBumpDomains, that.noSslBumpDomains)
                 && Objects.equals(skipProxyHostsPattern, that.skipProxyHostsPattern)
                 && Objects.equals(restUrl, that.restUrl);
     }
 
+    @SuppressWarnings("MagicNumber")
     @Override
     public int hashCode()
     {
-        return Objects.hash(proxy, noSslBumpDomains, skipProxyHostsPattern, restUrl);
+        return 31 * super.hashCode() + Objects.hash(noSslBumpDomains, skipProxyHostsPattern, restUrl);
     }
 
     public void setCustomArguments(String customArguments)

@@ -71,7 +71,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStart() throws Exception
     {
         mockSocket();
@@ -81,7 +81,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStartWhenErrorAtPortAllocation() throws Exception
     {
         IOException ioException = new IOException();
@@ -92,7 +92,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStartTwice() throws Exception
     {
         mockSocket();
@@ -104,7 +104,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStartOneMoreConnectionWithingOneThreadIsNotAllowed() throws Exception
     {
         mockSocket();
@@ -117,7 +117,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStop() throws Exception
     {
         mockSocket();
@@ -134,7 +134,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStopTwice() throws Exception
     {
         mockSocket();
@@ -145,7 +145,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStartStopStart() throws Exception
     {
         mockSocket();
