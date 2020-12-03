@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.sauce;
+package org.vividus.selenium.tunnel;
 
-public interface ISauceConnectManager
+public interface TunnelManager<T extends TunnelOptions>
 {
-    String start(SauceConnectOptions options);
+    String start(T options) throws TunnelException;
 
-    void stop();
+    void stop() throws TunnelException;
 
     boolean isStarted();
 }

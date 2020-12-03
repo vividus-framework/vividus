@@ -30,6 +30,8 @@ import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
@@ -132,5 +134,13 @@ public class ResourceUtilsTests
         UncheckedIOException exception = assertThrows(UncheckedIOException.class,
             () -> ResourceUtils.loadResource(ResourceUtils.class, RESOURCE_NAME));
         assertEquals(ioException, exception.getCause());
+    }
+
+    @Test
+    public void shouldCreateTempFile() throws IOException
+    {
+        String data = "data";
+        Path tempFilePath = ResourceUtils.createTempFile("index", ".js", data);
+        assertEquals(data, Files.readString(tempFilePath, StandardCharsets.UTF_8));
     }
 }

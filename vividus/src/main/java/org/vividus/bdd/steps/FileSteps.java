@@ -19,6 +19,7 @@ package org.vividus.bdd.steps;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -28,6 +29,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.util.ResourceUtils;
 
 public class FileSteps
 {
@@ -54,11 +56,9 @@ public class FileSteps
     public void saveResponseBodyToFile(String name, String content, Set<VariableScope> scopes, String pathVariable)
             throws IOException
     {
-        File temporaryFile = File.createTempFile(FilenameUtils.getBaseName(name),
-                "." + FilenameUtils.getExtension(name));
-        temporaryFile.deleteOnExit();
-        FileUtils.writeStringToFile(temporaryFile, content, StandardCharsets.UTF_8);
-        bddVariableContext.putVariable(scopes, pathVariable, temporaryFile.getAbsolutePath());
+        Path temporaryFile = ResourceUtils.createTempFile(FilenameUtils.getBaseName(name),
+                "." + FilenameUtils.getExtension(name), content);
+        bddVariableContext.putVariable(scopes, pathVariable, temporaryFile.toString());
     }
 
     /**

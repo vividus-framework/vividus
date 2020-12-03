@@ -18,7 +18,6 @@ package org.vividus.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +35,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.HasCapabilities;
-import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.remote.CapabilityType;
@@ -155,17 +153,5 @@ class VividusWebDriverFactoryTests
         notRemoteExecution();
         when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(false, FIREFOX);
-    }
-
-    @Test
-    void shouldAddProxyCapabilitiesWhenProxyStarted()
-    {
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        when(proxy.isStarted()).thenReturn(true);
-        Proxy seleniumProxy = mock(Proxy.class);
-        when(proxy.createSeleniumProxy()).thenReturn(seleniumProxy);
-        vividusWebDriverFactory.setDesiredCapabilities(desiredCapabilities);
-        verify(desiredCapabilities).setCapability(CapabilityType.PROXY, seleniumProxy);
-        verify(desiredCapabilities).setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
     }
 }

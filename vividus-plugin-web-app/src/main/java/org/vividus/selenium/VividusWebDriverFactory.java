@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.openqa.selenium.support.events.WebDriverEventListener;
@@ -33,7 +32,6 @@ import org.vividus.selenium.manager.IWebDriverManagerContext;
 public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
 {
     private final IWebDriverFactory webDriverFactory;
-    private final IProxy proxy;
 
     private List<WebDriverEventListener> webDriverEventListeners;
 
@@ -41,20 +39,8 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
             IBddRunContext bddRunContext, Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers,
             IWebDriverFactory webDriverFactory, IProxy proxy)
     {
-        super(remoteExecution, webDriverManagerContext, bddRunContext, desiredCapabilitiesConfigurers);
+        super(remoteExecution, webDriverManagerContext, bddRunContext, proxy, desiredCapabilitiesConfigurers);
         this.webDriverFactory = webDriverFactory;
-        this.proxy = proxy;
-    }
-
-    @Override
-    protected void setDesiredCapabilities(DesiredCapabilities desiredCapabilities)
-    {
-        if (proxy.isStarted())
-        {
-            desiredCapabilities.setCapability(CapabilityType.PROXY, proxy.createSeleniumProxy());
-            desiredCapabilities.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
-        }
-        super.setDesiredCapabilities(desiredCapabilities);
     }
 
     @Override

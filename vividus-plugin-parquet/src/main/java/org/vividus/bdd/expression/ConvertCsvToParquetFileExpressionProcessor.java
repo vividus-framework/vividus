@@ -64,8 +64,8 @@ public class ConvertCsvToParquetFileExpressionProcessor implements IExpressionPr
             try
             {
                 List<Map<String, String>> csvData = csvReader.readCsvString(ResourceUtils.loadResource(csvPath));
-                File temporaryFile = File.createTempFile(FilenameUtils.getBaseName(csvPath), ".parquet");
-                temporaryFile.deleteOnExit();
+                File temporaryFile = ResourceUtils.createTempFile(FilenameUtils.getBaseName(csvPath), ".parquet", null)
+                        .toFile();
                 write(temporaryFile, schemaPath, csvData);
                 return Optional.of(temporaryFile.getPath());
             }

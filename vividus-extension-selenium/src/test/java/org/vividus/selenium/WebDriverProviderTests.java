@@ -50,6 +50,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.proxy.IProxy;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
@@ -150,9 +151,10 @@ class WebDriverProviderTests
 
     private static class TestVividusDriverFactory extends AbstractVividusWebDriverFactory
     {
-        TestVividusDriverFactory(IBddRunContext bddRunContext, IWebDriverManagerContext webDriverManagerContext)
+        TestVividusDriverFactory(IBddRunContext bddRunContext, IWebDriverManagerContext webDriverManagerContext,
+                IProxy proxy)
         {
-            super(true, webDriverManagerContext, bddRunContext, Optional.empty());
+            super(true, webDriverManagerContext, bddRunContext, proxy, Optional.empty());
         }
 
         @Override

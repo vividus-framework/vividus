@@ -39,11 +39,14 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
+import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
@@ -56,12 +59,11 @@ class VividusWebDriverFactoryTests
     private static final String KEY3 = "key3";
     private static final String KEY2 = "key2";
     private static final String KEY1 = "key1";
-    @Mock
-    private WebDriver webDriver;
-    @Mock
-    private IWebDriverManagerContext webDriverManagerContext;
-    @Mock
-    private IBddRunContext bddRunContext;
+
+    @Mock private WebDriver webDriver;
+    @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private IBddRunContext bddRunContext;
+    @Mock private IProxy proxy;
 
     @Test
     void shouldCreateWebDriverWithCapabilitiesFromConfigurersAndFromMeta()
@@ -92,8 +94,12 @@ class VividusWebDriverFactoryTests
         when(scenario.getMeta())
                 .thenReturn(metaOf("capability.key6 valueFromScenarioMeta6", "capability.key7 valueFromScenarioMeta7"));
 
+        Proxy proxyMock = mock(Proxy.class);
+        when(proxy.isStarted()).thenReturn(true);
+        when(proxy.createSeleniumProxy()).thenReturn(proxyMock);
+
         TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(true, webDriverManagerContext,
-                bddRunContext, Optional.of(Set.of(firstCapabilitiesConfigurer, secondCapabilitiesConfigurer,
+                bddRunContext, proxy, Optional.of(Set.of(firstCapabilitiesConfigurer, secondCapabilitiesConfigurer,
                         thirdCapabilitiesConfigurer)));
 
         VividusWebDriver vividusWebDriver = factory.create();
@@ -105,7 +111,10 @@ class VividusWebDriverFactoryTests
                             KEY4,   "valueFromStoryMeta4",
                             KEY5,   valueFromWebDriverManager5,
                             "key6", "valueFromScenarioMeta6",
-                            "key7", "valueFromScenarioMeta7"), vividusWebDriver.getDesiredCapabilities().asMap());
+                            "key7", "valueFromScenarioMeta7",
+                            CapabilityType.PROXY, proxyMock,
+                            CapabilityType.ACCEPT_INSECURE_CERTS, true),
+                vividusWebDriver.getDesiredCapabilities().asMap());
         InOrder ordered = Mockito.inOrder(webDriverManagerContext, bddRunContext);
         ordered.verify(webDriverManagerContext).getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES);
         ordered.verify(webDriverManagerContext).reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
@@ -122,7 +131,7 @@ class VividusWebDriverFactoryTests
                 .thenReturn(new DesiredCapabilities(Map.of(KEY1, value)));
 
         TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(false, webDriverManagerContext,
-                bddRunContext, Optional.empty());
+                bddRunContext, proxy, Optional.empty());
 
         VividusWebDriver vividusWebDriver = factory.create();
 
@@ -141,7 +150,7 @@ class VividusWebDriverFactoryTests
     void shouldReturnRemoteExecution()
     {
         TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(true, webDriverManagerContext,
-                bddRunContext, Optional.empty());
+                bddRunContext, proxy, Optional.empty());
         assertTrue(factory.isRemoteExecution());
     }
 
@@ -153,10 +162,10 @@ class VividusWebDriverFactoryTests
     private final class TestVividusWebDriverFactory extends AbstractVividusWebDriverFactory
     {
         private TestVividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
-                IBddRunContext bddRunContext,
+                IBddRunContext bddRunContext, IProxy proxy,
                 Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
         {
-            super(remoteExecution, webDriverManagerContext, bddRunContext, desiredCapabilitiesConfigurers);
+            super(remoteExecution, webDriverManagerContext, bddRunContext, proxy, desiredCapabilitiesConfigurers);
         }
 
         @Override
