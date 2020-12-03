@@ -74,3 +74,26 @@ Examples:
 Examples:
 {transformer=FROM_EXCEL, path=/my-excel-file.xlsx, sheet=Data, range=A2:B4}
 ----
+== Steps
+
+=== Create excel file with specified content
+
+Create temporary excel file with specified content and save the path to the variable
+
+[source,gherkin]
+----
+When I create temporary excel file with content:$content and put path to $scopes variable with name `$variableName`
+----
+
+- `$content` - the data to be put to the excel file. Any valid ExamplesTable
+- `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes]
+- `$variableName` - the variable name
+
+.Create temporary excel file
+[source,gherkin]
+----
+When I create temporary excel file with content:
+|key1  |key2  |
+|value1|value2|
+and put path to scenario variable with name `path`
+----
