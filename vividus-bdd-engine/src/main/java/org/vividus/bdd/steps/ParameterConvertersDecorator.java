@@ -105,7 +105,7 @@ public class ParameterConvertersDecorator extends ParameterConverters
         if (type == String.class || String.class.isInstance(adaptedValue))
         {
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
-            if (!value.equals(adaptedValue))
+            if (!value.equals(adaptedValue) && adaptedValue instanceof String)
             {
                 if (iteration == MAX_DEPTH)
                 {
@@ -125,7 +125,7 @@ public class ParameterConvertersDecorator extends ParameterConverters
         return rawType instanceof Class<?> && ((Class<?>) rawType).isAssignableFrom(clazz);
     }
 
-    private String processExpressions(String valueToConvert)
+    private Object processExpressions(String valueToConvert)
     {
         return expressionAdaptor.process(valueToConvert);
     }

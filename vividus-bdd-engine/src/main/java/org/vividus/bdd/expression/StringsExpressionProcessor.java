@@ -37,7 +37,7 @@ import org.vividus.util.ILocationProvider;
 import org.vividus.util.ResourceUtils;
 
 @Named
-public class StringsExpressionProcessor extends DelegatingExpressionProcessor
+public class StringsExpressionProcessor extends DelegatingExpressionProcessor<String>
 {
     private static final Pattern COMMA_SEPARATED = Pattern.compile("(?<!\\\\), ?");
     private static final Pattern ESCAPED_COMMA = Pattern.compile("\\\\,");

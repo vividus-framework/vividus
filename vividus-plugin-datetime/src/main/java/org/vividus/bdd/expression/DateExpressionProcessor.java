@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.util.DateUtils;
 
-public class DateExpressionProcessor implements IExpressionProcessor
+public class DateExpressionProcessor implements IExpressionProcessor<String>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(DateExpressionProcessor.class);
 

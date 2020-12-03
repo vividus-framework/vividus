@@ -16,9 +16,20 @@
 
 package org.vividus.bdd.expression;
 
-import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public interface IExpressionProcessor<T>
+import java.nio.charset.StandardCharsets;
+
+import org.junit.jupiter.api.Test;
+
+class LoadBinaryResourceExpressionProcessorTests
 {
-    Optional<T> execute(String expression);
+    private final LoadBinaryResourceExpressionProcessor processor = new LoadBinaryResourceExpressionProcessor();
+
+    @Test
+    void shouldLoadResourceAsBytesArray()
+    {
+        assertArrayEquals("big data".getBytes(StandardCharsets.UTF_8),
+                processor.execute("loadBinaryResource(/org/vividus/bdd/expressions/resource.txt)").get());
+    }
 }

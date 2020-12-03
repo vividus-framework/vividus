@@ -17,29 +17,31 @@
 package org.vividus.bdd.expression;
 
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Named;
-
-@Named
-public class RandomIntExpressionProcessor implements IExpressionProcessor<Integer>
+public class FunctionalExpressionProcessor<T> implements IExpressionProcessor<T>
 {
-    private static final String INT_NUMBER_REGEX = "(-?[1-9]\\d*|0)";
-    private static final Pattern RANDOM_VALUE_PATTERN = Pattern.compile(
-            "^randomInt\\(" + INT_NUMBER_REGEX + ",\\s*" + INT_NUMBER_REGEX + "\\)$", Pattern.CASE_INSENSITIVE);
+    private static final int INPUT_DATA_GROUP = 1;
+
+    private final Pattern pattern;
+    private final Function<String, T> transformer;
+
+    public FunctionalExpressionProcessor(String functionName, Function<String, T> transformer)
+    {
+        pattern = Pattern.compile("^" + functionName + "\\((.*)\\)$", Pattern.CASE_INSENSITIVE);
+        this.transformer = transformer;
+    }
 
     @Override
-    public Optional<Integer> execute(String expression)
+    public Optional<T> execute(String expression)
     {
-        Matcher expressionMatcher = RANDOM_VALUE_PATTERN.matcher(expression);
+        Matcher expressionMatcher = pattern.matcher(expression);
         if (expressionMatcher.find())
         {
-            int minInclusive = Integer.parseInt(expressionMatcher.group(1));
-            int maxInclusive = Integer.parseInt(expressionMatcher.group(2));
-            int randomInt = ThreadLocalRandom.current().nextInt(minInclusive, maxInclusive + 1);
-            return Optional.of(randomInt);
+            String inputData = expressionMatcher.group(INPUT_DATA_GROUP);
+            return Optional.of(transformer.apply(inputData));
         }
         return Optional.empty();
     }

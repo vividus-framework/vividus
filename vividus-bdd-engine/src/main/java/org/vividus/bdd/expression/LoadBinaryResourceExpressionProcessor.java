@@ -16,9 +16,15 @@
 
 package org.vividus.bdd.expression;
 
-import java.util.Optional;
+import javax.inject.Named;
 
-public interface IExpressionProcessor<T>
+import org.vividus.util.ResourceUtils;
+
+@Named
+public class LoadBinaryResourceExpressionProcessor extends FunctionalExpressionProcessor<byte[]>
 {
-    Optional<T> execute(String expression);
+    public LoadBinaryResourceExpressionProcessor()
+    {
+        super("loadBinaryResource", ResourceUtils::loadResourceAsByteArray);
+    }
 }

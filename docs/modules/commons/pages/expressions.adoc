@@ -193,6 +193,25 @@ Loads the resource found at the provided path and replaces the expression with t
 When I initialize the scenario variable `my-data` with value `#{loadResource(/data/body.txt)}`
 ----
 
+=== `loadBinaryResource`
+
+Loads the resource found at the provided path as bytes. Could be useful for the steps that accepting raw binary data.
+
+[source, subs="+quotes"]
+----
+#{loadBinaryResource(*$pathToResource*)}
+----
+
+* {path-parameter}
+
+.Load data from the project resource as bytes
+[source,gherkin]
+----
+When I mock HTTP responses with request URL which CONTAINS `frames.html` using response code `200`, content `#{loadBinaryResource(page.html)}` and headers:
+|name        |value    |
+|Content-Type|text/html|
+----
+
 === `resourceToBase64`
 
 Finds the resource at the provided path and replaces the expression with the content of the resource in Base64 format.

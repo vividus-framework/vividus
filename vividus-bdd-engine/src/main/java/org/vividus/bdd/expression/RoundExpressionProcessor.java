@@ -30,7 +30,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 @Named
-public class RoundExpressionProcessor implements IExpressionProcessor
+public class RoundExpressionProcessor implements IExpressionProcessor<String>
 {
     private static final Pattern ROUND_EXPRESSION_PATTERN;
 
