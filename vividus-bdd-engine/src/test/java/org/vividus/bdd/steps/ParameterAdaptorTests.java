@@ -25,6 +25,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -185,10 +187,22 @@ class ParameterAdaptorTests
         assertNull(actualValue);
     }
 
-    @Test
-    void shouldResolveDefaultValueWithAVariable()
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "var:default",
+            "var:${var1}",
+            "var:"
+    })
+    void shouldResolveDefaultValueWithAVariable(String varDefinition)
     {
-        when(bddVariableContext.getVariable("var:${var1}")).thenReturn(VAR1_VARIABLE);
-        assertEquals(VAR1_VARIABLE, parameterAdaptor.convert("${var:${var1}}"));
+        when(bddVariableContext.getVariable(varDefinition)).thenReturn(VAR1_VARIABLE);
+        assertEquals(VAR1_VARIABLE, parameterAdaptor.convert(String.format("${%s}", varDefinition)));
+    }
+
+    @Test
+    void shouldResolveVariableUsedAsAPartOfOuterVariableName()
+    {
+        when(bddVariableContext.getVariable("varPartName")).thenReturn(VALUE1);
+        assertEquals("${varvalue1}", parameterAdaptor.convert("${var${varPartName}}"));
     }
 }

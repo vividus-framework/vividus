@@ -28,7 +28,8 @@ import org.vividus.bdd.variable.DynamicVariable;
 
 public class ParameterAdaptor
 {
-    private static final Pattern DYNAMIC_DATA_PATTERN = Pattern.compile("\\$\\{(((?!\\$|\\#).|(?<=:).)*?}*)}");
+    private static final Pattern DYNAMIC_DATA_PATTERN =
+        Pattern.compile("\\$\\{(((?!\\$|\\#).)*?(:((?!\\$|\\#).)*?)?)}");
 
     private IBddVariableContext bddVariableContext;
     private Map<String, DynamicVariable> dynamicVariables = Map.of();
