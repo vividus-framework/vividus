@@ -29,6 +29,12 @@ include::partial$common-filters.adoc[]
 |Filter elements by their exact text.
 |tagName(android.widget.EditText)->filter.text(Welcome)
 
+|attribute
+|Filter elements by their attribute values
+a|`tagName(android.widget.TextView)->filter.attribute(text=Hi)` - `android.widget.TextView` element has the `text` attribute with `Hi` value
+`tagName(android.widget.TextView)->filter.attribute(text)` - `android.widget.TextView` element has the `text` attribute with any value
+`tagName(android.widget.TextView)->filter.attribute(text=)` - `android.widget.TextView` element has the `text` attribute with an empty value
+
 |===
 
 

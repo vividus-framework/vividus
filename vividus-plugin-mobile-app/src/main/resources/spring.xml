@@ -72,6 +72,8 @@
         <constructor-arg index="1" value="#{T(org.vividus.bdd.steps.StringComparisonRule).IS_EQUAL_TO}" />
     </bean>
 
+    <bean class="org.vividus.ui.mobile.action.search.ElementAttributeFilter" />
+
     <bean class="org.vividus.ui.mobile.action.MobileAppElementActions" />
 
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">

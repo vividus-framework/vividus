@@ -57,10 +57,10 @@ When I tap on element located `accessibilityId(<togglerAccessibilityId>)` with d
 Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `1`
 
 
-Scenario: Verify step: 'When I tap on element located `$locator`'
+Scenario: Verify step: 'When I tap on element located `$locator`' and Attribute Filter
 Then number of elements found by `accessibilityId(<incrementAccessibilityId>)` is equal to `0`
-When I tap on element located `xpath(<menuButtonXpath>)`
-Then number of elements found by `accessibilityId(<incrementAccessibilityId>)` is equal to `1`
+When I tap on element located `xpath(<menuButtonXpath>)->filter.attribute(${visibility-attribute})`
+Then number of elements found by `accessibilityId(<incrementAccessibilityId>)->filter.attribute(${visibility-attribute}=true)` is equal to `1`
 
 
 Scenario: Verify step: 'When I navigate back'

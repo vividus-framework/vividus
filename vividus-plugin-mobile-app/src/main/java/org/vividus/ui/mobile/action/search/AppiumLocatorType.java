@@ -26,7 +26,8 @@ public enum AppiumLocatorType implements LocatorType
     ACCESSIBILITY_ID("Accessibility Id", ByAppiumLocatorSearch.class),
     IOS_CLASS_CHAIN("iOS Class Chain", ByAppiumLocatorSearch.class),
     TEXT_PART("Text part", GenericTextFilter.class),
-    TEXT("Text", GenericTextFilter.class);
+    TEXT("Text", GenericTextFilter.class),
+    ATTRIBUTE("Attribute", ElementAttributeFilter.class);
 
     private final String attributeName;
     private final Class<? extends IElementAction> actionClass;
