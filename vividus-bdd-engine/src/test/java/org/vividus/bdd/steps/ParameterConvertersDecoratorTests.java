@@ -60,7 +60,7 @@ class ParameterConvertersDecoratorTests
     @Mock private StepMonitor stepMonitor;
     @Mock private StoryLoader storyLoader;
     @Mock private Configuration configuration;
-    @Mock private ParameterAdaptor parameterAdaptor;
+    @Mock private VariableResolver variableResolver;
     @Mock private ExpressionAdaptor expressionAdaptor;
 
     private ParameterConvertersDecorator parameterConverters;
@@ -71,7 +71,7 @@ class ParameterConvertersDecoratorTests
         when(configuration.stepMonitor()).thenReturn(stepMonitor);
         when(configuration.keywords()).thenReturn(new Keywords());
         when(configuration.storyLoader()).thenReturn(storyLoader);
-        parameterConverters = new ParameterConvertersDecorator(configuration, parameterAdaptor, expressionAdaptor);
+        parameterConverters = new ParameterConvertersDecorator(configuration, variableResolver, expressionAdaptor);
     }
 
     @Test
@@ -80,9 +80,9 @@ class ParameterConvertersDecoratorTests
         String value = "var${var}";
         String convertedValue = "Varvar\r\nVarvar2";
         Type type = String.class;
-        when(parameterAdaptor.convert(value)).thenReturn(convertedValue);
+        when(variableResolver.resolve(value)).thenReturn(convertedValue);
         when(expressionAdaptor.process(convertedValue)).thenReturn(convertedValue);
-        when(parameterAdaptor.convert(convertedValue)).thenReturn(convertedValue);
+        when(variableResolver.resolve(convertedValue)).thenReturn(convertedValue);
         String actual = (String) parameterConverters.convert(value, type);
         assertEquals("Varvar" + System.lineSeparator() + "Varvar2", actual);
         verify(stepMonitor).convertedValueOfType(convertedValue, type, actual, queueOf(StringConverter.class));
@@ -94,13 +94,13 @@ class ParameterConvertersDecoratorTests
         String value = "${var#{eval(${nestedVar} + 1)}}";
         Type type = String.class;
         String valueWithNestedVarReplaced = "${var#{eval(2 + 1)}}";
-        when(parameterAdaptor.convert(value)).thenReturn(valueWithNestedVarReplaced);
+        when(variableResolver.resolve(value)).thenReturn(valueWithNestedVarReplaced);
         String valueWithExpressionProcessed = "${var3}";
         when(expressionAdaptor.process(valueWithNestedVarReplaced)).thenReturn(valueWithExpressionProcessed);
         String valueWithExternalVarReplaced = "value";
-        when(parameterAdaptor.convert(valueWithExpressionProcessed)).thenReturn(valueWithExternalVarReplaced);
+        when(variableResolver.resolve(valueWithExpressionProcessed)).thenReturn(valueWithExternalVarReplaced);
         when(expressionAdaptor.process(valueWithExternalVarReplaced)).thenReturn(valueWithExternalVarReplaced);
-        when(parameterAdaptor.convert(valueWithExternalVarReplaced)).thenReturn(valueWithExternalVarReplaced);
+        when(variableResolver.resolve(valueWithExternalVarReplaced)).thenReturn(valueWithExternalVarReplaced);
         String actual = (String) parameterConverters.convert(value, type);
         assertEquals(valueWithExternalVarReplaced, actual);
         verify(stepMonitor).convertedValueOfType(valueWithExternalVarReplaced, type, actual,
@@ -117,7 +117,7 @@ class ParameterConvertersDecoratorTests
 
         String value = prefix + "${value}" + postfix;
         Type type = String.class;
-        when(parameterAdaptor.convert(any())).then((Answer<String>) invocation -> {
+        when(variableResolver.resolve(any())).then((Answer<String>) invocation -> {
             String arg = invocation.getArgument(0).toString();
             int endIndex = arg.length() - postfixLength;
             return arg.substring(0, prefixLength) + "#{removeWrappingDoubleQuotes(" + arg.substring(prefixLength,
@@ -129,7 +129,7 @@ class ParameterConvertersDecoratorTests
         String resolvedVariable = prefix + "#{removeWrappingDoubleQuotes(${value})}" + postfix;
         assertEquals(resolvedVariable, actual);
         verify(stepMonitor).convertedValueOfType(resolvedVariable, type, actual, queueOf(StringConverter.class));
-        verify(parameterAdaptor, times(17)).convert(any());
+        verify(variableResolver, times(17)).resolve(any());
         verify(expressionAdaptor, times(17)).process(any());
     }
 
@@ -145,7 +145,7 @@ class ParameterConvertersDecoratorTests
         List<Integer> convertedValue = List.of();
         Type type = new TypeLiteral<List<Integer>>() { }.value;
         when(expressionAdaptor.process(value)).thenReturn(value);
-        when(parameterAdaptor.convert(value)).thenReturn(value);
+        when(variableResolver.resolve(value)).thenReturn(value);
         List<Integer> actual = (List<Integer>) parameterConverters.convert(value, type);
         assertEquals(convertedValue, actual);
         verifyNoInteractions(stepMonitor);
@@ -158,7 +158,7 @@ class ParameterConvertersDecoratorTests
         Optional<Integer> convertedValue = Optional.empty();
         Type type = new TypeLiteral<Optional<Integer>>() { }.value;
         when(expressionAdaptor.process(value)).thenReturn(value);
-        when(parameterAdaptor.convert(value)).thenReturn(value);
+        when(variableResolver.resolve(value)).thenReturn(value);
         Optional<Integer> actual = (Optional<Integer>) parameterConverters.convert(value, type);
         assertEquals(convertedValue, actual);
         verifyNoInteractions(stepMonitor);
@@ -171,7 +171,7 @@ class ParameterConvertersDecoratorTests
         Optional<Integer> convertedValue = Optional.of(baseConvertedValue);
         Type type = new TypeLiteral<Optional<Integer>>() { }.value;
         when(expressionAdaptor.process(VALUE)).thenReturn(VALUE);
-        when(parameterAdaptor.convert(VALUE)).thenReturn(VALUE);
+        when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
         Optional<Integer> actual = (Optional<Integer>) parameterConverters.convert(VALUE, type);
         assertEquals(convertedValue, actual);
         verify(stepMonitor).convertedValueOfType(VALUE, Integer.class, baseConvertedValue,
@@ -181,7 +181,7 @@ class ParameterConvertersDecoratorTests
     @Test
     void shouldConvertStringsProcessedByExpressionAdapter()
     {
-        when(parameterAdaptor.convert(VALUE)).thenReturn(VALUE);
+        when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
         when(expressionAdaptor.process(VALUE)).thenReturn(VALUE);
         Type type = int.class;
         Object actual = parameterConverters.convert(VALUE, type);
@@ -193,7 +193,7 @@ class ParameterConvertersDecoratorTests
     void shouldReturnNotStringsAsIsIfExpectedAndReceivedTypesMatch()
     {
         Integer number = Integer.parseInt(VALUE);
-        when(parameterAdaptor.convert(VALUE)).thenReturn(number);
+        when(variableResolver.resolve(VALUE)).thenReturn(number);
         Type type = Integer.class;
         Object actual = parameterConverters.convert(VALUE, type);
         assertEquals(number, actual);
@@ -204,7 +204,7 @@ class ParameterConvertersDecoratorTests
     void shouldConvertNotStringsIfExpectedAndReceivedTypesMismatch()
     {
         Integer number = Integer.parseInt(VALUE);
-        when(parameterAdaptor.convert(VALUE)).thenReturn(number);
+        when(variableResolver.resolve(VALUE)).thenReturn(number);
         Type type = Float.class;
         Object actual = parameterConverters.convert(VALUE, type);
         assertEquals(Float.parseFloat(VALUE), actual);
@@ -214,7 +214,7 @@ class ParameterConvertersDecoratorTests
     @Test
     void shouldReturnStringsAsIsProcessedByExpressionAdapterForObjectType()
     {
-        when(parameterAdaptor.convert(VALUE)).thenReturn(VALUE);
+        when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
         Type type = Object.class;
         when(expressionAdaptor.process(VALUE)).thenReturn(VALUE);
         String actual = (String) parameterConverters.convert(VALUE, type);
@@ -226,7 +226,7 @@ class ParameterConvertersDecoratorTests
     {
         Type type = new TypeLiteral<List<Map<String, Object>>>() { }.value;
         List<Map<Object, Object>> adaptedValue = List.of(Map.of());
-        when(parameterAdaptor.convert(VALUE)).thenReturn(adaptedValue);
+        when(variableResolver.resolve(VALUE)).thenReturn(adaptedValue);
         assertEquals(adaptedValue, parameterConverters.convert(VALUE, type));
         verifyNoInteractions(expressionAdaptor);
     }
@@ -237,7 +237,7 @@ class ParameterConvertersDecoratorTests
         SubSteps subSteps = mock(SubSteps.class);
         parameterConverters.addConverters(new FunctionalParameterConverter<>(SubSteps.class, s -> subSteps));
         assertEquals(subSteps, parameterConverters.convert("sub-steps", SubSteps.class));
-        verifyNoInteractions(parameterAdaptor, expressionAdaptor);
+        verifyNoInteractions(variableResolver, expressionAdaptor);
     }
 
     @Test
@@ -252,14 +252,14 @@ class ParameterConvertersDecoratorTests
         String pathToTable = "/table-with-expression-and-variable.table";
         String tableAsString = String.format("|%s|%s|%n|%s|%s|", expressionKey, variableKey, expression, variable);
         when(expressionAdaptor.process(pathToTable)).thenReturn(pathToTable);
-        when(parameterAdaptor.convert(pathToTable)).thenReturn(pathToTable);
-        when(parameterAdaptor.convert(expression)).thenReturn(expression);
+        when(variableResolver.resolve(pathToTable)).thenReturn(pathToTable);
+        when(variableResolver.resolve(expression)).thenReturn(expression);
         when(expressionAdaptor.process(expression)).thenReturn(expressionValue);
-        when(parameterAdaptor.convert(expressionValue)).thenReturn(expressionValue);
+        when(variableResolver.resolve(expressionValue)).thenReturn(expressionValue);
         when(expressionAdaptor.process(expressionValue)).thenReturn(expressionValue);
-        when(parameterAdaptor.convert(variable)).thenReturn(variableValue);
+        when(variableResolver.resolve(variable)).thenReturn(variableValue);
         when(expressionAdaptor.process(variableValue)).thenReturn(variableValue);
-        when(parameterAdaptor.convert(variableValue)).thenReturn(variableValue);
+        when(variableResolver.resolve(variableValue)).thenReturn(variableValue);
         when(storyLoader.loadResourceAsText(pathToTable)).thenReturn(tableAsString);
         Object result = parameterConverters.convert(pathToTable, ExamplesTable.class);
         assertThat(result, instanceOf(ExamplesTable.class));
@@ -273,19 +273,19 @@ class ParameterConvertersDecoratorTests
         String pathToTable = "/empty-example-table.table";
         String tableAsString = "";
         when(expressionAdaptor.process(pathToTable)).thenReturn(pathToTable);
-        when(parameterAdaptor.convert(pathToTable)).thenReturn(pathToTable);
+        when(variableResolver.resolve(pathToTable)).thenReturn(pathToTable);
         when(storyLoader.loadResourceAsText(pathToTable)).thenReturn(tableAsString);
         Object result = parameterConverters.convert(pathToTable, ExamplesTable.class);
         assertThat(result, instanceOf(ExamplesTable.class));
         ExamplesTable table = (ExamplesTable) result;
         assertTrue(table.isEmpty());
-        verifyNoMoreInteractions(expressionAdaptor, parameterAdaptor);
+        verifyNoMoreInteractions(expressionAdaptor, variableResolver);
     }
 
     @Test
     void shouldReturnValueAsIsIfExpressionsResolvedToNotAStringType()
     {
-        when(parameterAdaptor.convert(VALUE)).thenReturn(VALUE);
+        when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
         Type type = Object.class;
         Integer expected = Integer.valueOf(42);
         when(expressionAdaptor.process(VALUE)).thenReturn(expected);

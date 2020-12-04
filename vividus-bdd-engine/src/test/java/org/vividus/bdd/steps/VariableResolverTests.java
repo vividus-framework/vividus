@@ -35,7 +35,7 @@ import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.DynamicVariable;
 
 @ExtendWith(MockitoExtension.class)
-class ParameterAdaptorTests
+class VariableResolverTests
 {
     private static final String VAR1_VARIABLE = "${var1}";
     private static final String VAR1 = "var1";
@@ -47,7 +47,7 @@ class ParameterAdaptorTests
 
     private Object convert(String value)
     {
-        return new ParameterAdaptor(bddVariableContext, Map.of()).convert(value);
+        return new VariableResolver(bddVariableContext, Map.of()).resolve(value);
     }
 
     @ParameterizedTest
@@ -129,9 +129,9 @@ class ParameterAdaptorTests
     {
         DynamicVariable dynamicVariable = mock(DynamicVariable.class);
         when(bddVariableContext.getVariable(VAR1)).thenReturn(null);
-        ParameterAdaptor parameterAdaptor = new ParameterAdaptor(bddVariableContext, Map.of(VAR1, dynamicVariable));
+        VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(VAR1, dynamicVariable));
         when(dynamicVariable.getValue()).thenReturn(VALUE1);
-        Object actualValue = parameterAdaptor.convert(VAR1_VARIABLE);
+        Object actualValue = variableResolver.resolve(VAR1_VARIABLE);
         assertEquals(VALUE1, actualValue);
     }
 
@@ -140,9 +140,9 @@ class ParameterAdaptorTests
     {
         DynamicVariable dynamicVariable = mock(DynamicVariable.class);
         when(bddVariableContext.getVariable(VAR1)).thenReturn(null);
-        ParameterAdaptor parameterAdaptor = new ParameterAdaptor(bddVariableContext, Map.of(VAR2, dynamicVariable));
+        VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(VAR2, dynamicVariable));
         String test1 = VAR1_VARIABLE;
-        Object actualValue = parameterAdaptor.convert(test1);
+        Object actualValue = variableResolver.resolve(test1);
         assertEquals(test1, actualValue);
     }
 }

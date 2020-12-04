@@ -41,13 +41,13 @@ import org.jbehave.core.steps.StepMonitor;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.steps.ExpressionAdaptor;
-import org.vividus.bdd.steps.ParameterAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
+import org.vividus.bdd.steps.VariableResolver;
 
 public class ExtendedConfiguration extends Configuration
 {
     private IPathFinder pathFinder;
-    private ParameterAdaptor parameterAdaptor;
+    private VariableResolver variableResolver;
     private ExpressionAdaptor expressionAdaptor;
     private List<ChainableParameterConverter<?, ?>> customConverters;
     private List<StepMonitor> stepMonitors;
@@ -63,7 +63,7 @@ public class ExtendedConfiguration extends Configuration
         initKeywords();
         initCompositePaths();
         useParameterControls(parameterControls);
-        useParameterConverters(new ParameterConvertersDecorator(this, parameterAdaptor, expressionAdaptor)
+        useParameterConverters(new ParameterConvertersDecorator(this, variableResolver, expressionAdaptor)
                 .addConverters(customConverters));
         useStoryParser(new RegexStoryParser(keywords(), examplesTableFactory()));
         TableTransformers transformers = tableTransformers();
@@ -121,9 +121,9 @@ public class ExtendedConfiguration extends Configuration
         this.compositePaths = compositePaths;
     }
 
-    public void setParameterAdaptor(ParameterAdaptor parameterAdaptor)
+    public void setVariableResolver(VariableResolver variableResolver)
     {
-        this.parameterAdaptor = parameterAdaptor;
+        this.variableResolver = variableResolver;
     }
 
     @Inject
