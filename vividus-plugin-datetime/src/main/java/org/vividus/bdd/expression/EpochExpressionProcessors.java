@@ -26,7 +26,7 @@ import javax.inject.Named;
 import org.vividus.util.DateUtils;
 
 @Named
-public class EpochExpressionProcessors extends DelegatingExpressionProcessor
+public class EpochExpressionProcessors extends DelegatingExpressionProcessor<String>
 {
     public EpochExpressionProcessors(DateUtils dateUtils)
     {

@@ -43,7 +43,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.expression.IExpressionProcessor;
 import org.vividus.bdd.expression.StringsExpressionProcessor;
@@ -67,14 +66,9 @@ class ExpressionAdapterTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ExpressionAdaptor.class);
 
-    @Mock
-    private IExpressionProcessor mockedTargetProcessor;
-
-    @Mock
-    private IExpressionProcessor mockedAnotherProcessor;
-
-    @InjectMocks
-    private ExpressionAdaptor expressionAdaptor;
+    @Mock private IExpressionProcessor<Object> mockedTargetProcessor;
+    @Mock private IExpressionProcessor<Object> mockedAnotherProcessor;
+    @InjectMocks private ExpressionAdaptor expressionAdaptor;
 
     @ParameterizedTest
     @CsvSource({
@@ -87,8 +81,7 @@ class ExpressionAdapterTests
     })
     void testSupportedExpression(String expressionKeyword, String input, String outputFormat, String outputValue)
     {
-        Mockito.lenient().when(mockedTargetProcessor.execute(EXPRESSION_KEYWORD))
-                .thenReturn(Optional.of(EXPRESSION_RESULT));
+        lenient().when(mockedTargetProcessor.execute(EXPRESSION_KEYWORD)).thenReturn(Optional.of(EXPRESSION_RESULT));
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
         when(mockedTargetProcessor.execute(expressionKeyword)).thenReturn(Optional.of(outputValue));
         Object actual = expressionAdaptor.process(input);
@@ -102,7 +95,7 @@ class ExpressionAdapterTests
         String input = "#{capitalize(#{trim(#{toLowerCase( VIVIDUS )})})}";
         String output = "Vividus";
         ILocationProvider locationProvider = mock(ILocationProvider.class);
-        IExpressionProcessor processor = new StringsExpressionProcessor(locationProvider);
+        IExpressionProcessor<String> processor = new StringsExpressionProcessor(locationProvider);
         expressionAdaptor.setProcessors(List.of(processor));
         Object actual = expressionAdaptor.process(input);
         assertEquals(output, actual);
@@ -199,7 +192,7 @@ class ExpressionAdapterTests
     {
         String input = "#{generateLocalized(number.number_between 'a','b', ru)}";
         ILocationProvider locationProvider = mock(ILocationProvider.class);
-        IExpressionProcessor processor = new StringsExpressionProcessor(locationProvider);
+        IExpressionProcessor<String> processor = new StringsExpressionProcessor(locationProvider);
         expressionAdaptor.setProcessors(List.of(processor));
         assertThrows(RuntimeException.class, () -> expressionAdaptor.process(input));
         assertThat(logger.getLoggingEvents(),

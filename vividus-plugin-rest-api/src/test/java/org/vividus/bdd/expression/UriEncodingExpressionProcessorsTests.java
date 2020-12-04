@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class UriEncodingExpressionProcessorsTests
 {
-    private final IExpressionProcessor processor = new UriEncodingExpressionProcessors();
+    private final IExpressionProcessor<String> processor = new UriEncodingExpressionProcessors();
 
     @Test
     void testExecuteWithUnsupportedException()
