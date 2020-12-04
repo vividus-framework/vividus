@@ -44,7 +44,7 @@
 
     <bean id="examplesTableLoader" class="org.vividus.bdd.examples.ExamplesTableFileLoader">
         <property name="bddResourceLoader" ref="bddResourceLoader" />
-        <property name="parameterAdaptor" ref="parameterAdaptor" />
+        <property name="variableResolver" ref="variableResolver" />
         <property name="cacheTables" value="${bdd.cache-examples-table}" />
     </bean>
 
@@ -72,7 +72,7 @@
         <property name="pathFinder" ref="pathFinder" />
         <property name="storyLoader" ref="storyLoader" />
         <property name="storyReporterBuilder" ref="storyReporterBuilder" />
-        <property name="parameterAdaptor" ref="parameterAdaptor" />
+        <property name="variableResolver" ref="variableResolver" />
         <property name="compositePaths" value="${bdd.configuration.all-composite-paths}"/>
         <property name="expressionAdaptor" ref="expressionAdaptor" />
         <property name="storyControls" ref="springStoryControls" />
@@ -108,7 +108,7 @@
         <property name="generateViewAfterBatches" value="${bdd.generate-view-after-batches}" />
     </bean>
 
-    <bean id="parameterAdaptor" class="org.vividus.bdd.steps.ParameterAdaptor" />
+    <bean id="variableResolver" class="org.vividus.bdd.steps.VariableResolver" />
     <bean id="parameterControls" class="org.jbehave.core.steps.ParameterControls" />
 
 </beans>

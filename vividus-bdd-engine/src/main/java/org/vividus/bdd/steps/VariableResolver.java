@@ -23,20 +23,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.DynamicVariable;
 
-public class ParameterAdaptor
+public class VariableResolver
 {
     private static final String VARIABLE_START_MARKER = "${";
 
     private final IBddVariableContext bddVariableContext;
     private final Map<String, DynamicVariable> dynamicVariables;
 
-    public ParameterAdaptor(IBddVariableContext bddVariableContext, Map<String, DynamicVariable> dynamicVariables)
+    public VariableResolver(IBddVariableContext bddVariableContext, Map<String, DynamicVariable> dynamicVariables)
     {
         this.bddVariableContext = bddVariableContext;
         this.dynamicVariables = dynamicVariables;
     }
 
-    public Object convert(final String value)
+    public Object resolve(final String value)
     {
         if (value == null)
         {

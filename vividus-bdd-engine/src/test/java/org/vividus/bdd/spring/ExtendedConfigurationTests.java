@@ -61,8 +61,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.steps.ExpressionAdaptor;
-import org.vividus.bdd.steps.ParameterAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
+import org.vividus.bdd.steps.VariableResolver;
 
 @RunWith(PowerMockRunner.class)
 public class ExtendedConfigurationTests
@@ -73,7 +73,7 @@ public class ExtendedConfigurationTests
     private IPathFinder pathFinder;
 
     @Mock
-    private ParameterAdaptor parameterAdaptor;
+    private VariableResolver variableResolver;
 
     @Mock
     private ExpressionAdaptor expressionAdaptor;
@@ -108,7 +108,7 @@ public class ExtendedConfigurationTests
         PowerMockito.whenNew(RegexStoryParser.class).withArguments(keywords, examplesTableFactory)
                 .thenReturn(regexStoryParser);
         ParameterConvertersDecorator parameterConverters = mock(ParameterConvertersDecorator.class);
-        PowerMockito.whenNew(ParameterConvertersDecorator.class).withArguments(spy, parameterAdaptor, expressionAdaptor)
+        PowerMockito.whenNew(ParameterConvertersDecorator.class).withArguments(spy, variableResolver, expressionAdaptor)
                 .thenReturn(parameterConverters);
         List<ChainableParameterConverter<?, ?>> parameterConverterList = List.of();
         when(parameterConverters.addConverters(parameterConverterList)).thenReturn(parameterConverters);
