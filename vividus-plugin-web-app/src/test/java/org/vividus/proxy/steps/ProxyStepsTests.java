@@ -323,6 +323,13 @@ class ProxyStepsTests
         assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
     }
 
+    @Test
+    void shouldClearFilters()
+    {
+        proxySteps.resetMocks();
+        verify(proxy).clearRequestFilters();
+    }
+
     private void verifySizeAssertion(String message, int actualMatchedEntriesNumber, ComparisonRule rule,
             int callsNumber)
     {

@@ -97,3 +97,13 @@ Then number of elements found by `<elementSelector>` is = `0`
 Examples:
 |frameId       |elementSelector|
 |id(exampleCom)|cssSelector(h1)|
+
+Scenario: Verify step When I clear proxy mocks
+Meta:
+    @requirementId 1176
+When I mock HTTP responses with request URL which CONTAINS `frames.html` using response code `200`, content `#{loadResource(page.html)}` and headers:
+|name        |value    |
+|Content-Type|text/html|
+When I clear proxy mocks
+Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+Then number of elements found by `id(sw)` is = `0`
