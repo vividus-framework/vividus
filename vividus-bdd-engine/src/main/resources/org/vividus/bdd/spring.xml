@@ -108,10 +108,7 @@
         <property name="generateViewAfterBatches" value="${bdd.generate-view-after-batches}" />
     </bean>
 
-    <bean id="parameterAdaptor" class="org.vividus.bdd.steps.ParameterAdaptor">
-        <property name="bddVariableContext" ref="bddVariableContext" />
-    </bean>
-
+    <bean id="parameterAdaptor" class="org.vividus.bdd.steps.ParameterAdaptor" />
     <bean id="parameterControls" class="org.jbehave.core.steps.ParameterControls" />
 
 </beans>

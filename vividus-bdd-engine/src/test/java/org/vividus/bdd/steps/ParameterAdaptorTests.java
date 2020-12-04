@@ -17,7 +17,7 @@
 package org.vividus.bdd.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,7 +25,10 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
@@ -35,100 +38,90 @@ import org.vividus.bdd.variable.DynamicVariable;
 class ParameterAdaptorTests
 {
     private static final String VAR1_VARIABLE = "${var1}";
-    private static final String UID = "\"4e201077-3b63-40a8-919f-1b1c1617b8c0\"]}";
-    private static final String OBJECT = "object";
     private static final String VAR1 = "var1";
     private static final String VALUE1 = "value1";
-    private static final String VAR3 = "var3";
-    private static final String VALUE3 = "value3";
-    private static final String VAR3_PROPERTY = "${" + VAR3 + "}";
-    private static final String JSON_INPUT_PARAMETER = "{\"relatedObjectIds\": [\"${var1}\", " + UID;
-    private static final String JSON_OUTPUT_WITH_VARIABLE = "{\"relatedObjectIds\": [\"value1\", " + UID;
+    private static final String VAR2 = "var2";
+    private static final String VALUE2 = "value2";
 
-    @Mock
-    private IBddVariableContext bddVariableContext;
+    @Mock private IBddVariableContext bddVariableContext;
 
-    @InjectMocks
-    private ParameterAdaptor parameterAdaptor;
+    private Object convert(String value)
+    {
+        return new ParameterAdaptor(bddVariableContext, Map.of()).convert(value);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            " ${var},                               var,             value, value",
+            " ${var}${var},                         var,             value, valuevalue",
+            " ${var[0].Name},                       var[0].Name,     value, value",
+            " ${var}|#{expr},                       var,             value, value|#{expr}",
+            " #{eval(${var:0} + 1)},                var:0,           0,     #{eval(0 + 1)}",
+            " ${var},                               var,             ,      ${var}",
+            " ${var:default},                       var:default,     value, value",
+            " ${var:},                              var:,            value, value",
+            " '{\"ids\": [\"${var}\", \"12-ce\"]}', var,             value, '{\"ids\": [\"value\", \"12-ce\"]}'",
+            " ${var${varPartName}},                 varPartName,     value, ${varvalue}"
+    })
+    void shouldResolveVariables(String valueToResolve, String variableKey, String variableValue, String expected)
+    {
+        when(bddVariableContext.getVariable(variableKey)).thenReturn(variableValue);
+        assertEquals(expected, convert(valueToResolve));
+    }
 
     @Test
-    void testTextBeforeAfterTwoVariablesAndList()
+    void shouldResolveVariableAsObject()
+    {
+        Object object = new Object();
+        when(bddVariableContext.getVariable("varWithObject")).thenReturn(object);
+        assertEquals(object, convert("${varWithObject}"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "varvar",
+            "${}",
+            "$",
+            "{}",
+            "$}{",
+            "${var[0]}"
+    })
+    @NullSource
+    void shouldReturnTheSameValueWhenNothingToResolve(String input)
+    {
+        Object actualValue = convert(input);
+        assertEquals(input, actualValue);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "varvar${var1}${var2}moremore, varvarvalue1value2moremore",
+            "${var1}${var2}moremore,       value1value2moremore",
+            "varvar${var1}${var2},         varvarvalue1value2"
+    })
+    void shouldResolveSeveralVariables(String input, String expected)
     {
         when(bddVariableContext.getVariable(VAR1)).thenReturn(VALUE1);
-        when(bddVariableContext.getVariable("product[2]")).thenReturn(OBJECT);
-        when(bddVariableContext.getVariable(VAR3)).thenReturn(VALUE3);
-        Object actualValue = parameterAdaptor.convert("varvar${" + VAR3 + "}${product[2]}${" + VAR1 + "}moremore");
-        assertEquals("varvarvalue3objectvalue1moremore", actualValue);
+        when(bddVariableContext.getVariable(VAR2)).thenReturn(VALUE2);
+        Object actualValue = convert(input);
+        assertEquals(expected, actualValue);
     }
 
     @Test
-    void testTextAfterTwoVariablesAndList()
+    void shouldResolveSeveralVariablesWithNonStringValues()
+    {
+        lenient().when(bddVariableContext.getVariable(VAR1)).thenReturn(1);
+        lenient().when(bddVariableContext.getVariable(VAR2)).thenReturn(2L);
+        Object actualValue = convert("varvar${var1}${var2}moremore");
+        assertEquals("varvar12moremore", actualValue);
+    }
+
+    @Test
+    void shouldResolveDefaultValueWithVariable()
     {
         when(bddVariableContext.getVariable(VAR1)).thenReturn(VALUE1);
-        when(bddVariableContext.getVariable("product[1]")).thenReturn(OBJECT);
-        when(bddVariableContext.getVariable(VAR3)).thenReturn(VALUE3);
-        Object actualValue = parameterAdaptor.convert("${var3}${product[1]}${var1}moremore");
-        assertEquals("value3objectvalue1moremore", actualValue);
-    }
-
-    @Test
-    void testParameterInJson()
-    {
-        when(bddVariableContext.getVariable(VAR1)).thenReturn(VALUE1);
-        Object actualValue = parameterAdaptor.convert(JSON_INPUT_PARAMETER);
-        assertEquals(JSON_OUTPUT_WITH_VARIABLE, actualValue);
-    }
-
-    @Test
-    void testListIndexOutOfBounds()
-    {
-        String value = "${product[1]}";
-        Object actualValue = parameterAdaptor.convert(value);
-        assertEquals(value, actualValue);
-    }
-
-    @Test
-    void testNullListVariable()
-    {
-        String value = "${product[0]}";
-        Object actualValue = parameterAdaptor.convert(value);
-        assertEquals(value, actualValue);
-    }
-
-    @Test
-    void testNullListVariableIndexedVariableExists()
-    {
-        when(bddVariableContext.getVariable("product[0].Name")).thenReturn(VALUE1);
-        String value = "${product[0].Name}";
-        assertEquals(VALUE1, parameterAdaptor.convert(value));
-    }
-
-    @Test
-    void testTextBeforeAfterTwoVariables()
-    {
-        when(bddVariableContext.getVariable(VAR1)).thenReturn(VALUE1);
-        when(bddVariableContext.getVariable(VAR3)).thenReturn(VALUE3);
-        Object actualValue = parameterAdaptor.convert("varvar${var3}${var1}moremore");
-        assertEquals("varvarvalue3value1moremore", actualValue);
-    }
-
-    @Test
-    void testTextBeforeTwoVariables()
-    {
-        String test1 = "varvar${var3}${var1}";
-        when(bddVariableContext.getVariable(VAR1)).thenReturn(VALUE1);
-        when(bddVariableContext.getVariable(VAR3)).thenReturn(VALUE3);
-        Object actualValue = parameterAdaptor.convert(test1);
-        assertEquals("varvarvalue3value1", actualValue);
-    }
-
-    @Test
-    void testVariablesAndExpressions()
-    {
-        String test1 = "${var1}|#{expr}";
-        when(bddVariableContext.getVariable(VAR1)).thenReturn(VALUE1);
-        Object actualValue = parameterAdaptor.convert(test1);
-        assertEquals("value1|#{expr}", actualValue);
+        when(bddVariableContext.getVariable("var:" + VALUE1)).thenReturn(VALUE2);
+        assertEquals(VALUE2, convert("${var:${var1}}"));
     }
 
     @Test
@@ -136,7 +129,7 @@ class ParameterAdaptorTests
     {
         DynamicVariable dynamicVariable = mock(DynamicVariable.class);
         when(bddVariableContext.getVariable(VAR1)).thenReturn(null);
-        parameterAdaptor.setDynamicVariables(Map.of(VAR1, dynamicVariable));
+        ParameterAdaptor parameterAdaptor = new ParameterAdaptor(bddVariableContext, Map.of(VAR1, dynamicVariable));
         when(dynamicVariable.getValue()).thenReturn(VALUE1);
         Object actualValue = parameterAdaptor.convert(VAR1_VARIABLE);
         assertEquals(VALUE1, actualValue);
@@ -146,49 +139,10 @@ class ParameterAdaptorTests
     void testVariablesDynamicValueNoProvider()
     {
         DynamicVariable dynamicVariable = mock(DynamicVariable.class);
-        String test1 = VAR1_VARIABLE;
         when(bddVariableContext.getVariable(VAR1)).thenReturn(null);
-        parameterAdaptor.setDynamicVariables(Map.of("var2", dynamicVariable));
+        ParameterAdaptor parameterAdaptor = new ParameterAdaptor(bddVariableContext, Map.of(VAR2, dynamicVariable));
+        String test1 = VAR1_VARIABLE;
         Object actualValue = parameterAdaptor.convert(test1);
         assertEquals(test1, actualValue);
-    }
-
-    @Test
-    void testNoConversion()
-    {
-        String value = "varvar";
-        Object actualValue = parameterAdaptor.convert(value);
-        assertEquals(value, actualValue);
-    }
-
-    @Test
-    void testSimpleVariable()
-    {
-        when(bddVariableContext.getVariable(VAR3)).thenReturn(VALUE3);
-        Object actualValue = parameterAdaptor.convert(VAR3_PROPERTY);
-        assertEquals(VALUE3, actualValue);
-    }
-
-    @Test
-    void testNullVariable()
-    {
-        when(bddVariableContext.getVariable(VAR3)).thenReturn(null);
-        String value = VAR3_PROPERTY;
-        Object actualValue = parameterAdaptor.convert(value);
-        assertEquals(value, actualValue);
-    }
-
-    @Test
-    void testConvertNullVariable()
-    {
-        Object actualValue = parameterAdaptor.convert(null);
-        assertNull(actualValue);
-    }
-
-    @Test
-    void shouldResolveDefaultValueWithAVariable()
-    {
-        when(bddVariableContext.getVariable("var:${var1}")).thenReturn(VAR1_VARIABLE);
-        assertEquals(VAR1_VARIABLE, parameterAdaptor.convert("${var:${var1}}"));
     }
 }
