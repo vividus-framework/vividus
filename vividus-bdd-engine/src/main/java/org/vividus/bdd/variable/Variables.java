@@ -28,7 +28,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class Variables
 {
@@ -64,9 +63,7 @@ public class Variables
 
     private Stream<Map<String, Object>> concatedVariables()
     {
-        return Stream.concat(
-                    StreamSupport.stream(stepVariables.spliterator(), false),
-                    Stream.of(scenarioVariables, storyVariables, batchVariables));
+        return Stream.concat(stepVariables.stream(), Stream.of(scenarioVariables, storyVariables, batchVariables));
     }
 
     public Map<String, Object> getVariables()
