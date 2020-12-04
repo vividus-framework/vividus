@@ -38,6 +38,7 @@ public class SearchActions implements ISearchActions
     @Inject private IUiContext uiContext;
     @Inject private ElementActionService elementActionService;
 
+    @Override
     public List<WebElement> findElements(SearchContext searchContext, Locator locator)
     {
         SearchParameters searchParameters = locator.getSearchParameters();

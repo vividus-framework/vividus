@@ -173,6 +173,7 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
         return executeScript("return arguments[0].value", webElement);
     }
 
+    @Override
     public void onLoad()
     {
         browserConfig.get();

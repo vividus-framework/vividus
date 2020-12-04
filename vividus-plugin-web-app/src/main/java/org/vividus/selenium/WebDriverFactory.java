@@ -60,6 +60,7 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
                 configuration));
     }
 
+    @Override
     protected DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities)
     {
         WebDriverType webDriverType = WebDriverManager.detectType(desiredCapabilities);
@@ -80,6 +81,7 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
         return new DesiredCapabilities(capabilities);
     }
 
+    @Override
     protected void configureWebDriver(WebDriver webDriver)
     {
         timeoutConfigurer.configure(webDriver.manage().timeouts());
