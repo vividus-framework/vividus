@@ -357,6 +357,15 @@ public class ProxySteps
         });
     }
 
+    /**
+     * Resets previously created proxy mocks
+     */
+    @When("I clear proxy mocks")
+    public void resetMocks()
+    {
+        proxy.clearRequestFilters();
+    }
+
     private byte[] getBytes(Object content)
     {
         if (content instanceof String)
