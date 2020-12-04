@@ -54,10 +54,11 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.steps.ExpressionAdaptor;
@@ -65,6 +66,7 @@ import org.vividus.bdd.steps.ParameterConvertersDecorator;
 import org.vividus.bdd.steps.VariableResolver;
 
 @RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(MockitoJUnitRunner.class)
 public class ExtendedConfigurationTests
 {
     private static final String SEPARATOR = "|";
@@ -84,7 +86,6 @@ public class ExtendedConfigurationTests
     @Before
     public void before()
     {
-        MockitoAnnotations.initMocks(this);
         configuration.setCustomConverters(List.of());
         configuration.setCustomTableTransformers(Map.of());
         configuration.setExamplesTableHeaderSeparator(SEPARATOR);
