@@ -94,56 +94,7 @@ image::cucumber.png[Cucumber test case view]
 
 |===
 
-== Authorization
-
-[cols="1,2", options="header"]
-|===
-
-|Name
-|Description
-
-|[#noop-link]`noop`
-|Used if Jira endpoint is hidden behind SSO and the only way to access the endpoint is to use custom authorization flows or cookies
-
-|[#caching-credentials-link]`caching-credentials`
-|Authorize in Jira using client username and password
-
-|===
-
-== Jira properties
-
-[cols="1,1,1,3", options="header"]
-|===
-
-|Property
-|Required
-|Acceptable values
-|Description
-
-|jira.username
-|Required for `caching-credentials` auth
-|`string`
-|Jira username used to export test cases
-
-|jira.password
-|Required for `caching-credentials` auth
-|`string`
-|Jira password used to export test cases
-
-|jira.endpoint
-|true
-|https://en.wikipedia.org/wiki/URL[URL]
-|Jira URL e.g. `https://jira.example.com/`
-
-|jira.http.context-type
-|false
-a|<<caching-credentials-link, caching-credentials>>
-
-<<noop-link, noop>>
-
-|defined Jira <<_authorization>> mechanism, default value is <<caching-credentials-link, caching-credentials>>
-
-|===
+include::partial$authorization.adoc[]
 
 == Scenario Meta Attributes
 

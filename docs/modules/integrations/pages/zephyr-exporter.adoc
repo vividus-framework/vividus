@@ -1,0 +1,111 @@
+= Zephyr Exporter
+
+Zephyr Exporter is a tool used for exporting test execution results into Jira Zephyr Plugin.
+
+Features:
+
+* Create test executions
+* Set test execution statuses
+
+== Zephyr Export Properties
+
+[cols="1,2,3", options="header"]
+|===
+
+|Property
+|Required
+|Description
+
+|`zephyr.exporter.source-directory`
+|true
+|Path to directory with test execution JSON results.
+
+|`zephyr.project-key`
+|true
+|Key of a Jira project where new test executions should be created
+
+|`zephyr.version-name`
+|true
+|Version/release name where new test executions should be created
+
+|`zephyr.cycle-name`
+|true
+|Cycle/sprint name where new test executions should be created
+
+|`zephyr.folder-name`
+|true
+|Folder name where new test executions should be created
+
+|===
+
+== Zephyr Execution Status Mapping
+
+The Zephyr plugin for Jira has own configurable execution statuses. testExecutionStatus endpoint is used to get the detailed information about the statuses, like: https://jira.example.com/rest/zapi/latest/util/testExecutionStatus. The following properties are used to setup a mapping between Vividus and Zephyr execution statuses.
+
+[cols="1,2", options="header"]
+|===
+
+|Vividus execution status property name
+|Zephyr execution status value (by default)
+
+|`zephyr.statuses.FAILED`
+|FAILED
+
+|`zephyr.statuses.BROKEN`
+|TEST NEEDS REWORK
+
+|`zephyr.statuses.PENDING`
+|TEST NEEDS REWORK
+
+|`zephyr.statuses.UNKNOWN`
+|PASSED WITH REMARKS
+
+|`zephyr.statuses.SKIPPED`
+|SCHEDULED
+
+|`zephyr.statuses.PASSED`
+|PASSED
+
+|===
+
+include::partial$authorization.adoc[]
+
+== Scenario Meta Attributes
+
+[cols="2,2,3", options="header"]
+|===
+
+|Name
+|Example
+|Description
+
+|`testCaseId`
+|`@testCaseId TEST-1`
+|Add test execution to Jira test case
+
+|===
+
+== Example of scenario for export
+
+.Test.story
+[source,gherkin]
+----
+Scenario: Buy an item
+Meta:
+    @layout desktop chrome_phone
+    @testCaseId TEST-1; TEST-2; TEST-3
+
+Given I am on a page with the URL '${vividus-test-site-url}/delayedScroll.html'
+When I click on element located `By.id(anchor)`
+When I wait until scroll is finished
+Then page is scrolled to element located `id(toClick)`
+----
+
+== Export
+
+* Download Zephyr Exporter JAR
+* Create a file named `application.properties` and put there all necessary properties
+* Run the following command with replacing `<jar name>` with existing jar name previously downloaded
+```bash
+java -jar <jar name> -Dspring.config.location=classpath:/application.properties,./application.properties
+```

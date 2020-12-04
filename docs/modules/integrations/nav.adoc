@@ -1,2 +1,3 @@
 .Integrations
 * xref:xray-exporter.adoc[Xray Exporter]
+* xref:zephyr-exporter.adoc[Zephyr Exporter]
