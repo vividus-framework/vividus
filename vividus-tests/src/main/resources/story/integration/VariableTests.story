@@ -56,8 +56,11 @@ Then `${}`                         is equal to `val`
 Then `${a.b:NULL}`                 is equal to `a.b-value`
 Then `${a.b}`                      is equal to `a.b-value`
 Then `${foo:${bar}}`               is equal to `foo`
+Then `${foo}:${foo}`               is equal to `foo:foo`
 Then `${baz:${foo}}`               is equal to `foo`
+Then `${baz:a${foo}z}`             is equal to `afooz`
 Then `${baz:${foo#{eval(0 + 1)}}}` is equal to `foo1`
+Then `${not-existing:}`            is equal to ``
 
 Scenario: Verify that expression can be used as a part of variable name and vice versa
 Meta:
@@ -120,3 +123,15 @@ When I initialize scenario variable `table` with values:
 When I run composite step with table:${table}
 Then `${table[0].column}` is equal to `value`
 Then `${table-from-composite-step[0].column}` is equal to `value`
+
+Scenario: Use variables as part of names of another variables
+Meta:
+    @issueId 1181
+When I initialize the scenario variable `variable` with value `Variable`
+When I initialize the scenario variable `Variable` with value `nested`
+When I initialize the scenario variable `compositeVariable` with value `expected`
+When I initialize the scenario variable `expected` with value `nested-expected`
+Then `${composite${variable}}`              is equal to `expected`
+Then `${${variable}}`                       is equal to `nested`
+Then `${composite:${composite${variable}}}` is equal to `expected`
+Then `#{eval(${non-existing:0} + 1)}`       is equal to `1`

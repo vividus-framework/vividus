@@ -18,59 +18,115 @@ package org.vividus.bdd.steps;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-
+import org.apache.commons.lang3.StringUtils;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.DynamicVariable;
 
 public class ParameterAdaptor
 {
-    private static final Pattern DYNAMIC_DATA_PATTERN = Pattern.compile("\\$\\{(((?!\\$|\\#).|(?<=:).)*?}*)}");
+    private static final String VARIABLE_START_MARKER = "${";
 
-    private IBddVariableContext bddVariableContext;
-    private Map<String, DynamicVariable> dynamicVariables = Map.of();
+    private final IBddVariableContext bddVariableContext;
+    private final Map<String, DynamicVariable> dynamicVariables;
+
+    public ParameterAdaptor(IBddVariableContext bddVariableContext, Map<String, DynamicVariable> dynamicVariables)
+    {
+        this.bddVariableContext = bddVariableContext;
+        this.dynamicVariables = dynamicVariables;
+    }
 
     public Object convert(final String value)
     {
-        Object convertedValue = value;
-        if (value != null)
+        if (value == null)
         {
-            Matcher dynamicDataMatcher = DYNAMIC_DATA_PATTERN.matcher(value);
-            if (dynamicDataMatcher.matches())
-            {
-                convertedValue = updateValue(convertedValue, dynamicDataMatcher, true);
-                return convertedValue;
-            }
-            dynamicDataMatcher.reset(value);
-            while (dynamicDataMatcher.find())
-            {
-                convertedValue = updateValue(convertedValue, dynamicDataMatcher, false);
-            }
+            return null;
         }
-        return convertedValue;
+
+        return resolveVariables(0, value);
     }
 
-    private Object updateValue(Object convertedValue, Matcher dynamicDataMatcher, boolean checkType)
+    private Object resolveVariables(int scanStartPosition, String value)
     {
-        Object variable = getVariableValue(dynamicDataMatcher.group(1));
-        if (variable != null)
+        int start = -1;
+        int end = -1;
+        int level = 0;
+
+        for (int i = scanStartPosition; i < value.length(); i++)
         {
-            if (!checkType)
+            switch (value.charAt(i))
             {
-                return replaceVariable(convertedValue, dynamicDataMatcher, variable);
+                case '$':
+                    if (i + 1 < value.length() && value.charAt(i + 1) == '{')
+                    {
+                        if (start == -1)
+                        {
+                            start = i;
+                        }
+                        level++;
+                    }
+                    break;
+                case '}':
+                    if (start != -1)
+                    {
+                        end = i;
+                    }
+                    level--;
+                    break;
+                default:
+                    break;
             }
-            return variable instanceof String
-                    ? replaceVariable(convertedValue, dynamicDataMatcher, variable) : variable;
+            if (level == 0 && end != -1)
+            {
+                return resolveVariable(value, start, end);
+            }
         }
-        return convertedValue;
+        return value;
     }
 
-    private String replaceVariable(Object convertedValue, Matcher dynamicDataMatcher, Object variableValue)
+    private Object resolveVariable(String value, int start, int end)
     {
-        return ((String) convertedValue).replace(dynamicDataMatcher.group(0), variableValue.toString());
+        String variableKey = value.substring(start + 2, end);
+        Object resolved = resolveVariable(value, variableKey);
+        if (end == value.length() - 1)
+        {
+            return resolved;
+        }
+        String resolvedStr = (String) resolved;
+        int nextScanStartPosition = resolvedStr.indexOf(value.substring(end + 1));
+        return resolveVariables(nextScanStartPosition, resolvedStr);
+    }
+
+    private Object resolveVariable(String value, String variableKey)
+    {
+        String updatedVariableKey;
+        String target;
+        if (variableKey.contains(VARIABLE_START_MARKER))
+        {
+            updatedVariableKey = (String) resolveVariables(0, variableKey);
+            target = value.replace(variableKey, updatedVariableKey);
+        }
+        else
+        {
+            updatedVariableKey = variableKey;
+            target = value;
+        }
+        return replaceVariableKeyWithValue(target, updatedVariableKey);
+    }
+
+    private Object replaceVariableKeyWithValue(String target, String variableKey)
+    {
+        Object variableValue = getVariableValue(variableKey);
+        if (variableValue == null)
+        {
+            return target;
+        }
+        String variablePlaceholder = VARIABLE_START_MARKER + variableKey + "}";
+        if (variablePlaceholder.equals(target))
+        {
+            return variableValue;
+        }
+        return StringUtils.replaceOnce(target, variablePlaceholder, variableValue.toString());
     }
 
     private Object getVariableValue(String variableKey)
@@ -83,16 +139,5 @@ public class ParameterAdaptor
                                .orElse(null);
         }
         return variable;
-    }
-
-    public void setBddVariableContext(IBddVariableContext bddVariableContext)
-    {
-        this.bddVariableContext = bddVariableContext;
-    }
-
-    @Inject
-    public void setDynamicVariables(Map<String, DynamicVariable> dynamicVariables)
-    {
-        this.dynamicVariables = dynamicVariables;
     }
 }
