@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="console">
+            <PatternLayout pattern="%highlight{%d [%t] %-5p %c - %m%n}" />
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="console" />
+        </Root>
+    </Loggers>
+</Configuration>

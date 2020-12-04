@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath(group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: '2.4.0')
+    }
+}
+apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
+apply plugin: io.spring.gradle.dependencymanagement.DependencyManagementPlugin
+
+project.description = 'Vividus to Zephyr exporter'
+
+dependencies {
+    implementation project(':vividus-util')
+    implementation project(':vividus-facade-jira')
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
+
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'commons-io', name: 'commons-io', version: versions.commonsIo)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}
+
+tasks.artifactoryPublish.enabled = false
+tasks.publish.enabled = false
