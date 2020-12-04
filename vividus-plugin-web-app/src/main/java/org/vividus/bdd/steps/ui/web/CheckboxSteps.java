@@ -59,7 +59,7 @@ public class CheckboxSteps
      * @param checkBoxAction Actions to be performed (CHECK, UNCHECK)
      * @param checkboxLocator Locator to locate checkboxes
      */
-    @When(value = "I $checkBoxAction checkbox located by `$checkboxLocator`")
+    @When("I $checkBoxAction checkbox located by `$checkboxLocator`")
     public void changeStateOfCheckbox(CheckboxAction checkBoxAction, Locator checkboxLocator)
     {
         WebElement checkboxElement = baseValidations.assertIfElementExists(CHECKBOX, checkboxLocator);
