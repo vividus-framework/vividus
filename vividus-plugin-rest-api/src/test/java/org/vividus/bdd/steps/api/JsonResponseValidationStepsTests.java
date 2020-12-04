@@ -320,7 +320,7 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testWaitForJsonFieldAppearsWithoutPolling() throws IOException, IllegalAccessException, NoSuchFieldException
+    void testWaitForJsonFieldAppearsWithoutPolling() throws IOException
     {
         mockResponse(JSON);
         testWaitForJsonFieldAppears(1);
@@ -331,7 +331,7 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testWaitForJsonFieldAppearsWithPolling() throws IOException, IllegalAccessException, NoSuchFieldException
+    void testWaitForJsonFieldAppearsWithPolling() throws IOException
     {
         String body = "{\"key\":\"value\"}";
         mockResponse(body);

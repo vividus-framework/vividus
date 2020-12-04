@@ -140,7 +140,7 @@ class BrowserStackLocalManagerTests
     }
 
     @Test
-    void shouldWrapExceptionIntoTunnelExceptionOnStart() throws Exception
+    void shouldWrapExceptionIntoTunnelExceptionOnStart()
     {
         Exception thrown = mock(Exception.class);
         try (MockedConstruction<Local> localMocks = mockConstruction(Local.class,

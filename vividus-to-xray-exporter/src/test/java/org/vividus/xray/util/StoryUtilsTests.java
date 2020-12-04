@@ -44,7 +44,7 @@ class StoryUtilsTests
     private static final List<Scenario> SCENARIOS = StoryUtils.getFoldedScenarios(readStory("story.json"));
 
     @Test
-    void shouldAppendLifecycleExamplesToScenarioWithoutLocalExamples() throws IOException
+    void shouldAppendLifecycleExamplesToScenarioWithoutLocalExamples()
     {
         Parameters params = SCENARIOS.get(0).getExamples().getParameters();
         assertEquals(List.of(LIFECYCLE_KEY + 1, LIFECYCLE_KEY + 2), params.getNames());
@@ -55,7 +55,7 @@ class StoryUtilsTests
     }
 
     @Test
-    void shouldAppendLifecycleExamplesToScenarioWithSingleLocalExamples() throws IOException
+    void shouldAppendLifecycleExamplesToScenarioWithSingleLocalExamples()
     {
         Parameters params = SCENARIOS.get(1).getExamples().getParameters();
         assertEquals(List.of(
@@ -68,7 +68,7 @@ class StoryUtilsTests
     }
 
     @Test
-    void shouldAppendLifecycleExamplesToScenarioWithMultipleLocalExamples() throws IOException
+    void shouldAppendLifecycleExamplesToScenarioWithMultipleLocalExamples()
     {
         Parameters params = SCENARIOS.get(2).getExamples().getParameters();
         assertEquals(List.of(

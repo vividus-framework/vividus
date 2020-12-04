@@ -133,7 +133,7 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldUpdateTestCaseNotEditableStatus() throws IOException, NonEditableIssueStatusException
+    void shouldUpdateTestCaseNotEditableStatus() throws IOException
     {
         initializeFacade(List.of(OPEN_STATUS));
         String closedStatus = "Closed";

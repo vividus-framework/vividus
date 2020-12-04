@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,14 +102,14 @@ class SshStepsTests
     }
 
     @Test
-    void shouldCreateFileOverSftp() throws CommandExecutionException, IOException
+    void shouldCreateFileOverSftp() throws CommandExecutionException
     {
         String content = "content";
         testPutFile(SftpCommand.PUT, content, () -> sshSteps.createFileOverSftp(content, DESTINATION_PATH, SERVER));
     }
 
     @Test
-    void testPutFileSftp() throws CommandExecutionException, IOException
+    void testPutFileSftp() throws CommandExecutionException
     {
         String filePath = "/test.txt";
         testPutFile(SftpCommand.PUT_FROM_FILE, filePath,
@@ -118,7 +117,7 @@ class SshStepsTests
     }
 
     private void testPutFile(SftpCommand command, String parameter, StepRunner stepExecutor)
-            throws CommandExecutionException, IOException
+            throws CommandExecutionException
     {
         CommandExecutionManager<SftpOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SFTP);
         when(executionManager.run(eq(SERVER_CONFIGURATION), argThat(commands -> {
@@ -160,6 +159,6 @@ class SshStepsTests
     @FunctionalInterface
     private interface StepRunner
     {
-        void run() throws CommandExecutionException, IOException;
+        void run() throws CommandExecutionException;
     }
 }

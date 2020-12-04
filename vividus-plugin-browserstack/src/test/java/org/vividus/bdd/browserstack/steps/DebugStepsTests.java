@@ -66,7 +66,7 @@ class DebugStepsTests
     }
 
     @Test
-    void shouldFailIfNoSessionAvailable() throws BrowserStackException
+    void shouldFailIfNoSessionAvailable()
     {
         when(textContext.get(PREVIOUS_SESSION_ID)).thenReturn(null);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,

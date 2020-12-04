@@ -89,7 +89,7 @@ class AbstractTunnellingCapabilitiesConfigurerTests
     }
 
     @Test
-    void shouldNotConfigureTunnel() throws TunnelException
+    void shouldNotConfigureTunnel()
     {
         tunnellingConfigurer.setTunnellingEnabled(false);
 
