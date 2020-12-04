@@ -36,14 +36,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
 @RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(MockitoJUnitRunner.class)
 public class SauceConnectManagerTests
 {
     private static final String OPTIONS = "options";
@@ -64,7 +66,6 @@ public class SauceConnectManagerTests
     @Before
     public void before()
     {
-        MockitoAnnotations.initMocks(this);
         sauceConnectManager.setSauceLabsUsername(USERNAME);
         sauceConnectManager.setSauceLabsAccessKey(USERKEY);
         sauceConnectManager.setTestContext(context);
@@ -110,7 +111,6 @@ public class SauceConnectManagerTests
         mockSocket();
         startConnection();
         SauceConnectOptions options2 = mock(SauceConnectOptions.class);
-        when(options2.build(anyString())).thenReturn(OPTIONS);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> sauceConnectManager.start(options2));
         assertEquals("Only one SauceConnect tunnel is allowed within one thread", exception.getMessage());
