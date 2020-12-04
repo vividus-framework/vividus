@@ -95,7 +95,7 @@ public class KeyboardActions
         if (genericWebDriverManager.isIOSNativeApp() && realDevice)
         {
             String tagName = webElement.getTagName();
-            /**
+            /*
              * Tap on 'Return' doesn't close the keyboard for XCUIElementTypeTextView element, the only way to close the
              * keyboard is to tap on any element outside the text view.
              */
@@ -105,7 +105,7 @@ public class KeyboardActions
                         + " the {} to hide the keyboard");
                 return;
             }
-            /**
+            /*
              * Handle closing the keyboard as it's done in appium
              * https://github.com/appium/appium-xcuitest-driver/blob/master/lib/commands/general.js#L199
              */
