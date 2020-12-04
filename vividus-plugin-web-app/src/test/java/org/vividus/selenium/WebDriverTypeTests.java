@@ -381,7 +381,7 @@ class WebDriverTypeTests
         try (MockedStatic<WebDriverManager> webDriverManagerMock = mockStatic(WebDriverManager.class))
         {
             WebDriverManager webDriverManager = mock(WebDriverManager.class);
-            webDriverManagerMock.when(() -> managerSupplier.get()).thenReturn(webDriverManager);
+            webDriverManagerMock.when(managerSupplier::get).thenReturn(webDriverManager);
             type.setDriverExecutablePath(Optional.empty());
             verify(webDriverManager).setup();
         }

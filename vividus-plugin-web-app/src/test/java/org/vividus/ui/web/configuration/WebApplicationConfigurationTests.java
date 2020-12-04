@@ -65,7 +65,7 @@ class WebApplicationConfigurationTests
     {
         WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(null, null);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> webApplicationConfiguration.getMainApplicationPageUrl());
+                webApplicationConfiguration::getMainApplicationPageUrl);
         assertEquals("URL of the main application page should be non-blank", exception.getMessage());
     }
 
