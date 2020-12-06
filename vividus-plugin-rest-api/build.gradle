@@ -19,7 +19,7 @@ dependencies {
         exclude module: 'hamcrest-library'
     }
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
-    implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '2.21.0')
+    implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '2.22.0')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'org.apache.tika', name: 'tika-core', version: versions.tika)
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
