@@ -20,6 +20,10 @@ Features:
 |true
 |Path to directory with test execution JSON results.
 
+|`zephyr.exporter.update-execution-statuses-only`
+|false
+|Property for update existing executions statuses only.
+
 |`zephyr.project-key`
 |true
 |Key of a Jira project where new test executions should be created
