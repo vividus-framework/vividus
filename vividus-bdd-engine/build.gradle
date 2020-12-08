@@ -13,7 +13,9 @@ dependencies {
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
-    runtimeOnly(group: 'org.vividus', name: 'jbehave-spring', version: versions.jbehave)
+    runtimeOnly(group: 'org.vividus', name: 'jbehave-spring', version: versions.jbehave) {
+        exclude group: 'org.springframework', module: 'spring-context'
+    }
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
