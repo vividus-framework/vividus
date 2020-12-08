@@ -49,12 +49,12 @@ When I add headers to proxied requests with URL pattern which is equal to `http:
 Given I am on a page with the URL 'http://httpbin.org/headers'
 When I change context to element located `xpath(//pre)`
 When I set the text found in search context to the 'SCENARIO' variable 'response'
-Then a JSON element from '${response}' by the JSON path '$.headers' is equal to '
+Then JSON element from `${response}` by JSON path `$.headers` is equal to `
 {
     "Testname1": "testValue1",
     "Testname2": "testValue2"
 }
-'IGNORING_EXTRA_FIELDS
+`IGNORING_EXTRA_FIELDS
 
 Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers with binary data
 Meta:

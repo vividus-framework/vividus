@@ -96,7 +96,7 @@ public class JsonResponseValidationSteps
      * IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS, IGNORING_VALUES
      * @return true JSON contains the expected data by given JSON path, otherwise - false
      */
-    @Then("a JSON element by the JSON path '$jsonPath' is equal to '$expectedData'$options")
+    @Then("JSON element by JSON path `$jsonPath` is equal to `$expectedData`$options")
     public boolean isDataByJsonPathEqual(String jsonPath, String expectedData, Options options)
     {
         return isDataByJsonPathFromJsonEqual(getActualJson(), jsonPath, expectedData, options);
@@ -111,7 +111,7 @@ public class JsonResponseValidationSteps
      * IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS, IGNORING_VALUES
      * @return true JSON contains the expected data by given JSON path, otherwise - false
      */
-    @Then("a JSON element from '$json' by the JSON path '$jsonPath' is equal to '$expectedData'$options")
+    @Then("JSON element from `$json` by JSON path `$jsonPath` is equal to `$expectedData`$options")
     public boolean isDataByJsonPathFromJsonEqual(String json, String jsonPath, String expectedData, Options options)
     {
         return getDataByJsonPath(json, jsonPath, expectedData).map(match(jsonPath, expectedData, options))
@@ -159,7 +159,7 @@ public class JsonResponseValidationSteps
      * @return true - the number of found elements is as expected; false - the actual number is not as expected or the
      * specified JSON path was not found
      */
-    @Then("the number of JSON elements by the JSON path '$jsonPath' is $comparisonRule $elementsNumber")
+    @Then("number of JSON elements by JSON path `$jsonPath` is $comparisonRule $elementsNumber")
     public boolean doesJsonPathElementsMatchRule(String jsonPath, ComparisonRule comparisonRule, int elementsNumber)
     {
         return doesJsonPathElementsFromJsonMatchRule(getActualJson(), jsonPath, comparisonRule, elementsNumber);
@@ -232,7 +232,7 @@ public class JsonResponseValidationSteps
      * </ul>
      * @param variableName A variable name
      */
-    @When("I save a JSON element from '$json' by JSON path '$jsonPath' to $scopes variable '$variableName'")
+    @When("I save JSON element from `$json` by JSON path `$jsonPath` to $scopes variable `$variableName`")
     public void saveJsonElementToVariable(String json, String jsonPath, Set<VariableScope> scopes, String variableName)
     {
         getDataByJsonPath(json, jsonPath, null)
@@ -253,7 +253,7 @@ public class JsonResponseValidationSteps
      * </ul>
      * @param variableName A variable name
      */
-    @When("I set the number of elements found by the JSON path '$jsonPath' to the $scopes variable '$variableName'")
+    @When("I set number of elements found by JSON path `$jsonPath` to $scopes variable `$variableName`")
     public void saveElementsNumberByJsonPath(String jsonPath, Set<VariableScope> scopes, String variableName)
     {
         bddVariableContext.putVariable(scopes, variableName, getElementsNumber(getActualJson(), jsonPath));
@@ -404,7 +404,7 @@ public class JsonResponseValidationSteps
      * @param stepsToExecute examples table with steps to execute for each found elements
      */
     @SuppressWarnings("MagicNumber")
-    @When(value = "I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element do"
+    @When(value = "I find $comparisonRule `$elementsNumber` JSON elements by `$jsonPath` and for each element do"
             + "$stepsToExecute", priority = 6)
     public void performAllStepsForJsonIfFound(ComparisonRule comparisonRule, int elementsNumber, String jsonPath,
             SubSteps stepsToExecute)
