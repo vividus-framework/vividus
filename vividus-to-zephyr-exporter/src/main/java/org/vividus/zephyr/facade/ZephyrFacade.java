@@ -24,6 +24,7 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 
 import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraFacade;
@@ -141,5 +142,16 @@ public class ZephyrFacade implements IZephyrFacade
             testStatusPerZephyrIdMapping.put(s.getKey(), statusId.get(0));
         });
         return testStatusPerZephyrIdMapping;
+    }
+
+    @Override
+    public OptionalInt findExecutionId(String issueId) throws IOException
+    {
+        String json = client.executeGet(ZAPI_ENDPOINT + "execution?issueId=" + issueId);
+        String jsonpath = String.format("$..[?(@.versionName=='%s' && @.cycleName=='%s' && @.folderName=='%s')].id",
+                zephyrExporterConfiguration.getVersionName(), zephyrExporterConfiguration.getCycleName(),
+                zephyrExporterConfiguration.getFolderName());
+        List<Integer> executionId = JsonPathUtils.getData(json, jsonpath);
+        return executionId.size() != 0 ? OptionalInt.of(executionId.get(0)) : OptionalInt.empty();
     }
 }

@@ -28,6 +28,8 @@ public class ZephyrExporterProperties
     @NotBlank(message = "Property 'zephyr.exporter.source-directory' must not be blank")
     private Path sourceDirectory;
 
+    private boolean updateExecutionStatusesOnly;
+
     public Path getSourceDirectory()
     {
         return sourceDirectory;
@@ -36,5 +38,15 @@ public class ZephyrExporterProperties
     public void setSourceDirectory(Path sourceDirectory)
     {
         this.sourceDirectory = sourceDirectory;
+    }
+
+    public boolean getUpdateExecutionStatusesOnly()
+    {
+        return updateExecutionStatusesOnly;
+    }
+
+    public void setUpdateExecutionStatusesOnly(boolean updateExecutionStatusesOnly)
+    {
+        this.updateExecutionStatusesOnly = updateExecutionStatusesOnly;
     }
 }

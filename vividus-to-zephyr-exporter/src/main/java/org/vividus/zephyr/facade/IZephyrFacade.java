@@ -17,6 +17,7 @@
 package org.vividus.zephyr.facade;
 
 import java.io.IOException;
+import java.util.OptionalInt;
 
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 
@@ -27,4 +28,6 @@ public interface IZephyrFacade
     Integer createExecution(String execution) throws IOException;
 
     void updateExecutionStatus(int executionId, String executionBody) throws IOException;
+
+    OptionalInt findExecutionId(String issueId) throws IOException;
 }

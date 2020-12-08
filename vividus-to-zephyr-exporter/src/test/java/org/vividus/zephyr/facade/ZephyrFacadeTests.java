@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,12 +47,17 @@ class ZephyrFacadeTests
     private static final String GET_CYCLE_ID_ENDPOINT = ZAPI_ENDPOINT + "cycle?projectId=%s&versionId=%s";
     private static final String GET_FOLDER_ID_ENDPOINT = ZAPI_ENDPOINT +  "cycle/%s/folders?projectId=%s&versionId=%s";
     private static final String GET_STATUSES_ENDPOINT = ZAPI_ENDPOINT + "util/testExecutionStatus";
+    private static final String GET_EXECUTION_ID_ENDPOINT = ZAPI_ENDPOINT + "execution?issueId=111";
     private static final String GET_CYCLE_ID_RESPONSE = "{\"11113\":{\"name\":\"test\"},\"recordsCount\":1}";
     private static final String GET_FOLDER_ID_RESPONSE = "[{\"folderId\":11114,\"folderName\":\"test\"}]";
+    private static final String GET_EXECUTION_ID_RESPONSE = "{\"issueId\": 111,\"executions\": [{\"id\": 1001,"
+            + "\"cycleName\": \"test\",\"folderName\": \"test\",\"versionName\": \"test\"},{\"id\": 1002,"
+            + "\"cycleName\": \"test 2\",\"folderName\": \"test 2\",\"versionName\": \"test 2\"}]}";
     private static final String PROJECT_ID = "11111";
     private static final String VERSION_ID = "11112";
     private static final String CYCLE_ID = "11113";
     private static final String FOLDER_ID = "11114";
+    private static final String ISSUE_ID = "111";
     private static final String TEST = "test";
 
     @Mock
@@ -164,6 +170,26 @@ class ZephyrFacadeTests
         assertEquals(FOLDER_ID, actualConfiguration.getFolderId());
         assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().size());
         assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().get(TestCaseStatus.PASSED));
+    }
+
+    @Test
+    void testFindExecutionId() throws IOException
+    {
+        when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
+        when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
+        when(zephyrExporterConfiguration.getFolderName()).thenReturn(TEST);
+        when(client.executeGet(GET_EXECUTION_ID_ENDPOINT)).thenReturn(GET_EXECUTION_ID_RESPONSE);
+        assertEquals(OptionalInt.of(1001), zephyrFacade.findExecutionId(ISSUE_ID));
+    }
+
+    @Test
+    void testExecutionIdNotFound() throws IOException
+    {
+        when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
+        when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
+        when(zephyrExporterConfiguration.getFolderName()).thenReturn("test2");
+        when(client.executeGet(GET_EXECUTION_ID_ENDPOINT)).thenReturn(GET_EXECUTION_ID_RESPONSE);
+        assertEquals(OptionalInt.empty(), zephyrFacade.findExecutionId(ISSUE_ID));
     }
 
     private void mockJiraProjectRetrieve() throws IOException
