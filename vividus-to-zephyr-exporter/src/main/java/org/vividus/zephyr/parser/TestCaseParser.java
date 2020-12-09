@@ -57,13 +57,17 @@ public class TestCaseParser
                 .collect(Collectors.groupingBy(TestCase::getKey,
                         Collectors.mapping(TestCase::getStatus, Collectors.toCollection(TreeSet::new))));
 
-        List<TestCase> testCasesForImporting = new ArrayList<>();
+        List<TestCase> testCasesForExporting = new ArrayList<>();
         for (Map.Entry<String, TreeSet<TestCaseStatus>> entry : testCasesMap.entrySet())
         {
-            testCasesForImporting.add(new TestCase(entry.getKey(), entry.getValue().first()));
+            TestCaseStatus testCaseStatus = entry.getValue().first();
+            if (zephyrExporterProperties.getStatusesOfTestCasesToAddToExecution().contains(testCaseStatus))
+            {
+                testCasesForExporting.add(new TestCase(entry.getKey(), testCaseStatus));
+            }
         }
-        LOGGER.info("Test cases for exporting to JIRA: {}", testCasesForImporting);
-        return testCasesForImporting;
+        LOGGER.info("Test cases for exporting to JIRA: {}", testCasesForExporting);
+        return testCasesForExporting;
     }
 
     private List<File> getJsonResultsFiles() throws IOException

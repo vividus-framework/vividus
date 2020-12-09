@@ -17,10 +17,12 @@
 package org.vividus.zephyr.configuration;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.vividus.zephyr.model.TestCaseStatus;
 
 @ConfigurationProperties("zephyr.exporter")
 public class ZephyrExporterProperties
@@ -29,6 +31,8 @@ public class ZephyrExporterProperties
     private Path sourceDirectory;
 
     private boolean updateExecutionStatusesOnly;
+
+    private List<TestCaseStatus> statusesOfTestCasesToAddToExecution;
 
     public Path getSourceDirectory()
     {
@@ -48,5 +52,15 @@ public class ZephyrExporterProperties
     public void setUpdateExecutionStatusesOnly(boolean updateExecutionStatusesOnly)
     {
         this.updateExecutionStatusesOnly = updateExecutionStatusesOnly;
+    }
+
+    public List<TestCaseStatus> getStatusesOfTestCasesToAddToExecution()
+    {
+        return statusesOfTestCasesToAddToExecution;
+    }
+
+    public void setStatusesOfTestCasesToAddToExecution(List<TestCaseStatus> statusesOfTestCasesToAddToExecution)
+    {
+        this.statusesOfTestCasesToAddToExecution = statusesOfTestCasesToAddToExecution;
     }
 }
