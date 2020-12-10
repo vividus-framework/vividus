@@ -129,9 +129,12 @@ jobs:
         MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
         MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
         KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
       shell: bash
       run: |
-        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD && -n $KAFKA_PASSWORD ]]; then
+        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD && -n $KAFKA_PASSWORD && -n $AWS_ACCESS_KEY_ID && -n $AWS_SECRET_ACCESS_KEY && -n $AWS_REGION ]]; then
             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                                 -Pvividus.configuration.environments=system/web,system/api \
                                                 -Pvividus.configuration.suite=system \
@@ -148,7 +151,7 @@ jobs:
                                                 -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                 -Pvividus.allure.executor.report-name="System tests report"
         else
-            echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY and/or APPLITOOLS_EXECUTE_KEY and/or APPLITOOLS_READ_KEY and/or MONGODB_USERNAME and/or MONGODB_PASSWORD variables and/or KAFKA_PASSWORD, System tests will be skipped
+            echo No passwords/access keys are available, skipping system tests
         fi
 
     - name: Publish system tests report
