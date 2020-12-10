@@ -17,6 +17,7 @@
 package org.vividus.zephyr.facade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,6 +54,7 @@ class ZephyrFacadeTests
     private static final String GET_EXECUTION_ID_RESPONSE = "{\"issueId\": 111,\"executions\": [{\"id\": 1001,"
             + "\"cycleName\": \"test\",\"folderName\": \"test\",\"versionName\": \"test\"},{\"id\": 1002,"
             + "\"cycleName\": \"test 2\",\"folderName\": \"test 2\",\"versionName\": \"test 2\"}]}";
+    private static final String GET_STATUSES_ID_RESPONSE = "[{\"id\": 1, \"name\": \"test\"}]";
     private static final String PROJECT_ID = "11111";
     private static final String VERSION_ID = "11112";
     private static final String CYCLE_ID = "11113";
@@ -162,12 +164,35 @@ class ZephyrFacadeTests
             .thenReturn(GET_CYCLE_ID_RESPONSE);
         when(client.executeGet(String.format(GET_FOLDER_ID_ENDPOINT, CYCLE_ID, PROJECT_ID, VERSION_ID)))
                 .thenReturn(GET_FOLDER_ID_RESPONSE);
-        when(client.executeGet(GET_STATUSES_ENDPOINT)).thenReturn("[{\"id\": 1, \"name\": \"test\"}]");
+        when(client.executeGet(GET_STATUSES_ENDPOINT)).thenReturn(GET_STATUSES_ID_RESPONSE);
         ZephyrConfiguration actualConfiguration = zephyrFacade.prepareConfiguration();
         assertEquals(PROJECT_ID, actualConfiguration.getProjectId());
         assertEquals(VERSION_ID, actualConfiguration.getVersionId());
         assertEquals(CYCLE_ID, actualConfiguration.getCycleId());
         assertEquals(FOLDER_ID, actualConfiguration.getFolderId());
+        assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().size());
+        assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().get(TestCaseStatus.PASSED));
+    }
+
+    @Test
+    void testPrepareConfigurationWithoutFolder() throws IOException
+    {
+        when(zephyrExporterConfiguration.getProjectKey()).thenReturn(TEST);
+        when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
+        when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
+        when(zephyrExporterConfiguration.getFolderName()).thenReturn("");
+        Map<TestCaseStatus, String> statuses = new EnumMap<>(TestCaseStatus.class);
+        statuses.put(TestCaseStatus.PASSED, TEST);
+        when(zephyrExporterConfiguration.getStatuses()).thenReturn(statuses);
+        mockJiraProjectRetrieve();
+        when(client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT, PROJECT_ID, VERSION_ID)))
+            .thenReturn(GET_CYCLE_ID_RESPONSE);
+        when(client.executeGet(GET_STATUSES_ENDPOINT)).thenReturn(GET_STATUSES_ID_RESPONSE);
+        ZephyrConfiguration actualConfiguration = zephyrFacade.prepareConfiguration();
+        assertEquals(PROJECT_ID, actualConfiguration.getProjectId());
+        assertEquals(VERSION_ID, actualConfiguration.getVersionId());
+        assertEquals(CYCLE_ID, actualConfiguration.getCycleId());
+        assertNull(actualConfiguration.getFolderId());
         assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().size());
         assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().get(TestCaseStatus.PASSED));
     }
@@ -180,6 +205,17 @@ class ZephyrFacadeTests
         when(zephyrExporterConfiguration.getFolderName()).thenReturn(TEST);
         when(client.executeGet(GET_EXECUTION_ID_ENDPOINT)).thenReturn(GET_EXECUTION_ID_RESPONSE);
         assertEquals(OptionalInt.of(1001), zephyrFacade.findExecutionId(ISSUE_ID));
+    }
+
+    @Test
+    void testFindExecutionIdWithoutFolder() throws IOException
+    {
+        when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
+        when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
+        when(zephyrExporterConfiguration.getFolderName()).thenReturn("");
+        when(client.executeGet(GET_EXECUTION_ID_ENDPOINT)).thenReturn("{\"issueId\": 111,\"executions\":"
+                + "[{\"id\": 1003,\"cycleName\": \"test\",\"versionName\": \"test\"}]}");
+        assertEquals(OptionalInt.of(1003), zephyrFacade.findExecutionId(ISSUE_ID));
     }
 
     @Test

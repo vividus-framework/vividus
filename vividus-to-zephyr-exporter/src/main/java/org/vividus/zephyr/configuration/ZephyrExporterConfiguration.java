@@ -37,7 +37,6 @@ public class ZephyrExporterConfiguration
     @NotBlank(message = "Property 'zephyr.cycle-name' should not be empty")
     private final String cycleName;
 
-    @NotBlank(message = "Property 'zephyr.folder-name' should not be empty")
     private final String folderName;
 
     private final Map<TestCaseStatus, String> statuses;
