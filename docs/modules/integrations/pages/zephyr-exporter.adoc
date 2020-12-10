@@ -41,7 +41,7 @@ Features:
 |Cycle/sprint name where new test executions should be created
 
 |`zephyr.folder-name`
-|true
+|false
 |Folder name where new test executions should be created
 
 |===

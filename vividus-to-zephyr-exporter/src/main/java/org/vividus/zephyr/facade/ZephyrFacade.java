@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 
+import org.apache.commons.lang3.StringUtils;
 import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.Project;
@@ -82,8 +83,11 @@ public class ZephyrFacade implements IZephyrFacade
         String cycleId = findCycleId(projectAndVersionUrlQuery);
         zephyrConfiguration.setCycleId(cycleId);
 
-        String folderId = findFolderId(cycleId, projectAndVersionUrlQuery);
-        zephyrConfiguration.setFolderId(folderId);
+        if (StringUtils.isNotBlank(zephyrExporterConfiguration.getFolderName()))
+        {
+            String folderId = findFolderId(cycleId, projectAndVersionUrlQuery);
+            zephyrConfiguration.setFolderId(folderId);
+        }
 
         Map<TestCaseStatus, Integer> statusIdMap = getExecutionStatuses();
         zephyrConfiguration.setTestStatusPerZephyrIdMapping(statusIdMap);
@@ -148,9 +152,18 @@ public class ZephyrFacade implements IZephyrFacade
     public OptionalInt findExecutionId(String issueId) throws IOException
     {
         String json = client.executeGet(ZAPI_ENDPOINT + "execution?issueId=" + issueId);
-        String jsonpath = String.format("$..[?(@.versionName=='%s' && @.cycleName=='%s' && @.folderName=='%s')].id",
+        String jsonpath;
+        if (StringUtils.isNotBlank(zephyrExporterConfiguration.getFolderName()))
+        {
+            jsonpath = String.format("$..[?(@.versionName=='%s' && @.cycleName=='%s' && @.folderName=='%s')].id",
                 zephyrExporterConfiguration.getVersionName(), zephyrExporterConfiguration.getCycleName(),
                 zephyrExporterConfiguration.getFolderName());
+        }
+        else
+        {
+            jsonpath = String.format("$..[?(@.versionName=='%s' && @.cycleName=='%s')].id",
+                    zephyrExporterConfiguration.getVersionName(), zephyrExporterConfiguration.getCycleName());
+        }
         List<Integer> executionId = JsonPathUtils.getData(json, jsonpath);
         return executionId.size() != 0 ? OptionalInt.of(executionId.get(0)) : OptionalInt.empty();
     }
