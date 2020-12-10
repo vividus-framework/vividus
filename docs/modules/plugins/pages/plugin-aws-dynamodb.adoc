@@ -1,0 +1,85 @@
+= AWS DynamoDB Plugin
+
+The plugin provides functionality to interact with https://aws.amazon.com/dynamodb/[Amazon DynamoDB].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-aws-dynamodb', version: '{current-version}')
+----
+
+include::partial$aws.adoc[]
+
+== Steps
+
+:partiql: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ql-reference.html[PartiQL]
+
+=== Querying Data
+
+Execute {partiql} `SELECT` statement and save the result as JSON to the specified variable.
+
+[source,gherkin]
+----
+When I execute query `$partiqlQuery` against DynamoDB and save result as JSON to $scopes variable `$variableName`
+----
+
+* `$partiqlQuery` - The {partiql} (A SQL-Compatible Query Language for Amazon DynamoDB) query representing the `SELECT` statement to execute.
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results in JSON format.
+
+
+.Execute SELECT statement and validate result
+[source,gherkin]
+----
+When I execute query `
+    SELECT * FROM Music
+    WHERE Artist='Roxette' and SongTitle='The Look'
+` against DynamoDB and save result as JSON to scenario variable `song`
+Then JSON element from `${song}` by JSON path `$` is equal to `
+{
+    "Artist": "Roxette",
+    "SongTitle": "The Look"
+}`
+----
+
+=== Manipulating Data
+
+Execute https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ql-reference.html[PartiQL] `INSERT`, `UPDATE`, `DELETE` statements.
+
+[source,gherkin]
+----
+When I execute query `$partiqlQuery` against DynamoDB
+----
+
+* `$partiqlQuery` - The {partiql} (A SQL-Compatible Query Language for Amazon DynamoDB) query representing the `INSERT`, `UPDATE` or `DELETE` statement to execute.
+
+.Execute INSERT statement
+[source,gherkin]
+----
+When I execute query `
+    INSERT INTO Music
+    value {'Artist':'Roxette','SongTitle':'The Look'}
+` against DynamoDB
+----
+
+.Execute UPDATE statement
+[source,gherkin]
+----
+When I execute query `
+    UPDATE Music
+    SET AwardsWon=1
+    SET AwardDetail={'Grammis':[1989, 1990]}
+    WHERE Artist='Roxette' and SongTitle='The Look'
+` against DynamoDB
+----
+
+.Execute DELETE statement
+[source,gherkin]
+----
+When I execute query `
+    DELETE FROM Music
+    WHERE Artist='Roxette' and SongTitle='The Look'
+` against DynamoDB
+----
