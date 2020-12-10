@@ -18,6 +18,7 @@ package org.vividus.bdd.spring;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.io.StoryLoader;
+import org.jbehave.core.model.Story;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
@@ -108,6 +110,12 @@ public class ExtendedConfiguration extends Configuration
     public void setViewGenerator(Optional<ViewGenerator> viewGenerator)
     {
         viewGenerator.ifPresent(this::useViewGenerator);
+    }
+
+    @Inject
+    public void setStoryExecutionComparator(Optional<Comparator<Story>> storyExecutionComparator)
+    {
+        storyExecutionComparator.ifPresent(this::useStoryExecutionComparator);
     }
 
     @Inject

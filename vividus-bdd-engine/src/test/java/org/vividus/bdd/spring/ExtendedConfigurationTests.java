@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.Story;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.ViewGenerator;
@@ -175,7 +177,7 @@ public class ExtendedConfigurationTests
     }
 
     @Test
-    public void testSetViewGenerator()
+    public void shouldSetViewGenerator()
     {
         ViewGenerator viewGenerator = mock(ViewGenerator.class);
         configuration.setViewGenerator(Optional.of(viewGenerator));
@@ -188,5 +190,22 @@ public class ExtendedConfigurationTests
         ExtendedConfiguration spy = Mockito.spy(configuration);
         configuration.setViewGenerator(Optional.empty());
         verify(spy, never()).useViewGenerator(any());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldSetStoryExecutionComparator()
+    {
+        Comparator<Story> storyExecutionComparator = mock(Comparator.class);
+        configuration.setStoryExecutionComparator(Optional.of(storyExecutionComparator));
+        assertEquals(storyExecutionComparator, configuration.storyExecutionComparator());
+    }
+
+    @Test
+    public void shouldNotSetStoryExecutionComparatorIfEmptyOptionalUsed()
+    {
+        ExtendedConfiguration spy = Mockito.spy(configuration);
+        configuration.setStoryExecutionComparator(Optional.empty());
+        verify(spy, never()).useStoryExecutionComparator(any());
     }
 }
