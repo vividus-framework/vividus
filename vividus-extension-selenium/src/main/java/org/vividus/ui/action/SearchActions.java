@@ -25,6 +25,8 @@ import javax.inject.Inject;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.ui.action.search.ElementActionService;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
@@ -35,6 +37,8 @@ import org.vividus.ui.context.IUiContext;
 
 public class SearchActions implements ISearchActions
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchActions.class);
+
     @Inject private IUiContext uiContext;
     @Inject private ElementActionService elementActionService;
 
@@ -49,7 +53,21 @@ public class SearchActions implements ISearchActions
             IElementFilterAction filterAction = elementActionService.find(entry.getKey());
             for (String filterValue : entry.getValue())
             {
-                foundElements = filterAction.filter(foundElements, filterValue);
+                int size = foundElements.size();
+                if (size == 0)
+                {
+                    break;
+                }
+
+                List<WebElement> filteredElements = filterAction.filter(foundElements, filterValue);
+
+                LOGGER.atInfo().addArgument(() -> size - filteredElements.size())
+                               .addArgument(size)
+                               .addArgument(entry::getKey)
+                               .addArgument(filterValue)
+                               .log("{} of {} elements were filtered out by {} filter with '{}' value");
+
+                foundElements = filteredElements;
             }
         }
         List<Locator> childLocators = locator.getChildLocators();
