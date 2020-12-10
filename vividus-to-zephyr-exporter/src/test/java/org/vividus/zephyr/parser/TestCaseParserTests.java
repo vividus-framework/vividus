@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -51,6 +52,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.databind.TestCaseDeserializer;
 import org.vividus.zephyr.model.TestCase;
+import org.vividus.zephyr.model.TestCaseStatus;
 
 import uk.org.lidalia.slf4jext.Level;
 
@@ -58,6 +60,9 @@ import uk.org.lidalia.slf4jext.Level;
 public class TestCaseParserTests
 {
     private static final String JSON_FILES_STRING = "Json files: {}";
+    private static final String TEST_CASES_STRING = "Test cases: {}";
+    private static final String FOR_EXPORTING_STRING = "Test cases for exporting to JIRA: {}";
+    private static final String RESOURCE_PATH = "/test-cases";
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(TestCaseParser.class);
 
@@ -111,17 +116,39 @@ public class TestCaseParserTests
     void testCreateTestCases() throws URISyntaxException, IOException
     {
         configureObjectMapper();
-        Path sourceDirectory = Paths.get(getClass().getResource("/test-cases").toURI());
+        Path sourceDirectory = Paths.get(getClass().getResource(RESOURCE_PATH).toURI());
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
+        when(zephyrExporterProperties.getStatusesOfTestCasesToAddToExecution())
+            .thenReturn(List.of(TestCaseStatus.SKIPPED, TestCaseStatus.PASSED));
         List<TestCase> testCases = testCaseParser.createTestCases(objectMapper);
         assertEquals(testCases.size(), 2);
-        assertThat(testLogger.getLoggingEvents().get(0).getMessage(), is(JSON_FILES_STRING));
-        assertThat(testLogger.getLoggingEvents().get(0).getLevel(), is(Level.INFO));
-        assertThat(testLogger.getLoggingEvents().get(1).getMessage(), is("Test cases: {}"));
-        assertThat(testLogger.getLoggingEvents().get(1).getLevel(), is(Level.INFO));
-        assertThat(testLogger.getLoggingEvents().get(2).getMessage(), is("Test cases for exporting to JIRA: {}"));
-        assertThat(testLogger.getLoggingEvents().get(2).getLevel(), is(Level.INFO));
-        assertThat(testLogger.getLoggingEvents().size(), equalTo(3));
+        List<LoggingEvent> events = testLogger.getLoggingEvents();
+        assertThat(events.get(0).getMessage(), is(JSON_FILES_STRING));
+        assertThat(events.get(0).getLevel(), is(Level.INFO));
+        assertThat(events.get(1).getMessage(), is(TEST_CASES_STRING));
+        assertThat(events.get(1).getLevel(), is(Level.INFO));
+        assertThat(events.get(2).getMessage(), is(FOR_EXPORTING_STRING));
+        assertThat(events.get(2).getLevel(), is(Level.INFO));
+        assertThat(events.size(), equalTo(3));
+    }
+
+    @Test
+    void testCreateTestCasesWithStatusFilter() throws URISyntaxException, IOException
+    {
+        configureObjectMapper();
+        Path sourceDirectory = Paths.get(getClass().getResource(RESOURCE_PATH).toURI());
+        when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
+        when(zephyrExporterProperties.getStatusesOfTestCasesToAddToExecution())
+            .thenReturn(List.of(TestCaseStatus.PASSED));
+        List<TestCase> testCases = testCaseParser.createTestCases(objectMapper);
+        assertEquals(testCases.size(), 1);
+        List<LoggingEvent> events = testLogger.getLoggingEvents();
+        assertThat(events.get(0).getMessage(), is(JSON_FILES_STRING));
+        assertThat(events.get(0).getLevel(), is(Level.INFO));
+        assertThat(events.get(1).getMessage(), is(TEST_CASES_STRING));
+        assertThat(events.get(1).getLevel(), is(Level.INFO));
+        assertThat(events.get(2), is(info(FOR_EXPORTING_STRING, testCases)));
+        assertThat(events.size(), equalTo(3));
     }
 
     private void configureObjectMapper()

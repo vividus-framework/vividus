@@ -24,6 +24,10 @@ Features:
 |false
 |Property for update existing executions statuses only.
 
+|`zephyr.exporter.statuses-of-test-cases-to-add-to-execution`
+|false
+|List of test case statuses for adding to execution.
+
 |`zephyr.project-key`
 |true
 |Key of a Jira project where new test executions should be created
