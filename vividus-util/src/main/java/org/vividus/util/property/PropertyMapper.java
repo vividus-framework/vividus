@@ -32,7 +32,7 @@ import java.util.function.IntFunction;
 import java.util.function.UnaryOperator;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 
@@ -50,7 +50,7 @@ public class PropertyMapper implements IPropertyMapper
         SimpleModule module = new SimpleModule();
         deserializers.forEach(deserializer -> module.addDeserializer(getType(deserializer), deserializer));
         javaPropsMapper = new JavaPropsMapper();
-        javaPropsMapper.setPropertyNamingStrategy(PropertyNamingStrategy.KEBAB_CASE).registerModule(module);
+        javaPropsMapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE).registerModule(module);
         javaPropsMapper.findAndRegisterModules();
     }
 
