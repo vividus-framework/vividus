@@ -1,11 +1,11 @@
 name: vividus
-version: 0.2.12
+version: latest
 prerelease: false
 title: Vividus
 asciidoc:
   attributes:
     release-version: 'false'
-    current-version: 0.2.12
+    current-version: 0.2.13-SNAPSHOT
     source-language: asciidoc@
     xrefstyle: short@
     listing-caption: Example@
