@@ -11,7 +11,7 @@
 
     <bean id="jsonUtils-LowerCamelCase" class="org.vividus.util.json.JsonUtils">
         <constructor-arg>
-            <util:constant static-field="com.fasterxml.jackson.databind.PropertyNamingStrategy.LOWER_CAMEL_CASE"/>
+            <util:constant static-field="com.fasterxml.jackson.databind.PropertyNamingStrategies.LOWER_CAMEL_CASE"/>
         </constructor-arg>
     </bean>
 
