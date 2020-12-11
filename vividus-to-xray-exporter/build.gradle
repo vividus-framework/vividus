@@ -7,7 +7,6 @@ buildscript {
     }
 }
 apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
-apply plugin: io.spring.gradle.dependencymanagement.DependencyManagementPlugin
 
 project.description = 'Vividus to Xray exporter'
 
@@ -24,6 +23,10 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-facade-jira')
+
+    // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
+    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: '2.4.0')
+
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
 
@@ -43,6 +46,12 @@ dependencies {
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
 }
 
-tasks.artifactoryPublish.enabled = false
-tasks.publish.enabled = false
-tasks.publishMavenPublicationToMavenLocal.enabled = false
+// https://stackoverflow.com/a/62645933/2067574
+configurations {
+    [apiElements, runtimeElements].each {
+        it.outgoing.artifacts.removeIf {
+            it.buildDependencies.getDependencies(null).contains(jar)
+        }
+        it.outgoing.artifact(bootJar)
+    }
+}
