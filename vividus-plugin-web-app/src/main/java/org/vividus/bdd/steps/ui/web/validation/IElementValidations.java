@@ -25,8 +25,6 @@ public interface IElementValidations
 {
     boolean assertIfElementContainsText(WebElement element, String text, boolean isTrue);
 
-    boolean assertIfElementContainsTooltip(WebElement element, String expectedTooltip);
-
     boolean assertAllWebElementsHaveEqualDimension(List<WebElement> elements, Dimension dimension);
 
     boolean assertIfElementHasWidthInPerc(WebElement parent, WebElement element, int widthInPerc);

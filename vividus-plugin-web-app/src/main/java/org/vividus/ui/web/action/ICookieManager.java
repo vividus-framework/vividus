@@ -17,7 +17,6 @@
 package org.vividus.ui.web.action;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.Set;
 
 import org.apache.http.client.CookieStore;
@@ -26,8 +25,6 @@ import org.openqa.selenium.Cookie;
 public interface ICookieManager
 {
     void addCookie(String cookieName, String cookieValue, String path, String urlAsString);
-
-    void addCookie(String cookieName, String cookieValue, String path, URL url);
 
     void addCookie(String cookieName, String cookieValue, String path, URI uri);
 
