@@ -16,6 +16,10 @@ When I initialize the SCENARIO variable `date` with value `#{generateDate(P, yyy
 When I initialize the SCENARIO variable `epoch` with value `#{toEpochSecond(${date})}`
 Then `${date}` is equal to `#{fromEpochSecond(${epoch})}`
 
+Scenario: Verify epoch generation with timezone
+When I initialize the SCENARIO variable `epoch` with value `#{toEpochSecond(2020-12-11T18:43:05+05:30)}`
+Then `${epoch}` is equal to `1607692385`
+
 Scenario: Verify anyOf expression
 Then `#{anyOf(1, 2\,3,3)}` matches `1|2,3|3`
 
