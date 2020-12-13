@@ -14,12 +14,12 @@ When I hover a mouse over an image with the tooltip 'Avatar'
 Then an element by the xpath './/div[@class='textfade']' exists
 
 Scenario: Step verification When I click on an image with the src '$src'
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/index.html'
+Given I am on a page with the URL '${vividus-test-site-url}/index.html'
 When I click on an image with the src 'img/vividus.png'
 Then a link by By.xpath(//a[@href='#ElementId']) exists
 
 Scenario: Step verification When I click on an image with the name '$imageName'
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/index.html'
+Given I am on a page with the URL '${vividus-test-site-url}/index.html'
 When I click on an image with the name 'vividus-logo'
 Then a link by By.xpath(//a[@href='#ElementId']) exists
 
@@ -45,12 +45,12 @@ When I change context to an element by By.xpath(.//div[@class='containerfade'])
 Then an image with the src containing '3css/img_avatar3.png' exists
 
 Scenario: Step verification Then an image with the tooltip '$tooltip' and src containing '$srcpart' exists
-Given I am on a page with the URL 'https://www.wpbeginner.com/beginners-guide/image-alt-text-vs-image-title-in-wordpress-whats-the-difference/'
-Then an image with the tooltip 'Alternate text displayed in a broken image container' and src containing 'ploads/2014/10/broken-img-alt-text.jpg' exists
+Given I am on a page with the URL '${vividus-test-site-url}/index.html'
+Then an image with the tooltip 'Vividus Logo' and src containing 'mg/vividus.png' exists
 
 Scenario: Step verification Then an image with the src '$imageSrc' and tooltip '$tooltip' exists
-Given I am on a page with the URL 'https://www.wpbeginner.com/beginners-guide/image-alt-text-vs-image-title-in-wordpress-whats-the-difference/'
-Then an image with the src 'https://cdn3.wpbeginner.com/wp-content/uploads/2014/10/broken-img-alt-text.jpg' and tooltip 'Alternate text displayed in a broken image container' exists
+Given I am on a page with the URL '${vividus-test-site-url}/index.html'
+Then an image with the src 'img/vividus.png' and tooltip 'Vividus Logo' exists
 
 Scenario: Step verification Then a [$state] image with the src '$imageSrc' and tooltip '$tooltip' exists
 Given I am on a page with the URL 'https://www.w3schools.com/howto/howto_css_image_overlay.asp'
