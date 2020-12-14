@@ -73,33 +73,20 @@ class LinkUrlSearchTests
     private static final String PORT = ":8080";
     private static final String SIMPLE_URL_WITH_PATH = SIMPLE_URL + SOME_URL;
     private static final String PART = "#part";
-    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is equal to {}";
     private static final By LINK_URL_LOCATOR_CASE_INSENSITIVE = By.xpath(".//a[normalize-space(translate(@href,"
             + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=\"" + URL.toLowerCase() + "\"" + "]");
     private static final Duration TIMEOUT = Duration.ofSeconds(0);
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
-    @Mock
-    private WebDriver webDriver;
+    @Mock private WebDriver webDriver;
+    @Mock private WebElement webElement;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private SearchContext searchContext;
+    @Mock private WebWaitActions waitActions;
+    @Mock private IExpectedConditions<By> expectedSearchContextConditions;
 
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private SearchContext searchContext;
-
-    @Mock
-    private WebWaitActions waitActions;
-
-    @Mock
-    private IExpectedConditions<By> expectedSearchContextConditions;
-
-    @InjectMocks
-    private LinkUrlSearch search;
+    @InjectMocks private LinkUrlSearch search;
 
     static Stream<Arguments> hrefProvider()
     {
@@ -132,14 +119,22 @@ class LinkUrlSearchTests
     void testFindLinksByTextByLinkTextHeightWidthPositive()
     {
         testJavascriptActionsWasCalled();
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, LOCATOR, 1))));
+        verifyLogging();
     }
 
     @Test
     void testFindLinksByTextByLinkTextHeightWidthNegative()
     {
         testJavascriptActionsWasCalled();
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, LOCATOR, 1))));
+        verifyLogging();
+    }
+
+    private void verifyLogging()
+    {
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+            info("Total number of elements found {} is {}", LOCATOR, 1),
+            info("Number of {} elements is {}", Visibility.VISIBLE.getDescription(), 1)
+        )));
     }
 
     @Test

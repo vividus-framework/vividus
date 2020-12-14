@@ -70,7 +70,9 @@ public abstract class AbstractElementAction implements IElementAction
                 ? waitForElement(searchContext, locator)
                 : searchContext.findElements(locator);
         boolean elementsFound = null != elements;
-        LOGGER.info("Total number of elements found {} is equal to {}", locator, elementsFound ? elements.size() : 0);
+        LOGGER.atInfo().addArgument(locator)
+                       .addArgument(() -> elementsFound ? elements.size() : 0)
+                       .log("Total number of elements found {} is {}");
         if (elementsFound)
         {
             Visibility visibility = parameters.getVisibility();
@@ -78,7 +80,7 @@ public abstract class AbstractElementAction implements IElementAction
             {
                 return Visibility.ALL == visibility
                         ? elements
-                        : filterElementsByVisibility(elements, visibility == Visibility.VISIBLE, retry);
+                        : filterElementsByVisibility(elements, visibility, retry);
             }
             catch (StaleElementReferenceException e)
             {
@@ -88,9 +90,10 @@ public abstract class AbstractElementAction implements IElementAction
         return List.of();
     }
 
-    private List<WebElement> filterElementsByVisibility(List<WebElement> elements, boolean visible,
+    private List<WebElement> filterElementsByVisibility(List<WebElement> elements, Visibility visibility,
             boolean retry)
     {
+        boolean visible = visibility == Visibility.VISIBLE;
         return elements.stream().filter(element -> {
             try
             {
@@ -105,7 +108,13 @@ public abstract class AbstractElementAction implements IElementAction
                 LOGGER.warn(e.getMessage(), e);
                 return false;
             }
-        }).collect(Collectors.toList());
+        }).collect(Collectors.collectingAndThen(Collectors.toList(), list ->
+        {
+            LOGGER.atInfo().addArgument(visibility::getDescription)
+                           .addArgument(list::size)
+                           .log("Number of {} elements is {}");
+            return list;
+        }));
     }
 
     protected boolean isElementVisible(WebElement element)

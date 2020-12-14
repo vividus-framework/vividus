@@ -70,7 +70,7 @@ class ElementSearchActionTests
     private static final String CAPITALIZE = "capitalize";
     private static final String TEXT_TRANSFORM = "text-transform";
     private static final String TEXT = "Text";
-    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is equal to {}";
+    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is {}";
     private static final By ELEMENT_BY_TEXT_LOCATOR = By.xpath(".//*[contains(normalize-space(text()), 'Text')]");
     private static final Duration TIMEOUT = Duration.ofSeconds(0);
 
@@ -80,35 +80,16 @@ class ElementSearchActionTests
     private SearchParameters parameters = new SearchParameters(TEXT);
     private AbstractWebElementSearchAction spy;
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private WebDriver webDriver;
-
-    @Mock
-    private SearchContext searchContext;
-
-    @Mock
-    private WebJavascriptActions javascriptActions;
-
-    @Mock
-    private IWebElementActions webElementActions;
-
-    @Mock
-    private IWebWaitActions waitActions;
-
-    @Mock
-    private WaitResult<Object> result;
-
-    @Mock
-    private By locator;
-
-    @Mock
-    private IExpectedConditions<By> expectedConditions;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private WebElement webElement;
+    @Mock private WebDriver webDriver;
+    @Mock private SearchContext searchContext;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private IWebElementActions webElementActions;
+    @Mock private IWebWaitActions waitActions;
+    @Mock private WaitResult<Object> result;
+    @Mock private By locator;
+    @Mock private IExpectedConditions<By> expectedConditions;
 
     @InjectMocks
     private final AbstractWebElementSearchAction elementSearchAction = new AbstractWebElementSearchAction(
@@ -218,8 +199,7 @@ class ElementSearchActionTests
         List<WebElement> foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
-        assertThat(logger.getLoggingEvents(),
-                equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 1))));
+        verifyLogging();
     }
 
     @Test
@@ -233,8 +213,7 @@ class ElementSearchActionTests
         List<WebElement> foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
-        assertThat(logger.getLoggingEvents(),
-                equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 1))));
+        verifyLogging();
     }
 
     @Test
@@ -248,8 +227,15 @@ class ElementSearchActionTests
         List<WebElement> foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
-        assertThat(logger.getLoggingEvents(),
-                equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 1))));
+        verifyLogging();
+    }
+
+    private void verifyLogging()
+    {
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+            info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 1),
+            info("Number of {} elements is {}", Visibility.VISIBLE.getDescription(), 1)
+        )));
     }
 
     @SuppressWarnings("unchecked")
