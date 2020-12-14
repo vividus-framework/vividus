@@ -61,26 +61,18 @@ import org.vividus.ui.action.WaitResult;
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class AbstractElementSearchActionTests
 {
-    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is equal to {}";
+    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is {}";
+    private static final String NUMBER_OF_VISIBLE_ELEMENTS = "Number of {} elements is {}";
     private static final String EXCEPTION = "exception";
     private static final Duration TIMEOUT = Duration.ofSeconds(0);
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
-    @Mock
-    private SearchContext searchContext;
-
-    @Mock
-    private IWaitActions waitActions;
-
-    @Mock
-    private WaitResult<Object> result;
-
-    @Mock
-    private By locator;
-
-    @Mock
-    private IExpectedConditions<By> expectedConditions;
+    @Mock private SearchContext searchContext;
+    @Mock private IWaitActions waitActions;
+    @Mock private WaitResult<Object> result;
+    @Mock private By locator;
+    @Mock private IExpectedConditions<By> expectedConditions;
 
     @InjectMocks
     private final AbstractElementAction elementSearchAction = new AbstractElementAction(TestLocatorType.SEARCH)
@@ -102,6 +94,17 @@ class AbstractElementSearchActionTests
                 error("Unable to locate elements, because search context is not set"))));
     }
 
+    @Test
+    void testFindNoElements()
+    {
+        elementSearchAction.setWaitForElementTimeout(TIMEOUT);
+        when(searchContext.findElements(locator)).thenReturn(null);
+        List<WebElement> foundElements = elementSearchAction.findElements(searchContext, locator,
+                new SearchParameters().setWaitForElement(false));
+        assertThat(foundElements, empty());
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 0))));
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     void testFindAndScroll()
@@ -119,7 +122,10 @@ class AbstractElementSearchActionTests
         assertEquals(1, foundElements.size());
         assertEquals(element1, foundElements.get(0));
         verify(waitActions).wait(searchContext, TIMEOUT, condition, false);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 1))));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+            info(TOTAL_NUMBER_OF_ELEMENTS, locator, 1),
+            info(NUMBER_OF_VISIBLE_ELEMENTS, Visibility.VISIBLE.getDescription(), 1)
+        )));
         verify(element1).isDisplayed();
     }
 
@@ -136,7 +142,10 @@ class AbstractElementSearchActionTests
                 new SearchParameters().setWaitForElement(false));
         assertEquals(1, foundElements.size());
         assertEquals(element1, foundElements.get(0));
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 2))));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+            info(TOTAL_NUMBER_OF_ELEMENTS, locator, 2),
+            info(NUMBER_OF_VISIBLE_ELEMENTS, Visibility.VISIBLE.getDescription(), 1)
+        )));
         verify(element2).isDisplayed();
     }
 
@@ -180,7 +189,10 @@ class AbstractElementSearchActionTests
         assertEquals(1, foundElements.size());
         assertEquals(List.of(element2), foundElements);
         verify(waitActions).wait(searchContext, TIMEOUT, condition, false);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 2))));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+            info(TOTAL_NUMBER_OF_ELEMENTS, locator, 2),
+            info(NUMBER_OF_VISIBLE_ELEMENTS, Visibility.INVISIBLE.getDescription(), 1)
+        )));
         verify(element2).isDisplayed();
     }
 

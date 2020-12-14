@@ -56,7 +56,7 @@ class LinkUrlPartSearchTests
     private static final By LINK_URL_PART_LOCATOR = By.xpath(".//a[contains (translate(@href,"
             + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), \"urlpart\")]");
     private static final String LINK_WITH_PART_URL_PATTERN = ".//a[contains(@href, %s)]";
-    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is equal to {}";
+    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is {}";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
