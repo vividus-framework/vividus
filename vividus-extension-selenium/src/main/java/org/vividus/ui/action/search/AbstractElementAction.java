@@ -28,6 +28,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IWaitActions;
 
@@ -37,6 +38,7 @@ public abstract class AbstractElementAction implements IElementAction
 
     private IWaitActions waitActions;
     @Inject private IExpectedConditions<By> expectedConditions;
+    @Inject private ElementActions elementActions;
     private Duration waitForElementTimeout;
     private boolean retrySearchIfStale;
 
@@ -97,7 +99,7 @@ public abstract class AbstractElementAction implements IElementAction
         return elements.stream().filter(element -> {
             try
             {
-                return visible == isElementVisible(element);
+                return visible == elementActions.isElementVisible(element);
             }
             catch (StaleElementReferenceException e)
             {
@@ -115,11 +117,6 @@ public abstract class AbstractElementAction implements IElementAction
                            .log("Number of {} elements is {}");
             return list;
         }));
-    }
-
-    protected boolean isElementVisible(WebElement element)
-    {
-        return element.isDisplayed();
     }
 
     private List<WebElement> waitForElement(SearchContext searchContext, By locator)

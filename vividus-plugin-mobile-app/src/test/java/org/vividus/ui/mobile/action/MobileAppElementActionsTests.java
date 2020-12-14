@@ -17,26 +17,64 @@
 package org.vividus.ui.mobile.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.manager.GenericWebDriverManager;
 
+@ExtendWith(MockitoExtension.class)
 class MobileAppElementActionsTests
 {
-    private final MobileAppElementActions elementActions = new MobileAppElementActions();
+    @Mock private WebElement webElement;
+    @Mock private GenericWebDriverManager genericWebDriverManager;
+    @InjectMocks private MobileAppElementActions elementActions;
 
     @Test
     void shouldGetElementText()
     {
         String text = "text";
-        WebElement webElement = mock(WebElement.class);
 
         when(webElement.getText()).thenReturn(text);
 
         assertEquals(text, elementActions.getElementText(webElement));
         verify(webElement).getText();
+    }
+
+    @Test
+    void shouldCheckIfElementIsVisible()
+    {
+        when(webElement.isDisplayed()).thenReturn(true);
+
+        assertTrue(elementActions.isElementVisible(webElement));
+    }
+
+    @Test
+    void shouldNotCheckVisibilityUsingAttributeOnNotIOSNativeApps()
+    {
+        when(webElement.isDisplayed()).thenReturn(false);
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+
+        assertFalse(elementActions.isElementVisible(webElement));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void shouldCheckIfElementIsVisibleOnIOSNativeAppsUsingAttribute(Boolean visible)
+    {
+        when(webElement.isDisplayed()).thenReturn(false);
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(webElement.getAttribute("visible")).thenReturn(visible.toString());
+
+        assertEquals(visible, elementActions.isElementVisible(webElement));
     }
 }

@@ -17,13 +17,28 @@
 package org.vividus.ui.mobile.action;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.ui.action.ElementActions;
 
 public class MobileAppElementActions implements ElementActions
 {
+    private final GenericWebDriverManager genericWebDriverManager;
+
+    public MobileAppElementActions(GenericWebDriverManager genericWebDriverManager)
+    {
+        this.genericWebDriverManager = genericWebDriverManager;
+    }
+
     @Override
     public String getElementText(WebElement element)
     {
         return element.getText();
+    }
+
+    @Override
+    public boolean isElementVisible(WebElement element)
+    {
+        return element.isDisplayed()
+                || (genericWebDriverManager.isIOSNativeApp() && Boolean.parseBoolean(element.getAttribute("visible")));
     }
 }

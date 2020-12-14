@@ -21,7 +21,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -51,6 +50,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.WaitResult;
@@ -86,6 +86,7 @@ class ElementSearchActionTests
     @Mock private SearchContext searchContext;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private IWebElementActions webElementActions;
+    @Mock private ElementActions elementActions;
     @Mock private IWebWaitActions waitActions;
     @Mock private WaitResult<Object> result;
     @Mock private By locator;
@@ -195,7 +196,7 @@ class ElementSearchActionTests
         addMockedWebElement();
         when(waitActions.wait(eq(searchContext), eq(TIMEOUT), any(), eq(false))).thenReturn(result);
         parameters.setVisibility(Visibility.VISIBLE);
-        when(webElements.get(0).isDisplayed()).thenReturn(Boolean.TRUE);
+        when(elementActions.isElementVisible(webElements.get(0))).thenReturn(Boolean.TRUE);
         List<WebElement> foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
@@ -209,7 +210,7 @@ class ElementSearchActionTests
         addMockedWebElement();
         when(waitActions.wait(eq(searchContext), eq(TIMEOUT), any(), eq(false))).thenReturn(result);
         parameters.setVisibility(Visibility.VISIBLE);
-        when(webElements.get(0).isDisplayed()).thenReturn(Boolean.TRUE);
+        when(elementActions.isElementVisible(webElements.get(0))).thenReturn(Boolean.TRUE);
         List<WebElement> foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
@@ -223,7 +224,7 @@ class ElementSearchActionTests
         addMockedWebElement();
         when(waitActions.wait(eq(searchContext), eq(TIMEOUT), any(), eq(false))).thenReturn(result);
         parameters.setVisibility(Visibility.VISIBLE);
-        when(webElements.get(0).isDisplayed()).thenReturn(Boolean.TRUE);
+        when(elementActions.isElementVisible(webElements.get(0))).thenReturn(Boolean.TRUE);
         List<WebElement> foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
@@ -299,15 +300,6 @@ class ElementSearchActionTests
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
         verifySearchByTextEvents();
-    }
-
-    @Test
-    void testIsElementVisibleWithScrolling()
-    {
-        WebElement element = mock(WebElement.class);
-        when(element.isDisplayed()).thenReturn(false).thenReturn(true);
-        assertTrue(elementSearchAction.isElementVisible(element));
-        verify(javascriptActions).scrollIntoView(element, true);
     }
 
     private void verifySearchByTextEvents()

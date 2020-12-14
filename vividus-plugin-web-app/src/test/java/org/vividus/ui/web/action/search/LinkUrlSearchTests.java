@@ -49,6 +49,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.WaitResult;
@@ -84,6 +85,7 @@ class LinkUrlSearchTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private SearchContext searchContext;
     @Mock private WebWaitActions waitActions;
+    @Mock private ElementActions elementActions;
     @Mock private IExpectedConditions<By> expectedSearchContextConditions;
 
     @InjectMocks private LinkUrlSearch search;
@@ -287,7 +289,7 @@ class LinkUrlSearchTests
         IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
         search.setWaitForElementTimeout(TIMEOUT);
         when(expectedSearchContextConditions.presenceOfAllElementsLocatedBy(LOCATOR)).thenReturn(condition);
-        when(webElement.isDisplayed()).thenReturn(true);
+        when(elementActions.isElementVisible(webElement)).thenReturn(true);
         WaitResult<List<WebElement>> result = mock(WaitResult.class);
         when(waitActions.wait(searchContext, TIMEOUT, condition, false)).thenReturn(result);
         when(result.getData()).thenReturn(List.of(webElement));

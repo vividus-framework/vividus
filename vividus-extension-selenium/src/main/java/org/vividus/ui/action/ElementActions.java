@@ -27,4 +27,11 @@ public interface ElementActions
      * or empty string if no content found
      */
     String getElementText(WebElement element);
+
+    /**
+     * Determine if an element is currently visible
+     * @param element element to get text from
+     * @return whether or not the element is visible
+     */
+    boolean isElementVisible(WebElement element);
 }

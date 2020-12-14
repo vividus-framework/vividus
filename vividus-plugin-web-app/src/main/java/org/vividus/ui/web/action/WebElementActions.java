@@ -126,6 +126,26 @@ public class WebElementActions implements IWebElementActions
     }
 
     @Override
+    public boolean isElementVisible(WebElement element)
+    {
+        return isElementVisible(element, false);
+    }
+
+    private boolean isElementVisible(WebElement element, boolean scrolled)
+    {
+        if (!element.isDisplayed())
+        {
+            if (!scrolled)
+            {
+                javascriptActions.scrollIntoView(element, true);
+                return isElementVisible(element, true);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean isPageVisibleAreaScrolledToElement(final WebElement element)
     {
         if (element != null)
