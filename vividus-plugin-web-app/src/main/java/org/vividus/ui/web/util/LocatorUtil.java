@@ -64,11 +64,6 @@ public final class LocatorUtil
         return getXPathByTagNameAndAttribute(ANY, attributeName, attributeValue);
     }
 
-    public static String getXPathByAttribute(String attributeName)
-    {
-        return getXPathByTagNameAndAttribute(ANY, attributeName);
-    }
-
     public static String getXPathByTagNameAndAttribute(String tagName, String attributeName, String attributeValue)
     {
         if (!attributeValue.equals(StringEscapeUtils.escapeHtml4(attributeValue)))
@@ -77,11 +72,6 @@ public final class LocatorUtil
                     StringEscapeUtils.escapeHtml4(attributeValue));
         }
         return getXPath(String.format(".//%s[@%s=%%s]", tagName, attributeName), attributeValue);
-    }
-
-    public static String getXPathByTagNameAndAttribute(String tagName, String attributeName)
-    {
-        return getXPath(String.format(".//%s[@%s]", tagName, attributeName));
     }
 
     public static By getXPathLocator(String xpathPattern, Object... args)
@@ -106,16 +96,6 @@ public final class LocatorUtil
         return xpathFromRootPattern.replaceAll("'((concat.*?(\"\\)))|(\"[^\"]*?\"))'", "$1");
     }
 
-    public static By getXPathLocatorByTextWithTagName(String tagName, String text)
-    {
-        return By.xpath(getXPath(true, String.format(".//%s[contains(text(), '%%s')]", tagName), text));
-    }
-
-    public static By getXPathLocatorByText(String text)
-    {
-        return getXPathLocatorByTextWithTagName(ANY, text);
-    }
-
     public static By getXPathLocatorByInnerTextWithTagName(String tagName, String text)
     {
         return By.xpath(getXPathByInnerTextWithTagName(tagName, text));
@@ -123,22 +103,12 @@ public final class LocatorUtil
 
     public static By getXPathLocatorByFullInnerText(String text)
     {
-        return By.xpath(getXPathByFullInnerTextWithTagName(ANY, text));
+        return By.xpath(getXPath(true, String.format(".//%1$s[.=%%1$s and not(.//%1$s[.=%%1$s])]", ANY), text));
     }
 
     public static By getXPathLocatorByInnerText(String text)
     {
-        return By.xpath(getXPathByInnerText(text));
-    }
-
-    public static String getXPathByInnerText(String text)
-    {
-        return getXPathByInnerTextWithTagName(ANY, text);
-    }
-
-    private static String getXPathByFullInnerTextWithTagName(String tagName, String text)
-    {
-        return getXPath(true, String.format(".//%1$s[.=%%1$s and not(.//%1$s[.=%%1$s])]", tagName), text);
+        return By.xpath(getXPathByInnerTextWithTagName(ANY, text));
     }
 
     private static String getXPathByInnerTextWithTagName(String tagName, String text)

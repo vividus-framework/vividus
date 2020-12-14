@@ -24,9 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -95,13 +93,6 @@ class CookieManagerTests
     void testAddCookie()
     {
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, DOMAIN);
-        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
-    }
-
-    @Test
-    void testAddCookieUrl() throws MalformedURLException
-    {
-        cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, new URL(DOMAIN));
         verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
     }
 

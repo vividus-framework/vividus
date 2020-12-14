@@ -17,7 +17,6 @@
 package org.vividus.ui.web.action;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -49,12 +48,6 @@ public class CookieManager implements ICookieManager
     public void addCookie(String cookieName, String cookieValue, String path, String urlAsString)
     {
         addCookie(cookieName, cookieValue, path, URI.create(urlAsString));
-    }
-
-    @Override
-    public void addCookie(String cookieName, String cookieValue, String path, URL url)
-    {
-        executeAddCookieScript(cookieName, cookieValue, path, InternetUtils.getTopDomain(url));
     }
 
     @Override
