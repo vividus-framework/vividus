@@ -241,6 +241,31 @@ TIP: Since parameters of the expression comma-separated, meaningful commas (like
 |PT8774591H59M20S
 |===
 
+=== `toEpochSecond`
+
+Converts the input date to https://en.wikipedia.org/wiki/Unix_time[the unix epoch time] (the number of seconds from the epoch of 1970-01-01T00:00:00Z).
+
+[source, subs="+quotes"]
+----
+#{toEpochSecond(*$inputDate*)}
+----
+
+* *`$inputDate`* - the date to be formatted, it should be presented in the {iso-date-format-link} format
+
+[cols="2,>1", options="header"]
+.Examples of the expressions converting the input date to the unix epoch time
+|===
+|Expression
+|Result
+
+|`#{toEpochSecond(1993-04-16T00:00:00)}`
+|734918400
+
+|`#{toEpochSecond(2020-12-11T18:43:05+05:30)}`
+|1607692385
+
+|===
+
 
 == Steps
 

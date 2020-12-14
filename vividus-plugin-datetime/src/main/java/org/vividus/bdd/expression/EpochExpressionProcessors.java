@@ -32,7 +32,7 @@ public class EpochExpressionProcessors extends DelegatingExpressionProcessor<Str
     {
         super(List.of(
             new UnaryExpressionProcessor("toEpochSecond",
-                arg -> String.valueOf(dateUtils.toEpochSecond(arg, DateTimeFormatter.ISO_DATE_TIME))),
+                arg -> String.valueOf(dateUtils.parseDateTime(arg, DateTimeFormatter.ISO_DATE_TIME).toEpochSecond())),
             new UnaryExpressionProcessor("fromEpochSecond",
                 arg -> DateTimeFormatter.ISO_DATE_TIME.format(dateUtils.fromEpochSecond(parseLong(arg))))
             ));
