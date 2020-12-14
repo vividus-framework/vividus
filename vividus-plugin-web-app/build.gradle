@@ -2,7 +2,7 @@ project.description = 'Vividus plugin for testing web applications'
 
 ext {
     seleniumVersion = '4.0.0-alpha-1'
-    browserupProxyVersion = '2.1.1'
+    browserupProxyVersion = 'c3ff661083'
 }
 
 dependencies {
@@ -26,8 +26,8 @@ dependencies {
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-opera-driver', version: seleniumVersion)
     implementation(group: 'junit', name: 'junit', version: versions.junit4)
     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.2.2')
-    implementation(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
-    implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
+    implementation(group: 'com.github.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
+    implementation(group: 'com.github.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
     implementation(group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
