@@ -18,6 +18,7 @@ package org.vividus.bdd.browserstack.steps;
 
 import static org.apache.commons.lang3.Validate.isTrue;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import com.browserstack.client.exception.BrowserStackException;
@@ -27,6 +28,8 @@ import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.browserstack.BrowserStackAutomateClient;
+import org.vividus.json.JsonContext;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
 
@@ -37,17 +40,21 @@ public class DebugSteps
     private final BrowserStackAutomateClient appAutomateClient;
     private final IBddVariableContext bddVariableContext;
     private final TestContext testContext;
+    private final JsonContext jsonContext;
+    private final IAttachmentPublisher attachmentPublisher;
 
     public DebugSteps(BrowserStackAutomateClient appAutomateClient, IBddVariableContext bddVariableContext,
-            TestContext testContext)
+            TestContext testContext, JsonContext jsonContext, IAttachmentPublisher attachmentPublisher)
     {
         this.appAutomateClient = appAutomateClient;
         this.bddVariableContext = bddVariableContext;
         this.testContext = testContext;
+        this.jsonContext = jsonContext;
+        this.attachmentPublisher = attachmentPublisher;
     }
 
     /**
-     * Saves network logs from an application sesssion. The application session must be closed before network logs
+     * Saves network logs from an application session. The application session must be closed before network logs
      * can be saved.
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      * <i>Available scopes:</i>
@@ -63,10 +70,29 @@ public class DebugSteps
     @When("I save BrowserStack network logs to $scopes variable `$variableName`")
     public void saveNetworkLogs(Set<VariableScope> scopes, String variableName) throws BrowserStackException
     {
+        bddVariableContext.putVariable(scopes, variableName, getNetworkLogs());
+    }
+
+    /**
+     * Saves network traffic captured during application run into JSON context. The network traffic data is in HAR
+     * format. The application session must be closed before network logs can be saved.
+     * <br>
+     * The network from the HAR can be accessed by using JSON steps that work with the JSON context
+     * @throws BrowserStackException if error occurred while interacting with BrowserStack
+     */
+    @When("I save BrowserStack network logs to JSON context")
+    public void saveNetworkLogsToJsonContext() throws BrowserStackException
+    {
+        String logs = getNetworkLogs();
+        jsonContext.putJsonContext(logs);
+        attachmentPublisher.publishAttachment(logs.getBytes(StandardCharsets.UTF_8), "BrowserStack network logs.har");
+    }
+
+    private String getNetworkLogs() throws BrowserStackException
+    {
         String sessionId = testContext.get(PREVIOUS_SESSION_ID);
         isTrue(sessionId != null, "Unable to find a previous session");
-        String networkLogs = appAutomateClient.getNetworkLogs(sessionId);
-        bddVariableContext.putVariable(scopes, variableName, networkLogs);
+        return appAutomateClient.getNetworkLogs(sessionId);
     }
 
     @Subscribe

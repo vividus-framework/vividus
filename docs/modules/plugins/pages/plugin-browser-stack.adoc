@@ -64,21 +64,9 @@ a|`true`
 
 |===
 
-== Steps
+== Enable network capturing
 
-=== Save network logs
-
-Saves network traffic saved during application run in JSON format. The application session must be closed before network logs can be saved.
-
-[source,gherkin]
-----
-When I save BrowserStack network logs to $scopes variable `$variableName`
-----
-
-. `$scopes` - xref:parameters:variable-scope.adoc[variable scopes]
-. `$variableName` - name of variable to save network logs
-
-The following options available to enable network logs capturing on BrowserStack side:
+The following options are available to enable network logs capturing on BrowserStack side:
 
 * Add `selenium.grid.capabilities.bstack:options.networkLogs=true` property into tests configuration, this will enable network logs capturing for all stories in suite.
 * Add `@capability.bstack:options.networkLogs true` meta for a story being run
@@ -91,10 +79,47 @@ Given I start mobile application with capabilities:
 |bstack:options.networkLogs|true |
 ----
 
+== Steps
+
+=== Save network logs into variable
+
+Saves network traffic captured during application run into variable. The network traffic data is in HAR format. The application session must be closed before network logs can be saved.
+
+[source,gherkin]
+----
+When I save BrowserStack network logs to $scopes variable `$variableName`
+----
+
+. `$scopes` - xref:parameters:variable-scope.adoc[variable scopes]
+. `$variableName` - name of variable to save network logs
+
+See <<_enable_network_capturing>>
+
 .Save network logs into variable
 [source,gherkin]
 ----
 When I close mobile application
 When I save BrowserStack network logs to SCENARIO variable `networkLogs`
+Then number of JSON elements from `${networkLogs}` by JSON path `$..*[?(@.url == 'https://graph.example.com/v8.0')]` is equal to 1
+----
+
+=== Save network logs into context
+
+Saves network traffic captured during application run into JSON context. The network traffic data is in HAR format. The application session must be closed before network logs can be saved.
+
+[source,gherkin]
+----
+When I save BrowserStack network logs to JSON context
+----
+
+See <<_enable_network_capturing>>
+
+To interact with the saved network logs see xref:plugins:plugin-rest-api.adoc#_json_steps[JSON steps] that work with the JSON context
+
+.Save network logs into variable
+[source,gherkin]
+----
+When I close mobile application
+When I save BrowserStack network logs to JSON context
 Then number of JSON elements from `${networkLogs}` by JSON path `$..*[?(@.url == 'https://graph.example.com/v8.0')]` is equal to 1
 ----
