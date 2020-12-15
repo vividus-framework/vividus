@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import com.browserstack.client.exception.BrowserStackException;
@@ -35,6 +36,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.browserstack.BrowserStackAutomateClient;
+import org.vividus.json.JsonContext;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
 
@@ -45,23 +48,24 @@ class DebugStepsTests
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.STORY);
     private static final String PREVIOUS_SESSION_ID = "previousSessionId";
     private static final String SESSION_ID = "session-id";
+    private static final String NETWORK_LOGS = "network-logs";
 
     @Mock private BrowserStackAutomateClient automateClient;
     @Mock private IBddVariableContext bddVariableContext;
     @Mock private TestContext textContext;
+    @Mock private JsonContext jsonContext;
+    @Mock private IAttachmentPublisher attachmentPublisher;
     @InjectMocks private DebugSteps debugSteps;
 
     @Test
     void shouldSaveNetworkLogs() throws BrowserStackException
     {
-        String networkLogs = "network-logs";
-
         when(textContext.get(PREVIOUS_SESSION_ID)).thenReturn(SESSION_ID);
-        when(automateClient.getNetworkLogs(SESSION_ID)).thenReturn(networkLogs);
+        when(automateClient.getNetworkLogs(SESSION_ID)).thenReturn(NETWORK_LOGS);
 
         debugSteps.saveNetworkLogs(SCOPES, VARIABLE_NAME);
 
-        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, networkLogs);
+        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, NETWORK_LOGS);
         verifyNoMoreInteractions(automateClient, bddVariableContext, textContext);
     }
 
@@ -82,5 +86,18 @@ class DebugStepsTests
         debugSteps.onWebDriverQuit(new WebDriverQuitEvent(SESSION_ID));
         verify(textContext).put(PREVIOUS_SESSION_ID, SESSION_ID);
         verifyNoInteractions(automateClient, bddVariableContext);
+    }
+
+    @Test
+    void shouldSaveNetworkLogsIntoJsonContext() throws BrowserStackException
+    {
+        when(textContext.get(PREVIOUS_SESSION_ID)).thenReturn(SESSION_ID);
+        when(automateClient.getNetworkLogs(SESSION_ID)).thenReturn(NETWORK_LOGS);
+
+        debugSteps.saveNetworkLogsToJsonContext();
+
+        verify(jsonContext).putJsonContext(NETWORK_LOGS);
+        verify(attachmentPublisher).publishAttachment(NETWORK_LOGS.getBytes(StandardCharsets.UTF_8),
+                "BrowserStack network logs.har");
     }
 }

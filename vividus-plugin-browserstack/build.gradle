@@ -4,6 +4,8 @@ dependencies {
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
+    implementation project(':vividus-reporter')
+    implementation project(':vividus-plugin-rest-api')
 
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'com.browserstack', name: 'automate-client-java', version: '0.6')
