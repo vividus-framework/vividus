@@ -107,26 +107,6 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
         }
     }
 
-    @Override
-    protected boolean isElementVisible(WebElement element)
-    {
-        return isElementVisible(element, false);
-    }
-
-    private boolean isElementVisible(WebElement element, boolean scrolled)
-    {
-        if (!element.isDisplayed())
-        {
-            if (!scrolled)
-            {
-                javascriptActions.scrollIntoView(element, true);
-                return isElementVisible(element, true);
-            }
-            return false;
-        }
-        return true;
-    }
-
     protected IWebElementActions getWebElementActions()
     {
         return this.webElementActions;
