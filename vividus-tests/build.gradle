@@ -9,6 +9,7 @@ dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-applitools')
     implementation project(':vividus-plugin-aws-dynamodb')
+    implementation project(':vividus-plugin-aws-s3')
     implementation project(':vividus-plugin-browserstack')
     implementation project(':vividus-plugin-db')
     implementation project(':vividus-plugin-mobile-app')

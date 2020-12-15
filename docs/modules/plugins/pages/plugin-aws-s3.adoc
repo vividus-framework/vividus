@@ -38,7 +38,6 @@ When I upload data `{"my":"json"}` with key `folder/name.json` and content type 
 
 Retrieve the object by key from the provided S3 bucket and save its content to a variable. The specified bucket and object key must exist, or an error will result.
 
-
 [source,gherkin]
 ----
 When I fetch object with key `$objectKey` from S3 bucket `$bucketName` and save result to $scopes variable `$variableName`
@@ -53,4 +52,23 @@ When I fetch object with key `$objectKey` from S3 bucket `$bucketName` and save 
 [source,gherkin]
 ----
 When I fetch object with key `/path/file.json` from S3 bucket `some-bucket-name` and save result to scenario variable `my-json-var`
+----
+
+=== Set S3 object ACL
+
+Set https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl[the canned access control list (ACL)] for the specified object in Amazon S3. Each bucket and object in Amazon S3 has an ACL that defines its access control policy. When a request is made, Amazon S3 authenticates the request using its standard authentication procedure and then checks the ACL to verify the sender was granted access to the bucket or object. If the sender is approved, the request proceeds. Otherwise, Amazon S3 returns an error.
+
+[source,gherkin]
+----
+When I set ACL `$cannedAcl` for object with key `$objectKey` from S3 bucket `$bucketName`
+----
+
+- `$cannedAcl` - The new pre-configured canned ACL for the specified object. (See https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl[the official documentation] for a complete list of the available ACLs)
+- `$objectKey` - The key of the object within the specified bucket whose ACL is being set.
+- `$bucketName` - The name of the bucket containing the object whose ACL is being set
+
+.Set public READ permission
+[source,gherkin]
+----
+When I set ACL `public-read` for object with key `/path/file.json` from S3 bucket `some-bucket-name`
 ----

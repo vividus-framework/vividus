@@ -27,6 +27,7 @@ import java.util.Set;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
@@ -177,6 +178,27 @@ public class S3BucketSteps
         {
             return IOUtils.toString(objectContent, StandardCharsets.UTF_8);
         }
+    }
+
+    /**
+     * Sets the canned access control list (ACL) for the specified object in Amazon S3. Each bucket and object in
+     * Amazon S3 has an ACL that defines its access control policy.  When a request is made, Amazon S3 authenticates the
+     * request using its standard authentication procedure and then checks the ACL to verify the sender was granted
+     * access to the bucket or object. If the sender is approved, the request proceeds. Otherwise, Amazon S3 returns
+     * an error.
+     *
+     * @param cannedAcl  The new pre-configured canned ACL for the specified object. See
+     *                   <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl">
+     *                   the official documentation
+     *                   </a>
+     *                   for a complete list of the available ACLs.
+     * @param objectKey  The key of the object within the specified bucket whose ACL is being set.
+     * @param bucketName The name of the bucket containing the object whose ACL is being set
+     */
+    @When("I set ACL `$cannedAcl` for object with key `$objectKey` from S3 bucket `$bucketName`")
+    public void setObjectAcl(CannedAccessControlList cannedAcl, String objectKey, String bucketName)
+    {
+        amazonS3Client.setObjectAcl(bucketName, objectKey, cannedAcl);
     }
 
     /**

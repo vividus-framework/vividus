@@ -33,6 +33,7 @@ import java.util.Set;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
@@ -134,6 +135,13 @@ class S3BucketStepsTests
         S3Object s3Object = mock(S3Object.class);
         when(s3Object.getObjectContent()).thenReturn(s3ObjectInputStream);
         when(amazonS3Client.getObject(S3_BUCKET_NAME, objectKey)).thenReturn(s3Object);
+    }
+
+    @Test
+    void shouldSetObjectAcl() throws IOException
+    {
+        testSteps(steps -> steps.setObjectAcl(CannedAccessControlList.PublicReadWrite, S3_OBJECT_KEY, S3_BUCKET_NAME));
+        verify(amazonS3Client).setObjectAcl(S3_BUCKET_NAME, S3_OBJECT_KEY, CannedAccessControlList.PublicReadWrite);
     }
 
     @Test
