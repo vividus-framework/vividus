@@ -16,12 +16,15 @@
 
 package org.vividus.bdd.steps.ui.model;
 
+import java.util.Collections;
 import java.util.Comparator;
 
 public enum StringSortingOrder
 {
     ASCENDING(Comparator.naturalOrder()),
-    DESCENDING(Comparator.reverseOrder());
+    DESCENDING(Comparator.reverseOrder()),
+    CASE_INSENSITIVE_ASCENDING(String.CASE_INSENSITIVE_ORDER),
+    CASE_INSENSITIVE_DESCENDING(Collections.reverseOrder(String.CASE_INSENSITIVE_ORDER));
 
     private final Comparator<String> sortingType;
 

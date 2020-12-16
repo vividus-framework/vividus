@@ -94,7 +94,8 @@ public class GenericElementSteps
     /**
      * Verifies if the elements located by the <b>locator</b> are sorted in <b>sortingOrder</b> order by their text
      * @param locator locator to locate elements
-     * @param sortingOrder sorting order, can be either <b>ASCENDING</b> or <b>DESCENDING</b>
+     * @param sortingOrder sorting order, can be either <b>ASCENDING</b> or <b>DESCENDING</b> or
+     * <b>CASE_INSENSITIVE_ASCENDING</b> or <b>CASE_INSENSITIVE_DESCENDING</b>
      */
     @Then("elements located `$locator` are sorted by text in $sortingOrder order")
     public void areElementSorted(Locator locator, StringSortingOrder sortingOrder)
