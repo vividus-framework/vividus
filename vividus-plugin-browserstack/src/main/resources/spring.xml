@@ -19,6 +19,7 @@
     </bean>
 
     <bean id="debugSteps" class="org.vividus.bdd.browserstack.steps.DebugSteps" />
+    <bean id="browserStackSteps" class="org.vividus.bdd.browserstack.steps.BrowserStackSteps" />
 
     <bean class="org.vividus.selenium.browserstack.BrowserStackLocalManager" >
          <constructor-arg index="0" value="${selenium.grid.password}" />
@@ -26,5 +27,6 @@
 
     <util:list id="stepBeanNames-BrowserStack" value-type="java.lang.String">
         <idref bean="debugSteps" />
+        <idref bean="browserStackSteps" />
     </util:list>
 </beans>

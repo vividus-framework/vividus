@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.report.allure;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -87,6 +90,7 @@ import org.vividus.bdd.report.allure.adapter.IVerificationErrorAdapter;
 import org.vividus.bdd.report.allure.model.ScenarioExecutionStage;
 import org.vividus.bdd.report.allure.model.StatusPriority;
 import org.vividus.bdd.report.allure.model.StoryExecutionStage;
+import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.testcontext.SimpleTestContext;
@@ -994,6 +998,34 @@ class AllureStoryReporterTests
         lenient().when(stepResult.getStatus()).thenReturn(initialStepStatus);
         allureStoryReporter.updateStepStatus(statusUpdate);
         verify(stepResult, times(updatedTimes)).setStatus(statusUpdate);
+    }
+
+    @Test
+    void shouldAddPublishedLink()
+    {
+        String linkName = "link-name";
+        String linkUrl = "link-url";
+        LinkPublishEvent event = new LinkPublishEvent(linkName, linkUrl);
+
+        List<Link> links = new ArrayList<>();
+        TestResult testResult = mock(TestResult.class);
+        when(testResult.getLinks()).thenReturn(links);
+        doAnswer(a ->
+        {
+            Consumer<TestResult> consumer = a.getArgument(1);
+            consumer.accept(testResult);
+            return null;
+        }).when(allureLifecycle).updateTestCase(eq(SCENARIO_UID), any());
+
+        mockScenarioUid(false);
+
+        allureStoryReporter.onLinkPublish(event);
+        allureStoryReporter.onLinkPublish(event);
+
+        assertThat(links, hasSize(1));
+        Link link = links.get(0);
+        assertEquals(linkName, link.getName());
+        assertEquals(linkUrl, link.getUrl());
     }
 
     private void testFailed(Throwable throwable)
