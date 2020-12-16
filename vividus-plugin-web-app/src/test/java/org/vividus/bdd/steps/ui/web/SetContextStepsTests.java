@@ -45,7 +45,6 @@ import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.State;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -63,18 +62,9 @@ class SetContextStepsTests
     private static final String QUOTE = "\"";
     private static final String TITLE = "Title";
     private static final String MATCHER_STRING = "not \"{770e3411-5e19-4831-8f36-fc76e46a2807}\"";
-    private static final String AN_ELEMENT_WITH_THE_NAME_NAME = "An element with the name 'name'";
-    private static final String AN_ELEMENT_WITH_THE_ATTRIBUTE_ATTRIBUTE_TYPE_ATTRIBUTE_VALUE =
-            "An element with the attribute 'attributeType'='attributeValue'";
-    private static final String THE_FOUND_ELEMENT_IS = "The found element is ";
-    private static final String ATTRIBUTE_TYPE = "attributeType";
-    private static final String ATTRIBUTE_VALUE = "attributeValue";
-    private static final String XPATH_ATTRIBUTE_VALUE = LocatorUtil.getXPath(".//*[@attributeType=%s]",
-            ATTRIBUTE_VALUE);
     private static final String WINDOW_OR_TAB_WITH_NAME = "Window or tab name is ";
     private static final String IS_FOUND = " is found";
     private static final String NEW_WINDOW_OR_TAB_IS_FOUND = "New window or browser tab name is ";
-    private static final String NAME = "name";
     private static final String APOSTROPHE = "'";
     private static final String XPATH = "someXpath";
     private static final String CURRENT_WINDOW_HANDLE = "{770e3411-5e19-4831-8f36-fc76e46a2807}";
@@ -116,52 +106,6 @@ class SetContextStepsTests
     {
         verify(uiContext).reset();
         verify(uiContext).putSearchContext(eq(element), any(SearchContextSetter.class));
-    }
-
-    @Test
-    void testChangeContextToElementWithAttribute()
-    {
-        when(mockedBaseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTE_ATTRIBUTE_TYPE_ATTRIBUTE_VALUE,
-                new Locator(WebLocatorType.XPATH, XPATH_ATTRIBUTE_VALUE))).thenReturn(mockedWebElement);
-        setContextSteps.changeContextToElementWithAttribute(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verifyContextSetting(mockedWebElement);
-    }
-
-    @Test
-    void testChangeContextToStateElementWithAttribute()
-    {
-        when(mockedBaseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTE_ATTRIBUTE_TYPE_ATTRIBUTE_VALUE,
-                new Locator(WebLocatorType.XPATH, XPATH_ATTRIBUTE_VALUE))).thenReturn(mockedWebElement);
-        when(mockedBaseValidations.assertElementState(THE_FOUND_ELEMENT_IS + State.ENABLED, State.ENABLED,
-                mockedWebElement)).thenReturn(true);
-        setContextSteps.changeContextToStateElementWithAttribute(State.ENABLED, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verifyContextSetting(mockedWebElement);
-    }
-
-    @Test
-    void testChangeContextToNotElementWithAttribute()
-    {
-        setContextSteps.changeContextToStateElementWithAttribute(State.ENABLED, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verifyContextSetting(null);
-    }
-
-    @Test
-    void testChangeContextToStateElementWithName()
-    {
-        when(mockedBaseValidations
-                .assertIfElementExists(AN_ELEMENT_WITH_THE_NAME_NAME,
-                        new Locator(WebLocatorType.ELEMENT_NAME, NAME)
-                                .addFilter(WebLocatorType.STATE, State.ENABLED.toString())))
-                .thenReturn(mockedWebElement);
-        setContextSteps.changeContextToElementWithName(State.ENABLED, NAME);
-        verifyContextSetting(mockedWebElement);
-    }
-
-    @Test
-    void testChangeContextToNotStateElementWithName()
-    {
-        setContextSteps.changeContextToElementWithName(State.ENABLED, NAME);
-        verifyContextSetting(null);
     }
 
     @Test
