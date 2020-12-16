@@ -65,7 +65,6 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
         if (proxy.isStarted())
         {
             desiredCapabilities.setCapability(CapabilityType.PROXY, proxy.createSeleniumProxy());
-            desiredCapabilities.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
         }
 
         desiredCapabilitiesConfigurers.ifPresent(
