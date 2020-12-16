@@ -16,4 +16,4 @@ Meta:
 When I set ACL `aws-exec-read` for object with key `${object-key}` from S3 bucket `vividus-bucket`
 
 Scenario: Delete the created object
-When I delete object with key `object-key-cxcl` from S3 bucket `vividus-bucket`
+When I delete object with key `${object-key}` from S3 bucket `vividus-bucket`
