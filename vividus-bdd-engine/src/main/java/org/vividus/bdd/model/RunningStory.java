@@ -53,6 +53,11 @@ public class RunningStory
         return failed;
     }
 
+    public void setFailed(boolean failed)
+    {
+        this.failed = failed;
+    }
+
     public boolean isAllowed()
     {
         return allowed;
