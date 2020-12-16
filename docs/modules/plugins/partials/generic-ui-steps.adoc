@@ -360,7 +360,32 @@ Then elements located `$locator` are sorted by text in $sortingOrder order
 ==== *_Parameters_*
 
 . `$locator` - <<_locator>>
-. `$sortingOrder` - either https://www.computerhope.com/jargon/a/ascendin.htm[ASCENDING] or https://www.computerhope.com/jargon/d/descorde.htm[DESCENDING] order
+. `$sortingOrder`
+
+[cols="2,2,2", options="header"]
+|===
+
+|Plain
+|Readable
+|Description
+
+|ASCENDING
+|ascending
+|Verify that elements are sorted in https://www.computerhope.com/jargon/a/ascendin.htm[ascending] order
+
+|DESCENDING
+|descending
+|Verify that elements are sorted in https://www.computerhope.com/jargon/d/descorde.htm[descending] order
+
+|CASE_INSENSITIVE_ASCENDING
+|case-insensitive ascending
+|Verify that elements are sorted in https://www.yourdictionary.com/case-insensitive[case-insensitive] https://www.computerhope.com/jargon/a/ascendin.htm[ascending] order
+
+|CASE_INSENSITIVE_DESCENDING
+|case-insensitive descending
+|Verify that elements are sorted in https://www.yourdictionary.com/case-insensitive[case-insensitive] https://www.computerhope.com/jargon/d/descorde.htm[descending] order
+
+|===
 
 ==== *_Usage_*
 
