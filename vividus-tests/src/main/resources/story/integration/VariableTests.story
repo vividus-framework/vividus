@@ -131,7 +131,9 @@ When I initialize the scenario variable `variable` with value `Variable`
 When I initialize the scenario variable `Variable` with value `nested`
 When I initialize the scenario variable `compositeVariable` with value `expected`
 When I initialize the scenario variable `expected` with value `nested-expected`
-Then `${composite${variable}}`              is equal to `expected`
-Then `${${variable}}`                       is equal to `nested`
-Then `${composite:${composite${variable}}}` is equal to `expected`
-Then `#{eval(${non-existing:0} + 1)}`       is equal to `1`
+When I initialize the scenario variable `complex` with value `[{ids=2}, {ids=0}, {ids=7}, {ids=7}]`
+Then `${composite${variable}}`                                            is equal to `expected`
+Then `${${variable}}`                                                     is equal to `nested`
+Then `${composite:${composite${variable}}}`                               is equal to `expected`
+Then `#{eval(${non-existing:0} + 1)}`                                     is equal to `1`
+Then `#{replaceAllByRegExp("""\},\s\{ids=""", """""", """${complex}""")}` is equal to `[{ids=2077}]`
