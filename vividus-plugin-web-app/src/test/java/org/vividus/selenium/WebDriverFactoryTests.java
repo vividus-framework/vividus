@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,9 +46,12 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
@@ -60,8 +64,10 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.BrowserType;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.vividus.proxy.IProxy;
 import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
@@ -101,17 +107,22 @@ class WebDriverFactoryTests
     @Mock
     private IPropertyParser propertyParser;
 
+    @Mock
+    private IProxy proxy;
+
     private WebDriverFactory webDriverFactory;
 
     @BeforeEach
     void beforeEach()
     {
         webDriverFactory = new WebDriverFactory(remoteWebDriverFactory, propertyParser,
-                new JsonUtils(), timeoutConfigurer);
+                new JsonUtils(), timeoutConfigurer, proxy);
     }
 
-    @Test
-    void testGetWebDriverWithWebDriverType() throws IllegalAccessException
+    @ParameterizedTest
+    @CsvSource({ "true, true", "false," })
+    void testGetWebDriverWithWebDriverType(boolean proxyStarted,
+            Boolean acceptsInsecureCers) throws IllegalAccessException
     {
         mockCapabilities((HasCapabilities) driver);
         WebDriverType webDriverType = mock(WebDriverType.class);
@@ -119,11 +130,17 @@ class WebDriverFactoryTests
         WebDriverConfiguration configuration = mock(WebDriverConfiguration.class);
         Map<String, Object> capablities = Map.of(KEY1, TRUE, KEY2, FALSE);
         when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES)).thenReturn(capablities);
+        when(proxy.isStarted()).thenReturn(proxyStarted);
         configuration.setBinaryPath(Optional.of(PATH));
         injectConfigurations(webDriverType, configuration);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities(Map.of(KEY2, true));
-        when(webDriverType.getWebDriver(new DesiredCapabilities(Map.of(KEY1, Boolean.TRUE, KEY2,  Boolean.TRUE)),
-                configuration)).thenReturn(driver);
+        when(webDriverType.getWebDriver(argThat(capabilities -> {
+            Assertions.assertAll(() -> assertTrue((boolean) capabilities.getCapability(KEY1)),
+                                 () -> assertTrue((boolean) capabilities.getCapability(KEY2)),
+                                 () -> assertEquals(acceptsInsecureCers,
+                                         capabilities.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS)));
+            return true;
+        }), eq(configuration))).thenReturn(driver);
         mockTimeouts(driver);
         WebDriver actualDriver = webDriverFactory.getWebDriver(desiredCapabilities);
         assertThat(actualDriver, instanceOf(TextFormattingWebDriver.class));
@@ -255,6 +272,27 @@ class WebDriverFactoryTests
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         when(remoteWebDriverFactory.getRemoteWebDriver(URL.toURL(), desiredCapabilities)).thenReturn(remoteWebDriver);
         Timeouts timeouts = mockTimeouts(remoteWebDriver);
+        assertEquals(remoteWebDriver,
+                ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
+        verify(timeoutConfigurer).configure(timeouts);
+        assertLogger();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"CHROME, true", "IEXPLORE,", "SAFARI,"})
+    void shouldSetAcceptInsecureCertsForSupportingBrowsers(String type, Boolean acceptsInsecureCerts) throws Exception
+    {
+        mockCapabilities(remoteWebDriver);
+        setRemoteDriverUrl();
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        desiredCapabilities.setBrowserName(type);
+        when(proxy.isStarted()).thenReturn(true);
+        when(remoteWebDriverFactory.getRemoteWebDriver(any(URL.class), argThat(capabilities -> {
+            assertEquals(acceptsInsecureCerts, capabilities.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS));
+            return true;
+        }))).thenReturn(remoteWebDriver);
+        Timeouts timeouts = mockTimeouts(remoteWebDriver);
+        desiredCapabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, false);
         assertEquals(remoteWebDriver,
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);

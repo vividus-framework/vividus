@@ -112,8 +112,7 @@ class VividusWebDriverFactoryTests
                             KEY5,   valueFromWebDriverManager5,
                             "key6", "valueFromScenarioMeta6",
                             "key7", "valueFromScenarioMeta7",
-                            CapabilityType.PROXY, proxyMock,
-                            CapabilityType.ACCEPT_INSECURE_CERTS, true),
+                            CapabilityType.PROXY, proxyMock),
                 vividusWebDriver.getDesiredCapabilities().asMap());
         InOrder ordered = Mockito.inOrder(webDriverManagerContext, bddRunContext);
         ordered.verify(webDriverManagerContext).getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES);
