@@ -23,6 +23,7 @@ import com.google.common.eventbus.Subscribe;
 
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeScenario;
+import org.jbehave.core.annotations.ScenarioType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.browserstack.BrowserStackAutomateClient;
 import org.vividus.reporter.event.LinkPublishEvent;
@@ -48,7 +49,7 @@ public class BrowserStackSteps
         this.testContext = testContext;
     }
 
-    @BeforeScenario
+    @BeforeScenario(uponType = ScenarioType.ANY)
     public void resetState()
     {
         testContext.put(KEY, new SessionLinkPublishState());
