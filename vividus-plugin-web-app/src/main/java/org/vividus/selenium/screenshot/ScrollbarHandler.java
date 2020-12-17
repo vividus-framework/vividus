@@ -42,11 +42,11 @@ public class ScrollbarHandler implements IScrollbarHandler
 
     private <T> T performWithHiddenScrollabrs(Supplier<T> action, WebElement scrollableElement)
     {
-        String parameter = scrollableElement == null ? "document.documentElement" : "arguments[0]";
         if (webDriverManager.isMobile())
         {
             return action.get();
         }
+        String parameter = scrollableElement == null ? "document.documentElement" : "arguments[0]";
         Object originalStyleOverflow = null;
         JavascriptExecutor executor = (JavascriptExecutor) webDriverProvider.get();
         try

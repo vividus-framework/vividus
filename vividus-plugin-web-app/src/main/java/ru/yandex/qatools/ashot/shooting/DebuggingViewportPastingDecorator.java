@@ -52,7 +52,7 @@ public class DebuggingViewportPastingDecorator extends ShootingDecorator {
             + "return [];";
     private static final long serialVersionUID = 4173686031614281540L;
     private static final String CURRENT_SCROLL = "current_scroll_";
-    protected int scrollTimeout = 0;
+    protected int scrollTimeout;
     private Coords shootingArea;
     private transient ScreenshotDebugger screenshotDebugger;
     private final String scrollVerticallyScript;

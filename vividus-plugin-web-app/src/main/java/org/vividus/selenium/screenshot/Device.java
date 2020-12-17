@@ -17,6 +17,7 @@
 package org.vividus.selenium.screenshot;
 
 import java.awt.Dimension;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
@@ -144,7 +145,7 @@ public enum Device
 
     Device(String... deviceNames)
     {
-        this.deviceNames = deviceNames;
+        this.deviceNames = Arrays.copyOf(deviceNames, deviceNames.length);
     }
 
     public ShootingStrategy decorate(boolean landscape, boolean viewportScreenshot)

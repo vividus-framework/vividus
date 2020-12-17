@@ -53,7 +53,7 @@ public class WebDriverConfiguration
         return copy(commandLineArguments);
     }
 
-    public void setCommandLineArguments(String[] commandLineArguments)
+    public void setCommandLineArguments(String... commandLineArguments)
     {
         this.commandLineArguments = copy(commandLineArguments);
     }
@@ -68,7 +68,7 @@ public class WebDriverConfiguration
         this.experimentalOptions = experimentalOptions;
     }
 
-    private String[] copy(String[] toCopy)
+    private String[] copy(String... toCopy)
     {
         return Arrays.copyOf(toCopy, toCopy.length);
     }

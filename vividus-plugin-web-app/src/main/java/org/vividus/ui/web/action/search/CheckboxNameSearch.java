@@ -78,12 +78,11 @@ public class CheckboxNameSearch extends AbstractWebElementSearchAction implement
             else
             {
                 checkboxes = label.findElements(getXPathLocator(PRECEDING_SIBLING_CHECKBOX_LOCATOR));
-                if (checkboxes.isEmpty())
-                {
-                    continue;
-                }
             }
-            return checkboxes.stream().map(e -> new Checkbox(e, label)).collect(Collectors.toList());
+            if (!checkboxes.isEmpty())
+            {
+                return checkboxes.stream().map(e -> new Checkbox(e, label)).collect(Collectors.toList());
+            }
         }
         return List.of();
     }

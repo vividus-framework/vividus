@@ -85,7 +85,7 @@ public class SetVariableSteps
      * @param variable A name under which the value should be saved
      */
     @When("I get the value from the URL and set it to the '$scopes' variable '$variable'")
-    public void gettingValueFromUrl(Set<VariableScope> scopes, String variable)
+    public void saveValueFromUrl(Set<VariableScope> scopes, String variable)
     {
         String url = getWebDriver().getCurrentUrl();
         int valueIndex = url.lastIndexOf('/') + 1;
@@ -171,7 +171,7 @@ public class SetVariableSteps
      */
     @When("I get the URL value of a video with sequence number '$number' and set it to the '$scopes'"
             + " variable '$variable'")
-    public void getUrlValueOfVideoWithNumber(int number, Set<VariableScope> scopes, String variable)
+    public void saveUrlValueOfVideoWithNumber(int number, Set<VariableScope> scopes, String variable)
     {
         List<WebElement> frames = getVideoIFrames(number);
         if (!frames.isEmpty())
@@ -205,7 +205,7 @@ public class SetVariableSteps
      * @param variable A name under which the value should be saved
      */
     @When("I get the URL value of a video with the name '$name' and set it to the '$scopes' variable '$variable'")
-    public void getUrlValueOfVideoWithName(String name, Set<VariableScope> scopes, String variable)
+    public void saveUrlValueOfVideoWithName(String name, Set<VariableScope> scopes, String variable)
     {
         List<WebElement> frames = getVideoIFrames(1);
         if (!frames.isEmpty())
@@ -248,7 +248,7 @@ public class SetVariableSteps
      */
     @When("I set the number of elements found by the attribute '$attributeType'='$attributeValue'"
             + " to the '$scopes' variable '$variableName'")
-    public void getNumberOfElementsByAttributeValueToVariable(String attributeType, String attributeValue,
+    public void saveNumberOfElementsByAttributeValueToVariable(String attributeType, String attributeValue,
             Set<VariableScope> scopes, String variableName)
     {
         Locator locator = new Locator(WebLocatorType.XPATH,
@@ -274,7 +274,7 @@ public class SetVariableSteps
      * (e.g. var a=1; return a;)
      */
     @When("I perform javascript '$jsCode' and save result to the '$scopes' variable '$variableName'")
-    public void gettingValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
+    public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
         assertAndSaveResult(() -> javascriptActions.executeScript(jsCode), scopes, variableName);
     }
@@ -297,7 +297,7 @@ public class SetVariableSteps
      * (e.g. var a=1; return a;)
      */
     @When("I perform async javascript '$jsCode' and save result to the '$scopes' variable '$variableName'")
-    public void gettingValueFromAsyncJS(String jsCode, Set<VariableScope> scopes, String variableName)
+    public void saveValueFromAsyncJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
         assertAndSaveResult(() -> javascriptActions.executeAsyncScript(jsCode), scopes, variableName);
     }
