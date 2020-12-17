@@ -3,6 +3,7 @@ project.description = 'Vividus plugin for Browser Stack'
 dependencies {
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-util')
+    implementation project(':vividus-reporter')
     implementation project(':vividus-extension-selenium')
     implementation project(':vividus-reporter')
     implementation project(':vividus-plugin-rest-api')
