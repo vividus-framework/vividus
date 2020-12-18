@@ -2,7 +2,7 @@ project.description = 'Vividus extension for selenium'
 
  ext {
      seleniumVersion = '4.0.0-alpha-1'
-     browserupProxyVersion = '2.1.1'
+     browserupProxyVersion = '2.1.2'
 }
 
 
@@ -21,11 +21,12 @@ project.description = 'Vividus extension for selenium'
          exclude module: 'selenium-java'
      }
 
+     api(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
+     implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
+
      implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
      implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
-     implementation(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
-     implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
 
      compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
