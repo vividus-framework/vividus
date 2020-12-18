@@ -69,7 +69,7 @@ public class CheckboxSteps
 
     private Checkbox createCheckbox(WebElement checkbox)
     {
-        return (checkbox == null || checkbox instanceof Checkbox) ? (Checkbox) checkbox : new Checkbox(checkbox);
+        return checkbox == null || checkbox instanceof Checkbox ? (Checkbox) checkbox : new Checkbox(checkbox);
     }
 
     private void changeCheckboxState(Checkbox checkbox, CheckboxAction action)

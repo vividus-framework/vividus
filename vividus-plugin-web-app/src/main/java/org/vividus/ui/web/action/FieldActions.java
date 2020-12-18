@@ -43,32 +43,38 @@ public class FieldActions implements IFieldActions
                         .recordFailedAssertion("Multiple selecting is not available to single select drop down");
                 return;
             }
-            boolean selected = false;
-            List<WebElement> options = select.getOptions();
-            for (int i = 0; i < options.size(); i++)
-            {
-                WebElement currentOption = options.get(i);
-                String optionValue = webElementActions.getElementText(currentOption).trim();
-                if (text.equals(optionValue))
-                {
-                    select.selectByIndex(i);
-                    selected = true;
-                    if (!multiple)
-                    {
-                        break;
-                    }
-                }
-                else if (currentOption.isSelected() && !addition && multiple)
-                {
-                    select.deselectByIndex(i);
-                }
-            }
+            boolean selected = selectOptions(select, text, addition, multiple);
             String assertionMessage = multiple ? String.format(
                     "Items with the text '%s' are selected from a drop down", text) : String.format(
                     "Item with the text '%s' is selected from a drop down", text);
             softAssert.assertTrue(assertionMessage, selected);
             waitActions.waitForPageLoad();
         }
+    }
+
+    private boolean selectOptions(Select select, String text, boolean addition, boolean multiple)
+    {
+        boolean selected = false;
+        List<WebElement> options = select.getOptions();
+        for (int i = 0; i < options.size(); i++)
+        {
+            WebElement currentOption = options.get(i);
+            String optionValue = webElementActions.getElementText(currentOption).trim();
+            if (text.equals(optionValue))
+            {
+                select.selectByIndex(i);
+                selected = true;
+                if (!multiple)
+                {
+                    break;
+                }
+            }
+            else if (currentOption.isSelected() && !addition && multiple)
+            {
+                select.deselectByIndex(i);
+            }
+        }
+        return selected;
     }
 
     @Override

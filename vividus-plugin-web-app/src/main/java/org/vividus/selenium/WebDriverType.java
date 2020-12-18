@@ -16,6 +16,7 @@
 
 package org.vividus.selenium;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -204,7 +205,7 @@ public enum WebDriverType
         this.commandLineArgumentsSupported = commandLineArgumentsSupported;
         this.useW3C = useW3C;
         this.driverSpecificCapabilities = driverSpecificCapabilities;
-        this.browserNames = browserNames;
+        this.browserNames = Arrays.copyOf(browserNames, browserNames.length);
     }
 
     public void prepareCapabilities(@SuppressWarnings("unused") DesiredCapabilities desiredCapabilities)

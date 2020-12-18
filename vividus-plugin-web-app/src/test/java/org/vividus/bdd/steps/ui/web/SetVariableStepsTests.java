@@ -68,7 +68,6 @@ class SetVariableStepsTests
     private static final Locator VIDEO_IFRAME_SEARCH = new Locator(WebLocatorType.XPATH,
             LocatorUtil.getXPath("div[contains(@class,'video')]/iframe"));
     private static final String VARIABLE_NAME = "variableName";
-    private static final String XPATH = "xpath";
     private static final String SRC = "src";
     private static final String NUMBER_FOUND_VIDEO_MESSAGE = "The number of found video frames";
 
@@ -107,7 +106,7 @@ class SetVariableStepsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getCurrentUrl()).thenReturn("http://testurl.com/testvalue");
-        setVariableSteps.gettingValueFromUrl(VARIABLE_SCOPE, VARIABLE);
+        setVariableSteps.saveValueFromUrl(VARIABLE_SCOPE, VARIABLE);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE, "testvalue");
     }
 
@@ -127,7 +126,7 @@ class SetVariableStepsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getCurrentUrl()).thenReturn(url);
-        setVariableSteps.gettingValueFromUrl(VARIABLE_SCOPE, VARIABLE);
+        setVariableSteps.saveValueFromUrl(VARIABLE_SCOPE, VARIABLE);
         verify(softAssert).recordFailedAssertion("Any appropriate value wasn't found in the URL: " + url);
         verifyNoInteractions(bddVariableContext);
     }
@@ -140,21 +139,21 @@ class SetVariableStepsTests
                 .thenReturn(Collections.singletonList(videoFrame));
         when(videoFrame.getAttribute(SRC)).thenReturn(VALUE);
         when(softAssert.assertNotNull(THE_SRC_VALUE_WAS_FOUND, VALUE)).thenReturn(Boolean.TRUE);
-        setVariableSteps.getUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
+        setVariableSteps.saveUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, URL_VARIABLE, VALUE);
     }
 
     @Test
     void testGetNullUrlValueOfVideoWithNumber()
     {
-        setVariableSteps.getUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
+        setVariableSteps.saveUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
         verifyNoInteractions(bddVariableContext);
     }
 
     @Test
     void testGetUrlValueOfNullVideoWithNumber()
     {
-        setVariableSteps.getUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
+        setVariableSteps.saveUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
         verifyNoInteractions(bddVariableContext);
     }
 
@@ -172,7 +171,7 @@ class SetVariableStepsTests
         TargetLocator mockedTargetLocator = mock(TargetLocator.class);
         when(webDriver.switchTo()).thenReturn(mockedTargetLocator);
         when(mockedTargetLocator.frame(videoFrame)).thenReturn(webDriver);
-        setVariableSteps.getUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
+        setVariableSteps.saveUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, URL_VARIABLE, VALUE);
     }
 
@@ -181,7 +180,7 @@ class SetVariableStepsTests
     {
         when(baseValidations.assertIfAtLeastNumberOfElementsExist(NUMBER_FOUND_VIDEO_MESSAGE, VIDEO_IFRAME_SEARCH, 1))
                 .thenReturn(List.of());
-        setVariableSteps.getUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
+        setVariableSteps.saveUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
         verifyNoInteractions(bddVariableContext);
     }
 
@@ -197,7 +196,7 @@ class SetVariableStepsTests
         TargetLocator mockedTargetLocator = mock(TargetLocator.class);
         when(webDriver.switchTo()).thenReturn(mockedTargetLocator);
         when(mockedTargetLocator.frame(videoFrame)).thenReturn(webDriver);
-        setVariableSteps.getUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
+        setVariableSteps.saveUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
         verify(softAssert).recordFailedAssertion("A video with the " + NAME + " 'name' was not found");
         verifyNoInteractions(bddVariableContext);
     }
@@ -225,7 +224,7 @@ class SetVariableStepsTests
         TargetLocator mockedTargetLocator = mock(TargetLocator.class);
         when(webDriver.switchTo()).thenReturn(mockedTargetLocator);
         when(mockedTargetLocator.frame(videoFrame)).thenReturn(webDriver);
-        setVariableSteps.getUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
+        setVariableSteps.saveUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, URL_VARIABLE, null);
     }
 
@@ -237,7 +236,7 @@ class SetVariableStepsTests
         Locator locator = new Locator(WebLocatorType.XPATH,
                 ".//*[normalize-space(@attributeType)=\"attributeValue\"]");
         when(searchActions.findElements(webDriver, locator)).thenReturn(Collections.singletonList(webElement));
-        setVariableSteps.getNumberOfElementsByAttributeValueToVariable("attributeType", "attributeValue",
+        setVariableSteps.saveNumberOfElementsByAttributeValueToVariable("attributeType", "attributeValue",
                 VARIABLE_SCOPE, NUMBER_BY_XPATH);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, NUMBER_BY_XPATH, 1);
     }
@@ -247,14 +246,14 @@ class SetVariableStepsTests
     {
         when(javascriptActions.executeScript(JS_CODE)).thenReturn(VALUE);
         when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
-        setVariableSteps.gettingValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
+        setVariableSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);
     }
 
     @Test
     void testGettingValueFromJSNullIsReturned()
     {
-        setVariableSteps.gettingValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
+        setVariableSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
         verifyNoInteractions(bddVariableContext);
     }
@@ -264,14 +263,14 @@ class SetVariableStepsTests
     {
         when(javascriptActions.executeAsyncScript(JS_CODE)).thenReturn(VALUE);
         when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
-        setVariableSteps.gettingValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
+        setVariableSteps.saveValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);
     }
 
     @Test
     void testGettingValueFromAsyncJSNullIsReturned()
     {
-        setVariableSteps.gettingValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
+        setVariableSteps.saveValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
         verifyNoInteractions(bddVariableContext);
     }

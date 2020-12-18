@@ -31,7 +31,7 @@ public final class CeilingJsCoordsProvider extends CoordsProvider
 
     private final String getCoordinatesJs;
 
-    private transient WebJavascriptActions javascriptActions;
+    private final transient WebJavascriptActions javascriptActions;
 
     private CeilingJsCoordsProvider(String scrollTopJs, WebJavascriptActions javascriptActions)
     {

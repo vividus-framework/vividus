@@ -77,7 +77,7 @@ public enum DropDownState implements IState
         @Override
         public ExpectedCondition<?> getExpectedCondition(WebElement element)
         {
-            return ExpectedConditions.isMultiSelectDropDown(element, true);
+            return ExpectedConditions.expectMultiSelectDropDown(element, true);
         }
     },
     SINGLE_SELECT
@@ -85,7 +85,7 @@ public enum DropDownState implements IState
         @Override
         public ExpectedCondition<?> getExpectedCondition(WebElement element)
         {
-            return ExpectedConditions.isMultiSelectDropDown(element, false);
+            return ExpectedConditions.expectMultiSelectDropDown(element, false);
         }
     }
 }
