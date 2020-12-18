@@ -1,0 +1,70 @@
+= AWS Kinesis Plugin
+
+The plugin provides functionality to interact with https://aws.amazon.com/kinesis/[Amazon Kinesis].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-aws-kinesis', version: '{current-version}')
+----
+
+include::partial$aws.adoc[]
+
+== Producer
+=== Steps
+
+==== *Put the record*
+
+Write a single data record into an Amazon Kinesis data stream. You must specify the name of the stream that captures, stores, and transports the data; a partition key; and the data blob itself. The partition key is used by Kinesis Data Streams to distribute data across shards. Kinesis Data Streams segregates the data records that belong to a stream into multiple shards, using the partition key associated with each data record to determine the shard to which a given data record belongs. Partition keys are Unicode strings, with a maximum length limit of 256 characters for each key. An MD5 hash function is used to map partition keys to 128-bit integer values and to map associated data records to shards using the hash key ranges of the shards. The step logs the shard ID of where the data record was placed and the sequence number that was assigned to the data record. Sequence numbers increase over time and are specific to a shard within a stream, not across all shards within a stream. After you write a record to a stream, you cannot modify that record or its order within the stream.
+
+[source,gherkin]
+----
+When I put record `$data` with partition key `$partitionKey` to Kinesis stream `$streamName`
+----
+
+* `$data` - The data blob to put into the record.
+* `$partitionKey` - The partition key determining which shard in the stream the data record is assigned to.
+* `$streamName` - The name of the Amazon Kinesis data stream to put the data record into.
+
+=== Examples
+.Put the record to the Amazon Kinesis data stream
+[source,gherkin]
+----
+When I put record `Hello from Vividus!` with partition key `hello` to Kinesis stream `vividus-data-stream`
+----
+
+== Consumer
+=== Steps
+
+==== *Start the consumer*
+Create Amazon Kinesis shard iterators. A shard iterator expires 5 minutes after it is returned to the requester. A shard iterator specifies the shard position from which to start reading data records sequentially.
+
+[source,gherkin]
+----
+When I start consuming records from Kinesis stream `$streamName`
+----
+
+* `$streamName` - The name of the Amazon Kinesis data stream.
+
+==== *Drain the consumed records*
+Get data records from a Kinesis data stream's shard and drain the consumed records to the specified variable. The shard iterator created at step `When I start consuming records from Kinesis stream \`$streamName\`` specifies the position in the shard from which you want to start reading data records sequentially. If there are no records available in the portion of the shard that the iterator points to, an empty list of records is saved. Each draining moves the iterator to the position next after the last consumed record.
+
+[source,gherkin]
+----
+When I drain consumed Kinesis records to $scopes variable `$variableName`
+----
+
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the records. The records are accessible via zero-based index, e.g. `${my-var[0]}` will return the first received record.
+
+=== Examples
+.Consume records from the Amazon Kinesis data stream
+[source,gherkin]
+----
+When I start consuming records from Kinesis stream `vividus-data-stream`
+!-- Perform any actions putting the records to the Kinesis stream
+When I drain consumed Kinesis records to scenario variable `consumed-records`
+Then `${consumed-records[0]}` is equal to `Hello from Vividus!`
+----
