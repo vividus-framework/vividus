@@ -1,0 +1,18 @@
+project.description = 'Vividus plugin for Amazon Kinesis'
+
+dependencies {
+    api project(':vividus-bdd-engine')
+    implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.11.918')
+    implementation(group: 'com.amazonaws', name: 'aws-java-sdk-kinesis')
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}
+
+artifactoryPublish {
+    // The publishing is skipped due to bintray restrictions: https://stackoverflow.com/questions/60602428/unable-to-add-bintray-package-to-jcenter-and-oss-jfrog
+    skip = true
+}

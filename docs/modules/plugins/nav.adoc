@@ -2,6 +2,7 @@
 * xref:plugin-applitools.adoc[Applitools*]
 * AWS
 ** xref:plugin-aws-dynamodb.adoc[DynamoDB]
+** xref:plugin-aws-kinesis.adoc[Kinesis]
 ** xref:plugin-aws-lambda.adoc[Lambda]
 ** xref:plugin-aws-s3.adoc[S3]
 * xref:plugin-browser-stack.adoc[Browser Stack]
