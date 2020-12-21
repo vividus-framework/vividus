@@ -165,11 +165,12 @@ class ProxyStepsTests
         mockHar(httpMethod, HttpStatus.SC_OK);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURLQuery(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value -> {
-            Map<String, String> map = (Map<String, String>) value;
-            return map.size() == 2 && map.containsKey(KEY1) && VALUE1.equals(map.get(KEY1)) && map.containsKey(KEY2)
-                    && VALUE2.equals(map.get(KEY2));
-        }));
+        verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value ->
+            value.equals(Map.of(
+                    KEY1, List.of(VALUE1, VALUE2),
+                    KEY2, List.of(VALUE2)
+            ))
+        ));
     }
 
     @Test
@@ -193,17 +194,17 @@ class ProxyStepsTests
         proxySteps.captureRequestAndSaveRequestData(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value -> {
             Map<String, Object> map = (Map<String, Object>) value;
-            Map<String, String> urlQuery = (Map<String, String>) map.get("query");
+            Map<String, List<String>> urlQuery = (Map<String, List<String>>) map.get("query");
             Map<String, String> requestBody = (Map<String, String>) map.get("requestBody");
-            Map<String, String> requestBodyParameters = (Map<String, String>) map.get("requestBodyParameters");
+            Map<String, List<String>> formData = (Map<String, List<String>>) map.get("requestBodyParameters");
             Integer responseStatus = (Integer) map.get("responseStatus");
             assertAll(
-                    () -> assertEquals(VALUE1, urlQuery.get(KEY1)),
-                    () -> assertEquals(VALUE2, urlQuery.get(KEY2)),
+                    () -> assertEquals(List.of(VALUE1, VALUE2), urlQuery.get(KEY1)),
+                    () -> assertEquals(List.of(VALUE2), urlQuery.get(KEY2)),
                     () -> assertEquals(MIME_TYPE, requestBody.get(MIME_TYPE)),
                     () -> assertEquals(COMMENT, requestBody.get(COMMENT)),
-                    () -> assertEquals(VALUE1, requestBodyParameters.get(KEY1)),
-                    () -> assertEquals(VALUE2, requestBodyParameters.get(KEY2)),
+                    () -> assertEquals(List.of(VALUE1, VALUE2), formData.get(KEY1)),
+                    () -> assertEquals(List.of(VALUE2), formData.get(KEY2)),
                     () -> assertEquals(statusCode, responseStatus)
             );
             return true;
@@ -370,12 +371,20 @@ class ProxyStepsTests
         postData.setMimeType(MIME_TYPE);
         postData.setText(TEXT);
         postData.setComment(COMMENT);
-        postData.setParams(List.of(createHarPostDataParam(KEY1, VALUE1), createHarPostDataParam(KEY2, VALUE2)));
+        postData.setParams(List.of(
+                createHarPostDataParam(KEY1, VALUE1),
+                createHarPostDataParam(KEY1, VALUE2),
+                createHarPostDataParam(KEY2, VALUE2)
+        ));
 
         HarRequest request = new HarRequest();
         request.setMethod(httpMethod);
         request.setUrl(URL);
-        request.setQueryString(List.of(createHarQueryParam(KEY1, VALUE1), createHarQueryParam(KEY2, VALUE2)));
+        request.setQueryString(List.of(
+                createHarQueryParam(KEY1, VALUE1),
+                createHarQueryParam(KEY1, VALUE2),
+                createHarQueryParam(KEY2, VALUE2)
+        ));
         request.setPostData(postData);
 
         HarResponse response = new HarResponse();
