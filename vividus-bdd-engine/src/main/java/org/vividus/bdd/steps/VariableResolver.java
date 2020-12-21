@@ -71,7 +71,10 @@ public class VariableResolver
                     {
                         end = i;
                     }
-                    level--;
+                    if (level > 0)
+                    {
+                        level--;
+                    }
                     break;
                 default:
                     break;
@@ -93,7 +96,7 @@ public class VariableResolver
             return resolved;
         }
         String resolvedStr = (String) resolved;
-        int nextScanStartPosition = resolvedStr.indexOf(value.substring(end + 1));
+        int nextScanStartPosition = resolvedStr.indexOf(value.substring(end + 1), start);
         return resolveVariables(nextScanStartPosition, resolvedStr);
     }
 

@@ -61,7 +61,9 @@ class VariableResolverTests
             " ${var:default},                       var:default,     value, value",
             " ${var:},                              var:,            value, value",
             " '{\"ids\": [\"${var}\", \"12-ce\"]}', var,             value, '{\"ids\": [\"value\", \"12-ce\"]}'",
-            " ${var${varPartName}},                 varPartName,     value, ${varvalue}"
+            " ${var${varPartName}},                 varPartName,     value, ${varvalue}",
+            " '#{exp(\\}{BNS_TRX_ID=, A, ${var})}', var,             value, '#{exp(\\}{BNS_TRX_ID=, A, value)}'",
+            " [JAVA_HOME=${var}].*[^${PATH}].*,     var,             value, [JAVA_HOME=value].*[^${PATH}].*"
     })
     void shouldResolveVariables(String valueToResolve, String variableKey, String variableValue, String expected)
     {
