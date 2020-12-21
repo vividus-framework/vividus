@@ -27,6 +27,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -110,7 +111,7 @@ class WebDriverProviderTests
     void testEndNoWebDriver()
     {
         webDriverProvider.end();
-        verify(mockedEventBus).post(argThat(e -> ((WebDriverQuitEvent) e).getSessionId() == null));
+        verifyNoInteractions(mockedEventBus);
     }
 
     @Test
