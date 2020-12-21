@@ -81,19 +81,10 @@ public class WebDriverProvider implements IWebDriverProvider
             finally
             {
                 webDrivers.remove(webDriver);
-                reset(sessionId);
+                testContext.remove(VividusWebDriver.class);
+                eventBus.post(new WebDriverQuitEvent(sessionId));
             }
         }
-        else
-        {
-            reset(null);
-        }
-    }
-
-    private void reset(String sessionId)
-    {
-        testContext.remove(VividusWebDriver.class);
-        eventBus.post(new WebDriverQuitEvent(sessionId));
     }
 
     @Override
