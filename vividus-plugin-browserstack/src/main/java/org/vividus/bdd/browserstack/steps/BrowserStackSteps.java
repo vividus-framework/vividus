@@ -55,7 +55,7 @@ public class BrowserStackSteps
         testContext.put(KEY, new SessionLinkPublishState());
     }
 
-    @AfterScenario
+    @AfterScenario(uponType = ScenarioType.ANY)
     public void publishSessionLinkAfterScenario() throws BrowserStackException
     {
         if (webDriverProvider.isWebDriverInitialized())
