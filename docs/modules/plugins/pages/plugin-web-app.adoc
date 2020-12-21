@@ -1,5 +1,5 @@
 = Web Application Plugin
-:proxy: This step requires proxy to be turned on: it can be done by setting the corresponding properties or by switching on @proxy meta tag at story level.
+:proxy: This step requires proxy to be turned on. It can be done in properties or by switching on @proxy meta tag at the story level.
 :har-attached: In case of failure the full HTTP archive (HAR) is attached to the report.
 
 The plugin provides functionality to interact with Web applications.
@@ -392,12 +392,13 @@ When I select `Red` in dropdown located `id(colors)`
 === Proxy - Check the number of HTTP requests
 
 {proxy}
+
 The actions preformed by the step:
 
 * extract HTTP messages from the recorded proxy archive
-* filter out the HTTP messages with response status code `302 Moved Temporarily`
-* find HTTP requests matching the provided HTTP methods and URL regular expression
-* check that total number of the found HTTP messages satisfies the desired condition
+* filter out the HTTP messages with the response status code `302 Moved Temporarily`
+* find HTTP requests matching the provided HTTP methods and the URL regular expression
+* check that the total number of the found HTTP messages satisfies the desired condition
 
 {har-attached}
 
@@ -417,15 +418,18 @@ Then number of HTTP GET, POST requests with URL pattern `http://httpbin\.org/get
 ----
 
 
-=== Proxy - Save the HTTP request URL
+=== Proxy - Save the URL
+
+Save the URL from the request with given URL-pattern into the variable with specified name and the scopes.
 
 {proxy}
+
 The actions preformed by the step:
 
 * extract HTTP messages from the recorded proxy archive
-* filter out the HTTP messages with response status code `302 Moved Temporarily`
-* find HTTP requests matching the provided HTTP methods and URL regular expression
-* check that total number of the found HTTP messages is equal to 1
+* filter out the HTTP messages with the response status code `302 Moved Temporarily`
+* find HTTP requests matching the provided HTTP methods and the URL regular expression
+* check that total number of the found HTTP messages is equal to `1`
 * save the HTTP request URL to the specified variable
 
 {har-attached}
@@ -434,12 +438,12 @@ The actions preformed by the step:
 ----
 When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
 ----
-* `$httpMethods` - the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
-* `$urlPattern` - the regular expression to match HTTP request URL
-* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
-* `$variableName` - the variable name
+* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
+* `$urlPattern` - The regular expression to match HTTP request URL.
+* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope].
+* `$variableName` - The variable name to save the URL.
 
-.Save the URL of the matching HTTP request to the variable
+.Validate the URL of the matching HTTP request
 [source,gherkin]
 ----
 Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
@@ -448,16 +452,19 @@ Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
 ----
 
 
-=== Proxy - Save the HTTP request URL query
+=== Proxy - Save the URL query
+
+Save the URL query parameters from the request with given URL-pattern into the variable with specified name and the scopes.
 
 {proxy}
+
 The actions preformed by the step:
 
 * extract HTTP messages from the recorded proxy archive
-* filter out the HTTP messages with response status code `302 Moved Temporarily`
-* find HTTP requests matching the provided HTTP methods and URL regular expression
-* check that total number of the found HTTP messages is equal to 1
-* save the HTTP request URL query to the specified variable
+* filter out the HTTP messages with the response status code `302 Moved Temporarily`
+* find HTTP requests matching the provided HTTP methods and the URL regular expression
+* check that total number of the found HTTP messages is equal to `1`
+* save the URL query parameters to the specified variable
 
 {har-attached}
 
@@ -465,22 +472,23 @@ The actions preformed by the step:
 ----
 When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`
 ----
-* `$httpMethods` - the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
-* `$urlPattern` - the regular expression to match HTTP request URL
-* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
-* `$variableName` - the variable name
+* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
+* `$urlPattern` - The regular expression to match HTTP request URL.
+* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope].
+* `$variableName` - The variable name to save the URL query. The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
 
-.Save the URL query of the matching HTTP request to the variable
+.Validate the URL query of the matching HTTP request
 [source,gherkin]
 ----
-Given I am on a page with the URL 'http://httpbin.org/forms/post'
-When I click on element located `By.xpath(//button)`
-When I capture HTTP POST request with URL pattern `http://httpbin\.org/post` and save URL query to scenario variable `query`
-Then `${query}` is equal to `{}`
+Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
+When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL query to scenario variable `query`
+Then `${query.q[0]}` is equal to `vividus`
+Then `${query.q}` is equal to `[vividus]`
+Then `${query}` is equal to `{q=[vividus]}`
 ----
 
 
-=== Proxy - Save the HTTP message data
+=== Proxy - Save the HTTP message
 
 {proxy}
 The actions preformed by the step:
@@ -497,12 +505,17 @@ The actions preformed by the step:
 ----
 When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
 ----
-* `$httpMethods` - the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
-* `$urlPattern` - the regular expression to match HTTP request URL
-* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
-* `$variableName` - the variable name
+* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
+* `$urlPattern` - The regular expression to match HTTP request URL.
+* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope].
+* `$variableName` - The variable name to store results. If the variable name is `my-var`, the following variables will be created:
+** `${my-var.query}` - The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
+** `${my-var.requestBody.mimeType}` - The MIME type of posted data, the variable will not be created if MIME type is not present.
+** `${my-var.requestBody.text}` - The posted data as plain text, the variable will not be created if the request body is not present.
+** `${my-var.requestBodyParameters}` - The form data parameters are stored as a collection of key and value pairs, where key is the name of the form parameter and value is the list of form parameter values. The form parameter values are accessible via zero-based index.
+** `${my-var.responseStatus}` - The response status, the variable will not be created if the response is not present.
 
-.Save the data from the matching HTTP message to the variable
+.Validate the data from the matching HTTP message
 [source,gherkin]
 ----
 Given I am on a page with the URL 'http://httpbin.org/forms/post'

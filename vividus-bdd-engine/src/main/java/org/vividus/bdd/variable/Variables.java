@@ -102,7 +102,8 @@ public class Variables
         String mapKey = variableMatcher.group(MAP_KEY_GROUP);
         if (mapKey != null && variable instanceof Map)
         {
-            return ((Map<String, ?>) variable).get(mapKey);
+            Map<String, Object> map = (Map<String, Object>) variable;
+            return Optional.ofNullable(map.get(mapKey)).or(() -> resolveAsCompound(map, mapKey)).orElse(null);
         }
         return variable;
     }

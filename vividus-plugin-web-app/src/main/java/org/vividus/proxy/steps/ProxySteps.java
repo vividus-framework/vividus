@@ -16,6 +16,8 @@
 
 package org.vividus.proxy.steps;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
@@ -117,28 +119,35 @@ public class ProxySteps
     }
 
     /**
-     * Saves the query string from request with given URL-pattern into the variable
-     * with specified name and scopes.
+     * Saves the URL query parameters from the request with given URL-pattern into the variable with specified name and
+     * the scopes.
      * <p>
-     * This step requires proxy to be turned on.
-     * It can be done via setting properties or switching on <b>@proxy</b> metatag inside the story file.
-     * Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
-     * If there is one entry, it saves the query string from request as Map of keys and values
-     * into the variable with specified name and scopes.
-     * If there weren't any calls or more than one matching requirements, HAR file with all
-     * calls will be attached to report.
+     * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
+     * meta tag at the story level.
      * </p>
-     * @param httpMethods the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
-     * @param urlPattern the regular expression to match HTTP request URL
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
+     * The actions preformed by the step:
      * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * <li>extract HTTP messages from the recorded proxy archive</li>
+     * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
+     * <li>find HTTP requests matching the provided HTTP methods and the URL regular expression</li>
+     * <li>check that total number of the found HTTP messages is equal to 1</li>
+     * <li>save the URL query parameters to the specified variable</li>
      * </ul>
-     * @param variableName A variable name
+     * In case of failure the full HTTP archive (HAR) is attached to the report.
+     *
+     * @param httpMethods  The "or"-separated set of HTTP methods to filter by, e.g. 'GET or POST or PUT'
+     * @param urlPattern   The regular expression to match HTTP request URL
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The variable name to save the URL query. The URL query is stored as a collection of key and
+     *                     value pairs, where key is the name of the query parameter and value is the list of query
+     *                     parameter values. The query parameter values are accessible via zero-based index.
      * @throws IOException If any error happens during operation
      */
     @When("I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL query to $scopes "
@@ -151,28 +160,32 @@ public class ProxySteps
     }
 
     /**
-     * Saves the URL from request with given URL-pattern into the variable
-     * with specified name and scopes.
+     * Saves the URL from the request with given URL-pattern into the variable with specified name and the scopes.
      * <p>
-     * This step requires proxy to be turned on.
-     * It can be done via setting properties or switching on <b>@proxy</b> metatag inside the story file.
-     * Step gets proxy's log, extract from contained requests URLs and match them with URL-pattern
-     * If there is one entry, it saves the query string from request as Map of keys and values
-     * into the variable with specified name and scopes.
-     * If there weren't any calls or more than one matching requirements, HAR file with all
-     * calls will be attached to report.
+     * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
+     * meta tag at the story level.
      * </p>
-     * @param httpMethods the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
-     * @param urlPattern the regular expression to match HTTP request URL
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
+     * The actions preformed by the step:
      * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * <li>extract HTTP messages from the recorded proxy archive</li>
+     * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
+     * <li>find HTTP requests matching the provided HTTP methods and the URL regular expression</li>
+     * <li>check that total number of the found HTTP messages is equal to 1</li>
+     * <li>save the URL to the specified variable</li>
      * </ul>
-     * @param variableName A variable name
+     * In case of failure the full HTTP archive (HAR) is attached to the report.
+     *
+     * @param httpMethods  The "or"-separated set of HTTP methods to filter by, e.g. 'GET or POST or PUT'
+     * @param urlPattern   The regular expression to match HTTP request URL
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The variable name to save the URL.
      * @throws IOException If any error happens during operation
      */
     @When("I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL to $scopes "
@@ -185,28 +198,48 @@ public class ProxySteps
     }
 
     /**
-     * Saves the query string, body from request with given URL-pattern and response status from response
-     * into the variable with specified name and scopes.
+     * Saves the URL query parameters, the request body and the response status code from the message with given
+     * request  URL-pattern into the variable with specified name and the scopes.
      * <p>
-     * This step requires proxy to be turned on.
-     * It can be done via setting properties or switching on <b>@proxy</b> metatag inside the story file.
-     * Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
-     * If there is one entry, it saves the query string from request as Map of keys and values
-     * into the variable with specified name and scopes.
-     * If there weren't any calls or more than one matching requirements, HAR file with all
-     * calls will be attached to report.
+     * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
+     * meta tag at the story level.
      * </p>
-     * @param httpMethods the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
-     * @param urlPattern the regular expression to match HTTP request URL
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
+     * The actions preformed by the step:
      * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * <li>extract HTTP messages from the recorded proxy archive</li>
+     * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
+     * <li>find HTTP requests matching the provided HTTP methods and the URL regular expression</li>
+     * <li>check that total number of the found HTTP messages is equal to 1</li>
+     * <li>save the HTTP message data to the specified variable</li>
      * </ul>
-     * @param variableName A variable name
+     * In case of failure the full HTTP archive (HAR) is attached to the report.
+     *
+     * @param httpMethods  The "or"-separated set of HTTP methods to filter by, e.g. 'GET or POST or PUT'
+     * @param urlPattern   The regular expression to match HTTP request URL
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The variable name to store results. If the variable name is my-var, the following
+     *                     variables will be created:
+     *                     <ul>
+     *                     <li>${my-var.query} - The URL query is stored as a collection of key and value pairs,
+     *                     where key is the name of the query parameter and value is the list of query parameter
+     *                     values. The query parameter values are accessible via zero-based index.</li>
+     *                     <li>${my-var.requestBody.mimeType} - The MIME type of posted data, the variable will not
+     *                     be created if MIME type is not present.</li>
+     *                     <li>${my-var.requestBody.text} - The posted data as plain text, the variable will not be
+     *                     created if the request body is not present.</li>
+     *                     <li>${my-var.requestBodyParameters} - The form data parameters are stored as a collection
+     *                     of key and value pairs, where key is the name of the form parameter and value is the list
+     *                     of form parameter values. The form parameter values are accessible via zero-based index.</li>
+     *                     <li>${my-var.responseStatus} - The response status, the variable will not be created if
+     *                     the response is not present.</li>
+     *                     </ul>
      * @throws IOException If any error happens during operation
      */
     @When("I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save request data to $scopes "
@@ -250,16 +283,16 @@ public class ProxySteps
         );
     }
 
-    private Map<String, String> getRequestBodyParameters(HarPostData postData)
+    private Map<String, List<String>> getRequestBodyParameters(HarPostData postData)
     {
-        return postData.getParams().stream()
-                .collect(Collectors.toMap(HarPostDataParam::getName, HarPostDataParam::getValue));
+        return postData.getParams().stream().collect(
+                groupingBy(HarPostDataParam::getName, mapping(HarPostDataParam::getValue, toList())));
     }
 
-    private Map<String, String> getQueryParameters(HarRequest request)
+    private Map<String, List<String>> getQueryParameters(HarRequest request)
     {
-        return request.getQueryString().stream()
-                .collect(Collectors.toMap(HarQueryParam::getName, HarQueryParam::getValue));
+        return request.getQueryString().stream().collect(
+                groupingBy(HarQueryParam::getName, mapping(HarQueryParam::getValue, toList())));
     }
 
     /**

@@ -66,7 +66,9 @@ class VariablesTests
                 arguments("a.b:NULL",                        "a.b",        VALUE,                       VALUE),
                 arguments(A_B,                               A_B,          VALUE,                       VALUE),
                 arguments("variableKey[0]",                  VARIABLE_KEY, List.of(Set.of(KEY)),        Set.of(KEY)),
-                arguments("variableKey[7]",                  VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), null)
+                arguments("variableKey[7]",                  VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), null),
+                arguments("variableKey.key",                 VARIABLE_KEY, Map.of(KEY, List.of(VALUE)), List.of(VALUE)),
+                arguments("variableKey.key[0]",              VARIABLE_KEY, Map.of(KEY, List.of(VALUE)), VALUE)
         );
         //CHECKSTYLE:ON
     }
