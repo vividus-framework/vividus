@@ -128,12 +128,11 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
     }
 
     /**
-     * Opens page URL in a new window
-     * @param pageUrl An absolute URL of the page
+     * Opens new window
      */
-    public void openPageUrlInNewWindow(String pageUrl)
+    public void openNewWindow()
     {
-        executeScript("window.open(arguments[0])", pageUrl);
+        executeScript("window.open()");
     }
 
     public void triggerMouseEvents(WebElement webElement, String... eventTypes)

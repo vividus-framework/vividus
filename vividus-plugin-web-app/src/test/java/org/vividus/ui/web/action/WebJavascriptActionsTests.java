@@ -158,11 +158,10 @@ class WebJavascriptActionsTests
     }
 
     @Test
-    void testOpenPageUrlInNewWindow()
+    void testOpenNewWindow()
     {
-        String pageUrl = "url";
-        javascriptActions.openPageUrlInNewWindow(pageUrl);
-        verify((JavascriptExecutor) webDriver).executeScript("window.open(arguments[0])", pageUrl);
+        javascriptActions.openNewWindow();
+        verify((JavascriptExecutor) webDriver).executeScript("window.open()");
     }
 
     @Test

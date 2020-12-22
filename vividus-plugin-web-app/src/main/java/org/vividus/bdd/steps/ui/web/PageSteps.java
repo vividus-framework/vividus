@@ -174,7 +174,9 @@ public class PageSteps
     @When("I open URL `$pageUrl` in new window")
     public void openPageUrlInNewWindow(String pageUrl)
     {
-        javascriptActions.openPageUrlInNewWindow(pageUrl);
+        javascriptActions.openNewWindow();
+        setContextSteps.switchingToWindow();
+        iAmOnPage(pageUrl);
     }
 
     /**
