@@ -160,6 +160,14 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
         return getFormattedInnerText("document.body");
     }
 
+    public Map<String, String> stopPageLoading()
+    {
+        return executeScript(
+            "let before = document.readyState;"
+          + "window.stop();"
+          + "return {before: before, after: document.readyState};");
+    }
+
     private String getFormattedInnerText(String context, Object... args)
     {
         boolean firefox = webDriverManager.isTypeAnyOf(WebDriverType.FIREFOX);
