@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -47,8 +48,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -330,8 +333,13 @@ class PageStepsTests
     @Test
     void testOpenPageUrlInNewWindow()
     {
+        InOrder inOrder = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions, uiContext);
         pageSteps.openPageUrlInNewWindow(URL);
-        verify(javascriptActions).openPageUrlInNewWindow(URL);
+        inOrder.verify(javascriptActions).openNewWindow();
+        inOrder.verify(setContextSteps).switchingToWindow();
+        inOrder.verify(uiContext).reset();
+        inOrder.verify(navigateActions).loadPage(URL);
+        verifyNoMoreInteractions(setContextSteps, navigateActions, javascriptActions, uiContext);
     }
 
     @Test

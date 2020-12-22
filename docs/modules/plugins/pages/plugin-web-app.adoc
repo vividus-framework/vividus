@@ -219,6 +219,22 @@ include::partial$selenium-properties.adoc[]
 
 == Steps
 
+=== Open URL in a new tab
+
+Loads given URL in a new tab
+
+[source,gherkin]
+----
+When I open URL `$URL` in new window
+----
+* `$URL` - The URL to open
+
+.Open docs in a new tab.story
+[source,gherkin]
+----
+When I open URL `https://docs.vividus.dev` in new window
+----
+
 === Execute sequence of actions
 
 Executes the sequence of web actions
