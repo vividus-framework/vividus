@@ -297,6 +297,17 @@ class WebJavascriptActionsTests
                 ResourceUtils.loadResource(WebJavascriptActionsTests.class, "wait-for-scroll.js"));
     }
 
+    @Test
+    void shouldStopPageLoadingAndReturnResult()
+    {
+        String script =   "let before = document.readyState;"
+                        + "window.stop();"
+                        + "return {before: before, after: document.readyState};";
+        Map<String, String> result = Map.of("before", "interactive", "after", "complete");
+        when(((JavascriptExecutor) webDriver).executeScript(script)).thenReturn(result);
+        assertEquals(result, javascriptActions.stopPageLoading());
+    }
+
     private void mockScriptExecution(String script, Object result)
     {
         when(((JavascriptExecutor) webDriver).executeScript(script)).thenReturn(result);

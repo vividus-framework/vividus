@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -34,6 +35,7 @@ import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
@@ -327,6 +329,27 @@ public class PageSteps
     public void assertPageTitle(StringComparisonRule comparisonRule, String text)
     {
         descriptiveSoftAssert.assertThat(PAGE_TITLE, getWebDriver().getTitle(), comparisonRule.createMatcher(text));
+    }
+
+    /**
+     * Stop the loading of page using javascript method:
+     * <code>window.stop();</code>
+     */
+    @When("I stop page loading")
+    public void stopPageLoading()
+    {
+        try
+        {
+            Map<String, String> pageStates = javascriptActions.stopPageLoading();
+            LOGGER.atInfo()
+                  .addArgument(() -> pageStates.get("before"))
+                  .addArgument(() -> pageStates.get("after"))
+                  .log("Page ready state before stop: {}, after stop:{}");
+        }
+        catch (JavascriptException javascriptException)
+        {
+            descriptiveSoftAssert.recordFailedAssertion("Unable to stop page loading", javascriptException);
+        }
     }
 
     /**

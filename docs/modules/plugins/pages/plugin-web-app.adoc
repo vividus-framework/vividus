@@ -235,6 +235,25 @@ When I open URL `$URL` in new window
 When I open URL `https://docs.vividus.dev` in new window
 ----
 
+=== Stop page loading
+
+Stops page loading
+
+[source,gherkin]
+----
+When I stop page loading
+----
+
+[TIP]
+Could be useful in combination with Selenium's https://www.selenium.dev/documentation/en/webdriver/page_loading_strategy/[page load strategy]
+
+.Stop page loading.story
+[source,gherkin]
+----
+When I open URL `https://delayed.vividus.dev` in new window
+When I stop page loading
+----
+
 === Execute sequence of actions
 
 Executes the sequence of web actions
