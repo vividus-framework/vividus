@@ -62,7 +62,7 @@ When I execute query `
     SET BandMembers =set_add(BandMembers, <<'Christoffer Lundquist'>>)
     WHERE Artist='Roxette' and SongTitle='The Look'
 ` against DynamoDB
-When I execute query `SELECT * FROM Music` against DynamoDB and save result as JSON to scenario variable `song`
+When I execute query `SELECT * FROM Music` against DynamoDB and save result as JSON to story variable `song`
 Then JSON element from `${song}` by JSON path `$` is equal to `
 [
     {
@@ -79,3 +79,20 @@ Then JSON element from `${song}` by JSON path `$` is equal to `
         "SongTitle": "Real Sugar"
     }
 ]` ignoring array order
+
+Scenario: Wait for the data
+Meta:
+    @requirementId 1235
+When I save JSON element from `${song}` by JSON path `$[?(@.SongTitle == "The Look")].BandMembers` to scenario variable `bandMembers`
+When I save JSON element from `${song}` by JSON path `$[0].length()` to scenario variable `numberOfBandMembers`
+When I execute steps with delay `PT1S` at most 1 times while variable `numberOfBandMembers` is greater than `2`:
+|step                                                                                                                                 |
+|When I execute query `                                                                                                               |
+     UPDATE Music                                                                                                                     |
+     SET BandMembers =set_delete(BandMembers, <<'Christoffer Lundquist'>>)                                                            |
+     WHERE Artist='Roxette' and SongTitle='The Look'                                                                                  |
+| ` against DynamoDB                                                                                                                  |
+|When I execute query `SELECT * FROM Music` against DynamoDB and save result as JSON to scenario variable `song`                      |
+|When I save JSON element from `${song}` by JSON path `$[?(@.SongTitle == "The Look")].BandMembers` to scenario variable `bandMembers`|
+|When I save JSON element from `${song}` by JSON path `$[0].length()` to scenario variable `numberOfBandMembers`                      |
+Then `${numberOfBandMembers}` is equal to `2`

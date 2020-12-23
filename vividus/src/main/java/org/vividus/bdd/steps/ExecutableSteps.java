@@ -19,6 +19,7 @@ package org.vividus.bdd.steps;
 import static org.apache.commons.lang3.Validate.inclusiveBetween;
 import static org.apache.commons.lang3.Validate.isTrue;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
@@ -29,6 +30,7 @@ import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.util.wait.MaxTimesBasedWaiter;
 
 public class ExecutableSteps
 {
@@ -94,8 +96,8 @@ public class ExecutableSteps
     }
 
     /**
-     * Executes the steps while variable doesn't match to the coparison rule or until the maximum number of iterations
-     * is reached.<br>
+     * Executes the steps while variable matches the comparison rule or until the maximum number of iterations is
+     * reached.<br>
      * <b>Example:</b><br>
      * <code>
      * When I execute steps at most 5 times while `var` is &lt; `3`:<br>
@@ -103,13 +105,19 @@ public class ExecutableSteps
      * |When I click on element located `id(counter)`                               |<br>
      * |When I set the text found in search context to the 'scenario' variable 'var'|<br>
      * </code>
-     * @param max Maximum number of iterations
-     * @param name Variable name to check
-     * @param comparisonRule The rule to compare values
-     * (&lt;i&gt;Possible values:&lt;b&gt; LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
-     * EQUAL_TO&lt;/b&gt;&lt;/i&gt;)
-     * @param expectedValue The expected value of the variable
-     * @param stepsToExecute The examples table with the steps to execute
+     *
+     * @param max            The maximum number of iterations
+     * @param name           The name of the variable to check
+     * @param comparisonRule The rule to match the variable value. Allowed options:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than(&gt;)</li>
+     *                       <li>greater than or equal to(&gt;=)</li>
+     *                       <li>equal to(=))</li>
+     *                       </ul>
+     * @param expectedValue  The expected value of the variable
+     * @param stepsToExecute The ExamplesTable with a single column containing the steps to execute
      */
     @When("I execute steps at most $max times while variable "
             + "`$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute")
@@ -124,6 +132,44 @@ public class ExecutableSteps
             --iterationsLeft;
             stepsToExecute.execute(Optional.empty());
         }
+    }
+
+    /**
+     * Executes the steps while variable matches the comparison rule or until the maximum number of iterations is
+     * reached. The delay is used to define the amount of time to wait between iterations.<br>
+     * <b>Example:</b><br>
+     * <code>
+     * When I execute steps with delay `PT10S` at most 5 times while `var` is &lt; `3`:<br>
+     * |step                                                                        |<br>
+     * |When I click on element located `id(counter)`                               |<br>
+     * |When I set the text found in search context to the 'scenario' variable 'var'|<br>
+     * </code>
+     *
+     * @param delay          The delay between iterations
+     * @param max            The maximum number of iterations
+     * @param name           The name of the variable to check
+     * @param comparisonRule The rule to match the variable value. Allowed options:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than(&gt;)</li>
+     *                       <li>greater than or equal to(&gt;=)</li>
+     *                       <li>equal to(=))</li>
+     *                       </ul>
+     * @param expectedValue  The expected value of the variable
+     * @param stepsToExecute The ExamplesTable with a single column containing the steps to execute
+     */
+    @When("I execute steps with delay `$delay` at most $max times while variable "
+            + "`$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute")
+    @Alias("I execute steps with delay '$delay' at most $max times while variable "
+            + "'$variableName' is $comparisonRule '$expectedValue':$stepsToExecute")
+    public void executeStepsWithPollingInterval(Duration delay, int max, String name,
+            ComparisonRule comparisonRule, Object expectedValue, SubSteps stepsToExecute)
+    {
+        new MaxTimesBasedWaiter(delay, max).wait(
+                () -> stepsToExecute.execute(Optional.empty()),
+                () -> !doesVariableValueMatch(name, comparisonRule, expectedValue)
+        );
     }
 
     private boolean doesVariableValueMatch(String name, ComparisonRule comparisonRule, Object expectedValue)
