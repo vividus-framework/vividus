@@ -168,7 +168,7 @@ Meta:
     @targetPlatform android
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `xpath(//android.widget.TextView[@text='Web View'])`
-When I wait until element located `accessibilityId(webView)` appears
+When I wait until element located `xpath(//android.webkit.WebView[@focusable='true'])` appears
 When I switch to web view with index `1`
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `1`
 When I switch to native context
