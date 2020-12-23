@@ -393,7 +393,7 @@ When I clear field located `accessibilityId(username)`
 
 ==== *_Info_*
 
-Swipes to an element in either UP or DOWN direction with the specified duration
+Swipes to an element in either UP or DOWN direction with the specified swipe duration
 
 ==== *_Wording_*
 
@@ -411,7 +411,7 @@ When I swipe $direction to element located `$locator` with duration $swipeDurati
 
 . `$direction` - direction to swipe, either UP or DOWN
 . `$locator` - <<_locator>>
-. `$duration` - swipe duration in {iso-date-format-link} format
+. `$swipeDuration` - swipe duration in {iso-date-format-link} format
 
 ==== *_Usage_*
 

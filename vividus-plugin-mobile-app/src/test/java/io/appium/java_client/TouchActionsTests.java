@@ -190,6 +190,13 @@ class TouchActionsTests
         verifyConfiguration();
     }
 
+    @Test
+    void shouldPerformVerticalSwipe()
+    {
+        touchActions.performVerticalSwipe(640, 160, DURATION);
+        verifySwipe(1);
+    }
+
     private void verifySwipe(int times)
     {
         verify(performsTouchActions, times(times))
