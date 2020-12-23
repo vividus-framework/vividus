@@ -16,7 +16,12 @@
 
 package org.vividus.bdd.browserstack.steps;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.error;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,8 +29,13 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import com.browserstack.automate.model.Session;
 import com.browserstack.client.exception.BrowserStackException;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.Test;
@@ -42,7 +52,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.testcontext.ThreadedTestContext;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class BrowserStackStepsTests
 {
     private static final String SESSION_ID = "session-id";
@@ -56,6 +66,8 @@ class BrowserStackStepsTests
     @Spy private ThreadedTestContext testContext;
     @InjectMocks private BrowserStackSteps browserStackSteps;
 
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(BrowserStackSteps.class);
+
     @Test
     void shouldPublishSessionLinkAfterScenario() throws BrowserStackException
     {
@@ -67,6 +79,7 @@ class BrowserStackStepsTests
         browserStackSteps.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
 
         verifyLinkPublishEvent(1);
+        assertThat(logger.getLoggingEvents(), is(empty()));
         verifyNoInteractions(webDriverQuitEvent);
     }
 
@@ -82,6 +95,7 @@ class BrowserStackStepsTests
         browserStackSteps.publishSessionLinkAfterScenario();
 
         verifyLinkPublishEvent(1);
+        assertThat(logger.getLoggingEvents(), is(empty()));
         verifyNoMoreInteractions(webDriverProvider);
     }
 
@@ -99,6 +113,22 @@ class BrowserStackStepsTests
         browserStackSteps.publishSessionLinkAfterScenario();
 
         verifyLinkPublishEvent(3);
+        assertThat(logger.getLoggingEvents(), is(empty()));
+        verifyNoMoreInteractions(webDriverProvider);
+    }
+
+    @Test
+    void shouldLogExceptionsOccuredWhileGettingSessionLink() throws BrowserStackException
+    {
+        BrowserStackException exception = mock(BrowserStackException.class);
+        doThrow(exception).when(appAutomateClient).getSession(SESSION_ID);
+        when(webDriverQuitEvent.getSessionId()).thenReturn(SESSION_ID);
+
+        browserStackSteps.resetState();
+        browserStackSteps.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
+
+        assertThat(logger.getLoggingEvents(),
+            is(List.of(error(exception, "Unable to get an URL for BrowserStack session with the ID {}", SESSION_ID))));
         verifyNoMoreInteractions(webDriverProvider);
     }
 
