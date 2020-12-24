@@ -16,8 +16,9 @@
 
 package org.vividus.bdd.browserstack.steps;
 
+import java.util.Optional;
+
 import com.browserstack.automate.model.Session;
-import com.browserstack.client.exception.BrowserStackException;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
@@ -25,6 +26,8 @@ import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.ScenarioType;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.browserstack.BrowserStackAutomateClient;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
@@ -33,6 +36,8 @@ import org.vividus.testcontext.TestContext;
 
 public class BrowserStackSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BrowserStackSteps.class);
+
     private static final Object KEY = SessionLinkPublishState.class;
 
     private final IWebDriverProvider webDriverProvider;
@@ -56,7 +61,7 @@ public class BrowserStackSteps
     }
 
     @AfterScenario(uponType = ScenarioType.ANY)
-    public void publishSessionLinkAfterScenario() throws BrowserStackException
+    public void publishSessionLinkAfterScenario()
     {
         if (webDriverProvider.isWebDriverInitialized())
         {
@@ -67,7 +72,7 @@ public class BrowserStackSteps
     }
 
     @Subscribe
-    public void publishSessionLinkOnWebDriverQuit(WebDriverQuitEvent event) throws BrowserStackException
+    public void publishSessionLinkOnWebDriverQuit(WebDriverQuitEvent event)
     {
         if (!getPublishState().isPublishedAfterScenario())
         {
@@ -80,10 +85,27 @@ public class BrowserStackSteps
         return testContext.get(KEY, SessionLinkPublishState.class);
     }
 
-    private void publishSessionLink(String sessionId) throws BrowserStackException
+    private void publishSessionLink(String sessionId)
     {
-        Session session = appAutomateClient.getSession(sessionId);
-        eventBus.post(new LinkPublishEvent("BrowserStack Session URL", session.getPublicUrl()));
+        getSessionLink(sessionId)
+                .ifPresent(link -> eventBus.post(new LinkPublishEvent("BrowserStack Session URL", link)));
+    }
+
+    @SuppressWarnings("IllegalCatchExtended")
+    private Optional<String> getSessionLink(String sessionId)
+    {
+        try
+        {
+            Session session = appAutomateClient.getSession(sessionId);
+            return Optional.of(session.getPublicUrl());
+        }
+        catch (Exception exception)
+        {
+            LOGGER.atError().addArgument(sessionId)
+                            .setCause(exception)
+                            .log("Unable to get an URL for BrowserStack session with the ID {}");
+            return Optional.empty();
+        }
     }
 
     private final class SessionLinkPublishState
