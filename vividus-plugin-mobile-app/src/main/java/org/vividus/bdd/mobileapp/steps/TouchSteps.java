@@ -29,24 +29,30 @@ import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.mobileapp.action.KeyboardActions;
 import org.vividus.mobileapp.action.TouchActions;
+import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 
 @TakeScreenshotOnFailure
 public class TouchSteps
 {
+    private static final float VISIBILITY_TOP_INDENT_COEFFICIENT = 0.15f;
+    private static final float VISIBILITY_BOTTOM_INDENT_COEFFICIENT = 0.25f;
+
     private final TouchActions touchActions;
     private final KeyboardActions keyboardActions;
     private final IBaseValidations baseValidations;
     private final ISearchActions searchActions;
+    private final GenericWebDriverManager genericWebDriverManager;
 
     public TouchSteps(TouchActions touchActions, KeyboardActions keyboardActions, IBaseValidations baseValidations,
-            ISearchActions searchActions)
+            ISearchActions searchActions, GenericWebDriverManager genericWebDriverManager)
     {
         this.touchActions = touchActions;
         this.keyboardActions = keyboardActions;
         this.baseValidations = baseValidations;
         this.searchActions = searchActions;
+        this.genericWebDriverManager = genericWebDriverManager;
     }
 
     /**
@@ -122,25 +128,51 @@ public class TouchSteps
      * Swipes to element in <b>direction</b> direction with duration <b>duration</b>
      * @param direction direction to swipe, either <b>UP</b> or <b>DOWN</b>
      * @param locator locator to find an element
-     * @param duration swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
+     * @param swipeDuration swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
      */
     @When("I swipe $direction to element located `$locator` with duration $swipeDuration")
-    public void swipeToElement(SwipeDirection direction, Locator locator, Duration duration)
+    public void swipeToElement(SwipeDirection direction, Locator locator, Duration swipeDuration)
     {
         locator.getSearchParameters().setWaitForElement(false);
 
         List<WebElement> elements = new ArrayList<>(searchActions.findElements(locator));
         if (elements.isEmpty())
         {
-            touchActions.swipeUntil(direction, duration, () ->
+            touchActions.swipeUntil(direction, swipeDuration, () ->
             {
                 elements.addAll(searchActions.findElements(locator));
                 return !elements.isEmpty();
             });
         }
 
-        baseValidations.assertElementsNumber(String.format("The element by locator %s exists", locator), elements,
-                ComparisonRule.EQUAL_TO, 1);
+        if (baseValidations.assertElementsNumber(String.format("The element by locator %s exists", locator), elements,
+                ComparisonRule.EQUAL_TO, 1))
+        {
+            adjustVerticalPosition(elements.get(0), swipeDuration);
+        }
+    }
+
+    private void adjustVerticalPosition(WebElement element, Duration swipeDuration)
+    {
+        int windowSizeHeight = genericWebDriverManager.getSize().getHeight();
+        int windowCenterY = windowSizeHeight / 2;
+        int elementTopCoordinateY = element.getLocation().getY();
+
+        int bottomVisibilityIndent = (int) (VISIBILITY_BOTTOM_INDENT_COEFFICIENT * windowSizeHeight);
+        int visibilityY = windowSizeHeight - bottomVisibilityIndent;
+        if (elementTopCoordinateY > visibilityY)
+        {
+            touchActions.performVerticalSwipe(windowCenterY, windowCenterY - (elementTopCoordinateY - visibilityY),
+                    swipeDuration);
+            return;
+        }
+
+        int topVisibilityIndent = (int) (VISIBILITY_TOP_INDENT_COEFFICIENT * windowSizeHeight);
+        if (elementTopCoordinateY < topVisibilityIndent)
+        {
+            touchActions.performVerticalSwipe(windowCenterY,
+                    windowCenterY + topVisibilityIndent - elementTopCoordinateY, swipeDuration);
+        }
     }
 
     private Optional<WebElement> findElementToTap(Locator locator)

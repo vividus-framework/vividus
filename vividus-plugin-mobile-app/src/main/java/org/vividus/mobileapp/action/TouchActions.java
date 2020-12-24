@@ -132,7 +132,7 @@ public class TouchActions
         BufferedImage previousFrame = null;
         for (int count = 0; count <= swipeLimit; count++)
         {
-            swipe(direction, swipeDuration);
+            swipe(direction.calculateCoordinates(genericWebDriverManager.getSize()), swipeDuration);
             Sleeper.sleep(stabilizationDuration);
             if (stopCondition.getAsBoolean())
             {
@@ -154,6 +154,18 @@ public class TouchActions
         }
     }
 
+    /**
+     * Performs vertical swipe from <b>startY</b> to <b>endY</b> with <b>swipeDuration</b>
+     *
+     * @param startY start Y coordinate
+     * @param endY end Y coordinate
+     * @param swipeDuration swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
+     */
+    public void performVerticalSwipe(int startY, int endY, Duration swipeDuration)
+    {
+        swipe(new SwipeCoordinates(1, startY, 1, endY), swipeDuration);
+    }
+
     private BufferedImage takeScreenshot()
     {
         try
@@ -166,11 +178,10 @@ public class TouchActions
         }
     }
 
-    private void swipe(SwipeDirection direction, Duration duration)
+    private void swipe(SwipeCoordinates coordinates, Duration swipeDuration)
     {
-        SwipeCoordinates coordinates = direction.calculateCoordinates(genericWebDriverManager.getSize());
         performAction(b -> b.press(point(coordinates.getStart()))
-                            .waitAction(waitOptions(duration))
+                            .waitAction(waitOptions(swipeDuration))
                             .moveTo(point(coordinates.getEnd()))
                             .release());
     }
