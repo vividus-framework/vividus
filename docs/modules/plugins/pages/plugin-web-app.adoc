@@ -16,20 +16,6 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '{
 include::partial$locator-header.adoc[]
 
 
-=== Filter Types
-
-[cols="1,2,2", options="header"]
-|===
-
-|Type
-|Description
-|Examples
-
-include::partial$common-filters.adoc[]
-
-|===
-
-
 === Locator Types
 
 [cols="1,2,1", options="header"]
@@ -170,6 +156,8 @@ element xref:parameters:state.adoc[State]
 |dropDownText
 |any of select options should be equal to a value
 |id(v1)->filter.dropDownText(value)
+
+include::partial$common-filters.adoc[]
 
 |===
 
