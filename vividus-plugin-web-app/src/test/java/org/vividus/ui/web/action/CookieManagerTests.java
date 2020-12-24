@@ -54,20 +54,10 @@ class CookieManagerTests
     private static final String COOKIE_VALUE = "cookieValue";
     private static final String DOMAIN = "https://www.domain.com";
 
-    @Mock
-    private WebJavascriptActions javascriptActions;
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private Options options;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
-
-    @InjectMocks
-    private CookieManager cookieManager;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private Options options;
+    @Mock private IWebDriverManager webDriverManager;
+    @InjectMocks private CookieManager cookieManager;
 
     @Test
     void testDeleteAllCookies()
@@ -161,10 +151,5 @@ class CookieManagerTests
         Set<Cookie> cookies = Collections.singleton(cookie);
         when(options.getCookies()).thenReturn(cookies);
         return cookies;
-    }
-
-    private void mockIsSafari(boolean safari)
-    {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(safari);
     }
 }
