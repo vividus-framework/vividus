@@ -358,12 +358,12 @@ jobs:
         name: BrowserStack - System Tests - Allure report - Android
         path: vividus-tests/output/reports/bs-android-allure
 
-    - name: Publish snapshot artifacts
-      if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
-      env:
-        BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-        BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
-      run: ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=http://oss.jfrog.org -Dartifactory.publish.repoKey=oss-snapshot-local -Dartifactory.publish.username=$BINTRAY_USER -Dartifactory.publish.password=$BINTRAY_KEY -Dartifactory.publish.buildInfo=false
+    # - name: Publish snapshot artifacts
+    #   if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
+    #   env:
+    #     BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
+    #     BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
+    #   run: ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=http://oss.jfrog.org -Dartifactory.publish.repoKey=oss-snapshot-local -Dartifactory.publish.username=$BINTRAY_USER -Dartifactory.publish.password=$BINTRAY_KEY -Dartifactory.publish.buildInfo=false
 
     - name: Publish release artifacts
       if: startsWith(github.ref, 'refs/tags/release-') && matrix.platform == 'ubuntu-latest'
