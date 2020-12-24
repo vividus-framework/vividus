@@ -55,6 +55,7 @@ import org.vividus.bdd.report.allure.model.ScenarioExecutionStage;
 import org.vividus.bdd.report.allure.model.StatusPriority;
 import org.vividus.bdd.report.allure.model.StoryExecutionStage;
 import org.vividus.reporter.event.AttachmentPublishEvent;
+import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.model.KnownIssue;
@@ -230,6 +231,27 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     }
 
     @Override
+    public void beforeScenarioSteps(Stage stage)
+    {
+        if (stage == Stage.BEFORE)
+        {
+            allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
+        }
+        else if (stage == Stage.AFTER)
+        {
+            allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.AFTER_STEPS);
+        }
+        super.beforeScenarioSteps(stage);
+    }
+
+    @Override
+    public void afterScenarioSteps(Stage stage)
+    {
+        super.afterScenarioSteps(stage);
+        allureRunContext.resetScenarioExecutionStage();
+    }
+
+    @Override
     public void beforeStep(String step)
     {
         startBddStep(step);
@@ -364,15 +386,18 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
 
     private void checkForBeforeAfterScenarioSteps()
     {
-        ScenarioExecutionStage scenarioExecutionStage = allureRunContext.getScenarioExecutionStage();
-        if (ScenarioExecutionStage.BEFORE_STEPS == scenarioExecutionStage)
+        if (!allureRunContext.isStepInProgress())
         {
-            startBddStep("@BeforeScenario");
-        }
-        else if (ScenarioExecutionStage.AFTER_STEPS == scenarioExecutionStage && getLinkedStep().isRootItem())
-        {
-            startBddStep("@AfterScenario");
-            updateStepStatus(Status.PASSED);
+            ScenarioExecutionStage scenarioExecutionStage = allureRunContext.getScenarioExecutionStage();
+            if (ScenarioExecutionStage.BEFORE_STEPS == scenarioExecutionStage)
+            {
+                startBddStep("@BeforeScenario");
+            }
+            else if (ScenarioExecutionStage.AFTER_STEPS == scenarioExecutionStage && getLinkedStep().isRootItem())
+            {
+                startBddStep("@AfterScenario");
+                updateStepStatus(Status.PASSED);
+            }
         }
     }
 
@@ -417,10 +442,28 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         lifecycle.addAttachment(attachment.getTitle(), attachment.getContentType(), null, attachment.getContent());
     }
 
+    @Subscribe
+    public void onLinkPublish(LinkPublishEvent event)
+    {
+        lifecycle.updateTestCase(getRootStepId(), result ->
+        {
+            String name = event.getName();
+            String url = event.getUrl();
+
+            boolean notExists = result.getLinks().stream()
+                                              .noneMatch(l -> l.getUrl().equals(url) && l.getName().equals(name));
+
+            if (notExists)
+            {
+                Link link = new Link().setName(name).setUrl(url);
+                result.getLinks().add(link);
+            }
+        });
+    }
+
     private void startBddStep(String stepTitle)
     {
         startStep(stepTitle);
-        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.IN_PROGRESS);
     }
 
     private void startStep(String stepTitle)
@@ -448,6 +491,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         String childStepId = parentStepId + "-" + Thread.currentThread().getId();
         lifecycle.startStep(parentStepId, childStepId, stepResult);
         putCurrentStepId(childStepId);
+        allureRunContext.startStep();
     }
 
     private void stopBddStep(Status status)
@@ -456,12 +500,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     }
 
     private void stopBddStep(Status status, StatusDetails statusDetails)
-    {
-        stopStep(status, statusDetails);
-        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.AFTER_STEPS);
-    }
-
-    private void stopStep(Status status, StatusDetails statusDetails)
     {
         LinkedQueueItem<String> step = getLinkedStep();
         while (step != null && !step.isRootItem())
@@ -477,6 +515,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     {
         lifecycle.stopStep(getCurrentStepId());
         switchToParent();
+        allureRunContext.stopStep();
     }
 
     private void modifyStepTitle(String stepTitle)
@@ -537,7 +576,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
             startStep(runningScenario.getTitle());
         }
         allureRunContext.setStoryExecutionStage(storyExecutionStage);
-        allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.BEFORE_STEPS);
     }
 
     private String getHistoryId(RunningStory runningStory, RunningScenario runningScenario)
@@ -562,8 +600,9 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
 
     private void stopTestCase()
     {
-        if (allureRunContext.getScenarioExecutionStage() == ScenarioExecutionStage.IN_PROGRESS)
+        if (allureRunContext.isStepInProgress())
         {
+            // Stop @AfterScenario step
             stopBddStep(StatusPriority.getLowest().getStatusModel());
         }
 
@@ -584,7 +623,6 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
 
         lifecycle.stopTestCase(id);
         lifecycle.writeTestCase(id);
-        allureRunContext.resetScenarioExecutionStage();
         switchToParent();
     }
 

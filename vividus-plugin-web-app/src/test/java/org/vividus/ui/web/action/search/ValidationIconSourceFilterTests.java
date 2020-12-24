@@ -86,4 +86,10 @@ class ValidationIconSourceFilterTests
         verifyNoInteractions(webElementActions);
         assertEquals(webElements, foundElements);
     }
+
+    @Test
+    void shoudReturnLocatorType()
+    {
+        assertEquals(WebLocatorType.VALIDATION_ICON_SOURCE, filter.getType());
+    }
 }

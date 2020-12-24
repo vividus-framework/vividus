@@ -21,6 +21,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,9 +30,11 @@ import static org.mockito.Mockito.when;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.net.ssl.SSLContext;
 
@@ -43,6 +47,7 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.RedirectStrategy;
+import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.DnsResolver;
 import org.apache.http.conn.HttpClientConnectionManager;
@@ -51,19 +56,17 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.keystore.IKeyStoreFactory;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ HttpClientBuilder.class, ClientBuilderUtils.class, HttpClientFactory.class })
-public class HttpClientFactoryTests
+@ExtendWith(MockitoExtension.class)
+class HttpClientFactoryTests
 {
     private static final AuthScope AUTH_SCOPE = new AuthScope("host1", 1);
     private static final Map<String, String> HEADERS = Collections.singletonMap("header1", "value1");
@@ -71,39 +74,16 @@ public class HttpClientFactoryTests
 
     @Mock private SslContextFactory sslContextFactory;
     @Mock private IKeyStoreFactory keyStoreFactory;
+    @InjectMocks private HttpClientFactory httpClientFactory;
 
-    private final HttpClientBuilder mockedHttpClientBuilder = PowerMockito.mock(HttpClientBuilder.class);
-
-    @Mock
-    private CloseableHttpClient mockedApacheHttpClient;
-
-    @Mock
-    private HttpClient mockedHttpClient;
-
-    private HttpClientFactory httpClientFactory;
-
-    @Mock
-    private CredentialsProvider credentialsProvider;
+    @Mock private HttpClientBuilder mockedHttpClientBuilder;
+    @Mock private CloseableHttpClient mockedApacheHttpClient;
+    @Mock private CredentialsProvider credentialsProvider;
 
     private final HttpClientConfig config = new HttpClientConfig();
 
-    @Before
-    public void before() throws Exception
-    {
-        MockitoAnnotations.initMocks(this);
-
-        httpClientFactory = new HttpClientFactory(sslContextFactory, keyStoreFactory);
-
-        PowerMockito.mockStatic(HttpClientBuilder.class);
-        when(HttpClientBuilder.create()).thenReturn(mockedHttpClientBuilder);
-        when(mockedHttpClientBuilder.build()).thenReturn(mockedApacheHttpClient);
-
-        PowerMockito.mock(HttpClient.class);
-        PowerMockito.whenNew(HttpClient.class).withNoArguments().thenReturn(mockedHttpClient);
-    }
-
     @Test
-    public void testBuildHttpClientWithHeaders() throws GeneralSecurityException
+    void testBuildHttpClientWithHeaders() throws GeneralSecurityException
     {
         config.setHeadersMap(HEADERS);
 
@@ -112,50 +92,56 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildHttpClientWithFullAuthentication() throws GeneralSecurityException
+    void testBuildHttpClientWithFullAuthentication() throws GeneralSecurityException
     {
         config.setCredentials(CREDS);
         config.setAuthScope(AUTH_SCOPE);
 
-        prepareClientBuilderUtilsMock();
+        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class))
+        {
+            clientBuilderUtils.when(() -> ClientBuilderUtils.createCredentialsProvider(AUTH_SCOPE, CREDS)).thenReturn(
+                    credentialsProvider);
 
-        testBuildHttpClientUsingConfig();
+            testBuildHttpClientUsingConfig();
 
-        verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
-        verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
-        PowerMockito.verifyStatic(ClientBuilderUtils.class);
-        ClientBuilderUtils.createCredentialsProvider(AUTH_SCOPE, CREDS);
+            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
+            verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
+        }
     }
 
     @Test
-    public void testBuildHttpClientWithAuthentication() throws GeneralSecurityException
+    void testBuildHttpClientWithAuthentication() throws GeneralSecurityException
     {
         config.setCredentials(CREDS);
-        prepareClientBuilderUtilsMock();
 
-        testBuildHttpClientUsingConfig();
+        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class))
+        {
+            clientBuilderUtils.when(
+                    () -> ClientBuilderUtils.createCredentialsProvider(ClientBuilderUtils.DEFAULT_AUTH_SCOPE, CREDS))
+                    .thenReturn(credentialsProvider);
 
-        verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
-        verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
-        PowerMockito.verifyStatic(ClientBuilderUtils.class);
-        ClientBuilderUtils.createCredentialsProvider(ClientBuilderUtils.DEFAULT_AUTH_SCOPE, CREDS);
+            testBuildHttpClientUsingConfig();
+
+            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
+            verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
+        }
     }
 
     @Test
-    public void testBuildHttpClientAuthenticationWithoutPass() throws GeneralSecurityException
+    void testBuildHttpClientAuthenticationWithoutPass() throws GeneralSecurityException
     {
-        prepareClientBuilderUtilsMock();
+        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class))
+        {
+            testBuildHttpClientUsingConfig();
 
-        testBuildHttpClientUsingConfig();
-
-        verify(mockedHttpClientBuilder, never()).setDefaultCredentialsProvider(any(CredentialsProvider.class));
-        verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
-        PowerMockito.verifyStatic(ClientBuilderUtils.class, never());
-        ClientBuilderUtils.createCredentialsProvider(any(AuthScope.class), anyString(), anyString());
+            verify(mockedHttpClientBuilder, never()).setDefaultCredentialsProvider(any(CredentialsProvider.class));
+            verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
+            clientBuilderUtils.verifyNoInteractions();
+        }
     }
 
     @Test
-    public void testBuildTrustedHttpClient() throws GeneralSecurityException
+    void testBuildTrustedHttpClient() throws GeneralSecurityException
     {
         config.setCredentials(CREDS);
         config.setSslCertificateCheckEnabled(false);
@@ -168,7 +154,7 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildHostnameVerifierHttpClient() throws GeneralSecurityException
+    void testBuildHostnameVerifierHttpClient() throws GeneralSecurityException
     {
         config.setCredentials(CREDS);
         config.setSslHostnameVerificationEnabled(false);
@@ -177,7 +163,7 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildDnsResolver() throws GeneralSecurityException
+    void testBuildDnsResolver() throws GeneralSecurityException
     {
         DnsResolver resolver = mock(DnsResolver.class);
         config.setDnsResolver(resolver);
@@ -186,16 +172,28 @@ public class HttpClientFactoryTests
     }
 
     @Test
-    public void testBuildCircularRedirects() throws GeneralSecurityException
+    void testBuildCircularRedirects() throws GeneralSecurityException
     {
         config.setCircularRedirectsAllowed(true);
-        prepareClientBuilderUtilsMock();
-        httpClientFactory.buildHttpClient(config);
-        verify(mockedHttpClientBuilder).setDefaultRequestConfig(argThat(RequestConfig::isCircularRedirectsAllowed));
+        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class);
+                MockedStatic<HttpClientBuilder> httpClientBuilder = mockStatic(HttpClientBuilder.class);
+                MockedConstruction<HttpClient> httpClient = mockConstruction(HttpClient.class))
+        {
+            clientBuilderUtils.when(
+                    () -> ClientBuilderUtils.createCredentialsProvider(any(AuthScope.class), anyString())).thenReturn(
+                    credentialsProvider);
+
+            httpClientBuilder.when(HttpClientBuilder::create).thenReturn(mockedHttpClientBuilder);
+            when(mockedHttpClientBuilder.build()).thenReturn(mockedApacheHttpClient);
+
+            IHttpClient actualClient = httpClientFactory.buildHttpClient(config);
+            assertEquals(httpClient.constructed(), List.of(actualClient));
+            verify(mockedHttpClientBuilder).setDefaultRequestConfig(argThat(RequestConfig::isCircularRedirectsAllowed));
+        }
     }
 
     @Test
-    public void testBuildHttpClientAllPossible() throws GeneralSecurityException
+    void testBuildHttpClientAllPossible() throws GeneralSecurityException
     {
         String baseUrl = "http://somewh.ere/";
         config.setBaseUrl(baseUrl);
@@ -220,22 +218,29 @@ public class HttpClientFactoryTests
         when(sslContextFactory.getSslContext(SSLConnectionSocketFactory.SSL, keyStore, privateKeyPassword)).thenReturn(
                 sslContext);
 
-        prepareClientBuilderUtilsMock();
+        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class))
+        {
+            clientBuilderUtils.when(() -> ClientBuilderUtils.createCredentialsProvider(AUTH_SCOPE, CREDS)).thenReturn(
+                    credentialsProvider);
 
-        testBuildHttpClientUsingConfig();
-        verify(mockedHttpClientBuilder).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
-        verify(mockedHttpClient).setHttpHost(HttpHost.create(baseUrl));
-        verify(mockedHttpClient).setSkipResponseEntity(config.isSkipResponseEntity());
-        verify(mockedHttpClientBuilder).setSSLContext(sslContext);
-        verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
-        verify(mockedHttpClientBuilder).setDefaultCookieStore(cookieStore);
-        verify(mockedHttpClientBuilder).setDnsResolver(resolver);
-        verifyDefaultHeaderSetting(HEADERS.entrySet().iterator().next());
-        PowerMockito.verifyStatic(ClientBuilderUtils.class);
-        ClientBuilderUtils.createCredentialsProvider(AUTH_SCOPE, CREDS);
+            testBuildHttpClientUsingConfig(httpClient -> verify(httpClient).setHttpHost(HttpHost.create(baseUrl)));
+            verify(mockedHttpClientBuilder).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+
+            verify(mockedHttpClientBuilder).setSSLContext(sslContext);
+            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
+            verify(mockedHttpClientBuilder).setDefaultCookieStore(cookieStore);
+            verify(mockedHttpClientBuilder).setDnsResolver(resolver);
+            verify(mockedHttpClientBuilder).useSystemProperties();
+            verifyDefaultHeaderSetting(HEADERS.entrySet().iterator().next());
+        }
     }
 
     private void testBuildHttpClientUsingConfig() throws GeneralSecurityException
+    {
+        testBuildHttpClientUsingConfig(httpClient -> { });
+    }
+
+    private void testBuildHttpClientUsingConfig(Consumer<HttpClient> httpClientVerifier) throws GeneralSecurityException
     {
         HttpClientConnectionManager connectionManager = mock(HttpClientConnectionManager.class);
         config.setConnectionManager(connectionManager);
@@ -259,38 +264,36 @@ public class HttpClientFactoryTests
         config.setCookieSpec(cookieSpec);
         HttpRequestRetryHandler handler = mock(HttpRequestRetryHandler.class);
         config.setHttpRequestRetryHandler(handler);
-        IHttpClient actualClient = httpClientFactory.buildHttpClient(config);
-        verifyBaseClientCreationPath(actualClient);
-        verify(mockedHttpClientBuilder).setRetryHandler(handler);
-        verify(mockedHttpClientBuilder).setConnectionManager(connectionManager);
-        verify(mockedHttpClientBuilder).setMaxConnTotal(maxTotalConnections);
-        verify(mockedHttpClientBuilder).setMaxConnPerRoute(maxConnectionsPerRoute);
-        verify(mockedHttpClientBuilder).addInterceptorLast(requestInterceptor);
-        verify(mockedHttpClientBuilder).addInterceptorLast(responseInterceptor);
-        verify(mockedHttpClientBuilder).setRedirectStrategy(redirectStrategy);
-        verify(mockedHttpClientBuilder)
-                .setDefaultRequestConfig(argThat(requestConfig -> requestConfig.getConnectTimeout() == connectTimeout
-                        && requestConfig.getConnectionRequestTimeout() == connectionRequestTimeout
-                        && requestConfig.getSocketTimeout() == socketTimeout
-                        && requestConfig.getCookieSpec().equals(cookieSpec)));
-        verify(mockedHttpClientBuilder)
-                .setDefaultSocketConfig(argThat(socketConfig -> socketConfig.getSoTimeout() == socketTimeout));
-    }
+        ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy = mock(ServiceUnavailableRetryStrategy.class);
+        config.setServiceUnavailableRetryStrategy(serviceUnavailableRetryStrategy);
+        try (MockedStatic<HttpClientBuilder> httpClientBuilder = mockStatic(HttpClientBuilder.class);
+                MockedConstruction<HttpClient> httpClient = mockConstruction(HttpClient.class))
+        {
+            httpClientBuilder.when(HttpClientBuilder::create).thenReturn(mockedHttpClientBuilder);
+            when(mockedHttpClientBuilder.build()).thenReturn(mockedApacheHttpClient);
 
-    private void prepareClientBuilderUtilsMock()
-    {
-        PowerMockito.mockStatic(ClientBuilderUtils.class);
-        when(ClientBuilderUtils.createCredentialsProvider(any(AuthScope.class), anyString()))
-                .thenReturn(credentialsProvider);
-    }
-
-    private void verifyBaseClientCreationPath(IHttpClient actualClient)
-    {
-        assertEquals(mockedHttpClient, actualClient);
-        PowerMockito.verifyStatic(HttpClientBuilder.class);
-        HttpClientBuilder.create();
-        verify(mockedHttpClient).setCloseableHttpClient(mockedApacheHttpClient);
-        verify(mockedHttpClientBuilder).build();
+            IHttpClient actualClient = httpClientFactory.buildHttpClient(config);
+            assertEquals(httpClient.constructed(), List.of(actualClient));
+            verify((HttpClient) actualClient).setCloseableHttpClient(mockedApacheHttpClient);
+            verify((HttpClient) actualClient).setSkipResponseEntity(config.isSkipResponseEntity());
+            httpClientVerifier.accept((HttpClient) actualClient);
+            verify(mockedHttpClientBuilder).build();
+            verify(mockedHttpClientBuilder).setRetryHandler(handler);
+            verify(mockedHttpClientBuilder).setServiceUnavailableRetryStrategy(serviceUnavailableRetryStrategy);
+            verify(mockedHttpClientBuilder).setConnectionManager(connectionManager);
+            verify(mockedHttpClientBuilder).setMaxConnTotal(maxTotalConnections);
+            verify(mockedHttpClientBuilder).setMaxConnPerRoute(maxConnectionsPerRoute);
+            verify(mockedHttpClientBuilder).addInterceptorLast(requestInterceptor);
+            verify(mockedHttpClientBuilder).addInterceptorLast(responseInterceptor);
+            verify(mockedHttpClientBuilder).setRedirectStrategy(redirectStrategy);
+            verify(mockedHttpClientBuilder).setDefaultRequestConfig(
+                    argThat(requestConfig -> requestConfig.getConnectTimeout() == connectTimeout
+                            && requestConfig.getConnectionRequestTimeout() == connectionRequestTimeout
+                            && requestConfig.getSocketTimeout() == socketTimeout
+                            && requestConfig.getCookieSpec().equals(cookieSpec)));
+            verify(mockedHttpClientBuilder).setDefaultSocketConfig(
+                    argThat(socketConfig -> socketConfig.getSoTimeout() == socketTimeout));
+        }
     }
 
     private void verifyDefaultHeaderSetting(Entry<String, String> headerEntry)

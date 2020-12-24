@@ -24,11 +24,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.openqa.selenium.By;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.IScreenshotTaker;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
-import org.vividus.ui.web.action.ISearchActions;
+import org.vividus.selenium.screenshot.WebScreenshotTaker;
+import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.model.VisualCheck;
 
 import ru.yandex.qatools.ashot.Screenshot;
@@ -37,15 +37,15 @@ import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 
 public class AshotScreenshotProvider implements ScreenshotProvider
 {
-    private final IScreenshotTaker screenshotTaker;
+    private final WebScreenshotTaker screenshotTaker;
     private final ISearchActions searchActions;
     private final ScreenshotDebugger screenshotDebugger;
     private final CoordsProvider coordsProvider;
     private final IWebDriverProvider webDriverProvider;
 
-    private Map<IgnoreStrategy, Set<By>> ignoreStrategies;
+    private Map<IgnoreStrategy, Set<Locator>> ignoreStrategies;
 
-    public AshotScreenshotProvider(IScreenshotTaker screenshotTaker, ISearchActions searchActions,
+    public AshotScreenshotProvider(WebScreenshotTaker screenshotTaker, ISearchActions searchActions,
             ScreenshotDebugger screenshotDebugger, CoordsProvider coordsProvider, IWebDriverProvider webDrvierProvider)
     {
         this.screenshotTaker = screenshotTaker;
@@ -61,8 +61,8 @@ public class AshotScreenshotProvider implements ScreenshotProvider
         Screenshot screenshot = screenshotTaker.takeAshotScreenshot(
                 visualCheck.getSearchContext(), visualCheck.getScreenshotConfiguration());
         BufferedImage original = screenshot.getImage();
-        Map<IgnoreStrategy, Set<By>> stepLevelElementsToIgnore = visualCheck.getElementsToIgnore();
-        for (Map.Entry<IgnoreStrategy, Set<By>> strategy : ignoreStrategies.entrySet())
+        Map<IgnoreStrategy, Set<Locator>> stepLevelElementsToIgnore = visualCheck.getElementsToIgnore();
+        for (Map.Entry<IgnoreStrategy, Set<Locator>> strategy : ignoreStrategies.entrySet())
         {
             IgnoreStrategy cropStrategy = strategy.getKey();
             Set<Coords> ignore = Stream.concat(
@@ -84,12 +84,12 @@ public class AshotScreenshotProvider implements ScreenshotProvider
         return screenshot;
     }
 
-    private Stream<By> getLocatorsStream(Set<By> locatorsSet)
+    private Stream<Locator> getLocatorsStream(Set<Locator> locatorsSet)
     {
         return Optional.ofNullable(locatorsSet).stream().flatMap(Collection::stream);
     }
 
-    public void setIgnoreStrategies(Map<IgnoreStrategy, Set<By>> ignoreStrategies)
+    public void setIgnoreStrategies(Map<IgnoreStrategy, Set<Locator>> ignoreStrategies)
     {
         this.ignoreStrategies = ignoreStrategies;
     }

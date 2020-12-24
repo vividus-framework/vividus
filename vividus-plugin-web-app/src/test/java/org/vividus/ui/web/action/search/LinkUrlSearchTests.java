@@ -22,7 +22,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -50,11 +49,15 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.web.action.IExpectedConditions;
-import org.vividus.ui.web.action.IExpectedSearchContextCondition;
-import org.vividus.ui.web.action.JavascriptActions;
-import org.vividus.ui.web.action.WaitActions;
-import org.vividus.ui.web.action.WaitResult;
+import org.vividus.ui.action.ElementActions;
+import org.vividus.ui.action.IExpectedConditions;
+import org.vividus.ui.action.IExpectedSearchContextCondition;
+import org.vividus.ui.action.WaitResult;
+import org.vividus.ui.action.search.AbstractElementAction;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.web.action.WebJavascriptActions;
+import org.vividus.ui.web.action.WebWaitActions;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class LinkUrlSearchTests
@@ -71,33 +74,21 @@ class LinkUrlSearchTests
     private static final String PORT = ":8080";
     private static final String SIMPLE_URL_WITH_PATH = SIMPLE_URL + SOME_URL;
     private static final String PART = "#part";
-    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is equal to {}";
     private static final By LINK_URL_LOCATOR_CASE_INSENSITIVE = By.xpath(".//a[normalize-space(translate(@href,"
             + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=\"" + URL.toLowerCase() + "\"" + "]");
     private static final Duration TIMEOUT = Duration.ofSeconds(0);
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementSearchAction.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
-    @Mock
-    private WebDriver webDriver;
+    @Mock private WebDriver webDriver;
+    @Mock private WebElement webElement;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private SearchContext searchContext;
+    @Mock private WebWaitActions waitActions;
+    @Mock private ElementActions elementActions;
+    @Mock private IExpectedConditions<By> expectedSearchContextConditions;
 
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private SearchContext searchContext;
-
-    @Mock
-    private WaitActions waitActions;
-
-    @Mock
-    private IExpectedConditions<By> expectedSearchContextConditions;
-
-    @InjectMocks
-    private LinkUrlSearch search;
+    @InjectMocks private LinkUrlSearch search;
 
     static Stream<Arguments> hrefProvider()
     {
@@ -130,14 +121,22 @@ class LinkUrlSearchTests
     void testFindLinksByTextByLinkTextHeightWidthPositive()
     {
         testJavascriptActionsWasCalled();
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, LOCATOR, 1))));
+        verifyLogging();
     }
 
     @Test
     void testFindLinksByTextByLinkTextHeightWidthNegative()
     {
         testJavascriptActionsWasCalled();
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, LOCATOR, 1))));
+        verifyLogging();
+    }
+
+    private void verifyLogging()
+    {
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+            info("Total number of elements found {} is {}", LOCATOR, 1),
+            info("Number of {} elements is {}", Visibility.VISIBLE.getDescription(), 1)
+        )));
     }
 
     @Test
@@ -145,9 +144,9 @@ class LinkUrlSearchTests
     {
         search.setCaseSensitiveSearch(true);
         LinkUrlSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(URL);
+        SearchParameters parameters = new SearchParameters(URL, Visibility.ALL, false);
         List<WebElement> webElements = List.of(webElement);
-        doReturn(webElements).when(spy).findElements(searchContext, LOCATOR, parameters);
+        when(searchContext.findElements(LOCATOR)).thenReturn(webElements);
         List<WebElement> foundElements = spy.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
     }
@@ -157,9 +156,9 @@ class LinkUrlSearchTests
     {
         search.setCaseSensitiveSearch(false);
         LinkUrlSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(URL);
+        SearchParameters parameters = new SearchParameters(URL, Visibility.ALL, false);
         List<WebElement> webElements = List.of(webElement);
-        doReturn(webElements).when(spy).findElements(searchContext, LINK_URL_LOCATOR_CASE_INSENSITIVE, parameters);
+        when(searchContext.findElements(LINK_URL_LOCATOR_CASE_INSENSITIVE)).thenReturn(webElements);
         List<WebElement> foundElements = spy.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
     }
@@ -290,14 +289,20 @@ class LinkUrlSearchTests
         IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
         search.setWaitForElementTimeout(TIMEOUT);
         when(expectedSearchContextConditions.presenceOfAllElementsLocatedBy(LOCATOR)).thenReturn(condition);
-        when(webElement.isDisplayed()).thenReturn(true);
+        when(elementActions.isElementVisible(webElement)).thenReturn(true);
         WaitResult<List<WebElement>> result = mock(WaitResult.class);
         when(waitActions.wait(searchContext, TIMEOUT, condition, false)).thenReturn(result);
         when(result.getData()).thenReturn(List.of(webElement));
         search.setCaseSensitiveSearch(true);
         search.search(searchContext, new SearchParameters(URL));
-        JavascriptActions javascriptActions = mock(JavascriptActions.class);
+        WebJavascriptActions javascriptActions = mock(WebJavascriptActions.class);
         verify(javascriptActions, never()).scrollIntoView(webElement, true);
+    }
+
+    @Test
+    void shouldThrowExceptionIfMatchesIsInvoked()
+    {
+        assertThrows(UnsupportedOperationException.class, () -> search.matches(null, null));
     }
 
     private void mockGetCurrentUrl()

@@ -26,19 +26,19 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.Resource;
 import org.vividus.bdd.resource.IBddResourceLoader;
 import org.vividus.bdd.resource.ResourceLoadException;
-import org.vividus.bdd.steps.ParameterAdaptor;
+import org.vividus.bdd.steps.VariableResolver;
 
 public class ExamplesTableFileLoader implements IExamplesTableLoader
 {
     private static final Map<String, String> TABLES_CACHE = new ConcurrentHashMap<>();
     private IBddResourceLoader bddResourceLoader;
-    private ParameterAdaptor parameterAdaptor;
+    private VariableResolver variableResolver;
     private boolean cacheTables;
 
     @Override
     public String loadExamplesTable(String exampleTablePath)
     {
-        String tablePath = (String) parameterAdaptor.convert(exampleTablePath);
+        String tablePath = (String) variableResolver.resolve(exampleTablePath);
         String table;
         if (cacheTables)
         {
@@ -69,9 +69,9 @@ public class ExamplesTableFileLoader implements IExamplesTableLoader
         this.bddResourceLoader = bddResourceLoader;
     }
 
-    public void setParameterAdaptor(ParameterAdaptor parameterAdaptor)
+    public void setVariableResolver(VariableResolver variableResolver)
     {
-        this.parameterAdaptor = parameterAdaptor;
+        this.variableResolver = variableResolver;
     }
 
     public void setCacheTables(boolean cacheTables)

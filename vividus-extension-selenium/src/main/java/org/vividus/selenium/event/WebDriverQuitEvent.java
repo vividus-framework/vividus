@@ -18,4 +18,15 @@ package org.vividus.selenium.event;
 
 public class WebDriverQuitEvent
 {
+    private final String sessionId;
+
+    public WebDriverQuitEvent(String sessionId)
+    {
+        this.sessionId = sessionId;
+    }
+
+    public String getSessionId()
+    {
+        return sessionId;
+    }
 }

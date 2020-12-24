@@ -20,13 +20,13 @@ import java.util.Optional;
 
 import org.jbehave.core.annotations.AsParameters;
 import org.openqa.selenium.Point;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
 
 @AsParameters
 public class Action
 {
     private ActionType type;
-    private Optional<SearchAttributes> searchAttributes;
+    private Optional<Locator> searchAttributes;
     private Optional<Point> offset;
 
     public ActionType getType()
@@ -39,12 +39,12 @@ public class Action
         this.type = type;
     }
 
-    public Optional<SearchAttributes> getSearchAttributes()
+    public Optional<Locator> getSearchAttributes()
     {
         return searchAttributes;
     }
 
-    public void setSearchAttributes(Optional<SearchAttributes> searchAttributes)
+    public void setSearchAttributes(Optional<Locator> searchAttributes)
     {
         this.searchAttributes = searchAttributes;
     }

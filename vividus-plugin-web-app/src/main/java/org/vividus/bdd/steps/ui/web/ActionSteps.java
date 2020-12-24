@@ -26,13 +26,13 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.model.Action;
 import org.vividus.bdd.steps.ui.web.model.ActionType;
 import org.vividus.bdd.steps.ui.web.model.SequenceAction;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
 
 @TakeScreenshotOnFailure
 public class ActionSteps
@@ -90,11 +90,11 @@ public class ActionSteps
             }
             else
             {
-                Optional<SearchAttributes> searchAttributes = action.getSearchAttributes();
+                Optional<Locator> locator = action.getSearchAttributes();
                 Optional<WebElement> element;
-                if (searchAttributes.isPresent())
+                if (locator.isPresent())
                 {
-                    element = findElement(searchAttributes.get());
+                    element = findElement(locator.get());
                     if (element.isEmpty())
                     {
                         return false;
@@ -128,6 +128,8 @@ public class ActionSteps
      * <br> |CLICK         |By.placeholder(Enter your password)     |
      * <br> |CLICK         |                                        |
      * <br> |PRESS_KEYS    |BACK_SPACE                              |
+     * <br> |KEY_DOWN      |CONTROL,SHIFT                           |
+     * <br> |KEY_UP        |CONTROL,SHIFT                           |
      * <br> |MOVE_TO       |By.id(name)                             |
      * </code>
      * </pre>
@@ -173,9 +175,24 @@ public class ActionSteps
      * </tr>
      * <tr>
      * <td>PRESS_KEYS</td>
-     * <td><a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
-     * </td>
+     * <td><a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a></td>
      * <td>BACK_SPACE</td>
+     * </tr>
+     * <tr>
+     * <td>KEY_DOWN</td>
+     * <td>
+     *     key – Either <a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
+     *     SHIFT, ALT or CONTROL.
+     * </td>
+     * <td>CONTROL,SHIFT</td>
+     * </tr>
+     * <tr>
+     * <td>KEY_UP</td>
+     * <td>
+     *     key – Either <a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
+     *     SHIFT, ALT or CONTROL.
+     * </td>
+     * <td>CONTROL,SHIFT</td>
      * </tr>
      * <tr>
      * <td>MOVE_TO</td>
@@ -194,9 +211,9 @@ public class ActionSteps
         performActions(actions, (builder, action) ->
         {
             Object argument = action.getArgument();
-            if (argument != null && argument.getClass().equals(SearchAttributes.class))
+            if (argument != null && argument.getClass().equals(Locator.class))
             {
-                Optional<WebElement> element = findElement((SearchAttributes) argument);
+                Optional<WebElement> element = findElement((Locator) argument);
                 if (element.isEmpty())
                 {
                     return false;
@@ -221,8 +238,8 @@ public class ActionSteps
         actions.build().perform();
     }
 
-    private Optional<WebElement> findElement(SearchAttributes searchAttributes)
+    private Optional<WebElement> findElement(Locator locator)
     {
-        return Optional.ofNullable(baseValidations.assertIfElementExists("Element for interaction", searchAttributes));
+        return Optional.ofNullable(baseValidations.assertIfElementExists("Element for interaction", locator));
     }
 }

@@ -35,17 +35,20 @@
         <property name="cleanableDirectories" value="${start-context-listener.cleanable-directories}" />
     </bean>
 
-    <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
+    <bean id="storyReporter" class="org.vividus.bdd.TestContextStoryReporter">
+        <property name="next" ref="runContextStoryReporter" />
+    </bean>
+
+    <bean id="runContextStoryReporter" class="org.vividus.bdd.RunContextStoryReporter">
         <property name="next" ref="allureStoryReporter" />
     </bean>
 
     <bean id="allureStoryReporter" parent="abstractAllureStoryReporter">
-        <property name="next" ref="bddVariableStoryReporter" />
-    </bean>
-
-    <bean id="bddVariableStoryReporter" class="org.vividus.bdd.BddVariableStoryReporter">
-        <property name="bddVariableContext" ref="bddVariableContext" />
-        <property name="next" ref="statusStoryReporter" />
+        <property name="next">
+            <bean class="org.vividus.bdd.variable.VariableStoryReporter">
+                <property name="next" ref="statusStoryReporter" />
+            </bean>
+        </property>
     </bean>
 
     <bean id="statusStoryReporter" class="org.vividus.bdd.StatusStoryReporter">
@@ -67,6 +70,9 @@
             </bean>
         </property>
     </bean>
+
+
+    <bean class="org.vividus.bdd.groovy.VariableContextAwareGroovyScriptEvaluator" />
 
     <util:list id="storyReporters" />
 

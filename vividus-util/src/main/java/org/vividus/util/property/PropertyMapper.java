@@ -22,14 +22,17 @@ import static java.util.stream.Collectors.toSet;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.IntFunction;
+import java.util.function.UnaryOperator;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 
@@ -47,7 +50,7 @@ public class PropertyMapper implements IPropertyMapper
         SimpleModule module = new SimpleModule();
         deserializers.forEach(deserializer -> module.addDeserializer(getType(deserializer), deserializer));
         javaPropsMapper = new JavaPropsMapper();
-        javaPropsMapper.setPropertyNamingStrategy(PropertyNamingStrategy.KEBAB_CASE).registerModule(module);
+        javaPropsMapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE).registerModule(module);
         javaPropsMapper.findAndRegisterModules();
     }
 
@@ -59,21 +62,41 @@ public class PropertyMapper implements IPropertyMapper
     }
 
     @Override
-    public <T> Map<String, T> readValues(String propertyPrefix, Class<T> valueType) throws IOException
+    public <T> PropertyMappedCollection<T> readValues(String propertyPrefix, Class<T> valueType) throws IOException
+    {
+        return readValues(propertyPrefix, UnaryOperator.identity(), valueType);
+    }
+
+    @Override
+    public <T> PropertyMappedCollection<T> readValues(String propertyPrefix, UnaryOperator<String> keyMapper,
+            Class<T> valueType) throws IOException
+    {
+        return readValues(propertyPrefix, keyMapper, valueType,  HashMap::new);
+    }
+
+    @Override
+    public <T> PropertyMappedCollection<T> readValues(String propertyPrefix, UnaryOperator<String> keyMapper,
+            Comparator<String> keyComparator, Class<T> valueType) throws IOException
+    {
+        return readValues(propertyPrefix, keyMapper, valueType, keysSize -> new TreeMap<>(keyComparator));
+    }
+
+    private <T> PropertyMappedCollection<T> readValues(String propertyPrefix, UnaryOperator<String> keyMapper,
+            Class<T> valueType, IntFunction<Map<String, T>> mapProducer) throws IOException
     {
         Map<String, String> properties = propertyParser.getPropertiesByPrefix(propertyPrefix);
         Set<String> keys = getKeys(properties.keySet(), propertyPrefix);
-        Map<String, T> result = new HashMap<>(keys.size());
+        Map<String, T> result = mapProducer.apply(keys.size());
         for (String key : keys)
         {
             String propertyFamily = propertyPrefix + key + PROPERTY_PREFIX_SEPARATOR;
-            Properties objectProps = properties.entrySet().stream().filter(e -> e.getKey().startsWith(propertyFamily))
-                    .collect(toMap(e -> StringUtils.removeStart(e.getKey(), propertyFamily), Entry::getValue,
-                        (v1, v2) -> null, Properties::new));
-            T value = javaPropsMapper.readPropertiesAs(objectProps, valueType);
-            result.put(key, value);
+            Map<String, String> objectProps = properties.entrySet().stream()
+                    .filter(e -> e.getKey().startsWith(propertyFamily))
+                    .collect(toMap(e -> StringUtils.removeStart(e.getKey(), propertyFamily), Entry::getValue));
+            T value = javaPropsMapper.readMapAs(objectProps, valueType);
+            result.put(keyMapper.apply(key), value);
         }
-        return result;
+        return new PropertyMappedCollection<>(result);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,49 +1,168 @@
-= Plugin Mobile App
+= Mobile Application Plugin
 
-== General Info
-
-The plugin provides functionality to test mobile application on real devides, Android Emulators and iOS Simulators
+The plugin provides functionality to test mobile application on real devices, Android Emulators and iOS Simulators
 
 == Installation
 
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version: '{current-version}')
 ----
+
+
+include::partial$locator-header.adoc[]
+
+
+=== Filter Types
+
+[cols="1,2,2", options="header"]
+|===
+
+|Type
+|Description
+|Examples
+
+include::partial$common-filters.adoc[]
+
+|text
+|Filter elements by their exact text.
+|tagName(android.widget.EditText)->filter.text(Welcome)
+
+|attribute
+|Filter elements by their attribute values
+a|`tagName(android.widget.TextView)->filter.attribute(text=Hi)` - `android.widget.TextView` element has the `text` attribute with `Hi` value
+`tagName(android.widget.TextView)->filter.attribute(text)` - `android.widget.TextView` element has the `text` attribute with any value
+`tagName(android.widget.TextView)->filter.attribute(text=)` - `android.widget.TextView` element has the `text` attribute with an empty value
+
+|===
+
+
+=== Locator Types
+:locator-strategy: https://appium.io/docs/en/commands/element/find-elements/index.html#selector-strategies
+
+[cols="1,1,2,2", options="header"]
+|===
+
+|Type
+|Platform
+|Description
+|Examples
+
+|XPath
+|any
+|Search the app XML source using xpath (not recommended, has {locator-strategy}[performance issues])
+|xpath(//android.widget.TextView[@text='Home']) or By.xpath(//XCUIElementTypeStaticText[@value='Home'])
+
+|Accessibility ID
+|any
+|See {locator-strategy}[Accessibility ID] selector strategy
+|accessibilityId(menu-toggler) or By.accessibilityId(menu-toggler)
+
+|iOS Class Chain
+|`iOS`
+|See https://github.com/facebookarchive/WebDriverAgent/wiki/Class-Chain-Queries-Construction-Rules[Class Chain Queries] for more details
+|+iosClassChain(**/XCUIElementTypeCell[$name BEGINSWITH "A"$])+ or +By.iosClassChain(**/XCUIElementTypeCell[$name BEGINSWITH "B"$])+
+
+|===
+
+include::partial$visibility-types.adoc[]
+
+
 
 == Properties
 
-=== Required
+See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid] properties to configure remote grid
 
-* `selenium.grid.device-name` - defines device name to run tests on
-
-See xref:ROOT:tests-configuration.adoc[Selenium Grid] properties to configure remote grid
-
-=== Optional
-
-* `selenium.grid.platform-name` - defines mobile OS to use, e.g. `Android` or `iOS`
-* `selenium.grid.automation-name` - defines automation engine to use, see <<automation-engines, automation engines>> table for details
-
-.[[automation-engines]]Automation engines
-[cols="1,2", options="header"]
+:application-under-test: mobile application
+:session-scope-property-base: mobile-application
+[cols="6,3,2,6", options="header"]
 |===
+|Property Name
+|Acceptable values
+|Default
+|Description
 
-|Platform
-|Recommended engine
+include::partial$selenium-properties.adoc[]
 
-|`Android`
-|http://appium.io/docs/en/drivers/android-uiautomator2/[UIAutomator2]
+|`selenium.grid.platform-name`
+a|`Android`
 
-|`iOS`
-|http://appium.io/docs/en/drivers/ios-xcuitest/[XCUITest]
+`iOS`
+|Depends on the set profile
+|Defines the mobile OS to use
+
+|`selenium.grid.automation-name`
+a|`UIAutomator2`
+`XCUITest`
+|Depends on the set profile
+a|Defines automation engine to use
+[cols="1,2", options="header"]
+!===
+
+!Platform
+!Recommended engine
+
+!`Android`
+!http://appium.io/docs/en/drivers/android-uiautomator2/[UIAutomator2]
+
+!`iOS`
+!http://appium.io/docs/en/drivers/ios-xcuitest/[XCUITest]
+!===
+
+|`mobile-environment.real-device`
+a|`true`
+
+`false`
+
+|Depends on the set profile
+
+a|Defines whether the tests run on real device
+[cols="2,1", options="header"]
+!===
+
+!Profile
+!Value
+
+!`browserstack/mobile_app`
+!`true`
+
+!`mobile_app/ios`
+!`false`
+
+!`mobile_app/android`
+!`false`
+
+!===
+
+|`mobile-environment.device.folder-for-file-upload`
+|`string`
+
+|Depends on the set profile
+
+a|Defines a destination folder on a device for a file being uploaded
+[cols="1,1", options="header"]
+!===
+
+!Profile
+!Value
+
+!`mobile_app/ios`
+!`/private/var/mobile/Media/DCIM/`
+
+!`mobile_app/android`
+!`/sdcard/Pictures`
+
+!===
+
 |===
 
 == Profiles
 
 === iOS
+:ios-profile: mobile_app/ios
 
-The profile can be enabled by adding `mobile_app/ios` to `configuration.profiles` property
+The profile can be enabled by adding `{ios-profile}` to `configuration.profiles` property
 
 Default profile configuration
 [source,properties]
@@ -53,8 +172,9 @@ selenium.grid.automation-name=XCUITest
 ----
 
 === Android
+:android-profile: mobile_app/android
 
-The profile can be enabled by adding `mobile_app/android` to `configuration.profiles` property
+The profile can be enabled by adding `{android-profile}` to `configuration.profiles` property
 
 Default profile configuration
 [source,properties]
@@ -62,13 +182,6 @@ Default profile configuration
 selenium.grid.platform-name=Android
 selenium.grid.automation-name=UIAutomator2
 ----
-
-=== BrowserStack
-
-* The profile can be enabled by adding `browserstack/mobile_app` to `configuration.profiles` property
-* BrowserStack specific properties must be prepended with `selenium.grid.capabilities.bstack\:options.` prefix, meaning given a property `projectName` with a value `My Project` the resulting property will be `selenium.grid.capabilities.bstack\:options.projectName=My Project`
-* Appium specific properties in BrowserStack must be prepended with `selenium.grid.capabilities.appium\:options.` prefix, meaning given a property `clearSystemFiles` with a value `true` the resulting property will be `selenium.grid.capabilities.appium\:options.clearSystemFiles=true`
-* See https://www.browserstack.com/app-automate/capabilities[Platform Configurator] to setup configuration
 
 == Steps
 
@@ -122,3 +235,348 @@ Given I start mobile application with capabilities:
 |bstack:options.networkLogs     |true |
 |appium:options.clearSystemFiles|false|
 ----
+
+=== Close mobile application
+
+==== *_Info_*
+
+Closes a mobile application and quits the session
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I close mobile application
+----
+
+==== *_Usage_*
+
+.Close mobile application
+[source,gherkin]
+----
+When I close mobile application
+----
+
+=== Tap on element with duration
+
+==== *_Info_*
+
+Taps on the element located by the locator with the specified duration.
+
+The atomic actions performed are:
+* press on the element
+* wait for the duration
+* release
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I tap on element located `$locator` with duration `$duration`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$duration` - duration between an element is pressed and released in {iso-date-format-link} format
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Tap on element with duration
+When I tap on element located `accessibilityId(menu-toggler)` with duration `PT0.5S`
+----
+
+=== Tap on element
+
+==== *_Info_*
+
+Taps on the element located by the locator.
+
+The atomic actions performed are:
+* press on the element
+* release
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I tap on element located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Sample.story
+[source,gherkin]
+----
+Scenario: Tap on element
+When I tap on element located `accessibilityId(menu-toggler)`
+----
+
+=== Type text
+
+==== *_Info_*
+
+Types the text into the element located by the locator.
+
+[WARNING]
+Existing text is re-written by the text passed into the step
+
+The atomic actions performed are:
+* type text into the element
+* hide keyboard
+
+[WARNING]
+For `iOS` real devices the hide keyboard action works only for `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView` elements, in case of `XCUIElementTypeTextView` element tap outside the text view to close the keyboard.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I type `$text` in field located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$text` - text to type into the element
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Keyboard.story
+[source,gherkin]
+----
+Scenario: Type text
+When I type `Bob` in field located `accessibilityId(username)`
+----
+
+=== Clear field
+
+==== *_Info_*
+
+Clears a field located by the locator.
+
+The atomic actions performed are:
+* clear the field
+* hide keyboard
+
+[WARNING]
+For `iOS` real devices the hide keyboard action works only for `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView` elements, in case of `XCUIElementTypeTextView` element tap outside the text view to close the keyboard.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I clear field located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Keyboard.story
+[source,gherkin]
+----
+Scenario: Type text
+When I clear field located `accessibilityId(username)`
+----
+
+=== Swipe to an element
+
+==== *_Info_*
+
+Swipes to an element in either UP or DOWN direction with the specified swipe duration
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I swipe $direction to element located `$locator` with duration $swipeDuration
+----
+
+==== Properties
+
+* `mobile-application.swipe.limit` - defines max numbers of swipes to perform (if it's reached the swipe process is stopped and the error is thrown)
+* `mobile-application.swipe.stabilization-duration` - defines a duration to wait after swipe until view becomes stable
+
+==== *_Parameters_*
+
+. `$direction` - direction to swipe, either UP or DOWN
+. `$locator` - <<_locator>>
+. `$swipeDuration` - swipe duration in {iso-date-format-link} format
+
+==== *_Usage_*
+
+.Swipe.story
+[source,gherkin]
+----
+Scenario: Swipe to element
+Then number of elements found by `accessibilityId(end-of-screen)` is equal to `0`
+When I swipe UP to element located `accessibilityId(end-of-screen)` with duration PT1S
+Then number of elements found by `accessibilityId(end-of-screen)` is equal to `1`
+----
+
+=== Upload a file to a device
+
+==== *_Info_*
+
+Uploads a file to a device
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I upload file `$filePath` to device
+----
+
+==== *_Parameters_*
+
+. `$filePath` - path of the file to upload to a device
+
+==== *_Usage_*
+
+.Upload.story
+[source,gherkin]
+----
+Scenario: Upload file
+When I upload file `images/avatar.png` to device
+Then the avatar icon is displayed with the uploaded image
+----
+
+=== Activate mobile application
+
+==== *_Info_*
+
+Activates an existing application on the device and moves it to the foreground. The application should be already running in order to activate it.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I activate application with bundle identifier `$bundleId`
+----
+
+==== *_Parameters_*
+
+. `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
+
+==== *_Usage_*
+
+.GoToSafari.story
+[source,gherkin]
+----
+Scenario: Open safari
+When I activate application with bundle identifier `com.apple.mobilesafari`
+----
+
+include::partial$generic-ui-steps.adoc[]
+
+
+=== Change session settings
+
+==== *_Info_*
+
+Changes the behavior of the Appium session
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I change Appium session settings:$settings
+----
+
+==== *_Parameters_*
+
+. `$settings` - https://appium.io/docs/en/advanced-concepts/settings/#settings[Settings]
+
+==== *_Usage_*
+
+.Settings.story
+[source,gherkin]
+----
+Scenario: Show invisible elements
+When I change Appium session settings:
+|name                  |value|
+|allowInvisibleElements|true |
+----
+
+=== Select date in date picker
+
+==== *_Info_*
+
+Selects a next or previous picker wheel value in date picker
+
+[WARNING]
+* Only `iOS` platform is supported
+* Target element must be of type `XCUIElementTypePickerWheel`
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I select $direction value with `$offset` offset in picker wheel located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$direction` - next value to select, either `NEXT` or `PREVIOUS`
+. `$offset` - offset for pick from a middle of a wheel, see https://appium.io/docs/en/writing-running-appium/ios/ios-xctest-mobile-gestures/index.html#mobile-selectpickerwheelvalue[Select Picker Wheel Value]
+. `$locator` - locator to locate `XCUIElementTypePickerWheel` element
+
+==== *_Usage_*
+
+.Select next item in the picker wheel
+[source,gherkin]
+----
+When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(3)`
+----
+
+=== Switch to web view
+
+Switches context to a web view by the index, it starts from 1.
+
+See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+
+[source,gherkin]
+----
+When I switch to web view with index `$index`
+----
+
+. `$index` - index of a web view
+
+.Switch to web view
+[source,gherkin]
+----
+Then number of elements found by `xpath(html)` is equal to `0`
+When I switch to web view with index `1`
+Then number of elements found by `xpath(html)` is equal to `1`
+----
+
+=== Switch to native context
+
+Switches context to a mobile native context.
+
+See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+
+[source,gherkin]
+----
+When I switch to native context
+----
+
+.Switch to native context
+[source,gherkin]
+----
+Then number of elements found by `xpath(html)` is equal to `1`
+When I switch to native context
+Then number of elements found by `xpath(html)` is equal to `0`
+----
+
+include::partial$generic-ui-steps.adoc[]

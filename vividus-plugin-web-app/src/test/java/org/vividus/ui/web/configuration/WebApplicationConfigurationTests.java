@@ -19,6 +19,7 @@ package org.vividus.ui.web.configuration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,7 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openqa.selenium.Dimension;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 class WebApplicationConfigurationTests
 {
@@ -63,8 +64,9 @@ class WebApplicationConfigurationTests
     void testGetMainApplicationPageUrlWithNullUrlAndNullAuthentication()
     {
         WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(null, null);
-        URI actualUrl = webApplicationConfiguration.getMainApplicationPageUrl();
-        assertNull(actualUrl);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                webApplicationConfiguration::getMainApplicationPageUrl);
+        assertEquals("URL of the main application page should be non-blank", exception.getMessage());
     }
 
     @Test
@@ -128,7 +130,7 @@ class WebApplicationConfigurationTests
     {
         WebApplicationConfiguration webApplicationConfiguration = prepareWebApplicationConfiguration();
         webApplicationConfiguration.setMobileScreenResolutionWidthThreshold(WIDTH_THRESHOLD);
-        IJavascriptActions javascriptActions = mockJavascriptActions(actualWidth);
+        WebJavascriptActions javascriptActions = mockJavascriptActions(actualWidth);
         assertEquals(mobileViewport, webApplicationConfiguration.isMobileViewport(javascriptActions));
     }
 
@@ -138,7 +140,7 @@ class WebApplicationConfigurationTests
     {
         WebApplicationConfiguration webApplicationConfiguration = prepareWebApplicationConfiguration();
         webApplicationConfiguration.setTabletScreenResolutionWidthThreshold(WIDTH_THRESHOLD);
-        IJavascriptActions javascriptActions = mockJavascriptActions(actualWidth);
+        WebJavascriptActions javascriptActions = mockJavascriptActions(actualWidth);
         assertEquals(tabletViewport, webApplicationConfiguration.isTabletViewport(javascriptActions));
     }
 
@@ -147,9 +149,9 @@ class WebApplicationConfigurationTests
         return new WebApplicationConfiguration(MAIN_APP_URL, AuthenticationMode.URL);
     }
 
-    private static IJavascriptActions mockJavascriptActions(int actualWidth)
+    private static WebJavascriptActions mockJavascriptActions(int actualWidth)
     {
-        IJavascriptActions javascriptActions = mock(IJavascriptActions.class);
+        WebJavascriptActions javascriptActions = mock(WebJavascriptActions.class);
         when(javascriptActions.getViewportSize()).thenReturn(new Dimension(actualWidth, VIEWPORT_HEIGHT));
         return javascriptActions;
     }

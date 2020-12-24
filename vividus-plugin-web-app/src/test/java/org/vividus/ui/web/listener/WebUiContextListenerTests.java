@@ -16,8 +16,6 @@
 
 package org.vividus.ui.web.listener;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -34,10 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
-import org.vividus.selenium.event.WebDriverCreateEvent;
-import org.vividus.selenium.event.WebDriverQuitEvent;
-import org.vividus.ui.web.context.IWebUiContext;
-import org.vividus.ui.web.context.SearchContextSetter;
+import org.vividus.ui.context.IUiContext;
 
 @ExtendWith(MockitoExtension.class)
 class WebUiContextListenerTests
@@ -46,47 +41,30 @@ class WebUiContextListenerTests
     private static final String WINDOW_NAME2 = "windowName2";
 
     @Mock
-    private IWebUiContext webUiContext;
+    private IUiContext uiContext;
 
     @InjectMocks
     private WebUiContextListener webUiContextListener;
 
     @Test
-    void testOnWebDriverCreate()
-    {
-        WebDriver webDriver = mock(WebDriver.class);
-        WebDriverCreateEvent event = new WebDriverCreateEvent(webDriver);
-        webUiContextListener.onWebDriverCreate(event);
-        verify(webUiContext).putSearchContext(eq(webDriver), any(SearchContextSetter.class));
-    }
-
-    @Test
-    void testOnWebDriverQuit()
-    {
-        WebDriverQuitEvent event = new WebDriverQuitEvent();
-        webUiContextListener.onWebDriverQuit(event);
-        verify(webUiContext).clear();
-    }
-
-    @Test
     void testAfterNavigateBack()
     {
         webUiContextListener.afterNavigateBack(mock(WebDriver.class));
-        verify(webUiContext).reset();
+        verify(uiContext).reset();
     }
 
     @Test
     void testAfterNavigateForward()
     {
         webUiContextListener.afterNavigateForward(mock(WebDriver.class));
-        verify(webUiContext).reset();
+        verify(uiContext).reset();
     }
 
     @Test
     void testAfterNavigateTo()
     {
         webUiContextListener.afterNavigateTo("url", mock(WebDriver.class));
-        verify(webUiContext).reset();
+        verify(uiContext).reset();
     }
 
     @Test
@@ -94,7 +72,7 @@ class WebUiContextListenerTests
     {
         WebDriver webDriver = mock(WebDriver.class);
         webUiContextListener.beforeSwitchToWindow(WINDOW_NAME1, webDriver);
-        verifyNoInteractions(webUiContext);
+        verifyNoInteractions(uiContext);
     }
 
     @Test
@@ -104,7 +82,7 @@ class WebUiContextListenerTests
         webUiContextListener.afterSwitchToWindow(WINDOW_NAME1, webDriver);
         when(webDriver.getWindowHandles()).thenReturn(new LinkedHashSet<>(List.of(WINDOW_NAME1, WINDOW_NAME2)));
         webUiContextListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
-        verifyNoInteractions(webUiContext);
+        verifyNoInteractions(uiContext);
     }
 
     @Test
@@ -118,7 +96,7 @@ class WebUiContextListenerTests
 
         webUiContextListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
 
-        verify(webUiContext).reset();
+        verify(uiContext).reset();
         verify(targetLocator).window(WINDOW_NAME2);
     }
 }

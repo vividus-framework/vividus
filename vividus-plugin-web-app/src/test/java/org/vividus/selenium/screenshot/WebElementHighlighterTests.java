@@ -33,8 +33,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith(MockitoExtension.class)
 class WebElementHighlighterTests
@@ -45,10 +45,10 @@ class WebElementHighlighterTests
             + "arguments[0].style.boxShadow=\"\"";
 
     @Mock
-    private IWebUiContext webUiContext;
+    private IUiContext uiContext;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private WebElement webElement;
@@ -59,9 +59,9 @@ class WebElementHighlighterTests
     @Test
     void testTakeScreenshotWithHighlights()
     {
-        when(webUiContext.getAssertingWebElements()).thenReturn(List.of(webElement));
+        when(uiContext.getAssertingWebElements()).thenReturn(List.of(webElement));
         SearchContext searchContext = mock(SearchContext.class, withSettings().extraInterfaces(WebElement.class));
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         Object expected = new Object();
         Object actual = webElementHighlighter.takeScreenshotWithHighlights(() -> expected);
         assertEquals(expected, actual);
@@ -74,9 +74,9 @@ class WebElementHighlighterTests
     @Test
     void testTakeScreenshotWithHighlightsNoContext()
     {
-        when(webUiContext.getAssertingWebElements()).thenReturn(List.of(webElement));
+        when(uiContext.getAssertingWebElements()).thenReturn(List.of(webElement));
         SearchContext searchContext = mock(SearchContext.class);
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         Object expected = new Object();
         Object actual = webElementHighlighter.takeScreenshotWithHighlights(() -> expected);
         assertEquals(expected, actual);
@@ -87,9 +87,9 @@ class WebElementHighlighterTests
     @Test
     void testEnableHighlightingStaleException()
     {
-        when(webUiContext.getAssertingWebElements()).thenReturn(List.of(webElement));
+        when(uiContext.getAssertingWebElements()).thenReturn(List.of(webElement));
         SearchContext searchContext = mock(SearchContext.class);
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         StaleElementReferenceException exception = new StaleElementReferenceException("StaleElementReferenceException");
         when(javascriptActions.executeScript(ENABLE_HIGHLIGHT_SCRIPT, webElement)).thenThrow(exception);
         Object expected = new Object();
@@ -101,22 +101,15 @@ class WebElementHighlighterTests
     @Test
     void testEnableHighlightingRuntimeException()
     {
-        when(webUiContext.getAssertingWebElements()).thenReturn(List.of(webElement));
+        when(uiContext.getAssertingWebElements()).thenReturn(List.of(webElement));
         String exceptionMessage = "RuntimeException";
         SearchContext searchContext = mock(SearchContext.class);
-        when(webUiContext.getSearchContext()).thenReturn(searchContext);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         when(javascriptActions.executeScript(ENABLE_HIGHLIGHT_SCRIPT, webElement))
                 .thenThrow(new RuntimeException(exceptionMessage));
         RuntimeException exception = assertThrows(RuntimeException.class,
             () -> webElementHighlighter.takeScreenshotWithHighlights(Object::new));
         assertEquals(exceptionMessage, exception.getMessage());
         verify(javascriptActions).executeScript(DISABLE_HIGHLIGHT_SCRIPT, webElement);
-    }
-
-    @Test
-    void testClearAssertingWebElements()
-    {
-        webElementHighlighter.clearAssertingWebElements();
-        verify(webUiContext).clearAssertingWebElements();
     }
 }

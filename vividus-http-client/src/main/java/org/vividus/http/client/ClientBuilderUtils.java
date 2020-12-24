@@ -16,17 +16,12 @@
 
 package org.vividus.http.client;
 
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collector;
 
-import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.vividus.util.UriUtils;
@@ -38,11 +33,6 @@ public final class ClientBuilderUtils
 
     private ClientBuilderUtils()
     {
-    }
-
-    public static CredentialsProvider createCredentialsProvider(String usernamePassword)
-    {
-        return createCredentialsProvider(DEFAULT_AUTH_SCOPE, usernamePassword);
     }
 
     public static CredentialsProvider createCredentialsProvider(AuthScope authScope, String usernamePassword)
@@ -61,16 +51,6 @@ public final class ClientBuilderUtils
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(authScope, new UsernamePasswordCredentials(username, password));
         return credentialsProvider;
-    }
-
-    public static UrlEncodedFormEntity createUrlEncodedFormEntity(List<NameValuePair> params)
-    {
-        return new UrlEncodedFormEntity(params, (Charset) null);
-    }
-
-    public static CookieStore createCookieStore(Set<Cookie> cookies)
-    {
-        return cookies.stream().collect(toCookieStore());
     }
 
     public static Collector<Cookie, CookieStore, CookieStore> toCookieStore()

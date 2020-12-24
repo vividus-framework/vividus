@@ -71,8 +71,6 @@ class StringsExpressionProcessorTests
                 arguments("uncapitalize(ABc)",                                             "aBc"),
                 arguments("generateLocalized(regexify '[Ы]{5}', ru)",                      "ЫЫЫЫЫ"),
                 arguments("generateLocalized(number.number_between '1000','1000', es-MX)", "1000"),
-                arguments("encodeUrl(/wiki/w3schools)",                                    "%2Fwiki%2Fw3schools"),
-                arguments("encodeUrl(/wls/recipes#!/)",                                    "%2Fwls%2Frecipes%23%21%2F"),
                 arguments("loadResource(/org/vividus/bdd/expressions/resource.txt)",       BIG_DATA),
                 arguments("loadResource(org/vividus/bdd/expressions/resource.txt)",        BIG_DATA),
                 arguments("resourceToBase64(/org/vividus/bdd/expressions/resource.txt)",   BASE_64),

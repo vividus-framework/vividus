@@ -27,6 +27,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.RedirectStrategy;
+import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.conn.DnsResolver;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
@@ -55,6 +56,7 @@ public class HttpClientConfig
     private boolean circularRedirectsAllowed;
     private String cookieSpec;
     private HttpRequestRetryHandler httpRequestRetryHandler;
+    private ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy;
 
     public boolean hasBaseUrl()
     {
@@ -285,5 +287,15 @@ public class HttpClientConfig
     public void setHttpRequestRetryHandler(HttpRequestRetryHandler httpRequestRetryHandler)
     {
         this.httpRequestRetryHandler = httpRequestRetryHandler;
+    }
+
+    public ServiceUnavailableRetryStrategy getServiceUnavailableRetryStrategy()
+    {
+        return serviceUnavailableRetryStrategy;
+    }
+
+    public void setServiceUnavailableRetryStrategy(ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy)
+    {
+        this.serviceUnavailableRetryStrategy = serviceUnavailableRetryStrategy;
     }
 }

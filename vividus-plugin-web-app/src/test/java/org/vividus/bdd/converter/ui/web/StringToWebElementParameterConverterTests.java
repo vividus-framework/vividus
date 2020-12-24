@@ -28,25 +28,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.SearchActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.SearchActions;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.web.util.ElementUtil;
 
 @ExtendWith(MockitoExtension.class)
 class StringToWebElementParameterConverterTests
 {
-    @Mock
-    private SearchActions searchActions;
-
-    @InjectMocks
-    private StringToWebElementParameterConverter converter;
+    @Mock private SearchActions searchActions;
+    @Mock private ElementUtil elementUtil;
+    @Mock private Locator locator;
+    @InjectMocks private StringToWebElementParameterConverter converter;
 
     @Test
     void shouldConvertStringToWebElement()
     {
+        String locator = "locator";
         Optional<WebElement> expected = Optional.of(mock(WebElement.class));
-        when(searchActions.findElement(new SearchAttributes(ActionAttributeType.ID, "id")))
-            .thenReturn(expected);
-        assertEquals(expected, converter.convertValue("By.id(id)", null).get());
+        when(elementUtil.getElement(locator, searchActions)).thenReturn(() -> expected);
+        assertEquals(expected, converter.convertValue(locator, null).get());
     }
 }

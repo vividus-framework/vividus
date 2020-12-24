@@ -16,40 +16,48 @@
 
 package org.vividus.visual.eyes.logger;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
-import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import com.applitools.eyes.logging.TraceLevel;
+import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
 class EyesLogHandlerTests
 {
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(EyesLogHandler.class);
 
-    private final EyesLogHandler eyesLogHandler = new EyesLogHandler(EyesLogHandler.class);
-
-    @Test
-    void shouldReportVerboseMessagesAtDebugLevel()
+    static Stream<Arguments> loggingLevels()
     {
-        String logString = "debug message";
-        eyesLogHandler.onMessage(true, logString);
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(debug(logString))));
+        return Stream.of(
+                arguments(TraceLevel.Debug,  (Function<String, LoggingEvent>) LoggingEvent::debug),
+                arguments(TraceLevel.Info,   (Function<String, LoggingEvent>) LoggingEvent::info),
+                arguments(TraceLevel.Notice, (Function<String, LoggingEvent>) LoggingEvent::info),
+                arguments(null,              (Function<String, LoggingEvent>) LoggingEvent::info),
+                arguments(TraceLevel.Warn,   (Function<String, LoggingEvent>) LoggingEvent::warn),
+                arguments(TraceLevel.Error,  (Function<String, LoggingEvent>) LoggingEvent::error)
+        );
     }
 
-    @Test
-    void shouldReportNotVerboseMessagesAtInfoLevel()
+    @ParameterizedTest
+    @MethodSource("loggingLevels")
+    void shouldReportMessagesAtProperLevel(TraceLevel level, Function<String, LoggingEvent> eventProducer)
     {
-        String logString = "info message";
-        eyesLogHandler.onMessage(false, logString);
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(info(logString))));
+        String logString = "message";
+        new EyesLogHandler(EyesLogHandler.class).onMessage(level, logString);
+        assertThat(LOGGER.getLoggingEvents(), is(List.of(eventProducer.apply(logString))));
     }
 }

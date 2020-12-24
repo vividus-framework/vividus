@@ -30,10 +30,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ExcelTableTransformerTests
 {
+    private static final String LINE_BREAK_REPLACEMENT = "lineBreakReplacement";
+    private static final String DATA = "data";
+    private static final String COLUMN = "column";
     private static final String ADDRESSES = "addresses";
     private static final String INCREMENT = "increment";
     private static final String RANGE = "range";
     private static final String RANGE_VALUE = "B4:B6";
+    private static final String EXTEND_RANGE_VALUE = "A1:B3";
     private static final String JOIN_VALUES = "joinValues";
     private static final String TRUE = "true";
 
@@ -46,12 +50,12 @@ class ExcelTableTransformerTests
     {
         properties.getProperties().setProperty("path", "/TestTemplate.xlsx");
         properties.getProperties().setProperty("sheet", "RepeatingData");
-        properties.getProperties().setProperty("column", "data");
     }
 
     @Test
     void testCheckConcurrentConditionsWithTwoPropertiesThrowException()
     {
+        properties.getProperties().setProperty(COLUMN, DATA);
         properties.getProperties().setProperty(RANGE, RANGE_VALUE);
         properties.getProperties().setProperty(ADDRESSES, "1,3,5");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -63,6 +67,7 @@ class ExcelTableTransformerTests
     @Test
     void testCheckConcurrentConditionsWithoutPropertiesThrowException()
     {
+        properties.getProperties().setProperty(COLUMN, DATA);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform("", null, properties));
         assertEquals("One of ExamplesTable properties must be set: either 'range' or 'addresses'",
@@ -72,6 +77,7 @@ class ExcelTableTransformerTests
     @Test
     void testTransformWithUsingRangeWithIncrementJoining()
     {
+        properties.getProperties().setProperty(COLUMN, DATA);
         properties.getProperties().setProperty(RANGE, RANGE_VALUE);
         properties.getProperties().setProperty(INCREMENT, "2");
         properties.getProperties().setProperty(JOIN_VALUES, TRUE);
@@ -82,6 +88,7 @@ class ExcelTableTransformerTests
     @Test
     void testTransformWithUsingRangeWithoutIncrement()
     {
+        properties.getProperties().setProperty(COLUMN, DATA);
         properties.getProperties().setProperty(RANGE, RANGE_VALUE);
         String actualResult = transformer.transform("", null, properties);
         assertEquals("|data|\n|OPEN|\n|PENDING|\n|CLOSED|", actualResult);
@@ -90,14 +97,16 @@ class ExcelTableTransformerTests
     @Test
     void testTransformWithUsingAddresses()
     {
+        properties.getProperties().setProperty(COLUMN, DATA);
         properties.getProperties().setProperty(ADDRESSES, "B4;B6");
         String actualResult = transformer.transform("", null, properties);
         assertEquals("|data|\n|OPEN|\n|CLOSED|", actualResult);
     }
 
     @Test
-    void textTransformWithCellContainsNewLine()
+    void testTransformWithCellContainsNewLine()
     {
+        properties.getProperties().setProperty(COLUMN, DATA);
         properties.getProperties().setProperty(ADDRESSES, "B7;B8");
         properties.getProperties().setProperty(JOIN_VALUES, TRUE);
         String actualResult = transformer.transform("", null, properties);
@@ -105,12 +114,30 @@ class ExcelTableTransformerTests
     }
 
     @Test
-    void textTransformWithCellContainsNewLineWithReplaceParameter()
+    void testTransformWithCellContainsNewLineWithReplaceParameter()
     {
+        properties.getProperties().setProperty(COLUMN, DATA);
         properties.getProperties().setProperty(ADDRESSES, "B6;B8");
         properties.getProperties().setProperty(JOIN_VALUES, TRUE);
-        properties.getProperties().setProperty("lineBreakReplacement", " ");
+        properties.getProperties().setProperty(LINE_BREAK_REPLACEMENT, " ");
         String actualResult = transformer.transform("", null, properties);
         assertEquals("|data|\n|CLOSED CLOSED  |", actualResult);
+    }
+
+    @Test
+    void testTrasformWithoutColumnProperty()
+    {
+        properties.getProperties().setProperty(RANGE, EXTEND_RANGE_VALUE);
+        String actualResult = transformer.transform("", null, properties);
+        assertEquals("|name|status|\n|First|OPEN|\n|Second|OPEN|", actualResult);
+    }
+
+    @Test
+    void testTrasformWithoutColumnWithReplaceParameter()
+    {
+        properties.getProperties().setProperty(RANGE, "A7:B8");
+        properties.getProperties().setProperty(LINE_BREAK_REPLACEMENT, "!");
+        String actualResult = transformer.transform("", null, properties);
+        assertEquals("|Sixth|CLOSED|\n|Seventh|CLOSED !|", actualResult);
     }
 }

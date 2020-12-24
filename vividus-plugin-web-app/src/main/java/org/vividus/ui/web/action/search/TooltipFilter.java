@@ -16,12 +16,30 @@
 
 package org.vividus.ui.web.action.search;
 
-import org.openqa.selenium.WebElement;
+import java.util.List;
 
-public class TooltipFilter extends AbstractElementFilterAction
+import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
+import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.web.util.LocatorUtil;
+
+public class TooltipFilter extends AbstractWebElementSearchAction implements IElementSearchAction, IElementFilterAction
 {
+    public TooltipFilter()
+    {
+        super(WebLocatorType.TOOLTIP);
+    }
+
     @Override
-    protected boolean matches(WebElement element, String tooltip)
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    {
+        return searchContext.findElements(LocatorUtil.getXPathLocator(".//*[@title=%s]", parameters.getValue()));
+    }
+
+    @Override
+    public boolean matches(WebElement element, String tooltip)
     {
         return tooltip.equals(element.getAttribute("title"));
     }

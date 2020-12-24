@@ -24,6 +24,6 @@
     </bean>
 
     <util:list id="stepBeanNames-Visual-Hooks">
-        <value>scenario</value>
+        <idref bean="scenario" />
     </util:list>
 </beans>

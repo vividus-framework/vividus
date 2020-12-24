@@ -1,1 +1,97 @@
-include::ROOT:page$under-construction.adoc[]
+= Web Application & REST API Integration Plugin
+
+The plugin provides the integration between web application testing functionality and REST API features.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-web-app-to-rest-api', version: '{current-version}')
+----
+
+== Table Transformers
+
+=== FROM_SITEMAP
+
+`FROM_SITEMAP` transformer generates table based on the website sitemap.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`siteMapRelativeUrl`
+|relative URL of `sitemap.xml`
+
+|`ignoreErrors`
+|ignore sitemap parsing errors (_true_ or _false_)
+
+|`column`
+|the column name in the generated table
+|===
+
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`bdd.transformer.sitemap.ignore-errors`
+|`true` / `false`
+|`false`
+|ignore sitemap parsing errors
+
+|`bdd.transformer.sitemap.filter-redirects`
+|`true` / `false`
+|`false`
+|defines whether urls that has redirect to the one that has already been included in the table are excluded from the table
+|===
+==== Required properties
+* `web-application.main-page-url` - defines main application page URL
+
+.Usage example
+----
+Examples:
+{transformer=FROM_SITEMAP, siteMapRelativeUrl=/sitemap.xml, ignoreErrors=true, column=page-url}
+----
+
+=== FROM_HEADLESS_CRAWLING
+
+`FROM_HEADLESS_CRAWLING` transformer generates table based on the results of headless crawling.
+
+[cols="1,3", options="header"]
+|===
+|Parameter Name
+|Description
+
+|`column`
+|the column name in the generated table
+|===
+
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`bdd.transformer.headless.seed-relative-urls`
+|Comma-separated list of values
+|
+|list of relative URLs, a seed URL is a URL that is fetched by the crawler to extract new URLs in it and follow them for crawling
+
+|`bdd.transformer.headless.filter-redirects`
+|`true` / `false`
+|`false`
+|defines whether urls that has redirect to the one that has already been included in the table are excluded from the table
+|===
+==== Required properties
+* `web-application.main-page-url` - defines main application page URL
+
+.Usage example
+----
+Examples:
+{transformer=FROM_HEADLESS_CRAWLING, column=page-url}
+----

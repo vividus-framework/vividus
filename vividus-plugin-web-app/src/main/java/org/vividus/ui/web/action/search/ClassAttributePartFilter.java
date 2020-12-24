@@ -17,12 +17,20 @@
 package org.vividus.ui.web.action.search;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
+import org.vividus.ui.action.search.LocatorType;
 
-public class ClassAttributePartFilter extends AbstractElementFilterAction
+public class ClassAttributePartFilter implements IElementFilterAction
 {
     @Override
-    protected boolean matches(WebElement element, String text)
+    public boolean matches(WebElement element, String text)
     {
         return element.getAttribute("class").contains(text);
+    }
+
+    @Override
+    public LocatorType getType()
+    {
+        return WebLocatorType.CLASS_ATTRIBUTE_PART;
     }
 }

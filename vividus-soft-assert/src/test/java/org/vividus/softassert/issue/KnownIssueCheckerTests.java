@@ -17,11 +17,15 @@
 package org.vividus.softassert.issue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -48,6 +52,7 @@ class KnownIssueCheckerTests
     private static final String PATTERN = "pattern";
     private static final String CASE = "case";
     private static final String STEP = "step";
+    private static final String SECOND_STEP = "step2";
     private static final String SUITE = "suite";
     private static final String CLOSED = "closed";
     private static final String FIRST_ISSUE = "UNIT-1";
@@ -83,17 +88,19 @@ class KnownIssueCheckerTests
     {
         //@formatter:off
         return Stream.of(
-            Arguments.of(STEP, CASE, SUITE, false),
-            Arguments.of(STEP, TEXT, SUITE, true),
-            Arguments.of(null, CASE, null,  false),
-            Arguments.of(null, TEXT, null,  true),
-            Arguments.of(TEXT, CASE, SUITE, true),
-            Arguments.of(STEP, null, null,  false),
-            Arguments.of(TEXT, null, null,  true),
-            Arguments.of(STEP, CASE, TEXT,  true),
-            Arguments.of(null, null, SUITE, false),
-            Arguments.of(null, null, TEXT,  true),
-            Arguments.of(null, null, null,  false)
+            Arguments.of(List.of(STEP), CASE, SUITE, false),
+            Arguments.of(List.of(STEP), TEXT, SUITE, true),
+            Arguments.of(List.of(STEP), CASE, null,  false),
+            Arguments.of(List.of(STEP), TEXT, null,  true),
+            Arguments.of(List.of(TEXT), CASE, SUITE, true),
+            Arguments.of(List.of(STEP), null, null,  false),
+            Arguments.of(List.of(TEXT), null, null,  true),
+            Arguments.of(List.of(STEP), CASE, TEXT,  true),
+            Arguments.of(List.of(STEP), null, SUITE, false),
+            Arguments.of(List.of(STEP), null, TEXT,  true),
+            Arguments.of(List.of(STEP), null, null,  false),
+            Arguments.of(List.of(STEP, SECOND_STEP), null, null,  false),
+            Arguments.of(List.of(TEXT, SECOND_STEP), null, null,  true)
         );
         //@formatter:on
     }
@@ -127,11 +134,13 @@ class KnownIssueCheckerTests
 
     @ParameterizedTest
     @MethodSource("getKnownIssueWithNotNullTestInfoDataProvider")
-    void testGetKnownIssueIfPotentiallyKnownIsFalse(String testStep, String testCase, String testSuite,
+    void testGetKnownIssueIfPotentiallyKnownIsFalse(List<String> testSteps, String testCase, String testSuite,
             boolean isPotentiallyKnown)
     {
+        knownIssueChecker.setDetectPotentiallyKnownIssues(true);
         mockKnownIssueIdentifiers();
-        when(testInfoProvider.getTestInfo()).thenReturn(createTestInfo(testStep, testCase, testSuite));
+        when(testInfoProvider.getTestInfo()).thenReturn(createTestInfo(new LinkedList<>(testSteps),
+                testCase, testSuite));
         assertKnownIssue(isPotentiallyKnown, TEXT);
     }
 
@@ -230,11 +239,24 @@ class KnownIssueCheckerTests
     @Test
     void testGetKnownIssueFirstWithMatchedAssertionPattern()
     {
+        knownIssueChecker.setDetectPotentiallyKnownIssues(true);
         Map<String, KnownIssueIdentifier> identifierMap = new HashMap<>();
         identifierMap.put(FIRST_ISSUE, createIdentifierWithTestSuitePattern(NOT_MATCHING_ASSERTION, STEP, SUITE));
         identifierMap.put(SECOND_ISSUE, createIdentifierWithTestSuitePattern(PATTERN, NOT_MATCHING_STEP, SUITE));
         identifierMap.put(THIRD_ISSUE, createIdentifierWithTestSuitePattern(PATTERN, STEP, NOT_MATCHING_SUITE));
         testGetKnownIssueFromSeveralCandidates(identifierMap, true);
+    }
+
+    @Test
+    void shouldNotFindPotentiallyKnownIssueWhenFeatureDisabled()
+    {
+        Map<String, KnownIssueIdentifier> identifierMap = new HashMap<>();
+        identifierMap.put(FIRST_ISSUE, createIdentifierWithTestSuitePattern(NOT_MATCHING_ASSERTION, STEP, SUITE));
+        identifierMap.put(SECOND_ISSUE, createIdentifierWithTestSuitePattern(PATTERN, NOT_MATCHING_STEP, SUITE));
+        identifierMap.put(THIRD_ISSUE, createIdentifierWithTestSuitePattern(PATTERN, STEP, NOT_MATCHING_SUITE));
+        when(testInfoProvider.getTestInfo()).thenReturn(createTestInfo(new LinkedList<>(List.of(STEP)), CASE, SUITE));
+        doReturn(identifierMap).when(knownIssueProvider).getKnownIssueIdentifiers();
+        assertNull(knownIssueChecker.getKnownIssue(PATTERN));
     }
 
     @Test
@@ -250,7 +272,7 @@ class KnownIssueCheckerTests
     private void testGetKnownIssueFromSeveralCandidates(Map<String, KnownIssueIdentifier> identifierMap,
             boolean potentiallyKnown)
     {
-        when(testInfoProvider.getTestInfo()).thenReturn(createTestInfo(STEP, CASE, SUITE));
+        when(testInfoProvider.getTestInfo()).thenReturn(createTestInfo(new LinkedList<>(List.of(STEP)), CASE, SUITE));
         doReturn(identifierMap).when(knownIssueProvider).getKnownIssueIdentifiers();
         assertKnownIssue(potentiallyKnown, SECOND_ISSUE);
     }
@@ -291,10 +313,10 @@ class KnownIssueCheckerTests
         return identifier;
     }
 
-    private TestInfo createTestInfo(String testStep, String testCase, String testSuite)
+    private TestInfo createTestInfo(Deque<String> testSteps, String testCase, String testSuite)
     {
         TestInfo testInfo = new TestInfo();
-        testInfo.setTestStep(testStep);
+        testInfo.setTestSteps(testSteps);
         testInfo.setTestCase(testCase);
         testInfo.setTestSuite(testSuite);
         return testInfo;
@@ -318,5 +340,7 @@ class KnownIssueCheckerTests
         assertEquals(KnownIssueType.AUTOMATION, actual.getType());
         assertEquals(status, actual.getStatus());
         assertEquals(resolution, actual.getResolution());
+        assertFalse(actual.isFailTestCaseFast());
+        assertFalse(actual.isFailTestSuiteFast());
     }
 }

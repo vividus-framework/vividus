@@ -16,20 +16,17 @@
 
 package org.vividus.bdd.converter;
 
-import java.lang.reflect.Type;
-
 import javax.inject.Named;
 
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.openqa.selenium.By;
 import org.vividus.selenium.LocatorFactory;
 
 @Named
-public class StringToSeleniumLocatorParameterConverter extends AbstractParameterConverter<By>
+public class StringToSeleniumLocatorParameterConverter extends FunctionalParameterConverter<By>
 {
-    @Override
-    public By convertValue(String value, Type type)
+    public StringToSeleniumLocatorParameterConverter()
     {
-        return LocatorFactory.convertStringToLocator(value);
+        super(LocatorFactory::convertStringToLocator);
     }
 }

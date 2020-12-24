@@ -16,9 +16,11 @@
 
 package org.vividus.bdd.steps.api;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -27,9 +29,12 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
@@ -46,22 +51,25 @@ import org.vividus.bdd.variable.VariableScope;
 import org.vividus.http.CookieStoreProvider;
 import org.vividus.softassert.ISoftAssert;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class HttpCookieStepsTests
 {
     private static final String NAME = "name";
+    private static final String ANOTHER_NAME = "newName";
     private static final String VALUE = "value";
-    private static final String ANOTHER_PATH = "/anotherPath";
-    private static final String NUMBER_OF_COOKIES_PATTERN = "Number of cookies with name '%s'";
-    private static final Set<VariableScope> SCENARIO_SCOPE = Set.of(VariableScope.SCENARIO);
-    private static final String NUMBER_OF_COOKIES_WITH_NAME_AND_PATH =
-            "Number of cookies with name '%s' and path attribute '%s'";
-    private static final String PATH = "/";
     private static final String NEW_VALUE = "newValue";
-    private static final String NEW_NAME = "newName";
+    private static final String ROOT = "/";
+    private static final String NOT_ROOT = "/anotherPath";
 
-    @Mock
-    private Cookie cookie;
+    private static final Set<VariableScope> SCENARIO_SCOPE = Set.of(VariableScope.SCENARIO);
+
+    private static final String NUMBER_OF_COOKIES_WITH_NAME = String.format("Number of cookies with name '%s'", NAME);
+    private static final String NUMBER_OF_COOKIES_WITH_NAME_AND_PATH = String.format(
+            "Number of cookies with name '%s' and path attribute '%s'", NAME, ROOT);
+
+    private static final String FILTERING_COOKIES_LOG_MESSAGE = "Filtering cookies by path attribute '{}'";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(HttpCookieSteps.class);
 
     @Mock
     private CookieStoreProvider cookieStoreProvider;
@@ -87,14 +95,11 @@ class HttpCookieStepsTests
     @Test
     void shouldSaveCookieValueIntoVariableContext()
     {
-        List<Cookie> cookies = List.of(cookie);
+        List<Cookie> cookies = List.of(createCookie(NAME, NOT_ROOT));
         when(cookieStore.getCookies()).thenReturn(cookies);
-        when(cookie.getName()).thenReturn(NAME);
-        when(cookie.getValue()).thenReturn(VALUE);
-        when(softAssert.assertThat(eq(String.format(NUMBER_OF_COOKIES_PATTERN, NAME)), eq(cookies.size()),
-                any(Matcher.class))).thenReturn(true);
+        when(softAssert.assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(1), getSizeMatcher())).thenReturn(true);
         httpCookieSteps.saveHttpCookieIntoVariable(NAME, SCENARIO_SCOPE, NAME);
-        verifyCookieAssertion(cookies);
+        verify(softAssert).assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(1), getSizeMatcher());
         verify(bddVariableContext).putVariable(SCENARIO_SCOPE, NAME, VALUE);
         verifyNoMoreInteractions(softAssert);
     }
@@ -102,51 +107,38 @@ class HttpCookieStepsTests
     @Test
     void shouldSaveCookieWithRootPathValueIntoVariableContext()
     {
-        Cookie cookieWithAnotherPath = mock(Cookie.class);
-        List<Cookie> cookies = List.of(cookie, cookieWithAnotherPath);
+        List<Cookie> cookies = List.of(createCookie(NAME, ROOT), createCookie(ANOTHER_NAME, ROOT),
+                createCookie(NAME, NOT_ROOT));
         when(cookieStore.getCookies()).thenReturn(cookies);
-        when(cookie.getName()).thenReturn(NAME);
-        when(cookieWithAnotherPath.getName()).thenReturn(NAME);
-        when(cookie.getPath()).thenReturn(PATH);
-        when(cookieWithAnotherPath.getPath()).thenReturn(ANOTHER_PATH);
-        when(cookie.getValue()).thenReturn(VALUE);
-        when(softAssert.assertThat(eq(String.format(NUMBER_OF_COOKIES_PATTERN, NAME)), eq(cookies.size()),
-                any(Matcher.class))).thenReturn(true);
-        when(softAssert.assertEquals(String.format(NUMBER_OF_COOKIES_WITH_NAME_AND_PATH, NAME, PATH), 1, 1))
-                .thenReturn(true);
+        when(softAssert.assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(2), getSizeMatcher())).thenReturn(true);
+        when(softAssert.assertEquals(NUMBER_OF_COOKIES_WITH_NAME_AND_PATH, 1, 1)).thenReturn(true);
         httpCookieSteps.saveHttpCookieIntoVariable(NAME, SCENARIO_SCOPE, NAME);
-        verifyCookieAssertion(cookies);
+        verify(softAssert).assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(2), getSizeMatcher());
         verify(bddVariableContext).putVariable(SCENARIO_SCOPE, NAME, VALUE);
         verifyNoMoreInteractions(softAssert);
+        assertThat(logger.getLoggingEvents(), is(List.of(info(FILTERING_COOKIES_LOG_MESSAGE, ROOT))));
     }
 
     @Test
     void shouldNotSaveCookiesWithTheSameNameAndNotRootPathVariableContext()
     {
-        Cookie cookieWithAnotherPath = mock(Cookie.class);
-        List<Cookie> cookies = List.of(cookie, cookieWithAnotherPath);
+        List<Cookie> cookies = List.of(createCookie(NAME, NOT_ROOT), createCookie(NAME, NOT_ROOT));
         when(cookieStore.getCookies()).thenReturn(cookies);
-        when(cookie.getName()).thenReturn(NAME);
-        when(cookieWithAnotherPath.getName()).thenReturn(NAME);
-        when(cookie.getPath()).thenReturn(ANOTHER_PATH);
-        when(cookieWithAnotherPath.getPath()).thenReturn(ANOTHER_PATH + "/1");
-        when(softAssert.assertThat(eq(String.format(NUMBER_OF_COOKIES_PATTERN, NAME)), eq(cookies.size()),
-                any(Matcher.class))).thenReturn(true);
-        when(softAssert.assertEquals(String.format(NUMBER_OF_COOKIES_WITH_NAME_AND_PATH, NAME, PATH), 1, 0))
-                .thenReturn(false);
+        when(softAssert.assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(2), getSizeMatcher())).thenReturn(true);
+        when(softAssert.assertEquals(NUMBER_OF_COOKIES_WITH_NAME_AND_PATH, 1, 0)).thenReturn(false);
         httpCookieSteps.saveHttpCookieIntoVariable(NAME, SCENARIO_SCOPE, NAME);
-        verifyCookieAssertion(cookies);
+        verify(softAssert).assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(2), getSizeMatcher());
         verifyNoInteractions(bddVariableContext);
         verifyNoMoreInteractions(softAssert);
+        assertThat(logger.getLoggingEvents(), is(List.of(info(FILTERING_COOKIES_LOG_MESSAGE, ROOT))));
     }
 
     @Test
     void shouldNotSaveNotExistingCookieAndRecordAssertion()
     {
-        List<Cookie> cookies = Collections.emptyList();
-        when(cookieStore.getCookies()).thenReturn(cookies);
+        when(cookieStore.getCookies()).thenReturn(List.of());
         httpCookieSteps.saveHttpCookieIntoVariable(NAME, SCENARIO_SCOPE, NAME);
-        verifyCookieAssertion(cookies);
+        verify(softAssert).assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(0), getSizeMatcher());
         verifyNoInteractions(bddVariableContext);
         verifyNoMoreInteractions(softAssert);
     }
@@ -157,10 +149,9 @@ class HttpCookieStepsTests
         Cookie cookie = new BasicClientCookie(NAME, VALUE);
         List<Cookie> cookies = List.of(cookie);
         when(cookieStore.getCookies()).thenReturn(cookies);
-        when(softAssert.assertThat(eq(String.format(NUMBER_OF_COOKIES_PATTERN, NAME)), eq(cookies.size()),
-                any(Matcher.class))).thenReturn(true);
+        when(softAssert.assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(1), getSizeMatcher())).thenReturn(true);
         httpCookieSteps.changeHttpCookieValue(NAME, NEW_VALUE);
-        verifyCookieAssertion(cookies);
+        verify(softAssert).assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(1), getSizeMatcher());
         assertEquals(NEW_VALUE, cookie.getValue());
     }
 
@@ -168,15 +159,12 @@ class HttpCookieStepsTests
     void shouldNotChangeCookieValue()
     {
         Cookie cookie = mock(Cookie.class);
-        List<Cookie> cookies = List.of(cookie);
-        when(cookieStore.getCookies()).thenReturn(cookies);
-        when(cookie.getName()).thenReturn(NEW_NAME);
-        when(softAssert.assertThat(eq(String.format(NUMBER_OF_COOKIES_PATTERN, NAME)), eq(0),
-                any(Matcher.class))).thenReturn(false);
+        when(cookieStore.getCookies()).thenReturn(List.of(cookie));
+        when(cookie.getName()).thenReturn(ANOTHER_NAME);
+        when(softAssert.assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(0), getSizeMatcher())).thenReturn(false);
         httpCookieSteps.changeHttpCookieValue(NAME, NEW_VALUE);
-        verifyCookieAssertion(Collections.emptyList());
-        verifyNoMoreInteractions(softAssert);
-        verifyNoMoreInteractions(cookie);
+        verify(softAssert).assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(0), getSizeMatcher());
+        verifyNoMoreInteractions(softAssert, cookie);
     }
 
     @Test
@@ -186,17 +174,22 @@ class HttpCookieStepsTests
         List<Cookie> cookies = List.of(cookie);
         when(cookieStore.getCookies()).thenReturn(cookies);
         when(cookie.getName()).thenReturn(NAME);
-        when(softAssert.assertThat(eq(String.format(NUMBER_OF_COOKIES_PATTERN, NAME)), eq(cookies.size()),
-                any(Matcher.class))).thenReturn(true);
+        when(softAssert.assertThat(eq(NUMBER_OF_COOKIES_WITH_NAME), eq(1), getSizeMatcher())).thenReturn(true);
         Throwable exception = assertThrows(IllegalStateException.class, () ->
                 httpCookieSteps.changeHttpCookieValue(NAME, NEW_VALUE));
         assertEquals(String.format("Unable to change value of cookie with name '%s' of type '%s'", NAME,
                 cookie.getClass().getName()), exception.getMessage());
     }
 
-    private void verifyCookieAssertion(List<Cookie> cookies)
+    private BasicClientCookie createCookie(String name, String path)
     {
-        verify(softAssert).assertThat(eq(String.format(NUMBER_OF_COOKIES_PATTERN, NAME)), eq(cookies.size()),
-                        argThat(arg -> "a value greater than <0>".equals(arg.toString())));
+        BasicClientCookie cookie = new BasicClientCookie(name, VALUE);
+        cookie.setPath(path);
+        return cookie;
+    }
+
+    private Matcher<? super Integer> getSizeMatcher()
+    {
+        return argThat(arg -> "a value greater than <0>".equals(arg.toString()));
     }
 }

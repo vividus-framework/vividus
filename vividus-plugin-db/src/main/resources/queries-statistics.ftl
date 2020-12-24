@@ -5,8 +5,8 @@
     <title>Queries statistics</title>
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="../../css/external.css"/>
     <link rel="stylesheet" href="../../styles.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/3.3.6/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>

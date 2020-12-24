@@ -16,9 +16,14 @@
 
 package org.vividus.ui.web.configuration;
 
-import java.net.URI;
+import static org.apache.commons.lang3.Validate.isTrue;
 
-import org.vividus.ui.web.action.IJavascriptActions;
+import java.net.URI;
+import java.util.function.Supplier;
+
+import com.google.common.base.Suppliers;
+
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.util.UriUtils;
 
 public class WebApplicationConfiguration
@@ -88,17 +93,17 @@ public class WebApplicationConfiguration
                 : configurationStorage.get().mainApplicationPageUri.getHost();
     }
 
-    public boolean isMobileViewport(IJavascriptActions javascritActions)
+    public boolean isMobileViewport(WebJavascriptActions javascritActions)
     {
         return getViewportWidth(javascritActions) <= mobileScreenResolutionWidthThreshold;
     }
 
-    public boolean isTabletViewport(IJavascriptActions javascritActions)
+    public boolean isTabletViewport(WebJavascriptActions javascritActions)
     {
         return getViewportWidth(javascritActions) <= tabletScreenResolutionWidthThreshold;
     }
 
-    private int getViewportWidth(IJavascriptActions javascritActions)
+    private int getViewportWidth(WebJavascriptActions javascritActions)
     {
         return javascritActions.getViewportSize().getWidth();
     }
@@ -114,6 +119,11 @@ public class WebApplicationConfiguration
         private AuthenticationMode authenticationMode;
         private String mainApplicationPageUrl;
         private String basicAuthUser;
+        private final Supplier<URI> mainApplicationPageUriSupplier = Suppliers.memoize(() ->
+        {
+            isTrue(mainApplicationPageUri != null, "URL of the main application page should be non-blank");
+            return mainApplicationPageUri;
+        });
 
         ConfigurationStorage(String mainApplicationPageUrl, AuthenticationMode authenticationMode)
         {
@@ -128,7 +138,7 @@ public class WebApplicationConfiguration
 
         private URI getMainApplicationPageUri()
         {
-            return mainApplicationPageUri;
+            return mainApplicationPageUriSupplier.get();
         }
 
         private void setAuthenticationMode(AuthenticationMode authenticationMode)

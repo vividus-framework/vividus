@@ -25,11 +25,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.action.search.Visibility;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith(MockitoExtension.class)
 class ScriptStepsTests
@@ -49,7 +49,7 @@ class ScriptStepsTests
     void testThenJavascriptFileWithNameIsIncludedInTheSourceCode()
     {
         when(baseValidations.assertIfElementExists("Script with the name 'test'",
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         new SearchParameters(".//script[contains(normalize-space(@src), \"test\")]", Visibility.ALL))))
                 .thenReturn(mockedScript);
         assertEquals(scriptSteps.thenJavascriptFileWithNameIsIncludedInTheSourceCode(TEST), mockedScript);
@@ -59,7 +59,7 @@ class ScriptStepsTests
     void testThenJavascriptFileWithTextIsIncludedInTheSourceCode()
     {
         when(baseValidations.assertIfElementExists("Script with text 'test'",
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         new SearchParameters(".//script[text()[normalize-space()=\"test\"]]", Visibility.ALL))))
                 .thenReturn(mockedScript);
         assertEquals(scriptSteps.thenJavascriptFileWithTextIsIncludedInTheSourceCode(TEST), mockedScript);
@@ -69,7 +69,7 @@ class ScriptStepsTests
     void testThenJavascriptWithTextPartIsIncludedInTheSourceCode()
     {
         when(baseValidations.assertIfElementExists("Script with the text part 'test'",
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         new SearchParameters(".//script[contains(normalize-space(text()),\"test\")]", Visibility.ALL))))
                 .thenReturn(mockedScript);
         assertEquals(scriptSteps.thenJavascriptWithTextPartIsIncludedInTheSourceCode(TEST), mockedScript);

@@ -45,15 +45,15 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.model.Action;
 import org.vividus.bdd.steps.ui.web.model.ActionType;
 import org.vividus.bdd.steps.ui.web.model.SequenceAction;
 import org.vividus.bdd.steps.ui.web.model.SequenceActionType;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith(MockitoExtension.class)
 class ActionStepsTests
@@ -100,17 +100,17 @@ class ActionStepsTests
     @Test
     void testExecuteActionsSequence()
     {
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, SIGNATURE_FIELD_XPATH);
-        List<Action> actions = createActionsList(searchAttributes);
-        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, searchAttributes)).thenReturn(webElement);
+        Locator locator = new Locator(WebLocatorType.XPATH, SIGNATURE_FIELD_XPATH);
+        List<Action> actions = createActionsList(locator);
+        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(webElement);
         doReturn(true).when(softAssert).assertTrue(OFFSETS_PRESENT_MESSAGE, true);
         actionSteps.executeActionsSequence(actions);
-        verify(baseValidations, times(2)).assertIfElementExists(ELEMENT_EXISTS_MESSAGE, searchAttributes);
+        verify(baseValidations, times(2)).assertIfElementExists(ELEMENT_EXISTS_MESSAGE, locator);
         verify(softAssert).assertTrue(OFFSETS_PRESENT_MESSAGE, true);
     }
 
     @Test
-    void testExecuteActionsSequenceNoSearchAttributes()
+    void testExecuteActionsSequenceNoLocator()
     {
         List<Action> actions = createActionsList(null);
         actionSteps.executeActionsSequence(actions);
@@ -118,13 +118,13 @@ class ActionStepsTests
     }
 
     @Test
-    void testExecuteActionsSequenceWrongSearchAttributes()
+    void testExecuteActionsSequenceWrongLocator()
     {
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, SIGNATURE_FIELD_XPATH);
-        List<Action> actions = createActionsList(searchAttributes);
-        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, searchAttributes)).thenReturn(null);
+        Locator locator = new Locator(WebLocatorType.XPATH, SIGNATURE_FIELD_XPATH);
+        List<Action> actions = createActionsList(locator);
+        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(null);
         actionSteps.executeActionsSequence(actions);
-        verify(baseValidations).assertIfElementExists(ELEMENT_EXISTS_MESSAGE, searchAttributes);
+        verify(baseValidations).assertIfElementExists(ELEMENT_EXISTS_MESSAGE, locator);
     }
 
     @Test
@@ -144,23 +144,23 @@ class ActionStepsTests
     @Test
     void testExecuteSequenceOfActions()
     {
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, SIGNATURE_FIELD_XPATH);
+        Locator locator = new Locator(WebLocatorType.XPATH, SIGNATURE_FIELD_XPATH);
         Point point = mock(Point.class);
         WebElement webElement = mock(WebElement.class);
         int offset = 15;
 
-        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, searchAttributes)).thenReturn(webElement);
+        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(webElement);
         when(point.getX()).thenReturn(offset);
         when(point.getY()).thenReturn(offset);
 
         List<SequenceAction> actions = List.of(
-                new SequenceAction(SequenceActionType.DOUBLE_CLICK, searchAttributes),
-                new SequenceAction(SequenceActionType.CLICK_AND_HOLD, searchAttributes),
+                new SequenceAction(SequenceActionType.DOUBLE_CLICK, locator),
+                new SequenceAction(SequenceActionType.CLICK_AND_HOLD, locator),
                 new SequenceAction(SequenceActionType.MOVE_BY_OFFSET, point),
-                new SequenceAction(SequenceActionType.RELEASE, searchAttributes),
+                new SequenceAction(SequenceActionType.RELEASE, locator),
                 new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT),
-                new SequenceAction(SequenceActionType.CLICK, searchAttributes),
-                new SequenceAction(SequenceActionType.MOVE_TO, searchAttributes),
+                new SequenceAction(SequenceActionType.CLICK, locator),
+                new SequenceAction(SequenceActionType.MOVE_TO, locator),
                 new SequenceAction(SequenceActionType.DOUBLE_CLICK, null),
                 new SequenceAction(SequenceActionType.CLICK_AND_HOLD, null),
                 new SequenceAction(SequenceActionType.RELEASE, null),
@@ -202,12 +202,12 @@ class ActionStepsTests
     @Test
     void testExecuteActionsSequenceElementIsNull()
     {
-        SearchAttributes searchAttributes = new SearchAttributes(ActionAttributeType.XPATH, SIGNATURE_FIELD_XPATH);
+        Locator locator = new Locator(WebLocatorType.XPATH, SIGNATURE_FIELD_XPATH);
 
-        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, searchAttributes)).thenReturn(null);
+        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(null);
 
         List<SequenceAction> actions = List.of(
-                new SequenceAction(SequenceActionType.DOUBLE_CLICK, searchAttributes),
+                new SequenceAction(SequenceActionType.DOUBLE_CLICK, locator),
                 new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT)
                 );
         actionSteps.executeSequenceOfActions(actions);
@@ -223,17 +223,17 @@ class ActionStepsTests
                 .collect(Collectors.joining());
     }
 
-    private List<Action> createActionsList(SearchAttributes searchAttributes)
+    private List<Action> createActionsList(Locator locator)
     {
         List<Action> actions = new ArrayList<>();
         Action actionFirst = new Action();
         actionFirst.setType(ActionType.CLICK_AND_HOLD);
-        actionFirst.setSearchAttributes(Optional.ofNullable(searchAttributes));
+        actionFirst.setSearchAttributes(Optional.ofNullable(locator));
         actionFirst.setOffset(Optional.of(new Point(0, 0)));
         actions.add(actionFirst);
         Action actionSecond = new Action();
         actionSecond.setType(ActionType.DOUBLE_CLICK);
-        actionSecond.setSearchAttributes(Optional.ofNullable(searchAttributes));
+        actionSecond.setSearchAttributes(Optional.ofNullable(locator));
         actions.add(actionSecond);
         Action actionThird = new Action();
         actionThird.setType(ActionType.MOVE_BY_OFFSET);

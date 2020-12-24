@@ -18,5 +18,5 @@ package org.vividus.bdd.variable;
 
 public enum VariableScope
 {
-    STEP, SCENARIO, STORY, NEXT_BATCHES, GLOBAL
+    STEP, SCENARIO, STORY, NEXT_BATCHES
 }

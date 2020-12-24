@@ -1,0 +1,24 @@
+Composite: Then a drop down with the name '$dropDownName' does not exist
+Then number of elements found by `xpath(.//select[@*='<dropDownName>']):a` is = `0`
+
+Composite: Then a [$state] drop down with the name '$dropDownName' exists
+Then number of elements found by `xpath(.//select[@*='<dropDownName>'])->filter.dropDownState(<state>)` is = `1`
+
+Composite: Then a drop down with the name '$dropDownName' exists
+Then number of elements found by `xpath(.//select[@*='<dropDownName>'])` is = `1`
+
+Composite: When I select '$text' from a drop down with the name '$dropDownName'
+When I select `<text>` in dropdown located `By.xpath(.//select[@*='<dropDownName>'])`
+
+Composite: When I add '$text' to selection in a drop down with the name '$dropDownName'
+When I add `<text>` to selection in dropdown located `xpath(.//select[@*='<dropDownName>'])`
+
+Composite: Then a drop down with the name '$dropDownName' and text '$dropDownText' exists
+Priority:1
+Then dropdown located `xpath(.//select[@*='<dropDownName>'])` exists and selected option is `<dropDownText>`
+
+Composite: Then a drop down with the name '$dropDownName' contains the items: $dropDownItems
+Then dropdown located `xpath(.//select[@*='<dropDownName>'])` contains options: <dropDownItems>
+
+Composite: When I select `$text` from drop down located `$locator`
+When I select `<text>` in dropdown located `<locator>`

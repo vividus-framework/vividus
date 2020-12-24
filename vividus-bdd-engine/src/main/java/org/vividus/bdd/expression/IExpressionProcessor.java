@@ -18,7 +18,7 @@ package org.vividus.bdd.expression;
 
 import java.util.Optional;
 
-public interface IExpressionProcessor
+public interface IExpressionProcessor<T>
 {
-    Optional<String> execute(String expression);
+    Optional<T> execute(String expression);
 }

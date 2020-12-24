@@ -16,33 +16,12 @@
 
 package org.vividus.bdd.expression;
 
-import java.util.Optional;
 import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class UnaryExpressionProcessor implements IExpressionProcessor
+public class UnaryExpressionProcessor extends FunctionalExpressionProcessor<String>
 {
-    private static final int INPUT_DATA_GROUP = 1;
-
-    private final Pattern pattern;
-    private final UnaryOperator<String> transformer;
-
     public UnaryExpressionProcessor(String functionName, UnaryOperator<String> transformer)
     {
-        pattern = Pattern.compile("^" + functionName + "\\((.*)\\)$", Pattern.CASE_INSENSITIVE);
-        this.transformer = transformer;
-    }
-
-    @Override
-    public Optional<String> execute(String expression)
-    {
-        Matcher expressionMatcher = pattern.matcher(expression);
-        if (expressionMatcher.find())
-        {
-            String inputData = expressionMatcher.group(INPUT_DATA_GROUP);
-            return Optional.of(transformer.apply(inputData));
-        }
-        return Optional.empty();
+        super(functionName, transformer);
     }
 }

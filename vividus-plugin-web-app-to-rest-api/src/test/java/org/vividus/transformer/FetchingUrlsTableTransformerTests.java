@@ -26,6 +26,8 @@ import java.util.Set;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.junit.jupiter.api.Test;
+import org.vividus.ui.web.configuration.AuthenticationMode;
+import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 
 class FetchingUrlsTableTransformerTests
 {
@@ -61,6 +63,17 @@ class FetchingUrlsTableTransformerTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform("|first|", null, tableProeprties));
         assertEquals("Input table must be empty", exception.getMessage());
+    }
+
+    @Test
+    void testTransformWithoutMainApplicationPageUrl()
+    {
+        WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(null,
+                AuthenticationMode.URL);
+        transformer.setWebApplicationConfiguration(webApplicationConfiguration);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                transformer::getMainApplicationPageUri);
+        assertEquals("URL of the main application page should be non-blank", exception.getMessage());
     }
 
     private static final class TestTransformer extends AbstractFetchingUrlsTableTransformer

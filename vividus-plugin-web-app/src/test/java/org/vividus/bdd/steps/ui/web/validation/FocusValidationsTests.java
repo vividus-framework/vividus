@@ -25,17 +25,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.FocusState;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith(MockitoExtension.class)
 class FocusValidationsTests
 {
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
-    private IHighlightingSoftAssert softAssert;
+    private IDescriptiveSoftAssert softAssert;
 
     @Mock
     private WebElement webElement;

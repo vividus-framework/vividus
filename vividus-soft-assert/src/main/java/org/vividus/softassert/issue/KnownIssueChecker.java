@@ -31,6 +31,7 @@ public class KnownIssueChecker implements IKnownIssueChecker
 
     private ITestInfoProvider testInfoProvider;
     private IIssueStateProvider issueStateProvider;
+    private boolean detectPotentiallyKnownIssues;
 
     public KnownIssueChecker(IKnownIssueProvider knownIssueProvider, KnownIssueDataProvider knownIssueDataProvider)
     {
@@ -79,6 +80,11 @@ public class KnownIssueChecker implements IKnownIssueChecker
         this.issueStateProvider = issueStateProvider;
     }
 
+    public void setDetectPotentiallyKnownIssues(boolean detectPotentiallyKnownIssues)
+    {
+        this.detectPotentiallyKnownIssues = detectPotentiallyKnownIssues;
+    }
+
     private class CandidateIssue
     {
         private static final int ALL_PATTERNS = 3;
@@ -102,6 +108,10 @@ public class KnownIssueChecker implements IKnownIssueChecker
                 return false;
             }
             boolean potentiallyKnown = isPotentiallyKnown(candidate);
+            if (potentiallyKnown && !detectPotentiallyKnownIssues)
+            {
+                return false;
+            }
             if (potentiallyKnown)
             {
                 resetCurrentPatternsMatched();
@@ -109,7 +119,7 @@ public class KnownIssueChecker implements IKnownIssueChecker
             if (issue == null || bestPatternsMatched < currentPatternsMatched)
             {
                 bestPatternsMatched = currentPatternsMatched;
-                issue = new KnownIssue(candidateId, candidate.getType(), potentiallyKnown);
+                issue = new KnownIssue(candidateId, candidate, potentiallyKnown);
                 return bestPatternsMatched == ALL_PATTERNS;
             }
             return false;
@@ -132,8 +142,11 @@ public class KnownIssueChecker implements IKnownIssueChecker
             return testInfo != null && (
                     isPotentiallyKnown(testInfo.getTestSuite(), knownIssueIdentifier.getTestSuiteCompiledPattern())
                             || isPotentiallyKnown(testInfo.getTestCase(),
-                            knownIssueIdentifier.getTestCaseCompiledPattern()) || isPotentiallyKnown(
-                            testInfo.getTestStep(), knownIssueIdentifier.getTestStepCompiledPattern()));
+                            knownIssueIdentifier.getTestCaseCompiledPattern())
+                            || testInfo.getTestSteps()
+                                    .stream()
+                                    .allMatch(s ->
+                                            isPotentiallyKnown(s, knownIssueIdentifier.getTestStepCompiledPattern())));
         }
 
         boolean isPotentiallyKnown(String testInfo, Pattern pattern)

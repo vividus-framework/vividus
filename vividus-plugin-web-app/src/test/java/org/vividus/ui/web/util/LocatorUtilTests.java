@@ -61,30 +61,6 @@ class LocatorUtilTests
     private static final String ATTR = "attr";
 
     @Test
-    void testGetXPathLocatorByTextConcat()
-    {
-        By expectedLocator = By.xpath(".//a[contains(normalize-space(text()), \"C'mon In%!\")]");
-        By actualLocator = LocatorUtil.getXPathLocatorByTextWithTagName(A, "C'mon In%!");
-        assertEquals(expectedLocator, actualLocator);
-    }
-
-    @Test
-    void testGetXPathLocatorByTextWithTagName()
-    {
-        By expectedLocator = By.xpath(".//tag[contains(normalize-space(text()), \"text %\")]");
-        By actualLocator = LocatorUtil.getXPathLocatorByTextWithTagName("tag", TEXT_WITH_PERCENT);
-        assertEquals(expectedLocator, actualLocator);
-    }
-
-    @Test
-    void testGetXPathLocatorByTextWithoutTagName()
-    {
-        By expectedLocator = By.xpath(".//*[contains(normalize-space(text()), \"text %\")]");
-        By actualLocator = LocatorUtil.getXPathLocatorByText(TEXT_WITH_PERCENT);
-        assertEquals(expectedLocator, actualLocator);
-    }
-
-    @Test
     void testGetXPathLocatorByInnerTextWithTagName()
     {
         String tagName = "tagName";
@@ -289,18 +265,6 @@ class LocatorUtilTests
     {
         assertEquals(".//*[normalize-space(@text)=\"When to Use 1%\"]",
                 LocatorUtil.getXPathByAttribute(TEXT, "When to Use 1%"));
-    }
-
-    @Test
-    void testGetXPathByAttributeName()
-    {
-        assertEquals(".//*[@attr]", LocatorUtil.getXPathByAttribute(ATTR));
-    }
-
-    @Test
-    void testGetXPathByTagNameAndAttributeName()
-    {
-        assertEquals(".//div[@attr]", LocatorUtil.getXPathByTagNameAndAttribute("div", ATTR));
     }
 
     @Test

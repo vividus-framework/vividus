@@ -22,8 +22,6 @@ import static org.hamcrest.Matchers.not;
 import java.time.Duration;
 import java.util.function.BooleanSupplier;
 
-import javax.inject.Inject;
-
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebDriver;
@@ -32,16 +30,16 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.web.State;
-import org.vividus.ui.web.action.IWaitActions;
+import org.vividus.ui.State;
+import org.vividus.ui.action.IWaitActions;
+import org.vividus.ui.action.WaitResult;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWindowsActions;
-import org.vividus.ui.web.action.WaitResult;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
@@ -49,37 +47,23 @@ public class SetContextSteps
 {
     private static final String AN_ELEMENT_WITH_THE_ATTRIBUTE = "An element with the attribute '%1$s'='%2$s'";
 
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IWebUiContext webUiContext;
-    @Inject private IBaseValidations baseValidations;
-    @Inject private IHighlightingSoftAssert highlightingSoftAssert;
-    @Inject private IWindowsActions windowsActions;
-    @Inject private IWaitActions waitActions;
+    private final IUiContext uiContext;
+    private final IWebDriverProvider webDriverProvider;
+    private final IDescriptiveSoftAssert descriptiveSoftAssert;
+    private final IWindowsActions windowsActions;
+    private final IWaitActions waitActions;
+    private final IBaseValidations baseValidations;
 
-    /**
-     * Set the context for further localization of elements to the <b>page</b> itself
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Switches focus to the root tag of the page, this is as a rule {@code <html>} tag.
-     * </ul>
-     */
-    @When("I change context to the page")
-    public void changeContextToPage()
+    public SetContextSteps(IUiContext uiContext, IWebDriverProvider webDriverProvider,
+            IDescriptiveSoftAssert descriptiveSoftAssert, IWindowsActions windowsActions, IWaitActions waitActions,
+            IBaseValidations baseValidations)
     {
-        webUiContext.reset();
-    }
-
-    /**
-     * Set the context for further localization of elements to an <b>element</b> specified by <b>locator</b>
-     * @param locator Locator used to find an element
-     */
-    @When("I change context to element located `$locator`")
-    public void changeContextToElement(SearchAttributes locator)
-    {
-        changeContextToPage();
-        WebElement element = baseValidations.assertIfElementExists("Element to set context", locator);
-        webUiContext.putSearchContext(element, () -> changeContextToElement(locator));
+        this.uiContext = uiContext;
+        this.webDriverProvider = webDriverProvider;
+        this.descriptiveSoftAssert = descriptiveSoftAssert;
+        this.windowsActions = windowsActions;
+        this.waitActions = waitActions;
+        this.baseValidations = baseValidations;
     }
 
     /**
@@ -92,12 +76,12 @@ public class SetContextSteps
     @When("I change context to a [$state] element with the name '$name'")
     public void changeContextToElementWithName(State state, String name)
     {
-        changeContextToPage();
+        resetContext();
         WebElement element = baseValidations.assertIfElementExists(
                 String.format("An element with the name '%1$s'", name),
-                new SearchAttributes(ActionAttributeType.ELEMENT_NAME, name)
-                        .addFilter(ActionAttributeType.STATE, state.toString()));
-        webUiContext.putSearchContext(element, () -> changeContextToElementWithName(state, name));
+                new Locator(WebLocatorType.ELEMENT_NAME, name)
+                        .addFilter(WebLocatorType.STATE, state.toString()));
+        uiContext.putSearchContext(element, () -> changeContextToElementWithName(state, name));
     }
 
     /**
@@ -109,13 +93,13 @@ public class SetContextSteps
     @When("I change context to an element with the attribute '$attributeType'='$attributeValue'")
     public void changeContextToElementWithAttribute(String attributeType, String attributeValue)
     {
-        changeContextToPage();
+        resetContext();
 
         WebElement element = baseValidations.assertIfElementExists(
                 String.format(AN_ELEMENT_WITH_THE_ATTRIBUTE, attributeType, attributeValue),
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-        webUiContext.putSearchContext(element, () -> changeContextToElementWithAttribute(attributeType,
+        uiContext.putSearchContext(element, () -> changeContextToElementWithAttribute(attributeType,
                 attributeValue));
     }
 
@@ -130,15 +114,15 @@ public class SetContextSteps
     @When("I change context to a [$state] element with the attribute '$attributeType'='$attributeValue'")
     public void changeContextToStateElementWithAttribute(State state, String attributeType, String attributeValue)
     {
-        changeContextToPage();
+        resetContext();
         WebElement element = baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_THE_ATTRIBUTE,
-                attributeType, attributeValue), new SearchAttributes(ActionAttributeType.XPATH,
+                attributeType, attributeValue), new Locator(WebLocatorType.XPATH,
                         LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
         if (!baseValidations.assertElementState("The found element is " + state, state, element))
         {
             element = null;
         }
-        webUiContext.putSearchContext(element, () -> changeContextToStateElementWithAttribute(state,
+        uiContext.putSearchContext(element, () -> changeContextToStateElementWithAttribute(state,
                 attributeType, attributeValue));
     }
 
@@ -153,7 +137,7 @@ public class SetContextSteps
     @When("I switch back to the page")
     public void switchingToDefault()
     {
-        changeContextToPage();
+        resetContext();
         getWebDriver().switchTo().defaultContent();
     }
 
@@ -181,9 +165,9 @@ public class SetContextSteps
      * </pre>
      */
     @When("I switch to frame located `$locator`")
-    public void switchingToFrame(SearchAttributes locator)
+    public void switchingToFrame(Locator locator)
     {
-        changeContextToPage();
+        resetContext();
         WebElement element = baseValidations.assertIfElementExists("A frame", locator);
         switchToFrame(element);
     }
@@ -208,10 +192,10 @@ public class SetContextSteps
     {
         String currentWindow = getWebDriver().getWindowHandle();
         String newWindow = windowsActions.switchToNewWindow(currentWindow);
-        if (highlightingSoftAssert.assertThat(String.format("New window '%s' is found", newWindow),
+        if (descriptiveSoftAssert.assertThat(String.format("New window '%s' is found", newWindow),
                 "New window is found", newWindow, not(equalTo(currentWindow))))
         {
-            changeContextToPage();
+            resetContext();
         }
     }
 
@@ -239,7 +223,7 @@ public class SetContextSteps
         Matcher<String> matcher = comparisonRule.createMatcher(windowName);
         String titleAfterSwitch = windowsActions.switchToWindowWithMatchingTitle(matcher);
         resetContextIf(() ->
-            highlightingSoftAssert.assertThat("New window or browser tab name is ", "Window or tab name is ",
+            descriptiveSoftAssert.assertThat("New window or browser tab name is ", "Window or tab name is ",
                 titleAfterSwitch, matcher));
     }
 
@@ -295,7 +279,7 @@ public class SetContextSteps
     {
         if (condition.getAsBoolean())
         {
-            changeContextToPage();
+            resetContext();
         }
     }
 
@@ -310,5 +294,10 @@ public class SetContextSteps
     private WebDriver getWebDriver()
     {
         return webDriverProvider.get();
+    }
+
+    private void resetContext()
+    {
+        uiContext.reset();
     }
 }

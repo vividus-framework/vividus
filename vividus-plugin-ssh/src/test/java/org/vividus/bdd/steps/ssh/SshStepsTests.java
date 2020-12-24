@@ -23,11 +23,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.function.FailableFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +46,7 @@ import org.vividus.ssh.SingleCommand;
 import org.vividus.ssh.exec.SshOutput;
 import org.vividus.ssh.sftp.SftpCommand;
 import org.vividus.ssh.sftp.SftpOutput;
+import org.vividus.util.property.PropertyMappedCollection;
 
 @ExtendWith(MockitoExtension.class)
 class SshStepsTests
@@ -69,7 +70,7 @@ class SshStepsTests
     @BeforeEach
     void beforeEach()
     {
-        sshSteps.setServerConfigurations(Map.of(SERVER, SERVER_CONFIGURATION));
+        sshSteps.setServerConfigurations(new PropertyMappedCollection<>(Map.of(SERVER, SERVER_CONFIGURATION)));
     }
 
     @Test
@@ -101,14 +102,14 @@ class SshStepsTests
     }
 
     @Test
-    void shouldCreateFileOverSftp() throws CommandExecutionException, IOException
+    void shouldCreateFileOverSftp() throws CommandExecutionException
     {
         String content = "content";
         testPutFile(SftpCommand.PUT, content, () -> sshSteps.createFileOverSftp(content, DESTINATION_PATH, SERVER));
     }
 
     @Test
-    void testPutFileSftp() throws CommandExecutionException, IOException
+    void testPutFileSftp() throws CommandExecutionException
     {
         String filePath = "/test.txt";
         testPutFile(SftpCommand.PUT_FROM_FILE, filePath,
@@ -116,7 +117,7 @@ class SshStepsTests
     }
 
     private void testPutFile(SftpCommand command, String parameter, StepRunner stepExecutor)
-            throws CommandExecutionException, IOException
+            throws CommandExecutionException
     {
         CommandExecutionManager<SftpOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SFTP);
         when(executionManager.run(eq(SERVER_CONFIGURATION), argThat(commands -> {
@@ -133,14 +134,15 @@ class SshStepsTests
         verify(sshTestContext).putSshOutput(null);
     }
 
-    private SftpOutput testSftpExecution(CommandExecutor commandExecutor) throws CommandExecutionException
+    private SftpOutput testSftpExecution(FailableFunction<Commands, Object, CommandExecutionException> commandExecutor)
+            throws CommandExecutionException
     {
         CommandExecutionManager<SftpOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SFTP);
         Commands commands = new Commands("sftp-command");
         SftpOutput output = new SftpOutput();
         output.setResult("sftp-output");
         when(executionManager.run(SERVER_CONFIGURATION, commands)).thenReturn(output);
-        Object actual = commandExecutor.execute(commands);
+        Object actual = commandExecutor.apply(commands);
         assertEquals(output, actual);
         verify(sshTestContext).putSshOutput(null);
         return output;
@@ -155,14 +157,8 @@ class SshStepsTests
     }
 
     @FunctionalInterface
-    private interface CommandExecutor
-    {
-        Object execute(Commands commands) throws CommandExecutionException;
-    }
-
-    @FunctionalInterface
     private interface StepRunner
     {
-        void run() throws CommandExecutionException, IOException;
+        void run() throws CommandExecutionException;
     }
 }

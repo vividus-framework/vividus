@@ -28,15 +28,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
-import org.vividus.ui.web.State;
-import org.vividus.ui.web.action.ISearchActions;
+import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
@@ -45,9 +44,9 @@ public class WebElementsSteps
     @Inject private IWebElementActions webElementActions;
     @Inject private IBaseValidations baseValidations;
     @Inject private IElementValidations elementValidations;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     @Inject private ISearchActions searchActions;
-    @Inject private IHighlightingSoftAssert highlightingSoftAssert;
+    @Inject private ISoftAssert softAssert;
 
     /**
      * Checks if the text in context matches <b>regex</b>
@@ -58,7 +57,7 @@ public class WebElementsSteps
     {
         String actualText = "";
         boolean assertCondition = false;
-        boolean isWebElement = getSearchContext() instanceof WebElement;
+        boolean isWebElement = contextualSearch();
         if (isWebElement)
         {
             actualText = webElementActions.getElementText((WebElement) getSearchContext());
@@ -69,20 +68,27 @@ public class WebElementsSteps
         }
         if (!actualText.isEmpty())
         {
-            Pattern pattern = Pattern.compile(regex);
-            assertCondition = pattern.matcher(actualText).find();
-            if (!assertCondition && isWebElement)
+            assertCondition = verifyText(regex, actualText, isWebElement);
+        }
+        softAssert.assertTrue("The text in search context matches regular expression " + regex,
+                assertCondition);
+    }
+
+    private boolean verifyText(String regex, String actualText, boolean isWebElement)
+    {
+        boolean assertCondition;
+        Pattern pattern = Pattern.compile(regex);
+        assertCondition = pattern.matcher(actualText).find();
+        if (!assertCondition && isWebElement)
+        {
+            String pseudoElementContent = webElementActions
+                    .getPseudoElementContent((WebElement) getSearchContext());
+            if (!pseudoElementContent.isEmpty())
             {
-                String pseudoElementContent = webElementActions
-                        .getPseudoElementContent((WebElement) getSearchContext());
-                if (!pseudoElementContent.isEmpty())
-                {
-                    assertCondition = pattern.matcher(pseudoElementContent).find();
-                }
+                assertCondition = pattern.matcher(pseudoElementContent).find();
             }
         }
-        highlightingSoftAssert.assertTrue("The text in search context matches regular expression " + regex,
-                assertCondition);
+        return assertCondition;
     }
 
     /**
@@ -92,32 +98,22 @@ public class WebElementsSteps
     @Then("the text '$text' exists")
     public void ifTextExists(String text)
     {
-        boolean searchFromRoot = getSearchContext() instanceof WebDriver;
-        if (!searchFromRoot)
+        if (contextualSearch())
         {
-            elementValidations.assertIfElementContainsText(webUiContext.getSearchContext(WebElement.class), text, true);
+            elementValidations.assertIfElementContainsText(uiContext.getSearchContext(WebElement.class), text, true);
         }
         else
         {
             By locator = LocatorUtil.getXPathLocatorByInnerText(text);
 
-            List<WebElement> elements;
-            try
-            {
-                elements = getSearchContext().findElements(locator);
-            }
-            // Workaround for WebDriverException: Permission denied to access property '_wrapped'
-            catch (WebDriverException ex)
-            {
-                elements = getSearchContext().findElements(locator);
-            }
+            List<WebElement> elements = findElements(locator);
 
             boolean assertCondition = !elements.isEmpty();
 
             if (!assertCondition)
             {
-                SearchAttributes attributes = new SearchAttributes(ActionAttributeType.CASE_SENSITIVE_TEXT, text);
-                elements = searchActions.findElements(getSearchContext(), attributes);
+                Locator caseSensitiveLocator = new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text);
+                elements = searchActions.findElements(getSearchContext(), caseSensitiveLocator);
                 assertCondition = !elements.isEmpty();
             }
 
@@ -143,9 +139,24 @@ public class WebElementsSteps
                 }
             }
 
-            highlightingSoftAssert.assertTrue("There is an element with text=" + text + " in the context",
+            softAssert.assertTrue("There is an element with text=" + text + " in the context",
                     assertCondition);
         }
+    }
+
+    private List<WebElement> findElements(By locator)
+    {
+        List<WebElement> elements;
+        try
+        {
+            elements = getSearchContext().findElements(locator);
+        }
+        // Workaround for WebDriverException: Permission denied to access property '_wrapped'
+        catch (WebDriverException ex)
+        {
+            elements = getSearchContext().findElements(locator);
+        }
+        return elements;
     }
 
     /**
@@ -156,49 +167,25 @@ public class WebElementsSteps
     @Then("the text '$text' does not exist")
     public boolean textDoesNotExist(String text)
     {
-        if (getSearchContext() instanceof WebElement)
+        if (contextualSearch())
         {
-            return elementValidations.assertIfElementContainsText(webUiContext.getSearchContext(WebElement.class), text,
+            return elementValidations.assertIfElementContainsText(uiContext.getSearchContext(WebElement.class), text,
                     false);
         }
         else
         {
             return baseValidations.assertIfElementDoesNotExist(String.format("An element with text '%s'", text),
-                    new SearchAttributes(ActionAttributeType.CASE_SENSITIVE_TEXT, text));
+                    new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text));
         }
     }
 
-    /**
-     * Checks, if there is a frame with desired attribute on the context
-     * @param attributeType Type of tag attribute (for ex. 'name', 'id')
-     * @param attributeValue Value of the attribute
-     * @return Frame web element if it is found on the page
-     */
-    @Then("a frame with the attribute '$attributeType'='$attributeValue' exists")
-    public WebElement isFrameWithCertainAttributeFound(String attributeType, String attributeValue)
+    private boolean contextualSearch()
     {
-        return baseValidations.assertIfElementExists(
-                String.format("A frame with the attribute '%1$s'='%2$s'", attributeType, attributeValue),
-                new SearchAttributes(ActionAttributeType.XPATH,
-                        LocatorUtil.getXPathByTagNameAndAttribute("iframe", attributeType, attributeValue)));
-    }
-
-    /**
-     * Checks, if there is a frame with desired attribute on the context
-     * and it has expected <b>state</b>
-     * @param state Enabled or Disabled
-     * @param attributeType Type of tag attribute (for ex. 'name', 'id')
-     * @param attributeValue Value of the attribute
-     */
-    @Then("a [$state] frame with the attribute '$attributeType'='$attributeValue' exists")
-    public void isFrameWithCertainAttributeFound(State state, String attributeType, String attributeValue)
-    {
-        WebElement element = isFrameWithCertainAttributeFound(attributeType, attributeValue);
-        baseValidations.assertElementState("The found frame is " + state, state, element);
+        return getSearchContext() instanceof WebElement;
     }
 
     protected SearchContext getSearchContext()
     {
-        return webUiContext.getSearchContext();
+        return uiContext.getSearchContext();
     }
 }

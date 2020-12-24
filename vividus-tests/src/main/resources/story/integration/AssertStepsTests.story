@@ -1,4 +1,9 @@
-Scenario: Set-Up
+Meta:
+    @epic vividus-plugin-rest-api
+
+Lifecycle:
+Before:
+Scope: STORY
 Given I am on a page with the URL 'https://google.com'
 
 Scenario: Verify step Then I verify assertions matching '$assertionsPattern'

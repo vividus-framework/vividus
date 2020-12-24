@@ -31,7 +31,7 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 
 @ExtendWith(MockitoExtension.class)
-public class LocationTests
+class LocationTests
 {
     private static final Rectangle ORIGIN_RECT = new Rectangle(new Point(400, 2000), new Dimension(50, 100));
     private static final Rectangle TARGET_RECT = new Rectangle(new Point(700, 2500), new Dimension(150, 200));

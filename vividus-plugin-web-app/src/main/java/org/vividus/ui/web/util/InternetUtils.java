@@ -17,8 +17,6 @@
 package org.vividus.ui.web.util;
 
 import java.net.URI;
-import java.net.URL;
-import java.util.List;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
@@ -32,50 +30,13 @@ public final class InternetUtils
     }
 
     /**
-     * Gets the domain with desired levels.
-     * <p>For example:</p>
-     * <ul>
-     * <li>for URI: "https://www.by.example.com" and levels = 2 method will return example.com</li>
-     * <li>for URI: "https://www.by.example.com" and levels = 5 method will return www.by.example.com</li>
-     * </ul>
-     * @param uri Uri to process
-     * @param domainLevels desired domain levels
-     * @return processed domain with desired levels
-     */
-    public static String getDomainName(URI uri, int domainLevels)
-    {
-        InternetDomainName domaneName = InternetDomainName.from(uri.getHost());
-        List<String> domainParts = domaneName.parts();
-        if (domainLevels < domainParts.size())
-        {
-            List<String> resultDomainParts = domainParts.subList(domainParts.size() - domainLevels, domainParts.size());
-            return String.join(DOMAIN_PARTS_SEPARATOR, resultDomainParts);
-        }
-        return domaneName.toString();
-    }
-
-    /**
-     * Gets url's top domain
-     * @param url Desired URL
-     * @return Top domain, if there are several domains. Host, if there is only one domain
-     */
-    public static String getTopDomain(URL url)
-    {
-        return getTopDomain(url.getHost());
-    }
-
-    /**
      * Gets uri's top domain
      * @param uri Desired URI
      * @return Top domain, if there are several domains. Host, if there is only one domain
      */
     public static String getTopDomain(URI uri)
     {
-        return getTopDomain(uri.getHost());
-    }
-
-    private static String getTopDomain(String host)
-    {
+        String host = uri.getHost();
         return host.contains(DOMAIN_PARTS_SEPARATOR) && !InetAddresses.isInetAddress(host)
                 ? InternetDomainName.from(host).topPrivateDomain().toString()
                 : host;

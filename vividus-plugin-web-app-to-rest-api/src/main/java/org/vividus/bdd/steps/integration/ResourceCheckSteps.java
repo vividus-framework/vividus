@@ -28,8 +28,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
@@ -54,22 +52,33 @@ public class ResourceCheckSteps
     private static final Set<String> ALLOWED_SCHEMES = Set.of("http", "https");
     private static final String EXCLUDE_PATTERN = "#";
 
-    @Inject private ResourceValidator resourceValidator;
-    @Inject private AttachmentPublisher attachmentPublisher;
-    @Inject private HttpRequestExecutor httpRequestExecutor;
-    @Inject private SoftAssert softAssert;
-    @Inject private WebApplicationConfiguration webApplicationConfiguration;
-    @Inject private ContextCopyingExecutor executor;
-    @Inject private HttpTestContext httpTestContext;
-
-    private URI mainApplicationPageURI;
+    private final ResourceValidator resourceValidator;
+    private final AttachmentPublisher attachmentPublisher;
+    private final HttpRequestExecutor httpRequestExecutor;
+    private final SoftAssert softAssert;
+    private final WebApplicationConfiguration webApplicationConfiguration;
+    private final ContextCopyingExecutor executor;
+    private final HttpTestContext httpTestContext;
     private Pattern excludeHrefsPattern;
 
     private Optional<String> uriToIgnoreRegex;
 
+    public ResourceCheckSteps(ResourceValidator resourceValidator, AttachmentPublisher attachmentPublisher,
+            HttpRequestExecutor httpRequestExecutor, SoftAssert softAssert,
+            WebApplicationConfiguration webApplicationConfiguration, ContextCopyingExecutor executor,
+            HttpTestContext httpTestContext)
+    {
+        this.resourceValidator = resourceValidator;
+        this.attachmentPublisher = attachmentPublisher;
+        this.httpRequestExecutor = httpRequestExecutor;
+        this.softAssert = softAssert;
+        this.webApplicationConfiguration = webApplicationConfiguration;
+        this.executor = executor;
+        this.httpTestContext = httpTestContext;
+    }
+
     public void init()
     {
-        mainApplicationPageURI = webApplicationConfiguration.getMainApplicationPageUrl();
         excludeHrefsPattern = Pattern.compile(uriToIgnoreRegex.map(p -> p + "|" + EXCLUDE_PATTERN)
                                                            .orElse(EXCLUDE_PATTERN));
     }
@@ -163,7 +172,7 @@ public class ResourceCheckSteps
         {
             return uriToCheck;
         }
-        return UriUtils.buildNewUrl(mainApplicationPageURI, uriToCheck.getPath());
+        return UriUtils.buildNewUrl(webApplicationConfiguration.getMainApplicationPageUrl(), uriToCheck.getPath());
     }
 
     /**

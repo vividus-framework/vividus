@@ -1,0 +1,33 @@
+{
+  "path": "storyPath",
+  "title": "",
+  "beforeStorySteps": [],
+  "scenarios": [
+    {
+      "keyword": "Scenario:",
+      "title": "Dummy scenario",
+      "meta": [
+        {
+          "keyword": "@",
+          "name": "testCaseId",
+          "value": "STUB-0"
+        }
+      ],
+      "steps": [
+        {
+          "outcome": "successful",
+          "value": "Given I setup test environment"
+        },
+        {
+          "outcome": "successful",
+          "value": "When I perform action on test environment"
+        },
+        {
+          "outcome": "successful",
+          "value": "Then I verify changes on test environment"
+        }
+      ]
+    }
+  ],
+  "afterStorySteps": []
+}

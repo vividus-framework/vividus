@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
 @Named
-public class DiffDateExpressionProcessor implements IExpressionProcessor
+public class DiffDateExpressionProcessor implements IExpressionProcessor<String>
 {
     private static final int FORMAT_GROUP = 6;
     private static final Pattern DIFF_DATE_PATTERN = Pattern

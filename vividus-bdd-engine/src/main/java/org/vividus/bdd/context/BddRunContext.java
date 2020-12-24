@@ -51,10 +51,6 @@ public class BddRunContext implements IBddRunContext
         {
             getGivenStories().pop();
         }
-        else
-        {
-            testContext.remove(RunningStory.class);
-        }
     }
 
     @Override

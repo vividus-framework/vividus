@@ -59,7 +59,7 @@ class RandomIntExpressionProcessorTests
     })
     void testRandomInt(String expression, Integer minInclusive, Integer maxInclusive)
     {
-        String actual = processor.execute(expression).get();
-        assertThat(Integer.valueOf(actual), allOf(greaterThanOrEqualTo(minInclusive), lessThanOrEqualTo(maxInclusive)));
+        assertThat(processor.execute(expression).get(),
+                allOf(greaterThanOrEqualTo(minInclusive), lessThanOrEqualTo(maxInclusive)));
     }
 }

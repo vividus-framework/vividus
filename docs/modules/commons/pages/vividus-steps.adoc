@@ -1,0 +1,86 @@
+= Steps available out of the box
+
+== Description
+
+Here one could find description of the steps that are delivered with Vividus itself without any plugins required.
+
+=== Execute while-like loop
+
+Executes the steps while variable matches the comparison rule or until the maximum number of iterations is reached.
+
+[IMPORTANT]
+If the maximum number of iterations is reached no failure or exception will occur.
+
+Syntax:
+[source,gherkin]
+----
+When I execute steps at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
+----
+
+Alias:
+[source,gherkin]
+----
+When I execute steps at most $max times while variable '$variableName' is $comparisonRule '$expectedValue':$stepsToExecute
+----
+
+* `$max` - The maximum number of iterations
+* `$variableName` - The name of the variable to check
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
+* `$expectedValue` - The expected value of the variable
+* `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute
+
+==== *_Usage_*
+
+.Click button 5 times
+[source,gherkin]
+----
+When I execute steps at most 5 times while variable `var` is less than `3`:
+|step                                                                                                                   |
+|When I click on element located `id(counter)`                                                                          |
+|When I find <= `1` elements by `xpath(//div[@id='clickResult' and (text()='3' or text()='4')])` and for each element do|
+|{headerSeparator=!,valueSeparator=!}                                                                                   |
+|!step!                                                                                                                 |
+|!When I set the text found in search context to the 'scenario' variable 'var'!                                         |
+Then `${var}` is = `3`
+----
+
+=== Execute while-like loop with delays
+
+Executes the steps while variable matches the comparison rule or until the maximum number of iterations is reached. The delay is used to define the amount of time to wait between iterations.
+
+[IMPORTANT]
+If the maximum number of iterations is reached no failure or exception will occur.
+
+Syntax:
+[source,gherkin]
+----
+When I execute steps with delay `$delay` at most $max times while variable variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
+----
+
+Alias:
+[source,gherkin]
+----
+When I execute steps with delay '$delay' at most $max times while variable '$variableName' is $comparisonRule '$expectedValue':$stepsToExecute
+----
+
+* `$delay` - The delay between iterations
+* `$max` - The maximum number of iterations
+* `$variableName` - The name of the variable to check
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
+* `$expectedValue` - The expected value of the variable
+* `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute
+
+==== *_Usage_*
+
+.Click button 5 times with 1 second delay
+[source,gherkin]
+----
+When I execute steps with delay `PT1S` at most 5 times while variable `var` is less than `3`:
+|step                                                                                                                   |
+|When I click on element located `id(counter)`                                                                          |
+|When I find <= `1` elements by `xpath(//div[@id='clickResult' and (text()='3' or text()='4')])` and for each element do|
+|{headerSeparator=!,valueSeparator=!}                                                                                   |
+|!step!                                                                                                                 |
+|!When I set the text found in search context to the 'scenario' variable 'var'!                                         |
+Then `${var}` is = `3`
+----

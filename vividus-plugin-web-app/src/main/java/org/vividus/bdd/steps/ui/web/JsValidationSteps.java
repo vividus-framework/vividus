@@ -51,7 +51,7 @@ public class JsValidationSteps
      * @param logEntries Log entries to check: "errors", "warnings", "errors, warnings" or "warnings, errors"
      * @param regex Regular expression to filter log entries
      */
-    @Then(value = "there are browser console $logEntries by regex `$regex`")
+    @Then("there are browser console $logEntries by regex `$regex`")
     public void checkThereAreLogEntriesOnOpenedPageFiltredByRegExp(List<BrowserLogLevel> logEntries, String regex)
     {
         WebDriver webDriver = webDriverProvider.get();

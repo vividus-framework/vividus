@@ -123,3 +123,20 @@ When I find = `1` elements `By.xpath(//div[@id='output' and text()!='mark'])` an
 |!type      !argument   !                                        |
 |!PRESS_KEYS!BACK_SPACE !                                        |
 Then number of elements found by `By.xpath(//div[@id='output' and text()='mark'])` is equal to `1`
+
+Scenario: Action verification KEY_DOWN and KEY_UP combiantion
+Meta:
+    @requirementId 686
+Given I am on a page with the URL 'https://mdn.mozillademos.org/en-US/docs/Web/HTML/Element/input$samples/caret-color'
+When I initialize the scenario variable `inputText` with value `mark#{generate(regexify '[a-z]{10}')}`
+When I initialize the scenario variable `inputLocator` with value `By.id(textInput)`
+When I enter `${inputText}` in field located `${inputLocator}`
+Then field value is `${inputText}`
+When I click on element located `${inputLocator}`
+When I execute sequence of actions:
+|type      |argument|
+|KEY_DOWN  |CONTROL |
+|PRESS_KEYS|a       |
+|KEY_UP    |CONTROL |
+|PRESS_KEYS|DELETE  |
+Then field value is ``

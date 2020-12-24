@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.type.CollectionType;
 
@@ -33,7 +34,7 @@ public class JsonUtils
 
     public JsonUtils()
     {
-        this(PropertyNamingStrategy.LOWER_CAMEL_CASE);
+        this(PropertyNamingStrategies.LOWER_CAMEL_CASE);
     }
 
     public JsonUtils(PropertyNamingStrategy namingStrategy)

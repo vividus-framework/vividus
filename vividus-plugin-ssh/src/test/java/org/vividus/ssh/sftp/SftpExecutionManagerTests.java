@@ -19,34 +19,25 @@ package org.vividus.ssh.sftp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.vividus.softassert.ISoftAssert;
+import org.junit.jupiter.api.Test;
+import org.vividus.ssh.CommandExecutionException;
 import org.vividus.ssh.Commands;
 import org.vividus.ssh.ServerConfiguration;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(SftpExecutionManager.class)
-public class SftpExecutionManagerTests
+class SftpExecutionManagerTests
 {
     @Test
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    public void shouldRunExecution() throws Exception
+    void shouldRunExecution() throws CommandExecutionException
     {
-        ISoftAssert softAssert = mock(ISoftAssert.class);
         SftpExecutor executor = mock(SftpExecutor.class);
-        whenNew(SftpExecutor.class).withArguments(softAssert).thenReturn(executor);
         ServerConfiguration serverConfiguration = new ServerConfiguration();
         Commands commands = new Commands("sftp-command");
         SftpOutput sftpOutput = new SftpOutput();
         when(executor.execute(serverConfiguration, commands)).thenReturn(sftpOutput);
         SftpOutputPublisher outputPublisher = mock(SftpOutputPublisher.class);
-        SftpExecutionManager executionManager = new SftpExecutionManager(outputPublisher, softAssert);
+        SftpExecutionManager executionManager = new SftpExecutionManager(executor, outputPublisher);
         SftpOutput actual = executionManager.run(serverConfiguration, commands);
         assertEquals(sftpOutput, actual);
         verify(outputPublisher).publishOutput(sftpOutput);

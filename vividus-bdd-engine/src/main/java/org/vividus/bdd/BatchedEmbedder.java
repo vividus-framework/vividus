@@ -115,7 +115,7 @@ public class BatchedEmbedder extends Embedder
                 }
                 finally
                 {
-                    bddVariableContext.clearVariables();
+                    bddVariableContext.clearBatchVariables();
                     bddRunContext.removeRunningBatch();
                     executorService.shutdownNow();
                     storyManager = null;

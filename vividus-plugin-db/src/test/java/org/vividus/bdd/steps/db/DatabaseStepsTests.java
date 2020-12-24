@@ -79,6 +79,7 @@ import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
+import org.vividus.util.property.PropertyMappedCollection;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -135,6 +136,9 @@ class DatabaseStepsTests
 
     private static final HashCode HASH3 = Hashing.murmur3_128().hashString(VAL3, StandardCharsets.UTF_8);
 
+    private static final String MISSING_DB_CONFIG_ERROR = "Database connection with key '%s' is not configured in "
+            + "properties";
+
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(DatabaseSteps.class);
 
     private static final String DURATION_PATTERN = "[0-2][0-9]:[0-5][0-9]:[01][0-9]\\.[0-9]{3}";
@@ -146,7 +150,7 @@ class DatabaseStepsTests
     private final IAttachmentPublisher attachmentPublisher = mock(IAttachmentPublisher.class);
 
     @Mock
-    private Map<String, DriverManagerDataSource> dataSources;
+    private PropertyMappedCollection<DriverManagerDataSource> dataSources;
 
     @Mock
     private HashFunction hashFunction;
@@ -214,9 +218,8 @@ class DatabaseStepsTests
         when(stmt.executeUpdate(QUERY)).thenReturn(1);
         Connection con = mock(Connection.class);
         when(con.createStatement()).thenReturn(stmt);
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
         when(dataSource.getConnection()).thenReturn(con);
-        when(dataSources.get(DB_KEY)).thenReturn(dataSource);
         databaseSteps.executeSql(QUERY, DB_KEY);
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info("Executed query: {}\nAffected rows:{}", QUERY, 1))));
     }
@@ -226,8 +229,7 @@ class DatabaseStepsTests
     void shouldCompareSqlStatesSQLExceptionIsThrown() throws SQLException
     {
         String sqlState = "28000";
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
-        when(dataSources.get(DB_KEY)).thenReturn(dataSource);
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
         SQLException exception = mock(SQLException.class);
         when(exception.getSQLState()).thenReturn(sqlState);
         doThrow(exception).when(dataSource).getConnection(ADMIN, ADMIN);
@@ -239,8 +241,7 @@ class DatabaseStepsTests
     void shouldCompareSqlStatesSuccessConnection() throws SQLException
     {
         String sqlState = "00000";
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
-        when(dataSources.get(DB_KEY)).thenReturn(dataSource);
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
         Connection connection = mock(Connection.class);
         when(dataSource.getConnection(ADMIN, ADMIN)).thenReturn(connection);
         databaseSteps.verifySqlState(DB_KEY, ADMIN, ADMIN, StringComparisonRule.IS_EQUAL_TO, sqlState);
@@ -262,9 +263,8 @@ class DatabaseStepsTests
         when(stmt.executeUpdate(QUERY)).thenThrow(cause);
         Connection con = mock(Connection.class);
         when(con.createStatement()).thenReturn(stmt);
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
         when(dataSource.getConnection()).thenReturn(con);
-        when(dataSources.get(DB_KEY)).thenReturn(dataSource);
         IllegalStateException actual = assertThrows(IllegalStateException.class,
             () -> databaseSteps.executeSql(QUERY, DB_KEY));
         assertEquals(cause, actual.getCause());
@@ -367,19 +367,29 @@ class DatabaseStepsTests
     void shouldThrowTimeoutExceptionIfQueryTakesTooMuchTime()
     {
         databaseSteps.setDbQueryTimeout(Duration.ofNanos(0));
-        when(dataSources.get(DB_KEY)).thenReturn(mock(DriverManagerDataSource.class));
+        mockDataSourceRetrieval();
         assertThrows(TimeoutException.class,
             () -> databaseSteps.compareData(QUERY, DB_KEY, QUERY, DB_KEY, Set.of(COL1)));
         verifyNoInteractions(attachmentPublisher, softAssert);
     }
 
-    @Test
-    void shouldCompareDataVsExamplesTableAndNotPostReportIfDataEqual()
+    static Stream<Arguments> equalDataProvider()
+    {
+        return Stream.of(
+                Arguments.of(List.of(Map.of(COL1, VAL1)), new ExamplesTable("|col1|\n|val1|")),
+                Arguments.of(List.of(Map.of(COL1, VAL1, COL2, VAL2)), new ExamplesTable("|col2|col1|\n|val2|val1|"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("equalDataProvider")
+    void shouldCompareDataVsExamplesTableAndNotPostReportIfDataEqual(List<Map<String, Object>> data,
+            ExamplesTable table)
     {
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         mockRowsFilterAsNOOP();
         mockDataSource();
-        databaseSteps.compareData(List.of(Map.of(COL1, VAL1)), Set.of(), DB_KEY, new ExamplesTable("|col1|\n|val1|"));
+        databaseSteps.compareData(data, Set.of(), DB_KEY, table);
         verify(attachmentPublisher, never()).publishAttachment(eq(TEMPLATE_PATH), any(), any());
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
                 argThat(r -> {
@@ -466,9 +476,8 @@ class DatabaseStepsTests
         when(stmt.executeQuery(QUERY)).thenReturn(rsFirst).thenReturn(rsSecond);
         Connection con = mock(Connection.class);
         when(con.createStatement()).thenReturn(stmt);
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
         when(dataSource.getConnection()).thenReturn(con);
-        lenient().when(dataSources.get(DB_KEY)).thenReturn(dataSource);
 
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
@@ -488,12 +497,11 @@ class DatabaseStepsTests
         when(stmt.executeQuery(QUERY)).thenReturn(rsFirst).thenReturn(rsSecond);
         Connection con = mock(Connection.class);
         when(con.createStatement()).thenReturn(stmt);
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
         when(dataSource.getConnection()).thenReturn(con);
-        lenient().when(dataSources.get(DB_KEY)).thenReturn(dataSource);
 
         databaseSteps.waitForDataAppearance(
-                Duration.parse("PT2S"), 2, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
+                Duration.ofSeconds(2), 2, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
         String logMessage = "SQL result data is not equal to expected data in {} records";
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(logMessage, 1), info(logMessage, 1))));
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
@@ -554,9 +562,16 @@ class DatabaseStepsTests
 
     private void mockDataSource()
     {
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
         when(dataSource.getUrl()).thenReturn(DB_URL);
-        when(dataSources.get(DB_KEY)).thenReturn(dataSource);
+    }
+
+    private DriverManagerDataSource mockDataSourceRetrieval()
+    {
+        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        String dbKey = DB_KEY;
+        when(dataSources.get(dbKey, MISSING_DB_CONFIG_ERROR, dbKey)).thenReturn(dataSource);
+        return dataSource;
     }
 
     private DriverManagerDataSource mockDataSource(String query, String dbKey, ResultSet rs) throws SQLException
@@ -567,7 +582,7 @@ class DatabaseStepsTests
         when(con.createStatement()).thenReturn(stmt);
         DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
         when(dataSource.getConnection()).thenReturn(con);
-        lenient().when(dataSources.get(dbKey)).thenReturn(dataSource);
+        lenient().when(dataSources.get(dbKey, MISSING_DB_CONFIG_ERROR, dbKey)).thenReturn(dataSource);
         return dataSource;
     }
 

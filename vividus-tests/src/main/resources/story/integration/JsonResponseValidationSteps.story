@@ -18,6 +18,11 @@ When I save a JSON element from response by JSON path '<jsonPath>' to scenario v
 Then `${numberOfBooks}` is equal to `<booksNumber>`
 
 
+Scenario: Verify composite step 'When I save JSON element from response by JSON path `$jsonPath` to $scopes variable `$variableName`'
+When I save JSON element from response by JSON path `<jsonPath>` to scenario variable `numberOfBooks`
+Then `${numberOfBooks}` is equal to `<booksNumber>`
+
+
 Scenario: Verify composite step 'When I wait for presence of element by '$jsonPath' in HTTP GET response from '$resourceUrl' for '$duration' duration retrying $retryTimes times'
 When I wait for presence of element by '<jsonPath>' in HTTP GET response from '<URL>' for 'PT1M' duration retrying 20 times
 When I save a JSON element from response by JSON path '<jsonPath>' to scenario variable 'numberOfBooks'
@@ -40,10 +45,34 @@ Then a JSON element from '
 }
 ' by the JSON path '$' is equal to '${expected-json}' ignoring extra fields
 
+Scenario: Verify step 'Then the number of JSON elements by the JSON path '$jsonPath' is $comparisonRule $elementsNumber'
+Then the number of JSON elements by the JSON path '$.store.book' is greater than 0
+
+Scenario: Verify step 'Then number of JSON elements by JSON path `$jsonPath` is $comparisonRule $elementsNumber'
+Then number of JSON elements by JSON path `$.store.book` is greater than 0
+
+Scenario: Verify step 'When I set the number of elements found by the JSON path '$jsonPath' to the $scopes variable '$variableName''
+When I set the number of elements found by the JSON path '$.store.book' to the scenario variable 'bookCount'
+Then `${bookCount}` is greater than `0`
+
+Scenario: Verify step 'When I set number of elements found by JSON path `$jsonPath` to $scopes variable `$variableName`'
+When I set number of elements found by JSON path `$.store.book` to scenario variable `bookCount`
+Then `${bookCount}` is greater than `0`
+
+Scenario: Verify step 'When I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element do$stepsToExecute'
+When I find greater than '1' JSON elements by '$.store.book' and for each element do
+|step                                                       |
+|Then number of JSON elements by JSON path `$.author` is = 1|
+
+Scenario: Verify step 'When I find $comparisonRule `$elementsNumber` JSON elements by `$jsonPath` and for each element do$stepsToExecute'
+When I find greater than `1` JSON elements by `$.store.book` and for each element do
+|step                                                       |
+|Then number of JSON elements by JSON path `$.author` is = 1|
+
 Scenario: Verify step "When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute"
 When I wait for presence of element by `$.json.iteration3` for `PT15S` duration retrying 3 times
 |step                                                                                          |
-|When I initialize the step variable `iteration` with value `#{eval(${iteration:0} + 1)}`      |
+|When I initialize the scenario variable `iteration` with value `#{eval(${iteration:0} + 1)}`  |
 |When I set request headers:                                                                   |
 |{headerSeparator=!,valueSeparator=!}                                                          |
 |!name         !value            !                                                             |

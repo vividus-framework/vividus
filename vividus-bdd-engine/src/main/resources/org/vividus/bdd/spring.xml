@@ -44,7 +44,7 @@
 
     <bean id="examplesTableLoader" class="org.vividus.bdd.examples.ExamplesTableFileLoader">
         <property name="bddResourceLoader" ref="bddResourceLoader" />
-        <property name="parameterAdaptor" ref="parameterAdaptor" />
+        <property name="variableResolver" ref="variableResolver" />
         <property name="cacheTables" value="${bdd.cache-examples-table}" />
     </bean>
 
@@ -72,20 +72,20 @@
         <property name="pathFinder" ref="pathFinder" />
         <property name="storyLoader" ref="storyLoader" />
         <property name="storyReporterBuilder" ref="storyReporterBuilder" />
-        <property name="parameterAdaptor" ref="parameterAdaptor" />
+        <property name="variableResolver" ref="variableResolver" />
         <property name="compositePaths" value="${bdd.configuration.all-composite-paths}"/>
         <property name="expressionAdaptor" ref="expressionAdaptor" />
-        <property name="storyControls">
-            <bean class="org.jbehave.core.configuration.spring.SpringStoryControls">
-                <property name="dryRun" value="${bdd.configuration.dry-run}" />
-                <property name="resetStateBeforeScenario" value="${bdd.configuration.reset-state-before-scenario}" />
-                <property name="skipStoryIfGivenStoryFailed" value="${bdd.configuration.skip-story-if-given-story-failed}" />
-            </bean>
-        </property>
+        <property name="storyControls" ref="springStoryControls" />
         <property name="parallelStoryExamplesEnabled" value="${bdd.configuration.parallel-story-examples-enabled}"/>
         <property name="examplesTableHeaderSeparator" value="${bdd.configuration.examples-table-header-separator}"/>
         <property name="examplesTableValueSeparator" value="${bdd.configuration.examples-table-value-separator}"/>
         <property name="parameterControls" ref="parameterControls" />
+    </bean>
+
+    <bean id="springStoryControls" class="org.jbehave.core.configuration.spring.SpringStoryControls">
+         <property name="dryRun" value="${bdd.configuration.dry-run}" />
+         <property name="resetStateBeforeScenario" value="${bdd.configuration.reset-state-before-scenario}" />
+         <property name="skipStoryIfGivenStoryFailed" value="${bdd.configuration.skip-story-if-given-story-failed}" />
     </bean>
 
     <bean class="org.vividus.bdd.log.LoggingStepMonitor" />
@@ -108,10 +108,7 @@
         <property name="generateViewAfterBatches" value="${bdd.generate-view-after-batches}" />
     </bean>
 
-    <bean id="parameterAdaptor" class="org.vividus.bdd.steps.ParameterAdaptor">
-        <property name="bddVariableContext" ref="bddVariableContext" />
-    </bean>
-
+    <bean id="variableResolver" class="org.vividus.bdd.steps.VariableResolver" />
     <bean id="parameterControls" class="org.jbehave.core.steps.ParameterControls" />
 
 </beans>

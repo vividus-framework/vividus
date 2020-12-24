@@ -1,0 +1,32 @@
+= State
+
+== Description
+
+Describes element state
+
+== Possible values
+
+[cols="1,1", options="header"]
+|===
+
+|Plain
+|Readable
+
+|VISIBLE
+|visible
+
+|NOT_VISIBLE
+|not visible
+
+|DISABLED
+|disabled
+
+|ENABLED
+|enabled
+
+|SELECTED
+|selected
+
+|NOT_SELECTED
+|not selected
+|===

@@ -38,11 +38,11 @@ import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.model.Location;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith(MockitoExtension.class)
 class DragAndDropStepsTests
@@ -51,7 +51,7 @@ class DragAndDropStepsTests
     private IWebDriverProvider webDriverProvider;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private IBaseValidations baseValidations;
@@ -107,9 +107,9 @@ class DragAndDropStepsTests
 
     private void testDragAndDropToTargetAtLocation(WebElement draggable, Location location, WebElement target)
     {
-        SearchAttributes draggableSearchAttributes = mockDraggableElementSearch(draggable);
-        SearchAttributes targetSearchAttributes = mockTargetElementSearch(target);
-        dragAndDropSteps.dragAndDropToTargetAtLocation(draggableSearchAttributes, location, targetSearchAttributes);
+        Locator draggableLocator = mockDraggableElementSearch(draggable);
+        Locator targetLocator = mockTargetElementSearch(target);
+        dragAndDropSteps.dragAndDropToTargetAtLocation(draggableLocator, location, targetLocator);
     }
 
     @Test
@@ -117,28 +117,28 @@ class DragAndDropStepsTests
     {
         WebElement draggable = mock(WebElement.class);
         WebElement target = mock(WebElement.class);
-        SearchAttributes draggableSearchAttributes = mockDraggableElementSearch(draggable);
-        SearchAttributes targetSearchAttributes = mockTargetElementSearch(target);
-        dragAndDropSteps.simulateDragAndDrop(draggableSearchAttributes, targetSearchAttributes);
+        Locator draggableLocator = mockDraggableElementSearch(draggable);
+        Locator targetLocator = mockTargetElementSearch(target);
+        dragAndDropSteps.simulateDragAndDrop(draggableLocator, targetLocator);
         verify(javascriptActions).executeScriptFromResource(DragAndDropSteps.class, "simulate-drag-and-drop.js",
                 draggable, target);
     }
 
-    private SearchAttributes mockDraggableElementSearch(WebElement draggable)
+    private Locator mockDraggableElementSearch(WebElement draggable)
     {
         return mockElementSearch(draggable, "Draggable element");
     }
 
-    private SearchAttributes mockTargetElementSearch(WebElement target)
+    private Locator mockTargetElementSearch(WebElement target)
     {
         return mockElementSearch(target, "Target element");
     }
 
-    private SearchAttributes mockElementSearch(WebElement element, String assertionDescription)
+    private Locator mockElementSearch(WebElement element, String assertionDescription)
     {
-        SearchAttributes searchAttributes = mock(SearchAttributes.class);
-        lenient().when(baseValidations.assertIfElementExists(assertionDescription, searchAttributes)).thenReturn(
+        Locator locator = mock(Locator.class);
+        lenient().when(baseValidations.assertIfElementExists(assertionDescription, locator)).thenReturn(
                 element);
-        return searchAttributes;
+        return locator;
     }
 }

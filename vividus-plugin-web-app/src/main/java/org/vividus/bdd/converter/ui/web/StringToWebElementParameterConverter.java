@@ -16,26 +16,21 @@
 
 package org.vividus.bdd.converter.ui.web;
 
-import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.SearchActions;
+import org.vividus.ui.action.SearchActions;
 import org.vividus.ui.web.util.ElementUtil;
 
 @Named
-public class StringToWebElementParameterConverter extends AbstractParameterConverter<Supplier<Optional<WebElement>>>
+public class StringToWebElementParameterConverter extends FunctionalParameterConverter<Supplier<Optional<WebElement>>>
 {
-    @Inject private SearchActions searchActions;
-
-    @Override
-    public Supplier<Optional<WebElement>> convertValue(String value, Type type)
+    public StringToWebElementParameterConverter(SearchActions searchActions, ElementUtil elementUtil)
     {
-        return ElementUtil.getElement(value, searchActions);
+        super(value -> elementUtil.getElement(value, searchActions));
     }
 }

@@ -1,0 +1,57 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath(group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: '2.4.1')
+    }
+}
+apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+project.description = 'Vividus to Xray exporter'
+
+configurations.testCompile {
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j18-impl'
+    exclude group: 'ch.qos.logback', module: 'logback-classic'
+}
+
+configurations.all {
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+}
+
+dependencies {
+    implementation project(':vividus-util')
+    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-facade-jira')
+
+    // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
+    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: '2.4.1')
+
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
+
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.14.0')
+    implementation(group: 'org.apache.logging.log4j', name: 'log4j-api')
+    implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
+    implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl')
+
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
+
+    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}
+
+// https://stackoverflow.com/a/62645933/2067574
+configurations {
+    [apiElements, runtimeElements].each {
+        it.outgoing.artifacts.removeIf {
+            it.buildDependencies.getDependencies(null).contains(jar)
+        }
+        it.outgoing.artifact(bootJar)
+    }
+}

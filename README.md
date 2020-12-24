@@ -6,35 +6,20 @@
 [![BrowserStack Status](https://automate.browserstack.com/badge.svg?badge_key=VjFGZEtSdWpWZ3QrNkNBeHphOUpLbWFsL2VLMW15eUxySGEwamovU1ArTT0tLVN3dlROQWpVbnlNWWdsOGFxdDYwRGc9PQ==--4afc60c487e3a7d23e327c7b430c81e34277a35e)](https://automate.browserstack.com/public-build/VjFGZEtSdWpWZ3QrNkNBeHphOUpLbWFsL2VLMW15eUxySGEwamovU1ArTT0tLVN3dlROQWpVbnlNWWdsOGFxdDYwRGc9PQ==--4afc60c487e3a7d23e327c7b430c81e34277a35e)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
-
-## Support/Community
-[**Slack chat**](https://vividus-support.herokuapp.com/)
+This repository contains source code of Vividus tool. If you are looking for the usage guide, please, check out [Vividus Starter](https://github.com/vividus-framework/vividus-starter) and [the official documentation](https://docs.vividus.dev/).
 
 ## Prerequisites
-#### Java
-- The baseline is JDK 11. Latest [JDK 14](https://jdk.java.net/14/) is supported as well
-- Configure `JAVA_HOME` environment variable
-- Update `PATH` environment variable: add `$JAVA_HOME/bin`
-
-#### Eclipse
-- Install [Eclipse IDE 2020-03](https://www.eclipse.org/downloads/packages/release/2020-03/r/eclipse-ide-java-developers)
-- Add [JBehave plugin](https://jbehave.org/eclipse-integration.html)
-
+The baseline is JDK 11. The latest [JDK 15](https://jdk.java.net/15/) is supported as well
 
 ## How to build the project?
 1. Clone main [Vividus project](https://github.com/vividus-framework/vividus.git)
-
     ```shell
     git clone --recursive https://github.com/vividus-framework/vividus.git
     ```
-
-2. Build the project (run commands from the project root):
-
+1. Build the project:
     ```shell
-    ./gradlew build eclipse
+    ./gradlew build
     ```
-
-4. [Import project to Eclipse](https://help.eclipse.org/2020-03/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-importproject.htm)
 
 ## Acknowledgements
 [<img src="https://saucelabs.com/images/logo-saucelabs.png" width="180px" alt="SauceLabs">](https://saucelabs.com)

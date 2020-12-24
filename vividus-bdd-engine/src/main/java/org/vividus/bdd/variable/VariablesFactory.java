@@ -16,10 +16,10 @@
 
 package org.vividus.bdd.variable;
 
-import static java.util.Map.entry;
-
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -49,24 +49,22 @@ public class VariablesFactory implements IVariablesFactory
         this.bddRunContext = bddRunContext;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void init() throws IOException
     {
         globalVariables = propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX);
-        batchVariables = propertyMapper.readValues(BDD_VARIABLES_PREFIX + BATCH_PREFIX, Map.class).entrySet()
-            .stream()
-            .map(e -> entry(BATCH_PREFIX + e.getKey(), e.getValue()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        batchVariables = propertyMapper.readValues(BDD_VARIABLES_PREFIX + BATCH_PREFIX, BATCH_PREFIX::concat, Map.class)
+                .getData().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
     public Variables createVariables()
     {
-        Variables variables = new Variables();
-        Map<String, Object> globalScoped = variables.getVariables(VariableScope.GLOBAL);
-        globalScoped.putAll(globalVariables);
-        globalScoped.putAll(batchVariables.getOrDefault(bddRunContext.getRunningBatchKey(), Map.of()));
-        variables.getVariables(VariableScope.NEXT_BATCHES).putAll(nextBatchesVariables);
-        return variables;
+        Map<String, Object> merged = new HashMap<>(globalVariables);
+        Optional.ofNullable(batchVariables.get(bddRunContext.getRunningBatchKey())).ifPresent(merged::putAll);
+        merged.putAll(nextBatchesVariables);
+        return new Variables(merged);
     }
 
     @Override

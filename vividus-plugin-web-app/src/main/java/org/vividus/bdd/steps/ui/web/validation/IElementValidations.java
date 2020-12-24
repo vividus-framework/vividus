@@ -18,18 +18,12 @@ package org.vividus.bdd.steps.ui.web.validation;
 
 import java.util.List;
 
-import org.hamcrest.Matcher;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.web.Dimension;
 
 public interface IElementValidations
 {
-    boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
-            Matcher<? super List<WebElement>> matcher);
-
     boolean assertIfElementContainsText(WebElement element, String text, boolean isTrue);
-
-    boolean assertIfElementContainsTooltip(WebElement element, String expectedTooltip);
 
     boolean assertAllWebElementsHaveEqualDimension(List<WebElement> elements, Dimension dimension);
 

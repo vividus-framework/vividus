@@ -1,0 +1,292 @@
+= Table Transformers
+
+Vividus provides a set of pre-registered table transformers. Also Vividus plugins may register own table transformers (they are documented in the corresponding plugins sections). It's allowed to define a chain of transformers, in this case the transformers are applied sequentially from top to bottom.
+
+== FROM_LANDSCAPE
+
+`FROM_LANDSCAPE` transformer is designed to transform the table from a landscape form.
+
+.Usage of FROM_LANDSCAPE transformer
+----
+{transformer=FROM_LANDSCAPE}
+|header 1|value 11| ... | value m1|
+...
+|header n|value 1n| .... |value mn|
+----
+
+== FORMATTING
+
+`FORMATTING` transformer formats the table according to the max width of each column. Also this transformer removes the commented lines.
+
+.Usage of FORMATTING transformer
+----
+{transformer=FORMATTING}
+|key|
+|value|
+|-- |value|
+|longValue|
+----
+
+== REPLACING
+
+`REPLACING` transformer replaces all substrings inside table values with replacement according to the given parameters.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`replacing`
+|the sequence of chars to be replaced in the table cells
+
+|`replacement`
+|the replacing sequence of chars
+|===
+
+.Usage of REPLACING transformer
+----
+{transformer=REPLACING, replacing=k, replacement=l}
+|key  |
+|vakue|
+----
+
+== SORTING
+
+`SORTING` transformer is designed to sort the table rows by the values in
+the columns.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`byColumns`
+|column names ordered according to the priority of applying sorting (the column names are joined using `\|`)
+|===
+
+
+.Usage of SORTING transformer
+----
+{transformer=SORTING, byColumns=key|key1}
+|key   |key1  |
+|value3|value4|
+|value1|value2|
+----
+
+== ITERATING
+
+`ITERATING` transformer generates simple one-column table with header `iterator` and numbers as values: 0, 1, 2... .
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`limit`
+|threshold value, so values are generated from 0 to (`limit` - 1)
+|===
+
+.Usage of ITERATING transformer
+----
+{transformer=ITERATING, limit=5}
+----
+
+== FILTERING
+
+`FILTERING` transformer filters the table using the specified parameters.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`byMaxColumns`
+|the maximum number of columns to keep in the resulting table
+
+|`byMaxRows`
+|the maximum number of rows to keep in the resulting table
+
+|`byColumnNames`
+|the names of the columns to keep in the resulting table
+
+|`byRowIndexes`
+|the indexes of the rows to keep in the resulting table
+|===
+
+[IMPORTANT]
+`byMaxColumns` and `byColumnNames` are competing properties and only one can be specified at the same time. The same restriction is applied to the properties `byMaxRows` and `byRowIndexes`.
+
+.Usage of FILTERING transformer with filtering by column names and by max number of rows
+----
+{transformer=FILTERING, byColumnNames=key1;key3, byMaxRows=1}
+|key1  |key2  |key3  |
+|value1|value2|value3|
+|value4|value5|value6|
+----
+
+.Usage of FILTERING transformer with filtering by max number of columns and by row indexes
+----
+{transformer=FILTERING, byMaxColumns=2, byRowIndexes=0;2}
+|key1  |key2  |key3  |
+|value1|value2|value3|
+|value4|value5|value6|
+|value7|value8|value9|
+----
+
+== MERGING
+
+`MERGING` transformer merges several tables into one.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`mergeMode`
+|_rows_ or _columns_
+
+|`tables`
+|paths to examples tables or transformers to merge
+
+|`fillerValue`
+|value to fill new cells while merging tables with different number of rows (in `columns` mode) or columns (in `rows` mode)
+|===
+
+[IMPORTANT]
+====
+* to merge tables with different number of rows or columns use `fillerValue` parameter to fill new cells
+* to merge tables in rows mode they must have the same numbers of columns + the same headers(keys)
+* to merge tables in columns mode they must have the same number of rows + unique headers(keys)
+* number of unique tables paths must be more than 1
+* when using transformers in `tables` parameter it is necessary to escape brackets, commas and semicolon in them: for unary nested- "", for double - "\" etc.
+====
+
+.Usage of MERGING transformer with 'rows' merge mode
+----
+{transformer=MERGING, mergeMode=rows, tables=story/tables/test1.table;story/tables/test2.table}
+----
+
+.Usage of MERGING transformer with 'columns' merge mode
+----
+{transformer=MERGING, mergeMode=columns, tables=story/tables/test1.table;story/tables/test2.table;story/tables/test3.table}
+----
+
+.Usage of MERGING transformer with nested tables
+----
+{transformer=MERGING, mergeMode=columns, fillerValue=null, tables=\{transformer=FROM_EXCEL\, path=TestTemplate.xlsx\, sheet=Data\, addresses=A2\;A3\, column=test1\};\{transformer=FROM_EXCEL\, path=TestTemplate.xlsx\, sheet=Data\, range=B2:B4\, column=test2\}}
+----
+
+.Usage of nested MERGING transformers
+----
+{
+ transformer=MERGING,
+ mergeMode=rows,
+ fillerValue=null,
+ tables=
+ \{
+   transformer=MERGING\,
+   mergeMode=columns\,
+   tables=
+        \\{
+           transformer=FROM_EXCEL\\,
+           path=TestTemplate.xlsx\\,
+           sheet=Data\\,
+           addresses=E6\\,
+           column=text1
+        \\}
+        \;
+        \\{
+           transformer=FROM_EXCEL\\,
+           path=TestTemplate.xlsx\\,
+           sheet=Data\\,
+           addresses=E7\\,
+           column=text2
+        \\}
+ \}
+ ;
+ \{
+   transformer=FROM_EXCEL\,
+   path=TestTemplate.xlsx\,
+   sheet=Data\,
+   addresses=E8\,
+   column=text1
+ \}
+}
+----
+
+.Usage of MERGING transformer with table body
+----
+{transformer=MERGING, mergeMode=columns, tables=/data/some-table.table}
+|column1|
+|value1 |
+----
+
+== JOINING
+
+`JOINING` transformer joins values from rows/columns of the table.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`joinMode`
+|_rows_ or _columns_
+
+|`joinedColumn`
+|[_columns_ mode only] name of the new column with joined values
+
+|`columnsToJoin`
+|[_columns_ mode only] colon-separated list of the columns to join
+|===
+
+[IMPORTANT]
+`JOINING` transformer should be the last while joining columns/rows of the table which created using another transformer.
+
+.Usage of JOINING transformer with 'columns' join mode
+----
+Scenario: Verify JOINING transformer in default columns mode
+Then `<joinedColumn>` is equal to `A B`
+Examples:
+{transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn}
+|column1|column2|
+|A      |B      |
+----
+
+
+.Usage of JOINING transformer with 'columns' join mode and definition of columns to join
+----
+Scenario: Verify JOINING transformer in configured columns mode
+Then `<joinedColumn>` is equal to `B D`
+Examples:
+{transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn, columnsToJoin=column2;column4}
+|column1|column2|column3|column4|
+|A      |B      |C      |D      |
+----
+
+.Usage of JOINING transformer with 'rows' join mode
+----
+Scenario: Verify JOINING transformer in default rows mode
+Then `<column1>` is equal to `A B`
+Then `<column2>` is equal to `C D`
+Examples:
+{transformer=JOINING, joinMode=rows}
+|column1|column2|
+|A      |C      |
+|B      |D      |
+----
+
+.Usage of JOINING transformer in the chain of transformers
+----
+{transformer=MERGING, mergeMode=columns, tables=
+  \{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=A4:A5\, column=header1\, joinValues=true\};
+  \{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=B4:B5\, column=header2\, joinValues=true\}
+}
+{transformer=JOINING, joinMode=columns, joinedColumn=header}
+----
+
+.Usage of JOINING transformer with table body containing path to table file
+----
+{transformer=JOINING, joinMode=columns, joinedColumn=header}
+/test1.table
+----

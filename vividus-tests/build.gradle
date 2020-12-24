@@ -8,13 +8,20 @@ runStories.treatKnownIssuesOnlyAsPassed = true
 dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-applitools')
+    implementation project(':vividus-plugin-aws-dynamodb')
+    implementation project(':vividus-plugin-aws-kinesis')
+    implementation project(':vividus-plugin-aws-lambda')
+    implementation project(':vividus-plugin-aws-s3')
+    implementation project(':vividus-plugin-browserstack')
     implementation project(':vividus-plugin-db')
     implementation project(':vividus-plugin-mobile-app')
     implementation project(':vividus-plugin-mongodb')
     implementation project(':vividus-plugin-csv')
     implementation project(':vividus-plugin-datetime')
+    implementation project(':vividus-plugin-kafka')
     implementation project(':vividus-plugin-html')
     implementation project(':vividus-plugin-rest-api')
+    implementation project(':vividus-plugin-saucelabs')
     implementation project(':vividus-plugin-ssh')
     implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-plugin-web-app-to-rest-api')
@@ -22,5 +29,5 @@ dependencies {
     implementation project(':vividus-plugin-visual')
     implementation project(':vividus-plugin-excel')
 
-    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.14')
+    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.18')
 }

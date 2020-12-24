@@ -28,5 +28,37 @@
     "assertionPattern": "HTTP response body is not present",
     "scenarioPattern": "Verify failure in step .*",
     "storyPattern": "JsonResponseValidationSteps"
+  },
+  "VVD-6": {
+    "type": "Internal",
+    "assertionPattern": ".*",
+    "scenarioPattern": "Known issue should be detected and matched by step pattern with composite step",
+    "storyPattern": "KnownIssues",
+    "stepPattern": "When I use composite step in known-issues"
+  },
+  "VVD-7": {
+    "type": "Internal",
+    "assertionPattern": ".*",
+    "scenarioPattern": "Known issue should should stop scenario if it's marked as fail test case fast",
+    "storyPattern": "KnownIssues",
+    "stepPattern": "Then `vividus` matches.*",
+    "failTestCaseFast": true
+  },
+  "VVD-8": {
+    "type": "Internal",
+    "assertionPattern": ".*",
+    "scenarioPattern": "Known issue should should stop scenario and the rest of the story if it's marked as fail test case and test suite fast",
+    "storyPattern": "KnownIssues",
+    "stepPattern": "Then `vividus` matches.*",
+    "failTestCaseFast": true,
+    "failTestSuiteFast": true
+  },
+  "VVD-9": {
+    "type": "Internal",
+    "assertionPattern": ".*",
+    "scenarioPattern": "Known issue should be detected in sub-steps",
+    "storyPattern": "KnownIssues",
+    "stepPattern": "When I use composite step in known-issues",
+    "failTestCaseFast": true
   }
 }

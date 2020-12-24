@@ -18,49 +18,33 @@ package org.vividus.ui.web.listener;
 
 import java.util.Set;
 
-import com.google.common.eventbus.Subscribe;
-
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
-import org.vividus.selenium.event.WebDriverCreateEvent;
-import org.vividus.selenium.event.WebDriverQuitEvent;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
 
 public class WebUiContextListener extends AbstractWebDriverEventListener
 {
     private final ThreadLocal<String> currentWindowIdentifier = ThreadLocal.withInitial(() -> StringUtils.EMPTY);
 
-    private IWebUiContext webUiContext;
-
-    @Subscribe
-    public void onWebDriverCreate(WebDriverCreateEvent event)
-    {
-        webUiContext.putSearchContext(event.getWebDriver(), () -> onWebDriverCreate(event));
-    }
-
-    @Subscribe
-    public void onWebDriverQuit(@SuppressWarnings("unused") WebDriverQuitEvent event)
-    {
-        webUiContext.clear();
-    }
+    private IUiContext uiContext;
 
     @Override
     public void afterNavigateBack(WebDriver driver)
     {
-        webUiContext.reset();
+        uiContext.reset();
     }
 
     @Override
     public void afterNavigateForward(WebDriver driver)
     {
-        webUiContext.reset();
+        uiContext.reset();
     }
 
     @Override
     public void afterNavigateTo(String url, WebDriver driver)
     {
-        webUiContext.reset();
+        uiContext.reset();
     }
 
     @Override
@@ -75,7 +59,7 @@ public class WebUiContextListener extends AbstractWebDriverEventListener
         if (!windowHandles.contains(currentIdentifier))
         {
             driver.switchTo().window(windowHandles.iterator().next());
-            webUiContext.reset();
+            uiContext.reset();
         }
     }
 
@@ -85,8 +69,8 @@ public class WebUiContextListener extends AbstractWebDriverEventListener
         currentWindowIdentifier.set(windowName);
     }
 
-    public void setWebUiContext(IWebUiContext webUiContext)
+    public void setUiContext(IUiContext uiContext)
     {
-        this.webUiContext = webUiContext;
+        this.uiContext = uiContext;
     }
 }

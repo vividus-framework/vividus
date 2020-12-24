@@ -41,7 +41,7 @@ public class TestInfoProvider implements ITestInfoProvider
                 .map(RunningScenario::getScenario)
                 .map(Scenario::getTitle)
                 .ifPresent(testInfo::setTestCase);
-            testInfo.setTestStep(runningStory.getRunningStep());
+            testInfo.setTestSteps(runningStory.getRunningSteps());
         }
         return testInfo;
     }

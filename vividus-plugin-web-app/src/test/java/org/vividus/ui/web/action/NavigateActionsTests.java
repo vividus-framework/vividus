@@ -67,13 +67,13 @@ class NavigateActionsTests
     private Navigation navigation;
 
     @Mock
-    private IWaitActions waitActions;
+    private IWebWaitActions waitActions;
 
     @Mock
     private ISoftAssert softAssert;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @InjectMocks
     private NavigateActions navigateActions;

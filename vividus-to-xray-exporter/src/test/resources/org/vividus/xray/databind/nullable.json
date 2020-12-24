@@ -1,0 +1,34 @@
+{
+  "fields": {
+    "project": {
+      "key": "project key"
+    },
+    "issuetype": {
+      "name": "Test"
+    },
+    "test-case-type-field": {
+      "value": "Manual"
+    },
+    "summary": "summary",
+    "manual-steps-field": {
+      "steps": [
+        {
+          "index": 1,
+          "fields": {
+            "Action": "action 1",
+            "Data": "data 1",
+            "Expected Result": "result 1"
+          }
+        },
+        {
+          "index": 2,
+          "fields": {
+            "Action": "action 2",
+            "Data": "data 2",
+            "Expected Result": "result 2"
+          }
+        }
+      ]
+    }
+  }
+}

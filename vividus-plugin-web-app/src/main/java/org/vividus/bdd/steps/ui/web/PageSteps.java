@@ -25,33 +25,36 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.ui.web.action.IWaitActions;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
-import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.listener.IWebApplicationListener;
 import org.vividus.util.UriUtils;
 
@@ -63,17 +66,17 @@ public class PageSteps
     private static final String FORWARD_SLASH = "/";
     private static final String PAGE_TITLE = "Page title";
 
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     @Inject private SetContextSteps setContextSteps;
     @Inject private IWebElementActions webElementActions;
     @Inject private INavigateActions navigateActions;
     @Inject private IBaseValidations baseValidations;
     @Inject private WebApplicationConfiguration webApplicationConfiguration;
     @Inject private IWebApplicationListener webApplicationListener;
-    @Inject private IWaitActions waitActions;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private IWebWaitActions waitActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IHighlightingSoftAssert highlightingSoftAssert;
+    @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
     @Inject private IWebDriverManager webDriverManager;
     private IHttpClient httpClient;
 
@@ -87,15 +90,7 @@ public class PageSteps
     @Given("I am on the main application page")
     public void iAmOnTheMainApplicationPage()
     {
-        URI mainApplicationPageUrl = webApplicationConfiguration.getMainApplicationPageUrl();
-        if (mainApplicationPageUrl != null)
-        {
-            loadApplicationPage(mainApplicationPageUrl);
-        }
-        else
-        {
-            throw new IllegalArgumentException("URL of the main application page should be non-blank");
-        }
+        loadApplicationPage(webApplicationConfiguration.getMainApplicationPageUrl());
     }
 
     /**
@@ -108,7 +103,7 @@ public class PageSteps
     @Given("I am on a page with the URL '$pageURL'")
     public void iAmOnPage(String pageURL)
     {
-        webUiContext.reset();
+        uiContext.reset();
         navigateActions.loadPage(pageURL);
     }
 
@@ -133,11 +128,11 @@ public class PageSteps
         if (url.getPath() != null)
         {
             String expectedRelativeUrl = relativeURL.isEmpty() ? FORWARD_SLASH : relativeURL;
-            highlightingSoftAssert.assertEquals("Page has correct relative URL",
+            descriptiveSoftAssert.assertEquals("Page has correct relative URL",
                     UriUtils.buildNewUrl(getWebDriver().getCurrentUrl(), expectedRelativeUrl), url);
             return;
         }
-        highlightingSoftAssert.recordFailedAssertion("URL path component is null");
+        descriptiveSoftAssert.recordFailedAssertion("URL path component is null");
     }
 
     /**
@@ -156,7 +151,7 @@ public class PageSteps
     public void checkPageHost(String host)
     {
         URI url = UriUtils.createUri(getWebDriver().getCurrentUrl());
-        highlightingSoftAssert.assertEquals("Page has correct host", host, url.getHost());
+        descriptiveSoftAssert.assertEquals("Page has correct host", host, url.getHost());
     }
 
     /**
@@ -170,7 +165,7 @@ public class PageSteps
     @When("I refresh the page")
     public void refreshPage()
     {
-        webUiContext.reset();
+        uiContext.reset();
         navigateActions.refresh();
     }
 
@@ -181,7 +176,9 @@ public class PageSteps
     @When("I open URL `$pageUrl` in new window")
     public void openPageUrlInNewWindow(String pageUrl)
     {
-        javascriptActions.openPageUrlInNewWindow(pageUrl);
+        javascriptActions.openNewWindow();
+        setContextSteps.switchingToWindow();
+        iAmOnPage(pageUrl);
     }
 
     /**
@@ -198,7 +195,7 @@ public class PageSteps
     @Then("the page load time should be less than '$pageLoadTimeThreshold' milliseconds")
     public void thenTheLoadTimeShouldBeLessThan(long pageLoadTimeThreshold)
     {
-        highlightingSoftAssert.assertThat("The page load time is less than load time threshold.",
+        descriptiveSoftAssert.assertThat("The page load time is less than load time threshold.",
                 String.format("The page load time is less than '%s'", pageLoadTimeThreshold),
                 navigateActions.getActualPageLoadTimeInMs(), lessThan(pageLoadTimeThreshold));
     }
@@ -213,7 +210,7 @@ public class PageSteps
     public void checkUriIsLoaded(String url)
     {
         String actualUrl = getWebDriver().getCurrentUrl();
-        highlightingSoftAssert.assertEquals("Page has correct URL", decodeUrl(url), decodeUrl(actualUrl));
+        descriptiveSoftAssert.assertEquals("Page has correct URL", decodeUrl(url), decodeUrl(actualUrl));
     }
 
     private String decodeUrl(String url)
@@ -228,7 +225,11 @@ public class PageSteps
     @Then("the page with the URL containing '$URLpart' is loaded")
     public void checkUrlPartIsLoaded(String urlPart)
     {
-        baseValidations.assertPageWithURLPartIsLoaded(urlPart);
+        URI actualUrl = UriUtils.createUri(getWebDriver().getCurrentUrl());
+        String actualDecodedUrl = actualUrl.toString();
+        descriptiveSoftAssert.assertThat(String.format("Page with the URLpart '%s' is loaded", urlPart),
+                String.format("Page url '%1$s' contains part '%2$s'", actualDecodedUrl, urlPart), actualDecodedUrl,
+                Matchers.containsString(urlPart));
     }
 
     /**
@@ -246,13 +247,13 @@ public class PageSteps
      * @param locator A locator to locate element
      */
     @Then("page is scrolled to element located `$locator`")
-    public void isPageScrolledToAnElement(SearchAttributes locator)
+    public void isPageScrolledToAnElement(Locator locator)
     {
         WebElement element = baseValidations.assertIfElementExists("Element to verify position", locator);
         if (element != null)
         {
             boolean pageVisibleAreaScrolledToElement = webElementActions.isPageVisibleAreaScrolledToElement(element);
-            highlightingSoftAssert.assertTrue(String.format("The page is scrolled to an element with located by %s",
+            descriptiveSoftAssert.assertTrue(String.format("The page is scrolled to an element with located by %s",
                 locator), pageVisibleAreaScrolledToElement);
         }
     }
@@ -312,18 +313,9 @@ public class PageSteps
                 break;
             }
         }
-        highlightingSoftAssert.assertThat("Current window has been closed",
+        descriptiveSoftAssert.assertThat("Current window has been closed",
                 String.format("Current window '%s' has been closed", currentWindow), driver.getWindowHandles(),
                 not(contains(currentWindow)));
-    }
-
-    /**
-     * Loads the previous URL in the browser history list
-     */
-    @When("I navigate back")
-    public void navigateBack()
-    {
-        webDriverProvider.get().navigate().back();
     }
 
     /**
@@ -336,7 +328,28 @@ public class PageSteps
     @Then("the page title $comparisonRule '$text'")
     public void assertPageTitle(StringComparisonRule comparisonRule, String text)
     {
-        highlightingSoftAssert.assertThat(PAGE_TITLE, getWebDriver().getTitle(), comparisonRule.createMatcher(text));
+        descriptiveSoftAssert.assertThat(PAGE_TITLE, getWebDriver().getTitle(), comparisonRule.createMatcher(text));
+    }
+
+    /**
+     * Stop the loading of page using javascript method:
+     * <code>window.stop();</code>
+     */
+    @When("I stop page loading")
+    public void stopPageLoading()
+    {
+        try
+        {
+            Map<String, String> pageStates = javascriptActions.stopPageLoading();
+            LOGGER.atInfo()
+                  .addArgument(() -> pageStates.get("before"))
+                  .addArgument(() -> pageStates.get("after"))
+                  .log("Page ready state before stop: {}, after stop:{}");
+        }
+        catch (JavascriptException javascriptException)
+        {
+            descriptiveSoftAssert.recordFailedAssertion("Unable to stop page loading", javascriptException);
+        }
     }
 
     /**

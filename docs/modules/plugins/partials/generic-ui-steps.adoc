@@ -1,0 +1,399 @@
+=== Verify elements number
+
+==== *_Info_*
+
+Verifies if the number of elements located by locator matches desired number
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then number of elements found by `$locator` is $comparisonRule `$quantity`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
+. `$quantity` - expected number of elements
+
+==== *_Usage_*
+
+.VerifyNumber.story
+[source,gherkin]
+----
+Scenario: Step verification 'Then number of elements found by `$locator` is $comparisonRule `$quantity`'
+Then number of elements found by `tagName(img)` is equal to `5`
+----
+
+=== Verify elements state
+
+==== *_Info_*
+
+Verifies if the number of elements located by locator matches number condition and all of them are in desired state
+
+[IMPORTANT]
+
+If you describe number condition as equal to 5 in case if there are 10 elements by this locator and only 5 of them in the desired state. You will get two failed assertions.
+The first one about number condition violation. The second one about state check failure.
+
+[WARNING]
+In case when locator's visibility and checked state are equal (For an example :i and NOT_VISIBLE) exception will be thrown. In such cases please use step: <<_verify_elements_number>>
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then number of $state elements found by `$locator` is $comparisonRule `$quantity`
+----
+
+==== *_Parameters_*
+
+. `$state` - xref:parameters:state.adoc[State]
+. `$locator` - <<_locator>>
+. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
+. `$quantity` - expected number of elements
+
+==== *_Usage_*
+
+.VerifyState.story
+[source,gherkin]
+----
+Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
+Given I am on a page with the URL '${vividus-test-site-url}'
+Then number of VISIBLE elements found by `tagName(img)` is = `1`
+----
+
+
+=== Wait for element appearance
+
+==== *_Info_*
+
+Waits for appearance of an element by the locator
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I wait until element located `$locator` appears
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Wait.story
+[source,gherkin]
+----
+Scenario: Wait for element appearance
+When I wait until element located `name(welcome-image)` appears
+----
+
+
+=== Wait for element disappearance
+
+==== *_Info_*
+
+Waits for disappearance of an element by the locator
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I wait until element located `$locator` disappears
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Wait.story
+[source,gherkin]
+----
+Scenario: Wait for element disappearance
+When I wait until element located `name(welcome-image)` disappears
+----
+
+=== Save text of context element
+
+==== *_Info_*
+
+Saves text of a context element into a variable
+
+[WARNING]
+Step will throw an error if the context element is not set
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I save text of context element to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - name of a variable
+
+==== *_Usage_*
+
+.SaveText.story
+[source,gherkin]
+----
+Scenario: Save text of context element
+When I change context to element located `By.id(username)`
+When I save text of context element to SCENARIO variable `username`
+----
+
+=== Save attribute value of context element
+
+==== *_Info_*
+
+Saves attribute value of a context element into a variable
+
+[WARNING]
+Step will throw an error if the context element is not set
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I save `$attributeName` attribute value of context element to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$attributeName` - name of an element's attribute
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - name of a variable
+
+==== *_Usage_*
+
+.SaveAttributeValue.story
+[source,gherkin]
+----
+Scenario: Save attribute value of context element
+When I change context to element located `By.id(username)`
+When I save `innerText` attribute value of context element to SCENARIO variable `username`
+----
+
+=== Save attribute value of element
+
+==== *_Info_*
+
+Saves attribute value of an element located by locator into a variable
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I save `$attributeName` attribute value of element located `$locator` to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$attributeName` - name of an element's attribute
+. `$locator` - <<_locator>>
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - name of a variable
+
+==== *_Usage_*
+
+.SaveAttributeValue.story
+[source,gherkin]
+----
+Scenario: Save attribute value of element
+When I save `innerText` attribute value of element located `By.id(username)` to SCENARIO variable `username`
+----
+
+=== Save number of elements
+
+==== *_Info_*
+
+Saves number of elements located by locator into a variable
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I save number of elements located `$locator` to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - name of a variable
+
+==== *_Usage_*
+
+.SaveNumberOfElements.story
+[source,gherkin]
+----
+Scenario: Save number of elements
+When I save number of elements located `tagName(a)` to scenario variable `numberOfLinks`
+Then `${numberOfLinks}` is equal to `1`
+----
+
+=== Change context
+
+==== *_Info_*
+
+Changes the context to an element located by locator for limiting area of subsequent UI interactions
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I change context to element located `$locator`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.ChangeContext.story
+[source,gherkin]
+----
+Scenario: Change context
+Then number of elements found by `By.xpath(html)` is equal to `1`
+When I change context to element located `By.xpath(//body)`
+Then number of elements found by `By.xpath(html)` is equal to `0`
+----
+
+=== Reset context
+
+==== *_Info_*
+
+Resets the context
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I reset context
+----
+
+==== *_Usage_*
+
+.ResetContext.story
+[source,gherkin]
+----
+Scenario: Reset context
+Then number of elements found by `By.xpath(html)` is equal to `1`
+When I change context to element located `By.xpath(//body)`
+Then number of elements found by `By.xpath(html)` is equal to `0`
+When I reset context
+Then number of elements found by `By.xpath(html)` is equal to `1`
+----
+
+=== Element exists for duration
+
+==== *_Info_*
+
+Verifies that an element located by locator exists for given duration
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then element located `$locator` exists for `$duration` duration
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$duration` - duration in {iso-date-format-link} format
+
+==== *_Usage_*
+
+.ElementExistence.story
+[source,gherkin]
+----
+Scenario: Element should exists for 5 second
+Then element located 'id(banner)' exists for 'PT5S' duration
+----
+
+=== Navigate back
+
+==== *_Info_*
+
+Navigates back to the previous view
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I navigate back
+----
+
+==== *_Usage_*
+
+.Navigate back
+[source,gherkin]
+----
+Scenario: Navigate back
+Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `1`
+When I navigate back
+Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `0`
+----
+
+=== Verify elements order
+
+==== *_Info_*
+
+Gets a collection of elements by locator and checks that they are sorted by their text in the specified order. The collection should have more than 1 element with not empty text, otherwise the step fails.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then elements located `$locator` are sorted by text in $sortingOrder order
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$sortingOrder`
+
+[cols="2,2,2", options="header"]
+|===
+
+|Plain
+|Readable
+|Description
+
+|ASCENDING
+|ascending
+|Verify that elements are sorted in https://www.computerhope.com/jargon/a/ascendin.htm[ascending] order
+
+|DESCENDING
+|descending
+|Verify that elements are sorted in https://www.computerhope.com/jargon/d/descorde.htm[descending] order
+
+|CASE_INSENSITIVE_ASCENDING
+|case-insensitive ascending
+|Verify that elements are sorted in https://www.yourdictionary.com/case-insensitive[case-insensitive] https://www.computerhope.com/jargon/a/ascendin.htm[ascending] order
+
+|CASE_INSENSITIVE_DESCENDING
+|case-insensitive descending
+|Verify that elements are sorted in https://www.yourdictionary.com/case-insensitive[case-insensitive] https://www.computerhope.com/jargon/d/descorde.htm[descending] order
+
+|===
+
+==== *_Usage_*
+
+.OrderVerification.story
+[source,gherkin]
+----
+Scenario: Check items are sorted
+Given I am on a page with the URL 'https://grocery.by'
+When I click on element located `By.id(a-z)`
+Then elements located `By.xpath(//span[@id='item-to-purchase'])` are sorted by text in ascending order
+----

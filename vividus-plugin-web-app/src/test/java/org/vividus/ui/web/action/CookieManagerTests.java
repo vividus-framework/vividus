@@ -24,9 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +55,7 @@ class CookieManagerTests
     private static final String DOMAIN = "https://www.domain.com";
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private IWebDriverProvider webDriverProvider;
@@ -84,14 +82,6 @@ class CookieManagerTests
     {
         configureMockedWebDriver();
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, DOMAIN);
-        verify(options).addCookie(new Cookie(COOKIE_NAME, ZERO));
-    }
-
-    @Test
-    void testAddCookieUrl() throws MalformedURLException
-    {
-        configureMockedWebDriver();
-        cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, new URL(DOMAIN));
         verify(options).addCookie(new Cookie(COOKIE_NAME, ZERO));
     }
 

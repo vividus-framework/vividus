@@ -22,8 +22,11 @@ import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -108,6 +111,23 @@ public final class ResourceUtils
         {
             return Paths.get(resourceUrl.getFile()).toFile();
         }
+    }
+
+    /**
+     * Creates a temporary file with the specified content
+     * @param prefix the prefix string to be used in generating the file's name
+     * @param suffix the suffix string to be used in generating the file's name
+     * @param data the content to write to the file
+     * @return Path the path to the newly created file
+     * @throws IOException IOException if an I/O exception of some sort has occurred
+     */
+    public static Path createTempFile(String prefix, String suffix, String data) throws IOException
+    {
+        Path tempFilePath = Files.createTempFile(prefix, suffix);
+        File tempFile = tempFilePath.toFile();
+        FileUtils.writeStringToFile(tempFile, data, StandardCharsets.UTF_8);
+        tempFile.deleteOnExit();
+        return tempFilePath;
     }
 
     private static String ensureRootPath(String resourceName)

@@ -76,13 +76,25 @@ Then a link with the text 'CSS: Cascading Style Sheets' and URL '/en-US/docs/Web
 When I change context to an element by By.cssSelector(.page-header)
 Then a link with the text 'CSS: Cascading Style Sheets' and URL '/en-US/docs/Web/CSS' does not exist
 
-Scenario: Step verification Then a link with the URL '$URL' and tooltip '$tooltip' does not exist
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP'
-When I change context to an element by By.xpath(//div[@class='quick-links'])
-When I click on element located `By.xpath(//*[text()='HTTP headers'])`
-Then a link with the URL '/en-US/docs/Web/HTTP/Headers/Accept' and tooltip 'The Accept request HTTP header advertises which content types, expressed as MIME types, the client is able to understand. Using content negotiation, the server then selects one of the proposals, uses it and informs the client of its choice with the Content-Type response header. Browsers set adequate values for this header depending on the context where the request is done: when fetching a CSS stylesheet a different value is set for the request than when fetching an image, video or a script.' exists
-When I click on element located `By.xpath(//*[text()='HTTP headers'])`
-Then a link with the URL '/en-US/docs/Web/HTTP/Headers/Accept' and tooltip 'The Accept request HTTP header advertises which content types, expressed as MIME types, the client is able to understand. Using content negotiation, the server then selects one of the proposals, uses it and informs the client of its choice with the Content-Type response header. Browsers set adequate values for this header depending on the context where the request is done: when fetching a CSS stylesheet a different value is set for the request than when fetching an image, video or a script.' does not exist
+Scenario: Step verification: Then a link with the URL '$URL' and tooltip '$tooltip' exists
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+Then a link with the URL '#' and tooltip 'Link title' exists
+
+Scenario: Step verification: Then a [$state] link with the text '$text' and tooltip '$tooltip' exists
+Then a [VISIBLE] link with the text 'Link with tooltip' and tooltip 'Link title' exists
+
+Scenario: Step verification: Then a [$state] link with the URL '$URL' and tooltip '$tooltip' exists
+Then a [VISIBLE] link with the URL '#' and tooltip 'Link title' exists
+
+Scenario: Step verification: Then a link with the tooltip '$tooltip' exists
+Then a link with the tooltip 'Link title' exists
+
+Scenario: Step verification: Then a [$state] link with the tooltip '$tooltip' exists
+Then a [VISIBLE] link with the tooltip 'Link title' exists
+
+Scenario: Step verification: Then a link with the URL '$URL' and tooltip '$tooltip' does not exist
+When I click on element located `By.xpath(//a[@title='Link title'])`
+Then a link with the URL '#' and tooltip 'Link title' does not exist
 
 Scenario: Step verification Then a link with the text '$text' and URL '$URL' and tooltip '$tooltip' does not exist
 Given I am on a page with the URL 'https://www.w3schools.com/html/tryit.asp?filename=tryhtml_links_title'
@@ -90,28 +102,6 @@ When I switch to a frame with the attribute 'id'='iframeResult'
 Then a link with the text 'Visit our HTML Tutorial' and tooltip 'Go to W3Schools HTML section' exists
 When I click on a link with the text 'Visit our HTML Tutorial' and URL 'https://www.w3schools.com/html/'
 Then a link with the text 'Visit our HTML Tutorial' and URL 'https://www.w3schools.com/html/' and tooltip 'Go to W3Schools HTML section' does not exist
-
-Scenario: Step verification Then a link with the text '$text' and tooltip '$tooltip' exists
-Given I am on a page with the URL 'https://www.w3schools.com/html/tryit.asp?filename=tryhtml_links_title'
-When I switch to a frame with the attribute 'id'='iframeResult'
-Then a link with the text 'Visit our HTML Tutorial' and tooltip 'Go to W3Schools HTML section' exists
-
-Scenario: Step verification Then a [$state] link with the text '$text' and tooltip '$tooltip' exists
-Given I am on a page with the URL 'https://www.w3schools.com/html/tryit.asp?filename=tryhtml_links_title'
-When I switch to a frame with the attribute 'id'='iframeResult'
-Then a [VISIBLE] link with the text 'Visit our HTML Tutorial' and tooltip 'Go to W3Schools HTML section' exists
-
-Scenario: Step verification Then a link with the URL '$URL' and tooltip '$tooltip' exists
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP'
-When I change context to an element by By.xpath(//div[@class='quick-links'])
-When I click on element located `By.xpath(//*[text()='HTTP headers'])`
-Then a link with the URL '/en-US/docs/Web/HTTP/Headers/Accept' and tooltip 'The Accept request HTTP header advertises which content types, expressed as MIME types, the client is able to understand. Using content negotiation, the server then selects one of the proposals, uses it and informs the client of its choice with the Content-Type response header. Browsers set adequate values for this header depending on the context where the request is done: when fetching a CSS stylesheet a different value is set for the request than when fetching an image, video or a script.' exists
-
-Scenario: Step verification Then a [$state] link with the URL '$URL' and tooltip '$tooltip' exists
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP'
-When I change context to an element by By.xpath(//div[@class='quick-links'])
-When I click on element located `By.xpath(//*[text()='HTTP headers'])`
-Then a [VISIBLE] link with the URL '/en-US/docs/Web/HTTP/Headers/Accept' and tooltip 'The Accept request HTTP header advertises which content types, expressed as MIME types, the client is able to understand. Using content negotiation, the server then selects one of the proposals, uses it and informs the client of its choice with the Content-Type response header. Browsers set adequate values for this header depending on the context where the request is done: when fetching a CSS stylesheet a different value is set for the request than when fetching an image, video or a script.' exists
 
 Scenario: Step verification Then a link with the text '$text' and URL '$URL' and tooltip '$tooltip' exists
 Given I am on a page with the URL 'https://www.w3schools.com/html/tryit.asp?filename=tryhtml_links_title'
@@ -142,11 +132,3 @@ Then a [VISIBLE] link with the text 'Link to an element' and URL '#ElementId' ex
 Scenario: Step verification Then a link tag with href '$href' exists
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/'
 Then a link tag with href 'https://developer.mozilla.org/en-US/search/xml' exists
-
-Scenario: Step verification Then a link with the tooltip '$tooltip' exists
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expect'
-Then a link with the tooltip 'The Connection general header controls whether or not the network connection stays open after the current transaction finishes. If the value sent is keep-alive, the connection is persistent and not closed, allowing for subsequent requests to the same server to be done.' exists
-
-Scenario: Step verification Then a [$state] link with the tooltip '$tooltip' exists
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expect'
-Then a [VISIBLE] link with the tooltip 'The Connection general header controls whether or not the network connection stays open after the current transaction finishes. If the value sent is keep-alive, the connection is persistent and not closed, allowing for subsequent requests to the same server to be done.' exists

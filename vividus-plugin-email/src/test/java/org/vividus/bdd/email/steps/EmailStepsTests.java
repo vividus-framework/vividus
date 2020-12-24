@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,6 +55,7 @@ import org.vividus.bdd.email.service.EmailFetchService;
 import org.vividus.bdd.email.service.ImapFetchService.EmailFetchServiceException;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.property.PropertyMappedCollection;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class EmailStepsTests
@@ -83,7 +83,8 @@ class EmailStepsTests
     @BeforeEach
     void init()
     {
-        Map<String, EmailServerConfiguration> configs = Map.of(CONFIG_KEY, configuration);
+        PropertyMappedCollection<EmailServerConfiguration> configs = new PropertyMappedCollection<>(
+                Map.of(CONFIG_KEY, configuration));
         steps = new EmailSteps(configs, messageFetchService, bddVariableContext, softAssert);
     }
 
@@ -94,7 +95,7 @@ class EmailStepsTests
     }
 
     @Test
-    void testSaveMessageContent() throws MessagingException, IOException, EmailFetchServiceException
+    void testSaveMessageContent() throws MessagingException, EmailFetchServiceException
     {
         String text = "text";
         String contentType = "TEXT/PLAIN; charset=utf-8";
@@ -115,7 +116,7 @@ class EmailStepsTests
     class NegativeTests
     {
         @Test
-        void testNoMessagesFoundByGivenFilters() throws MessagingException, IOException, EmailFetchServiceException
+        void testNoMessagesFoundByGivenFilters() throws MessagingException, EmailFetchServiceException
         {
             when(messageFetchService.fetch(List.of(filter), configuration)).thenReturn(List.of());
 
@@ -127,8 +128,7 @@ class EmailStepsTests
         }
 
         @Test
-        void testMoreThanOneMessageFoundByGivenFilters()
-                throws MessagingException, IOException, EmailFetchServiceException
+        void testMoreThanOneMessageFoundByGivenFilters() throws MessagingException, EmailFetchServiceException
         {
             MessageMock messageMock = MessageMockFactory.create();
             EmailMessage emailMessage = new EmailMessage(messageMock.getMock(), List.of());
@@ -157,7 +157,7 @@ class EmailStepsTests
         }
 
         @Test
-        void testOneMessageFoundByGivenFilters() throws MessagingException, IOException, EmailFetchServiceException
+        void testOneMessageFoundByGivenFilters() throws MessagingException, EmailFetchServiceException
         {
             EmailMessage emailMessage = new EmailMessage(null, List.of());
             when(messageFetchService.fetch(List.of(filter), configuration)).thenReturn(List.of(emailMessage));

@@ -22,8 +22,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -41,15 +44,14 @@ class ExecutableStepsTests
 {
     private static final String KEY = "key";
     private static final String ITERATION_VARIABLE = "iterationVariable";
+    private static final String ONE = "1";
+    private static final String THREE = "3";
+    private static final String X = "x";
+    private static final String Y = "y";
 
-    @Mock
-    private IBddVariableContext bddVariableContext;
-
-    @Mock
-    private SubSteps subSteps;
-
-    @InjectMocks
-    private ExecutableSteps executableSteps;
+    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private SubSteps subSteps;
+    @InjectMocks private ExecutableSteps executableSteps;
 
     @Test
     void testTrue()
@@ -78,6 +80,55 @@ class ExecutableStepsTests
         when(bddVariableContext.getVariable(KEY)).thenReturn("value");
         executableSteps.ifVariableNotSetPerformSteps(KEY, subSteps);
         verifyNoInteractions(subSteps);
+    }
+
+    @Test
+    void shouldPerformTheStepsAndStopWhenSimpleVariableValueMatches()
+    {
+        when(bddVariableContext.getVariable(KEY)).thenReturn(null).thenReturn(ONE).thenReturn(2).thenReturn(THREE);
+        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, 3, subSteps);
+        verify(subSteps, times(3)).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldPerformTheStepsAndStopWhenMapVariableValueMatches()
+    {
+        Map<String, String> expectedValue = Map.of(X, Y);
+        when(bddVariableContext.getVariable(KEY)).thenReturn(List.of(expectedValue)).thenReturn(List.of());
+        executableSteps.executeStepsWhile(3, KEY, ComparisonRule.EQUAL_TO, List.of(expectedValue), subSteps);
+        verify(subSteps, times(1)).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldPerformTheStepsAndStopWhenLimitReached()
+    {
+        executableSteps.executeStepsWhile(10, KEY, ComparisonRule.LESS_THAN, 1, subSteps);
+        verify(subSteps, times(10)).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldPerformTheStepsWithPollingIntervalAndStopWhenSimpleVariableValueMatches()
+    {
+        when(bddVariableContext.getVariable(KEY)).thenReturn(null).thenReturn(ONE).thenReturn(2).thenReturn(THREE);
+        executableSteps.executeStepsWithPollingInterval(Duration.ZERO, 10, KEY, ComparisonRule.LESS_THAN, 3, subSteps);
+        verify(subSteps, times(3)).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldPerformTheStepsWithPollingIntervalAndStopWhenMapVariableValueMatches()
+    {
+        Map<String, String> expectedValue = Map.of(X, Y);
+        when(bddVariableContext.getVariable(KEY)).thenReturn(List.of(expectedValue)).thenReturn(List.of());
+        executableSteps.executeStepsWithPollingInterval(Duration.ZERO, 3, KEY, ComparisonRule.EQUAL_TO,
+                List.of(expectedValue), subSteps);
+        verify(subSteps, times(1)).execute(Optional.empty());
+    }
+
+    @Test
+    void shouldPerformTheStepsWithPollingIntervalAndStopWhenLimitReached()
+    {
+        executableSteps.executeStepsWithPollingInterval(Duration.ZERO, 10, KEY, ComparisonRule.LESS_THAN, 1, subSteps);
+        verify(subSteps, times(10)).execute(Optional.empty());
     }
 
     @Test

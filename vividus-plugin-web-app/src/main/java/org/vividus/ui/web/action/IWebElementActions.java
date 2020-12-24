@@ -19,9 +19,9 @@ package org.vividus.ui.web.action;
 import java.util.List;
 
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.ElementActions;
 
-public interface IWebElementActions
+public interface IWebElementActions extends ElementActions
 {
     /**
      * Gets css value and removes all occurrences of quotes and apostrophes
@@ -37,13 +37,6 @@ public interface IWebElementActions
      * @return the text from the css 'content' value of the chosen element or empty string if no content found
      */
     String getPseudoElementContent(WebElement element);
-
-    /**
-     * Enters text in any element
-     * @param locator to locate element
-     * @param text Text to type
-     */
-    void typeText(SearchAttributes locator, String text);
 
     /**
      * Enters text in any element without clearing its previous content
@@ -75,10 +68,9 @@ public interface IWebElementActions
     String getPageText();
 
     /**
-     * Gets the text content from element
-     * @param element Any element to get text from
-     * @return the inner text from element
-     * or empty string if no content found
+     * Checks that the content of the element is editable
+     * @param element element to check
+     * @return true - if the element's content is editable or false - if it's not
      */
-    String getElementText(WebElement element);
+    boolean isElementContenteditable(WebElement element);
 }

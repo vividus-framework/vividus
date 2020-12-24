@@ -171,3 +171,43 @@ Examples:
 
 Scenario: Verify variable from nested transformers scenario
 Then `${table-row-number}` is equal to `3`
+
+Scenario: Verify processing of tables with table separators in cells by table transformers
+Meta:
+    @issueId 951
+Then `<col1>` is equal to `A | B`
+Then `<col2>` is equal to `C ! D`
+Examples:
+{transformer=MERGING, mergeMode=columns, tables=
+    \{transformer=FROM_EXCEL\, path=/data/complex-data.xlsx\, sheet=with separators\, range=A1:A2\, column=col1\};
+    \{transformer=FROM_EXCEL\, path=/data/complex-data.xlsx\, sheet=with separators\, range=B1:B2\, column=col2\}
+}
+{transformer=FILTERING, column.col1=.+}
+
+Scenario: Verify DISTINCTING transformer
+Meta:
+    @requirementId 992
+Then `<column1>` is equal to `a a b b`
+Then `<column3>` is equal to `a b a b`
+Examples:
+{transformer=DISTINCTING, byColumnNames=column1;column3}
+{transformer=JOINING, joinMode=rows}
+|column1|column2|column3|
+|a      |x      |a      |
+|a      |y      |a      |
+|a      |x      |b      |
+|a      |y      |b      |
+|b      |x      |a      |
+|b      |y      |a      |
+|b      |x      |b      |
+|b      |y      |b      |
+
+Scenario: Verify possibility to use the range of ALL cells
+Meta:
+    @requirementId 919
+Then `<date1>` is equal to `line1 line4`
+Then `<date2>` is equal to `line2 line5`
+Then `<date3>` is equal to `line3 line6`
+Examples:
+{transformer=FROM_EXCEL, path=/data/complex-data.xlsx, sheet=range-all-cells, range=B2:D4}
+{transformer=JOINING, joinMode=rows}

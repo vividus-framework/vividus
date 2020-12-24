@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
 @Named
-public class FormatDateToExpressionProcessor implements IExpressionProcessor
+public class FormatDateToExpressionProcessor implements IExpressionProcessor<String>
 {
     private static final Pattern FORMAT_TO_PATTERN = Pattern
             .compile("^formatDateTo\\((.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?)\\)$", Pattern.CASE_INSENSITIVE);

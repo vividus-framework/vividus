@@ -3,18 +3,18 @@ project.description = 'Vividus plugin for Applitools support'
 dependencies {
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-extension-visual-testing')
+    implementation project(':vividus-extension-selenium')
     implementation project(':vividus-http-client')
     implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
 
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
-    implementation(group: 'com.applitools', name: 'eyes-images-java3', version: '3.171.0')
+    implementation(group: 'com.applitools', name: 'eyes-images-java3', version: '3.189.0')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
 }

@@ -19,7 +19,7 @@ package org.vividus.selenium.screenshot;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
@@ -28,10 +28,10 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Adj
     private static final long serialVersionUID = 278174510416744242L;
 
     private final transient WebElement scrollableElement;
-    private final transient IJavascriptActions javascriptActions;
+    private final transient WebJavascriptActions javascriptActions;
 
     public AdjustingScrollableElementAwareViewportPastingDecorator(ShootingStrategy strategy,
-            WebElement scrollableElement, IJavascriptActions javascriptActions, ScreenshotConfiguration configuration)
+            WebElement scrollableElement, WebJavascriptActions javascriptActions, ScreenshotConfiguration configuration)
     {
         super(strategy, configuration.getWebHeaderToCut(), configuration.getWebFooterToCut(), "arguments[1]");
         this.javascriptActions = javascriptActions;

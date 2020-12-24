@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.testcontext.SimpleTestContext;
+import org.vividus.testcontext.TestContext;
 
 class BddRunContextTests
 {
@@ -57,11 +60,10 @@ class BddRunContextTests
     @Test
     void testRemoveRunningStory()
     {
-        bddRunContext.setTestContext(new SimpleTestContext());
-        RunningStory runningStory = new RunningStory();
-        bddRunContext.putRunningStory(runningStory, false);
+        TestContext testContext = mock(TestContext.class);
+        bddRunContext.setTestContext(testContext);
         bddRunContext.removeRunningStory(false);
-        assertNull(bddRunContext.getRunningStory());
+        verifyNoInteractions(testContext);
     }
 
     @Test

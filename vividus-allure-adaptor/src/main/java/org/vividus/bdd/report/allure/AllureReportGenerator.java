@@ -23,28 +23,40 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.report.allure.model.AllureCategory;
+import org.vividus.reporter.environment.EnvironmentConfigurer;
+import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.IPropertyMapper;
 
 import io.qameta.allure.ConfigurationBuilder;
 import io.qameta.allure.Constants;
 import io.qameta.allure.Extension;
+import io.qameta.allure.PluginConfiguration;
 import io.qameta.allure.ReportGenerator;
+import io.qameta.allure.behaviors.BehaviorsPlugin;
 import io.qameta.allure.core.Configuration;
+import io.qameta.allure.core.Plugin;
 import io.qameta.allure.duration.DurationTrendPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
 import io.qameta.allure.entity.Status;
 import io.qameta.allure.executor.ExecutorPlugin;
 import io.qameta.allure.history.HistoryTrendPlugin;
+import io.qameta.allure.plugin.DefaultPlugin;
 import io.qameta.allure.summary.SummaryPlugin;
 import io.qameta.allure.util.PropertiesUtils;
 
@@ -105,6 +117,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
         wrap(() ->
         {
             createDirectories(resultsDirectory, reportDirectory, historyDirectory);
+            writeEnvironmentProperties();
             writeCategoriesInfo();
             writeExecutorInfo();
             copyDirectory(historyDirectory, resolveHistoryDir(resultsDirectory));
@@ -138,6 +151,18 @@ public class AllureReportGenerator implements IAllureReportGenerator
         createJsonFileInResultsDirectory("executor.json", executorInfo);
     }
 
+    private void writeEnvironmentProperties() throws IOException
+    {
+        Map<String, String> testExecutionProperties = new LinkedHashMap<>();
+        Map<PropertyCategory, Map<String, String>> environmentConfig = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION;
+        testExecutionProperties.putAll(environmentConfig.get(PropertyCategory.CONFIGURATION));
+        testExecutionProperties.putAll(environmentConfig.get(PropertyCategory.PROFILE));
+        testExecutionProperties.putAll(environmentConfig.get(PropertyCategory.SUITE));
+        testExecutionProperties.putAll(environmentConfig.get(PropertyCategory.ENVIRONMENT));
+        File targetFile = Paths.get(resultsDirectory.getPath(), "environment.properties").toFile();
+        new JavaPropsMapper().writeValue(targetFile, testExecutionProperties);
+    }
+
     private File resolveHistoryDir(File root)
     {
         return new File(root, Constants.HISTORY_DIR);
@@ -145,13 +170,20 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private void generateData() throws IOException
     {
-        List<Extension> plugins = List.of(
+        List<Extension> extensions = List.of(
                 new SummaryPlugin(),
                 new HistoryTrendPlugin(),
                 new DurationTrendPlugin(),
                 new ExecutorPlugin()
         );
-        Configuration configuration = new ConfigurationBuilder().useDefault().fromExtensions(plugins).build();
+        List<Plugin> plugins = List.of(
+                new EmbeddedPlugin("behaviors", List.of("index.js"))
+        );
+        Configuration configuration = new ConfigurationBuilder()
+                .useDefault()
+                .fromExtensions(extensions)
+                .fromPlugins(plugins)
+                .build();
         new ReportGenerator(configuration).generate(reportDirectory.toPath(), List.of(resultsDirectory.toPath()));
     }
 
@@ -224,11 +256,11 @@ public class AllureReportGenerator implements IAllureReportGenerator
         }
     }
 
-    private static void wrap(IOExecutable executable)
+    private static void wrap(FailableRunnable<IOException> runnable)
     {
         try
         {
-            executable.execute();
+            runnable.run();
         }
         catch (IOException e)
         {
@@ -246,8 +278,17 @@ public class AllureReportGenerator implements IAllureReportGenerator
         this.historyDirectory = historyDirectory;
     }
 
-    private interface IOExecutable
+    private static class EmbeddedPlugin extends DefaultPlugin
     {
-        void execute() throws IOException;
+        EmbeddedPlugin(String id, List<String> jsFiles)
+        {
+            super(new PluginConfiguration().setId(id).setJsFiles(jsFiles), List.of(new BehaviorsPlugin()), null);
+        }
+
+        @Override
+        public void unpackReportStatic(Path outputDirectory)
+        {
+            // do nothing
+        }
     }
 }

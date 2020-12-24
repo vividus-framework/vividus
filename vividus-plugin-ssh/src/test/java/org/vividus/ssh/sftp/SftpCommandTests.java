@@ -98,18 +98,18 @@ class SftpCommandTests
     {
         ChannelSftp channel = mock(ChannelSftp.class);
         String path = "/path";
-        String result = SftpCommand.CD.execute(channel, path);
+        String result = SftpCommand.CD.execute(channel, List.of(path));
         assertNull(result);
         verify(channel).cd(path);
     }
 
     @Test
-    void shouldExecutePwdCommand() throws SftpException
+    void shouldExecutePwdCommand() throws IOException, SftpException
     {
         ChannelSftp channel = mock(ChannelSftp.class);
         String pwd = "~";
         when(channel.pwd()).thenReturn(pwd);
-        String result = SftpCommand.PWD.execute(channel);
+        String result = SftpCommand.PWD.execute(channel, List.of());
         assertEquals(pwd, result);
     }
 
@@ -118,7 +118,7 @@ class SftpCommandTests
     {
         ChannelSftp channel = mock(ChannelSftp.class);
         String path = "/file-to-remove";
-        String result = SftpCommand.RM.execute(channel, path);
+        String result = SftpCommand.RM.execute(channel, List.of(path));
         assertNull(result);
         verify(channel).rm(path);
     }
@@ -128,7 +128,7 @@ class SftpCommandTests
     {
         ChannelSftp channel = mock(ChannelSftp.class);
         String path = "/dir-to-remove";
-        String result = SftpCommand.RMDIR.execute(channel, path);
+        String result = SftpCommand.RMDIR.execute(channel, List.of(path));
         assertNull(result);
         verify(channel).rmdir(path);
     }
@@ -138,7 +138,7 @@ class SftpCommandTests
     {
         ChannelSftp channel = mock(ChannelSftp.class);
         String path = "/dir-to-create";
-        String result = SftpCommand.MKDIR.execute(channel, path);
+        String result = SftpCommand.MKDIR.execute(channel, List.of(path));
         assertNull(result);
         verify(channel).mkdir(path);
     }
@@ -157,7 +157,7 @@ class SftpCommandTests
         ls.add(lsEntry1);
         ls.add(lsEntry2);
         when(channel.ls(path)).thenReturn(ls);
-        String result = SftpCommand.LS.execute(channel, path);
+        String result = SftpCommand.LS.execute(channel, List.of(path));
         assertEquals("file1.txt,file2.story", result);
     }
 
@@ -168,7 +168,7 @@ class SftpCommandTests
         String path = "/file-to-get";
         String data = "data";
         when(channel.get(path)).thenReturn(IOUtils.toInputStream(data, StandardCharsets.UTF_8));
-        String result = SftpCommand.GET.execute(channel, path);
+        String result = SftpCommand.GET.execute(channel, List.of(path));
         assertEquals(data, result);
     }
 
@@ -179,7 +179,7 @@ class SftpCommandTests
         ChannelSftp channel = mock(ChannelSftp.class);
         ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
         doNothing().when(channel).put(inputStreamArgumentCaptor.capture(), eq(REMOTE_PATH));
-        String result = SftpCommand.PUT.execute(channel, content, REMOTE_PATH);
+        String result = SftpCommand.PUT.execute(channel, List.of(content, REMOTE_PATH));
         assertNull(result);
         assertEquals(content, new String(inputStreamArgumentCaptor.getValue().readAllBytes(), StandardCharsets.UTF_8));
     }
@@ -200,7 +200,7 @@ class SftpCommandTests
             }
         }),
             eq(REMOTE_PATH));
-        String result = SftpCommand.PUT_FROM_FILE.execute(channel, filePath, REMOTE_PATH);
+        String result = SftpCommand.PUT_FROM_FILE.execute(channel, List.of(filePath, REMOTE_PATH));
         assertNull(result);
     }
 

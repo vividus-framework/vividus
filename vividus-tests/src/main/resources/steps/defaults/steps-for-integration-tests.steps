@@ -1,0 +1,14 @@
+Composite: Then field value is `$expected`
+When I perform javascript 'return document.querySelector('#textInput').value' and save result to the 'Scenario' variable 'fieldValue'
+Then `${fieldValue}` is equal to `<expected>`
+
+Composite: When I run composite step with comment
+When I initialize the scenario variable `before-comment` with value `before`
+!-- comment
+When I initialize the scenario variable `after-comment` with value `after`
+
+Composite: When I use composite step in known-issues
+Then `0` is = `1`
+
+Composite: When I run composite step with table:$table
+When I initialize scenario variable `table-from-composite-step` with values:<table>

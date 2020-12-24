@@ -19,7 +19,6 @@ package org.vividus.bdd.steps.ui.web.validation;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -27,7 +26,9 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matcher;
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.Dimension;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.util.ElementUtil;
 
@@ -37,15 +38,8 @@ public class ElementValidations implements IElementValidations
     public static final int ACCURACY = 2;
 
     @Inject private IWebElementActions webElementActions;
-    @Inject private IHighlightingSoftAssert softAssert;
-
-    @Override
-    public boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
-            Matcher<? super List<WebElement>> matcher)
-    {
-        return softAssert.withHighlightedElements(elements).assertThat(businessDescription, systemDescription,
-                elements, matcher);
-    }
+    @Inject private IDescriptiveSoftAssert softAssert;
+    @Inject private IUiContext uiContext;
 
     @Override
     public boolean assertIfElementContainsText(WebElement element, String text, boolean isTrue)
@@ -70,17 +64,12 @@ public class ElementValidations implements IElementValidations
                     description.append(" (Difference in substring: \"").append(difference).append("\")");
                 }
             }
-            return softAssert.withHighlightedElement(element).assertThat(description.toString(), actualText,
-                    matcher);
+            String elementDescription = description.toString();
+            String elementText = actualText;
+            return uiContext.withAssertingWebElements(List.of(element),
+                () -> softAssert.assertThat(elementDescription, elementText, matcher));
         }
         return false;
-    }
-
-    @Override
-    public boolean assertIfElementContainsTooltip(WebElement element, String expectedTooltip)
-    {
-        return element != null && softAssert.withHighlightedElement(element)
-                .assertEquals("Element has correct tooltip", expectedTooltip, element.getAttribute("title"));
     }
 
     @Override
@@ -90,11 +79,13 @@ public class ElementValidations implements IElementValidations
         boolean result = elements.size() > 1;
         for (int i = 1; i < elements.size(); i++)
         {
-            WebElement element = elements.get(i);
-            result = softAssert.withHighlightedElements(elements).assertEquals(
+            int currentIndex = i;
+            WebElement element = elements.get(currentIndex);
+            boolean currentResult = result;
+            result = uiContext.withAssertingWebElements(elements, () -> softAssert.assertEquals(
                     String.format("Element <%1$s:%2$s[%3$s]> has correct '%4$s'", element.getTagName(),
-                            element.getText(), i, dimension),
-                    firstElementDimension, dimension.getDimension(element.getSize())) && result;
+                            element.getText(), currentIndex, dimension),
+                    firstElementDimension, dimension.getDimension(element.getSize())) && currentResult);
         }
         return result;
     }
@@ -102,9 +93,12 @@ public class ElementValidations implements IElementValidations
     @Override
     public boolean assertIfElementHasWidthInPerc(WebElement parent, WebElement element, int widthInPerc)
     {
-        return parent != null && element != null
-                && softAssert.withHighlightedElements(Arrays.asList(parent, element)).assertEquals(
-                        "Element has correct width", widthInPerc, ElementUtil.getElementWidthInPerc(parent, element),
-                        ACCURACY);
+        if (parent != null && element != null)
+        {
+            return uiContext.withAssertingWebElements(List.of(parent, element),
+                () -> softAssert.assertEquals("Element has correct width", widthInPerc,
+                        ElementUtil.getElementWidthInPerc(parent, element), ACCURACY));
+        }
+        return false;
     }
 }

@@ -18,6 +18,7 @@ package org.vividus.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -28,75 +29,69 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.CircularRedirectException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpClient;
 import org.vividus.http.client.HttpResponse;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(HttpClientContext.class)
-public class HttpRedirectsProviderTests
+@ExtendWith(MockitoExtension.class)
+class HttpRedirectsProviderTests
 {
     private static final URI URI_EXAMPLES = URI.create("http://examples.com");
 
-    @Mock
-    private HttpClientContext httpClientContext;
+    @Mock private HttpClientContext httpClientContext;
+    @Mock private HttpClient httpClient;
+    @InjectMocks private HttpRedirectsProvider redirectsProvider;
 
-    @Mock
-    private HttpClient httpClient;
-
-    @InjectMocks
-    private HttpRedirectsProvider redirectsProvider;
-
-    @Before
-    public void before()
+    @Test
+    void shouldFailWhenStatusCodeIsNotAcceptable() throws IOException
     {
-        MockitoAnnotations.initMocks(this);
-        PowerMockito.mockStatic(HttpClientContext.class);
-        when(HttpClientContext.create()).thenReturn(httpClientContext);
+        try (MockedStatic<HttpClientContext> httpClientContextMock = mockStatic(HttpClientContext.class))
+        {
+            httpClientContextMock.when(HttpClientContext::create).thenReturn(httpClientContext);
+            HttpResponse httpResponse = new HttpResponse();
+            httpResponse.setStatusCode(HttpStatus.SC_BAD_GATEWAY);
+            when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenReturn(httpResponse);
+            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+                    () -> redirectsProvider.getRedirects(URI_EXAMPLES));
+            assertEquals("Service returned response with unexpected status code: [502]. Expected code from range "
+                    + "[200 - 207]", illegalStateException.getMessage());
+        }
     }
 
     @Test
-    public void shouldFailWhenStatusCodeIsNotAcceptable() throws IOException
+    void shouldUpdateErrorMessageAndRethrowAsIllegalStateExceptionInCaseOfCircularRedirectException() throws IOException
     {
-        HttpResponse httpResponse = new HttpResponse();
-        httpResponse.setStatusCode(HttpStatus.SC_BAD_GATEWAY);
-        when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenReturn(httpResponse);
-        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
-            () -> redirectsProvider.getRedirects(URI_EXAMPLES));
-        assertEquals("Service returned response with unexpected status code: [502]. Expected code from range "
-                + "[200 - 207]", illegalStateException.getMessage());
+        try (MockedStatic<HttpClientContext> httpClientContextMock = mockStatic(HttpClientContext.class))
+        {
+            httpClientContextMock.when(HttpClientContext::create).thenReturn(httpClientContext);
+            ClientProtocolException clientProtocolException = new ClientProtocolException(
+                    new CircularRedirectException("Circular reference"));
+            when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenThrow(clientProtocolException);
+            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+                    () -> redirectsProvider.getRedirects(URI_EXAMPLES));
+            assertEquals("Circular reference Circular redirects are forbidden by default. To allow them, please set "
+                            + "property 'http.redirects-provider.circular-redirects-allowed=true'",
+                    illegalStateException.getMessage());
+        }
     }
 
     @Test
-    public void shouldUpdateErrorMessageAndRethrowAsIllegalStateExceptionInCaseOfCircularRedirectException()
-            throws IOException
+    void shouldReturnRedirectsList() throws IOException
     {
-        ClientProtocolException clientProtocolException = new ClientProtocolException(
-                new CircularRedirectException("Circular reference"));
-        when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenThrow(clientProtocolException);
-        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
-            () -> redirectsProvider.getRedirects(URI_EXAMPLES));
-        assertEquals("Circular reference Circular redirects are forbidden by default. To allow them, please set "
-                        + "property 'http.redirects-provider.circular-redirects-allowed=true'",
-                illegalStateException.getMessage());
-    }
-
-    @Test
-    public void shouldReturnRedirectsList() throws IOException
-    {
-        HttpResponse httpResponse = new HttpResponse();
-        httpResponse.setStatusCode(HttpStatus.SC_OK);
-        when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenReturn(httpResponse);
-        List<URI> redirects = List.of(URI_EXAMPLES);
-        when(httpClientContext.getRedirectLocations()).thenReturn(redirects);
-        assertEquals(redirects, redirectsProvider.getRedirects(URI_EXAMPLES));
+        try (MockedStatic<HttpClientContext> httpClientContextMock = mockStatic(HttpClientContext.class))
+        {
+            httpClientContextMock.when(HttpClientContext::create).thenReturn(httpClientContext);
+            HttpResponse httpResponse = new HttpResponse();
+            httpResponse.setStatusCode(HttpStatus.SC_OK);
+            when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenReturn(httpResponse);
+            List<URI> redirects = List.of(URI_EXAMPLES);
+            when(httpClientContext.getRedirectLocations()).thenReturn(redirects);
+            assertEquals(redirects, redirectsProvider.getRedirects(URI_EXAMPLES));
+        }
     }
 }

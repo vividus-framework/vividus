@@ -30,15 +30,15 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ComparisonRule;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.web.model.JsArgument;
 import org.vividus.bdd.steps.ui.web.model.JsArgumentType;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
-import org.vividus.ui.web.action.search.SearchParameters;
-import org.vividus.ui.web.action.search.Visibility;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.web.action.WebJavascriptActions;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 public class CodeSteps
@@ -46,7 +46,7 @@ public class CodeSteps
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Inject private IBaseValidations baseValidations;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private ISoftAssert softAssert;
 
     /**
@@ -127,7 +127,7 @@ public class CodeSteps
     public void ifFaviconWithSrcExists(String srcpart)
     {
         WebElement faviconElement = baseValidations.assertIfElementExists("Favicon",
-                new SearchAttributes(ActionAttributeType.XPATH,
+                new Locator(WebLocatorType.XPATH,
                         new SearchParameters(LocatorUtil.getXPath("//head/link[@rel='shortcut icon' or @rel='icon']"),
                                 Visibility.ALL)));
         if (faviconElement != null)
@@ -152,7 +152,7 @@ public class CodeSteps
      * <b> null</b> - if there are no desired elements
      */
     @Then("number of invisible elements `$locator` is $comparisonRule `$quantity`")
-    public List<WebElement> doesInvisibleQuantityOfElementsExists(SearchAttributes locator,
+    public List<WebElement> doesInvisibleQuantityOfElementsExists(Locator locator,
             ComparisonRule comparisonRule, int quantity)
     {
         locator.getSearchParameters().setVisibility(Visibility.ALL);
@@ -160,7 +160,7 @@ public class CodeSteps
                     locator, quantity, comparisonRule);
     }
 
-    public void setJavascriptActions(IJavascriptActions javascriptActions)
+    public void setJavascriptActions(WebJavascriptActions javascriptActions)
     {
         this.javascriptActions = javascriptActions;
     }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+       profile="browserstack">
+
+    <bean class="org.vividus.selenium.browserstack.BrowserStackCapabilitiesConfigurer" >
+        <property name="browserStackEnabled" value="${selenium.grid.enabled}"/>
+        <property name="tunnellingEnabled" value="${browserstack.browserstack-local.enabled}"/>
+    </bean>
+
+    <bean class="org.vividus.browserstack.BrowserStackAutomateClient">
+        <constructor-arg index="0" value="${browserstack.api.endpoint}" />
+        <constructor-arg index="1" value="${selenium.grid.username}" />
+        <constructor-arg index="2" value="${selenium.grid.password}" />
+    </bean>
+
+    <bean id="debugSteps" class="org.vividus.bdd.browserstack.steps.DebugSteps" />
+    <bean id="browserStackSteps" class="org.vividus.bdd.browserstack.steps.BrowserStackSteps" />
+
+    <bean class="org.vividus.selenium.browserstack.BrowserStackLocalManager" >
+         <constructor-arg index="0" value="${selenium.grid.password}" />
+     </bean>
+
+    <util:list id="stepBeanNames-BrowserStack" value-type="java.lang.String">
+        <idref bean="debugSteps" />
+        <idref bean="browserStackSteps" />
+    </util:list>
+</beans>

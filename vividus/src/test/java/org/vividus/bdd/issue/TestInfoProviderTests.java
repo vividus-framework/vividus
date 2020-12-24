@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -54,8 +56,9 @@ class TestInfoProviderTests
         runningScenario.setScenario(scenario);
         RunningStory runningStory = prepareGetRunningStory();
         runningStory.setRunningScenario(runningScenario);
-        runningStory.setRunningStep(TEST_STEP);
-        assertEqualsTestInfo(TEST_SUITE, testCase, TEST_STEP, testInfoProvider.getTestInfo());
+        String testStep2 = "step2";
+        runningStory.setRunningSteps(new LinkedList<>(List.of(TEST_STEP, testStep2)));
+        assertEqualsTestInfo(TEST_SUITE, testCase, List.of(TEST_STEP, testStep2), testInfoProvider.getTestInfo());
     }
 
     @Test
@@ -69,7 +72,7 @@ class TestInfoProviderTests
     void testGetTestInfoRunningScenarioIsNull()
     {
         prepareGetRunningStory();
-        assertEqualsTestInfo(TEST_SUITE, null, null, testInfoProvider.getTestInfo());
+        assertEqualsTestInfo(TEST_SUITE, null, List.of(), testInfoProvider.getTestInfo());
     }
 
     @Test
@@ -77,15 +80,16 @@ class TestInfoProviderTests
     {
         RunningStory runningStory = prepareGetRunningStory();
         runningStory.setRunningScenario(new RunningScenario());
-        runningStory.setRunningStep(TEST_STEP);
-        assertEqualsTestInfo(TEST_SUITE, null, TEST_STEP, testInfoProvider.getTestInfo());
+        runningStory.putRunningStep(TEST_STEP);
+        assertEqualsTestInfo(TEST_SUITE, null, List.of(TEST_STEP), testInfoProvider.getTestInfo());
     }
 
-    private void assertEqualsTestInfo(String expectedSuite, String expectedCase, String expectedStep, TestInfo actual)
+    private void assertEqualsTestInfo(String expectedSuite, String expectedCase,
+            List<String> expectedSteps, TestInfo actual)
     {
         assertEquals(expectedSuite, actual.getTestSuite());
         assertEquals(expectedCase, actual.getTestCase());
-        assertEquals(expectedStep, actual.getTestStep());
+        assertEquals(expectedSteps, actual.getTestSteps());
     }
 
     private RunningStory prepareGetRunningStory()

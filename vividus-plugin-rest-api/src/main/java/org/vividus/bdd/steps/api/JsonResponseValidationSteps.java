@@ -51,6 +51,8 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.util.json.JsonUtils;
+import org.vividus.util.wait.DurationBasedWaiter;
+import org.vividus.util.wait.RetryTimesBasedWaiter;
 import org.vividus.util.wait.WaitMode;
 import org.vividus.util.wait.Waiter;
 
@@ -94,7 +96,7 @@ public class JsonResponseValidationSteps
      * IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS, IGNORING_VALUES
      * @return true JSON contains the expected data by given JSON path, otherwise - false
      */
-    @Then("a JSON element by the JSON path '$jsonPath' is equal to '$expectedData'$options")
+    @Then("JSON element by JSON path `$jsonPath` is equal to `$expectedData`$options")
     public boolean isDataByJsonPathEqual(String jsonPath, String expectedData, Options options)
     {
         return isDataByJsonPathFromJsonEqual(getActualJson(), jsonPath, expectedData, options);
@@ -109,7 +111,7 @@ public class JsonResponseValidationSteps
      * IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS, IGNORING_VALUES
      * @return true JSON contains the expected data by given JSON path, otherwise - false
      */
-    @Then("a JSON element from '$json' by the JSON path '$jsonPath' is equal to '$expectedData'$options")
+    @Then("JSON element from `$json` by JSON path `$jsonPath` is equal to `$expectedData`$options")
     public boolean isDataByJsonPathFromJsonEqual(String json, String jsonPath, String expectedData, Options options)
     {
         return getDataByJsonPath(json, jsonPath, expectedData).map(match(jsonPath, expectedData, options))
@@ -157,7 +159,7 @@ public class JsonResponseValidationSteps
      * @return true - the number of found elements is as expected; false - the actual number is not as expected or the
      * specified JSON path was not found
      */
-    @Then("the number of JSON elements by the JSON path '$jsonPath' is $comparisonRule $elementsNumber")
+    @Then("number of JSON elements by JSON path `$jsonPath` is $comparisonRule $elementsNumber")
     public boolean doesJsonPathElementsMatchRule(String jsonPath, ComparisonRule comparisonRule, int elementsNumber)
     {
         return doesJsonPathElementsFromJsonMatchRule(getActualJson(), jsonPath, comparisonRule, elementsNumber);
@@ -230,7 +232,7 @@ public class JsonResponseValidationSteps
      * </ul>
      * @param variableName A variable name
      */
-    @When("I save a JSON element from '$json' by JSON path '$jsonPath' to $scopes variable '$variableName'")
+    @When("I save JSON element from `$json` by JSON path `$jsonPath` to $scopes variable `$variableName`")
     public void saveJsonElementToVariable(String json, String jsonPath, Set<VariableScope> scopes, String variableName)
     {
         getDataByJsonPath(json, jsonPath, null)
@@ -251,7 +253,7 @@ public class JsonResponseValidationSteps
      * </ul>
      * @param variableName A variable name
      */
-    @When("I set the number of elements found by the JSON path '$jsonPath' to the $scopes variable '$variableName'")
+    @When("I set number of elements found by JSON path `$jsonPath` to $scopes variable `$variableName`")
     public void saveElementsNumberByJsonPath(String jsonPath, Set<VariableScope> scopes, String variableName)
     {
         bddVariableContext.putVariable(scopes, variableName, getElementsNumber(getActualJson(), jsonPath));
@@ -308,9 +310,39 @@ public class JsonResponseValidationSteps
             + "$stepsToExecute")
     public void waitForJsonElement(String jsonPath, Duration duration, int retryTimes, SubSteps stepsToExecute)
     {
-        new Waiter(new WaitMode(duration, retryTimes)).wait(
-                () -> stepsToExecute.execute(Optional.empty()),
-                () -> isJsonElementSearchCompleted(httpTestContext.getResponse(), jsonPath)
+        waitForJsonElement(new DurationBasedWaiter(new WaitMode(duration, retryTimes)), jsonPath, stepsToExecute);
+    }
+
+    /**
+     * Execute the provided sub-steps until the HTTP response body contains an element by the specified JSON path or
+     * until the maximum number of retries is reached. The maximum duration of the step execution is not limited.
+     * <p>
+     * <b>The actions performed:</b>
+     * </p>
+     * <ul>
+     * <li>execute sub-steps</li>
+     * <li>wait for the polling interval</li>
+     * <li>if the required JSON element exists or the maximum number of retries is reached, then execution stops,
+     * otherwise the step actions are repeated</li>
+     * </ul>
+     * @param jsonPath the JSON path of the element to find
+     * @param pollingInterval the duration to wait between retries
+     * @param retryTimes the maximum number of the retries
+     * @param stepsToExecute the sub-steps to execute at each iteration
+     */
+    @When("I wait for presence of element by `$jsonPath` with `$pollingInterval` polling interval "
+            + "retrying $retryTimes times$stepsToExecute")
+    public void waitForJsonElementWithPollingInterval(String jsonPath, Duration pollingInterval,
+                                                      int retryTimes, SubSteps stepsToExecute)
+    {
+        waitForJsonElement(new RetryTimesBasedWaiter(pollingInterval, retryTimes), jsonPath, stepsToExecute);
+    }
+
+    private void waitForJsonElement(Waiter waiter, String jsonPath, SubSteps stepsToExecute)
+    {
+        waiter.wait(
+            () -> stepsToExecute.execute(Optional.empty()),
+            () -> isJsonElementSearchCompleted(httpTestContext.getResponse(), jsonPath)
         );
         assertJsonElementExists(jsonPath);
     }
@@ -372,7 +404,7 @@ public class JsonResponseValidationSteps
      * @param stepsToExecute examples table with steps to execute for each found elements
      */
     @SuppressWarnings("MagicNumber")
-    @When(value = "I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element do"
+    @When(value = "I find $comparisonRule `$elementsNumber` JSON elements by `$jsonPath` and for each element do"
             + "$stepsToExecute", priority = 6)
     public void performAllStepsForJsonIfFound(ComparisonRule comparisonRule, int elementsNumber, String jsonPath,
             SubSteps stepsToExecute)

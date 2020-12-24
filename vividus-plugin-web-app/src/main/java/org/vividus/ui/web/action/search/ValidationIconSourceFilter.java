@@ -16,18 +16,29 @@
 
 package org.vividus.ui.web.action.search;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
+import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.web.action.IWebElementActions;
 
-public class ValidationIconSourceFilter extends AbstractElementFilterAction
+public class ValidationIconSourceFilter implements IElementFilterAction
 {
-    @Inject private IWebElementActions webElementActions;
+    private final IWebElementActions webElementActions;
+
+    public ValidationIconSourceFilter(IWebElementActions webElementActions)
+    {
+        this.webElementActions = webElementActions;
+    }
 
     @Override
-    protected boolean matches(WebElement element, String validationIconSrc)
+    public boolean matches(WebElement element, String validationIconSrc)
     {
         return validationIconSrc.equals(webElementActions.getCssValue(element, "background-image"));
+    }
+
+    @Override
+    public LocatorType getType()
+    {
+        return WebLocatorType.VALIDATION_ICON_SOURCE;
     }
 }

@@ -16,6 +16,7 @@
 
 package org.vividus.softassert;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.eventbus.EventBus;
 
+import org.jbehave.core.embedder.StoryControls;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,8 +36,8 @@ import org.vividus.softassert.model.SoftAssertionError;
 @ExtendWith(MockitoExtension.class)
 class AssertionManagerTests
 {
-    @Mock
-    private ISoftAssert softAssert;
+    @Mock private ISoftAssert softAssert;
+    @Mock private StoryControls storyControls;
 
     private AssertionManager assertionManager;
 
@@ -43,7 +45,7 @@ class AssertionManagerTests
     void beforeEach()
     {
         EventBus eventBus = new EventBus();
-        assertionManager = new AssertionManager(eventBus, softAssert);
+        assertionManager = new AssertionManager(eventBus, softAssert, storyControls);
         eventBus.register(assertionManager);
     }
 
@@ -51,7 +53,7 @@ class AssertionManagerTests
     void shouldNotFailFast()
     {
         assertionManager.setFailFast(false);
-        assertionManager.onAssertionFailure(mock(AssertionFailedEvent.class));
+        assertionManager.onAssertionFailure(createEventWithError(false, false, false));
         verifyNoInteractions(softAssert);
     }
 
@@ -59,7 +61,7 @@ class AssertionManagerTests
     void shouldNotFailFastIfErrorIsKnownIssue()
     {
         assertionManager.setFailFast(true);
-        assertionManager.onAssertionFailure(createEventWithError(true));
+        assertionManager.onAssertionFailure(createEventWithError(true, false, false));
         verifyNoInteractions(softAssert);
     }
 
@@ -67,14 +69,36 @@ class AssertionManagerTests
     void shouldFailFastIfErrorIsNotKnownIssue()
     {
         assertionManager.setFailFast(true);
-        assertionManager.onAssertionFailure(createEventWithError(false));
+        assertionManager.onAssertionFailure(createEventWithError(false, false, false));
         verify(softAssert).verify();
     }
 
-    private AssertionFailedEvent createEventWithError(boolean knownIssue)
+    @Test
+    void shouldFailFastIfFailTestCaseFast()
+    {
+        assertionManager.setFailFast(false);
+        AssertionFailedEvent event = createEventWithError(true, true, false);
+        assertionManager.onAssertionFailure(event);
+        verify(softAssert).verify();
+    }
+
+    @Test
+    void shouldNotResetStateBeforeScenario()
+    {
+        assertionManager.setFailFast(false);
+        when(storyControls.currentStoryControls()).thenReturn(storyControls);
+        AssertionFailedEvent event = createEventWithError(true, false, true);
+        assertionManager.onAssertionFailure(event);
+        verify(storyControls).doResetStateBeforeScenario(false);
+    }
+
+    private AssertionFailedEvent createEventWithError(boolean knownIssue, boolean failTestCaseFast,
+            boolean failTestSuiteFast)
     {
         SoftAssertionError softAssertionError = mock(SoftAssertionError.class);
-        when(softAssertionError.isKnownIssue()).thenReturn(knownIssue);
+        lenient().when(softAssertionError.isKnownIssue()).thenReturn(knownIssue);
+        lenient().when(softAssertionError.isFailTestCaseFast()).thenReturn(failTestCaseFast);
+        lenient().when(softAssertionError.isFailTestSuiteFast()).thenReturn(failTestSuiteFast);
         return new AssertionFailedEvent(softAssertionError);
     }
 }

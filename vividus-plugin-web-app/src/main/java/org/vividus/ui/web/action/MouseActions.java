@@ -36,8 +36,8 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.AlertActions.Action;
-import org.vividus.ui.web.context.IWebUiContext;
 import org.vividus.ui.web.event.PageLoadEndEvent;
 
 public class MouseActions implements IMouseActions
@@ -49,11 +49,11 @@ public class MouseActions implements IMouseActions
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IWebDriverManager webDriverManager;
     @Inject private ISoftAssert softAssert;
-    @Inject private JavascriptActions javascriptActions;
-    @Inject private IWaitActions waitActions;
+    @Inject private WebJavascriptActions javascriptActions;
+    @Inject private IWebWaitActions waitActions;
     @Inject private IAlertActions alertActions;
     @Inject private EventBus eventBus;
-    @Inject private IWebUiContext webUiContext;
+    @Inject private IUiContext uiContext;
     private List<WebDriverEventListener> webDriverEventListeners;
 
     @Override
@@ -78,42 +78,49 @@ public class MouseActions implements IMouseActions
             }
             catch (WebDriverException webDriverException)
             {
-                String message = webDriverException.getMessage();
-                if (message.contains("is not clickable at point"))
-                {
-                    try
-                    {
-                        if (webDriverManager.isTypeAnyOf(WebDriverType.CHROME)
-                                && message.contains(". Other element would receive the click"))
-                        {
-                            javascriptActions.click(element);
-                        }
-                        else
-                        {
-                            element.click();
-                        }
-                        afterClick(clickResult, page, webDriver, defaultAlertAction);
-                    }
-                    catch (WebDriverException e)
-                    {
-                        softAssert.recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + e);
-                    }
-                }
-                else if (message.contains("timeout: Timed out receiving message from renderer"))
-                {
-                    softAssert.recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + webDriverException);
-                }
-                else if (message.contains("Timed out waiting for page to load"))
-                {
-                    afterClick(clickResult, page, webDriver, defaultAlertAction);
-                }
-                else
-                {
-                    throw webDriverException;
-                }
+                tryToWorkaroundException(element, defaultAlertAction, clickResult, webDriver, page,
+                        webDriverException);
             }
         }
         return clickResult;
+    }
+
+    private void tryToWorkaroundException(WebElement element, Optional<Action> defaultAlertAction,
+            ClickResult clickResult, WebDriver webDriver, WebElement page, WebDriverException webDriverException)
+    {
+        String message = webDriverException.getMessage();
+        if (message.contains("is not clickable at point"))
+        {
+            try
+            {
+                if (webDriverManager.isTypeAnyOf(WebDriverType.CHROME)
+                        && message.contains(". Other element would receive the click"))
+                {
+                    javascriptActions.click(element);
+                }
+                else
+                {
+                    element.click();
+                }
+                afterClick(clickResult, page, webDriver, defaultAlertAction);
+            }
+            catch (WebDriverException e)
+            {
+                softAssert.recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + e);
+            }
+        }
+        else if (message.contains("timeout: Timed out receiving message from renderer"))
+        {
+            softAssert.recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + webDriverException);
+        }
+        else if (message.contains("Timed out waiting for page to load"))
+        {
+            afterClick(clickResult, page, webDriver, defaultAlertAction);
+        }
+        else
+        {
+            throw webDriverException;
+        }
     }
 
     @Override
@@ -178,7 +185,7 @@ public class MouseActions implements IMouseActions
             catch (@SuppressWarnings("unused") WebDriverException e)
             {
                 clickResult.setNewPageLoaded(true);
-                webUiContext.reset();
+                uiContext.reset();
             }
         }
     }

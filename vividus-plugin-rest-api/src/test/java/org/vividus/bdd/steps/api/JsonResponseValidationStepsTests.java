@@ -69,6 +69,7 @@ import org.vividus.util.json.JsonUtils;
 import net.javacrumbs.jsonunit.core.Option;
 import net.javacrumbs.jsonunit.core.internal.Options;
 
+@SuppressWarnings("MethodCount")
 @ExtendWith(MockitoExtension.class)
 class JsonResponseValidationStepsTests
 {
@@ -319,7 +320,7 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testWaitForJsonFieldAppearsWithoutPolling() throws IOException, IllegalAccessException, NoSuchFieldException
+    void testWaitForJsonFieldAppearsWithoutPolling() throws IOException
     {
         mockResponse(JSON);
         testWaitForJsonFieldAppears(1);
@@ -330,12 +331,12 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testWaitForJsonFieldAppearsWithPolling() throws IOException, IllegalAccessException, NoSuchFieldException
+    void testWaitForJsonFieldAppearsWithPolling() throws IOException
     {
         String body = "{\"key\":\"value\"}";
         mockResponse(body);
         testWaitForJsonFieldAppears(0);
-        verify(httpClient, atLeast(5)).execute(argThat(base -> base instanceof HttpRequestBase
+        verify(httpClient, atLeast(4)).execute(argThat(base -> base instanceof HttpRequestBase
                 && base.getMethod().equals(GET)
                 && base.getURI().equals(URI.create(URL))),
                 argThat(context -> context instanceof HttpClientContext));
@@ -399,10 +400,28 @@ class JsonResponseValidationStepsTests
                 .thenReturn(new HttpResponse())
                 .thenReturn(createHttpResponse(JSON));
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
-        int retryTimes = 4;
+        int retryTimes = 10;
         jsonResponseValidationSteps.waitForJsonElement(STRING_PATH, Duration.ofSeconds(2), retryTimes, stepsToExecute);
-        verify(stepsToExecute, atLeast(retryTimes - 1)).execute(Optional.empty());
+        verify(stepsToExecute, atLeast(4)).execute(Optional.empty());
         verify(stepsToExecute, atMost(retryTimes)).execute(Optional.empty());
+        verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH), eq(1),
+                verifyMatcher(1));
+    }
+
+    @Test
+    void shouldWaitForJsonElementWithPollingInterval()
+    {
+        SubSteps stepsToExecute = mock(SubSteps.class);
+        when(httpTestContext.getResponse())
+                .thenReturn(createHttpResponse(HTML))
+                .thenReturn(createHttpResponse(OBJECT_PATH_RESULT))
+                .thenReturn(new HttpResponse())
+                .thenReturn(createHttpResponse(JSON));
+        when(httpTestContext.getJsonContext()).thenReturn(JSON);
+        int retryTimes = 4;
+        jsonResponseValidationSteps.waitForJsonElementWithPollingInterval(STRING_PATH,
+                Duration.ofSeconds(1), retryTimes, stepsToExecute);
+        verify(stepsToExecute, times(retryTimes)).execute(Optional.empty());
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH), eq(1),
                 verifyMatcher(1));
     }
@@ -420,7 +439,7 @@ class JsonResponseValidationStepsTests
 
     private void testWaitForJsonFieldAppears(int elementsFound) throws IOException
     {
-        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.parse("PT2S"),
+        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(2),
                 DURATION_DIVIDER);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH),
                 eq(elementsFound), verifyMatcher(1));

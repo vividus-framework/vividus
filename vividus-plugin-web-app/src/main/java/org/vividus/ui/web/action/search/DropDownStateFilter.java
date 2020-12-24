@@ -20,4 +20,8 @@ import org.vividus.ui.web.DropDownState;
 
 public class DropDownStateFilter extends AbstractStateFilter<DropDownState>
 {
+    public DropDownStateFilter()
+    {
+        super(WebLocatorType.DROP_DOWN_STATE);
+    }
 }

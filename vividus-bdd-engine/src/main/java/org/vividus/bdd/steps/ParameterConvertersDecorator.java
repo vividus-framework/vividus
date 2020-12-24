@@ -31,16 +31,16 @@ public class ParameterConvertersDecorator extends ParameterConverters
 {
     private static final int MAX_DEPTH = 16;
 
-    private final ParameterAdaptor parameterAdaptor;
+    private final VariableResolver variableResolver;
 
     private final ExpressionAdaptor expressionAdaptor;
 
-    public ParameterConvertersDecorator(Configuration configuration, ParameterAdaptor parameterAdaptor,
+    public ParameterConvertersDecorator(Configuration configuration, VariableResolver variableResolver,
             ExpressionAdaptor expressionAdaptor)
     {
         super(configuration.stepMonitor(), configuration.keywords(), configuration.storyLoader(),
                 configuration.parameterControls(), configuration.tableTransformers());
-        this.parameterAdaptor = parameterAdaptor;
+        this.variableResolver = variableResolver;
         this.expressionAdaptor = expressionAdaptor;
     }
 
@@ -101,17 +101,17 @@ public class ParameterConvertersDecorator extends ParameterConverters
 
     private Object resolvePlaceholders(String originalValue, String value, Type type, int iteration)
     {
-        Object adaptedValue = parameterAdaptor.convert(value);
+        Object adaptedValue = variableResolver.resolve(value);
         if (type == String.class || String.class.isInstance(adaptedValue))
         {
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
-            if (!value.equals(adaptedValue))
+            if (!value.equals(adaptedValue) && adaptedValue instanceof String)
             {
                 if (iteration == MAX_DEPTH)
                 {
                     // If we reached max depth, then we see circular reference or variables have more than MAX_DEPTH
                     // nested levels, we need to fallback to one cycle of variable resolution and exit early
-                    return parameterAdaptor.convert(originalValue);
+                    return variableResolver.resolve(originalValue);
                 }
                 return resolvePlaceholders(originalValue, (String) adaptedValue, type, iteration + 1);
             }
@@ -125,7 +125,7 @@ public class ParameterConvertersDecorator extends ParameterConverters
         return rawType instanceof Class<?> && ((Class<?>) rawType).isAssignableFrom(clazz);
     }
 
-    private String processExpressions(String valueToConvert)
+    private Object processExpressions(String valueToConvert)
     {
         return expressionAdaptor.process(valueToConvert);
     }

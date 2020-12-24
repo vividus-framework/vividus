@@ -19,6 +19,9 @@ package org.vividus.bdd.mobileapp.steps;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -30,20 +33,20 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.mobileapp.model.DesiredCapability;
+import org.vividus.bdd.mobileapp.model.NamedEntry;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
+import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.HasSessionDetails;
+import io.appium.java_client.InteractsWithApps;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ApplicationStepsTests
@@ -54,6 +57,8 @@ class ApplicationStepsTests
     private static final String CAPABILITY_VALUE = "capabilityValue";
     private static final String APP = "app";
     private static final String APP_NAME = "vividus-mobile.app";
+    private static final String SET_SETTINGS = "setSettings";
+    private static final String SETTINGS = "settings";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ApplicationSteps.class);
 
@@ -62,28 +67,27 @@ class ApplicationStepsTests
     @Mock private IWebDriverManagerContext webDriverManagerContext;
     @InjectMocks private ApplicationSteps applicationSteps;
 
-    @BeforeEach
-    void init()
+    private void mockCommons()
     {
         when(details.getSessionDetail(APP)).thenReturn(APP_NAME);
         when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
     }
 
-    @AfterEach
-    void afterEach()
+    private void verifyLogs()
     {
         assertThat(logger.getLoggingEvents(), is(List.of(info("Started application located at {}", APP_NAME))));
     }
 
     @Test
-    void testStartMobileApplicationWithCapabilities()
+    void shouldStartMobileApplicationWithCapabilities()
     {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities(Map.of(KEY, VALUE));
 
+        mockCommons();
         when(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES))
                 .thenReturn(desiredCapabilities);
 
-        DesiredCapability capability = new DesiredCapability();
+        NamedEntry capability = new NamedEntry();
         capability.setName(CAPABILITY_NAME);
         capability.setValue(CAPABILITY_VALUE);
 
@@ -92,13 +96,77 @@ class ApplicationStepsTests
         verify(webDriverManagerContext).putParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES,
                 new DesiredCapabilities(Map.of(KEY, VALUE, CAPABILITY_NAME, CAPABILITY_VALUE)));
         verifyNoMoreInteractions(webDriverProvider, details, webDriverManagerContext);
+        verifyLogs();
     }
 
     @Test
-    void testStartMobileApplication()
+    void shouldStartMobileApplication()
     {
+        mockCommons();
+
         applicationSteps.startMobileApplication();
 
         verifyNoMoreInteractions(webDriverProvider, details);
+        verifyLogs();
+    }
+
+    @Test
+    void shouldCloseMobileApplication()
+    {
+        applicationSteps.closeMobileApplication();
+
+        verify(webDriverProvider).end();
+        verifyNoMoreInteractions(webDriverProvider);
+    }
+
+    @Test
+    void shouldActivateApp()
+    {
+        InteractsWithApps driver = mockInteractingWithAppsDriver();
+        String bundleId = "bundleId";
+        when(driver.isAppInstalled(bundleId)).thenReturn(true);
+        applicationSteps.activateApp(bundleId);
+        verify(driver).activateApp(bundleId);
+    }
+
+    @Test
+    void shouldNotActivateNotInstalledApp()
+    {
+        InteractsWithApps driver = mockInteractingWithAppsDriver();
+        String bundleId = "unknown bundle id";
+        when(driver.isAppInstalled(bundleId)).thenReturn(false);
+        Exception exception = assertThrows(IllegalArgumentException.class,
+            () -> applicationSteps.activateApp(bundleId));
+        assertEquals(
+            String.format("Application with the bundle identifier '%s' is not installed on the device", bundleId),
+            exception.getMessage());
+    }
+
+    @Test
+    void shouldChangeAppiumSettings()
+    {
+        ExecutesMethod executesMethod = mock(ExecutesMethod.class);
+        when(webDriverProvider.getUnwrapped(ExecutesMethod.class)).thenReturn(executesMethod);
+
+        applicationSteps.changeAppiumSettings(List.of(
+                createSetting(KEY + 1, "50"),
+                createSetting(KEY + 2, VALUE)));
+
+        verify(executesMethod).execute(SET_SETTINGS, Map.of(SETTINGS, Map.of(KEY + 1, 50L, KEY + 2, VALUE)));
+    }
+
+    private static NamedEntry createSetting(String settingName, String settingValue)
+    {
+        NamedEntry setting = new NamedEntry();
+        setting.setName(settingName);
+        setting.setValue(settingValue);
+        return setting;
+    }
+
+    private InteractsWithApps mockInteractingWithAppsDriver()
+    {
+        InteractsWithApps driver = mock(InteractsWithApps.class);
+        when(webDriverProvider.getUnwrapped(InteractsWithApps.class)).thenReturn(driver);
+        return driver;
     }
 }

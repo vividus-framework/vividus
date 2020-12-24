@@ -17,14 +17,14 @@
 package org.vividus.bdd.steps.ui.web;
 
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 public enum FocusState
 {
     IN_FOCUS
     {
         @Override
-        public boolean isInState(IJavascriptActions javaScriptActions, WebElement expectedElement)
+        public boolean isInState(WebJavascriptActions javaScriptActions, WebElement expectedElement)
         {
             return isInFocus(javaScriptActions, expectedElement);
         }
@@ -32,15 +32,15 @@ public enum FocusState
     NOT_IN_FOCUS
     {
         @Override
-        public boolean isInState(IJavascriptActions javaScriptActions, WebElement expectedElement)
+        public boolean isInState(WebJavascriptActions javaScriptActions, WebElement expectedElement)
         {
             return !isInFocus(javaScriptActions, expectedElement);
         }
     };
 
-    public abstract boolean isInState(IJavascriptActions javaScriptActions, WebElement expectedElement);
+    public abstract boolean isInState(WebJavascriptActions javaScriptActions, WebElement expectedElement);
 
-    private static boolean isInFocus(IJavascriptActions javaScriptActions, WebElement expectedElement)
+    private static boolean isInFocus(WebJavascriptActions javaScriptActions, WebElement expectedElement)
     {
         return javaScriptActions.executeScript("return arguments[0]==document.activeElement", expectedElement);
     }

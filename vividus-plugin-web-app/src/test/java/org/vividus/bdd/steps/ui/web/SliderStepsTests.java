@@ -30,11 +30,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
+import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.action.search.ActionAttributeType;
-import org.vividus.ui.web.action.search.SearchAttributes;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.web.action.WebJavascriptActions;
+import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +44,7 @@ class SliderStepsTests
     private static final String VALUE = "1";
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private IBaseValidations baseValidations;
@@ -91,7 +91,7 @@ class SliderStepsTests
 
     private void mockBaseValidations(String businessDescription, WebElement foundElement)
     {
-        when(baseValidations.assertIfElementExists(businessDescription, new SearchAttributes(ActionAttributeType.XPATH,
+        when(baseValidations.assertIfElementExists(businessDescription, new Locator(WebLocatorType.XPATH,
                 LocatorUtil.getXPath(XPATH)))).thenReturn(foundElement);
     }
 }

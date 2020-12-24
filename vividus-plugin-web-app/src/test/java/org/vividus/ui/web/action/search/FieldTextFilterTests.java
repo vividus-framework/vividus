@@ -31,7 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith(MockitoExtension.class)
 class FieldTextFilterTests
@@ -44,7 +44,7 @@ class FieldTextFilterTests
     private WebElement webElement;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @InjectMocks
     private FieldTextFilter fieldTextFilter;
@@ -82,6 +82,12 @@ class FieldTextFilterTests
     void testTextFilterEmpty()
     {
         testTextFilterEmptyOrNull("");
+    }
+
+    @Test
+    void shouldReturnLocatorType()
+    {
+        assertEquals(WebLocatorType.FIELD_TEXT, fieldTextFilter.getType());
     }
 
     private void testTextFilterEmptyOrNull(String text)

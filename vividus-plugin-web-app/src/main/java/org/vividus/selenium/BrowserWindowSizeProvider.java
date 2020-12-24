@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import org.jbehave.core.model.Meta;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.MetaWrapper;
+import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 
 public class BrowserWindowSizeProvider implements IBrowserWindowSizeProvider
@@ -37,8 +38,13 @@ public class BrowserWindowSizeProvider implements IBrowserWindowSizeProvider
         RunningStory runningStory = bddRunContext.getRunningStory();
         if (runningStory != null)
         {
-            Meta scenarioMeta = runningStory.getRunningScenario().getScenario().getMeta();
-            BrowserWindowSize browserWindowSize = getBrowserSizeFromMeta(scenarioMeta, remoteExecution);
+            RunningScenario runningScenario = runningStory.getRunningScenario();
+            BrowserWindowSize browserWindowSize = null;
+            if (null != runningScenario)
+            {
+                Meta scenarioMeta = runningScenario.getScenario().getMeta();
+                browserWindowSize = getBrowserSizeFromMeta(scenarioMeta, remoteExecution);
+            }
             return browserWindowSize == null
                     ? getBrowserSizeFromMeta(runningStory.getStory().getMeta(), remoteExecution)
                     : browserWindowSize;

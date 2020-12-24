@@ -16,39 +16,34 @@
 
 package org.vividus.runner;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.*", "org.xml.*", "org.w3c.*", "com.sun.*"})
-public class BddStepPrinterTests extends SystemStreamTests
+class BddStepPrinterTests extends SystemStreamTests
 {
     @Test
-    public void testPrintHelp() throws Exception
+    void testPrintHelp() throws IOException, ParseException
     {
         BddStepPrinter.main(new String[] {"-h"});
         assertOutput(List.of("usage: BddStepPrinter",
@@ -57,39 +52,41 @@ public class BddStepPrinterTests extends SystemStreamTests
     }
 
     @Test
-    @PrepareForTest({ Vividus.class, BeanFactory.class })
-    public void testPrintToSystemOut() throws Exception
+    void testPrintToSystemOut() throws IOException, ParseException, ReflectiveOperationException
     {
-        List<String> expectedOutput = mockStepCandidates();
-        BddStepPrinter.main(new String[0]);
-        assertOutput(expectedOutput);
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
+                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        {
+            List<String> expectedOutput = mockStepCandidates(beanFactory);
+            BddStepPrinter.main(new String[0]);
+            assertOutput(expectedOutput);
+            vividus.verify(Vividus::init);
+        }
     }
 
     @Test
-    @PrepareForTest({ Vividus.class, BeanFactory.class, FileUtils.class })
-    public void testPrintToFile() throws Exception
+    void testPrintToFile() throws IOException, ParseException, ReflectiveOperationException
     {
-        List<String> expectedOutput = mockStepCandidates();
-        String filePath = "mocked" + File.separator + "file";
-        mockStatic(FileUtils.class);
-        BddStepPrinter.main(new String[] {"-f", filePath});
-        Path file = Paths.get(filePath);
-        assertOutput(List.of("File with BDD steps: " + file.toAbsolutePath()));
-        PowerMockito.verifyStatic(FileUtils.class);
-        FileUtils.writeLines(argThat(f -> filePath.equals(f.toString())), argThat(steps -> steps.stream()
-                    .map(Object::toString)
-                    .collect(Collectors.toList())
-                .equals(expectedOutput)));
+        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
+                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
+                MockedStatic<FileUtils> fileUtils = mockStatic(FileUtils.class))
+        {
+            List<String> expectedOutput = mockStepCandidates(beanFactory);
+            String filePath = "mocked" + File.separator + "file";
+            BddStepPrinter.main(new String[] {"-f", filePath});
+            Path file = Paths.get(filePath);
+            assertOutput(List.of("File with BDD steps: " + file.toAbsolutePath()));
+            vividus.verify(Vividus::init);
+            fileUtils.verify(() -> FileUtils.writeLines(argThat(f -> filePath.equals(f.toString())),
+                    argThat(steps -> steps.stream().map(Object::toString).collect(Collectors.toList())
+                            .equals(expectedOutput))));
+        }
     }
 
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    private List<String> mockStepCandidates() throws Exception
+    private List<String> mockStepCandidates(MockedStatic<BeanFactory> beanFactory) throws ReflectiveOperationException
     {
-        mockStatic(Vividus.class);
-        PowerMockito.doNothing().when(Vividus.class, "init");
-        mockStatic(BeanFactory.class);
         InjectableStepsFactory stepsFactory = mock(InjectableStepsFactory.class);
-        when(BeanFactory.getBean(InjectableStepsFactory.class)).thenReturn(stepsFactory);
+        beanFactory.when(() -> BeanFactory.getBean(InjectableStepsFactory.class)).thenReturn(stepsFactory);
         CandidateSteps candidateSteps = mock(CandidateSteps.class);
         when(stepsFactory.createCandidateSteps()).thenReturn(List.of(candidateSteps));
         StepCandidate stepCandidate1 = mockStepCandidate("Given", "initial state is '$status'", "simpleMethod");
@@ -114,13 +111,6 @@ public class BddStepPrinterTests extends SystemStreamTests
         when(stepCandidate.getPatternAsString()).thenReturn(patternAsString);
         when(stepCandidate.getMethod()).thenReturn(method);
         return stepCandidate;
-    }
-
-    private void assertOutput(List<String> lines)
-    {
-        String lineSeparator = System.lineSeparator();
-        String expectedOutput = lines.stream().collect(Collectors.joining(lineSeparator, "", lineSeparator));
-        assertEquals(expectedOutput, getOutStreamContent());
     }
 
     @SuppressWarnings("unused")

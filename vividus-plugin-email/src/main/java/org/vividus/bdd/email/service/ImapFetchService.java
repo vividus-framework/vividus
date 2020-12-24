@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.mail.Authenticator;
 import javax.mail.FetchProfile;
@@ -51,8 +50,8 @@ import org.vividus.bdd.email.factory.EmailMessageFactory.EmailMessageCreationExc
 import org.vividus.bdd.email.model.EmailMessage;
 import org.vividus.bdd.email.model.EmailServerConfiguration;
 import org.vividus.util.Sleeper;
+import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
-import org.vividus.util.wait.Waiter;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -115,7 +114,7 @@ public class ImapFetchService implements EmailFetchService
             }
             else
             {
-                Waiter waiter = new Waiter(waitMode);
+                DurationBasedWaiter waiter = new DurationBasedWaiter(waitMode);
                 List<Message> output = interruptible(() -> waiter.wait(listener::getMessages, msgs -> !msgs.isEmpty()));
                 return asMailMessages(output);
             }
@@ -317,8 +316,7 @@ public class ImapFetchService implements EmailFetchService
                         messageHandleCondition.await();
                     }
                 }
-                return StreamSupport.stream(this.messages.spliterator(), false)
-                                    .collect(Collectors.toList());
+                return new ArrayList<>(this.messages);
             }
             finally
             {

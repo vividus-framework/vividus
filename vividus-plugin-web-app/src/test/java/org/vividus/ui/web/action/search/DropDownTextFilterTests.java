@@ -92,6 +92,12 @@ class DropDownTextFilterTests
         assertEquals(webElements, foundElements);
     }
 
+    @Test
+    void shouldReturnLocatorType()
+    {
+        assertEquals(WebLocatorType.DROP_DOWN_TEXT, fieldTextFilter.getType());
+    }
+
     private void stubDropDown()
     {
         WebElement option = mock(WebElement.class);

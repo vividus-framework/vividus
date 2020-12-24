@@ -19,6 +19,7 @@ package org.vividus.softassert.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.vividus.softassert.issue.KnownIssueIdentifier;
 import org.vividus.softassert.issue.KnownIssueType;
 
 public class KnownIssue implements Serializable
@@ -31,13 +32,17 @@ public class KnownIssue implements Serializable
     private final String identifier;
     private final KnownIssueType type;
     private final boolean potentiallyKnown;
+    private final boolean failTestCaseFast;
+    private final boolean failTestSuiteFast;
     private String status;
     private String resolution;
 
-    public KnownIssue(String identifier, KnownIssueType type, boolean potentiallyKnown)
+    public KnownIssue(String identifier, KnownIssueIdentifier issueIdentifier, boolean potentiallyKnown)
     {
         this.identifier = identifier;
-        this.type = type;
+        this.type = issueIdentifier.getType();
+        this.failTestCaseFast = issueIdentifier.isFailTestCaseFast();
+        this.failTestSuiteFast = issueIdentifier.isFailTestSuiteFast();
         this.potentiallyKnown = potentiallyKnown;
     }
 
@@ -87,10 +92,20 @@ public class KnownIssue implements Serializable
                 && FIXED_ISSUE_RESOLUTIONS_STRING.contains(resolution.toLowerCase());
     }
 
+    public boolean isFailTestCaseFast()
+    {
+        return failTestCaseFast;
+    }
+
+    public boolean isFailTestSuiteFast()
+    {
+        return failTestSuiteFast;
+    }
+
     @Override
     public int hashCode()
     {
-        return Objects.hash(identifier, type, potentiallyKnown, status);
+        return Objects.hash(identifier, type, potentiallyKnown, failTestCaseFast, failTestSuiteFast, status);
     }
 
     @Override
@@ -109,7 +124,10 @@ public class KnownIssue implements Serializable
             return false;
         }
         KnownIssue other = (KnownIssue) obj;
-        return Objects.equals(identifier, other.identifier) && potentiallyKnown == other.potentiallyKnown
+        return Objects.equals(identifier, other.identifier)
+                && potentiallyKnown == other.potentiallyKnown
+                && failTestCaseFast == other.failTestCaseFast
+                && failTestSuiteFast == other.failTestSuiteFast
                 && Objects.equals(status, other.status) && type == other.type;
     }
 }

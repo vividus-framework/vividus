@@ -21,52 +21,52 @@ import java.util.function.Consumer;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.IJavascriptActions;
-import org.vividus.ui.web.context.IWebUiContext;
+import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 public enum ScrollDirection
 {
     TOP
     {
         @Override
-        public void scroll(IWebUiContext webUiContext, IJavascriptActions javascriptActions)
+        public void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions)
         {
-            scrollContext(javascriptActions::scrollToStartOfPage, javascriptActions::scrollToStartOf, webUiContext);
+            scrollContext(javascriptActions::scrollToStartOfPage, javascriptActions::scrollToStartOf, uiContext);
         }
     },
     BOTTOM
     {
         @Override
-        public void scroll(IWebUiContext webUiContext, IJavascriptActions javascriptActions)
+        public void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions)
         {
-            scrollContext(javascriptActions::scrollToEndOfPage, javascriptActions::scrollToEndOf, webUiContext);
+            scrollContext(javascriptActions::scrollToEndOfPage, javascriptActions::scrollToEndOf, uiContext);
         }
     },
     LEFT
     {
         @Override
-        public void scroll(IWebUiContext webUiContext, IJavascriptActions javascriptActions)
+        public void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions)
         {
             scrollContext(ScrollDirection::unsupportedScroll, javascriptActions::scrollToLeftOf,
-                    webUiContext);
+                    uiContext);
         }
     },
     RIGHT
     {
         @Override
-        public void scroll(IWebUiContext webUiContext, IJavascriptActions javascriptActions)
+        public void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions)
         {
             scrollContext(ScrollDirection::unsupportedScroll, javascriptActions::scrollToRightOf,
-                    webUiContext);
+                    uiContext);
         }
     };
 
-    public abstract void scroll(IWebUiContext webUiContext, IJavascriptActions javascriptActions);
+    public abstract void scroll(IUiContext uiContext, WebJavascriptActions javascriptActions);
 
     private static void scrollContext(Runnable pageScroller, Consumer<WebElement> elementScroller,
-            IWebUiContext webUiContext)
+            IUiContext uiContext)
     {
-        SearchContext context = webUiContext.getSearchContext();
+        SearchContext context = uiContext.getSearchContext();
         if (context instanceof WebDriver)
         {
             pageScroller.run();

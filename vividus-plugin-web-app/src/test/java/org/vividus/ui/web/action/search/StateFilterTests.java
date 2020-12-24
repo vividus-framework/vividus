@@ -82,4 +82,10 @@ class StateFilterTests
         filter.filter(webElements, null);
         verifyNoInteractions(webDriver);
     }
+
+    @Test
+    void shouldReturnLocatorType()
+    {
+        assertEquals(WebLocatorType.STATE, filter.getType());
+    }
 }

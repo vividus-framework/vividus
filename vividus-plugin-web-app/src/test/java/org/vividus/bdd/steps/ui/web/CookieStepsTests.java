@@ -38,7 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.steps.ui.web.validation.IHighlightingSoftAssert;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.action.CookieManager;
@@ -55,7 +55,7 @@ class CookieStepsTests
     private INavigateActions navigateActions;
 
     @Mock
-    private IHighlightingSoftAssert softAssert;
+    private IDescriptiveSoftAssert softAssert;
 
     @Mock
     private CookieManager cookieManager;

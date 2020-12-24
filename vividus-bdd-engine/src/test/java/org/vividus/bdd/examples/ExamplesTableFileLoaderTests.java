@@ -34,7 +34,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.vividus.bdd.resource.BddResourceLoader;
 import org.vividus.bdd.resource.ResourceLoadException;
-import org.vividus.bdd.steps.ParameterAdaptor;
+import org.vividus.bdd.steps.VariableResolver;
 
 @ExtendWith(MockitoExtension.class)
 class ExamplesTableFileLoaderTests
@@ -47,7 +47,7 @@ class ExamplesTableFileLoaderTests
     private BddResourceLoader bddResourceLoader;
 
     @Mock
-    private ParameterAdaptor parameterAdaptor;
+    private VariableResolver variableResolver;
 
     @InjectMocks
     private ExamplesTableFileLoader examplesTableFileLoader;
@@ -58,7 +58,7 @@ class ExamplesTableFileLoaderTests
     void testLoadExamplesTable()
     {
         Resource resource = resourceLoader.getResource(TABLE_FILENAME);
-        when(parameterAdaptor.convert(PRE_PROCESSED)).thenReturn(TABLE_FILENAME);
+        when(variableResolver.resolve(PRE_PROCESSED)).thenReturn(TABLE_FILENAME);
         when(bddResourceLoader.getResource(TABLE_FILENAME)).thenReturn(resource);
         String actual = examplesTableFileLoader.loadExamplesTable(PRE_PROCESSED);
         assertEquals(TABLE_CONTENT, actual.trim());
@@ -68,7 +68,7 @@ class ExamplesTableFileLoaderTests
     void shouldCacheExamplesTableByPath()
     {
         Resource resource = resourceLoader.getResource(TABLE_FILENAME);
-        when(parameterAdaptor.convert(PRE_PROCESSED)).thenReturn(TABLE_FILENAME);
+        when(variableResolver.resolve(PRE_PROCESSED)).thenReturn(TABLE_FILENAME);
         when(bddResourceLoader.getResource(TABLE_FILENAME)).thenReturn(resource);
         examplesTableFileLoader.setCacheTables(true);
         assertEquals(TABLE_CONTENT, examplesTableFileLoader.loadExamplesTable(PRE_PROCESSED).trim());
@@ -81,7 +81,7 @@ class ExamplesTableFileLoaderTests
     {
         String resourcePath = "resourcePath";
         Resource resource = mock(Resource.class);
-        when(parameterAdaptor.convert(PRE_PROCESSED)).thenReturn(resourcePath);
+        when(variableResolver.resolve(PRE_PROCESSED)).thenReturn(resourcePath);
         when(bddResourceLoader.getResource(resourcePath)).thenReturn(resource);
         String exceptionMessage = "Resource IOException";
         IOException ioException = new IOException(exceptionMessage);

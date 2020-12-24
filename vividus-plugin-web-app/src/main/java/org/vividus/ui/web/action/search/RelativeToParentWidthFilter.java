@@ -18,16 +18,24 @@ package org.vividus.ui.web.action.search;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
+import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.web.util.ElementUtil;
 
-public class RelativeToParentWidthFilter extends AbstractElementFilterAction
+public class RelativeToParentWidthFilter implements IElementFilterAction
 {
     @Override
-    protected boolean matches(WebElement element, String relativeToParentWidth)
+    public boolean matches(WebElement element, String relativeToParentWidth)
     {
         int expectedRelativeToParentWidth = Integer.parseInt(relativeToParentWidth);
         WebElement parentElement = element.findElement(By.xpath(".."));
         return Math.abs(expectedRelativeToParentWidth - ElementUtil.getElementWidthInPerc(parentElement, element))
                 <= ElementUtil.ACCURACY;
+    }
+
+    @Override
+    public LocatorType getType()
+    {
+        return WebLocatorType.RELATIVE_TO_PARENT_WIDTH;
     }
 }

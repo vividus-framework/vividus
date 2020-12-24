@@ -94,13 +94,12 @@ class JsonDiffMatcherTests
     void testDescribeMismatchItemMatches()
     {
         Description description = mock(Description.class);
-        Object object = mock(Object.class);
-        when(object.toString()).thenReturn(JSON);
+        Object object = JSON;
         JsonDiffMatcher matcher = createMatcher(JSON);
         matcher.matches(JSON);
         matcher.describeMismatch(object, description);
         verify(description).appendText(JSON);
-        verifyNoMoreInteractions(description, object);
+        verifyNoMoreInteractions(description);
     }
 
     @Test

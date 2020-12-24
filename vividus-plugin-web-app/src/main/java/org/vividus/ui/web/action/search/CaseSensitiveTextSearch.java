@@ -21,11 +21,20 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
+import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
-public class CaseSensitiveTextSearch extends AbstractElementFilterAction implements IElementSearchAction
+public class CaseSensitiveTextSearch extends AbstractWebElementSearchAction
+        implements IElementSearchAction, IElementFilterAction
 {
     private static final String ANY = "*";
+
+    public CaseSensitiveTextSearch()
+    {
+        super(WebLocatorType.CASE_SENSITIVE_TEXT);
+    }
 
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
@@ -39,7 +48,7 @@ public class CaseSensitiveTextSearch extends AbstractElementFilterAction impleme
     }
 
     @Override
-    protected boolean matches(WebElement element, String text)
+    public boolean matches(WebElement element, String text)
     {
         String elementText = getWebElementActions().getElementText(element);
         return text.equals(elementText) || StringUtils.equalsIgnoreCase(elementText, text) && matchesToText(element,

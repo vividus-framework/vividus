@@ -18,7 +18,6 @@ package org.vividus.bdd.expression;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
@@ -38,7 +37,7 @@ import org.vividus.util.ILocationProvider;
 import org.vividus.util.ResourceUtils;
 
 @Named
-public class StringsExpressionProcessor extends DelegatingExpressionProcessor
+public class StringsExpressionProcessor extends DelegatingExpressionProcessor<String>
 {
     private static final Pattern COMMA_SEPARATED = Pattern.compile("(?<!\\\\), ?");
     private static final Pattern ESCAPED_COMMA = Pattern.compile("\\\\,");
@@ -63,7 +62,6 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor
             new UnaryExpressionProcessor("uncapitalize",      StringUtils::uncapitalize),
             new UnaryExpressionProcessor("generate",          input -> generate(locationProvider.getLocale(), input)),
             new UnaryExpressionProcessor("generateLocalized", generateLocalized()),
-            new UnaryExpressionProcessor("encodeUrl",         input -> URLEncoder.encode(input, UTF_8)),
             new UnaryExpressionProcessor("loadResource",      ResourceUtils::loadResource),
             new UnaryExpressionProcessor("resourceToBase64",  input -> Base64.getEncoder()
                     .encodeToString(ResourceUtils.loadResourceAsByteArray(input))),

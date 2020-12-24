@@ -39,9 +39,9 @@ public class ExpressionAdaptor
 
     private static final String REPLACEMENT_PATTERN = "\\#\\{%s\\}";
 
-    private List<IExpressionProcessor> processors;
+    private List<IExpressionProcessor<?>> processors;
 
-    public String process(String value)
+    public Object process(String value)
     {
         try
         {
@@ -55,7 +55,7 @@ public class ExpressionAdaptor
         }
     }
 
-    private String processExpression(String value, Iterator<Pattern> expressionPatterns)
+    private Object processExpression(String value, Iterator<Pattern> expressionPatterns)
     {
         String processedValue = value;
         Matcher expressionMatcher = expressionPatterns.next().matcher(processedValue);
@@ -64,11 +64,16 @@ public class ExpressionAdaptor
         {
             expressionFound = true;
             String expression = expressionMatcher.group(1);
-            String expressionResult = apply(expression);
+            Object expressionResult = apply(expression);
+            if (!(expressionResult instanceof String) && processedValue.startsWith("#{" + expression))
+            {
+                return expressionResult;
+            }
             if (!expressionResult.equals(expression))
             {
                 String regex = String.format(REPLACEMENT_PATTERN, Pattern.quote(expression));
-                processedValue = processedValue.replaceFirst(regex, Matcher.quoteReplacement(expressionResult));
+                processedValue = processedValue.replaceFirst(regex,
+                    Matcher.quoteReplacement(String.valueOf(expressionResult)));
                 expressionFound = false;
                 expressionMatcher.reset(processedValue);
             }
@@ -80,11 +85,11 @@ public class ExpressionAdaptor
         return processedValue;
     }
 
-    private String apply(String expression)
+    private Object apply(String expression)
     {
-        for (IExpressionProcessor processor : processors)
+        for (IExpressionProcessor<?> processor : processors)
         {
-            Optional<String> optional = processor.execute(expression);
+            Optional<?> optional = processor.execute(expression);
             if (optional.isPresent())
             {
                 return optional.get();
@@ -94,7 +99,7 @@ public class ExpressionAdaptor
     }
 
     @Inject
-    public void setProcessors(List<IExpressionProcessor> processors)
+    public void setProcessors(List<IExpressionProcessor<?>> processors)
     {
         this.processors = processors;
     }

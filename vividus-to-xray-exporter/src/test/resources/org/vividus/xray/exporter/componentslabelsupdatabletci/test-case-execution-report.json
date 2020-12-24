@@ -1,0 +1,67 @@
+{
+  "path": "storyPath",
+  "title": "",
+  "lifecycle": {
+    "keyword": "Lifecycle:"
+  },
+  "beforeStorySteps": [],
+  "scenarios": [
+    {
+      "keyword": "Scenario:",
+      "title": "Dummy scenario",
+      "meta": [
+        {
+          "keyword": "@",
+          "name": "testCaseId",
+          "value": "STUB-0"
+        },
+        {
+          "keyword": "@",
+          "name": "requirementId",
+          "value": ""
+        },
+        {
+          "keyword": "@",
+          "name": "xray.components",
+          "value": "dummy-component-1; dummy-component-2"
+        },
+        {
+          "keyword": "@",
+          "name": "xray.labels",
+          "value": "dummy-label-1; dummy-label-2"
+        }
+      ],
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "!-- Comment"
+        ],
+        "parameters": {
+          "names": [],
+          "values": []
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "value": "{xray.labels=dummy-label-1; dummy-label-2, xray.components=dummy-label-1; dummy-label-2, key=stub, testCaseId=STUB-1}",
+            "steps": [
+              {
+                "outcome": "comment",
+                "value": "!-- Step: Step"
+              },
+              {
+                "outcome": "comment",
+                "value": "!-- Data: Data"
+              },
+              {
+                "outcome": "comment",
+                "value": "!-- Result: Result"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "afterStorySteps": []
+}

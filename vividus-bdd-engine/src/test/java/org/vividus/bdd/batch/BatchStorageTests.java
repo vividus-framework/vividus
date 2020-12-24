@@ -30,18 +30,25 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.vividus.util.property.IPropertyMapper;
+import org.vividus.util.property.PropertyMapper;
+import org.vividus.util.property.PropertyParser;
 
 class BatchStorageTests
 {
+    private static final String BATCH_LOADER_PROPERTY_PREFIX = "bdd.story-loader.batch-";
+
     private static final List<String> BATCH_NUMBERS = List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
     private static final List<String> BATCH_KEYS = BATCH_NUMBERS.stream().map(n -> "batch-" + n).collect(
             Collectors.toList());
+
+    private static final String DEFAULT_RESOURCE_LOCATION = "";
 
     private static final long DEFAULT_TIMEOUT = 300;
     private static final List<String> DEFAULT_META_FILTERS = List.of("groovy: !skip");
@@ -53,51 +60,53 @@ class BatchStorageTests
 
     private BatchStorage batchStorage;
 
-    private Map<String, BatchResourceConfiguration> batchResourceConfigurations;
-
     @BeforeEach
     void beforeEach() throws IOException
     {
-        batchResourceConfigurations = new HashMap<>();
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(1), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(0), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(9), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(2), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(3), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(4), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(5), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(6), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(7), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(8), new BatchResourceConfiguration());
-        batchResourceConfigurations.put(BATCH_NUMBERS.get(10), new BatchResourceConfiguration());
+        Map<String, String> batchResourceConfigurations = new HashMap<>();
+        addBatchResourceConfiguration(batchResourceConfigurations, 1);
+        addBatchResourceConfiguration(batchResourceConfigurations, 0);
+        addBatchResourceConfiguration(batchResourceConfigurations, 9);
+        addBatchResourceConfiguration(batchResourceConfigurations, 2);
+        addBatchResourceConfiguration(batchResourceConfigurations, 3);
+        addBatchResourceConfiguration(batchResourceConfigurations, 4);
+        addBatchResourceConfiguration(batchResourceConfigurations, 5);
+        addBatchResourceConfiguration(batchResourceConfigurations, 6);
+        addBatchResourceConfiguration(batchResourceConfigurations, 7);
+        addBatchResourceConfiguration(batchResourceConfigurations, 8);
+        addBatchResourceConfiguration(batchResourceConfigurations, 10);
 
-        BatchExecutionConfiguration batchExecutionConfiguration1 = new BatchExecutionConfiguration();
-        batchExecutionConfiguration1.setMetaFilters((String) null);
-        batchExecutionConfiguration1.setIgnoreFailure(null);
-        BatchExecutionConfiguration batchExecutionConfiguration2 = new BatchExecutionConfiguration();
-        batchExecutionConfiguration2.setName(BATCH_2_NAME);
-        batchExecutionConfiguration2.setThreads(BATCH_2_THREADS);
-        batchExecutionConfiguration2.setStoryExecutionTimeout(BATCH_2_TIMEOUT);
-        batchExecutionConfiguration2.setMetaFilters(BATCH_2_META_FILTERS);
-        batchExecutionConfiguration2.setIgnoreFailure(false);
-        Map<String, BatchExecutionConfiguration> batchExecutionConfigurations = new HashMap<>();
-        batchExecutionConfigurations.put(BATCH_NUMBERS.get(0), batchExecutionConfiguration1);
-        batchExecutionConfigurations.put(BATCH_NUMBERS.get(1), batchExecutionConfiguration2);
-
-        IPropertyMapper propertyMapper = mock(IPropertyMapper.class);
-        when(propertyMapper.readValues("bdd.story-loader.batch-", BatchResourceConfiguration.class)).thenReturn(
+        PropertyParser propertyParser = mock(PropertyParser.class);
+        when(propertyParser.getPropertiesByPrefix(BATCH_LOADER_PROPERTY_PREFIX)).thenReturn(
                 batchResourceConfigurations);
-        when(propertyMapper.readValues("bdd.batch-", BatchExecutionConfiguration.class)).thenReturn(
-                batchExecutionConfigurations);
+        when(propertyParser.getPropertiesByPrefix("bdd.batch-")).thenReturn(Map.of(
+            "bdd.batch-1.ignore-failure", "",
+            "bdd.batch-2.name", BATCH_2_NAME,
+            "bdd.batch-2.threads", Integer.toString(BATCH_2_THREADS),
+            "bdd.batch-2.story-execution-timeout", BATCH_2_TIMEOUT.toString(),
+            "bdd.batch-2.meta-filters", BATCH_2_META_FILTERS,
+            "bdd.batch-2.ignore-failure", "false"
+        ));
 
+        IPropertyMapper propertyMapper = new PropertyMapper(propertyParser, Set.of());
         batchStorage = new BatchStorage(propertyMapper, Long.toString(DEFAULT_TIMEOUT), DEFAULT_META_FILTERS, true);
+    }
+
+    private void addBatchResourceConfiguration(Map<String, String> batchResourceConfigurations, int i)
+    {
+        batchResourceConfigurations.put(BATCH_LOADER_PROPERTY_PREFIX + BATCH_NUMBERS.get(i) + ".resource-location",
+                DEFAULT_RESOURCE_LOCATION);
     }
 
     @Test
     void shouldGetBatchResourceConfigurationByKey()
     {
         BatchResourceConfiguration batch = batchStorage.getBatchResourceConfiguration(BATCH_KEYS.get(0));
-        assertEquals(batchResourceConfigurations.get(BATCH_NUMBERS.get(0)), batch);
+        assertAll(
+            () -> assertEquals(DEFAULT_RESOURCE_LOCATION, batch.getResourceLocation()),
+            () -> assertEquals(List.of(), batch.getResourceIncludePatterns()),
+            () -> assertEquals(List.of(), batch.getResourceExcludePatterns())
+        );
     }
 
     @Test

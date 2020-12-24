@@ -34,8 +34,8 @@ public class NavigateActions implements INavigateActions
 
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private ISoftAssert softAssert;
-    @Inject private IJavascriptActions javascriptActions;
-    @Inject private IWaitActions waitActions;
+    @Inject private WebJavascriptActions javascriptActions;
+    @Inject private IWebWaitActions waitActions;
     private final ThreadLocal<Long> actualPageLoadTimeInMs = ThreadLocal.withInitial(() -> 0L);
 
     @Override

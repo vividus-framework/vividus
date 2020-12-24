@@ -75,7 +75,7 @@ public enum CollectionComparisonRule
     @SuppressWarnings("unchecked")
     private static <T> T[] asArray(List<T> items)
     {
-        return (T[]) items.toArray(l -> new Object[l]);
+        return (T[]) items.toArray(Object[]::new);
     }
 
     public abstract <T> Matcher<Iterable<T>> getComparisonRule(List<T> items);

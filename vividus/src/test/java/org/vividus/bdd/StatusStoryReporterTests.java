@@ -32,6 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.exception.VerificationError;
+import org.vividus.softassert.issue.KnownIssueIdentifier;
 import org.vividus.softassert.issue.KnownIssueType;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
@@ -115,7 +116,7 @@ class StatusStoryReporterTests
     void testKnownIssuesOnly()
     {
         SoftAssertionError softAssertionError = new SoftAssertionError(null);
-        softAssertionError.setKnownIssue(new KnownIssue(null, KnownIssueType.AUTOMATION, false));
+        softAssertionError.setKnownIssue(createKnownIssue(false));
         VerificationError verificationError = new VerificationError(null, List.of(softAssertionError));
         UUIDExceptionWrapper throwable = new UUIDExceptionWrapper(verificationError);
         statusStoryReporter.failed(null, throwable);
@@ -127,7 +128,7 @@ class StatusStoryReporterTests
     void testFailedWithPotentiallyKnownIssue()
     {
         SoftAssertionError softAssertionError = new SoftAssertionError(null);
-        softAssertionError.setKnownIssue(new KnownIssue(null, KnownIssueType.AUTOMATION, true));
+        softAssertionError.setKnownIssue(createKnownIssue(true));
         VerificationError verificationError = new VerificationError(null, List.of(softAssertionError));
         UUIDExceptionWrapper throwable = new UUIDExceptionWrapper(verificationError);
         statusStoryReporter.failed(null, throwable);
@@ -151,5 +152,25 @@ class StatusStoryReporterTests
         statusStoryReporter.successful(null);
         assertEquals(Optional.of(Status.BROKEN), statusStoryReporter.getRunStatus());
         verify(nextStoryReporter).failed(null, null);
+    }
+
+    @Test
+    void shouldSwitchKnownIssuesOnlyToPending()
+    {
+        SoftAssertionError softAssertionError = new SoftAssertionError(null);
+        softAssertionError.setKnownIssue(createKnownIssue(false));
+        VerificationError verificationError = new VerificationError(null, List.of(softAssertionError));
+        UUIDExceptionWrapper throwable = new UUIDExceptionWrapper(verificationError);
+        statusStoryReporter.failed(null, throwable);
+        assertEquals(Optional.of(Status.KNOWN_ISSUES_ONLY), statusStoryReporter.getRunStatus());
+        statusStoryReporter.pending(null);
+        assertEquals(Optional.of(Status.PENDING), statusStoryReporter.getRunStatus());
+    }
+
+    private KnownIssue createKnownIssue(boolean potentiallyKnown)
+    {
+        KnownIssueIdentifier identifier = new KnownIssueIdentifier();
+        identifier.setType(KnownIssueType.AUTOMATION);
+        return new KnownIssue(null, identifier, potentiallyKnown);
     }
 }

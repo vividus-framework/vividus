@@ -25,11 +25,15 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.message.BasicHeader;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
@@ -41,8 +45,8 @@ import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
-import org.vividus.util.wait.Waiter;
 
 public class HttpRequestSteps
 {
@@ -73,19 +77,22 @@ public class HttpRequestSteps
      * Sets multipart request entity that will be used while sending request
      * <div>Example:</div>
      * <code>
-     *   <br>Given multipart request:
-     *   <br>|name       |type|value                                     |
-     *   <br>|binaryImage|file|/story/bvt/user_avatar.png|
+     * <br>Given multipart request:
+     * <br>|type|name    |value         |contentType|fileName       |
+     * <br>|file|file-key|/data/file.txt|text/plain |anotherName.txt|
      * </code>
      * <br>
      * <br>where
      * <ul>
+     *   <li><code>type</code> is one of request part types: STRING, FILE, BINARY</li>
      *   <li><code>name</code> is request part name</li>
-     *   <li><code>type</code> is one of request types: STRING, FILE</li>
-     *   <li><code>value</code> is actual content for STRING request type and file path for FILE request type</li>
+     *   <li><code>value</code> is the resource path for FILE part type and the actual content for STRING and BINARY
+     *   part types</li>
+     *   <li><code>contentType</code> is the content type</li>
+     *   <li><code>fileName</code> is the name of the file contained in this request part. The parameter is not allowed
+     *   for STRING part type, but it's required for BINARY one and optional for FILE part type</li>
      * </ul>
      * @param requestParts HTTP request parts
-     *
      */
     @Given("multipart request:$requestParts")
     public void putMultipartRequest(ExamplesTable requestParts)
@@ -93,11 +100,16 @@ public class HttpRequestSteps
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
         for (Parameters row : requestParts.getRowsAsParameters(true))
         {
+            RequestPartType requestPartType = row.valueAs("type", RequestPartType.class);
             String name = row.valueAs(NAME, String.class);
             String value = row.valueAs(VALUE, String.class);
-            String contentType = row.valueAs("contentType", String.class, null);
-            RequestPartType requestPartType = row.valueAs("type", RequestPartType.class);
-            requestPartType.addPart(multipartEntityBuilder, name, value, Optional.ofNullable(contentType));
+            String contentTypeStr = row.valueAs("contentType", String.class, null);
+            String fileName = row.valueAs("fileName", String.class, null);
+            ContentType contentType = StringUtils.isBlank(contentTypeStr) ? requestPartType.getDefaultContentType()
+                    : ContentType.parse(contentTypeStr);
+            ContentBody part = StringUtils.isBlank(fileName) ? requestPartType.createPart(value, contentType)
+                    : requestPartType.createPart(value, contentType, fileName);
+            multipartEntityBuilder.addPart(name, part);
         }
         httpTestContext.putRequestEntity(multipartEntityBuilder.build());
     }
@@ -110,10 +122,18 @@ public class HttpRequestSteps
     @When("I set request headers:$headers")
     public void setUpRequestHeaders(ExamplesTable headers)
     {
-        List<Header> requestHeaders = headers.getRowsAsParameters(true).stream()
-                .map(row -> new BasicHeader(row.valueAs(NAME, String.class), row.valueAs(VALUE, String.class)))
-                .collect(toList());
-        httpTestContext.putRequestHeaders(requestHeaders);
+        performWithHeaders(headers, httpTestContext::putRequestHeaders);
+    }
+
+    /**
+     * Add request headers
+     * @param headers ExamplesTable representing list of headers with columns "name" and "value" specifying HTTP header
+     * names and values respectively
+     */
+    @When("I add request headers:$headers")
+    public void addRequestHeaders(ExamplesTable headers)
+    {
+        performWithHeaders(headers, httpTestContext::addRequestHeaders);
     }
 
     /**
@@ -227,10 +247,18 @@ public class HttpRequestSteps
     public void waitForResponseCode(int responseCode, Duration duration, int retryTimes,
             SubSteps stepsToExecute)
     {
-        new Waiter(new WaitMode(duration, retryTimes)).wait(
+        new DurationBasedWaiter(new WaitMode(duration, retryTimes)).wait(
                 () -> stepsToExecute.execute(Optional.empty()),
                 () -> isResponseCodeIsEqualToExpected(httpTestContext.getResponse(), responseCode)
         );
+    }
+
+    private void performWithHeaders(ExamplesTable headers, Consumer<List<Header>> headersConsumer)
+    {
+        List<Header> requestHeaders = headers.getRowsAsParameters(true).stream()
+                .map(row -> new BasicHeader(row.valueAs(NAME, String.class), row.valueAs(VALUE, String.class)))
+                .collect(toList());
+        headersConsumer.accept(requestHeaders);
     }
 
     private boolean isResponseCodeIsEqualToExpected(HttpResponse response, int expectedResponseCode)

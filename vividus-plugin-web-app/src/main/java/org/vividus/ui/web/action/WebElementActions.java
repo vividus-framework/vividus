@@ -17,21 +17,16 @@
 package org.vividus.ui.web.action;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.steps.ui.web.validation.IBaseValidations;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.search.SearchAttributes;
 import org.vividus.ui.web.util.FormatUtil;
 
 public class WebElementActions implements IWebElementActions
@@ -39,13 +34,9 @@ public class WebElementActions implements IWebElementActions
     private static final Logger LOGGER = LoggerFactory.getLogger(WebElementActions.class);
     private static final char APOSTROPHE = '\'';
     private static final char QUOTE = '"';
-    private static final int TEXT_TYPING_ATTEMPTS_LIMIT = 5;
-    private static final String AN_ELEMENT_WITH_ATTRIBUTES = "An element with attributes%1$s";
 
-    @Inject private IBaseValidations baseValidations;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverManager webDriverManager;
-    @Inject private ISoftAssert softAssert;
 
     @Override
     public String getCssValue(WebElement element, String propertyName)
@@ -71,54 +62,6 @@ public class WebElementActions implements IWebElementActions
         // CHROME only: The script returns content in single or double quotes depending on the browser
         return content == null || content.isEmpty() || "none".equals(content)
                 ? "" : content.substring(1, content.length() - 1);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void typeText(SearchAttributes locator, String text)
-    {
-        WebElement element = findElement(locator);
-        if (element != null)
-        {
-            String normalizedText = FormatUtil.normalizeLineEndings(text);
-            element.clear();
-            LOGGER.info("Entering text \"{}\" in element", normalizedText);
-            if (webDriverManager.isTypeAnyOf(WebDriverType.SAFARI) && isElementContenteditable(element))
-            {
-                javascriptActions.executeScript("var element = arguments[0];element.innerHTML = arguments[1];", element,
-                        normalizedText);
-                return;
-            }
-            try
-            {
-                element.sendKeys(normalizedText);
-            }
-            catch (StaleElementReferenceException e)
-            {
-                LOGGER.info("An element is stale. One more attempt to type text into it");
-                element = findElement(locator);
-                element.sendKeys(normalizedText);
-            }
-            // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
-            if (webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE) && Boolean.TRUE.equals(
-                    ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(WebDriverType.IE_OPTIONS))
-                            .get("requireWindowFocus")))
-            {
-                int iterationsCounter = TEXT_TYPING_ATTEMPTS_LIMIT;
-                while (iterationsCounter > 0 && !isValueEqualTo(element, normalizedText))
-                {
-                    element.clear();
-                    LOGGER.info("Re-typing text \"{}\" to element", normalizedText);
-                    element.sendKeys(normalizedText);
-                    iterationsCounter--;
-                }
-                if (iterationsCounter == 0 && !isValueEqualTo(element, normalizedText))
-                {
-                    softAssert.recordFailedAssertion(String.format("The element is not filled correctly"
-                            + " after %d typing attempt(s)", TEXT_TYPING_ATTEMPTS_LIMIT + 1));
-                }
-            }
-        }
     }
 
     @Override
@@ -164,11 +107,6 @@ public class WebElementActions implements IWebElementActions
         return javascriptActions.executeScript(script);
     }
 
-    private WebElement findElement(SearchAttributes locator)
-    {
-        return baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator), locator);
-    }
-
     @Override
     public String getPageText()
     {
@@ -188,6 +126,26 @@ public class WebElementActions implements IWebElementActions
     }
 
     @Override
+    public boolean isElementVisible(WebElement element)
+    {
+        return isElementVisible(element, false);
+    }
+
+    private boolean isElementVisible(WebElement element, boolean scrolled)
+    {
+        if (!element.isDisplayed())
+        {
+            if (!scrolled)
+            {
+                javascriptActions.scrollIntoView(element, true);
+                return isElementVisible(element, true);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean isPageVisibleAreaScrolledToElement(final WebElement element)
     {
         if (element != null)
@@ -200,13 +158,9 @@ public class WebElementActions implements IWebElementActions
         return false;
     }
 
-    private static boolean isElementContenteditable(WebElement element)
+    @Override
+    public boolean isElementContenteditable(WebElement element)
     {
         return Boolean.parseBoolean(element.getAttribute("contenteditable"));
-    }
-
-    private boolean isValueEqualTo(WebElement element, String expectedValue)
-    {
-        return expectedValue.equals(javascriptActions.executeScript("return arguments[0].value;", element));
     }
 }

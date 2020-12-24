@@ -65,13 +65,13 @@ public final class ExamplesTableProcessor
      * @param properties table properties
      * @return examples table as string
      */
-    public static String buildExamplesTable(Collection<String> headers, List<Map<String, String>> rows,
+    public static String buildExamplesTable(Collection<String> headers, Collection<Map<String, String>> rows,
             TableProperties properties)
     {
         return buildExamplesTable(headers, asDataRows(rows), properties, false, false);
     }
 
-    private static List<List<String>> asDataRows(List<Map<String, String>> rows)
+    private static List<List<String>> asDataRows(Collection<Map<String, String>> rows)
     {
         return rows.stream()
                 .map(LinkedHashMap::new)

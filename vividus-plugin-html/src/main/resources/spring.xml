@@ -10,6 +10,6 @@
     <bean id="htmlSteps" class="org.vividus.bdd.steps.html.HtmlSteps" />
 
     <util:list id="stepBeanNames-Html" value-type="java.lang.String">
-        <value>htmlSteps</value>
+        <idref bean="htmlSteps" />
     </util:list>
 </beans>

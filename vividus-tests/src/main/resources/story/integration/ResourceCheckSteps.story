@@ -6,7 +6,7 @@ Meta:
 Lifecycle:
 Examples:
 |pageToValidate          |
-|https://www.example.com/|
+|${vividus-test-site-url}|
 
 Scenario: Verification of Then all resources by selector $cssSelector from $html are valid; Source from HTTP response
 When I issue a HTTP GET request for a resource with the URL '<pageToValidate>'

@@ -30,6 +30,7 @@ import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.exception.HttpRequestBuildException;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
 import org.vividus.util.wait.Waiter;
 
@@ -82,7 +83,7 @@ public class HttpRequestExecutor
     public void executeHttpRequest(HttpMethod httpMethod, String endpoint, Optional<String> relativeURL,
             Predicate<HttpResponse> stopCondition, WaitMode waitMode) throws IOException
     {
-        Waiter waiter = new Waiter(waitMode);
+        Waiter waiter = new DurationBasedWaiter(waitMode);
         try
         {
             waiter.wait(() -> executeHttpCallSafely(httpMethod, endpoint, relativeURL.orElse(null)), stopCondition);

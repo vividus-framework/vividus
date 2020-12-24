@@ -17,12 +17,20 @@
 package org.vividus.ui.web.action.search;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
+import org.vividus.ui.action.search.LocatorType;
 
-public class PlaceholderFilter extends AbstractElementFilterAction
+public class PlaceholderFilter implements IElementFilterAction
 {
     @Override
-    protected boolean matches(WebElement element, String placeholder)
+    public boolean matches(WebElement element, String placeholder)
     {
         return placeholder.equals(element.getAttribute("placeholder"));
+    }
+
+    @Override
+    public LocatorType getType()
+    {
+        return WebLocatorType.PLACEHOLDER;
     }
 }

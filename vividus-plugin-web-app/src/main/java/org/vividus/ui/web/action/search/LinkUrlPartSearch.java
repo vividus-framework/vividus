@@ -22,14 +22,23 @@ import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
+import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
-public class LinkUrlPartSearch extends AbstractElementSearchAction implements IElementSearchAction, IElementFilterAction
+public class LinkUrlPartSearch extends AbstractWebElementSearchAction
+        implements IElementSearchAction, IElementFilterAction
 {
     private static final String LINK_WITH_PART_URL_PATTERN = ".//a[contains(@href, %s)]";
     private static final String LINK_WITH_CASE_INSENSITIVE_URL_PART = ".//a[contains (" + String.format(
             TRANSLATE_TO_LOWER_CASE, "@href") + ", %s)]";
     private boolean caseSensitiveSearch;
+
+    public LinkUrlPartSearch()
+    {
+        super(WebLocatorType.LINK_URL_PART);
+    }
 
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
@@ -59,5 +68,11 @@ public class LinkUrlPartSearch extends AbstractElementSearchAction implements IE
     public void setCaseSensitiveSearch(boolean caseSensitiveSearch)
     {
         this.caseSensitiveSearch = caseSensitiveSearch;
+    }
+
+    @Override
+    public boolean matches(WebElement element, String value)
+    {
+        throw new UnsupportedOperationException();
     }
 }

@@ -19,13 +19,14 @@ package org.vividus.bdd.steps.ui.web.validation;
 import javax.inject.Inject;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.FocusState;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 public class FocusValidations implements IFocusValidations
 {
-    @Inject private IJavascriptActions javascriptActions;
-    @Inject private IHighlightingSoftAssert softAssert;
+    @Inject private WebJavascriptActions javascriptActions;
+    @Inject private IDescriptiveSoftAssert softAssert;
 
     @Override
     public boolean isElementInFocusState(WebElement webElement, FocusState focusState)

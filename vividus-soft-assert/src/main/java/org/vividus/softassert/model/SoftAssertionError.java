@@ -49,4 +49,14 @@ public class SoftAssertionError implements Serializable
     {
         return knownIssue != null && !knownIssue.isPotentiallyKnown();
     }
+
+    public boolean isFailTestCaseFast()
+    {
+        return isKnownIssue() && knownIssue.isFailTestCaseFast();
+    }
+
+    public boolean isFailTestSuiteFast()
+    {
+        return isKnownIssue() && knownIssue.isFailTestSuiteFast();
+    }
 }

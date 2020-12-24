@@ -27,10 +27,10 @@ import com.google.common.base.Suppliers;
 
 import org.openqa.selenium.ScreenOrientation;
 import org.vividus.selenium.IWebDriverFactory;
-import org.vividus.selenium.SauceLabsCapabilityType;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
+import io.appium.java_client.remote.MobileCapabilityType;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
@@ -43,7 +43,7 @@ public class AshotFactory implements IAshotFactory
 
     @Inject private IWebDriverFactory webDriverFactory;
     @Inject private IWebDriverManager webDriverManager;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private ScreenshotDebugger screenshotDebugger;
 
     private final Supplier<ShootingStrategy> baseShootingStrategy = Suppliers.memoize(
@@ -105,7 +105,7 @@ public class AshotFactory implements IAshotFactory
     private AShot createAShot(ShootingStrategy baseShootingStrategy,
             ScreenshotShootingStrategy screenshotShootingStrategy, boolean viewportScreenshot)
     {
-        String deviceName = webDriverFactory.getCapability(SauceLabsCapabilityType.DEVICE_NAME, false);
+        String deviceName = webDriverFactory.getCapability(MobileCapabilityType.DEVICE_NAME, false);
         boolean landscapeOrientation = webDriverManager.isOrientation(ScreenOrientation.LANDSCAPE);
         ShootingStrategy shootingStrategy = screenshotShootingStrategy.getDecoratedShootingStrategy(
                 baseShootingStrategy, viewportScreenshot, landscapeOrientation, deviceName);

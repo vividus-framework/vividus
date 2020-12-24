@@ -22,9 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.Story;
@@ -37,31 +38,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.ReflectionUtils;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
 import org.vividus.bdd.spring.ExtendedConfiguration;
-import org.vividus.bdd.steps.ISubStepsListener;
 import org.vividus.bdd.steps.SubSteps;
 
 @ExtendWith(MockitoExtension.class)
 class SubStepsConverterTests
 {
-    @Mock
-    private ExtendedConfiguration configuration;
-    @Mock
-    private IBddRunContext bddRunContext;
-    @Mock
-    private ISubStepsListener subStepsListener;
-    @Mock
-    private IStepExamplesTableParser stepExamplesTableParser;
-
-    @InjectMocks
-    private SubStepsConverter subStepsConverter;
+    @Mock private ExtendedConfiguration configuration;
+    @Mock private IBddRunContext bddRunContext;
+    @Mock private Embedder embedder;
+    @Mock private IStepExamplesTableParser stepExamplesTableParser;
+    @InjectMocks private SubStepsConverter subStepsConverter;
 
     @Test
-    void testCreateSubSteps()
+    void testCreateSubSteps() throws IllegalAccessException
     {
         ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
         when(configuration.examplesTableFactory()).thenReturn(examplesTableFactory);
@@ -79,15 +72,13 @@ class SubStepsConverterTests
         assertEquals(1, actualStoryReporter.getDelegates().size());
         assertFalse(actualStoryReporter.getDelegates().iterator().next() instanceof ConcurrentStoryReporter);
         assertEquals(configuration, getFieldValue("configuration", executor));
-        assertEquals(subStepsListener, getFieldValue("subStepsListener", executor));
+        assertEquals(embedder, getFieldValue("embedder", executor));
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T getFieldValue(String fieldName, Object objectToExtractValue)
+    private <T> T getFieldValue(String fieldName, Object objectToExtractValue) throws IllegalAccessException
     {
-        Field field = ReflectionUtils.findField(SubSteps.class, fieldName);
-        field.setAccessible(true);
-        return (T) ReflectionUtils.getField(field, objectToExtractValue);
+        return (T) FieldUtils.readField(objectToExtractValue, fieldName, true);
     }
 
     private StoryReporter mockStoryReporter()

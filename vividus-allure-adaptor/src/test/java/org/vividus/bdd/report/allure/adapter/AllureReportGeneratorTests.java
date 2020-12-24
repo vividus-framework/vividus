@@ -16,12 +16,19 @@
 
 package org.vividus.bdd.report.allure.adapter;
 
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,147 +44,207 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.report.allure.AllureReportGenerator;
+import org.vividus.reporter.environment.EnvironmentConfigurer;
+import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
+import io.qameta.allure.Extension;
 import io.qameta.allure.ReportGenerator;
+import io.qameta.allure.behaviors.BehaviorsPlugin;
+import io.qameta.allure.core.Configuration;
+import io.qameta.allure.core.Plugin;
+import io.qameta.allure.duration.DurationTrendPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
+import io.qameta.allure.executor.ExecutorPlugin;
+import io.qameta.allure.history.HistoryTrendPlugin;
+import io.qameta.allure.summary.SummaryPlugin;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.xml.*")
-public class AllureReportGeneratorTests
+@ExtendWith(MockitoExtension.class)
+class AllureReportGeneratorTests
 {
     private static final String ALLURE_CUSTOMIZATION_PATH = "/allure-customization/";
     private static final String ALLURE_CUSTOMIZATION_PATTERN = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
             + ALLURE_CUSTOMIZATION_PATH + "**";
     private static final String ALLURE_RESULTS_DIRECTORY_PROPERTY = "allure.results.directory";
 
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
+    private Path tempDir;
+    private Path resultsDirectory;
 
-    private File resultsDirectory;
-
-    @Mock
-    private PropertyMapper propertyMapper;
-
-    @Mock
-    private ResourcePatternResolver resourcePatternResolver;
+    @Mock private PropertyMapper propertyMapper;
+    @Mock private ResourcePatternResolver resourcePatternResolver;
 
     private AllureReportGenerator allureReportGenerator;
 
-    @Before
-    public void before() throws IOException
+    @BeforeEach
+    void beforeEach(@TempDir Path tempDir) throws IOException
     {
-        resultsDirectory = testFolder.newFolder("allure-results");
-        System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.getAbsolutePath());
+        this.tempDir = tempDir;
+        resultsDirectory = tempDir.resolve("allure-results");
+        Files.createDirectories(resultsDirectory);
+        System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
         allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver);
     }
 
-    @After
-    public void after()
+    @AfterEach
+    void afterEach()
     {
         System.clearProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY);
+        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(Map::clear);
     }
 
     @Test
-    public void testStart() throws IOException
+    void testStart() throws IOException
     {
-        File testFile = testFolder.newFile();
-        File reportDirectory = testFolder.getRoot();
+        File testFile = tempDir.resolve("any.json").toFile();
+        FileUtils.writeLines(testFile, List.of("{}"));
+        File reportDirectory = tempDir.toFile();
         allureReportGenerator.setReportDirectory(reportDirectory);
         allureReportGenerator.start();
         assertFalse(FileUtils.directoryContains(reportDirectory, testFile));
     }
 
     @Test
-    public void testStartNoReportDirectory()
+    void testStartNoReportDirectory()
     {
-        File reportDirectory = Mockito.mock(File.class);
+        File reportDirectory = mock(File.class);
         allureReportGenerator.setReportDirectory(reportDirectory);
         allureReportGenerator.start();
         verify(reportDirectory, never()).listFiles();
     }
 
     @Test
-    @PrepareForTest(FileUtils.class)
-    public void testStartException() throws IOException
+    void testStartException()
     {
-        File reportDirectory = Mockito.mock(File.class);
+        File reportDirectory = mock(File.class);
         allureReportGenerator.setReportDirectory(reportDirectory);
         when(reportDirectory.exists()).thenReturn(true);
-        IOException ioException = Mockito.mock(IOException.class);
-        PowerMockito.mockStatic(FileUtils.class);
-        PowerMockito.doThrow(ioException).when(FileUtils.class);
-        FileUtils.cleanDirectory(reportDirectory);
-        Exception thrown = assertThrows(IllegalStateException.class, () -> allureReportGenerator.start());
-        assertEquals(ioException, thrown.getCause());
+        try (MockedStatic<FileUtils> fileUtils = mockStatic(FileUtils.class))
+        {
+            IOException ioException = new IOException();
+            fileUtils.when(() -> FileUtils.cleanDirectory(reportDirectory)).thenThrow(ioException);
+            Exception thrown = assertThrows(IllegalStateException.class, () -> allureReportGenerator.start());
+            assertEquals(ioException, thrown.getCause());
+        }
     }
 
     @Test
-    @PrepareForTest(AllureReportGenerator.class)
-    public void testEndNotStarted() throws Exception
+    void testEndNotStarted()
     {
-        AllureReportGenerator spy = PowerMockito.spy(allureReportGenerator);
-        spy.end();
-        PowerMockito.verifyPrivate(spy, never()).invoke("generateReport");
+        try (MockedStatic<Files> files = mockStatic(Files.class))
+        {
+            allureReportGenerator.end();
+            files.verifyNoInteractions();
+        }
     }
 
     @Test
-    @PrepareForTest({ReportGenerator.class, AllureReportGenerator.class, FileUtils.class})
-    public void testEndWhenResultsDirectoryExists() throws Exception
+    void testEndWhenResultsDirectoryExists() throws Exception
     {
         testEnd();
     }
 
     @Test
-    @PrepareForTest({ReportGenerator.class, AllureReportGenerator.class, FileUtils.class})
-    public void testEndWhenResultsDirectoryDoesNotExist() throws Exception
+    void testEndWhenResultsDirectoryDoesNotExist() throws Exception
     {
-        resultsDirectory = new File(testFolder.getRoot(), "allure-results-to-be-created");
-        System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.getAbsolutePath());
+        resultsDirectory = tempDir.resolve("allure-results-to-be-created");
+        System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
         allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver);
         testEnd();
     }
 
     @SuppressWarnings("unchecked")
-    private void testEnd() throws Exception
+    private void testEnd() throws IOException
     {
-        File historyDirectory = testFolder.newFolder();
-        allureReportGenerator.setHistoryDirectory(historyDirectory);
-        File reportDirectory = testFolder.getRoot();
+        Path historyDirectory = tempDir.resolve("history");
+        Files.createDirectories(historyDirectory);
+        allureReportGenerator.setHistoryDirectory(historyDirectory.toFile());
+        File reportDirectory = tempDir.toFile();
         allureReportGenerator.setReportDirectory(reportDirectory);
-        ReportGenerator reportGenerator = PowerMockito.mock(ReportGenerator.class);
-        PowerMockito.whenNew(ReportGenerator.class).withAnyArguments().thenReturn(reportGenerator);
-        PowerMockito.mockStatic(FileUtils.class);
-        PowerMockito.doAnswer(a ->
+        try (MockedStatic<FileUtils> fileUtils = mockStatic(FileUtils.class);
+                MockedConstruction<ReportGenerator> reportGenerator = mockConstruction(ReportGenerator.class,
+                        (mock, context) -> {
+                            doAnswer(a -> {
+                                resolveTrendsDir(reportDirectory);
+                                return a;
+                            }).when(mock).generate(any(Path.class), any(List.class));
+
+                            assertEquals(1, context.getCount());
+                            List<?> arguments = context.arguments();
+                            assertEquals(1, arguments.size());
+                            Configuration config = (Configuration) arguments.get(0);
+
+                            List<Plugin> plugins = config.getPlugins();
+                            assertEquals(1, plugins.size());
+
+                            Extension extension = plugins.get(0).getExtensions().get(0);
+                            assertEquals(BehaviorsPlugin.class, extension.getClass());
+
+                            assertThat(config.getAggregators().stream().map(Object::getClass).collect(toList()),
+                                    hasItems(
+                                            SummaryPlugin.class,
+                                            HistoryTrendPlugin.class,
+                                            DurationTrendPlugin.class,
+                                            ExecutorPlugin.class
+                                    )
+                            );
+                        }))
         {
-            resolveTrendsDir(reportDirectory);
-            return a;
-        }).when(reportGenerator).generate(any(Path.class), any(List.class));
-        String text = "text";
-        when(FileUtils.readFileToString(any(File.class), eq(StandardCharsets.UTF_8))).thenReturn(text);
-        allureReportGenerator.setReportDirectory(testFolder.getRoot());
-        Resource resource = mockResource("/allure-customization/some_file.txt");
-        Resource folder = mockResource("/allure-customization/folder/");
-        Resource[] resources = { resource, folder };
-        when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
+            String text = "text";
+            fileUtils.when(() -> FileUtils.readFileToString(any(File.class), eq(StandardCharsets.UTF_8))).thenReturn(
+                    text);
+            allureReportGenerator.setReportDirectory(reportDirectory);
+            Resource resource = mockResource("/allure-customization/some_file.txt");
+            Resource folder = mockResource("/allure-customization/folder/");
+            Resource[] resources = { resource, folder };
+            when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
+            prepareEnvironmentConfiguration();
+            ExecutorInfo executorInfo = createExecutorInfo();
+            when(propertyMapper.readValue("allure.executor.", ExecutorInfo.class)).thenReturn(executorInfo);
+            allureReportGenerator.start();
+            allureReportGenerator.end();
+            fileUtils.verify(never(),
+                    () -> FileUtils.copyInputStreamToFile(eq(folder.getInputStream()), any(File.class)));
+            fileUtils.verify(() -> FileUtils.copyInputStreamToFile(eq(resource.getInputStream()), any(File.class)));
+            fileUtils.verify(times(2),
+                    () -> FileUtils.writeStringToFile(any(File.class), eq(text), eq(StandardCharsets.UTF_8)));
+            fileUtils.verify(() -> FileUtils
+                    .copyDirectory(argThat(arg -> arg.getAbsolutePath().equals(resolveTrendsDir(reportDirectory))),
+                            eq(historyDirectory.toFile())));
+            verify(reportGenerator.constructed().get(0)).generate(any(Path.class), any(List.class));
+            assertEnvironmentProperties();
+            assertExecutorJson(executorInfo);
+            assertCategoriesJson();
+        }
+    }
+
+    private void prepareEnvironmentConfiguration()
+    {
+        Map<PropertyCategory, Map<String, String>> environmentConfiguration =
+                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION;
+        environmentConfiguration.get(PropertyCategory.CONFIGURATION).put("Suite", "allure-test");
+        environmentConfiguration.get(PropertyCategory.PROFILE).put("Operating System", "Mac OS X");
+        environmentConfiguration.get(PropertyCategory.SUITE).put("Global Meta Filters", "groovy: !skip");
+        environmentConfiguration.get(PropertyCategory.ENVIRONMENT).put("Main Application Page", "https://vividus.dev/");
+    }
+
+    private ExecutorInfo createExecutorInfo()
+    {
         ExecutorInfo executorInfo = new ExecutorInfo();
         executorInfo.setName("Jenkins");
         executorInfo.setType("jenkins");
@@ -187,45 +254,58 @@ public class AllureReportGeneratorTests
         executorInfo.setBuildUrl("https://my-jenkins.url/test-run#77");
         executorInfo.setReportName("Test Run Allure Report");
         executorInfo.setReportUrl("https://my-jenkins.url/test-run#77/AllureReport");
-        when(propertyMapper.readValue("allure.executor.", ExecutorInfo.class)).thenReturn(executorInfo);
-        allureReportGenerator.start();
-        allureReportGenerator.end();
-        PowerMockito.verifyStatic(FileUtils.class, never());
-        FileUtils.copyInputStreamToFile(eq(folder.getInputStream()), any(File.class));
-        PowerMockito.verifyStatic(FileUtils.class);
-        FileUtils.copyInputStreamToFile(eq(resource.getInputStream()), any(File.class));
-        PowerMockito.verifyStatic(FileUtils.class, times(2));
-        FileUtils.writeStringToFile(any(File.class), eq(text), eq(StandardCharsets.UTF_8));
-        PowerMockito.verifyStatic(FileUtils.class);
-        FileUtils.copyDirectory(argThat(arg -> arg.getAbsolutePath().equals(resolveTrendsDir(reportDirectory))),
-                eq(historyDirectory));
-        verify(reportGenerator).generate(any(Path.class), any(List.class));
-        assertEquals("{"
-                    + "\"name\":\"" + executorInfo.getName()
-                    + "\",\"type\":\"" + executorInfo.getType()
-                    + "\",\"url\":\"" + executorInfo.getUrl()
-                    + "\",\"buildOrder\":" + executorInfo.getBuildOrder()
-                    + ",\"buildName\":\"" + executorInfo.getBuildName()
-                    + "\",\"buildUrl\":\"" + executorInfo.getBuildUrl()
-                    + "\",\"reportName\":\"" + executorInfo.getReportName()
-                    + "\",\"reportUrl\":\"" + executorInfo.getReportUrl()
-                    + "\"}",
-                Files.readString(resultsDirectory.toPath().resolve("executor.json")));
-        assertEquals("["
-                        + "{\"name\":\"Test defects\","
-                        + "\"matchedStatuses\":[\"broken\"]},"
-                        + "{\"name\":\"Product defects\","
-                        + "\"matchedStatuses\":[\"failed\"]},"
-                        + "{\"name\":\"Known issues\","
-                        + "\"matchedStatuses\":[\"unknown\"]}"
-                        + "]",
-                Files.readString(resultsDirectory.toPath().resolve("categories.json")));
+        return executorInfo;
+    }
+
+    private void assertEnvironmentProperties() throws IOException
+    {
+        assertResultFile("environment.properties",
+                      "Suite=allure-test\n"
+                    + "Operating\\ System=Mac OS X\n"
+                    + "Global\\ Meta\\ Filters=groovy: !skip\n"
+                    + "Main\\ Application\\ Page=https://vividus.dev/\n"
+        );
+    }
+
+    private void assertExecutorJson(ExecutorInfo executorInfo) throws IOException
+    {
+        assertResultFile("executor.json",
+                  "{"
+                + "\"name\":\"" + executorInfo.getName()
+                + "\",\"type\":\"" + executorInfo.getType()
+                + "\",\"url\":\"" + executorInfo.getUrl()
+                + "\",\"buildOrder\":" + executorInfo.getBuildOrder()
+                + ",\"buildName\":\"" + executorInfo.getBuildName()
+                + "\",\"buildUrl\":\"" + executorInfo.getBuildUrl()
+                + "\",\"reportName\":\"" + executorInfo.getReportName()
+                + "\",\"reportUrl\":\"" + executorInfo.getReportUrl()
+                + "\"}"
+        );
+    }
+
+    private void assertCategoriesJson() throws IOException
+    {
+        assertResultFile("categories.json",
+                  "["
+                + "{\"name\":\"Test defects\","
+                + "\"matchedStatuses\":[\"broken\"]},"
+                + "{\"name\":\"Product defects\","
+                + "\"matchedStatuses\":[\"failed\"]},"
+                + "{\"name\":\"Known issues\","
+                + "\"matchedStatuses\":[\"unknown\"]}"
+                + "]"
+        );
+    }
+
+    private void assertResultFile(String fileName, String expected) throws IOException
+    {
+        assertEquals(expected, Files.readString(resultsDirectory.resolve(fileName)));
     }
 
     private Resource mockResource(String asString) throws IOException
     {
-        Resource resource = Mockito.mock(Resource.class);
-        URL resourceURL = PowerMockito.mock(URL.class);
+        Resource resource = mock(Resource.class);
+        URL resourceURL = mock(URL.class);
         when(resource.getURL()).thenReturn(resourceURL);
         when(resourceURL.toString()).thenReturn(asString);
         InputStream stubInputStream = new ByteArrayInputStream("test data".getBytes(StandardCharsets.UTF_8));

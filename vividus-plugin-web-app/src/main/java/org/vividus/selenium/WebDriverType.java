@@ -16,6 +16,7 @@
 
 package org.vividus.selenium;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -60,9 +61,8 @@ public enum WebDriverType
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
             prepareCapabilities(desiredCapabilities);
-            configuration.getBinaryPath()
-                    .ifPresent(binaryPath -> desiredCapabilities.setCapability(FirefoxDriver.BINARY, binaryPath));
             FirefoxOptions options = new FirefoxOptions(desiredCapabilities);
+            configuration.getBinaryPath().ifPresent(options::setBinary);
             options.addArguments(configuration.getCommandLineArguments());
             return new FirefoxDriver(options);
         }
@@ -90,9 +90,9 @@ public enum WebDriverType
             prepareCapabilities(desiredCapabilities);
             InternetExplorerOptions options = new InternetExplorerOptions(desiredCapabilities);
             String[] switches = configuration.getCommandLineArguments();
-            options.addCommandSwitches(switches);
             if (switches.length > 0)
             {
+                options.addCommandSwitches(switches);
                 options.useCreateProcessApiToLaunchIe();
             }
             return new InternetExplorerDriver(options);
@@ -205,7 +205,7 @@ public enum WebDriverType
         this.commandLineArgumentsSupported = commandLineArgumentsSupported;
         this.useW3C = useW3C;
         this.driverSpecificCapabilities = driverSpecificCapabilities;
-        this.browserNames = browserNames;
+        this.browserNames = Arrays.copyOf(browserNames, browserNames.length);
     }
 
     public void prepareCapabilities(@SuppressWarnings("unused") DesiredCapabilities desiredCapabilities)

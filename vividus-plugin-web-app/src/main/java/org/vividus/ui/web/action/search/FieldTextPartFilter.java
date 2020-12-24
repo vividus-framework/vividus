@@ -17,12 +17,28 @@
 package org.vividus.ui.web.action.search;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
+import org.vividus.ui.action.search.LocatorType;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
-public class FieldTextPartFilter extends AbstractElementFilterAction
+public class FieldTextPartFilter implements IElementFilterAction
 {
-    @Override
-    protected boolean matches(WebElement element, String textPart)
+    private final WebJavascriptActions javascriptActions;
+
+    public FieldTextPartFilter(WebJavascriptActions javascriptActions)
     {
-        return getJavascriptActions().getElementValue(element).contains(textPart);
+        this.javascriptActions = javascriptActions;
+    }
+
+    @Override
+    public boolean matches(WebElement element, String textPart)
+    {
+        return javascriptActions.getElementValue(element).contains(textPart);
+    }
+
+    @Override
+    public LocatorType getType()
+    {
+        return WebLocatorType.FIELD_TEXT_PART;
     }
 }

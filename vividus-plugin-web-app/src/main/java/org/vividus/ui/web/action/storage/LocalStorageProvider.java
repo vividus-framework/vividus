@@ -26,13 +26,13 @@ import org.openqa.selenium.remote.html5.RemoteLocalStorage;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 class LocalStorageProvider implements ILocalStorageProvider
 {
     @Inject private IWebDriverManager webDriverManager;
     @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
 
     @Override
     public LocalStorage getLocalStorage()

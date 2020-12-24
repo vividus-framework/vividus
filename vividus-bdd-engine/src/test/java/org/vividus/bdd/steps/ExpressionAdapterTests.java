@@ -20,8 +20,10 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -41,7 +43,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.expression.IExpressionProcessor;
 import org.vividus.bdd.expression.StringsExpressionProcessor;
@@ -65,14 +66,9 @@ class ExpressionAdapterTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ExpressionAdaptor.class);
 
-    @Mock
-    private IExpressionProcessor mockedTargetProcessor;
-
-    @Mock
-    private IExpressionProcessor mockedAnotherProcessor;
-
-    @InjectMocks
-    private ExpressionAdaptor expressionAdaptor;
+    @Mock private IExpressionProcessor<Object> mockedTargetProcessor;
+    @Mock private IExpressionProcessor<Object> mockedAnotherProcessor;
+    @InjectMocks private ExpressionAdaptor expressionAdaptor;
 
     @ParameterizedTest
     @CsvSource({
@@ -85,11 +81,10 @@ class ExpressionAdapterTests
     })
     void testSupportedExpression(String expressionKeyword, String input, String outputFormat, String outputValue)
     {
-        Mockito.lenient().when(mockedTargetProcessor.execute(EXPRESSION_KEYWORD))
-                .thenReturn(Optional.of(EXPRESSION_RESULT));
+        lenient().when(mockedTargetProcessor.execute(EXPRESSION_KEYWORD)).thenReturn(Optional.of(EXPRESSION_RESULT));
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
         when(mockedTargetProcessor.execute(expressionKeyword)).thenReturn(Optional.of(outputValue));
-        String actual = expressionAdaptor.process(input);
+        Object actual = expressionAdaptor.process(input);
         String output = String.format(outputFormat, outputValue);
         assertEquals(output, actual);
     }
@@ -100,9 +95,9 @@ class ExpressionAdapterTests
         String input = "#{capitalize(#{trim(#{toLowerCase( VIVIDUS )})})}";
         String output = "Vividus";
         ILocationProvider locationProvider = mock(ILocationProvider.class);
-        IExpressionProcessor processor = new StringsExpressionProcessor(locationProvider);
+        IExpressionProcessor<String> processor = new StringsExpressionProcessor(locationProvider);
         expressionAdaptor.setProcessors(List.of(processor));
-        String actual = expressionAdaptor.process(input);
+        Object actual = expressionAdaptor.process(input);
         assertEquals(output, actual);
     }
 
@@ -112,7 +107,7 @@ class ExpressionAdapterTests
         when(mockedAnotherProcessor.execute(UNSUPPORTED_EXPRESSION_KEYWORD)).thenReturn(Optional.empty());
         when(mockedTargetProcessor.execute(UNSUPPORTED_EXPRESSION_KEYWORD)).thenReturn(Optional.empty());
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
-        String actual = expressionAdaptor.process(UNSUPPORTED_EXPRESSION);
+        Object actual = expressionAdaptor.process(UNSUPPORTED_EXPRESSION);
         assertEquals(UNSUPPORTED_EXPRESSION, actual, "Unsupported expression, should leave as is");
 
         verify(mockedTargetProcessor, times(2)).execute(UNSUPPORTED_EXPRESSION_KEYWORD);
@@ -123,7 +118,7 @@ class ExpressionAdapterTests
     @CsvSource({"${var}", "'#expr'", "{expr}", "value"})
     void testNonExpression(String nonExpression)
     {
-        String actual = expressionAdaptor.process(nonExpression);
+        Object actual = expressionAdaptor.process(nonExpression);
         assertEquals(nonExpression, actual, "Not expression, should leave as is");
 
         verify(mockedTargetProcessor, never()).execute(nonExpression);
@@ -145,7 +140,7 @@ class ExpressionAdapterTests
                 + " \\ and $|";
         when(mockedTargetProcessor.execute("target (something inside#$)"))
                 .thenReturn(Optional.of(EXPRESSION_RESULT));
-        String actualTable = expressionAdaptor.process(inputTable);
+        Object actualTable = expressionAdaptor.process(inputTable);
         assertEquals(expectedTable, actualTable);
         verify(mockedTargetProcessor, times(6)).execute(anyString());
     }
@@ -157,7 +152,7 @@ class ExpressionAdapterTests
         when(mockedTargetProcessor.execute(UNSUPPORTED_EXPRESSION_KEYWORD)).thenReturn(Optional.empty());
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
         String inputTable = "|value1|value2|value3|\n|#{unsupported}|simple|#{unsupported}|";
-        String actualTable = expressionAdaptor.process(inputTable);
+        Object actualTable = expressionAdaptor.process(inputTable);
         assertEquals(inputTable, actualTable);
     }
 
@@ -177,7 +172,7 @@ class ExpressionAdapterTests
         String inputTable = header + "|#{unsupported}|simple|#{target}|#{tar\nget}|#{another}|";
         String expectedTable = header + "|#{unsupported}|simple|target result with \\ and $|target result with \\ and"
                 + " $|another result|";
-        String actualTable = expressionAdaptor.process(inputTable);
+        Object actualTable = expressionAdaptor.process(inputTable);
         assertEquals(expectedTable, actualTable);
     }
 
@@ -188,7 +183,7 @@ class ExpressionAdapterTests
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
         String inputTable = "|value1|value2|\n|#{target}|${variable}|";
         String expectedTable = "|value1|value2|\n|target result with \\ and $|${variable}|";
-        String actualTable = expressionAdaptor.process(inputTable);
+        Object actualTable = expressionAdaptor.process(inputTable);
         assertEquals(expectedTable, actualTable);
     }
 
@@ -197,10 +192,30 @@ class ExpressionAdapterTests
     {
         String input = "#{generateLocalized(number.number_between 'a','b', ru)}";
         ILocationProvider locationProvider = mock(ILocationProvider.class);
-        IExpressionProcessor processor = new StringsExpressionProcessor(locationProvider);
+        IExpressionProcessor<String> processor = new StringsExpressionProcessor(locationProvider);
         expressionAdaptor.setProcessors(List.of(processor));
         assertThrows(RuntimeException.class, () -> expressionAdaptor.process(input));
         assertThat(logger.getLoggingEvents(),
                 is(List.of(error("Unable to process expression '{}'", input))));
+    }
+
+    @Test
+    void shouldReturnNotAStringValueForATopLevelExpression()
+    {
+        String expression = "#{object(#{string()})}";
+        lenient().when(mockedTargetProcessor.execute("string()")).thenReturn(Optional.of("result"));
+        expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
+        Object value = new Object();
+        lenient().when(mockedTargetProcessor.execute("object(result)")).thenReturn(Optional.of(value));
+        assertSame(value, expressionAdaptor.process(expression));
+    }
+
+    @Test
+    void shouldConvertNotAStringValueToAStringForNotTopLevelExpression()
+    {
+        String expression = "#{string(#{integer()})}";
+        lenient().when(mockedTargetProcessor.execute("integer()")).thenReturn(Optional.of(Integer.valueOf(42)));
+        expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
+        assertEquals("#{string(42)}", expressionAdaptor.process(expression));
     }
 }

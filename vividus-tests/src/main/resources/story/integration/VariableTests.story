@@ -33,8 +33,12 @@ Then `${v:ar}` is equal to `${v:ar}`
 Then `${}` is equal to `${}`
 Then `${:default}` is equal to `default`
 Then `${a.b:NULL}` is equal to `NULL`
+Then `${foo:${bar}}` is equal to `${foo:${bar}}`
+Then `${baz#{eval(0 + 2)}:${foo#{eval(0 + 1)}}}` is equal to `${baz2:${foo1}}`
 
 When I initialize the scenario variable `vAr` with value `vAl`
+When I initialize the scenario variable `foo` with value `foo`
+When I initialize the scenario variable `foo1` with value `foo1`
 When I initialize the scenario variable `v.ar` with value `v.al`
 When I initialize the scenario variable `var[0]` with value `val[0]`
 When I initialize the scenario variable `v[0].ar` with value `v[0].al`
@@ -42,15 +46,21 @@ When I initialize the scenario variable `v.ar[0]` with value `v.al[0]`
 When I initialize the scenario variable `v:ar` with value `v:al`
 When I initialize the scenario variable `` with value `val`
 When I initialize the scenario variable `a.b` with value `a.b-value`
-Then `${vAr}` is equal to `vAl`
-Then `${v.ar}` is equal to `v.al`
-Then `${var[0]}` is equal to `val[0]`
-Then `${v[0].ar}` is equal to `v[0].al`
-Then `${v.ar[0]}` is equal to `v.al[0]`
-Then `${v:ar}` is equal to `v:al`
-Then `${}` is equal to `val`
-Then `${a.b:NULL}` is equal to `a.b-value`
-Then `${a.b}` is equal to `a.b-value`
+Then `${vAr}`                      is equal to `vAl`
+Then `${v.ar}`                     is equal to `v.al`
+Then `${var[0]}`                   is equal to `val[0]`
+Then `${v[0].ar}`                  is equal to `v[0].al`
+Then `${v.ar[0]}`                  is equal to `v.al[0]`
+Then `${v:ar}`                     is equal to `v:al`
+Then `${}`                         is equal to `val`
+Then `${a.b:NULL}`                 is equal to `a.b-value`
+Then `${a.b}`                      is equal to `a.b-value`
+Then `${foo:${bar}}`               is equal to `foo`
+Then `${foo}:${foo}`               is equal to `foo:foo`
+Then `${baz:${foo}}`               is equal to `foo`
+Then `${baz:a${foo}z}`             is equal to `afooz`
+Then `${baz:${foo#{eval(0 + 1)}}}` is equal to `foo1`
+Then `${not-existing:}`            is equal to ``
 
 Scenario: Verify that expression can be used as a part of variable name and vice versa
 Meta:
@@ -75,3 +85,55 @@ When I initialize the scenario variable `var` with value `val`
 Given I initialize the scenario variable `template-result` using template `/data/simple-template.ftl` with parameters:
 /data/table-with-scenario-level-variables.table
 Then `${template-result}` is equal to `passed: variable is resolved`
+
+Scenario: Verify that variables of different nesting step-levels are cleaned up only for the current level
+Meta:
+    @issueId 763
+When I execute steps while counter is <= `1` with increment `1` starting from `1`:
+|step                                                                             |
+|When I initialize the scenario variable `test1` with value `${iterationVariable}`|
+|When the condition 'true' is true I do                                           |
+|{headerSeparator=!,valueSeparator=!}                                             |
+|!step                                                             !              |
+|!When I initialize the scenario variable `value` with value `test`!              |
+|When I initialize the scenario variable `test2` with value `${iterationVariable}`|
+|Then `${test1}` is equal to `${test2}`                                           |
+
+Scenario: Verify that variables of different nesting step-levels don't affect each other
+Meta:
+    @issueId 763
+When I execute steps while counter is <= `1` with increment `1` starting from `1`:
+|step                                                                               |
+|When I initialize the scenario variable `test1` with value `${iterationVariable}`  |
+|When the condition 'true' is true I do                                             |
+|{headerSeparator=!,valueSeparator=!}                                               |
+|!step                                                                             !|
+|!Then `${test1}` is equal to `1`                                                  !|
+|!When I initialize the scenario variable `iterationVariable` with value `42`      !|
+|!When I initialize the scenario variable `test2` with value `${iterationVariable}`!|
+|Then `${test2}` is equal to `1`                                                    |
+Then `${iterationVariable}` is equal to `42`
+
+Scenario: Pass ExamplesTable as variable to composite step accepting ExamplesTable
+Meta:
+    @issueId 1136
+When I initialize scenario variable `table` with values:
+|column |
+|value  |
+When I run composite step with table:${table}
+Then `${table[0].column}` is equal to `value`
+Then `${table-from-composite-step[0].column}` is equal to `value`
+
+Scenario: Use variables as part of names of another variables
+Meta:
+    @issueId 1181
+When I initialize the scenario variable `variable` with value `Variable`
+When I initialize the scenario variable `Variable` with value `nested`
+When I initialize the scenario variable `compositeVariable` with value `expected`
+When I initialize the scenario variable `expected` with value `nested-expected`
+When I initialize the scenario variable `complex` with value `[{ids=2}, {ids=0}, {ids=7}, {ids=7}]`
+Then `${composite${variable}}`                                            is equal to `expected`
+Then `${${variable}}`                                                     is equal to `nested`
+Then `${composite:${composite${variable}}}`                               is equal to `expected`
+Then `#{eval(${non-existing:0} + 1)}`                                     is equal to `1`
+Then `#{replaceAllByRegExp("""\},\s\{ids=""", """""", """${complex}""")}` is equal to `[{ids=2077}]`
