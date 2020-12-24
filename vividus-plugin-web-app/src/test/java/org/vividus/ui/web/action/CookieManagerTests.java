@@ -42,7 +42,6 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 
 @ExtendWith(MockitoExtension.class)
