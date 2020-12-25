@@ -55,7 +55,6 @@ class CookieManagerTests
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private Options options;
-    @Mock private IWebDriverManager webDriverManager;
     @InjectMocks private CookieManager cookieManager;
 
     @Test
