@@ -6,7 +6,7 @@ buildscript {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
     }
 }
-ext.buildSystemDir = file("${System.env.BUILD_SYSTEM_ROOT?:buildSystemRootDir}/${buildSystemVersion}")
+ext.buildSystemDir = file("${System.env.VIVIDUS_BUILD_SYSTEM_HOME?:buildSystemRootDir}/${buildSystemVersion}")
 ext.gradleScriptDir =  new File(ext.buildSystemDir, 'gradle')
 apply from: "${gradleScriptDir}/project.gradle"
 apply from: "${gradleScriptDir}/jacoco.gradle"
