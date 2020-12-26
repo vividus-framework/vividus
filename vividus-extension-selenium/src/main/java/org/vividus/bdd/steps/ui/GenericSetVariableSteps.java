@@ -31,7 +31,6 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 
 @TakeScreenshotOnFailure
@@ -128,7 +127,6 @@ public class GenericSetVariableSteps
     public void saveAttributeValueOfElementByLocatorToVariable(String attributeName, Locator locator,
             Set<VariableScope> scopes, String variableName)
     {
-        locator.getSearchParameters().setVisibility(Visibility.ALL);
         Optional<Object> value = baseValidations.assertElementExists("The element to extract the attribute", locator)
                                                 .map(element -> getAssertedAttributeValue(element, attributeName));
         putVariable(scopes, variableName, value);

@@ -43,8 +43,6 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 
 @ExtendWith(MockitoExtension.class)
@@ -109,12 +107,9 @@ class GenericSetVariableStepsTests
     void shouldSaveAttributeValueOfElementByLocatorToVariable(String value)
     {
         Locator locator = mock(Locator.class);
-        SearchParameters searchParameters = mock(SearchParameters.class);
         WebElement webElement = mock(WebElement.class);
         when(baseValidations.assertElementExists("The element to extract the attribute", locator))
                 .thenReturn(Optional.of(webElement));
-        when(locator.getSearchParameters()).thenReturn(searchParameters);
-        when(searchParameters.setVisibility(Visibility.ALL)).thenReturn(searchParameters);
         when(webElement.getAttribute(ATTRIBUTE_NAME)).thenReturn(value);
         when(softAssert.assertNotNull(ATTRIBUTE_VALUE_MESSAGE, value)).thenReturn(Boolean.TRUE);
         genericSetVariableSteps.saveAttributeValueOfElementByLocatorToVariable(ATTRIBUTE_NAME, locator, VARIABLE_SCOPE,
