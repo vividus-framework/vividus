@@ -43,6 +43,10 @@ Sauce Labs profile must be first.
 
 Explore https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/[Platform Configurator] to use advanced Sauce Labs configuration options.
 
+[TIP]
+
+A link to SauceLabs test runs can be found in Allure report
+
 == Properties
 
 See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid] properties to configure generic options.

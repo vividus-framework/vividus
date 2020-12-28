@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.browserstack.steps;
+package org.vividus.ui.report;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.error;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,13 +24,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.Optional;
 
-import com.browserstack.automate.model.Session;
-import com.browserstack.client.exception.BrowserStackException;
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.Test;
@@ -46,96 +36,65 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
-import org.vividus.browserstack.BrowserStackAutomateClient;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.event.WebDriverQuitEvent;
+import org.vividus.testcontext.TestContext;
 import org.vividus.testcontext.ThreadedTestContext;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-class BrowserStackStepsTests
+@ExtendWith(MockitoExtension.class)
+class AbstractSessionLinkPublisherTests
 {
     private static final String SESSION_ID = "session-id";
     private static final String URL = "https://example.com";
 
-    @Mock private Session session;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private EventBus eventBus;
-    @Mock private BrowserStackAutomateClient appAutomateClient;
     @Mock private WebDriverQuitEvent webDriverQuitEvent;
     @Spy private ThreadedTestContext testContext;
-    @InjectMocks private BrowserStackSteps browserStackSteps;
-
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(BrowserStackSteps.class);
+    @InjectMocks private TestSessionLinkPublisher linkPublisher;
 
     @Test
-    void shouldPublishSessionLinkAfterScenario() throws BrowserStackException
+    void shouldPublishSessionLinkAfterScenario()
     {
         mockDriverSession();
-        mockSession();
 
-        browserStackSteps.resetState();
-        browserStackSteps.publishSessionLinkAfterScenario();
-        browserStackSteps.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
+        linkPublisher.resetState();
+        linkPublisher.publishSessionLinkAfterScenario();
+        linkPublisher.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
 
         verifyLinkPublishEvent(1);
-        assertThat(logger.getLoggingEvents(), is(empty()));
         verifyNoInteractions(webDriverQuitEvent);
     }
 
     @Test
-    void shouldNotPublishSessionLinkAfterScenarioIfWebDriverWasClosed() throws BrowserStackException
+    void shouldNotPublishSessionLinkAfterScenarioIfWebDriverWasClosed()
     {
         when(webDriverQuitEvent.getSessionId()).thenReturn(SESSION_ID);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(false);
-        mockSession();
 
-        browserStackSteps.resetState();
-        browserStackSteps.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
-        browserStackSteps.publishSessionLinkAfterScenario();
+        linkPublisher.resetState();
+        linkPublisher.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
+        linkPublisher.publishSessionLinkAfterScenario();
 
         verifyLinkPublishEvent(1);
-        assertThat(logger.getLoggingEvents(), is(empty()));
         verifyNoMoreInteractions(webDriverProvider);
     }
 
     @Test
-    void shouldPublishSessionLinkAfterScenarioIfMultipleWebDriverSessionReCreationOccured() throws BrowserStackException
+    void shouldPublishSessionLinkAfterScenarioIfMultipleWebDriverSessionReCreationOccured()
     {
         when(webDriverQuitEvent.getSessionId()).thenReturn(SESSION_ID);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         mockDriverSession();
-        mockSession();
 
-        browserStackSteps.resetState();
-        browserStackSteps.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
-        browserStackSteps.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
-        browserStackSteps.publishSessionLinkAfterScenario();
+        linkPublisher.resetState();
+        linkPublisher.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
+        linkPublisher.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
+        linkPublisher.publishSessionLinkAfterScenario();
 
         verifyLinkPublishEvent(3);
-        assertThat(logger.getLoggingEvents(), is(empty()));
         verifyNoMoreInteractions(webDriverProvider);
-    }
-
-    @Test
-    void shouldLogExceptionsOccuredWhileGettingSessionLink() throws BrowserStackException
-    {
-        BrowserStackException exception = mock(BrowserStackException.class);
-        doThrow(exception).when(appAutomateClient).getSession(SESSION_ID);
-        when(webDriverQuitEvent.getSessionId()).thenReturn(SESSION_ID);
-
-        browserStackSteps.resetState();
-        browserStackSteps.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
-
-        assertThat(logger.getLoggingEvents(),
-            is(List.of(error(exception, "Unable to get an URL for BrowserStack session with the ID {}", SESSION_ID))));
-        verifyNoMoreInteractions(webDriverProvider);
-    }
-
-    private void mockSession() throws BrowserStackException
-    {
-        when(appAutomateClient.getSession(SESSION_ID)).thenReturn(session);
-        when(session.getPublicUrl()).thenReturn(URL);
     }
 
     private void mockDriverSession()
@@ -154,7 +113,21 @@ class BrowserStackStepsTests
         verify(eventBus, times(times)).post(argThat(arg ->
         {
             LinkPublishEvent event = (LinkPublishEvent) arg;
-            return URL.equals(event.getUrl()) && "BrowserStack Session URL".equals(event.getName());
+            return URL.equals(event.getUrl()) && "Test Session URL".equals(event.getName());
         }));
+    }
+
+    private static final class TestSessionLinkPublisher extends AbstractSessionLinkPublisher
+    {
+        TestSessionLinkPublisher(IWebDriverProvider webDriverProvider, EventBus eventBus, TestContext testContext)
+        {
+            super("Test", webDriverProvider, eventBus, testContext);
+        }
+
+        @Override
+        protected Optional<String> getSessionUrl(String sessionId)
+        {
+            return Optional.of(URL);
+        }
     }
 }
