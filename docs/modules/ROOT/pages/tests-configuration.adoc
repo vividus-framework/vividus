@@ -1,5 +1,63 @@
 = Tests Configuration
 
+== `configuration.properties`
+
+The Vividus configuration includes the following parts: profiles, environments and suite.
+
+=== Suite
+
+The suite is defined by the property:
+
+```properties
+configuration.suite
+```
+
+The Vividus suite consists of the unlimited number of batches. In its turn the batch consists of any number of stories represented by the files with `*.story` extension. The batches are run sequentially, while the stories in the batch are run in parallel.
+
+The following properties are used to configure batches (Vividus doesn't provide any default batch configuration out of the box). `batch-number` is one-based batch index.
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="2,1,2", options="header"]
+|===
+|Property
+|Default value
+|Description
+
+|[subs=+quotes]`*bdd.story-loader.batch-<batch-number>.resource-location*`
+|
+|The test project path to the folder with story-files
+
+|`bdd.story-loader.batch-<batch-number>.resource-include-patterns`
+|`<empty>`
+|The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be included in the batch
+
+|`bdd.story-loader.batch-<batch-number>.resource-exclude-patterns`
+|`<empty>`
+|The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be excluded from the batch
+
+|`bdd.batch-<batch-number>.name`
+|`batch-<batch-number>`
+|The name of the batch to display in the report
+
+|`bdd.batch-<batch-number>.threads`
+|`1`
+|The number of parallel threads used to run stories
+
+|`bdd.batch-<batch-number>.meta-filters`
+|suite meta-filter
+|The meta-filter used to filter the batch stories and scenarios
+
+|`bdd.batch-<batch-number>.ignore-failure`
+|`true`
+|If `false` and any failure is occurred during the batch execution, the subsequent batches are not executed.
+
+|`bdd.batch-<batch-number>.story-execution-timeout`
+|`PT3H`
+|The max duration of the single story in the batch.
+|===
+
+
 == Selenium Grid
 
 * `selenium.grid.username` - defines remote grid username
@@ -21,12 +79,12 @@ JSON file should contain a valid JSON. If JSON is not valid known issues will be
 |Default value
 |Description
 
-|known-issue-provider.fileName
-|known-issues.json
+|`known-issue-provider.fileName`
+|`known-issues.json`
 |Defines the location of the known issues file
 
-|known-issue-provider.detect-potentially-known-issues
-|true
+|`known-issue-provider.detect-potentially-known-issues`
+|`true`
 |Defines are potentially known issues detected
 |===
 
