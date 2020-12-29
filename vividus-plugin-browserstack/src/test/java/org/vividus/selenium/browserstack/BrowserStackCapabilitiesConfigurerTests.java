@@ -18,7 +18,6 @@ package org.vividus.selenium.browserstack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -50,18 +49,8 @@ class BrowserStackCapabilitiesConfigurerTests
     @InjectMocks private BrowserStackCapabilitiesConfigurer configurer;
 
     @Test
-    void shouldNotConfigureCapabilitiesIfBrowserStackInDisabled()
-    {
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        configurer.setBrowserStackEnabled(false);
-        configurer.configure(desiredCapabilities);
-        verifyNoInteractions(bddRunContext, desiredCapabilities);
-    }
-
-    @Test
     void shouldConfigureTestName()
     {
-        configurer.setBrowserStackEnabled(true);
         String name = "name";
         RunningStory runningStory = mock(RunningStory.class);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
@@ -78,7 +67,6 @@ class BrowserStackCapabilitiesConfigurerTests
     @Test
     void shouldConfigureTunnel() throws TunnelException
     {
-        configurer.setBrowserStackEnabled(true);
         configurer.setTunnellingEnabled(true);
         String proxyHost = "localhost:52745";
         String localIdentifier = "local-identifier";

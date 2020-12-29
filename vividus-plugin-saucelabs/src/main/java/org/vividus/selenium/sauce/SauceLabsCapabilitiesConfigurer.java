@@ -24,7 +24,6 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
 {
     private static final String SAUCE_OPTIONS = "sauce:options";
 
-    private boolean sauceLabsEnabled;
     private String sauceConnectArguments;
     private String restUrl;
 
@@ -36,13 +35,10 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
     @Override
     public void configure(DesiredCapabilities desiredCapabilities)
     {
-        if (sauceLabsEnabled)
-        {
-            configureTunnel(desiredCapabilities,
-                    tunnelId -> putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelIdentifier", tunnelId));
+        configureTunnel(desiredCapabilities,
+                tunnelId -> putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelIdentifier", tunnelId));
 
-            configureTestName(desiredCapabilities, SAUCE_OPTIONS, "name");
-        }
+        configureTestName(desiredCapabilities, SAUCE_OPTIONS, "name");
     }
 
     @Override
@@ -52,11 +48,6 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
         sauceConnectOptions.setCustomArguments(sauceConnectArguments);
         sauceConnectOptions.setRestUrl(restUrl);
         return sauceConnectOptions;
-    }
-
-    public void setSauceLabsEnabled(boolean sauceLabsEnabled)
-    {
-        this.sauceLabsEnabled = sauceLabsEnabled;
     }
 
     public void setRestUrl(String restUrl)

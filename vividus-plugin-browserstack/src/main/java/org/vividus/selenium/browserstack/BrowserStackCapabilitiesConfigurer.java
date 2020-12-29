@@ -26,8 +26,6 @@ public class BrowserStackCapabilitiesConfigurer
 {
     private static final String BSTACK_OPTIONS = "bstack:options";
 
-    private boolean browserStackEnabled;
-
     public BrowserStackCapabilitiesConfigurer(IBddRunContext bddRunContext,
             BrowserStackLocalManager browserStackLocalManager)
     {
@@ -37,26 +35,18 @@ public class BrowserStackCapabilitiesConfigurer
     @Override
     public void configure(DesiredCapabilities desiredCapabilities)
     {
-        if (browserStackEnabled)
+        configureTunnel(desiredCapabilities, tunnelId ->
         {
-            configureTunnel(desiredCapabilities, tunnelId ->
-            {
-                putNestedCapability(desiredCapabilities, BSTACK_OPTIONS, "local", true);
-                putNestedCapability(desiredCapabilities, BSTACK_OPTIONS, "localIdentifier", tunnelId);
-            });
+            putNestedCapability(desiredCapabilities, BSTACK_OPTIONS, "local", true);
+            putNestedCapability(desiredCapabilities, BSTACK_OPTIONS, "localIdentifier", tunnelId);
+        });
 
-            configureTestName(desiredCapabilities, BSTACK_OPTIONS, "sessionName");
-        }
+        configureTestName(desiredCapabilities, BSTACK_OPTIONS, "sessionName");
     }
 
     @Override
     protected TunnelOptions createOptions()
     {
         return new TunnelOptions();
-    }
-
-    public void setBrowserStackEnabled(boolean browserStackEnabled)
-    {
-        this.browserStackEnabled = browserStackEnabled;
     }
 }
