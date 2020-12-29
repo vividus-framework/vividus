@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        profile="saucelabs" default-lazy-init="true">
 
     <bean id="sauceConnectManager" class="org.vividus.selenium.sauce.SauceConnectManager">
@@ -25,6 +28,10 @@
         </property>
     </bean>
 
+    <bean id="sauceLabsLinkPublisher" class="org.vividus.saucelabs.report.SauceLabsSessionLinkPublisher">
+        <constructor-arg index="0" value="${saucelabs.data-center}" />
+    </bean>
+
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
         <property name="tunnellingEnabled" value="${saucelabs.sauce-connect.enabled}"/>
         <property name="sauceLabsEnabled" value="${selenium.grid.enabled}"/>
@@ -32,4 +39,15 @@
         <property name="sauceConnectArguments" value="${saucelabs.sauce-connect.command-line-arguments}" />
     </bean>
 
+    <util:list id="stepBeanNames-SauceLabs" value-type="java.lang.String">
+        <idref bean="sauceLabsLinkPublisher" />
+    </util:list>
+
+    <util:map id="propertyEditors-SauceLabs" key-type="java.lang.Class">
+        <entry key="com.saucelabs.saucerest.DataCenter">
+            <bean class="org.vividus.beans.RelaxedEnumPropertyEditor">
+                <constructor-arg value="com.saucelabs.saucerest.DataCenter" />
+            </bean>
+        </entry>
+    </util:map>
 </beans>
