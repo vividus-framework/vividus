@@ -18,20 +18,15 @@ package org.vividus.bdd.steps.ui.web;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.web.model.Action;
-import org.vividus.bdd.steps.ui.web.model.ActionType;
 import org.vividus.bdd.steps.ui.web.model.SequenceAction;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 
 @TakeScreenshotOnFailure
@@ -39,75 +34,11 @@ public class ActionSteps
 {
     private final IWebDriverProvider webDriverProvider;
     private final IBaseValidations baseValidations;
-    private final ISoftAssert softAssert;
 
-    public ActionSteps(IWebDriverProvider webDriverProvider, IBaseValidations baseValidations, ISoftAssert softAssert)
+    public ActionSteps(IWebDriverProvider webDriverProvider, IBaseValidations baseValidations)
     {
         this.webDriverProvider = webDriverProvider;
         this.baseValidations = baseValidations;
-        this.softAssert = softAssert;
-    }
-
-    /**
-     * Executes the sequence of web actions
-     * <div>Example:</div>
-     * <code>
-     *   <br>When I execute the sequence of actions:
-     *   <br>|type           |searchAttributes                        |offset   |
-     *   <br>|MOVE_BY_OFFSET |                                        |(-300, 0)|
-     *   <br>|MOVE_BY_OFFSET |                                        |(0, 40)  |
-     *   <br>|CLICK_AND_HOLD |By.xpath(//signature-pad-control/canvas)|         |
-     *   <br>|MOVE_BY_OFFSET |                                        |(0, 100) |
-     *   <br>|RELEASE        |By.xpath(//signature-pad-control/canvas)|         |
-     * </code>
-     * <br>
-     * <br>
-     * where
-     * <ul>
-     * <li><code>type</code> is one of web actions: move by offset, click and hold, release</li>
-     * <li><code>searchAttributes</code> is search attribute to find element for interaction
-     *  (could be empty if not applicable)</li>
-     * <li><code>offset</code> the offset to move by (ex.: (10, 10))</li>
-     * </ul>
-     * @param actions table of actions to execute
-     * @deprecated Use <i>When I execute sequence of actions: actions</i>
-     */
-    @Deprecated(since = "0.2.0", forRemoval = true)
-    @When("I execute the sequence of actions: $actions")
-    public void executeActionsSequence(List<Action> actions)
-    {
-        performActions(actions, (builder, action) ->
-        {
-            ActionType actionType = action.getType();
-            if (actionType.isCoordinatesRequired())
-            {
-                Optional<Point> offset = action.getOffset();
-                if (!softAssert.assertTrue("Action offset is present", offset.isPresent()))
-                {
-                    return false;
-                }
-                actionType.addAction(builder, offset.get());
-            }
-            else
-            {
-                Optional<Locator> locator = action.getSearchAttributes();
-                Optional<WebElement> element;
-                if (locator.isPresent())
-                {
-                    element = findElement(locator.get());
-                    if (element.isEmpty())
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    element = Optional.empty();
-                }
-                actionType.addAction(builder, element);
-            }
-            return true;
-        });
     }
 
     /**
@@ -213,12 +144,13 @@ public class ActionSteps
             Object argument = action.getArgument();
             if (argument != null && argument.getClass().equals(Locator.class))
             {
-                Optional<WebElement> element = findElement((Locator) argument);
-                if (element.isEmpty())
+                WebElement element = baseValidations.assertIfElementExists("Element for interaction",
+                        (Locator) argument);
+                if (element == null)
                 {
                     return false;
                 }
-                argument = element.get();
+                argument = element;
             }
             action.getType().addAction(builder, argument);
             return true;
@@ -236,10 +168,5 @@ public class ActionSteps
             }
         }
         actions.build().perform();
-    }
-
-    private Optional<WebElement> findElement(Locator locator)
-    {
-        return Optional.ofNullable(baseValidations.assertIfElementExists("Element for interaction", locator));
     }
 }
