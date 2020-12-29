@@ -5,8 +5,8 @@ Meta:
     @feature expressions
 
 Scenario: [Deprecated] Verify date generation and format
-When I initialize the scenario variable `currentDate` with value `#{P}`
-Then `#{formatDateTo(${currentDate}, yyyy-MM-dd, yyyy)}` is equal to `#{P(yyyy)}`
+When I initialize the scenario variable `currentDate` with value `#{generateDate(P)}`
+Then `#{formatDateTo(${currentDate}, yyyy-MM-dd, yyyy)}` is equal to `#{generateDate(P, yyyy)}`
 
 Scenario: Verify date generation and format
 Then `#{formatDateTo(#{generateDate(P)}, yyyy-MM-dd, yyyy)}` is equal to `#{generateDate(P, yyyy)}`
@@ -28,7 +28,6 @@ Then `777` is = `#{diffDate(2019-01-01T12:00:00.223Z,yyyy-MM-dd'T'HH:mm:ss.SSSVV
 
 Scenario: Verify eval expression
 Then `#{<expression>}` is = `<expected>`
-
 Examples:
 |expected|expression                                                        |
 |null    |eval(null)                                                        |
@@ -45,7 +44,6 @@ Meta:
     @requirementId 696
 When I initialize the story variable `someVar` with value `<contextVar>`
 Then `#{<expression>}` is = `<expected>`
-
 Examples:
 |expected|expression                          |contextVar|
 |2       |eval(${someVar} + 1)                |1         |
