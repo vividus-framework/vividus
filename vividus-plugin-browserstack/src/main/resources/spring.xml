@@ -8,7 +8,6 @@
        profile="browserstack">
 
     <bean class="org.vividus.selenium.browserstack.BrowserStackCapabilitiesConfigurer" >
-        <property name="browserStackEnabled" value="${selenium.grid.enabled}"/>
         <property name="tunnellingEnabled" value="${browserstack.browserstack-local.enabled}"/>
     </bean>
 

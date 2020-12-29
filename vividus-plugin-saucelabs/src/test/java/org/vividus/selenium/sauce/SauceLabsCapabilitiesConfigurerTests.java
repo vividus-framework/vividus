@@ -65,19 +65,9 @@ class SauceLabsCapabilitiesConfigurerTests
     }
 
     @Test
-    void shouldDoNothingWhenSauceLabsIsDisabled()
-    {
-        configurer.setSauceLabsEnabled(false);
-        configurer.setTunnellingEnabled(true);
-        configurer.configure(null);
-        verifyNoInteractions(bddRunContext, sauceConnectManager);
-    }
-
-    @Test
     void shouldDoNothingWhenSauceConnectIsDisabledAndNoProxy()
     {
         mockRunningStory();
-        configurer.setSauceLabsEnabled(true);
         configurer.setTunnellingEnabled(false);
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(null, null);
         configurer.configure(desiredCapabilities);
@@ -89,7 +79,6 @@ class SauceLabsCapabilitiesConfigurerTests
     void shouldStartSauceConnectWhenSauceConnectIsEnabled()
     {
         mockRunningStory();
-        configurer.setSauceLabsEnabled(true);
         configurer.setTunnellingEnabled(true);
         Map<String, Object> sauceOptions = new HashMap<>();
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(null, sauceOptions);
@@ -105,7 +94,6 @@ class SauceLabsCapabilitiesConfigurerTests
     @Test
     void shouldStartSauceConnectWhenSauceConnectIsDisabledButProxyIsStarted()
     {
-        configurer.setSauceLabsEnabled(true);
         configurer.setTunnellingEnabled(false);
         String restUrl = "http://eu-central-1.saucelabs.com/rest/v1";
         configurer.setRestUrl(restUrl);
