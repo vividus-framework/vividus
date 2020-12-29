@@ -41,9 +41,7 @@ Browser Stack profile must be first.
 
 Explore https://www.browserstack.com/app-automate/capabilities?tag=w3c[Capabilities Builder] for more fine-grained Browser Stack configuration.
 
-[TIP]
-
-A link to BrowserStack test runs can be found in Allure report
+TIP: Links to BrowserStack test runs can be found in Allure report
 
 == Properties
 
