@@ -20,7 +20,6 @@ import static java.lang.String.format;
 import static java.lang.String.join;
 import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
@@ -43,8 +42,6 @@ import org.vividus.bdd.diff.JsonDiffMatcher;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.SubSteps;
 import org.vividus.bdd.variable.VariableScope;
-import org.vividus.http.HttpMethod;
-import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.reporter.event.IAttachmentPublisher;
@@ -73,18 +70,16 @@ public class JsonResponseValidationSteps
     private final HttpTestContext httpTestContext;
     private final IBddVariableContext bddVariableContext;
     private final IAttachmentPublisher attachmentPublisher;
-    private final HttpRequestExecutor httpRequestExecutor;
     private final JsonUtils jsonUtils;
 
     private ISoftAssert softAssert;
 
     public JsonResponseValidationSteps(HttpTestContext httpTestContext, IBddVariableContext bddVariableContext,
-            IAttachmentPublisher attachmentPublisher, HttpRequestExecutor httpRequestExecutor, JsonUtils jsonUtils)
+            IAttachmentPublisher attachmentPublisher, JsonUtils jsonUtils)
     {
         this.httpTestContext = httpTestContext;
         this.bddVariableContext = bddVariableContext;
         this.attachmentPublisher = attachmentPublisher;
-        this.httpRequestExecutor = httpRequestExecutor;
         this.jsonUtils = jsonUtils;
     }
 
@@ -257,37 +252,6 @@ public class JsonResponseValidationSteps
     public void saveElementsNumberByJsonPath(String jsonPath, Set<VariableScope> scopes, String variableName)
     {
         bddVariableContext.putVariable(scopes, variableName, getElementsNumber(getActualJson(), jsonPath));
-    }
-
-    /**
-     * Waits until GET request to resource retrieves response body that contains specific JSON path
-     * for a specified amount of time.
-     * <p>
-     * <b>Actions performed at this step:</b>
-     * </p>
-     * <ul>
-     * <li>Executes HTTP GET request to the specified resource</li>
-     * <li>Checks if response body contains an element by JSON path</li>
-     * <li>Sleeps during calculated part of specified duration</li>
-     * <li>Repeats previous actions if element was not found and seconds timeout not expired</li>
-     * </ul>
-     * @param jsonPath A JSON path
-     * @param resourceUrl Resource URL
-     * @param duration Time duration to wait
-     * @param retryTimes How many times request will be retried; duration/retryTimes=timeout between requests
-     * @throws IOException If an input or output exception occurred
-     * @deprecated Use <i>When I wait for presence of element by `$jsonPath` for `$duration` duration
-     * retrying $retryTimes times$stepsToExecute</i>
-     */
-    @Deprecated(since = "0.2.0", forRemoval = true)
-    @When("I wait for presence of element by '$jsonPath' in HTTP GET response from '$resourceUrl'"
-            + " for '$duration' duration retrying $retryTimes times")
-    public void waitForJsonFieldAppearance(String jsonPath, String resourceUrl, Duration duration,
-            int retryTimes) throws IOException
-    {
-        httpRequestExecutor.executeHttpRequest(HttpMethod.GET, resourceUrl, Optional.empty(),
-            response -> isJsonElementSearchCompleted(response, jsonPath), new WaitMode(duration, retryTimes));
-        assertJsonElementExists(jsonPath);
     }
 
     /**

@@ -15,9 +15,6 @@ When I save JSON element from `${response}` by JSON path `<jsonPath>` to <scopes
 Composite: When I save a JSON element from '$json' by JSON path '$jsonPath' to $scopes variable '$variableName'
 When I save JSON element from `<json>` by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
 
-Composite: When I wait for presence of the element by JSON path '$jsonPath' in HTTP GET response from '$resourceUrl' for '$duration' duration
-When I wait for presence of element by '<jsonPath>' in HTTP GET response from '<resourceUrl>' for '<duration>' duration retrying 10 times
-
 Composite: Then a JSON element by the JSON path '$jsonPath' is equal to '$expectedData'$options
 Then JSON element by JSON path `<jsonPath>` is equal to `<expectedData>`<options>
 
