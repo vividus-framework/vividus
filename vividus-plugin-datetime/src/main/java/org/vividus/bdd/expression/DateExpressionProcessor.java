@@ -23,19 +23,11 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.util.DateUtils;
 
 public class DateExpressionProcessor implements IExpressionProcessor<String>
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DateExpressionProcessor.class);
-
     private static final String DATE_TIME_REGEX_PART = "((-)?P((?:\\d+[YMWD])*)(T(?:\\d+[HMS])+)?)";
-
-    private static final Pattern ISO_DURATION_PATTERN_WITH_FORMAT_PATTERN = Pattern
-            .compile("^" + DATE_TIME_REGEX_PART + "(?:\\((.*)\\))?$");
-    private static final int FORMAT_GROUP = 5;
 
     private static final Pattern GENERATE_DATE_PATTERN = Pattern
             .compile("^generateDate\\(" + DATE_TIME_REGEX_PART + "(,\\s*(.*))?\\)$");
@@ -63,20 +55,6 @@ public class DateExpressionProcessor implements IExpressionProcessor<String>
         {
             return generateDate(new DateExpression(durationMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP, DURATION_GROUP,
                     GENERATE_DATE_FORMAT_GROUP));
-        }
-        Matcher isoDurationMatcher = ISO_DURATION_PATTERN_WITH_FORMAT_PATTERN.matcher(expression);
-        if (isoDurationMatcher.find())
-        {
-            DateExpression dateExpression = new DateExpression(isoDurationMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
-                    DURATION_GROUP, FORMAT_GROUP);
-            LOGGER.atWarn()
-                  .addArgument(expression)
-                  .addArgument(() -> isoDurationMatcher.group(1))
-                  .addArgument(() -> dateExpression.hasCustomFormat()
-                          ? ", " + dateExpression.getCustomFormatString()
-                          : "")
-                  .log("WARNING: The syntax of expression #{{}} is deprecated, use new syntax #{generateDate({}{})");
-            return generateDate(dateExpression);
         }
         return Optional.empty();
     }
