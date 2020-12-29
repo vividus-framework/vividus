@@ -57,6 +57,7 @@ public final class ConfigurationResolver
     private static final String ENVIRONMENT = "environment";
     private static final String ENVIRONMENTS = "environments";
     private static final String SUITE = "suite";
+    private static final String SUITES = "suites";
 
     private static final String PLACEHOLDER_PREFIX = "${";
     private static final String PLACEHOLDER_SUFFIX = "}";
@@ -142,7 +143,8 @@ public final class ConfigurationResolver
                 Pair.of(PROFILE, PROFILES));
         String environments = getConfigurationPropertyValue(configurationProperties, overridingProperties,
                 ENVIRONMENTS);
-        String suite = getConfigurationPropertyValue(configurationProperties, overridingProperties, SUITE);
+        String suites = getCompetingConfigurationPropertyValue(configurationProperties, overridingProperties,
+                Pair.of(SUITE, SUITES));
 
         Properties mergedProperties = new Properties();
         mergedProperties.putAll(configurationProperties);
@@ -151,12 +153,12 @@ public final class ConfigurationResolver
 
         profiles = propertyPlaceholderHelper.replacePlaceholders(profiles, mergedProperties::getProperty);
         environments = propertyPlaceholderHelper.replacePlaceholders(environments, mergedProperties::getProperty);
-        suite = propertyPlaceholderHelper.replacePlaceholders(suite, mergedProperties::getProperty);
+        suites = propertyPlaceholderHelper.replacePlaceholders(suites, mergedProperties::getProperty);
 
         Multimap<String, String> configuration = LinkedHashMultimap.create();
         configuration.putAll(PROFILE, asPaths(profiles));
         configuration.putAll(ENVIRONMENT, asPaths(environments));
-        configuration.put(SUITE, suite);
+        configuration.putAll(SUITE, asPaths(suites));
         return configuration;
     }
 
