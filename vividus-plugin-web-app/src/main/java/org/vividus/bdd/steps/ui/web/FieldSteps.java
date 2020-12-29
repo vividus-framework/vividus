@@ -33,8 +33,8 @@ import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.IFieldActions;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.IWebElementActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.util.FormatUtil;
 
 @TakeScreenshotOnFailure
@@ -49,7 +49,7 @@ public class FieldSteps
     @Inject private IWebElementActions webElementActions;
     @Inject private IFieldActions fieldActions;
     @Inject private ISoftAssert softAssert;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverManager webDriverManager;
 
     /**
@@ -150,34 +150,46 @@ public class FieldSteps
                         normalizedText);
                 return;
             }
-            try
+            element = sendKeysRetryingIfStale(locator, element, normalizedText);
+            applyWorkaroundIfIE(element, normalizedText);
+        }
+    }
+
+    private WebElement sendKeysRetryingIfStale(Locator locator, WebElement element, String normalizedText)
+    {
+        WebElement toSendKeys = element;
+        try
+        {
+            toSendKeys.sendKeys(normalizedText);
+        }
+        catch (StaleElementReferenceException e)
+        {
+            LOGGER.info("An element is stale. One more attempt to type text into it");
+            toSendKeys = findElement(locator);
+            toSendKeys.sendKeys(normalizedText);
+        }
+        return toSendKeys;
+    }
+
+    private void applyWorkaroundIfIE(WebElement element, String normalizedText)
+    {
+        // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
+        if (webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE) && Boolean.TRUE.equals(
+                ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(WebDriverType.IE_OPTIONS))
+                        .get("requireWindowFocus")))
+        {
+            int iterationsCounter = TEXT_TYPING_ATTEMPTS_LIMIT;
+            while (iterationsCounter > 0 && !isValueEqualTo(element, normalizedText))
             {
+                element.clear();
+                LOGGER.info("Re-typing text \"{}\" to element", normalizedText);
                 element.sendKeys(normalizedText);
+                iterationsCounter--;
             }
-            catch (StaleElementReferenceException e)
+            if (iterationsCounter == 0 && !isValueEqualTo(element, normalizedText))
             {
-                LOGGER.info("An element is stale. One more attempt to type text into it");
-                element = findElement(locator);
-                element.sendKeys(normalizedText);
-            }
-            // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
-            if (webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE) && Boolean.TRUE.equals(
-                    ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(WebDriverType.IE_OPTIONS))
-                            .get("requireWindowFocus")))
-            {
-                int iterationsCounter = TEXT_TYPING_ATTEMPTS_LIMIT;
-                while (iterationsCounter > 0 && !isValueEqualTo(element, normalizedText))
-                {
-                    element.clear();
-                    LOGGER.info("Re-typing text \"{}\" to element", normalizedText);
-                    element.sendKeys(normalizedText);
-                    iterationsCounter--;
-                }
-                if (iterationsCounter == 0 && !isValueEqualTo(element, normalizedText))
-                {
-                    softAssert.recordFailedAssertion(String.format("The element is not filled correctly"
-                            + " after %d typing attempt(s)", TEXT_TYPING_ATTEMPTS_LIMIT + 1));
-                }
+                softAssert.recordFailedAssertion(String.format("The element is not filled correctly"
+                        + " after %d typing attempt(s)", TEXT_TYPING_ATTEMPTS_LIMIT + 1));
             }
         }
     }

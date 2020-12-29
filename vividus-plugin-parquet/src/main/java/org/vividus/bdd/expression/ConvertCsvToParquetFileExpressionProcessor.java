@@ -37,7 +37,7 @@ import org.apache.parquet.hadoop.ParquetWriter;
 import org.vividus.csv.CsvReader;
 import org.vividus.util.ResourceUtils;
 
-public class ConvertCsvToParquetFileExpressionProcessor implements IExpressionProcessor
+public class ConvertCsvToParquetFileExpressionProcessor implements IExpressionProcessor<String>
 {
     private static final Pattern CONVERT_CSV_TO_PARQUET_PATTERN = Pattern
             .compile("^convertCsvToParquetFile\\((.+), (.+)\\)$");
@@ -64,8 +64,8 @@ public class ConvertCsvToParquetFileExpressionProcessor implements IExpressionPr
             try
             {
                 List<Map<String, String>> csvData = csvReader.readCsvString(ResourceUtils.loadResource(csvPath));
-                File temporaryFile = File.createTempFile(FilenameUtils.getBaseName(csvPath), ".parquet");
-                temporaryFile.deleteOnExit();
+                File temporaryFile = ResourceUtils.createTempFile(FilenameUtils.getBaseName(csvPath), ".parquet", null)
+                        .toFile();
                 write(temporaryFile, schemaPath, csvData);
                 return Optional.of(temporaryFile.getPath());
             }

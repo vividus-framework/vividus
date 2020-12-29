@@ -18,6 +18,7 @@ package org.vividus.bdd.spring;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.io.StoryLoader;
+import org.jbehave.core.model.Story;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
@@ -41,13 +43,13 @@ import org.jbehave.core.steps.StepMonitor;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.steps.ExpressionAdaptor;
-import org.vividus.bdd.steps.ParameterAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
+import org.vividus.bdd.steps.VariableResolver;
 
 public class ExtendedConfiguration extends Configuration
 {
     private IPathFinder pathFinder;
-    private ParameterAdaptor parameterAdaptor;
+    private VariableResolver variableResolver;
     private ExpressionAdaptor expressionAdaptor;
     private List<ChainableParameterConverter<?, ?>> customConverters;
     private List<StepMonitor> stepMonitors;
@@ -63,7 +65,7 @@ public class ExtendedConfiguration extends Configuration
         initKeywords();
         initCompositePaths();
         useParameterControls(parameterControls);
-        useParameterConverters(new ParameterConvertersDecorator(this, parameterAdaptor, expressionAdaptor)
+        useParameterConverters(new ParameterConvertersDecorator(this, variableResolver, expressionAdaptor)
                 .addConverters(customConverters));
         useStoryParser(new RegexStoryParser(keywords(), examplesTableFactory()));
         TableTransformers transformers = tableTransformers();
@@ -111,6 +113,12 @@ public class ExtendedConfiguration extends Configuration
     }
 
     @Inject
+    public void setStoryExecutionComparator(Optional<Comparator<Story>> storyExecutionComparator)
+    {
+        storyExecutionComparator.ifPresent(this::useStoryExecutionComparator);
+    }
+
+    @Inject
     public void setStepMonitors(List<StepMonitor> stepMonitors)
     {
         this.stepMonitors = Collections.unmodifiableList(stepMonitors);
@@ -121,9 +129,9 @@ public class ExtendedConfiguration extends Configuration
         this.compositePaths = compositePaths;
     }
 
-    public void setParameterAdaptor(ParameterAdaptor parameterAdaptor)
+    public void setVariableResolver(VariableResolver variableResolver)
     {
-        this.parameterAdaptor = parameterAdaptor;
+        this.variableResolver = variableResolver;
     }
 
     @Inject

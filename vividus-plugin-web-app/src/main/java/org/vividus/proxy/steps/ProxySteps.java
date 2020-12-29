@@ -16,12 +16,14 @@
 
 package org.vividus.proxy.steps;
 
-import java.io.ByteArrayOutputStream;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
-import java.util.Collection;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -29,7 +31,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.browserup.harreader.model.Har;
 import com.browserup.harreader.model.HarEntry;
 import com.browserup.harreader.model.HarPostData;
 import com.browserup.harreader.model.HarPostDataParam;
@@ -42,19 +43,25 @@ import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.proxy.IProxy;
-import org.vividus.proxy.ProxyLog;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWebWaitActions;
 
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @TakeScreenshotOnFailure(onlyInDebugMode = "proxy")
@@ -68,15 +75,13 @@ public class ProxySteps
     @Inject private IBddVariableContext bddVariableContext;
     @Inject private IWebWaitActions waitActions;
 
-    private final ThreadLocal<Optional<ProxyLog>> externalProxyLog = ThreadLocal.withInitial(Optional::empty);
-
     /**
      * Clears the proxy log
      */
     @When("I clear proxy log")
     public void clearProxyLog()
     {
-        proxy.getLog().clear();
+        proxy.clearRecordedData();
     }
 
     /**
@@ -89,8 +94,8 @@ public class ProxySteps
      * If there weren't any calls matching requirements, HAR file with all calls will be attached to report.
      * If response contains status code 302 - corresponding request will be filtered out.
      * </p>
-     * @param httpMethod HTTP method to filter by
-     * @param urlPattern the string value of URL-pattern to filter by
+     * @param httpMethods the comma-separated HTTP methods to filter by
+     * @param urlPattern the regular expression to match HTTP request URL
      * @param comparisonRule The rule to compare values
      * (<i>Possible values:<b> LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
      * EQUAL_TO</b></i>)
@@ -98,145 +103,175 @@ public class ProxySteps
      * @throws IOException If any error happens during operation
      * @return Filtered HAR entries
      */
-    @Then("number of HTTP $httpMethod requests with URL pattern `$urlPattern` is $comparisonRule `$number`")
-    public List<HarEntry> checkNumberOfRequests(HttpMethod httpMethod, Pattern urlPattern,
-            ComparisonRule comparisonRule, long number) throws IOException
+    @Then("number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $comparisonRule `$number`")
+    public List<HarEntry> checkNumberOfRequests(Set<HttpMethod> httpMethods, Pattern urlPattern,
+            ComparisonRule comparisonRule, int number) throws IOException
     {
-        List<HarEntry> harEntries = getHarEntries(httpMethod, urlPattern);
-        assertSize(String.format("Number of HTTP %s requests matching URL pattern '%s'", httpMethod, urlPattern),
-                harEntries, comparisonRule, number);
+        List<HarEntry> harEntries = getLogEntries(httpMethods, urlPattern);
+        String description = String.format("Number of HTTP %s requests matching URL pattern '%s'",
+                methodsToString(httpMethods, ", "), urlPattern);
+        if (!softAssert.assertThat(description, harEntries.size(), comparisonRule.getComparisonRule(number)))
+        {
+            byte[] harBytes = OBJECT_MAPPER.writeValueAsBytes(proxy.getRecordedData());
+            attachmentPublisher.publishAttachment(harBytes, "har.har");
+        }
         return harEntries;
     }
 
-    private List<HarEntry> getHarEntries(HttpMethod httpMethod, Pattern urlPattern)
+    /**
+     * Saves the URL query parameters from the request with given URL-pattern into the variable with specified name and
+     * the scopes.
+     * <p>
+     * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
+     * meta tag at the story level.
+     * </p>
+     * The actions preformed by the step:
+     * <ul>
+     * <li>extract HTTP messages from the recorded proxy archive</li>
+     * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
+     * <li>find HTTP requests matching the provided HTTP methods and the URL regular expression</li>
+     * <li>check that total number of the found HTTP messages is equal to 1</li>
+     * <li>save the URL query parameters to the specified variable</li>
+     * </ul>
+     * In case of failure the full HTTP archive (HAR) is attached to the report.
+     *
+     * @param httpMethods  The "or"-separated set of HTTP methods to filter by, e.g. 'GET or POST or PUT'
+     * @param urlPattern   The regular expression to match HTTP request URL
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The variable name to save the URL query. The URL query is stored as a collection of key and
+     *                     value pairs, where key is the name of the query parameter and value is the list of query
+     *                     parameter values. The query parameter values are accessible via zero-based index.
+     * @throws IOException If any error happens during operation
+     */
+    @When("I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL query to $scopes "
+            + "variable `$variableName`")
+    public void captureRequestAndSaveURLQuery(Set<HttpMethod> httpMethods, Pattern urlPattern,
+            Set<VariableScope> scopes, String variableName) throws IOException
     {
-        return getProxyLog().getLogEntries(httpMethod, urlPattern)
-                .stream()
-                .filter(h -> h.getResponse().getStatus() != HttpStatus.SC_MOVED_TEMPORARILY)
-                .collect(Collectors.toList());
+        saveHarEntryFieldInTheScope(httpMethods, urlPattern, scopes, variableName,
+                harEntry -> getQueryParameters(harEntry.getRequest()));
     }
 
     /**
-     * Saves the query string from request with given URL-pattern into the variable
-     * with specified name and scopes.
+     * Saves the URL from the request with given URL-pattern into the variable with specified name and the scopes.
      * <p>
-     * This step requires proxy to be turned on.
-     * It can be done via setting properties or switching on <b>@proxy</b> metatag inside the story file.
-     * Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
-     * If there is one entry, it saves the query string from request as Map of keys and values
-     * into the variable with specified name and scopes.
-     * If there weren't any calls or more than one matching requirements, HAR file with all
-     * calls will be attached to report.
+     * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
+     * meta tag at the story level.
      * </p>
-     * @param httpMethod HTTP method to filter by
-     * @param urlPattern The string value of URL-pattern to filter by
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
+     * The actions preformed by the step:
      * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * <li>extract HTTP messages from the recorded proxy archive</li>
+     * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
+     * <li>find HTTP requests matching the provided HTTP methods and the URL regular expression</li>
+     * <li>check that total number of the found HTTP messages is equal to 1</li>
+     * <li>save the URL to the specified variable</li>
      * </ul>
-     * @param variableName A variable name
+     * In case of failure the full HTTP archive (HAR) is attached to the report.
+     *
+     * @param httpMethods  The "or"-separated set of HTTP methods to filter by, e.g. 'GET or POST or PUT'
+     * @param urlPattern   The regular expression to match HTTP request URL
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The variable name to save the URL.
      * @throws IOException If any error happens during operation
      */
-    @When("I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL query to $scopes "
+    @When("I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL to $scopes "
             + "variable `$variableName`")
-    public void captureRequestAndSaveURLQuery(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
+    public void captureRequestAndSaveURL(Set<HttpMethod> httpMethods, Pattern urlPattern, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
-        saveHarEntryFieldInTheScope(httpMethod, urlPattern, scopes, variableName, this::getQueryParameters);
+        saveHarEntryFieldInTheScope(httpMethods, urlPattern, scopes, variableName,
+                harEntry -> harEntry.getRequest().getUrl());
     }
 
     /**
-     * Saves the URL from request with given URL-pattern into the variable
-     * with specified name and scopes.
+     * Saves the URL query parameters, the request body and the response status code from the message with given
+     * request  URL-pattern into the variable with specified name and the scopes.
      * <p>
-     * This step requires proxy to be turned on.
-     * It can be done via setting properties or switching on <b>@proxy</b> metatag inside the story file.
-     * Step gets proxy's log, extract from contained requests URLs and match them with URL-pattern
-     * If there is one entry, it saves the query string from request as Map of keys and values
-     * into the variable with specified name and scopes.
-     * If there weren't any calls or more than one matching requirements, HAR file with all
-     * calls will be attached to report.
+     * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
+     * meta tag at the story level.
      * </p>
-     * @param httpMethod HTTP method to filter by
-     * @param urlPattern The string value of URL-pattern to filter by
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
+     * The actions preformed by the step:
      * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * <li>extract HTTP messages from the recorded proxy archive</li>
+     * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
+     * <li>find HTTP requests matching the provided HTTP methods and the URL regular expression</li>
+     * <li>check that total number of the found HTTP messages is equal to 1</li>
+     * <li>save the HTTP message data to the specified variable</li>
      * </ul>
-     * @param variableName A variable name
+     * In case of failure the full HTTP archive (HAR) is attached to the report.
+     *
+     * @param httpMethods  The "or"-separated set of HTTP methods to filter by, e.g. 'GET or POST or PUT'
+     * @param urlPattern   The regular expression to match HTTP request URL
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The variable name to store results. If the variable name is my-var, the following
+     *                     variables will be created:
+     *                     <ul>
+     *                     <li>${my-var.query} - The URL query is stored as a collection of key and value pairs,
+     *                     where key is the name of the query parameter and value is the list of query parameter
+     *                     values. The query parameter values are accessible via zero-based index.</li>
+     *                     <li>${my-var.requestBody.mimeType} - The MIME type of posted data, the variable will not
+     *                     be created if MIME type is not present.</li>
+     *                     <li>${my-var.requestBody.text} - The posted data as plain text, the variable will not be
+     *                     created if the request body is not present.</li>
+     *                     <li>${my-var.requestBodyParameters} - The form data parameters are stored as a collection
+     *                     of key and value pairs, where key is the name of the form parameter and value is the list
+     *                     of form parameter values. The form parameter values are accessible via zero-based index.</li>
+     *                     <li>${my-var.responseStatus} - The response status, the variable will not be created if
+     *                     the response is not present.</li>
+     *                     </ul>
      * @throws IOException If any error happens during operation
      */
-    @When("I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save URL to $scopes "
+    @When("I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save request data to $scopes "
             + "variable `$variableName`")
-    public void captureRequestAndSaveURL(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
-            String variableName) throws IOException
+    public void captureRequestAndSaveRequestData(Set<HttpMethod> httpMethods, Pattern urlPattern,
+            Set<VariableScope> scopes, String variableName) throws IOException
     {
-        saveHarEntryFieldInTheScope(httpMethod, urlPattern, scopes, variableName, HarRequest::getUrl);
+        saveHarEntryFieldInTheScope(httpMethods, urlPattern, scopes, variableName, this::extractFullRequestData);
     }
 
-    private void saveHarEntryFieldInTheScope(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
-            String variableName, Function<HarRequest, Object> valueExtractor) throws IOException
+    private void saveHarEntryFieldInTheScope(Set<HttpMethod> httpMethods, Pattern urlPattern,
+            Set<VariableScope> scopes, String variableName, Function<HarEntry, Object> valueExtractor)
+            throws IOException
     {
-        List<HarEntry> harEntries = checkNumberOfRequests(httpMethod, urlPattern, ComparisonRule.EQUAL_TO, 1);
+        List<HarEntry> harEntries = checkNumberOfRequests(httpMethods, urlPattern, ComparisonRule.EQUAL_TO, 1);
         if (harEntries.size() == 1)
         {
             HarEntry harEntry = harEntries.get(0);
-            bddVariableContext.putVariable(scopes, variableName, valueExtractor.apply(harEntry.getRequest()));
+            bddVariableContext.putVariable(scopes, variableName, valueExtractor.apply(harEntry));
         }
     }
 
-    /**
-     * Saves the query string, body from request with given URL-pattern and response status from response
-     * into the variable with specified name and scopes.
-     * <p>
-     * This step requires proxy to be turned on.
-     * It can be done via setting properties or switching on <b>@proxy</b> metatag inside the story file.
-     * Step gets proxies log, extract from contained requests URLs and match them with URL-pattern
-     * If there is one entry, it saves the query string from request as Map of keys and values
-     * into the variable with specified name and scopes.
-     * If there weren't any calls or more than one matching requirements, HAR file with all
-     * calls will be attached to report.
-     * </p>
-     * @param httpMethod HTTP method to filter by
-     * @param urlPattern The string value of URL-pattern to filter by
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A variable name
-     * @throws IOException If any error happens during operation
-     */
-    @When("I capture HTTP $httpMethod request with URL pattern `$urlPattern` and save request data to $scopes "
-            + "variable `$variableName`")
-    public void captureRequestAndSaveRequestData(HttpMethod httpMethod, Pattern urlPattern, Set<VariableScope> scopes,
-            String variableName) throws IOException
+    private Map<String, Object> extractFullRequestData(HarEntry harEntry)
     {
-        List<HarEntry> harEntries = checkNumberOfRequests(httpMethod, urlPattern, ComparisonRule.EQUAL_TO, 1);
-        if (harEntries.size() == 1)
-        {
-            HarEntry harEntry = harEntries.get(0);
-            HarRequest request = harEntry.getRequest();
-            HarPostData postData = request.getPostData();
-            Map<String, Object> requestData = Map.of(
-                    "query", getQueryParameters(request),
-                    "requestBody", getRequestBody(postData),
-                    "requestBodyParameters", getRequestBodyParameters(postData),
-                    "responseStatus", harEntry.getResponse().getStatus()
-            );
-            bddVariableContext.putVariable(scopes, variableName, requestData);
-        }
+        HarRequest request = harEntry.getRequest();
+        HarPostData postData = request.getPostData();
+        return Map.of(
+                "query", getQueryParameters(request),
+                "requestBody", getRequestBody(postData),
+                "requestBodyParameters", getRequestBodyParameters(postData),
+                "responseStatus", harEntry.getResponse().getStatus()
+        );
     }
 
     private Map<String, String> getRequestBody(HarPostData postData)
@@ -248,93 +283,160 @@ public class ProxySteps
         );
     }
 
-    private Map<String, String> getRequestBodyParameters(HarPostData postData)
+    private Map<String, List<String>> getRequestBodyParameters(HarPostData postData)
     {
-        return postData.getParams().stream()
-                .collect(Collectors.toMap(HarPostDataParam::getName, HarPostDataParam::getValue));
+        return postData.getParams().stream().collect(
+                groupingBy(HarPostDataParam::getName, mapping(HarPostDataParam::getValue, toList())));
     }
 
-    private Map<String, String> getQueryParameters(HarRequest request)
+    private Map<String, List<String>> getQueryParameters(HarRequest request)
     {
-        return request.getQueryString().stream()
-                .collect(Collectors.toMap(HarQueryParam::getName, HarQueryParam::getValue));
+        return request.getQueryString().stream().collect(
+                groupingBy(HarQueryParam::getName, mapping(HarQueryParam::getValue, toList())));
     }
 
     /**
      * Waits for appearance of HTTP request matched <b>httpMethod</b> and <b>urlPattern</b> in proxy log
-     * @param httpMethod HTTP method to filter by
-     * @param urlPattern The string value of URL-pattern to filter by
+     * @param httpMethods the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
+     * @param urlPattern the regular expression to match HTTP request URL
      */
-    @When("I wait until HTTP $httpMethod request with URL pattern `$urlPattern` exists in proxy log")
-    public void waitRequestInProxyLog(HttpMethod httpMethod, Pattern urlPattern)
+    @When("I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log")
+    public void waitRequestInProxyLog(Set<HttpMethod> httpMethods, Pattern urlPattern)
     {
         waitActions.wait(urlPattern, new Function<>()
         {
             @Override
             public Boolean apply(Pattern urlPattern)
             {
-                List<HarEntry> entries = getHarEntries(httpMethod, urlPattern);
-                return !entries.isEmpty();
+                return !getLogEntries(httpMethods, urlPattern).isEmpty();
             }
 
             @Override
             public String toString()
             {
-                return String.format("waiting for HTTP %s request with URL pattern %s", httpMethod, urlPattern);
+                return String.format("waiting for HTTP %s request with URL pattern %s",
+                        methodsToString(httpMethods, " or "), urlPattern);
             }
         });
     }
 
     /**
-     * Add headers to proxy request that will be used while sending request with given urlPattern
-     * @param headers ExamplesTable representing list of headers with columns "name" and "value" specifying HTTP header
-     * names and values respectively
+     * Add headers to the proxied HTTP request satisfying the desired condition
      * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain"
-     * @param urlPattern The string value of URL-pattern to filter by
+     * @param url The string value of URL to match comparison rule
+     * @param headers ExamplesTable representing the list of the headers with columns "name" and "value" specifying
+     * HTTP header names and values respectively
      */
-    @When("I add headers to proxied requests with URL pattern which $comparisonRule `$urlPattern`:$headers")
-    public void addHeadersToProxyRequest(StringComparisonRule comparisonRule, String urlPattern, ExamplesTable headers)
+    @When("I add headers to proxied requests with URL pattern which $comparisonRule `$url`:$headers")
+    public void addHeadersToProxyRequest(StringComparisonRule comparisonRule, String url, DefaultHttpHeaders headers)
     {
-        DefaultHttpHeaders httpHeaders = new DefaultHttpHeaders();
-        headers.getRowsAsParameters(true)
-                .forEach(row -> httpHeaders.add(
-                        row.valueAs("name", String.class),
-                        (Object) row.valueAs("value", String.class)
-                ));
-        Matcher<String> expected = comparisonRule.createMatcher(urlPattern);
+        applyUrlFilter(comparisonRule, url, request -> {
+            request.headers().add(headers);
+            return null;
+        });
+    }
+
+    /**
+     * The step allows to mock HTTP request, and provide within response status code, headers and content.
+     * Once the request is matched by URL comparison rule response will be returned. In this case no actual request will
+     * be executed.
+     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
+     * @param url The string value of URL to match comparison rule
+     * @param responseCode The code will be used in response
+     * @param content The content will be used in the response
+     * @param headers ExamplesTable representing the list of the headers with columns "name" and "value" specifying
+     * HTTP header names and values respectively
+     */
+    @When(value = "I mock HTTP responses with request URL which $comparisonRule `$url` using"
+            + " response code `$responseCode`, content `$payload` and headers:$headers", priority = 1)
+    public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode, Object content,
+            DefaultHttpHeaders headers)
+    {
+        byte[] contentBytes = getBytes(content);
+        applyUrlFilter(comparisonRule, url, request -> {
+            HttpResponseStatus responseStatus = HttpResponseStatus.valueOf(responseCode);
+            HttpVersion protocolVersion = request.protocolVersion();
+
+            DefaultFullHttpResponse mockedRequest =
+                new DefaultFullHttpResponse(protocolVersion, responseStatus, Unpooled.wrappedBuffer(contentBytes));
+
+            HttpHeaders httpHeaders = mockedRequest.headers();
+            httpHeaders.add("Content-Length", contentBytes.length);
+            httpHeaders.add(headers);
+            return mockedRequest;
+        });
+    }
+
+    /**
+     * The step allows to mock HTTP request, and provide within response status code and headers.
+     * Once the request is matched by URL comparison rule response will be returned. In this case no actual request will
+     * be executed.
+     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
+     * @param url The string value of URL to match comparison rule
+     * @param responseCode The code will be used in response
+     * @param headers ExamplesTable representing the list of the headers with columns "name" and "value" specifying
+     * HTTP header names and values respectively
+     */
+    @When("I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`"
+            + " and headers:$headers")
+    public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode,
+            DefaultHttpHeaders headers)
+    {
+        applyUrlFilter(comparisonRule, url, request -> {
+            DefaultHttpResponse mockedRequest =
+                new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.valueOf(responseCode));
+            mockedRequest.headers().add(headers);
+            return mockedRequest;
+        });
+    }
+
+    /**
+     * Resets previously created proxy mocks
+     */
+    @When("I clear proxy mocks")
+    public void resetMocks()
+    {
+        proxy.clearRequestFilters();
+    }
+
+    private byte[] getBytes(Object content)
+    {
+        if (content instanceof String)
+        {
+            return ((String) content).getBytes(StandardCharsets.UTF_8);
+        }
+        else if (content instanceof byte[])
+        {
+            return (byte[]) content;
+        }
+        throw new IllegalArgumentException("Unsupported content type: " + content.getClass());
+    }
+
+    private void applyUrlFilter(StringComparisonRule comparisonRule, String url,
+            Function<HttpRequest, HttpResponse> requestProcessor)
+    {
+        Matcher<String> expected = comparisonRule.createMatcher(url);
         proxy.addRequestFilter((request, contents, messageInfo) -> {
             if (expected.matches(messageInfo.getUrl()))
             {
-                request.headers().add(httpHeaders);
+                return requestProcessor.apply(request);
             }
             return null;
         });
     }
 
-    private boolean assertSize(String assertionDescription, Collection<?> collection, ComparisonRule comparisonRule,
-            long expectedSize) throws IOException
+    private List<HarEntry> getLogEntries(Set<HttpMethod> httpMethods, Pattern urlPattern)
     {
-        boolean assertionPassed = softAssert.assertThat(assertionDescription, (long) collection.size(),
-                comparisonRule.getComparisonRule(expectedSize));
-        if (!assertionPassed)
-        {
-            publishHar();
-        }
-        return assertionPassed;
+        return proxy.getRecordedData().getLog()
+                .findEntries(urlPattern)
+                .stream()
+                .filter(entry -> entry.getResponse().getStatus() != HttpStatus.SC_MOVED_TEMPORARILY
+                        && httpMethods.contains(entry.getRequest().getMethod()))
+                .collect(toList());
     }
 
-    private void publishHar() throws IOException
+    private String methodsToString(Set<HttpMethod> httpMethods, String delimiter)
     {
-        Har har = proxy.getProxyServer().getHar();
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream())
-        {
-            OBJECT_MAPPER.writeValue(byteArrayOutputStream, har);
-            attachmentPublisher.publishAttachment(byteArrayOutputStream.toByteArray(), "har.har");
-        }
-    }
-
-    private ProxyLog getProxyLog()
-    {
-        return externalProxyLog.get().orElse(proxy.getLog());
+        return httpMethods.stream().map(HttpMethod::toString).collect(Collectors.joining(delimiter));
     }
 }

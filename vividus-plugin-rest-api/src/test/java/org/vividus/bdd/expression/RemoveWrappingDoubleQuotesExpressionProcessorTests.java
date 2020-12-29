@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class RemoveWrappingDoubleQuotesExpressionProcessorTests
 {
-    private final IExpressionProcessor processor = new RemoveWrappingDoubleQuotesExpressionProcessor();
+    private final IExpressionProcessor<String> processor = new RemoveWrappingDoubleQuotesExpressionProcessor();
 
     @Test
     void testExecuteWithUnsupportedException()

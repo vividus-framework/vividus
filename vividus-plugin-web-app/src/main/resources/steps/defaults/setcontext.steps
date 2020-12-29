@@ -12,3 +12,19 @@ When I save `<attributeName>` attribute value of element located `<locator>` to 
 
 Composite: When I change context to the page
 When I reset context
+
+
+Composite: When I set the number of elements found `$locator` to $scopes variable `$variableName`
+When I save number of elements located `<locator>` to <scopes> variable `<variableName>`
+
+
+Composite: When I change context to a [$state] element with the name '$name'
+When I change context to element located `By.elementName(<name>)->filter.state(<state>)`
+
+
+Composite: When I change context to an element with the attribute '$attributeType'='$attributeValue'
+When I change context to element located `By.xpath(.//*[@<attributeType>='<attributeValue>'])`
+
+
+Composite: When I change context to a [$state] element with the attribute '$attributeType'='$attributeValue'
+When I change context to element located `By.xpath(.//*[@<attributeType>='<attributeValue>'])->filter.state(<state>)`

@@ -7,7 +7,7 @@ The plugin provides the integration between web application testing functionalit
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-web-app-to-rest-api', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-web-app-to-rest-api', version: '{current-version}')
 ----
 
 == Table Transformers

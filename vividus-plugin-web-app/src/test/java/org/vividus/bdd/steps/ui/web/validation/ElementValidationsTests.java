@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -44,7 +43,6 @@ import org.vividus.ui.web.action.WebElementActions;
 @ExtendWith(MockitoExtension.class)
 class ElementValidationsTests
 {
-    private static final String TITLE = "title";
     private static final String ELEMENT_CONTAINS_TEXT = "Element contains text";
     private static final String STRING_ARG = "stringArg";
     private static final int DIMENSION_VALUE = 100;
@@ -171,21 +169,6 @@ class ElementValidationsTests
     void testAssertIfElementHasWidthInPercNullElements()
     {
         assertFalse(elementValidations.assertIfElementHasWidthInPerc(null, null, CORRECT_WIDTH_VALUE));
-    }
-
-    @Test
-    void testAssertIfElementContainsTooltip()
-    {
-        assertFalse(elementValidations.assertIfElementContainsTooltip(null, STRING_ARG));
-    }
-
-    @Test
-    void testAssertIfElementContainsTooltipEquals()
-    {
-        when(mockedWebElement.getAttribute(TITLE)).thenReturn(STRING_ARG);
-        mockAssertingWebElements(List.of(mockedWebElement));
-        elementValidations.assertIfElementContainsTooltip(mockedWebElement, STRING_ARG);
-        verify(descriptiveSoftAssert).assertEquals("Element has correct tooltip", STRING_ARG, STRING_ARG);
     }
 
     @Test

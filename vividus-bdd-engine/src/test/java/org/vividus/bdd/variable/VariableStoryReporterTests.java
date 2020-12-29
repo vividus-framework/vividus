@@ -20,16 +20,13 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
-import java.util.stream.Stream;
-
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.StoryReporter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -51,16 +48,11 @@ class VariableStoryReporterTests
         variableStoryReporter.setNext(nextStoryReporter);
     }
 
-    static Stream<Arguments> storyData()
-    {
-        return Stream.of(
-                Arguments.of(false, 1),
-                Arguments.of(true,  0)
-        );
-    }
-
     @ParameterizedTest
-    @MethodSource("storyData")
+    @CsvSource({
+        "false, 1",
+        "true,  0"
+    })
     void testBeforeStory(boolean givenStory, int numberOfInvocations)
     {
         Story story = mock(Story.class);
@@ -109,17 +101,6 @@ class VariableStoryReporterTests
         InOrder ordered = inOrder(bddVariableContext, nextStoryReporter);
         ordered.verify(nextStoryReporter).afterScenario();
         ordered.verify(bddVariableContext).clearScenarioVariables();
-        ordered.verifyNoMoreInteractions();
-    }
-
-    @ParameterizedTest
-    @MethodSource("storyData")
-    void testAfterStory(boolean givenStory, int numberOfInvocations)
-    {
-        variableStoryReporter.afterStory(givenStory);
-        InOrder ordered = inOrder(bddVariableContext, nextStoryReporter);
-        ordered.verify(nextStoryReporter).afterStory(givenStory);
-        ordered.verify(bddVariableContext, times(numberOfInvocations)).clearStoryVariables();
         ordered.verifyNoMoreInteractions();
     }
 }

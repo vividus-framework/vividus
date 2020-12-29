@@ -44,7 +44,7 @@ class ElementActionServiceTests
     @InjectMocks private ElementActionService service;
 
     @BeforeEach
-    void init() throws IllegalArgumentException, IllegalAccessException
+    void init() throws IllegalArgumentException
     {
         elementActions.add(new TestElementFilter());
         elementActions.add(new TestElementSearch());

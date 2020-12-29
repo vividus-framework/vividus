@@ -167,7 +167,8 @@ class ControllingMetaTagTests
         when(metaWrapper.getOptionalPropertyValue(anyString())).thenReturn(Optional.empty());
         ControllingMetaTag.setDesiredCapabilitiesFromMeta(desiredCapabilities, metaWrapper);
         verify(metaWrapper).getOptionalPropertyValue(VERSION);
-        verifyNoInteractions(desiredCapabilities);
+        verify(desiredCapabilities).asMap();
+        verifyNoMoreInteractions(desiredCapabilities);
     }
 
     @SuppressWarnings("unchecked")
@@ -175,16 +176,28 @@ class ControllingMetaTagTests
     void testSetDesiredCapabilitiesFromCapabilityMeta()
     {
         String prefix = ControllingMetaTag.CAPABILITY.getMetaTagName();
+        String groupPrefix = "group.";
         String acceptInsecureCerts = "acceptInsecureCerts";
         when(metaWrapper.getPropertiesByKey(any(Predicate.class))).thenReturn(Map.of(
                 prefix + APPIUM_VERSION, VERSION_NUMBER,
                 prefix + VERSION, VERSION_NUMBER,
-                prefix + acceptInsecureCerts, "true"
+                prefix + acceptInsecureCerts, Boolean.TRUE.toString(),
+                prefix + groupPrefix + APPIUM_VERSION, VERSION_NUMBER,
+                prefix + groupPrefix + VERSION, VERSION_NUMBER,
+                prefix + groupPrefix + acceptInsecureCerts, Boolean.TRUE.toString()
         ));
-        ControllingMetaTag.CAPABILITY.setCapability(desiredCapabilities, metaWrapper);
-        verify(desiredCapabilities).setCapability(APPIUM_VERSION, Integer.parseInt(VERSION_NUMBER));
-        verify(desiredCapabilities).setCapability(acceptInsecureCerts, (Object) true);
-        verify(desiredCapabilities).setCapability(VERSION, Integer.parseInt(VERSION_NUMBER));
-        verifyNoMoreInteractions(desiredCapabilities, metaWrapper);
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+        ControllingMetaTag.CAPABILITY.setCapability(capabilities, metaWrapper);
+        assertEquals(Map.of(
+            acceptInsecureCerts, true,
+            APPIUM_VERSION, VERSION_NUMBER,
+            VERSION, VERSION_NUMBER,
+            "group", Map.of(
+                        acceptInsecureCerts, true,
+                        APPIUM_VERSION, Integer.parseInt(VERSION_NUMBER),
+                        VERSION, Integer.parseInt(VERSION_NUMBER)
+                    )
+        ), capabilities.asMap());
+        verifyNoMoreInteractions(metaWrapper);
     }
 }

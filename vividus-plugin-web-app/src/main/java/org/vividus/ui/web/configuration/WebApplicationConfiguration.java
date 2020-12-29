@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 
 import com.google.common.base.Suppliers;
 
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.util.UriUtils;
 
 public class WebApplicationConfiguration
@@ -93,17 +93,17 @@ public class WebApplicationConfiguration
                 : configurationStorage.get().mainApplicationPageUri.getHost();
     }
 
-    public boolean isMobileViewport(IJavascriptActions javascritActions)
+    public boolean isMobileViewport(WebJavascriptActions javascritActions)
     {
         return getViewportWidth(javascritActions) <= mobileScreenResolutionWidthThreshold;
     }
 
-    public boolean isTabletViewport(IJavascriptActions javascritActions)
+    public boolean isTabletViewport(WebJavascriptActions javascritActions)
     {
         return getViewportWidth(javascritActions) <= tabletScreenResolutionWidthThreshold;
     }
 
-    private int getViewportWidth(IJavascriptActions javascritActions)
+    private int getViewportWidth(WebJavascriptActions javascritActions)
     {
         return javascritActions.getViewportSize().getWidth();
     }

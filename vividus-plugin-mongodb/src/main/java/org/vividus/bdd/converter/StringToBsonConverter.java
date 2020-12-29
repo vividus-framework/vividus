@@ -16,22 +16,18 @@
 
 package org.vividus.bdd.converter;
 
-import java.lang.reflect.Type;
-
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 
 @Named
-public class StringToBsonConverter extends AbstractParameterConverter<Bson>
+public class StringToBsonConverter extends FunctionalParameterConverter<Bson>
 {
-    @Override
-    public Bson convertValue(String value, Type type)
+    public StringToBsonConverter()
     {
-        String json = StringUtils.isNoneBlank(value) ? value : "{}";
-        return Document.parse(json);
+        super(value -> Document.parse(StringUtils.defaultIfBlank(value, "{}")));
     }
 }

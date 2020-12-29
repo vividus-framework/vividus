@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
 import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
@@ -31,9 +31,9 @@ public final class CeilingJsCoordsProvider extends CoordsProvider
 
     private final String getCoordinatesJs;
 
-    private transient IJavascriptActions javascriptActions;
+    private final transient WebJavascriptActions javascriptActions;
 
-    private CeilingJsCoordsProvider(String scrollTopJs, IJavascriptActions javascriptActions)
+    private CeilingJsCoordsProvider(String scrollTopJs, WebJavascriptActions javascriptActions)
     {
         this.javascriptActions = javascriptActions;
         getCoordinatesJs = String.format("var rect = arguments[0].getBoundingClientRect();"
@@ -56,12 +56,12 @@ public final class CeilingJsCoordsProvider extends CoordsProvider
                 + "});", scrollTopJs);
     }
 
-    public static CeilingJsCoordsProvider getSimple(IJavascriptActions javascriptActions)
+    public static CeilingJsCoordsProvider getSimple(WebJavascriptActions javascriptActions)
     {
         return new CeilingJsCoordsProvider("0", javascriptActions);
     }
 
-    public static CeilingJsCoordsProvider getScrollAdjusted(IJavascriptActions javascriptActions)
+    public static CeilingJsCoordsProvider getScrollAdjusted(WebJavascriptActions javascriptActions)
     {
         return new CeilingJsCoordsProvider("window.scrollY || window.scrollTop || "
                 + "document.getElementsByTagName('html')[0].scrollTop", javascriptActions);

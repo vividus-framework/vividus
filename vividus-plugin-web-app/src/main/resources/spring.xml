@@ -86,7 +86,7 @@
     </bean>
 
     <bean id="fieldActions" class="org.vividus.ui.web.action.FieldActions" />
-    <bean id="javascriptActions" class="org.vividus.ui.web.action.JavascriptActions" />
+    <bean id="javascriptActions" class="org.vividus.ui.web.action.WebJavascriptActions" />
     <bean id="mouseActions" class="org.vividus.ui.web.action.MouseActions">
         <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
     </bean>
@@ -132,20 +132,23 @@
     <bean class="org.vividus.ui.web.action.search.CaseSensitiveTextSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.TooltipFilter" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.StateFilter" parent="abstractStateFilter" />
-    <bean class="org.vividus.ui.web.action.search.RelativeToParentWidthFilter" parent="abstractWebElementSearchAction"/>
-    <bean class="org.vividus.ui.web.action.search.TextPartFilter" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.ValidationIconSourceFilter" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.PlaceholderFilter" parent="abstractWebElementSearchAction" />
+    <bean class="org.vividus.ui.web.action.search.RelativeToParentWidthFilter"/>
+    <bean class="org.vividus.ui.action.search.GenericTextFilter" >
+        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).TEXT_PART}" />
+        <constructor-arg index="1" value="#{T(org.vividus.bdd.steps.StringComparisonRule).CONTAINS}" />
+    </bean>
+    <bean class="org.vividus.ui.web.action.search.ValidationIconSourceFilter" />
+    <bean class="org.vividus.ui.web.action.search.PlaceholderFilter" />
     <bean class="org.vividus.ui.web.action.search.ButtonNameSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.CheckboxNameSearch" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.ClassAttributePartFilter" parent="abstractWebElementSearchAction" />
+    <bean class="org.vividus.ui.web.action.search.ClassAttributePartFilter" />
     <bean class="org.vividus.ui.web.action.search.ImageWithSourcePartFilter" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.PartialLinkTextSearch" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.FieldTextFilter" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.FieldTextPartFilter" parent="abstractWebElementSearchAction" />
+    <bean class="org.vividus.ui.web.action.search.FieldTextFilter" />
+    <bean class="org.vividus.ui.web.action.search.FieldTextPartFilter" />
     <bean class="org.vividus.ui.web.action.search.FieldNameSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.DropDownStateFilter" parent="abstractStateFilter" />
-    <bean class="org.vividus.ui.web.action.search.DropDownTextFilter" parent="abstractWebElementSearchAction" />
+    <bean class="org.vividus.ui.web.action.search.DropDownTextFilter" />
     <bean class="org.vividus.ui.web.action.search.CaseInsensitiveTextSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.ImageWithSourceSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.XpathSearch" parent="abstractWebElementSearchAction" />

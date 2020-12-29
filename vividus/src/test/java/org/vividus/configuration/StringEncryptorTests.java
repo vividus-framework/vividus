@@ -17,20 +17,15 @@
 package org.vividus.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Properties;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(StandardPBEStringEncryptor.class)
-public class StringEncryptorTests
+class StringEncryptorTests
 {
     private static final String PROPERTY_KEY_FIRST = "key first";
     private static final String PROPERTY_KEY_SECOND = "key second";
@@ -39,7 +34,7 @@ public class StringEncryptorTests
     private static final String PROPERTY_VALUE_SECOND_ENCRYPTED = "ENC(value second)";
 
     @Test
-    public void testDecryptProperties()
+    void testDecryptProperties()
     {
         StandardPBEStringEncryptor standardPBEStringEncryptor = mock(StandardPBEStringEncryptor.class);
         Properties properties = new Properties();

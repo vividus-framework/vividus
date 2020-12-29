@@ -1,5 +1,5 @@
 {transformer=FROM_LANDSCAPE}
-|mainViewHeaderTextXpath    |//android.widget.TextView[@text='Home']              |
+|textElementXpath           |//android.widget.TextView                            |
 |togglerAccessibilityId     |menu-toggler-accessibilityLabel                      |
 |menuButtonXpath            |//android.widget.TextView[@text='Button']            |
 |incrementAccessibilityId   |increment-accessibilityLabel                         |

@@ -49,7 +49,7 @@ public interface IBaseValidations
      * @param comparisonRule The rule to compare values
      * (&lt;i&gt;Possible values:&lt;b&gt; LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
      * EQUAL_TO&lt;/b&gt;&lt;/i&gt;)
-     * @param number expected number of elements in the <b>element</b> collection
+     * @param number expected number of elements in the <b>elements</b> collection
      * @return whether the number of elements in <b>elements</b> is equal to <b>number</b>
      */
     boolean assertElementsNumber(String description, List<WebElement> elements, ComparisonRule comparisonRule,
@@ -85,11 +85,36 @@ public interface IBaseValidations
 
     List<WebElement> assertIfElementsExist(String businessDescription, SearchContext searchContext, Locator locator);
 
+    /**
+     * Assert that the number of elements found by <b>locator</b> is <b>comparisonRule</b> <b>number</b>
+     * @param businessDescription business description of the elements being found, must not be {@code null}
+     * @param locator locator to find elements, must not be {@code null}
+     * @param number expected number of found elements
+     * @param comparisonRule The rule to compare values
+     * (&lt;i&gt;Possible values:&lt;b&gt; LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
+     * EQUAL_TO&lt;/b&gt;&lt;/i&gt;)
+     * @return collection of found elements
+     * @deprecated Use {@link #assertNumberOfElementsFound(String, Locator, int, ComparisonRule)}
+     */
+    @Deprecated(since = "0.2.9", forRemoval = true)
     List<WebElement> assertIfNumberOfElementsFound(String businessDescription, Locator locator, int number,
             ComparisonRule comparisonRule);
 
     List<WebElement> assertIfNumberOfElementsFound(String businessDescription, SearchContext searchContext,
             Locator locator, int number, ComparisonRule comparisonRule);
+
+    /**
+     * Assert that the number of elements found by <b>locator</b> is <b>comparisonRule</b> <b>number</b>
+     * @param description business description of the elements being found, must not be {@code null}
+     * @param locator locator to find elements, must not be {@code null}
+     * @param number expected number of found elements
+     * @param comparisonRule The rule to compare values
+     * (&lt;i&gt;Possible values:&lt;b&gt; LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
+     * EQUAL_TO&lt;/b&gt;&lt;/i&gt;)
+     * @return collection of found elements
+     */
+    List<WebElement> assertNumberOfElementsFound(String description, Locator locator, int number,
+            ComparisonRule comparisonRule);
 
     boolean assertIfExactNumberOfElementsFound(String businessDescription, Locator locator, int number);
 

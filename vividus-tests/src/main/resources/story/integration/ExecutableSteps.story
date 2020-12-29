@@ -75,8 +75,17 @@ When I `1` times do:
 Then `${iterator}` is = `2`
 
 Scenario: Verify step: When I execute steps at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExeute
-When I initialize the scenario variable `var` with value `0`
-When I execute steps at most 5 times while variable `var` is < `3`:
+When I initialize the scenario variable `var` with value `5`
+When I execute steps at most 5 times while variable `var` is < `10`:
 |step                                                                          |
 |When I initialize the scenario variable `var` with value `#{eval(${var} + 1)}`|
-Then `${var}` is = `3`
+Then `${var}` is = `10`
+
+Scenario: Verify step: When I execute steps with delay `$delay` at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExeute
+Meta:
+    @requirementId 1235
+When I initialize the scenario variable `var` with value `5`
+When I execute steps with delay `PT0.5S` at most 2 times while variable `var` is < `7`:
+|step                                                                          |
+|When I initialize the scenario variable `var` with value `#{eval(${var} + 1)}`|
+Then `${var}` is = `7`

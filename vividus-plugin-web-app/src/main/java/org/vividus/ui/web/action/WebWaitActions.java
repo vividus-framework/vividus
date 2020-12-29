@@ -32,7 +32,7 @@ public class WebWaitActions extends WaitActions implements IWebWaitActions
 {
     @Inject private IWebDriverProvider webDriverProvider;
 
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IAlertActions alertActions;
     @Inject private IWebDriverManager webDriverManager;
 

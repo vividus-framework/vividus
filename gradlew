@@ -22,15 +22,22 @@ else
     die "$file not found."
 fi
 
-if [ -z "$BUILD_SYSTEM_ROOT" ] ; then
-    export BUILD_SYSTEM_ROOT=$(getValue 'buildSystemRootDir')
+#If VIVIDUS_BUILD_SYSTEM_HOME is not set -> try BUILD_SYSTEM_ROOT -> try embedded
+if [ -n "$VIVIDUS_BUILD_SYSTEM_HOME" ] ; then
+    :
+elif [ -n "$BUILD_SYSTEM_ROOT" ] ; then
+    echo "WARNING: BUILD_SYSTEM_ROOT environment variable is deprecated, use VIVIDUS_BUILD_SYSTEM_HOME instead"
+    export VIVIDUS_BUILD_SYSTEM_HOME="$BUILD_SYSTEM_ROOT"
+else
+   export VIVIDUS_BUILD_SYSTEM_HOME=$(getValue 'buildSystemRoot')
 fi
 
-GRADLEW_PATH=$BUILD_SYSTEM_ROOT/$buildSystemVersion/gradlew
+GRADLEW_PATH=$VIVIDUS_BUILD_SYSTEM_HOME/$buildSystemVersion/gradlew
 if [ -f "$GRADLEW_PATH" ] ; then
     exec "$GRADLEW_PATH" "$@"
 else
-    die "ERROR: Neither environment variable "BUILD_SYSTEM_ROOT" is set nor embedded build system is synced
+    die "ERROR: Neither environment variable "VIVIDUS_BUILD_SYSTEM_HOME" is set nor embedded build system is synced
+Used path: $GRADLEW_PATH
 Please check Build System guide:
 https://github.com/vividus-framework/vividus-build-system
 or

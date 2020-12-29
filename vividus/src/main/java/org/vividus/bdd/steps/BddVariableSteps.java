@@ -18,26 +18,18 @@ package org.vividus.bdd.steps;
 
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 
-import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.util.MapUtils;
 import org.vividus.bdd.variable.VariableScope;
@@ -54,9 +46,36 @@ public class BddVariableSteps
     private static final String TABLES_ARE_EQUAL = "Tables are equal";
 
     private FreemarkerProcessor freemarkerProcessor;
-    @Inject private IBddVariableContext bddVariableContext;
-    @Inject private ISoftAssert softAssert;
-    @Inject private IAttachmentPublisher attachmentPublisher;
+    private final IBddVariableContext bddVariableContext;
+    private final ISoftAssert softAssert;
+    private final IAttachmentPublisher attachmentPublisher;
+    private final VariableComparator variableComparator;
+
+    public BddVariableSteps(IBddVariableContext bddVariableContext, ISoftAssert softAssert,
+            IAttachmentPublisher attachmentPublisher)
+    {
+        this.bddVariableContext = bddVariableContext;
+        this.softAssert = softAssert;
+        this.attachmentPublisher = attachmentPublisher;
+        this.variableComparator = new VariableComparator()
+        {
+            @Override
+            protected <T extends Comparable<T>> boolean compareValues(T value1, ComparisonRule condition, T value2)
+            {
+                String readableCondition = condition.name().toLowerCase().replace('_', ' ');
+                String description = "Checking if \"" + value1 + "\" is " + readableCondition + " \"" + value2 + "\"";
+                return softAssert.assertThat(description, value1, condition.getComparisonRule(value2));
+            }
+
+            @Override
+            protected boolean compareListsOfMaps(Object variable1, Object variable2)
+            {
+                List<List<EntryComparisonResult>> results = ComparisonUtils.compareListsOfMaps(variable1, variable2);
+                publishMapComparisonResults(results);
+                return softAssert.assertTrue(TABLES_ARE_EQUAL, areAllResultsPassed(results));
+            }
+        };
+    }
 
     /**
      * This step initializes BDD variable with a result of given template processing
@@ -147,29 +166,7 @@ public class BddVariableSteps
     @Then("`$variable1` is $comparisonRule `$variable2`")
     public boolean compareVariables(Object variable1, ComparisonRule condition, Object variable2)
     {
-        if (variable1 instanceof String && variable2 instanceof String)
-        {
-            String variable1AsString = (String) variable1;
-            String variable2AsString = (String) variable2;
-            if (NumberUtils.isCreatable(variable1AsString) && NumberUtils.isCreatable(variable2AsString))
-            {
-                BigDecimal number1 = NumberUtils.createBigDecimal(variable1AsString);
-                BigDecimal number2 = NumberUtils.createBigDecimal(variable2AsString);
-                return compare(number1, condition, number2);
-            }
-        }
-        else if (ComparisonRule.EQUAL_TO.equals(condition))
-        {
-            if (isEmptyOrListOfMaps(variable1) && isEmptyOrListOfMaps(variable2))
-            {
-                return compareListsOfMaps(variable1, variable2);
-            }
-            else if (instanceOfMap(variable1) && instanceOfMap(variable2))
-            {
-                return compareListsOfMaps(List.of(variable1), List.of(variable2));
-            }
-        }
-        return compare(variable1.toString(), condition, variable2.toString());
+        return variableComparator.compare(variable1, condition, variable2);
     }
 
     /**
@@ -181,7 +178,7 @@ public class BddVariableSteps
     @Then("`$variable` is equal to table ignoring extra columns:$table")
     public void tablesAreEqualIgnoringExtraColumns(Object variable, ExamplesTable table)
     {
-        if (!instanceOfMap(variable))
+        if (!(variable instanceof Map))
         {
             throw new IllegalArgumentException("'variable' should be instance of map");
         }
@@ -199,11 +196,11 @@ public class BddVariableSteps
     @Then("`$variable` is equal to table:$table")
     public void tablesAreEqual(Object variable, ExamplesTable table)
     {
-        if (!isEmptyOrListOfMaps(variable))
+        if (!variableComparator.isEmptyOrListOfMaps(variable))
         {
             throw new IllegalArgumentException("'variable' should be empty list or list of maps structure");
         }
-        compareListsOfMaps(variable, table.getRows());
+        variableComparator.compareListsOfMaps(variable, table.getRows());
     }
 
     /**
@@ -216,19 +213,6 @@ public class BddVariableSteps
     {
         softAssert.assertThat(String.format("Value '%s' matches pattern '%s'", value, pattern.pattern()), value,
                 matchesPattern(pattern));
-    }
-
-    /**
-     * Saves content to file with specified pathname
-     * @param pathname Fully qualified file name with parent folders and extension
-     * (e.g. temp/some_file.txt)
-     * @param fileContent Content to be saved to file
-     * @throws IOException If an I/O exception of some sort has occurred
-     */
-    @When("I create a file with the pathname `$pathname` and the content `$fileContent`")
-    public void saveVariableToFile(String pathname, String fileContent) throws IOException
-    {
-        FileUtils.writeStringToFile(new File(pathname), fileContent, StandardCharsets.UTF_8);
     }
 
     /**
@@ -246,42 +230,15 @@ public class BddVariableSteps
      */
     @When("I initialize $scopes variable `$variableName` with values:$examplesTable")
     public void initVariableWithGivenValues(Set<VariableScope> scopes, String variableName,
-                ExamplesTable examplesTable)
+            List<Map<String, String>> examplesTable)
     {
-        List<Map<String, String>> listOfMaps = examplesTable.getRowsAsParameters()
-                .stream().map(Parameters::values).collect(Collectors.toList());
-        bddVariableContext.putVariable(scopes, variableName, listOfMaps);
-    }
-
-    private boolean compareListsOfMaps(Object variable1, Object variable2)
-    {
-        List<List<EntryComparisonResult>> results = ComparisonUtils.compareListsOfMaps(variable1, variable2);
-        publishMapComparisonResults(results);
-        return softAssert.assertTrue(TABLES_ARE_EQUAL,
-                results.stream().flatMap(List::stream).allMatch(EntryComparisonResult::isPassed));
+        bddVariableContext.putVariable(scopes, variableName, examplesTable);
     }
 
     private void publishMapComparisonResults(List<List<EntryComparisonResult>> results)
     {
         attachmentPublisher.publishAttachment("/templates/maps-comparison-table.ftl",
                 Map.of("results", results), "Tables comparison result");
-    }
-
-    private boolean isEmptyOrListOfMaps(Object list)
-    {
-        return list instanceof List && (((List<?>) list).isEmpty() || instanceOfMap(((List<?>) list).get(0)));
-    }
-
-    private boolean instanceOfMap(Object object)
-    {
-        return object instanceof Map;
-    }
-
-    private <T extends Comparable<T>> boolean compare(T value1, ComparisonRule condition, T value2)
-    {
-        String readableCondition = condition.name().toLowerCase().replace('_', ' ');
-        String description = "Checking if \"" + value1 + "\" is " + readableCondition + " \"" + value2 + "\"";
-        return softAssert.assertThat(description, value1, condition.getComparisonRule(value2));
     }
 
     public void setFreemarkerProcessor(FreemarkerProcessor freemarkerProcessor)

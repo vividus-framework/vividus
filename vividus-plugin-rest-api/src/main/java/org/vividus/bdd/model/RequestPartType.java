@@ -16,11 +16,13 @@
 
 package org.vividus.bdd.model;
 
-import java.util.Optional;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.vividus.util.ResourceUtils;
 
 public enum RequestPartType
@@ -28,25 +30,72 @@ public enum RequestPartType
     STRING
     {
         @Override
-        public void addPart(MultipartEntityBuilder builder, String name, String value, Optional<String> contentType)
+        public ContentType getDefaultContentType()
         {
-            contentType.ifPresentOrElse(type -> builder.addTextBody(name, value, ContentType.parse(type)),
-                () -> builder.addTextBody(name, value));
+            return ContentType.DEFAULT_TEXT;
+        }
+
+        @Override
+        public ContentBody createPart(String value, ContentType contentType)
+        {
+            return new StringBody(value, contentType);
+        }
+
+        @Override
+        public ContentBody createPart(String value, ContentType contentType, String fileName)
+        {
+            throw new IllegalArgumentException(
+                    String.format("'fileName' parameter is not allowed for %s request part type", name()));
         }
     },
     FILE
     {
         @Override
-        public void addPart(MultipartEntityBuilder builder, String name, String value, Optional<String> contentType)
+        public ContentType getDefaultContentType()
+        {
+            return ContentType.DEFAULT_BINARY;
+        }
+
+        @Override
+        public ContentBody createPart(String value, ContentType contentType)
+        {
+            String fileName = FilenameUtils.getName(value);
+            return createPart(value, contentType, fileName);
+        }
+
+        @Override
+        public ContentBody createPart(String value, ContentType contentType, String fileName)
         {
             byte[] byteArray = ResourceUtils.loadResourceAsByteArray(getClass(), value);
-            String fileName = FilenameUtils.getName(value);
-            builder.addBinaryBody(name, byteArray,
-                    contentType.map(ContentType::parse).orElse(ContentType.DEFAULT_BINARY),
-                    fileName);
+            return new ByteArrayBody(byteArray, contentType, fileName);
+        }
+    },
+    BINARY
+    {
+        @Override
+        public ContentType getDefaultContentType()
+        {
+            return ContentType.DEFAULT_BINARY;
+        }
+
+        @Override
+        public ContentBody createPart(String value, ContentType contentType)
+        {
+            throw new IllegalArgumentException(
+                    String.format("'fileName' parameter is required for %s request part type", name()));
+        }
+
+        @Override
+        public ContentBody createPart(String value, ContentType contentType, String fileName)
+        {
+            byte[] byteArray = value.getBytes(StandardCharsets.UTF_8);
+            return new ByteArrayBody(byteArray, contentType, fileName);
         }
     };
 
-    public abstract void addPart(MultipartEntityBuilder builder, String name, String value,
-            Optional<String> contentType);
+    public abstract ContentType getDefaultContentType();
+
+    public abstract ContentBody createPart(String value, ContentType contentType);
+
+    public abstract ContentBody createPart(String value, ContentType contentType, String fileName);
 }

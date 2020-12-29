@@ -2,10 +2,11 @@ project.description = 'Vividus plugin for Sauce Labs'
 
 dependencies {
     implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
 
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.150') {
+    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.151') {
         exclude module: 'sauce-connect'
         exclude group: 'com.google.collections', module: 'google-collections'
     }
@@ -14,7 +15,6 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
     testCompileOnly(group: 'junit', name: 'junit', version: versions.junit4)
-    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
     testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)

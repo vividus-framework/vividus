@@ -71,10 +71,6 @@ public class AllureRunContext implements IAllureRunContext
         {
             getGivenStoriesLabels().pop();
         }
-        else
-        {
-            testContext.remove(STORY_LABELS);
-        }
     }
 
     @Override
@@ -120,6 +116,30 @@ public class AllureRunContext implements IAllureRunContext
         setScenarioExecutionStage(null);
     }
 
+    @Override
+    public void startStep()
+    {
+        changeStepState(true);
+    }
+
+    @Override
+    public boolean isStepInProgress()
+    {
+        ExecutionStages executionStages = getExecutionStages().peek();
+        return executionStages != null && executionStages.stepInProgress;
+    }
+
+    @Override
+    public void stopStep()
+    {
+        changeStepState(false);
+    }
+
+    private void changeStepState(boolean stepInProgress)
+    {
+        getExecutionStages().peek().stepInProgress = stepInProgress;
+    }
+
     private Deque<List<Label>> getGivenStoriesLabels()
     {
         return testContext.get(GIVEN_STORY_LABELS, LinkedList::new);
@@ -134,5 +154,6 @@ public class AllureRunContext implements IAllureRunContext
     {
         private StoryExecutionStage storyStage;
         private ScenarioExecutionStage scenarioStage;
+        private boolean stepInProgress;
     }
 }

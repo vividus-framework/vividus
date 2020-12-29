@@ -29,6 +29,10 @@
 
     <bean id="touchSteps" class="org.vividus.bdd.mobileapp.steps.TouchSteps" />
 
+    <bean id="setContextSteps" class="org.vividus.bdd.mobileapp.steps.SetContextSteps" />
+
+    <bean id="elementSteps" class="org.vividus.bdd.mobileapp.steps.ElementSteps" />
+
     <bean id="deviceSteps" class="org.vividus.bdd.mobileapp.steps.DeviceSteps" >
         <constructor-arg index="0" value="${mobile-environment.device.folder-for-file-upload}" />
     </bean>
@@ -58,6 +62,18 @@
         <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).IOS_CLASS_CHAIN}" />
     </bean>
 
+    <bean class="org.vividus.ui.action.search.GenericTextFilter" >
+        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).TEXT_PART}" />
+        <constructor-arg index="1" value="#{T(org.vividus.bdd.steps.StringComparisonRule).CONTAINS}" />
+    </bean>
+
+    <bean class="org.vividus.ui.action.search.GenericTextFilter" >
+        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).TEXT}" />
+        <constructor-arg index="1" value="#{T(org.vividus.bdd.steps.StringComparisonRule).IS_EQUAL_TO}" />
+    </bean>
+
+    <bean class="org.vividus.ui.mobile.action.search.ElementAttributeFilter" />
+
     <bean class="org.vividus.ui.mobile.action.MobileAppElementActions" />
 
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
@@ -65,5 +81,7 @@
         <idref bean="webDriverSetupSteps" />
         <idref bean="touchSteps" />
         <idref bean="deviceSteps" />
+        <idref bean="elementSteps" />
+        <idref bean="setContextSteps" />
     </util:list>
 </beans>

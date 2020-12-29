@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -34,6 +35,7 @@ import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
@@ -47,10 +49,10 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.listener.IWebApplicationListener;
@@ -72,7 +74,7 @@ public class PageSteps
     @Inject private WebApplicationConfiguration webApplicationConfiguration;
     @Inject private IWebApplicationListener webApplicationListener;
     @Inject private IWebWaitActions waitActions;
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
     @Inject private IWebDriverManager webDriverManager;
@@ -174,7 +176,9 @@ public class PageSteps
     @When("I open URL `$pageUrl` in new window")
     public void openPageUrlInNewWindow(String pageUrl)
     {
-        javascriptActions.openPageUrlInNewWindow(pageUrl);
+        javascriptActions.openNewWindow();
+        setContextSteps.switchingToWindow();
+        iAmOnPage(pageUrl);
     }
 
     /**
@@ -315,15 +319,6 @@ public class PageSteps
     }
 
     /**
-     * Loads the previous URL in the browser history list
-     */
-    @When("I navigate back")
-    public void navigateBack()
-    {
-        webDriverProvider.get().navigate().back();
-    }
-
-    /**
      * Checks that the page's <b>title</b> matches to <b>text</b> according to the provided string validation rule
      * <p>
      * A <b>title</b> is a text within a {@literal <title>} tag.
@@ -334,6 +329,27 @@ public class PageSteps
     public void assertPageTitle(StringComparisonRule comparisonRule, String text)
     {
         descriptiveSoftAssert.assertThat(PAGE_TITLE, getWebDriver().getTitle(), comparisonRule.createMatcher(text));
+    }
+
+    /**
+     * Stop the loading of page using javascript method:
+     * <code>window.stop();</code>
+     */
+    @When("I stop page loading")
+    public void stopPageLoading()
+    {
+        try
+        {
+            Map<String, String> pageStates = javascriptActions.stopPageLoading();
+            LOGGER.atInfo()
+                  .addArgument(() -> pageStates.get("before"))
+                  .addArgument(() -> pageStates.get("after"))
+                  .log("Page ready state before stop: {}, after stop:{}");
+        }
+        catch (JavascriptException javascriptException)
+        {
+            descriptiveSoftAssert.recordFailedAssertion("Unable to stop page loading", javascriptException);
+        }
     }
 
     /**

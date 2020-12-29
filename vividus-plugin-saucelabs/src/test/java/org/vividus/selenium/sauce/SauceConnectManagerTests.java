@@ -36,14 +36,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
 @RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(MockitoJUnitRunner.class)
 public class SauceConnectManagerTests
 {
     private static final String OPTIONS = "options";
@@ -64,14 +66,13 @@ public class SauceConnectManagerTests
     @Before
     public void before()
     {
-        MockitoAnnotations.initMocks(this);
         sauceConnectManager.setSauceLabsUsername(USERNAME);
         sauceConnectManager.setSauceLabsAccessKey(USERKEY);
         sauceConnectManager.setTestContext(context);
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStart() throws Exception
     {
         mockSocket();
@@ -81,7 +82,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStartWhenErrorAtPortAllocation() throws Exception
     {
         IOException ioException = new IOException();
@@ -92,33 +93,31 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStartTwice() throws Exception
     {
         mockSocket();
         startConnection();
-        String tunnelId = sauceConnectManager.getTunnelId();
-        sauceConnectManager.start(options);
+        String tunnelId = sauceConnectManager.start(options);
         verify(sauceTunnelManager, times(1)).openConnection(USERNAME, USERKEY, 1, null, OPTIONS, null, Boolean.TRUE,
                 null);
-        assertEquals(tunnelId, sauceConnectManager.getTunnelId());
+        assertEquals(tunnelId, sauceConnectManager.start(options));
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStartOneMoreConnectionWithingOneThreadIsNotAllowed() throws Exception
     {
         mockSocket();
         startConnection();
         SauceConnectOptions options2 = mock(SauceConnectOptions.class);
-        when(options2.build(anyString())).thenReturn(OPTIONS);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> sauceConnectManager.start(options2));
         assertEquals("Only one SauceConnect tunnel is allowed within one thread", exception.getMessage());
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStop() throws Exception
     {
         mockSocket();
@@ -135,7 +134,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStopTwice() throws Exception
     {
         mockSocket();
@@ -146,7 +145,7 @@ public class SauceConnectManagerTests
     }
 
     @Test
-    @PrepareForTest({ SauceConnectManager.class, ISauceConnectManager.class })
+    @PrepareForTest(SauceConnectManager.class)
     public void testStartStopStart() throws Exception
     {
         mockSocket();

@@ -19,6 +19,7 @@ package org.vividus.aws.s3.steps;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,14 +32,17 @@ import java.util.Map;
 import java.util.Set;
 
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.function.FailableConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
@@ -54,13 +58,20 @@ class S3BucketStepsTests
 
     @Mock private AmazonS3Client amazonS3Client;
     @Mock private IBddVariableContext bddVariableContext;
-    @InjectMocks private S3BucketSteps steps;
 
     @Test
-    void shouldUploadResource()
+    void shouldUploadData() throws IOException
+    {
+        String csv = ResourceUtils.loadResource(CSV_FILE_PATH);
+        testSteps(steps -> steps.uploadData(csv, S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME));
+        verifyContentUploaded(csv.getBytes(StandardCharsets.UTF_8), CONTENT_TYPE);
+    }
+
+    @Test
+    void shouldUploadResource() throws IOException
     {
         byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
-        steps.uploadResource(CSV_FILE_PATH, S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME);
+        testSteps(steps -> steps.uploadResource(CSV_FILE_PATH, S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME));
         verifyContentUploaded(csv, CONTENT_TYPE);
     }
 
@@ -68,8 +79,8 @@ class S3BucketStepsTests
     void shouldUploadFile() throws IOException
     {
         byte[] csv = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
-        steps.uploadFile(ResourceUtils.loadFile(getClass(), CSV_FILE_PATH),
-                S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME);
+        testSteps(steps -> steps.uploadFile(ResourceUtils.loadFile(getClass(), CSV_FILE_PATH),
+                S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME));
         verifyContentUploaded(csv, CONTENT_TYPE);
     }
 
@@ -99,7 +110,7 @@ class S3BucketStepsTests
 
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         String variableName = "csvVar";
-        steps.fetchCsvObject(S3_OBJECT_KEY, S3_BUCKET_NAME, scopes, variableName);
+        testSteps(steps -> steps.fetchCsvObject(S3_OBJECT_KEY, S3_BUCKET_NAME, scopes, variableName));
         verify(bddVariableContext).putVariable(scopes, variableName, List.of(Map.of("id", "1")));
     }
 
@@ -113,7 +124,7 @@ class S3BucketStepsTests
 
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         String variableName = "jsonVar";
-        steps.fetchObject(objectKey, S3_BUCKET_NAME, scopes, variableName);
+        testSteps(steps -> steps.fetchObject(objectKey, S3_BUCKET_NAME, scopes, variableName));
         verify(amazonS3Client).getObject(S3_BUCKET_NAME, objectKey);
         verify(bddVariableContext).putVariable(scopes, variableName, data);
     }
@@ -127,9 +138,26 @@ class S3BucketStepsTests
     }
 
     @Test
-    void shouldDeleteObject()
+    void shouldSetObjectAcl() throws IOException
     {
-        steps.deleteObject(S3_OBJECT_KEY, S3_BUCKET_NAME);
+        testSteps(steps -> steps.setObjectAcl(CannedAccessControlList.PublicReadWrite, S3_OBJECT_KEY, S3_BUCKET_NAME));
+        verify(amazonS3Client).setObjectAcl(S3_BUCKET_NAME, S3_OBJECT_KEY, CannedAccessControlList.PublicReadWrite);
+    }
+
+    @Test
+    void shouldDeleteObject() throws IOException
+    {
+        testSteps(steps -> steps.deleteObject(S3_OBJECT_KEY, S3_BUCKET_NAME));
         verify(amazonS3Client).deleteObject(S3_BUCKET_NAME, S3_OBJECT_KEY);
+    }
+
+    void testSteps(FailableConsumer<S3BucketSteps, IOException> test) throws IOException
+    {
+        try (MockedStatic<AmazonS3ClientBuilder> clientBuilder = mockStatic(AmazonS3ClientBuilder.class))
+        {
+            clientBuilder.when(AmazonS3ClientBuilder::defaultClient).thenReturn(amazonS3Client);
+            S3BucketSteps steps = new S3BucketSteps(bddVariableContext);
+            test.accept(steps);
+        }
     }
 }

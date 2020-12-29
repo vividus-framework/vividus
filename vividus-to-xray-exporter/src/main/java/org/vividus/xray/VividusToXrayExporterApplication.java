@@ -26,6 +26,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.vividus.util.property.PropertyParser;
@@ -34,7 +35,9 @@ import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.exporter.XrayExporter;
 
 @SpringBootApplication
-@ImportResource(locations = { "org/vividus/jira/spring.xml", "org/vividus/http/client/spring.xml" })
+@ImportResource(locations = { "org/vividus/jira/spring.xml", "org/vividus/http/client/spring.xml",
+        "org/vividus/xray/spring.xml" })
+@PropertySource("classpath:/properties/defaults/default.properties")
 @EnableConfigurationProperties({ XrayExporterOptions.class, JiraFieldsMapping.class })
 public class VividusToXrayExporterApplication
 {

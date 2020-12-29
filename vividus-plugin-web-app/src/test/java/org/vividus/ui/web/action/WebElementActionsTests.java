@@ -65,20 +65,12 @@ class WebElementActionsTests
     private static final String QUOTE = "'";
     private static final String TEXT = "text";
 
-    @Mock
-    private IJavascriptActions javascriptActions;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private WebElement webElement;
+    @Mock private Point point;
+    @Mock private IWebDriverManager webDriverManager;
 
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private Point point;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
-
-    @InjectMocks
-    private WebElementActions webElementActions;
+    @InjectMocks private WebElementActions webElementActions;
 
     @Test
     void testGetBeforePseudoElementContentFromElement()
@@ -268,6 +260,28 @@ class WebElementActionsTests
     {
         when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(result);
         assertEquals(Boolean.valueOf(result), webElementActions.isElementContenteditable(webElement));
+    }
+
+    @Test
+    void shouldCheckIsElementVisible()
+    {
+        when(webElement.isDisplayed()).thenReturn(true);
+
+        assertTrue(webElementActions.isElementVisible(webElement));
+
+        verifyNoInteractions(javascriptActions);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void shouldCheckIsElementVisibleWithScrolling(boolean visibilityAfterScroll)
+    {
+        when(webElement.isDisplayed()).thenReturn(false).thenReturn(visibilityAfterScroll);
+
+        assertEquals(visibilityAfterScroll, webElementActions.isElementVisible(webElement));
+
+        verify(javascriptActions).scrollIntoView(webElement, true);
+        verifyNoMoreInteractions(javascriptActions);
     }
 
     private void verifyRichTextNotEditable()

@@ -16,25 +16,28 @@
 
 package org.vividus.proxy.steps;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collections;
+import java.nio.charset.StandardCharsets;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.util.HttpMessageInfo;
 import com.browserup.harreader.model.Har;
@@ -50,10 +53,12 @@ import com.browserup.harreader.model.HttpMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.HttpStatus;
-import org.jbehave.core.model.ExamplesTable;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -64,25 +69,27 @@ import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.proxy.IProxy;
-import org.vividus.proxy.ProxyLog;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWebWaitActions;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyStepsTests
 {
+    private static final String CONTENT_LENGTH = "Content-Length";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String URL = "www.test.com";
-    private static final String REQUESTS_MATCHING_URL_ASSERTION_PATTERN = "Number of HTTP %s requests matching URL "
-            + "pattern '%s'";
-    private static final String ATTACHMENT_FILENAME = "har.har";
+    private static final String REQUESTS_MATCHING_URL_ASSERTION_PATTERN =
+            "Number of HTTP %s requests matching URL pattern '%s'";
     private static final String VARIABLE_NAME = "variable";
-    private static final HttpMethod HTTP_METHOD = HttpMethod.POST;
     private static final String KEY1 = "key1";
     private static final String VALUE1 = "value1";
     private static final String KEY2 = "key2";
@@ -90,7 +97,7 @@ class ProxyStepsTests
     private static final String MIME_TYPE = "mimeType";
     private static final String TEXT = "text";
     private static final String COMMENT = "comment";
-    private static final ExamplesTable HEADERS = new ExamplesTable("|name|value|\n|name1|value1|");
+    private static final DefaultHttpHeaders HEADERS = new DefaultHttpHeaders();
     private static final Pattern URL_PATTERN = Pattern.compile(URL);
 
     @Mock
@@ -101,9 +108,6 @@ class ProxyStepsTests
 
     @Mock
     private IProxy proxy;
-
-    @Mock
-    private ProxyLog proxyLog;
 
     @Mock
     private IAttachmentPublisher attachmentPublisher;
@@ -117,86 +121,65 @@ class ProxyStepsTests
     @Test
     void testClearProxyLog()
     {
-        when(proxy.getLog()).thenReturn(proxyLog);
         proxySteps.clearProxyLog();
-        verify(proxyLog).clear();
+        verify(proxy).clearRecordedData();
     }
 
     @Test
     void checkHarEntryExistenceWithHttpMethodAndUrlPattern() throws IOException
     {
-        when(proxy.getLog()).thenReturn(proxyLog);
         HttpMethod httpMethod = HttpMethod.POST;
-        HarEntry harEntry = mock(HarEntry.class);
-        HarResponse harResponse = mock(HarResponse.class);
-        when(proxyLog.getLogEntries(httpMethod, URL_PATTERN)).thenReturn(List.of(harEntry));
-        when(harEntry.getResponse()).thenReturn(harResponse);
-        when(harResponse.getStatus()).thenReturn(HttpStatus.SC_OK);
-        long callsNumber = 1;
+        mockHar(httpMethod, HttpStatus.SC_OK);
+        int callsNumber = 1;
         ComparisonRule rule = ComparisonRule.EQUAL_TO;
-        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
+        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, "GET, POST", URL);
         mockSizeAssertion(message, callsNumber, rule, callsNumber);
-        proxySteps.checkNumberOfRequests(httpMethod, URL_PATTERN, rule, callsNumber);
+        proxySteps.checkNumberOfRequests(EnumSet.of(httpMethod, HttpMethod.GET), URL_PATTERN, rule, callsNumber);
         verifySizeAssertion(message, callsNumber, rule, callsNumber);
         verifyNoInteractions(attachmentPublisher);
     }
 
-    @Test
-    void checkHarEntryExistenceWithHttpMethodAndUrlPatternNoCalls() throws IOException
+    @ParameterizedTest
+    @CsvSource({
+            "GET,  200",
+            "POST, 302"
+    })
+    void checkHarEntryExistenceWithHttpMethodAndUrlPatternNoCalls(HttpMethod httpMethodInHar, int statusCode)
+            throws IOException
     {
-        when(proxy.getLog()).thenReturn(proxyLog);
         HttpMethod httpMethod = HttpMethod.POST;
-        when(proxyLog.getLogEntries(httpMethod, URL_PATTERN)).thenReturn(Collections.emptyList());
-        long callsNumber = 1;
-        ComparisonRule rule = ComparisonRule.EQUAL_TO;
-        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod,
-                URL);
-        byte[] data = mockProxyLog();
-        proxySteps.checkNumberOfRequests(httpMethod, URL_PATTERN, rule, callsNumber);
-        verifySizeAssertion(message, 0, rule, callsNumber);
-        verify(attachmentPublisher).publishAttachment(data, ATTACHMENT_FILENAME);
+        byte[] data = mockHar(httpMethodInHar, statusCode);
+        String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
+        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, Set.of(VariableScope.SCENARIO),
+                VARIABLE_NAME);
+        verifySizeAssertion(message, 0, ComparisonRule.EQUAL_TO, 1);
+        verify(attachmentPublisher).publishAttachment(data, "har.har");
+        verifyNoInteractions(bddVariableContext);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     void checkCaptureQueryStringFromHarEntry() throws IOException
     {
-        ProxySteps spy = spy(proxySteps);
-        HarEntry harEntry = mock(HarEntry.class);
-        doReturn(List.of(harEntry)).when(spy).checkNumberOfRequests(HTTP_METHOD, URL_PATTERN,
-                ComparisonRule.EQUAL_TO, 1);
-        HarRequest harRequest = mock(HarRequest.class);
-        when(harEntry.getRequest()).thenReturn(harRequest);
-        when(harRequest.getQueryString())
-                .thenReturn(List.of(
-                        getHarQueryParam(KEY1, VALUE1),
-                        getHarQueryParam(KEY2, VALUE2)
-                ));
+        HttpMethod httpMethod = HttpMethod.POST;
+        mockHar(httpMethod, HttpStatus.SC_OK);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
-        spy.captureRequestAndSaveURLQuery(HTTP_METHOD, URL_PATTERN, variableScopes, VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveURLQuery(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value ->
-        {
-            Map<String, String> map = (Map<String, String>) value;
-            return map.size() == 2
-                    && map.containsKey(KEY1)
-                    && VALUE1.equals(map.get(KEY1))
-                    && map.containsKey(KEY2)
-                    && VALUE2.equals(map.get(KEY2));
-        }));
+            value.equals(Map.of(
+                    KEY1, List.of(VALUE1, VALUE2),
+                    KEY2, List.of(VALUE2)
+            ))
+        ));
     }
 
     @Test
     void shouldSaveUrlFromCapturedHar() throws IOException
     {
-        ProxySteps spy = spy(proxySteps);
-        HarEntry harEntry = mock(HarEntry.class);
-        doReturn(List.of(harEntry)).when(spy).checkNumberOfRequests(HTTP_METHOD, URL_PATTERN,
-                ComparisonRule.EQUAL_TO, 1);
-        HarRequest harRequest = mock(HarRequest.class);
-        when(harEntry.getRequest()).thenReturn(harRequest);
-        when(harRequest.getUrl()).thenReturn(URL);
+        HttpMethod httpMethod = HttpMethod.POST;
+        mockHar(httpMethod, HttpStatus.SC_OK);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
-        spy.captureRequestAndSaveURL(HTTP_METHOD, URL_PATTERN, variableScopes, VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(variableScopes, VARIABLE_NAME, URL);
     }
 
@@ -204,69 +187,28 @@ class ProxyStepsTests
     @Test
     void checkCaptureRequestDataFromHarEntry() throws IOException
     {
-        ProxySteps spy = spy(proxySteps);
-        HarEntry harEntry = mock(HarEntry.class);
-        doReturn(List.of(harEntry)).when(spy).checkNumberOfRequests(HTTP_METHOD, URL_PATTERN,
-                ComparisonRule.EQUAL_TO, 1);
-        HarResponse harResponse = mock(HarResponse.class);
-        when(harEntry.getResponse()).thenReturn(harResponse);
-        HarRequest harRequest = mock(HarRequest.class);
-        when(harEntry.getRequest()).thenReturn(harRequest);
-        when(harRequest.getQueryString())
-                .thenReturn(List.of(
-                        getHarQueryParam(KEY1, VALUE1),
-                        getHarQueryParam(KEY2, VALUE2)
-                ));
-        when(harRequest.getPostData()).thenReturn(getHarPostData());
-        when(harResponse.getStatus()).thenReturn(200);
+        HttpMethod httpMethod = HttpMethod.POST;
+        int statusCode = HttpStatus.SC_OK;
+        mockHar(httpMethod, statusCode);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
-        spy.captureRequestAndSaveRequestData(HTTP_METHOD, URL_PATTERN, variableScopes, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value ->
-        {
+        proxySteps.captureRequestAndSaveRequestData(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
+        verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value -> {
             Map<String, Object> map = (Map<String, Object>) value;
-            Map<String, String> urlQuery = (Map<String, String>) map.get("query");
+            Map<String, List<String>> urlQuery = (Map<String, List<String>>) map.get("query");
             Map<String, String> requestBody = (Map<String, String>) map.get("requestBody");
-            Map<String, String> requestBodyParameters = (Map<String, String>) map.get("requestBodyParameters");
+            Map<String, List<String>> formData = (Map<String, List<String>>) map.get("requestBodyParameters");
             Integer responseStatus = (Integer) map.get("responseStatus");
-            Assertions.assertAll(
-                () -> Assertions.assertEquals(VALUE1, urlQuery.get(KEY1)),
-                () -> Assertions.assertEquals(VALUE2, urlQuery.get(KEY2)),
-                () -> Assertions.assertEquals(MIME_TYPE, requestBody.get(MIME_TYPE)),
-                () -> Assertions.assertEquals(COMMENT, requestBody.get(COMMENT)),
-                () -> Assertions.assertEquals(VALUE1, requestBodyParameters.get(KEY1)),
-                () -> Assertions.assertEquals(VALUE2, requestBodyParameters.get(KEY2)),
-                () -> Assertions.assertEquals(200, responseStatus));
+            assertAll(
+                    () -> assertEquals(List.of(VALUE1, VALUE2), urlQuery.get(KEY1)),
+                    () -> assertEquals(List.of(VALUE2), urlQuery.get(KEY2)),
+                    () -> assertEquals(MIME_TYPE, requestBody.get(MIME_TYPE)),
+                    () -> assertEquals(COMMENT, requestBody.get(COMMENT)),
+                    () -> assertEquals(List.of(VALUE1, VALUE2), formData.get(KEY1)),
+                    () -> assertEquals(List.of(VALUE2), formData.get(KEY2)),
+                    () -> assertEquals(statusCode, responseStatus)
+            );
             return true;
         }));
-    }
-
-    private HarPostData getHarPostData()
-    {
-        HarPostData postData = new HarPostData();
-        postData.setMimeType(MIME_TYPE);
-        postData.setText(TEXT);
-        postData.setComment(COMMENT);
-        postData.setParams(List.of(
-                getHarPostDataParam(KEY1, VALUE1),
-                getHarPostDataParam(KEY2, VALUE2))
-        );
-        return postData;
-    }
-
-    private HarPostDataParam getHarPostDataParam(String key, String value)
-    {
-        HarPostDataParam postDataParam = new HarPostDataParam();
-        postDataParam.setName(key);
-        postDataParam.setValue(value);
-        return postDataParam;
-    }
-
-    private HarQueryParam getHarQueryParam(String key, String value)
-    {
-        HarQueryParam harQueryParam = new HarQueryParam();
-        harQueryParam.setName(key);
-        harQueryParam.setValue(value);
-        return harQueryParam;
     }
 
     @Test
@@ -274,18 +216,33 @@ class ProxyStepsTests
     {
         HttpMethod httpMethod = HttpMethod.POST;
         ProxySteps spy = spy(proxySteps);
-        Mockito.lenient().doReturn(List.of(mock(HarEntry.class), mock(HarEntry.class))).when(spy)
-                .checkNumberOfRequests(httpMethod, URL_PATTERN, ComparisonRule.EQUAL_TO, 1);
+        Mockito.lenient().doReturn(List.of(mock(HarEntry.class), mock(HarEntry.class))).when(spy).checkNumberOfRequests(
+                EnumSet.of(httpMethod), URL_PATTERN, ComparisonRule.EQUAL_TO, 1);
         verifyNoInteractions(bddVariableContext);
     }
 
-    @Test
-    void testWaitRequestInProxyLog()
+    @ParameterizedTest
+    @CsvSource({
+            "POST, true",
+            "PUT, false"
+    })
+    void testWaitRequestInProxyLog(HttpMethod actualHttpMethod, boolean waitSuccessful) throws IOException
     {
-        HttpMethod httpMethod = HttpMethod.POST;
-        proxySteps.waitRequestInProxyLog(httpMethod, URL_PATTERN);
-        verify(waitActions).wait(eq(URL_PATTERN),
-                argThat(e -> "waiting for HTTP POST request with URL pattern www.test.com".equals(e.toString())));
+        mockHar(actualHttpMethod, HttpStatus.SC_OK);
+        proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST), URL_PATTERN);
+        verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
+                "waiting for HTTP POST request with URL pattern www.test.com".equals(e.toString())
+                        && e.apply(URL_PATTERN) == waitSuccessful));
+    }
+
+    @Test
+    void testWaitAnyOfRequestInProxyLog() throws IOException
+    {
+        mockHar(HttpMethod.PUT, HttpStatus.SC_OK);
+        proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST, HttpMethod.PUT), URL_PATTERN);
+        verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
+                "waiting for HTTP POST or PUT request with URL pattern www.test.com".equals(e.toString())
+                        && e.apply(URL_PATTERN)));
     }
 
     @Test
@@ -300,8 +257,7 @@ class ProxyStepsTests
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
         assertNull(filterCaptor.getValue().filterRequest(request, null, messageInfo));
-        verify(httpHeaders).add(argThat(headers ->
-                headers instanceof DefaultHttpHeaders && headers.size() == 1 && VALUE1.equals(headers.get("name1"))));
+        verify(httpHeaders).add(HEADERS);
     }
 
     @Test
@@ -312,36 +268,147 @@ class ProxyStepsTests
         verify(proxy).addRequestFilter(argThat(filter -> filter.filterRequest(null, null, messageInfo) == null));
     }
 
-    private byte[] mockProxyLog() throws IOException
+    static Stream<Arguments> contentSource()
     {
-        HarCreatorBrowser browser = new HarCreatorBrowser();
-        browser.setName("chrome");
-        browser.setVersion("66");
-        HarLog harLog = new HarLog();
-        Har har = new Har();
-        BrowserUpProxy mockBrowserUpProxy = mock(BrowserUpProxy.class);
-        harLog.setBrowser(browser);
-        harLog.setCreator(browser);
-        har.setLog(harLog);
-        when(mockBrowserUpProxy.getHar()).thenReturn(har);
-        when(proxy.getProxyServer()).thenReturn(mockBrowserUpProxy);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        OBJECT_MAPPER.writeValue(byteArrayOutputStream, har);
-        return byteArrayOutputStream.toByteArray();
+        return Stream.of(Arguments.of(VALUE1), Arguments.of(VALUE1.getBytes(StandardCharsets.UTF_8)));
     }
 
-    private void verifySizeAssertion(String message, long actualMatchedEntriesNumber, ComparisonRule rule,
-            long callsNumber)
+    @ParameterizedTest
+    @MethodSource("contentSource")
+    void shouldMockARequestWithTheContent(Object content)
     {
-        verify(nonFailingAssert).assertThat(eq(message), eq(actualMatchedEntriesNumber), argThat(
-            object -> object != null && object.toString().equals(rule.getComparisonRule(callsNumber).toString())));
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        when(messageInfo.getUrl()).thenReturn(URL);
+        HttpRequest request = mock(HttpRequest.class);
+        when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
+        DefaultHttpHeaders headers = new DefaultHttpHeaders();
+        headers.add(KEY1, VALUE2);
+        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, content, headers);
+
+        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
+        verify(proxy).addRequestFilter(filterCaptor.capture());
+        FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
+                messageInfo);
+        assertEquals(HttpResponseStatus.OK, response.status());
+        assertEquals(VALUE1, response.content().toString(StandardCharsets.UTF_8));
+        assertEquals(VALUE2, response.headers().get(KEY1));
+        assertEquals("6", response.headers().get(CONTENT_LENGTH));
+        assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
     }
 
-    private void mockSizeAssertion(String message, long actualMatchedEntriesNumber, ComparisonRule rule,
-            long callsNumber)
+    @Test
+    void shouldThrowAnExceptionIfInvalidContentTypeIsUsed()
+    {
+        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
+                () -> proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, Class.class, null));
+        assertEquals("Unsupported content type: class java.lang.Class", iae.getMessage());
+    }
+
+    @Test
+    void shouldMockARequestWithoutAContent()
+    {
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        when(messageInfo.getUrl()).thenReturn(URL);
+        HttpRequest request = mock(HttpRequest.class);
+        when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
+        DefaultHttpHeaders headers = new DefaultHttpHeaders();
+        headers.add(KEY1, VALUE2);
+        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, headers);
+
+        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
+        verify(proxy).addRequestFilter(filterCaptor.capture());
+        HttpResponse response = filterCaptor.getValue().filterRequest(request, null, messageInfo);
+        assertEquals(HttpResponseStatus.OK, response.status());
+        assertEquals(VALUE2, response.headers().get(KEY1));
+        assertNull(response.headers().get(CONTENT_LENGTH));
+        assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
+    }
+
+    @Test
+    void shouldClearFilters()
+    {
+        proxySteps.resetMocks();
+        verify(proxy).clearRequestFilters();
+    }
+
+    private void verifySizeAssertion(String message, int actualMatchedEntriesNumber, ComparisonRule rule,
+            int callsNumber)
+    {
+        verify(nonFailingAssert).assertThat(eq(message), eq(actualMatchedEntriesNumber),
+                argThat(object -> object != null && object.toString()
+                        .equals(rule.getComparisonRule(callsNumber).toString())));
+    }
+
+    private void mockSizeAssertion(String message, int actualMatchedEntriesNumber, ComparisonRule rule, int callsNumber)
     {
         when(nonFailingAssert.assertThat(eq(message), eq(actualMatchedEntriesNumber),
                 argThat(object -> object != null && object.toString()
                         .equals(rule.getComparisonRule(callsNumber).toString())))).thenReturn(true);
+    }
+
+    private byte[] mockHar(HttpMethod httpMethod, int statusCode) throws IOException
+    {
+        HarEntry harEntry = createHarEntry(httpMethod, statusCode);
+
+        HarCreatorBrowser browser = new HarCreatorBrowser();
+        browser.setName("chrome");
+        browser.setVersion("66");
+
+        HarLog harLog = new HarLog();
+        harLog.setBrowser(browser);
+        harLog.setCreator(browser);
+        harLog.setEntries(List.of(harEntry));
+
+        Har har = new Har();
+        har.setLog(harLog);
+        when(proxy.getRecordedData()).thenReturn(har);
+        return OBJECT_MAPPER.writeValueAsBytes(har);
+    }
+
+    private HarEntry createHarEntry(HttpMethod httpMethod, int statusCode)
+    {
+        HarPostData postData = new HarPostData();
+        postData.setMimeType(MIME_TYPE);
+        postData.setText(TEXT);
+        postData.setComment(COMMENT);
+        postData.setParams(List.of(
+                createHarPostDataParam(KEY1, VALUE1),
+                createHarPostDataParam(KEY1, VALUE2),
+                createHarPostDataParam(KEY2, VALUE2)
+        ));
+
+        HarRequest request = new HarRequest();
+        request.setMethod(httpMethod);
+        request.setUrl(URL);
+        request.setQueryString(List.of(
+                createHarQueryParam(KEY1, VALUE1),
+                createHarQueryParam(KEY1, VALUE2),
+                createHarQueryParam(KEY2, VALUE2)
+        ));
+        request.setPostData(postData);
+
+        HarResponse response = new HarResponse();
+        response.setStatus(statusCode);
+
+        HarEntry harEntry = new HarEntry();
+        harEntry.setRequest(request);
+        harEntry.setResponse(response);
+        return harEntry;
+    }
+
+    private HarQueryParam createHarQueryParam(String key, String value)
+    {
+        HarQueryParam harQueryParam = new HarQueryParam();
+        harQueryParam.setName(key);
+        harQueryParam.setValue(value);
+        return harQueryParam;
+    }
+
+    private HarPostDataParam createHarPostDataParam(String key, String value)
+    {
+        HarPostDataParam postDataParam = new HarPostDataParam();
+        postDataParam.setName(key);
+        postDataParam.setValue(value);
+        return postDataParam;
     }
 }

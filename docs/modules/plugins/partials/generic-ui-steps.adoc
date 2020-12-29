@@ -210,6 +210,35 @@ Scenario: Save attribute value of element
 When I save `innerText` attribute value of element located `By.id(username)` to SCENARIO variable `username`
 ----
 
+=== Save number of elements
+
+==== *_Info_*
+
+Saves number of elements located by locator into a variable
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I save number of elements located `$locator` to $scopes variable `$variableName`
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$variableName` - name of a variable
+
+==== *_Usage_*
+
+.SaveNumberOfElements.story
+[source,gherkin]
+----
+Scenario: Save number of elements
+When I save number of elements located `tagName(a)` to scenario variable `numberOfLinks`
+Then `${numberOfLinks}` is equal to `1`
+----
+
 === Change context
 
 ==== *_Info_*
@@ -289,4 +318,82 @@ Then element located `$locator` exists for `$duration` duration
 ----
 Scenario: Element should exists for 5 second
 Then element located 'id(banner)' exists for 'PT5S' duration
+----
+
+=== Navigate back
+
+==== *_Info_*
+
+Navigates back to the previous view
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I navigate back
+----
+
+==== *_Usage_*
+
+.Navigate back
+[source,gherkin]
+----
+Scenario: Navigate back
+Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `1`
+When I navigate back
+Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `0`
+----
+
+=== Verify elements order
+
+==== *_Info_*
+
+Gets a collection of elements by locator and checks that they are sorted by their text in the specified order. The collection should have more than 1 element with not empty text, otherwise the step fails.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+Then elements located `$locator` are sorted by text in $sortingOrder order
+----
+
+==== *_Parameters_*
+
+. `$locator` - <<_locator>>
+. `$sortingOrder`
+
+[cols="2,2,2", options="header"]
+|===
+
+|Plain
+|Readable
+|Description
+
+|ASCENDING
+|ascending
+|Verify that elements are sorted in https://www.computerhope.com/jargon/a/ascendin.htm[ascending] order
+
+|DESCENDING
+|descending
+|Verify that elements are sorted in https://www.computerhope.com/jargon/d/descorde.htm[descending] order
+
+|CASE_INSENSITIVE_ASCENDING
+|case-insensitive ascending
+|Verify that elements are sorted in https://www.yourdictionary.com/case-insensitive[case-insensitive] https://www.computerhope.com/jargon/a/ascendin.htm[ascending] order
+
+|CASE_INSENSITIVE_DESCENDING
+|case-insensitive descending
+|Verify that elements are sorted in https://www.yourdictionary.com/case-insensitive[case-insensitive] https://www.computerhope.com/jargon/d/descorde.htm[descending] order
+
+|===
+
+==== *_Usage_*
+
+.OrderVerification.story
+[source,gherkin]
+----
+Scenario: Check items are sorted
+Given I am on a page with the URL 'https://grocery.by'
+When I click on element located `By.id(a-z)`
+Then elements located `By.xpath(//span[@id='item-to-purchase'])` are sorted by text in ascending order
 ----

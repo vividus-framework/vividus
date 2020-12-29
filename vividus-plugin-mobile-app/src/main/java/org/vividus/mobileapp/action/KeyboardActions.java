@@ -16,7 +16,14 @@
 
 package org.vividus.mobileapp.action;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
+import java.util.List;
+import java.util.function.Consumer;
+
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.ui.action.ISearchActions;
@@ -29,6 +36,8 @@ import io.appium.java_client.HidesKeyboard;
 
 public class KeyboardActions
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyboardActions.class);
+
     private final TouchActions touchActions;
     private final IWebDriverProvider webDriverProvider;
     private final GenericWebDriverManager genericWebDriverManager;
@@ -59,7 +68,8 @@ public class KeyboardActions
      */
     public void typeText(WebElement element, String text)
     {
-        performWithHideKeyboard(() -> element.sendKeys(text));
+        LOGGER.atInfo().addArgument(text).log("Typing text '{}' into the field");
+        performWithHideKeyboard(element, e -> e.sendKeys(text));
     }
 
     /**
@@ -74,22 +84,37 @@ public class KeyboardActions
      */
     public void clearText(WebElement element)
     {
-        performWithHideKeyboard(element::clear);
+        performWithHideKeyboard(element, WebElement::clear);
     }
 
-    private void performWithHideKeyboard(Runnable runnable)
+    private void performWithHideKeyboard(WebElement webElement, Consumer<WebElement> performOnElement)
     {
-        runnable.run();
+        performOnElement.accept(webElement);
 
         // https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
         if (genericWebDriverManager.isIOSNativeApp() && realDevice)
         {
-            Locator keyboardReturnLocator = new Locator(AppiumLocatorType.XPATH, new SearchParameters(
-                    "//XCUIElementTypeKeyboard//XCUIElementTypeButton[@name='Return']", Visibility.VISIBLE, false));
-            searchActions.findElement(keyboardReturnLocator).ifPresentOrElse(touchActions::tap, () ->
+            String tagName = webElement.getTagName();
+            /*
+             * Tap on 'Return' doesn't close the keyboard for XCUIElementTypeTextView element, the only way to close the
+             * keyboard is to tap on any element outside the text view.
+             */
+            if ("XCUIElementTypeTextView".equals(tagName))
             {
-                throw new IllegalStateException("Unable to find 'Return' button to close the keyboard");
-            });
+                LOGGER.atWarn().addArgument(tagName).log("Skip hiding keyboard for {}. Use the tap step to tap outside"
+                        + " the {} to hide the keyboard");
+                return;
+            }
+            /*
+             * Handle closing the keyboard as it's done in appium
+             * https://github.com/appium/appium-xcuitest-driver/blob/master/lib/commands/general.js#L199
+             */
+            Locator keyboardButtonsLocator = new Locator(AppiumLocatorType.XPATH, new SearchParameters(
+                    "//XCUIElementTypeKeyboard//XCUIElementTypeButton", Visibility.VISIBLE, false));
+            List<WebElement> buttons = searchActions.findElements(webDriverProvider.get(), keyboardButtonsLocator);
+            int size = buttons.size();
+            isTrue(size > 0, "Unable to find a button to close the keyboard");
+            touchActions.tap(buttons.get(--size));
         }
         else
         {

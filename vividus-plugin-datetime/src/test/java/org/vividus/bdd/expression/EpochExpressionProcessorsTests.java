@@ -22,6 +22,8 @@ import java.time.ZoneId;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.vividus.util.DateUtils;
 
 class EpochExpressionProcessorsTests
@@ -31,10 +33,14 @@ class EpochExpressionProcessorsTests
 
     private final EpochExpressionProcessors processor = new EpochExpressionProcessors(new DateUtils(ZoneId.of("UTC")));
 
-    @Test
-    void testExecuteMatchingExpressionToEpoch()
+    @ParameterizedTest
+    @CsvSource({
+            ISO_DATE_TIME + ", " + EPOCH,
+            "2020-12-11T18:43:05+05:30, 1607692385"
+    })
+    void testExecuteMatchingExpressionToEpoch(String date, String expectedEpoch)
     {
-        assertEquals(Optional.of(EPOCH), processor.execute(String.format("toEpochSecond(%s)", ISO_DATE_TIME)));
+        assertEquals(Optional.of(expectedEpoch), processor.execute(String.format("toEpochSecond(%s)", date)));
     }
 
     @Test

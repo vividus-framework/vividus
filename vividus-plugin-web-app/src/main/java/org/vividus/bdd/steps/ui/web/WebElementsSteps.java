@@ -57,7 +57,7 @@ public class WebElementsSteps
     {
         String actualText = "";
         boolean assertCondition = false;
-        boolean isWebElement = getSearchContext() instanceof WebElement;
+        boolean isWebElement = contextualSearch();
         if (isWebElement)
         {
             actualText = webElementActions.getElementText((WebElement) getSearchContext());
@@ -68,20 +68,27 @@ public class WebElementsSteps
         }
         if (!actualText.isEmpty())
         {
-            Pattern pattern = Pattern.compile(regex);
-            assertCondition = pattern.matcher(actualText).find();
-            if (!assertCondition && isWebElement)
-            {
-                String pseudoElementContent = webElementActions
-                        .getPseudoElementContent((WebElement) getSearchContext());
-                if (!pseudoElementContent.isEmpty())
-                {
-                    assertCondition = pattern.matcher(pseudoElementContent).find();
-                }
-            }
+            assertCondition = verifyText(regex, actualText, isWebElement);
         }
         softAssert.assertTrue("The text in search context matches regular expression " + regex,
                 assertCondition);
+    }
+
+    private boolean verifyText(String regex, String actualText, boolean isWebElement)
+    {
+        boolean assertCondition;
+        Pattern pattern = Pattern.compile(regex);
+        assertCondition = pattern.matcher(actualText).find();
+        if (!assertCondition && isWebElement)
+        {
+            String pseudoElementContent = webElementActions
+                    .getPseudoElementContent((WebElement) getSearchContext());
+            if (!pseudoElementContent.isEmpty())
+            {
+                assertCondition = pattern.matcher(pseudoElementContent).find();
+            }
+        }
+        return assertCondition;
     }
 
     /**
@@ -91,8 +98,7 @@ public class WebElementsSteps
     @Then("the text '$text' exists")
     public void ifTextExists(String text)
     {
-        boolean searchFromRoot = getSearchContext() instanceof WebDriver;
-        if (!searchFromRoot)
+        if (contextualSearch())
         {
             elementValidations.assertIfElementContainsText(uiContext.getSearchContext(WebElement.class), text, true);
         }
@@ -100,16 +106,7 @@ public class WebElementsSteps
         {
             By locator = LocatorUtil.getXPathLocatorByInnerText(text);
 
-            List<WebElement> elements;
-            try
-            {
-                elements = getSearchContext().findElements(locator);
-            }
-            // Workaround for WebDriverException: Permission denied to access property '_wrapped'
-            catch (WebDriverException ex)
-            {
-                elements = getSearchContext().findElements(locator);
-            }
+            List<WebElement> elements = findElements(locator);
 
             boolean assertCondition = !elements.isEmpty();
 
@@ -147,6 +144,21 @@ public class WebElementsSteps
         }
     }
 
+    private List<WebElement> findElements(By locator)
+    {
+        List<WebElement> elements;
+        try
+        {
+            elements = getSearchContext().findElements(locator);
+        }
+        // Workaround for WebDriverException: Permission denied to access property '_wrapped'
+        catch (WebDriverException ex)
+        {
+            elements = getSearchContext().findElements(locator);
+        }
+        return elements;
+    }
+
     /**
      * Checks if the <b>text</b> does not exist in context
      * @param text Text value
@@ -155,7 +167,7 @@ public class WebElementsSteps
     @Then("the text '$text' does not exist")
     public boolean textDoesNotExist(String text)
     {
-        if (getSearchContext() instanceof WebElement)
+        if (contextualSearch())
         {
             return elementValidations.assertIfElementContainsText(uiContext.getSearchContext(WebElement.class), text,
                     false);
@@ -165,6 +177,11 @@ public class WebElementsSteps
             return baseValidations.assertIfElementDoesNotExist(String.format("An element with text '%s'", text),
                     new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text));
         }
+    }
+
+    private boolean contextualSearch()
+    {
+        return getSearchContext() instanceof WebElement;
     }
 
     protected SearchContext getSearchContext()

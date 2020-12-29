@@ -36,7 +36,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailablePredicate;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.IComparisonRule;
 import org.vividus.bdd.steps.StringComparisonRule;
 
 public enum EmailParameterFilterFactory
@@ -144,7 +143,7 @@ public enum EmailParameterFilterFactory
         {
             return false;
         }
-        IComparisonRule comparableRule = EnumUtils.getEnumIgnoreCase(ComparisonRule.class, rule);
+        ComparisonRule comparableRule = EnumUtils.getEnumIgnoreCase(ComparisonRule.class, rule);
         if (comparableRule != null)
         {
             return comparableRule.getComparisonRule(input).matches(messageData);

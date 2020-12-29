@@ -19,17 +19,17 @@ package org.vividus.bdd.expression;
 import java.util.Collection;
 import java.util.Optional;
 
-public class DelegatingExpressionProcessor implements IExpressionProcessor
+public class DelegatingExpressionProcessor<T> implements IExpressionProcessor<T>
 {
-    private final Collection<IExpressionProcessor> delegates;
+    private final Collection<IExpressionProcessor<T>> delegates;
 
-    public DelegatingExpressionProcessor(Collection<IExpressionProcessor> delegates)
+    public DelegatingExpressionProcessor(Collection<IExpressionProcessor<T>> delegates)
     {
         this.delegates = delegates;
     }
 
     @Override
-    public Optional<String> execute(String expression)
+    public Optional<T> execute(String expression)
     {
         return delegates.stream()
                 .map(processor -> processor.execute(expression))

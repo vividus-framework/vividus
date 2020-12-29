@@ -16,8 +16,11 @@
 
 package org.vividus.bdd.steps.api;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -33,13 +36,15 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -55,19 +60,13 @@ class HttpRequestStepsTests
     private static final String URL = "http://www.example.com/";
     private static final String RELATIVE_URL = "/relativeUrl";
     private static final String CONTENT = "content";
-    private static final String CR_LF = "\r\n";
     private static final int RETRY_TIMES = 3;
     private static final int RESPONSE_CODE = 200;
     private static final Duration DURATION = Duration.ofSeconds(5);
 
-    @Mock
-    private HttpTestContext httpTestContext;
-
-    @Mock
-    private HttpRequestExecutor httpRequestExecutor;
-
-    @InjectMocks
-    private HttpRequestSteps httpRequestSteps;
+    @Mock private HttpTestContext httpTestContext;
+    @Mock private HttpRequestExecutor httpRequestExecutor;
+    @InjectMocks private HttpRequestSteps httpRequestSteps;
 
     @Test
     void testRequest()
@@ -84,31 +83,42 @@ class HttpRequestStepsTests
         verifyPutRequestEntity(content);
     }
 
+    @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
+    static Stream<Arguments> multipartRequests()
+    {
+        return Stream.of(
+                arguments("|name|type|value|\n|part|STRING|content|",
+                        "Content-Disposition: form-data; name=\"part\"\r\n"
+                                + "Content-Type: text/plain; charset=ISO-8859-1\r\n"
+                                + "Content-Transfer-Encoding: 8bit\r\n\r\ncontent\r\n"),
+                arguments("|name|type|value|contentType|\n|part|STRING|content|text/html; charset=utf-8|",
+                        "Content-Disposition: form-data; name=\"part\"\r\n"
+                                + "Content-Type: text/html; charset=utf-8\r\n"
+                                + "Content-Transfer-Encoding: 8bit\r\n\r\ncontent\r\n"),
+                arguments("|name|type|value|fileName|\n|part|FILE|/requestBody.txt|file.txt|",
+                        "Content-Disposition: form-data; name=\"part\"; filename=\"file.txt\"\r\n"
+                                + "Content-Type: application/octet-stream\r\n"
+                                + "Content-Transfer-Encoding: binary\r\n\r\n{body}\r\n"),
+                arguments("|name|type|value|contentType|\n|part|FILE|/requestBody.txt|text/plain; charset=utf-8|",
+                        "Content-Disposition: form-data; name=\"part\"; filename=\"requestBody.txt\"\r\n"
+                                + "Content-Type: text/plain; charset=utf-8\r\n"
+                                + "Content-Transfer-Encoding: binary\r\n\r\n{body}\r\n"),
+                arguments("|name|type|value|fileName|\n|part|BINARY|data|file.bin|",
+                        "Content-Disposition: form-data; name=\"part\"; filename=\"file.bin\"\r\n"
+                                + "Content-Type: application/octet-stream\r\n"
+                                + "Content-Transfer-Encoding: binary\r\n\r\ndata\r\n")
+        );
+    }
+
     @ParameterizedTest
-    @CsvSource({
-            // CHECKSTYLE:OFF
-            "'|name|type|value|\n|partName|STRING|content|',                                      text/plain; charset=ISO-8859-1",
-            "'|name|type|value|contentType|\n|partName|STRING|content|text/html; charset=utf-8|', text/html; charset=utf-8"
-            // CHECKSTYLE:ON
-    })
-    void testPutMultipartRequest(String tableAsString, String contentType)
+    @MethodSource("multipartRequests")
+    void shouldPutMultipartRequestFromString(String tableAsString, String content) throws IOException
     {
         ExamplesTable requestParts = new ExamplesTable(tableAsString);
         httpRequestSteps.putMultipartRequest(requestParts);
-        verify(httpTestContext).putRequestEntity(argThat(entity ->
-        {
-            try
-            {
-                return IOUtils.toString(entity.getContent(), StandardCharsets.UTF_8)
-                        .contains("Content-Disposition: form-data; name=\"partName\"" + CR_LF
-                                + "Content-Type: " + contentType + CR_LF
-                                + "Content-Transfer-Encoding: 8bit" + CR_LF + CR_LF + CONTENT + CR_LF);
-            }
-            catch (@SuppressWarnings("unused") IOException e)
-            {
-                return false;
-            }
-        }));
+        ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
+        verify(httpTestContext).putRequestEntity(captor.capture());
+        assertThat(IOUtils.toString(captor.getValue().getContent(), StandardCharsets.UTF_8), containsString(content));
     }
 
     @Test

@@ -17,24 +17,28 @@
 package org.vividus.proxy;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.BrowserUpProxyServer;
 import com.browserup.bup.client.ClientUtil;
 import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.filters.RequestFilterAdapter.FilterSource;
-
-import org.littleshoot.proxy.HttpFiltersSource;
+import com.browserup.harreader.model.Har;
 
 public class Proxy implements IProxy
 {
-    private static final String PROXY_NOT_STARTED = "Proxy is not started";
+    private final IProxyServerFactory proxyServerFactory;
+    private final String proxyHost;
+    private BrowserUpProxyServer proxyServer;
 
-    private IProxyServerFactory proxyServerFactory;
-    private BrowserUpProxy proxyServer;
+    public Proxy(IProxyServerFactory proxyServerFactory, String proxyHost)
+    {
+        this.proxyServerFactory = proxyServerFactory;
+        this.proxyHost = proxyHost;
+    }
 
     @Override
     public void start()
@@ -42,7 +46,6 @@ public class Proxy implements IProxy
         startProxy(BrowserUpProxy::start);
     }
 
-    @Override
     public void start(int port, InetAddress address)
     {
         startProxy(proxy -> proxy.start(port, address));
@@ -60,30 +63,19 @@ public class Proxy implements IProxy
     @Override
     public void startRecording()
     {
-        if (isStarted())
-        {
-            proxyServer.newHar();
-        }
-        else
-        {
-            throw new IllegalStateException(PROXY_NOT_STARTED);
-        }
+        getIfProxyStarted(BrowserUpProxy::newHar);
+    }
+
+    @Override
+    public void clearRecordedData()
+    {
+        startRecording();
     }
 
     @Override
     public void stopRecording()
     {
-        if (isStarted())
-        {
-            if (proxyServer.getHar() != null)
-            {
-                proxyServer.endHar();
-            }
-        }
-        else
-        {
-            throw new IllegalStateException(PROXY_NOT_STARTED);
-        }
+        getIfProxyStarted(BrowserUpProxy::endHar);
     }
 
     @Override
@@ -103,49 +95,60 @@ public class Proxy implements IProxy
     }
 
     @Override
-    public BrowserUpProxy getProxyServer()
+    public Har getRecordedData()
     {
-        return proxyServer;
-    }
-
-    @Override
-    public ProxyLog getLog()
-    {
-        if (isStarted())
-        {
-            return new ProxyLog(proxyServer.getHar());
-        }
-        throw new IllegalStateException(PROXY_NOT_STARTED);
+        return getIfProxyStarted(BrowserUpProxy::getHar);
     }
 
     @Override
     public void addRequestFilter(RequestFilter requestFilter)
     {
-        proxyServer.addRequestFilter(requestFilter);
+        executeIfProxyStarted(proxy -> proxy.addRequestFilter(requestFilter));
     }
 
     @Override
     public void clearRequestFilters()
     {
-        List<HttpFiltersSource> toRemove = new ArrayList<>();
-        for (HttpFiltersSource source : ((BrowserUpProxyServer) proxyServer).getFilterFactories())
-        {
-            if (source instanceof FilterSource)
-            {
-                toRemove.add(source);
-            }
-        }
-        ((BrowserUpProxyServer) proxyServer).getFilterFactories().removeAll(toRemove);
+        executeIfProxyStarted(proxy -> proxy.getFilterFactories().removeIf(source -> source instanceof FilterSource));
     }
 
     @Override
     public org.openqa.selenium.Proxy createSeleniumProxy()
     {
-        return ClientUtil.createSeleniumProxy(proxyServer, InetAddress.getLoopbackAddress());
+        return getIfProxyStarted(proxy ->
+                Optional.ofNullable(proxyHost)
+                       .map(hostName -> createSeleniumProxy(hostName, proxy.getPort()))
+                       .orElseGet(() -> ClientUtil.createSeleniumProxy(proxy, InetAddress.getLoopbackAddress()))
+        );
     }
 
-    public void setProxyServerFactory(IProxyServerFactory proxyServerFactory)
+    private org.openqa.selenium.Proxy createSeleniumProxy(String hostName, int port)
     {
-        this.proxyServerFactory = proxyServerFactory;
+        String proxyAddress = hostName + ':' + port;
+        return new org.openqa.selenium.Proxy().setHttpProxy(proxyAddress)
+                                              .setSslProxy(proxyAddress)
+                                              .setProxyType(org.openqa.selenium.Proxy.ProxyType.MANUAL);
+    }
+
+    BrowserUpProxy getProxyServer()
+    {
+        return proxyServer;
+    }
+
+    private void executeIfProxyStarted(Consumer<BrowserUpProxyServer> proxyAction)
+    {
+        getIfProxyStarted(proxy -> {
+            proxyAction.accept(proxy);
+            return null;
+        });
+    }
+
+    private <R> R getIfProxyStarted(Function<BrowserUpProxyServer, R> proxyAction)
+    {
+        if (isStarted())
+        {
+            return proxyAction.apply(proxyServer);
+        }
+        throw new IllegalStateException("Proxy is not started");
     }
 }

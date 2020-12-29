@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.context;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class BddVariableContext implements IBddVariableContext
     @SuppressWarnings("unchecked")
     public <T> T getVariable(String variableKey)
     {
-        return (T) getVariables().getVariable(variableKey);
+        return (T) getScopedVariables().getVariable(variableKey);
     }
 
     @Override
@@ -56,13 +57,13 @@ public class BddVariableContext implements IBddVariableContext
                 variablesFactory.addNextBatchesVariable(variableKey, variableValue);
                 break;
             case STORY:
-                getVariables().putStoryVariable(variableKey, variableValue);
+                getScopedVariables().putStoryVariable(variableKey, variableValue);
                 break;
             case SCENARIO:
-                getVariables().putScenarioVariable(variableKey, variableValue);
+                getScopedVariables().putScenarioVariable(variableKey, variableValue);
                 break;
             case STEP:
-                getVariables().putStepVariable(variableKey, variableValue);
+                getScopedVariables().putStepVariable(variableKey, variableValue);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported variable scope: " + variableScope);
@@ -72,31 +73,25 @@ public class BddVariableContext implements IBddVariableContext
     @Override
     public void initVariables()
     {
-        getVariables();
+        getScopedVariables();
     }
 
     @Override
     public void initStepVariables()
     {
-        getVariables().initStepVariables();
+        getScopedVariables().initStepVariables();
     }
 
     @Override
     public void clearStepVariables()
     {
-        getVariables().clearStepVariables();
+        getScopedVariables().clearStepVariables();
     }
 
     @Override
     public void clearScenarioVariables()
     {
-        getVariables().clearScenarioVariables();
-    }
-
-    @Override
-    public void clearStoryVariables()
-    {
-        getVariables().clearStoryVariables();
+        getScopedVariables().clearScenarioVariables();
     }
 
     @Override
@@ -105,7 +100,13 @@ public class BddVariableContext implements IBddVariableContext
         testContext.remove(VARIABLES_KEY);
     }
 
-    private Variables getVariables()
+    @Override
+    public Map<String, Object> getVariables()
+    {
+        return getScopedVariables().getVariables();
+    }
+
+    private Variables getScopedVariables()
     {
         return testContext.get(VARIABLES_KEY, variablesFactory::createVariables);
     }

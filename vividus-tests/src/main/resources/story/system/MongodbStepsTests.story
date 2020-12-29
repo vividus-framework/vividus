@@ -72,7 +72,7 @@ When I execute commands
 |projection|{ name: 1, email: 1, "pets.$": 1, "_id": 0 }|
 |collect   |                                            |
  in `${collectionName}` collection against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `find`
-Then a JSON element from '${find}' by the JSON path '$' is equal to '
+Then JSON element from `${find}` by JSON path `$` is equal to `
 [
    {
       "name":"Joanna Pierce",
@@ -94,7 +94,7 @@ Then a JSON element from '${find}' by the JSON path '$' is equal to '
          }
       ]
    }
-]'
+]`
 
 Scenario: Find and count
 When I execute commands
@@ -115,7 +115,7 @@ When I execute command `
 }
 ` against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `native-find`
 Then `${native-find.ok}` is equal to `1.0`
-Then a JSON element from '${native-find.cursor}' by the JSON path '$.firstBatch' is equal to '
+Then JSON element from `${native-find.cursor}` by JSON path `$.firstBatch` is equal to `
 [
    {
       "age": 20,
@@ -129,7 +129,7 @@ Then a JSON element from '${native-find.cursor}' by the JSON path '$.firstBatch'
       "age": 40,
       "name": "Buck Frazier"
    }
-]'
+]`
 
 Scenario: Compare document from MongoDB with table from relational DB
 When I execute SQL query `SELECT * FROM ${tableName}` against `vividus` and save result to SCENARIO variable `tableSource`

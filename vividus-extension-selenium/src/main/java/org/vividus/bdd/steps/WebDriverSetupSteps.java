@@ -58,7 +58,7 @@ public class WebDriverSetupSteps
         processMeta(bddRunContext.getRunningStory().getStory().getMeta());
     }
 
-    @AfterScenario(uponType = ScenarioType.ANY)
+    @AfterScenario(uponType = ScenarioType.ANY, order = Integer.MAX_VALUE)
     public void afterScenario()
     {
         if (webDriverSessionScope == WebDriverSessionScope.SCENARIO)

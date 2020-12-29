@@ -18,7 +18,6 @@ package org.vividus.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -35,13 +35,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.HasCapabilities;
-import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.WebDriverEventListener;
-import org.powermock.reflect.Whitebox;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
@@ -73,12 +71,12 @@ class VividusWebDriverFactoryTests
                 Optional.empty(), webDriverFactory, proxy);
     }
 
-    private void runCreateTest(boolean remoteExecution, String browserName)
+    private void runCreateTest(boolean remoteExecution, String browserName) throws IllegalAccessException
     {
         runCreateTest(remoteExecution, createRunningStory(browserName));
     }
 
-    private void runCreateTest(boolean remoteExecution, RunningStory runningStory)
+    private void runCreateTest(boolean remoteExecution, RunningStory runningStory) throws IllegalAccessException
     {
         List<WebDriverEventListener> eventListeners = List.of(webDriverEventListener);
         vividusWebDriverFactory.setWebDriverEventListeners(eventListeners);
@@ -87,7 +85,7 @@ class VividusWebDriverFactoryTests
         VividusWebDriver vividusWebDriver = vividusWebDriverFactory.create();
         WebDriver eventFiringDriver = vividusWebDriver.getWrappedDriver();
         assertEquals(driver, ((WrapsDriver) eventFiringDriver).getWrappedDriver());
-        assertEquals(eventListeners, Whitebox.getInternalState(eventFiringDriver, "eventListeners"));
+        assertEquals(eventListeners, FieldUtils.readField(eventFiringDriver, "eventListeners", true));
         assertEquals(remoteExecution, vividusWebDriver.isRemote());
         verify(webDriverManagerContext).reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
     }
@@ -114,21 +112,21 @@ class VividusWebDriverFactoryTests
     }
 
     @Test
-    void testCreateWebDriverRemoteWithProxy()
+    void testCreateWebDriverRemoteWithProxy() throws IllegalAccessException
     {
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(true, (String) null);
     }
 
     @Test
-    void testCreateWebDriverRemoteNoProxy()
+    void testCreateWebDriverRemoteNoProxy() throws IllegalAccessException
     {
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(true, (String) null);
     }
 
     @Test
-    void testCreateWebDriverNoRunningScenario()
+    void testCreateWebDriverNoRunningScenario() throws IllegalAccessException
     {
         when(webDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         RunningStory runningStory = new RunningStory();
@@ -137,35 +135,23 @@ class VividusWebDriverFactoryTests
     }
 
     @Test
-    void testCreateWebDriverLocalWithProxy()
+    void testCreateWebDriverLocalWithProxy() throws IllegalAccessException
     {
         notRemoteExecution();
         when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(false, FIREFOX);
     }
 
-    private void notRemoteExecution()
+    private void notRemoteExecution() throws IllegalAccessException
     {
-        Whitebox.setInternalState(vividusWebDriverFactory, "remoteExecution", false);
+        FieldUtils.writeField(vividusWebDriverFactory, "remoteExecution", false, true);
     }
 
     @Test
-    void testCreateWebDriverLocalNoProxy()
+    void testCreateWebDriverLocalNoProxy() throws IllegalAccessException
     {
         notRemoteExecution();
         when(webDriverFactory.getWebDriver(any(DesiredCapabilities.class))).thenReturn(driver);
         runCreateTest(false, FIREFOX);
-    }
-
-    @Test
-    void shouldAddProxyCapabilitiesWhenProxyStarted()
-    {
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        when(proxy.isStarted()).thenReturn(true);
-        Proxy seleniumProxy = mock(Proxy.class);
-        when(proxy.createSeleniumProxy()).thenReturn(seleniumProxy);
-        vividusWebDriverFactory.setDesiredCapabilities(desiredCapabilities);
-        verify(desiredCapabilities).setCapability(CapabilityType.PROXY, seleniumProxy);
-        verify(desiredCapabilities).setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true);
     }
 }

@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,7 +46,7 @@ class JsonUtilsTests
         TEST_OBJECT.setFirstName("name");
     }
 
-    private JsonUtils jsonUtils = new JsonUtils(PropertyNamingStrategy.LOWER_CAMEL_CASE);
+    private JsonUtils jsonUtils = new JsonUtils(PropertyNamingStrategies.LOWER_CAMEL_CASE);
 
     @Test
     void testToJsonSuccessDefault()
@@ -93,7 +93,7 @@ class JsonUtilsTests
     @Test
     void testToObjectListSuccess()
     {
-        jsonUtils = new JsonUtils(PropertyNamingStrategy.SNAKE_CASE);
+        jsonUtils = new JsonUtils(PropertyNamingStrategies.SNAKE_CASE);
         int expectedSize = 2;
         List<TestClass> actualList = jsonUtils.toObjectList(JSON_LIST_STRING, TestClass.class);
         assertEquals(actualList.size(), expectedSize);
@@ -103,7 +103,7 @@ class JsonUtilsTests
     void testToObjectListInputStreamSuccess()
     {
         InputStream jsonListStream = new ByteArrayInputStream(JSON_LIST_STRING.getBytes(StandardCharsets.UTF_8));
-        jsonUtils = new JsonUtils(PropertyNamingStrategy.SNAKE_CASE);
+        jsonUtils = new JsonUtils(PropertyNamingStrategies.SNAKE_CASE);
         int expectedSize = 2;
         List<TestClass> actualList = jsonUtils.toObjectList(jsonListStream, TestClass.class);
         assertEquals(actualList.size(), expectedSize);

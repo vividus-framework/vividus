@@ -11,152 +11,116 @@ The plugin provides the following abilities:
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '{current-version}')
 ----
 
 
 == Properties
 
-[WARNING]
-To be implemented
+NOTE: The properties marked with *bold* are mandatory.
 
-== Steps
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
 
-=== Verify secure protocols supported by server
+4+^.^|_Configuration of HTTP retries on service unavailability_
 
-==== *_Info_*
+|`http.service-unavailable-retry.max-retries`
+|`1`
+|`integer`
+|The maximum number of allowed retries if the server responds with a HTTP code from the retry code set defined below
 
-Checks that a server defined by the `hostname` supports secure protocols listed in the `protocols` parameter.
+|`http.service-unavailable-retry.status-codes`
+|<empty>
+|set of integers
+|The set of HTTP status codes to be retried. If it's empty, no retries will be performed
 
-==== *_Wording_*
+|`http.service-unavailable-retry.retry-interval`
+|`PT1S`
+|{iso-date-format-link}
+|The retry interval between subsequent requests
 
-[source,gherkin]
-----
-Then server `$hostname` supports secure protocols that $rule `$protocols`
-----
-
-==== *_Parameters_*
-
-. `$hostname` - server hostname.
-. `$rule` - xref:parameters:collection-comparison-rule.adoc[Collection Comparison Rule]
-. `$protocols` - secure protocols that are expected to match specified `$rule`
-
-==== *_Usage_*
-
-.Sample.story
-[source,gherkin]
-----
-Scenario: Verify that the server supports TLSv1.3 and TLSv1.2 protocols
-Then server `vividus-test-site.herokuapp.com` supports secure protocols that contain `TLSv1.3,TLSv1.2`
-----
-
-=== Wait for JSON element to be returned in HTTP response
-
-==== *_Info_*
-
-Execute the provided sub-steps until the HTTP response body contains an element by the specified JSON path or until the maximum number of retries is reached. The maximum duration of the step execution is not limited. The actions of the step:
-. execute sub-steps
-. wait for the polling interval
-. if the required JSON element exists or the maximum number of retries is reached, then execution stops, otherwise the step actions are repeated
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I wait for presence of element by `$jsonPath` with `$pollingInterval` polling interval retrying $retryTimes times$stepsToExecute
-----
-
-==== *_Parameters_*
-
-. `jsonPath` - the JSON path of the element to find
-. `pollingInterval` - the duration to wait between retries
-. `retryTimes` - the maximum number of the retries
-. `stepsToExecute` - the sub-steps to execute at each iteration
-
-==== *_Usage_*
-
-.Sample.story
-[source,gherkin]
-----
-Scenario: Wait for presence of element by JSON path $.data.testData
-When I wait for presence of element by `$.data.testData` with `PT5S` polling interval retrying 10 times
-|step                                  |
-|When I set request headers:           |
-|{headerSeparator=!,valueSeparator=!}  |
-|!name          !value                !|
-|!Authorization !${accessToken}       !|
-|When I issue a HTTP GET request for a resource with the URL '${requestUrl}'|
-----
-
-=== Adding headers to HTTP request
-
-==== *_Info_*
-
-Adds headers to HTTP request. See https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[standard request fields].
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I add request headers:$headers
-----
-
-==== *_Parameters_*
-
-. `headers` - ExamplesTable representing list of headers with columns `name` and `value` specifying HTTP header
-
-==== *_Usage_*
-
-.Sample.story
-[source,gherkin]
-----
-Scenario: Verify possibility to add request header with name Accept-Language and value en-ru
-When I add request headers:
-|name           |value |
-|Accept-Language|en-ru |
-When I send HTTP GET to the relative URL '/get?name=Content'
-Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
-----
+|===
 
 == Expressions
 
+NOTE: The expression parameters marked with *bold* are mandatory.
 
-=== URI Encoding
+=== `removeWrappingDoubleQuotes`
 
-`${encodeUriXyz(..)}` is a family of expressions that encode specific URI components (e.g. path, query)
+When REST API providing the data in JSON format is used it may be required to extract some values from JSON messages.
+String values are usually wrapped into double quotes, but sometimes only the value without quotes is needed.
+This expression allows to remove wrapping double quotes and use the value as is.
+
+[source, subs="+quotes"]
+----
+#{removeWrappingDoubleQuotes(*$input*)}
+----
+
+* *`$input`* - any string to remove wrapping double quotes
+
+.Extracting ID from JSON data and using it in HTTP GET
+[source,gherkin]
+----
+When I save a JSON element from '${response}' by JSON path '$.id' to story variable 'id'
+When I send HTTP GET to the relative URL 'rest/#{removeWrappingDoubleQuotes(${id})}'
+----
+
+.Examples of the expressions removing wrapping double quotes
+|===
+|Expression |Result
+
+|`#{removeWrappingDoubleQuotes("value")}`  |`value`
+|`#{removeWrappingDoubleQuotes(value)}`    |`value`
+|`#{removeWrappingDoubleQuotes()}`         |`<empty>`
+|`#{removeWrappingDoubleQuotes("")}`       |`<empty>`
+|`#{removeWrappingDoubleQuotes(""")}`      |`"`
+|`#{removeWrappingDoubleQuotes("value)}`   |`"value`
+|`#{removeWrappingDoubleQuotes(v"alu"e)}`  |`v"alu"e`
+|`#{removeWrappingDoubleQuotes("va"lu"e")}`|`va"lu"e`
+|`#{removeWrappingDoubleQuotes("va"lu"e)}` |`"va"lu"e`
+|`#{removeWrappingDoubleQuotes("va"lue)}`  |`"va"lue`
+|`#{removeWrappingDoubleQuotes(va"lue")}`  |`va"lue"`
+|===
+
+=== `encodeUriXyz`
+
+`#{encodeUriXyz(..)}` is a family of expressions that encode specific URI components (e.g. path, query)
 by percent encoding illegal characters, which includes non-US-ASCII characters, and also characters that
 are otherwise illegal within the given URI component type, as defined in
 https://www.ietf.org/rfc/rfc3986.txt[RFC 3986].
 
-[cols="3,2", options="header"]
+[cols="3,2", options="header", subs="+quotes"]
 |===
 |Syntax
 |Description
 
-|`#{encodeUriUserInfo($userInfo)}`
-|Encode the given URI user info
+|`#{encodeUriUserInfo(*$userInfo*)}`
+|encodes the given URI user info
 
-|`#{encodeUriHost($host)}`
-|Encode the given URI host
+|`#{encodeUriHost(*$host*)}`
+|encodes the given URI host
 
-|`#{encodeUriPath($path)}`
-|Encode the given URI path
+|`#{encodeUriPath(*$path*)}`
+|encodes the given URI path
 
-|`#{encodeUriPathSegment($segment)}`
-|Encode the given URI path segment
+|`#{encodeUriPathSegment(*$segment*)}`
+|encodes the given URI path segment
 
-|`#{encodeUriQuery($query)}`
-|Encode the given URI query
+|`#{encodeUriQuery(*$query*)}`
+|encodes the given URI query
 
-|`#{encodeUriQueryParameter($queryParameter)}`
-|Encode the given URI query parameter
+|`#{encodeUriQueryParameter(*$queryParameter*)}`
+|encodes the given URI query parameter
 
-|`#{encodeUriFragment($fragment)}`
-|Encode the given URI fragment
+|`#{encodeUriFragment(*$fragment*)}`
+|encode the given URI fragment
 |===
 
-==== Examples
-
+.Examples of the expressions encoding URI parts
 |===
 |Expression |Result
 
@@ -182,3 +146,317 @@ https://www.ietf.org/rfc/rfc3986.txt[RFC 3986].
 |frag%20ment
 
 |===
+
+== HTTP Steps
+
+=== *Init multipart HTTP request*
+
+Sets https://tools.ietf.org/html/rfc7578[multipart] request entity that will be used while executing HTTP requests.
+
+[source,gherkin]
+----
+Given multipart request:$requestParts
+----
+
+where `requestParts` - `ExamplesTable` representing the list of the request parts with the following columns:
+
+* `type` - one of request part types: `STRING`, `FILE`, `BINARY`
+* `name` - the request part name
+* `value` - the path to the resource with the content for `FILE` part type and the actual content for `STRING` and `BINARY` part types
+* `contentType` - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type[the content type]
+* `fileName` - the name of the file contained in this request part. The parameter is not allowed for `STRING` part type, but it's required for `BINARY` one and optional for `FILE` part type
+
+.Init HTTP request consisting of 4 different parts
+[source,gherkin]
+----
+Given multipart request:
+|type  |name      |value         |contentType|fileName       |
+|file  |file-key  |/data/file.txt|           |anotherName.txt|
+|file  |file-key2 |/data/file.txt|text/plain |               |
+|string|string-key|string1       |text/plain |               |
+|binary|binary-key|raw           |text/plain |raw.txt        |
+----
+
+=== *Add HTTP headers to the request*
+
+Adds https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[HTTP headers] to the HTTP request.
+
+[source,gherkin]
+----
+When I add request headers:$headers
+----
+
+* `headers` - `ExamplesTable` representing the list of the headers with columns `name` and `value` specifying HTTP header
+
+.Add request header with name Accept-Language and value en-ru
+[source,gherkin]
+----
+When I add request headers:
+|name           |value |
+|Accept-Language|en-ru |
+When I send HTTP GET to the relative URL '/get?name=Content'
+Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
+----
+
+=== *Wait for JSON element in the HTTP response*
+
+Executes the provided sub-steps until the HTTP response body contains an element by the specified JSON path or the maximum number of retries is reached. The maximum duration of the step execution is not limited. The actions of the step:
+
+. execute sub-steps
+. wait the polling interval
+. if the required JSON element exists or the maximum number of retries is reached, then the execution stops, otherwise the step actions are repeated
+
+[source,gherkin]
+----
+When I wait for presence of element by `$jsonPath` with `$pollingInterval` polling interval retrying $retryTimes times$stepsToExecute
+----
+
+* `jsonPath` - the JSON path of the element to find
+* `pollingInterval` - the duration to wait between retries
+* `retryTimes` - the maximum number of the retries
+* `stepsToExecute` - the sub-steps to execute at each iteration
+
+.Wait for presence of element by JSON path $.data.testData
+[source,gherkin]
+----
+When I wait for presence of element by `$.data.testData` with `PT5S` polling interval retrying 10 times
+|step                                  |
+|When I set request headers:           |
+|{headerSeparator=!,valueSeparator=!}  |
+|!name          !value                !|
+|!Authorization !${accessToken}       !|
+|When I issue a HTTP GET request for a resource with the URL '${requestUrl}'|
+----
+
+=== *Validate secure protocols supported by server*
+
+Checks that a server defined by the `hostname` supports secure protocols listed in the `protocols` parameter.
+
+[source,gherkin]
+----
+Then server `$hostname` supports secure protocols that $rule `$protocols`
+----
+
+* `$hostname` - the server hostname
+* `$rule` - xref:parameters:collection-comparison-rule.adoc[the collection comparison rule]
+* `$protocols` - the secure protocols that are expected to match specified `$rule`
+
+.Validate the server supports TLSv1.2 and TLSv1.3 protocols
+[source,gherkin]
+----
+Then server `vividus-test-site.herokuapp.com` supports secure protocols that contain `TLSv1.2,TLSv1.3`
+----
+
+== JSON Steps
+
+:json-path: https://github.com/json-path/JsonPath#path-examples[JSON Path]
+:json-unit-options: https://github.com/lukas-krecan/JsonUnit/blob/master/README.md#options[options]
+
+
+=== *Verify context contains data* 
+
+Checks if the JSON context contains an expected data by a JSON path
+
+[source,gherkin]
+----
+Then JSON element by JSON path `$jsonPath` is equal to `$expectedData`$options
+----
+
+* `jsonPath` - {json-path}
+* `expectedData` - expected JSON
+* `options` - {json-unit-options}
+
+.Check JSON context contains JSON object by JSON path
+[source,gherkin]
+----
+Then JSON element by JSON path `$.accountList[0]` is equal to `
+{
+  "accountId": 12345,
+  "accountName": "${json-unit.any-string}",
+  "status": "Active"
+}
+`ignoring extra fields
+----
+
+=== *Verify JSON contains data*
+
+Checks if a JSON contains an expected data by a JSON path
+
+[source,gherkin]
+----
+Then JSON element from `$json` by JSON path `$jsonPath` is equal to `$expectedData`$options
+----
+
+* `json` - input JSON
+* `jsonPath` - {json-path}
+* `expectedData` - expected JSON
+* `options` - {json-unit-options}
+
+.Check JSON contains string value by JSON path
+[source,gherkin]
+----
+Then JSON element from `
+{
+  "accountId": 12345,
+  "status": "Active"
+}
+` by JSON path `$.status` is equal to `Active`
+----
+
+=== *Verify number of elements in context*
+
+Verifies that the number of elements found in the JSON context by a JSON path matches an expected number according to specified comparison rule
+
+[source,gherkin]
+----
+Then number of JSON elements by JSON path `$jsonPath` is $comparisonRule $elementsNumber
+----
+
+* `jsonPath` - {json-path}
+* `comparisonRule` - xref:parameters:comparison-rule.adoc[comparison rule]
+* `elementsNumber` - expected elements number
+
+.Number of account lists in JSON is less than 5
+[source,gherkin]
+----
+Then number of JSON elements by JSON path `$.accountList` is equal to 2
+----
+
+=== *Verify number of elements in JSON*
+
+Verifies that the number of elements found in JSON data by a JSON path matches an expected number according to specified comparison rule
+
+[source,gherkin]
+----
+Then number of JSON elements from `$json` by JSON path `$jsonPath` is $comparisonRule $elementsNumber
+----
+
+* `json` - JSON data
+* `jsonPath` - {json-path}
+* `comparisonRule` - xref:parameters:comparison-rule.adoc[comparison rule]
+* `elementsNumber` - expected elements number
+
+.Number of account lists in JSON is equal to 2
+[source,gherkin]
+----
+Then number of JSON elements from `
+[
+  {
+    "accountId": 843
+  },
+  {
+    "accountId": 233
+  }
+]
+` by JSON path `$..accountId` is equal to 2
+----
+
+=== *Save element from context*
+
+Saves value extracted from the JSON context into a variable with specified name
+
+[source,gherkin]
+----
+When I save JSON element from context by JSON path `$jsonPath` to $scopes variable `$variableName`
+----
+
+* `jsonPath` - {json-path}
+* `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes]
+* `$variableName` - the variable name
+
+.Save accountId element from JSON context
+[source,gherkin]
+----
+When I save JSON element from context by JSON path `$.accountId` to SCENARIO variable `account-id`
+----
+
+=== *Save element from JSON*
+
+Saves value extracted from a JSON data into a variable with specified name
+
+[source,gherkin]
+----
+When I save JSON element from `$json` by JSON path `$jsonPath` to $scopes variable `$variableName`
+----
+
+* `json` - JSON data
+* `jsonPath` - {json-path}
+* `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes]
+* `$variableName` - the variable name
+
+.Save accountId element from JSON
+[source,gherkin]
+----
+When I save JSON element from `
+{
+  "accountId": 12345,
+  "status": "Active"
+}
+` by JSON path `$.accountId` to SCENARIO variable `account-id`
+----
+
+=== *Save number of elements in context*
+
+Saves number of elements found in the JSON context by JSON path into a variable
+
+[source,gherkin]
+----
+When I set number of elements found by JSON path `$jsonPath` to $scopes variable `$variableName`
+----
+
+* `jsonPath` - {json-path}
+* `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes]
+* `$variableName` - the variable name
+
+.Save number of id elements
+[source,gherkin]
+----
+When I set number of elements found by JSON path `$..id` to scenario variable `idsCount`
+----
+
+=== *Perform steps on elements in JSON*
+
+Performs steps against all elements found by JSON path in JSON data
+
+Actions performed by step:
+
+* searches for elements using JSON path
+* checks that elements quantity matches comparison rule and elements number
+* for each element switches JSON context and performs all steps. No steps will be performed in case of comparison rule mismatch
+* restores previously set context
+
+[source,gherkin]
+----
+When I find $comparisonRule `$elementsNumber` JSON elements from `$json` by `$jsonPath` and for each element do$stepsToExecute
+----
+
+* `comparisonRule` - xref:parameters:comparison-rule.adoc[comparison rule]
+* `elementsNumber` - expected number of elements
+* `json` - JSON data
+* `jsonPath` - {json-path}
+* `stepsToExecute` - steps to perform on JSON elements
+
+.Verify each account id is a number
+[source,gherkin]
+----
+When I find > `0` JSON elements from `
+{
+  "accounts": [
+    {
+      "accountId": 00,
+      "status": "Active"
+    },
+    {
+      "accountId": 01,
+      "status": "Active"
+    },
+    {
+      "accountId": 10,
+      "status": "Active"
+    }
+  ]
+}
+` by `$.accounts.*` and for each element docs
+|step                                                                                 |
+|Then number of JSON elements by JSON path `$[?(@.accountId =~ /\d+/i)]` is equal to 1|
+----

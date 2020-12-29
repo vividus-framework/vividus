@@ -1,14 +1,15 @@
-project.description = 'Vividus plugin for Amazion S3'
+project.description = 'Vividus plugin for Amazon S3'
 
 dependencies {
     api project(':vividus-bdd-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
-    implementation(group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.875')
+    implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.11.926')
+    implementation(group: 'com.amazonaws', name: 'aws-java-sdk-s3')
+    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-core', version: versions.mockito)
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
 }

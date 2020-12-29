@@ -30,7 +30,7 @@ import java.util.stream.IntStream;
 import javax.inject.Named;
 
 @Named
-public class ReplaceByRegExpProcessor implements IExpressionProcessor
+public class ReplaceByRegExpProcessor implements IExpressionProcessor<String>
 {
     private static final Map<Pattern, Function<Matcher, Function<String, String>>> EVALUATE_REG_EXP = Map.of(
             buildPattern("First"), matcher -> matcher::replaceFirst,

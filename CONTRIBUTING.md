@@ -9,18 +9,28 @@ Thank you for considering a contribution to Vividus! This guide explains how to:
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
-## Creating Commits And Writing Commit Messages
+## Making Changes
+* Fork the repository on GitHub if you haven't done it before.
+* Create a topic branch from where you want to base your work (this is usually the `master` branch).
+* Respect the original code style: we use [Checkstyle](http://checkstyle.sourceforge.net/), [SpotBugs](https://spotbugs.github.io/), [Spotless](https://github.com/diffplug/spotless) to enforce a common code style:
+  * Create minimal diffs - disable on save actions like reformat source code or organize imports. If you feel the source code should be reformatted create a separate PR for this change.
+  * Check for unnecessary whitespace with `git diff --check` before committing.
+* Follow [the code conventions](#code-conventions)
+* The commit messages that accompany your code changes are an important piece of documentation, follow these guidelines when creating commits:
+  * Keep commits discrete: avoid including multiple unrelated changes in a single commit
+  * Keep commits self-contained: avoid spreading a single change across multiple commits. A single commit should make sense in isolation
+* Make sure you have added the necessary unit, intergration and/or system tests for your changes.
+* Run all the checks and tests with `./gradlew clean build` to assure nothing else was accidentally broken.
 
-The commit messages that accompany your code changes are an important piece of documentation, please follow these guidelines when writing commit messages:
-
-* Keep commits discrete: avoid including multiple unrelated changes in a single commit
-* Keep commits self-contained: avoid spreading a single change across multiple commits. A single commit should make sense in isolation
-
-## Pull requests
-
-* Please create your pull request against the `master` branch. We will rebase/merge it to the maintenance branches, if necessary.
-* We are using [Checkstyle](http://checkstyle.sourceforge.net/), [SpotBugs](https://spotbugs.github.io/), [Spotless](https://github.com/diffplug/spotless) to enforce a common code style. The check is integrated into the default build - so, make sure, you can build Vividus without errors.
+## Submitting Changes
+* Push your changes to a topic branch in your fork of the repository.
+* Submit a pull request to the original repository. We will rebase/merge it to the maintenance branches, if necessary.
 * After you submit your pull request, a Vividus core developer will review it. It is normal that this takes several iterations, so don't get discouraged by change requests. They ensure the high quality that we all enjoy.
+
+## Code Conventions
+### Unit tests
+
+* Business logic that is related to unit tests must not be placed within methods annotated with `@BeforeEach` and `@AfterEach` annotations, such methods can only be used for common logic such as initializing mock service for testing, clean up filesystem resources etc.
 
 ## Bug reports
 

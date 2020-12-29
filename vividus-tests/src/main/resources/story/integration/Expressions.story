@@ -16,6 +16,10 @@ When I initialize the SCENARIO variable `date` with value `#{generateDate(P, yyy
 When I initialize the SCENARIO variable `epoch` with value `#{toEpochSecond(${date})}`
 Then `${date}` is equal to `#{fromEpochSecond(${epoch})}`
 
+Scenario: Verify epoch generation with timezone
+When I initialize the SCENARIO variable `epoch` with value `#{toEpochSecond(2020-12-11T18:43:05+05:30)}`
+Then `${epoch}` is equal to `1607692385`
+
 Scenario: Verify anyOf expression
 Then `#{anyOf(1, 2\,3,3)}` matches `1|2,3|3`
 
@@ -36,9 +40,6 @@ Examples:
 |true    |eval(`string\n1` == `string\n1`)                                  |
 |false   |eval(`string\n1` == `string1`)                                    |
 
-
-
-
 Scenario: Verify eval has an access to a variable context
 Meta:
     @requirementId 696
@@ -53,3 +54,11 @@ Examples:
 |2       |eval(someVar = 1; someVar + someVar)|1         |
 |VALUE   |eval(someVar.toUpperCase())         |value     |
 |123     |eval(someVar.replaceAll('\D', ''))  |va1lu2e3  |
+
+Scenario: Verify groovy expression
+When I initialize Scenario variable `listOfMaps` with values:
+|key|
+|2  |
+|1  |
+|3  |
+Then `1-2-3` is = `#{evalGroovy(return listOfMaps.collect{it['key']}.sort().join('-'))}`

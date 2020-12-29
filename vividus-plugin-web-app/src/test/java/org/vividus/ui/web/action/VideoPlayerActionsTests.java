@@ -32,7 +32,7 @@ class VideoPlayerActionsTests
     private WebElement webElement;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @InjectMocks
     private VideoPlayerActions videoPlayerActions;

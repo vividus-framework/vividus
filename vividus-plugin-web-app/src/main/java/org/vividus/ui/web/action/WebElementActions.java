@@ -35,7 +35,7 @@ public class WebElementActions implements IWebElementActions
     private static final char APOSTROPHE = '\'';
     private static final char QUOTE = '"';
 
-    @Inject private IJavascriptActions javascriptActions;
+    @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverManager webDriverManager;
 
     @Override
@@ -123,6 +123,26 @@ public class WebElementActions implements IWebElementActions
                     : javascriptActions.getElementText(element);
         }
         return null;
+    }
+
+    @Override
+    public boolean isElementVisible(WebElement element)
+    {
+        return isElementVisible(element, false);
+    }
+
+    private boolean isElementVisible(WebElement element, boolean scrolled)
+    {
+        if (!element.isDisplayed())
+        {
+            if (!scrolled)
+            {
+                javascriptActions.scrollIntoView(element, true);
+                return isElementVisible(element, true);
+            }
+            return false;
+        }
+        return true;
     }
 
     @Override

@@ -19,29 +19,39 @@ package org.vividus.softassert;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import org.jbehave.core.embedder.StoryControls;
 import org.vividus.softassert.event.AssertionFailedEvent;
+import org.vividus.softassert.model.SoftAssertionError;
 
 public class AssertionManager
 {
     private final EventBus eventBus;
     private final ISoftAssert softAssert;
+    private final StoryControls storyControls;
 
     private boolean failFast;
 
-    public AssertionManager(EventBus eventBus, ISoftAssert softAssert)
+    public AssertionManager(EventBus eventBus, ISoftAssert softAssert, StoryControls storyControls)
     {
         this.eventBus = eventBus;
         this.softAssert = softAssert;
+        this.storyControls = storyControls;
     }
 
     @Subscribe
     public void onAssertionFailure(AssertionFailedEvent event)
     {
-        if (failFast && !event.getSoftAssertionError().isKnownIssue())
+        SoftAssertionError error = event.getSoftAssertionError();
+        if (failFast && !error.isKnownIssue() || error.isFailTestCaseFast())
         {
             // Way to order EventBus listeners: all AssertionFailedEvent listeners and all events spawned by
             // these listeners must be processed, only after that verification may be triggered
             eventBus.post(new VerifyAssertionsEvent());
+        }
+
+        if (error.isFailTestSuiteFast())
+        {
+            storyControls.currentStoryControls().doResetStateBeforeScenario(false);
         }
     }
 

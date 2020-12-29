@@ -25,9 +25,10 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.json.JsonContext;
 import org.vividus.testcontext.TestContext;
 
-public class HttpTestContext
+public class HttpTestContext implements JsonContext
 {
     private static final Object KEY = HttpTestContextData.class;
 
@@ -70,6 +71,7 @@ public class HttpTestContext
         data.jsonElement = Optional.empty();
     }
 
+    @Override
     public void putJsonContext(String jsonElement)
     {
         getData().jsonElement = Optional.ofNullable(jsonElement);
@@ -100,6 +102,7 @@ public class HttpTestContext
         return getData().response;
     }
 
+    @Override
     public String getJsonContext()
     {
         return getData().jsonElement.orElse(getResponse() == null ? null : getResponse().getResponseBodyAsString());

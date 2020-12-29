@@ -19,12 +19,10 @@ package org.vividus.ui.web.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class InternetUtilTests
@@ -41,26 +39,8 @@ class InternetUtilTests
 
     @ParameterizedTest
     @MethodSource("testData")
-    void testGetTopDomainURL(URL url, String expectedDomain)
-    {
-        assertEquals(expectedDomain, InternetUtils.getTopDomain(url));
-    }
-
-    @ParameterizedTest
-    @MethodSource("testData")
     void testGetTopDomainURI(URI uri, String expectedDomain)
     {
         assertEquals(expectedDomain, InternetUtils.getTopDomain(uri));
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-        "http://www.by.example.com,           2, example.com",
-        "http://www.by.example.com,           5, www.by.example.com",
-        "http://user:pass@www.by.example.com, 4, www.by.example.com"
-    })
-    void testGetUriDomainLevels(String uri, int domainLevels, String expectedDomainName)
-    {
-        assertEquals(expectedDomainName, InternetUtils.getDomainName(URI.create(uri), domainLevels));
     }
 }

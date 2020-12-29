@@ -101,7 +101,7 @@ public class XrayExporter
         publishErrors();
     }
 
-    private Optional<String> exportScenario(String storyTitle, Scenario scenario) throws IOException
+    private Optional<String> exportScenario(String storyTitle, Scenario scenario)
     {
         String scenarioTitle = scenario.getTitle();
 

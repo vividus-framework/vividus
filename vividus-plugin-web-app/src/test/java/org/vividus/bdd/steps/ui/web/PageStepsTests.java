@@ -17,8 +17,10 @@
 package org.vividus.bdd.steps.ui.web;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -29,12 +31,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -47,9 +51,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
@@ -65,10 +72,10 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -106,7 +113,7 @@ class PageStepsTests
     private INavigateActions navigateActions;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private IUiContext uiContext;
@@ -330,8 +337,13 @@ class PageStepsTests
     @Test
     void testOpenPageUrlInNewWindow()
     {
+        InOrder ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions, uiContext);
         pageSteps.openPageUrlInNewWindow(URL);
-        verify(javascriptActions).openPageUrlInNewWindow(URL);
+        ordered.verify(javascriptActions).openNewWindow();
+        ordered.verify(setContextSteps).switchingToWindow();
+        ordered.verify(uiContext).reset();
+        ordered.verify(navigateActions).loadPage(URL);
+        ordered.verifyNoMoreInteractions();
     }
 
     @Test
@@ -454,17 +466,6 @@ class PageStepsTests
     }
 
     @Test
-    void testNavigateBack()
-    {
-        WebDriver driver = mock(WebDriver.class);
-        when(webDriverProvider.get()).thenReturn(driver);
-        WebDriver.Navigation navigation = mock(WebDriver.Navigation.class);
-        when(driver.navigate()).thenReturn(navigation);
-        pageSteps.navigateBack();
-        verify(navigation).back();
-    }
-
-    @Test
     void testPageTitleContainsText()
     {
         String text = "text";
@@ -474,5 +475,29 @@ class PageStepsTests
         pageSteps.assertPageTitle(StringComparisonRule.CONTAINS, text);
         verify(softAssert).assertThat(eq(PAGE_TITLE), eq(text),
                 argThat(matcher -> "a string containing \"text\"".equals(matcher.toString())));
+    }
+
+    @Test
+    void shouldStopThePageAndLogStatuses()
+    {
+        String interactive = "interactive";
+        String complete = "complete";
+        Map<String, String> result = Map.of("before", interactive, "after", complete);
+        when(javascriptActions.stopPageLoading()).thenReturn(result);
+        pageSteps.stopPageLoading();
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info("Page ready state before stop: {}, after stop:{}", interactive, complete))));
+        verifyNoMoreInteractions(javascriptActions);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionInCaseOfJavascriptExceptionDuringPageStoppage()
+    {
+        JavascriptException javascriptException = new JavascriptException("I can't take this any moooore");
+        when(javascriptActions.stopPageLoading()).thenThrow(javascriptException);
+        pageSteps.stopPageLoading();
+        softAssert.recordFailedAssertion("Unable to stop page loading", javascriptException);
+        verifyNoMoreInteractions(javascriptActions);
+        assertThat(logger.getLoggingEvents(), is(empty()));
     }
 }

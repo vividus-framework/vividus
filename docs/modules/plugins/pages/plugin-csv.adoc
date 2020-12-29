@@ -7,7 +7,7 @@ The plugin provides the ability to work with CSV files.
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{page-component-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{current-version}')
 ----
 
 == Table Transformers

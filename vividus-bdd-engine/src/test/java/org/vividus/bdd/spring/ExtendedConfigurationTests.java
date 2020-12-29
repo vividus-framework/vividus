@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.Story;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.ViewGenerator;
@@ -54,17 +56,19 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.steps.ExpressionAdaptor;
-import org.vividus.bdd.steps.ParameterAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
+import org.vividus.bdd.steps.VariableResolver;
 
 @RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(MockitoJUnitRunner.class)
 public class ExtendedConfigurationTests
 {
     private static final String SEPARATOR = "|";
@@ -73,7 +77,7 @@ public class ExtendedConfigurationTests
     private IPathFinder pathFinder;
 
     @Mock
-    private ParameterAdaptor parameterAdaptor;
+    private VariableResolver variableResolver;
 
     @Mock
     private ExpressionAdaptor expressionAdaptor;
@@ -84,7 +88,6 @@ public class ExtendedConfigurationTests
     @Before
     public void before()
     {
-        MockitoAnnotations.initMocks(this);
         configuration.setCustomConverters(List.of());
         configuration.setCustomTableTransformers(Map.of());
         configuration.setExamplesTableHeaderSeparator(SEPARATOR);
@@ -108,7 +111,7 @@ public class ExtendedConfigurationTests
         PowerMockito.whenNew(RegexStoryParser.class).withArguments(keywords, examplesTableFactory)
                 .thenReturn(regexStoryParser);
         ParameterConvertersDecorator parameterConverters = mock(ParameterConvertersDecorator.class);
-        PowerMockito.whenNew(ParameterConvertersDecorator.class).withArguments(spy, parameterAdaptor, expressionAdaptor)
+        PowerMockito.whenNew(ParameterConvertersDecorator.class).withArguments(spy, variableResolver, expressionAdaptor)
                 .thenReturn(parameterConverters);
         List<ChainableParameterConverter<?, ?>> parameterConverterList = List.of();
         when(parameterConverters.addConverters(parameterConverterList)).thenReturn(parameterConverters);
@@ -174,7 +177,7 @@ public class ExtendedConfigurationTests
     }
 
     @Test
-    public void testSetViewGenerator()
+    public void shouldSetViewGenerator()
     {
         ViewGenerator viewGenerator = mock(ViewGenerator.class);
         configuration.setViewGenerator(Optional.of(viewGenerator));
@@ -187,5 +190,22 @@ public class ExtendedConfigurationTests
         ExtendedConfiguration spy = Mockito.spy(configuration);
         configuration.setViewGenerator(Optional.empty());
         verify(spy, never()).useViewGenerator(any());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldSetStoryExecutionComparator()
+    {
+        Comparator<Story> storyExecutionComparator = mock(Comparator.class);
+        configuration.setStoryExecutionComparator(Optional.of(storyExecutionComparator));
+        assertEquals(storyExecutionComparator, configuration.storyExecutionComparator());
+    }
+
+    @Test
+    public void shouldNotSetStoryExecutionComparatorIfEmptyOptionalUsed()
+    {
+        ExtendedConfiguration spy = Mockito.spy(configuration);
+        configuration.setStoryExecutionComparator(Optional.empty());
+        verify(spy, never()).useStoryExecutionComparator(any());
     }
 }

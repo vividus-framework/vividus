@@ -34,7 +34,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 import org.vividus.util.UriUtils;
@@ -48,11 +48,11 @@ public class SetVariableSteps
     private final IBaseValidations baseValidations;
     private final IBddVariableContext bddVariableContext;
     private final IUiContext uiContext;
-    private final IJavascriptActions javascriptActions;
+    private final WebJavascriptActions javascriptActions;
 
     public SetVariableSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert, ISearchActions searchActions,
             IBaseValidations baseValidations, IBddVariableContext bddVariableContext, IUiContext uiContext,
-            IJavascriptActions javascriptActions)
+            WebJavascriptActions javascriptActions)
     {
         this.webDriverProvider = webDriverProvider;
         this.softAssert = softAssert;
@@ -85,7 +85,7 @@ public class SetVariableSteps
      * @param variable A name under which the value should be saved
      */
     @When("I get the value from the URL and set it to the '$scopes' variable '$variable'")
-    public void gettingValueFromUrl(Set<VariableScope> scopes, String variable)
+    public void saveValueFromUrl(Set<VariableScope> scopes, String variable)
     {
         String url = getWebDriver().getCurrentUrl();
         int valueIndex = url.lastIndexOf('/') + 1;
@@ -171,7 +171,7 @@ public class SetVariableSteps
      */
     @When("I get the URL value of a video with sequence number '$number' and set it to the '$scopes'"
             + " variable '$variable'")
-    public void getUrlValueOfVideoWithNumber(int number, Set<VariableScope> scopes, String variable)
+    public void saveUrlValueOfVideoWithNumber(int number, Set<VariableScope> scopes, String variable)
     {
         List<WebElement> frames = getVideoIFrames(number);
         if (!frames.isEmpty())
@@ -205,7 +205,7 @@ public class SetVariableSteps
      * @param variable A name under which the value should be saved
      */
     @When("I get the URL value of a video with the name '$name' and set it to the '$scopes' variable '$variable'")
-    public void getUrlValueOfVideoWithName(String name, Set<VariableScope> scopes, String variable)
+    public void saveUrlValueOfVideoWithName(String name, Set<VariableScope> scopes, String variable)
     {
         List<WebElement> frames = getVideoIFrames(1);
         if (!frames.isEmpty())
@@ -225,33 +225,6 @@ public class SetVariableSteps
             getWebDriver().switchTo().defaultContent();
             softAssert.recordFailedAssertion(String.format("A video with the name '%s' was not found", name));
         }
-    }
-
-    /**
-     * Extracts the <b>number</b> of elements found by specified <b>XPath</b> in the context
-     * and saves it into the <b>variable</b> with the specified <b>name</b>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Finds the elements by <b>xpath</b>
-     * <li>Saves the number of found elements into the <i>variable</i>
-     * </ul>
-     * @param locator to locate elements
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A name under which the value should be saved
-     */
-    @When("I set the number of elements found `$locator` to $scopes variable `$variableName`")
-    public void getNumberOfElementsByXpathToVariable(Locator locator, Set<VariableScope> scopes,
-            String variableName)
-    {
-        List<WebElement> elements = searchActions.findElements(getSearchContext(), locator);
-        saveVariable(scopes, variableName, elements.size());
     }
 
     /**
@@ -275,7 +248,7 @@ public class SetVariableSteps
      */
     @When("I set the number of elements found by the attribute '$attributeType'='$attributeValue'"
             + " to the '$scopes' variable '$variableName'")
-    public void getNumberOfElementsByAttributeValueToVariable(String attributeType, String attributeValue,
+    public void saveNumberOfElementsByAttributeValueToVariable(String attributeType, String attributeValue,
             Set<VariableScope> scopes, String variableName)
     {
         Locator locator = new Locator(WebLocatorType.XPATH,
@@ -301,7 +274,7 @@ public class SetVariableSteps
      * (e.g. var a=1; return a;)
      */
     @When("I perform javascript '$jsCode' and save result to the '$scopes' variable '$variableName'")
-    public void gettingValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
+    public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
         assertAndSaveResult(() -> javascriptActions.executeScript(jsCode), scopes, variableName);
     }
@@ -324,7 +297,7 @@ public class SetVariableSteps
      * (e.g. var a=1; return a;)
      */
     @When("I perform async javascript '$jsCode' and save result to the '$scopes' variable '$variableName'")
-    public void gettingValueFromAsyncJS(String jsCode, Set<VariableScope> scopes, String variableName)
+    public void saveValueFromAsyncJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
         assertAndSaveResult(() -> javascriptActions.executeAsyncScript(jsCode), scopes, variableName);
     }

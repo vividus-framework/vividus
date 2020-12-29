@@ -24,9 +24,10 @@ import java.util.UUID;
 
 import com.saucelabs.ci.sauceconnect.SauceTunnelManager;
 
+import org.vividus.selenium.tunnel.TunnelManager;
 import org.vividus.testcontext.TestContext;
 
-public class SauceConnectManager implements ISauceConnectManager
+public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
 {
     private static final Object KEY = SauceConnectDescriptor.class;
 
@@ -38,7 +39,7 @@ public class SauceConnectManager implements ISauceConnectManager
     private TestContext testContext;
 
     @Override
-    public void start(SauceConnectOptions sauceConnectOptions)
+    public String start(SauceConnectOptions sauceConnectOptions)
     {
         SauceConnectDescriptor sauceConnectDescriptor = activeConnections.get(sauceConnectOptions);
         SauceConnectDescriptor currentConnectionDescriptor = getSauceConnectDescriptor();
@@ -75,6 +76,7 @@ public class SauceConnectManager implements ISauceConnectManager
         {
             throw new IllegalArgumentException("Only one SauceConnect tunnel is allowed within one thread");
         }
+        return sauceConnectDescriptor.getTunnelId();
     }
 
     @Override
@@ -91,12 +93,6 @@ public class SauceConnectManager implements ISauceConnectManager
                 }
             }
         }
-    }
-
-    @Override
-    public String getTunnelId()
-    {
-        return getSauceConnectDescriptor().getTunnelId();
     }
 
     @Override

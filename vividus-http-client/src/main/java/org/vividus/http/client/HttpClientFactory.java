@@ -76,6 +76,7 @@ public class HttpClientFactory implements IHttpClientFactory
         builder.addInterceptorLast(config.getLastResponseInterceptor());
         builder.setRedirectStrategy(config.getRedirectStrategy());
         builder.setRetryHandler(config.getHttpRequestRetryHandler());
+        builder.setServiceUnavailableRetryStrategy(config.getServiceUnavailableRetryStrategy());
         Builder requestConfigBuilder = RequestConfig.custom();
         requestConfigBuilder.setConnectionRequestTimeout(config.getConnectionRequestTimeout());
         requestConfigBuilder.setConnectTimeout(config.getConnectTimeout());
@@ -87,6 +88,7 @@ public class HttpClientFactory implements IHttpClientFactory
                 .setSoTimeout(config.getSocketTimeout())
                 .build());
         builder.setDnsResolver(config.getDnsResolver());
+        builder.useSystemProperties();
 
         HttpClient httpClient = new HttpClient();
         httpClient.setCloseableHttpClient(builder.build());

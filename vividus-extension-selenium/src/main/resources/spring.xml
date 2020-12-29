@@ -39,6 +39,7 @@
     </bean>
 
     <bean class="org.vividus.ui.action.SearchActions" />
+    <bean class="org.vividus.ui.action.JavascriptActions" />
 
     <bean id="abstractElementAction" class="org.vividus.ui.action.search.AbstractElementAction"
           abstract="true">
@@ -56,7 +57,9 @@
         <constructor-arg index="0" value="${proxy.host}" />
         <constructor-arg index="1" value="${proxy.ports}" />
         <constructor-arg index="2">
-            <bean class="org.vividus.proxy.ProxyFactory" />
+            <bean class="org.vividus.proxy.ProxyFactory">
+                <property name="proxyHost" value="${proxy.connectable-host}"/>
+            </bean>
         </constructor-arg>
     </bean>
 
@@ -87,7 +90,7 @@
         <property name="captureTypes" value="${proxy.capture-types}"/>
     </bean>
 
-    <bean id="storyReporter" class="org.vividus.bdd.RunContextStoryReporter">
+    <bean id="runContextStoryReporter" class="org.vividus.bdd.RunContextStoryReporter">
         <property name="next">
             <bean class="org.vividus.bdd.proxy.ProxyAgentStoryReporter">
                 <property name="proxyEnabled" value="${proxy.enabled}" />
@@ -120,12 +123,16 @@
     <bean id="genericWaitSteps" class="org.vividus.bdd.steps.ui.GenericWaitSteps" />
     <bean id="genericSetVariableSteps" class="org.vividus.bdd.steps.ui.GenericSetVariableSteps" />
     <bean id="genericSetContextSteps" class="org.vividus.bdd.steps.ui.GenericSetContextSteps" />
+    <bean id="navigationSteps" class="org.vividus.bdd.steps.ui.NavigationSteps" />
+
+    <bean class="org.vividus.ui.action.search.IndexElementFilter" />
 
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
         <idref bean="genericElementSteps" />
         <idref bean="genericWaitSteps" />
         <idref bean="genericSetVariableSteps" />
         <idref bean="genericSetContextSteps" />
+        <idref bean="navigationSteps" />
     </util:list>
 
     <util:map id="propertyEditors-UI" key-type="java.lang.Class">

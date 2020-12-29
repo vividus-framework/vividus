@@ -47,8 +47,8 @@ class RepeatingTableTranformerTests
                    + ROW1
                    + ROW2
                    + ROW1
-                   + "|r2v1|r2v2|", transformer.transform(TABLE_AS_STRING,
-                new TableParsers(), new TableProperties(properties)));
+                   + "|r2v1|r2v2|", transformer.transform(TABLE_AS_STRING, new TableParsers(),
+                       new TableProperties(properties)));
     }
 
     @Test

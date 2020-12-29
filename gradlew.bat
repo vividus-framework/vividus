@@ -9,17 +9,26 @@ goto fail
 call :setpropertyvalue buildSystemVersion , buildSystemVersion
 
 :checkpath
-if not exist "%BUILD_SYSTEM_ROOT%" (
-    call :setpropertyvalue buildSystemRootDir , BUILD_SYSTEM_ROOT
+if exist "%VIVIDUS_BUILD_SYSTEM_HOME%" (
+    goto findPath
 )
-set GRADLEW_PATH=%BUILD_SYSTEM_ROOT%\%buildSystemVersion%\gradlew.bat
+if exist "%BUILD_SYSTEM_ROOT%" (
+    echo.
+    echo WARNING: BUILD_SYSTEM_ROOT environment variable is deprecated, use VIVIDUS_BUILD_SYSTEM_HOME instead
+    set VIVIDUS_BUILD_SYSTEM_HOME=%BUILD_SYSTEM_ROOT%
+) else (
+    call :setpropertyvalue buildSystemRootDir , VIVIDUS_BUILD_SYSTEM_HOME
+)
+
+
+:findPath
+set GRADLEW_PATH=%VIVIDUS_BUILD_SYSTEM_HOME%\%buildSystemVersion%\gradlew.bat
 if exist "%GRADLEW_PATH%" goto call
 set ERROR_MSG=Couldn't find %GRADLEW_PATH%. Check BUILD_SYSTEM_ROOT and buildSystemVersion set correctly
 
 :fail
 echo.
 echo ERROR: %ERROR_MSG%
-echo.
 echo Please check Build System guide:
 echo https://github.com/vividus-framework/vividus-build-system
 echo or

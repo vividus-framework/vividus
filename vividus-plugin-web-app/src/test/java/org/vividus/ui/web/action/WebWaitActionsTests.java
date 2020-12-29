@@ -68,7 +68,7 @@ class WebWaitActionsTests
     private IWaitFactory waitFactory;
 
     @Mock
-    private IJavascriptActions javascriptActions;
+    private WebJavascriptActions javascriptActions;
 
     @Mock
     private IAlertActions alertActions;

@@ -129,7 +129,7 @@ class ImapFetchServiceSystemTests
     }
 
     @Test
-    void testFetchNoEmailReceived() throws MessagingException
+    void testFetchNoEmailReceived()
     {
         String subject = GreenMailUtil.random();
         FailablePredicate<Message, MessagingException> subjectPredicate = EmailParameterFilterFactory.SUBJECT

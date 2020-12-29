@@ -21,7 +21,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -51,15 +50,16 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
-import org.vividus.ui.web.action.IJavascriptActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class ElementSearchActionTests
@@ -70,7 +70,7 @@ class ElementSearchActionTests
     private static final String CAPITALIZE = "capitalize";
     private static final String TEXT_TRANSFORM = "text-transform";
     private static final String TEXT = "Text";
-    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is equal to {}";
+    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is {}";
     private static final By ELEMENT_BY_TEXT_LOCATOR = By.xpath(".//*[contains(normalize-space(text()), 'Text')]");
     private static final Duration TIMEOUT = Duration.ofSeconds(0);
 
@@ -80,35 +80,17 @@ class ElementSearchActionTests
     private SearchParameters parameters = new SearchParameters(TEXT);
     private AbstractWebElementSearchAction spy;
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private WebDriver webDriver;
-
-    @Mock
-    private SearchContext searchContext;
-
-    @Mock
-    private IJavascriptActions javascriptActions;
-
-    @Mock
-    private IWebElementActions webElementActions;
-
-    @Mock
-    private IWebWaitActions waitActions;
-
-    @Mock
-    private WaitResult<Object> result;
-
-    @Mock
-    private By locator;
-
-    @Mock
-    private IExpectedConditions<By> expectedConditions;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private WebElement webElement;
+    @Mock private WebDriver webDriver;
+    @Mock private SearchContext searchContext;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private IWebElementActions webElementActions;
+    @Mock private ElementActions elementActions;
+    @Mock private IWebWaitActions waitActions;
+    @Mock private WaitResult<Object> result;
+    @Mock private By locator;
+    @Mock private IExpectedConditions<By> expectedConditions;
 
     @InjectMocks
     private final AbstractWebElementSearchAction elementSearchAction = new AbstractWebElementSearchAction(
@@ -214,12 +196,11 @@ class ElementSearchActionTests
         addMockedWebElement();
         when(waitActions.wait(eq(searchContext), eq(TIMEOUT), any(), eq(false))).thenReturn(result);
         parameters.setVisibility(Visibility.VISIBLE);
-        when(webElements.get(0).isDisplayed()).thenReturn(Boolean.TRUE);
+        when(elementActions.isElementVisible(webElements.get(0))).thenReturn(Boolean.TRUE);
         List<WebElement> foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
-        assertThat(logger.getLoggingEvents(),
-                equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 1))));
+        verifyLogging();
     }
 
     @Test
@@ -229,12 +210,11 @@ class ElementSearchActionTests
         addMockedWebElement();
         when(waitActions.wait(eq(searchContext), eq(TIMEOUT), any(), eq(false))).thenReturn(result);
         parameters.setVisibility(Visibility.VISIBLE);
-        when(webElements.get(0).isDisplayed()).thenReturn(Boolean.TRUE);
+        when(elementActions.isElementVisible(webElements.get(0))).thenReturn(Boolean.TRUE);
         List<WebElement> foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
-        assertThat(logger.getLoggingEvents(),
-                equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 1))));
+        verifyLogging();
     }
 
     @Test
@@ -244,12 +224,19 @@ class ElementSearchActionTests
         addMockedWebElement();
         when(waitActions.wait(eq(searchContext), eq(TIMEOUT), any(), eq(false))).thenReturn(result);
         parameters.setVisibility(Visibility.VISIBLE);
-        when(webElements.get(0).isDisplayed()).thenReturn(Boolean.TRUE);
+        when(elementActions.isElementVisible(webElements.get(0))).thenReturn(Boolean.TRUE);
         List<WebElement> foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
-        assertThat(logger.getLoggingEvents(),
-                equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 1))));
+        verifyLogging();
+    }
+
+    private void verifyLogging()
+    {
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+            info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 1),
+            info("Number of {} elements is {}", Visibility.VISIBLE.getDescription(), 1)
+        )));
     }
 
     @SuppressWarnings("unchecked")
@@ -313,15 +300,6 @@ class ElementSearchActionTests
                 parameters, ANY_TEXT);
         assertEquals(webElements, foundElements);
         verifySearchByTextEvents();
-    }
-
-    @Test
-    void testIsElementVisibleWithScrolling()
-    {
-        WebElement element = mock(WebElement.class);
-        when(element.isDisplayed()).thenReturn(false).thenReturn(true);
-        assertTrue(elementSearchAction.isElementVisible(element));
-        verify(javascriptActions).scrollIntoView(element, true);
     }
 
     private void verifySearchByTextEvents()

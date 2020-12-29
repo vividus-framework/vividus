@@ -612,6 +612,22 @@ class BaseValidationsTests
             "number of elements is a value equal to or greater than <0>", true);
     }
 
+    @Test
+    void shouldAssertNumberOfElementsFound()
+    {
+        spy = Mockito.spy(baseValidations);
+        Locator locator = mock(Locator.class);
+        List<WebElement> webElements = List.of(mockedWebElement);
+
+        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
+        doReturn(true).when(spy).assertElementsNumber(BUSINESS_DESCRIPTION, webElements, ComparisonRule.GREATER_THAN,
+                1);
+
+        assertEquals(webElements,
+                spy.assertNumberOfElementsFound(BUSINESS_DESCRIPTION, locator, 1, ComparisonRule.GREATER_THAN));
+    }
+
     private void testAssertIfNumberOfElementsFound(Function<Locator, List<WebElement>> actualCall, boolean checkPassed,
             List<WebElement> foundElements)
     {

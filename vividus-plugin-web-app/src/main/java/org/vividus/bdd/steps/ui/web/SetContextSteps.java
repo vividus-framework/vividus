@@ -30,97 +30,35 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.steps.ui.GenericSetContextSteps;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.State;
 import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWindowsActions;
-import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
-public class SetContextSteps extends GenericSetContextSteps
+public class SetContextSteps
 {
-    private static final String AN_ELEMENT_WITH_THE_ATTRIBUTE = "An element with the attribute '%1$s'='%2$s'";
-
+    private final IUiContext uiContext;
     private final IWebDriverProvider webDriverProvider;
     private final IDescriptiveSoftAssert descriptiveSoftAssert;
     private final IWindowsActions windowsActions;
     private final IWaitActions waitActions;
+    private final IBaseValidations baseValidations;
 
-    public SetContextSteps(IUiContext uiContext, IWebDriverProvider webDriverProvider, IBaseValidations baseValidations,
-            IDescriptiveSoftAssert descriptiveSoftAssert, IWindowsActions windowsActions, IWaitActions waitActions)
+    public SetContextSteps(IUiContext uiContext, IWebDriverProvider webDriverProvider,
+            IDescriptiveSoftAssert descriptiveSoftAssert, IWindowsActions windowsActions, IWaitActions waitActions,
+            IBaseValidations baseValidations)
     {
-        super(uiContext, baseValidations);
+        this.uiContext = uiContext;
         this.webDriverProvider = webDriverProvider;
         this.descriptiveSoftAssert = descriptiveSoftAssert;
         this.windowsActions = windowsActions;
         this.waitActions = waitActions;
-    }
-
-    /**
-     * Set the context for further localization of elements to an <b>element</b> specified by the <b>name</b> and
-     * <b>state</b>
-     * @param name Any attribute or text value of the element
-     * @param state A state value of the element
-     * (<i>Possible values:</i> <b>ENABLED, DISABLED, SELECTED, NOT_SELECTED, VISIBLE, NOT_VISIBLE</b>)
-    */
-    @When("I change context to a [$state] element with the name '$name'")
-    public void changeContextToElementWithName(State state, String name)
-    {
-        resetContext();
-        WebElement element = getBaseValidations().assertIfElementExists(
-                String.format("An element with the name '%1$s'", name),
-                new Locator(WebLocatorType.ELEMENT_NAME, name)
-                        .addFilter(WebLocatorType.STATE, state.toString()));
-        getUiContext().putSearchContext(element, () -> changeContextToElementWithName(state, name));
-    }
-
-    /**
-     * Set the context for further localization of elements to an <b>element</b>
-     * with the specified <b>attribute</b>
-     * @param attributeType A type of the element's attribute
-     * @param attributeValue A value of the element's attribute
-    */
-    @When("I change context to an element with the attribute '$attributeType'='$attributeValue'")
-    public void changeContextToElementWithAttribute(String attributeType, String attributeValue)
-    {
-        resetContext();
-
-        WebElement element = getBaseValidations().assertIfElementExists(
-                String.format(AN_ELEMENT_WITH_THE_ATTRIBUTE, attributeType, attributeValue),
-                new Locator(WebLocatorType.XPATH,
-                        LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-        getUiContext().putSearchContext(element, () -> changeContextToElementWithAttribute(attributeType,
-                attributeValue));
-    }
-
-    /**
-     * Set the context for further localization of elements to an <b>element</b>
-     * with the specified <b>attribute</b> and <b>state</b>
-     * @param attributeType A type of the element's attribute
-     * @param attributeValue A value of the element's attribute
-     * @param state A state value of the element
-     * (<i>Possible values:</i> <b>ENABLED, DISABLED, SELECTED, NOT_SELECTED, VISIBLE, NOT_VISIBLE</b>)
-    */
-    @When("I change context to a [$state] element with the attribute '$attributeType'='$attributeValue'")
-    public void changeContextToStateElementWithAttribute(State state, String attributeType, String attributeValue)
-    {
-        resetContext();
-        WebElement element = getBaseValidations().assertIfElementExists(String.format(AN_ELEMENT_WITH_THE_ATTRIBUTE,
-                attributeType, attributeValue), new Locator(WebLocatorType.XPATH,
-                        LocatorUtil.getXPathByAttribute(attributeType, attributeValue)));
-        if (!getBaseValidations().assertElementState("The found element is " + state, state, element))
-        {
-            element = null;
-        }
-        getUiContext().putSearchContext(element, () -> changeContextToStateElementWithAttribute(state,
-                attributeType, attributeValue));
+        this.baseValidations = baseValidations;
     }
 
     /**
@@ -165,7 +103,7 @@ public class SetContextSteps extends GenericSetContextSteps
     public void switchingToFrame(Locator locator)
     {
         resetContext();
-        WebElement element = getBaseValidations().assertIfElementExists("A frame", locator);
+        WebElement element = baseValidations.assertIfElementExists("A frame", locator);
         switchToFrame(element);
     }
 
@@ -291,5 +229,10 @@ public class SetContextSteps extends GenericSetContextSteps
     private WebDriver getWebDriver()
     {
         return webDriverProvider.get();
+    }
+
+    private void resetContext()
+    {
+        uiContext.reset();
     }
 }

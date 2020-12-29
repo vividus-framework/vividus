@@ -18,62 +18,57 @@ package org.vividus.http.dns;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 
 import org.apache.http.conn.DnsResolver;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@PrepareForTest(LocalDnsResolver.class)
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(MockitoJUnitRunner.class)
-public class LocalDnsResolverTests
+@ExtendWith(MockitoExtension.class)
+class LocalDnsResolverTests
 {
     private static final String HOST = "host";
 
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     private static final String IP_ADDRESS = "1.1.1.1";
 
-    @Mock
-    private InetAddress inetAddress;
-
-    @Mock
-    private DnsResolver fallbackDnsResolver;
-
-    @InjectMocks
-    private LocalDnsResolver localDnsResolver;
+    @Mock private InetAddress inetAddress;
+    @Mock private DnsResolver fallbackDnsResolver;
+    @InjectMocks private LocalDnsResolver localDnsResolver;
 
     @Test
-    public void testResolve() throws Exception
+    void testResolve() throws UnknownHostException
     {
         localDnsResolver.setDnsMappingStorage(Collections.singletonMap(HOST, IP_ADDRESS));
-        PowerMockito.mockStatic(InetAddress.class);
-        when(InetAddress.getByName(IP_ADDRESS)).thenReturn(inetAddress);
-        assertArrayEquals(new InetAddress[] { inetAddress }, localDnsResolver.resolve(HOST));
-        verifyNoInteractions(fallbackDnsResolver);
+        try (MockedStatic<InetAddress> inetAddress = mockStatic(InetAddress.class))
+        {
+            inetAddress.when(() -> InetAddress.getByName(IP_ADDRESS)).thenReturn(this.inetAddress);
+            assertArrayEquals(new InetAddress[] { this.inetAddress }, localDnsResolver.resolve(HOST));
+            verifyNoInteractions(fallbackDnsResolver);
+        }
     }
 
     @Test
-    public void testResolveHostsAreEmpty() throws Exception
+    void testResolveHostsAreEmpty() throws UnknownHostException
     {
         localDnsResolver.setDnsMappingStorage(Collections.emptyMap());
         InetAddress[] inetAddresses = { inetAddress };
         when(fallbackDnsResolver.resolve(HOST)).thenReturn(inetAddresses);
-        PowerMockito.mockStatic(InetAddress.class);
-        assertArrayEquals(inetAddresses, localDnsResolver.resolve(HOST));
-        PowerMockito.verifyStatic(InetAddress.class, never());
-        InetAddress.getByName(any());
+        try (MockedStatic<InetAddress> inetAddress = mockStatic(InetAddress.class))
+        {
+            assertArrayEquals(inetAddresses, localDnsResolver.resolve(HOST));
+            inetAddress.verifyNoInteractions();
+            InetAddress.getByName(any());
+        }
     }
 }

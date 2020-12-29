@@ -16,9 +16,9 @@
 
 package org.vividus.proxy;
 
-import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.BrowserUpProxyServer;
 
 public interface IProxyServerFactory
 {
-    BrowserUpProxy createProxyServer();
+    BrowserUpProxyServer createProxyServer();
 }

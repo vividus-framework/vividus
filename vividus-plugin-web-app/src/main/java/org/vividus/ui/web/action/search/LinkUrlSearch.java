@@ -83,6 +83,12 @@ public class LinkUrlSearch extends AbstractWebElementSearchAction
         return linksWithUrl;
     }
 
+    @Override
+    public boolean matches(WebElement element, String value)
+    {
+        throw new UnsupportedOperationException();
+    }
+
     private static String buildExpectedLinkUrl(String linkUrl)
     {
         URI url = URI.create(linkUrl);

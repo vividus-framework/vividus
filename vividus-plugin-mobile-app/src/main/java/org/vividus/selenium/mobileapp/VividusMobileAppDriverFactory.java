@@ -22,6 +22,7 @@ import java.util.Set;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.proxy.IProxy;
 import org.vividus.selenium.AbstractVividusWebDriverFactory;
 import org.vividus.selenium.DesiredCapabilitiesConfigurer;
 import org.vividus.selenium.IGenericWebDriverFactory;
@@ -32,10 +33,10 @@ public class VividusMobileAppDriverFactory extends AbstractVividusWebDriverFacto
     private final IGenericWebDriverFactory driverFactory;
 
     public VividusMobileAppDriverFactory(IWebDriverManagerContext webDriverManagerContext, IBddRunContext bddRunContext,
-            Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers,
+            IProxy proxy, Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers,
             IGenericWebDriverFactory driverFactory)
     {
-        super(true, webDriverManagerContext, bddRunContext, desiredCapabilitiesConfigurers);
+        super(true, webDriverManagerContext, bddRunContext, proxy, desiredCapabilitiesConfigurers);
         this.driverFactory = driverFactory;
     }
 

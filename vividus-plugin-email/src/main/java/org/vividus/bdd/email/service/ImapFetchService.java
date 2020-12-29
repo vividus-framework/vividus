@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.mail.Authenticator;
 import javax.mail.FetchProfile;
@@ -317,8 +316,7 @@ public class ImapFetchService implements EmailFetchService
                         messageHandleCondition.await();
                     }
                 }
-                return StreamSupport.stream(this.messages.spliterator(), false)
-                                    .collect(Collectors.toList());
+                return new ArrayList<>(this.messages);
             }
             finally
             {

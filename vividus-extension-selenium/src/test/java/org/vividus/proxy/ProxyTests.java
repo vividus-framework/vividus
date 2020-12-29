@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -32,38 +31,35 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
-import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.BrowserUpProxyServer;
 import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.filters.RequestFilterAdapter;
 import com.browserup.bup.filters.ResponseFilter;
 import com.browserup.bup.filters.ResponseFilterAdapter;
-import com.browserup.harreader.model.Har;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.littleshoot.proxy.HttpFiltersSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Proxy.ProxyType;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyTests
 {
-    private static final String PROXY_NOT_STARTED = "Proxy is not started";
-
-    private IProxy proxy;
-
-    @Mock
-    private IProxyServerFactory proxyServerFactory;
-
-    @Mock
-    private BrowserUpProxy browserMobProxy;
+    @Mock private IProxyServerFactory proxyServerFactory;
+    @Mock private BrowserUpProxyServer browserUpProxyServer;
+    @InjectMocks private Proxy proxy;
 
     @Test
     void testIfNotStartedAfterCreation()
     {
-        configureProxy();
         assertFalse(proxy.isStarted());
         verifyNoInteractions(proxyServerFactory);
     }
@@ -71,160 +67,118 @@ class ProxyTests
     @Test
     void testStart()
     {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
-        verify(browserMobProxy).start();
+        verify(browserUpProxyServer).start();
     }
 
     @Test
     void testStartOnAddr() throws UnknownHostException
     {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         InetAddress address = InetAddress.getLocalHost();
         int port = 8080;
         proxy.start(port, address);
-        verify(browserMobProxy).start(port, address);
+        verify(browserUpProxyServer).start(port, address);
     }
 
     @Test
     void testStartTwice()
     {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
         proxy.start();
-        verify(browserMobProxy, times(1)).start();
+        verify(browserUpProxyServer, times(1)).start();
     }
 
     @Test
     void testGetServer()
     {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
-        assertEquals(browserMobProxy, proxy.getProxyServer());
+        assertEquals(browserUpProxyServer, proxy.getProxyServer());
     }
 
     @Test
     void testStop()
     {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
         proxy.stop();
-        verify(browserMobProxy).stop();
+        verify(browserUpProxyServer).stop();
         assertNull(proxy.getProxyServer());
     }
 
     @Test
     void testStopTwice()
     {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
         proxy.stop();
         proxy.stop();
-        verify(browserMobProxy, times(1)).stop();
+        verify(browserUpProxyServer, times(1)).stop();
     }
 
     @Test
     void testStartRecording()
     {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
         proxy.startRecording();
-        verify(browserMobProxy).newHar();
+        verify(browserUpProxyServer).newHar();
     }
 
     @Test
-    void testStartRecordingWhenProxyIsNotStarted()
+    void testClearRecordedData()
     {
-        configureProxy();
-        IllegalStateException exception = assertThrows(IllegalStateException.class, proxy :: startRecording);
-        assertEquals(PROXY_NOT_STARTED, exception.getMessage());
-        verifyNoInteractions(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
+        proxy.start();
+        proxy.clearRecordedData();
+        verify(browserUpProxyServer).newHar();
+    }
+
+    @Test
+    void testGetRecordedData()
+    {
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
+        proxy.start();
+        proxy.getRecordedData();
+        verify(browserUpProxyServer).getHar();
     }
 
     @Test
     void testStopRecording()
     {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
-        when(browserMobProxy.getHar()).thenReturn(new Har());
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
         proxy.startRecording();
         proxy.stopRecording();
-        verify(browserMobProxy).endHar();
-    }
-
-    @Test
-    void testStopRecordingWithoutHar()
-    {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
-        when(browserMobProxy.getHar()).thenReturn(null);
-        proxy.start();
-        proxy.startRecording();
-        proxy.stopRecording();
-        verify(browserMobProxy, never()).endHar();
-    }
-
-    @Test
-    void testStopRecordingWhenProxyIsNotStarted()
-    {
-        configureProxy();
-        IllegalStateException exception = assertThrows(IllegalStateException.class, proxy :: stopRecording);
-        assertEquals(PROXY_NOT_STARTED, exception.getMessage());
-        verifyNoInteractions(browserMobProxy);
-    }
-
-    @Test
-    void testGetLog()
-    {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
-        proxy.start();
-        proxy.getLog();
-        verify(browserMobProxy).getHar();
-    }
-
-    @Test
-    void testGetLogWhenProxyIsNotStarted()
-    {
-        configureProxy();
-        IllegalStateException exception = assertThrows(IllegalStateException.class, proxy :: getLog);
-        assertEquals(PROXY_NOT_STARTED, exception.getMessage());
-        verifyNoInteractions(browserMobProxy);
+        verify(browserUpProxyServer).endHar();
     }
 
     @Test
     void testAddRequestFilter()
     {
-        configureProxy();
         RequestFilter requestFilter = mock(RequestFilter.class);
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
         proxy.addRequestFilter(requestFilter);
-        verify(browserMobProxy).addRequestFilter(requestFilter);
+        verify(browserUpProxyServer).addRequestFilter(requestFilter);
     }
 
     @Test
     void testClearRequestFilters()
     {
-        configureProxy();
-        BrowserUpProxyServer browserMobProxyServer = mock(BrowserUpProxyServer.class);
+        BrowserUpProxyServer browserUpProxyServer = mock(BrowserUpProxyServer.class);
         ResponseFilter responseFilter = mock(ResponseFilter.class);
         RequestFilter requestFilter = mock(RequestFilter.class);
         ResponseFilterAdapter.FilterSource fsResponse = new ResponseFilterAdapter.FilterSource(responseFilter);
         RequestFilterAdapter.FilterSource fsRequest = new RequestFilterAdapter.FilterSource(requestFilter);
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxyServer);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         List<HttpFiltersSource> toRemove = new ArrayList<>();
         toRemove.add(fsResponse);
         toRemove.add(fsRequest);
-        when(browserMobProxyServer.getFilterFactories()).thenReturn(toRemove).thenReturn(toRemove);
+        when(browserUpProxyServer.getFilterFactories()).thenReturn(toRemove).thenReturn(toRemove);
         proxy.start();
         proxy.clearRequestFilters();
         assertTrue(toRemove.size() == 1 && toRemove.contains(fsResponse));
@@ -233,17 +187,46 @@ class ProxyTests
     @Test
     void shouldCreateSeleniumProxy()
     {
-        configureProxy();
-        when(proxyServerFactory.createProxyServer()).thenReturn(browserMobProxy);
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
         proxy.start();
-        when(browserMobProxy.getPort()).thenReturn(101);
+        when(browserUpProxyServer.getPort()).thenReturn(101);
         org.openqa.selenium.Proxy seleniumProxy = proxy.createSeleniumProxy();
         assertEquals(InetAddress.getLoopbackAddress().getHostName() + ":101", seleniumProxy.getHttpProxy());
     }
 
-    private void configureProxy()
+    @Test
+    void shouldUseProvidedHostForASeleniumProxy()
     {
-        proxy = new Proxy();
-        ((Proxy) proxy).setProxyServerFactory(proxyServerFactory);
+        Proxy proxy = new Proxy(proxyServerFactory, "host.docker.internal");
+        when(proxyServerFactory.createProxyServer()).thenReturn(browserUpProxyServer);
+        proxy.start();
+        when(browserUpProxyServer.getPort()).thenReturn(101);
+        org.openqa.selenium.Proxy seleniumProxy = proxy.createSeleniumProxy();
+        String proxyHostAndPort = "host.docker.internal:101";
+        assertEquals(proxyHostAndPort, seleniumProxy.getHttpProxy());
+        assertEquals(proxyHostAndPort, seleniumProxy.getSslProxy());
+        assertEquals(ProxyType.MANUAL, seleniumProxy.getProxyType());
+    }
+
+    static Stream<Consumer<Proxy>> proxyActions()
+    {
+        return Stream.of(
+                Proxy::startRecording,
+                Proxy::stopRecording,
+                Proxy::getRecordedData,
+                Proxy::clearRecordedData,
+                Proxy::clearRequestFilters,
+                Proxy::createSeleniumProxy,
+                proxy -> proxy.addRequestFilter(mock(RequestFilter.class))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("proxyActions")
+    void shouldNotRunProxyActionWhenProxyIsNotStarted(Consumer<Proxy> proxyAction)
+    {
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> proxyAction.accept(proxy));
+        assertEquals("Proxy is not started", exception.getMessage());
+        verifyNoInteractions(browserUpProxyServer);
     }
 }

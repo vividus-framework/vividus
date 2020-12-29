@@ -24,14 +24,14 @@ import java.util.regex.Pattern;
 import javax.inject.Named;
 
 @Named
-public class RandomIntExpressionProcessor implements IExpressionProcessor
+public class RandomIntExpressionProcessor implements IExpressionProcessor<Integer>
 {
     private static final String INT_NUMBER_REGEX = "(-?[1-9]\\d*|0)";
     private static final Pattern RANDOM_VALUE_PATTERN = Pattern.compile(
             "^randomInt\\(" + INT_NUMBER_REGEX + ",\\s*" + INT_NUMBER_REGEX + "\\)$", Pattern.CASE_INSENSITIVE);
 
     @Override
-    public Optional<String> execute(String expression)
+    public Optional<Integer> execute(String expression)
     {
         Matcher expressionMatcher = RANDOM_VALUE_PATTERN.matcher(expression);
         if (expressionMatcher.find())
@@ -39,7 +39,7 @@ public class RandomIntExpressionProcessor implements IExpressionProcessor
             int minInclusive = Integer.parseInt(expressionMatcher.group(1));
             int maxInclusive = Integer.parseInt(expressionMatcher.group(2));
             int randomInt = ThreadLocalRandom.current().nextInt(minInclusive, maxInclusive + 1);
-            return Optional.of(Integer.toString(randomInt));
+            return Optional.of(randomInt);
         }
         return Optional.empty();
     }

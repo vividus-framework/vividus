@@ -199,7 +199,7 @@ class XrayExporterTests
     }
 
     @Test
-    void shouldFailIfResultsDirectoryIsEmpty(@TempDir Path sourceDirectory) throws IOException
+    void shouldFailIfResultsDirectoryIsEmpty(@TempDir Path sourceDirectory)
     {
         xrayExporterOptions.setJsonResultsDirectory(sourceDirectory);
 

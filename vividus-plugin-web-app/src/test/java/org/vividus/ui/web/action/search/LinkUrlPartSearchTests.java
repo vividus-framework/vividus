@@ -20,6 +20,7 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +56,7 @@ class LinkUrlPartSearchTests
     private static final By LINK_URL_PART_LOCATOR = By.xpath(".//a[contains (translate(@href,"
             + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), \"urlpart\")]");
     private static final String LINK_WITH_PART_URL_PATTERN = ".//a[contains(@href, %s)]";
-    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is equal to {}";
+    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is {}";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
@@ -140,6 +141,12 @@ class LinkUrlPartSearchTests
         SearchParameters parameters = new SearchParameters(URL_PART);
         List<WebElement> foundElements = search.search(null, parameters);
         assertTrue(foundElements.isEmpty());
+    }
+
+    @Test
+    void shouldThrowExceptionIfMatchesIsInvoked()
+    {
+        assertThrows(UnsupportedOperationException.class, () -> search.matches(null, null));
     }
 
     private List<WebElement> captureFoundElements(Boolean equals, String url, String actualHref, String currentUrl)

@@ -24,11 +24,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
+import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
 import org.vividus.http.exception.HttpRequestBuildException;
 
@@ -63,7 +63,7 @@ class HttpRequestBuilderTests
     }
 
     @Test
-    void buildPostWithContent() throws HttpRequestBuildException, IOException
+    void buildPostWithContent() throws IOException
     {
         HttpRequestBase request = builder.withHttpMethod(HttpMethod.POST).withEndpoint(ENDPOINT).withContent(CONTENT)
                 .build();
@@ -71,7 +71,7 @@ class HttpRequestBuilderTests
     }
 
     @Test
-    void buildPostWithContentAndContentType() throws HttpRequestBuildException, IOException
+    void buildPostWithContentAndContentType() throws IOException
     {
         ContentType contentType = ContentType.APPLICATION_FORM_URLENCODED;
         HttpRequestBase request = builder.withHttpMethod(HttpMethod.POST).withEndpoint(ENDPOINT)
@@ -125,7 +125,7 @@ class HttpRequestBuilderTests
     private void assertRequestWithContent(HttpRequestBase request, String method, String url, String content)
             throws IOException
     {
-        assertEquals(content, IOUtils.toString(((HttpEntityEnclosingRequestBase) request).getEntity().getContent(),
+        assertEquals(content, EntityUtils.toString(((HttpEntityEnclosingRequestBase) request).getEntity(),
                 StandardCharsets.UTF_8));
         assertRequest(request, method, url);
     }

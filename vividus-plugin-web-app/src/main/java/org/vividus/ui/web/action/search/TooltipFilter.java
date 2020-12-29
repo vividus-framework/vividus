@@ -20,11 +20,12 @@ import java.util.List;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
-public class TooltipFilter extends AbstractElementFilterAction implements IElementSearchAction
+public class TooltipFilter extends AbstractWebElementSearchAction implements IElementSearchAction, IElementFilterAction
 {
     public TooltipFilter()
     {
@@ -38,7 +39,7 @@ public class TooltipFilter extends AbstractElementFilterAction implements IEleme
     }
 
     @Override
-    protected boolean matches(WebElement element, String tooltip)
+    public boolean matches(WebElement element, String tooltip)
     {
         return tooltip.equals(element.getAttribute("title"));
     }

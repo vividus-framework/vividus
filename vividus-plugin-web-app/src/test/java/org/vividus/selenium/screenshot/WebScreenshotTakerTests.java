@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -47,23 +48,22 @@ import javax.imageio.ImageIO;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.google.common.eventbus.EventBus;
 
 import org.jsoup.UncheckedIOException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.property.PropertyMappedCollection;
@@ -71,9 +71,8 @@ import org.vividus.util.property.PropertyMappedCollection;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ImageTool.class)
-public class WebScreenshotTakerTests
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+class WebScreenshotTakerTests
 {
     private static final String SCREENSHOT_WAS_TAKEN = "Screenshot was taken: {}";
     private static final AShot ASHOT = mock(AShot.class);
@@ -85,55 +84,29 @@ public class WebScreenshotTakerTests
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(WebScreenshotTaker.class);
 
-    @Rule
-    private final TemporaryFolder temp = new TemporaryFolder();
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
+    @Mock private IWebElementHighlighter webElementHighlighter;
+    @Mock private EventBus eventBus;
+    @Mock private IScrollbarHandler scrollbarHandler;
+    @Mock private IAshotFactory ashotFactory;
+    @Mock private ScreenshotDebugger screenshotDebugger;
+    @InjectMocks private WebScreenshotTaker screenshotTaker;
 
     @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
 
     @Mock
-    private IWebElementHighlighter webElementHighlighter;
-
-    @Mock
-    private IScreenshotFileNameGenerator screenshotFileNameGenerator;
-
-    @Mock
-    private IScrollbarHandler scrollbarHandler;
-
-    @Mock
-    private IAshotFactory ashotFactory;
-
-    @Mock
-    private EventBus eventBus;
-
-    @Mock
-    private ScreenshotDebugger screenshotDebugger;
-
-    @Mock
     private ScreenshotConfiguration screenshotConfiguration;
 
-    private WebScreenshotTaker screenshotTaker;
-
-    @Before
-    public void before()
+    @BeforeEach
+    void beforeEach()
     {
-        screenshotTaker = new WebScreenshotTaker(webDriverProvider, screenshotFileNameGenerator, webElementHighlighter,
-                eventBus, scrollbarHandler, ashotFactory, screenshotDebugger);
         screenshotTaker.setHighlighterType(HighlighterType.DEFAULT);
         screenshotTaker.setIndent(1);
         screenshotTaker.setShootingStrategy(STRATEGY);
         screenshotTaker.setAshotConfigurations(
                 new PropertyMappedCollection<>(Map.of(STRATEGY, screenshotConfiguration)));
-        when(screenshotConfiguration.getScrollableElement()).thenReturn(Optional::empty);
-    }
-
-    @After
-    public void after()
-    {
-        testLogger.clearAll();
     }
 
     @SuppressWarnings("unchecked")
@@ -156,7 +129,7 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeScreenshotWebElementsDefaultHighlighter() throws IOException
+    void testTakeScreenshotWebElementsDefaultHighlighter() throws IOException
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
@@ -164,14 +137,14 @@ public class WebScreenshotTakerTests
                 .thenReturn(SCREENSHOT_NAME_GENERATED);
         when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
         mockTakeScreenshotWithHighlights();
-        List<WebElement> webElements = mockWebElementsToHighlight();
+        List<WebElement> webElements = List.of(mock(WebElement.class));
         when(ASHOT.takeScreenshot(webDriver, webElements)).thenReturn(SCREENSHOT);
         Optional<Screenshot> screen = screenshotTaker.takeScreenshot(SCREENSHOT_NAME, webElements);
         assertScreenshotWithHighlighter(screen);
     }
 
     @Test
-    public void testTakeScreenshotWhenWebDriverIsNotInitialized()
+    void testTakeScreenshotWhenWebDriverIsNotInitialized()
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(Boolean.FALSE);
         Optional<Screenshot> screen = screenshotTaker.takeScreenshot(SCREENSHOT_NAME);
@@ -180,7 +153,7 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeScreenshotWebElementsBlurHighlighter() throws IOException
+    void testTakeScreenshotWebElementsBlurHighlighter() throws IOException
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
@@ -188,14 +161,14 @@ public class WebScreenshotTakerTests
                 .thenReturn(SCREENSHOT_NAME_GENERATED);
         when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
         screenshotTaker.setHighlighterType(HighlighterType.BLUR);
-        List<WebElement> webElements = mockWebElementsToHighlight();
+        List<WebElement> webElements = List.of(mock(WebElement.class));
         when(ASHOT.takeScreenshot(webDriver, webElements)).thenReturn(SCREENSHOT);
         Optional<Screenshot> screen = screenshotTaker.takeScreenshot(SCREENSHOT_NAME, webElements);
         assertScreenshotWithHighlighter(screen);
     }
 
     @Test
-    public void testTakeScreenshotEmptyWebElements() throws IOException
+    void testTakeScreenshotEmptyWebElements() throws IOException
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
@@ -209,7 +182,7 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeScreenshotWebElementsFullPage() throws IOException
+    void testTakeScreenshotWebElementsFullPage() throws IOException
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
@@ -220,18 +193,13 @@ public class WebScreenshotTakerTests
         mockTakeScreenshotWithHighlights();
         List<WebElement> webElements = Collections.singletonList(mock(WebElement.class));
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
-        when(scrollbarHandler.performActionWithHiddenScrollbars(argThat(s -> {
-            s.get();
-            return true;
-        }))).thenReturn(SCREENSHOT);
         Optional<Screenshot> screen = screenshotTaker.takeScreenshot(SCREENSHOT_NAME, webElements);
         assertScreenshotWithHighlighter(screen);
     }
 
     @Test
-    public void testTakeScreenshot() throws IOException
+    void testTakeScreenshot() throws IOException
     {
-        mockTakeScreenshotWithHighlights();
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME))
@@ -244,7 +212,7 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeViewportScreenshot()
+    void testTakeViewportScreenshot()
     {
         WebScreenshotTaker spy = Mockito.spy(screenshotTaker);
         doReturn(Optional.of(mock(Screenshot.class))).when(spy).takeScreenshot(SCREENSHOT_NAME, List.of(), true);
@@ -253,14 +221,14 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeViewportScreenshotByPath() throws Exception
+    void testTakeViewportScreenshotByPath(@TempDir Path tempDir) throws Exception
     {
         mockTakeScreenshotWithHighlights();
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(ashotFactory.create(true, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
-        Path filePath = temp.newFolder().toPath().resolve(SCREENSHOT_NAME_GENERATED);
+        Path filePath = tempDir.resolve(SCREENSHOT_NAME_GENERATED);
         screenshotTaker.takeScreenshot(filePath, true);
         verify(eventBus).post(argThat(e -> filePath.equals(((ScreenshotTakeEvent) e).getScreenshotFilePath())));
         assertTrue(Files.exists(filePath));
@@ -269,14 +237,14 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeViewportScreenshotByPathNotViewport() throws Exception
+    void testTakeViewportScreenshotByPathNotViewport(@TempDir Path tempDir) throws Exception
     {
         mockTakeScreenshotWithHighlights();
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
-        Path filePath = temp.newFolder().toPath().resolve(SCREENSHOT_NAME_GENERATED);
+        Path filePath = tempDir.resolve(SCREENSHOT_NAME_GENERATED);
         screenshotTaker.takeScreenshot(filePath);
         verify(eventBus).post(argThat(e -> filePath.equals(((ScreenshotTakeEvent) e).getScreenshotFilePath())));
         assertTrue(Files.exists(filePath));
@@ -285,7 +253,7 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void shouldTakeScreenshotAsFile() throws IOException
+    void shouldTakeScreenshotAsFile(@TempDir Path tempDir) throws IOException
     {
         mockTakeScreenshotWithHighlights();
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
@@ -293,9 +261,8 @@ public class WebScreenshotTakerTests
         when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
         String fileName = "screenshotName.png";
-        Path folder = temp.newFolder().toPath();
-        screenshotTaker.setScreenshotDirectory(folder.toFile());
-        Path absolutePath = folder.resolve(fileName).toAbsolutePath();
+        screenshotTaker.setScreenshotDirectory(tempDir.toFile());
+        Path absolutePath = tempDir.resolve(fileName).toAbsolutePath();
         when(screenshotFileNameGenerator.generateScreenshotFileName(fileName))
             .thenReturn(fileName);
         screenshotTaker.takeScreenshotAsFile(fileName);
@@ -306,7 +273,7 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeViewportScreenshotByElements()
+    void testTakeViewportScreenshotByElements()
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
@@ -322,8 +289,9 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeScreenshotAsBytesWebElement() throws Exception
+    void testTakeScreenshotAsBytesWebElement() throws Exception
     {
+        when(screenshotConfiguration.getScrollableElement()).thenReturn(Optional::empty);
         WebElement context = mock(WebElement.class);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
@@ -337,8 +305,9 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeScreenshotAsBytesFullpage() throws Exception
+    void testTakeScreenshotAsBytesFullpage() throws Exception
     {
+        when(screenshotConfiguration.getScrollableElement()).thenReturn(Optional::empty);
         when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(scrollbarHandler.performActionWithHiddenScrollbars(argThat(s -> {
@@ -350,24 +319,27 @@ public class WebScreenshotTakerTests
     }
 
     @Test
-    public void testTakeScreenshotAsBytesException() throws Exception
+    void testTakeScreenshotAsBytesException()
     {
+        when(screenshotConfiguration.getScrollableElement()).thenReturn(Optional::empty);
         when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(scrollbarHandler.performActionWithHiddenScrollbars(argThat(s -> {
             s.get();
             return true;
         }))).thenReturn(SCREENSHOT);
-        PowerMockito.mockStatic(ImageTool.class);
-        IOException ioException = new IOException();
-        PowerMockito.when(ImageTool.toByteArray(SCREENSHOT)).thenThrow(ioException);
-        IllegalStateException illegalStateException =
-            assertThrows(IllegalStateException.class, () -> screenshotTaker.takeScreenshot(SCREENSHOT_NAME, webDriver));
-        assertEquals(ioException, illegalStateException.getCause());
+        try (MockedStatic<ImageTool> imageTool = mockStatic(ImageTool.class))
+        {
+            IOException ioException = new IOException();
+            imageTool.when(() -> ImageTool.toByteArray(SCREENSHOT)).thenThrow(ioException);
+            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+                    () -> screenshotTaker.takeScreenshot(SCREENSHOT_NAME, webDriver));
+            assertEquals(ioException, illegalStateException.getCause());
+        }
     }
 
     @Test
-    public void shouldTakeAShotScreenshotWithCustomConfiguration() throws IOException
+    void shouldTakeAShotScreenshotWithCustomConfiguration() throws IOException
     {
         ScreenshotConfiguration configurationMock = mock(ScreenshotConfiguration.class);
         Optional<ScreenshotConfiguration> screenshotConfiguration = Optional.of(configurationMock);
@@ -394,10 +366,5 @@ public class WebScreenshotTakerTests
     {
         assertNotEquals(Optional.empty(), actualScreenshot);
         assertArrayEquals(ImageTool.toByteArray(SCREENSHOT), actualScreenshot.get().getData());
-    }
-
-    private List<WebElement> mockWebElementsToHighlight()
-    {
-        return List.of(mock(WebElement.class));
     }
 }

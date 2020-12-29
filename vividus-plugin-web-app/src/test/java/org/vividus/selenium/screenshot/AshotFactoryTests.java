@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,10 +34,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebElement;
-import org.powermock.reflect.Whitebox;
 import org.vividus.selenium.IWebDriverFactory;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.action.IJavascriptActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
 import io.appium.java_client.remote.MobileCapabilityType;
 import ru.yandex.qatools.ashot.AShot;
@@ -53,19 +53,12 @@ class AshotFactoryTests
     private static final String COORDS_PROVIDER = "coordsProvider";
     private static final int TEN = 10;
 
-    @Mock
-    private ShootingStrategy baseShootingStrategy;
-    @Mock
-    private IWebDriverFactory webDriverFactory;
-    @Mock
-    private IWebDriverManager webDriverManager;
-    @Mock
-    private IJavascriptActions javascriptActions;
-    @Mock
-    private ScreenshotDebugger screenshotDebugger;
-
-    @InjectMocks
-    private AshotFactory ashotFactory;
+    @Mock private ShootingStrategy baseShootingStrategy;
+    @Mock private IWebDriverFactory webDriverFactory;
+    @Mock private IWebDriverManager webDriverManager;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private ScreenshotDebugger screenshotDebugger;
+    @InjectMocks private AshotFactory ashotFactory;
 
     @BeforeEach
     void beforeEach()
@@ -74,13 +67,13 @@ class AshotFactoryTests
     }
 
     @Test
-    void shouldCreateAshotViaScreenshotShootingStrategyIfThereIfConfigurationNotFound()
+    void shouldCreateAshotViaScreenshotShootingStrategyIfThereIfConfigurationNotFound() throws IllegalAccessException
     {
         mockDeviceAndOrientation();
         ashotFactory.setScreenshotShootingStrategy(ScreenshotShootingStrategy.VIEWPORT_PASTING);
         AShot aShot = ashotFactory.create(false, Optional.empty());
-        assertThat(Whitebox.getInternalState(aShot, COORDS_PROVIDER), is(instanceOf(CeilingJsCoordsProvider.class)));
-        assertThat(Whitebox.getInternalState(aShot, SHOOTING_STRATEGY),
+        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
+        assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true),
                 instanceOf(AdjustingViewportPastingDecorator.class));
     }
 
@@ -92,29 +85,29 @@ class AshotFactoryTests
     }
 
     @Test
-    void shouldCreateAshotViaScreenshotShootingStrategyUsingStrategyFromConfiguration()
+    void shouldCreateAshotViaScreenshotShootingStrategyUsingStrategyFromConfiguration() throws IllegalAccessException
     {
         mockDeviceAndOrientation();
         ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration();
         screenshotConfiguration.setScreenshotShootingStrategy(Optional.of(ScreenshotShootingStrategy.SIMPLE));
         AShot aShot = ashotFactory.create(false, Optional.of(screenshotConfiguration));
-        assertThat(Whitebox.getInternalState(aShot, COORDS_PROVIDER), is(instanceOf(CeilingJsCoordsProvider.class)));
-        assertThat(Whitebox.getInternalState(aShot, SHOOTING_STRATEGY), instanceOf(ScalingDecorator.class));
+        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
+        assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true), instanceOf(ScalingDecorator.class));
     }
 
     @Test
-    void shouldCreateAshotViaWithSimpleCoords()
+    void shouldCreateAshotViaWithSimpleCoords() throws IllegalAccessException
     {
         ashotFactory.setScreenshotShootingStrategy(ScreenshotShootingStrategy.SIMPLE);
         ShootingStrategy strategy = ScreenshotShootingStrategy.SIMPLE
                 .getDecoratedShootingStrategy(baseShootingStrategy, false, false, null);
         AShot aShot = ashotFactory.create(false, Optional.empty());
-        assertThat(Whitebox.getInternalState(aShot, COORDS_PROVIDER), is(instanceOf(CeilingJsCoordsProvider.class)));
+        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
         assertEquals(strategy, baseShootingStrategy);
     }
 
     @Test
-    void shouldCreateAshotWithCuttingStrategiesForNativeWebHeadersFooters()
+    void shouldCreateAshotWithCuttingStrategiesForNativeWebHeadersFooters() throws IllegalAccessException
     {
         ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration();
         screenshotConfiguration.setNativeFooterToCut(TEN);
@@ -123,11 +116,11 @@ class AshotFactoryTests
 
         AShot aShot = ashotFactory.create(false, Optional.of(screenshotConfiguration));
 
-        assertThat(Whitebox.getInternalState(aShot, COORDS_PROVIDER), is(instanceOf(CeilingJsCoordsProvider.class)));
+        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
         ShootingStrategy viewportPastingDecorator = getShootingStrategy(aShot);
         assertThat(viewportPastingDecorator, is(instanceOf(AdjustingViewportPastingDecorator.class)));
-        assertEquals(500, (int) Whitebox.getInternalState(viewportPastingDecorator, "scrollTimeout"));
-        assertEquals(screenshotDebugger, Whitebox.getInternalState(viewportPastingDecorator, "screenshotDebugger"));
+        assertEquals(500, (int) FieldUtils.readField(viewportPastingDecorator, "scrollTimeout", true));
+        assertEquals(screenshotDebugger, FieldUtils.readField(viewportPastingDecorator, "screenshotDebugger", true));
 
         ShootingStrategy webCuttingDecorator = getShootingStrategy(viewportPastingDecorator);
         assertThat(webCuttingDecorator, is(instanceOf(CuttingDecorator.class)));
@@ -146,14 +139,14 @@ class AshotFactoryTests
         verifyDPR(scalingDecorator);
     }
 
-    private void verifyDPR(ShootingStrategy scalingDecorator)
+    private void verifyDPR(ShootingStrategy scalingDecorator) throws IllegalAccessException
     {
-        assertEquals(2f, (float) Whitebox.getInternalState(scalingDecorator, "dprX"));
-        assertEquals(2f, (float) Whitebox.getInternalState(scalingDecorator, "dprY"));
+        assertEquals(2f, (float) FieldUtils.readField(scalingDecorator, "dprX", true));
+        assertEquals(2f, (float) FieldUtils.readField(scalingDecorator, "dprY", true));
     }
 
     @Test
-    void shouldCreateAshotUsingScrollableElement()
+    void shouldCreateAshotUsingScrollableElement() throws IllegalAccessException
     {
         WebElement webElement = mock(WebElement.class);
         ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration();
@@ -162,21 +155,20 @@ class AshotFactoryTests
         screenshotConfiguration.setScreenshotShootingStrategy(Optional.empty());
         AShot aShot = ashotFactory.create(false, Optional.of(screenshotConfiguration));
 
-        assertThat(Whitebox.getInternalState(aShot, COORDS_PROVIDER), is(instanceOf(CeilingJsCoordsProvider.class)));
+        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
         ShootingStrategy scrollableElementAwareDecorator = getShootingStrategy(aShot);
         assertThat(scrollableElementAwareDecorator,
                 is(instanceOf(AdjustingScrollableElementAwareViewportPastingDecorator.class)));
-        assertEquals(webElement,
-                Whitebox.getInternalState(scrollableElementAwareDecorator, "scrollableElement"));
+        assertEquals(webElement, FieldUtils.readField(scrollableElementAwareDecorator, "scrollableElement", true));
 
         ShootingStrategy scalingDecorator = getShootingStrategy(scrollableElementAwareDecorator);
         assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
         verifyDPR(scalingDecorator);
     }
 
-    private CutStrategy getCutStrategy(Object hasCutStrategy)
+    private CutStrategy getCutStrategy(Object hasCutStrategy) throws IllegalAccessException
     {
-        return Whitebox.getInternalState(hasCutStrategy, "cutStrategy");
+        return (CutStrategy) FieldUtils.readField(hasCutStrategy, "cutStrategy", true);
     }
 
     private void validateCutStrategy(int footer, int header, CutStrategy toValidate)
@@ -185,8 +177,8 @@ class AshotFactoryTests
         assertEquals(header, toValidate.getHeaderHeight(null));
     }
 
-    private ShootingStrategy getShootingStrategy(Object hasShootingStrategy)
+    private ShootingStrategy getShootingStrategy(Object hasShootingStrategy) throws IllegalAccessException
     {
-        return Whitebox.getInternalState(hasShootingStrategy, SHOOTING_STRATEGY);
+        return (ShootingStrategy) FieldUtils.readField(hasShootingStrategy, SHOOTING_STRATEGY, true);
     }
 }

@@ -73,18 +73,6 @@ public class ElementValidations implements IElementValidations
     }
 
     @Override
-    public boolean assertIfElementContainsTooltip(WebElement element, String expectedTooltip)
-    {
-        if (element != null)
-        {
-            return uiContext.withAssertingWebElements(List.of(element),
-                () -> softAssert.assertEquals("Element has correct tooltip", expectedTooltip,
-                    element.getAttribute("title")));
-        }
-        return false;
-    }
-
-    @Override
     public boolean assertAllWebElementsHaveEqualDimension(List<WebElement> elements, Dimension dimension)
     {
         int firstElementDimension = dimension.getDimension(elements.get(0).getSize());

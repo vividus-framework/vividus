@@ -72,7 +72,7 @@ class FetchingUrlsTableTransformerTests
                 AuthenticationMode.URL);
         transformer.setWebApplicationConfiguration(webApplicationConfiguration);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.getMainApplicationPageUri());
+                transformer::getMainApplicationPageUri);
         assertEquals("URL of the main application page should be non-blank", exception.getMessage());
     }
 

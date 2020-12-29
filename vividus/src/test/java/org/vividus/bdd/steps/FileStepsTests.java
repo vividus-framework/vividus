@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.steps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -24,11 +25,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -62,5 +65,14 @@ class FileStepsTests
                 throw new UncheckedIOException(e);
             }
         }));
+    }
+
+    @Test
+    void testSaveStringVariableToFile(@TempDir Path tempDir) throws IOException
+    {
+        String tempFilePath = tempDir.resolve("temp").resolve("any.txt").toString();
+        String fileContent = "file-content";
+        fileSteps.createFile(tempFilePath, fileContent);
+        assertEquals(fileContent, FileUtils.readFileToString(new File(tempFilePath), StandardCharsets.UTF_8));
     }
 }

@@ -26,6 +26,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
@@ -35,15 +36,17 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
 
     private final ITimeoutConfigurer timeoutConfigurer;
+    private final IProxy proxy;
     private WebDriverType webDriverType;
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
     public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
-            JsonUtils jsonUtils, ITimeoutConfigurer timeoutConfigurer)
+            JsonUtils jsonUtils, ITimeoutConfigurer timeoutConfigurer, IProxy proxy)
     {
         super(remoteWebDriverFactory, propertyParser, jsonUtils);
         this.timeoutConfigurer = timeoutConfigurer;
+        this.proxy = proxy;
     }
 
     @Override
@@ -56,10 +59,12 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
                     .orElse(this.webDriverType);
         boolean localRun = true;
         WebDriverConfiguration configuration = getWebDriverConfiguration(driverType, localRun);
+        configureProxy(driverType, desiredCapabilities);
         return createWebDriver(driverType.getWebDriver(getWebDriverCapabilities(localRun, desiredCapabilities),
                 configuration));
     }
 
+    @Override
     protected DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities)
     {
         WebDriverType webDriverType = WebDriverManager.detectType(desiredCapabilities);
@@ -68,6 +73,7 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
         if (webDriverType != null)
         {
             webDriverType.prepareCapabilities(desiredCapabilities);
+            configureProxy(webDriverType, desiredCapabilities);
             if (webDriverType == WebDriverType.CHROME)
             {
                 WebDriverConfiguration configuration = getWebDriverConfiguration(webDriverType, false);
@@ -80,9 +86,23 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
         return new DesiredCapabilities(capabilities);
     }
 
+    @Override
     protected void configureWebDriver(WebDriver webDriver)
     {
         timeoutConfigurer.configure(webDriver.manage().timeouts());
+    }
+
+    private void configureProxy(WebDriverType webDriverType, DesiredCapabilities desiredCapabilities)
+    {
+        if (proxy.isStarted() && supportsAcceptInsecureCerts(webDriverType))
+        {
+            desiredCapabilities.setAcceptInsecureCerts(true);
+        }
+    }
+
+    private boolean supportsAcceptInsecureCerts(WebDriverType webDriverType)
+    {
+        return webDriverType != WebDriverType.SAFARI && webDriverType != WebDriverType.IEXPLORE;
     }
 
     private WebDriverConfiguration getWebDriverConfiguration(WebDriverType webDriverType, boolean localRun)

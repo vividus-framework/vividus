@@ -24,9 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -44,8 +42,6 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
-import org.vividus.selenium.manager.IWebDriverManager;
 
 @ExtendWith(MockitoExtension.class)
 class CookieManagerTests
@@ -55,23 +51,10 @@ class CookieManagerTests
     private static final String COOKIE_NAME = "name";
     private static final String COOKIE_VALUE = "cookieValue";
     private static final String DOMAIN = "https://www.domain.com";
-    private static final String JS_DELETE_COOKIE_FORMAT = "document.cookie='name=; expires=-1'";
-    private static final String JS_COOKIE_FORMAT = "document.cookie='name=0; path=/; domain=domain.com'";
 
-    @Mock
-    private IJavascriptActions javascriptActions;
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private Options options;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
-
-    @InjectMocks
-    private CookieManager cookieManager;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private Options options;
+    @InjectMocks private CookieManager cookieManager;
 
     @Test
     void testDeleteAllCookies()
@@ -82,51 +65,27 @@ class CookieManagerTests
     }
 
     @Test
-    void testDeleteAllCookiesSafari()
-    {
-        configureMockedWebDriver();
-        mockIsSafari(true);
-        mockGetCookies(new Cookie(COOKIE_NAME, COOKIE_VALUE));
-        cookieManager.deleteAllCookies();
-        verify(javascriptActions).executeScript(JS_DELETE_COOKIE_FORMAT);
-    }
-
-    @Test
     void testAddCookie()
     {
+        configureMockedWebDriver();
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, DOMAIN);
-        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
-    }
-
-    @Test
-    void testAddCookieUrl() throws MalformedURLException
-    {
-        cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, new URL(DOMAIN));
-        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
+        verify(options).addCookie(new Cookie(COOKIE_NAME, ZERO));
     }
 
     @Test
     void testAddCookieUri()
     {
+        configureMockedWebDriver();
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, URI.create(DOMAIN));
-        verify(javascriptActions).executeScript(JS_COOKIE_FORMAT);
+        verify(options).addCookie(new Cookie(COOKIE_NAME, ZERO));
     }
 
     @Test
-    void testDeleteCookieNotSafari()
+    void testDeleteCookie()
     {
         configureMockedWebDriver();
-        mockIsSafari(false);
         cookieManager.deleteCookie(COOKIE_NAME);
         verify(options).deleteCookieNamed(COOKIE_NAME);
-    }
-
-    @Test
-    void testDeleteCookieSafari()
-    {
-        mockIsSafari(true);
-        cookieManager.deleteCookie(COOKIE_NAME);
-        verify(javascriptActions).executeScript(JS_DELETE_COOKIE_FORMAT);
     }
 
     @Test
@@ -189,10 +148,5 @@ class CookieManagerTests
         Set<Cookie> cookies = Collections.singleton(cookie);
         when(options.getCookies()).thenReturn(cookies);
         return cookies;
-    }
-
-    private void mockIsSafari(boolean safari)
-    {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(safari);
     }
 }

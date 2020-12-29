@@ -28,6 +28,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IWaitActions;
 
@@ -37,6 +38,7 @@ public abstract class AbstractElementAction implements IElementAction
 
     private IWaitActions waitActions;
     @Inject private IExpectedConditions<By> expectedConditions;
+    @Inject private ElementActions elementActions;
     private Duration waitForElementTimeout;
     private boolean retrySearchIfStale;
 
@@ -70,7 +72,9 @@ public abstract class AbstractElementAction implements IElementAction
                 ? waitForElement(searchContext, locator)
                 : searchContext.findElements(locator);
         boolean elementsFound = null != elements;
-        LOGGER.info("Total number of elements found {} is equal to {}", locator, elementsFound ? elements.size() : 0);
+        LOGGER.atInfo().addArgument(locator)
+                       .addArgument(() -> elementsFound ? elements.size() : 0)
+                       .log("Total number of elements found {} is {}");
         if (elementsFound)
         {
             Visibility visibility = parameters.getVisibility();
@@ -78,7 +82,7 @@ public abstract class AbstractElementAction implements IElementAction
             {
                 return Visibility.ALL == visibility
                         ? elements
-                        : filterElementsByVisibility(elements, visibility == Visibility.VISIBLE, retry);
+                        : filterElementsByVisibility(elements, visibility, retry);
             }
             catch (StaleElementReferenceException e)
             {
@@ -88,13 +92,14 @@ public abstract class AbstractElementAction implements IElementAction
         return List.of();
     }
 
-    private List<WebElement> filterElementsByVisibility(List<WebElement> elements, boolean visible,
+    private List<WebElement> filterElementsByVisibility(List<WebElement> elements, Visibility visibility,
             boolean retry)
     {
+        boolean visible = visibility == Visibility.VISIBLE;
         return elements.stream().filter(element -> {
             try
             {
-                return visible == isElementVisible(element);
+                return visible == elementActions.isElementVisible(element);
             }
             catch (StaleElementReferenceException e)
             {
@@ -105,12 +110,13 @@ public abstract class AbstractElementAction implements IElementAction
                 LOGGER.warn(e.getMessage(), e);
                 return false;
             }
-        }).collect(Collectors.toList());
-    }
-
-    protected boolean isElementVisible(WebElement element)
-    {
-        return element.isDisplayed();
+        }).collect(Collectors.collectingAndThen(Collectors.toList(), list ->
+        {
+            LOGGER.atInfo().addArgument(visibility::getDescription)
+                           .addArgument(list::size)
+                           .log("Number of {} elements is {}");
+            return list;
+        }));
     }
 
     private List<WebElement> waitForElement(SearchContext searchContext, By locator)
