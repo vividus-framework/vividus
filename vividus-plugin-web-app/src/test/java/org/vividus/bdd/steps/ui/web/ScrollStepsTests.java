@@ -122,20 +122,6 @@ class ScrollStepsTests
     }
 
     @Test
-    void testScrollToTheEndOfThePage()
-    {
-        scrollSteps.scrollToTheEndOfThePage();
-        verify(javascriptActions).scrollToEndOfPage();
-    }
-
-    @Test
-    void testScrollToTheStartOfThePage()
-    {
-        scrollSteps.scrollToTheStartOfThePage();
-        verify(javascriptActions).scrollToStartOfPage();
-    }
-
-    @Test
     void shouldScrollElementIntoViewAlignedToATop()
     {
         WebElement webElement = mock(WebElement.class);
