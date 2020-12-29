@@ -17,9 +17,7 @@
 package org.vividus.http;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -30,9 +28,6 @@ import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.exception.HttpRequestBuildException;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.wait.DurationBasedWaiter;
-import org.vividus.util.wait.WaitMode;
-import org.vividus.util.wait.Waiter;
 
 /**
  * Executor of HTTP requests which supports some exceptions handling, test context releasing
@@ -65,72 +60,31 @@ public class HttpRequestExecutor
     public void executeHttpRequest(HttpMethod httpMethod, String endpoint, Optional<String> relativeURL)
             throws IOException
     {
-        executeHttpRequest(httpMethod, endpoint, relativeURL, response -> true, new WaitMode(Duration.ZERO, 1));
-    }
-
-    /**
-     * Executes HTTP request <i>while predicate condition is true</i>
-     * and frees context request entity and headers afterwards.
-     * Request is executed safely for unchecked exceptions: HttpRequestBuildException, ConnectionClosedException.
-     * Assertion fails if exceptions occurred.
-     * @param httpMethod HttpMethod to execute
-     * @param endpoint Request endpoint
-     * @param relativeURL Relative URL - optional
-     * @param stopCondition Condition used to check whether stop wait or proceed to the next iteration
-     * @param waitMode Which time duration to wait and how many retry times
-     * @throws IOException If an input or output exception occurred
-     */
-    public void executeHttpRequest(HttpMethod httpMethod, String endpoint, Optional<String> relativeURL,
-            Predicate<HttpResponse> stopCondition, WaitMode waitMode) throws IOException
-    {
-        Waiter waiter = new DurationBasedWaiter(waitMode);
         try
         {
-            waiter.wait(() -> executeHttpCallSafely(httpMethod, endpoint, relativeURL.orElse(null)), stopCondition);
+            HttpRequestBuilder requestBuilder = HttpRequestBuilder.create()
+                    .withHttpMethod(httpMethod)
+                    .withEndpoint(endpoint)
+                    .withRelativeUrl(relativeURL.orElse(null))
+                    .withHeaders(httpTestContext.getRequestHeaders());
+            httpTestContext.getRequestEntity().ifPresent(requestBuilder::withContent);
+            HttpRequestBase request = requestBuilder.build();
+
+            HttpClientContext context = new HttpClientContext();
+            httpTestContext.getCookieStore().ifPresent(context::setCookieStore);
+            httpTestContext.getRequestConfig().ifPresent(context::setRequestConfig);
+
+            HttpResponse response = httpClient.execute(request, context);
+            httpTestContext.putResponse(response);
+            LOGGER.info("Response time: {} ms", response.getResponseTimeInMs());
+        }
+        catch (HttpRequestBuildException | ConnectionClosedException e)
+        {
+            softAssert.recordFailedAssertion(e);
         }
         finally
         {
             httpTestContext.releaseRequestData();
         }
-    }
-
-    private HttpResponse executeHttpCallSafely(HttpMethod httpMethod, String endpoint, String relativeURL)
-            throws IOException
-    {
-        try
-        {
-            return execute(httpMethod, endpoint, relativeURL);
-        }
-        catch (HttpRequestBuildException | ConnectionClosedException e)
-        {
-            softAssert.recordFailedAssertion(e);
-            return null;
-        }
-    }
-
-    private HttpResponse execute(HttpMethod httpMethod, String endpoint, String relativeURL)
-            throws HttpRequestBuildException, IOException
-    {
-        HttpRequestBase requestBase = prepareHttpRequestBase(httpMethod, endpoint, relativeURL);
-        HttpClientContext httpClientContext = new HttpClientContext();
-        httpTestContext.getCookieStore().ifPresent(httpClientContext::setCookieStore);
-        httpTestContext.getRequestConfig().ifPresent(httpClientContext::setRequestConfig);
-
-        HttpResponse httpResponse = httpClient.execute(requestBase, httpClientContext);
-        httpTestContext.putResponse(httpResponse);
-        LOGGER.info("Response time: {} ms", httpResponse.getResponseTimeInMs());
-        return httpResponse;
-    }
-
-    private HttpRequestBase prepareHttpRequestBase(HttpMethod httpMethod, String endpoint, String relativeURL)
-            throws HttpRequestBuildException
-    {
-        HttpRequestBuilder httpRequestBuilder = HttpRequestBuilder.create()
-                .withHttpMethod(httpMethod)
-                .withEndpoint(endpoint)
-                .withRelativeUrl(relativeURL)
-                .withHeaders(httpTestContext.getRequestHeaders());
-        httpTestContext.getRequestEntity().ifPresent(httpRequestBuilder::withContent);
-        return httpRequestBuilder.build();
     }
 }

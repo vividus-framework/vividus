@@ -28,8 +28,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
@@ -38,9 +36,6 @@ import java.util.stream.Stream;
 
 import com.jayway.jsonpath.PathNotFoundException;
 
-import org.apache.http.ConnectionClosedException;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,10 +51,8 @@ import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.SubSteps;
 import org.vividus.bdd.variable.VariableScope;
-import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
-import org.vividus.http.client.IHttpClient;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
@@ -73,8 +66,6 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 @ExtendWith(MockitoExtension.class)
 class JsonResponseValidationStepsTests
 {
-    private static final int DURATION_DIVIDER = 10;
-    private static final String GET = "GET";
     private static final String SOME_PATH = "$.some";
     private static final String RESPONSE_PATH = "$.response";
     private static final String RESPONSE_NULL = "{\"response\": null}";
@@ -96,8 +87,6 @@ class JsonResponseValidationStepsTests
     private static final String JSON = "{\"test\":" + OBJECT_PATH_RESULT + "}";
     private static final int ELEMENTS_NUMBER = 1;
 
-    private static final String URL = "http://www.example.com/";
-
     private static final String JSON_PATH = "$..value";
     private static final String THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE =
             "The number of JSON elements by JSON path: ";
@@ -114,9 +103,6 @@ class JsonResponseValidationStepsTests
     private HttpTestContext httpTestContext;
 
     @Mock
-    private IHttpClient httpClient;
-
-    @Mock
     private IAttachmentPublisher attachmentPublisher;
 
     private JsonResponseValidationSteps jsonResponseValidationSteps;
@@ -125,9 +111,8 @@ class JsonResponseValidationStepsTests
     void beforeEach()
     {
         JsonPathUtils.setJacksonConfiguration();
-        HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor(httpClient, httpTestContext, softAssert);
         jsonResponseValidationSteps = new JsonResponseValidationSteps(httpTestContext, bddVariableContext,
-                attachmentPublisher, httpRequestExecutor, new JsonUtils());
+                attachmentPublisher, new JsonUtils());
         jsonResponseValidationSteps.setSoftAssert(softAssert);
     }
 
@@ -320,77 +305,6 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testWaitForJsonFieldAppearsWithoutPolling() throws IOException
-    {
-        mockResponse(JSON);
-        testWaitForJsonFieldAppears(1);
-        verify(httpClient).execute(argThat(base -> base instanceof HttpRequestBase
-                && base.getMethod().equals(GET)
-                && base.getURI().equals(URI.create(URL))),
-                argThat(context -> context instanceof HttpClientContext));
-    }
-
-    @Test
-    void testWaitForJsonFieldAppearsWithPolling() throws IOException
-    {
-        String body = "{\"key\":\"value\"}";
-        mockResponse(body);
-        testWaitForJsonFieldAppears(0);
-        verify(httpClient, atLeast(4)).execute(argThat(base -> base instanceof HttpRequestBase
-                && base.getMethod().equals(GET)
-                && base.getURI().equals(URI.create(URL))),
-                argThat(context -> context instanceof HttpClientContext));
-        verify(httpClient, atMost(10)).execute(argThat(base -> base instanceof HttpRequestBase),
-                argThat(context -> context instanceof HttpClientContext));
-    }
-
-    @Test
-    void shouldIgnoreInvalidBodyDuringTimeoutTest() throws IOException
-    {
-        HttpResponse response = mock(HttpResponse.class);
-        when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
-                argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
-        when(httpTestContext.getResponse()).thenReturn(response);
-        when(httpTestContext.getJsonContext()).thenReturn(JSON);
-        when(response.getResponseBody()).thenReturn(JSON.getBytes(StandardCharsets.UTF_8));
-        when(response.getResponseBodyAsString()).thenReturn(HTML, JSON);
-        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
-                DURATION_DIVIDER);
-        verify(httpClient, times(2)).execute(argThat(base -> base instanceof HttpRequestBase),
-                argThat(context -> context instanceof HttpClientContext));
-        verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH), eq(1),
-                argThat(m -> "a value greater than <0>".equals(m.toString())));
-    }
-
-    @Test
-    void testFailedAssertionRecordingIfResponseDidNtContainJson() throws IOException
-    {
-        HttpResponse response = mock(HttpResponse.class);
-        when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
-                argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
-        when(httpTestContext.getResponse()).thenReturn(response);
-        when(response.getResponseBodyAsString()).thenReturn(HTML);
-        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
-                DURATION_DIVIDER);
-        verify(softAssert).recordFailedAssertion("HTTP response body is not present");
-    }
-
-    @Test
-    void testWaitForJsonFieldAppearsHandledException() throws IOException
-    {
-        when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase
-                && base.getMethod().equals(GET)
-                && base.getURI().equals(URI.create(URL))),
-                argThat(context -> context instanceof HttpClientContext)))
-            .thenThrow(new ConnectionClosedException());
-        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(1),
-                DURATION_DIVIDER);
-        verify(softAssert).recordFailedAssertion(
-                (Exception) argThat(arg -> arg instanceof ConnectionClosedException
-                        && "Connection is closed".equals(((Exception) arg).getMessage())));
-    }
-
-    @Test
     void shouldWaitForJsonElement()
     {
         SubSteps stepsToExecute = mock(SubSteps.class);
@@ -435,23 +349,6 @@ class JsonResponseValidationStepsTests
         jsonResponseValidationSteps.waitForJsonElement(STRING_PATH, Duration.ofSeconds(1), retryTimes, stepsToExecute);
         verify(stepsToExecute, times(1)).execute(Optional.empty());
         verifyNoInteractions(softAssert);
-    }
-
-    private void testWaitForJsonFieldAppears(int elementsFound) throws IOException
-    {
-        jsonResponseValidationSteps.waitForJsonFieldAppearance(STRING_PATH, URL, Duration.ofSeconds(2),
-                DURATION_DIVIDER);
-        verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + STRING_PATH),
-                eq(elementsFound), verifyMatcher(1));
-    }
-
-    private void mockResponse(String body) throws IOException
-    {
-        HttpResponse response = createHttpResponse(body);
-        when(httpTestContext.getResponse()).thenReturn(response);
-        when(httpTestContext.getJsonContext()).thenReturn(body);
-        when(httpClient.execute(argThat(base -> base instanceof HttpRequestBase),
-                argThat(context -> context instanceof HttpClientContext))).thenReturn(response);
     }
 
     private HttpResponse createHttpResponse(String body)
