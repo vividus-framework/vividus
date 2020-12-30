@@ -20,9 +20,6 @@ When I initialize the story variable `html` with value
 </html>
 `
 
-Scenario: Verify step 'Then HTML `$html` contains element by CSS selector `$cssSelector`'
-Then HTML `${html}` contains element by CSS selector `body > h1`
-
 Scenario: Verify step 'Then HTML `$html` contains data `$expectedData` by CSS selector `$cssSelector`'
 Then HTML `${html}` contains data `This is a paragraph.` by CSS selector `body > p`
 

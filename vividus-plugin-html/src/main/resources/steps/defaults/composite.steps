@@ -1,2 +1,0 @@
-Composite: Then HTML `$html` contains element by CSS selector `$cssSelector`
-Then number of elements found by CSS selector `<cssSelector>` in HTML `<html>` is = `1`
