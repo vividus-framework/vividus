@@ -222,8 +222,8 @@ class BeanFactoryIntegrationTests
     {
         Properties properties = ConfigurationResolver.getInstance().getProperties();
         assertEquals("basicenv-property-value", properties.getProperty("basicenv-property"));
-        assertEquals("root-property-value", properties.getProperty("root-property"));
-        assertEquals("basicenv-property-overriden-root-value", properties.getProperty("basicenv-property-overriden"));
+        assertEquals("root-property-basicenv-value", properties.getProperty("root-property"));
+        assertEquals("basicenv-property-overriden-value", properties.getProperty("basicenv-property-overriden"));
         assertEquals(additionalValueFirst, properties.getProperty("additionalenv-props-property"));
         assertEquals(additionalValueSecond, properties.getProperty("additionalenv-property"));
         assertEquals("override-property-value", properties.getProperty("override-property"));
