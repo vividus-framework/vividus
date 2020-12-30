@@ -6,12 +6,10 @@ dependencies {
 
     implementation project(':vividus-util')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
-    implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.1')
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'org.springframework', name: 'spring-beans', version: versions.spring)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-    implementation(group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
     runtimeOnly(group: 'org.vividus', name: 'jbehave-spring', version: versions.jbehave)
 
