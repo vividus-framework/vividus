@@ -27,20 +27,6 @@ When I scroll context to TOP edge
 When I change context to an element by By.id(current-vertical):a
 Then the text matches '0'
 
-Scenario: Verify step: When I scroll to the end of the context
-When I change context to an element by By.id(current-vertical):a
-When I change context to an element by By.id(scrollable)
-When I scroll to the end of the context
-When I change context to an element by By.id(current-vertical):a
-Then the text matches '\d+'
-
-Scenario: Verify step: When I scroll to the start of the context
-When I change context to an element by By.id(current-vertical):a
-When I change context to an element by By.id(scrollable)
-When I scroll to the start of the context
-When I change context to an element by By.id(current-vertical):a
-Then the text matches '0'
-
 Scenario: Verify step: When I scroll element located `$locator` into view
 Meta:
     @requirementId 436
@@ -57,15 +43,5 @@ Then `${scroll}` is > `0`
 
 Scenario: Scroll TOP for page Verify step: When I scroll context to $scrollDirection edge
 When I scroll context to TOP edge
-When I perform javascript 'return document.documentElement.scrollTop' and save result to the 'scenario' variable 'scroll'
-Then `${scroll}` is = `0`
-
-Scenario: Verify step: When I scroll to the end of the page
-When I scroll to the end of the page
-When I perform javascript 'return document.documentElement.scrollTop' and save result to the 'scenario' variable 'scroll'
-Then `${scroll}` is > `0`
-
-Scenario: Verify step: When I scroll to the start of the page
-When I scroll to the start of the page
 When I perform javascript 'return document.documentElement.scrollTop' and save result to the 'scenario' variable 'scroll'
 Then `${scroll}` is = `0`

@@ -67,43 +67,4 @@ public class ScrollSteps
             javascriptActions.scrollIntoView(toScroll, true);
         }
     }
-
-    /**
-     * Scrolls to the end of the page with dynamically loading content upon scrolling
-     * Before using step, it is necessary to wait until scroll appears if it exists
-     * <p>
-     * Attribute scroll manages scroll bars in a browser window
-     * when the content of a web page exceeds the size of the current window
-     * </p>
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li>Scrolls to the end of the page</li>
-     * </ul>
-     * @deprecated Step will be removed use {@link #scrollContextIn(ScrollDirection)}
-     */
-    @When("I scroll to the end of the page")
-    @Deprecated(forRemoval = true, since = "0.2.1")
-    public void scrollToTheEndOfThePage()
-    {
-        javascriptActions.scrollToEndOfPage();
-    }
-
-    /**
-     * Scrolls to the start of the page
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li>Scrolls to the start of the page</li>
-     * </ul>
-     * @deprecated Step will be removed use {@link #scrollContextIn(ScrollDirection)}
-     */
-    @When("I scroll to the start of the page")
-    @Deprecated(forRemoval = true, since = "0.2.1")
-    public void scrollToTheStartOfThePage()
-    {
-        javascriptActions.scrollToStartOfPage();
-    }
 }
