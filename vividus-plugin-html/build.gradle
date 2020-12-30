@@ -5,7 +5,6 @@ dependencies {
 
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-soft-assert')
-    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testImplementation project(':vividus-util')
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
