@@ -87,6 +87,7 @@ public final class ConfigurationResolver
         Properties properties = new Properties();
         properties.putAll(configurationProperties);
         properties.putAll(propertiesLoader.loadFromResourceTreeRecursively("defaults"));
+        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(ROOT));
 
         Multimap<String, String> configuration = assembleConfiguration(configurationProperties, overridingProperties);
         for (Entry<String, String> configurationEntry : configuration.entries())
@@ -94,8 +95,6 @@ public final class ConfigurationResolver
             properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(configurationEntry.getKey(),
                     configurationEntry.getValue()));
         }
-
-        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(ROOT));
 
         Properties deprecatedProperties = propertiesLoader.loadFromResourceTreeRecursively("deprecated");
         DeprecatedPropertiesHandler deprecatedPropertiesHandler = new DeprecatedPropertiesHandler(
