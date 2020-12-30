@@ -66,6 +66,7 @@ dependencies {
     implementation(group: 'org.jasypt', name: 'jasypt-spring4', version: '1.9.3')
 
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.98')
