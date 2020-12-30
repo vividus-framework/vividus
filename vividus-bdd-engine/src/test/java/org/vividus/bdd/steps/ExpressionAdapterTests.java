@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,6 +36,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,9 +44,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.expression.DelegatingExpressionProcessor;
 import org.vividus.bdd.expression.IExpressionProcessor;
-import org.vividus.bdd.expression.StringsExpressionProcessor;
-import org.vividus.util.ILocationProvider;
+import org.vividus.bdd.expression.UnaryExpressionProcessor;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ExpressionAdapterTests
@@ -94,8 +94,11 @@ class ExpressionAdapterTests
     {
         String input = "#{capitalize(#{trim(#{toLowerCase( VIVIDUS )})})}";
         String output = "Vividus";
-        ILocationProvider locationProvider = mock(ILocationProvider.class);
-        IExpressionProcessor<String> processor = new StringsExpressionProcessor(locationProvider);
+        IExpressionProcessor<String> processor = new DelegatingExpressionProcessor<>(List.of(
+            new UnaryExpressionProcessor("trim",        StringUtils::trim),
+            new UnaryExpressionProcessor("toLowerCase", StringUtils::lowerCase),
+            new UnaryExpressionProcessor("capitalize",  StringUtils::capitalize)
+        ));
         expressionAdaptor.setProcessors(List.of(processor));
         Object actual = expressionAdaptor.process(input);
         assertEquals(output, actual);
@@ -190,11 +193,14 @@ class ExpressionAdapterTests
     @Test
     void testExpressionProcessingError()
     {
-        String input = "#{generateLocalized(number.number_between 'a','b', ru)}";
-        ILocationProvider locationProvider = mock(ILocationProvider.class);
-        IExpressionProcessor<String> processor = new StringsExpressionProcessor(locationProvider);
+        String input = "#{exp(any)}";
+        RuntimeException exception = new RuntimeException();
+        IExpressionProcessor<String> processor = new UnaryExpressionProcessor("exp", value -> {
+            throw exception;
+        });
         expressionAdaptor.setProcessors(List.of(processor));
-        assertThrows(RuntimeException.class, () -> expressionAdaptor.process(input));
+        RuntimeException actualException = assertThrows(RuntimeException.class, () -> expressionAdaptor.process(input));
+        assertEquals(exception, actualException);
         assertThat(logger.getLoggingEvents(),
                 is(List.of(error("Unable to process expression '{}'", input))));
     }
