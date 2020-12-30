@@ -1,0 +1,40 @@
+= Lambda Test Plugin
+
+The plugin provides integration with continuous testing cloud https://www.lambdatest.com/[Lambda Test].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-lambdatest', version: '{current-version}')
+----
+
+== Profiles
+
+[cols="1,2"]
+|===
+
+|`lambdatest/web`
+|Use in conjunction with web application profiles.
+
+|===
+
+Lambda Test profiles can be enabled by adding the corresponding entry to `configuration.profiles` property.
+
+.Configure Chrome on Lambda Test
+[source,properties,subs="attributes+"]
+----
+configuration.profiles=lambdatest/web,web/desktop/chrome
+----
+
+[IMPORTANT]
+Lambda Test profile must be first.
+
+Explore https://www.lambdatest.com/capabilities-generator/[Capabilities Generator] for more fine-grained Lambda Test configuration.
+
+TIP: Links to lambdatest test runs can be found in Allure report
+
+== Properties
+
+* See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid] properties to configure generic options.
