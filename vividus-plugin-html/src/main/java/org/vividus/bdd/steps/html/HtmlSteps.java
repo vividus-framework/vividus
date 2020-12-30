@@ -19,8 +19,6 @@ package org.vividus.bdd.steps.html;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jsoup.nodes.Element;
@@ -33,8 +31,14 @@ import org.vividus.util.HtmlUtils;
 
 public class HtmlSteps
 {
-    @Inject private ISoftAssert softAssert;
-    @Inject private IBddVariableContext bddVariableContext;
+    private final ISoftAssert softAssert;
+    private final IBddVariableContext bddVariableContext;
+
+    public HtmlSteps(ISoftAssert softAssert, IBddVariableContext bddVariableContext)
+    {
+        this.softAssert = softAssert;
+        this.bddVariableContext = bddVariableContext;
+    }
 
     private Optional<Element> findElementByCssSelectorExist(String html, String cssSelector)
     {
