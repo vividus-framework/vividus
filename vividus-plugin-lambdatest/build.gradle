@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Lambda Test'
+project.description = 'Vividus plugin for LambdaTest'
 
 dependencies {
     implementation project(':vividus-bdd-engine')
