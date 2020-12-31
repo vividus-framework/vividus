@@ -1,6 +1,6 @@
-= Lambda Test Plugin
+= LambdaTest Plugin
 
-The plugin provides integration with continuous testing cloud https://www.lambdatest.com/[Lambda Test].
+The plugin provides integration with continuous testing cloud https://www.lambdatest.com/[LambdaTest].
 
 == Installation
 
@@ -20,20 +20,20 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-lambdatest', version:
 
 |===
 
-Lambda Test profiles can be enabled by adding the corresponding entry to `configuration.profiles` property.
+LambdaTest profiles can be enabled by adding the corresponding entry to `configuration.profiles` property.
 
-.Configure Chrome on Lambda Test
+.Configure Chrome on LambdaTest
 [source,properties,subs="attributes+"]
 ----
 configuration.profiles=lambdatest/web,web/desktop/chrome
 ----
 
 [IMPORTANT]
-Lambda Test profile must be first.
+LambdaTest profile must be first.
 
 Explore https://www.lambdatest.com/capabilities-generator/[Capabilities Generator] for more fine-grained Lambda Test configuration.
 
-TIP: Links to lambdatest test runs can be found in Allure report
+TIP: Links to LambdaTest test runs can be found in Allure report
 
 == Properties
 
