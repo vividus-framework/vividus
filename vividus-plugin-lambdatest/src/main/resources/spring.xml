@@ -7,11 +7,11 @@
        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        profile="lambdatest" default-lazy-init="true">
 
-    <bean id="lambdaTestLinkPublisher" class="org.vividus.lambdatest.report.LambdaTestSessionLinkPublisher" />
+    <bean id="lambdaTestSessionLinkPublisher" class="org.vividus.lambdatest.report.LambdaTestSessionLinkPublisher" />
 
     <bean class="org.vividus.selenium.lambdatest.LambdaTestCapabilitiesConfigurer" />
 
     <util:list id="stepBeanNames-LambdaTest" value-type="java.lang.String">
-        <idref bean="lambdaTestLinkPublisher" />
+        <idref bean="lambdaTestSessionLinkPublisher" />
     </util:list>
 </beans>
