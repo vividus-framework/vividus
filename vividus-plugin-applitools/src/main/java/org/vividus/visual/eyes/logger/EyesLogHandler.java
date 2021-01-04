@@ -16,14 +16,21 @@
 
 package org.vividus.visual.eyes.logger;
 
+import java.io.UncheckedIOException;
+import java.util.function.Consumer;
+
 import com.applitools.eyes.NullLogHandler;
+import com.applitools.eyes.logging.ClientEvent;
 import com.applitools.eyes.logging.TraceLevel;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EyesLogHandler extends NullLogHandler
 {
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final Logger logger;
 
     public EyesLogHandler(Class<?> clazz)
@@ -32,24 +39,49 @@ public class EyesLogHandler extends NullLogHandler
     }
 
     @Override
-    public void onMessage(TraceLevel level, String message)
+    public void onMessage(ClientEvent event)
     {
+        TraceLevel level = event.getLevel();
         TraceLevel actualLevel = level == null ? TraceLevel.Notice : level;
         switch (actualLevel)
         {
             case Debug:
-                logger.debug(message);
+                logMessage(event, logger::debug);
                 break;
             case Warn:
-                logger.warn(message);
+                logMessage(event, logger::warn);
                 break;
             case Error:
-                logger.error(message);
+                logMessage(event, logger::error);
                 break;
             case Info:
             case Notice:
             default:
-                logger.info(message);
+                logMessage(event, logger::info);
         }
+    }
+
+    private void logMessage(ClientEvent event, Consumer<String> logger)
+    {
+        try
+        {
+            logger.accept(objectMapper.writeValueAsString(event));
+        }
+        catch (JsonProcessingException e)
+        {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return super.hashCode();
     }
 }
