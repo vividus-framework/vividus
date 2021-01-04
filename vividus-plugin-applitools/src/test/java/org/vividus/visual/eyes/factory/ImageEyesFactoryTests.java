@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
+import java.util.Set;
 
 import com.applitools.connectivity.ServerConnector;
 import com.applitools.eyes.LogHandler;
@@ -87,7 +88,7 @@ class ImageEyesFactoryTests
             () -> assertNull(configuration.getViewportSize()),
             () -> assertEquals(SERVER_URI, readServerConnector.getServerUrl()),
             () -> assertEquals(EXECUTE_API_KEY, readServerConnector.getApiKey()),
-            () -> assertSame(logHandler, eyes.getLogHandler())
+            () -> assertEquals(Set.of(logHandler), FieldUtils.readField(eyes.getLogHandler(),"logHandlers", true))
         );
     }
 
@@ -128,7 +129,7 @@ class ImageEyesFactoryTests
             () -> assertEquals(new RectangleSize(7680, 4320), configuration.getViewportSize()),
             () -> assertEquals(SERVER_URI, readServerConnector.getServerUrl()),
             () -> assertEquals(EXECUTE_API_KEY, readServerConnector.getApiKey()),
-            () -> assertSame(logHandler, actual.getLogHandler())
+            () -> assertEquals(Set.of(logHandler), FieldUtils.readField(actual.getLogHandler(),"logHandlers", true))
         );
     }
 
