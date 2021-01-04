@@ -7,21 +7,21 @@ Examples:
 |Windows     |Vividus Test Site|${vividus-test-site-url}/windows.html|
 
 
-Scenario: Verify step: "When I switch to a window with the name '$windowName'"
+Scenario: Verify step with "is equal to": "When I switch to window with title that $stringComparisonRule `$title`"
 Given I am on a page with the URL '<vivdus-test-site>'
 Then the page title is equal to '<windowsTitle>'
 When I click on element located `id(plain)`
-When I switch to a window with the name '<indexTitle>'
+When I switch to window with title that is equal to `<indexTitle>`
 Then the page title is equal to '<indexTitle>'
 When I close the current window
 Then the page title is equal to '<windowsTitle>'
 
 
-Scenario: Verify step: "When I switch to a window with the name containing '$windowPartName'"
+Scenario: Verify step with "contains": "When I switch to window with title that $stringComparisonRule `$title`"
 Given I am on a page with the URL '<vivdus-test-site>'
 Then the page title is equal to '<windowsTitle>'
 When I click on element located `id(plain)`
-When I switch to a window with the name containing '<indexTitle>'
+When I switch to window with title that contains `<indexTitle>`
 Then the page title is equal to '<indexTitle>'
 When I close the current window
 Then the page title is equal to '<windowsTitle>'
