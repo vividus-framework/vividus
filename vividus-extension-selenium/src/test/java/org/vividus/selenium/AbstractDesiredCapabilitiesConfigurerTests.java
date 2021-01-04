@@ -74,15 +74,34 @@ class AbstractDesiredCapabilitiesConfigurerTests
     void shouldConfigureTestName()
     {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        RunningStory runningStory = mock(RunningStory.class);
-
-        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
-        when(runningStory.getName()).thenReturn(VALUE);
+        RunningStory runningStory = mockRunningStory();
 
         configurer.configureTestName(desiredCapabilities, OUTER_KEY, INNER_KEY);
 
         assertEquals(Map.of(OUTER_KEY, Map.of(INNER_KEY, VALUE)), desiredCapabilities.asMap());
         verifyNoMoreInteractions(bddRunContext, runningStory);
+    }
+
+    @Test
+    void shouldConfigureTestNameByKey()
+    {
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        RunningStory runningStory = mockRunningStory();
+
+        configurer.configureTestName(desiredCapabilities, INNER_KEY);
+
+        assertEquals(Map.of(INNER_KEY, VALUE), desiredCapabilities.asMap());
+        verifyNoMoreInteractions(bddRunContext, runningStory);
+    }
+
+    private RunningStory mockRunningStory()
+    {
+        RunningStory runningStory = mock(RunningStory.class);
+
+        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
+        when(runningStory.getName()).thenReturn(VALUE);
+
+        return runningStory;
     }
 
     @Test

@@ -19,6 +19,7 @@ package org.vividus.selenium;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
@@ -47,8 +48,18 @@ public abstract class AbstractDesiredCapabilitiesConfigurer implements DesiredCa
 
     protected void configureTestName(DesiredCapabilities desiredCapabilities, String parentKey, String testNameKey)
     {
+        consumeTestName(name -> putNestedCapability(desiredCapabilities, parentKey, testNameKey, name));
+    }
+
+    protected void configureTestName(DesiredCapabilities desiredCapabilities, String testNameKey)
+    {
+        consumeTestName(name -> desiredCapabilities.setCapability(testNameKey, name));
+    }
+
+    private void consumeTestName(Consumer<String> testNameConsumer)
+    {
         Optional.ofNullable(bddRunContext.getRootRunningStory())
                 .map(RunningStory::getName)
-                .ifPresent(name -> putNestedCapability(desiredCapabilities, parentKey, testNameKey, name));
+                .ifPresent(testNameConsumer);
     }
 }
