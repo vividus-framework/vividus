@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jbehave.core.model.Meta;
-import org.slf4j.LoggerFactory;
 import org.vividus.bdd.model.MetaWrapper;
 
 import io.qameta.allure.SeverityLevel;
@@ -43,32 +42,8 @@ public enum VividusLabel
         @Override
         public Set<String> extractMetaValues(Meta storyMeta, Meta scenarioMeta)
         {
-            String deprecatedMetaKey = "testTier";
-            MetaWrapper metaWrapper = new MetaWrapper(scenarioMeta);
-            Optional<String> deprecatedMeta = metaWrapper.getOptionalPropertyValue(deprecatedMetaKey);
-            Optional<String> actualMeta = metaWrapper.getOptionalPropertyValue(getMetaName());
-
-            if (deprecatedMeta.isPresent())
-            {
-                String message;
-                if (actualMeta.isPresent())
-                {
-                    message = "Both deprecated '{}' and new '{}' meta are present, new meta is used, "
-                            + "please, remove usage of the deprecated meta";
-                }
-                else
-                {
-                    message = "Deprecated meta found: '{}'. Use '{}' instead";
-                    actualMeta = deprecatedMeta;
-                }
-                LoggerFactory.getLogger(VividusLabel.class)
-                        .atWarn()
-                        .addArgument(deprecatedMetaKey)
-                        .addArgument(this::getMetaName)
-                        .log(message);
-            }
-
-            return actualMeta
+            return new MetaWrapper(scenarioMeta)
+                    .getOptionalPropertyValue(getMetaName())
                     .map(Integer::parseInt)
                     .map(severity -> SeverityLevel.values()[severity - 1])
                     .map(SeverityLevel::value)

@@ -16,15 +16,12 @@
 
 package org.vividus.bdd.report.allure;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -32,15 +29,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-
 import org.jbehave.core.model.Meta;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -49,7 +41,6 @@ import org.junit.jupiter.params.provider.EnumSource.Mode;
 import io.qameta.allure.model.Label;
 import io.qameta.allure.model.Link;
 
-@ExtendWith(TestLoggerFactoryExtension.class)
 class VividusLabelTests
 {
     private static final String HTTPS = "https://";
@@ -58,9 +49,6 @@ class VividusLabelTests
             .collect(Collectors.toMap(type -> "allure.link." + type + ".pattern", type -> HTTPS + type + "/{}"));
 
     private static final String SEVERITY = "severity";
-    private static final String TEST_TIER = "testTier";
-
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(VividusLabel.class);
 
     @BeforeAll
     static void beforeAll()
@@ -97,38 +85,13 @@ class VividusLabelTests
     }
 
     @Test
-    void shouldExtractNonDeprecatedSeverity()
+    void shouldExtractSeverity()
     {
         String metaKey = SEVERITY;
         Meta storyMeta = createMeta(metaKey, "1");
         Meta scenarioMeta = createMeta(metaKey, "2");
         Set<String> metaValues = VividusLabel.SEVERITY.extractMetaValues(storyMeta, scenarioMeta);
         assertEquals(Set.of("critical"), metaValues);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of()));
-    }
-
-    @Test
-    void shouldExtractDeprecatedSeverity()
-    {
-        Meta scenarioMeta = createMeta(TEST_TIER, "3");
-        Set<String> metaValues = VividusLabel.SEVERITY.extractMetaValues(new Meta(), scenarioMeta);
-        assertEquals(Set.of("normal"), metaValues);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(
-                warn("Deprecated meta found: '{}'. Use '{}' instead", TEST_TIER, SEVERITY))));
-    }
-
-    @Test
-    void shouldExtractNonDeprecatedSeverityWhenBothDeprecatedAndNonDeprecatedOnesArePresent()
-    {
-        Meta scenarioMeta = createMeta(Map.of(
-                TEST_TIER, "4",
-                SEVERITY,  "5"
-        ));
-        Set<String> metaValues = VividusLabel.SEVERITY.extractMetaValues(new Meta(), scenarioMeta);
-        assertEquals(Set.of("trivial"), metaValues);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(
-                warn("Both deprecated '{}' and new '{}' meta are present, new meta is used, "
-                        + "please, remove usage of the deprecated meta", TEST_TIER, SEVERITY))));
     }
 
     @ParameterizedTest
