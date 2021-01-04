@@ -52,9 +52,7 @@ public final class ConfigurationResolver
     private static final String VIVIDUS_SYSTEM_PROPERTY_FAMILY = "vividus.";
     private static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
     private static final String ROOT = "";
-    private static final String PROFILE = "profile";
     private static final String PROFILES = "profiles";
-    private static final String ENVIRONMENT = "environment";
     private static final String ENVIRONMENTS = "environments";
     private static final String SUITE = "suite";
     private static final String SUITES = "suites";
@@ -138,8 +136,7 @@ public final class ConfigurationResolver
     private static Multimap<String, String> assembleConfiguration(Properties configurationProperties,
             Properties overridingProperties)
     {
-        String profiles = getCompetingConfigurationPropertyValue(configurationProperties, overridingProperties,
-                Pair.of(PROFILE, PROFILES));
+        String profiles = getConfigurationPropertyValue(configurationProperties, overridingProperties, PROFILES);
         String environments = getConfigurationPropertyValue(configurationProperties, overridingProperties,
                 ENVIRONMENTS);
         String suites = getCompetingConfigurationPropertyValue(configurationProperties, overridingProperties,
@@ -155,8 +152,8 @@ public final class ConfigurationResolver
         suites = propertyPlaceholderHelper.replacePlaceholders(suites, mergedProperties::getProperty);
 
         Multimap<String, String> configuration = LinkedHashMultimap.create();
-        configuration.putAll(PROFILE, asPaths(profiles));
-        configuration.putAll(ENVIRONMENT, asPaths(environments));
+        configuration.putAll("profile", asPaths(profiles));
+        configuration.putAll("environment", asPaths(environments));
         configuration.putAll(SUITE, asPaths(suites));
         return configuration;
     }
@@ -222,7 +219,7 @@ public final class ConfigurationResolver
                 {
                     if (failOnAbsence)
                     {
-                        throw new IllegalStateException(key + " is not set");
+                        throw new IllegalStateException(String.format("'%s' is not set", key));
                     }
                     return Optional.empty();
                 }

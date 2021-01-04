@@ -33,7 +33,6 @@ import org.springframework.beans.factory.BeanIsAbstractException;
 
 class BeanFactoryIntegrationTests
 {
-    private static final String CONFIGURATION_PROFILE = "configuration.profile";
     private static final String CONFIGURATION_PROFILES = "configuration.profiles";
     private static final String CONFIGURATION_ENVIRONMENTS = "configuration.environments";
     private static final String CONFIGURATION_SUITE = "configuration.suite";
@@ -75,7 +74,7 @@ class BeanFactoryIntegrationTests
     void testBeanFactory(String profile)
     {
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
-        System.setProperty(CONFIGURATION_PROFILE, profile);
+        System.setProperty(CONFIGURATION_PROFILES, profile);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, "integrationtest");
         BeanFactory.open();
         for (String beanName : BeanFactory.getBeanDefinitionNames())
@@ -95,7 +94,7 @@ class BeanFactoryIntegrationTests
     void testConfigurationResolverMultipleEnvironments() throws IOException
     {
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
-        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV + COMMA + ADDITIONAL_ENV);
         BeanFactory.open();
         assertProperties("additionalenv-props-property-value", "additionalenv-property-value");
@@ -104,7 +103,7 @@ class BeanFactoryIntegrationTests
     @Test
     void testConfigurationResolverMultipleSuites() throws IOException
     {
-        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE + COMMA + ADDITIONAL_SUITE);
         BeanFactory.open();
@@ -122,7 +121,7 @@ class BeanFactoryIntegrationTests
     void shouldResolvePlaceholdersInConfigurationProperties(String profile, String environments, String suite)
             throws IOException
     {
-        System.setProperty(CONFIGURATION_PROFILE, profile);
+        System.setProperty(CONFIGURATION_PROFILES, profile);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, environments);
         System.setProperty(CONFIGURATION_SUITE, suite);
         BeanFactory.open();
@@ -133,15 +132,22 @@ class BeanFactoryIntegrationTests
     @Test
     void testConfigurationResolverEnvironmentsIsNotSet()
     {
-        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("environments is not set", exception.getMessage());
+        assertEquals("'environments' is not set", exception.getMessage());
+    }
+
+    @Test
+    void testConfigurationResolverProfilesIsNotSet()
+    {
+        Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
+        assertEquals("'profiles' is not set", exception.getMessage());
     }
 
     @Test
     void testConfigurationResolverNeitherSuiteNorSuitesPropertiesAreNotSet()
     {
-        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
         assertEquals("Either 'suite' or 'suites' configuration property must be set", exception.getMessage());
@@ -151,7 +157,7 @@ class BeanFactoryIntegrationTests
     void testConfigurationResolverSuiteOverridesEnvironments() throws Exception
     {
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
-        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         BeanFactory.open();
         assertSuiteProperty("env-suite-overridable-property", PROPERTY_VALUE_FROM_SUITE);
@@ -161,7 +167,7 @@ class BeanFactoryIntegrationTests
     void testConfigurationResolverSuiteOverridesProfile() throws Exception
     {
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
-        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         BeanFactory.open();
         assertSuiteProperty("profile-suite-overridable-property", PROPERTY_VALUE_FROM_SUITE);
@@ -170,20 +176,11 @@ class BeanFactoryIntegrationTests
     @Test
     void testConfigurationResolverDeeperSuiteOverridesUpperSuite() throws Exception
     {
-        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
         BeanFactory.open();
         assertIntegrationSuiteProperty();
-    }
-
-    @Test
-    void testConfigurationResolverBothProfileAndProfilePropertiesAreSet()
-    {
-        System.setProperty(CONFIGURATION_PROFILE, BASIC_PROFILE);
-        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
-        Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("Exactly one configuration property: 'profile' or 'profiles' must be set", exception.getMessage());
     }
 
     @Test
@@ -198,13 +195,6 @@ class BeanFactoryIntegrationTests
         assertSuiteProperty("other-profile-property-value", "other-value");
         assertSuiteProperty("property-wtih-expression-containing-placeholder-for-another-property-with-expression",
                 "yes");
-    }
-
-    @Test
-    void testConfigurationResolverNeitherProfileNorProfilesPropertiesAreNotSet()
-    {
-        Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("Either 'profile' or 'profiles' configuration property must be set", exception.getMessage());
     }
 
     private void assertIntegrationSuiteProperty() throws IOException
@@ -231,8 +221,8 @@ class BeanFactoryIntegrationTests
 
     private void resetBeanFactory()
     {
-        Stream.of(CONFIGURATION_PROFILE, CONFIGURATION_ENVIRONMENTS, CONFIGURATION_PROFILES, CONFIGURATION_SUITE,
-                CONFIGURATION_SUITES).forEach(System::clearProperty);
+        Stream.of(CONFIGURATION_PROFILES, CONFIGURATION_ENVIRONMENTS, CONFIGURATION_SUITE, CONFIGURATION_SUITES)
+                .forEach(System::clearProperty);
         BeanFactory.reset();
         ConfigurationResolver.reset();
     }
