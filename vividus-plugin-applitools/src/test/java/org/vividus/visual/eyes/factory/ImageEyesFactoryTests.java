@@ -66,6 +66,8 @@ class ImageEyesFactoryTests
 
     private static final String BASELINE_ENV_NAME = "baselineEnvName";
 
+    private static final String LOG_HANDLERS = "logHandlers";
+
     @Mock private LogHandler logHandler;
 
     @InjectMocks private ImageEyesFactory imageEyesFactory;
@@ -88,7 +90,7 @@ class ImageEyesFactoryTests
             () -> assertNull(configuration.getViewportSize()),
             () -> assertEquals(SERVER_URI, readServerConnector.getServerUrl()),
             () -> assertEquals(EXECUTE_API_KEY, readServerConnector.getApiKey()),
-            () -> assertEquals(Set.of(logHandler), FieldUtils.readField(eyes.getLogHandler(),"logHandlers", true))
+            () -> assertEquals(Set.of(logHandler), FieldUtils.readField(eyes.getLogHandler(), LOG_HANDLERS, true))
         );
     }
 
@@ -129,7 +131,7 @@ class ImageEyesFactoryTests
             () -> assertEquals(new RectangleSize(7680, 4320), configuration.getViewportSize()),
             () -> assertEquals(SERVER_URI, readServerConnector.getServerUrl()),
             () -> assertEquals(EXECUTE_API_KEY, readServerConnector.getApiKey()),
-            () -> assertEquals(Set.of(logHandler), FieldUtils.readField(actual.getLogHandler(),"logHandlers", true))
+            () -> assertEquals(Set.of(logHandler), FieldUtils.readField(actual.getLogHandler(), LOG_HANDLERS, true))
         );
     }
 
