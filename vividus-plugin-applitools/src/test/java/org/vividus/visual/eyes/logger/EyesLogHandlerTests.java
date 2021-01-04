@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.applitools.eyes.logging.ClientEvent;
 import com.applitools.eyes.logging.TraceLevel;
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -43,21 +44,25 @@ class EyesLogHandlerTests
     static Stream<Arguments> loggingLevels()
     {
         return Stream.of(
-                arguments(TraceLevel.Debug,  (Function<String, LoggingEvent>) LoggingEvent::debug),
-                arguments(TraceLevel.Info,   (Function<String, LoggingEvent>) LoggingEvent::info),
-                arguments(TraceLevel.Notice, (Function<String, LoggingEvent>) LoggingEvent::info),
-                arguments(null,              (Function<String, LoggingEvent>) LoggingEvent::info),
-                arguments(TraceLevel.Warn,   (Function<String, LoggingEvent>) LoggingEvent::warn),
-                arguments(TraceLevel.Error,  (Function<String, LoggingEvent>) LoggingEvent::error)
+                arguments(TraceLevel.Debug,  "\"Debug\"",  (Function<String, LoggingEvent>) LoggingEvent::debug),
+                arguments(TraceLevel.Info,   "\"Info\"",   (Function<String, LoggingEvent>) LoggingEvent::info),
+                arguments(TraceLevel.Notice, "\"Notice\"", (Function<String, LoggingEvent>) LoggingEvent::info),
+                arguments(null,              "null",       (Function<String, LoggingEvent>) LoggingEvent::info),
+                arguments(TraceLevel.Warn,   "\"Warn\"",   (Function<String, LoggingEvent>) LoggingEvent::warn),
+                arguments(TraceLevel.Error,  "\"Error\"",  (Function<String, LoggingEvent>) LoggingEvent::error)
         );
     }
 
     @ParameterizedTest
     @MethodSource("loggingLevels")
-    void shouldReportMessagesAtProperLevel(TraceLevel level, Function<String, LoggingEvent> eventProducer)
+    void shouldReportMessagesAtProperLevel(TraceLevel level, String logLevel,
+            Function<String, LoggingEvent> eventProducer)
     {
+        String timestamp = "timestamp";
         String logString = "message";
-        new EyesLogHandler(EyesLogHandler.class).onMessage(level, logString);
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(eventProducer.apply(logString))));
+        ClientEvent clientEvent = new ClientEvent(timestamp, logString, level);
+        new EyesLogHandler(EyesLogHandler.class).onMessage(clientEvent);
+        assertThat(LOGGER.getLoggingEvents(), is(List.of(eventProducer.apply(String
+                .format("{\"timestamp\":\"%s\",\"event\":\"%s\",\"level\":%s}", timestamp, logString, logLevel)))));
     }
 }
