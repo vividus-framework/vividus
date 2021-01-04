@@ -72,4 +72,16 @@ public class EyesLogHandler extends NullLogHandler
             throw new UncheckedIOException(e);
         }
     }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return super.hashCode();
+    }
 }
