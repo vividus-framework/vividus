@@ -35,7 +35,7 @@ Then a [VISIBLE] image with the src '/w3css/img_avatar3.png' exists
 
 Scenario: Step verification Then an image with the src '$src' does not exist
 Given I am on a page with the URL 'https://www.w3schools.com/tags/tryit.asp?filename=tryhtml_link_image'
-When I switch to a frame with the attribute 'id'='iframeResult'
+When I switch to frame located `By.id(iframeResult)`
 When I click on an image with the src 'logo_w3s.gif'
 Then an image with the src 'logo_w3s.gif' does not exist
 

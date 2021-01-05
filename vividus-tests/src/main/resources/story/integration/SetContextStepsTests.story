@@ -49,42 +49,6 @@ When I switch to frame located `id(exampleCom)`
 When I click on element located `By.xpath(//a)`
 
 
-Scenario: Verify step: "When I switch to a frame by the xpath '$xpath'"
-When I refresh the page
-When I change context to element located `id(toRemove):a`
-When I perform javascript '
-document.querySelector('#toRemove').remove();
-return [];
-' and save result to the 'scenario' variable 'result'
-When I switch to a frame by the xpath '//iframe[@id='parent']'
-When I switch to a frame by the xpath '//frame[@id='exampleCom']'
-When I click on element located `By.xpath(//a)`
-
-
-Scenario: Verify step: "When I switch to a frame with the attribute '$attributeName'='$attributeValue'"
-When I refresh the page
-When I change context to element located `id(toRemove):a`
-When I perform javascript '
-document.querySelector('#toRemove').remove();
-return [];
-' and save result to the 'scenario' variable 'result'
-When I switch to a frame with the attribute 'id'='parent'
-When I switch to a frame with the attribute 'id'='exampleCom'
-When I click on element located `By.xpath(//a)`
-
-
-Scenario: Verify step: "When I switch to a frame number '$numberValue' with the attribute '$attributeType'='$attributeValue'"
-When I refresh the page
-When I change context to element located `id(toRemove):a`
-When I perform javascript '
-document.querySelector('#toRemove').remove();
-return [];
-' and save result to the 'scenario' variable 'result'
-When I switch to a frame number '1' with the attribute 'id'='parent'
-When I switch to a frame number '1' with the attribute 'id'='exampleCom'
-When I click on element located `By.xpath(//a)`
-
-
 Scenario: Verify step: "When I change context to the page" AND "When I change context to element located `$locator`"
 When I change context to element located `By.xpath(//body)`
 Then number of elements found by `By.xpath(html)` is equal to `0`
