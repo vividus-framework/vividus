@@ -11,13 +11,6 @@ When I wait until scroll is finished
 Then page is scrolled to element located `id(toClick)`
 
 
-Scenario: Verify step: 'Then the page is scrolled to an element with the attribute '$attributeType'='$attributeValue''
-When I refresh the page
-When I click on element located `By.id(anchor)`
-When I wait until scroll is finished
-Then the page is scrolled to an element with the attribute 'id'='toClick'
-
-
 Scenario: Verify step: When I open URL `$URL` in new window; Verify step: When I stop page loading
 Meta:
     @requirementId 1154; 1236
