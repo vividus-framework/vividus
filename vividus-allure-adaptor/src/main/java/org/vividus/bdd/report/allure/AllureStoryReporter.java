@@ -22,6 +22,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterator;
@@ -451,7 +452,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
             String url = event.getUrl();
 
             boolean notExists = result.getLinks().stream()
-                                              .noneMatch(l -> l.getUrl().equals(url) && l.getName().equals(name));
+                    .noneMatch(l -> Objects.equals(l.getUrl(), url) && Objects.equals(l.getName(), name));
 
             if (notExists)
             {
