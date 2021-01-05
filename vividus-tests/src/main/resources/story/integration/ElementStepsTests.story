@@ -40,7 +40,7 @@ Then each element with locator `By.xpath(.//form)` has `2` child elements with l
 Scenario: Step verification When I hover a mouse over an element located '$locator'
 Given I am on a page with the URL 'https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_over_enter'
 When I switch to frame located `By.id(iframeResult)`
-When I change context to an element by By.xpath(//div[contains(., 'onmouseover: Mouse over me!')])
+When I change context to element located `By.xpath(//div[contains(., 'onmouseover: Mouse over me!')])`
 When I hover mouse over element located `By.xpath(self::*)`
 Then the text 'onmouseover: 1' exists
 
@@ -186,7 +186,7 @@ Then a [ENABLED] element with the tag 'p' exists
 Scenario: Step verification When I hover a mouse over an element with the xpath '$xpath'
 Given I am on a page with the URL 'https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_onmousemove_over_enter'
 When I switch to frame located `By.id(iframeResult)`
-When I change context to an element by By.xpath(//div[contains(., 'onmouseover: Mouse over me!')])
+When I change context to element located `By.xpath(//div[contains(., 'onmouseover: Mouse over me!')])`
 When I hover a mouse over an element with the xpath 'self::*'
 Then the text 'onmouseover: 1' exists
 

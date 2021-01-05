@@ -10,15 +10,15 @@ Then a link by By.linkUrlPart(<URLpart>) exists
 
 Composite: When I change context to an element by the xpath '$xpath'
 Priority: 1
-When I change context to an element by By.xpath(<xpath>)
+When I change context to element located `By.xpath(<xpath>)`
 
 Composite: When I change context to an element by the CSS selector '$cssSelector'
 Priority: 1
-When I change context to an element by By.cssSelector(<cssSelector>)
+When I change context to element located `By.cssSelector(<cssSelector>)`
 
 Composite: When I change context to an element with the name '$name'
 Priority: 1
-When I change context to an element by By.name(<name>)
+When I change context to element located `By.name(<name>)`
 
 Composite: Then the page title is '$pageTitle'
 Priority: 1
@@ -237,8 +237,6 @@ When I wait until element located `By.elementName(<elementName>)` contains text 
 Composite: Then an element with the name '$elementName' disappears in '$timeout' seconds
 Then element located `By.elementName(<elementName>)` disappears in '$timeout'
 
-Composite: When I change context to an element by $locator
-When I change context to element located `<locator>`
 
 Composite: When I wait '$duration' with '$pollingDuration' polling until an element located by $locator appears
 When I wait `<duration>` with `<pollingDuration>` polling until element located `<locator>` becomes VISIBLE

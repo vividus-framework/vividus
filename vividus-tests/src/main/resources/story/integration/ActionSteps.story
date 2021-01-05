@@ -44,7 +44,7 @@ Then the text '${expectedText}' exists
 
 Scenario: Action verification CLICK_AND_HOLD
 Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
-When I change context to an element by By.id(target)
+When I change context to element located `By.id(target)`
 Then the context element has the CSS property 'background-color'='rgba(255, 255, 255, 1)'
 When I execute sequence of actions:
 |type          |argument         |
@@ -53,7 +53,7 @@ Then the context element has the CSS property 'background-color'='rgba(255, 0, 0
 
 Scenario: Action verification CLICK_AND_HOLD with no argument
 Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
-When I change context to an element by By.id(target)
+When I change context to element located `By.id(target)`
 Then the context element has the CSS property 'background-color'='rgba(255, 255, 255, 1)'
 When I execute sequence of actions:
 |type          |argument         |
@@ -63,7 +63,7 @@ Then the context element has the CSS property 'background-color'='rgba(255, 0, 0
 
 Scenario: Action verification RELEASE
 Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
-When I change context to an element by By.id(target)
+When I change context to element located `By.id(target)`
 Then the context element has the CSS property 'background-color'='rgba(255, 255, 255, 1)'
 When I execute sequence of actions:
 |type          |argument         |
@@ -73,7 +73,7 @@ Then the context element has the CSS property 'background-color'='rgba(0, 128, 0
 
 Scenario: Action verification RELEASE with no argument
 Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
-When I change context to an element by By.id(target)
+When I change context to element located `By.id(target)`
 Then the context element has the CSS property 'background-color'='rgba(255, 255, 255, 1)'
 When I execute sequence of actions:
 |type          |argument         |
