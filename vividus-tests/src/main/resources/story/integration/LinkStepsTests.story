@@ -98,19 +98,19 @@ Then a link with the URL '#' and tooltip 'Link title' does not exist
 
 Scenario: Step verification Then a link with the text '$text' and URL '$URL' and tooltip '$tooltip' does not exist
 Given I am on a page with the URL 'https://www.w3schools.com/html/tryit.asp?filename=tryhtml_links_title'
-When I switch to a frame with the attribute 'id'='iframeResult'
+When I switch to frame located `By.id(iframeResult)`
 Then a link with the text 'Visit our HTML Tutorial' and tooltip 'Go to W3Schools HTML section' exists
 When I click on a link with the text 'Visit our HTML Tutorial' and URL 'https://www.w3schools.com/html/'
 Then a link with the text 'Visit our HTML Tutorial' and URL 'https://www.w3schools.com/html/' and tooltip 'Go to W3Schools HTML section' does not exist
 
 Scenario: Step verification Then a link with the text '$text' and URL '$URL' and tooltip '$tooltip' exists
 Given I am on a page with the URL 'https://www.w3schools.com/html/tryit.asp?filename=tryhtml_links_title'
-When I switch to a frame with the attribute 'id'='iframeResult'
+When I switch to frame located `By.id(iframeResult)`
 Then a link with the text 'Visit our HTML Tutorial' and URL 'https://www.w3schools.com/html/' and tooltip 'Go to W3Schools HTML section' exists
 
 Scenario: Step verification Then a [$state] link with the text '$text' and URL '$URL' and tooltip '$tooltip' exists
 Given I am on a page with the URL 'https://www.w3schools.com/html/tryit.asp?filename=tryhtml_links_title'
-When I switch to a frame with the attribute 'id'='iframeResult'
+When I switch to frame located `By.id(iframeResult)`
 Then a [VISIBLE] link with the text 'Visit our HTML Tutorial' and URL 'https://www.w3schools.com/html/' and tooltip 'Go to W3Schools HTML section' exists
 
 Scenario: Step verification Then a [$state] link with text '$text' and URL containing '$URLpart' exists
