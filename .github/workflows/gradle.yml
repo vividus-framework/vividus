@@ -225,7 +225,6 @@ jobs:
             ./gradlew runStories -x testVividusInitialization \
                                  -Pvividus.configuration.environments=system/saucelabs \
                                  -Pvividus.configuration.suites=grid \
-                                 -Pvividus.bdd.all-meta-filters=groovy:!skip \
                                  -Pvividus.configuration.profiles=saucelabs/web,web/tablet/${profile} \
                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
@@ -247,7 +246,6 @@ jobs:
             ./gradlew runStories -x testVividusInitialization \
                                  -Pvividus.configuration.environments=system/saucelabs \
                                  -Pvividus.configuration.suites=grid \
-                                 -Pvividus.bdd.all-meta-filters=groovy:!skip \
                                  -Pvividus.configuration.profiles=saucelabs/web,web/phone/${profile} \
                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
