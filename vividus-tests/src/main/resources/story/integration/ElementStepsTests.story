@@ -196,12 +196,6 @@ Then an element by the xpath './/*[@class='context-menu-item context-menu-icon c
 When I perform right click on an element by the xpath './/*[@class='context-menu-one btn btn-neutral']'
 Then an element by the xpath './/*[@class='context-menu-item context-menu-icon context-menu-icon-edit']' exists
 
-Scenario: Step verification When I select an element with the '$attributeType'='$attributeValue' and upload the file '$filePath'
-Given I am on a page with the URL 'http://demo.guru99.com/test/upload/'
-When I select an element with the 'id'='uploadfile_0' and upload the file '/data/file_for_upload_step.png'
-When I click on element located `By.name(send)`
-Then the text 'has been successfully uploaded' exists
-
 Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
 Given I am on a page with the URL '${vividus-test-site-url}'
 Then number of VISIBLE elements found by `tagName(img):a` is = `1`
