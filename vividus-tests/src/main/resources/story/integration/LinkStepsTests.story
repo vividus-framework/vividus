@@ -3,7 +3,7 @@ Meta:
 
 Scenario: Step verification Then context contains list of link items with the text: $expectedLinkItems
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link'
-When I change context to an element by By.cssSelector(.standard-table)
+When I change context to element located `By.cssSelector(.standard-table)`
 Then context contains list of link items with the text:
 |text                                                    |
 |RFC 8288, section 3: Link Serialisation in HTTP Headers |
@@ -11,7 +11,7 @@ Then context contains list of link items with the text:
 
 Scenario: Step verification Then context contains list of link items with the text and link: $expectedLinkItems
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link'
-When I change context to an element by By.cssSelector(.standard-table)
+When I change context to element located `By.cssSelector(.standard-table)`
 Then context contains list of link items with the text and link:
 |text                                                    |link                                         |
 |RFC 8288, section 3: Link Serialisation in HTTP Headers |https://tools.ietf.org/html/rfc8288#section-3|
@@ -67,13 +67,13 @@ Then the page with the URL 'https://developer.mozilla.org/en-US/docs/MDN/About#C
 Scenario: Step verification Then a link with the text '$text' does not exist
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
 Then a link with the text 'CSS: Cascading Style Sheets' exists
-When I change context to an element by By.cssSelector(.page-header)
+When I change context to element located `By.cssSelector(.page-header)`
 Then a link with the text 'CSS: Cascading Style Sheets' does not exist
 
 Scenario: Step verification Then a link with the text '$text' and URL '$URL' does not exist
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
 Then a link with the text 'CSS: Cascading Style Sheets' and URL '/en-US/docs/Web/CSS' exists
-When I change context to an element by By.cssSelector(.page-header)
+When I change context to element located `By.cssSelector(.page-header)`
 Then a link with the text 'CSS: Cascading Style Sheets' and URL '/en-US/docs/Web/CSS' does not exist
 
 Scenario: Step verification: Then a link with the URL '$URL' and tooltip '$tooltip' exists

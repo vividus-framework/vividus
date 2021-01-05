@@ -17,7 +17,7 @@ When I <action> baseline with `full-page`
 
 
 Scenario: Validation of step When I $actionType baseline with `$name` for context element
-When I change context to an element by <firstP>
+When I change context to element located `<firstP>`
 When I <action> baseline with `context`
 When I change context to the page
 
@@ -35,14 +35,14 @@ When I <action> baseline with `full-page-area-cut` ignoring:
 
 
 Scenario: Validation of step When I $actionType baseline with `$name` ignoring:$ignoredElements for context element with element cut
-When I change context to an element by By.xpath(.//body)
+When I change context to element located `By.xpath(.//body)`
 When I <action> baseline with `context-element-cut` ignoring:
 |ELEMENT         |
 |<firstP>  |
 
 
 Scenario: Validation of step When I $actionType baseline with `$name` ignoring:$ignoredElements for context element not in viewport with element cut
-When I change context to an element by By.xpath(.//p[last()])
+When I change context to element located `By.xpath(.//p[last()])`
 When I <action> baseline with `not-viewport-context-element-cut` ignoring:
 |ELEMENT                                                                                     |
 |By.cssSelector(img)|
