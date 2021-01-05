@@ -1,6 +1,3 @@
-Composite: When I wait '$duration' with '$pollingDuration' polling until an element with the xpath '$xpath' appears
-When I wait '<duration>' with '<pollingDuration>' polling until an element located by By.xpath(<xpath>) appears
-
 Composite: Then a link with the URL '$URL' exists
 Then a link by By.linkUrl(<URL>) exists
 
@@ -236,10 +233,6 @@ When I wait until element located `By.elementName(<elementName>)` contains text 
 
 Composite: Then an element with the name '$elementName' disappears in '$timeout' seconds
 Then element located `By.elementName(<elementName>)` disappears in '$timeout'
-
-
-Composite: When I wait '$duration' with '$pollingDuration' polling until an element located by $locator appears
-When I wait `<duration>` with `<pollingDuration>` polling until element located `<locator>` becomes VISIBLE
 
 Composite: When I wait until elements with the name '$elementName' appear
 When I wait until element located `By.elementName(<elementName>)` appears
