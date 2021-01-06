@@ -60,9 +60,9 @@ When I click on a link with the URL '#ElementId'
 Then the page with the URL '${vividus-test-site-url}/links.html#ElementId' is loaded
 
 Scenario: Step verification When I click on a link with the URL containing '$URLpart'
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/'
-When I click on a link with the URL containing '-US/docs/MDN/About#Copyrights_and_licenses'
-Then the page with the URL 'https://developer.mozilla.org/en-US/docs/MDN/About#Copyrights_and_licenses' is loaded
+Given I am on a page with the URL '${vividus-test-site-url}/index.html'
+When I click on a link with the URL containing 'nks.html'
+Then the page with the URL '${vividus-test-site-url}/links.html' is loaded
 
 Scenario: Step verification Then a link with the text '$text' does not exist
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/any-hover'
