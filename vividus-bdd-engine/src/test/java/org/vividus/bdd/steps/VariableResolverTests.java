@@ -39,9 +39,9 @@ class VariableResolverTests
 {
     private static final String VAR1_VARIABLE = "${var1}";
     private static final String VAR1 = "var1";
-    private static final String VALUE1 = "value1";
+    private static final String VALUE1 = "2";
     private static final String VAR2 = "var2";
-    private static final String VALUE2 = "value2";
+    private static final String VALUE2 = "3";
 
     @Mock private IBddVariableContext bddVariableContext;
 
@@ -97,9 +97,11 @@ class VariableResolverTests
 
     @ParameterizedTest
     @CsvSource({
-            "varvar${var1}${var2}moremore, varvarvalue1value2moremore",
-            "${var1}${var2}moremore,       value1value2moremore",
-            "varvar${var1}${var2},         varvarvalue1value2"
+            "varvar${var1}${var2}moremore,  varvar23moremore",
+            "${var1}${var2}moremore,        23moremore",
+            "varvar${var1}${var2},          varvar23",
+            "${var${var1}},                 3",
+            "${var${var1}} + ${var${var1}}, 3 + 3"
     })
     void shouldResolveSeveralVariables(String input, String expected)
     {
