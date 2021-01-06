@@ -60,3 +60,9 @@ When I initialize Scenario variable `listOfMaps` with values:
 |1  |
 |3  |
 Then `1-2-3` is = `#{evalGroovy(return listOfMaps.collect{it['key']}.sort().join('-'))}`
+
+Scenario: Verify 'trim' expression
+Then `#{trim( A B C )}` is equal to `A B C`
+Then `#{trim(
+A B C
+)}` is equal to `A B C`

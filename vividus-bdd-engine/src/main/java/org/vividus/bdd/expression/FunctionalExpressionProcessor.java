@@ -30,7 +30,7 @@ public class FunctionalExpressionProcessor<T> implements IExpressionProcessor<T>
 
     public FunctionalExpressionProcessor(String functionName, Function<String, T> transformer)
     {
-        pattern = Pattern.compile("^" + functionName + "\\((.*)\\)$", Pattern.CASE_INSENSITIVE);
+        pattern = Pattern.compile("^" + functionName + "\\((.*)\\)$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         this.transformer = transformer;
     }
 
