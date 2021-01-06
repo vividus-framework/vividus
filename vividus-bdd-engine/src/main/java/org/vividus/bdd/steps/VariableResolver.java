@@ -107,7 +107,7 @@ public class VariableResolver
         if (variableKey.contains(VARIABLE_START_MARKER))
         {
             updatedVariableKey = (String) resolveVariables(0, variableKey);
-            target = value.replace(variableKey, updatedVariableKey);
+            target = StringUtils.replaceOnce(value, variableKey, updatedVariableKey);
         }
         else
         {
