@@ -1,6 +1,7 @@
 = Web Application Plugin
 :proxy: This step requires proxy to be turned on. It can be done in properties or by switching on @proxy meta tag at the story level.
 :har-attached: In case of failure the full HTTP archive (HAR) is attached to the report.
+:grid-default-hostname: empty
 
 The plugin provides functionality to interact with Web applications.
 
@@ -174,6 +175,7 @@ include::partial$common-filters.adoc[]
 |Description
 
 include::partial$selenium-properties.adoc[]
+include::partial$selenium-grid-properties.adoc[]
 |screenshot.on-failure.debug-modes
 |proxy
 |empty

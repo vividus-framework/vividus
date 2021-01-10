@@ -1,3 +1,5 @@
+:grid-default-hostname: hub-cloud.browserstack.com
+
 = Browser Stack Plugin
 
 The plugin provides integration with continuous testing cloud https://www.browserstack.com/[BrowserStack].
@@ -45,7 +47,6 @@ TIP: Links to BrowserStack test runs can be found in Allure report
 
 == Properties
 
-* See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid] properties to configure generic options.
 * Browser Stack specific properties must be prepended with `selenium.grid.capabilities.bstack\:options.` prefix, meaning given a property `projectName` with a value `My Project` the resulting property will be `selenium.grid.capabilities.bstack\:options.projectName=My Project`
 * Appium specific properties in Browser Stack must be prepended with `selenium.grid.capabilities.appium\:options.` prefix, meaning given a property `clearSystemFiles` with a value `true` the resulting property will be `selenium.grid.capabilities.appium\:options.clearSystemFiles=true`
 
@@ -57,6 +58,8 @@ TIP: Links to BrowserStack test runs can be found in Allure report
 |Acceptable values
 |Default
 |Description
+
+include::partial$selenium-grid-properties.adoc[]
 
 |`browserstack.browserstack-local.enabled`
 a|`true`

@@ -1,3 +1,5 @@
+:grid-default-hostname: empty
+
 = Mobile Application Plugin
 
 The plugin provides functionality to test mobile application on real devices, Android Emulators and iOS Simulators
@@ -72,8 +74,6 @@ include::partial$visibility-types.adoc[]
 
 == Properties
 
-See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid] properties to configure remote grid
-
 :application-under-test: mobile application
 :session-scope-property-base: mobile-application
 [cols="6,3,2,6", options="header"]
@@ -84,6 +84,7 @@ See xref:tests-development:tests-configuration.adoc#_selenium_grid[Selenium Grid
 |Description
 
 include::partial$selenium-properties.adoc[]
+include::partial$selenium-grid-properties.adoc[]
 
 |`selenium.grid.platform-name`
 a|`Android`

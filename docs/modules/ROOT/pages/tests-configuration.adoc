@@ -59,13 +59,6 @@ NOTE: The properties marked with *bold* are mandatory.
 |The max duration of the single story in the batch.
 |===
 
-
-== Selenium Grid
-
-* `selenium.grid.username` - defines remote grid username
-* `selenium.grid.password` - defines remote grid password
-* `selenium.grid.host` - defines remote grid hostname
-
 == Known Issues
 
 Known issues mechanism allows to distinguish failures from known issues presented in the system under test.
