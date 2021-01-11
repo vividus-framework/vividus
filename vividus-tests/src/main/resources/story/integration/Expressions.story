@@ -66,3 +66,7 @@ Then `#{trim( A B C )}` is equal to `A B C`
 Then `#{trim(
 A B C
 )}` is equal to `A B C`
+
+Scenario: Verify 'randomInt' expression with another string
+When I initialize the scenario variable `var` with value `#{randomInt(42, 42)} and 24`
+Then `${var}` is equal to `42 and 24`
