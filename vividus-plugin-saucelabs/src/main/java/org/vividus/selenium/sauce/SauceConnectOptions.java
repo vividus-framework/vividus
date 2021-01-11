@@ -29,11 +29,19 @@ import org.vividus.selenium.tunnel.TunnelOptions;
 
 public class SauceConnectOptions extends TunnelOptions
 {
-    private static final String PAC_FILE_CONTENT_FORMAT = "function FindProxyForURL(url, host) { "
-            + "if (shExpMatch(host, \"*.miso.saucelabs.com\")"
-            + "|| shExpMatch(host, \"saucelabs.com\")"
-            + "|| shExpMatch(host, \"%1$s\")) {"
-            + "return \"DIRECT\";}return \"PROXY %2$s\";}";
+    private static final String PAC_FILE_CONTENT_FORMAT =
+              "function FindProxyForURL(url, host) {%n"
+            + "    if (shExpMatch(host, \"*.miso.saucelabs.com\") ||%n"
+            + "        shExpMatch(host, \"*.api.testobject.com\") ||%n"
+            + "        shExpMatch(host, \"*.saucelabs.com\") ||%n"
+            + "        shExpMatch(host, \"saucelabs.com\") ||%n"
+            + "        shExpMatch(host, \"%1$s\")) {%n"
+            + "        // KGP and REST connections. Another proxy can also be specified%n"
+            + "        return \"DIRECT\";%n"
+            + "    }%n"
+            + "    // Test HTTP traffic, route it through the custom proxy%n"
+            + "    return \"PROXY %2$s\";%n"
+            + "}%n";
 
     private String noSslBumpDomains;
     private String skipProxyHostsPattern;

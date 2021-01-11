@@ -44,9 +44,19 @@ class SauceConnectOptionsTests
     private static final String NO_REMOVE_COLLIDING_TUNNELS = "--no-remove-colliding-tunnels";
     private static final String NO_PROXY_CACHING = "--no-proxy-caching";
     private static final String SAUCE_LABS_REST_URL = "https://saucelabs.com/rest/v1/";
-    private static final String PAC_DATA = "function FindProxyForURL(url, host) "
-            + "{ if (shExpMatch(host, \"*.miso.saucelabs.com\")|| shExpMatch(host, \"saucelabs.com\")|| "
-            + "shExpMatch(host, \"%s\")) {return \"DIRECT\";}return \"PROXY test\";}";
+    private static final String PAC_DATA =
+              "function FindProxyForURL(url, host) {%n"
+            + "    if (shExpMatch(host, \"*.miso.saucelabs.com\") ||%n"
+            + "        shExpMatch(host, \"*.api.testobject.com\") ||%n"
+            + "        shExpMatch(host, \"*.saucelabs.com\") ||%n"
+            + "        shExpMatch(host, \"saucelabs.com\") ||%n"
+            + "        shExpMatch(host, \"%s\")) {%n"
+            + "        // KGP and REST connections. Another proxy can also be specified%n"
+            + "        return \"DIRECT\";%n"
+            + "    }%n"
+            + "    // Test HTTP traffic, route it through the custom proxy%n"
+            + "    return \"PROXY test\";%n"
+            + "}%n";
 
     private static final String PID_FILE = "--pidfile";
 
