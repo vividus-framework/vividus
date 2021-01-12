@@ -24,14 +24,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -49,44 +50,36 @@ import org.jbehave.core.reporters.ViewGenerator;
 import org.jbehave.core.steps.DelegatingStepMonitor;
 import org.jbehave.core.steps.ParameterConverters.ChainableParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
+import org.mockito.MockedConstruction;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
 import org.vividus.bdd.steps.ExpressionAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
 import org.vividus.bdd.steps.VariableResolver;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(MockitoJUnitRunner.class)
-public class ExtendedConfigurationTests
+@ExtendWith(MockitoExtension.class)
+class ExtendedConfigurationTests
 {
     private static final String SEPARATOR = "|";
 
-    @Mock
-    private IPathFinder pathFinder;
-
-    @Mock
-    private VariableResolver variableResolver;
-
-    @Mock
-    private ExpressionAdaptor expressionAdaptor;
+    @Mock private IPathFinder pathFinder;
+    @Mock private VariableResolver variableResolver;
+    @Mock private ExpressionAdaptor expressionAdaptor;
 
     @InjectMocks
+    @Spy
     private ExtendedConfiguration configuration;
 
-    @Before
-    public void before()
+    @BeforeEach
+    void beforeEach()
     {
         configuration.setCustomConverters(List.of());
         configuration.setCustomTableTransformers(Map.of());
@@ -94,49 +87,67 @@ public class ExtendedConfigurationTests
         configuration.setExamplesTableValueSeparator(SEPARATOR);
     }
 
+    @SuppressWarnings("try")
     @Test
-    @PrepareForTest(ExtendedConfiguration.class)
-    public void testInit() throws Exception
+    void testInit() throws IOException
     {
         String compositePathPatterns = "**/*.steps";
         List<String> compositePaths = List.of("/path/to/composite.steps");
         when(pathFinder.findPaths(equalToCompositeStepsBatch(compositePathPatterns))).thenReturn(compositePaths);
 
-        ExtendedConfiguration spy = spy(configuration);
-        Keywords keywords = mock(Keywords.class);
-        PowerMockito.whenNew(Keywords.class).withArguments(Keywords.defaultKeywords()).thenReturn(keywords);
         ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
-        when(spy.examplesTableFactory()).thenReturn(examplesTableFactory);
-        RegexStoryParser regexStoryParser = mock(RegexStoryParser.class);
-        PowerMockito.whenNew(RegexStoryParser.class).withArguments(keywords, examplesTableFactory)
-                .thenReturn(regexStoryParser);
-        ParameterConvertersDecorator parameterConverters = mock(ParameterConvertersDecorator.class);
-        PowerMockito.whenNew(ParameterConvertersDecorator.class).withArguments(spy, variableResolver, expressionAdaptor)
-                .thenReturn(parameterConverters);
+        when(configuration.examplesTableFactory()).thenReturn(examplesTableFactory);
+
+        Map<Class<?>, Object> constructedMocks = new HashMap<>();
         List<ChainableParameterConverter<?, ?>> parameterConverterList = List.of();
-        when(parameterConverters.addConverters(parameterConverterList)).thenReturn(parameterConverters);
-        StoryControls storyControls = mock(StoryControls.class);
-        spy.setCustomConverters(parameterConverterList);
-        spy.setCompositePaths(compositePathPatterns);
-        spy.setStoryControls(storyControls);
-        List<StepMonitor> stepMonitors = List.of(mock(StepMonitor.class));
-        spy.setStepMonitors(stepMonitors);
-        spy.init();
 
-        verify(spy).useKeywords(keywords);
-        verify(spy).useCompositePaths(new HashSet<>(compositePaths));
+        try (MockedConstruction<Keywords> ignoredKeywords = mockConstruction(
+                Keywords.class, (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    assertEquals(List.of(Keywords.defaultKeywords()), context.arguments());
+                    constructedMocks.put(Keywords.class, mock);
+                });
+            MockedConstruction<RegexStoryParser> ignoredParser = mockConstruction(
+                RegexStoryParser.class, (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    assertEquals(List.of(constructedMocks.get(Keywords.class), examplesTableFactory),
+                            context.arguments());
+                    constructedMocks.put(RegexStoryParser.class, mock);
+                });
+            MockedConstruction<ParameterConvertersDecorator> ignoredDecorator = mockConstruction(
+                ParameterConvertersDecorator.class, (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    assertEquals(List.of(configuration, variableResolver, expressionAdaptor), context.arguments());
+                    constructedMocks.put(ParameterConvertersDecorator.class, mock);
 
-        InOrder inOrder = inOrder(spy);
-        inOrder.verify(spy).useParameterConverters(parameterConverters);
-        inOrder.verify(spy).useStoryParser(regexStoryParser);
+                    when(mock.addConverters(parameterConverterList)).thenReturn(mock);
+                }))
+        {
+            StoryControls storyControls = mock(StoryControls.class);
+            configuration.setCustomConverters(parameterConverterList);
+            configuration.setCompositePaths(compositePathPatterns);
+            configuration.setStoryControls(storyControls);
+            StepMonitor stepMonitor = mock(StepMonitor.class);
+            configuration.setStepMonitors(List.of(stepMonitor));
 
-        verify(spy).useStoryControls(storyControls);
-        verifyStepMonitor(spy, stepMonitors.get(0));
+            configuration.init();
+
+            InOrder ordered = inOrder(configuration);
+            ordered.verify(configuration).useKeywords((Keywords) constructedMocks.get(Keywords.class));
+            ordered.verify(configuration).useCompositePaths(new HashSet<>(compositePaths));
+            ordered.verify(configuration).useParameterConverters(
+                    (ParameterConvertersDecorator) constructedMocks.get(ParameterConvertersDecorator.class));
+            ordered.verify(configuration).useStoryParser(
+                    (RegexStoryParser) constructedMocks.get(RegexStoryParser.class));
+            ordered.verify(configuration).useStoryControls(storyControls);
+
+            verifyStepMonitor(stepMonitor);
+        }
     }
 
-    private static void verifyStepMonitor(ExtendedConfiguration spy, StepMonitor expectedStepMonitorDelegate)
+    private void verifyStepMonitor(StepMonitor expectedStepMonitorDelegate)
     {
-        StepMonitor actualStepMonitor = spy.stepMonitor();
+        StepMonitor actualStepMonitor = configuration.stepMonitor();
         assertThat(actualStepMonitor, instanceOf(DelegatingStepMonitor.class));
         String step = "step";
         boolean dryRun = true;
@@ -146,7 +157,7 @@ public class ExtendedConfigurationTests
     }
 
     @Test
-    public void testSetCustomTableTransformers() throws IOException
+    void testSetCustomTableTransformers() throws IOException
     {
         String name = "customTableTransformer";
         TableTransformer tableTransformer = mock(TableTransformer.class);
@@ -167,7 +178,7 @@ public class ExtendedConfigurationTests
     }
 
     @Test
-    public void testSetDryRun() throws IOException
+    void testSetDryRun() throws IOException
     {
         StoryControls storyControls = new StoryControls();
         storyControls.doDryRun(true);
@@ -177,7 +188,7 @@ public class ExtendedConfigurationTests
     }
 
     @Test
-    public void shouldSetViewGenerator()
+    void shouldSetViewGenerator()
     {
         ViewGenerator viewGenerator = mock(ViewGenerator.class);
         configuration.setViewGenerator(Optional.of(viewGenerator));
@@ -185,16 +196,15 @@ public class ExtendedConfigurationTests
     }
 
     @Test
-    public void shouldNotSetViewGeneratorIfEmptyOptionalUsed()
+    void shouldNotSetViewGeneratorIfEmptyOptionalUsed()
     {
-        ExtendedConfiguration spy = Mockito.spy(configuration);
         configuration.setViewGenerator(Optional.empty());
-        verify(spy, never()).useViewGenerator(any());
+        verify(configuration, never()).useViewGenerator(any());
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void shouldSetStoryExecutionComparator()
+    void shouldSetStoryExecutionComparator()
     {
         Comparator<Story> storyExecutionComparator = mock(Comparator.class);
         configuration.setStoryExecutionComparator(Optional.of(storyExecutionComparator));
@@ -202,10 +212,9 @@ public class ExtendedConfigurationTests
     }
 
     @Test
-    public void shouldNotSetStoryExecutionComparatorIfEmptyOptionalUsed()
+    void shouldNotSetStoryExecutionComparatorIfEmptyOptionalUsed()
     {
-        ExtendedConfiguration spy = Mockito.spy(configuration);
         configuration.setStoryExecutionComparator(Optional.empty());
-        verify(spy, never()).useStoryExecutionComparator(any());
+        verify(configuration, never()).useStoryExecutionComparator(any());
     }
 }
