@@ -19,7 +19,6 @@ package org.vividus.bdd.model;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jbehave.core.model.Story;
 
@@ -31,7 +30,6 @@ public class RunningStory
     private boolean allowed;
     private RunningScenario runningScenario;
     private Deque<String> runningSteps = new LinkedList<>();
-    private final AtomicInteger nextVariableIndex = new AtomicInteger();
 
     public Story getStory()
     {
@@ -95,11 +93,6 @@ public class RunningStory
     public void putRunningStep(String runningStep)
     {
         runningSteps.push(runningStep);
-    }
-
-    public int calculateNextVariableIndex()
-    {
-        return nextVariableIndex.incrementAndGet();
     }
 
     public Deque<String> getRunningSteps()
