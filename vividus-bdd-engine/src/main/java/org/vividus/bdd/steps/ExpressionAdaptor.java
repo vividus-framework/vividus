@@ -65,7 +65,7 @@ public class ExpressionAdaptor
             expressionFound = true;
             String expression = expressionMatcher.group(1);
             Object expressionResult = apply(expression);
-            if (!(expressionResult instanceof String) && processedValue.startsWith("#{" + expression))
+            if (!(expressionResult instanceof String) && ("#{" + expression + "}").equals(processedValue))
             {
                 return expressionResult;
             }

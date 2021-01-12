@@ -216,12 +216,16 @@ class ExpressionAdapterTests
         assertSame(value, expressionAdaptor.process(expression));
     }
 
-    @Test
-    void shouldConvertNotAStringValueToAStringForNotTopLevelExpression()
+    @ParameterizedTest
+    @CsvSource({
+            "'#{string(#{integer()})}', '#{string(42)}'",
+            "'24 + #{integer()}',       '24 + 42'",
+            "'#{integer()} + 24',       '42 + 24'"
+    })
+    void shouldConvertNotAStringValueToAStringForNotTopLevelExpression(String expression, String expected)
     {
-        String expression = "#{string(#{integer()})}";
         lenient().when(mockedTargetProcessor.execute("integer()")).thenReturn(Optional.of(Integer.valueOf(42)));
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
-        assertEquals("#{string(42)}", expressionAdaptor.process(expression));
+        assertEquals(expected, expressionAdaptor.process(expression));
     }
 }
