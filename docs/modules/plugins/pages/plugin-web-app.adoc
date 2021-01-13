@@ -211,7 +211,7 @@ include::partial$selenium-grid-properties.adoc[]
 
 === Open URL in a new tab
 
-Loads given URL in a new tab
+Opens a new tab, switches to the opened tab and loads the given URL
 
 [source,gherkin]
 ----
