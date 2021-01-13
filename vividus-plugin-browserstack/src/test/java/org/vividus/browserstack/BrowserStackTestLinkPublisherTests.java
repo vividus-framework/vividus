@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.browserstack.report;
+package org.vividus.browserstack;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,19 +39,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.browserstack.BrowserStackAutomateClient;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-class BrowserStackSessionLinkPublisherTests
+class BrowserStackTestLinkPublisherTests
 {
     private static final String SESSION_ID = "session-id";
     private static final String URL = "https://example.com";
 
     @Mock private Session session;
     @Mock private BrowserStackAutomateClient appAutomateClient;
-    @InjectMocks private BrowserStackSessionLinkPublisher linkPublisher;
+    @InjectMocks private BrowserStackTestLinkPublisher linkPublisher;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(BrowserStackSessionLinkPublisher.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(BrowserStackTestLinkPublisher.class);
 
     @Test
     void shouldReturnSessionUrl() throws BrowserStackException
@@ -59,7 +58,7 @@ class BrowserStackSessionLinkPublisherTests
         when(appAutomateClient.getSession(SESSION_ID)).thenReturn(session);
         when(session.getPublicUrl()).thenReturn(URL);
 
-        assertEquals(Optional.of(URL), linkPublisher.getSessionUrl(SESSION_ID));
+        assertEquals(Optional.of(URL), linkPublisher.getCloudTestUrl(SESSION_ID));
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
@@ -69,7 +68,7 @@ class BrowserStackSessionLinkPublisherTests
         BrowserStackException exception = mock(BrowserStackException.class);
         doThrow(exception).when(appAutomateClient).getSession(SESSION_ID);
 
-        assertEquals(Optional.empty(), linkPublisher.getSessionUrl(SESSION_ID));
+        assertEquals(Optional.empty(), linkPublisher.getCloudTestUrl(SESSION_ID));
 
         assertThat(logger.getLoggingEvents(),
             is(List.of(error(exception, "Unable to get an URL for BrowserStack session with the ID {}", SESSION_ID))));

@@ -18,8 +18,8 @@ package org.vividus.ui.listener;
 
 import com.google.common.eventbus.Subscribe;
 
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
-import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.ui.context.IUiContext;
 
 public class UiContextListener
@@ -38,7 +38,7 @@ public class UiContextListener
     }
 
     @Subscribe
-    public void onWebDriverQuit(@SuppressWarnings("unused") WebDriverQuitEvent event)
+    public void onWebDriverQuit(@SuppressWarnings("unused") AfterWebDriverQuitEvent event)
     {
         uiContext.clear();
     }

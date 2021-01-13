@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.saucelabs.report;
+package org.vividus.saucelabs;
 
 import static java.lang.String.format;
 
@@ -24,14 +24,14 @@ import com.google.common.eventbus.EventBus;
 import com.saucelabs.saucerest.DataCenter;
 
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher;
 import org.vividus.testcontext.TestContext;
-import org.vividus.ui.report.AbstractSessionLinkPublisher;
 
-public class SauceLabsSessionLinkPublisher extends AbstractSessionLinkPublisher
+public class SauceLabsTestLinkPublisher extends AbstractCloudTestLinkPublisher
 {
     private final String sauceLabsUrl;
 
-    public SauceLabsSessionLinkPublisher(DataCenter dataCenter, IWebDriverProvider webDriverProvider, EventBus eventBus,
+    public SauceLabsTestLinkPublisher(DataCenter dataCenter, IWebDriverProvider webDriverProvider, EventBus eventBus,
             TestContext testContext)
     {
         super("SauceLabs", webDriverProvider, eventBus, testContext);
@@ -39,7 +39,7 @@ public class SauceLabsSessionLinkPublisher extends AbstractSessionLinkPublisher
     }
 
     @Override
-    protected Optional<String> getSessionUrl(String sessionId)
+    protected Optional<String> getCloudTestUrl(String sessionId)
     {
         return Optional.of(format("%stests/%s", sauceLabsUrl, sessionId));
     }

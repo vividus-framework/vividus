@@ -31,12 +31,14 @@ import java.util.List;
 import com.browserstack.automate.model.Session;
 import com.browserstack.client.BrowserStackClient.Method;
 import com.browserstack.client.exception.BrowserStackException;
+import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.browserstack.BrowserStackAutomateClient;
@@ -82,6 +84,22 @@ class BrowserStackAutomateClientTests
             () -> client.getNetworkLogs(SESSION_ID));
         assertEquals(browserStackException, exception);
         verifyMocks();
+    }
+
+    @Test
+    void shouldUpdateSessionStatus() throws BrowserStackException
+    {
+        doReturn(browserStackRequest).when(client).newRequest(Method.PUT, "/sessions/{sessionId}.json");
+        when(browserStackRequest.routeParam("sessionId", SESSION_ID)).thenReturn(browserStackRequest);
+        ArgumentCaptor<ByteArrayContent> captor = ArgumentCaptor.forClass(ByteArrayContent.class);
+        when(browserStackRequest.body(captor.capture())).thenReturn(browserStackRequest);
+
+        client.updateSessionStatus(SESSION_ID, "passed");
+
+        verify(browserStackRequest).asString();
+
+        ByteArrayContent content = captor.getValue();
+        assertEquals(19, content.getLength());
     }
 
     private void mockCommons() throws BrowserStackException

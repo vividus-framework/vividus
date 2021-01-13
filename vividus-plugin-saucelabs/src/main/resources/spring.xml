@@ -28,9 +28,11 @@
         </property>
     </bean>
 
-    <bean id="sauceLabsLinkPublisher" class="org.vividus.saucelabs.report.SauceLabsSessionLinkPublisher">
+    <bean id="sauceLabsLinkPublisher" class="org.vividus.saucelabs.SauceLabsTestLinkPublisher">
         <constructor-arg index="0" value="${saucelabs.data-center}" />
     </bean>
+
+    <bean class="org.vividus.saucelabs.SauceLabsTestStatusManager" lazy-init="false"/>
 
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
         <property name="tunnellingEnabled" value="${saucelabs.sauce-connect.enabled}"/>

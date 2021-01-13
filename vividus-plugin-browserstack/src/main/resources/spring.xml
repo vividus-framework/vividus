@@ -18,7 +18,9 @@
     </bean>
 
     <bean id="debugSteps" class="org.vividus.bdd.browserstack.steps.DebugSteps" />
-    <bean id="browserStackLinkPublisher" class="org.vividus.browserstack.report.BrowserStackSessionLinkPublisher" />
+    <bean id="browserStackLinkPublisher" class="org.vividus.browserstack.BrowserStackTestLinkPublisher" />
+
+    <bean class="org.vividus.browserstack.BrowserStackTestStatusManager" lazy-init="false" />
 
     <bean class="org.vividus.selenium.browserstack.BrowserStackLocalManager" >
          <constructor-arg index="0" value="${selenium.grid.password}" />

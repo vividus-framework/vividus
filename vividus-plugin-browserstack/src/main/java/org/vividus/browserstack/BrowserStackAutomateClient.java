@@ -19,10 +19,12 @@ package org.vividus.browserstack;
 import java.net.URI;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 import com.browserstack.client.BrowserStackClient;
 import com.browserstack.client.BrowserStackRequest;
 import com.browserstack.client.exception.BrowserStackException;
+import com.google.api.client.http.ByteArrayContent;
 
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.UriUtils;
@@ -70,5 +72,14 @@ public class BrowserStackAutomateClient extends BrowserStackClient
                 throw e;
             }
         }, jsonUtils::isJson);
+    }
+
+    public void updateSessionStatus(String sessionId, String status) throws BrowserStackException
+    {
+        BrowserStackRequest request = newRequest(Method.PUT, "/sessions/{sessionId}.json").routeParam("sessionId",
+                sessionId);
+        ByteArrayContent content = ByteArrayContent.fromString("application/json",
+                jsonUtils.toJson(Map.of("status", status)));
+        request.body(content).asString();
     }
 }

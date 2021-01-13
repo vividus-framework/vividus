@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.report;
+package org.vividus.selenium.cloud;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -38,21 +38,21 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.event.WebDriverQuitEvent;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
 import org.vividus.testcontext.ThreadedTestContext;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractSessionLinkPublisherTests
+class AbstractCloudTestLinkPublisherTests
 {
     private static final String SESSION_ID = "session-id";
     private static final String URL = "https://example.com";
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private EventBus eventBus;
-    @Mock private WebDriverQuitEvent webDriverQuitEvent;
+    @Mock private AfterWebDriverQuitEvent webDriverQuitEvent;
     @Spy private ThreadedTestContext testContext;
-    @InjectMocks private TestSessionLinkPublisher linkPublisher;
+    @InjectMocks private TestCloudTestLinkPublisher linkPublisher;
 
     @Test
     void shouldPublishSessionLinkAfterScenario()
@@ -60,8 +60,8 @@ class AbstractSessionLinkPublisherTests
         mockDriverSession();
 
         linkPublisher.resetState();
-        linkPublisher.publishSessionLinkAfterScenario();
-        linkPublisher.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
+        linkPublisher.publishCloudTestLinkAfterScenario();
+        linkPublisher.publishCloudTestLinkOnWebDriverQuit(webDriverQuitEvent);
 
         verifyLinkPublishEvent(1);
         verifyNoInteractions(webDriverQuitEvent);
@@ -74,8 +74,8 @@ class AbstractSessionLinkPublisherTests
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(false);
 
         linkPublisher.resetState();
-        linkPublisher.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
-        linkPublisher.publishSessionLinkAfterScenario();
+        linkPublisher.publishCloudTestLinkOnWebDriverQuit(webDriverQuitEvent);
+        linkPublisher.publishCloudTestLinkAfterScenario();
 
         verifyLinkPublishEvent(1);
         verifyNoMoreInteractions(webDriverProvider);
@@ -89,9 +89,9 @@ class AbstractSessionLinkPublisherTests
         mockDriverSession();
 
         linkPublisher.resetState();
-        linkPublisher.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
-        linkPublisher.publishSessionLinkOnWebDriverQuit(webDriverQuitEvent);
-        linkPublisher.publishSessionLinkAfterScenario();
+        linkPublisher.publishCloudTestLinkOnWebDriverQuit(webDriverQuitEvent);
+        linkPublisher.publishCloudTestLinkOnWebDriverQuit(webDriverQuitEvent);
+        linkPublisher.publishCloudTestLinkAfterScenario();
 
         verifyLinkPublishEvent(3);
         verifyNoMoreInteractions(webDriverProvider);
@@ -113,19 +113,19 @@ class AbstractSessionLinkPublisherTests
         verify(eventBus, times(times)).post(argThat(arg ->
         {
             LinkPublishEvent event = (LinkPublishEvent) arg;
-            return URL.equals(event.getUrl()) && "Test Session URL".equals(event.getName());
+            return URL.equals(event.getUrl()) && "Test Test URL".equals(event.getName());
         }));
     }
 
-    private static final class TestSessionLinkPublisher extends AbstractSessionLinkPublisher
+    private static final class TestCloudTestLinkPublisher extends AbstractCloudTestLinkPublisher
     {
-        TestSessionLinkPublisher(IWebDriverProvider webDriverProvider, EventBus eventBus, TestContext testContext)
+        TestCloudTestLinkPublisher(IWebDriverProvider webDriverProvider, EventBus eventBus, TestContext testContext)
         {
             super("Test", webDriverProvider, eventBus, testContext);
         }
 
         @Override
-        protected Optional<String> getSessionUrl(String sessionId)
+        protected Optional<String> getCloudTestUrl(String sessionId)
         {
             return Optional.of(URL);
         }
