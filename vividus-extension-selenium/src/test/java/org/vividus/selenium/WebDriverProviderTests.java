@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -52,8 +54,9 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.proxy.IProxy;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
+import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
-import org.vividus.selenium.event.WebDriverQuitEvent;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
@@ -63,23 +66,13 @@ class WebDriverProviderTests
 {
     private static final String SESSION_ID = "sessionId";
 
-    @Spy
-    private final TestContext testContext = new SimpleTestContext();
-
-    @Mock
-    private TestVividusDriverFactory vividusDriverFactory;
-
+    @Spy private final TestContext testContext = new SimpleTestContext();
+    @Mock private TestVividusDriverFactory vividusDriverFactory;
     @Mock(extraInterfaces = WrapsDriver.class)
     private RemoteWebDriver remoteWebDriver;
-
-    @Mock
-    private VividusWebDriver vividusWebDriver;
-
-    @Mock
-    private EventBus mockedEventBus;
-
-    @InjectMocks
-    private WebDriverProvider webDriverProvider;
+    @Mock private VividusWebDriver vividusWebDriver;
+    @Mock private EventBus mockedEventBus;
+    @InjectMocks private WebDriverProvider webDriverProvider;
 
     @Test
     void testEnd()
@@ -89,9 +82,11 @@ class WebDriverProviderTests
         when(vividusWebDriver.getWrappedDriver()).thenReturn(remoteWebDriver);
         when(remoteWebDriver.getSessionId()).thenReturn(sessionId);
         when(sessionId.toString()).thenReturn(SESSION_ID);
+        InOrder bus = inOrder(mockedEventBus);
         webDriverProvider.end();
         verify(remoteWebDriver).quit();
-        verify(mockedEventBus).post(argThat(e -> SESSION_ID.equals(((WebDriverQuitEvent) e).getSessionId())));
+        bus.verify(mockedEventBus).post(any(BeforeWebDriverQuitEvent.class));
+        bus.verify(mockedEventBus).post(argThat(e -> SESSION_ID.equals(((AfterWebDriverQuitEvent) e).getSessionId())));
     }
 
     @Test
@@ -103,8 +98,10 @@ class WebDriverProviderTests
         when(remoteWebDriver.getSessionId()).thenReturn(sessionId);
         when(sessionId.toString()).thenReturn(SESSION_ID);
         doThrow(new WebDriverException()).when(remoteWebDriver).quit();
+        InOrder bus = inOrder(mockedEventBus);
         assertThrows(WebDriverException.class, webDriverProvider :: end);
-        verify(mockedEventBus).post(argThat(e -> SESSION_ID.equals(((WebDriverQuitEvent) e).getSessionId())));
+        bus.verify(mockedEventBus).post(any(BeforeWebDriverQuitEvent.class));
+        bus.verify(mockedEventBus).post(argThat(e -> SESSION_ID.equals(((AfterWebDriverQuitEvent) e).getSessionId())));
     }
 
     @Test

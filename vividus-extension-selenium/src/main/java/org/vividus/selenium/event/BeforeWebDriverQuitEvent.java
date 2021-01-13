@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package org.vividus.lambdatest.report;
+package org.vividus.selenium.event;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
-
-class LambdaTestSessionLinkPublisherTests
+public class BeforeWebDriverQuitEvent
 {
-    @Test
-    void shouldReturnSessionUrl()
-    {
-        LambdaTestSessionLinkPublisher publisher = new LambdaTestSessionLinkPublisher(null, null, null);
-        assertEquals(Optional.of("https://automation.lambdatest.com/logs/?sessionID=session-id"),
-                publisher.getSessionUrl("session-id"));
-    }
 }

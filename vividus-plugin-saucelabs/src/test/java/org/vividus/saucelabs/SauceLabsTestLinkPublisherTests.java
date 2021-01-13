@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.saucelabs.report;
+package org.vividus.saucelabs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,14 +24,14 @@ import com.saucelabs.saucerest.DataCenter;
 
 import org.junit.jupiter.api.Test;
 
-class SauceLabsSessionLinkPublisherTests
+class SauceLabsTestLinkPublisherTests
 {
     @Test
     void shouldReturnSessionUrl()
     {
-        SauceLabsSessionLinkPublisher linkPublisher = new SauceLabsSessionLinkPublisher(DataCenter.EU, null, null,
+        SauceLabsTestLinkPublisher linkPublisher = new SauceLabsTestLinkPublisher(DataCenter.EU, null, null,
                 null);
         assertEquals(Optional.of("https://app.eu-central-1.saucelabs.com/tests/session-id"),
-                linkPublisher.getSessionUrl("session-id"));
+                linkPublisher.getCloudTestUrl("session-id"));
     }
 }

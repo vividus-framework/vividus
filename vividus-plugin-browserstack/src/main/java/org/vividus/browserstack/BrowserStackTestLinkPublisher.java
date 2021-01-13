@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.browserstack.report;
+package org.vividus.browserstack;
 
 import java.util.Optional;
 
@@ -23,18 +23,17 @@ import com.google.common.eventbus.EventBus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.browserstack.BrowserStackAutomateClient;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher;
 import org.vividus.testcontext.TestContext;
-import org.vividus.ui.report.AbstractSessionLinkPublisher;
 
-public class BrowserStackSessionLinkPublisher extends AbstractSessionLinkPublisher
+public class BrowserStackTestLinkPublisher extends AbstractCloudTestLinkPublisher
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BrowserStackSessionLinkPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BrowserStackTestLinkPublisher.class);
 
     private final BrowserStackAutomateClient appAutomateClient;
 
-    public BrowserStackSessionLinkPublisher(IWebDriverProvider webDriverProvider, EventBus eventBus,
+    public BrowserStackTestLinkPublisher(IWebDriverProvider webDriverProvider, EventBus eventBus,
             TestContext testContext, BrowserStackAutomateClient appAutomateClient)
     {
         super("BrowserStack", webDriverProvider, eventBus, testContext);
@@ -43,7 +42,7 @@ public class BrowserStackSessionLinkPublisher extends AbstractSessionLinkPublish
 
     @SuppressWarnings("IllegalCatchExtended")
     @Override
-    protected Optional<String> getSessionUrl(String sessionId)
+    public Optional<String> getCloudTestUrl(String sessionId)
     {
         try
         {

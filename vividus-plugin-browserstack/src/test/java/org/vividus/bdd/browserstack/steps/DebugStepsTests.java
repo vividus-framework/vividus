@@ -38,7 +38,7 @@ import org.vividus.bdd.variable.VariableScope;
 import org.vividus.browserstack.BrowserStackAutomateClient;
 import org.vividus.json.JsonContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.selenium.event.WebDriverQuitEvent;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,7 +83,7 @@ class DebugStepsTests
     @Test
     void shouldSavePreviousSessionId()
     {
-        debugSteps.onWebDriverQuit(new WebDriverQuitEvent(SESSION_ID));
+        debugSteps.onWebDriverQuit(new AfterWebDriverQuitEvent(SESSION_ID));
         verify(textContext).put(PREVIOUS_SESSION_ID, SESSION_ID);
         verifyNoInteractions(automateClient, bddVariableContext);
     }

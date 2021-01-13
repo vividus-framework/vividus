@@ -25,7 +25,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
-import org.vividus.selenium.event.WebDriverQuitEvent;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 
 public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelOptions>
         extends AbstractDesiredCapabilitiesConfigurer
@@ -68,7 +68,7 @@ public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelO
     protected abstract T createOptions();
 
     @Subscribe
-    public void stopTunnel(WebDriverQuitEvent event) throws TunnelException
+    public void stopTunnel(AfterWebDriverQuitEvent event) throws TunnelException
     {
         tunnelManager.stop();
     }

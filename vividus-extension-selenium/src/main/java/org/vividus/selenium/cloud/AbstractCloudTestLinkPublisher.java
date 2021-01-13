@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.report;
+package org.vividus.selenium.cloud;
 
 import static java.lang.String.format;
 
@@ -29,12 +29,12 @@ import org.jbehave.core.annotations.ScenarioType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.event.WebDriverQuitEvent;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
 
-public abstract class AbstractSessionLinkPublisher
+public abstract class AbstractCloudTestLinkPublisher
 {
-    private static final Object KEY = SessionLinkPublishState.class;
+    private static final Object KEY = CloudTestLinkPublishState.class;
 
     private final String linkName;
 
@@ -42,54 +42,54 @@ public abstract class AbstractSessionLinkPublisher
     private final EventBus eventBus;
     private final TestContext testContext;
 
-    protected AbstractSessionLinkPublisher(String testCloudName, IWebDriverProvider webDriverProvider,
+    protected AbstractCloudTestLinkPublisher(String testCloudName, IWebDriverProvider webDriverProvider,
             EventBus eventBus, TestContext testContext)
     {
-        this.linkName = format("%s Session URL", testCloudName);
+        this.linkName = format("%s Test URL", testCloudName);
         this.webDriverProvider = webDriverProvider;
         this.eventBus = eventBus;
         this.testContext = testContext;
     }
 
-    protected abstract Optional<String> getSessionUrl(String sessionId);
+    protected abstract Optional<String> getCloudTestUrl(String sessionId);
 
     @BeforeScenario(uponType = ScenarioType.ANY)
     public void resetState()
     {
-        testContext.put(KEY, new SessionLinkPublishState());
+        testContext.put(KEY, new CloudTestLinkPublishState());
     }
 
     @AfterScenario(uponType = ScenarioType.ANY)
-    public void publishSessionLinkAfterScenario()
+    public void publishCloudTestLinkAfterScenario()
     {
         if (webDriverProvider.isWebDriverInitialized())
         {
             String sessionId = webDriverProvider.getUnwrapped(RemoteWebDriver.class).getSessionId().toString();
-            publishSessionLink(sessionId);
+            publishCloudTestLink(sessionId);
             getPublishState().onPublishedAfterScenario();
         }
     }
 
     @Subscribe
-    public void publishSessionLinkOnWebDriverQuit(WebDriverQuitEvent event)
+    public void publishCloudTestLinkOnWebDriverQuit(AfterWebDriverQuitEvent event)
     {
         if (!getPublishState().isPublishedAfterScenario())
         {
-            publishSessionLink(event.getSessionId());
+            publishCloudTestLink(event.getSessionId());
         }
     }
 
-    private SessionLinkPublishState getPublishState()
+    private CloudTestLinkPublishState getPublishState()
     {
-        return testContext.get(KEY, SessionLinkPublishState.class);
+        return testContext.get(KEY, CloudTestLinkPublishState.class);
     }
 
-    private void publishSessionLink(String sessionId)
+    private void publishCloudTestLink(String sessionId)
     {
-        getSessionUrl(sessionId).ifPresent(link -> eventBus.post(new LinkPublishEvent(linkName, link)));
+        getCloudTestUrl(sessionId).ifPresent(link -> eventBus.post(new LinkPublishEvent(linkName, link)));
     }
 
-    private final class SessionLinkPublishState
+    private final class CloudTestLinkPublishState
     {
         private boolean publishedAfterScenario;
 

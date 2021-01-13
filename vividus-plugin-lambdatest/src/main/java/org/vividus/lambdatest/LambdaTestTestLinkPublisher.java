@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.lambdatest.report;
+package org.vividus.lambdatest;
 
 import static java.lang.String.format;
 
@@ -23,19 +23,19 @@ import java.util.Optional;
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher;
 import org.vividus.testcontext.TestContext;
-import org.vividus.ui.report.AbstractSessionLinkPublisher;
 
-public class LambdaTestSessionLinkPublisher extends AbstractSessionLinkPublisher
+public class LambdaTestTestLinkPublisher extends AbstractCloudTestLinkPublisher
 {
-    public LambdaTestSessionLinkPublisher(IWebDriverProvider webDriverProvider, EventBus eventBus,
+    public LambdaTestTestLinkPublisher(IWebDriverProvider webDriverProvider, EventBus eventBus,
             TestContext testContext)
     {
         super("LambdaTest", webDriverProvider, eventBus, testContext);
     }
 
     @Override
-    protected Optional<String> getSessionUrl(String sessionId)
+    protected Optional<String> getCloudTestUrl(String sessionId)
     {
         return Optional.of(format("https://automation.lambdatest.com/logs/?sessionID=%s", sessionId));
     }

@@ -30,7 +30,7 @@ import org.vividus.bdd.variable.VariableScope;
 import org.vividus.browserstack.BrowserStackAutomateClient;
 import org.vividus.json.JsonContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.selenium.event.WebDriverQuitEvent;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
 
 public class DebugSteps
@@ -96,7 +96,7 @@ public class DebugSteps
     }
 
     @Subscribe
-    public void onWebDriverQuit(WebDriverQuitEvent event)
+    public void onWebDriverQuit(AfterWebDriverQuitEvent event)
     {
         testContext.put(PREVIOUS_SESSION_ID, event.getSessionId());
     }
