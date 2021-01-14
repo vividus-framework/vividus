@@ -9,6 +9,7 @@ project.description = 'Vividus plugin for testing mobile applications'
 
      implementation(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: versions.ashot)
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
      testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
      testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
@@ -16,4 +17,4 @@ project.description = 'Vividus plugin for testing mobile applications'
      testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
 
      testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
- }
+}

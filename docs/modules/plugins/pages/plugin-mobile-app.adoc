@@ -184,6 +184,23 @@ selenium.grid.platform-name=Android
 selenium.grid.automation-name=UIAutomator2
 ----
 
+== Dynamic variables
+
+=== Get clipboard text
+
+Gets the text of the system clipboard of simulator or real device
+
+[source]
+----
+${clipboard-text}
+----
+
+.Verify clipboard content
+[source,gherkin]
+---- 
+Then `${clipboard-text}` is equal to `uarlouski@gmail.com`
+----
+
 == Steps
 
 === Start mobile application
