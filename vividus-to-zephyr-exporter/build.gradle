@@ -15,7 +15,7 @@ dependencies {
     implementation project(':vividus-facade-jira')
 
     // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
-    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: '2.4.1')
+    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: '2.4.2')
 
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
