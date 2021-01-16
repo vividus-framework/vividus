@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
@@ -33,6 +32,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.mobileapp.model.NamedEntry;
+import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
@@ -40,7 +40,6 @@ import org.vividus.util.property.PropertyParser;
 
 import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.HasSessionDetails;
-import io.appium.java_client.InteractsWithApps;
 
 public class ApplicationSteps
 {
@@ -48,11 +47,14 @@ public class ApplicationSteps
 
     private final IWebDriverProvider webDriverProvider;
     private final IWebDriverManagerContext webDriverManagerContext;
+    private final ApplicationActions applicationActions;
 
-    public ApplicationSteps(IWebDriverProvider webDriverProvider, IWebDriverManagerContext webDriverManagerContext)
+    public ApplicationSteps(IWebDriverProvider webDriverProvider, IWebDriverManagerContext webDriverManagerContext,
+            ApplicationActions applicationActions)
     {
         this.webDriverProvider = webDriverProvider;
         this.webDriverManagerContext = webDriverManagerContext;
+        this.applicationActions = applicationActions;
     }
 
     /**
@@ -101,10 +103,7 @@ public class ApplicationSteps
     @When("I activate application with bundle identifier `$bundleId`")
     public void activateApp(String bundleId)
     {
-        InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
-        Validate.isTrue(interactor.isAppInstalled(bundleId),
-                "Application with the bundle identifier '%s' is not installed on the device", bundleId);
-        interactor.activateApp(bundleId);
+        applicationActions.activateApp(bundleId);
     }
 
     /**

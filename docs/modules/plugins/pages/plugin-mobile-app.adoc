@@ -190,6 +190,22 @@ selenium.grid.automation-name=UIAutomator2
 
 Gets the text of the system clipboard of simulator or real device
 
+==== Properties
+
+[cols="1,1,3", options="header"]
+
+|===
+
+|Property Name
+|Default
+|Description
+
+|`mobile-environment.wda-bundle-id`
+|`empty`
+|The property is for iOS real devices only and it specifies the WebDriverAgent bundle ID used to http://appium.io/docs/en/commands/device/clipboard/get-clipboard/#description[get clipboard text]. The property value may vary depending on test cloud providers and can be found in the XCode logs.
+
+|===
+
 [source]
 ----
 ${clipboard-text}
