@@ -70,3 +70,8 @@ A B C
 Scenario: Verify 'randomInt' expression with another string
 When I initialize the scenario variable `var` with value `#{randomInt(42, 42)} and 24`
 Then `${var}` is equal to `42 and 24`
+
+Scenario: Verify 'toBase64Gzip' expression
+Meta:
+    @requirementId 1337
+Then `#{toBase64Gzip(vividus)}` is equal to `H4sIAAAAAAAAACvLLMtMKS0GANIHCdkHAAAA`
