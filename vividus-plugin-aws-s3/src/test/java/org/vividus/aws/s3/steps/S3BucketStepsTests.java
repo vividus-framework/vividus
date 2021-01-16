@@ -16,6 +16,9 @@
 
 package org.vividus.aws.s3.steps;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -26,6 +29,9 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Date;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,27 +40,41 @@ import java.util.Set;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.aws.s3.steps.S3BucketSteps.S3ObjectFilter;
+import org.vividus.aws.s3.steps.S3BucketSteps.S3ObjectFilterType;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.util.DateUtils;
 import org.vividus.util.ResourceUtils;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class S3BucketStepsTests
 {
     private static final String CONTENT_TYPE = "contentType";
     private static final String CSV_FILE_PATH = "/test.csv";
     private static final String S3_BUCKET_NAME = "bucketName";
     private static final String S3_OBJECT_KEY = "objectKey";
+    private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
+    private static final String VARIABLE_NAME = "var";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(S3BucketSteps.class);
 
     @Mock private AmazonS3Client amazonS3Client;
     @Mock private IBddVariableContext bddVariableContext;
@@ -108,10 +128,8 @@ class S3BucketStepsTests
 
         mockGetObject(S3_OBJECT_KEY + ".csv", csv);
 
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        String variableName = "csvVar";
-        testSteps(steps -> steps.fetchCsvObject(S3_OBJECT_KEY, S3_BUCKET_NAME, scopes, variableName));
-        verify(bddVariableContext).putVariable(scopes, variableName, List.of(Map.of("id", "1")));
+        testSteps(steps -> steps.fetchCsvObject(S3_OBJECT_KEY, S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
+        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(Map.of("id", "1")));
     }
 
     @Test
@@ -122,11 +140,9 @@ class S3BucketStepsTests
 
         mockGetObject(objectKey, data.getBytes(StandardCharsets.UTF_8));
 
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        String variableName = "jsonVar";
-        testSteps(steps -> steps.fetchObject(objectKey, S3_BUCKET_NAME, scopes, variableName));
+        testSteps(steps -> steps.fetchObject(objectKey, S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
         verify(amazonS3Client).getObject(S3_BUCKET_NAME, objectKey);
-        verify(bddVariableContext).putVariable(scopes, variableName, data);
+        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, data);
     }
 
     private void mockGetObject(String objectKey, byte[] data)
@@ -151,12 +167,101 @@ class S3BucketStepsTests
         verify(amazonS3Client).deleteObject(S3_BUCKET_NAME, S3_OBJECT_KEY);
     }
 
+    @Test
+    void shouldCollectKeysWithEmptyFilters() throws IOException
+    {
+        String key = "any";
+        S3ObjectSummary objectSummary = new S3ObjectSummary();
+        objectSummary.setKey(key);
+
+        ListObjectsV2Result result = new ListObjectsV2Result();
+        result.setTruncated(false);
+        result.getObjectSummaries().add(objectSummary);
+
+        when(amazonS3Client.listObjectsV2(argThat((ArgumentMatcher<ListObjectsV2Request>)
+                rq -> S3_BUCKET_NAME.equals(rq.getBucketName()) && rq.getPrefix() == null))).thenReturn(result);
+        testSteps(steps -> steps.collectObjectKeys(List.of(), S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
+
+        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(key));
+
+        assertKeysCollectorLogs(1, 1);
+    }
+
+    @Test
+    void shouldCollectKeysWithFilters() throws IOException
+    {
+        String dateThreshold = "2021-01-15T19:00:00+00:00";
+        ZonedDateTime zonedDateThreshold = ZonedDateTime.parse(dateThreshold);
+        String key = "/folder/object.xml";
+
+        S3ObjectSummary objectSummary1 = new S3ObjectSummary();
+        objectSummary1.setKey(key);
+        objectSummary1.setLastModified(Date.from(zonedDateThreshold.plusMinutes(1).toInstant()));
+
+        S3ObjectSummary objectSummary2 = new S3ObjectSummary();
+        objectSummary2.setKey(key);
+        objectSummary2.setLastModified(Date.from(zonedDateThreshold.toInstant()));
+
+
+        ListObjectsV2Result result1 = new ListObjectsV2Result();
+        result1.getObjectSummaries().add(objectSummary1);
+        result1.getObjectSummaries().add(objectSummary2);
+        result1.setTruncated(true);
+
+        S3ObjectSummary objectSummary3 = new S3ObjectSummary();
+        objectSummary3.setKey("/folder/object.txt");
+        objectSummary3.setLastModified(Date.from(zonedDateThreshold.plusMinutes(1).toInstant()));
+
+        ListObjectsV2Result result2 = new ListObjectsV2Result();
+        result2.getObjectSummaries().add(objectSummary3);
+        result2.setTruncated(false);
+
+        String prefix = "/folder/o";
+
+        when(amazonS3Client.listObjectsV2(argThat((ArgumentMatcher<ListObjectsV2Request>)
+                    rq -> S3_BUCKET_NAME.equals(rq.getBucketName()) && prefix.equals(rq.getPrefix()))))
+                .thenReturn(result1, result2);
+
+        List<S3ObjectFilter> filters = createFilters(prefix, ".xml", dateThreshold);
+
+        testSteps(steps -> steps.collectObjectKeys(filters, S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
+
+        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(key));
+
+        assertKeysCollectorLogs(3, 1);
+    }
+
+    private void assertKeysCollectorLogs(int totalNumberOfObjects, int numberOfObjectsAfterFiltering)
+    {
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info("The total number of S3 objects is {}", totalNumberOfObjects),
+                info("The number of S3 objects after filtering is {}", numberOfObjectsAfterFiltering)
+        )));
+    }
+
+    private List<S3ObjectFilter> createFilters(String prefix, String suffix, String dateThreshold)
+    {
+        S3ObjectFilter keyPrefixFilter = new S3ObjectFilter();
+        keyPrefixFilter.setFilterType(S3ObjectFilterType.KEY_PREFIX);
+        keyPrefixFilter.setFilterValue(prefix);
+
+        S3ObjectFilter keySuffixFilter = new S3ObjectFilter();
+        keySuffixFilter.setFilterType(S3ObjectFilterType.KEY_SUFFIX);
+        keySuffixFilter.setFilterValue(suffix);
+
+        S3ObjectFilter lastModifiedDateFilter = new S3ObjectFilter();
+        lastModifiedDateFilter.setFilterType(S3ObjectFilterType.OBJECT_MODIFIED_NOT_EARLIER_THAN);
+        lastModifiedDateFilter.setFilterValue(dateThreshold);
+
+        return List.of(keyPrefixFilter, keySuffixFilter, lastModifiedDateFilter);
+    }
+
     void testSteps(FailableConsumer<S3BucketSteps, IOException> test) throws IOException
     {
         try (MockedStatic<AmazonS3ClientBuilder> clientBuilder = mockStatic(AmazonS3ClientBuilder.class))
         {
             clientBuilder.when(AmazonS3ClientBuilder::defaultClient).thenReturn(amazonS3Client);
-            S3BucketSteps steps = new S3BucketSteps(bddVariableContext);
+            S3BucketSteps steps = new S3BucketSteps(bddVariableContext, new DateUtils(ZoneId.of("Z")));
             test.accept(steps);
         }
     }

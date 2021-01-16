@@ -7,9 +7,11 @@ dependencies {
     implementation project(':vividus-plugin-csv')
     implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.11.930')
     implementation(group: 'com.amazonaws', name: 'aws-java-sdk-s3')
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
 }
