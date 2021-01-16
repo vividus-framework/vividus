@@ -11,11 +11,17 @@
 
      <context:component-scan base-package="org.vividus.bdd.mobileapp.variable"/>
 
+     <bean class="org.vividus.bdd.mobileapp.configuration.MobileEnvironment">
+         <constructor-arg index="0" value="${mobile-environment.real-device}" />
+         <constructor-arg index="1" value="${mobile-environment.wda-bundle-id}" />
+     </bean>
+
     <bean id="webDriverSetupSteps" class="org.vividus.bdd.steps.WebDriverSetupSteps">
         <constructor-arg index="0" value="${mobile-application.session-scope}" />
     </bean>
 
     <bean class="org.vividus.mobileapp.action.TouchActions" />
+    <bean class="org.vividus.mobileapp.action.ApplicationActions" />
 
     <bean class="org.vividus.mobileapp.action.KeyboardActions" >
         <constructor-arg index="0" value="${mobile-environment.real-device}" />

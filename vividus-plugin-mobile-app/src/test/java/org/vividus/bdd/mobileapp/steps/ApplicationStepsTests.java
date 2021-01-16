@@ -19,8 +19,6 @@ package org.vividus.bdd.mobileapp.steps;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -40,13 +38,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.mobileapp.model.NamedEntry;
+import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.HasSessionDetails;
-import io.appium.java_client.InteractsWithApps;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ApplicationStepsTests
@@ -65,6 +63,7 @@ class ApplicationStepsTests
     @Mock private HasSessionDetails details;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private ApplicationActions applicationActions;
     @InjectMocks private ApplicationSteps applicationSteps;
 
     private void mockCommons()
@@ -122,24 +121,9 @@ class ApplicationStepsTests
     @Test
     void shouldActivateApp()
     {
-        InteractsWithApps driver = mockInteractingWithAppsDriver();
         String bundleId = "bundleId";
-        when(driver.isAppInstalled(bundleId)).thenReturn(true);
         applicationSteps.activateApp(bundleId);
-        verify(driver).activateApp(bundleId);
-    }
-
-    @Test
-    void shouldNotActivateNotInstalledApp()
-    {
-        InteractsWithApps driver = mockInteractingWithAppsDriver();
-        String bundleId = "unknown bundle id";
-        when(driver.isAppInstalled(bundleId)).thenReturn(false);
-        Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> applicationSteps.activateApp(bundleId));
-        assertEquals(
-            String.format("Application with the bundle identifier '%s' is not installed on the device", bundleId),
-            exception.getMessage());
+        verify(applicationActions).activateApp(bundleId);
     }
 
     @Test
@@ -161,12 +145,5 @@ class ApplicationStepsTests
         setting.setName(settingName);
         setting.setValue(settingValue);
         return setting;
-    }
-
-    private InteractsWithApps mockInteractingWithAppsDriver()
-    {
-        InteractsWithApps driver = mock(InteractsWithApps.class);
-        when(webDriverProvider.getUnwrapped(InteractsWithApps.class)).thenReturn(driver);
-        return driver;
     }
 }
