@@ -46,11 +46,8 @@ class StringsExpressionProcessorTests
     private static final String BIG_DATA = "big data";
     private static final String BASE_64 = "YmlnIGRhdGE=";
 
-    @Mock
-    private ILocationProvider locationProvider;
-
-    @InjectMocks
-    private StringsExpressionProcessor processor;
+    @Mock private ILocationProvider locationProvider;
+    @InjectMocks private StringsExpressionProcessor processor;
 
     @Test
     void testExecuteWithUnsupportedException()
@@ -60,6 +57,7 @@ class StringsExpressionProcessorTests
 
     static Stream<Arguments> expressionSource()
     {
+        // CHECKSTYLE:OFF
         return Stream.of(
                 arguments("trim(value)",                                                   VALUE),
                 arguments("TRIM( value )",                                                 VALUE),
@@ -80,8 +78,10 @@ class StringsExpressionProcessorTests
                 arguments("anyOf(123)",                                                    "123"),
                 arguments("anyOf()",                                                       EMPTY),
                 arguments("anyOf(,)",                                                      EMPTY),
-                arguments("anyOf(\\,)",                                                    ",")
+                arguments("anyOf(\\,)",                                                    ","),
+                arguments("toBase64Gzip(vividus)",                                         "H4sIAAAAAAAAACvLLMtMKS0GANIHCdkHAAAA")
         );
+        // CHECKSTYLE:ON
     }
 
     @ParameterizedTest(name = "{index}: for expression \"{0}\", result is \"{1}\"")

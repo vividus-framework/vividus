@@ -173,6 +173,26 @@ Decodes the input string from Base64 format to the regular string
 |`vividus`
 |===
 
+
+=== `toBase64Gzip`
+
+Compress the input string to GZip and encode compressed bytes to Base64 format
+
+[source, subs="+quotes"]
+----
+#{toBase64Gzip(*$input*)}
+----
+
+* *`$input`* - any string to be compressed and encoded
+
+.Examples of the expressions compressing and encoding to Base64 GZip
+|===
+|Expression |Result
+
+|`#{toBase64Gzip(vividus)}`
+|`H4sIAAAAAAAAACvLLMtMKS0GANIHCdkHAAAA`
+|===
+
 == Resources
 :path-parameter: pass:quotes[*`$pathToResource`* - the path to the resource to load. It must be relative to the project, meaning `src/main/resources` is left out of it. Therefore, if the file is located at `my-tests/src/main/resources/data/body.txt`, then it's required to put only relative resource part: `/data/body.txt`]
 
