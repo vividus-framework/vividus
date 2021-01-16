@@ -72,3 +72,58 @@ When I set ACL `$cannedAcl` for object with key `$objectKey` from S3 bucket `$bu
 ----
 When I set ACL `public-read` for object with key `/path/file.json` from S3 bucket `some-bucket-name`
 ----
+
+=== Collect S3 objects keys
+Collects a list of the S3 objects keys in the specified bucket. Because buckets can contain a virtually unlimited number of keys, the complete results can be extremely large, thus it's recommended to use filters to retrieve the filtered dataset.
+
+[source,gherkin]
+----
+When I collect objects keys filtered by:$filters in S3 bucket `$bucketName` and save result to $scopes variable `$variableName`
+----
+
+- `$filters` - The ExamplesTable with filters to be applied to the objects to limit the resulting set.
++
+.The supported filter types
+[cols="1,1,2", options="header"]
+|===
+|Type
+|Alias
+|Description
+
+|`KEY_PREFIX`
+|`key prefix`
+|The prefix parameter, restricting to keys that begin with the specified value
+
+|`KEY_SUFFIX`
+|`key suffix`
+|The suffix parameter, restricting to keys that end with the specified value
+
+|`OBJECT_MODIFIED_NOT_EARLIER_THAN`
+|`object modified not earlier than`
+|The ISO-8601 date, restricting to objects with last modified date after the specified value
+
+|===
++
+The filters can be combined in any order and in any composition.
++
+.The combination of filters
+[source,gherkin]
+----
+|filterType                      |filterValue               |
+|key suffix                      |.txt                      |
+|object modified not earlier than|2021-01-15T19:00:00+00:00 |
+----
+
+- `$bucketName` - The name of the S3 bucket which objects keys are to be collected
+- `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes]
+- `$variableName` - The variable name to store the S3 objects keys. The keys are accessible via zero-based index, `${my-keys[0]}` will return the first found key.
+
+.Download the first found S3 object with the specified prefix
+[source,gherkin]
+----
+When I collect objects keys filtered by:
+|filterType                      |filterValue   |
+|key prefix                      |folder/       |
+in S3 bucket `some-bucket-name` and save result to scenario variable `s3-keys`
+When I fetch object with key `${s3-keys[0]}` from S3 bucket `some-bucket-name` and save result to scenario variable `s3-object`
+----

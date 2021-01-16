@@ -16,37 +16,56 @@
 
 package org.vividus.aws.s3.steps;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.When;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.csv.CsvReader;
+import org.vividus.util.DateUtils;
 import org.vividus.util.ResourceUtils;
 
 public class S3BucketSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(S3BucketSteps.class);
+
     private final AmazonS3 amazonS3Client;
     private final IBddVariableContext bddVariableContext;
+    private final DateUtils dateUtils;
 
-    public S3BucketSteps(IBddVariableContext bddVariableContext)
+    public S3BucketSteps(IBddVariableContext bddVariableContext, DateUtils dateUtils)
     {
+        this.dateUtils = dateUtils;
         this.amazonS3Client = AmazonS3ClientBuilder.defaultClient();
         this.bddVariableContext = bddVariableContext;
     }
@@ -213,5 +232,141 @@ public class S3BucketSteps
     public void deleteObject(String objectKey, String bucketName)
     {
         amazonS3Client.deleteObject(bucketName, objectKey);
+    }
+
+    /**
+     * <p>
+     * Collects a list of the S3 objects keys in the specified bucket and saves its content to <b>scopes</b> variables
+     * with name <b>variableName</b>.
+     * </p>
+     * <p>
+     * Because buckets can contain a virtually unlimited number of keys, the complete results can be extremely large,
+     * thus it's recommended to use filters to retrieve the filtered dataset.
+     * </p>
+     *
+     * @param filters      The ExamplesTable with filters to be applied to the objects to limit the resulting set.
+     *                     The supported filter types are:
+     *                     <ul>
+     *                     <li><code>KEY_PREFIX</code> - the prefix parameter, restricting to keys that begin with
+     *                     the specified value.</li>
+     *                     <li><code>KEY_SUFFIX</code> - the suffix parameter, restricting to keys that end with the
+     *                     specified value.</li>
+     *                     <li><code>OBJECT_MODIFIED_NOT_EARLIER_THAN</code> - the ISO-8601 date, restricting to objects
+     *                     with last modified date after the specified value.</li>
+     *                     </ul>
+     *                     The filters can be combined in any order and in any composition, e.g.<br/>
+     *                     <code>
+     *                     |filterType                      |filterValue               |<br/>
+     *                     |key suffix                      |.txt                      |<br/>
+     *                     |object modified not earlier than|2021-01-15T19:00:00+00:00 |<br/>
+     *                     </code>
+     *
+     * @param bucketName   The name of the S3 bucket which objects keys are to be collected
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variables scopes<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>@param scopes
+     * @param variableName the variable name to store the S3 objects keys. The keys are accessible via zero-based index,
+     *                     e.g. <code>${my-keys[0]}</code> will return the first found key.
+     */
+    @When("I collect objects keys filtered by:$filters in S3 bucket `$bucketName` and save result to $scopes variable "
+            + "`$variableName`")
+    public void collectObjectKeys(List<S3ObjectFilter> filters, String bucketName, Set<VariableScope> scopes,
+            String variableName)
+    {
+        Map<S3ObjectFilterType, String> filterParameters = filters.stream().collect(
+                toMap(S3ObjectFilter::getFilterType, S3ObjectFilter::getFilterValue));
+
+        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(bucketName);
+        Optional.ofNullable(filterParameters.get(S3ObjectFilterType.KEY_PREFIX)).ifPresent(request::setPrefix);
+
+        Predicate<S3ObjectSummary> filter = buildFilter(filterParameters);
+
+        List<String> keys = collectS3ObjectsKeys(request, filter);
+        bddVariableContext.putVariable(scopes, variableName, keys);
+    }
+
+    private Predicate<S3ObjectSummary> buildFilter(Map<S3ObjectFilterType, String> filterParameters)
+    {
+        Predicate<S3ObjectSummary> keySuffixPredicate = Optional.ofNullable(
+                filterParameters.get(S3ObjectFilterType.KEY_SUFFIX))
+                .map(keySuffix -> (Predicate<S3ObjectSummary>) summary -> summary.getKey().endsWith(keySuffix))
+                .orElseGet(() -> summary -> true);
+
+        Predicate<S3ObjectSummary> lowestModifiedPredicate = Optional.ofNullable(
+                filterParameters.get(S3ObjectFilterType.OBJECT_MODIFIED_NOT_EARLIER_THAN))
+                .map(date -> dateUtils.parseDateTime(date, DateTimeFormatter.ISO_DATE_TIME))
+                .map(ZonedDateTime::toInstant)
+                .map(Date::from)
+                .map(date -> (Predicate<S3ObjectSummary>) summary -> summary.getLastModified().after(date))
+                .orElseGet(() -> summary -> true);
+
+        return keySuffixPredicate.and(lowestModifiedPredicate);
+    }
+
+    private List<String> collectS3ObjectsKeys(ListObjectsV2Request request, Predicate<S3ObjectSummary> filter)
+    {
+        ListObjectsV2Result result;
+        List<String> keys = new ArrayList<>();
+        int totalNumberOfObjects = 0;
+
+        do
+        {
+            result = amazonS3Client.listObjectsV2(request);
+
+            List<S3ObjectSummary> objectSummaries = result.getObjectSummaries();
+            totalNumberOfObjects += objectSummaries.size();
+
+            objectSummaries.stream()
+                    .filter(filter)
+                    .map(S3ObjectSummary::getKey)
+                    .forEach(keys::add);
+
+            request.setContinuationToken(result.getNextContinuationToken());
+        }
+        while (result.isTruncated());
+
+        LOGGER.info("The total number of S3 objects is {}", totalNumberOfObjects);
+        LOGGER.atInfo().addArgument(keys::size).log("The number of S3 objects after filtering is {}");
+
+        return keys;
+    }
+
+    @AsParameters
+    public static class S3ObjectFilter
+    {
+        private S3ObjectFilterType filterType;
+        private String filterValue;
+
+        public S3ObjectFilterType getFilterType()
+        {
+            return filterType;
+        }
+
+        public void setFilterType(S3ObjectFilterType filterType)
+        {
+            this.filterType = filterType;
+        }
+
+        public String getFilterValue()
+        {
+            return filterValue;
+        }
+
+        public void setFilterValue(String filterValue)
+        {
+            this.filterValue = filterValue;
+        }
+    }
+
+    public enum S3ObjectFilterType
+    {
+        KEY_PREFIX,
+        KEY_SUFFIX,
+        OBJECT_MODIFIED_NOT_EARLIER_THAN
     }
 }
