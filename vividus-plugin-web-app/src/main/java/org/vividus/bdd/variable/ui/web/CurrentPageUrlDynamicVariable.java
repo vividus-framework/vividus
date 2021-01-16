@@ -22,7 +22,7 @@ import javax.inject.Named;
 import org.vividus.bdd.variable.DynamicVariable;
 import org.vividus.selenium.IWebDriverProvider;
 
-@Named("currentPageUrl")
+@Named("current-page-url")
 public class CurrentPageUrlDynamicVariable implements DynamicVariable
 {
     @Inject private IWebDriverProvider webDriverProvider;

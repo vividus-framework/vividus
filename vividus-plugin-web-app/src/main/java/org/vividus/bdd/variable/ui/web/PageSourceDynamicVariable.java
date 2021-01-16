@@ -21,7 +21,7 @@ import javax.inject.Named;
 import org.vividus.bdd.variable.DynamicVariable;
 import org.vividus.selenium.IWebDriverProvider;
 
-@Named("pageSource")
+@Named("page-source")
 public class PageSourceDynamicVariable implements DynamicVariable
 {
     private final IWebDriverProvider webDriverProvider;

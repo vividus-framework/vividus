@@ -37,7 +37,6 @@ import org.vividus.bdd.variable.DynamicVariable;
 @ExtendWith(MockitoExtension.class)
 class VariableResolverTests
 {
-    private static final String VAR1_VARIABLE = "${var1}";
     private static final String VAR1 = "var1";
     private static final String VALUE1 = "2";
     private static final String VAR2 = "var2";
@@ -128,15 +127,20 @@ class VariableResolverTests
         assertEquals(VALUE2, convert("${var:${var1}}"));
     }
 
-    @Test
-    void testVariablesDynamicValue()
+    @ParameterizedTest
+    @CsvSource({
+        "dynamic-variable-key, dynamicVariableKey",
+        "key                 , key               "
+    })
+    void testVariablesDynamicValue(String key, String alias)
     {
         DynamicVariable dynamicVariable = mock(DynamicVariable.class);
-        when(bddVariableContext.getVariable(VAR1)).thenReturn(null);
-        VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(VAR1, dynamicVariable));
+        when(bddVariableContext.getVariable(key)).thenReturn(null);
+        when(bddVariableContext.getVariable(alias)).thenReturn(null);
+        VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(key, dynamicVariable));
         when(dynamicVariable.getValue()).thenReturn(VALUE1);
-        Object actualValue = variableResolver.resolve(VAR1_VARIABLE);
-        assertEquals(VALUE1, actualValue);
+        assertEquals(VALUE1, variableResolver.resolve(asRef(key)));
+        assertEquals(VALUE1, variableResolver.resolve(asRef(alias)));
     }
 
     @Test
@@ -145,8 +149,13 @@ class VariableResolverTests
         DynamicVariable dynamicVariable = mock(DynamicVariable.class);
         when(bddVariableContext.getVariable(VAR1)).thenReturn(null);
         VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(VAR2, dynamicVariable));
-        String test1 = VAR1_VARIABLE;
+        String test1 = asRef(VAR1);
         Object actualValue = variableResolver.resolve(test1);
         assertEquals(test1, actualValue);
+    }
+
+    private static String asRef(String name)
+    {
+        return "${" + name + "}";
     }
 }

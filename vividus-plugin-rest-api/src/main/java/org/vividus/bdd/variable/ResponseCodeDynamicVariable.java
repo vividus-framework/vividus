@@ -24,7 +24,7 @@ import javax.inject.Named;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
 
-@Named("responseCode")
+@Named("response-code")
 public class ResponseCodeDynamicVariable implements DynamicVariable
 {
     @Inject private HttpTestContext httpTestContext;

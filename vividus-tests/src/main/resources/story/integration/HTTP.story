@@ -5,7 +5,7 @@ Meta:
 
 Scenario: Verify method DEBUG is supported; accidental space is trimmed in httpMethod enum
 When I issue a HTTP DEBUG  request for a resource with the URL 'http://example.org/'
-Then `${responseCode}` is equal to `405`
+Then `${response-code}` is equal to `405`
 
 Scenario: Verify handling of plus character in URL query
 When I send HTTP GET to the relative URL '/get?birthDate=<query-parameter-value>'
@@ -56,7 +56,7 @@ Then `${responseCode}` is equal to `200`
 
 Scenario: Validate HTTP methods with missing optional request body and zero content-length
 When I send HTTP <http-method> to the relative URL '/<http-method>'
-Then `${responseCode}` is equal to `200`
+Then `${response-code}` is equal to `200`
 Then JSON element by JSON path `$.json` is equal to `null`
 Then JSON element by JSON path `$.headers.Content-Length` is equal to `"0"`
 Examples:
@@ -80,7 +80,7 @@ When I add request headers:
 |name    |value|
 |Language|en-ru|
 When I send HTTP GET to the relative URL '/get?name=Content'
-Then `${responseCode}` is equal to `200`
+Then `${response-code}` is equal to `200`
 Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/json"`
 Then JSON element by JSON path `$.headers.Language` is equal to `"en-ru"`
 

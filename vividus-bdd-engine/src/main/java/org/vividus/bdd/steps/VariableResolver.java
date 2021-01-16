@@ -16,8 +16,11 @@
 
 package org.vividus.bdd.steps;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import com.google.common.base.CaseFormat;
 
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.bdd.context.IBddVariableContext;
@@ -33,7 +36,16 @@ public class VariableResolver
     public VariableResolver(IBddVariableContext bddVariableContext, Map<String, DynamicVariable> dynamicVariables)
     {
         this.bddVariableContext = bddVariableContext;
-        this.dynamicVariables = dynamicVariables;
+        this.dynamicVariables = new HashMap<>();
+        dynamicVariables.forEach((key, variable) ->
+        {
+            this.dynamicVariables.put(key, variable);
+            if (key.indexOf('-') > -1)
+            {
+                String camelKey = CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, key);
+                this.dynamicVariables.put(camelKey, variable);
+            }
+        });
     }
 
     public Object resolve(final String value)
