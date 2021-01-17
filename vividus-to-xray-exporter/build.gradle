@@ -1,9 +1,11 @@
 buildscript {
+    ext.springBootVersion = '2.4.1'
+
     repositories {
         gradlePluginPortal()
     }
     dependencies {
-        classpath(group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: '2.4.1')
+        classpath(group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: "${springBootVersion}")
     }
 }
 apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
@@ -25,7 +27,7 @@ dependencies {
     implementation project(':vividus-facade-jira')
 
     // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
-    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: '2.4.1')
+    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: "${springBootVersion}")
 
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
