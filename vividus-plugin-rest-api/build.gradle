@@ -1,8 +1,7 @@
 project.description = 'Vividus plugin for REST API testing'
 
-ext {
-    aspectjVersion = '1.9.5'
-}
+ext.jsonPathVersion = '2.4.0'
+ext.aspectjVersion = '1.9.5'
 
 dependencies {
     api project(':vividus-bdd-engine')
@@ -15,7 +14,7 @@ dependencies {
     implementation(group: 'org.apache.httpcomponents', name: 'httpmime', version: versions.httpclient)
     implementation(group: 'org.springframework', name: 'spring-web', version: versions.spring)
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
-    implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: '2.4.0') {
+    implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: "${jsonPathVersion}") {
         exclude module: 'hamcrest-library'
     }
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
