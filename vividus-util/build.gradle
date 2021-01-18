@@ -1,6 +1,6 @@
 project.description = 'Vividus utilities'
 
-ext.jsonPathVersion = '2.4.0'
+ext.jsonPathVersion = '2.5.0'
 
 dependencies {
     api(group: 'org.apache.commons', name: 'commons-pool2', version: '2.9.0')
