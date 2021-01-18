@@ -1,0 +1,3 @@
+== Dynamic variables
+
+Dynamic variables are variables available out of the box using standard approach `$\{name\}`. The variables support both lower camel case (e.g. `$\{dynamicVariableName\}`) and lower hyphen case (e.g. `$\{dynamic-variable-name\}`) name formats. Usually the data provided by the dynamic variables calculated at the runtime.

@@ -703,10 +703,7 @@ When I mock HTTP responses with request URL which CONTAINS `example.com` using r
 ----
 
 
-== Dynamic variables
-
-Dynamic variables is variables available out of the box using standard approach `$\{variable-name\}` Usually the data provided by dynamic variables calculated at runtime.
-
+include::partial$dynamic-variables-header.adoc[]
 
 === Context element rectangle
 

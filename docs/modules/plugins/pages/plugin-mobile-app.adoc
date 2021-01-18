@@ -184,7 +184,7 @@ selenium.grid.platform-name=Android
 selenium.grid.automation-name=UIAutomator2
 ----
 
-== Dynamic variables
+include::partial$dynamic-variables-header.adoc[]
 
 === Get clipboard text
 

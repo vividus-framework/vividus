@@ -21,7 +21,7 @@ import javax.inject.Named;
 
 import org.vividus.bdd.context.IBddRunContext;
 
-@Named("runningStory")
+@Named("running-story")
 public class RunningStoryNameDynamicVariable implements DynamicVariable
 {
     @Inject private IBddRunContext runContext;
