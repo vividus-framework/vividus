@@ -29,7 +29,7 @@
 
     <bean class="org.vividus.mobileapp.action.DeviceActions" />
 
-    <bean class="org.vividus.mobileapp.listener.PublishingSourceOnFailureListener" lazy-init="false" />
+    <bean class="org.vividus.mobileapp.listener.MobileSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
 
     <bean class="org.vividus.bdd.monitor.GenericScreenshotOnFailureMonitor" />
 

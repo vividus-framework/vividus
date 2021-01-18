@@ -10,3 +10,8 @@ a|Defines the test lifecycle of the {application-under-test}:
 * each scenario-level examples table iteration is treated as a separate `scenario`
 
 An empty property value will lead to the error: "Application session scope is not set".
+
+|ui.publish-source-on-failure
+|true/false
+|true
+|Defines if Vividus publishes the application source code on failure
