@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
 @Named
-public class DiffDateExpressionProcessor implements IExpressionProcessor<String>
+public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final int FORMAT_GROUP = 6;
     private static final Pattern DIFF_DATE_PATTERN = Pattern
@@ -49,37 +49,33 @@ public class DiffDateExpressionProcessor implements IExpressionProcessor<String>
 
     public DiffDateExpressionProcessor(DateUtils dateUtils)
     {
+        super(DIFF_DATE_PATTERN);
         this.dateUtils = dateUtils;
     }
 
     @Override
-    public Optional<String> execute(String expression)
+    protected String evaluateExpression(Matcher expressionMatcher)
     {
-        Matcher expressionMatcher = DIFF_DATE_PATTERN.matcher(expression);
-        if (expressionMatcher.find())
-        {
-            ZonedDateTime firstZonedDateTime = getZonedDateTime(expressionMatcher, FIRST_INPUT_DATE_GROUP,
-                    FIRST_INPUT_FORMAT_GROUP);
-            ZonedDateTime secondZonedDateTime = getZonedDateTime(expressionMatcher, SECOND_INPUT_DATE_GROUP,
-                    SECOND_INPUT_FORMAT_GROUP);
-            Duration duration = Duration.between(firstZonedDateTime, secondZonedDateTime);
-            String durationAsString = duration.toString();
-            return Optional.ofNullable(expressionMatcher.group(FORMAT_GROUP))
-                           .map(String::trim)
-                           .map(String::toUpperCase)
-                           .map(t -> EnumUtils.getEnum(ChronoUnit.class, t))
-                           .map(u -> u.between(firstZonedDateTime, secondZonedDateTime))
-                           .map(Object::toString)
-                           .or(() -> processNegative(duration, durationAsString));
-        }
-        return Optional.empty();
+        ZonedDateTime firstZonedDateTime = getZonedDateTime(expressionMatcher, FIRST_INPUT_DATE_GROUP,
+                FIRST_INPUT_FORMAT_GROUP);
+        ZonedDateTime secondZonedDateTime = getZonedDateTime(expressionMatcher, SECOND_INPUT_DATE_GROUP,
+                SECOND_INPUT_FORMAT_GROUP);
+        Duration duration = Duration.between(firstZonedDateTime, secondZonedDateTime);
+        String durationAsString = duration.toString();
+        return Optional.ofNullable(expressionMatcher.group(FORMAT_GROUP))
+                .map(String::trim)
+                .map(String::toUpperCase)
+                .map(t -> EnumUtils.getEnum(ChronoUnit.class, t))
+                .map(u -> u.between(firstZonedDateTime, secondZonedDateTime))
+                .map(Object::toString)
+                .orElseGet(() -> processNegative(duration, durationAsString));
     }
 
-    private Optional<String> processNegative(Duration duration, String durationAsString)
+    private String processNegative(Duration duration, String durationAsString)
     {
         return duration.isNegative()
-                ? Optional.of(MINUS_SIGN + durationAsString.replace(MINUS_SIGN, StringUtils.EMPTY))
-                : Optional.of(durationAsString);
+                ? MINUS_SIGN + durationAsString.replace(MINUS_SIGN, StringUtils.EMPTY)
+                : durationAsString;
     }
 
     private ZonedDateTime getZonedDateTime(Matcher expressionMatcher, int inputDateGroup, int inputFormatGroup)

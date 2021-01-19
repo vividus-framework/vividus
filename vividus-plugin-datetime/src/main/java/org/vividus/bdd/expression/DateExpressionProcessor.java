@@ -19,13 +19,12 @@ package org.vividus.bdd.expression;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.vividus.util.DateUtils;
 
-public class DateExpressionProcessor implements IExpressionProcessor<String>
+public class DateExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final String DATE_TIME_REGEX_PART = "((-)?P((?:\\d+[YMWD])*)(T(?:\\d+[HMS])+)?)";
 
@@ -44,23 +43,15 @@ public class DateExpressionProcessor implements IExpressionProcessor<String>
 
     public DateExpressionProcessor(DateUtils dateUtils)
     {
+        super(GENERATE_DATE_PATTERN);
         this.dateUtils = dateUtils;
     }
 
     @Override
-    public Optional<String> execute(String expression)
+    protected String evaluateExpression(Matcher expressionMatcher)
     {
-        Matcher durationMatcher = GENERATE_DATE_PATTERN.matcher(expression);
-        if (durationMatcher.find())
-        {
-            return generateDate(new DateExpression(durationMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP, DURATION_GROUP,
-                    GENERATE_DATE_FORMAT_GROUP));
-        }
-        return Optional.empty();
-    }
-
-    private Optional<String> generateDate(DateExpression dateExpression)
-    {
+        DateExpression dateExpression = new DateExpression(expressionMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
+                DURATION_GROUP, GENERATE_DATE_FORMAT_GROUP);
         ZonedDateTime current = dateUtils.getCurrentDateTime();
         DateTimeFormatter format = DateTimeFormatter.ISO_LOCAL_DATE;
         if (dateExpression.hasPeriod())
@@ -76,7 +67,7 @@ public class DateExpressionProcessor implements IExpressionProcessor<String>
         {
             format = DateTimeFormatter.ofPattern(dateExpression.getCustomFormatString(), locale);
         }
-        return Optional.of(current.format(format));
+        return current.format(format);
     }
 
     public void setLocale(Locale locale)

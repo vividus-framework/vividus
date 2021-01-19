@@ -18,7 +18,6 @@ package org.vividus.bdd.expression;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 @Named
-public class RoundExpressionProcessor implements IExpressionProcessor<String>
+public class RoundExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final Pattern ROUND_EXPRESSION_PATTERN;
 
@@ -43,22 +42,19 @@ public class RoundExpressionProcessor implements IExpressionProcessor<String>
         ROUND_EXPRESSION_PATTERN = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
     }
 
-    @Override
-    public Optional<String> execute(String expression)
+    public RoundExpressionProcessor()
     {
-        Matcher expressionMatcher = ROUND_EXPRESSION_PATTERN.matcher(expression);
-        if (expressionMatcher.find())
-        {
-            RoundExpression roundExpression = new RoundExpression(expressionMatcher);
-            return Optional.of(round(roundExpression.getValue(), roundExpression.getMaxFractionDigits(),
-                    roundExpression.getRoundingMode()));
-        }
-        return Optional.empty();
+        super(ROUND_EXPRESSION_PATTERN);
     }
 
-    private String round(String value, int fractionDigitsNumber, RoundingMode roundingMode)
+    @Override
+    protected String evaluateExpression(Matcher expressionMatcher)
     {
-        return new BigDecimal(value).setScale(fractionDigitsNumber, roundingMode).stripTrailingZeros().toPlainString();
+        RoundExpression roundExpression = new RoundExpression(expressionMatcher);
+        return new BigDecimal(roundExpression.getValue())
+                .setScale(roundExpression.getMaxFractionDigits(), roundExpression.getRoundingMode())
+                .stripTrailingZeros()
+                .toPlainString();
     }
 
     private static final class RoundExpression

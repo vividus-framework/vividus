@@ -19,7 +19,6 @@ package org.vividus.bdd.expression;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +27,7 @@ import javax.inject.Named;
 import org.vividus.util.DateUtils;
 
 @Named
-public class FormatDateExpressionProcessor implements IExpressionProcessor<String>
+public class FormatDateExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final Pattern FORMAT_PATTERN = Pattern
             .compile("^formatDate\\(([^,]*),\\s*([^,]*)(?:,\\s*(.*))?\\)$", Pattern.CASE_INSENSITIVE);
@@ -41,32 +40,22 @@ public class FormatDateExpressionProcessor implements IExpressionProcessor<Strin
 
     public FormatDateExpressionProcessor(DateUtils dateUtils)
     {
+        super(FORMAT_PATTERN);
         this.dateUtils = dateUtils;
     }
 
     @Override
-    public Optional<String> execute(String expression)
+    protected String evaluateExpression(Matcher expressionMatcher)
     {
-        Matcher expressionMatcher = FORMAT_PATTERN.matcher(expression);
-        if (expressionMatcher.find())
-        {
-            ZonedDateTime zonedDate = dateUtils.parseDateTime(expressionMatcher.group(INPUT_DATE_GROUP),
-                    ISO_STANDARD_FORMAT);
-            String outputFormat = expressionMatcher.group(OUTPUT_FORMAT_GROUP);
-            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputFormat);
-            zonedDate = updateTimeZone(expressionMatcher, zonedDate);
-            return Optional.of(outputFormatter.format(zonedDate));
-        }
-        return Optional.empty();
-    }
-
-    private ZonedDateTime updateTimeZone(Matcher expressionMatcher, ZonedDateTime zonedDate)
-    {
+        ZonedDateTime zonedDate = dateUtils.parseDateTime(expressionMatcher.group(INPUT_DATE_GROUP),
+                ISO_STANDARD_FORMAT);
+        String outputFormat = expressionMatcher.group(OUTPUT_FORMAT_GROUP);
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputFormat);
         String outputTimeZone = expressionMatcher.group(OUTPUT_TIMEZONE_GROUP);
         if (outputTimeZone != null)
         {
-            return zonedDate.withZoneSameInstant(ZoneId.of(outputTimeZone));
+            zonedDate = zonedDate.withZoneSameInstant(ZoneId.of(outputTimeZone));
         }
-        return zonedDate;
+        return outputFormatter.format(zonedDate);
     }
 }
