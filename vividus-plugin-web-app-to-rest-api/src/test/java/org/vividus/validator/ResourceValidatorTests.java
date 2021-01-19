@@ -143,7 +143,6 @@ class ResourceValidatorTests
         ResourceValidation result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.BROKEN, result.getCheckStatus());
         verify(httpClient).execute(any(HttpUriRequest.class), any(HttpContext.class));
-        verify(softAssert).recordFailedAssertion(eq("Exception occured during check of: https://vividus.org"),
-                eq(ioException));
+        verify(softAssert).recordFailedAssertion("Exception occured during check of: https://vividus.org", ioException);
     }
 }

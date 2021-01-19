@@ -118,7 +118,7 @@ class BaseValidationsTests
         webElements = List.of(mockedWebElement);
         when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
         Locator attributes = mock(Locator.class);
-        when(searchActions.findElements(eq(mockedSearchContext), eq(attributes))).thenReturn(webElements);
+        when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(webElements);
         when(attributes.toString()).thenReturn("attributes");
         when(softAssert.assertThat(eq(SOME_ELEMENT), anyString(), eq(webElements),
                 any(Matcher.class))).thenReturn(true);
