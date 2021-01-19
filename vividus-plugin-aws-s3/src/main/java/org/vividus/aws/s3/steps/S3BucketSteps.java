@@ -254,11 +254,11 @@ public class S3BucketSteps
      *                     <li><code>OBJECT_MODIFIED_NOT_EARLIER_THAN</code> - the ISO-8601 date, restricting to objects
      *                     with last modified date after the specified value.</li>
      *                     </ul>
-     *                     The filters can be combined in any order and in any composition, e.g.<br/>
+     *                     The filters can be combined in any order and in any composition, e.g.<br>
      *                     <code>
-     *                     |filterType                      |filterValue               |<br/>
-     *                     |key suffix                      |.txt                      |<br/>
-     *                     |object modified not earlier than|2021-01-15T19:00:00+00:00 |<br/>
+     *                     |filterType                      |filterValue               |<br>
+     *                     |key suffix                      |.txt                      |<br>
+     *                     |object modified not earlier than|2021-01-15T19:00:00+00:00 |<br>
      *                     </code>
      *
      * @param bucketName   The name of the S3 bucket which objects keys are to be collected
