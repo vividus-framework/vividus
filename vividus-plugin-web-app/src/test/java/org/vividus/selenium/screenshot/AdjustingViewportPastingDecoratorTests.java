@@ -17,7 +17,6 @@
 package org.vividus.selenium.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +53,7 @@ class AdjustingViewportPastingDecoratorTests
     {
         String script = "return window.innerHeight || document.documentElement.clientHeight "
                 + "|| document.getElementsByTagName('body')[0].clientHeight;";
-        when(((JavascriptExecutor) webDriver).executeScript(eq(script))).thenReturn(WINDOW_HEIGHT);
+        when(((JavascriptExecutor) webDriver).executeScript(script)).thenReturn(WINDOW_HEIGHT);
         assertEquals(WINDOW_HEIGHT - HEADER_ADJUSTMENT - FOOTER_ADJUSTMENT, decorator.getWindowHeight(webDriver));
     }
 
@@ -63,7 +62,7 @@ class AdjustingViewportPastingDecoratorTests
     {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) webDriver;
         int currentScrollY = 0;
-        when(jsExecutor.executeScript(eq(SCROLL_Y_SCRIPT))).thenReturn(currentScrollY);
+        when(jsExecutor.executeScript(SCROLL_Y_SCRIPT)).thenReturn(currentScrollY);
         assertEquals(currentScrollY, decorator.getCurrentScrollY(jsExecutor));
     }
 
@@ -72,7 +71,7 @@ class AdjustingViewportPastingDecoratorTests
     {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) webDriver;
         int currentScrollY = 100;
-        when(jsExecutor.executeScript(eq(SCROLL_Y_SCRIPT))).thenReturn(currentScrollY);
+        when(jsExecutor.executeScript(SCROLL_Y_SCRIPT)).thenReturn(currentScrollY);
         decorator.getCurrentScrollY(jsExecutor);
         assertEquals(currentScrollY, decorator.getCurrentScrollY(jsExecutor));
         assertEquals(currentScrollY + HEADER_ADJUSTMENT, decorator.getCurrentScrollY(jsExecutor));

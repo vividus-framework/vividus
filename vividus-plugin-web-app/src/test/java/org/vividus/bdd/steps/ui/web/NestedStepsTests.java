@@ -82,7 +82,7 @@ class NestedStepsTests
     void testPerformAllStepsForElementIfFound()
     {
         Locator locator = mock(Locator.class);
-        doNothing().when(subSteps).execute(eq(Optional.empty()));
+        doNothing().when(subSteps).execute(Optional.empty());
         WebElement first = mock(WebElement.class);
         WebElement second = mock(WebElement.class);
         when(baseValidations.assertIfNumberOfElementsFound(ELEMENTS_TO_PERFORM_STEPS, locator, 1,

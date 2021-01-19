@@ -252,8 +252,8 @@ class ElementStepsTests
         when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator)).thenReturn(webElement);
         when(mouseActions.click(webElement)).thenReturn(clickResult);
         elementSteps.clickElementPageNotRefresh(locator);
-        verify(softAssert).assertTrue(eq("Page has not been refreshed after clicking on the element located by "
-                + "Case sensitive text: 'text'; Visibility: VISIBLE;"), eq(!clickResult.isNewPageLoaded()));
+        verify(softAssert).assertTrue("Page has not been refreshed after clicking on the element located by "
+                + "Case sensitive text: 'text'; Visibility: VISIBLE;", !clickResult.isNewPageLoaded());
     }
 
     @Test

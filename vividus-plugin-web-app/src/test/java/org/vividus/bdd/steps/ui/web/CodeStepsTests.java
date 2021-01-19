@@ -168,8 +168,8 @@ class CodeStepsTests
         Locator locator = new Locator(WebLocatorType.XPATH,
                     new SearchParameters(XPATH));
         codeSteps.doesInvisibleQuantityOfElementsExists(locator,  ComparisonRule.EQUAL_TO, 1);
-        verify(mockedBaseValidations).assertIfNumberOfElementsFound(eq("The number of found invisible elements"),
-                    eq(locator), eq(1), eq(ComparisonRule.EQUAL_TO));
+        verify(mockedBaseValidations).assertIfNumberOfElementsFound("The number of found invisible elements", locator,
+                1, ComparisonRule.EQUAL_TO);
     }
 
     static Stream<Arguments> executeJavascriptWithArguments()
