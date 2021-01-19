@@ -2,7 +2,7 @@
 
 === Authentication
 
-The plugin will search for credentials using https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html#credentials-default[the default credential provider chain] in the following order:
+The plugin attempts to find AWS credentials by using https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html#credentials-default[the default credential provider chain]. The provider chain looks for credentials using the provided below options one by one starting from the top. If credentials are found at some point, the search stops and further options are not evaluated.
 
 . Environment variables: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (the optional variable for session token is `AWS_SESSION_TOKEN`).
 . The properties: `system.aws.accessKeyId` and `system.aws.secretKey` (the optional property for session token is `system.aws.sessionToken`).
@@ -16,7 +16,7 @@ See the official https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/cre
 
 === Region Selection
 
-The plugin will search for credentials using https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-region-selection.html#default-region-provider-chain[the default region provider chain] in the following order:
+The plugin attempts to find AWS region by using https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-region-selection.html#default-region-provider-chain[the default region provider chain]. The provider chain looks for a region using the provided below options one by one starting from the top. If region is found at some point, the search stops and further options are not evaluated.
 
 . Environment variable: `AWS_REGION`.
 . The property: `system.aws.region`.
