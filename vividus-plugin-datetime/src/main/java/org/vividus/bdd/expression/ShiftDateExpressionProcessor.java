@@ -19,7 +19,6 @@ package org.vividus.bdd.expression;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
 @Named
-public class ShiftDateExpressionProcessor implements IExpressionProcessor<String>
+public class ShiftDateExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final Pattern SHIFT_DATE_PATTERN = Pattern.compile(
             "^shiftDate\\((.+?),(?<!\\\\,)(.+?),\\s*(-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*)\\)$",
@@ -45,32 +44,28 @@ public class ShiftDateExpressionProcessor implements IExpressionProcessor<String
 
     public ShiftDateExpressionProcessor(DateUtils dateUtils)
     {
+        super(SHIFT_DATE_PATTERN);
         this.dateUtils = dateUtils;
     }
 
     @Override
-    public Optional<String> execute(String expression)
+    protected String evaluateExpression(Matcher expressionMatcher)
     {
-        Matcher expressionMatcher = SHIFT_DATE_PATTERN.matcher(expression);
-        if (expressionMatcher.find())
-        {
-            DateTimeFormatter format = DateTimeFormatter.ofPattern(normalize(expressionMatcher.group(FORMAT_GROUP)),
+        DateTimeFormatter format = DateTimeFormatter.ofPattern(normalize(expressionMatcher.group(FORMAT_GROUP)),
                 Locale.ENGLISH);
-            ZonedDateTime zonedDateTime = dateUtils.parseDateTime(normalize(expressionMatcher.group(INPUT_DATE_GROUP)),
-                    format);
-            DateExpression dateExpression = new DateExpression(expressionMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
-                    DURATION_GROUP, FORMAT_GROUP);
-            if (dateExpression.hasPeriod())
-            {
-                zonedDateTime = dateExpression.processPeriod(zonedDateTime);
-            }
-            if (dateExpression.hasDuration())
-            {
-                zonedDateTime = dateExpression.processDuration(zonedDateTime);
-            }
-            return Optional.of(format.format(zonedDateTime));
+        ZonedDateTime zonedDateTime = dateUtils.parseDateTime(normalize(expressionMatcher.group(INPUT_DATE_GROUP)),
+                format);
+        DateExpression dateExpression = new DateExpression(expressionMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
+                DURATION_GROUP, FORMAT_GROUP);
+        if (dateExpression.hasPeriod())
+        {
+            zonedDateTime = dateExpression.processPeriod(zonedDateTime);
         }
-        return Optional.empty();
+        if (dateExpression.hasDuration())
+        {
+            zonedDateTime = dateExpression.processDuration(zonedDateTime);
+        }
+        return format.format(zonedDateTime);
     }
 
     private String normalize(String argument)

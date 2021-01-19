@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +36,7 @@ import org.apache.parquet.hadoop.ParquetWriter;
 import org.vividus.csv.CsvReader;
 import org.vividus.util.ResourceUtils;
 
-public class ConvertCsvToParquetFileExpressionProcessor implements IExpressionProcessor<String>
+public class ConvertCsvToParquetFileExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final Pattern CONVERT_CSV_TO_PARQUET_PATTERN = Pattern
             .compile("^convertCsvToParquetFile\\((.+), (.+)\\)$");
@@ -49,32 +48,28 @@ public class ConvertCsvToParquetFileExpressionProcessor implements IExpressionPr
 
     public ConvertCsvToParquetFileExpressionProcessor(CsvReader csvReader)
     {
+        super(CONVERT_CSV_TO_PARQUET_PATTERN);
         this.csvReader = csvReader;
     }
 
     @Override
-    public Optional<String> execute(String expression)
+    protected String evaluateExpression(Matcher expressionMatcher)
     {
-        Matcher generateParquetMatcher = CONVERT_CSV_TO_PARQUET_PATTERN.matcher(expression);
-        if (generateParquetMatcher.find())
-        {
-            String csvPath = generateParquetMatcher.group(CSV_PATH_GROUP);
-            String schemaPath = generateParquetMatcher.group(SCHEMA_PATH_GROUP);
+        String csvPath = expressionMatcher.group(CSV_PATH_GROUP);
+        String schemaPath = expressionMatcher.group(SCHEMA_PATH_GROUP);
 
-            try
-            {
-                List<Map<String, String>> csvData = csvReader.readCsvString(ResourceUtils.loadResource(csvPath));
-                File temporaryFile = ResourceUtils.createTempFile(FilenameUtils.getBaseName(csvPath), ".parquet", null)
-                        .toFile();
-                write(temporaryFile, schemaPath, csvData);
-                return Optional.of(temporaryFile.getPath());
-            }
-            catch (IOException e)
-            {
-                throw new UncheckedIOException("Problem during file interaction: ", e);
-            }
+        try
+        {
+            List<Map<String, String>> csvData = csvReader.readCsvString(ResourceUtils.loadResource(csvPath));
+            File temporaryFile = ResourceUtils.createTempFile(FilenameUtils.getBaseName(csvPath), ".parquet", null)
+                    .toFile();
+            write(temporaryFile, schemaPath, csvData);
+            return temporaryFile.getPath();
         }
-        return Optional.empty();
+        catch (IOException e)
+        {
+            throw new UncheckedIOException("Problem during file interaction: ", e);
+        }
     }
 
     private void write(File file, String avroSchemaPath, List<Map<String, String>> data) throws IOException

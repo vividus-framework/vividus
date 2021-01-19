@@ -16,26 +16,30 @@
 
 package org.vividus.bdd.expression;
 
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FunctionalExpressionProcessor<T> extends AbstractExpressionProcessor<T>
+public abstract class AbstractExpressionProcessor<T> implements IExpressionProcessor<T>
 {
-    private static final int INPUT_DATA_GROUP = 1;
+    private final Pattern pattern;
 
-    private final Function<String, T> transformer;
-
-    public FunctionalExpressionProcessor(String functionName, Function<String, T> transformer)
+    protected AbstractExpressionProcessor(Pattern pattern)
     {
-        super(Pattern.compile("^" + functionName + "\\((.*)\\)$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL));
-        this.transformer = transformer;
+        this.pattern = pattern;
     }
 
     @Override
-    protected T evaluateExpression(Matcher expressionMatcher)
+    public Optional<T> execute(String expression)
     {
-        String inputData = expressionMatcher.group(INPUT_DATA_GROUP);
-        return transformer.apply(inputData);
+        Matcher expressionMatcher = pattern.matcher(expression);
+        if (expressionMatcher.find())
+        {
+            T expressionResult = evaluateExpression(expressionMatcher);
+            return Optional.of(expressionResult);
+        }
+        return Optional.empty();
     }
+
+    protected abstract T evaluateExpression(Matcher expressionMatcher);
 }

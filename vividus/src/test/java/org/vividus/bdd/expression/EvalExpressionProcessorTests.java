@@ -94,20 +94,20 @@ class EvalExpressionProcessorTests
     }
 
     @Test
-    void shoudThrowAnExceptionInCaseOfMissingVariable()
+    void shouldThrowAnExceptionInCaseOfMissingVariable()
     {
         JexlException.Variable exception = assertThrows(JexlException.Variable.class,
             () -> processor.execute("eval(missingVar + 'val')"));
-        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.execute@1:1 undefined variable missingVar",
-                exception.getMessage());
+        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.evaluateExpression@1:1 undefined variable "
+                + "missingVar", exception.getMessage());
     }
 
     @Test
-    void shoudThrowAnExceptionInCaseOfSyntaxError()
+    void shouldThrowAnExceptionInCaseOfSyntaxError()
     {
         JexlException.Parsing exception = assertThrows(JexlException.Parsing.class,
             () -> processor.execute("eval(var + 'val')"));
-        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.execute@1:5 parsing error in '+'",
+        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.evaluateExpression@1:5 parsing error in '+'",
                 exception.getMessage());
     }
 }

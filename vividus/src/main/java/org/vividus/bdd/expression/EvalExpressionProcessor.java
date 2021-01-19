@@ -18,7 +18,6 @@ package org.vividus.bdd.expression;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.bdd.context.IBddVariableContext;
 
 @Named
-public class EvalExpressionProcessor implements IExpressionProcessor<String>
+public class EvalExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final Pattern EVAL_PATTERN = Pattern.compile("^eval\\((.*)\\)$", Pattern.CASE_INSENSITIVE
             | Pattern.DOTALL);
@@ -47,20 +46,16 @@ public class EvalExpressionProcessor implements IExpressionProcessor<String>
 
     public EvalExpressionProcessor(IBddVariableContext bddVariableContext)
     {
+        super(EVAL_PATTERN);
         this.bddVariableContext = bddVariableContext;
     }
 
     @Override
-    public Optional<String> execute(String expression)
+    protected String evaluateExpression(Matcher expressionMatcher)
     {
-        Matcher expressionMatcher = EVAL_PATTERN.matcher(expression);
-        if (expressionMatcher.find())
-        {
-            String expressionToEvaluate = expressionMatcher.group(EVAL_GROUP);
-            JexlScript jexlScript = jexlEngine.get().createScript(expressionToEvaluate);
-            return Optional.of(String.valueOf(jexlScript.execute(new JexlBddVariableContext(bddVariableContext))));
-        }
-        return Optional.empty();
+        String expressionToEvaluate = expressionMatcher.group(EVAL_GROUP);
+        JexlScript jexlScript = jexlEngine.get().createScript(expressionToEvaluate);
+        return String.valueOf(jexlScript.execute(new JexlBddVariableContext(bddVariableContext)));
     }
 
     private static final class JexlBddVariableContext extends MapContext
