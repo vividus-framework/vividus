@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.bdd.util.EnumUtils;
 import org.vividus.bdd.variable.IVariablesFactory;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.bdd.variable.Variables;
@@ -50,7 +51,11 @@ public class BddVariableContext implements IBddVariableContext
     @Override
     public void putVariable(VariableScope variableScope, String variableKey, Object variableValue)
     {
-        LOGGER.info("Saving a value '{}' into the '{}' variable '{}'", variableValue, variableScope, variableKey);
+        LOGGER.atInfo()
+                .addArgument(variableValue)
+                .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
+                .addArgument(variableKey)
+                .log("Saving a value '{}' into the {} variable '{}'");
         switch (variableScope)
         {
             case NEXT_BATCHES:

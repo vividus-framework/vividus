@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.util.EnumUtils;
 import org.vividus.bdd.variable.IVariablesFactory;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.bdd.variable.Variables;
@@ -54,9 +55,10 @@ import org.vividus.testcontext.TestContext;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class BddVariableContextTests
 {
-    private static final String SAVE_MESSAGE_TEMPLATE = "Saving a value '{}' into the '{}' variable '{}'";
+    private static final String SAVE_MESSAGE_TEMPLATE = "Saving a value '{}' into the {} variable '{}'";
     private static final String VARIABLE_KEY = "variableKey";
     private static final String VALUE = "value";
+    private static final String STEP = "step";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(BddVariableContext.class);
 
@@ -79,8 +81,9 @@ class BddVariableContextTests
         when(variablesFactory.createVariables()).thenReturn(variables);
         bddVariableContext.putVariable(variableScope, VARIABLE_KEY, VALUE);
         assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
+        String scope = EnumUtils.toHumanReadableForm(variableScope);
         assertThat(logger.getLoggingEvents(), equalTo(
-                List.of(info(SAVE_MESSAGE_TEMPLATE, VALUE, variableScope, VARIABLE_KEY))));
+                List.of(info(SAVE_MESSAGE_TEMPLATE, VALUE, scope, VARIABLE_KEY))));
     }
 
     @Test
@@ -88,12 +91,11 @@ class BddVariableContextTests
     {
         Variables variables = new Variables(Map.of());
         when(variablesFactory.createVariables()).thenReturn(variables);
-        VariableScope variableScope = VariableScope.STEP;
         bddVariableContext.initStepVariables();
-        bddVariableContext.putVariable(variableScope, VARIABLE_KEY, VALUE);
+        bddVariableContext.putVariable(VariableScope.STEP, VARIABLE_KEY, VALUE);
         assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
         assertThat(logger.getLoggingEvents(), equalTo(
-                List.of(info(SAVE_MESSAGE_TEMPLATE, VALUE, variableScope, VARIABLE_KEY))));
+                List.of(info(SAVE_MESSAGE_TEMPLATE, VALUE, STEP, VARIABLE_KEY))));
     }
 
     @Test
@@ -124,10 +126,10 @@ class BddVariableContextTests
         List<LoggingEvent> loggingEvents = logger.getLoggingEvents();
         assertThat(loggingEvents, hasSize(4));
         assertThat(loggingEvents, hasItems(
-                info(SAVE_MESSAGE_TEMPLATE, VALUE, VariableScope.STEP, VARIABLE_KEY),
-                info(SAVE_MESSAGE_TEMPLATE, VALUE, VariableScope.SCENARIO, VARIABLE_KEY),
-                info(SAVE_MESSAGE_TEMPLATE, VALUE, VariableScope.STORY, VARIABLE_KEY),
-                info(SAVE_MESSAGE_TEMPLATE, VALUE, VariableScope.NEXT_BATCHES, VARIABLE_KEY)));
+                info(SAVE_MESSAGE_TEMPLATE, VALUE, STEP, VARIABLE_KEY),
+                info(SAVE_MESSAGE_TEMPLATE, VALUE, "scenario", VARIABLE_KEY),
+                info(SAVE_MESSAGE_TEMPLATE, VALUE, "story", VARIABLE_KEY),
+                info(SAVE_MESSAGE_TEMPLATE, VALUE, "next batches", VARIABLE_KEY)));
         verify(variablesFactory).addNextBatchesVariable(VARIABLE_KEY, VALUE);
     }
 

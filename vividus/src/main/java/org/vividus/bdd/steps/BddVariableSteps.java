@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.util.EnumUtils;
 import org.vividus.bdd.util.MapUtils;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
@@ -62,7 +63,7 @@ public class BddVariableSteps
             @Override
             protected <T extends Comparable<T>> boolean compareValues(T value1, ComparisonRule condition, T value2)
             {
-                String readableCondition = condition.name().toLowerCase().replace('_', ' ');
+                String readableCondition = EnumUtils.toHumanReadableForm(condition);
                 String description = "Checking if \"" + value1 + "\" is " + readableCondition + " \"" + value2 + "\"";
                 return softAssert.assertThat(description, value1, condition.getComparisonRule(value2));
             }
