@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.FocusState;
+import org.vividus.bdd.util.EnumUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
 public class FocusValidations implements IFocusValidations
@@ -31,8 +32,7 @@ public class FocusValidations implements IFocusValidations
     @Override
     public boolean isElementInFocusState(WebElement webElement, FocusState focusState)
     {
-        return softAssert.assertTrue(
-                "The context element is " + focusState.name().toLowerCase().replace('_', ' '),
+        return softAssert.assertTrue("The context element is " + EnumUtils.toHumanReadableForm(focusState),
                 focusState.isInState(javascriptActions, webElement));
     }
 }

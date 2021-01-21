@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.vividus.bdd.util.EnumUtils;
 
 public enum ComparisonRule
 {
@@ -93,7 +94,7 @@ public enum ComparisonRule
     @Override
     public String toString()
     {
-        return super.toString().replace('_', ' ').toLowerCase();
+        return EnumUtils.toHumanReadableForm(this);
     }
 
     public String getSign()
