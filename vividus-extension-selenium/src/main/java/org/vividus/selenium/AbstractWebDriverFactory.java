@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.vividus.selenium;
 
 import static java.util.stream.Collectors.toMap;
+import static org.vividus.selenium.DesiredCapabilitiesMerger.merge;
 import static org.vividus.selenium.type.CapabilitiesValueTypeAdjuster.adjustType;
 
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
@@ -133,25 +133,6 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
     protected DesiredCapabilities getWebDriverCapabilities(boolean localRun, DesiredCapabilities toMerge)
     {
         return merge(getWebDriverCapabilities(localRun), toMerge);
-    }
-
-    @SuppressWarnings("unchecked")
-    private DesiredCapabilities merge(DesiredCapabilities base, DesiredCapabilities toMerge)
-    {
-        DesiredCapabilities baseProperties = new DesiredCapabilities(base);
-        toMerge.asMap().forEach((cName, cValue) ->
-        {
-            Object basePropertyValue = baseProperties.getCapability(cName);
-            if (basePropertyValue instanceof Map && cValue instanceof Map)
-            {
-                Map<String, Object> capabilities = new HashMap<>((Map<String, Object>) basePropertyValue);
-                capabilities.putAll((Map<String, Object>) cValue);
-                baseProperties.setCapability(cName, capabilities);
-                return;
-            }
-            baseProperties.setCapability(cName, cValue);
-        });
-        return baseProperties;
     }
 
     protected IPropertyParser getPropertyParser()

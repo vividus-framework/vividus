@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,8 @@ class VividusWebDriverFactoryTests
     private static final String KEY3 = "key3";
     private static final String KEY2 = "key2";
     private static final String KEY1 = "key1";
+    private static final String OUTER_KEY = "outer-key";
+    private static final String INNER_KEY = "inner-key";
 
     @Mock private WebDriver webDriver;
     @Mock private IWebDriverManagerContext webDriverManagerContext;
@@ -74,11 +76,22 @@ class VividusWebDriverFactoryTests
                 "valueFromConfigurer2");
         DesiredCapabilitiesConfigurer thirdCapabilitiesConfigurer = caps -> caps.setCapability(KEY3,
                 VALUE_FROM_CONFIGURER3);
+        DesiredCapabilitiesConfigurer fourthCapabilitiesConfigurer = caps -> caps.setCapability(OUTER_KEY,
+                Map.of(INNER_KEY, "configurer-value"));
+
         String valueWebDriverManager1 = "valueWebDriverManager1";
         String valueFromWebDriverManager5 = "valueFromWebDriverManager5";
+        String parameterValue = "parameter-value";
+
+        Map<String, Object> parameterCapabilities = Map.of(
+            KEY1, valueWebDriverManager1,
+            KEY4, "valueFromWebDriverManager4",
+            KEY5, valueFromWebDriverManager5,
+            OUTER_KEY, Map.of(INNER_KEY, parameterValue)
+        );
+
         when(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES))
-                .thenReturn(new DesiredCapabilities(Map.of(KEY1, valueWebDriverManager1, KEY4,
-                        "valueFromWebDriverManager4", KEY5, valueFromWebDriverManager5)));
+                .thenReturn(new DesiredCapabilities(parameterCapabilities));
 
         RunningStory runningStory = mock(RunningStory.class);
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
@@ -100,7 +113,7 @@ class VividusWebDriverFactoryTests
 
         TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(true, webDriverManagerContext,
                 bddRunContext, proxy, Optional.of(Set.of(firstCapabilitiesConfigurer, secondCapabilitiesConfigurer,
-                        thirdCapabilitiesConfigurer)));
+                        thirdCapabilitiesConfigurer, fourthCapabilitiesConfigurer)));
 
         VividusWebDriver vividusWebDriver = factory.create();
 
@@ -112,7 +125,8 @@ class VividusWebDriverFactoryTests
                             KEY5,   valueFromWebDriverManager5,
                             "key6", "valueFromScenarioMeta6",
                             "key7", "valueFromScenarioMeta7",
-                            CapabilityType.PROXY, proxyMock),
+                            CapabilityType.PROXY, proxyMock,
+                            OUTER_KEY, Map.of(INNER_KEY, parameterValue)),
                 vividusWebDriver.getDesiredCapabilities().asMap());
         InOrder ordered = Mockito.inOrder(webDriverManagerContext, bddRunContext);
         ordered.verify(webDriverManagerContext).getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES);

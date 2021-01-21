@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.vividus.selenium;
+
+import static org.vividus.selenium.DesiredCapabilitiesMerger.merge;
 
 import java.util.Optional;
 import java.util.Set;
@@ -54,14 +56,16 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
     public VividusWebDriver create()
     {
         VividusWebDriver vividusWebDriver = new VividusWebDriver();
-        setDesiredCapabilities(vividusWebDriver.getDesiredCapabilities());
+        vividusWebDriver.setDesiredCapabilities(getDesiredCapabilities());
         vividusWebDriver.setWebDriver(createWebDriver(vividusWebDriver.getDesiredCapabilities()));
         vividusWebDriver.setRemote(remoteExecution);
         return vividusWebDriver;
     }
 
-    private void setDesiredCapabilities(DesiredCapabilities desiredCapabilities)
+    private DesiredCapabilities getDesiredCapabilities()
     {
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+
         if (proxy.isStarted())
         {
             desiredCapabilities.setCapability(CapabilityType.PROXY, proxy.createSeleniumProxy());
@@ -69,7 +73,10 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
 
         desiredCapabilitiesConfigurers.ifPresent(
             configurers -> configurers.forEach(configurer -> configurer.configure(desiredCapabilities)));
-        desiredCapabilities.merge(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES));
+
+        DesiredCapabilities mergedCapabilities = merge(desiredCapabilities,
+                webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES));
+
         webDriverManagerContext.reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
         RunningStory runningStory = bddRunContext.getRunningStory();
         if (runningStory != null)
@@ -80,8 +87,10 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
                                         .map(scenario -> scenario.getMeta().inheritFrom(storyMeta))
                                         .orElse(storyMeta);
             MetaWrapper metaWrapper = new MetaWrapper(mergedMeta);
-            ControllingMetaTag.setDesiredCapabilitiesFromMeta(desiredCapabilities, metaWrapper);
+            ControllingMetaTag.setDesiredCapabilitiesFromMeta(mergedCapabilities, metaWrapper);
         }
+
+        return mergedCapabilities;
     }
 
     protected abstract WebDriver createWebDriver(DesiredCapabilities desiredCapabilities);
