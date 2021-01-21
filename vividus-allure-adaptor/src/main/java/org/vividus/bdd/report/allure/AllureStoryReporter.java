@@ -615,21 +615,9 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         }
 
         String id = step.getValue();
-        String testRunId = getTestRunId();
-        if (testRunId != null)
-        {
-            Link testRunLink = ResultsUtils.createTmsLink(testRunId).setName("Test run ID");
-            lifecycle.updateTestCase(id, result -> result.getLinks().add(testRunLink));
-        }
-
         lifecycle.stopTestCase(id);
         lifecycle.writeTestCase(id);
         switchToParent();
-    }
-
-    private String getTestRunId()
-    {
-        return null;
     }
 
     private StatusDetails getStatusDetailsFromThrowable(Throwable throwable)
