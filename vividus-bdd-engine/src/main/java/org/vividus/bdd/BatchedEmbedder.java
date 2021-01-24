@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class BatchedEmbedder extends Embedder
     private boolean generateViewAfterBatches;
 
     private String batch;
-    private boolean ignoreFailure;
+    private boolean failFast;
 
     public BatchedEmbedder(BddRunContext bddRunContext, IBddVariableContext bddVariableContext,
             BatchStorage batchStorage)
@@ -80,7 +80,7 @@ public class BatchedEmbedder extends Embedder
                 useEmbedderControls(createEmbedderControls(batchExecutionConfiguration));
                 useMetaFilters(batchExecutionConfiguration.getMetaFilters());
 
-                ignoreFailure = batchExecutionConfiguration.isIgnoreFailure();
+                failFast = batchExecutionConfiguration.isFailFast();
 
                 EmbedderControls embedderControls = embedderControls();
                 embedderMonitor.usingControls(embedderControls);
@@ -108,7 +108,7 @@ public class BatchedEmbedder extends Embedder
                     storyManager().runStoriesAsPaths(storyPaths, filter, failures);
 
                     handleFailures(failures);
-                    if (!ignoreFailure && !failures.isEmpty())
+                    if (failFast && !failures.isEmpty())
                     {
                         break;
                     }
@@ -145,7 +145,7 @@ public class BatchedEmbedder extends Embedder
         BatchedPerformableTree performableTree = (BatchedPerformableTree) super.performableTree();
         performableTree.setReportBeforeStories(reportBeforeStories);
         performableTree.setReportAfterStories(reportAfterStories);
-        performableTree.setIgnoreFailureInBatches(ignoreFailure);
+        performableTree.setFailFast(failFast);
         return performableTree;
     }
 

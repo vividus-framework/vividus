@@ -1,0 +1,38 @@
+{
+  "STORY" : {
+    "total" : 2,
+    "passed" : 1,
+    "failed" : 1,
+    "broken" : 0,
+    "skipped" : 0,
+    "pending" : 0,
+    "knownIssue" : 0
+  },
+  "SCENARIO" : {
+    "total" : 4,
+    "passed" : 2,
+    "failed" : 1,
+    "broken" : 0,
+    "skipped" : 1,
+    "pending" : 0,
+    "knownIssue" : 0
+  },
+  "STEP" : {
+    "total" : 2,
+    "passed" : 1,
+    "failed" : 1,
+    "broken" : 0,
+    "skipped" : 0,
+    "pending" : 0,
+    "knownIssue" : 0
+  },
+  "GIVEN_STORY" : {
+    "total" : 0,
+    "passed" : 0,
+    "failed" : 0,
+    "broken" : 0,
+    "skipped" : 0,
+    "pending" : 0,
+    "knownIssue" : 0
+  }
+}

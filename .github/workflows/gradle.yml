@@ -421,6 +421,14 @@ jobs:
         name: BrowserStack - System Tests - Allure report - Android
         path: vividus-tests/output/reports/bs-android-allure
 
+    - name: Validate fail fast
+      if: matrix.plaform == 'macos-latest'
+      shell: bash
+      run: |
+        ./gradlew :vividus-tests:validateRunStatistics \
+                                -Pvividus.configuration.suites=failFast \
+                                -PexpectedRunStatistics="resources/main/failFast/expected.json"
+
     - name: Publish snapshot artifacts
       if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
       env:

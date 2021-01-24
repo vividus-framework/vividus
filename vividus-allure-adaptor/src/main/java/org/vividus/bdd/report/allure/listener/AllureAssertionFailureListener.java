@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import com.google.common.eventbus.Subscribe;
 import org.vividus.bdd.report.allure.IAllureStepReporter;
 import org.vividus.bdd.report.allure.model.StatusPriority;
 import org.vividus.softassert.event.AssertionFailedEvent;
-import org.vividus.softassert.model.SoftAssertionError;
 
 import io.qameta.allure.model.Status;
 
@@ -37,9 +36,7 @@ public class AllureAssertionFailureListener
     @Subscribe
     public void onAssertionFailure(AssertionFailedEvent event)
     {
-        SoftAssertionError softAssertionError = event.getSoftAssertionError();
-        Status status = (softAssertionError.isKnownIssue() && !softAssertionError.getKnownIssue().isFixed()
-                ? StatusPriority.KNOWN_ISSUES_ONLY : StatusPriority.FAILED).getStatusModel();
+        Status status = StatusPriority.from(event).getStatusModel();
         allureStepReporter.updateStepStatus(status);
     }
 }

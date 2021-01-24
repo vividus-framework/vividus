@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class AssertionManagerTests
     @Test
     void shouldNotFailFast()
     {
-        assertionManager.setFailFast(false);
+        assertionManager.setFailScenarioFast(false);
         assertionManager.onAssertionFailure(createEventWithError(false, false, false));
         verifyNoInteractions(softAssert);
     }
@@ -60,7 +60,7 @@ class AssertionManagerTests
     @Test
     void shouldNotFailFastIfErrorIsKnownIssue()
     {
-        assertionManager.setFailFast(true);
+        assertionManager.setFailScenarioFast(true);
         assertionManager.onAssertionFailure(createEventWithError(true, false, false));
         verifyNoInteractions(softAssert);
     }
@@ -68,7 +68,7 @@ class AssertionManagerTests
     @Test
     void shouldFailFastIfErrorIsNotKnownIssue()
     {
-        assertionManager.setFailFast(true);
+        assertionManager.setFailScenarioFast(true);
         assertionManager.onAssertionFailure(createEventWithError(false, false, false));
         verify(softAssert).verify();
     }
@@ -76,7 +76,7 @@ class AssertionManagerTests
     @Test
     void shouldFailFastIfFailTestCaseFast()
     {
-        assertionManager.setFailFast(false);
+        assertionManager.setFailScenarioFast(false);
         AssertionFailedEvent event = createEventWithError(true, true, false);
         assertionManager.onAssertionFailure(event);
         verify(softAssert).verify();
@@ -85,7 +85,7 @@ class AssertionManagerTests
     @Test
     void shouldNotResetStateBeforeScenario()
     {
-        assertionManager.setFailFast(false);
+        assertionManager.setFailScenarioFast(false);
         when(storyControls.currentStoryControls()).thenReturn(storyControls);
         AssertionFailedEvent event = createEventWithError(true, false, true);
         assertionManager.onAssertionFailure(event);

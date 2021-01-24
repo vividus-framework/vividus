@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class AssertionManager
     private final ISoftAssert softAssert;
     private final StoryControls storyControls;
 
-    private boolean failFast;
+    private boolean failScenarioFast;
 
     public AssertionManager(EventBus eventBus, ISoftAssert softAssert, StoryControls storyControls)
     {
@@ -42,7 +42,7 @@ public class AssertionManager
     public void onAssertionFailure(AssertionFailedEvent event)
     {
         SoftAssertionError error = event.getSoftAssertionError();
-        if (failFast && !error.isKnownIssue() || error.isFailTestCaseFast())
+        if (failScenarioFast && !error.isKnownIssue() || error.isFailTestCaseFast())
         {
             // Way to order EventBus listeners: all AssertionFailedEvent listeners and all events spawned by
             // these listeners must be processed, only after that verification may be triggered
@@ -61,9 +61,9 @@ public class AssertionManager
         softAssert.verify();
     }
 
-    public void setFailFast(boolean failFast)
+    public void setFailScenarioFast(boolean failScenarioFast)
     {
-        this.failFast = failFast;
+        this.failScenarioFast = failScenarioFast;
     }
 
     private static class VerifyAssertionsEvent
