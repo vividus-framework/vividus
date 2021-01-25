@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ class XrayExporterTests
     void shouldExportCucumberTestCaseWithoutTestCaseId() throws URISyntaxException, IOException
     {
         URI jsonResultsUri = getJsonResultsUri("createcucumber");
-        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        setUpXrayExporterOptions(jsonResultsUri);
         CucumberTestCase testCase = mock(CucumberTestCase.class);
 
         when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
@@ -130,7 +130,7 @@ class XrayExporterTests
     void shouldUpdateExistingCucumberTestCase() throws URISyntaxException, IOException, NonEditableIssueStatusException
     {
         URI jsonResultsUri = getJsonResultsUri("updatecucumber");
-        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        setUpXrayExporterOptions(jsonResultsUri);
         CucumberTestCase testCase = mock(CucumberTestCase.class);
 
         when(testCaseFactory.createCucumberTestCase(cucumberTestCaseParametersCaptor.capture())).thenReturn(testCase);
@@ -148,9 +148,9 @@ class XrayExporterTests
             throws URISyntaxException, IOException, NonEditableIssueStatusException
     {
         URI jsonResultsUri = getJsonResultsUri("componentslabelsupdatabletci");
-        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
-        String testExecutionKey = "TEST-0";
-        xrayExporterOptions.setTestExecutionKey(testExecutionKey);
+        String testSetKey = "TEST-SET";
+        String testExecutionKey = "TEST-EXEC";
+        setUpXrayExporterOptions(jsonResultsUri, Optional.of(testSetKey), Optional.of(testExecutionKey));
         ManualTestCase testCase = mock(ManualTestCase.class);
 
         when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
@@ -161,6 +161,7 @@ class XrayExporterTests
         verifyManualTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
                 Set.of("dummy-component-1", "dummy-component-2"));
         verify(xrayFacade).updateTestExecution(testExecutionKey, List.of(ISSUE_ID));
+        verify(xrayFacade).updateTestSet(testSetKey, List.of(ISSUE_ID));
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }
 
@@ -169,7 +170,7 @@ class XrayExporterTests
             throws URISyntaxException, IOException, NonEditableIssueStatusException
     {
         URI jsonResultsUri = getJsonResultsUri("continueiferror");
-        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        setUpXrayExporterOptions(jsonResultsUri);
         IOException exception = mock(IOException.class);
         String errorIssueId = "STUB-ERROR";
 
@@ -191,7 +192,7 @@ class XrayExporterTests
     void shouldNotExportSkippedTest() throws URISyntaxException, IOException
     {
         URI jsonResultsUri = getJsonResultsUri("skipped");
-        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        setUpXrayExporterOptions(jsonResultsUri);
 
         xrayExporter.exportResults();
 
@@ -214,7 +215,7 @@ class XrayExporterTests
     void shouldExportNewTestAndLinkToRequirements() throws URISyntaxException, IOException
     {
         URI jsonResultsUri = getJsonResultsUri("createandlink");
-        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        setUpXrayExporterOptions(jsonResultsUri);
         ManualTestCase testCase = mock(ManualTestCase.class);
 
         when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
@@ -232,7 +233,7 @@ class XrayExporterTests
     void shouldFailIfMoreThanOneIdIsSpecified() throws URISyntaxException, IOException
     {
         URI jsonResultsUri = getJsonResultsUri("morethanoneid");
-        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        setUpXrayExporterOptions(jsonResultsUri);
 
         xrayExporter.exportResults();
 
@@ -312,5 +313,18 @@ class XrayExporterTests
     public URI getJsonResultsUri(String resource) throws URISyntaxException
     {
         return ResourceUtils.findResource(getClass(), resource).toURI();
+    }
+
+    private void setUpXrayExporterOptions(URI jsonResultsUri)
+    {
+        setUpXrayExporterOptions(jsonResultsUri, Optional.empty(), Optional.empty());
+    }
+
+    private void setUpXrayExporterOptions(URI jsonResultsUri, Optional<String> testSetKey,
+            Optional<String> testExecutionKey)
+    {
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        xrayExporterOptions.setTestSetKey(testSetKey);
+        xrayExporterOptions.setTestExecutionKey(testExecutionKey);
     }
 }

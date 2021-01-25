@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import org.vividus.util.json.JsonPathUtils;
 import org.vividus.xray.databind.CucumberTestCaseSerializer;
 import org.vividus.xray.databind.ManualTestCaseSerializer;
 import org.vividus.xray.model.AbstractTestCase;
+import org.vividus.xray.model.AddOperationRequest;
 import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
-import org.vividus.xray.model.TestExecution;
 
 public class XrayFacade
 {
@@ -87,13 +87,24 @@ public class XrayFacade
 
     public void updateTestExecution(String testExecutionKey, List<String> testCaseKeys) throws IOException
     {
-        TestExecution testExecution = new TestExecution(testCaseKeys);
-        String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
+        addTestCases(testExecutionKey, "test execution", "testexec", testCaseKeys);
+    }
+
+    public void updateTestSet(String testSetKey, List<String> testCaseKeys) throws IOException
+    {
+        addTestCases(testSetKey, "test set", "testset", testCaseKeys);
+    }
+
+    private void addTestCases(String key, String name, String pathKey, List<String> testCaseKeys) throws IOException
+    {
+        AddOperationRequest request = new AddOperationRequest(testCaseKeys);
+        String requestBody = objectMapper.writeValueAsString(request);
         LOGGER.atInfo()
               .addArgument(() -> StringUtils.join(testCaseKeys, ", "))
-              .addArgument(testExecutionKey)
-              .log("Add {} test cases to {} test execution");
-        jiraClient.executePost("/rest/raven/1.0/api/testexec/" + testExecutionKey + "/test", testExecutionRequest);
+              .addArgument(key)
+              .addArgument(name)
+              .log("Add {} test cases to {} {}");
+        jiraClient.executePost("/rest/raven/1.0/api/" + pathKey + "/" + key + "/test", requestBody);
     }
 
     private void checkIfIssueEditable(String issueKey) throws IOException, NonEditableIssueStatusException
