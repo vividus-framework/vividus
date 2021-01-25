@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,8 +97,28 @@ public class XrayExporter
             }
         }
 
+        addTestCasesToTestSet(testCaseIds);
         addTestCasesToTestExecution(testCaseIds);
+
         publishErrors();
+    }
+
+    private void addTestCasesToTestSet(List<String> testCaseIds) throws IOException
+    {
+        Optional<String> testSetKey = xrayExporterOptions.getTestSetKey();
+        if (testSetKey.isPresent())
+        {
+            xrayFacade.updateTestSet(testSetKey.get(), testCaseIds);
+        }
+    }
+
+    private void addTestCasesToTestExecution(List<String> testCaseIds) throws IOException
+    {
+        Optional<String> testExecutionKey = xrayExporterOptions.getTestExecutionKey();
+        if (testExecutionKey.isPresent())
+        {
+            xrayFacade.updateTestExecution(testExecutionKey.get(), testCaseIds);
+        }
     }
 
     private Optional<String> exportScenario(String storyTitle, Scenario scenario)
@@ -167,15 +187,6 @@ public class XrayExporter
         parameters.setLabels(getMetaValues(scenarioMeta, "xray.labels"));
         parameters.setComponents(getMetaValues(scenarioMeta, "xray.components"));
         parameters.setSummary(scenario.getTitle());
-    }
-
-    private void addTestCasesToTestExecution(List<String> testCaseIds) throws IOException
-    {
-        String testExecutionKey = xrayExporterOptions.getTestExecutionKey();
-        if (testExecutionKey != null)
-        {
-            xrayFacade.updateTestExecution(testExecutionKey, testCaseIds);
-        }
     }
 
     private void publishErrors()

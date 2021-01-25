@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.xray.configuration;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -24,7 +25,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class XrayExporterOptions
 {
     private Path jsonResultsDirectory;
-    private String testExecutionKey;
+    private Optional<String> testSetKey;
+    private Optional<String> testExecutionKey;
 
     public Path getJsonResultsDirectory()
     {
@@ -36,12 +38,22 @@ public class XrayExporterOptions
         this.jsonResultsDirectory = jsonResultsDirectory;
     }
 
-    public String getTestExecutionKey()
+    public Optional<String> getTestSetKey()
+    {
+        return testSetKey;
+    }
+
+    public void setTestSetKey(Optional<String> testSetKey)
+    {
+        this.testSetKey = testSetKey;
+    }
+
+    public Optional<String> getTestExecutionKey()
     {
         return testExecutionKey;
     }
 
-    public void setTestExecutionKey(String testExecutionKey)
+    public void setTestExecutionKey(Optional<String> testExecutionKey)
     {
         this.testExecutionKey = testExecutionKey;
     }

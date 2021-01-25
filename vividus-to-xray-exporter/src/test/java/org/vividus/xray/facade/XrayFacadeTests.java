@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.vividus.xray.model.TestCaseType;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class XrayFacadeTests
 {
+    private static final String ISSUE_KEY = "TEST-0";
     private static final String ISSUE_ID = "issue id";
     private static final String BODY = "{}";
     private static final String OPEN_STATUS = "Open";
@@ -162,12 +163,24 @@ class XrayFacadeTests
     void shouldAddTestCasesToTestExecution() throws IOException
     {
         initializeFacade(List.of());
-        String testExecutionKey = "TEST-0";
-        xrayFacade.updateTestExecution(testExecutionKey, List.of(ISSUE_ID, ISSUE_ID));
-        verify(jiraClient).executePost("/rest/raven/1.0/api/testexec/" + testExecutionKey + "/test",
-                "{\"add\":[\"issue id\",\"issue id\"]}");
+        xrayFacade.updateTestExecution(ISSUE_KEY, List.of(ISSUE_ID, ISSUE_ID));
+        verifyAddOperation("test execution", "testexec");
+    }
+
+    @Test
+    void shouldAddTestCasesToTestSet() throws IOException
+    {
+        initializeFacade(List.of());
+        xrayFacade.updateTestSet(ISSUE_KEY, List.of(ISSUE_ID, ISSUE_ID));
+        verifyAddOperation("test set", "testset");
+    }
+
+    private void verifyAddOperation(String name, String pathKey) throws IOException
+    {
+        verify(jiraClient).executePost("/rest/raven/1.0/api/" + pathKey + "/" + ISSUE_KEY + "/test",
+            "{\"add\":[\"issue id\",\"issue id\"]}");
         assertThat(logger.getLoggingEvents(), is(List.of(
-                info("Add {} test cases to {} test execution", ISSUE_ID + ", " + ISSUE_ID, testExecutionKey)
+            info("Add {} test cases to {} {}", ISSUE_ID + ", " + ISSUE_ID, ISSUE_KEY, name)
         )));
     }
 
