@@ -172,10 +172,11 @@ public final class ConfigurationResolver
                     {
                         return props.get(0).getValue().get();
                     }
-                    String errorMessage = size == 0 ? "Either '%s' or '%s' configuration property must be set"
-                            : "Exactly one configuration property: '%s' or '%s' must be set";
-                    throw new IllegalStateException(
-                            String.format(errorMessage, competingKeys.getLeft(), competingKeys.getRight()));
+                    String errorMessage = size == 0
+                            ? "Either '%1$s%2$s' or '%1$s%3$s' test configuration property must be set"
+                            : "Exactly one test configuration property: '%1$s%2$s' or '%1$s%3$s' must be set";
+                    throw new IllegalStateException(String.format(errorMessage, CONFIGURATION_PROPERTY_FAMILY,
+                            competingKeys.getLeft(), competingKeys.getRight()));
                 }));
     }
 

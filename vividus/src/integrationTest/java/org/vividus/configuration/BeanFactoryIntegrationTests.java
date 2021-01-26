@@ -150,7 +150,20 @@ class BeanFactoryIntegrationTests
         System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("Either 'suite' or 'suites' configuration property must be set", exception.getMessage());
+        assertEquals("Either 'configuration.suite' or 'configuration.suites' test configuration property must be set",
+                exception.getMessage());
+    }
+
+    @Test
+    void testConfigurationResolverBothSuiteAndSuitesPropertiesAreSet()
+    {
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
+        System.setProperty(CONFIGURATION_SUITE, BASIC_SUITE);
+        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
+        Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
+        assertEquals("Exactly one test configuration property: 'configuration.suite' or 'configuration.suites' must"
+                + " be set", exception.getMessage());
     }
 
     @Test
