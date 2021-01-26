@@ -17,7 +17,6 @@
 package org.vividus.xray.configuration;
 
 import java.nio.file.Path;
-import java.util.Optional;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -25,8 +24,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class XrayExporterOptions
 {
     private Path jsonResultsDirectory;
-    private Optional<String> testSetKey;
-    private Optional<String> testExecutionKey;
+    private String testSetKey;
+    private String testExecutionKey;
 
     public Path getJsonResultsDirectory()
     {
@@ -38,22 +37,22 @@ public class XrayExporterOptions
         this.jsonResultsDirectory = jsonResultsDirectory;
     }
 
-    public Optional<String> getTestSetKey()
+    public String getTestSetKey()
     {
         return testSetKey;
     }
 
-    public void setTestSetKey(Optional<String> testSetKey)
+    public void setTestSetKey(String testSetKey)
     {
         this.testSetKey = testSetKey;
     }
 
-    public Optional<String> getTestExecutionKey()
+    public String getTestExecutionKey()
     {
         return testExecutionKey;
     }
 
-    public void setTestExecutionKey(Optional<String> testExecutionKey)
+    public void setTestExecutionKey(String testExecutionKey)
     {
         this.testExecutionKey = testExecutionKey;
     }

@@ -106,7 +106,7 @@ class XrayExporterTests
     void shouldExportCucumberTestCaseWithoutTestCaseId() throws URISyntaxException, IOException
     {
         URI jsonResultsUri = getJsonResultsUri("createcucumber");
-        setUpXrayExporterOptions(jsonResultsUri);
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
         CucumberTestCase testCase = mock(CucumberTestCase.class);
 
         when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
@@ -130,7 +130,7 @@ class XrayExporterTests
     void shouldUpdateExistingCucumberTestCase() throws URISyntaxException, IOException, NonEditableIssueStatusException
     {
         URI jsonResultsUri = getJsonResultsUri("updatecucumber");
-        setUpXrayExporterOptions(jsonResultsUri);
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
         CucumberTestCase testCase = mock(CucumberTestCase.class);
 
         when(testCaseFactory.createCucumberTestCase(cucumberTestCaseParametersCaptor.capture())).thenReturn(testCase);
@@ -150,7 +150,9 @@ class XrayExporterTests
         URI jsonResultsUri = getJsonResultsUri("componentslabelsupdatabletci");
         String testSetKey = "TEST-SET";
         String testExecutionKey = "TEST-EXEC";
-        setUpXrayExporterOptions(jsonResultsUri, Optional.of(testSetKey), Optional.of(testExecutionKey));
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        xrayExporterOptions.setTestSetKey(testSetKey);
+        xrayExporterOptions.setTestExecutionKey(testExecutionKey);
         ManualTestCase testCase = mock(ManualTestCase.class);
 
         when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
@@ -170,7 +172,7 @@ class XrayExporterTests
             throws URISyntaxException, IOException, NonEditableIssueStatusException
     {
         URI jsonResultsUri = getJsonResultsUri("continueiferror");
-        setUpXrayExporterOptions(jsonResultsUri);
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
         IOException exception = mock(IOException.class);
         String errorIssueId = "STUB-ERROR";
 
@@ -192,7 +194,7 @@ class XrayExporterTests
     void shouldNotExportSkippedTest() throws URISyntaxException, IOException
     {
         URI jsonResultsUri = getJsonResultsUri("skipped");
-        setUpXrayExporterOptions(jsonResultsUri);
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
 
         xrayExporter.exportResults();
 
@@ -215,7 +217,7 @@ class XrayExporterTests
     void shouldExportNewTestAndLinkToRequirements() throws URISyntaxException, IOException
     {
         URI jsonResultsUri = getJsonResultsUri("createandlink");
-        setUpXrayExporterOptions(jsonResultsUri);
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
         ManualTestCase testCase = mock(ManualTestCase.class);
 
         when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
@@ -233,7 +235,7 @@ class XrayExporterTests
     void shouldFailIfMoreThanOneIdIsSpecified() throws URISyntaxException, IOException
     {
         URI jsonResultsUri = getJsonResultsUri("morethanoneid");
-        setUpXrayExporterOptions(jsonResultsUri);
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
 
         xrayExporter.exportResults();
 
@@ -313,18 +315,5 @@ class XrayExporterTests
     public URI getJsonResultsUri(String resource) throws URISyntaxException
     {
         return ResourceUtils.findResource(getClass(), resource).toURI();
-    }
-
-    private void setUpXrayExporterOptions(URI jsonResultsUri)
-    {
-        setUpXrayExporterOptions(jsonResultsUri, Optional.empty(), Optional.empty());
-    }
-
-    private void setUpXrayExporterOptions(URI jsonResultsUri, Optional<String> testSetKey,
-            Optional<String> testExecutionKey)
-    {
-        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
-        xrayExporterOptions.setTestSetKey(testSetKey);
-        xrayExporterOptions.setTestExecutionKey(testExecutionKey);
     }
 }

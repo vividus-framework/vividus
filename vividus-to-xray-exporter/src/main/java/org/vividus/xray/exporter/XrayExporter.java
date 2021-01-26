@@ -105,19 +105,19 @@ public class XrayExporter
 
     private void addTestCasesToTestSet(List<String> testCaseIds) throws IOException
     {
-        Optional<String> testSetKey = xrayExporterOptions.getTestSetKey();
-        if (testSetKey.isPresent())
+        String testSetKey = xrayExporterOptions.getTestSetKey();
+        if (testSetKey != null)
         {
-            xrayFacade.updateTestSet(testSetKey.get(), testCaseIds);
+            xrayFacade.updateTestSet(testSetKey, testCaseIds);
         }
     }
 
     private void addTestCasesToTestExecution(List<String> testCaseIds) throws IOException
     {
-        Optional<String> testExecutionKey = xrayExporterOptions.getTestExecutionKey();
-        if (testExecutionKey.isPresent())
+        String testExecutionKey = xrayExporterOptions.getTestExecutionKey();
+        if (testExecutionKey != null)
         {
-            xrayFacade.updateTestExecution(testExecutionKey.get(), testCaseIds);
+            xrayFacade.updateTestExecution(testExecutionKey, testCaseIds);
         }
     }
 
