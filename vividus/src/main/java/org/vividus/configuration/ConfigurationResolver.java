@@ -220,7 +220,8 @@ public final class ConfigurationResolver
                 {
                     if (failOnAbsence)
                     {
-                        throw new IllegalStateException(String.format("'%s' is not set", key));
+                        throw new IllegalStateException(
+                                String.format("The '%s%s' property is not set", CONFIGURATION_PROPERTY_FAMILY, key));
                     }
                     return Optional.empty();
                 }

@@ -134,14 +134,14 @@ class BeanFactoryIntegrationTests
     {
         System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("'environments' is not set", exception.getMessage());
+        assertEquals("The 'configuration.environments' property is not set", exception.getMessage());
     }
 
     @Test
     void testConfigurationResolverProfilesIsNotSet()
     {
         Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("'profiles' is not set", exception.getMessage());
+        assertEquals("The 'configuration.profiles' property is not set", exception.getMessage());
     }
 
     @Test
