@@ -127,3 +127,21 @@ When I collect objects keys filtered by:
 in S3 bucket `some-bucket-name` and save result to scenario variable `s3-keys`
 When I fetch object with key `${s3-keys[0]}` from S3 bucket `some-bucket-name` and save result to scenario variable `s3-object`
 ----
+
+=== Delete S3 object
+
+Delete the specified object in the specified bucket. Once deleted, the object can only be restored if versioning was enabled when the object was deleted. If attempting to delete an object that does not exist, Amazon S3 returns a success message instead of an error message.
+
+[source,gherkin]
+----
+When I delete object with key `$objectKey` from S3 bucket `$bucketName`
+----
+
+- `$objectKey` - The key of the object to delete.
+- `$bucketName` - The name of the Amazon S3 bucket containing the object to delete.
+
+.Delete S3 object
+[source,gherkin]
+----
+When I delete object with key `/path/file.json` from S3 bucket `some-bucket-name`
+----

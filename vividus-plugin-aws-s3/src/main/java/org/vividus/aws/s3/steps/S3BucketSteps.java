@@ -221,12 +221,15 @@ public class S3BucketSteps
     }
 
     /**
-     * Delete <b>file</b> from S3 bucket by the <b>objectKey</b>
+     * Deletes the specified object in the specified bucket. Once deleted, the object can only be restored if
+     * versioning was enabled when the object was deleted. If attempting to delete an object that does not exist,
+     * Amazon S3 returns a success message instead of an error message.
      * <br>
      * Usage example:
      * <code><br>I delete object with key `test.csv` from S3 bucket `testBucket`</code>
-     * @param objectKey Key on which the content is placed in S3 bucket
-     * @param bucketName S3 bucket with file
+     *
+     * @param objectKey  The key of the object to delete
+     * @param bucketName The name of the Amazon S3 bucket containing the object to delete
      */
     @When("I delete object with key `$objectKey` from S3 bucket `$bucketName`")
     public void deleteObject(String objectKey, String bucketName)
