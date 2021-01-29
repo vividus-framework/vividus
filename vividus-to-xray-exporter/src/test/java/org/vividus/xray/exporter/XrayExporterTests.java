@@ -42,6 +42,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -61,6 +62,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.model.jbehave.Scenario;
 import org.vividus.util.ResourceUtils;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.exception.SyntaxException;
@@ -70,10 +72,12 @@ import org.vividus.xray.facade.ManualTestCaseParameters;
 import org.vividus.xray.facade.XrayFacade;
 import org.vividus.xray.facade.XrayFacade.NonEditableIssueStatusException;
 import org.vividus.xray.factory.TestCaseFactory;
+import org.vividus.xray.factory.TestExecutionFactory;
 import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.ManualTestStep;
 import org.vividus.xray.model.TestCaseType;
+import org.vividus.xray.model.TestExecution;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class XrayExporterTests
@@ -88,10 +92,12 @@ class XrayExporterTests
 
     @Captor private ArgumentCaptor<ManualTestCaseParameters> manualTestCaseParametersCaptor;
     @Captor private ArgumentCaptor<CucumberTestCaseParameters> cucumberTestCaseParametersCaptor;
+    @Captor private ArgumentCaptor<List<Entry<String, Scenario>>> scenariosCaptor;
 
     @Spy private XrayExporterOptions xrayExporterOptions;
     @Mock private TestCaseFactory testCaseFactory;
     @Mock private XrayFacade xrayFacade;
+    @Mock private TestExecutionFactory testExecutionFactory;
     @InjectMocks private XrayExporter xrayExporter;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(XrayExporter.class);
@@ -157,12 +163,20 @@ class XrayExporterTests
 
         when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
 
+        TestExecution testExecution = mock(TestExecution.class);
+        when(testExecutionFactory.create(scenariosCaptor.capture())).thenReturn(testExecution);
+
         xrayExporter.exportResults();
 
         verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
         verifyManualTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
                 Set.of("dummy-component-1", "dummy-component-2"));
-        verify(xrayFacade).updateTestExecution(testExecutionKey, List.of(ISSUE_ID));
+
+        verify(xrayFacade).updateTestExecution(testExecution);
+        List<Entry<String, Scenario>> scenarios = scenariosCaptor.getValue();
+        assertThat(scenarios, hasSize(1));
+        assertEquals(ISSUE_ID, scenarios.get(0).getKey());
+
         verify(xrayFacade).updateTestSet(testSetKey, List.of(ISSUE_ID));
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }

@@ -19,6 +19,7 @@ package org.vividus.xray.facade;
 import java.io.IOException;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -35,6 +36,7 @@ import org.vividus.xray.model.AbstractTestCase;
 import org.vividus.xray.model.AddOperationRequest;
 import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
+import org.vividus.xray.model.TestExecution;
 
 public class XrayFacade
 {
@@ -54,6 +56,7 @@ public class XrayFacade
         this.jiraClient = jiraClient;
         this.objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .setSerializationInclusion(Include.NON_NULL)
                 .registerModule(new SimpleModule().addSerializer(ManualTestCase.class, manualTestSerializer)
                                                   .addSerializer(CucumberTestCase.class, cucumberTestSerializer));
     }
@@ -85,26 +88,27 @@ public class XrayFacade
                        .log("{} Test with key {} has been updated");
     }
 
-    public void updateTestExecution(String testExecutionKey, List<String> testCaseKeys) throws IOException
+    public void updateTestExecution(TestExecution testExecution) throws IOException
     {
-        addTestCases(testExecutionKey, "test execution", "testexec", testCaseKeys);
+        String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
+        String testExecutionKey = testExecution.getTestExecutionKey();
+        LOGGER.atInfo()
+              .addArgument(testExecutionKey)
+              .addArgument(testExecutionRequest)
+              .log("Updating Test Execution with ID {}: {}");
+        jiraClient.executePost("/rest/raven/1.0/import/execution", testExecutionRequest);
+        LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been updated");
     }
 
     public void updateTestSet(String testSetKey, List<String> testCaseKeys) throws IOException
-    {
-        addTestCases(testSetKey, "test set", "testset", testCaseKeys);
-    }
-
-    private void addTestCases(String key, String name, String pathKey, List<String> testCaseKeys) throws IOException
     {
         AddOperationRequest request = new AddOperationRequest(testCaseKeys);
         String requestBody = objectMapper.writeValueAsString(request);
         LOGGER.atInfo()
               .addArgument(() -> StringUtils.join(testCaseKeys, ", "))
-              .addArgument(key)
-              .addArgument(name)
-              .log("Add {} test cases to {} {}");
-        jiraClient.executePost("/rest/raven/1.0/api/" + pathKey + "/" + key + "/test", requestBody);
+              .addArgument(testSetKey)
+              .log("Add {} test cases to Test Set with ID {}");
+        jiraClient.executePost("/rest/raven/1.0/api/testset/" + testSetKey + "/test", requestBody);
     }
 
     private void checkIfIssueEditable(String issueKey) throws IOException, NonEditableIssueStatusException
