@@ -40,7 +40,7 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 
 |`xray-exporter.test-execution-key`
 |false
-|The key of a `Test Execution` to which the exported test cases will be added
+|The key of a `Test Execution` to which the exported test cases along with their statuses will be added
 
 |`xray-exporter.test-set-key`
 |false

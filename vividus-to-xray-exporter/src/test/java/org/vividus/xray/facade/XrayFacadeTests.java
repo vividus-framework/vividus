@@ -56,6 +56,9 @@ import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.ManualTestStep;
 import org.vividus.xray.model.TestCaseType;
+import org.vividus.xray.model.TestExecution;
+import org.vividus.xray.model.TestExecutionItem;
+import org.vividus.xray.model.TestExecutionItemStatus;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class XrayFacadeTests
@@ -163,8 +166,30 @@ class XrayFacadeTests
     void shouldAddTestCasesToTestExecution() throws IOException
     {
         initializeFacade(List.of());
-        xrayFacade.updateTestExecution(ISSUE_KEY, List.of(ISSUE_ID, ISSUE_ID));
-        verifyAddOperation("test execution", "testexec");
+        TestExecution testExecution = new TestExecution();
+        testExecution.setTestExecutionKey(ISSUE_KEY);
+        testExecution.setTests(List.of(
+            createTestExecutionItem("test-1", TestExecutionItemStatus.PASS, null),
+            createTestExecutionItem("test-2", TestExecutionItemStatus.FAIL, List.of(TestExecutionItemStatus.PASS,
+                    TestExecutionItemStatus.FAIL))
+        ));
+        xrayFacade.updateTestExecution(testExecution);
+        String body = "{\"testExecutionKey\":\"TEST-0\",\"tests\":[{\"testKey\":\"test-1\",\"status\":\"PASS\"},"
+                + "{\"testKey\":\"test-2\",\"status\":\"FAIL\",\"examples\":[\"PASS\",\"FAIL\"]}]}";
+        verify(jiraClient).executePost("/rest/raven/1.0/import/execution", body);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+            info("Updating Test Execution with ID {}: {}", ISSUE_KEY, body),
+            info("Test Execution with key {} has been updated", ISSUE_KEY))));
+    }
+
+    private static TestExecutionItem createTestExecutionItem(String key, TestExecutionItemStatus status,
+            List<TestExecutionItemStatus> statusess)
+    {
+        TestExecutionItem test = new TestExecutionItem();
+        test.setTestKey(key);
+        test.setStatus(status);
+        test.setExamples(statusess);
+        return test;
     }
 
     @Test
@@ -172,15 +197,10 @@ class XrayFacadeTests
     {
         initializeFacade(List.of());
         xrayFacade.updateTestSet(ISSUE_KEY, List.of(ISSUE_ID, ISSUE_ID));
-        verifyAddOperation("test set", "testset");
-    }
-
-    private void verifyAddOperation(String name, String pathKey) throws IOException
-    {
-        verify(jiraClient).executePost("/rest/raven/1.0/api/" + pathKey + "/" + ISSUE_KEY + "/test",
+        verify(jiraClient).executePost("/rest/raven/1.0/api/testset/" + ISSUE_KEY + "/test",
             "{\"add\":[\"issue id\",\"issue id\"]}");
         assertThat(logger.getLoggingEvents(), is(List.of(
-            info("Add {} test cases to {} {}", ISSUE_ID + ", " + ISSUE_ID, ISSUE_KEY, name)
+            info("Add {} test cases to Test Set with ID {}", ISSUE_ID + ", " + ISSUE_ID, ISSUE_KEY)
         )));
     }
 

@@ -17,6 +17,8 @@
 package org.vividus.xray.exporter;
 
 import static java.lang.System.lineSeparator;
+import static java.util.Map.Entry;
+import static java.util.Map.entry;
 import static org.apache.commons.lang3.Validate.notEmpty;
 
 import java.io.IOException;
@@ -55,8 +57,10 @@ import org.vividus.xray.facade.ManualTestCaseParameters;
 import org.vividus.xray.facade.XrayFacade;
 import org.vividus.xray.facade.XrayFacade.NonEditableIssueStatusException;
 import org.vividus.xray.factory.TestCaseFactory;
+import org.vividus.xray.factory.TestExecutionFactory;
 import org.vividus.xray.model.AbstractTestCase;
 import org.vividus.xray.model.TestCaseType;
+import org.vividus.xray.model.TestExecution;
 import org.vividus.xray.reader.JsonResourceReader;
 import org.vividus.xray.reader.JsonResourceReader.FileEntry;
 import org.vividus.xray.util.StoryUtils;
@@ -71,6 +75,7 @@ public class XrayExporter
     @Autowired private XrayExporterOptions xrayExporterOptions;
     @Autowired private XrayFacade xrayFacade;
     @Autowired private TestCaseFactory testCaseFactory;
+    @Autowired private TestExecutionFactory testExecutionFactory;
 
     private final List<ErrorExportEntry> errors = new ArrayList<>();
 
@@ -86,42 +91,47 @@ public class XrayExporter
 
     public void exportResults() throws IOException
     {
-        List<String> testCaseIds = new ArrayList<>();
+        List<Entry<String, Scenario>> testCases = new ArrayList<>();
         for (Story story : readStories())
         {
             LOGGER.atInfo().addArgument(story::getPath).log("Exporting scenarios from {} story");
 
             for (Scenario scenario : StoryUtils.getFoldedScenarios(story))
             {
-                exportScenario(story.getPath(), scenario).ifPresent(testCaseIds::add);
+                exportScenario(story.getPath(), scenario).ifPresent(testCases::add);
             }
         }
 
-        addTestCasesToTestSet(testCaseIds);
-        addTestCasesToTestExecution(testCaseIds);
+        addTestCasesToTestSet(testCases);
+        addTestCasesToTestExecution(testCases);
 
         publishErrors();
     }
 
-    private void addTestCasesToTestSet(List<String> testCaseIds) throws IOException
+    private void addTestCasesToTestSet(List<Entry<String, Scenario>> testCases) throws IOException
     {
         String testSetKey = xrayExporterOptions.getTestSetKey();
         if (testSetKey != null)
         {
+            List<String> testCaseIds = testCases.stream()
+                                                .map(Entry::getKey)
+                                                .collect(Collectors.toList());
+
             xrayFacade.updateTestSet(testSetKey, testCaseIds);
         }
     }
 
-    private void addTestCasesToTestExecution(List<String> testCaseIds) throws IOException
+    private void addTestCasesToTestExecution(List<Entry<String, Scenario>> testCases) throws IOException
     {
         String testExecutionKey = xrayExporterOptions.getTestExecutionKey();
         if (testExecutionKey != null)
         {
-            xrayFacade.updateTestExecution(testExecutionKey, testCaseIds);
+            TestExecution testExecution = testExecutionFactory.create(testCases);
+            xrayFacade.updateTestExecution(testExecution);
         }
     }
 
-    private Optional<String> exportScenario(String storyTitle, Scenario scenario)
+    private Optional<Entry<String, Scenario>> exportScenario(String storyTitle, Scenario scenario)
     {
         String scenarioTitle = scenario.getTitle();
 
@@ -150,7 +160,7 @@ public class XrayExporter
                 testCaseId = xrayFacade.createTestCase(testCase);
             }
             createTestsLink(testCaseId, scenarioMeta);
-            return Optional.of(testCaseId);
+            return Optional.of(entry(testCaseId, scenario));
         }
         catch (IOException | SyntaxException | NonEditableIssueStatusException e)
         {
