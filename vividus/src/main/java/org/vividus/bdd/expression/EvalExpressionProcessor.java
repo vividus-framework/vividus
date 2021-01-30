@@ -42,7 +42,7 @@ public class EvalExpressionProcessor extends AbstractExpressionProcessor<String>
     private final ThreadLocal<JexlEngine> jexlEngine = ThreadLocal
             .withInitial(() -> new JexlBuilder().charset(StandardCharsets.UTF_8).namespaces(NAMESPACES).create());
 
-    private IBddVariableContext bddVariableContext;
+    private final IBddVariableContext bddVariableContext;
 
     public EvalExpressionProcessor(IBddVariableContext bddVariableContext)
     {
