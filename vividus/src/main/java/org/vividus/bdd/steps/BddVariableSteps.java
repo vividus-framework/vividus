@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.steps;
 
+import static org.apache.commons.lang3.Validate.isTrue;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -30,6 +32,7 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.util.EnumUtils;
 import org.vividus.bdd.util.MapUtils;
@@ -177,16 +180,39 @@ public class BddVariableSteps
      * @param table ExamplesTable with parameters to compare with
      */
     @Then("`$variable` is equal to table ignoring extra columns:$table")
+    @SuppressWarnings("unchecked")
     public void tablesAreEqualIgnoringExtraColumns(Object variable, ExamplesTable table)
     {
-        if (!(variable instanceof Map))
-        {
-            throw new IllegalArgumentException("'variable' should be instance of map");
-        }
-        Map<String, String> expectedMap = MapUtils.convertSingleRowExamplesTableToMap(table);
-        List<EntryComparisonResult> results = ComparisonUtils.checkMapContainsSubMap((Map<?, ?>) variable, expectedMap);
+        isTrue(variable instanceof Map, "'variable' should be an instance of map");
+        Map<Object, Object> actualMap = expandListValuesWithSingleElement((Map<Object, Object>) variable);
+
+        List<Parameters> rows = table.getRowsAsParameters(true);
+        isTrue(rows.size() == 1, "ExamplesTable should contain single row with values");
+
+        Map<String, String> expectedMap =  rows.get(0).values();
+        List<EntryComparisonResult> results = ComparisonUtils.checkMapContainsSubMap(actualMap, expectedMap);
         publishMapComparisonResults(List.of(results));
         softAssert.assertTrue(TABLES_ARE_EQUAL, results.stream().allMatch(EntryComparisonResult::isPassed));
+    }
+
+    private Map<Object, Object> expandListValuesWithSingleElement(Map<Object, Object> map)
+    {
+        Map<Object, Object> expandedMap = new HashMap<>();
+
+        for (Entry<?, Object> entry : map.entrySet())
+        {
+            if (entry.getValue() instanceof List)
+            {
+                List<?> valueAsList = (List<?>) entry.getValue();
+                if (valueAsList.size() == 1)
+                {
+                    expandedMap.put(entry.getKey(), valueAsList.get(0));
+                    continue;
+                }
+            }
+            return map;
+        }
+        return expandedMap;
     }
 
     /**

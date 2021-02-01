@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -61,13 +62,12 @@ import freemarker.template.TemplateException;
 @ExtendWith(MockitoExtension.class)
 class BddVariableStepsTests
 {
-    private static final String TABLES_ASSERT_MESSAGE = "Tables comparison result";
-    private static final String TEMPLATE_NAME = "/templates/maps-comparison-table.ftl";
-    private static final String RESULTS = "results";
     private static final String TABLES_ARE_EQUAL = "Tables are equal";
-    private static final String VALUE2 = "value2";
-    private static final String VALUE = "value";
-    private static final String KEY = "key";
+    private static final String KEY_1 = "k1";
+    private static final String VALUE_1 = "v1";
+    private static final String KEY_2 = "k2";
+    private static final String VALUE_2 = "v2";
+    private static final ExamplesTable SINGLE_VALUE_TABLE = new ExamplesTable("|k1|\n|v1|");
 
     @Mock private FreemarkerProcessor freemarkerProcessor;
     @Mock private IBddVariableContext bddVariableContext;
@@ -117,26 +117,20 @@ class BddVariableStepsTests
     void testInitVariableWithGivenValue()
     {
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        bddVariableSteps.initVariableWithGivenValue(scopes, VALUE, VALUE);
-        verify(bddVariableContext).putVariable(scopes, VALUE, VALUE);
+        bddVariableSteps.initVariableWithGivenValue(scopes, VALUE_1, VALUE_1);
+        verify(bddVariableContext).putVariable(scopes, VALUE_1, VALUE_1);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     void shouldCompareEqualToListsOfMapsAndPublishResultTable()
     {
-        List<Map<String, Object>> listOfMaps1 = List.of(Map.of(KEY, VALUE));
-        List<Map<String, Object>> listOfMaps2 = List.of(Map.of(KEY, VALUE2));
+        List<Map<String, Object>> listOfMaps1 = List.of(Map.of(KEY_1, VALUE_1));
+        List<Map<String, Object>> listOfMaps2 = List.of(Map.of(KEY_1, VALUE_2));
         assertFalse(bddVariableSteps.compareVariables(listOfMaps1, ComparisonRule.EQUAL_TO, listOfMaps2));
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, false);
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(results ->
-        {
-            EntryComparisonResult result =
-                    ((Map<String, List<List<EntryComparisonResult>>>) results).get(RESULTS).get(0)
-                            .get(0);
-            return KEY.equals(result.getKey()) && VALUE.equals(result.getLeft()) && VALUE2.equals(result.getRight())
-                    && !result.isPassed();
-        }), eq(TABLES_ASSERT_MESSAGE));
+        EntryComparisonResult result = captureComparisonResults().get(0).get(0);
+        assertResult(KEY_1, VALUE_1, VALUE_2, false, result);
         verify(softAssert, never()).assertThat(any(), any(), any());
     }
 
@@ -147,95 +141,73 @@ class BddVariableStepsTests
         List<Map<String, Object>> listOfMaps2 = List.of();
         assertFalse(bddVariableSteps.compareVariables(listOfMaps1, ComparisonRule.EQUAL_TO, listOfMaps2));
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, true);
-        verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME, Map.of(RESULTS, List.of()),
-                TABLES_ASSERT_MESSAGE);
+        assertEquals(List.of(), captureComparisonResults());
         verify(softAssert, never()).assertThat(any(), any(), any());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldCompareEqualToMapsAndPublishResultTable()
     {
-        Map<String, Object> map1 = Map.of(KEY, 2);
-        Map<String, Object> map2 = Map.of(KEY, 2L);
+        Map<String, Object> map1 = Map.of(KEY_1, 2);
+        Map<String, Object> map2 = Map.of(KEY_1, 2L);
         BigDecimal twoBD = new BigDecimal("2");
         assertFalse(bddVariableSteps.compareVariables(map1, ComparisonRule.EQUAL_TO, map2));
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, true);
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(results ->
-        {
-            EntryComparisonResult result =
-                    ((Map<String, List<List<EntryComparisonResult>>>) results).get(RESULTS).get(0)
-                            .get(0);
-            return KEY.equals(result.getKey()) && twoBD.equals(result.getLeft()) && twoBD.equals(result.getRight())
-                    && result.isPassed();
-        }), eq(TABLES_ASSERT_MESSAGE));
+
+        EntryComparisonResult result = captureComparisonResults().get(0).get(0);
+        assertResult(KEY_1, twoBD, twoBD, true, result);
+
         verify(softAssert, never()).assertThat(any(), any(), any());
     }
 
     @Test
     void shouldCompareEqualToNotAlignedListsRightIsLongerOfMapsAndPublishResultTable()
     {
-        List<Map<String, Object>> listOfMaps1 = List.of(Map.of(KEY, VALUE));
-        List<Map<String, Object>> listOfMaps2 = List.of(Map.of(KEY, VALUE), Map.of(KEY, VALUE2));
+        List<Map<String, Object>> listOfMaps1 = List.of(Map.of(KEY_1, VALUE_1));
+        List<Map<String, Object>> listOfMaps2 = List.of(Map.of(KEY_1, VALUE_1), Map.of(KEY_1, VALUE_2));
         assertFalse(bddVariableSteps.compareVariables(listOfMaps1, ComparisonRule.EQUAL_TO, listOfMaps2));
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, false);
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(results ->
-        {
-            @SuppressWarnings("unchecked")
-            Map<String, List<List<EntryComparisonResult>>> map =
-                    (Map<String, List<List<EntryComparisonResult>>>) results;
-            EntryComparisonResult result1 = map.get(RESULTS).get(0).get(0);
-            EntryComparisonResult result2 = map.get(RESULTS).get(1).get(0);
-            return assertResult(result1) && KEY.equals(result2.getKey()) && null == result2.getLeft()
-                    && VALUE2.equals(result2.getRight()) && !result2.isPassed();
-        }), eq(TABLES_ASSERT_MESSAGE));
+
+        List<List<EntryComparisonResult>> results = captureComparisonResults();
+        assertResult(KEY_1, VALUE_1, VALUE_1, true, results.get(0).get(0));
+        assertResult(KEY_1, null, VALUE_2, false, results.get(1).get(0));
+
         verify(softAssert, never()).assertThat(any(), any(), any());
     }
 
     @Test
     void shouldCompareEqualToNotAlignedListsLeftIsLongerOfMapsAndPublishResultTable()
     {
-        List<Map<String, Object>> listOfMaps1 = List.of(Map.of(KEY, VALUE), Map.of(KEY, VALUE2));
-        List<Map<String, Object>> listOfMaps2 = List.of(Map.of(KEY, VALUE));
+        List<Map<String, Object>> listOfMaps1 = List.of(Map.of(KEY_1, VALUE_1), Map.of(KEY_1, VALUE_2));
+        List<Map<String, Object>> listOfMaps2 = List.of(Map.of(KEY_1, VALUE_1));
         assertFalse(bddVariableSteps.compareVariables(listOfMaps1, ComparisonRule.EQUAL_TO, listOfMaps2));
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, false);
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(results ->
-        {
-            @SuppressWarnings("unchecked")
-            Map<String, List<List<EntryComparisonResult>>> map =
-                    (Map<String, List<List<EntryComparisonResult>>>) results;
-            EntryComparisonResult result1 = map.get(RESULTS).get(0).get(0);
-            EntryComparisonResult result2 = map.get(RESULTS).get(1).get(0);
-            return assertResult(result1) && KEY.equals(result2.getKey()) && VALUE2.equals(result2.getLeft())
-                    && null == result2.getRight() && !result2.isPassed();
-        }), eq(TABLES_ASSERT_MESSAGE));
+
+        List<List<EntryComparisonResult>> results = captureComparisonResults();
+        assertResult(KEY_1, VALUE_1, VALUE_1, true, results.get(0).get(0));
+        assertResult(KEY_1, VALUE_2, null, false, results.get(1).get(0));
+
         verify(softAssert, never()).assertThat(any(), any(), any());
     }
 
     @Test
     void shouldTreatNullForBothValuesAsEqual()
     {
-        List<Map<String, Object>> listOfMaps = List.of(Collections.singletonMap(KEY, null));
+        List<Map<String, Object>> listOfMaps = List.of(Collections.singletonMap(KEY_1, null));
         bddVariableSteps.compareVariables(listOfMaps, ComparisonRule.EQUAL_TO, listOfMaps);
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, true);
-    }
-
-    private boolean assertResult(EntryComparisonResult result)
-    {
-        return KEY.equals(result.getKey()) && VALUE.equals(result.getLeft()) && VALUE.equals(result.getRight())
-                && result.isPassed();
     }
 
     @SuppressWarnings("checkstyle:NoWhitespaceBefore")
     static Stream<Arguments> parametersProvider()
     {
         return Stream.of(
-                arguments(VALUE,                       ComparisonRule.EQUAL_TO , VALUE2),
-                arguments(List.of(Map.of(KEY, VALUE)), ComparisonRule.LESS_THAN, List.of(Map.of(KEY, VALUE))),
-                arguments(List.of(Map.of(KEY, VALUE)), ComparisonRule.EQUAL_TO,  Map.of(KEY, VALUE)),
-                arguments(Map.of(KEY, VALUE),          ComparisonRule.EQUAL_TO,  List.of(Map.of(KEY, VALUE))),
-                arguments(Map.of(KEY, VALUE),          ComparisonRule.LESS_THAN, Map.of(KEY, VALUE)),
-                arguments(List.of(KEY),                ComparisonRule.EQUAL_TO,  List.of())
+                arguments(VALUE_1,                         ComparisonRule.EQUAL_TO , VALUE_2),
+                arguments(List.of(Map.of(KEY_1, VALUE_1)), ComparisonRule.LESS_THAN, List.of(Map.of(KEY_1, VALUE_1))),
+                arguments(List.of(Map.of(KEY_1, VALUE_1)), ComparisonRule.EQUAL_TO,  Map.of(KEY_1, VALUE_1)),
+                arguments(Map.of(KEY_1, VALUE_1),          ComparisonRule.EQUAL_TO,  List.of(Map.of(KEY_1, VALUE_1))),
+                arguments(Map.of(KEY_1, VALUE_1),          ComparisonRule.LESS_THAN, Map.of(KEY_1, VALUE_1)),
+                arguments(List.of(KEY_1),                  ComparisonRule.EQUAL_TO,  List.of())
         );
     }
 
@@ -247,27 +219,34 @@ class BddVariableStepsTests
         verifyNoInteractions(attachmentPublisher);
     }
 
-    @SuppressWarnings("unchecked")
-    @Test
-    void shouldCompareTablesIgnoringExtraColumns()
+    static Stream<Arguments> tablesIgnoringExtraColumns()
     {
-        String key1 = "k1";
-        String value1 = "v1";
-        Map<String, Object> actualMap = Map.of(key1, value1);
+        return Stream.of(
+                arguments(Map.of(KEY_1, VALUE_1)),
+                arguments(Map.of(KEY_1, List.of(VALUE_1)))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("tablesIgnoringExtraColumns")
+    void shouldCompareTablesIgnoringExtraColumns(Map<String, Object> actualMap)
+    {
         ExamplesTable table = new ExamplesTable("|k1|k2|\n|v1|v2|");
         bddVariableSteps.tablesAreEqualIgnoringExtraColumns(actualMap, table);
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, false);
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(results ->
-        {
-            EntryComparisonResult result1 =
-                    ((Map<String, List<List<EntryComparisonResult>>>) results).get(RESULTS).get(0).get(0);
-            EntryComparisonResult result2 =
-                    ((Map<String, List<List<EntryComparisonResult>>>) results).get(RESULTS).get(0).get(1);
-            return key1.equals(result1.getKey()) && value1.equals(result1.getLeft())
-                            && value1.equals(result1.getRight()) && result1.isPassed()
-                    && "k2".equals(result2.getKey()) && "v2".equals(result2.getLeft())
-                            && result2.getRight() == null && !result2.isPassed();
-        }), eq(TABLES_ASSERT_MESSAGE));
+        List<EntryComparisonResult> results = captureComparisonResults().get(0);
+        assertResult(KEY_1, VALUE_1, VALUE_1, true, results.get(0));
+        assertResult(KEY_2, VALUE_2, null, false, results.get(1));
+    }
+
+    @Test
+    void shouldFailOnComparisonOfJaggedTablesIgnoringExtraColumns()
+    {
+        Map<String, Object> actualMap = Map.of(KEY_1, List.of(VALUE_1, VALUE_2));
+        bddVariableSteps.tablesAreEqualIgnoringExtraColumns(actualMap, SINGLE_VALUE_TABLE);
+        verify(softAssert).assertTrue(TABLES_ARE_EQUAL, false);
+        EntryComparisonResult result = captureComparisonResults().get(0).get(0);
+        assertResult(KEY_1, VALUE_1, List.of(VALUE_1, VALUE_2), false, result);
     }
 
     @Test
@@ -275,24 +254,49 @@ class BddVariableStepsTests
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> bddVariableSteps.tablesAreEqualIgnoringExtraColumns("stringValue", null));
-        assertEquals("'variable' should be instance of map", exception.getMessage());
+        assertEquals("'variable' should be an instance of map", exception.getMessage());
     }
 
-    @SuppressWarnings("unchecked")
+    @ParameterizedTest
+    @CsvSource({
+            "''",
+            "'|k1|\n|v1|\n|v2|'"
+    })
+    void shouldFailOnCompareTablesIgnoringExtraColumnsIfExamplesTableIsOfUnexpectedSize(ExamplesTable examplesTable)
+    {
+        Map<Object, Object> variable = Map.of();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> bddVariableSteps.tablesAreEqualIgnoringExtraColumns(variable, examplesTable));
+        assertEquals("ExamplesTable should contain single row with values", exception.getMessage());
+    }
+
     @Test
     void shouldCompareTables()
     {
-        List<Map<String, Object>> listOfMaps = List.of(Map.of(KEY, VALUE));
-        ExamplesTable table = new ExamplesTable("|key|\n|value|");
-        bddVariableSteps.tablesAreEqual(listOfMaps, table);
+        List<Map<String, Object>> listOfMaps = List.of(Map.of(KEY_1, VALUE_1));
+        bddVariableSteps.tablesAreEqual(listOfMaps, SINGLE_VALUE_TABLE);
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, true);
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(results ->
-        {
-            EntryComparisonResult result = ((Map<String, List<List<EntryComparisonResult>>>) results).get(RESULTS)
-                    .get(0).get(0);
-            return KEY.equals(result.getKey()) && VALUE.equals(result.getLeft()) && VALUE.equals(result.getRight())
-                    && result.isPassed();
-        }), eq(TABLES_ASSERT_MESSAGE));
+        EntryComparisonResult result = captureComparisonResults().get(0).get(0);
+        assertResult(KEY_1, VALUE_1, VALUE_1, true, result);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<List<EntryComparisonResult>> captureComparisonResults()
+    {
+        ArgumentCaptor<Object> dataModelCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(attachmentPublisher).publishAttachment(eq("/templates/maps-comparison-table.ftl"),
+                dataModelCaptor.capture(), eq("Tables comparison result"));
+
+        return ((Map<String, List<List<EntryComparisonResult>>>) dataModelCaptor.getValue()).get("results");
+    }
+
+    private void assertResult(String expectedKey, Object expectedLeft, Object expectedRight, boolean expectedPassed,
+            EntryComparisonResult actualResult)
+    {
+        assertEquals(expectedKey, actualResult.getKey());
+        assertEquals(expectedLeft, actualResult.getLeft());
+        assertEquals(expectedRight, actualResult.getRight());
+        assertEquals(expectedPassed, actualResult.isPassed());
     }
 
     @Test
@@ -321,21 +325,21 @@ class BddVariableStepsTests
         throws IOException, TemplateException
     {
         String templatePath = "/templatePath";
-        when(freemarkerProcessor.process(templatePath, resultMap, StandardCharsets.UTF_8)).thenReturn(VALUE);
+        when(freemarkerProcessor.process(templatePath, resultMap, StandardCharsets.UTF_8)).thenReturn(VALUE_1);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         String variableName = "variableName";
         bddVariableSteps.initVariableUsingTemplate(scopes, variableName, templatePath,
                 new ExamplesTable("").withRows(List.of(dataModel)));
-        verify(bddVariableContext).putVariable(scopes, variableName, VALUE);
+        verify(bddVariableContext).putVariable(scopes, variableName, VALUE_1);
     }
 
     @Test
     void testValueMatchesPattern()
     {
         String pattern = ".*";
-        bddVariableSteps.valueMatchesPattern(VALUE, Pattern.compile(pattern));
-        verify(softAssert).assertThat(eq(String.format("Value '%s' matches pattern '%s'", VALUE, pattern)),
-                eq(VALUE), argThat(m -> "a string matching the pattern '.*'".equals(m.toString())));
+        bddVariableSteps.valueMatchesPattern(VALUE_1, Pattern.compile(pattern));
+        verify(softAssert).assertThat(eq(String.format("Value '%s' matches pattern '%s'", VALUE_1, pattern)),
+                eq(VALUE_1), argThat(m -> "a string matching the pattern '.*'".equals(m.toString())));
     }
 
     @Test
@@ -343,7 +347,7 @@ class BddVariableStepsTests
     {
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         List<Map<String, String>> listOfMaps = List.of(Map.of("key0", "value0", "key1", "value1"));
-        bddVariableSteps.initVariableWithGivenValues(scopes, VALUE, listOfMaps);
-        verify(bddVariableContext).putVariable(scopes, VALUE, listOfMaps);
+        bddVariableSteps.initVariableWithGivenValues(scopes, VALUE_1, listOfMaps);
+        verify(bddVariableContext).putVariable(scopes, VALUE_1, listOfMaps);
     }
 }

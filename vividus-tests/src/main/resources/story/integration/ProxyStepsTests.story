@@ -16,7 +16,7 @@ Then number of HTTP GET, POST requests with URL pattern `http://httpbin\.org/get
 
 Scenario: Verify steps "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`" and  "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`"
 Meta:
-    @issueId 1248
+    @issueId 1248; 1388
 Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
 When I capture HTTP GET or POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
 Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
@@ -24,6 +24,9 @@ When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save 
 Then `${query.q[0]}` is equal to `vividus`
 Then `${query.q}` is equal to `[vividus]`
 Then `${query}` is equal to `{q=[vividus]}`
+Then `${query}` is equal to table ignoring extra columns:
+|q      |
+|vividus|
 
 Scenario: Verify step When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
 Given I am on a page with the URL 'http://httpbin.org/forms/post'

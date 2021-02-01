@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,6 @@ public final class MapUtils
 {
     private MapUtils()
     {
-    }
-
-    public static Map<String, String> convertSingleRowExamplesTableToMap(ExamplesTable table)
-    {
-        List<Parameters> rows = table.getRowsAsParameters(true);
-        if (rows.size() != 1)
-        {
-            throw new IllegalArgumentException("ExamplesTable should contain single row with values");
-        }
-        return rows.get(0).values();
     }
 
     public static Map<String, List<String>> convertExamplesTableToMap(ExamplesTable table)
