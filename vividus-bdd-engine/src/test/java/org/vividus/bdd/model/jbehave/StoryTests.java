@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,15 +65,17 @@ class StoryTests
         performTest((reporter, out) ->
         {
             reporter.beforeStory(TEST_STORY, false);
+            reporter.beforeScenarios();
             reporter.beforeScenario(TEST_SCENARIO);
             reporter.beforeScenarioSteps(null);
             reporter.beforeStep(STEP);
             reporter.comment(STEP);
             reporter.afterScenarioSteps(null);
             reporter.afterScenario();
+            reporter.afterScenarios();
             reporter.afterStory(false);
 
-            Story story = MAPPER.readValue(new String(out.toByteArray(), StandardCharsets.UTF_8), Story.class);
+            Story story = MAPPER.readValue(out.toString(StandardCharsets.UTF_8), Story.class);
             assertNull(story.getLifecycle());
             assertEquals(STORY_PATH, story.getPath());
             Scenario scenario = ensureSingleElement(story.getScenarios());
@@ -94,6 +96,7 @@ class StoryTests
 
             reporter.beforeStory(TEST_STORY, false);
             reporter.lifecyle(jbehaveLifecycle);
+            reporter.beforeScenarios();
             reporter.beforeScenario(TEST_SCENARIO);
             reporter.beforeExamples(List.of(STEP), table);
             reporter.example(table.getRow(0), -1);
@@ -103,9 +106,10 @@ class StoryTests
             reporter.afterScenarioSteps(null);
             reporter.afterExamples();
             reporter.afterScenario();
+            reporter.afterScenarios();
             reporter.afterStory(false);
 
-            Story story = MAPPER.readValue(new String(out.toByteArray(), StandardCharsets.UTF_8), Story.class);
+            Story story = MAPPER.readValue(out.toString(StandardCharsets.UTF_8), Story.class);
             assertEquals(STORY_PATH, story.getPath());
             Lifecycle lifecycle = story.getLifecycle();
             verifyParameters(lifecycle.getParameters());
