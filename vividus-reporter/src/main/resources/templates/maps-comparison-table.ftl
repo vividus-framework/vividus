@@ -1,12 +1,13 @@
 <#ftl strip_whitespace=true>
 <#setting boolean_format="true ,false ">
 <#assign valueLimit = 5>
+<#assign visibilityThreshold = 8>
 <#assign abbreviation = '...'>
 <#assign more = 'more'>
 <#assign less = 'less'>
 <#assign animationDuration = 600>
 <#function createCell input>
-  <#if valueLimit < (input?length)>
+  <#if visibilityThreshold < (input?length)>
       <#assign visiblePart = input[0..valueLimit]>
       <#assign hiddenPart = input[valueLimit + 1..]>
       <#return visiblePart + '<span class="abbreviation">' + abbreviation
