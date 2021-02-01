@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.bdd.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Map;
@@ -67,26 +66,5 @@ class MapUtilsTests
         ExamplesTable exTable = ExamplesTable.EMPTY;
         Map<String, ?> actualMap = MapUtils.convertExamplesTableToMap(exTable);
         assertEquals(expectedMapSize, actualMap.size(), SHOULD_BE_CONVERTED_INTO_MAP_WITH_SIZE + expectedMapSize);
-    }
-
-    @Test
-    void testConvertSingleRowExamplesTableToMap()
-    {
-        int expectedMapSize = 3;
-        ExamplesTable exTable = new ExamplesTable(SINGLE_ROW_TABLE);
-        Map<String, String> actualMap = MapUtils.convertSingleRowExamplesTableToMap(exTable);
-        assertEquals(expectedMapSize, actualMap.size(), SHOULD_BE_CONVERTED_INTO_MAP_WITH_SIZE + expectedMapSize);
-        assertEquals(VALUE1, actualMap.get(KEY1));
-        assertEquals(VALUE2, actualMap.get(KEY2));
-        assertEquals(VALUE3, actualMap.get(KEY3));
-    }
-
-    @Test
-    void testConvertSingleRowExamplesTableToMapMultiRows()
-    {
-        ExamplesTable exTable = new ExamplesTable("|key1|key2|\n|value1|value2|\n|valueA|valueB|");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> MapUtils
-                .convertSingleRowExamplesTableToMap(exTable));
-        assertEquals("ExamplesTable should contain single row with values", exception.getMessage());
     }
 }
