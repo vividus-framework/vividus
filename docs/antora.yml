@@ -1,7 +1,7 @@
 name: vividus
 version: latest
 prerelease: false
-title: Vividus
+title: VIVIDUS
 asciidoc:
   attributes:
     release-version: 'false'
