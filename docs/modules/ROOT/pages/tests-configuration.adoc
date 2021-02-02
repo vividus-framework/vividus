@@ -128,41 +128,54 @@ Use *\\* for escaping of special characters in regular expressions
 
 Meta tags functionality can be used to reach several goals:
 
-* Scenarios' grouping in Allure report.
-* Scenarios' delimitation for test executing by selected tag.
-* Setting desired execution attributes on scenario-level.
+* Grouping of stories and scenarios in the report.
+* Dynamic selection of tests to execute by meta tags.
+* Management of capabilities for the particular tests.
 
 === Levels
-Meta tags may be used at both story and scenario level. Meta tags specified at Story level are propagated to every scenario, if the same meta tag is used at Scenario level, then Scenario level value is applied.
+Meta tags may be used at both story and scenario level. Meta tags specified at Story level are propagated to every scenario, if the same meta tag is used at Scenario level, then Scenario level value takes precedence.
 ----
+!-- Story level
 Meta:
      @group Login
 
-Scenario: Check redirection to Online Stores
+Scenario: Open Google main page
+!-- Scenario level
 Meta:
-  @testTier 1
+  @severity 1
   @layout desktop
+Given I am on the main application page
+Then the page title is equal to 'Google'
 
-Scenario: Check redirection to Online Stores
+Scenario: Open Yandex main page
 Meta:
-  @testTier 2
+  @severity 2
   @layout desktop
+Given I am on the main application page
+Then the page title is equal to 'Yandex'
 
-Scenario: Check redirection to Online Stores
+Scenario: Open Mail.ru main page
 Meta:
-  @testTier 2
+  @severity 2
   @layout desktop
   @skip
+Given I am on the main application page
+Then the page title is equal to 'Mail.ru'
 ----
+
+=== Properties
+
+Prorerty *bdd.all-meta-filters* is used to set up or override values of default meta tags such as @skip / @layout / @browserWindowSize
 
 Property *bdd.meta-filters* with groovy can be used to select scenarios for execution.
 Example:
 ----
-bdd.meta-filters=groovy: (group == 'Login' && != skip)
+bdd.meta-filters=groovy: (group == 'Login' && !skip)
 ----
-selects all stories/scenarios with tag @group Login and without @skip.
+In example above it selects all stories/scenarios with tag @group Login and without @skip.
 
 Generic meta tags can be used in test scenarios to markup scenarios appropriately following common rules:
+
 
 
 === 1D tags (@key)
@@ -170,9 +183,6 @@ Generic meta tags can be used in test scenarios to markup scenarios appropriatel
 |===
 |Tag
 |Description
-
-|[subs=+quotes]`@proxy`
-|Some test scenarios require Proxy server mechanism switched-on, for this purpose test should be marked with this tag to let Vividus test framework understand that proxy mechanism should be switched-on first as a precondition for test execution.
 
 |`@skip`
 |@skip meta tag is used to exclude particular scenarios from the test execution
@@ -187,14 +197,14 @@ Generic meta tags can be used in test scenarios to markup scenarios appropriatel
 |Description
 |Example
 
-|@testTier
-|Numeric values
+|@severity
+|Numeric values (range 1-5)
 |This tag is used to mark importance of the test where, most usually, the smallest number is the most important Test, the highest number is the least important.
-|@testTier 1 / @testTier 2 / ... / @testTier 4
+|@severity 1 / @severity 2 / ... / @severity 4
 
 |@group
 |Any desired value
-|This tag is used to group marked stories and/or scenarios under specified label in Allure report.
+|Since Vividus version 0.2.3 meta @group is no more mapped to Allure labels since it's not used in the reporting. But it's still can be used by users to mark stories and scenarios for filtering.
 |@group Login
 
 |@layout
