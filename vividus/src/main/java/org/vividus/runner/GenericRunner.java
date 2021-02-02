@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,17 +51,18 @@ public class GenericRunner extends JUnitStories
     private final Embedder embedder;
     private final IBatchedPathFinder batchedPathFinder;
 
-    protected static void setEmbedderBeanName(String embedderBeanName)
-    {
-        GenericRunner.embedderBeanName = embedderBeanName;
-    }
-
+    public GenericRunner()
     {
         Vividus.init();
         batchedPathFinder = BeanFactory.getBean(IBatchedPathFinder.class);
         embedder = BeanFactory.getBean(embedderBeanName, Embedder.class);
         MetadataLogger.logPropertiesSecurely(System.getProperties());
         MetadataLogger.logPropertiesSecurely(BeanFactory.getBean("properties", Properties.class));
+    }
+
+    protected static void setEmbedderBeanName(String embedderBeanName)
+    {
+        GenericRunner.embedderBeanName = embedderBeanName;
     }
 
     @Override

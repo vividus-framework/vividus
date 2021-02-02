@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,7 @@ public final class BddStepPrinter
 
         List<String> stepsLines = steps.stream().map(s -> String
                 .format("%-" + (maxLocationLength + 1) + "s%-24s%s %s", s.getLocation(),
-                        s.deprecated ? DEPRECATED : (s.compositeInStepsFile ? COMPOSITE : EMPTY), s.startingWord,
-                        s.pattern))
+                        s.deprecated ? DEPRECATED : compositeInStepsFile(s), s.startingWord, s.pattern))
                 .collect(Collectors.toList());
 
         String file = commandLine.getOptionValue(fileOption.getOpt());
@@ -90,6 +89,11 @@ public final class BddStepPrinter
             FileUtils.writeLines(path.toFile(), stepsLines);
             System.out.println("File with BDD steps: " + path.toAbsolutePath());
         }
+    }
+
+    private static String compositeInStepsFile(Step s)
+    {
+        return s.compositeInStepsFile ? COMPOSITE : EMPTY;
     }
 
     private static Set<Step> getSteps()
