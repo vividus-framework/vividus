@@ -123,3 +123,87 @@ Use *\\* for escaping of special characters in regular expressions
 * To consider failed assertion known or potentially-known *assertionPattern* should match assertion failure, if defined *variablePatterns* should match also.
 * If *assertionPattern*/*variablePatterns* matched and you have *story/scenario/step/Pattern* defined, to consider issue known all of them should match.
 * If *assertionPattern*/*variablePatterns* matched and you have *story/scenario/step/Pattern* defined, when at least one not matched issue is considered potentially known.
+
+== Meta filters
+
+Meta tags functionality can be used to reach several goals:
+
+* Scenarios' grouping in Allure report.
+* Scenarios' delimitation for test executing by selected tag.
+* Setting desired execution attributes on scenario-level.
+
+=== Levels
+Meta tags may be used at both story and scenario level. Meta tags specified at Story level are propagated to every scenario, if the same meta tag is used at Scenario level, then Scenario level value is applied.
+----
+Meta:
+     @group Login
+
+Scenario: Check redirection to Online Stores
+Meta:
+  @testTier 1
+  @layout desktop
+
+Scenario: Check redirection to Online Stores
+Meta:
+  @testTier 2
+  @layout desktop
+
+Scenario: Check redirection to Online Stores
+Meta:
+  @testTier 2
+  @layout desktop
+  @skip
+----
+
+Property *bdd.meta-filters* with groovy can be used to select scenarios for execution.
+Example:
+----
+bdd.meta-filters=groovy: (group == 'Login' && != skip)
+----
+selects all stories/scenarios with tag @group Login and without @skip.
+
+Generic meta tags can be used in test scenarios to markup scenarios appropriately following common rules:
+
+
+=== 1D tags (@key)
+[cols="1,4", options="header"]
+|===
+|Tag
+|Description
+
+|[subs=+quotes]`@proxy`
+|Some test scenarios require Proxy server mechanism switched-on, for this purpose test should be marked with this tag to let Vividus test framework understand that proxy mechanism should be switched-on first as a precondition for test execution.
+
+|`@skip`
+|@skip meta tag is used to exclude particular scenarios from the test execution
+|===
+
+
+=== 2D tags (@key  value)
+[cols="1,1,3,1", options="header"]
+|===
+|Tag Key
+|Values
+|Description
+|Example
+
+|@testTier
+|Numeric values
+|This tag is used to mark importance of the test where, most usually, the smallest number is the most important Test, the highest number is the least important.
+|@testTier 1 / @testTier 2 / ... / @testTier 4
+
+|@group
+|Any desired value
+|This tag is used to group marked stories and/or scenarios under specified label in Allure report.
+|@group Login
+
+|@layout
+|There exists following possible values: desktop / phone / phone_portrait / phone_landscape / chrome_phone / chrome_responsive / chrome_tablet / tablet / tablet_landscape / tablet_portrait
+|This tag is used to specify layout, using which marked Test or Scenario should be executed. In case if this meta tag is not specified, default (desktop) value is used.
+|
+
+|@browserWindowSize
+|Any browser window size in pixels. For ex. 800x600 Note: browser window size should be smaller than screen-resolution.
+|This tag is used to specify browser window size. It can be used on both story and scenario levels. In case, if browser size differs between adjacent scenarios, browser window will be simply resized to desired values, browser session will not be restarted. If the tag is not set for story or scenario, the browser window will be maximized to the screen size.
+|@browserWindowSize 1024x768
+|===
