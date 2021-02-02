@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,16 +49,9 @@ import org.vividus.ui.web.util.LocatorUtil;
 @ExtendWith(MockitoExtension.class)
 class WebElementsStepsTests
 {
-    private static final String A_FRAME_WITH_THE_ATTRIBUTE_ATTRIBUTE_TYPE_ATTRIBUTE_VALUE = "A "
-            + "frame with the attribute 'attributeType'='attributeValue'";
-    private static final String IFRAME = "iframe";
-    private static final String ATTRIBUTE_VALUE = "attributeValue";
-    private static final String ATTRIBUTE_TYPE = "attributeType";
     private static final String TEXT = "text";
     private static final String REGEX = "[a-zA-Z]+";
     private static final String TEXT_MATCHES_REGEX_MESSAGE = "The text in search context matches regular expression ";
-    private static final String XPATH = LocatorUtil.getXPathByTagNameAndAttribute(IFRAME, ATTRIBUTE_TYPE,
-            ATTRIBUTE_VALUE);
     private static final String THERE_IS_AN_ELEMENT_WITH_TEXT_TEXT_IN_THE_CONTEXT = "There"
             + " is an element with text=text in the context";
     private static final String ELEMENT_TEXT = "1";

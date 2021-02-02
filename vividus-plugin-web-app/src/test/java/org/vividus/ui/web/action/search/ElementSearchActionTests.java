@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
@@ -80,16 +78,13 @@ class ElementSearchActionTests
     private SearchParameters parameters = new SearchParameters(TEXT);
     private AbstractWebElementSearchAction spy;
 
-    @Mock private IWebDriverProvider webDriverProvider;
     @Mock private WebElement webElement;
-    @Mock private WebDriver webDriver;
     @Mock private SearchContext searchContext;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private IWebElementActions webElementActions;
     @Mock private ElementActions elementActions;
     @Mock private IWebWaitActions waitActions;
     @Mock private WaitResult<Object> result;
-    @Mock private By locator;
     @Mock private IExpectedConditions<By> expectedConditions;
 
     @InjectMocks

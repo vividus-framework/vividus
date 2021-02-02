@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,7 +155,7 @@ class WebWaitActionsTests
     void testWaitForPageLoadChrome()
     {
         configureWaitActions();
-        spy = Mockito.spy(waitActions);
+        spy = spy(waitActions);
         Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(true);
         testWaitForPageLoadSleepForTimeout();
     }
@@ -164,7 +164,7 @@ class WebWaitActionsTests
     void testWaitForPageLoadIOS()
     {
         configureWaitActions();
-        spy = Mockito.spy(waitActions);
+        spy = spy(waitActions);
         when(webDriverManager.isIOS()).thenReturn(true);
         testWaitForPageLoadSleepForTimeout();
     }
@@ -181,7 +181,7 @@ class WebWaitActionsTests
     @Test
     void testWaitForPageLoadIExplore()
     {
-        spy = Mockito.spy(waitActions);
+        spy = spy(waitActions);
         mockDescriptiveWait(ChronoUnit.DAYS);
         when(alertActions.isAlertPresent(webDriver)).thenReturn(false);
         when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
@@ -193,7 +193,7 @@ class WebWaitActionsTests
     @Test
     void testWaitForPageLoadIExploreEmptyDocumentReadyState()
     {
-        spy = Mockito.spy(waitActions);
+        spy = spy(waitActions);
         mockDescriptiveWait(ChronoUnit.MILLIS);
         when(alertActions.isAlertPresent(webDriver)).thenReturn(false);
         when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
@@ -205,7 +205,7 @@ class WebWaitActionsTests
     @Test
     void testWaitForPageLoadChromeNoSleep()
     {
-        spy = Mockito.spy(waitActions);
+        spy = spy(waitActions);
         mockDescriptiveWait(ChronoUnit.DAYS);
         when(javascriptActions.executeScript(SCRIPT_READY_STATE)).thenReturn("").thenReturn(COMPLETE);
         Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(Boolean.TRUE);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,21 +59,21 @@ class LocalStorageManagerTests
     }
 
     @Test
-    void getItemTest()
+    void shouldReturnItemByKey()
     {
         localStorageManager.getItem(KEY);
         verify(localStorage).getItem(KEY);
     }
 
     @Test
-    void keySetTest()
+    void shouldReturnKeySet()
     {
         localStorageManager.getKeys();
         verify(localStorage).keySet();
     }
 
     @Test
-    void setItemTests()
+    void shouldSetItem()
     {
         localStorageManager.setItem(KEY, VALUE);
         verify(localStorage).setItem(KEY, VALUE);
@@ -82,7 +82,7 @@ class LocalStorageManagerTests
     }
 
     @Test
-    void removeItemTest()
+    void shouldRemoveItem()
     {
         localStorageManager.removeItem(KEY);
         verify(localStorage).removeItem(KEY);
@@ -90,14 +90,14 @@ class LocalStorageManagerTests
     }
 
     @Test
-    void clearTest()
+    void shouldClearStorage()
     {
         localStorageManager.clear();
         verify(localStorage).clear();
     }
 
     @Test
-    void sizeTest()
+    void shouldReturnStorageSize()
     {
         localStorageManager.getSize();
         verify(localStorage).size();

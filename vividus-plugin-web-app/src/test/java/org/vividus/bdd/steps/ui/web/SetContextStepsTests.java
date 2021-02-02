@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,10 +131,10 @@ class SetContextStepsTests
     @Test
     void shouldSwitchAndResetContex()
     {
-        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> matcher.toString()
-                .equals(EQUALS_MATCHER)))).thenReturn(TITLE);
+        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> EQUALS_MATCHER
+                .equals(matcher.toString())))).thenReturn(TITLE);
         when(softAssert.assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
-                eq(TITLE), argThat(matcher -> matcher.toString().equals(EQUALS_MATCHER)))).thenReturn(true);
+                eq(TITLE), argThat(matcher -> EQUALS_MATCHER.equals(matcher.toString())))).thenReturn(true);
 
         setContextSteps.switchingToWindow(StringComparisonRule.IS_EQUAL_TO, NEW_TITLE);
 

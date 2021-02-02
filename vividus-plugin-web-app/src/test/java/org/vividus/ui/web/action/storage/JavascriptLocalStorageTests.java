@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,14 @@ class JavascriptLocalStorageTests
     private JavascriptLocalStorage javascriptLocalStorage;
 
     @Test
-    void getItemTest()
+    void shouldReturnItemByKey()
     {
         javascriptLocalStorage.getItem(KEY);
         verify(javascriptActions).executeScript("return window.localStorage.getItem(arguments[0]);", KEY);
     }
 
     @Test
-    void keySetTest()
+    void shouldReturnKeySet()
     {
         when(javascriptActions.executeScript("return Object.keys(window.localStorage)")).thenReturn(List.of(KEY));
         Set<String> keys = javascriptLocalStorage.keySet();
@@ -63,28 +63,28 @@ class JavascriptLocalStorageTests
     }
 
     @Test
-    void setItemTest()
+    void shouldSetItem()
     {
         javascriptLocalStorage.setItem(KEY, VALUE);
         verify(javascriptActions).executeScript("window.localStorage.setItem(arguments[0], arguments[1]);", KEY, VALUE);
     }
 
     @Test
-    void removeItem()
+    void shouldRemoveItem()
     {
         javascriptLocalStorage.removeItem(KEY);
         verify(javascriptActions).executeScript("window.localStorage.removeItem(arguments[0]);", KEY);
     }
 
     @Test
-    void clearTest()
+    void shouldClearStorage()
     {
         javascriptLocalStorage.clear();
         verify(javascriptActions).executeScript("window.localStorage.clear();");
     }
 
     @Test
-    void sizeTest()
+    void shouldReturnStorageSize()
     {
         when(javascriptActions.executeScript("return window.localStorage.length")).thenReturn(1);
         assertEquals(1, javascriptLocalStorage.size());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.action.search.Visibility;
 
 @ExtendWith(MockitoExtension.class)
 class TooltipFilterTests
@@ -38,7 +36,6 @@ class TooltipFilterTests
     private static final String TITLE = "title";
     private static final String TOOLTIP = "tooltip";
 
-    private final SearchParameters parameters = new SearchParameters("value", Visibility.ALL, false);
     private final TooltipFilter search = new TooltipFilter();
     private final List<WebElement> webElements = new ArrayList<>();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ class LocatorUtilTests
     private static final String TEXT = "text";
     private static final String TEXT_WITH_PERCENT = "text %";
     private static final String TEXT_WITH_NON_BREAKING_SPACE = "text with space";
-    private static final String A = "a";
     private static final String ATTR = "attr";
 
     @Test
