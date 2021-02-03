@@ -124,16 +124,16 @@ Use *\\* for escaping of special characters in regular expressions
 * If *assertionPattern*/*variablePatterns* matched and you have *story/scenario/step/Pattern* defined, to consider issue known all of them should match.
 * If *assertionPattern*/*variablePatterns* matched and you have *story/scenario/step/Pattern* defined, when at least one not matched issue is considered potentially known.
 
-== Meta filters
+== Meta tags
 
-Meta tags functionality can be used to reach several goals:
+Meta tags can be used to reach several goals:
 
 * Grouping of stories and scenarios in the report.
 * Dynamic selection of tests to execute by meta tags.
 * Management of capabilities for the particular tests.
 
 === Levels
-Meta tags may be used at both story and scenario level. Meta tags specified at Story level are propagated to every scenario, if the same meta tag is used at Scenario level, then Scenario level value takes precedence.
+Meta tags may be used at both story and scenario level. Meta tags specified at the story level are propagated to every scenario, if the same meta tag is used at the scenario level, then the scenario level value takes precedence.
 
 .Levels of meta tags 
 [source,gherkin]
@@ -142,44 +142,36 @@ Meta tags may be used at both story and scenario level. Meta tags specified at S
 Meta:
      @group Login
 
-Scenario: Open Google main page
+Scenario: Open Epam main page
 !-- Scenario level
 Meta:
   @severity 1
   @layout desktop
-Given I am on the main application page
-Then the page title is equal to 'Google'
+Given I am on a page with the URL 'https://www.epam.com/'
+Then the page title is equal to 'EPAM | Enterprise Software Development, Design & Consulting'
 
-Scenario: Open Yandex main page
-Meta:
-  @severity 2
-  @layout desktop
-Given I am on the main application page
-Then the page title is equal to 'Yandex'
-
-Scenario: Open Mail.ru main page
+Scenario: Open Google main page
 Meta:
   @severity 2
   @layout desktop
   @skip
-Given I am on the main application page
-Then the page title is equal to 'Mail.ru'
+Given I am on a page with the URL 'https://www.google.com/'
+Then the page title is equal to 'Google'
 ----
 
 === Properties
 
-Prorerty *bdd.all-meta-filters* is used to set up or override values of default meta tags such as @skip / @layout / @browserWindowSize
+The prorerty `bdd.all-meta-filters` is used to override values of the default meta filters based on the tags: `@skip`, `@layout`, `@browserWindowSize` and etc.
 
-Property *bdd.meta-filters* with groovy can be used to select scenarios for execution.
-Example:
+The property `bdd.meta-filters` relies on groovy synax can be used to filters tests to be executed.
+
+.Execute stoies and scenarios marked with '@group Login' tag and without '@skip' tag
+[source,properties]
 ----
 bdd.meta-filters=groovy: (group == 'Login' && !skip)
 ----
-In example above it selects all stories/scenarios with tag @group Login and without @skip.
 
-Generic meta tags can be used in test scenarios to markup scenarios appropriately following common rules:
-
-
+The following meta tags are available out of the box.
 
 === 1D tags (@key)
 [cols="1,4", options="header"]
@@ -188,7 +180,7 @@ Generic meta tags can be used in test scenarios to markup scenarios appropriatel
 |Description
 
 |`@skip`
-|@skip meta tag is used to exclude particular scenarios from the test execution
+|Used to exclude particular scenarios from the test execution
 |===
 
 
@@ -196,27 +188,22 @@ Generic meta tags can be used in test scenarios to markup scenarios appropriatel
 [cols="1,1,3,1", options="header"]
 |===
 |Tag Key
-|Values
+|Allowed values
 |Description
 |Example
 
 |@severity
 |Numeric values (range 1-5)
-|This tag is used to mark importance of the test where, most usually, the smallest number is the most important Test, the highest number is the least important.
-|@severity 1 / @severity 2 / ... / @severity 4
-
-|@group
-|Any desired value
-|Since Vividus version 0.2.3 meta @group is no more mapped to Allure labels since it's not used in the reporting. But it's still can be used by users to mark stories and scenarios for filtering.
-|@group Login
+|Used to mark importance of the test where, most usually, the smallest number is the most important Test, the highest number is the least important.
+|`@severity 1`
 
 |@layout
-|There exists following possible values: desktop / phone / phone_portrait / phone_landscape / chrome_phone / chrome_responsive / chrome_tablet / tablet / tablet_landscape / tablet_portrait
-|This tag is used to specify layout, using which marked Test or Scenario should be executed. In case if this meta tag is not specified, default (desktop) value is used.
-|
+|`desktop`, `phone`, `phone_portrait`, `phone_landscape`, `chrome_phone`, `chrome_responsive`, `chrome_tablet`, `tablet`, `tablet_landscape`, `tablet_portrait`
+|Used to specify layout, using which marked story or scenario should be executed. In case if this meta tag is not specified, default (`desktop`) value is used for web applications.
+|`@layout desktop`
 
 |@browserWindowSize
-|Any browser window size in pixels. For ex. 800x600 Note: browser window size should be smaller than screen-resolution.
-|This tag is used to specify browser window size. It can be used on both story and scenario levels. In case, if browser size differs between adjacent scenarios, browser window will be simply resized to desired values, browser session will not be restarted. If the tag is not set for story or scenario, the browser window will be maximized to the screen size.
-|@browserWindowSize 1024x768
+|Any browser window size in pixels, e.g. `800x600`. Note: browser window size should be smaller than the current screen resolution.
+|Used to specify browser window size. It can be applied on both story and scenario levels. In case, if browser size differs between adjacent scenarios, browser window will be simply resized to desired values, browser session will not be restarted. If the tag is not set for story or scenario, the browser window will be maximized to the screen size during local test execution.
+|`@browserWindowSize 1024x768`
 |===
