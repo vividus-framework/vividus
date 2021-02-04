@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Scenario
+public class Scenario extends AbstractStepsContainer
 {
     private String title;
     private List<Meta> meta;
-    private List<Step> steps;
     private Examples examples;
 
     public String getTitle()
@@ -47,11 +46,6 @@ public class Scenario
         this.meta = meta;
     }
 
-    public void setSteps(List<Step> steps)
-    {
-        this.steps = steps;
-    }
-
     public Examples getExamples()
     {
         return examples;
@@ -64,9 +58,9 @@ public class Scenario
 
     public List<Step> collectSteps()
     {
-        if (steps != null)
+        if (getSteps() != null)
         {
-            return steps;
+            return getSteps();
         }
         return Optional.ofNullable(examples)
                        .map(Examples::getExamples)

@@ -19,12 +19,12 @@ package org.vividus.xray.factory;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.vividus.bdd.model.jbehave.Example;
+import org.vividus.bdd.model.jbehave.AbstractStepsContainer;
 import org.vividus.bdd.model.jbehave.Scenario;
-import org.vividus.bdd.model.jbehave.Step;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.model.TestCaseType;
 import org.vividus.xray.model.TestExecution;
@@ -63,12 +63,11 @@ public class TestExecutionFactory
 
         if (scenario.getExamples() == null)
         {
-            test.setStatus(calculateStatus(scenario.collectSteps()));
+            test.setStatus(calculateStatus(scenario));
         }
         else
         {
             List<TestExecutionItemStatus> exampleStatuses = scenario.getExamples().getExamples().stream()
-                    .map(Example::getSteps)
                     .map(TestExecutionFactory::calculateStatus)
                     .collect(Collectors.toList());
             test.setExamples(exampleStatuses);
@@ -83,9 +82,11 @@ public class TestExecutionFactory
         return test;
     }
 
-    private static TestExecutionItemStatus calculateStatus(List<Step> steps)
+    private static TestExecutionItemStatus calculateStatus(AbstractStepsContainer steps)
     {
-        return steps.stream().allMatch(step -> "successful".equals(step.getOutcome())) ? TestExecutionItemStatus.PASS
-                : TestExecutionItemStatus.FAIL;
+        return Stream.of(steps.getBeforeScenarioSteps(), steps.getSteps(), steps.getAfterScenarioSteps())
+                     .flatMap(List::stream)
+                     .allMatch(step -> "successful".equals(step.getOutcome())) ? TestExecutionItemStatus.PASS
+                             : TestExecutionItemStatus.FAIL;
     }
 }

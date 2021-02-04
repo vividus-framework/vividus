@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
@@ -38,9 +37,8 @@ import org.jbehave.core.i18n.LocalizedKeywords;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.reporters.JsonOutput;
 import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.util.ReflectionUtils;
-import org.junit.platform.commons.util.ReflectionUtils.HierarchyTraversalMode;
 
 class StoryTests
 {
@@ -67,10 +65,9 @@ class StoryTests
             reporter.beforeStory(TEST_STORY, false);
             reporter.beforeScenarios();
             reporter.beforeScenario(TEST_SCENARIO);
-            reporter.beforeScenarioSteps(null);
-            reporter.beforeStep(STEP);
-            reporter.comment(STEP);
-            reporter.afterScenarioSteps(null);
+            reportStep(reporter, Stage.BEFORE);
+            reportStep(reporter, null);
+            reportStep(reporter, Stage.AFTER);
             reporter.afterScenario();
             reporter.afterScenarios();
             reporter.afterStory(false);
@@ -82,7 +79,9 @@ class StoryTests
             assertEquals(SCENARIO_TITLE, scenario.getTitle());
             assertNull(scenario.getExamples());
             verifyMeta(ensureSingleElement(scenario.getMeta()), META_KEY, META_VALUE);
-            verifyStep(ensureSingleElement(getStepsField(scenario)), COMMENT, STEP);
+            verifyStep(ensureSingleElement(scenario.getBeforeScenarioSteps()), COMMENT, STEP);
+            verifyStep(ensureSingleElement(scenario.getSteps()), COMMENT, STEP);
+            verifyStep(ensureSingleElement(scenario.getAfterScenarioSteps()), COMMENT, STEP);
         });
     }
 
@@ -100,10 +99,9 @@ class StoryTests
             reporter.beforeScenario(TEST_SCENARIO);
             reporter.beforeExamples(List.of(STEP), table);
             reporter.example(table.getRow(0), -1);
-            reporter.beforeScenarioSteps(null);
-            reporter.beforeStep(STEP);
-            reporter.comment(STEP);
-            reporter.afterScenarioSteps(null);
+            reportStep(reporter, Stage.BEFORE);
+            reportStep(reporter, null);
+            reportStep(reporter, Stage.AFTER);
             reporter.afterExamples();
             reporter.afterScenario();
             reporter.afterScenarios();
@@ -115,30 +113,32 @@ class StoryTests
             verifyParameters(lifecycle.getParameters());
             Scenario scenario = ensureSingleElement(story.getScenarios());
             assertEquals(SCENARIO_TITLE, scenario.getTitle());
-            assertNull(getStepsField(scenario));
+            assertNull(scenario.getBeforeScenarioSteps());
+            assertNull(scenario.getSteps());
+            assertNull(scenario.getAfterScenarioSteps());
             verifyMeta(ensureSingleElement(scenario.getMeta()), META_KEY, META_VALUE);
             Examples examples = scenario.getExamples();
             verifyParameters(examples.getParameters());
             assertNotNull(examples);
             Example example = ensureSingleElement(examples.getExamples());
+            verifyStep(ensureSingleElement(example.getBeforeScenarioSteps()), COMMENT, STEP);
             verifyStep(ensureSingleElement(example.getSteps()), COMMENT, STEP);
+            verifyStep(ensureSingleElement(example.getAfterScenarioSteps()), COMMENT, STEP);
         });
+    }
+
+    private static void reportStep(StoryReporter reporter, Stage stage)
+    {
+        reporter.beforeScenarioSteps(stage);
+        reporter.beforeStep(STEP);
+        reporter.comment(STEP);
+        reporter.afterScenarioSteps(stage);
     }
 
     private void verifyParameters(Parameters parameters)
     {
         assertEquals(List.of("table-key"), parameters.getNames());
         assertEquals(List.of(List.of(TABLE_VALUE + 1), List.of(TABLE_VALUE + 2)), parameters.getValues());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<Step> getStepsField(Object target) throws Exception
-    {
-        Field field = ReflectionUtils
-                .findFields(target.getClass(), f -> "steps".equals(f.getName()), HierarchyTraversalMode.TOP_DOWN)
-                .get(0);
-        ReflectionUtils.makeAccessible(field);
-        return (List<Step>) ReflectionUtils.tryToReadFieldValue(field, target).get();
     }
 
     private static void performTest(FailableBiConsumer<StoryReporter, ByteArrayOutputStream, Exception> testables)
