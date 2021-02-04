@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -269,11 +268,11 @@ public class DatabaseSteps
     @When("I wait for '$duration' duration retrying $retryTimes times while data from `$sqlQuery`"
             + " executed against `$dbKey` is equal to data from:$table")
     public void waitForDataAppearance(Duration duration, int retryTimes, String sqlQuery, String dbKey,
-            ExamplesTable table)
+            List<Map<String, String>> table)
     {
         JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
         QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate, jdbcTemplate);
-        Map<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table.getRows());
+        Map<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table);
         statistics.getTarget().setRowsQuantity(sourceData.size());
 
         DurationBasedWaiter waiter = new DurationBasedWaiter(new WaitMode(duration, retryTimes));
@@ -330,7 +329,8 @@ public class DatabaseSteps
      * @param table rows to compare data against
      */
     @Then("`$data` matching rows using `$keys` from `$dbKey` is equal to data from:$table")
-    public void compareData(List<Map<String, Object>> data, Set<String> keys, String dbKey, ExamplesTable table)
+    public void compareData(List<Map<String, Object>> data, Set<String> keys, String dbKey,
+            List<Map<String, String>> table)
     {
         JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
         QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate, jdbcTemplate);
@@ -339,7 +339,7 @@ public class DatabaseSteps
                 .map(m -> m.entrySet()
                            .stream()
                            .collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())))));
-        Map<Object, Map<String, Object>> sourceData = hashMap(keys, table.getRows());
+        Map<Object, Map<String, Object>> sourceData = hashMap(keys, table);
         statistics.getSource().setRowsQuantity(sourceData.size());
         List<List<EntryComparisonResult>> result = compareData(statistics, sourceData, targetData);
         verifyComparisonResult(statistics, filterPassedChecks(result));
