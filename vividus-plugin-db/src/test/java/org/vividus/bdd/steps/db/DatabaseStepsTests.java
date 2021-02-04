@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -56,7 +57,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 
-import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -89,8 +89,6 @@ class DatabaseStepsTests
 {
     private static final Duration TWO_SECONDS = Duration.ofSeconds(2);
 
-    private static final String EXAMPLES_TABLE = "|col1|\n|val2|";
-
     private static final String ADMIN = "admin";
 
     private static final String DB_KEY = "dbKey";
@@ -113,19 +111,15 @@ class DatabaseStepsTests
 
     private static final String TEMPLATE_PATH = "/templates/maps-comparison-table.ftl";
 
-    private static final String COL3 = "col3";
-
-    private static final String COL2 = "col2";
-
-    private static final String VAL3 = "val3";
-
-    private static final String VAL2 = "val2";
-
     private static final String QUERY_RESULTS_ARE_EQUAL = "Query results are equal";
 
-    private static final String VAL1 = "val1";
-
     private static final String COL1 = "col1";
+    private static final String VAL1 = "val1";
+    private static final String COL2 = "col2";
+    private static final String VAL2 = "val2";
+    private static final String COL3 = "col3";
+    private static final String VAL3 = "val3";
+    private static final List<Map<String, String>> TABLE = List.of(Map.of(COL1, VAL2));
 
     private static final String QUERY = "select col1 from table";
     private static final String QUERY2 = "select col1 from table2";
@@ -376,15 +370,15 @@ class DatabaseStepsTests
     static Stream<Arguments> equalDataProvider()
     {
         return Stream.of(
-                Arguments.of(List.of(Map.of(COL1, VAL1)), new ExamplesTable("|col1|\n|val1|")),
-                Arguments.of(List.of(Map.of(COL1, VAL1, COL2, VAL2)), new ExamplesTable("|col2|col1|\n|val2|val1|"))
+                arguments(List.of(Map.of(COL1, VAL1)), List.of(Map.of(COL1, VAL1))),
+                arguments(List.of(Map.of(COL1, VAL1, COL2, VAL2)), List.of(Map.of(COL2, VAL2, COL1, VAL1)))
         );
     }
 
     @ParameterizedTest
     @MethodSource("equalDataProvider")
     void shouldCompareDataVsExamplesTableAndNotPostReportIfDataEqual(List<Map<String, Object>> data,
-            ExamplesTable table)
+            List<Map<String, String>> table)
     {
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         mockRowsFilterAsNOOP();
@@ -420,7 +414,7 @@ class DatabaseStepsTests
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
         mockRowsFilterAsNOOP();
         mockDataSource();
-        databaseSteps.compareData(List.of(Map.of(COL1, VAL1)), Set.of(), DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
+        databaseSteps.compareData(List.of(Map.of(COL1, VAL1)), Set.of(), DB_KEY, TABLE);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_PATH), argThat(r -> {
             List<List<EntryComparisonResult>> results = (List<List<EntryComparisonResult>>) ((Map<?, ?>) r)
                     .get(RESULTS);
@@ -454,19 +448,19 @@ class DatabaseStepsTests
     }
 
     @Test
-    void testWaitUntilQueryReturnedDataEqualToTable() throws Exception
+    void testWaitUntilQueryReturnedDataEqualToTable() throws SQLException
     {
         mockRowsFilterAsNOOP();
         mockDataSource(QUERY, DB_KEY, mockResultSet(COL1, VAL2));
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
-        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
+        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, TABLE);
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
                 any(Map.class), eq(QUERIES_STATISTICS));
         verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, true);
     }
 
     @Test
-    void testWaitTwiceUntilQueryReturnedDataEqualToTable() throws Exception
+    void testWaitTwiceUntilQueryReturnedDataEqualToTable() throws SQLException
     {
         mockRowsFilterAsNOOP();
 
@@ -480,14 +474,14 @@ class DatabaseStepsTests
         when(dataSource.getConnection()).thenReturn(con);
 
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
-        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
+        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, TABLE);
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
                 any(Map.class), eq(QUERIES_STATISTICS));
         verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, true);
     }
 
     @Test
-    void testWaitUntilQueryReturnedDataEqualToTableFailed() throws Exception
+    void testWaitUntilQueryReturnedDataEqualToTableFailed() throws SQLException
     {
         mockRowsFilterAsNOOP();
 
@@ -501,7 +495,7 @@ class DatabaseStepsTests
         when(dataSource.getConnection()).thenReturn(con);
 
         databaseSteps.waitForDataAppearance(
-                Duration.ofSeconds(2), 2, QUERY, DB_KEY, new ExamplesTable(EXAMPLES_TABLE));
+                Duration.ofSeconds(2), 2, QUERY, DB_KEY, TABLE);
         String logMessage = "SQL result data is not equal to expected data in {} records";
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(logMessage, 1), info(logMessage, 1))));
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
