@@ -53,11 +53,18 @@ class TestExecutionFactoryTests
     void shouldCreateTestExecution()
     {
         List<Entry<String, Scenario>> scenarios = List.of(
-            entry("PLAIN_SUCCESS", createPlainScenario(SUCCESS)),
-            entry("PLAIN_FAILED", createPlainScenario(FAILED)),
+            entry("PLAIN_SUCCESS", createPlainScenario(SUCCESS, List.of(), List.of())),
+            entry("PLAIN_FAILED", createPlainScenario(FAILED, List.of(), List.of())),
             entry("MANUAL", createManualScenario()),
-            entry("EXAMPLE_SUCCESS", createExamplesScenario(SUCCESS)),
-            entry("EXAMPLE_FAILED", createExamplesScenario(FAILED))
+            entry("EXAMPLE_SUCCESS", createExamplesScenario(SUCCESS, List.of(), List.of())),
+            entry("EXAMPLE_FAILED", createExamplesScenario(FAILED, List.of(), List.of())),
+            entry("PLAIN_FAILED_IN_AFTER_STEPS", createPlainScenario(SUCCESS, List.of(), List.of(createStep(FAILED)))),
+            entry("PLAIN_FAILED_IN_BEFORE_STEPS", createPlainScenario(SUCCESS, List.of(createStep(FAILED)),
+                    List.of())),
+            entry("EXAMPLE_FAILED_IN_AFTER_STEPS", createExamplesScenario(SUCCESS, List.of(),
+                    List.of(createStep(FAILED)))),
+            entry("EXAMPLE_FAILED_IN_BEFORE_STEPS", createExamplesScenario(SUCCESS, List.of(createStep(FAILED)),
+                    List.of()))
         );
         xrayExporterOptions.setTestExecutionKey(KEY);
 
@@ -65,18 +72,25 @@ class TestExecutionFactoryTests
 
         assertEquals(KEY, execution.getTestExecutionKey());
         List<TestExecutionItem> tests = execution.getTests();
-        assertThat(tests, hasSize(5));
+        assertThat(tests, hasSize(9));
         assertEquals(TestExecutionItemStatus.PASS, tests.get(0).getStatus());
         assertEquals(TestExecutionItemStatus.FAIL, tests.get(1).getStatus());
         assertEquals(TestExecutionItemStatus.TODO, tests.get(2).getStatus());
         assertEquals(TestExecutionItemStatus.PASS, tests.get(3).getStatus());
         assertEquals(TestExecutionItemStatus.FAIL, tests.get(4).getStatus());
+        assertEquals(TestExecutionItemStatus.FAIL, tests.get(5).getStatus());
+        assertEquals(TestExecutionItemStatus.FAIL, tests.get(6).getStatus());
+        assertEquals(TestExecutionItemStatus.FAIL, tests.get(7).getStatus());
+        assertEquals(TestExecutionItemStatus.FAIL, tests.get(8).getStatus());
     }
 
-    private static Scenario createPlainScenario(String outcome)
+    private static Scenario createPlainScenario(String outcome, List<Step> beforeScenarioSteps,
+            List<Step> afterScenarioSteps)
     {
         Scenario scenario = new Scenario();
+        scenario.setBeforeScenarioSteps(beforeScenarioSteps);
         scenario.setSteps(List.of(createStep(SUCCESS), createStep(outcome)));
+        scenario.setAfterScenarioSteps(afterScenarioSteps);
         return scenario;
     }
 
@@ -87,15 +101,23 @@ class TestExecutionFactoryTests
         return scenario;
     }
 
-    private static Scenario createExamplesScenario(String outcome)
+    private static Scenario createExamplesScenario(String outcome, List<Step> beforeScenarioSteps,
+            List<Step> afterScenarioSteps)
     {
         Scenario scenario = new Scenario();
         Examples examples = new Examples();
         scenario.setExamples(examples);
+
         Example example1 = new Example();
+        example1.setBeforeScenarioSteps(beforeScenarioSteps);
         example1.setSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
+        example1.setAfterScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
+
         Example example2 = new Example();
+        example2.setBeforeScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
         example2.setSteps(List.of(createStep(SUCCESS), createStep(outcome)));
+        example2.setAfterScenarioSteps(afterScenarioSteps);
+
         examples.setExamples(List.of(example1, example2));
         return scenario;
     }
