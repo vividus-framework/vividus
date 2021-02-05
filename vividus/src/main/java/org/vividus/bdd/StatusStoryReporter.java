@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,10 @@ public class StatusStoryReporter extends ChainedStoryReporter implements IRunSta
     }
 
     @Override
-    public void scenarioNotAllowed(Scenario scenario, String filter)
+    public void scenarioExcluded(Scenario scenario, String filter)
     {
         changeStatus(Status.SKIPPED);
-        super.scenarioNotAllowed(scenario, filter);
+        super.scenarioExcluded(scenario, filter);
     }
 
     @Override

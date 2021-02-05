@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -38,6 +39,7 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.reporters.JsonOutput;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.Test;
 
 class StoryTests
@@ -68,7 +70,7 @@ class StoryTests
             reportStep(reporter, Stage.BEFORE);
             reportStep(reporter, null);
             reportStep(reporter, Stage.AFTER);
-            reporter.afterScenario();
+            reporter.afterScenario(mock(Timing.class));
             reporter.afterScenarios();
             reporter.afterStory(false);
 
@@ -103,7 +105,7 @@ class StoryTests
             reportStep(reporter, null);
             reportStep(reporter, Stage.AFTER);
             reporter.afterExamples();
-            reporter.afterScenario();
+            reporter.afterScenario(mock(Timing.class));
             reporter.afterScenarios();
             reporter.afterStory(false);
 

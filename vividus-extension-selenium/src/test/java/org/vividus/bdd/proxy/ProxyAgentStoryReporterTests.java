@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -236,9 +237,10 @@ class ProxyAgentStoryReporterTests
     @Test
     void testAfterScenarioWhenNoProxyIsStarted()
     {
-        proxyAgentStoryReporter.afterScenario();
+        Timing timing = mock(Timing.class);
+        proxyAgentStoryReporter.afterScenario(timing);
         verifyProxyInactivity();
-        verify(next).afterScenario();
+        verify(next).afterScenario(timing);
     }
 
     @Test
@@ -247,9 +249,10 @@ class ProxyAgentStoryReporterTests
         mockRunningScenarioAndStoryWithMeta(Collections.emptyList(), Collections.emptyList());
         proxyAgentStoryReporter.setProxyEnabled(true);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
-        proxyAgentStoryReporter.afterScenario();
+        Timing timing = mock(Timing.class);
+        proxyAgentStoryReporter.afterScenario(timing);
         verifyProxyInactivity();
-        verify(next).afterScenario();
+        verify(next).afterScenario(timing);
     }
 
     @Test
@@ -258,10 +261,11 @@ class ProxyAgentStoryReporterTests
         mockRunningScenarioWithMetaAndEmptyStory(Collections.emptyList());
         proxyAgentStoryReporter.setProxyRecordingEnabled(true);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
-        proxyAgentStoryReporter.afterScenario();
+        Timing timing = mock(Timing.class);
+        proxyAgentStoryReporter.afterScenario(timing);
         verify(proxy).stopRecording();
         verifyNoMoreInteractions(proxy);
-        verify(next).afterScenario();
+        verify(next).afterScenario(timing);
     }
 
     @Test
@@ -270,10 +274,11 @@ class ProxyAgentStoryReporterTests
         mockRunningScenarioWithMetaAndEmptyStory(PROXY_META);
         proxyAgentStoryReporter.setProxyRecordingEnabled(true);
         when(proxy.isStarted()).thenReturn(Boolean.TRUE);
-        proxyAgentStoryReporter.afterScenario();
+        Timing timing = mock(Timing.class);
+        proxyAgentStoryReporter.afterScenario(timing);
         verify(proxy).stopRecording();
         verify(proxy).stop();
-        verify(next).afterScenario();
+        verify(next).afterScenario(timing);
     }
 
     @Test

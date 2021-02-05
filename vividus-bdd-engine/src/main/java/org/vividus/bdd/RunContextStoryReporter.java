@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.steps.Timing;
 import org.vividus.bdd.context.BddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
@@ -58,9 +59,9 @@ public class RunContextStoryReporter extends ChainedStoryReporter
     }
 
     @Override
-    public void afterScenario()
+    public void afterScenario(Timing timing)
     {
-        super.afterScenario();
+        super.afterScenario(timing);
         bddRunContext.getRunningStory().setRunningScenario(null);
     }
 
@@ -97,10 +98,10 @@ public class RunContextStoryReporter extends ChainedStoryReporter
     }
 
     @Override
-    public void storyNotAllowed(Story story, String filter)
+    public void storyExcluded(Story story, String filter)
     {
         bddRunContext.setStoryStatus(story, Status.NOT_ALLOWED);
-        super.storyNotAllowed(story, filter);
+        super.storyExcluded(story, filter);
     }
 
     @Override

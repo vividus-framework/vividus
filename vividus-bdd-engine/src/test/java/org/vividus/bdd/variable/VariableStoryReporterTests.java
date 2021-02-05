@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,9 +98,10 @@ class VariableStoryReporterTests
     @Test
     void testAfterScenario()
     {
-        variableStoryReporter.afterScenario();
+        Timing timing = mock(Timing.class);
+        variableStoryReporter.afterScenario(timing);
         InOrder ordered = inOrder(bddVariableContext, nextStoryReporter);
-        ordered.verify(nextStoryReporter).afterScenario();
+        ordered.verify(nextStoryReporter).afterScenario(timing);
         ordered.verify(bddVariableContext).clearScenarioVariables();
         ordered.verifyNoMoreInteractions();
     }

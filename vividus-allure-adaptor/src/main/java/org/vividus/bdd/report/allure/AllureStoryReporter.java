@@ -44,6 +44,7 @@ import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.Timing;
 import org.vividus.bdd.ChainedStoryReporter;
 import org.vividus.bdd.JBehaveFailureUnwrapper;
 import org.vividus.bdd.batch.BatchStorage;
@@ -331,9 +332,9 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     }
 
     @Override
-    public void afterScenario()
+    public void afterScenario(Timing timing)
     {
-        super.afterScenario();
+        super.afterScenario(timing);
         stopTestCase();
         allureRunContext.setStoryExecutionStage(StoryExecutionStage.AFTER_SCENARIO);
     }

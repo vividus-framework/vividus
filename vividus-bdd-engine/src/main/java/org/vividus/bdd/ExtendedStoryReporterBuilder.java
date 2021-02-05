@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.jbehave.core.io.CodeLocations;
 import org.jbehave.core.reporters.DelegatingStoryReporter;
 import org.jbehave.core.reporters.FilePrintStreamFactory.FilePathResolver;
+import org.jbehave.core.reporters.Format;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
@@ -49,7 +50,6 @@ public class ExtendedStoryReporterBuilder extends StoryReporterBuilder
         this.storyReporter = storyReporter;
     }
 
-    @SuppressWarnings("deprecation")
     public void setFormats(List<Format> formats)
     {
         if (formats != null)
