@@ -23,7 +23,7 @@ dependencies {
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'com.icegreen', name: 'greenmail', version: '1.6.1')
+    testImplementation(group: 'com.icegreen', name: 'greenmail', version: '1.6.2')
     testImplementation(group: 'com.sun.mail', name: 'smtp', version: mailVersion)
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
 }
