@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.steps.Timing;
 import org.vividus.bdd.ChainedStoryReporter;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.spring.ExtendedConfiguration;
@@ -66,9 +67,9 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
     }
 
     @Override
-    public void afterScenario()
+    public void afterScenario(Timing timing)
     {
-        super.afterScenario();
+        super.afterScenario(timing);
         if (proxy.isStarted())
         {
             if (isProxyRecordingEnabled())

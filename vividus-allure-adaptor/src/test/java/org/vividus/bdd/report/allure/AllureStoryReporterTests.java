@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -683,8 +684,9 @@ class AllureStoryReporterTests
     void testAfterScenario()
     {
         mockScenarioUid(false);
-        allureStoryReporter.afterScenario();
-        verify(next).afterScenario();
+        Timing timing = mock(Timing.class);
+        allureStoryReporter.afterScenario(timing);
+        verify(next).afterScenario(timing);
         verify(allureLifecycle).stopTestCase(SCENARIO_UID);
         verify(allureLifecycle).writeTestCase(SCENARIO_UID);
         verify(testContext).put(CURRENT_STEP_KEY, null);
@@ -694,8 +696,9 @@ class AllureStoryReporterTests
     void testAfterScenarioGivenStoryScenarioLevel()
     {
         mockStepUid();
-        allureStoryReporter.afterScenario();
-        verify(next).afterScenario();
+        Timing timing = mock(Timing.class);
+        allureStoryReporter.afterScenario(timing);
+        verify(next).afterScenario(timing);
         verify(allureLifecycle).stopStep(STEP_UID);
         verify(allureLifecycle, never()).stopTestCase(SCENARIO_UID);
         verify(allureLifecycle, never()).writeTestCase(SCENARIO_UID);
