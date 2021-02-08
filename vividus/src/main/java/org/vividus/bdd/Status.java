@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.vividus.bdd;
+
+import org.vividus.bdd.report.allure.model.StatusPriority;
 
 public enum Status
 {
@@ -33,6 +35,38 @@ public enum Status
     Status(int priority)
     {
         this.priority = priority;
+    }
+
+    public static Status from(StatusPriority statusPriority)
+    {
+        Status status = null;
+        switch (statusPriority)
+        {
+            case BROKEN:
+                status = Status.BROKEN;
+                break;
+            case FAILED:
+                status = Status.FAILED;
+                break;
+            case PENDING:
+                status = Status.PENDING;
+                break;
+            case KNOWN_ISSUES_ONLY:
+                status = Status.KNOWN_ISSUES_ONLY;
+                break;
+            case CANCELED:
+                status = Status.SKIPPED;
+                break;
+            case PASSED:
+                status = Status.PASSED;
+                break;
+            case NOT_COVERED:
+                status = Status.PASSED;
+                break;
+            default:
+                break;
+        }
+        return status;
     }
 
     public static Status getLowest()

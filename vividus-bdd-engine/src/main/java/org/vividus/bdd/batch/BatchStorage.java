@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,14 @@ public class BatchStorage
 
     private final Duration defaultStoryExecutionTimeout;
     private final List<String> defaultMetaFilters;
-    private final boolean ignoreFailureInBatches;
+    private final boolean failFast;
 
     public BatchStorage(IPropertyMapper propertyMapper, String defaultStoryExecutionTimeout,
-            List<String> defaultMetaFilters, boolean ignoreFailureInBatches) throws IOException
+            List<String> defaultMetaFilters, boolean failFast) throws IOException
     {
         this.defaultMetaFilters = defaultMetaFilters;
         this.defaultStoryExecutionTimeout = Duration.ofSeconds(Long.parseLong(defaultStoryExecutionTimeout));
-        this.ignoreFailureInBatches = ignoreFailureInBatches;
+        this.failFast = failFast;
 
         batchResourceConfigurations = readFromProperties(propertyMapper, "bdd.story-loader.batch-",
                 BatchResourceConfiguration.class);
@@ -61,9 +61,9 @@ public class BatchStorage
             {
                 config.setStoryExecutionTimeout(this.defaultStoryExecutionTimeout);
             }
-            if (config.isIgnoreFailure() == null)
+            if (config.isFailFast() == null)
             {
-                config.setIgnoreFailure(ignoreFailureInBatches);
+                config.setFailFast(failFast);
             }
         });
     }
@@ -96,7 +96,7 @@ public class BatchStorage
             config.setName(batchKey);
             config.setStoryExecutionTimeout(defaultStoryExecutionTimeout);
             config.setMetaFilters(defaultMetaFilters);
-            config.setIgnoreFailure(ignoreFailureInBatches);
+            config.setFailFast(failFast);
             return config;
         });
     }
