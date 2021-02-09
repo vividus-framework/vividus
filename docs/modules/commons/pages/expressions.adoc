@@ -283,6 +283,7 @@ Then `1-2-3` is = `#{evalGroovy(return listOfMaps.collect{it['key']}.sort().join
 
 == Regular expressions
 
+
 [source, subs="+quotes"]
 ----
 #{replaceFirstByRegExp(<regularExpression>, <replacement>, <inputString>)}
@@ -292,12 +293,14 @@ Then `1-2-3` is = `#{evalGroovy(return listOfMaps.collect{it['key']}.sort().join
 #{replaceAllByRegExp(<regularExpression>, <replacement>, <inputString>)}
 ----
 
+
 These expressions replace the first substring/all substrings of input string that matches the given regular expression with the given replacement.
 Expression blocks with commas must be surrounded with triple quotes (""")
 
 * *<regularExpression>* - regular expression to match substring
 * *<replacement>* - will be used to process string. Mind that group's links will be used by reference. For example $1 - reference to first group
 * *<inputString>* - input string
+
 
 |===
 |Expression |Result
@@ -314,6 +317,7 @@ Expression blocks with commas must be surrounded with triple quotes (""")
 |#{replaceAllByRegExp(\s, -, convert spaces to dashes)}
 |convert-spaces-to-dashes
 |===
+
 
 [TIP]
 ====
