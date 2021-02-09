@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,15 @@
 package org.vividus.bdd.model;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.jbehave.core.model.Scenario;
 
 public class RunningScenario
 {
-    private final String uuid = UUID.randomUUID().toString();
     private Scenario scenario;
     private boolean failed;
     private String title;
     private int index = -1;
-
-    public String getUuid()
-    {
-        return uuid;
-    }
 
     public Scenario getScenario()
     {
