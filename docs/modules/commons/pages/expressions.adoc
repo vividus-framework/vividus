@@ -280,3 +280,42 @@ When I initialize Scenario variable `listOfMaps` with values:
 |3  |
 Then `1-2-3` is = `#{evalGroovy(return listOfMaps.collect{it['key']}.sort().join('-'))}`
 ----
+
+== Regular expressions
+
+[source, subs="+quotes"]
+----
+#{replaceFirstByRegExp(<regularExpression>, <replacement>, <inputString>)}
+----
+[source, subs="+quotes"]
+----
+#{replaceAllByRegExp(<regularExpression>, <replacement>, <inputString>)}
+----
+
+These expressions replace the first substring/all substrings of input string that matches the given regular expression with the given replacement.
+Expression blocks with commas must be surrounded with triple quotes (""")
+
+* *<regularExpression>* - regular expression to match substring
+* *<replacement>* - will be used to process string. Mind that group's links will be used by reference. For example $1 - reference to first group
+* *<inputString>* - input string
+
+|===
+|Expression |Result
+
+|#{replaceFirstByRegExp(/node/(\d+)/edit, $1, /node/86/edit)}
+|86
+
+|#{replaceFirstByRegExp(/node/(\d+)/edit, $1/delete, /node/86/edit)}
+|86/delete
+
+|#{replaceFirstByRegExp(.new password is (\d+)., $1, """Updated, new password is 12345""")}
+|12345
+
+|#{replaceAllByRegExp(\s, -, convert spaces to dashes)}
+|convert-spaces-to-dashes
+|===
+
+[TIP]
+====
+You can use following online tool to test your expression's parameters http://www.regexplanet.com/advanced/java/index.html[Test regular expression]
+====
