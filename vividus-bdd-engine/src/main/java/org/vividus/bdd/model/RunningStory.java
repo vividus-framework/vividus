@@ -18,13 +18,11 @@ package org.vividus.bdd.model;
 
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.UUID;
 
 import org.jbehave.core.model.Story;
 
 public class RunningStory
 {
-    private final String uuid = UUID.randomUUID().toString();
     private Story story;
     private boolean failed;
     private boolean allowed;
@@ -39,11 +37,6 @@ public class RunningStory
     public void setStory(Story story)
     {
         this.story = story;
-    }
-
-    public String getUuid()
-    {
-        return uuid;
     }
 
     public boolean isFailed()

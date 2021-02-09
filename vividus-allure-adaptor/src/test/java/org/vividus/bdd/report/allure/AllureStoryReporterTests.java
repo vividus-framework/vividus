@@ -1098,7 +1098,7 @@ class AllureStoryReporterTests
         RunningScenario runningScenario = new RunningScenario();
         runningScenario.setScenario(scenario);
         runningScenario.setIndex(scenarioRowIndex);
-        scenarioUid = String.format(SCENARIO_UID_PATTERN, runningScenario.getUuid(), scenarioRowIndex);
+        scenarioUid = String.format(SCENARIO_UID_PATTERN, scenario.getId(), scenarioRowIndex);
         return runningScenario;
     }
 
@@ -1141,7 +1141,7 @@ class AllureStoryReporterTests
         Properties scenarioMeta = getScenarioMeta(true);
         Scenario scenario = new Scenario(SCENARIO, new Meta(scenarioMeta));
         RunningScenario runningScenario = getRunningScenario(scenario, scenarioRowIndex);
-        scenarioUid = String.format(SCENARIO_UID_PATTERN, runningScenario.getUuid(), scenarioRowIndex);
+        scenarioUid = String.format(SCENARIO_UID_PATTERN, scenario.getId(), scenarioRowIndex);
         Properties storyMeta = getStoryMeta();
         Story story = new Story(null, null, new Meta(storyMeta), null, List.of(scenario));
         RunningStory runningStory = getRunningStory(story, runningScenario);

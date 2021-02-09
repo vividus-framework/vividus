@@ -545,7 +545,8 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         {
             RunningStory runningStory = bddRunContext.getRunningStory();
             Meta storyMeta = runningStory.getStory().getMeta();
-            Meta scenarioMeta = runningScenario.getScenario().getMeta();
+            Scenario scenario = runningScenario.getScenario();
+            Meta scenarioMeta = scenario.getMeta();
 
             Map<VividusLabel, Set<String>> metaLabels = Stream.of(VividusLabel.values())
                     .collect(Collectors.toMap(Function.identity(),
@@ -562,7 +563,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
             labels.addAll(allureRunContext.getCurrentStoryLabels());
 
             int index = runningScenario.getIndex();
-            String scenarioId = runningScenario.getUuid() + (index != -1 ? "[" + index + "]" : "");
+            String scenarioId = scenario.getId() + (index != -1 ? "[" + index + "]" : "");
             lifecycle.scheduleTestCase(new TestResult()
                     .setHistoryId(getHistoryId(runningStory, runningScenario))
                     .setUuid(scenarioId)
