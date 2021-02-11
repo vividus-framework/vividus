@@ -18,8 +18,6 @@
         </constructor-arg>
     </bean>
 
-    <bean class="org.jbehave.core.steps.ParameterConverters.FluentEnumConverter" />
-
     <bean name="SORTING" class="org.vividus.bdd.transformer.SortingTableTransformer" />
 
     <bean class="org.vividus.bdd.log.LoggingStepMonitor" />
