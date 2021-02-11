@@ -76,6 +76,6 @@
 
     <util:list id="storyReporters" />
 
-    <bean id="fluentEnumConverter" class="org.jbehave.core.steps.ParameterConverters.FluentEnumConverter" />
+    <bean class="org.jbehave.core.steps.ParameterConverters.FluentEnumConverter" />
 
 </beans>
