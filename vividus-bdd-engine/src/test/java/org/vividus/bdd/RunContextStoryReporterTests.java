@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -131,7 +132,7 @@ class RunContextStoryReporterTests
     @Test
     void testScenarioExamplesTable()
     {
-        RunningScenario runningScenario = new RunningScenario();
+        RunningScenario runningScenario = spy(RunningScenario.class);
         runningScenario.setScenario(scenario);
         RunningStory runningStory = mockGetRunningStory();
         runningStory.setRunningScenario(runningScenario);
@@ -141,6 +142,7 @@ class RunContextStoryReporterTests
         assertEquals(1, runningScenario.getIndex());
         assertEquals(String.format(TITLE_PATTERN, SCENARIO_TITLE, 2), runningScenario.getTitle());
         verify(next).example(tableRow, 1);
+        verify(runningScenario).setExample(tableRow);
     }
 
     @Test

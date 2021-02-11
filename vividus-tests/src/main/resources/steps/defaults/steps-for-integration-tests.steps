@@ -12,3 +12,15 @@ Then `0` is = `1`
 
 Composite: When I run composite step with table:$table
 When I initialize scenario variable `table-from-composite-step` with values:<table>
+
+Composite: When I use examples vars on the first level
+Then `<var>` is = `<var2>`
+
+Composite: When I use examples vars on the second level
+When I use examples vars on the first level
+
+Composite: When I use examples vars on the third level
+When the condition `true` is true I do
+|step                                        |
+|Then `<var3>` is = `<var4>`                 |
+|When I use examples vars on the second level|

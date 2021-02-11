@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.jbehave.core.model.Scenario;
@@ -25,6 +27,7 @@ public class RunningScenario
     private Scenario scenario;
     private boolean failed;
     private String title;
+    private Map<String, String> example = new HashMap<>();
     private int index = -1;
 
     public Scenario getScenario()
@@ -65,5 +68,15 @@ public class RunningScenario
     public void setIndex(int index)
     {
         this.index = index;
+    }
+
+    public Map<String, String> getExample()
+    {
+        return example;
+    }
+
+    public void setExample(Map<String, String> example)
+    {
+        this.example = example;
     }
 }
