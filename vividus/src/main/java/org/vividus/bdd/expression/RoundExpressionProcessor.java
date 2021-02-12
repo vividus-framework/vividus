@@ -25,32 +25,38 @@ import java.util.stream.Stream;
 
 import javax.inject.Named;
 
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 
 @Named
 public class RoundExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final Pattern ROUND_EXPRESSION_PATTERN;
 
+    private final FluentEnumConverter fluentEnumConverter;
+
     static
     {
-        String roundingModes = Stream.of(RoundingMode.values()).map(e -> e.name().toLowerCase())
-                .collect(Collectors.joining("|"));
+        String roundingModes = Stream.of(RoundingMode.values())
+                                     .map(RoundingMode::name)
+                                     .map(String::toLowerCase)
+                                     .map(e -> e.replaceAll("_", "[ _]"))
+                                     .collect(Collectors.joining("|"));
         String pattern = String.format("^round(?:\\((-?\\d+(?:\\.\\d*)?(?:[Ee]+(?:-|\\+)?\\d+)?)(?:,\\s*(\\d+))?"
                 + "(?:,\\s*(%s))?\\))$", roundingModes);
         ROUND_EXPRESSION_PATTERN = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
     }
 
-    public RoundExpressionProcessor()
+    public RoundExpressionProcessor(FluentEnumConverter fluentEnumConverter)
     {
         super(ROUND_EXPRESSION_PATTERN);
+        this.fluentEnumConverter = fluentEnumConverter;
     }
 
     @Override
     protected String evaluateExpression(Matcher expressionMatcher)
     {
-        RoundExpression roundExpression = new RoundExpression(expressionMatcher);
+        RoundExpression roundExpression = new RoundExpression(expressionMatcher, fluentEnumConverter);
         return new BigDecimal(roundExpression.getValue())
                 .setScale(roundExpression.getMaxFractionDigits(), roundExpression.getRoundingMode())
                 .stripTrailingZeros()
@@ -65,12 +71,14 @@ public class RoundExpressionProcessor extends AbstractExpressionProcessor<String
 
         private static final int DEFAULT_MAX_FRACTION_DIGITS = 2;
 
+        private final FluentEnumConverter converter;
         private final String value;
         private final String maxFractionDigits;
         private final String roundingMode;
 
-        RoundExpression(Matcher durationMatcher)
+        RoundExpression(Matcher durationMatcher, FluentEnumConverter fluentEnumConverter)
         {
+            converter = fluentEnumConverter;
             value = durationMatcher.group(VALUE_GROUP);
             maxFractionDigits = durationMatcher.group(MAX_FRACTION_DIGITS_GROUP);
             roundingMode = durationMatcher.group(ROUNDING_MODE_GROUP);
@@ -97,7 +105,7 @@ public class RoundExpressionProcessor extends AbstractExpressionProcessor<String
             {
                 return value.charAt(0) == '-' ? RoundingMode.HALF_DOWN : RoundingMode.HALF_UP;
             }
-            return EnumUtils.getEnum(RoundingMode.class, roundingMode.toUpperCase());
+            return (RoundingMode) converter.convertValue(roundingMode, RoundingMode.class);
         }
     }
 }

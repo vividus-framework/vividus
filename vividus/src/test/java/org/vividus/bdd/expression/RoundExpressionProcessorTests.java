@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.vividus.bdd.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class RoundExpressionProcessorTests
 {
-    private final RoundExpressionProcessor processor = new RoundExpressionProcessor();
+    private final RoundExpressionProcessor processor = new RoundExpressionProcessor(new FluentEnumConverter());
 
     @ParameterizedTest
     @CsvSource({
@@ -54,7 +55,10 @@ class RoundExpressionProcessorTests
         "'round(0.15237E,0)',     false",
         "'round(0.15237E-+2,0)',  false",
         "'round(0.15237-2,0)',    false",
-        "'round(0.15237+2,0)',    false"
+        "'round(0.15237+2,0)',    false",
+        "'round(1,2,half up)',    true",
+        "'round(1,2,half down)',  true",
+        "'round(1,2,half even)',  true"
     })
     void testApply(String expression, boolean expected)
     {
@@ -145,7 +149,10 @@ class RoundExpressionProcessorTests
         "'round(-1.1, 2, unnecessary)', -1.1",
         "'round(0.15237E3, 0)', 152",
         "'round(0.15237E+3, 0)', 152",
-        "'round(15237E-3, 2)', 15.24"
+        "'round(15237E-3, 2)', 15.24",
+        "'round(-1.4444, 3, half up)',  -1.444",
+        "'round(-1.4444, 3, half down)',-1.444",
+        "'round(-1.4444, 3, half even)',-1.444"
     })
     void testRound(String expression, String expected)
     {

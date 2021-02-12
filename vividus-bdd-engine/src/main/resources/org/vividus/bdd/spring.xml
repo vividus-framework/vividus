@@ -90,8 +90,6 @@
 
     <bean class="org.vividus.bdd.log.LoggingStepMonitor" />
 
-    <bean class="org.jbehave.core.steps.ParameterConverters.FluentEnumConverter"/>
-
     <bean id="stepFactory" class="org.vividus.bdd.steps.SpringStepFactory">
         <constructor-arg index="0" ref="configuration" />
     </bean>
