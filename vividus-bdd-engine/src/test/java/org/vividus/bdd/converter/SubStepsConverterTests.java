@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jbehave.core.embedder.Embedder;
@@ -39,6 +40,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
 import org.vividus.bdd.spring.ExtendedConfiguration;
@@ -63,7 +65,13 @@ class SubStepsConverterTests
         when(examplesTableFactory.createExamplesTable(stepsToExecute)).thenReturn(stepsToExecuteTable);
         Step step = mock(Step.class);
         List<Step> steps = List.of(step);
-        when(stepExamplesTableParser.parse(stepsToExecuteTable)).thenReturn(steps);
+        RunningStory runningStory = mock(RunningStory.class);
+        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        RunningScenario runningScenario = mock(RunningScenario.class);
+        Map<String, String> examples = Map.of("key", "value");
+        when(runningScenario.getExample()).thenReturn(examples);
+        when(runningStory.getRunningScenario()).thenReturn(runningScenario);
+        when(stepExamplesTableParser.parse(stepsToExecuteTable, examples)).thenReturn(steps);
         StoryReporter storyReporter = mockStoryReporter();
         SubSteps executor = subStepsConverter.convertValue(stepsToExecute, SubSteps.class);
         assertEquals(steps, getFieldValue("steps", executor));

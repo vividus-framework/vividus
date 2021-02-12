@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.Step;
+import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.spring.ExtendedConfiguration;
 
 public class StepExamplesTableParser implements IStepExamplesTableParser
@@ -36,14 +37,15 @@ public class StepExamplesTableParser implements IStepExamplesTableParser
     private final ExtendedConfiguration configuration;
     private final InjectableStepsFactory stepsFactory;
 
-    public StepExamplesTableParser(ExtendedConfiguration configuration, InjectableStepsFactory stepsFactory)
+    public StepExamplesTableParser(ExtendedConfiguration configuration, InjectableStepsFactory stepsFactory,
+            IBddRunContext bddRunContext)
     {
         this.configuration = configuration;
         this.stepsFactory = stepsFactory;
     }
 
     @Override
-    public List<Step> parse(ExamplesTable stepsAsTable)
+    public List<Step> parse(ExamplesTable stepsAsTable, Map<String, String> currentExample)
     {
         Validate.isTrue(List.of(STEP_COLUMN_NAME).equals(stepsAsTable.getHeaders()),
                 "The steps examples table must have only one column with the name '%s', but got %s", STEP_COLUMN_NAME,
@@ -60,7 +62,7 @@ public class StepExamplesTableParser implements IStepExamplesTableParser
         Scenario scenario = new Scenario(stepsAsText);
         MatchingStepMonitor monitor = new MatchingStepMonitor(configuration.stepMonitor());
         return configuration.stepCollector().collectScenarioSteps(stepsFactory.createCandidateSteps(),
-                scenario, Map.of(), monitor);
+                scenario, currentExample, monitor);
     }
 
     private static String getErrorMessage(List<String> headers)

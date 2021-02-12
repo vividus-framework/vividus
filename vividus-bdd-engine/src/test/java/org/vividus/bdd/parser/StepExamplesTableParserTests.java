@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.vividus.bdd.spring.ExtendedConfiguration;
 @ExtendWith(MockitoExtension.class)
 class StepExamplesTableParserTests
 {
+    private static final Map<String, String> PARAMETERS = Map.of("key", "value");
     private static final String STEP = "When I do something";
     private static final String ERROR_MESSAGE_PART = "The steps examples table must have only one column with the name"
         + " 'step', but got ";
@@ -67,7 +68,8 @@ class StepExamplesTableParserTests
     void testMoreThanOneColumnInStepsExampleTable()
     {
         ExamplesTable table = new ExamplesTable("|step|col2|col3|\n|val1|val2|val3|");
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> stepExamplesTableParser.parse(table));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> stepExamplesTableParser.parse(table,
+                Map.of()));
         assertEquals(ERROR_MESSAGE_PART + "step, col2, col3", exception.getMessage());
         verifyNoInteractions(stepsFactory, configuration);
     }
@@ -76,7 +78,7 @@ class StepExamplesTableParserTests
     void testGetListStepsNoStepsAsTable()
     {
         Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> stepExamplesTableParser.parse(ExamplesTable.EMPTY));
+            () -> stepExamplesTableParser.parse(ExamplesTable.EMPTY, Map.of()));
         assertEquals(ERROR_MESSAGE_PART + "empty table", exception.getMessage());
         verifyNoInteractions(stepsFactory, configuration);
     }
@@ -97,7 +99,7 @@ class StepExamplesTableParserTests
             return scenarioSteps.size() == 1 && STEP.equals(scenarioSteps.get(0));
         });
         ExamplesTable stepsToExecute = newStepExamplesTable(STEP);
-        stepExamplesTableParser.parse(stepsToExecute);
+        stepExamplesTableParser.parse(stepsToExecute, PARAMETERS);
         verify(configuration).storyParser();
         verify(configuration).stepMonitor();
     }
@@ -106,7 +108,7 @@ class StepExamplesTableParserTests
     {
         Step step = mock(Step.class);
         List<Step> steps = List.of(step);
-        when(mockStepCollector().collectScenarioSteps(eq(mockCandidateSteps()), argThat(matcher), eq(Map.of()),
+        when(mockStepCollector().collectScenarioSteps(eq(mockCandidateSteps()), argThat(matcher), eq(PARAMETERS),
                 any(MatchingStepMonitor.class))).thenReturn(steps);
     }
 

@@ -94,6 +94,7 @@ public class RunContextStoryReporter extends ChainedStoryReporter
         runningScenario.setIndex(exampleIndex);
         runningScenario.setTitle(runningScenario.getScenario().getTitle()
                 + (exampleIndex == -1 ? "" : " [" + (exampleIndex + 1) + ']'));
+        runningScenario.setExample(tableRow);
         super.example(tableRow, exampleIndex);
     }
 
