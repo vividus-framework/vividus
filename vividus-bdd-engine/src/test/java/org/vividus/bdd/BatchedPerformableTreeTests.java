@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class BatchedPerformableTreeTests
     {
         mockRunContext();
         when(runContext.getFailures()).thenReturn(getFailures());
-        batchedPerformableTree.setIgnoreFailureInBatches(false);
+        batchedPerformableTree.setFailFast(true);
         batchedPerformableTree.setReportAfterStories(false);
         batchedPerformableTree.performBeforeOrAfterStories(runContext, Stage.AFTER);
         verify(runContext).currentPath(AFTER_STORIES);
@@ -72,7 +72,7 @@ class BatchedPerformableTreeTests
     @Test
     void testPerformBeforeOrAfterStoriesPerformAfterFailureIgnoreFailureInBatches()
     {
-        batchedPerformableTree.setIgnoreFailureInBatches(true);
+        batchedPerformableTree.setFailFast(false);
         testPerformBeforeOrAfterStoriesPerformNone(Stage.AFTER);
     }
 
@@ -85,7 +85,7 @@ class BatchedPerformableTreeTests
     @Test
     void testPerformBeforeOrAfterStoriesPerformNoneForAfter()
     {
-        batchedPerformableTree.setIgnoreFailureInBatches(true);
+        batchedPerformableTree.setFailFast(false);
         testPerformBeforeOrAfterStoriesPerformNone(Stage.AFTER);
     }
 

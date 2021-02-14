@@ -12,7 +12,7 @@
         <constructor-arg ref="propertyMapper" />
         <constructor-arg value="${bdd.story-execution-timeout}" />
         <constructor-arg value="${bdd.all-meta-filters}" />
-        <constructor-arg value="${bdd.ignore-failure-in-batches}" />
+        <constructor-arg value="${bdd.batch.fail-fast}" />
     </bean>
 
     <bean id="bddVariableContext" class="org.vividus.bdd.context.BddVariableContext">
@@ -84,7 +84,7 @@
 
     <bean id="springStoryControls" class="org.jbehave.core.configuration.spring.SpringStoryControls">
          <property name="dryRun" value="${bdd.configuration.dry-run}" />
-         <property name="resetStateBeforeScenario" value="${bdd.configuration.reset-state-before-scenario}" />
+         <property name="resetStateBeforeScenario" value="#{!T(java.lang.Boolean).parseBoolean('${bdd.story.fail-fast}')}" />
          <property name="skipStoryIfGivenStoryFailed" value="${bdd.configuration.skip-story-if-given-story-failed}" />
     </bean>
 

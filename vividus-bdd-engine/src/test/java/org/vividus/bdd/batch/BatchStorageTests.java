@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,16 +80,16 @@ class BatchStorageTests
         when(propertyParser.getPropertiesByPrefix(BATCH_LOADER_PROPERTY_PREFIX)).thenReturn(
                 batchResourceConfigurations);
         when(propertyParser.getPropertiesByPrefix("bdd.batch-")).thenReturn(Map.of(
-            "bdd.batch-1.ignore-failure", "",
+            "bdd.batch-1.fail-fast", "",
             "bdd.batch-2.name", BATCH_2_NAME,
             "bdd.batch-2.threads", Integer.toString(BATCH_2_THREADS),
             "bdd.batch-2.story-execution-timeout", BATCH_2_TIMEOUT.toString(),
             "bdd.batch-2.meta-filters", BATCH_2_META_FILTERS,
-            "bdd.batch-2.ignore-failure", "false"
+            "bdd.batch-2.fail-fast", "true"
         ));
 
         IPropertyMapper propertyMapper = new PropertyMapper(propertyParser, Set.of());
-        batchStorage = new BatchStorage(propertyMapper, Long.toString(DEFAULT_TIMEOUT), DEFAULT_META_FILTERS, true);
+        batchStorage = new BatchStorage(propertyMapper, Long.toString(DEFAULT_TIMEOUT), DEFAULT_META_FILTERS, false);
     }
 
     private void addBatchResourceConfiguration(Map<String, String> batchResourceConfigurations, int i)
@@ -131,7 +131,7 @@ class BatchStorageTests
             () -> assertEquals(BATCH_2_THREADS, config.getThreads()),
             () -> assertEquals(BATCH_2_TIMEOUT, config.getStoryExecutionTimeout()),
             () -> assertEquals(List.of(BATCH_2_META_FILTERS), config.getMetaFilters()),
-            () -> assertFalse(config.isIgnoreFailure())
+            () -> assertTrue(config.isFailFast())
         );
     }
 
@@ -149,7 +149,7 @@ class BatchStorageTests
             () -> assertNull(config.getThreads()),
             () -> assertEquals(Duration.ofSeconds(DEFAULT_TIMEOUT), config.getStoryExecutionTimeout()),
             () -> assertEquals(DEFAULT_META_FILTERS, config.getMetaFilters()),
-            () -> assertTrue(config.isIgnoreFailure())
+            () -> assertFalse(config.isFailFast())
         );
     }
 }

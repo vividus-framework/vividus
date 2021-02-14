@@ -62,6 +62,9 @@
                                 <list>
                                     <bean class="org.vividus.bdd.log.LoggingStoryReporter" />
                                     <ref bean="analyticsStoryReporter" />
+                                    <bean class="org.vividus.bdd.StatisticsStoryReporter" >
+                                        <property name="statisticsFolder" value="${statistics.folder}" />
+                                    </bean>
                                 </list>
                             </list>
                         </property>

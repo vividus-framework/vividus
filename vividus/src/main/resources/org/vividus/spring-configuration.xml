@@ -46,6 +46,6 @@
     <bean class="org.vividus.spring.VividusEditorConfigurer" />
 
     <bean id="assertionManager" class="org.vividus.softassert.AssertionManager">
-        <property name="failFast" value="${soft-assert.fail-fast}" />
+        <property name="failScenarioFast" value="${bdd.scenario.fail-fast}" />
     </bean>
 </beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.jbehave.core.steps.StepCollector.Stage;
 
 public class BatchedPerformableTree extends PerformableTree
 {
-    private boolean ignoreFailureInBatches;
+    private boolean failFast;
     private boolean reportBeforeStories;
     private boolean reportAfterStories;
 
@@ -29,7 +29,7 @@ public class BatchedPerformableTree extends PerformableTree
     public void performBeforeOrAfterStories(RunContext context, Stage stage)
     {
         if (reportBeforeStories && Stage.BEFORE.equals(stage) || (Stage.AFTER.equals(stage)
-                && (reportAfterStories || !ignoreFailureInBatches && !context.getFailures().isEmpty())))
+                && (reportAfterStories || failFast && !context.getFailures().isEmpty())))
         {
             super.performBeforeOrAfterStories(context, stage);
         }
@@ -45,8 +45,8 @@ public class BatchedPerformableTree extends PerformableTree
         this.reportAfterStories = reportAfterStories;
     }
 
-    public void setIgnoreFailureInBatches(boolean ignoreFailureInBatches)
+    public void setFailFast(boolean failFast)
     {
-        this.ignoreFailureInBatches = ignoreFailureInBatches;
+        this.failFast = failFast;
     }
 }

@@ -50,13 +50,25 @@ NOTE: The properties marked with *bold* are mandatory.
 |suite meta-filter
 |The meta-filter used to filter the batch stories and scenarios
 
-|`bdd.batch-<batch-number>.ignore-failure`
-|`true`
-|If `false` and any failure is occurred during the batch execution, the subsequent batches are not executed.
+|`bdd.batch-<batch-number>.fail-fast`
+|`false`
+|If `true` and any failure is occurred during the batch execution, the subsequent batches will not be executed.
 
 |`bdd.batch-<batch-number>.story-execution-timeout`
 |`PT3H`
 |The max duration of the single story in the batch.
+
+|`bdd.batch.fail-fast`
+|`false`
+|If set to `true` the subsequent batches execution will be stopped after first failed assertion
+
+|`bdd.story.fail-fast`
+|`false`
+|If set to `true` the story execution will be stopped after first failed assertion
+
+|`bdd.scenario.fail-fast`
+|`false`
+|If set to `true` the scenario execution will be stopped after first failed assertion
 |===
 
 == Known Issues

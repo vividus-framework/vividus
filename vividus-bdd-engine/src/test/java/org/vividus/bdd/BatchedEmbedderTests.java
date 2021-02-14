@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ class BatchedEmbedderTests
             failures.put(key, throwable);
             return true;
         }));
-        mockBatchExecutionConfiguration(false);
+        mockBatchExecutionConfiguration(true);
         Map<String, List<String>> batches = new LinkedHashMap<>();
         batches.put(BATCH, testStoryPaths);
         batches.put("batch-2", List.of("path2"));
@@ -127,7 +127,7 @@ class BatchedEmbedderTests
         List<String> testStoryPaths = List.of(PATH);
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
         when(mockedEmbedderControls.threads()).thenReturn(THREADS);
-        mockBatchExecutionConfiguration(true);
+        mockBatchExecutionConfiguration(false);
         spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
         InOrder ordered = inOrder(spy, embedderMonitor, storyManager, bddRunContext, bddVariableContext);
         ordered.verify(spy).processSystemProperties();
@@ -160,7 +160,7 @@ class BatchedEmbedderTests
         when(mockedEmbedderControls.threads()).thenReturn(THREADS);
         when(mockedEmbedderControls.skip()).thenReturn(true);
         List<String> testStoryPaths = List.of(PATH);
-        mockBatchExecutionConfiguration(true);
+        mockBatchExecutionConfiguration(false);
         spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
         verify(spy).processSystemProperties();
         verify(embedderMonitor).usingControls(mockedEmbedderControls);
@@ -232,13 +232,13 @@ class BatchedEmbedderTests
         return mockedEmbedderControls;
     }
 
-    private void mockBatchExecutionConfiguration(boolean ignoreFailure)
+    private void mockBatchExecutionConfiguration(boolean failFast)
     {
         BatchExecutionConfiguration batchExecutionConfiguration = new BatchExecutionConfiguration();
         batchExecutionConfiguration.setStoryExecutionTimeout(Duration.ofHours(1));
         batchExecutionConfiguration.setMetaFilters(META_FILTERS);
         batchExecutionConfiguration.setThreads(2);
-        batchExecutionConfiguration.setIgnoreFailure(ignoreFailure);
+        batchExecutionConfiguration.setFailFast(failFast);
         when(batchStorage.getBatchExecutionConfiguration(BATCH)).thenReturn(batchExecutionConfiguration);
     }
 

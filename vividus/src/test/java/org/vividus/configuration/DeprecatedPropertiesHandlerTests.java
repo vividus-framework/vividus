@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
 import java.util.Properties;
@@ -28,6 +29,10 @@ import org.mockito.Mockito;
 
 class DeprecatedPropertiesHandlerTests
 {
+    private static final String FALSE = "false";
+
+    private static final String TRUE = "true";
+
     private static final String PROP1 = "norm1";
 
     private static final String PROP2 = "norm2";
@@ -121,6 +126,29 @@ class DeprecatedPropertiesHandlerTests
     }
 
     @Test
+    void shouldFlipBooleanValueIfKeyHasExclamationMarkBeforeDeprecatedPropertyValue()
+    {
+        Properties deprecatedProperties = new Properties();
+        String newKey = "new.key";
+        deprecatedProperties.put("!some.key", newKey);
+        String newKey1 = "new.key1";
+        deprecatedProperties.put("!some.key1", newKey1);
+        String newKey2 = "new.key2";
+        deprecatedProperties.put("!some.key2", newKey2);
+        DeprecatedPropertiesHandler handler = new DeprecatedPropertiesHandler(deprecatedProperties, PLACEHOLDER_PREFIX,
+                PLACEHOLDER_SUFFIX);
+        Properties properties = new Properties();
+        properties.put("some.key", TRUE);
+        properties.put("some.key1", FALSE);
+        String fortyTwo = "42";
+        properties.put("some.key2", fortyTwo);
+        handler.replaceDeprecated(properties, properties);
+        assertEquals(FALSE, properties.get(newKey));
+        assertEquals(TRUE, properties.get(newKey1));
+        assertEquals(fortyTwo, properties.get(newKey2));
+    }
+
+    @Test
     void testReplaceDeprecatedPlaceholderAndTextCombination()
     {
         String prop1Value = VALUE + PLACEHOLDER_PREFIX + VALUE + PLACEHOLDER_SUFFIX + VALUE;
@@ -138,5 +166,38 @@ class DeprecatedPropertiesHandlerTests
         Properties props = new Properties();
         spy.replaceDeprecated(props);
         verify(spy).replaceDeprecated(props, props);
+    }
+
+    @Test
+    void shouldReplaceDeprecatedPropertyWithDynamicPart()
+    {
+        Properties deprecatedProperties = new Properties();
+        deprecatedProperties.put("!oldKey.data-(\\d+).value", "newKey.data-(\\d+).value");
+        deprecatedProperties.put("(a+)-value-(b+)", "(a+)-new-value-(b+)");
+        DeprecatedPropertiesHandler handler = new DeprecatedPropertiesHandler(deprecatedProperties, PLACEHOLDER_PREFIX,
+                PLACEHOLDER_SUFFIX);
+        Properties properties = new Properties();
+        properties.put("oldKey-data-1.value", TRUE);
+        properties.put("oldKey-data-2.value", FALSE);
+        properties.put("aaaaaaa-value-b", VALUE);
+        String dynamicArgumentNotMatches = "oldKey-data-x.value";
+        properties.put(dynamicArgumentNotMatches, FALSE);
+        handler.replaceDeprecated(properties, properties);
+        assertEquals(FALSE, properties.get("newKey.data-1.value"));
+        assertEquals(TRUE, properties.get("newKey.data-2.value"));
+        assertEquals(FALSE, properties.get(dynamicArgumentNotMatches));
+        assertEquals(VALUE, properties.get("aaaaaaa-new-value-b"));
+    }
+
+    @Test
+    void shouldThrowAnExceptionIfNotAlignedNumberOfDynamicPartsPassed()
+    {
+        Properties deprecatedProperties = new Properties();
+        deprecatedProperties.put("key.(a+).value", "newKey.(a+).somemore.(b+).value");
+        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
+                () -> new DeprecatedPropertiesHandler(deprecatedProperties, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX));
+        assertEquals(
+            "Deprecated property: key.(a+).value and new property:"
+            + " newKey.(a+).somemore.(b+).value keys have different dynamic values number", iae.getMessage());
     }
 }

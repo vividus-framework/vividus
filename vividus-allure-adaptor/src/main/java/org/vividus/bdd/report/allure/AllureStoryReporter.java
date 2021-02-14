@@ -527,7 +527,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
 
     private boolean isStatusUpdateNeeded(WithStatus item, Status overrideStatus)
     {
-        return StatusPriority.fromStatus(item.getStatus()).getPriority() > StatusPriority.fromStatus(overrideStatus)
+        return StatusPriority.from(item.getStatus()).getPriority() > StatusPriority.from(overrideStatus)
                 .getPriority();
     }
 

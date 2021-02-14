@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
-import org.jbehave.core.reporters.NullStoryReporter;
 import org.vividus.analytics.model.AnalyticsEvent;
 import org.vividus.analytics.model.CustomDefinitions;
+import org.vividus.bdd.SystemStoriesAwareStoryReporter;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 
-public class AnalyticsStoryReporter extends NullStoryReporter
+public class AnalyticsStoryReporter extends SystemStoriesAwareStoryReporter
 {
     private static final AtomicLong STORIES = new AtomicLong();
     private static final AtomicLong SCENARIOS = new AtomicLong();
@@ -70,7 +70,8 @@ public class AnalyticsStoryReporter extends NullStoryReporter
         STEPS.incrementAndGet();
     }
 
-    private void beforeStories()
+    @Override
+    protected void beforeStories()
     {
         Map<String, String> payload = new HashMap<>();
         Map<String, String> configuration = getEnvironmentProperties(PropertyCategory.CONFIGURATION);
@@ -100,7 +101,8 @@ public class AnalyticsStoryReporter extends NullStoryReporter
         });
     }
 
-    public void afterStories()
+    @Override
+    protected void afterStories()
     {
         long duration = stopwatch.elapsed().toSeconds();
         Map<String, String> payload = new HashMap<>();
@@ -116,22 +118,5 @@ public class AnalyticsStoryReporter extends NullStoryReporter
     private Map<String, String> getEnvironmentProperties(PropertyCategory propertyCategory)
     {
         return EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(propertyCategory);
-    }
-
-    private boolean processSystemStory(String story)
-    {
-        if (story.startsWith("BeforeStories"))
-        {
-            beforeStories();
-        }
-        else if (story.startsWith("AfterStories"))
-        {
-            afterStories();
-        }
-        else
-        {
-            return false;
-        }
-        return true;
     }
 }

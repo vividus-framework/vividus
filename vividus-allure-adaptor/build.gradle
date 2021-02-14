@@ -6,6 +6,9 @@ dependencies {
     implementation project(':vividus-reporter')
     implementation project(':vividus-util')
 
+    api(group: 'io.qameta.allure', name: 'allure-model', version: versions.allure)
+    api(group: 'io.qameta.allure', name: 'allure-plugin-api', version: versions.allure)
+
     implementation(group: 'io.qameta.allure', name: 'allure-java-commons', version: versions.allure)
     implementation(group: 'io.qameta.allure', name: 'allure-generator', version: versions.allure)
     implementation(group: 'io.qameta.allure', name: 'allure-plugin-api', version: versions.allure)

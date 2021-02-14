@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.vividus.bdd.report.allure.model;
 
 import java.util.function.Function;
+
+import org.vividus.softassert.event.AssertionFailedEvent;
+import org.vividus.softassert.model.SoftAssertionError;
 
 import io.qameta.allure.model.Status;
 
@@ -43,14 +46,25 @@ public enum StatusPriority
         this.priority = priority;
     }
 
-    public static StatusPriority fromStatus(Status status)
+    public static StatusPriority from(Status status)
     {
         return getStatusPriority(status, StatusPriority::getStatusModel);
     }
 
-    public static StatusPriority fromStatus(io.qameta.allure.entity.Status status)
+    public static StatusPriority from(io.qameta.allure.entity.Status status)
     {
         return getStatusPriority(status, StatusPriority::getStatusEntity);
+    }
+
+    public static StatusPriority from(AssertionFailedEvent event)
+    {
+        SoftAssertionError softAssertionError = event.getSoftAssertionError();
+        return isNotFixedKnownIssue(softAssertionError) ? KNOWN_ISSUES_ONLY : FAILED;
+    }
+
+    private static boolean isNotFixedKnownIssue(SoftAssertionError softAssertionError)
+    {
+        return softAssertionError.isKnownIssue() && !softAssertionError.getKnownIssue().isFixed();
     }
 
     private static <T> StatusPriority getStatusPriority(T status, Function<StatusPriority, T> statusFromPriority)
