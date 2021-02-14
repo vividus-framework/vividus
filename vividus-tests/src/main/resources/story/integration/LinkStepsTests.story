@@ -131,4 +131,4 @@ Then a [VISIBLE] link with the text 'Link to an element' and URL '#ElementId' ex
 
 Scenario: Step verification Then a link tag with href '$href' exists
 Given I am on a page with the URL 'https://developer.mozilla.org/en-US/'
-Then a link tag with href 'https://developer.mozilla.org/en-US/search/xml' exists
+Then a link tag with href 'https://developer.mozilla.org' exists
