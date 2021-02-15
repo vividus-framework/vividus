@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.validator;
+package org.vividus.http.validation;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.oneOf;
@@ -26,8 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.inject.Named;
-
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -35,11 +33,11 @@ import org.hamcrest.Matcher;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
+import org.vividus.http.validation.model.AbstractResourceValidation;
+import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.softassert.SoftAssert;
-import org.vividus.validator.model.CheckStatus;
-import org.vividus.validator.model.ResourceValidation;
 
-public class ResourceValidator
+public class ResourceValidator<T extends AbstractResourceValidation<T>>
 {
     private final IHttpClient httpClient;
 
@@ -51,19 +49,19 @@ public class ResourceValidator
                                                                   HttpStatus.SC_NOT_FOUND,
                                                                   HttpStatus.SC_NOT_IMPLEMENTED);
 
-    private final Map<URI, ResourceValidation> cache = new ConcurrentHashMap<>();
+    private final Map<URI, T> cache = new ConcurrentHashMap<>();
 
-    public ResourceValidator(@Named("resourceValidator") IHttpClient httpClient, SoftAssert softAssert)
+    public ResourceValidator(IHttpClient httpClient, SoftAssert softAssert)
     {
         this.httpClient = httpClient;
         this.softAssert = softAssert;
     }
 
-    public ResourceValidation perform(ResourceValidation resourceValidation)
+    public T perform(T resourceValidation)
     {
         return cache.compute(resourceValidation.getUri(), (u, rv) -> {
             return Optional.ofNullable(rv).map(r -> {
-                ResourceValidation cachedResult = r.copy();
+                T cachedResult = r.copy();
                 cachedResult.setCheckStatus(CheckStatus.SKIPPED);
                 return cachedResult;
             }).orElseGet(() -> {
@@ -78,9 +76,9 @@ public class ResourceValidator
                     resourceValidation.setCheckStatus(CheckStatus.get(oneOf.matches(statusCode)));
                     softAssert.assertThat(message, statusCode, oneOf);
                 }
-                catch (IOException toReport)
+                catch (IOException e)
                 {
-                    softAssert.recordFailedAssertion("Exception occured during check of: " + u, toReport);
+                    softAssert.recordFailedAssertion("Exception occured during check of: " + u, e);
                     resourceValidation.setCheckStatus(CheckStatus.BROKEN);
                 }
                 return resourceValidation;

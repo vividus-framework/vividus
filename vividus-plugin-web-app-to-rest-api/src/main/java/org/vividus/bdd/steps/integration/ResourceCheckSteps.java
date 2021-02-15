@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,22 +37,22 @@ import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.http.validation.ResourceValidator;
+import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.softassert.SoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.util.HtmlUtils;
 import org.vividus.util.UriUtils;
-import org.vividus.validator.ResourceValidator;
-import org.vividus.validator.model.CheckStatus;
-import org.vividus.validator.model.ResourceValidation;
+import org.vividus.validator.model.WebPageResourceValidation;
 
 public class ResourceCheckSteps
 {
     private static final Set<String> ALLOWED_SCHEMES = Set.of("http", "https");
     private static final String EXCLUDE_PATTERN = "#";
 
-    private final ResourceValidator resourceValidator;
+    private final ResourceValidator<WebPageResourceValidation> resourceValidator;
     private final AttachmentPublisher attachmentPublisher;
     private final HttpRequestExecutor httpRequestExecutor;
     private final SoftAssert softAssert;
@@ -63,8 +63,8 @@ public class ResourceCheckSteps
 
     private Optional<String> uriToIgnoreRegex;
 
-    public ResourceCheckSteps(ResourceValidator resourceValidator, AttachmentPublisher attachmentPublisher,
-            HttpRequestExecutor httpRequestExecutor, SoftAssert softAssert,
+    public ResourceCheckSteps(ResourceValidator<WebPageResourceValidation> resourceValidator,
+            AttachmentPublisher attachmentPublisher, HttpRequestExecutor httpRequestExecutor, SoftAssert softAssert,
             WebApplicationConfiguration webApplicationConfiguration, ContextCopyingExecutor executor,
             HttpTestContext httpTestContext)
     {
@@ -102,22 +102,22 @@ public class ResourceCheckSteps
     {
         execute(() -> {
             Stream<Element> resourcesToValidate = getElements(cssSelector, html);
-            Stream<ResourceValidation> validations = createResourceValidations(resourcesToValidate,
-                p -> new ResourceValidation(p.getLeft(), p.getRight()));
+            Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
+                p -> new WebPageResourceValidation(p.getLeft(), p.getRight()));
             validateResources(validations);
         });
     }
 
-    private void validateResources(Stream<ResourceValidation> resourceValidation)
+    private void validateResources(Stream<WebPageResourceValidation> resourceValidation)
     {
-        Set<ResourceValidation> results = resourceValidation
+        Set<WebPageResourceValidation> results = resourceValidation
                .map(this::validate)
                .collect(Collectors.toCollection(TreeSet::new));
         attachmentPublisher.publishAttachment("resources-validation-result.ftl", Map.of("results", results),
                 "Resource validation results");
     }
 
-    private ResourceValidation validate(ResourceValidation r)
+    private WebPageResourceValidation validate(WebPageResourceValidation r)
     {
         return r.getUri() == null || CheckStatus.FILTERED == r.getCheckStatus()
                 ? r
@@ -129,8 +129,8 @@ public class ResourceCheckSteps
         return HtmlUtils.getElements(html, cssSelector).parallelStream();
     }
 
-    private Stream<ResourceValidation> createResourceValidations(Stream<Element> elements,
-            Function<Pair<URI, String>, ResourceValidation> resourceValidationFactory)
+    private Stream<WebPageResourceValidation> createResourceValidations(Stream<Element> elements,
+            Function<Pair<URI, String>, WebPageResourceValidation> resourceValidationFactory)
     {
         return elements.map(e ->
             Pair.of(getElementAttribute(e, "href").orElseGet(() -> e.attr("src")).trim(), getSelector(e)))
@@ -197,7 +197,7 @@ public class ResourceCheckSteps
     public void checkResources(String cssSelector, ExamplesTable pages) throws InterruptedException, ExecutionException
     {
         execute(() -> {
-            Stream<ResourceValidation> resourcesToValidate =
+            Stream<WebPageResourceValidation> resourcesToValidate =
                 pages.getRows()
                      .parallelStream()
                      .map(m -> m.get("pages"))
@@ -211,7 +211,7 @@ public class ResourceCheckSteps
                              return Optional.ofNullable(httpTestContext.getResponse())
                                             .map(HttpResponse::getResponseBodyAsString)
                                             .map(b -> createResourceValidations(getElements(cssSelector, b),
-                                                p -> new ResourceValidation(p.getLeft(), p.getRight(), pageURL)))
+                                                p -> new WebPageResourceValidation(p.getLeft(), p.getRight(), pageURL)))
                                             .orElseGet(() ->
                                                         Stream.of(brokenResourceValidation(pageURL, Optional.empty())));
                          }
@@ -230,9 +230,9 @@ public class ResourceCheckSteps
             (t, e) -> softAssert.recordFailedAssertion("Exception occured in thread with name: " + t.getName(), e));
     }
 
-    private ResourceValidation brokenResourceValidation(String pageURL, Optional<Exception> exception)
+    private WebPageResourceValidation brokenResourceValidation(String pageURL, Optional<Exception> exception)
     {
-        ResourceValidation resourceValidation = new ResourceValidation();
+        WebPageResourceValidation resourceValidation = new WebPageResourceValidation();
         resourceValidation.setCheckStatus(CheckStatus.BROKEN);
         resourceValidation.setPageURL(pageURL);
         String message = "Unable to get page with URL: " + pageURL;

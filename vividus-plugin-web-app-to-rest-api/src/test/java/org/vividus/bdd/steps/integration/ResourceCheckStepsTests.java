@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,13 @@ import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.http.validation.ResourceValidator;
+import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.softassert.SoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
-import org.vividus.validator.ResourceValidator;
-import org.vividus.validator.model.CheckStatus;
-import org.vividus.validator.model.ResourceValidation;
+import org.vividus.validator.model.WebPageResourceValidation;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceCheckStepsTests
@@ -164,9 +164,10 @@ class ResourceCheckStepsTests
 
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
-            Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
             assertThat(validationsToReport, hasSize(9));
-            Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
+            Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
             validate(resourceValidations, gifImageUri, N_A, CheckStatus.PASSED, N_A);
@@ -198,9 +199,10 @@ class ResourceCheckStepsTests
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
-            Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
             assertThat(validationsToReport, hasSize(8));
-            Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
+            Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations.next(), SERENITY_URI, HTTP_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
@@ -229,9 +231,10 @@ class ResourceCheckStepsTests
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, THIRD_PAGE_URL, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
-            Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
+            Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
             return true;
         }), eq(REPORT_NAME));
@@ -253,9 +256,10 @@ class ResourceCheckStepsTests
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
-            Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            ResourceValidation resourceValidation = validationsToReport.iterator().next();
+            WebPageResourceValidation resourceValidation = validationsToReport.iterator().next();
             Assertions.assertAll(
                 () -> assertNull(resourceValidation.getUri()),
                 () -> assertEquals(N_A, resourceValidation.getCssSelector()),
@@ -282,9 +286,10 @@ class ResourceCheckStepsTests
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
-            Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            ResourceValidation resourceValidation = validationsToReport.iterator().next();
+            WebPageResourceValidation resourceValidation = validationsToReport.iterator().next();
             Assertions.assertAll(
                 () -> assertNull(resourceValidation.getUri()),
                 () -> assertEquals(N_A, resourceValidation.getCssSelector()),
@@ -313,9 +318,9 @@ class ResourceCheckStepsTests
 
     private void mockResourceValidator()
     {
-        when(resourceValidator.perform(any(ResourceValidation.class)))
+        when(resourceValidator.perform(any(WebPageResourceValidation.class)))
             .thenAnswer(invocation -> {
-                ResourceValidation resourceValidation = invocation.getArgument(0);
+                WebPageResourceValidation resourceValidation = invocation.getArgument(0);
                 resourceValidation.setCheckStatus(CheckStatus.PASSED);
                 return resourceValidation;
             });
@@ -333,9 +338,10 @@ class ResourceCheckStepsTests
         resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
-            Set<ResourceValidation> validationsToReport = ((Map<String, Set<ResourceValidation>>) m).get(RESULTS);
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
             assertThat(validationsToReport, hasSize(7));
-            Iterator<ResourceValidation> resourceValidations = validationsToReport.iterator();
+            Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
@@ -355,15 +361,15 @@ class ResourceCheckStepsTests
         }), any());
     }
 
-    private void validate(Iterator<ResourceValidation> toValidate, URI uri, String selector,
+    private void validate(Iterator<WebPageResourceValidation> toValidate, URI uri, String selector,
             CheckStatus checkStatus, String pageUrl)
     {
-        ResourceValidation actual = toValidate.next();
+        WebPageResourceValidation actual = toValidate.next();
         validate(actual, uri, selector, checkStatus);
         assertEquals(pageUrl, actual.getPageURL());
     }
 
-    private void validate(ResourceValidation actual, URI uri, String selector, CheckStatus checkStatus)
+    private void validate(WebPageResourceValidation actual, URI uri, String selector, CheckStatus checkStatus)
     {
         Assertions.assertAll(
             () -> assertEquals(uri, actual.getUri()),

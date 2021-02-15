@@ -460,3 +460,31 @@ When I find > `0` JSON elements from `
 |step                                                                                 |
 |Then number of JSON elements by JSON path `$[?(@.accountId =~ /\d+/i)]` is equal to 1|
 ----
+
+=== *Validate HTTP resources*
+
+Validates the defined HTTP resources
+
+Actions performed by step:
+
+* executes https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD[HTTP HEAD] request against the passed URL
+* if the status code is `200` then the check is considered as `passed`
+* if the status code falls under any of `404`, `405`, `501`, `503` then the https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET[HTTP GET] request will be sent
+* if the GET status code is `200` then check is considered as `passed`, otherwise `failed`
+* if the target URL had beed already checked then the check is considered as `skipped`
+
+[source,gherkin]
+----
+Then HTTP resources are valid:$resources
+----
+
+* `resources` - The URLs of HTTP resources to validate
+
+.Verify HTTP resources
+[source,gherkin]
+----
+Then HTTP resources are valid:
+|url                                                    |
+|https://saucelabs.com                                  |
+|https://vividus-test-site.herokuapp.com/img/vividus.png|
+----
