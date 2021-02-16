@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package org.vividus.report;
 
+import java.util.Formatter;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.Maps;
@@ -26,13 +28,13 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
-import org.vividus.reporter.environment.PropertyCategory;
 
 public final class MetadataLogger
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataLogger.class);
     private static final Pattern SECURE_KEY_PATTERN = Pattern
             .compile(".*(password|access-?key|api-?key|secret|token).*", Pattern.CASE_INSENSITIVE);
+    private static final int HORIZONTAL_RULE_LENGTH = 60;
 
     private MetadataLogger()
     {
@@ -40,7 +42,27 @@ public final class MetadataLogger
 
     public static void logEnvironmentMetadata()
     {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.forEach(MetadataLogger::logMetadata);
+        if (LOGGER.isInfoEnabled())
+        {
+            String horizontalRule = "-".repeat(HORIZONTAL_RULE_LENGTH);
+            int maxKeyLength = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION
+                    .values()
+                    .stream()
+                    .map(Map::keySet)
+                    .flatMap(Set::stream)
+                    .mapToInt(String::length)
+                    .max().orElse(0);
+            String propertyFormat = "   %-" + maxKeyLength + "s %s%n";
+            try (Formatter message = new Formatter())
+            {
+                message.format("%n");
+                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.forEach((category, properties) -> {
+                    message.format("%s%n %s:%n", horizontalRule, category.getCategoryName());
+                    properties.forEach((name, value) -> message.format(propertyFormat, name, value));
+                });
+                LOGGER.info(message.toString());
+            }
+        }
     }
 
     public static void logPropertiesSecurely(Properties properties)
@@ -50,27 +72,10 @@ public final class MetadataLogger
             .forEach(MetadataLogger::logPropertySecurely);
     }
 
-    private static void logMetadata(PropertyCategory propertyCategory, Map<String, String> properties)
-    {
-        LOGGER.info("--------------------------------");
-        LOGGER.info("{}: ", propertyCategory.getCategoryName());
-        properties.forEach(MetadataLogger::logProperty);
-    }
-
-    private static void logProperty(String propertyName, String propetyValue)
-    {
-        logProperty("{}: {}", propertyName, propetyValue);
-    }
-
     private static void logPropertySecurely(Entry<String, String> entry)
     {
         String key = entry.getKey();
         String value = SECURE_KEY_PATTERN.matcher(key).matches() ? "****" : entry.getValue();
-        logProperty("{}={}", key, value);
-    }
-
-    private static void logProperty(String format, String key, String value)
-    {
-        LOGGER.info(format, key, value);
+        LOGGER.info("{}={}", key, value);
     }
 }
