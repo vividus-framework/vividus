@@ -23,6 +23,8 @@ public class TestExecutionItem
     private String testKey;
     private TestExecutionItemStatus status;
     private List<TestExecutionItemStatus> examples;
+    private String start;
+    private String finish;
 
     public String getTestKey()
     {
@@ -52,5 +54,25 @@ public class TestExecutionItem
     public void setExamples(List<TestExecutionItemStatus> examples)
     {
         this.examples = examples;
+    }
+
+    public String getStart()
+    {
+        return start;
+    }
+
+    public void setStart(String start)
+    {
+        this.start = start;
+    }
+
+    public String getFinish()
+    {
+        return finish;
+    }
+
+    public void setFinish(String finish)
+    {
+        this.finish = finish;
     }
 }

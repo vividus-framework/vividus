@@ -21,6 +21,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -41,6 +45,10 @@ import org.vividus.xray.model.TestExecutionItemStatus;
 @ExtendWith(MockitoExtension.class)
 class TestExecutionFactoryTests
 {
+    private static final ZoneOffset OFFSET = ZoneId.systemDefault().getRules().getOffset(Instant.now());
+    private static final OffsetDateTime START = OffsetDateTime.of(1977, 5, 25, 0, 0, 0, 0, OFFSET);
+    private static final OffsetDateTime FINISH = OffsetDateTime.of(1993, 4, 16, 0, 0, 0, 0, OFFSET);
+
     private static final String SUCCESS = "successful";
     private static final String FAILED = "failed";
     private static final String COMMENT = "comment";
@@ -73,21 +81,33 @@ class TestExecutionFactoryTests
         assertEquals(KEY, execution.getTestExecutionKey());
         List<TestExecutionItem> tests = execution.getTests();
         assertThat(tests, hasSize(9));
-        assertEquals(TestExecutionItemStatus.PASS, tests.get(0).getStatus());
-        assertEquals(TestExecutionItemStatus.FAIL, tests.get(1).getStatus());
-        assertEquals(TestExecutionItemStatus.TODO, tests.get(2).getStatus());
-        assertEquals(TestExecutionItemStatus.PASS, tests.get(3).getStatus());
-        assertEquals(TestExecutionItemStatus.FAIL, tests.get(4).getStatus());
-        assertEquals(TestExecutionItemStatus.FAIL, tests.get(5).getStatus());
-        assertEquals(TestExecutionItemStatus.FAIL, tests.get(6).getStatus());
-        assertEquals(TestExecutionItemStatus.FAIL, tests.get(7).getStatus());
-        assertEquals(TestExecutionItemStatus.FAIL, tests.get(8).getStatus());
+        assertExecutedItem(tests.get(0), TestExecutionItemStatus.PASS);
+        assertExecutedItem(tests.get(1), TestExecutionItemStatus.FAIL);
+        assertItem(tests.get(2), TestExecutionItemStatus.TODO, null, null);
+        assertExecutedItem(tests.get(3), TestExecutionItemStatus.PASS);
+        assertExecutedItem(tests.get(4), TestExecutionItemStatus.FAIL);
+        assertExecutedItem(tests.get(5), TestExecutionItemStatus.FAIL);
+        assertExecutedItem(tests.get(6), TestExecutionItemStatus.FAIL);
+        assertExecutedItem(tests.get(7), TestExecutionItemStatus.FAIL);
+        assertExecutedItem(tests.get(8), TestExecutionItemStatus.FAIL);
+    }
+
+    private static void assertExecutedItem(TestExecutionItem item, TestExecutionItemStatus status)
+    {
+        assertItem(item, status, START.toString(), FINISH.toString());
+    }
+
+    private static void assertItem(TestExecutionItem item, TestExecutionItemStatus status, String start, String finish)
+    {
+        assertEquals(status, item.getStatus());
+        assertEquals(start, item.getStart());
+        assertEquals(finish, item.getFinish());
     }
 
     private static Scenario createPlainScenario(String outcome, List<Step> beforeScenarioSteps,
             List<Step> afterScenarioSteps)
     {
-        Scenario scenario = new Scenario();
+        Scenario scenario = createScenario();
         scenario.setBeforeScenarioSteps(beforeScenarioSteps);
         scenario.setSteps(List.of(createStep(SUCCESS), createStep(outcome)));
         scenario.setAfterScenarioSteps(afterScenarioSteps);
@@ -96,7 +116,7 @@ class TestExecutionFactoryTests
 
     private static Scenario createManualScenario()
     {
-        Scenario scenario = new Scenario();
+        Scenario scenario = createScenario();
         scenario.setSteps(List.of(createStep(COMMENT), createStep(COMMENT)));
         return scenario;
     }
@@ -104,7 +124,7 @@ class TestExecutionFactoryTests
     private static Scenario createExamplesScenario(String outcome, List<Step> beforeScenarioSteps,
             List<Step> afterScenarioSteps)
     {
-        Scenario scenario = new Scenario();
+        Scenario scenario = createScenario();
         Examples examples = new Examples();
         scenario.setExamples(examples);
 
@@ -127,5 +147,13 @@ class TestExecutionFactoryTests
         Step step = new Step();
         step.setOutcome(outcome);
         return step;
+    }
+
+    private static Scenario createScenario()
+    {
+        Scenario scenario = new Scenario();
+        scenario.setStart(START.toInstant().toEpochMilli());
+        scenario.setEnd(FINISH.toInstant().toEpochMilli());
+        return scenario;
     }
 }
