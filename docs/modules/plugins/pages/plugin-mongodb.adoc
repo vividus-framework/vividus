@@ -1,1 +1,119 @@
-include::ROOT:page$under-construction.adoc[]
+= MongoDB Plugin
+
+The plugin provides a functionality to interact with https://www.mongodb.com/[MongoDB].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-mongodb', version: '{current-version}')
+----
+
+== Properties
+
+It's allowed to configure an unlimited number of MongoDB connections via the mechanism of the dynamic properties. The properties prefix example is:
+```properties
+mongodb.connection.my-mongodb-instance=mongodb+srv://username:password@mock-zzw4a.mongodb.net/test?retryWrites=true&w=majority
+```
+where `my-mongodb-instance` is a key used to refer a MongoDB connection in the steps. The key is defined by users, must be unique and can't contain dots.
+
+== Steps
+
+=== Execute database command
+
+Executes a mongo database command against a mongo database and saves the command result to a variable
+
+[NOTE]
+====
+* https://docs.mongodb.com/manual/reference/command/[Database commands]
+* For the `find` command the number of documents returned from the database is limited by the `batchSize` property that defaults to 101, so if you expect a dataset larger than the default value then adjust the `batchSize` property according to the number of expected documents
+====
+
+[source,gherkin]
+----
+When I execute command `$command` against `$dbName` database on `$instanceKey` MongoDB instance and save result to $scopes variable `$variableName`
+----
+
+* `$command` - The database command to execute
+* `$dbName` - The database name
+* `$instanceKey` - The key of a particular connection under `mongodb.connection.` prefix
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results in JSON format.
+
+.Find employees who are older than 20 years
+[source,gherkin]
+----
+When I execute command `
+{
+    find: "employees",
+    filter: { age: { $gte: 20 } },
+    sort: { age: 1 },
+    projection: { age: 1, name: 1, _id: 0 },
+    batchSize: 500
+}
+` against `users` database on `my-mongodb-instance` MongoDB instance and save result to SCENARIO variable `find`
+----
+
+=== Execute chained commands
+
+Executes an assembled sequence of predefined commands against a mongo database and saves the result to a variable
+
+.Commands
+[cols="1,1,2,2", options="header"]
+|===
+
+|Name
+|Type
+|Description
+|Example
+
+|find
+|source
+|selects documents in a collection, takes JSON as an argument
+|`{ age: { $gte: 20 }, city: "minsk" }`
+
+|projection
+|intermediate
+|determine which fields to include in the returned documents, takes JSON as an argument
+|`{ age: 1, city: 1, name: 0 }`
+
+|count
+|terminal
+|counts the number of documents in a collection, takes no arguments
+|
+
+|collect
+|terminal
+|collects previously found documents into JSON format, takes no arguments
+|
+
+|===
+
+[NOTE]
+====
+* Command sequence must start with a `source` command followed by any number of `intermediate` commands and end with a `terminal` command
+====
+
+[source,gherkin]
+----
+When I execute commands $commands in `$collectionName` collection against `$dbName` database on `$instanceKey` MongoDB instance and save result to $scopes variable `$variableName`
+----
+
+* `$commands` - The sequence of commands to execute
+* `$collectionName` - The collection name to retrieve documents from
+* `$dbName` - The database name
+* `$instanceKey` - Key of a particular connection under `mongodb.connection.` prefix
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results in JSON format.
+
+.Find employees who are older than 20 years
+[source,gherkin]
+----
+When I execute commands
+|command   |argument                   |
+|find      |{ age: { $gte: 20 } }      |
+|projection|{ age: 1, name: 1, _id: 0 }|
+|count     |                           |
+ in `employees` collection against `users` database on `my-mongodb-instance` MongoDB instance and save result to SCENARIO variable `find`
+----

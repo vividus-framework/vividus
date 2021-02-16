@@ -16,7 +16,7 @@
 * xref:plugin-lambda-test.adoc[LambdaTest]
 * xref:plugin-kafka.adoc[Kafka]
 * xref:plugin-mobile-app.adoc[Mobile Application]
-* xref:plugin-mongodb.adoc[MongoDB*]
+* xref:plugin-mongodb.adoc[MongoDB]
 * xref:plugin-parquet.adoc[Parquet*]
 * xref:plugin-rest-api.adoc[REST API]
 * xref:plugin-sauce-labs.adoc[Sauce Labs]
