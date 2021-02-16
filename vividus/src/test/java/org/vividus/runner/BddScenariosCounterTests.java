@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,9 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Properties;
 
-import com.github.valfirst.jbehave.junit.monitoring.JUnitReportingRunner;
-
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.jbehave.core.junit.JUnit4StoryRunner;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.Description;
 import org.junit.runners.model.InitializationError;
@@ -136,7 +135,7 @@ class BddScenariosCounterTests extends SystemStreamTests
             throws ParseException, InitializationError, ReflectiveOperationException
     {
         try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                MockedConstruction<JUnitReportingRunner> ignored = mockConstruction(JUnitReportingRunner.class,
+                MockedConstruction<JUnit4StoryRunner> ignored = mockConstruction(JUnit4StoryRunner.class,
                         (runner, context) -> {
                             assertEquals(1, context.getCount());
                             assertEquals(List.of(StoriesRunner.class), context.arguments());

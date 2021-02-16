@@ -73,8 +73,8 @@ class RunContextStoryReporterTests
     }
 
     @ParameterizedTest
-    @CsvSource({"NOT_ALLOWED, false", ", true"})
-    void testBeforeStory(Status status, boolean allowed)
+    @CsvSource({"EXCLUDED, false", ", true"})
+    void testBeforeStory(Status status, boolean notExcluded)
     {
         Story story = mock(Story.class);
         boolean givenStory = false;
@@ -82,7 +82,7 @@ class RunContextStoryReporterTests
         runContextStoryReporter.beforeStory(story, givenStory);
         InOrder ordered = inOrder(bddRunContext, next);
         ordered.verify(bddRunContext).putRunningStory(argThat(runningStory -> runningStory.getStory().equals(story)
-                && runningStory.isAllowed() == allowed), eq(givenStory));
+                && runningStory.isNotExcluded() == notExcluded), eq(givenStory));
         ordered.verify(next).beforeStory(story, givenStory);
     }
 
@@ -186,7 +186,7 @@ class RunContextStoryReporterTests
         Story story = mock(Story.class);
         String filter = "groovy: !skip";
         runContextStoryReporter.storyExcluded(story, filter);
-        verify(bddRunContext).setStoryStatus(story, Status.NOT_ALLOWED);
+        verify(bddRunContext).setStoryStatus(story, Status.EXCLUDED);
         verify(next).storyExcluded(story, filter);
     }
 

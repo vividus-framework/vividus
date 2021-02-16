@@ -25,13 +25,15 @@ import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.reporters.NullStoryReporter;
+import org.jbehave.core.steps.StepCollector;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.vividus.analytics.model.AnalyticsEvent;
 import org.vividus.analytics.model.CustomDefinitions;
-import org.vividus.bdd.SystemStoriesAwareStoryReporter;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 
-public class AnalyticsStoryReporter extends SystemStoriesAwareStoryReporter
+public class AnalyticsStoryReporter extends NullStoryReporter
 {
     private static final AtomicLong STORIES = new AtomicLong();
     private static final AtomicLong SCENARIOS = new AtomicLong();
@@ -49,12 +51,47 @@ public class AnalyticsStoryReporter extends SystemStoriesAwareStoryReporter
     }
 
     @Override
+    public void beforeStoriesSteps(StepCollector.Stage stage)
+    {
+        if (stage == StepCollector.Stage.BEFORE)
+        {
+            Map<String, String> payload = new HashMap<>();
+            Map<String, String> configuration = getEnvironmentProperties(PropertyCategory.CONFIGURATION);
+            Map<String, String> modules = getEnvironmentProperties(PropertyCategory.VIVIDUS);
+
+            CustomDefinitions.PROFILES.add(payload, configuration.get("Profiles"));
+            CustomDefinitions.JAVA.add(payload, Runtime.version().toString());
+            CustomDefinitions.VIVIDUS.add(payload, modules.getOrDefault("vividus", "not detected"));
+            CustomDefinitions.REMOTE.add(payload,
+                    getEnvironmentProperties(PropertyCategory.PROFILE).get("Remote Execution"));
+            payload.put(SESSION_CONTROL, "start");
+            eventBus.post(new AnalyticsEvent("startTests", payload));
+
+            postPluginsAnalytic(modules);
+            stopwatch = Stopwatch.createStarted();
+        }
+    }
+
+    @Override
+    public void afterStoriesSteps(Stage stage)
+    {
+        if (stage == Stage.AFTER)
+        {
+            long duration = stopwatch.elapsed().toSeconds();
+            Map<String, String> payload = new HashMap<>();
+            CustomDefinitions.STORIES.add(payload, STORIES.toString());
+            CustomDefinitions.SCENARIOS.add(payload, SCENARIOS.toString());
+            CustomDefinitions.STEPS.add(payload, STEPS.toString());
+            CustomDefinitions.DURATION.add(payload, Long.toString(duration));
+            payload.put(SESSION_CONTROL, "end");
+            AnalyticsEvent testFinishEvent = new AnalyticsEvent("finishTests", payload);
+            eventBus.post(testFinishEvent);
+        }
+    }
+
+    @Override
     public void beforeStory(Story story, boolean givenStory)
     {
-        if (processSystemStory(story.getPath()))
-        {
-            return;
-        }
         STORIES.incrementAndGet();
     }
 
@@ -70,25 +107,6 @@ public class AnalyticsStoryReporter extends SystemStoriesAwareStoryReporter
         STEPS.incrementAndGet();
     }
 
-    @Override
-    protected void beforeStories()
-    {
-        Map<String, String> payload = new HashMap<>();
-        Map<String, String> configuration = getEnvironmentProperties(PropertyCategory.CONFIGURATION);
-        Map<String, String> modules = getEnvironmentProperties(PropertyCategory.VIVIDUS);
-
-        CustomDefinitions.PROFILES.add(payload, configuration.get("Profiles"));
-        CustomDefinitions.JAVA.add(payload, Runtime.version().toString());
-        CustomDefinitions.VIVIDUS.add(payload, modules.getOrDefault("vividus", "not detected"));
-        CustomDefinitions.REMOTE.add(payload,
-                getEnvironmentProperties(PropertyCategory.PROFILE).get("Remote Execution"));
-        payload.put(SESSION_CONTROL, "start");
-        eventBus.post(new AnalyticsEvent("startTests", payload));
-
-        postPluginsAnalytic(modules);
-        stopwatch = Stopwatch.createStarted();
-    }
-
     private void postPluginsAnalytic(Map<String, String> modules)
     {
         modules.forEach((k, v) -> {
@@ -99,20 +117,6 @@ public class AnalyticsStoryReporter extends SystemStoriesAwareStoryReporter
                 eventBus.post(new AnalyticsEvent(k, "use", payload));
             }
         });
-    }
-
-    @Override
-    protected void afterStories()
-    {
-        long duration = stopwatch.elapsed().toSeconds();
-        Map<String, String> payload = new HashMap<>();
-        CustomDefinitions.STORIES.add(payload, STORIES.toString());
-        CustomDefinitions.SCENARIOS.add(payload, SCENARIOS.toString());
-        CustomDefinitions.STEPS.add(payload, STEPS.toString());
-        CustomDefinitions.DURATION.add(payload, Long.toString(duration));
-        payload.put(SESSION_CONTROL, "end");
-        AnalyticsEvent testFinishEvent = new AnalyticsEvent("finishTests", payload);
-        eventBus.post(testFinishEvent);
     }
 
     private Map<String, String> getEnvironmentProperties(PropertyCategory propertyCategory)

@@ -34,6 +34,8 @@ import com.google.common.eventbus.Subscribe;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.reporters.NullStoryReporter;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.Timing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +49,7 @@ import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.testcontext.TestContext;
 import org.vividus.util.json.JsonUtils;
 
-public class StatisticsStoryReporter extends SystemStoriesAwareStoryReporter
+public class StatisticsStoryReporter extends NullStoryReporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsStoryReporter.class);
 
@@ -84,10 +86,6 @@ public class StatisticsStoryReporter extends SystemStoriesAwareStoryReporter
     @Override
     public void beforeStory(Story story, boolean givenStory)
     {
-        if (processSystemStory(story.getPath()))
-        {
-            return;
-        }
         if (givenStory)
         {
             appendContainer(NodeType.GIVEN_STORY);
@@ -205,22 +203,25 @@ public class StatisticsStoryReporter extends SystemStoriesAwareStoryReporter
     }
 
     @Override
-    protected void afterStories()
+    public void afterStoriesSteps(Stage stage)
     {
-        try
+        if (stage == Stage.AFTER)
         {
-            Files.createDirectories(statisticsFolder.toPath());
-            Path statistics = statisticsFolder.toPath().resolve("statistics.json");
-            String resutls = jsonUtils.toPrettyJson(aggregator);
-            Files.write(statistics, resutls.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING);
-        }
-        catch (IOException e)
-        {
-            LOGGER.atDebug()
-                  .addArgument(statisticsFolder::getAbsoluteFile)
-                  .setCause(e)
-                  .log("Unable to write statistics.json into folder: {}");
+            try
+            {
+                Files.createDirectories(statisticsFolder.toPath());
+                Path statistics = statisticsFolder.toPath().resolve("statistics.json");
+                String results = jsonUtils.toPrettyJson(aggregator);
+                Files.write(statistics, results.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING);
+            }
+            catch (IOException e)
+            {
+                LOGGER.atDebug()
+                      .addArgument(statisticsFolder::getAbsoluteFile)
+                      .setCause(e)
+                      .log("Unable to write statistics.json into folder: {}");
+            }
         }
     }
 

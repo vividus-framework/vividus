@@ -312,7 +312,7 @@ class AllureStoryReporterTests
     }
 
     @Test
-    void testBeforeNotAllowedRunningStory()
+    void testBeforeExcludedRunningStory()
     {
         boolean givenStory = true;
         Story story = new Story();
@@ -323,16 +323,34 @@ class AllureStoryReporterTests
     }
 
     @Test
-    void testBeforeStories()
+    void testBeforeStoriesWithBeforeStage()
     {
-        testBeforeStory("BeforeStories", false);
+        allureStoryReporter.beforeStoriesSteps(Stage.BEFORE);
+        verify(next).beforeStoriesSteps(Stage.BEFORE);
         verify(allureReportGenerator).start();
     }
 
     @Test
-    void testAfterStories()
+    void testBeforeStoriesWithAfterStage()
     {
-        testBeforeStory("AfterStories", false);
+        allureStoryReporter.beforeStoriesSteps(Stage.AFTER);
+        verify(next).beforeStoriesSteps(Stage.AFTER);
+        verifyNoInteractions(allureReportGenerator);
+    }
+
+    @Test
+    void testAfterStoriesWithBeforeStage()
+    {
+        allureStoryReporter.afterStoriesSteps(Stage.BEFORE);
+        verify(next).afterStoriesSteps(Stage.BEFORE);
+        verifyNoInteractions(allureReportGenerator);
+    }
+
+    @Test
+    void testAfterStoriesWithAfterStage()
+    {
+        allureStoryReporter.afterStoriesSteps(Stage.AFTER);
+        verify(next).afterStoriesSteps(Stage.AFTER);
         verify(allureReportGenerator).end();
     }
 
@@ -630,7 +648,7 @@ class AllureStoryReporterTests
     }
 
     @Test
-    void testAfterNotAllowedRunningStory()
+    void testAfterExcludedRunningStory()
     {
         boolean givenStory = true;
         mockRunningStory(false);
@@ -665,7 +683,7 @@ class AllureStoryReporterTests
 
         boolean givenStory = false;
         RunningStory runningStory = new RunningStory();
-        runningStory.setAllowed(true);
+        runningStory.setNotExcluded(true);
         bddRunContext.putRunningStory(runningStory, givenStory);
         allureStoryReporter.afterStory(givenStory);
         InOrder ordered = inOrder(next, allureRunContext, allureLifecycle);
@@ -1077,7 +1095,7 @@ class AllureStoryReporterTests
     {
         RunningStory runningStory = new RunningStory();
         runningStory.setStory(story);
-        runningStory.setAllowed(true);
+        runningStory.setNotExcluded(true);
         runningStory.setRunningScenario(runningScenario);
         return runningStory;
     }
@@ -1198,10 +1216,10 @@ class AllureStoryReporterTests
         return runningScenario;
     }
 
-    private void mockRunningStory(boolean allowed)
+    private void mockRunningStory(boolean notExcluded)
     {
         RunningStory runningStory = new RunningStory();
-        runningStory.setAllowed(allowed);
+        runningStory.setNotExcluded(notExcluded);
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
     }
 

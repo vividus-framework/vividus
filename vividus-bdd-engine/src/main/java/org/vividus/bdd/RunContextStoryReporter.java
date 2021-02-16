@@ -37,7 +37,7 @@ public class RunContextStoryReporter extends ChainedStoryReporter
     {
         RunningStory runningStory = new RunningStory();
         runningStory.setStory(story);
-        runningStory.setAllowed(bddRunContext.getStoryStatus(story) != Status.NOT_ALLOWED);
+        runningStory.setNotExcluded(bddRunContext.getStoryStatus(story) != Status.EXCLUDED);
         bddRunContext.putRunningStory(runningStory, givenStory);
         super.beforeStory(story, givenStory);
     }
@@ -101,7 +101,7 @@ public class RunContextStoryReporter extends ChainedStoryReporter
     @Override
     public void storyExcluded(Story story, String filter)
     {
-        bddRunContext.setStoryStatus(story, Status.NOT_ALLOWED);
+        bddRunContext.setStoryStatus(story, Status.EXCLUDED);
         super.storyExcluded(story, filter);
     }
 

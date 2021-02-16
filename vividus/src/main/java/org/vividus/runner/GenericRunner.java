@@ -84,7 +84,7 @@ public class GenericRunner extends JUnitStories
     }
 
     @Override
-    protected List<String> storyPaths()
+    public List<String> storyPaths()
     {
         try
         {

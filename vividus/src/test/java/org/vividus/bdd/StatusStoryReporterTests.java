@@ -53,7 +53,7 @@ class StatusStoryReporterTests
     }
 
     @Test
-    void testScenarioNotAllowed()
+    void testScenarioExcluded()
     {
         statusStoryReporter.scenarioExcluded(null, null);
         assertEquals(Optional.of(Status.SKIPPED), statusStoryReporter.getRunStatus());
