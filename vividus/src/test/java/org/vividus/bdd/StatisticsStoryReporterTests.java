@@ -38,6 +38,7 @@ import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +49,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
-import org.vividus.testcontext.TestContext;
 import org.vividus.testcontext.ThreadedTestContext;
 import org.vividus.util.json.JsonUtils;
 
@@ -64,13 +64,8 @@ class StatisticsStoryReporterTests
     @Mock
     private EventBus eventBus;
 
-    @Mock
-    private TestContext context;
-
     private StatisticsStoryReporter reporter;
 
-    private final Story beforeStories = mockStory("BeforeStories");
-    private final Story afterStories = mockStory("AfterStories");
     private final Story givenStory = mockStory("GivenStory");
     private final Story story = mockStory("Story");
     private final Scenario scenario = new Scenario();
@@ -130,7 +125,7 @@ class StatisticsStoryReporterTests
     }
 
     @Test
-    void shouldLogMessageInCaseOfIOException(@TempDir File tempDir) throws IOException
+    void shouldLogMessageInCaseOfIOException(@TempDir File tempDir)
     {
         try (MockedStatic<Files> files = mockStatic(Files.class))
         {
@@ -153,8 +148,8 @@ class StatisticsStoryReporterTests
 
     private void reporterFlowProvider()
     {
-        reporter.beforeStory(beforeStories, false);
-        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.afterStoriesSteps(Stage.BEFORE);
 
         reporter.beforeStory(story, false);
 
@@ -240,8 +235,8 @@ class StatisticsStoryReporterTests
         reporter.afterScenario(null);
 
         reporter.afterStory(false);
-        reporter.beforeStory(afterStories, false);
-        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.AFTER);
+        reporter.afterStoriesSteps(Stage.AFTER);
     }
 
     private Story mockStory(String path)
@@ -282,8 +277,8 @@ class StatisticsStoryReporterTests
     void beforeAndAfterStep(@TempDir Path tempDirectory) throws IOException
     {
         reporter.setStatisticsFolder(tempDirectory.toFile());
-        reporter.beforeStory(beforeStories, false);
-        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.afterStoriesSteps(Stage.BEFORE);
 
         reporter.beforeStory(story, false);
         reporter.beforeScenario(scenario);
@@ -297,8 +292,8 @@ class StatisticsStoryReporterTests
         reportStep(reporter, () -> reporter.successful(STEP));
         reporter.afterScenario(null);
         reporter.afterStory(false);
-        reporter.beforeStory(afterStories, false);
-        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.AFTER);
+        reporter.afterStoriesSteps(Stage.AFTER);
 
         String statistic = readStatistics(tempDirectory);
         String expected = "{\n"
@@ -346,8 +341,8 @@ class StatisticsStoryReporterTests
     void beforeAndAfterScenario(@TempDir Path tempDirectory) throws IOException
     {
         reporter.setStatisticsFolder(tempDirectory.toFile());
-        reporter.beforeStory(beforeStories, false);
-        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.afterStoriesSteps(Stage.BEFORE);
 
         reporter.beforeStory(story, false);
         reporter.beforeScenario(scenario);
@@ -359,8 +354,8 @@ class StatisticsStoryReporterTests
         reportStep(reporter, () -> reporter.successful(STEP));
         reporter.afterScenario(null);
         reporter.afterStory(false);
-        reporter.beforeStory(afterStories, false);
-        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.AFTER);
+        reporter.afterStoriesSteps(Stage.AFTER);
         String statistic = readStatistics(tempDirectory);
         String expected = "{\n"
                 + "  \"STORY\" : {\n"
@@ -407,8 +402,8 @@ class StatisticsStoryReporterTests
     void beforeAndAfterStory(@TempDir Path tempDirectory) throws IOException
     {
         reporter.setStatisticsFolder(tempDirectory.toFile());
-        reporter.beforeStory(beforeStories, false);
-        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.afterStoriesSteps(Stage.BEFORE);
 
         reporter.beforeStory(story, false);
         reportStep(reporter, () -> reporter.failed(STEP, new Throwable()));
@@ -420,8 +415,8 @@ class StatisticsStoryReporterTests
         reporter.afterScenario(null);
         reportStep(reporter, () -> reporter.successful(STEP));
         reporter.afterStory(false);
-        reporter.beforeStory(afterStories, false);
-        reporter.afterStory(false);
+        reporter.beforeStoriesSteps(Stage.AFTER);
+        reporter.afterStoriesSteps(Stage.AFTER);
 
         String statistic = readStatistics(tempDirectory);
         String expected = "{\n"

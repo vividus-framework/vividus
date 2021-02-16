@@ -96,7 +96,7 @@ class StoryTests
             org.jbehave.core.model.Lifecycle jbehaveLifecycle = new org.jbehave.core.model.Lifecycle(table);
 
             reporter.beforeStory(TEST_STORY, false);
-            reporter.lifecyle(jbehaveLifecycle);
+            reporter.lifecycle(jbehaveLifecycle);
             reporter.beforeScenarios();
             reporter.beforeScenario(TEST_SCENARIO);
             reporter.beforeExamples(List.of(STEP), table);

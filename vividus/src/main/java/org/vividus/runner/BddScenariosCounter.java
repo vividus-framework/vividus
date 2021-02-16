@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.vividus.runner;
 
 import java.util.Properties;
 
-import com.github.valfirst.jbehave.junit.monitoring.JUnitReportingRunner;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -27,6 +25,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.jbehave.core.junit.JUnit4StoryRunner;
 import org.junit.runner.Description;
 import org.junit.runners.model.InitializationError;
 import org.vividus.configuration.BeanFactory;
@@ -62,7 +61,7 @@ public final class BddScenariosCounter
         configureStoryLocation(storyLocation);
 
         System.out.println("Story parsing may take up to 5 minutes. Please be patient.");
-        JUnitReportingRunner runner = new JUnitReportingRunner(StoriesRunner.class);
+        JUnit4StoryRunner runner = new JUnit4StoryRunner(StoriesRunner.class);
 
         print(getNumberOfChildren(runner.getDescription(), BDDLevel.STORY.getLevel()), "Stories");
         print(getNumberOfChildren(runner.getDescription(), BDDLevel.SCENARIO.getLevel()), "Scenarios");

@@ -53,8 +53,6 @@ dependencies {
     // JUL to slf4j bridge
     implementation(group: 'org.slf4j', name: 'jul-to-slf4j', version: versions.slf4j)
 
-    implementation(group: 'com.github.valfirst', name: 'jbehave-junit-runner', version: '2.3.0')
-
     // Meta filters based on Groovy
     implementation(group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy, classifier: 'indy')
 

@@ -25,7 +25,7 @@ public class RunningStory
 {
     private Story story;
     private boolean failed;
-    private boolean allowed;
+    private boolean notExcluded;
     private RunningScenario runningScenario;
     private Deque<String> runningSteps = new LinkedList<>();
 
@@ -44,14 +44,14 @@ public class RunningStory
         return failed;
     }
 
-    public boolean isAllowed()
+    public boolean isNotExcluded()
     {
-        return allowed;
+        return notExcluded;
     }
 
-    public void setAllowed(boolean allowed)
+    public void setNotExcluded(boolean notExcluded)
     {
-        this.allowed = allowed;
+        this.notExcluded = notExcluded;
     }
 
     public void fail()

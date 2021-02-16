@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,8 +52,6 @@ import org.vividus.reporter.environment.PropertyCategory;
 @ExtendWith(MockitoExtension.class)
 class AnalyticsStoryReporterTests
 {
-    private static final String BEFORE_STORIES = "BeforeStories";
-
     private static final String CUSTOM_DIMENSION5 = "cd5";
 
     private static final String START_TESTS = "startTests";
@@ -70,11 +70,8 @@ class AnalyticsStoryReporterTests
 
     private static final String SESSION_CONTROL = "sc";
 
-    @Mock
-    private EventBus eventBus;
-
-    @InjectMocks
-    private AnalyticsStoryReporter reporter;
+    @Mock private EventBus eventBus;
+    @InjectMocks private AnalyticsStoryReporter reporter;
 
     @BeforeEach
     void beforeEach()
@@ -92,7 +89,7 @@ class AnalyticsStoryReporterTests
     void shouldPostTestsStartBeforeTestsWhenNoModulesAvailable()
     {
         configureCommonProperties();
-        reporter.beforeStory(storyOfPath(BEFORE_STORIES), false);
+        reporter.beforeStoriesSteps(Stage.BEFORE);
         verify(eventBus).post(argThat(e -> {
             AnalyticsEvent event = (AnalyticsEvent) e;
             Map<String, String> payload = event.getPayload();
@@ -107,6 +104,13 @@ class AnalyticsStoryReporterTests
     }
 
     @Test
+    void shouldDoNothingOnBeforeStoriesAtAfterStage()
+    {
+        reporter.beforeStoriesSteps(Stage.AFTER);
+        verifyNoInteractions(eventBus);
+    }
+
+    @Test
     void shouldPostVividusVersionAndPluginsInformationAndStatistic()
     {
         configureCommonProperties();
@@ -115,13 +119,14 @@ class AnalyticsStoryReporterTests
         String plugin = "vividus-plugin-web-ui";
         String pluginVersion = "0.1.2";
         EnvironmentConfigurer.addProperty(PropertyCategory.VIVIDUS, plugin, pluginVersion);
-        Stream.concat(Stream.of(storyOfPath(BEFORE_STORIES)),
-                      Stream.generate(() -> storyOfPath("/tony_stark/projects/vividus"))
-                            .limit(9))
-              .forEach(s -> reporter.beforeStory(s, false));
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        Stream.generate(() -> "/tony_stark/projects/vividus")
+                .limit(9)
+                .map(Story::new)
+                .forEach(s -> reporter.beforeStory(s, false));
         Stream.generate(() -> 0).limit(40).forEach(v -> reporter.beforeStep(null));
         Stream.generate(() -> 0).limit(20).forEach(v -> reporter.beforeScenario(mock(Scenario.class)));
-        reporter.beforeStory(storyOfPath("AfterStories'"), false);
+        reporter.afterStoriesSteps(Stage.AFTER);
         ArgumentCaptor<AnalyticsEvent> captor = ArgumentCaptor.forClass(AnalyticsEvent.class);
         verify(eventBus, times(3)).post(captor.capture());
         List<AnalyticsEvent> events = captor.getAllValues();
@@ -153,6 +158,13 @@ class AnalyticsStoryReporterTests
             () -> assertEquals("finishTests", payload2.get(EVENT_ACTION)));
     }
 
+    @Test
+    void shouldDoNothingOnAfterStoriesAtBeforeStage()
+    {
+        reporter.afterStoriesSteps(Stage.BEFORE);
+        verifyNoInteractions(eventBus);
+    }
+
     private AnalyticsEvent getAndRemove(List<AnalyticsEvent> events, String criteria)
     {
         AnalyticsEvent analyticsEvent = events.stream()
@@ -167,10 +179,5 @@ class AnalyticsStoryReporterTests
     {
         EnvironmentConfigurer.addProperty(PropertyCategory.CONFIGURATION, "Profiles", "web/desktop/chrome");
         EnvironmentConfigurer.addProperty(PropertyCategory.PROFILE, "Remote Execution", "ON");
-    }
-
-    private Story storyOfPath(String path)
-    {
-        return new Story(path);
     }
 }

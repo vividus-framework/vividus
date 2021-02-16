@@ -107,33 +107,44 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     }
 
     @Override
+    public void beforeStoriesSteps(Stage stage)
+    {
+        if (stage == Stage.BEFORE)
+        {
+            allureReportGenerator.start();
+        }
+        super.beforeStoriesSteps(stage);
+    }
+
+    @Override
+    public void afterStoriesSteps(Stage stage)
+    {
+        super.afterStoriesSteps(stage);
+        if (stage == Stage.AFTER)
+        {
+            allureReportGenerator.end();
+        }
+    }
+
+    @Override
     public void beforeStory(Story story, boolean givenStory)
     {
         RunningStory runningStory = bddRunContext.getRunningStory();
-        if (runningStory.isAllowed())
+        if (runningStory.isNotExcluded())
         {
             allureRunContext.initExecutionStages();
             String storyName = runningStory.getName();
 
-            switch (storyName)
+            List<Label> storyLabels = allureRunContext.createNewStoryLabels(givenStory);
+            String title = givenStory ? "Given Story: " + storyName : storyName;
+            if (!bddRunContext.isDryRun() && getLinkedStep() != null)
             {
-                case "BeforeStories":
-                    allureReportGenerator.start();
-                    break;
-                case "AfterStories":
-                    allureReportGenerator.end();
-                    break;
-                default:
-                    List<Label> storyLabels = allureRunContext.createNewStoryLabels(givenStory);
-                    String title = givenStory ? "Given Story: " + storyName : storyName;
-                    if (!bddRunContext.isDryRun() && getLinkedStep() != null)
-                    {
-                        startStep(title, false);
-                        break;
-                    }
-                    collectLabels(runningStory, givenStory, title).forEach(
+                startStep(title, false);
+            }
+            else
+            {
+                collectLabels(runningStory, givenStory, title).forEach(
                         (name, value) -> storyLabels.add(ResultsUtils.createLabel(name.value(), value)));
-                    break;
             }
         }
         super.beforeStory(story, givenStory);
@@ -343,7 +354,7 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
     public void afterStory(boolean givenStory)
     {
         super.afterStory(givenStory);
-        if (bddRunContext.getRunningStory().isAllowed())
+        if (bddRunContext.getRunningStory().isNotExcluded())
         {
             if (allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_AFTER_STORY_STEPS)
             {

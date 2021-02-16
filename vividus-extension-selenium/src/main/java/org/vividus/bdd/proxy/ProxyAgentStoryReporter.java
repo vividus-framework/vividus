@@ -40,8 +40,7 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
     @Override
     public void beforeStory(Story story, boolean givenStory)
     {
-        String name = bddRunContext.getRunningStory().getName();
-        if (!configuration.dryRun() && !givenStory && isNotSystemStory(name) && isProxyEnabled())
+        if (!configuration.dryRun() && !givenStory && isProxyEnabled())
         {
             proxy.start();
         }
@@ -91,11 +90,6 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
         {
             proxy.stop();
         }
-    }
-
-    private boolean isNotSystemStory(String name)
-    {
-        return !"BeforeStories".equals(name) && !"AfterStories".equals(name);
     }
 
     private boolean isProxyEnabled()
