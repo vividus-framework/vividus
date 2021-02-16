@@ -13,8 +13,6 @@
         <property name="uriToIgnoreRegex" value="${resource-checker.uri-to-ignore-regex}" />
     </bean>
 
-    <bean id="httpResourceValidator" class="org.vividus.validator.ResourceValidator" />
-
     <bean id="httpRedirectsProvider" class="org.vividus.http.HttpRedirectsProvider">
         <property name="httpClient">
             <bean class="org.vividus.http.client.HttpClient"
@@ -53,18 +51,6 @@
         </property>
         <property name="filterRedirects" value="${bdd.transformer.headless.filter-redirects}" />
         <property name="seedRelativeUrls" value="${bdd.transformer.headless.seed-relative-urls}" />
-    </bean>
-
-    <bean class="org.vividus.http.client.HttpClient" id="resourceValidator"
-        factory-bean="httpClientFactory"
-        factory-method="buildHttpClient">
-        <constructor-arg>
-            <bean parent="restApiHttpClientConfig">
-                <property name="skipResponseEntity" value="true" />
-                <property name="lastRequestInterceptor"><null/></property>
-                <property name="lastResponseInterceptor"><null/></property>
-            </bean>
-        </constructor-arg>
     </bean>
 
     <util:list id="stepBeanNames-WebAppToRestApi" value-type="java.lang.String">

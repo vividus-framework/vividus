@@ -36,3 +36,8 @@ Scenario: Verify step "Then the connection is secured using $securityProtocol pr
 Given request body: ${request-body}
 When I send HTTP DELETE to the relative URL '/delete'
 Then the connection is secured using TLSv1.2 protocol
+
+Scenario: Verify step "Then sHTTP resources are valid:$resources"
+Then HTTP resources are valid:
+|url                                                    |
+|https://vividus-test-site.herokuapp.com/img/vividus.png|

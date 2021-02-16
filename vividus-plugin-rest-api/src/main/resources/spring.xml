@@ -9,6 +9,22 @@
         http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd"
     default-lazy-init="true">
 
+    <bean class="org.vividus.http.validation.ResourceValidator" >
+      <constructor-arg index="0">
+        <bean class="org.vividus.http.client.HttpClient"
+            factory-bean="httpClientFactory"
+            factory-method="buildHttpClient">
+            <constructor-arg>
+                <bean parent="restApiHttpClientConfig">
+                    <property name="skipResponseEntity" value="true" />
+                    <property name="lastRequestInterceptor"><null/></property>
+                    <property name="lastResponseInterceptor"><null/></property>
+                </bean>
+            </constructor-arg>
+        </bean>
+      </constructor-arg>
+    </bean>
+
     <bean id="httpTestContext" class="org.vividus.http.HttpTestContext" />
 
     <bean name="FROM_JSON" class="org.vividus.bdd.transformer.JsonRestApiTableTransformer">
@@ -22,6 +38,8 @@
     </bean>
 
     <bean id="httpResponseValidationSteps" class="org.vividus.bdd.steps.api.HttpResponseValidationSteps" />
+
+    <bean id="httpResourceValidationSteps" class="org.vividus.bdd.steps.http.HttpResourceValidationSteps" />
 
     <bean id="jsonResponseValidationSteps" class="org.vividus.bdd.steps.api.JsonResponseValidationSteps">
         <property name="softAssert" ref="jsonSoftAssert" />
@@ -77,6 +95,7 @@
     <util:list id="stepBeanNames-Api" value-type="java.lang.String">
         <idref bean="apiSteps" />
         <idref bean="httpResponseValidationSteps" />
+        <idref bean="httpResourceValidationSteps" />
         <idref bean="jsonResponseValidationSteps" />
         <idref bean="cookieStoreProvider" />
         <idref bean="httpCookieSteps" />

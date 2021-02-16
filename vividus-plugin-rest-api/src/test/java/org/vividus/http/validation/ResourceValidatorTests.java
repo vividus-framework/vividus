@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.validator;
+package org.vividus.http.validation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
@@ -42,9 +42,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
+import org.vividus.http.validation.model.CheckStatus;
+import org.vividus.http.validation.model.ResourceValidation;
 import org.vividus.softassert.SoftAssert;
-import org.vividus.validator.model.CheckStatus;
-import org.vividus.validator.model.ResourceValidation;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceValidatorTests
@@ -54,21 +54,13 @@ class ResourceValidatorTests
     private static final int OK = 200;
     private static final String HEAD = "HEAD";
     private static final URI FIRST = URI.create("https://vividus.org");
-    private static final String CSS_SELECTOR = "a";
     private static final ArgumentMatcher<Matcher<? super Integer>> MATCHER =
         m -> "is one of {<200>}".equals(m.toString());
 
-    @Mock
-    private IHttpClient httpClient;
-
-    @Mock
-    private SoftAssert softAssert;
-
-    @Mock
-    private HttpResponse httpResponse;
-
-    @InjectMocks
-    private ResourceValidator resourceValidator;
+    @Mock private IHttpClient httpClient;
+    @Mock private SoftAssert softAssert;
+    @Mock private HttpResponse httpResponse;
+    @InjectMocks private ResourceValidator<ResourceValidation> resourceValidator;
 
     @Test
     void shouldValidateResource() throws IOException
@@ -76,7 +68,7 @@ class ResourceValidatorTests
         when(httpClient.execute(argThat(r -> HEAD.equals(r.getMethod())), any(HttpContext.class)))
             .thenReturn(httpResponse);
         when(httpResponse.getStatusCode()).thenReturn(200);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST, CSS_SELECTOR);
+        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
         ResourceValidation result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
         verify(httpClient).execute(any(HttpUriRequest.class), any(HttpContext.class));
@@ -90,7 +82,7 @@ class ResourceValidatorTests
         when(httpClient.execute(argThat(r -> HEAD.equals(r.getMethod())), any(HttpContext.class)))
             .thenReturn(httpResponse);
         when(httpResponse.getStatusCode()).thenReturn(200);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST, CSS_SELECTOR);
+        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
         ResourceValidation first = resourceValidator.perform(resourceValidation);
         ResourceValidation second = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, first.getCheckStatus());
@@ -109,7 +101,7 @@ class ResourceValidatorTests
             .thenReturn(httpResponse);
         int forbidden = 403;
         when(httpResponse.getStatusCode()).thenReturn(forbidden);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST, CSS_SELECTOR);
+        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
         ResourceValidation result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.FAILED, result.getCheckStatus());
         verify(httpClient).execute(any(HttpUriRequest.class), any(HttpContext.class));
@@ -126,7 +118,7 @@ class ResourceValidatorTests
                 any(HttpContext.class));
         int notFound = 404;
         when(httpResponse.getStatusCode()).thenReturn(notFound).thenReturn(OK);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST, CSS_SELECTOR);
+        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
         ResourceValidation result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
         verify(httpClient, times(2)).execute(any(HttpUriRequest.class), any(HttpContext.class));
@@ -139,7 +131,7 @@ class ResourceValidatorTests
         IOException ioException = new IOException();
         when(httpClient.execute(argThat(r -> HEAD.equals(r.getMethod())), any(HttpContext.class)))
             .thenThrow(ioException);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST, CSS_SELECTOR);
+        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
         ResourceValidation result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.BROKEN, result.getCheckStatus());
         verify(httpClient).execute(any(HttpUriRequest.class), any(HttpContext.class));
