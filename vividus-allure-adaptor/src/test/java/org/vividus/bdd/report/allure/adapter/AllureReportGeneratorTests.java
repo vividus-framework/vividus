@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.vividus.bdd.report.allure.adapter;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,6 +48,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+
+import com.github.valfirst.slf4jtest.LoggingEvent;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -75,13 +83,17 @@ import io.qameta.allure.executor.ExecutorPlugin;
 import io.qameta.allure.history.HistoryTrendPlugin;
 import io.qameta.allure.summary.SummaryPlugin;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AllureReportGeneratorTests
 {
     private static final String ALLURE_CUSTOMIZATION_PATH = "/allure-customization/";
     private static final String ALLURE_CUSTOMIZATION_PATTERN = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
             + ALLURE_CUSTOMIZATION_PATH + "**";
     private static final String ALLURE_RESULTS_DIRECTORY_PROPERTY = "allure.results.directory";
+    private static final String RESULTS = "results";
+    private static final String REPORT = "report";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(AllureReportGenerator.class);
 
     private Path tempDir;
     private Path resultsDirectory;
@@ -154,27 +166,58 @@ class AllureReportGeneratorTests
     }
 
     @Test
-    void testEndWhenResultsDirectoryExists() throws Exception
+    void testEndWhenResultsDirectoryExists() throws IOException
     {
-        testEnd();
+        File reportDirectory = tempDir.toFile();
+        testEnd(reportDirectory);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+            buildCleanUpDirectoryLogEvent(RESULTS, resultsDirectory.toFile()),
+            buildDirectoryCleanedLogEvent(RESULTS, resultsDirectory.toFile()),
+            buildCleanUpDirectoryLogEvent(REPORT, reportDirectory),
+            buildDirectoryCleanedLogEvent(REPORT, reportDirectory),
+            buildReportGeneratedLogEvent(tempDir)
+        )));
     }
 
     @Test
-    void testEndWhenResultsDirectoryDoesNotExist() throws Exception
+    void testEndWhenResultsDirectoryDoesNotExist() throws IOException
     {
+        File reportDirectory = tempDir.toFile();
         resultsDirectory = tempDir.resolve("allure-results-to-be-created");
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
         allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver);
-        testEnd();
+        testEnd(reportDirectory);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+            buildCleanUpDirectoryLogEvent(RESULTS, resultsDirectory.toFile()),
+            debug("Allure {} directory {} doesn't exist", RESULTS, resultsDirectory.toFile()),
+            buildCleanUpDirectoryLogEvent(REPORT, reportDirectory),
+            buildDirectoryCleanedLogEvent(REPORT, reportDirectory),
+            buildReportGeneratedLogEvent(tempDir)
+        )));
+    }
+
+    private LoggingEvent buildCleanUpDirectoryLogEvent(String directoryDescription, File directory)
+    {
+        return debug("Cleaning up allure {} directory {}", directoryDescription, directory);
+    }
+
+    private LoggingEvent buildDirectoryCleanedLogEvent(String directoryDescription, File directory)
+    {
+        return debug("Allure {} directory {} is successfully cleaned", directoryDescription, directory);
+    }
+
+    private LoggingEvent buildReportGeneratedLogEvent(Path reportDirectory)
+    {
+        String htmlReportPath = reportDirectory.resolve("index.html").toFile().getAbsolutePath();
+        return info("Allure report is successfully generated at {}", htmlReportPath);
     }
 
     @SuppressWarnings("unchecked")
-    private void testEnd() throws IOException
+    private void testEnd(File reportDirectory) throws IOException
     {
         Path historyDirectory = tempDir.resolve("history");
         Files.createDirectories(historyDirectory);
         allureReportGenerator.setHistoryDirectory(historyDirectory.toFile());
-        File reportDirectory = tempDir.toFile();
         allureReportGenerator.setReportDirectory(reportDirectory);
         try (MockedStatic<FileUtils> fileUtils = mockStatic(FileUtils.class);
                 MockedConstruction<ReportGenerator> reportGenerator = mockConstruction(ReportGenerator.class,
