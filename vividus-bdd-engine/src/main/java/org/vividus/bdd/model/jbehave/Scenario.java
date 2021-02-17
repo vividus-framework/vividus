@@ -25,6 +25,8 @@ public class Scenario extends AbstractStepsContainer
     private String title;
     private List<Meta> meta;
     private Examples examples;
+    private long start;
+    private long end;
 
     public String getTitle()
     {
@@ -54,6 +56,26 @@ public class Scenario extends AbstractStepsContainer
     public void setExamples(Examples examples)
     {
         this.examples = examples;
+    }
+
+    public long getStart()
+    {
+        return start;
+    }
+
+    public void setStart(long start)
+    {
+        this.start = start;
+    }
+
+    public long getEnd()
+    {
+        return end;
+    }
+
+    public void setEnd(long end)
+    {
+        this.end = end;
     }
 
     public List<Step> collectSteps()

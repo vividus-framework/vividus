@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -70,7 +71,7 @@ class StoryTests
             reportStep(reporter, Stage.BEFORE);
             reportStep(reporter, null);
             reportStep(reporter, Stage.AFTER);
-            reporter.afterScenario(mock(Timing.class));
+            reporter.afterScenario(mockTiming());
             reporter.afterScenarios();
             reporter.afterStory(false);
 
@@ -78,6 +79,7 @@ class StoryTests
             assertNull(story.getLifecycle());
             assertEquals(STORY_PATH, story.getPath());
             Scenario scenario = ensureSingleElement(story.getScenarios());
+            assertTimings(scenario);
             assertEquals(SCENARIO_TITLE, scenario.getTitle());
             assertNull(scenario.getExamples());
             verifyMeta(ensureSingleElement(scenario.getMeta()), META_KEY, META_VALUE);
@@ -105,7 +107,7 @@ class StoryTests
             reportStep(reporter, null);
             reportStep(reporter, Stage.AFTER);
             reporter.afterExamples();
-            reporter.afterScenario(mock(Timing.class));
+            reporter.afterScenario(mockTiming());
             reporter.afterScenarios();
             reporter.afterStory(false);
 
@@ -114,6 +116,7 @@ class StoryTests
             Lifecycle lifecycle = story.getLifecycle();
             verifyParameters(lifecycle.getParameters());
             Scenario scenario = ensureSingleElement(story.getScenarios());
+            assertTimings(scenario);
             assertEquals(SCENARIO_TITLE, scenario.getTitle());
             assertNull(scenario.getBeforeScenarioSteps());
             assertNull(scenario.getSteps());
@@ -170,5 +173,19 @@ class StoryTests
     {
         assertEquals(comment, step.getOutcome());
         assertEquals(value, step.getValue());
+    }
+
+    private static Timing mockTiming()
+    {
+        Timing timing = mock(Timing.class);
+        when(timing.getStart()).thenReturn(1L);
+        when(timing.getEnd()).thenReturn(2L);
+        return timing;
+    }
+
+    private static void assertTimings(Scenario scenario)
+    {
+        assertEquals(1L, scenario.getStart());
+        assertEquals(2L, scenario.getEnd());
     }
 }

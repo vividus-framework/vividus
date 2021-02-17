@@ -16,8 +16,12 @@
 
 package org.vividus.xray.factory;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,6 +65,9 @@ public class TestExecutionFactory
             return test;
         }
 
+        test.setStart(asOffsetDateTime(scenario.getStart()));
+        test.setFinish(asOffsetDateTime(scenario.getEnd()));
+
         if (scenario.getExamples() == null)
         {
             test.setStatus(calculateStatus(scenario));
@@ -88,5 +95,12 @@ public class TestExecutionFactory
                      .flatMap(List::stream)
                      .allMatch(step -> "successful".equals(step.getOutcome())) ? TestExecutionItemStatus.PASS
                              : TestExecutionItemStatus.FAIL;
+    }
+
+    private static String asOffsetDateTime(long millis)
+    {
+        long seconds = TimeUnit.SECONDS.convert(millis, TimeUnit.MILLISECONDS);
+        Instant instant = Instant.ofEpochSecond(seconds);
+        return OffsetDateTime.ofInstant(instant, ZoneId.systemDefault()).toString();
     }
 }
