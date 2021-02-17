@@ -59,6 +59,7 @@ import org.vividus.bdd.report.allure.model.StoryExecutionStage;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.reporter.model.Attachment;
+import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.testcontext.TestContext;
@@ -77,7 +78,7 @@ import io.qameta.allure.model.WithStatus;
 import io.qameta.allure.util.ResultsUtils;
 
 @SuppressWarnings("checkstyle:MethodCount")
-public class AllureStoryReporter extends ChainedStoryReporter implements IAllureStepReporter
+public class AllureStoryReporter extends ChainedStoryReporter
 {
     private static final String CURRENT_STEP_KEY = "allureCurrentLinkedStep";
 
@@ -414,8 +415,14 @@ public class AllureStoryReporter extends ChainedStoryReporter implements IAllure
         }
     }
 
-    @Override
-    public void updateStepStatus(Status status)
+    @Subscribe
+    public void onAssertionFailure(AssertionFailedEvent event)
+    {
+        Status status = StatusPriority.from(event).getStatusModel();
+        updateStepStatus(status);
+    }
+
+    private void updateStepStatus(Status status)
     {
         LinkedQueueItem<String> step = getLinkedStep();
         while (!step.isRootItem())
