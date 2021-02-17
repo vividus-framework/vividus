@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class LocatorConversionUtilsTests
 {
     private static final String VALUE = "value";
     private static final String INVALID_LOCATOR_MESSAGE = "Invalid locator format. "
-            + "Expected matches [(?:By\\.)?([a-zA-Z]+)\\((.+?)\\):?([a-zA-Z]*)?] Actual: [";
+            + "Expected matches [(?:By\\.)?([a-zA-Z]+)\\((.+?)\\)(:(.*))?] Actual: [";
     private static final char CLOSING_BRACKET = ']';
     private static final String INVALID_LOCATOR = "To.xpath(.a)";
 
@@ -103,6 +103,26 @@ class LocatorConversionUtilsTests
             () -> utils
                 .convertToLocator("By.search(id)->filter.filter(enabled).filter(text).notFilter(any)"));
         assertEquals("Unsupported filter type: notFilter", exception.getMessage());
+    }
+
+    @Test
+    void testConvertToLocatorInvalidVisibilityType()
+    {
+        when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> utils.convertToLocator("By.search(id):invalid"));
+        assertEquals("Illegal visibility type 'invalid'. Expected one of 'visible', 'invisible', 'all'",
+                exception.getMessage());
+    }
+
+    @Test
+    void testConvertToLocatorEmptyVisibilityType()
+    {
+        when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> utils.convertToLocator("By.search(id):"));
+        assertEquals("Visibility type can not be empty. Expected one of 'visible', 'invisible', 'all'",
+                exception.getMessage());
     }
 
     @Test
