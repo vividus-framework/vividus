@@ -24,7 +24,4 @@
         <property name="historyDirectory" value="${allure.history-directory}" />
     </bean>
 
-    <bean class="org.vividus.bdd.report.allure.listener.AllureAssertionFailureListener"
-        lazy-init="false" />
-
 </beans>

@@ -48,7 +48,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import com.google.common.collect.Maps;
 
@@ -70,9 +69,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -92,8 +90,11 @@ import org.vividus.bdd.report.allure.model.ScenarioExecutionStage;
 import org.vividus.bdd.report.allure.model.StatusPriority;
 import org.vividus.bdd.report.allure.model.StoryExecutionStage;
 import org.vividus.reporter.event.LinkPublishEvent;
+import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.exception.VerificationError;
+import org.vividus.softassert.issue.KnownIssueIdentifier;
 import org.vividus.softassert.model.KnownIssue;
+import org.vividus.softassert.model.SoftAssertionError;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
@@ -155,15 +156,6 @@ class AllureStoryReporterTests
 
     @InjectMocks
     private AllureStoryReporter allureStoryReporter;
-
-    static Stream<Arguments> updateStepStatus()
-    {
-        return Stream.of(Arguments.of(null, Status.PASSED, 0),
-                Arguments.of(Status.PASSED, null, 1),
-                Arguments.of(null, Status.FAILED, 1),
-                Arguments.of(Status.PASSED, Status.FAILED, 1),
-                Arguments.of(Status.FAILED, Status.PASSED, 0));
-    }
 
     @BeforeAll
     static void beforeAll()
@@ -1005,22 +997,6 @@ class AllureStoryReporterTests
         assertEquals(1, labels.stream().filter(l -> REQUIREMENT_ID.equals(l.getName())).count());
     }
 
-    @ParameterizedTest
-    @MethodSource("updateStepStatus")
-    void testUpdateStepStatus(Status initialStepStatus, Status statusUpdate, int updatedTimes)
-    {
-        mockStepUid();
-        StepResult stepResult = mock(StepResult.class);
-        lenient().doNothing().when(allureLifecycle).updateStep(eq(STEP_UID), argThat(update ->
-        {
-            update.accept(stepResult);
-            return true;
-        }));
-        lenient().when(stepResult.getStatus()).thenReturn(initialStepStatus);
-        allureStoryReporter.updateStepStatus(statusUpdate);
-        verify(stepResult, times(updatedTimes)).setStatus(statusUpdate);
-    }
-
     @Test
     void shouldAddPublishedLink()
     {
@@ -1047,6 +1023,60 @@ class AllureStoryReporterTests
         Link link = links.get(0);
         assertEquals(linkName, link.getName());
         assertEquals(linkUrl, link.getUrl());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = "PASSED")
+    void testOnAssertionFailure(Status initialStepStatus)
+    {
+        StepResult stepResult = mockCurrentStep(initialStepStatus);
+        AssertionFailedEvent assertionFailedEvent = mockSoftAssertionError(null);
+        allureStoryReporter.onAssertionFailure(assertionFailedEvent);
+        verify(stepResult).setStatus(Status.FAILED);
+    }
+
+    @Test
+    void testOnAssertionFailureKnownIssue()
+    {
+        StepResult stepResult = mockCurrentStep(Status.PASSED);
+        AssertionFailedEvent assertionFailedEvent = mockSoftAssertionError(
+                new KnownIssue(null, new KnownIssueIdentifier(), false));
+        allureStoryReporter.onAssertionFailure(assertionFailedEvent);
+        verify(stepResult).setStatus(null);
+    }
+
+    @Test
+    void testOnAssertionFailureKnownIssueFixed()
+    {
+        StepResult stepResult = mockCurrentStep(Status.PASSED);
+        KnownIssue knownIssue = new KnownIssue(null, new KnownIssueIdentifier(), false);
+        knownIssue.setStatus("Closed");
+        knownIssue.setResolution("Fixed");
+        AssertionFailedEvent assertionFailedEvent = mockSoftAssertionError(knownIssue);
+        allureStoryReporter.onAssertionFailure(assertionFailedEvent);
+        verify(stepResult).setStatus(Status.FAILED);
+    }
+
+    private StepResult mockCurrentStep(Status initialStepStatus)
+    {
+        mockStepUid();
+        StepResult stepResult = mock(StepResult.class);
+        lenient().doNothing().when(allureLifecycle).updateStep(eq(STEP_UID), argThat(update -> {
+            update.accept(stepResult);
+            return true;
+        }));
+        lenient().when(stepResult.getStatus()).thenReturn(initialStepStatus);
+        return stepResult;
+    }
+
+    private AssertionFailedEvent mockSoftAssertionError(KnownIssue knownIssue)
+    {
+        SoftAssertionError softAssertionError = new SoftAssertionError(null);
+        softAssertionError.setKnownIssue(knownIssue);
+        AssertionFailedEvent assertionFailedEvent = mock(AssertionFailedEvent.class);
+        when(assertionFailedEvent.getSoftAssertionError()).thenReturn(softAssertionError);
+        return assertionFailedEvent;
     }
 
     private void testFailed(Throwable throwable)
