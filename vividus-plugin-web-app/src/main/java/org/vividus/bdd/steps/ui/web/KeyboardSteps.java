@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.jbehave.core.annotations.When;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.web.validation.IFocusValidations;
+import org.vividus.bdd.steps.ui.web.validation.FocusValidations;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.KeysUtils;
 import org.vividus.ui.context.IUiContext;
@@ -33,7 +33,7 @@ public class KeyboardSteps
 {
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IUiContext uiContext;
-    @Inject private IFocusValidations focusValidations;
+    @Inject private FocusValidations focusValidations;
 
     /**
      * Step for interaction with page via keyboard. Interacts with the context element in focus.

@@ -16,20 +16,29 @@
 
 package org.vividus.bdd.steps.ui.web.validation;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.FocusState;
 import org.vividus.bdd.util.EnumUtils;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
-public class FocusValidations implements IFocusValidations
+public class FocusValidations
 {
-    @Inject private WebJavascriptActions javascriptActions;
-    @Inject private IDescriptiveSoftAssert softAssert;
+    private final WebJavascriptActions javascriptActions;
+    private final ISoftAssert softAssert;
 
-    @Override
+    public FocusValidations(WebJavascriptActions javascriptActions, ISoftAssert softAssert)
+    {
+        this.javascriptActions = javascriptActions;
+        this.softAssert = softAssert;
+    }
+
+    /**
+     * Checks if the specified web-element is in specified focus state on the page
+     * @param webElement Element to check
+     * @param focusState Possible values: IN_FOCUS, NOT_IN_FOCUS
+     * @return true if element is in desired focus-state
+     */
     public boolean isElementInFocusState(WebElement webElement, FocusState focusState)
     {
         return softAssert.assertTrue("The context element is " + EnumUtils.toHumanReadableForm(focusState),
