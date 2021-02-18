@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.vividus.ui.action.search;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -43,9 +41,18 @@ class VisibilityTests
     void shouldThrowExceptionInCaseOfInvalidVisibility()
     {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
-            () -> Visibility.getElementType("some random stuff"));
-        assertThat(illegalArgumentException.getMessage(),
-                containsString("Illegal visibility type 'some random stuff'. Expected one of visible, invisible, all"));
+            () -> Visibility.getElementType("invalid"));
+        assertEquals("Illegal visibility type 'invalid'. Expected one of 'visible', 'invisible', 'all'",
+                illegalArgumentException.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionInCaseOfEmptyVisibility()
+    {
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+            () -> Visibility.getElementType(""));
+        assertEquals("Visibility type can not be empty. Expected one of 'visible', 'invisible', 'all'",
+                illegalArgumentException.getMessage());
     }
 
     @ParameterizedTest

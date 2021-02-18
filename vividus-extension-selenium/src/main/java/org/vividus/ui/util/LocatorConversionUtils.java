@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,10 @@ public class LocatorConversionUtils
     private static final int ATTRIBURTE_TYPE_GROUP = 1;
     private static final String EMPTY = "";
     private static final int ELEMENT_TYPE_GROUP = 3;
+    private static final int VISIBILITY_GROUP = 4;
     private static final char CLOSING_BRACKET = ']';
-    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z]+)\\((.+?)\\):?([a-zA-Z]*)?";
-    private static final Pattern SEARCH_ATTRIBUTE_PATTERN = Pattern.compile(LOCATOR_FORMAT);
+    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z]+)\\((.+?)\\)(:(.*))?";
+    private static final Pattern LOCATOR_PATTERN = Pattern.compile(LOCATOR_FORMAT);
     private static final Pattern FILTER_PATTERN = Pattern.compile("([a-zA-Z]+)(?:\\()([^()]*)(?:\\))");
 
     @Inject private ElementActionService elementActionService;
@@ -57,16 +58,17 @@ public class LocatorConversionUtils
         String[] locatorParts = locatorAsString.split("->filter\\.");
         String locator = locatorParts.length == 0 ? locatorAsString : locatorParts[0];
         String filters = locatorParts.length == 2 ? locatorParts[1] : EMPTY;
-        Matcher matcher = SEARCH_ATTRIBUTE_PATTERN.matcher(locator);
+        Matcher matcher = LOCATOR_PATTERN.matcher(locator);
         if (matcher.matches())
         {
             String elementActionType = matcher.group(ATTRIBURTE_TYPE_GROUP).toLowerCase();
             String searchValue = matcher.group(SEARCH_VALUE_GROUP);
             String elementType = matcher.group(ELEMENT_TYPE_GROUP);
             Locator convertedLocator = convertToLocator(elementActionType, searchValue);
-            if (!elementType.isEmpty())
+            if (elementType != null)
             {
-                convertedLocator.getSearchParameters().setVisibility(Visibility.getElementType(elementType));
+                String visibilityType = matcher.group(VISIBILITY_GROUP);
+                convertedLocator.getSearchParameters().setVisibility(Visibility.getElementType(visibilityType));
             }
             if (!filters.isEmpty())
             {
