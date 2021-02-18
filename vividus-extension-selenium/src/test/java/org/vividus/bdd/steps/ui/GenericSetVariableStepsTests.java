@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.vividus.bdd.steps.ui;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -29,12 +31,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
@@ -71,8 +71,6 @@ class GenericSetVariableStepsTests
     @Test
     void shouldSaveContextElementTextToVariable()
     {
-        WebDriver webDriver = mock(WebDriver.class);
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
         WebElement webElement = mock(WebElement.class);
         when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         when(elementActions.getElementText(webElement)).thenReturn(TEXT);
@@ -83,16 +81,15 @@ class GenericSetVariableStepsTests
     @Test
     void shouldSaveContextElementTextToVariableNoContext()
     {
-        when(uiContext.getSearchContext()).thenReturn(null);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(null);
         genericSetVariableSteps.saveContextElementTextToVariable(VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, null);
+        verifyNoInteractions(bddVariableContext);
     }
 
     @Test
     void shouldSaveContextElementAttributeValueToVariable()
     {
         WebElement webElement = mock(WebElement.class);
-        when(uiContext.getSearchContext()).thenReturn(webElement);
         when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
         when(webElement.getAttribute(ATTRIBUTE_NAME)).thenReturn(TEXT);
         when(softAssert.assertNotNull(ATTRIBUTE_VALUE_MESSAGE, TEXT)).thenReturn(Boolean.TRUE);
@@ -101,10 +98,12 @@ class GenericSetVariableStepsTests
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, TEXT);
     }
 
-    @NullSource
-    @ValueSource(strings = TEXT)
     @ParameterizedTest
-    void shouldSaveAttributeValueOfElementByLocatorToVariable(String value)
+    @CsvSource({
+            ",     0",
+            "text, 1"
+    })
+    void shouldSaveAttributeValueOfElementByLocatorToVariable(String value, int numberOfSaves)
     {
         Locator locator = mock(Locator.class);
         WebElement webElement = mock(WebElement.class);
@@ -114,7 +113,7 @@ class GenericSetVariableStepsTests
         when(softAssert.assertNotNull(ATTRIBUTE_VALUE_MESSAGE, value)).thenReturn(Boolean.TRUE);
         genericSetVariableSteps.saveAttributeValueOfElementByLocatorToVariable(ATTRIBUTE_NAME, locator, VARIABLE_SCOPE,
                 VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, value);
+        verify(bddVariableContext, times(numberOfSaves)).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, value);
     }
 
     @Test
