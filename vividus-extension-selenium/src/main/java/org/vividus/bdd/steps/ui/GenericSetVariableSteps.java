@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.vividus.bdd.steps.ui;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
@@ -75,7 +74,9 @@ public class GenericSetVariableSteps
     @When("I save text of context element to $scopes variable `$variableName`")
     public void saveContextElementTextToVariable(Set<VariableScope> scopes, String variableName)
     {
-        saveVariableIfContextElementPresent(elementActions::getElementText, scopes, variableName);
+        Optional.ofNullable(uiContext.getSearchContext(WebElement.class))
+                .map(elementActions::getElementText)
+                .ifPresent(text -> bddVariableContext.putVariable(scopes, variableName, text));
     }
 
     /**
@@ -100,8 +101,8 @@ public class GenericSetVariableSteps
     public void saveContextElementAttributeValueToVariable(String attributeName, Set<VariableScope> scopes,
             String variableName)
     {
-        saveVariableIfContextElementPresent(contextElement -> getAssertedAttributeValue(contextElement, attributeName),
-                scopes, variableName);
+        Optional<WebElement> webElement = Optional.ofNullable(uiContext.getSearchContext(WebElement.class));
+        saveAttributeValueOfElement(webElement, attributeName, scopes, variableName);
     }
 
     /**
@@ -127,9 +128,9 @@ public class GenericSetVariableSteps
     public void saveAttributeValueOfElementByLocatorToVariable(String attributeName, Locator locator,
             Set<VariableScope> scopes, String variableName)
     {
-        Optional<Object> value = baseValidations.assertElementExists("The element to extract the attribute", locator)
-                                                .map(element -> getAssertedAttributeValue(element, attributeName));
-        putVariable(scopes, variableName, value);
+        Optional<WebElement> webElement = baseValidations.assertElementExists("The element to extract the attribute",
+                locator);
+        saveAttributeValueOfElement(webElement, attributeName, scopes, variableName);
     }
 
     /**
@@ -152,31 +153,19 @@ public class GenericSetVariableSteps
      * @param variableName A name under which the value should be saved
      */
     @When("I save number of elements located `$locator` to $scopes variable `$variableName`")
-    public void saveNumberOfElementsToVariable(Locator locator, Set<VariableScope> scopes,
-            String variableName)
+    public void saveNumberOfElementsToVariable(Locator locator, Set<VariableScope> scopes, String variableName)
     {
         List<WebElement> elements = searchActions.findElements(locator);
-        putVariable(scopes, variableName, Optional.of(elements.size()));
+        bddVariableContext.putVariable(scopes, variableName, elements.size());
     }
 
-    private void saveVariableIfContextElementPresent(Function<WebElement, Object> contextElementProcessor,
+    private void saveAttributeValueOfElement(Optional<WebElement> element, String attributeName,
             Set<VariableScope> scopes, String variableName)
     {
-        Optional<Object> value = Optional.ofNullable(uiContext.getSearchContext())
-                                         .map(context -> uiContext.getSearchContext(WebElement.class))
-                                         .map(contextElementProcessor);
-        putVariable(scopes, variableName, value);
-    }
-
-    private void putVariable(Set<VariableScope> scopes, String variableName, Optional<Object> value)
-    {
-        bddVariableContext.putVariable(scopes, variableName, value.orElse(null));
-    }
-
-    private String getAssertedAttributeValue(WebElement element, String attributeName)
-    {
-        String value = element.getAttribute(attributeName);
-        softAssert.assertNotNull("The '" + attributeName + "' attribute value was found", value);
-        return value;
+        element.map(el -> {
+            String value = el.getAttribute(attributeName);
+            softAssert.assertNotNull("The '" + attributeName + "' attribute value was found", value);
+            return value;
+        }).ifPresent(value -> bddVariableContext.putVariable(scopes, variableName, value));
     }
 }
