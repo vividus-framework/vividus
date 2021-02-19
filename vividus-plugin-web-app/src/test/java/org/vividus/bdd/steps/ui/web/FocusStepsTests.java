@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.web.validation.IFocusValidations;
+import org.vividus.bdd.steps.ui.web.validation.FocusValidations;
 import org.vividus.ui.context.UiContext;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
@@ -47,7 +47,7 @@ class FocusStepsTests
     private WebJavascriptActions javaScriptActions;
 
     @Mock
-    private IFocusValidations focusValidations;
+    private FocusValidations focusValidations;
 
     @InjectMocks
     private FocusSteps focusSteps;
