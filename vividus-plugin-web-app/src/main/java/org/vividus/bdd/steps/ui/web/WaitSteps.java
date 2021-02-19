@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.titleIs;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -47,7 +46,6 @@ import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
@@ -60,27 +58,12 @@ public class WaitSteps
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IWaitActions waitActions;
     @Inject private ISearchActions searchActions;
-    @Inject private INavigateActions navigateActions;
     @Inject private IUiContext uiContext;
     @Inject private ISoftAssert softAssert;
     @Inject private IExpectedConditions<By> expectedSearchContextConditions;
     @Inject private IExpectedConditions<Locator> expectedSearchActionsConditions;
     @Inject private IBaseValidations baseValidations;
     @Inject private WebJavascriptActions javascriptActions;
-
-    public boolean waitTillElementWithTextDisappearsPageRefresh(String text, Duration timeout)
-    {
-        WebDriver driver = webDriverProvider.get();
-        return waitActions.wait(driver, timeout,
-                getFunction(false, text, "Waiting disappearance of all elements with text: ")).isWaitPassed();
-    }
-
-    public boolean waitTillElementWithTextAppearsPageRefresh(String text, Duration timeout)
-    {
-        WebDriver driver = webDriverProvider.get();
-        return waitActions.wait(driver, timeout,
-                getFunction(true, text, "Waiting presence of any element with text: ")).isWaitPassed();
-    }
 
     /**
      * Waits <b>duration</b> with <b>pollingDuration</b> until <b>an element</b> by the specified <b>locator</b>
@@ -135,9 +118,18 @@ public class WaitSteps
     public void waitTillElementDisappears(String elementTag, String attributeType, String attributeValue)
     {
         String elementXpath = LocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue);
-        Locator attributes = new Locator(WebLocatorType.XPATH, elementXpath);
-        String assertionDescription = "with the tag '%s' and attribute '%s'='%s'";
-        waitForElementDisappearance(attributes, assertionDescription, elementTag, attributeType, attributeValue);
+        Locator locator = new Locator(WebLocatorType.XPATH, elementXpath);
+        List<WebElement> elements = searchActions.findElements(getSearchContext(), locator);
+        if (!elements.isEmpty())
+        {
+            waitActions.wait(getWebDriver(), State.NOT_VISIBLE.getExpectedCondition(elements.get(0)));
+        }
+        else
+        {
+            String assertionDescription = "There is no element present with the tag '%s' and attribute '%s'='%s'";
+            String description = String.format(assertionDescription, elementTag, attributeType, attributeValue);
+            softAssert.recordPassedAssertion(description);
+        }
     }
 
     /**
@@ -374,32 +366,6 @@ public class WaitSteps
     }
 
     /**
-     * Waits for element disappearance with timeout
-     * @param searchContext Search context
-     * @param by The locating mechanism to use
-     * @return true if element disappeared, false otherwise
-     */
-    public boolean waitForElementDisappearance(SearchContext searchContext, By by)
-    {
-        return waitActions
-                .wait(searchContext, State.NOT_VISIBLE.getExpectedCondition(expectedSearchContextConditions, by))
-                .isWaitPassed();
-    }
-
-    /**
-     * Waits for element disappearance with desired timeout in seconds
-     * @param searchContext Search context
-     * @param by The locating mechanism to use
-     * @param timeout Desired timeout
-     * @return true if element disappeared, false otherwise
-     */
-    public boolean waitForElementDisappearance(SearchContext searchContext, By by, Duration timeout)
-    {
-        return waitActions.wait(searchContext, timeout,
-                State.NOT_VISIBLE.getExpectedCondition(expectedSearchContextConditions, by)).isWaitPassed();
-    }
-
-    /**
      * Waits for element disappearance with desired timeout in seconds
      * @param locator The locating mechanism to use
      * @param timeout Desired timeout
@@ -412,7 +378,7 @@ public class WaitSteps
                 expectedSearchActionsConditions.invisibilityOfElement(locator)).isWaitPassed();
     }
 
-    public boolean waitForElementAppearance(SearchContext searchContext, By by)
+    private boolean waitForElementAppearance(SearchContext searchContext, By by)
     {
         return waitActions.wait(searchContext,
                 expectedSearchContextConditions.visibilityOfAllElementsLocatedBy(by)).isWaitPassed();
@@ -426,53 +392,6 @@ public class WaitSteps
     public void waitForScroll()
     {
         javascriptActions.waitUntilScrollFinished();
-    }
-
-    /**
-     * Waits for element presence
-     * @param searchContext Search context
-     * @param by The locating mechanism to use
-     * @return true if element is presented, false otherwise
-     */
-    public boolean waitForElementPresence(SearchContext searchContext, By by)
-    {
-        return waitActions.wait(searchContext, expectedSearchContextConditions.presenceOfAllElementsLocatedBy(by))
-                .isWaitPassed();
-    }
-
-    private Function<WebDriver, Boolean> getFunction(boolean displayed, String textToFind, String message)
-    {
-        return new Function<>()
-        {
-            @Override
-            public Boolean apply(WebDriver driver)
-            {
-                navigateActions.refresh(driver);
-                Locator attributes = new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, textToFind);
-                List<WebElement> elements = searchActions.findElements(uiContext.getSearchContext(WebDriver.class),
-                        attributes);
-                return displayed == !elements.isEmpty();
-            }
-
-            @Override
-            public String toString()
-            {
-                return message + textToFind;
-            }
-        };
-    }
-
-    private void waitForElementDisappearance(Locator attributes, String assertionDescription,
-            Object... specifiedValues)
-    {
-        List<WebElement> elements = searchActions.findElements(getSearchContext(), attributes);
-        if (!elements.isEmpty())
-        {
-            waitActions.wait(getWebDriver(), State.NOT_VISIBLE.getExpectedCondition(elements.get(0)));
-            return;
-        }
-        softAssert.recordPassedAssertion(
-                "There is no element present ".concat(String.format(assertionDescription, specifiedValues)));
     }
 
     private WebDriver getWebDriver()
