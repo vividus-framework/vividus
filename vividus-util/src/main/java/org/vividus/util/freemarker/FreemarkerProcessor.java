@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class FreemarkerProcessor
      */
     public FreemarkerProcessor(Class<?> resourceLoaderClass, String templatePath)
     {
-        configuration = new Configuration(Configuration.VERSION_2_3_30);
+        configuration = new Configuration(Configuration.VERSION_2_3_31);
         configuration.setClassForTemplateLoading(resourceLoaderClass, templatePath);
         configuration.setDefaultEncoding(StandardCharsets.UTF_8.toString());
         configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
