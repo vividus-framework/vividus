@@ -68,11 +68,6 @@ a|`US`
 |
 |https://wiki.saucelabs.com/display/DOCS/Data+Center+Endpoints[Sauce Labs data center] to use
 
-|[subs=+quotes]`*saucelabs.rest-url*`
-a|URL
-|
-|Sauce Labs REST endpoint (it must match to the selected data center)
-
 |`saucelabs.sauce-connect.enabled`
 a|`true`
 `false`
