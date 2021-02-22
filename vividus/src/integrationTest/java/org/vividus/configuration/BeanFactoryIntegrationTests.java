@@ -69,7 +69,8 @@ class BeanFactoryIntegrationTests
             "web/desktop/chrome/mobile_emulation/tablet",
             "web/desktop/chrome/mobile_emulation/responsive",
             "mobile_app/ios",
-            "mobile_app/android"
+            "mobile_app/android",
+            "saucelabs/web,web/desktop/chrome"
     })
     void testBeanFactory(String profile)
     {

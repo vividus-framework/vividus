@@ -7,6 +7,12 @@
        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        profile="saucelabs" default-lazy-init="true">
 
+    <bean id="sauceRest" class="com.saucelabs.saucerest.SauceREST">
+        <constructor-arg index="0" value="${selenium.grid.username}" />
+        <constructor-arg index="1" value="${selenium.grid.password}" />
+        <constructor-arg index="2" value="${saucelabs.data-center}" />
+    </bean>
+
     <bean id="sauceConnectManager" class="org.vividus.selenium.sauce.SauceConnectManager">
         <property name="sauceLabsUsername" value="${selenium.grid.username}"/>
         <property name="sauceLabsAccessKey" value="${selenium.grid.password}"/>
@@ -15,13 +21,7 @@
             <bean class="com.saucelabs.ci.sauceconnect.SauceConnectFourManager">
                 <constructor-arg value="false"/>
                 <property name="useLatestSauceConnect" value="${saucelabs.sauce-connect.use-latest-version}"/>
-                <property name="sauceRest">
-                    <bean class="com.saucelabs.saucerest.SauceREST">
-                        <constructor-arg index="0" value="${selenium.grid.username}" />
-                        <constructor-arg index="1" value="${selenium.grid.password}" />
-                        <constructor-arg index="2" value="${saucelabs.data-center}" />
-                    </bean>
-                </property>
+                <property name="sauceRest" ref="sauceRest" />
             </bean>
         </property>
     </bean>
@@ -34,7 +34,7 @@
 
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
         <property name="tunnellingEnabled" value="${saucelabs.sauce-connect.enabled}"/>
-        <property name="restUrl" value="${saucelabs.rest-url}" />
+        <property name="restUrl" value="#{sauceRest.getRestApiEndpoint()}" />
         <property name="sauceConnectArguments" value="${saucelabs.sauce-connect.command-line-arguments}" />
     </bean>
 
