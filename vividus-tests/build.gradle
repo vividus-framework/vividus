@@ -1,4 +1,4 @@
-project.description = 'Vivuds tests'
+project.description = 'Vividus tests'
 
 tasks.artifactoryPublish.enabled = false
 tasks.publish.enabled = false
