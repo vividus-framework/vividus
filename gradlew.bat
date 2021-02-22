@@ -24,7 +24,7 @@ if exist "%BUILD_SYSTEM_ROOT%" (
 :findPath
 set GRADLEW_PATH=%VIVIDUS_BUILD_SYSTEM_HOME%\%buildSystemVersion%\gradlew.bat
 if exist "%GRADLEW_PATH%" goto call
-set ERROR_MSG=Couldn't find %GRADLEW_PATH%. Check BUILD_SYSTEM_ROOT and buildSystemVersion set correctly
+set ERROR_MSG=Couldn't find %GRADLEW_PATH%. Neither environment variable "VIVIDUS_BUILD_SYSTEM_HOME" is set nor embedded build system is synced
 
 :fail
 echo.
