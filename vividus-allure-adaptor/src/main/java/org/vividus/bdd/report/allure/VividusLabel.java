@@ -16,13 +16,19 @@
 
 package org.vividus.bdd.report.allure;
 
+import static java.util.Map.entry;
+import static org.vividus.bdd.model.MetaWrapper.META_VALUES_SEPARATOR;
+
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
 import org.vividus.bdd.model.MetaWrapper;
 
@@ -40,13 +46,14 @@ public enum VividusLabel
     SEVERITY(LabelName.SEVERITY.value(), Optional.empty())
     {
         @Override
-        public Set<String> extractMetaValues(Meta storyMeta, Meta scenarioMeta)
+        public Set<Entry<String, String>> extractMetaValues(Meta storyMeta, Meta scenarioMeta)
         {
             return new MetaWrapper(scenarioMeta)
                     .getOptionalPropertyValue(getMetaName())
                     .map(Integer::parseInt)
                     .map(severity -> SeverityLevel.values()[severity - 1])
                     .map(SeverityLevel::value)
+                    .map(s -> Map.entry(getMetaName(), s))
                     .map(Set::of)
                     .orElseGet(Set::of);
         }
@@ -54,6 +61,7 @@ public enum VividusLabel
     EPIC(LabelName.EPIC.value(), Optional.empty()),
     FEATURE(LabelName.FEATURE.value(), Optional.empty());
 
+    private static final String DOT = ".";
     private final String metaName;
     private final Optional<String> linkType;
 
@@ -68,22 +76,32 @@ public enum VividusLabel
         return metaName;
     }
 
-    public Set<String> extractMetaValues(Meta storyMeta, Meta scenarioMeta)
+    public Set<Entry<String, String>> extractMetaValues(Meta storyMeta, Meta scenarioMeta)
     {
         return Stream.of(storyMeta, scenarioMeta)
                 .map(MetaWrapper::new)
-                .map(meta -> meta.getPropertyValues(metaName))
+                .map(meta -> meta.getPropertiesByKey(k -> k.startsWith(metaName)).entrySet())
                 .flatMap(Collection::stream)
+                .flatMap(e -> Stream.of(StringUtils.split(e.getValue(), META_VALUES_SEPARATOR))
+                                    .map(String::trim)
+                                    .map(m -> entry(e.getKey(), m)))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public Optional<Link> createLink(String identifier)
+    public Optional<Link> createLink(Entry<String, String> identifier)
     {
-        return linkType.map(type -> ResultsUtils.createLink(identifier, null, null, type));
+        return linkType.map(type -> ResultsUtils.createLink(identifier.getValue(),
+                null, null, buildLinkType(identifier, type)).setType(type));
     }
 
-    public Label createLabel(String value)
+    private String buildLinkType(Entry<String, String> identifier, String type)
     {
-        return ResultsUtils.createLabel(metaName, value);
+        String suffix = StringUtils.substringAfter(identifier.getKey(), DOT);
+        return suffix.isEmpty() ? type : type + DOT + suffix;
+    }
+
+    public Label createLabel(Entry<String, String> identifier)
+    {
+        return ResultsUtils.createLabel(metaName, identifier.getValue());
     }
 }

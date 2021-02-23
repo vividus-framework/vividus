@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.report.allure;
 
+import static java.util.Map.entry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -43,9 +45,13 @@ import io.qameta.allure.model.Link;
 
 class VividusLabelTests
 {
+    private static final String ISSUE = "issue";
+
+    private static final String ISSUE_ID = "issueId";
+
     private static final String HTTPS = "https://";
 
-    private static final Map<String, String> LINK_TYPES = Stream.of("tms", "issue", "requirement")
+    private static final Map<String, String> LINK_TYPES = Stream.of("tms", ISSUE, "requirement")
             .collect(Collectors.toMap(type -> "allure.link." + type + ".pattern", type -> HTTPS + type + "/{}"));
 
     private static final String SEVERITY = "severity";
@@ -77,11 +83,27 @@ class VividusLabelTests
     @Test
     void shouldExtractMetaValues()
     {
-        String metaKey = "issueId";
-        Meta storyMeta = createMeta(metaKey, "VVD-1;VVD-2");
-        Meta scenarioMeta = createMeta(metaKey, "VVD-3; VVD-4");
-        Set<String> metaValues = VividusLabel.ISSUE_ID.extractMetaValues(storyMeta, scenarioMeta);
-        assertThat(metaValues, contains("VVD-1", "VVD-2", "VVD-3", "VVD-4"));
+        Meta storyMeta = createMeta(ISSUE_ID, "VVD-1;VVD-2");
+        Meta scenarioMeta = createMeta(ISSUE_ID, "VVD-3; VVD-4");
+        Set<Entry<String, String>> metaValues = VividusLabel.ISSUE_ID.extractMetaValues(storyMeta, scenarioMeta);
+        assertThat(metaValues, contains(issue("VVD-1"), issue("VVD-2"), issue("VVD-3"), issue("VVD-4")));
+    }
+
+    @Test
+    void shouldExtractMetaValuesWithDifferentSuffixes()
+    {
+        String issueIdDev = "issueId.dev";
+        Meta storyMeta = createMeta(issueIdDev, "VVD-6;VVD-7");
+        String issueIdProd = "issueId.prod";
+        Meta scenarioMeta = createMeta(issueIdProd, "VVD-8; VVD-9");
+        Set<Entry<String, String>> metaValues = VividusLabel.ISSUE_ID.extractMetaValues(storyMeta, scenarioMeta);
+        assertThat(metaValues, contains(entry(issueIdDev, "VVD-6"), entry(issueIdDev, "VVD-7"),
+                entry(issueIdProd, "VVD-8"), entry(issueIdProd, "VVD-9")));
+    }
+
+    private Entry<String, String> issue(String key)
+    {
+        return entry(ISSUE_ID, key);
     }
 
     @Test
@@ -90,8 +112,8 @@ class VividusLabelTests
         String metaKey = SEVERITY;
         Meta storyMeta = createMeta(metaKey, "1");
         Meta scenarioMeta = createMeta(metaKey, "2");
-        Set<String> metaValues = VividusLabel.SEVERITY.extractMetaValues(storyMeta, scenarioMeta);
-        assertEquals(Set.of("critical"), metaValues);
+        Set<Entry<String, String>> metaValues = VividusLabel.SEVERITY.extractMetaValues(storyMeta, scenarioMeta);
+        assertEquals(metaValues, Set.of(entry(metaKey, "critical")));
     }
 
     @ParameterizedTest
@@ -106,7 +128,7 @@ class VividusLabelTests
     void shouldCreateLabel(VividusLabel vividusLabel, String expectedName)
     {
         String value = "value";
-        Label label = vividusLabel.createLabel(value);
+        Label label = vividusLabel.createLabel(entry(expectedName, value));
         assertAll(
             () -> assertEquals(expectedName, label.getName()),
             () -> assertEquals(value, label.getValue())
@@ -122,7 +144,7 @@ class VividusLabelTests
     void shouldCreateLink(VividusLabel vividusLabel, String type)
     {
         String identifier = "VVD-5";
-        Optional<Link> optionalLink = vividusLabel.createLink(identifier);
+        Optional<Link> optionalLink = vividusLabel.createLink(entry(type, identifier));
         assertTrue(optionalLink.isPresent());
         Link link = optionalLink.get();
         assertAll(
@@ -132,10 +154,27 @@ class VividusLabelTests
         );
     }
 
+    @Test
+    void shouldCreateLinkUsingSuffix()
+    {
+        String identifier = "VVD-0";
+        String key = "allure.link.issue.test.pattern";
+        System.setProperty(key, "https://vividus.dev/{}");
+        Optional<Link> optionalLink = VividusLabel.ISSUE_ID.createLink(entry("issueId.test", identifier));
+        System.clearProperty(key);
+        assertTrue(optionalLink.isPresent());
+        Link link = optionalLink.get();
+        assertAll(
+            () -> assertEquals(identifier, link.getName()),
+            () -> assertEquals(ISSUE, link.getType()),
+            () -> assertEquals("https://vividus.dev/VVD-0", link.getUrl())
+        );
+    }
+
     @ParameterizedTest
     @EnumSource(names = {"SEVERITY", "EPIC", "FEATURE"}, mode = Mode.INCLUDE)
     void shouldNotCreateLink(VividusLabel vividusLabel)
     {
-        assertEquals(Optional.empty(), vividusLabel.createLink("any"));
+        assertEquals(Optional.empty(), vividusLabel.createLink(entry("type", "any")));
     }
 }
