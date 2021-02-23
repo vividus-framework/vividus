@@ -44,8 +44,9 @@ task copyRuntimeLibs(type: Copy) {
     from configurations.runtimeClasspath
 }
 
-import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 
 task createDockerfile(type: Dockerfile) {
     dependsOn copyRuntimeLibs
@@ -60,4 +61,9 @@ task createDockerfile(type: Dockerfile) {
 task buildImage(type: DockerBuildImage) {
     dependsOn createDockerfile
     images.add("vividus/vividus:${project.version}")
+}
+
+task pushImage(type: DockerPushImage) {
+    dependsOn buildImage
+    images = buildImage.images
 }
