@@ -8,8 +8,3 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
 }
-
-artifactoryPublish {
-    // The publishing is skipped due to bintray restrictions: https://stackoverflow.com/questions/60602428/unable-to-add-bintray-package-to-jcenter-and-oss-jfrog
-    skip = true
-}
