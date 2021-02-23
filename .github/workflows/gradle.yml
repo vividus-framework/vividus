@@ -171,7 +171,7 @@ jobs:
         if [[ -n $LAMBDATEST_USER && -n $LAMBDATEST_KEY ]]; then
           declare -a profiles=( iexplore chrome firefox edge safari )
           for profile in "${profiles[@]}"; do
-            ./gradlew runStories -x testVividusInitialization \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                  -Pvividus.configuration.environments=system/lambdatest \
                                  -Pvividus.configuration.suites=lambdatest \
                                  -Pvividus.configuration.profiles=lambdatest/web,web/desktop/${profile} \
@@ -192,14 +192,14 @@ jobs:
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
           declare -a profiles=( iexplore chrome firefox edge safari )
           for profile in "${profiles[@]}"; do
-            ./gradlew runStories -x testVividusInitialization \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                  -Pvividus.configuration.environments=system/saucelabs \
                                  -Pvividus.configuration.suites=grid \
                                  -Pvividus.configuration.profiles=saucelabs/web,web/desktop/${profile} \
                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
           done
-          ./gradlew runStories -x testVividusInitialization \
+          ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                -Pvividus.configuration.environments=system/saucelabs \
                                -Pvividus.configuration.suites= \
                                -Pvividus.configuration.profiles=saucelabs/web,web/desktop/chrome \
@@ -222,7 +222,7 @@ jobs:
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
           declare -a profiles=( ipad )
           for profile in "${profiles[@]}"; do
-            ./gradlew runStories -x testVividusInitialization \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                  -Pvividus.configuration.environments=system/saucelabs \
                                  -Pvividus.configuration.suites=grid \
                                  -Pvividus.configuration.profiles=saucelabs/web,web/tablet/${profile} \
@@ -243,7 +243,7 @@ jobs:
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
           declare -a profiles=( iphone )
           for profile in "${profiles[@]}"; do
-            ./gradlew runStories -x testVividusInitialization \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                  -Pvividus.configuration.environments=system/saucelabs \
                                  -Pvividus.configuration.suites=grid \
                                  -Pvividus.configuration.profiles=saucelabs/web,web/phone/${profile} \
@@ -336,7 +336,7 @@ jobs:
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
           declare -a profiles=( iexplore chrome firefox edge safari )
           for profile in "${profiles[@]}"; do
-            ./gradlew runStories -x testVividusInitialization \
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
                                  -Pvividus.configuration.suites=grid \
                                  -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \
                                  -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
