@@ -41,4 +41,5 @@ include 'vividus-plugin-xml'
 include 'vividus-to-xray-exporter'
 include 'vividus-to-zephyr-exporter'
 
+include 'vividus-docker-bundler'
 include 'vividus-tests'

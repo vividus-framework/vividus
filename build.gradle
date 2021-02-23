@@ -12,13 +12,12 @@ apply from: "${gradleScriptDir}/project.gradle"
 apply from: "${gradleScriptDir}/jacoco.gradle"
 apply from: "${gradleScriptDir}/sonarqube.gradle"
 
-def testProjectPostfix = '-tests'
-def nonTestSubprojects = subprojects.findAll { !it.name.endsWith(testProjectPostfix) }
 
-configure(subprojects.findAll { it.name.endsWith(testProjectPostfix) }) {
+configure([project(':vividus-tests'), project(':vividus-docker-bundler')]) {
     apply from: "${buildSystemDir}/vividus-test-subproject.gradle"
 }
 
+def nonTestSubprojects = subprojects.findAll { !it.name.equals('vividus-tests') && !it.name.equals('vividus-docker-bundler') }
 configure(nonTestSubprojects) {
     apply plugin: 'com.jfrog.bintray'
     apply from: "${buildSystemDir}/vividus-library-subproject.gradle"
