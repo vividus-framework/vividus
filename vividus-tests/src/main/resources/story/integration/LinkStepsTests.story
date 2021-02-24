@@ -130,5 +130,5 @@ Given I am on a page with the URL '${vividus-test-site-url}/links.html'
 Then a [VISIBLE] link with the text 'Link to an element' and URL '#ElementId' exists
 
 Scenario: Step verification Then a link tag with href '$href' exists
-Given I am on a page with the URL 'https://developer.mozilla.org/en-US/'
-Then a link tag with href 'https://developer.mozilla.org' exists
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+Then a link tag with href 'img/vividus.png' exists
