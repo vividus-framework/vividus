@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,7 @@ public class KafkaSteps
     @When("I start consuming messages from Kafka topics `$topics`")
     public void startKafkaListener(Set<String> topics)
     {
+        stopListener(false);
         BlockingQueue<String> messageQueue = new LinkedBlockingDeque<>();
         testContext.put(MESSAGES_KEY, messageQueue);
         ContainerProperties containerProperties = new ContainerProperties(topics.toArray(new String[0]));
