@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,9 @@ package org.vividus.bdd.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -58,17 +55,6 @@ class MetaWrapperTests
         properties.setProperty(propertyName, "");
         Meta meta = new Meta(properties);
         assertEquals(list, new MetaWrapper(meta).toTags());
-    }
-
-    @Test
-    void testGetOptionalPropertyValue()
-    {
-        Meta meta = mock(Meta.class);
-        String propertyName = "name";
-        String propertyValue = "value";
-        when(meta.getProperty(propertyName)).thenReturn(propertyValue);
-        MetaWrapper metaWrapper = new MetaWrapper(meta);
-        assertEquals(Optional.of(propertyValue), metaWrapper.getOptionalPropertyValue(propertyName));
     }
 
     static Stream<Arguments> metaValues()

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -55,12 +54,6 @@ public class MetaWrapper
             tags.add(StringUtils.isNoneBlank(propertyValue) ? propertyName + "=" + propertyValue : propertyName);
         }
         return tags;
-    }
-
-    public Optional<String> getOptionalPropertyValue(String propertyName)
-    {
-        String value = meta.getProperty(propertyName);
-        return value.isEmpty() ? Optional.empty() : Optional.of(value);
     }
 
     public Set<String> getPropertyValues(String propertyName)

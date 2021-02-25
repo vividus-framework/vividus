@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public enum ControllingMetaTag
         }
 
         @Override
-        protected void setCapability(DesiredCapabilities capabilities, MetaWrapper meta)
+        protected void setCapability(DesiredCapabilities capabilities, Meta meta)
         {
             // Nothing to do
         }
@@ -60,10 +60,10 @@ public enum ControllingMetaTag
     CAPABILITY("capability.")
     {
         @Override
-        protected void setCapability(DesiredCapabilities capabilities, MetaWrapper meta)
+        protected void setCapability(DesiredCapabilities capabilities, Meta meta)
         {
             Map<String, Object> capabilitiesContainer = new HashMap<>(capabilities.asMap());
-            meta.getPropertiesByKey(k -> k.startsWith(getMetaTagName())).forEach(
+            new MetaWrapper(meta).getPropertiesByKey(k -> k.startsWith(getMetaTagName())).forEach(
                     (k, v) -> putByPath(capabilitiesContainer, substringAfter(k, getMetaTagName()), adjustType(v)));
             capabilitiesContainer.forEach(capabilities::setCapability);
         }
@@ -83,7 +83,7 @@ public enum ControllingMetaTag
 
     protected boolean isContainedInImpl(Meta meta)
     {
-        return new MetaWrapper(meta).getOptionalPropertyValue(getMetaTagName()).isPresent();
+        return meta.getOptionalProperty(getMetaTagName()).isPresent();
     }
 
     public boolean isContainedIn(Meta... metas)
@@ -91,11 +91,10 @@ public enum ControllingMetaTag
         return Stream.of(metas).anyMatch(this::isContainedInImpl);
     }
 
-    protected void setCapability(DesiredCapabilities capabilities, MetaWrapper meta)
+    protected void setCapability(DesiredCapabilities capabilities, Meta meta)
     {
         String capabilityName = getMetaTagName();
-        meta.getOptionalPropertyValue(capabilityName)
-                .ifPresent(value -> capabilities.setCapability(capabilityName, value));
+        meta.getOptionalProperty(capabilityName).ifPresent(value -> capabilities.setCapability(capabilityName, value));
     }
 
     public static boolean isAnyContainedIn(Meta meta)
@@ -103,7 +102,7 @@ public enum ControllingMetaTag
         return Stream.of(values()).anyMatch(controllingMetaTag -> controllingMetaTag.isContainedIn(meta));
     }
 
-    public static void setDesiredCapabilitiesFromMeta(DesiredCapabilities capabilities, MetaWrapper meta)
+    public static void setDesiredCapabilitiesFromMeta(DesiredCapabilities capabilities, Meta meta)
     {
         for (ControllingMetaTag controllingMetaTag : values())
         {
