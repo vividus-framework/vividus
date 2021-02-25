@@ -48,8 +48,7 @@ public enum VividusLabel
         @Override
         public Set<Entry<String, String>> extractMetaValues(Meta storyMeta, Meta scenarioMeta)
         {
-            return new MetaWrapper(scenarioMeta)
-                    .getOptionalPropertyValue(getMetaName())
+            return scenarioMeta.getOptionalProperty(getMetaName())
                     .map(Integer::parseInt)
                     .map(severity -> SeverityLevel.values()[severity - 1])
                     .map(SeverityLevel::value)

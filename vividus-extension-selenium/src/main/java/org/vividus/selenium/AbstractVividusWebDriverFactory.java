@@ -26,7 +26,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.MetaWrapper;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.proxy.IProxy;
@@ -86,8 +85,7 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
                                         .map(RunningScenario::getScenario)
                                         .map(scenario -> scenario.getMeta().inheritFrom(storyMeta))
                                         .orElse(storyMeta);
-            MetaWrapper metaWrapper = new MetaWrapper(mergedMeta);
-            ControllingMetaTag.setDesiredCapabilitiesFromMeta(mergedCapabilities, metaWrapper);
+            ControllingMetaTag.setDesiredCapabilitiesFromMeta(mergedCapabilities, mergedMeta);
         }
 
         return mergedCapabilities;
