@@ -22,6 +22,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -566,7 +567,7 @@ public class AllureStoryReporter extends ChainedStoryReporter
             Scenario scenario = runningScenario.getScenario();
             Meta scenarioMeta = scenario.getMeta();
 
-            Map<VividusLabel, Set<String>> metaLabels = Stream.of(VividusLabel.values())
+            Map<VividusLabel, Set<Entry<String, String>>> metaLabels = Stream.of(VividusLabel.values())
                     .collect(Collectors.toMap(Function.identity(),
                         label -> label.extractMetaValues(storyMeta, scenarioMeta), (l, r) -> l, LinkedHashMap::new));
 

@@ -131,9 +131,11 @@ class AllureStoryReporterTests
 
     private static final String ALLURE_LINK_ISSUE_PROPERTY = "allure.link.issue.pattern";
     private static final String ALLURE_LINK_TMS_PROPERTY = "allure.link.tms.pattern";
+    private static final String ALLURE_LINK_ISSUE_DEV_PROPERTY = "allure.link.issue.dev.pattern";
 
     private static final String ISSUE_LINK_PREFIX = "https://issue/";
     private static final String TMS_LINK_PREFIX = "https://tms/";
+    private static final String ISSUE_LINK_DEV_PREFIX = "https://vividus.dev/";
 
     private static final String LIFECYCLE_BEFORE_STORY = "Lifecycle: Before story";
     private static final String LIFECYCLE_AFTER_STORY = "Lifecycle: After story";
@@ -163,6 +165,7 @@ class AllureStoryReporterTests
         String placeholder = "{}";
         System.setProperty(ALLURE_LINK_ISSUE_PROPERTY, ISSUE_LINK_PREFIX + placeholder);
         System.setProperty(ALLURE_LINK_TMS_PROPERTY, TMS_LINK_PREFIX + placeholder);
+        System.setProperty(ALLURE_LINK_ISSUE_DEV_PROPERTY, ISSUE_LINK_DEV_PREFIX + placeholder);
     }
 
     @AfterAll
@@ -170,6 +173,7 @@ class AllureStoryReporterTests
     {
         System.clearProperty(ALLURE_LINK_ISSUE_PROPERTY);
         System.clearProperty(ALLURE_LINK_TMS_PROPERTY);
+        System.clearProperty(ALLURE_LINK_ISSUE_DEV_PROPERTY);
     }
 
     @BeforeEach
@@ -954,8 +958,10 @@ class AllureStoryReporterTests
         mockScenarioUid(true);
         boolean givenStory = false;
         mockStoryStart(givenStory);
-        Properties scenarioMeta = putTestCaseMetaProperties(getScenarioMeta(false), EXPECTED_SCENARIO_TEST_CASE_ID,
+        Properties meta = getScenarioMeta(false);
+        Properties scenarioMeta = putTestCaseMetaProperties(meta, EXPECTED_SCENARIO_TEST_CASE_ID,
                 EXPECTED_SCENARIO_REQUIREMENT_ID);
+        meta.put("issueId.dev", "VVD-1");
         Scenario scenario1 = createScenario(scenarioMeta, List.of());
         Scenario scenario2 = createScenario(scenarioMeta, List.of());
         RunningScenario runningScenario = getRunningScenario(scenario1, 0);
@@ -971,8 +977,11 @@ class AllureStoryReporterTests
         assertTestResultLabel(TEST_CASE_ID, EXPECTED_SCENARIO_TEST_CASE_ID);
         assertTestResultLabel(REQUIREMENT_ID, EXPECTED_SCENARIO_REQUIREMENT_ID);
         List<Link> links = captured.getLinks();
-        assertFalse(links.isEmpty());
+        assertThat(links, hasSize(3));
         assertEquals(TMS_LINK_PREFIX + EXPECTED_SCENARIO_TEST_CASE_ID, links.get(0).getUrl());
+        Link issue = links.get(1);
+        assertEquals("https://vividus.dev/VVD-1", issue.getUrl());
+        assertEquals("issue", issue.getType());
         assertEquals(StatusPriority.getLowest().getStatusModel(), captured.getStatus());
     }
 
