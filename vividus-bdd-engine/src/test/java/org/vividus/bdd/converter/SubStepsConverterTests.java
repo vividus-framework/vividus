@@ -49,32 +49,55 @@ import org.vividus.bdd.steps.SubSteps;
 @ExtendWith(MockitoExtension.class)
 class SubStepsConverterTests
 {
+    private static final String STEPS_TO_EXECUTE = "stepsToExecute";
+
     @Mock private ExtendedConfiguration configuration;
     @Mock private IBddRunContext bddRunContext;
     @Mock private Embedder embedder;
     @Mock private IStepExamplesTableParser stepExamplesTableParser;
+    @Mock private RunningStory runningStory;
+    @Mock private Step step;
     @InjectMocks private SubStepsConverter subStepsConverter;
 
     @Test
-    void testCreateSubSteps() throws IllegalAccessException
+    void shouldCreateSubSteps() throws IllegalAccessException
     {
-        ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
-        when(configuration.examplesTableFactory()).thenReturn(examplesTableFactory);
-        ExamplesTable stepsToExecuteTable = mock(ExamplesTable.class);
-        String stepsToExecute = "stepsToExecute";
-        when(examplesTableFactory.createExamplesTable(stepsToExecute)).thenReturn(stepsToExecuteTable);
-        Step step = mock(Step.class);
-        List<Step> steps = List.of(step);
-        RunningStory runningStory = mock(RunningStory.class);
+        ExamplesTable stepsToExecuteTable = mockStepsToExecute();
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
         RunningScenario runningScenario = mock(RunningScenario.class);
         Map<String, String> examples = Map.of("key", "value");
         when(runningScenario.getExample()).thenReturn(examples);
         when(runningStory.getRunningScenario()).thenReturn(runningScenario);
-        when(stepExamplesTableParser.parse(stepsToExecuteTable, examples)).thenReturn(steps);
+        when(stepExamplesTableParser.parse(stepsToExecuteTable, examples)).thenReturn(List.of(step));
         StoryReporter storyReporter = mockStoryReporter();
-        SubSteps executor = subStepsConverter.convertValue(stepsToExecute, SubSteps.class);
-        assertEquals(steps, getFieldValue("steps", executor));
+        SubSteps executor = subStepsConverter.convertValue(STEPS_TO_EXECUTE, SubSteps.class);
+        assertResults(storyReporter, executor);
+    }
+
+    @Test
+    void shouldCreateLifecycleSubStepsPerformedBeforeStory() throws IllegalAccessException
+    {
+        ExamplesTable stepsToExecuteTable = mockStepsToExecute();
+        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runningStory.getRunningScenario()).thenReturn(null);
+        when(stepExamplesTableParser.parse(stepsToExecuteTable, Map.of())).thenReturn(List.of(step));
+        StoryReporter storyReporter = mockStoryReporter();
+        SubSteps executor = subStepsConverter.convertValue(STEPS_TO_EXECUTE, SubSteps.class);
+        assertResults(storyReporter, executor);
+    }
+
+    private ExamplesTable mockStepsToExecute()
+    {
+        ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
+        when(configuration.examplesTableFactory()).thenReturn(examplesTableFactory);
+        ExamplesTable stepsToExecuteTable = mock(ExamplesTable.class);
+        when(examplesTableFactory.createExamplesTable(STEPS_TO_EXECUTE)).thenReturn(stepsToExecuteTable);
+        return stepsToExecuteTable;
+    }
+
+    private void assertResults(StoryReporter storyReporter, SubSteps executor) throws IllegalAccessException
+    {
+        assertEquals(List.of(step), getFieldValue("steps", executor));
         DelegatingStoryReporter actualStoryReporter = getFieldValue("storyReporter", executor);
         assertNotEquals(storyReporter, actualStoryReporter);
         assertEquals(1, actualStoryReporter.getDelegates().size());

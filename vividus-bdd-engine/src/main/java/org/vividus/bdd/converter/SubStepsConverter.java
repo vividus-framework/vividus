@@ -19,6 +19,8 @@ package org.vividus.bdd.converter;
 import static java.util.stream.Collectors.collectingAndThen;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Named;
@@ -31,6 +33,7 @@ import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.jbehave.core.steps.Step;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
 import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.bdd.steps.SubSteps;
@@ -53,8 +56,12 @@ public class SubStepsConverter extends FunctionalParameterConverter<SubSteps>
                         .collect(collectingAndThen(Collectors.toList(), DelegatingStoryReporter::new));
             }
             ExamplesTable subStepsTable = configuration.examplesTableFactory().createExamplesTable(subSteps);
-            List<Step> steps = stepExamplesTableParser.parse(subStepsTable,
-                    bddRunContext.getRunningStory().getRunningScenario().getExample());
+
+            Map<String, String> parameters = Optional.ofNullable(bddRunContext.getRunningStory().getRunningScenario())
+                                                     .map(RunningScenario::getExample)
+                                                     .orElseGet(Map::of);
+
+            List<Step> steps = stepExamplesTableParser.parse(subStepsTable, parameters);
             return new SubSteps(configuration, storyReporter, embedder, steps);
         });
     }
