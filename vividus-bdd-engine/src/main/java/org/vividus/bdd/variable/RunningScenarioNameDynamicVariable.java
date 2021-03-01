@@ -16,10 +16,13 @@
 
 package org.vividus.bdd.variable;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.model.RunningScenario;
 
 @Named("running-scenario")
 public class RunningScenarioNameDynamicVariable implements DynamicVariable
@@ -29,6 +32,8 @@ public class RunningScenarioNameDynamicVariable implements DynamicVariable
     @Override
     public String getValue()
     {
-        return runContext.getRunningStory().getRunningScenario().getTitle();
+        return Optional.ofNullable(runContext.getRunningStory().getRunningScenario())
+                       .map(RunningScenario::getTitle)
+                       .orElseThrow(() -> new IllegalStateException("No scenario is running"));
     }
 }

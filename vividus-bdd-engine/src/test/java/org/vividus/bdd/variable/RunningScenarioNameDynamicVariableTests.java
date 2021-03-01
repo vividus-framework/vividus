@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.vividus.bdd.variable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -31,25 +33,29 @@ import org.vividus.bdd.model.RunningStory;
 @ExtendWith(MockitoExtension.class)
 class RunningScenarioNameDynamicVariableTests
 {
-    @Mock
-    private IBddRunContext bddRunContext;
-
-    @Mock
-    private RunningStory runningStory;
-
-    @Mock
-    private RunningScenario runningScenario;
-
-    @InjectMocks
-    private RunningScenarioNameDynamicVariable runningScenarioNameDynamicVariable;
+    @Mock private IBddRunContext bddRunContext;
+    @Mock private RunningStory runningStory;
+    @InjectMocks private RunningScenarioNameDynamicVariable runningScenarioNameDynamicVariable;
 
     @Test
     void shouldReturnStoryName()
     {
         when(bddRunContext.getRunningStory()).thenReturn(runningStory);
         String value = "name";
+        RunningScenario runningScenario = mock(RunningScenario.class);
         when(runningStory.getRunningScenario()).thenReturn(runningScenario);
         when(runningScenario.getTitle()).thenReturn(value);
         assertEquals(value, runningScenarioNameDynamicVariable.getValue());
+    }
+
+    @Test
+    void shouldFailIfThereIsNoRunningScenario()
+    {
+        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runningStory.getRunningScenario()).thenReturn(null);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                runningScenarioNameDynamicVariable::getValue);
+        assertEquals("No scenario is running", exception.getMessage());
     }
 }
