@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.AfterScenario;
-import org.jbehave.core.annotations.ScenarioType;
 import org.jbehave.core.annotations.Then;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningStory;
@@ -33,7 +32,7 @@ public class AssertSteps
     @Inject private ISoftAssert softAssert;
     @Inject private IBddRunContext bddRunContext;
 
-    @AfterScenario(uponType = ScenarioType.ANY)
+    @AfterScenario
     public void verifyIfAssertionsPassed()
     {
         boolean scenarioLevelGivenStoriesExistInChain = bddRunContext.getStoriesChain().stream()
