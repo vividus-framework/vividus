@@ -1,0 +1,114 @@
+= WebSocket Plugin
+
+The plugin provides a functionality to interact with https://tools.ietf.org/html/rfc6455[WebSocket].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-websocket', version: '{current-version}')
+----
+
+== Properties
+
+It's allowed to configure an unlimited number of WebSocket connections via the mechanism of the dynamic properties. The properties example is:
+```properties
+websocket.connection.chat=ws://websocket.chat.com/
+websocket.connection.debug=ws://localhost:54886/
+```
+where `chat` and `debug` are keys used to refer websocket connections in the steps. The keys are defined by users, must be unique and can't contain dots.
+
+== Steps
+
+=== Connect
+
+Creates a new websocket connection.
+
+[source,gherkin]
+----
+When I connect to `$webSocketConnectionKey` websocket
+----
+
+* `$webSocketConnectionKey` - the websocket connection key
+
+.Connect to a web socket
+[source,gherkin]
+----
+When I connect to `chat` websocket
+----
+
+=== Send text message
+
+Sends a text message over the websocket.
+
+[source,gherkin]
+----
+When I send text message `$message` over `$webSocketConnectionKey` websocket
+----
+
+* `$message` - the text message to send
+* `$webSocketConnectionKey` - the websocket connection key
+
+.Send text message
+[source,gherkin]
+----
+When I send text message `Hi everyone` over `chat` websocket
+----
+
+=== Disconnect
+
+Disconnects from an existing websocket. All the received text messages are kept and can be drained into the variable using the drain step.
+
+[source,gherkin]
+----
+When I disconnect from `$webSocketConnectionKey` websocket
+----
+
+* `$webSocketConnectionKey` - the websocket connection key
+
+.Disconnect from a websocket
+[source,gherkin]
+----
+When I disconnect from `chat` websocket
+----
+
+=== Wait for text messages
+
+Waits until the count of the text messages received over the specified websocket matches to the rule or until the timeout is exceeded.
+
+[source,gherkin]
+----
+When I wait with `$timeout` timeout until count of text messages received over `$webSocketConnectionKey` websocket is $comparisonRule `$expectedCount`
+----
+
+* `$timeout` - the maximum time to wait for the messages in {iso-date-format-link} format
+* `$webSocketConnectionKey` - the websocket connection key
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[the comparison rule]
+* `$expectedCount` - the expected count of the messages to be matched by the rule
+
+.Wait for text messages
+[source,gherkin]
+----
+When I wait with `PT30S` timeout until count of text messages received over `chat` websocket is equal to `1`
+----
+
+=== Drain text messages
+
+Drains the text messages received over the specified websocket to the specified variable. If the websocket is not disconnected, the new messages might arrive after the draining. If the websocket is disconnected, all the messages received after the websocket is connected or after the last draining operation are stored to the variable.
+
+[source,gherkin]
+----
+When I drain text messages received over `$webSocketConnectionKey` websocket to $scopes variable `$variableName`
+----
+
+* `$webSocketConnectionKey` - the websocket connection key
+* `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes].
+* `$variableName` - the variable name to store the messages. The messages are accessible via zero-based index, e.g. `${my-var[0]}` will return the first received message.
+
+.Drain text messages
+[source,gherkin]
+----
+When I drain text messages received over `chat` websocket to scenario variable `welcomeMessages`
+Then `${messages[0]}` is equal to `Hi Jetty`
+----

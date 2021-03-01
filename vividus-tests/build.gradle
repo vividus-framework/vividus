@@ -26,6 +26,7 @@ dependencies {
     implementation project(':vividus-plugin-ssh')
     implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-plugin-web-app-to-rest-api')
+    implementation project(':vividus-plugin-websocket')
     implementation project(':vividus-plugin-xml')
     implementation project(':vividus-plugin-visual')
     implementation project(':vividus-plugin-excel')
