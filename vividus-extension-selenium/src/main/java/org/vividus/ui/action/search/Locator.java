@@ -107,7 +107,7 @@ public class Locator
      * Returns string representation of the locator
      * @deprecated use {@link #toHumanReadableString()}
      */
-    @Deprecated(forRemoval = false, since = "0.2.9")
+    @Deprecated(forRemoval = true, since = "0.2.9")
     @Override
     public String toString()
     {
