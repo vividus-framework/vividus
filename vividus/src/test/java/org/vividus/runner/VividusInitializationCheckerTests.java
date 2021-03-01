@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ class VividusInitializationCheckerTests extends SystemStreamTests
             VividusInitializationChecker.main(new String[] { "--ignoreBeans", BEAN_2 });
             vividus.verify(Vividus::init);
             beanFactory.verify(() -> BeanFactory.getBean(BEAN_1));
-            beanFactory.verify(never(), () -> BeanFactory.getBean(BEAN_2));
+            beanFactory.verify(() -> BeanFactory.getBean(BEAN_2), never());
         }
     }
 

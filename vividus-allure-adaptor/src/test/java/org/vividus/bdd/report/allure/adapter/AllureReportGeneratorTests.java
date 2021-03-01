@@ -261,11 +261,11 @@ class AllureReportGeneratorTests
             when(propertyMapper.readValue("allure.executor.", ExecutorInfo.class)).thenReturn(executorInfo);
             allureReportGenerator.start();
             allureReportGenerator.end();
-            fileUtils.verify(never(),
-                    () -> FileUtils.copyInputStreamToFile(eq(folder.getInputStream()), any(File.class)));
+            fileUtils.verify(() -> FileUtils.copyInputStreamToFile(eq(folder.getInputStream()), any(File.class)),
+                    never());
             fileUtils.verify(() -> FileUtils.copyInputStreamToFile(eq(resource.getInputStream()), any(File.class)));
-            fileUtils.verify(times(2),
-                    () -> FileUtils.writeStringToFile(any(File.class), eq(text), eq(StandardCharsets.UTF_8)));
+            fileUtils.verify(() -> FileUtils.writeStringToFile(any(File.class), eq(text), eq(StandardCharsets.UTF_8)),
+                    times(2));
             fileUtils.verify(() -> FileUtils
                     .copyDirectory(argThat(arg -> arg.getAbsolutePath().equals(resolveTrendsDir(reportDirectory))),
                             eq(historyDirectory.toFile())));
