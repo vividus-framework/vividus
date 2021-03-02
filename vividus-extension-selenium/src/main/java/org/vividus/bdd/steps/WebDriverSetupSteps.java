@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.AfterStory;
 import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.BeforeStory;
-import org.jbehave.core.annotations.ScenarioType;
 import org.jbehave.core.model.Meta;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.selenium.ControllingMetaTag;
@@ -46,7 +45,7 @@ public class WebDriverSetupSteps
         this.bddRunContext = bddRunContext;
     }
 
-    @BeforeScenario(uponType = ScenarioType.ANY)
+    @BeforeScenario
     public void beforeScenario()
     {
         processMeta(bddRunContext.getRunningStory().getRunningScenario().getScenario().getMeta());
@@ -58,7 +57,7 @@ public class WebDriverSetupSteps
         processMeta(bddRunContext.getRunningStory().getStory().getMeta());
     }
 
-    @AfterScenario(uponType = ScenarioType.ANY, order = Integer.MAX_VALUE)
+    @AfterScenario(order = Integer.MAX_VALUE)
     public void afterScenario()
     {
         if (webDriverSessionScope == WebDriverSessionScope.SCENARIO)

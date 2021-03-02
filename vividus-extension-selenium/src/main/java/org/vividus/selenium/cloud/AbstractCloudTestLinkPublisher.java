@@ -25,7 +25,6 @@ import com.google.common.eventbus.Subscribe;
 
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeScenario;
-import org.jbehave.core.annotations.ScenarioType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
@@ -53,13 +52,13 @@ public abstract class AbstractCloudTestLinkPublisher
 
     protected abstract Optional<String> getCloudTestUrl(String sessionId);
 
-    @BeforeScenario(uponType = ScenarioType.ANY)
+    @BeforeScenario
     public void resetState()
     {
         testContext.put(KEY, new CloudTestLinkPublishState());
     }
 
-    @AfterScenario(uponType = ScenarioType.ANY)
+    @AfterScenario
     public void publishCloudTestLinkAfterScenario()
     {
         if (webDriverProvider.isWebDriverInitialized())

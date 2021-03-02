@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.AfterStory;
-import org.jbehave.core.annotations.ScenarioType;
 import org.vividus.http.client.ThreadedBasicCookieStore;
 
 public class CookieStoreProvider
@@ -40,7 +39,7 @@ public class CookieStoreProvider
         return cookieStore;
     }
 
-    @AfterScenario(uponType = ScenarioType.ANY)
+    @AfterScenario
     public void resetScenarioCookies()
     {
         if (cookieStoreLevel == CookieStoreLevel.SCENARIO)
