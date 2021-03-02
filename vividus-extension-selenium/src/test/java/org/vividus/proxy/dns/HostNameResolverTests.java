@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ class HostNameResolverTests
             inetAddressMock.when(() -> InetAddress.getByName(IP_ADDRESS)).thenReturn(inetAddress);
             assertEquals(List.of(inetAddress), hostNameResolver.resolve(HOST));
             assertTrue(logger.getLoggingEvents().isEmpty());
-            inetAddressMock.verify(never(), () -> InetAddress.getAllByName(any()));
+            inetAddressMock.verify(() -> InetAddress.getAllByName(any()), never());
         }
     }
 
@@ -79,7 +79,7 @@ class HostNameResolverTests
         {
             assertEquals(List.of(inetAddress), spyHostNameResolver.resolve(HOST));
             assertTrue(logger.getLoggingEvents().isEmpty());
-            inetAddressMock.verify(never(), () -> InetAddress.getByName(any()));
+            inetAddressMock.verify(() -> InetAddress.getByName(any()), never());
         }
     }
 
