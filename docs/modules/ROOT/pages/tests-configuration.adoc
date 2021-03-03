@@ -295,3 +295,37 @@ Then `1` is = `1`
 ----
 
 image::multiple-links.png[Multiple links]
+
+== Story Prioritization
+
+In order to start stories in particular order it is possible to assign the stories a numeric priority, the stories with the higher priority start first.
+
+To enable the feature create a file `spring.xml` in the `src/main/resources` directory and add the following XML data into that file.
+
+.Configuration
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-lazy-init="false">
+
+    <bean class="org.vividus.bdd.priority.MetaBasedStoryExecutionPriority" factory-method="byNumericMetaValue">
+        <constructor-arg index="0" value="story_priority" />
+    </bean>
+</beans>
+----
+
+The `story_priority` value that corresponds to a meta name in stories can be changed to arbitrary value without spaces.
+
+Taking `story_priority` as an example the priority meta should be placed at the story level as the following example shows:
+
+.Prioritized.story
+[source,gherkin]
+----
+Meta: @story_priority 15
+
+Scenario: Time consuming test
+When I perform highly time consuming task
+----
