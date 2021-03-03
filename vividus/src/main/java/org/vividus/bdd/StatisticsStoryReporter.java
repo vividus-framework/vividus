@@ -53,6 +53,8 @@ public class StatisticsStoryReporter extends NullStoryReporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsStoryReporter.class);
 
+    private static final Map<NodeType, Statistic> AGGREGATOR = new EnumMap<>(NodeType.class);
+
     private final Map<Status, Consumer<Statistic>> mapper = Map.of(
             Status.PASSED, Statistic::incrementPassed,
             Status.FAILED, Statistic::incrementFailed,
@@ -61,8 +63,6 @@ public class StatisticsStoryReporter extends NullStoryReporter
             Status.KNOWN_ISSUES_ONLY, Statistic::incrementKnownIssue,
             Status.SKIPPED, Statistic::incrementSkipped
             );
-
-    private final Map<NodeType, Statistic> aggregator = new EnumMap<>(NodeType.class);
 
     private final TestContext testContext;
     private final JsonUtils jsonUtils;
@@ -74,7 +74,7 @@ public class StatisticsStoryReporter extends NullStoryReporter
         eventBus.register(this);
         this.testContext = testContext;
         this.jsonUtils = jsonUtils;
-        Stream.of(NodeType.values()).forEach(t -> aggregator.put(t, new Statistic()));
+        Stream.of(NodeType.values()).forEach(t -> AGGREGATOR.put(t, new Statistic()));
     }
 
     @Subscribe
@@ -196,8 +196,7 @@ public class StatisticsStoryReporter extends NullStoryReporter
     {
         if (!StringUtils.contains(step, "verifyIfAssertionsPassed"))
         {
-            Status status = null;
-            status = Status.from(StatusPriority.from(StatusProvider.getStatus(throwable)));
+            Status status = Status.from(StatusPriority.from(StatusProvider.getStatus(throwable)));
             updateStepStatus(status);
         }
     }
@@ -211,7 +210,7 @@ public class StatisticsStoryReporter extends NullStoryReporter
             {
                 Files.createDirectories(statisticsFolder.toPath());
                 Path statistics = statisticsFolder.toPath().resolve("statistics.json");
-                String results = jsonUtils.toPrettyJson(aggregator);
+                String results = jsonUtils.toPrettyJson(AGGREGATOR);
                 Files.write(statistics, results.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
                         StandardOpenOption.TRUNCATE_EXISTING);
             }
@@ -258,7 +257,7 @@ public class StatisticsStoryReporter extends NullStoryReporter
 
     private void aggregate(Node node)
     {
-        Statistic stat = aggregator.get(node.getType());
+        Statistic stat = AGGREGATOR.get(node.getType());
         mapper.get(node.getStatus()).accept(stat);
     }
 
@@ -286,6 +285,11 @@ public class StatisticsStoryReporter extends NullStoryReporter
     private boolean isRoot()
     {
         return context().getTail() == null;
+    }
+
+    public static Map<NodeType, Statistic> getStatistics()
+    {
+        return Map.copyOf(AGGREGATOR);
     }
 
     public void setStatisticsFolder(File statisticsFolder)

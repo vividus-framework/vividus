@@ -27,11 +27,19 @@ import com.google.common.collect.Maps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.bdd.StatisticsStoryReporter;
+import org.vividus.bdd.model.NodeType;
+import org.vividus.bdd.model.Statistic;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.util.ResourceUtils;
 
 public final class MetadataLogger
 {
+    private static final String HYPHEN = "-";
+    private static final int HEADER_SIZE = 39;
+    private static final String PIPE = "|";
+    private static final String CATEGORY_FORMAT = "%s%n %s:%n";
+    private static final String NEW_LINE = "%n";
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataLogger.class);
     private static final Pattern SECURE_KEY_PATTERN = Pattern
             .compile(".*(password|access-?key|api-?key|secret|token).*", Pattern.CASE_INSENSITIVE);
@@ -50,7 +58,7 @@ public final class MetadataLogger
     {
         if (LOGGER.isInfoEnabled())
         {
-            String horizontalRule = "-".repeat(HORIZONTAL_RULE_LENGTH);
+            String horizontalRule = HYPHEN.repeat(HORIZONTAL_RULE_LENGTH);
             int maxKeyLength = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION
                     .values()
                     .stream()
@@ -61,14 +69,36 @@ public final class MetadataLogger
             String propertyFormat = "   %-" + maxKeyLength + "s %s%n";
             try (Formatter message = new Formatter())
             {
-                message.format("%n");
+                message.format(NEW_LINE);
                 EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.forEach((category, properties) -> {
-                    message.format("%s%n %s:%n", horizontalRule, category.getCategoryName());
+                    message.format(CATEGORY_FORMAT, horizontalRule, category.getCategoryName());
                     properties.forEach((name, value) -> message.format(propertyFormat, name, value));
                 });
-                LOGGER.info(message.toString());
+                logExecutionStatistics(message);
+                LOGGER.atInfo().log(message::toString);
             }
         }
+    }
+
+    private static void logExecutionStatistics(Formatter message)
+    {
+        Map<NodeType, Statistic> statistics = StatisticsStoryReporter.getStatistics();
+        Statistic story = statistics.get(NodeType.STORY);
+        Statistic scenario = statistics.get(NodeType.SCENARIO);
+        Statistic step = statistics.get(NodeType.STEP);
+        String row = "%n   |%-13s|%7s|%10s|%6s|";
+        message.format("%n Execution statistics:");
+        message.format(row, "", " Story ", " Scenario ", " Step ");
+        String rowsSeparator = "%n   |" + HYPHEN.repeat(HEADER_SIZE) + PIPE;
+        message.format(rowsSeparator);
+        message.format(row, "Passed", story.getPassed(), scenario.getPassed(), step.getPassed());
+        message.format(row, "Failed", story.getFailed(), scenario.getFailed(), step.getFailed());
+        message.format(row, "Broken", story.getBroken(), scenario.getBroken(), step.getBroken());
+        message.format(row, "Known Issue", story.getKnownIssue(), scenario.getKnownIssue(), step.getKnownIssue());
+        message.format(row, "Pending", story.getPending(), scenario.getPending(), step.getPending());
+        message.format(row, "Skipped", story.getSkipped(), scenario.getSkipped(), step.getSkipped());
+        message.format(rowsSeparator);
+        message.format(row, "TOTAL", story.getTotal(), scenario.getTotal(), step.getTotal());
     }
 
     public static void logPropertiesSecurely(Properties properties)
