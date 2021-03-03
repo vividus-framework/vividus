@@ -70,7 +70,7 @@ ext {
         allure:                 '2.13.7',
         ashot:                  '1.5.4',
         commonsIo:              '2.8.0',
-        commonsLang3:           '3.11',
+        commonsLang3:           '3.12.0',
         commonsText:            '1.9',
         commonsCollections4:    '4.4',
         groovy:                 '3.0.7',
