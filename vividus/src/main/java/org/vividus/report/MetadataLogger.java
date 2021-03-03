@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
+import org.vividus.util.ResourceUtils;
 
 public final class MetadataLogger
 {
@@ -38,6 +39,11 @@ public final class MetadataLogger
 
     private MetadataLogger()
     {
+    }
+
+    public static void drawBanner()
+    {
+        LOGGER.atInfo().addArgument(() -> ResourceUtils.loadResource("banner.vividus")).log("\n{}");
     }
 
     public static void logEnvironmentMetadata()

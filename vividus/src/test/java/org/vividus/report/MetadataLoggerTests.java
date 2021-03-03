@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.vividus.util.ResourceUtils;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
 class MetadataLoggerTests
@@ -59,6 +60,13 @@ class MetadataLoggerTests
         String key = "simple.ignore-failure";
         MetadataLogger.logPropertiesSecurely(createProperties(key, VALUE));
         assertThat(LOGGER.getLoggingEvents(), is(List.of(info(FORMAT, key, VALUE))));
+    }
+
+    @Test
+    void shouldPrintBanner()
+    {
+        MetadataLogger.drawBanner();
+        assertThat(LOGGER.getLoggingEvents(), is(List.of(info("\n{}", ResourceUtils.loadResource("banner.vividus")))));
     }
 
     private static Properties createProperties(String key, String value)
