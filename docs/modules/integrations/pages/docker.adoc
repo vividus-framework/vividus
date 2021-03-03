@@ -1,0 +1,33 @@
+= Docker Image
+
+VIVIDUS Docker images are built and pushed to https://hub.docker.com/r/vividus/vividus/tags[Docker Hub]. The image includes Java runtime, VIVIDUS core and all VIVIDUS plugins, so it's all-in-one solution. The Docker image enables easier extension of CI/CD pipelines with VIVIDUS-based tests. The appliance is not limited to CI/CD and the image can be used to run tests locally or anywhere else, however it could be less convenient in comparison with regular Gradle task or IDE.
+
+== How to run the tests
+. Assuming there is a project containing VIVIDUS-based tests (e.g. https://github.com/vividus-framework/vividus-starter[VIVIDUS Starter])
+. Go to the project root directory
++
+[source,bash]
+----
+cd vividus-starter
+----
+
+. Create a new directory or choose any existing directory at any location, this directory is going to be used to store the test logs and the report.
++
+[source,bash]
+----
+mkdir results
+----
+
+. Run the tests in the container
++
+IMPORTANT: The version of VIVIDUS used in the project (see `build.gradle` file) and the version of the Docker image must be the same.
++
+[source,bash,subs="attributes+"]
+----
+docker run --rm --mount source="$(pwd)/src/main/resources",target=/vividus/resources,type=bind --mount source="$(pwd)/results",target=/vividus/output,type=bind vividus/vividus:{current-version}
+----
+
+. Wait for the tests completion
+. Find the test execution artifacts in the results folder chosen at step 2.
+
+NOTE: The Docker image includes only Java runtime and doesn't contain any browsers, so if it's required to run web UI tests via approach described above, it's recommended to use solution based on Selenium Grid.
