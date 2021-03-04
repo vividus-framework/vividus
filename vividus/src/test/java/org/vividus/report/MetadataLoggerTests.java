@@ -103,16 +103,17 @@ class MetadataLoggerTests
                       + "-{60}\\s+"
                       + " Vividus:.*"
                       + " Execution statistics:\\s+.+"
-                      + "\\|             \\| Story \\| Scenario \\| Step \\|\\s+"
-                      + "\\|-{39}\\|\\s+"
-                      + "\\|Passed       \\|      1\\|         1\\|     1\\|\\s+"
-                      + "\\|Failed       \\|      1\\|         1\\|     1\\|\\s+"
-                      + "\\|Broken       \\|      1\\|         1\\|     1\\|\\s+"
-                      + "\\|Known Issue  \\|      1\\|         1\\|     1\\|\\s+"
-                      + "\\|Pending      \\|      0\\|         0\\|     0\\|\\s+"
-                      + "\\|Skipped      \\|      0\\|         0\\|     0\\|\\s+"
-                      + "\\|-{39}\\|\\s+"
-                      + "\\|TOTAL        \\|      4\\|         4\\|     4\\|"));
+                      + "-{40}\\s+"
+                      + "               Story   Scenario     Step\\s+"
+                      + "-{40}\\s+"
+                      + "Passed            1          1        1\\s+"
+                      + "Failed            1          1        1\\s+"
+                      + "Broken            1          1        1\\s+"
+                      + "Known Issue       1          1        1\\s+"
+                      + "Pending           0          0        0\\s+"
+                      + "Skipped           0          0        0\\s+"
+                      + "-{40}\\s+"
+                      + "TOTAL             4          4        4"));
         }
     }
 

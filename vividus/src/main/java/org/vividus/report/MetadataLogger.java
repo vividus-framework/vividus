@@ -36,8 +36,7 @@ import org.vividus.util.ResourceUtils;
 public final class MetadataLogger
 {
     private static final String HYPHEN = "-";
-    private static final int HEADER_SIZE = 39;
-    private static final String PIPE = "|";
+    private static final int HEADER_SIZE = 40;
     private static final String CATEGORY_FORMAT = "%s%n %s:%n";
     private static final String NEW_LINE = "%n";
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataLogger.class);
@@ -86,10 +85,11 @@ public final class MetadataLogger
         Statistic story = statistics.get(NodeType.STORY);
         Statistic scenario = statistics.get(NodeType.SCENARIO);
         Statistic step = statistics.get(NodeType.STEP);
-        String row = "%n   |%-13s|%7s|%10s|%6s|";
+        String row = "%n   %-12s %6s %10s %8s";
         message.format("%n Execution statistics:");
-        message.format(row, "", " Story ", " Scenario ", " Step ");
-        String rowsSeparator = "%n   |" + HYPHEN.repeat(HEADER_SIZE) + PIPE;
+        String rowsSeparator = "%n   " + HYPHEN.repeat(HEADER_SIZE);
+        message.format(rowsSeparator);
+        message.format(row, "", "Story", "Scenario", "Step");
         message.format(rowsSeparator);
         message.format(row, "Passed", story.getPassed(), scenario.getPassed(), step.getPassed());
         message.format(row, "Failed", story.getFailed(), scenario.getFailed(), step.getFailed());
