@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -39,6 +40,7 @@ import com.google.common.eventbus.EventBus;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +48,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.model.NodeType;
+import org.vividus.bdd.model.Statistic;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
@@ -122,6 +126,20 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, output);
+    }
+
+    @Test
+    void shouldReturnStatistics(@TempDir Path tempDirectory) throws IOException
+    {
+        reporter.setStatisticsFolder(tempDirectory.toFile());
+        reporterFlowProvider();
+
+        Map<NodeType, Statistic> output = StatisticsStoryReporter.getStatistics();
+        Assertions.assertAll(
+            () -> assertEquals(1, output.get(NodeType.STORY).getTotal()),
+            () -> assertEquals(10, output.get(NodeType.SCENARIO).getTotal()),
+            () -> assertEquals(20, output.get(NodeType.STEP).getTotal()),
+            () -> assertEquals(5, output.get(NodeType.GIVEN_STORY).getTotal()));
     }
 
     @Test
