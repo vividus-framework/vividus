@@ -21,6 +21,7 @@
 * xref:plugin-visual.adoc[Visual Testing*]
 * xref:plugin-web-app-to-rest-api.adoc[Web Application & REST API Integration]
 * xref:plugin-web-app.adoc[Web Application]
+* xref:plugin-websocket.adoc[WebSockets]
 * xref:plugin-xml.adoc[XML*]
 * Testing Clouds
 ** xref:plugin-browser-stack.adoc[Browser Stack]
