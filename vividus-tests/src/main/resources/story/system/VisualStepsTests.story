@@ -69,3 +69,10 @@ When I <action> baseline with `scrollable-element-fullpage-with-ignores` ignorin
 using screenshot configuration:
 |scrollableElement|webHeaderToCut|webFooterToCut|scrollTimeout|
 |By.id(scrollable)|10            |0             |PT1S         |
+
+
+Scenario: Validation of step When I $actionType baseline with `$name` for context element with acceptable diff percentage
+When I change context to element located `By.xpath(//a[@href="#home"])`
+When I <action> baseline with `context-element-with-acceptable-diff-percentage` ignoring:
+|ACCEPTABLE_DIFF_PERCENTAGE|
+|5                         |

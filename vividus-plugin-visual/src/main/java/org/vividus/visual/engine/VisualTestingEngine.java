@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 import org.vividus.visual.screenshot.ScreenshotProvider;
@@ -32,8 +34,11 @@ import ru.yandex.qatools.ashot.comparison.ImageDiffer;
 import ru.yandex.qatools.ashot.comparison.PointsMarkupPolicy;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
+@SuppressWarnings("MagicNumber")
 public class VisualTestingEngine implements IVisualTestingEngine
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VisualTestingEngine.class);
+
     private static final Color DIFF_COLOR = new Color(238, 111, 238);
     private static final Screenshot EMPTY_SCREENSHOT =
             new Screenshot(new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR));
@@ -41,6 +46,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private final ScreenshotProvider screenshotProvider;
     private final IBaselineRepository baselineRepository;
 
+    private int acceptableDiffPercentage;
     private boolean overrideBaselines;
 
     public VisualTestingEngine(ScreenshotProvider screenshotProvider,
@@ -68,6 +74,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
     @Override
     public VisualCheckResult compareAgainst(VisualCheck visualCheck) throws IOException
     {
+        visualCheck.getAcceptableDiffPercentage().ifPresent(e -> this.setAcceptableDiffPercentage(e));
         VisualCheckResult comparisonResult = new VisualCheckResult(visualCheck);
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
         comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
@@ -82,16 +89,34 @@ public class VisualTestingEngine implements IVisualTestingEngine
         {
             baselineScreenshot = EMPTY_SCREENSHOT;
         }
-        ImageDiffer differ = new ImageDiffer().withDiffMarkupPolicy(new PointsMarkupPolicy().withDiffColor(DIFF_COLOR));
-        ImageDiff diff = differ.makeDiff(baselineScreenshot, checkpoint);
 
+        int comparisonImageSize = calculateComparisonImageSize(baselineScreenshot, checkpoint);
+        ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, comparisonImageSize);
         comparisonResult.setPassed(!diff.hasDiff());
         comparisonResult.setDiff(imageToBase64(diff.getMarkedImage()));
+        LOGGER.atInfo().addArgument((double) acceptableDiffPercentage)
+                       .addArgument(() -> Math.ceil((double) (diff.getDiffSize() * 100) / (double) comparisonImageSize))
+                       .log("The acceptable visual difference percentage is {}% , but actual was {}%");
         if (overrideBaselines)
         {
             baselineRepository.saveBaseline(checkpoint, visualCheck.getBaselineName());
         }
         return comparisonResult;
+    }
+
+    private ImageDiff findImageDiff(Screenshot expected, Screenshot actual, int comparisonImageSize)
+    {
+        PointsMarkupPolicy pointsMarkupPolicy = new PointsMarkupPolicy();
+        pointsMarkupPolicy.setDiffSizeTrigger((int) (comparisonImageSize * acceptableDiffPercentage * 0.01));
+        ImageDiffer differ = new ImageDiffer().withDiffMarkupPolicy(pointsMarkupPolicy.withDiffColor(DIFF_COLOR));
+        return differ.makeDiff(expected, actual);
+    }
+
+    private int calculateComparisonImageSize(Screenshot expected, Screenshot actual)
+    {
+        int width = Math.max(expected.getImage().getWidth(), actual.getImage().getWidth());
+        int height = Math.max(expected.getImage().getHeight(), actual.getImage().getHeight());
+        return width * height;
     }
 
     private String imageToBase64(BufferedImage image) throws IOException
@@ -102,5 +127,10 @@ public class VisualTestingEngine implements IVisualTestingEngine
     public void setOverrideBaselines(boolean overrideBaselines)
     {
         this.overrideBaselines = overrideBaselines;
+    }
+
+    public void setAcceptableDiffPercentage(int acceptableDiffPercentage)
+    {
+        this.acceptableDiffPercentage = acceptableDiffPercentage;
     }
 }
