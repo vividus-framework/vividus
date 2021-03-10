@@ -1,1 +1,309 @@
-include::ROOT:page$under-construction.adoc[]
+= Visual Testing Plugin
+
+The plugin for visual testing.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-visual', version: '{current-version}')
+----
+
+== Properties
+
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`web.visual.ignored-elements`
+|xref:plugin-web-app.adoc#_locator[locators]
+|`empty`
+|The comma-separated list of locators of elements to ignore element areas
+
+|`web.visual.ignored-areas`
+|xref:plugin-web-app.adoc#_locator[locators]
+|`empty`
+|The comma-separated list of locators of elements to ignore page areas
+
+|`web.visual.baselines-folder`
+|`string`
+|`./baseline`
+|The path to folder for saving baselines (root folder is `src/main/resources`).
+For example, `web.visual.baselines-folder=C:/Workspace/vividus-tests/src/main/resources/baselines`
+
+|`web.visual.indexer`
+|scenario
+|`empty`
+|Used to append scenario based index to a baseline name
+
+|`web.visual.override-baselines`
+|`true` `false`
+|`false`
+|Used for overriding existing ones or creating not existing baselines during compare action
+
+|`web.visual.acceptable-diff-percentage`
+|percentage numbers
+|`0`
+|Add ability to configure sensitivity for visual checks
+
+|`selenium.screenshot.debug-directory`
+|`string`
+|`false`
+|The path to folder for saving debug screenshots. For example, `web.visual.baselines-folder=C:/temp/debug`
+
+|===
+
+== How to use
+
+Plugin has two monumental actions: `ESTABLISH` and `COMPARE_AGAINST`.
+
+=== `ESTABLISH`
+
+Action creates baseline image.
+
+Steps to establish baseline:
+
+. Run step `When I ESTABLISH baseline with `name``
+. Open report
+
+image::report_establish.png[Allure report with visual check on establish]
+
+. Save image using `contextual mouse click` -> Save as into folder for baselines
+
+image::establish_baseline.png[Baseline view]
+
+image::save_baseline.png[Saving baseline]
+
+=== `COMPARE_AGAINST`
+
+Compares actual appearance of the page or element against baseline. Make sure you have baseline.
+
+Steps to compare baseline:
+
+. Run step `When I COMPARE_AGAINST baseline with `name``
+. Open report
+
+image::report_compare.png[Allure report with visual check on compare]
+
+. Review comparison results
+
+image::comparison_result.png[Comparison result view]
+
+. If you need to accept the new baseline:
+
+a) Switch to checkpoint view
+
+image::checkpoint.png[Checkpoint view]
+
+b) Contextual click on the checkpoint image -> save as to baseline folder
+
+== Visual testing with custom shooting strategies
+
+In order to support screenshot taking configuration per-project/per-step basis framework provides following approach.
+
+=== Property based configuration
+
+Property based configuration could be specified using `selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>= pattern`,
+where:
+`YOUR_STRATEGY_NAME` - name of the custom strategy;
+`PROPERTY_NAME` - name of the property you want specify.
+
+==== Available properties (all of there not mandatory):
+
+[cols="3,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Description
+
+|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.web-header-to-cut`
+|size in pixels
+|Web header to cut (could be useful if your site has sticky header)
+
+|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.web-footer-to-cut`
+|size in pixels
+|Web footer to cut (could be useful if your site has sticky footer)
+
+|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-header-to-cut`
+|size in pixels
+|Native header to cut
+
+|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`
+|size in pixels
+|Native footer to cut
+
+|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.coords-provider`
+|`WEB_DRIVER` `CEILING`
+|Adds margins to coordinates, default one
+
+|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.scroll-timeout`
+|time in millis
+|Timeout for scrolling during performing visual check
+
+|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.scrollable-element`
+|locator
+|Locator of element for performing scroll action during visual check
+
+|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.screenshot-shooting-strategy`
+|`SIMPLE` `VIEWPORT_PASTING` `DEVICE_DEPENDENT` `PHONE_ANDROID_PORTRAIT` `PHONE_ANDROID_LANDSCAPE`
+|Screenshot shooting strategy name (`VIEWPORT_PASTING` by default)
+
+|`selenium.screenshot.shooting-strategy=YOUR_STRATEGY_NAME`
+|string
+|After configuration necessary properties use this one to enable your custom strategy
+
+|===
+
+Please see the image to get a clue about difference between native/web footer/header to cut.
+
+image::example.png[Difference between native/web footer/header image]
+
+=== Step based configuration
+
+To use custom configuration per step, two new steps were implemented.
+
+[source,gherkin]
+----
+When I $visualAction baseline with `$baselineName` using screenshot configuration:$screenshotConfiguration
+----
+
+[source,gherkin]
+----
+When I $visualAction baseline with `$baselineName` ignoring:$ignoringElement using screenshot configuration:$screenshotConfiguration
+----
+
+===== *Examples of usage property based configuration:*
+
+[source,gherkin]
+----
+selenium.screenshot.strategy.bombaysapphire.web-header-to-cut=80
+selenium.screenshot.strategy.bombaysapphire.web-footer-to-cut=0
+selenium.screenshot.strategy.bombaysapphire.scrollable-element=By.cssSelector(.page__inner)
+selenium.screenshot.strategy.bombaysapphire.scroll-timeout=PT1S
+selenium.screenshot.strategy.bombaysapphire.screenshot-shooting-strategy=SIMPLE
+selenium.screenshot.shooting-strategy=bombaysapphire
+----
+
+===== *Examples of usage step based configuration:*
+
+[source,gherkin]
+----
+When I <action> baseline with `scrollable-element-context` using screenshot configuration:
+|scrollableElement                    |webHeaderToCut|webFooterToCut|scrollTimeout|screenshotShootingStrategy|
+|By.xpath(//div[@class="page__inner"])|80            |0             |PT1S         |SIMPLE                    |
+----
+
+== Steps
+
+=== Run simple visual test
+
+==== *_Info_*
+
+Step establishes baseline or compares against existing one
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I $actionType baseline with `$name`
+----
+
+* `actionType` - `ESTABLISH`, `COMPARE_AGAINST`
+* `name` - name of baseline
+
+==== *_Usage_*
+
+.Perform simple visual check on compare
+[source,gherkin]
+----
+When I COMPARE_AGAINST baseline with `test`
+----
+
+=== Run visual test with specified configuration
+
+==== *_Info_*
+
+Step establishes baseline or compares against existing one with using specified configuration
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I $actionType baseline with `$name` using screenshot configuration:$screenshotConfiguration
+----
+
+* `actionType` - `ESTABLISH`, `COMPARE_AGAINST`
+* `name` - name of baseline
+* `screenshotConfiguration` - configuration to make screenshot
+
+==== *_Usage_*
+
+.Perform visual check on establish with specified configuration
+[source,gherkin]
+----
+When I ESTABLISH baseline with `test` using screenshot configuration:
+|scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|
+|By.xpath(.//header)|100           |100           |CEILING       |
+----
+
+=== Run visual test with ignoring option
+
+==== *_Info_*
+
+Step establishes baseline or compares against existing one with using ignoring option
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I $actionType baseline with `$name` ignoring:$ignoredElements
+----
+
+* `actionType` - `ESTABLISH`, `COMPARE_AGAINST`
+* `name` - name of baseline
+* `ignoredElements` - examples table of strategies (`ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`) and locators or acceptable diff percentage to ignore
+
+==== *_Usage_*
+
+.Perform visual check on compare with ignoring options
+[source,gherkin]
+----
+When I COMPARE_AGAINST baseline with `test` ignoring:
+|ELEMENT            |AREA                  |ACCEPTABLE_DIFF_PERCENTAGE|
+|By.xpath(.//header)|By.cssSelector(footer)|5                         |
+----
+
+=== Run visual test with ignoring option and specified configuration
+
+==== *_Info_*
+
+Step establishes baseline or compares against existing one with using ignoring option and specified configuration
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I $actionType baseline with `$name` ignoring:$ignoredElements using screenshot configuration:$screenshotConfiguration
+----
+
+* `actionType` - `ESTABLISH`, `COMPARE_AGAINST`
+* `name` - name of baseline
+* `ignoredElements` - examples table of strategies (`ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`) and locators or acceptable diff percentage to ignore
+* `screenshotConfiguration` - configuration to make screenshot
+
+==== *_Usage_*
+
+.Perform visual check on establish with ignoring options and specified configuration
+[source,gherkin]
+----
+When I ESTABLISH baseline with `test` ignoring:
+|ELEMENT            |AREA                  |ACCEPTABLE_DIFF_PERCENTAGE|
+|By.xpath(.//header)|By.cssSelector(footer)|5                         |
+using screenshot configuration:
+|scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|
+|By.xpath(.//header)|100           |100           |CEILING       |
+----
