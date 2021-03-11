@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.visual.model;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 
 import org.openqa.selenium.SearchContext;
@@ -29,6 +30,7 @@ public class VisualCheck
 {
     private String baselineName;
     private VisualActionType action;
+    private OptionalInt acceptableDiffPercentage = OptionalInt.empty();
     private Map<IgnoreStrategy, Set<Locator>> elementsToIgnore = Map.of();
     private Optional<ScreenshotConfiguration> screenshotConfiguration = Optional.empty();
     private SearchContext searchContext;
@@ -57,6 +59,16 @@ public class VisualCheck
     public void setElementsToIgnore(Map<IgnoreStrategy, Set<Locator>> elementsToIgnore)
     {
         this.elementsToIgnore = elementsToIgnore;
+    }
+
+    public OptionalInt getAcceptableDiffPercentage()
+    {
+        return acceptableDiffPercentage;
+    }
+
+    public void setAcceptableDiffPercentage(OptionalInt acceptableDiffPercentage)
+    {
+        this.acceptableDiffPercentage = acceptableDiffPercentage;
     }
 
     public VisualActionType getAction()

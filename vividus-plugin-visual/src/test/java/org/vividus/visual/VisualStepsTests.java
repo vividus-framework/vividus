@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -158,12 +159,13 @@ class VisualStepsTests
         when(table.getRowAsParameters(0)).thenReturn(row);
         Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
-        mockRow(row, elementsToIgnore, areasToIgnore);
+        mockRow(row, elementsToIgnore, areasToIgnore, 50);
         VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, table);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        assertEquals(OptionalInt.of(50), visualCheck.getAcceptableDiffPercentage());
         assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
                 visualCheck.getElementsToIgnore());
         verifyCheckResultPublish();
@@ -179,7 +181,7 @@ class VisualStepsTests
         when(table.getRowAsParameters(0)).thenReturn(row);
         Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
-        mockRow(row, elementsToIgnore, areasToIgnore);
+        mockRow(row, elementsToIgnore, areasToIgnore, 50);
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
         VisualCheck visualCheck = FACTORY.create(BASELINE, compareAgainst);
@@ -188,6 +190,7 @@ class VisualStepsTests
         mockCheckResult();
         visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, table, screenshotConfiguration);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        assertEquals(OptionalInt.of(50), visualCheck.getAcceptableDiffPercentage());
         assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
                 visualCheck.getElementsToIgnore());
         verifyCheckResultPublish();
@@ -217,10 +220,14 @@ class VisualStepsTests
         verifyNoInteractions(softAssert, visualTestingEngine, attachmentPublisher);
     }
 
-    private static void mockRow(Parameters row, Set<Locator> elementIgnore, Set<Locator> areaIgnore)
+    private static void mockRow(Parameters row, Set<Locator> elementIgnore, Set<Locator> areaIgnore,
+            int acceptableDiffPercentage)
     {
+        String keyName = "ACCEPTABLE_DIFF_PERCENTAGE";
         mockGettingValue(row, "ELEMENT", elementIgnore);
         mockGettingValue(row, "AREA", areaIgnore);
+        doReturn(Map.of(keyName, "50")).when(row).values();
+        doReturn(acceptableDiffPercentage).when(row).valueAs(keyName, Integer.TYPE);
     }
 
     private static void mockGettingValue(Parameters row, String name, Set<Locator> result)

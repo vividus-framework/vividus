@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.visual;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -46,6 +47,8 @@ import org.vividus.visual.screenshot.IgnoreStrategy;
 public class VisualSteps extends AbstractVisualSteps
 {
     private static final Type SET_BY = new TypeToken<Set<Locator>>() { }.getType();
+
+    private static final String ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME = "ACCEPTABLE_DIFF_PERCENTAGE";
 
     private final IVisualTestingEngine visualTestingEngine;
     private final ISoftAssert softAssert;
@@ -168,9 +171,16 @@ public class VisualSteps extends AbstractVisualSteps
         Map<IgnoreStrategy, Set<Locator>> toIgnore = Stream.of(IgnoreStrategy.values())
                                                       .collect(Collectors.toMap(Function.identity(),
                                                           s -> getLocatorsSet(rowAsParameters, s)));
+
+        OptionalInt acceptableDiffPercentage = rowAsParameters.values()
+                .containsKey(ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME)
+                ? OptionalInt.of(rowAsParameters.valueAs(ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME, Integer.TYPE))
+                : OptionalInt.empty();
+
         performVisualAction(() -> {
             VisualCheck visualCheck = visualCheckFactory.get();
             visualCheck.setElementsToIgnore(toIgnore);
+            visualCheck.setAcceptableDiffPercentage(acceptableDiffPercentage);
             return visualCheck;
         });
     }

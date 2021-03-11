@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.vividus.visual.engine;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -29,14 +33,23 @@ import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import javax.imageio.ImageIO;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,7 +62,7 @@ import org.vividus.visual.screenshot.ScreenshotProvider;
 
 import ru.yandex.qatools.ashot.Screenshot;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
 class VisualTestingEngineTests
 {
     private static final String BASELINE = "baseline";
@@ -67,7 +80,11 @@ class VisualTestingEngineTests
     private static final String DIFF_VS_EMPTY_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAFElEQVR4XmNgYGB"
                                             + "4l/8OjlA4ZPABQuY3CRSTNYoAAAAASUVORK5CYII=";
 
+    private static final String LOG_MESSAGE = "The acceptable visual difference percentage is {}% , but actual was {}%";
+
     private static final VisualCheckFactory FACTORY = new VisualCheckFactory();
+
+    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(VisualTestingEngine.class);
 
     @Mock
     private IBaselineRepository baselineRepository;
@@ -84,6 +101,12 @@ class VisualTestingEngineTests
         FACTORY.setScreenshotIndexer(Optional.empty());
     }
 
+    @BeforeEach
+    void init()
+    {
+        visualTestingEngine.setAcceptableDiffPercentage(0);
+    }
+
     @Test
     void shouldReturnOnlyCheckpointForEstablishAction() throws IOException
     {
@@ -98,6 +121,7 @@ class VisualTestingEngineTests
             () -> assertEquals(VisualActionType.ESTABLISH, checkResult.getActionType()),
             () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
             () -> assertFalse(checkResult.isPassed()));
+        assertThat(testLogger.getLoggingEvents(), empty());
     }
 
     private VisualCheck createVisualCheck(VisualActionType actionType)
@@ -105,11 +129,34 @@ class VisualTestingEngineTests
         return FACTORY.create(BASELINE, actionType);
     }
 
-    @Test
-    void shouldReturnVisualCheckResultWithDiffBaselineAndCheckpoint() throws IOException
+    @ParameterizedTest
+    @CsvSource({"0, false", "25, false", "50, true", "100, true"})
+    void shouldReturnVisualCheckResultWithDiffBaselineAndCheckpointDiffSensitivity(
+        int acceptableDiffPercentage, boolean status) throws IOException
     {
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
+        mockGetCheckpointScreenshot(visualCheck);
+        visualTestingEngine.setAcceptableDiffPercentage(acceptableDiffPercentage);
+        VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
+        Assertions.assertAll(
+            () -> assertEquals(BASELINE_BASE64, checkResult.getBaseline()),
+            () -> assertEquals(BASELINE, checkResult.getBaselineName()),
+            () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
+            () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
+            () -> assertEquals(DIFF_BASE64, checkResult.getDiff()),
+            () -> assertEquals(status, checkResult.isPassed()));
+        verify(baselineRepository, never()).saveBaseline(any(), any());
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE,
+                (double) acceptableDiffPercentage, 40.0))));
+    }
+
+    @Test
+    void shouldReturnVisualCheckResultWithBaselineAndCheckpointUsingAcceptableDiffPercentage() throws IOException
+    {
+        when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
+        VisualCheck visualCheck = FACTORY.create(BASELINE, VisualActionType.COMPARE_AGAINST);
+        visualCheck.setAcceptableDiffPercentage(OptionalInt.of(50));
         mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
@@ -118,8 +165,9 @@ class VisualTestingEngineTests
             () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
             () -> assertEquals(DIFF_BASE64, checkResult.getDiff()),
-            () -> assertFalse(checkResult.isPassed()));
+            () -> assertTrue(checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, 50.0, 40.0))));
     }
 
     @Test
@@ -137,6 +185,7 @@ class VisualTestingEngineTests
             () -> assertEquals(BASELINE_BASE64, checkResult.getDiff()),
             () -> assertTrue(checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, 0.0, 0.0))));
     }
 
     @Test
@@ -148,6 +197,7 @@ class VisualTestingEngineTests
         BufferedImage finalImage = mockGetCheckpointScreenshot(visualCheck);
         visualTestingEngine.compareAgainst(visualCheck);
         verify(baselineRepository).saveBaseline(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, 0.0, 40.0))));
     }
 
     @Test
@@ -164,6 +214,7 @@ class VisualTestingEngineTests
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
             () -> assertEquals(DIFF_VS_EMPTY_BASE64, checkResult.getDiff()),
             () -> assertFalse(checkResult.isPassed()));
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, 0.0, 96.0))));
     }
 
     private BufferedImage mockGetCheckpointScreenshot(VisualCheck visualCheck, String imageName) throws IOException
