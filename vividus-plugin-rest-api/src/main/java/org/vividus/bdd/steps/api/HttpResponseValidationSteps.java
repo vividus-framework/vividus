@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,10 +154,16 @@ public class HttpResponseValidationSteps
 
     /**
      * Compare size of decompressed HTTP response body with value <b>sizeInBytes</b>
-     * @param comparisonRule The rule to compare values<br>
-     * (<i>Possible values:<b> less than, less than or equal to, greater than, greater than or equal to,
-     * equal to</b></i>)
-     * @param sizeInBytes expected size of the response body in bytes
+     * @param comparisonRule The rule to match the variable value. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param sizeInBytes    The expected size of the response body in bytes
      */
     @Then("size of decompressed response body is $comparisonRule `$sizeInBytes`")
     public void doesDecompressedResponseBodySizeConfirmRule(ComparisonRule comparisonRule, int sizeInBytes)
@@ -170,9 +176,16 @@ public class HttpResponseValidationSteps
     /**
      * This step should be preceded with the step executing HTTP request
      * Step asserts that the response has the expected HTTP <b>responseCode</b>
-     * @param comparisonRule The rule to compare values (Available values: less than, less than or equal to,
-     * greater than, greater than or equal to, equal to)
-     * @param responseCode for example 200, 404
+     * @param comparisonRule The rule to match the variable value. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param responseCode   The expected response code (for example 200, 404)
      */
     @Then("the response code is $comparisonRule '$responseCode'")
     public void assertResponseCode(ComparisonRule comparisonRule, int responseCode)
@@ -245,11 +258,17 @@ public class HttpResponseValidationSteps
 
     /**
      * Checks whether the response contains specified number of headers with the name <b>headerName</b>
-     * @param headerName HTTP header name. For example, <b>Content-Type</b>
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
-     * EQUAL_TO</b></i>)
-     * @param value The number to compare with
+     * @param headerName     HTTP header name. For example, <b>Content-Type</b>
+     * @param comparisonRule The rule to match the quantity of headers. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param value          The number to compare with
      */
     @Then("the number of the response headers with the name '$headerName' is $comparisonRule $value")
     public void isHeaderWithNameFound(String headerName, ComparisonRule comparisonRule, int value)

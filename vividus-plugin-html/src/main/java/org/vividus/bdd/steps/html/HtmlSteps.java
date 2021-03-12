@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,16 +52,18 @@ public class HtmlSteps
 
     /**
      * Checks if HTML contains elements according to rule by CSS selector
-     * @param cssSelector CSS selector
-     * @param html HTML to check
-     * @param comparisonRule The rule to compare values
-     * <br>(<i>Possible values:</i>
-     * <br> less than (&lt;),
-     * <br> less than or equal to (&lt;=),
-     * <br> greater than(&gt;)
-     * <br> greater than or equal to(&gt;=),
-     * <br> equal to(=))
-     * @param number Number of elements
+     * @param cssSelector    CSS selector
+     * @param html           HTML to check
+     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param number         Number of elements
      * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
      * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      * @return true if elements quantity corresponds to rule, false otherwise

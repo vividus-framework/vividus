@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,10 +146,16 @@ public class JsonResponseValidationSteps
 
     /**
      * Compares the number of elements found in JSON by JSON path with the expected number.
-     * @param jsonPath JSON path
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> less than, less than or equal to, greater than, greater than or equal to,
-     * equal to</b></i>)
+     * @param jsonPath       JSON path
+     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
      * @param elementsNumber The expected number of elements
      * @return true - the number of found elements is as expected; false - the actual number is not as expected or the
      * specified JSON path was not found
@@ -162,11 +168,17 @@ public class JsonResponseValidationSteps
 
     /**
      * Compares the number of elements found in the given json by JSON path with the expected number.
-     * @param json A json string to find elements in it
-     * @param jsonPath JSON path
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> less than, less than or equal to, greater than, greater than or equal to,
-     * equal to</b></i>)
+     * @param json           A json string to find elements in it
+     * @param jsonPath       JSON path
+     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
      * @param elementsNumber The expected number of elements
      * @return true - the number of found elements is as expected; false - the actual number is not as expected or the
      * specified JSON path was not found
@@ -362,10 +374,18 @@ public class JsonResponseValidationSteps
      * <br>|step|
      * <br>|Then the number of JSON elements by the JSON path '$..name' is = 3|
      * </code>
-     * @param comparisonRule use to check elements quantity
+     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
      * @param elementsNumber The expected number of elements
-     * @param jsonPath A JSON path
-     * @param stepsToExecute examples table with steps to execute for each found elements
+     * @param jsonPath       A JSON path
+     * @param stepsToExecute Examples table with steps to execute for each found elements
      */
     @SuppressWarnings("MagicNumber")
     @When(value = "I find $comparisonRule `$elementsNumber` JSON elements by `$jsonPath` and for each element do"
@@ -395,11 +415,19 @@ public class JsonResponseValidationSteps
     * <br>|step|
     * <br>|Then the number of JSON elements by the JSON path '$..name' is = 2|
     * </code>
-    * @param comparisonRule use to check elements quantity
+    * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+    *                       <ul>
+    *                       <li>less than (&lt;)</li>
+    *                       <li>less than or equal to (&lt;=)</li>
+    *                       <li>greater than (&gt;)</li>
+    *                       <li>greater than or equal to (&gt;=)</li>
+    *                       <li>equal to (=)</li>
+    *                       <li>not equal to (!=)</li>
+    *                       </ul>
     * @param elementsNumber The expected number of elements
-    * @param json A JSON element
-    * @param jsonPath A JSON path
-    * @param stepsToExecute examples table with steps to execute for each found elements
+    * @param json           A JSON element
+    * @param jsonPath       A JSON path
+    * @param stepsToExecute Examples table with steps to execute for each found elements
     */
     @When("I find $comparisonRule `$elementsNumber` JSON elements from `$json` by `$jsonPath` and for each element do"
             + "$stepsToExecute")

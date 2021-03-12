@@ -130,12 +130,17 @@ public class KafkaSteps
      * Waits until the count of the consumed messaged (from the consumer start or after the last draining operation)
      * matches to the rule or until the timeout is exceeded.
      *
-     * @param timeout        the maximum time to wait for the messages in ISO-8601 format
-     * @param comparisonRule The rule to compare values
-     *                       (<i>Possible values:<b> less than, less than or equal to, greater than, greater than or
-     *                       equal to,
-     *                       equal to</b></i>)
-     * @param expectedCount  the expected count of the messages to be matched by the rule
+     * @param timeout        The maximum time to wait for the messages in ISO-8601 format
+     * @param comparisonRule The rule to match the quantity of messages. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param expectedCount  The expected count of the messages to be matched by the rule
      */
     @When("I wait with `$timeout` timeout until count of consumed Kafka messages is $comparisonRule `$expectedCount`")
     public void waitForKafkaMessages(Duration timeout, ComparisonRule comparisonRule, int expectedCount)

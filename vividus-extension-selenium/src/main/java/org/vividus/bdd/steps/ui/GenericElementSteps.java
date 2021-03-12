@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,11 +53,17 @@ public class GenericElementSteps
 
     /**
      * Checks whether the context contains exact amount of elements by locator
-     * @param locator to locate element
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
-     * EQUAL_TO</b></i>)
-     * @param quantity desired amount of elements
+     * @param locator        Locator to locate element
+     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param quantity       Desired amount of elements
      * @return list of Web elements
      */
     @Then("number of elements found by `$locator` is $comparisonRule `$quantity`")
@@ -72,12 +78,18 @@ public class GenericElementSteps
      * Verifies elements' located by locator state.
      * Where state one of: ENABLED/DISABLED, SELECTED/NOT_SELECTED, VISIBLE/NOT_VISIBLE
      * Step intended to verify strictly either number of elements and their state
-     * @param state Desired state of an element
-     * @param locator Locator to locate element
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
-     * EQUAL_TO</b></i>)
-     * @param quantity Desired amount of elements
+     * @param state          Desired state of an element
+     * @param locator        Locator to locate element
+     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param quantity       Desired amount of elements
      */
     @Then("number of $state elements found by `$locator` is $comparisonRule `$quantity`")
     public void assertElementsNumberInState(State state, Locator locator, ComparisonRule comparisonRule, int quantity)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,18 @@ public class NestedSteps
      * <br>|When I compare against baseline with name 'test_composit1_step'|
      * <br>|When I click on all elements by xpath './/a[@title='Close']'|
      * </code>
-     * @param comparisonRule use to check elements quantity
-     * @param number of elements to find
-     * @param locator to search for elements
-     * @param stepsToExecute examples table with steps to execute for each found elements
+     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param number         Number of elements to find
+     * @param locator        Locator to locate element
+     * @param stepsToExecute Examples table with steps to execute for each found elements
      */
     @When(value = "I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute",
             priority = 5)
@@ -122,11 +130,19 @@ public class NestedSteps
      * <br>|When I compare against baseline with name 'test_composit1_step'|
      * <br>|When I click on all elements by xpath './/a[@title='Close']'|
      * </code>
-     * @param comparisonRule use to check elements quantity
-     * @param number of elements to find
-     * @param locator to search for elements
-     * @param iterationLimit max iterations to perform
-     * @param stepsToExecute examples table with steps to execute for each found elements
+     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param number         Number of elements to find
+     * @param locator        Locator to locate element
+     * @param iterationLimit Max iterations to perform
+     * @param stepsToExecute Examples table with steps to execute for each found elements
      */
     @When(value = "I find $comparisonRule `$number` elements `$locator` and while they exist do up "
             + "to $iterationLimit iteration of$stepsToExecute", priority = 5)
