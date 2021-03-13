@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,12 +94,18 @@ public class ProxySteps
      * If there weren't any calls matching requirements, HAR file with all calls will be attached to report.
      * If response contains status code 302 - corresponding request will be filtered out.
      * </p>
-     * @param httpMethods the comma-separated HTTP methods to filter by
-     * @param urlPattern the regular expression to match HTTP request URL
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> LESS_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN, GREATER_THAN_OR_EQUAL_TO,
-     * EQUAL_TO</b></i>)
-     * @param number The number to compare with
+     * @param httpMethods    The comma-separated HTTP methods to filter by
+     * @param urlPattern     The regular expression to match HTTP request URL
+     * @param comparisonRule The rule to match the quantity of requests. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param number         The number to compare with
      * @throws IOException If any error happens during operation
      * @return Filtered HAR entries
      */

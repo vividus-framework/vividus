@@ -161,9 +161,15 @@ public class BddVariableSteps
      * <p>
      * The values of the variables should be logically comparable.
      * @param variable1 The <b>name</b> of the variable in witch the value was set
-     * @param condition The rule to compare values<br>
-     * (<i>Possible values:<b> less than, less than or equal to, greater than, greater than or equal to,
-     * equal to</b></i>)
+     * @param condition The rule to match the variable value. The supported rules:
+     *                  <ul>
+     *                  <li>less than (&lt;)</li>
+     *                  <li>less than or equal to (&lt;=)</li>
+     *                  <li>greater than (&gt;)</li>
+     *                  <li>greater than or equal to (&gt;=)</li>
+     *                  <li>equal to (=)</li>
+     *                  <li>not equal to (!=)</li>
+     *                  </ul>
      * @param variable2 The <b>name</b> of the different variable in witch the value was set
      * @return true if assertion is passed, otherwise false
      */

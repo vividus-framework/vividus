@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,17 @@ public class DateValidationSteps
      * <p>Note that ISO-8601 is not fully supported, if the step fails to parse date, try to use
      * {@link DateValidationSteps#doesDateConformRule(String, String, ComparisonRule, long)} step,
      * where you can define custom format.</p>
-     * @param date A date text string
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> less than, less than or equal to, greater than, greater than or equal to,
-     * equal to</b></i>)
-     * @param seconds An amount of seconds
+     * @param date           A date text string
+     * @param comparisonRule The rule to match the variable value. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param seconds        An amount of seconds
      */
     @Then("the date '$date' is $comparisonRule current for $seconds seconds")
     public void doesDateConformRule(String date, ComparisonRule comparisonRule, long seconds)
@@ -58,14 +64,20 @@ public class DateValidationSteps
 
     /**
      * <p>Checks that the difference between given date and current is less than specified amount of seconds.</p>
-     * @param date A date text string
-     * @param format A date format that can be described using standard Java format for DateTimeFormatter
+     * @param date           A date text string
+     * @param format         A date format that can be described using standard Java format for DateTimeFormatter
      * (https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html - Patterns for Formatting and
      * Parsing)
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> less than, less than or equal to, greater than, greater than or equal to,
-     * equal to</b></i>)
-     * @param seconds An amount of seconds
+     * @param comparisonRule The rule to match the variable value. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param seconds        An amount of seconds
      */
     @Then(value = "the date '$date' in the format '$format' is $comparisonRule current for $seconds seconds",
             priority = 1)
@@ -83,11 +95,17 @@ public class DateValidationSteps
 
     /**
      * Compares two dates according to the given comparison rule. Dates should be in ISO-8601 format.
-     * @param date1 The first date text string
-     * @param comparisonRule The rule to compare values
-     * (<i>Possible values:<b> less than, less than or equal to, greater than, greater than or equal to,
-     * equal to</b></i>)
-     * @param date2 The second date text string
+     * @param date1          The first date text string
+     * @param comparisonRule The rule to match the variable value. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param date2          The second date text string
      */
     @Then("the date '$date1' is $comparisonRule the date '$date2'")
     public void compareDates(String date1, ComparisonRule comparisonRule, String date2)

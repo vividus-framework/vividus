@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,13 +108,14 @@ public class ExecutableSteps
      *
      * @param max            The maximum number of iterations
      * @param name           The name of the variable to check
-     * @param comparisonRule The rule to match the variable value. Allowed options:
+     * @param comparisonRule The rule to match the variable value. The supported rules:
      *                       <ul>
      *                       <li>less than (&lt;)</li>
      *                       <li>less than or equal to (&lt;=)</li>
-     *                       <li>greater than(&gt;)</li>
-     *                       <li>greater than or equal to(&gt;=)</li>
-     *                       <li>equal to(=))</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
      *                       </ul>
      * @param expectedValue  The expected value of the variable
      * @param stepsToExecute The ExamplesTable with a single column containing the steps to execute
@@ -218,11 +219,19 @@ public class ExecutableSteps
      * <br>
      * |Then `${iterationVariable}` matches `\\d+`|
      * </code>
-     * @param comparisonRule comparison rule to match counter against
-     * @param limit counter limit
-     * @param increment number to add to the counter on each iteration
-     * @param seed initial counter value
-     * @param stepsToExecute steps to execute
+     * @param comparisonRule The rule to match the counter against. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param limit          The counter limit
+     * @param increment      The number to add to the counter on each iteration
+     * @param seed           The initial counter value
+     * @param stepsToExecute Steps to execute
      */
     @When("I execute steps while counter is $comparisonRule `$limit` with increment `$increment` starting from `$seed`"
             + ":$stepsToExecute")
