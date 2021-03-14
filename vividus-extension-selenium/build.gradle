@@ -17,7 +17,7 @@ project.description = 'Vividus extension for selenium'
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: seleniumVersion)
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: seleniumVersion)
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: seleniumVersion)
-     api(group: 'io.appium', name: 'java-client', version: '7.1.0') {
+     api(group: 'io.appium', name: 'java-client', version: '7.5.0') {
          exclude module: 'selenium-java'
      }
 
