@@ -33,7 +33,7 @@ dependencies {
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
 
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.14.0')
+    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.14.1')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-api')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl')
