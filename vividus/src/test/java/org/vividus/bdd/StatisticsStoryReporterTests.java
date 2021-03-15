@@ -20,14 +20,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +51,11 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.model.Failure;
 import org.vividus.bdd.model.NodeType;
+import org.vividus.bdd.model.RunningScenario;
+import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.model.Statistic;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.model.KnownIssue;
@@ -57,7 +64,7 @@ import org.vividus.testcontext.ThreadedTestContext;
 import org.vividus.util.json.JsonUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-@SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended" })
+@SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "AvoidDuplicateLiterals"})
 class StatisticsStoryReporterTests
 {
     private static final String STEP = "step";
@@ -68,6 +75,9 @@ class StatisticsStoryReporterTests
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    private IBddRunContext bddRunContext;
+
     private StatisticsStoryReporter reporter;
 
     private final Story givenStory = mockStory("GivenStory");
@@ -77,7 +87,9 @@ class StatisticsStoryReporterTests
     @BeforeEach
     void init()
     {
-        reporter = new StatisticsStoryReporter(eventBus, new ThreadedTestContext(), new JsonUtils());
+        reporter = new StatisticsStoryReporter(eventBus, new ThreadedTestContext(), new JsonUtils(),
+                bddRunContext);
+        reporter.init();
     }
 
     @Test
@@ -126,6 +138,7 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, output);
+        verifyNoInteractions(bddRunContext);
     }
 
     @Test
@@ -140,6 +153,7 @@ class StatisticsStoryReporterTests
             () -> assertEquals(10, output.get(NodeType.SCENARIO).getTotal()),
             () -> assertEquals(20, output.get(NodeType.STEP).getTotal()),
             () -> assertEquals(5, output.get(NodeType.GIVEN_STORY).getTotal()));
+        verifyNoInteractions(bddRunContext);
     }
 
     @Test
@@ -156,6 +170,7 @@ class StatisticsStoryReporterTests
             assertEquals(String.format("Unable to write statistics.json into folder: %s", tempDir),
                     event.getFormattedMessage());
             assertThat(event.getThrowable().get(), instanceOf(IOException.class));
+            verifyNoInteractions(bddRunContext);
         }
     }
 
@@ -353,6 +368,7 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, statistic);
+        verifyNoInteractions(bddRunContext);
     }
 
     @Test
@@ -414,6 +430,7 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, statistic);
+        verifyNoInteractions(bddRunContext);
     }
 
     @Test
@@ -476,5 +493,53 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, statistic);
+        verifyNoInteractions(bddRunContext);
+    }
+
+    @Test
+    void shouldProvideRecordedFailures()
+    {
+        reporter.beforeStory(story, false);
+        assertNull(StatisticsStoryReporter.getFailures());
+        reporter.setCollectFailures(true);
+        reporter.init();
+
+        RunningStory runningStory = mock(RunningStory.class);
+        String step = "step1";
+        when(runningStory.getRunningSteps()).thenReturn(new LinkedList<>(List.of(step, "step2")));
+        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        String storyName = "storyName";
+        when(runningStory.getName()).thenReturn(storyName);
+        RunningScenario runningScenario = mock(RunningScenario.class);
+        when(runningStory.getRunningScenario()).thenReturn(runningScenario);
+        String scenarioTitle = "scenarioTitle";
+        when(runningScenario.getTitle()).thenReturn(scenarioTitle);
+
+        AssertionFailedEvent event = mock(AssertionFailedEvent.class);
+        SoftAssertionError assertion = mock(SoftAssertionError.class);
+        when(event.getSoftAssertionError()).thenReturn(assertion);
+        AssertionError error = mock(AssertionError.class);
+        String causeMessage = "You're illegal";
+        when(assertion.getError()).thenReturn(error);
+        when(error.getMessage()).thenReturn(causeMessage);
+        reporter.onAssertionFailure(event);
+        IllegalArgumentException exception = new IllegalArgumentException(causeMessage);
+        reporter.failed("step", new IllegalArgumentException(exception));
+        reporter.failed("verifyIfAssertionsPassed", null);
+        reporter.failed("some other step", error);
+
+        List<Failure> failures = StatisticsStoryReporter.getFailures();
+        assertThat(failures, hasSize(2));
+        Failure fail = failures.get(0);
+        Failure broken = failures.get(1);
+        Assertions.assertAll(
+                () -> assertEquals(storyName, fail.getStory()),
+                () -> assertEquals(scenarioTitle, fail.getScenario()),
+                () -> assertEquals(step, fail.getStep()),
+                () -> assertEquals(causeMessage, fail.getMessage()),
+                () -> assertEquals(storyName, broken.getStory()),
+                () -> assertEquals(scenarioTitle, broken.getScenario()),
+                () -> assertEquals(step, broken.getStep()),
+                () -> assertEquals("java.lang.IllegalArgumentException: You're illegal", broken.getMessage()));
     }
 }

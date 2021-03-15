@@ -69,6 +69,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |`bdd.scenario.fail-fast`
 |`false`
 |If set to `true` the scenario execution will be stopped after first failed assertion
+
+|`statistics.print-failures`
+|`false`
+|If set to `true` prints table of failures including: story, scenario, step and error message
 |===
 
 == Known Issues

@@ -16,7 +16,10 @@
 
 package org.vividus.report;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -25,16 +28,26 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.Maps;
 
+import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.StatisticsStoryReporter;
+import org.vividus.bdd.model.Failure;
 import org.vividus.bdd.model.NodeType;
 import org.vividus.bdd.model.Statistic;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.util.ResourceUtils;
 
+import de.vandermeer.asciitable.AT_Context;
+import de.vandermeer.asciitable.AT_Renderer;
+import de.vandermeer.asciitable.AsciiTable;
+import de.vandermeer.asciitable.CWC_LongestLine;
+import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
+
 public final class MetadataLogger
 {
+    private static final int MAX_CELL_WIDTH = 50;
+    private static final int MARGIN = 3;
     private static final String HYPHEN = "-";
     private static final int HEADER_SIZE = 40;
     private static final String CATEGORY_FORMAT = "%s%n %s:%n";
@@ -99,6 +112,45 @@ public final class MetadataLogger
         message.format(row, "Skipped", story.getSkipped(), scenario.getSkipped(), step.getSkipped());
         message.format(rowsSeparator);
         message.format(row, "TOTAL", story.getTotal(), scenario.getTotal(), step.getTotal());
+        addFailureTable(message);
+    }
+
+    private static void addFailureTable(Formatter message)
+    {
+        List<Failure> failureMessages = StatisticsStoryReporter.getFailures();
+        if (failureMessages == null)
+        {
+            return;
+        }
+        else if (failureMessages.isEmpty())
+        {
+            message.format("%n   No Failures & Errors!");
+            return;
+        }
+        Collections.sort(failureMessages, Comparator.comparing(Failure::getStory)
+                                                    .thenComparing(Failure::getScenario)
+                                                    .thenComparing(Failure::getStep)
+                                                    .thenComparing(Failure::getMessage));
+        message.format("%n Failures & Errors:%n");
+        AT_Context context = new AT_Context();
+        AsciiTable table = new AsciiTable(context);
+        context.setFrameLeftMargin(MARGIN);
+        table.addRule();
+        table.addRow("STORY", "SCENARIO", "STEP", "ERROR MESSAGE");
+        table.addRule();
+        failureMessages.forEach(f -> table.addRow(f.getStory(), wrap(f.getScenario()),
+                f.getStep().replaceAll("\n|\r\n", "<br>"), wrap(f.getMessage())));
+        table.addRule();
+        table.setRenderer(AT_Renderer.create().setCWC(new CWC_LongestLine()));
+        table.setPaddingLeftRight(1);
+        table.setPaddingBottom(1);
+        table.setTextAlignment(TextAlignment.JUSTIFIED_LEFT);
+        message.format(table.render());
+    }
+
+    private static String wrap(String words)
+    {
+        return WordUtils.wrap(words, MAX_CELL_WIDTH);
     }
 
     public static void logPropertiesSecurely(Properties properties)
