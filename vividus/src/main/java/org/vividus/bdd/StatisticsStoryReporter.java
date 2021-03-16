@@ -22,10 +22,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.google.common.eventbus.EventBus;
@@ -39,6 +42,8 @@ import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.Timing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.model.Failure;
 import org.vividus.bdd.model.Node;
 import org.vividus.bdd.model.NodeContext;
 import org.vividus.bdd.model.NodeType;
@@ -54,6 +59,7 @@ public class StatisticsStoryReporter extends NullStoryReporter
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsStoryReporter.class);
 
     private static final Map<NodeType, Statistic> AGGREGATOR = new EnumMap<>(NodeType.class);
+    private static final FailuresBox FAILURES = new FailuresBox();
 
     private final Map<Status, Consumer<Statistic>> mapper = Map.of(
             Status.PASSED, Statistic::incrementPassed,
@@ -66,21 +72,42 @@ public class StatisticsStoryReporter extends NullStoryReporter
 
     private final TestContext testContext;
     private final JsonUtils jsonUtils;
+    private final IBddRunContext bddRunContext;
 
+    private boolean collectFailures;
     private File statisticsFolder;
 
-    public StatisticsStoryReporter(EventBus eventBus, TestContext testContext, JsonUtils jsonUtils)
+    public StatisticsStoryReporter(EventBus eventBus, TestContext testContext, JsonUtils jsonUtils,
+            IBddRunContext bddRunContext)
     {
         eventBus.register(this);
         this.testContext = testContext;
         this.jsonUtils = jsonUtils;
+        this.bddRunContext = bddRunContext;
         Stream.of(NodeType.values()).forEach(t -> AGGREGATOR.put(t, new Statistic()));
+    }
+
+    public void init()
+    {
+        if (collectFailures)
+        {
+            FAILURES.enable();
+        }
     }
 
     @Subscribe
     public void onAssertionFailure(AssertionFailedEvent event)
     {
+        addFailure(() -> event.getSoftAssertionError().getError().getMessage());
         updateStepStatus(Status.from(StatusPriority.from(event)));
+    }
+
+    private void addFailure(Supplier<String> message)
+    {
+        if (collectFailures)
+        {
+            FAILURES.add(Failure.from(bddRunContext.getRunningStory(), message.get()));
+        }
     }
 
     @Override
@@ -197,6 +224,10 @@ public class StatisticsStoryReporter extends NullStoryReporter
         if (!StringUtils.contains(step, "verifyIfAssertionsPassed"))
         {
             Status status = Status.from(StatusPriority.from(StatusProvider.getStatus(throwable)));
+            if (status == Status.BROKEN)
+            {
+                addFailure(() -> throwable.getCause().toString());
+            }
             updateStepStatus(status);
         }
     }
@@ -292,8 +323,41 @@ public class StatisticsStoryReporter extends NullStoryReporter
         return Map.copyOf(AGGREGATOR);
     }
 
+    public static List<Failure> getFailures()
+    {
+        return FAILURES.getFailures();
+    }
+
     public void setStatisticsFolder(File statisticsFolder)
     {
         this.statisticsFolder = statisticsFolder;
+    }
+
+    public void setCollectFailures(boolean collectFailures)
+    {
+        this.collectFailures = collectFailures;
+    }
+
+    private static final class FailuresBox
+    {
+        private static final List<Failure> FAILURES = new ArrayList<>();
+
+        private boolean enabled;
+
+        private void add(Failure failure)
+        {
+            FAILURES.add(failure);
+        }
+
+        @SuppressWarnings("NoNullForCollectionReturn")
+        private List<Failure> getFailures()
+        {
+            return enabled ? new ArrayList<>(FAILURES) : null;
+        }
+
+        private void enable()
+        {
+            enabled = true;
+        }
     }
 }

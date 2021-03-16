@@ -62,8 +62,9 @@
                                 <list>
                                     <bean class="org.vividus.bdd.log.LoggingStoryReporter" />
                                     <ref bean="analyticsStoryReporter" />
-                                    <bean class="org.vividus.bdd.StatisticsStoryReporter" >
+                                    <bean class="org.vividus.bdd.StatisticsStoryReporter" init-method = "init" >
                                         <property name="statisticsFolder" value="${statistics.folder}" />
+                                        <property name="collectFailures" value="${statistics.print-failures}" />
                                     </bean>
                                 </list>
                             </list>

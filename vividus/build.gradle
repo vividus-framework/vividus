@@ -48,6 +48,7 @@ dependencies {
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-api')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl')
+    implementation(group: 'de.vandermeer', name: 'asciitable', version: '0.3.2')
     // Replace commons-logging with slf4j
     implementation(group: 'org.slf4j', name: 'jcl-over-slf4j', version: versions.slf4j)
     // JUL to slf4j bridge
