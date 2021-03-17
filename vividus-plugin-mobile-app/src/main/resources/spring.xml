@@ -72,6 +72,11 @@
         <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).IOS_CLASS_CHAIN}" />
     </bean>
 
+    <bean class="org.vividus.ui.mobile.action.search.ByAppiumLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).ID}" />
+        <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).ID}" />
+    </bean>
+
     <bean class="org.vividus.ui.action.search.GenericTextFilter" >
         <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).TEXT_PART}" />
         <constructor-arg index="1" value="#{T(org.vividus.bdd.steps.StringComparisonRule).CONTAINS}" />
