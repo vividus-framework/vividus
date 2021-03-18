@@ -14,9 +14,10 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
-Scenario: [Android] Verify step: 'When I change Appium session settings:$settings'
+Scenario: [Android] Verify step: 'When I change Appium session settings:$settings' and Id Locator
 Meta:
     @targetPlatform android
+Then number of elements found by `id(com.vividustestapp:id/action_bar_root)` is equal to `1`
 Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `0`
 When I change Appium session settings:
 |name                  |value|
@@ -28,9 +29,10 @@ When I change Appium session settings:
 Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `0`
 
 
-Scenario: [iOS] Verify step: 'When I change Appium session settings:$settings'
+Scenario: [iOS] Verify step: 'When I change Appium session settings:$settings' and Id Locator
 Meta:
     @targetPlatform ios
+Then number of elements found by `id(menu-toggler-testID)` is equal to `1`
 Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `1`
 When I change Appium session settings:
 |name            |value|
