@@ -25,6 +25,7 @@ dependencies {
     implementation project(':vividus-plugin-email')
     implementation project(':vividus-plugin-excel')
     implementation project(':vividus-plugin-html')
+    implementation project(':vividus-plugin-json')
     implementation project(':vividus-plugin-kafka')
     implementation project(':vividus-plugin-lambdatest')
     implementation project(':vividus-plugin-mobile-app')

@@ -1,0 +1,33 @@
+= JSON Plugin
+
+The plugin provides different actions to interact with JSON.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-json', version: '{current-version}')
+----
+
+== Steps
+
+=== Patch JSON
+
+[source,gherkin]
+----
+When I patch JSON `$sourceJson` using `$jsonPatch` and save result to $scopes variable `$variableName`
+----
+
+* `$sourceJson` - JSON data to be patched.
+* `$jsonPatch` - JSON data with required patch actions according to https://tools.ietf.org/html/rfc6902#page-6[RFC-6902]
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes]
+* `$variableName` - The variable name
+
+=== Examples
+
+.Patch JSON data
+[source,gherkin]
+----
+When I patch JSON `{"a":"c"}` using `[{ "op": "replace", "path": "/a", "value": "c" }]` and save result to SCENARIO variable `patchedJSON`
+----
