@@ -84,3 +84,27 @@ When I execute steps with delay `PT1S` at most 5 times while variable `var` is l
 |!When I set the text found in search context to the 'scenario' variable 'var'!                                         |
 Then `${var}` is = `3`
 ----
+
+=== Wait for period
+
+Waits during specified period for debug purposes
+
+[WARNING]
+The step is for debugging purpose only
+
+Syntax:
+[source,gherkin]
+----
+When I wait `$period` for debug
+----
+
+* `$period` - total duration to wait in {iso-date-format-link} format
+
+==== *_Usage_*
+
+.Wait 30 seconds for debug
+[source,gherkin]
+----
+Scenario: Wait for debug
+When I wait `PT30S` for debug
+----

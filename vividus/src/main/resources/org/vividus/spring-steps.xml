@@ -20,6 +20,7 @@
         </property>
     </bean>
 
+    <bean id="debugSteps" class="org.vividus.bdd.steps.DebugSteps" />
     <bean id="executableSteps" class="org.vividus.bdd.steps.ExecutableSteps" />
     <bean id="fileSteps" class="org.vividus.bdd.steps.FileSteps" />
     <bean id="setupSteps" class="org.vividus.bdd.steps.SetupSteps" />
@@ -30,6 +31,7 @@
         <idref bean="fileSteps" />
         <idref bean="executableSteps" />
         <idref bean="setupSteps" />
+        <idref bean="debugSteps" />
     </util:list>
 
 </beans>
