@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,17 +93,10 @@ class JsonResponseValidationStepsTests
     private static final String HTML =
             "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\"/>";
 
-    @Mock
-    private IBddVariableContext bddVariableContext;
-
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private HttpTestContext httpTestContext;
-
-    @Mock
-    private IAttachmentPublisher attachmentPublisher;
+    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private ISoftAssert softAssert;
+    @Mock private HttpTestContext httpTestContext;
+    @Mock private IAttachmentPublisher attachmentPublisher;
 
     private JsonResponseValidationSteps jsonResponseValidationSteps;
 
@@ -289,6 +282,17 @@ class JsonResponseValidationStepsTests
         verify(subSteps, times(number)).execute(Optional.empty());
         verify(httpTestContext).getJsonContext();
         verify(httpTestContext).putJsonContext(null);
+    }
+
+    @Test
+    void shouldNotPerformStepsWhenNumberOfElementsInJsonIsZeroAndComparisonRuleIsPassed()
+    {
+        SubSteps subSteps = mock(SubSteps.class);
+        when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + JSON_PATH), eq(0),
+                verifyMatcher(0))).thenReturn(true);
+        jsonResponseValidationSteps.performAllStepsForProvidedJsonIfFound(ComparisonRule.LESS_THAN_OR_EQUAL_TO,
+                0, "{}", JSON_PATH, subSteps);
+        verifyNoInteractions(subSteps, httpTestContext);
     }
 
     @Test

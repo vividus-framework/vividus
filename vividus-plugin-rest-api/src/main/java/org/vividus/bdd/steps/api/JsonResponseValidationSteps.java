@@ -364,6 +364,7 @@ public class JsonResponseValidationSteps
      * <ul>
      * <li>Searches for elements using JSON path</li>
      * <li>Checks that elements quantity matches comparison rule and elements number</li>
+     * <li>Passes if the comparison rule matches and the elements number is 0</li>
      * <li>For each element switches JSON context and performs all steps. No steps will be performed
      * in case of comparison rule mismatch</li>
      * <li>Restores previously set context</li>
@@ -404,6 +405,7 @@ public class JsonResponseValidationSteps
     * <ul>
     * <li>Searches for elements using JSON path</li>
     * <li>Checks that elements quantity matches comparison rule and elements number</li>
+    * <li>Passes if the comparison rule matches and the elements number is 0</li>
     * <li>For each element switches JSON context and performs all steps. No steps will be performed
     * in case of comparison rule mismatch</li>
     * <li>Restores previously set context</li>
@@ -435,7 +437,8 @@ public class JsonResponseValidationSteps
             String jsonPath, SubSteps stepsToExecute)
     {
         Optional<List<?>> jsonElements = getElements(json, jsonPath);
-        if (assertJsonElementsNumber(jsonPath, countElementsNumber(jsonElements), comparisonRule, elementsNumber))
+        int count = countElementsNumber(jsonElements);
+        if (assertJsonElementsNumber(jsonPath, count, comparisonRule, elementsNumber) && count != 0)
         {
             String jsonContext = getActualJson();
             jsonElements.get().stream().map(jsonUtils::toJson).forEach(jsonElement ->
