@@ -422,6 +422,7 @@ Actions performed by step:
 
 * searches for elements using JSON path
 * checks that elements quantity matches comparison rule and elements number
+* passes if the comparison rule matches and the elements number is 0
 * for each element switches JSON context and performs all steps. No steps will be performed in case of comparison rule mismatch
 * restores previously set context
 
