@@ -60,5 +60,12 @@
     "storyPattern": "KnownIssues",
     "stepPattern": "When I use composite step in known-issues",
     "failTestCaseFast": true
+  },
+  "VVD-10": {
+    "type": "Internal",
+    "assertionPattern": ".*",
+    "scenarioPattern": "Verify wait for debug step",
+    "storyPattern": "DebugSteps",
+    "stepPattern": "When I wait .* for debug"
   }
 }
