@@ -176,7 +176,7 @@ When I $visualAction baseline with `$baselineName` using screenshot configuratio
 When I $visualAction baseline with `$baselineName` ignoring:$ignoringElement using screenshot configuration:$screenshotConfiguration
 ----
 
-===== *Examples of usage property based configuration:*
+==== *Examples of usage property based configuration:*
 
 [source,gherkin]
 ----
@@ -188,7 +188,7 @@ selenium.screenshot.strategy.bombaysapphire.screenshot-shooting-strategy=SIMPLE
 selenium.screenshot.shooting-strategy=bombaysapphire
 ----
 
-===== *Examples of usage step based configuration:*
+==== *Examples of usage step based configuration:*
 
 [source,gherkin]
 ----
