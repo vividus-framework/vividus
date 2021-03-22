@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+    default-lazy-init="true">
+
+    <bean id="eventGridSteps" class="org.vividus.azure.eventgrid.EventGridSteps">
+        <constructor-arg name="topics">
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="azure.event-grid." />
+                <constructor-arg value="org.vividus.azure.eventgrid.model.Topic" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.vividus.azure.eventgrid.service.EventGridService" />
+        </constructor-arg>
+    </bean>
+
+    <util:list id="stepBeanNames-Azure-Event-Grid" value-type="java.lang.String">
+        <idref bean="eventGridSteps" />
+    </util:list>
+</beans>
