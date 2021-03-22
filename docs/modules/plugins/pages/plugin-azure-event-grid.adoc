@@ -1,0 +1,61 @@
+= Azure Event Grid Plugin
+
+The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/event-grid/[Event Grid]
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-event-grid', version: '{current-version}')
+----
+
+== Configuration
+
+=== Topics configuration
+
+Topics are configured with a set of properties with the following format:
+
+[source,properties]
+----
+azure.event-grid.{topic-name}.{property-name}=property value
+----
+
+Where:
+
+. `topic-name` - The name of the topic which will be used as a step parameter
+. `property-name` - The name of the topic property. One of: 
+.. `key` - The topic access key
+.. `event-schema` - The kind of https://docs.microsoft.com/en-us/azure/event-grid/event-schema[schema] (GRID, CLOUD or CUSTOM)
+.. `endpoint` - The topic endpoint 
+
+== Steps
+
+=== Publish event
+
+Publishes an event to a topic
+
+[source,gherkin]
+----
+When I send event to `$topicName` topic with payload:$payload
+----
+
+* `$topicName` - The name of the topic, will be used to find required properties values
+* `$payload` - The JSON payload to send to a topic
+
+.Send an event
+[source,gherkin]
+----
+When I send event to `create-user` topic with payload:
+{
+  "id": "1807",
+  "eventType": "RegisterVehicle",
+  "subject": "myapp/vehicles/motorcycles",
+  "eventTime": "2017-08-10T21:03:07+00:00",
+  "data": {
+    "make": "Ducati",
+    "model": "Monster"
+  },
+  "dataVersion": "1.0"
+}
+----
