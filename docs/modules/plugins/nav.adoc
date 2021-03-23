@@ -5,6 +5,8 @@
 ** xref:plugin-aws-kinesis.adoc[Kinesis]
 ** xref:plugin-aws-lambda.adoc[Lambda]
 ** xref:plugin-aws-s3.adoc[S3]
+* xref:azure.adoc[Azure]
+** xref:plugin-azure-functions.adoc[Functions]
 * xref:plugin-csv.adoc[CSV]
 * xref:plugin-datetime.adoc[Date/Time]
 * xref:plugin-db.adoc[Relational DB*]

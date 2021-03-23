@@ -1,0 +1,6 @@
+= What is Azure
+
+Microsoft https://azure.microsoft.com/[Azure] is a cloud computing service created by Microsoft for building, testing, deploying,
+and managing applications and services through Microsoft-managed data centers.
+
+Vividus provides set of plugins to interact with the services.
