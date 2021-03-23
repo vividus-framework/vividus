@@ -8,6 +8,7 @@
 * xref:azure.adoc[Azure]
 ** xref:plugin-azure-event-grid.adoc[Event Grid]
 ** xref:plugin-azure-functions.adoc[Functions]
+** xref:plugin-azure-storage-queue.adoc[Storage Queue]
 * xref:plugin-csv.adoc[CSV]
 * xref:plugin-datetime.adoc[Date/Time]
 * xref:plugin-db.adoc[Relational DB*]
