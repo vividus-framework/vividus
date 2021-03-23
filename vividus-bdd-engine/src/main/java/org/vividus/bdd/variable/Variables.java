@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.reflect.FieldUtils;
 
 public class Variables
 {
@@ -92,8 +94,9 @@ public class Variables
         }
         String variableKey = variableMatcher.group(VARIABLE_NAME_GROUP);
         return Optional.ofNullable(variables.get(variableKey))
-                .map(v -> resolveAsListItem(variableMatcher, v))
-                .map(v -> resolveAsMapItem(variableMatcher, v));
+                       .map(v -> resolveAsListItem(variableMatcher, v))
+                       .map(v -> resolveAsMapItem(variableMatcher, v))
+                       .map(v -> resolveAsObjectField(variableMatcher, v));
     }
 
     @SuppressWarnings("unchecked")
@@ -106,6 +109,28 @@ public class Variables
             return Optional.ofNullable(map.get(mapKey)).or(() -> resolveAsCompound(map, mapKey)).orElse(null);
         }
         return variable;
+    }
+
+    private Object resolveAsObjectField(Matcher variableMatcher, Object variable)
+    {
+        String fieldName = variableMatcher.group(MAP_KEY_GROUP);
+        if (fieldName != null)
+        {
+            return Optional.ofNullable(readFieldSafely(variable, fieldName)).orElse(variable);
+        }
+        return variable;
+    }
+
+    private Object readFieldSafely(Object variable, String fieldName)
+    {
+        try
+        {
+            return FieldUtils.readDeclaredField(variable, fieldName, true);
+        }
+        catch (IllegalAccessException | IllegalArgumentException e)
+        {
+            return null;
+        }
     }
 
     private Object resolveAsListItem(Matcher variableMatcher, Object variable)
