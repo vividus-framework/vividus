@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+   <Loggers>
+        <Logger name="com.azure.core" level="ERROR" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="file" />
+        </Logger>
+    </Loggers>
+</Configuration>

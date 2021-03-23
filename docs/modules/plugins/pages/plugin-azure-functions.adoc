@@ -1,0 +1,60 @@
+= Azure functions Plugin
+
+The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/functions/[Azure Functions]
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-functions', version: '{current-version}')
+----
+
+== Configuration
+
+=== Authentication
+
+Authentication process relies on the configuration of environment variables.
+
+See the official https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/identity/azure-identity#environment-variables["Azure identity"] guide to get more details on what types of authentication could be used.
+
+=== Azure Environment selection
+
+The Azure environment could be selected via a property: `azure.functions.environment`
+The default value is AZURE
+
+Possible values are: AZURE, AZURE_CHINA, AZURE_GERMANY, AZURE_US_GOVERNMENT
+
+=== Azure Subscription selection
+
+The azure subscription should be configured via `AZURE_SUBSCRIPTION_ID` environment variable
+
+== Steps
+
+=== Function triggering
+
+Triggers a function
+
+[source,gherkin]
+----
+When I trigger funtion `$functionName` from function app `$functionAppName` in resource group `$resourceGroup` with payload:$payload and save response into $scopes variable `$variableNames`
+----
+
+* `$functionName` - The name of the function to trigger
+* `$functionAppName` - The name of the function app
+* `$resourceGroup` - The resource group function relates to
+* `$payload` - The JSON payload to send to a function (could be empty)
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results in JSON format. If the variable name is `my-var`, the following variables will be created:
+** `${my-var.body}` - The response body
+** `${my-var.status-code}` - The HTTP status code
+** `${my-var.headers}` - The response headers
+** `${my-var.url}` - The request URL
+
+.Trigger function
+[source,gherkin]
+----
+When I trigger function `HttpTrigger1` from function app `vivdus-http-function` in resource group `vividus` with payload:
+and save response into scenario variable `functionTrigger`
+Then `${functionTrigger.status-code}` is equal to `202`
+----
