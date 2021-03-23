@@ -1,0 +1,90 @@
+= Azure Storage Queue Plugin
+
+The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/storage/queues/[Storage Queue]
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-queue', version: '{current-version}')
+----
+
+== Configuration
+
+=== Queues configuration
+
+Queues are configured with a set of properties with the following format:
+
+[source,properties]
+----
+azure.storage.queue.{queue-name}.{property-name}=property value
+----
+
+Where:
+
+. `queue-name` - The name of the queue which will be used as a step parameter
+. `property-name` - The name of the queue property. One of: 
+.. `name` - The name of the queue
+.. `sas-token` - The https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS token]
+.. `queue` - The queue endpoint 
+
+== Steps
+
+=== Peek messages
+
+Peeks messages from the queue
+
+[source,gherkin]
+----
+When I peek up to `$count` messages from queue `$queueName` and save result to $scopes variable `$variableName`
+----
+
+* `$count` - The nember of messages to peek
+* `$queueName` - The name of the queue
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results in JSON format. If the variable name is `my-var`, the following variables will be created:
+** `${my-var[0].messageId}` - The message id
+** `${my-var[0].insertionTime}` - The message insertion time
+** `${my-var[0].expirationTime}` - The message expiration time
+** `${my-var[0].messageText}` - The message text
+
+.Peek the messages
+[source,gherkin]
+----
+When I peek up to `5` messages from queue `users` and save result to scenario variable `messages`
+Then `{"name" : "azure"}` is equal to `${messages[0].messageText}`
+----
+
+=== Send message
+
+Sends message to the queue
+
+[source,gherkin]
+----
+When I send message `$message` to queue `$queueName` and save result to $scopes variable `$variableName`
+----
+
+* `$message` - The message to send
+* `$queueName` - The name of the queue
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results in JSON format. If the variable name is `my-var`, the following variables will be created:
+** `${my-var.messageId}` - The message id
+** `${my-var.insertionTime}` - The message insertion time
+** `${my-var.expirationTime}` - The message expiration time
+
+.Send the messages
+[source,gherkin]
+----
+When I send message `{
+  "id": "1807",
+  "eventType": "CreateUser",
+  "subject": "myapp/vehicles/motorcycles",
+  "eventTime": "2021-03-22T12:44:07+00:00",
+  "data": {
+    "make": "lada",
+    "model": "xray"
+  },
+  "dataVersion": "1.0"
+}` to queue `users` and save result to scenario variable `result`
+----

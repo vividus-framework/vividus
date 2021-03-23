@@ -14,6 +14,7 @@ dependencies {
     implementation project(':vividus-plugin-aws-s3')
     implementation project(':vividus-plugin-azure-event-grid')
     implementation project(':vividus-plugin-azure-functions')
+    implementation project(':vividus-plugin-azure-storage-queue')
     implementation project(':vividus-plugin-browserstack')
     implementation project(':vividus-plugin-db')
     implementation project(':vividus-plugin-mobile-app')
