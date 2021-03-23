@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,6 +235,16 @@ class GenericWebDriverManagerTests
         Map<String, Object> capabilities = Map.of(
                 CapabilityType.PLATFORM_NAME, Platform.MAC.toString(),
                 BROWSER_TYPE, BrowserType.IPAD
+        );
+        mockWebDriverHavingCapabilities(capabilities);
+        assertTrue(driverManager.isIOS());
+    }
+
+    @Test
+    void testIsTvOS()
+    {
+        Map<String, Object> capabilities = Map.of(
+                CapabilityType.PLATFORM_NAME, MobilePlatform.TVOS
         );
         mockWebDriverHavingCapabilities(capabilities);
         assertTrue(driverManager.isIOS());
