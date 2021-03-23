@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,6 +146,7 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     public static boolean isIOS(Capabilities capabilities)
     {
         return isPlatformName(capabilities, MobilePlatform.IOS)
+                || isPlatformName(capabilities, MobilePlatform.TVOS)
                 || isBrowserAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD)
                 || isDeviceAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD);
     }
@@ -196,7 +197,8 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
             {
                 return platformNameFromCaps.equals(platformName);
             }
-            if (platformNameFromCaps instanceof Platform)
+            // https://github.com/SeleniumHQ/selenium/issues/9127
+            if (platformNameFromCaps instanceof Platform && !MobilePlatform.TVOS.equals(platformName))
             {
                 return platformNameFromCaps == Platform.fromString(platformName);
             }
