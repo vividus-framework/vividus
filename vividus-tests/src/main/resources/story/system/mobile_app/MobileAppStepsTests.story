@@ -14,6 +14,14 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
+Scenario: Verify steps: 'When I press $key key', 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Text Part Filter and Text Filter
+Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `1`
+When I press Home key
+Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `0`
+When I activate application with bundle identifier `${main-app}`
+When I wait until element located `xpath(<textElementXpath>)->filter.textPart(om)` appears
+
+
 Scenario: [Android] Verify step: 'When I change Appium session settings:$settings' and Id Locator
 Meta:
     @targetPlatform android
@@ -42,11 +50,6 @@ When I change Appium session settings:
 |name            |value     |
 |snapshotMaxDepth|50        |
 Then number of elements found by `xpath(<menuButtonXpath>):a` is equal to `1`
-
-
-Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Text Part Filter and Text Filter
-Then number of elements found by `xpath(<textElementXpath>)->filter.textPart(om)` is equal to `1`
-Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `1`
 
 
 Scenario: Verify step: 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`' and Accessibility Id Locator
