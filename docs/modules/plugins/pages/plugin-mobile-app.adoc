@@ -618,4 +618,21 @@ When I switch to native context
 Then number of elements found by `xpath(html)` is equal to `0`
 ----
 
+=== Press key
+
+Presses an https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS key] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android key]
+
+[source,gherkin]
+----
+When I press $key key
+----
+
+. `$key` - The key to press
+
+.Go to home
+[source,gherkin]
+----
+When I press Home key
+----
+
 include::partial$generic-ui-steps.adoc[]

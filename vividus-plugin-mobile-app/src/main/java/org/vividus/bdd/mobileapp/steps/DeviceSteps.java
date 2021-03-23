@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,22 @@
 package org.vividus.bdd.mobileapp.steps;
 
 import java.nio.file.Paths;
+import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.mobileapp.action.DeviceActions;
+import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.manager.GenericWebDriverManager;
+import org.vividus.ui.action.JavascriptActions;
+
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
+import io.appium.java_client.android.nativekey.PressesKey;
 
 public class DeviceSteps
 {
@@ -30,11 +40,19 @@ public class DeviceSteps
 
     private final DeviceActions deviceActions;
     private final String folderForFileUpload;
+    private final GenericWebDriverManager genericWebDriverManager;
+    private final JavascriptActions javascriptActions;
+    private final IWebDriverProvider webDriverProvider;
 
-    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions)
+    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions,
+            GenericWebDriverManager genericWebDriverManager, JavascriptActions javascriptActions,
+            IWebDriverProvider webDriverProvider)
     {
         this.folderForFileUpload = folderForFileUpload;
         this.deviceActions = deviceActions;
+        this.genericWebDriverManager = genericWebDriverManager;
+        this.javascriptActions = javascriptActions;
+        this.webDriverProvider = webDriverProvider;
     }
 
     /**
@@ -50,5 +68,29 @@ public class DeviceSteps
 
         String fileName = FilenameUtils.getName(filePath);
         deviceActions.pushFile(Paths.get(folderForFileUpload, fileName).toString(), filePath);
+    }
+
+    /**
+     * Presses the key
+     * <br>
+     * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
+     * <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
+     * Android keys</a> for available values
+     *
+     * @param key key to press
+     */
+    @When("I press $key key")
+    public void pressKey(String key)
+    {
+        if (genericWebDriverManager.isIOSNativeApp())
+        {
+            javascriptActions.executeScript("mobile: pressButton", Map.of("name", key));
+        }
+        else
+        {
+            AndroidKey androidKey = EnumUtils.getEnumIgnoreCase(AndroidKey.class, key);
+            Validate.isTrue(androidKey != null, "Unsupported Android key: %s", key);
+            webDriverProvider.getUnwrapped(PressesKey.class).pressKey(new KeyEvent(androidKey));
+        }
     }
 }
