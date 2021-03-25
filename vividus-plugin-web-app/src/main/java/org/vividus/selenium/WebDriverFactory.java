@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,9 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
         boolean localRun = true;
         WebDriverConfiguration configuration = getWebDriverConfiguration(driverType, localRun);
         configureProxy(driverType, desiredCapabilities);
-        return createWebDriver(driverType.getWebDriver(getWebDriverCapabilities(localRun, desiredCapabilities),
-                configuration));
+        DesiredCapabilities webDriverCapabilities = getWebDriverCapabilities(localRun, desiredCapabilities);
+        return createWebDriver(() -> driverType.getWebDriver(webDriverCapabilities, configuration),
+                webDriverCapabilities);
     }
 
     @Override
