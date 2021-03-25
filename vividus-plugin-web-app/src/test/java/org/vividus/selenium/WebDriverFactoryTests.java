@@ -18,6 +18,7 @@ package org.vividus.selenium;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,6 +76,9 @@ import org.vividus.util.property.IPropertyParser;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class WebDriverFactoryTests
 {
+    private static final String SESSION_CAPABILITIES = "Session capabilities:\n{}";
+    private static final String CAPS_AS_STRING = String.format("{%n  \"key\" : \"value\"%n}");
+    private static final Map<String, Object> CAPS = Map.of("key", "value");
     private static final String SELENIUM_CAPABILITIES = "selenium.capabilities.";
     private static final String SELENIUM_GRID_CAPABILITIES = "selenium.grid.capabilities.";
     private static final String FALSE = "false";
@@ -318,7 +322,13 @@ class WebDriverFactoryTests
         assertEquals(remoteWebDriver,
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
-        assertLogger();
+        assertLogger("{%n  \"acceptInsecureCerts\" : true,%n"
+                        + "  \"browserName\" : \"firefox\",%n"
+                        + "  \"moz:firefoxOptions\" : {%n"
+                        + "    \"args\" : [ ],%n"
+                        + "    \"prefs\" : {%n"
+                        + "      \"startup.homepage_welcome_url.additional\" : \"about:blank\"%n"
+                        + "    }%n  }%n}");
     }
 
     @Test
@@ -393,13 +403,19 @@ class WebDriverFactoryTests
     {
         Capabilities capabilities = mock(Capabilities.class);
         when(hasCapabilities.getCapabilities()).thenReturn(capabilities);
-        when(capabilities.asMap()).thenReturn(Map.of("key", "value"));
+        when(capabilities.asMap()).thenReturn(CAPS);
     }
 
     private void assertLogger()
     {
-        assertThat(logger.getLoggingEvents(),
-                is(List.of(info("Session capabilities:\n{}", String.format("{%n  \"key\" : \"value\"%n}")))));
+        assertThat(logger.getLoggingEvents(), hasItem(info(SESSION_CAPABILITIES, CAPS_AS_STRING)));
+    }
+
+    private void assertLogger(String sessionCaps)
+    {
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info("Requested capabilities:\n{}", String.format(sessionCaps)),
+                info(SESSION_CAPABILITIES, CAPS_AS_STRING))));
     }
 
     private static Timeouts mockTimeouts(WebDriver webDriver)

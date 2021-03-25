@@ -31,6 +31,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -98,20 +99,27 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
     public WebDriver getRemoteWebDriver(DesiredCapabilities desiredCapabilities)
     {
         DesiredCapabilities mergedDesiredCapabilities = getWebDriverCapabilities(false, desiredCapabilities);
-        return createWebDriver(remoteWebDriverFactory.getRemoteWebDriver(remoteDriverUrl,
-                updateDesiredCapabilities(mergedDesiredCapabilities)));
+        DesiredCapabilities updatedDesiredCapabilities = updateDesiredCapabilities(mergedDesiredCapabilities);
+        return createWebDriver(() -> remoteWebDriverFactory.getRemoteWebDriver(remoteDriverUrl,
+                updatedDesiredCapabilities), updatedDesiredCapabilities);
     }
 
-    protected WebDriver createWebDriver(WebDriver webDriver)
+    protected WebDriver createWebDriver(Supplier<WebDriver> webDriver, DesiredCapabilities sessionRequestCapabilities)
     {
-        WebDriver driver = new TextFormattingWebDriver(webDriver);
+        logCapabilities(sessionRequestCapabilities, "Requested capabilities:\n{}");
+        WebDriver driver = new TextFormattingWebDriver(webDriver.get());
         configureWebDriver(driver);
 
-        LOGGER.atInfo()
-              .addArgument(() -> jsonUtils
-                      .toPrettyJson(WebDriverUtil.unwrap(driver, HasCapabilities.class).getCapabilities().asMap()))
-              .log("Session capabilities:\n{}");
+        logCapabilities(WebDriverUtil.unwrap(driver, HasCapabilities.class).getCapabilities(),
+                "Session capabilities:\n{}");
         return driver;
+    }
+
+    private void logCapabilities(Capabilities capabilities, String message)
+    {
+        LOGGER.atInfo()
+              .addArgument(() -> jsonUtils.toPrettyJson(capabilities.asMap()))
+              .log(message);
     }
 
     protected abstract DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities);

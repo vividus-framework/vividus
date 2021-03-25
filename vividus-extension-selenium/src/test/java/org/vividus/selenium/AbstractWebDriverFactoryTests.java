@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,8 @@ import org.vividus.util.property.IPropertyParser;
 @ExtendWith(MockitoExtension.class)
 class AbstractWebDriverFactoryTests
 {
+    private static final String CAPS = String.format("{%n  \"key1\" : \"arg\",%n  \"key2\" "
+            + ": \"arg\",%n  \"key3\" : \"arg\"%n}");
     private static final String SELENIUM_CAPABILITIES = "selenium.capabilities.";
     private static final String SELENIUM_GRID_CAPABILITIES = "selenium.grid.capabilities.";
     private static final String FALSE = "false";
@@ -147,8 +149,7 @@ class AbstractWebDriverFactoryTests
         webDriverFactory.getRemoteWebDriver(new DesiredCapabilities(Map.of(KEY3, ARG)));
 
         assertThat(logger.getLoggingEvents(),
-                is(List.of(info("Session capabilities:\n{}", String.format("{%n  \"key1\" : \"arg\",%n  \"key2\" "
-                        + ": \"arg\",%n  \"key3\" : \"arg\"%n}")))));
+                is(List.of(info("Requested capabilities:\n{}", CAPS), info("Session capabilities:\n{}", CAPS))));
     }
 
     private static final class TestWebDriverFactory extends AbstractWebDriverFactory
