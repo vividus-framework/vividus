@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class VariablesTests
 {
+    private static final int TWO_HUNDRED = 200;
     private static final String STEP = "step";
     private static final String KEY3 = "key3";
     private static final String STORY = "story";
@@ -42,6 +43,7 @@ class VariablesTests
     private static final String VARIABLE_KEY = "variableKey";
     private static final String KEY = "key";
     private static final String VALUE = "value";
+    private static final Pojo POJO = new Pojo(VALUE);
     private static final String DEFAULT_VALUE = "defaultValue";
 
     @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
@@ -49,26 +51,33 @@ class VariablesTests
     {
         //CHECKSTYLE:OFF
         return Stream.of(
-                arguments(VARIABLE_KEY,                      VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), List.of(Map.of(KEY, VALUE))),
-                arguments(VARIABLE_KEY,                      VARIABLE_KEY, null,                        null),
-                arguments("",                                VARIABLE_KEY, null,                        null),
-                arguments("variableKey:defaultValue",        VARIABLE_KEY, null,                        DEFAULT_VALUE),
-                arguments("variableKey[0]",                  VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), Map.of(KEY, VALUE)),
-                arguments("variableKey[0].key",              VARIABLE_KEY, Map.of(KEY, VALUE),          VALUE),
-                arguments("variableKey[0]",                  VARIABLE_KEY, null,                        null),
-                arguments("variableKey[0]:defaultValue",     VARIABLE_KEY, List.of(),                   DEFAULT_VALUE),
-                arguments("variableKey[0].key",              VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), VALUE),
-                arguments("variableKey[0].key:defaultValue", VARIABLE_KEY, List.of(),                   DEFAULT_VALUE),
-                arguments("variableKey.key",                 VARIABLE_KEY, Map.of(KEY, VALUE),          VALUE),
-                arguments("variableKey.key",                 VARIABLE_KEY, VALUE,                       VALUE),
-                arguments("variableKey.key",                 VARIABLE_KEY, null,                        null),
-                arguments("variableKey.key:defaultValue",    VARIABLE_KEY, Map.of(),                    DEFAULT_VALUE),
-                arguments("a.b:NULL",                        "a.b",        VALUE,                       VALUE),
-                arguments(A_B,                               A_B,          VALUE,                       VALUE),
-                arguments("variableKey[0]",                  VARIABLE_KEY, List.of(Set.of(KEY)),        Set.of(KEY)),
-                arguments("variableKey[7]",                  VARIABLE_KEY, List.of(Map.of(KEY, VALUE)), null),
-                arguments("variableKey.key",                 VARIABLE_KEY, Map.of(KEY, List.of(VALUE)), List.of(VALUE)),
-                arguments("variableKey.key[0]",              VARIABLE_KEY, Map.of(KEY, List.of(VALUE)), VALUE)
+                arguments(VARIABLE_KEY,                      VARIABLE_KEY, List.of(Map.of(KEY, VALUE)),    List.of(Map.of(KEY, VALUE))),
+                arguments(VARIABLE_KEY,                      VARIABLE_KEY, null,                           null),
+                arguments("",                                VARIABLE_KEY, null,                           null),
+                arguments("variableKey:defaultValue",        VARIABLE_KEY, null,                           DEFAULT_VALUE),
+                arguments("variableKey[0]",                  VARIABLE_KEY, List.of(Map.of(KEY, VALUE)),    Map.of(KEY, VALUE)),
+                arguments("variableKey[0].key",              VARIABLE_KEY, Map.of(KEY, VALUE),             VALUE),
+                arguments("variableKey[0]",                  VARIABLE_KEY, null,                           null),
+                arguments("variableKey[0]:defaultValue",     VARIABLE_KEY, List.of(),                      DEFAULT_VALUE),
+                arguments("variableKey[0].key",              VARIABLE_KEY, List.of(Map.of(KEY, VALUE)),    VALUE),
+                arguments("variableKey[0].key:defaultValue", VARIABLE_KEY, List.of(),                      DEFAULT_VALUE),
+                arguments("variableKey.key",                 VARIABLE_KEY, Map.of(KEY, VALUE),             VALUE),
+                arguments("variableKey.key",                 VARIABLE_KEY, VALUE,                          VALUE),
+                arguments("variableKey.key",                 VARIABLE_KEY, null,                           null),
+                arguments("variableKey.key:defaultValue",    VARIABLE_KEY, Map.of(),                       DEFAULT_VALUE),
+                arguments("a.b:NULL",                        "a.b",        VALUE,                          VALUE),
+                arguments(A_B,                               A_B,          VALUE,                          VALUE),
+                arguments("variableKey[0]",                  VARIABLE_KEY, List.of(Set.of(KEY)),           Set.of(KEY)),
+                arguments("variableKey[7]",                  VARIABLE_KEY, List.of(Map.of(KEY, VALUE)),    null),
+                arguments("variableKey.key",                 VARIABLE_KEY, Map.of(KEY, List.of(VALUE)),    List.of(VALUE)),
+                arguments("variableKey.key[0]",              VARIABLE_KEY, Map.of(KEY, List.of(VALUE)),    VALUE),
+                arguments("variableKey.key",                 VARIABLE_KEY, Map.of(KEY, TWO_HUNDRED),       TWO_HUNDRED),
+                arguments("variableKey[0].key.name",         VARIABLE_KEY, List.of(Map.of(KEY, POJO)),     VALUE),
+                arguments("variableKey[0].name",             VARIABLE_KEY, List.of(POJO),                  VALUE),
+                arguments("variableKey.key[0].name",         VARIABLE_KEY, Map.of(KEY, List.of(POJO)),     VALUE),
+                arguments("variableKey.name",                VARIABLE_KEY, POJO,                           VALUE),
+                arguments("variableKey.key.key.name",        VARIABLE_KEY, Map.of(KEY, Map.of(KEY, POJO)), VALUE),
+                arguments("variableKey.notExists",           VARIABLE_KEY, POJO,                           POJO)
         );
         //CHECKSTYLE:ON
     }
@@ -163,5 +172,16 @@ class VariablesTests
         variables.putStoryVariable(KEY3, STORY);
         variables.putStoryVariable(KEY3, STEP);
         assertEquals(Map.of(KEY1, SCENARIO, KEY2, STORY, KEY3, STEP), variables.getVariables());
+    }
+
+    private static final class Pojo
+    {
+        @SuppressWarnings("unused")
+        private final String name;
+
+        private Pojo(String name)
+        {
+            this.name = name;
+        }
     }
 }
