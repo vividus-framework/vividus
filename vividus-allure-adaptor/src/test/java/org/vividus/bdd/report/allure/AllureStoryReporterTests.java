@@ -58,10 +58,12 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.GivenStories;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -570,8 +572,9 @@ class AllureStoryReporterTests
     void testBeforeStep()
     {
         mockScenarioUid(false);
-        allureStoryReporter.beforeStep(GIVEN_STEP);
-        verify(next).beforeStep(GIVEN_STEP);
+        Step givenStep = createStep(GIVEN_STEP);
+        allureStoryReporter.beforeStep(givenStep);
+        verify(next).beforeStep(givenStep);
         verify(allureLifecycle).startStep(eq(SCENARIO_UID), eq(STEP_UID), any(StepResult.class));
     }
 
@@ -588,7 +591,7 @@ class AllureStoryReporterTests
                 LIFECYCLE_AFTER_STORY);
     }
 
-    private void beforeStepShouldStartLifecycleStorySteps(StoryExecutionStage storyExecutionStage, String step,
+    private void beforeStepShouldStartLifecycleStorySteps(StoryExecutionStage storyExecutionStage, String stepAsString,
             String testCaseName)
     {
         BddRunContext bddRunContext = setupContext();
@@ -601,6 +604,7 @@ class AllureStoryReporterTests
         RunningStory runningStory = getRunningStory(story, null);
         bddRunContext.putRunningStory(runningStory, false);
 
+        Step step = createStep(stepAsString);
         allureStoryReporter.beforeStep(step);
 
         InOrder ordered = inOrder(allureLifecycle, next);
@@ -614,10 +618,15 @@ class AllureStoryReporterTests
         ordered.verify(allureLifecycle).startStep(eq(testResult.getUuid()), eq(testResult.getUuid() + DASH + THREAD_ID),
                 stepResultCaptor.capture());
         StepResult capturedStepResult = stepResultCaptor.getValue();
-        assertEquals(step, capturedStepResult.getName());
+        assertEquals(stepAsString, capturedStepResult.getName());
         assertEquals(StatusPriority.getLowest().getStatusModel(), capturedStepResult.getStatus());
         ordered.verify(next).beforeStep(step);
         verifyNoMoreInteractions(next, allureLifecycle);
+    }
+
+    private static Step createStep(String stepAsString)
+    {
+        return new Step(StepExecutionType.EXECUTABLE, stepAsString);
     }
 
     @Test
@@ -861,7 +870,6 @@ class AllureStoryReporterTests
         mockStepUid();
         allureStoryReporter.ignorable(GIVEN_STEP);
         verify(next).ignorable(GIVEN_STEP);
-        verify(allureLifecycle).startStep(eq(STEP_UID), eq(SUB_STEP_UID), any(StepResult.class));
         verify(allureLifecycle).updateStep(eq(STEP_UID), anyStepResultConsumer());
         verify(allureLifecycle).stopStep(STEP_UID);
         verify(allureLifecycle).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
@@ -876,7 +884,6 @@ class AllureStoryReporterTests
         verify(testContext, never()).get(ScenarioExecutionStage.class, ScenarioExecutionStage.class);
         verify(testContext, never()).put(eq(ScenarioExecutionStage.class), any(ScenarioExecutionStage.class));
         verify(next).comment(step);
-        verify(allureLifecycle).startStep(eq(STEP_UID), eq(SUB_STEP_UID), any(StepResult.class));
         verify(allureLifecycle).updateStep(eq(STEP_UID), anyStepResultConsumer());
         verify(allureLifecycle).stopStep(STEP_UID);
         verify(allureLifecycle, never()).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
@@ -888,7 +895,6 @@ class AllureStoryReporterTests
         mockStepUid();
         allureStoryReporter.pending(GIVEN_STEP);
         verify(next).pending(GIVEN_STEP);
-        verify(allureLifecycle).startStep(eq(STEP_UID), eq(SUB_STEP_UID), any(StepResult.class));
         verify(allureLifecycle).updateStep(eq(STEP_UID), anyStepResultConsumer());
         verify(allureLifecycle).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
     }
@@ -899,7 +905,6 @@ class AllureStoryReporterTests
         mockStepUid();
         allureStoryReporter.notPerformed(GIVEN_STEP);
         verify(next).notPerformed(GIVEN_STEP);
-        verify(allureLifecycle).startStep(eq(STEP_UID), eq(SUB_STEP_UID), any(StepResult.class));
         verify(allureLifecycle).updateStep(eq(STEP_UID), anyStepResultConsumer());
         verify(allureLifecycle).stopStep(STEP_UID);
         verify(allureLifecycle).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());

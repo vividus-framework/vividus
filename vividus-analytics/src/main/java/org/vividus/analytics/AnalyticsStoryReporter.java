@@ -24,6 +24,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.NullStoryReporter;
 import org.jbehave.core.steps.StepCollector;
@@ -102,7 +103,7 @@ public class AnalyticsStoryReporter extends NullStoryReporter
     }
 
     @Override
-    public void beforeStep(String step)
+    public void beforeStep(Step step)
     {
         STEPS.incrementAndGet();
     }

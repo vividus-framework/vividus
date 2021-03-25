@@ -22,6 +22,7 @@ import javax.inject.Inject;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.steps.Timing;
 import org.vividus.bdd.context.BddRunContext;
@@ -66,9 +67,9 @@ public class RunContextStoryReporter extends ChainedStoryReporter
     }
 
     @Override
-    public void beforeStep(String step)
+    public void beforeStep(Step step)
     {
-        bddRunContext.getRunningStory().putRunningStep(step);
+        bddRunContext.getRunningStory().putRunningStep(step.getStepAsString());
         super.beforeStep(step);
     }
 

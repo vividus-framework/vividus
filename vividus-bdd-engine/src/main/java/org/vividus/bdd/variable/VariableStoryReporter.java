@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.variable;
 
+import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.steps.Timing;
 import org.vividus.bdd.ChainedStoryReporter;
@@ -41,7 +42,7 @@ public class VariableStoryReporter extends ChainedStoryReporter
     }
 
     @Override
-    public void beforeStep(String step)
+    public void beforeStep(Step step)
     {
         bddVariableContext.initStepVariables();
         super.beforeStep(step);

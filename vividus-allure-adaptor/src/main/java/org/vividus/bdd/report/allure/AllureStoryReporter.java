@@ -42,6 +42,7 @@ import org.jbehave.core.failures.BeforeOrAfterFailed;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.steps.StepCollector.Stage;
@@ -267,9 +268,9 @@ public class AllureStoryReporter extends ChainedStoryReporter
     }
 
     @Override
-    public void beforeStep(String step)
+    public void beforeStep(Step step)
     {
-        startBddStep(step);
+        startBddStep(step.getStepAsString());
         super.beforeStep(step);
     }
 
@@ -284,7 +285,6 @@ public class AllureStoryReporter extends ChainedStoryReporter
     @Override
     public void ignorable(String step)
     {
-        startBddStep(step);
         super.ignorable(step);
         stopBddStep(Status.SKIPPED, new StatusDetails().setMessage("Step is commented"));
     }
@@ -292,7 +292,6 @@ public class AllureStoryReporter extends ChainedStoryReporter
     @Override
     public void comment(String step)
     {
-        startStep(step);
         super.comment(step);
         updateStepStatus(Status.SKIPPED);
         stopStep();
@@ -301,7 +300,6 @@ public class AllureStoryReporter extends ChainedStoryReporter
     @Override
     public void pending(String step)
     {
-        startBddStep(step);
         super.pending(step);
         stopBddStep(Status.SKIPPED, new StatusDetails().setMessage("Step is not implemented"));
     }
@@ -309,7 +307,6 @@ public class AllureStoryReporter extends ChainedStoryReporter
     @Override
     public void notPerformed(String step)
     {
-        startBddStep(step);
         super.notPerformed(step);
         stopBddStep(Status.SKIPPED, new StatusDetails().setMessage("Step is not performed"));
     }

@@ -41,8 +41,10 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,7 +69,8 @@ import org.vividus.util.json.JsonUtils;
 @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "AvoidDuplicateLiterals"})
 class StatisticsStoryReporterTests
 {
-    private static final String STEP = "step";
+    private static final String STEP_AS_STRING = "step";
+    private static final Step STEP = new Step(StepExecutionType.EXECUTABLE, STEP_AS_STRING);
     private static final String ASSERTION_STEP = "assertionPassed";
 
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(StatisticsStoryReporter.class);
@@ -190,20 +193,20 @@ class StatisticsStoryReporterTests
 
         reporter.beforeStory(givenStory, true);
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.afterScenario(null);
         reporter.afterStory(true);
 
         reporter.beforeScenario(scenario);
         reporter.beforeStory(givenStory, true);
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.pending(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.pending(STEP_AS_STRING));
         reporter.afterScenario(null);
         reporter.afterStory(true);
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.afterScenario(null);
 
         reporter.afterStory(true);
@@ -214,23 +217,23 @@ class StatisticsStoryReporterTests
 
         reporter.beforeStory(givenStory, true);
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.comment(STEP));
-        reportStep(reporter, () -> reporter.comment(STEP));
+        reportStep(reporter, () -> reporter.comment(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.comment(STEP_AS_STRING));
         reporter.afterScenario(null);
         reporter.afterStory(true);
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
 
         reporter.beforeStory(givenStory, true);
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.ignorable(STEP));
-        reportStep(reporter, () -> reporter.notPerformed(STEP));
+        reportStep(reporter, () -> reporter.ignorable(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.notPerformed(STEP_AS_STRING));
         reporter.afterScenario(null);
         reporter.afterStory(true);
         reporter.beforeStep(STEP);
         reporter.onAssertionFailure(mockFailed());
-        reporter.successful(STEP);
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reporter.successful(STEP_AS_STRING);
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.failed(ASSERTION_STEP, null);
 
         // examples end
@@ -240,20 +243,20 @@ class StatisticsStoryReporterTests
         // sub steps
 
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.beforeStep(STEP);
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.onAssertionFailure(mockKnownIssue());
-        reporter.successful(STEP);
+        reporter.successful(STEP_AS_STRING);
         reporter.failed(ASSERTION_STEP, null);
         reporter.afterScenario(null);
 
         // broken
 
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.failed(STEP, new Throwable()));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.failed(STEP_AS_STRING, new Throwable()));
         reporter.afterScenario(null);
 
         //skipped
@@ -315,14 +318,14 @@ class StatisticsStoryReporterTests
 
         reporter.beforeStory(story, false);
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.beforeStep(STEP);
         reporter.onAssertionFailure(mockFailed());
-        reporter.successful(STEP);
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reporter.successful(STEP_AS_STRING);
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.afterScenario(null);
         reporter.afterStory(false);
         reporter.beforeStoriesSteps(Stage.AFTER);
@@ -380,12 +383,12 @@ class StatisticsStoryReporterTests
 
         reporter.beforeStory(story, false);
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.successful(STEP));
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.beforeStep(STEP);
         reporter.onAssertionFailure(mockFailed());
-        reporter.successful(STEP);
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reporter.successful(STEP_AS_STRING);
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.afterScenario(null);
         reporter.afterStory(false);
         reporter.beforeStoriesSteps(Stage.AFTER);
@@ -441,14 +444,14 @@ class StatisticsStoryReporterTests
         reporter.afterStoriesSteps(Stage.BEFORE);
 
         reporter.beforeStory(story, false);
-        reportStep(reporter, () -> reporter.failed(STEP, new Throwable()));
+        reportStep(reporter, () -> reporter.failed(STEP_AS_STRING, new Throwable()));
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.beforeStep(STEP);
         reporter.onAssertionFailure(mockFailed());
-        reporter.successful(STEP);
+        reporter.successful(STEP_AS_STRING);
         reporter.afterScenario(null);
-        reportStep(reporter, () -> reporter.successful(STEP));
+        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.afterStory(false);
         reporter.beforeStoriesSteps(Stage.AFTER);
         reporter.afterStoriesSteps(Stage.AFTER);
