@@ -36,6 +36,7 @@ import com.google.common.eventbus.Subscribe;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.NullStoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
@@ -177,7 +178,7 @@ public class StatisticsStoryReporter extends NullStoryReporter
     }
 
     @Override
-    public void beforeStep(String step)
+    public void beforeStep(Step step)
     {
         Node node = new Node(NodeType.STEP);
         if (isRoot())

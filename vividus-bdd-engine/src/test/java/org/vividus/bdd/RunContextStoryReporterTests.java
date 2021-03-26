@@ -32,8 +32,10 @@ import java.util.Map;
 
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,10 +101,11 @@ class RunContextStoryReporterTests
     @Test
     void testBeforeStep()
     {
-        String step = "step";
+        String stepAsString = "step";
         RunningStory runningStory = mockGetRunningStory();
+        Step step = createStep(stepAsString);
         runContextStoryReporter.beforeStep(step);
-        assertEquals(step, runningStory.removeRunningStep());
+        assertEquals(stepAsString, runningStory.removeRunningStep());
         verify(next).beforeStep(step);
     }
 
@@ -111,7 +114,7 @@ class RunContextStoryReporterTests
     {
         String step = "successful";
         RunningStory runningStory = mockGetRunningStory();
-        runContextStoryReporter.beforeStep(step);
+        runContextStoryReporter.beforeStep(createStep(step));
         runContextStoryReporter.successful(step);
         assertEquals(List.of(), runningStory.getRunningSteps());
         verify(next).successful(step);
@@ -123,10 +126,15 @@ class RunContextStoryReporterTests
         String step = "failed";
         Throwable cause = mock(Throwable.class);
         RunningStory runningStory = mockGetRunningStory();
-        runContextStoryReporter.beforeStep(step);
+        runContextStoryReporter.beforeStep(createStep(step));
         runContextStoryReporter.failed(step, cause);
         assertEquals(List.of(), runningStory.getRunningSteps());
         verify(next).failed(step, cause);
+    }
+
+    private static Step createStep(String stepAsString)
+    {
+        return new Step(StepExecutionType.EXECUTABLE, stepAsString);
     }
 
     @Test

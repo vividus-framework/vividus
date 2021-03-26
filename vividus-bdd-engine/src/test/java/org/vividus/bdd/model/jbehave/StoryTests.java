@@ -40,6 +40,7 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.reporters.JsonOutput;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.Test;
 
@@ -135,7 +136,7 @@ class StoryTests
     private static void reportStep(StoryReporter reporter, Stage stage)
     {
         reporter.beforeScenarioSteps(stage);
-        reporter.beforeStep(STEP);
+        reporter.beforeStep(new org.jbehave.core.model.Step(StepExecutionType.EXECUTABLE, STEP));
         reporter.comment(STEP);
         reporter.afterScenarioSteps(stage);
     }

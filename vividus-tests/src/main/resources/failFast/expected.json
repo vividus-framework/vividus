@@ -18,11 +18,11 @@
     "knownIssue" : 0
   },
   "STEP" : {
-    "total" : 2,
+    "total" : 4,
     "passed" : 1,
     "failed" : 1,
     "broken" : 0,
-    "skipped" : 0,
+    "skipped" : 2,
     "pending" : 0,
     "knownIssue" : 0
   },

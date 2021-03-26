@@ -20,8 +20,10 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
+import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,10 +69,11 @@ class VariableStoryReporterTests
     @Test
     void testBeforeStep()
     {
-        variableStoryReporter.beforeStep(STEP);
+        Step step = new Step(StepExecutionType.EXECUTABLE, STEP);
+        variableStoryReporter.beforeStep(step);
         InOrder ordered = inOrder(bddVariableContext, nextStoryReporter);
         ordered.verify(bddVariableContext).initStepVariables();
-        ordered.verify(nextStoryReporter).beforeStep(STEP);
+        ordered.verify(nextStoryReporter).beforeStep(step);
         ordered.verifyNoMoreInteractions();
     }
 
