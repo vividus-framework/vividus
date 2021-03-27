@@ -10,7 +10,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
 
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
-    implementation(group: 'com.applitools', name: 'eyes-images-java3', version: '3.196.0')
+    implementation(group: 'com.applitools', name: 'eyes-images-java3', version: '3.197.0')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
