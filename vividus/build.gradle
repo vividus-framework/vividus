@@ -68,7 +68,7 @@ dependencies {
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-    implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.102')
+    implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.104')
     implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.1')
     implementation(group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2')
 
