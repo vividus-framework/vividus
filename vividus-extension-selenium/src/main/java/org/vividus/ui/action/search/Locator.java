@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class Locator
 {
@@ -132,7 +130,7 @@ public class Locator
 
         if (!filterAttributes.isEmpty())
         {
-            message.append(StringUtils.SPACE).append("with").append(StringUtils.SPACE);
+            message.append(SPACE).append("with").append(SPACE);
 
             filterAttributes.entrySet()
                             .stream()

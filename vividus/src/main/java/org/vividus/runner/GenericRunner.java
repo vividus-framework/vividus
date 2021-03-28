@@ -129,7 +129,7 @@ public class GenericRunner extends JUnitStories
             result.getFailures().forEach(f ->
             {
                 logger.error("Failure: {}", f);
-                logger.error(f.getTrace());
+                logger.atError().addArgument(f::getTrace).log("{}");
             });
             exitCode = ERROR_EXIT_CODE;
         }

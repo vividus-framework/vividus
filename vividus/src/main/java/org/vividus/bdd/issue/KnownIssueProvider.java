@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class KnownIssueProvider implements IKnownIssueProvider, ApplicationConte
                     BddKnownIssueIdentifier.class);
             for (Resource resource : resources)
             {
-                LOGGER.debug("Loading known issue identifiers from {}", resource.getDescription());
+                LOGGER.atDebug().addArgument(resource::getDescription).log("Loading known issue identifiers from {}");
                 knownIssueIdentifiers.putAll(filter(objectMapper.readValue(resource.getInputStream(), mapType)));
             }
         }
@@ -122,9 +122,11 @@ public class KnownIssueProvider implements IKnownIssueProvider, ApplicationConte
                 {
                     return true;
                 }
-                LOGGER.info(
-                        "Issue with key {} filtered out by additional pattern '{}'. Actual property value is '{}'",
-                        entry.getKey(), additionalPattern, propertyValue);
+                LOGGER.atInfo()
+                      .addArgument(entry::getKey)
+                      .addArgument(additionalPattern)
+                      .addArgument(propertyValue)
+                      .log("Issue with key {} filtered out by additional pattern '{}'. Actual property value is '{}'");
                 return false;
             });
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

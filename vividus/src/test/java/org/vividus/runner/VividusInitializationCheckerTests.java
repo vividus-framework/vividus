@@ -110,7 +110,7 @@ class VividusInitializationCheckerTests extends SystemStreamTests
             assertEquals("Initialization of beans has been failed", runtimeException.getMessage());
             vividus.verify(Vividus::init);
             beanFactory.verify(() -> BeanFactory.getBean(BEAN_1));
-            assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception.toString()))));
+            assertThat(logger.getLoggingEvents(), equalTo(List.of(error("{}", exception.toString()))));
         }
     }
 
