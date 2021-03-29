@@ -6,7 +6,9 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="dynamoDbSteps" class="org.vividus.aws.dynamodb.steps.DynamoDbSteps" />
+    <bean id="dynamoDbSteps" class="org.vividus.aws.dynamodb.steps.DynamoDbSteps">
+        <constructor-arg index="0" value="${aws.dynamodb.role-arn}" />
+    </bean>
 
     <util:list id="stepBeanNames-AWS-DynamoDb" value-type="java.lang.String">
         <idref bean="dynamoDbSteps" />
