@@ -12,6 +12,17 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-aws-dynamodb', versio
 
 include::partial$aws.adoc[]
 
+=== Cross-account Access
+
+Cross-account access is achieved https://aws.amazon.com/blogs/security/how-to-enable-cross-account-access-to-the-aws-management-console/[by switching roles]. Use the following property to specify the Amazon Resource Name (ARN) of the role to assume:
+
+[source,properties]
+----
+aws.dynamodb.role-arn=
+----
+
+The property is empty by default: no role is assumed.
+
 == Steps
 
 :partiql: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ql-reference.html[PartiQL]

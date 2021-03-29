@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider.Builder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -44,6 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
@@ -56,15 +60,28 @@ class DynamoDbStepsTests
 
     @Mock private IBddVariableContext bddVariableContext;
 
+    @SuppressWarnings({ "try", "PMD.CloseResource" })
     @Test
-    void shouldExecuteDeleteQuery()
+    void shouldExecuteDeleteQueryWithAssumedRole()
     {
         String partiqlQuery = "DELETE FROM Table WHERE KeyName='Value'";
         ExecuteStatementResult result = mock(ExecuteStatementResult.class);
-        shouldExecuteQuery(partiqlQuery, result, steps -> {
-            ExecuteStatementResult actual = steps.executeQuery(partiqlQuery);
-            assertEquals(result, actual);
-        });
+        STSAssumeRoleSessionCredentialsProvider provider = mock(STSAssumeRoleSessionCredentialsProvider.class);
+        String roleArn = "role:arn";
+        try (MockedConstruction<Builder> ignored = mockConstruction(Builder.class,
+                (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    assertEquals(List.of(roleArn, "Vividus"), context.arguments());
+                    when(mock.build()).thenReturn(provider);
+                }))
+        {
+            AmazonDynamoDBClientBuilder builder = executeQuery(roleArn, partiqlQuery,
+                    result, steps -> {
+                        ExecuteStatementResult actual = steps.executeQuery(partiqlQuery);
+                        assertEquals(result, actual);
+                    });
+            verify(builder).withCredentials(provider);
+        }
     }
 
     @Test
@@ -76,7 +93,7 @@ class DynamoDbStepsTests
                 Map.of("key1", new AttributeValue("value1")),
                 Map.of("key2", new AttributeValue("value2"))
         ));
-        shouldExecuteQuery(partiqlQuery, result, steps -> {
+        executeQuery(null, partiqlQuery, result, steps -> {
             Set<VariableScope> scopes = Set.of(VariableScope.STORY);
             String variableName = "var";
             steps.executeQuery(partiqlQuery, scopes, variableName);
@@ -85,17 +102,21 @@ class DynamoDbStepsTests
         });
     }
 
-    private void shouldExecuteQuery(String partiqlQuery, ExecuteStatementResult result, Consumer<DynamoDbSteps> test)
+    private AmazonDynamoDBClientBuilder executeQuery(String roleArn, String partiqlQuery, ExecuteStatementResult result,
+            Consumer<DynamoDbSteps> test)
     {
         try (MockedStatic<AmazonDynamoDBClientBuilder> builder = mockStatic(AmazonDynamoDBClientBuilder.class))
         {
+            AmazonDynamoDBClientBuilder amazonDynamoDBClientBuilder = mock(AmazonDynamoDBClientBuilder.class);
+            builder.when(AmazonDynamoDBClientBuilder::standard).thenReturn(amazonDynamoDBClientBuilder);
+
             AmazonDynamoDB amazonDynamoDB = mock(AmazonDynamoDB.class);
-            builder.when(AmazonDynamoDBClientBuilder::defaultClient).thenReturn(amazonDynamoDB);
+            when(amazonDynamoDBClientBuilder.build()).thenReturn(amazonDynamoDB);
 
             ArgumentCaptor<ExecuteStatementRequest> captor = ArgumentCaptor.forClass(ExecuteStatementRequest.class);
             when(amazonDynamoDB.executeStatement(captor.capture())).thenReturn(result);
 
-            DynamoDbSteps steps = new DynamoDbSteps(bddVariableContext);
+            DynamoDbSteps steps = new DynamoDbSteps(roleArn, bddVariableContext);
             test.accept(steps);
 
             ExecuteStatementRequest request = captor.getValue();
@@ -103,6 +124,8 @@ class DynamoDbStepsTests
             assertNull(request.getParameters());
 
             assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info("Executing query: {}", partiqlQuery))));
+
+            return amazonDynamoDBClientBuilder;
         }
     }
 }
