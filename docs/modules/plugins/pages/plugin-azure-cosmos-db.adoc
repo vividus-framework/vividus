@@ -1,0 +1,225 @@
+= Azure Cosmos DB Plugin
+
+The plugin provides functionality to interact with https://azure.microsoft.com/en-us/free/cosmos-db/[Cosmos DB]
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-cosmos-db', version: '{current-version}')
+----
+
+== Configuration
+
+=== Containers configuration
+
+Containers are configured with a set of properties with the following format:
+
+[source,properties]
+----
+azure.cosmos-db.container.{container-key}.{property-name}=property value
+----
+
+Where:
+
+. `container-name` - The key of the container configuration
+. `property-name` - The name of the container property. One of: 
+.. `container-id` - The id of the container
+.. `db-key` - The key of database configuration
+
+[source,properties]
+----
+azure.cosmos-db.database.{db-key}.{property-name}=property value
+----
+
+Where:
+
+. `db-key` - The key of the database configuration
+. `property-name` - The name of the container property. One of: 
+.. `db-id` - The id of the container
+.. `account-key` - The key of account configuration
+
+[source,properties]
+----
+azure.cosmos-db.account.{account-key}.{property-name}=property value
+----
+
+Where:
+
+. `account-key` - The key of the account configuration
+. `property-name` - The name of the container property. One of: 
+.. `key` - The key of the account
+.. `endpoint` - The endoint of the account
+
+.Access configuration
+[source,properties]
+----
+# Container configurations referring database instances via db-key
+azure.cosmos-db.container.items.id=Items
+azure.cosmos-db.container.items.db-key=main
+
+azure.cosmos-db.container.users.id=Users
+azure.cosmos-db.container.users.db-key=main
+
+azure.cosmos-db.container.orders.id=Orders
+azure.cosmos-db.container.orders.db-key=commecrial
+
+# Database configurations referring account instances via account-key
+azure.cosmos-db.database.main.id=MainDatabase
+azure.cosmos-db.database.main.account-key=vividus
+
+azure.cosmos-db.database.commecrial.id=OrdersDb
+azure.cosmos-db.database.commecrial.account-key=vividus
+
+# Accounts configuration contains connection details
+azure.cosmos-db.account.vividus.endpoint=https://vividus-cosmos.documents.azure.com:443/
+azure.cosmos-db.account.vividus.key=some key
+----
+
+== Steps
+
+=== Read
+
+Read an item by id and partition key
+
+[source,gherkin]
+----
+When I read item with `$id` id and `$partition` partition from CosmosDB container `$containerKey` and save result to $scopes variable `$variableName`
+----
+
+* `$id` - The id of the item
+* `$partition` - The value of partition key
+* `$containerKey` - The key of the container
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results in JSON format.
+
+.Read item
+[source,gherkin]
+----
+When I read item with `1` id and `personal` partition from CosmosDB container `test` and save result to scenario variable `result`
+Then JSON element from `${result}` by JSON path `$` is equal to `
+{
+    "id": "1",
+    "category": "personal",
+    "name": "groceries",
+    "description": "Pick up apples and strawberries.",
+    "isComplete": false
+}`IGNORING_EXTRA_FIELDS
+----
+
+=== Execute query
+
+Executes https://docs.microsoft.com/en-us/azure/cosmos-db/sql-query-getting-started[SQL] query
+
+[source,gherkin]
+----
+When I execute `$query` query against CosmosDB container `$containerKey` and save result to $scopes variable `$variableName`
+----
+
+* `$query` - The query to execute
+* `$containerKey` - The key of the container
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results in JSON format. 
+
+.Execute query
+[source,gherkin]
+----
+When I execute `SELECT * FROM Items` query against CosmosDB container `test` and save result to scenario variable `result`
+Then JSON element from `${result}` by JSON path `$` is equal to `
+[
+    {
+        "id": "1",
+        "category": "personal",
+        "name": "groceries",
+        "description": "Pick up apples and strawberries.",
+        "isComplete": false
+    },
+    {
+        "id": "2",
+        "category": "private",
+        "name": "stores",
+        "description": "Pick up apples and strawberries.",
+        "isComplete": false
+    },
+    {
+        "id": "3",
+        "category": "personal",
+        "name": "work",
+        "description": "Work till sundown",
+        "isComplete": false
+    }
+]`IGNORING_EXTRA_FIELDS
+----
+
+=== Upsert
+
+Upsert an item in the container
+
+[source,gherkin]
+----
+When I upsert `$data` into CosmosDB container `$containerKey`
+----
+
+* `$data` - The data to update
+* `$containerKey` - The key of the container
+
+.Upsert item
+[source,gherkin]
+----
+When I upsert `
+{
+    "id": "3",
+    "category": "personal",
+    "name": "work",
+    "description": "Work till sundown",
+    "isComplete": false
+}` into CosmosDB container `test`
+----
+
+=== Insert
+
+Insert an item in the container
+
+[source,gherkin]
+----
+When I insert `$data` into CosmosDB container `$containerKey`
+----
+
+* `$data` - The data to update/insert
+* `$containerKey` - The key of the container
+
+.Insert item
+[source,gherkin]
+----
+When I insert `
+{
+    "id": "3",
+    "category": "personal",
+    "name": "work",
+    "description": "Vacation",
+    "isComplete": false
+}` into CosmosDB container `test`
+----
+
+=== Delete
+
+Delete an item in the container
+
+[source,gherkin]
+----
+When I delete `$data` from CosmosDB container `$containerKey`
+----
+
+* `$data` - The data to delete
+* `$containerKey` - The key of the container
+
+.Delete item
+[source,gherkin]
+----
+When I delete `
+{
+    "id": "3",
+    "category": "personal"
+}` from CosmosDB container `test`
+----

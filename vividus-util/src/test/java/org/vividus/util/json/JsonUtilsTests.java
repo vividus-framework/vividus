@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,6 +146,13 @@ class JsonUtilsTests
     void testIsJson(String str, boolean json)
     {
         assertEquals(json, jsonUtils.isJson(str));
+    }
+
+    @Test
+    void shouldReadJson()
+    {
+        assertEquals(String.format("{%n  \"key\" : \"value\"%n}"),  jsonUtils.readTree("{\"key\" : \"value\"}"
+            ).toPrettyString());
     }
 
     public static class TestClass

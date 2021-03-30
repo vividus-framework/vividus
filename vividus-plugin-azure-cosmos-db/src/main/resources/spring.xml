@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+    default-lazy-init="true">
+
+    <bean id="cosmosDbSteps" class="org.vividus.azure.cosmos.CosmosDbSteps">
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="azure.cosmos-db.container." />
+                <constructor-arg value="org.vividus.azure.cosmos.model.CosmosDbContainer" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+           <bean class="org.vividus.azure.cosmos.CosmosDbService">
+               <constructor-arg>
+                   <bean factory-bean="propertyMapper" factory-method="readValues">
+                       <constructor-arg value="azure.cosmos-db.account." />
+                       <constructor-arg value="org.vividus.azure.cosmos.model.CosmosDbAccount" />
+                   </bean>
+              </constructor-arg>
+               <constructor-arg>
+                   <bean factory-bean="propertyMapper" factory-method="readValues">
+                       <constructor-arg value="azure.cosmos-db.database." />
+                       <constructor-arg value="org.vividus.azure.cosmos.model.CosmosDbDatabase" />
+                   </bean>
+               </constructor-arg>
+           </bean>
+        </constructor-arg>
+    </bean>
+
+    <util:list id="stepBeanNames-Azure-Cosmos-DB" value-type="java.lang.String">
+        <idref bean="cosmosDbSteps" />
+    </util:list>
+</beans>

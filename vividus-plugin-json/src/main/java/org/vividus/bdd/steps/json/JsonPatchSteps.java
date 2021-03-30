@@ -18,23 +18,23 @@ package org.vividus.bdd.steps.json;
 
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.flipkart.zjsonpatch.JsonPatch;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.util.json.JsonUtils;
 
 public class JsonPatchSteps
 {
     private final IBddVariableContext bddVariableContext;
-    private final JsonMapper jsonMapper = new JsonMapper();
+    private final JsonUtils jsonUtils;
 
-    public JsonPatchSteps(IBddVariableContext bddVariableContext)
+    public JsonPatchSteps(IBddVariableContext bddVariableContext, JsonUtils jsonUtils)
     {
         this.bddVariableContext = bddVariableContext;
+        this.jsonUtils = jsonUtils;
     }
 
     /**
@@ -46,10 +46,10 @@ public class JsonPatchSteps
      */
     @When("I patch JSON `$sourceJson` using `$jsonPatch` and save result to $scopes variable `$variableName`")
     public void patchJsonFile(String sourceJson, String jsonPatch, Set<VariableScope> scopes,
-            String variableName) throws JsonProcessingException
+            String variableName)
     {
-        JsonNode jsonSource = jsonMapper.readTree(sourceJson);
-        JsonNode patchJson = jsonMapper.readTree(jsonPatch);
+        JsonNode jsonSource = jsonUtils.readTree(sourceJson);
+        JsonNode patchJson = jsonUtils.readTree(jsonPatch);
         JsonNode patchedJson = JsonPatch.apply(patchJson, jsonSource);
         bddVariableContext.putVariable(scopes, variableName, patchedJson.toString());
     }

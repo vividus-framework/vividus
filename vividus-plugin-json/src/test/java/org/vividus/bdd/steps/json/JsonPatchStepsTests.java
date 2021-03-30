@@ -28,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.util.json.JsonUtils;
 
 @ExtendWith(MockitoExtension.class)
 class JsonPatchStepsTests
@@ -44,7 +45,7 @@ class JsonPatchStepsTests
     void patchJsonFile() throws JsonProcessingException
     {
         Set<VariableScope> variableScope = Set.of(VariableScope.SCENARIO);
-        JsonPatchSteps jsonPatchSteps = new JsonPatchSteps(bddVariableContext);
+        JsonPatchSteps jsonPatchSteps = new JsonPatchSteps(bddVariableContext, new JsonUtils());
         jsonPatchSteps.patchJsonFile(SOURCE_JSON, PATCH_JSON, variableScope, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(variableScope, VARIABLE_NAME, EXPECTED_RESULT);
     }
