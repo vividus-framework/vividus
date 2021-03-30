@@ -35,6 +35,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,12 +103,23 @@ class DeviceStepsTests
     @Test
     void shouldPressAndroidKey()
     {
+        performPressAndroidKeyTest(() -> deviceSteps.pressKey(AndroidKey.SPACE.name()));
+    }
+
+    @Test
+    void shouldPressAndroidKeys()
+    {
+        performPressAndroidKeyTest(() -> deviceSteps.pressKeys(new ExamplesTable("|key|\n|SPACE|")));
+    }
+
+    private void performPressAndroidKeyTest(Runnable run)
+    {
         ArgumentCaptor<KeyEvent> keyCaptor = ArgumentCaptor.forClass(KeyEvent.class);
         PressesKey pressesKey = mock(PressesKey.class);
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
         when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
 
-        deviceSteps.pressKey(AndroidKey.SPACE.name());
+        run.run();
 
         verify(pressesKey).pressKey(keyCaptor.capture());
 
@@ -118,10 +130,13 @@ class DeviceStepsTests
     @Test
     void shouldNotPressUnsupportedAndroidKey()
     {
+        PressesKey pressesKey = mock(PressesKey.class);
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> deviceSteps.pressKey("unsupported key"));
         assertEquals("Unsupported Android key: unsupported key", exception.getMessage());
         verifyNoMoreInteractions(webDriverProvider, genericWebDriverManager);
+        verifyNoInteractions(pressesKey);
     }
 }

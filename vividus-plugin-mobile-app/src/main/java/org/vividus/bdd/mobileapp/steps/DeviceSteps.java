@@ -17,12 +17,14 @@
 package org.vividus.bdd.mobileapp.steps;
 
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
+import org.jbehave.core.model.ExamplesTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.mobileapp.action.DeviceActions;
@@ -76,21 +78,64 @@ public class DeviceSteps
      * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
      * <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
      * Android keys</a> for available values
+     * <br>
+     * Example:
+     * <br>
+     * <code>
+     * When I press $key key
+     * </code>
      *
-     * @param key key to press
+     * @param key the key to press
      */
     @When("I press $key key")
     public void pressKey(String key)
     {
+        pressKeys(List.of(key));
+    }
+
+    /**
+     * Presses the keys
+     * <br>
+     * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
+     * <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
+     * Android keys</a> for available values
+     * <br>
+     * Example:
+     * <br>
+     * <code>
+     * When I press keys:
+     * <br>
+     * |key |
+     * <br>
+     * |Home|
+     * </code>
+     *
+     * @param keys the keys to press
+     */
+    @When("I press keys:$keys")
+    public void pressKeys(ExamplesTable keys)
+    {
+        pressKeys(keys.getColumn("key"));
+    }
+
+    private void pressKeys(List<String> keys)
+    {
         if (genericWebDriverManager.isIOSNativeApp())
         {
-            javascriptActions.executeScript("mobile: pressButton", Map.of("name", key));
+            keys.forEach(key -> javascriptActions.executeScript("mobile: pressButton", Map.of("name", key)));
         }
         else
         {
-            AndroidKey androidKey = EnumUtils.getEnumIgnoreCase(AndroidKey.class, key);
-            Validate.isTrue(androidKey != null, "Unsupported Android key: %s", key);
-            webDriverProvider.getUnwrapped(PressesKey.class).pressKey(new KeyEvent(androidKey));
+            PressesKey pressesKey = webDriverProvider.getUnwrapped(PressesKey.class);
+            keys.stream()
+                .map(key ->
+                {
+                    AndroidKey androidKey = EnumUtils.getEnumIgnoreCase(AndroidKey.class, key);
+                    Validate.isTrue(androidKey != null, "Unsupported Android key: %s", key);
+                    return androidKey;
+                })
+                .map(KeyEvent::new)
+                .forEach(pressesKey::pressKey);
         }
     }
 }
