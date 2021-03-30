@@ -635,4 +635,27 @@ When I press $key key
 When I press Home key
 ----
 
+=== Press keys
+
+Presses a sequence of https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
+
+[source,gherkin]
+----
+When I press keys:$keys
+----
+
+. `$keys` - The keys to press
+
+.Enter password
+[source,gherkin]
+----
+When I press keys:
+|key|
+|P  |
+|a  |
+|s  |
+|1  |
+|$  |
+----
+
 include::partial$generic-ui-steps.adoc[]
