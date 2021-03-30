@@ -6,6 +6,7 @@
 ** xref:plugin-aws-lambda.adoc[Lambda]
 ** xref:plugin-aws-s3.adoc[S3]
 * xref:azure.adoc[Azure]
+** xref:plugin-azure-cosmos-db.adoc[Cosmos DB]
 ** xref:plugin-azure-event-grid.adoc[Event Grid]
 ** xref:plugin-azure-functions.adoc[Functions]
 ** xref:plugin-azure-storage-queue.adoc[Storage Queue]

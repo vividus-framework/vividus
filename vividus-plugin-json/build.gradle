@@ -2,6 +2,7 @@ project.description = 'Vividus plugin for JSON testing'
 
 dependencies {
     implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-util')
     implementation (group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.11')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
