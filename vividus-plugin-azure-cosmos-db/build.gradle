@@ -12,6 +12,3 @@ dependencies {
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.5.5')
 }
-
-tasks.artifactoryPublish.enabled = false
-tasks.publish.enabled = false

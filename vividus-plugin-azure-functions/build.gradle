@@ -14,6 +14,3 @@ dependencies {
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
 }
-
-tasks.artifactoryPublish.enabled = false
-tasks.publish.enabled = false
