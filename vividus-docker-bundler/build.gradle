@@ -17,6 +17,7 @@ dependencies {
     implementation project(':vividus-plugin-aws-kinesis')
     implementation project(':vividus-plugin-aws-lambda')
     implementation project(':vividus-plugin-aws-s3')
+    implementation project(':vividus-plugin-azure-data-factory')
     implementation project(':vividus-plugin-browserstack')
     implementation project(':vividus-plugin-csv')
     implementation project(':vividus-plugin-datetime')

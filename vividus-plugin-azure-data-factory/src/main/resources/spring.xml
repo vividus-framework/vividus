@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+    default-lazy-init="true">
+
+    <bean id="dataFactorySteps" class="org.vividus.azure.datafactory.steps.DataFactorySteps">
+        <constructor-arg type="com.microsoft.azure.AzureEnvironment" value="${azure.data-factory.environment}" />
+        <constructor-arg value="${azure.data-factory.tenant-id}" />
+        <constructor-arg value="${azure.data-factory.subscription-id}" />
+    </bean>
+
+    <util:list id="stepBeanNames-Azure-DataFactory" value-type="java.lang.String">
+        <idref bean="dataFactorySteps" />
+    </util:list>
+</beans>
