@@ -1,0 +1,77 @@
+= Azure Data Factory Plugin
+
+The plugin provides functionality to interact with https://docs.microsoft.com/en-us/azure/data-factory/[Azure Data Factory]
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-data-factory', version: '{current-version}')
+----
+
+== Configuration
+
+=== Authentication
+
+The authentication process relies on the configuration of the environment variables.
+
+See the official https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/identity/azure-identity#environment-variables["Azure identity"] guide to get more details on what types of authentication could be used.
+
+== Properties
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="6,4,2,4", options="header"]
+|===
+|Property name
+|Acceptable values
+|Default
+|Description
+
+
+|[subs=+quotes]`*azure.data-factory.environment*`
+a|`AZURE`
+
+`AZURE_CHINA`
+
+`AZURE_GERMANY`
+
+`AZURE_US_GOVERNMENT`
+|`AZURE`
+|The Azure environment
+
+|[subs=+quotes]`*azure.data-factory.tenant-id*`
+|UUID
+|`<empty>`
+|The Azure tenant ID
+
+|[subs=+quotes]`*azure.data-factory.subscription-id*`
+|UUID
+|`<empty>`
+|The Azure subscription ID
+
+|===
+
+
+== Steps
+
+=== Run Pipeline
+
+Creates a run of a pipeline in Data Factory, waits for its completion or until the timeout is reached and validates the run status is `Succeeded`.
+
+[source,gherkin]
+----
+When I run pipeline `$pipelineName` in DataFactory `$factoryName` from resource group `$resourceGroupName` with wait timeout `$waitTimeout`
+----
+
+* `$pipelineName` - The name of the pipeline to run.
+* `$factoryName` - The name of the factory.
+* `$resourceGroupName` - The name of the resource group of the factory.
+* `$waitTimeout` - The maximum duration of time to wait for the pipeline completion in {iso-date-format-link} format.
+
+.Run pipeline
+[source,gherkin]
+----
+When I run pipeline `vividus-pipeline` in Data Factory `vividus-data-factory` from resource group `vividus-resource-group-ingestion` with wait timeout `PT30S`
+----
