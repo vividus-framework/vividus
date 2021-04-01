@@ -1,0 +1,112 @@
+= Azure Storage Blob Plugin
+
+The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/storage/blobs/[Azure Blob Storage]
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-blob', version: '{current-version}')
+----
+
+== Configuration
+
+=== Storage account configuration
+
+Storage accounts are configured with a set of properties with the following format:
+
+[source,properties]
+----
+azure.storage.blob.account.{account-name}.{property-name}=property value
+----
+
+Where:
+
+. `account-name` - The name of the storage account
+. `property-name` - The name of the account property. One of: 
+.. `name` - The name of the storage account
+.. `sas-token` - The https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS token]
+.. `container` - Comma-separated list of containers
+
+== Steps
+
+=== Read
+
+Reads a blob text content
+
+[source,gherkin]
+----
+When I read blob `$path` from `$containerId` blob container and save its content to $scopes variable `$variableName
+----
+
+* `$path` - The path to a blob
+* `$containerId` - The id of the container
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the blob
+
+.Read a blob
+[source,gherkin]
+----
+When I read blob `test.json` from `vividus` blob container and save its content to scenario variable `blob`
+----
+
+=== Copy
+
+Copies blob to a local filesystem temp folder
+
+[source,gherkin]
+----
+When I read blob `$path` from `$containerId` blob container to $filename temp file and save path to $scopes variable `$variableName`
+----
+
+* `$path` - The path to a blob
+* `$containerId` - The id of the container
+* `$filename` - The temp file suffix
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the blob
+
+.Save a blob to a temp folder
+[source,gherkin]
+----
+When I read file `test.json` from `vividus-blob` blob container to test.json temp file and save path to scenario variable `blobPath`
+----
+
+=== Delete
+
+Deletes a blob by the path
+
+[source,gherkin]
+----
+When I delete blob `$path` from `$containerId` blob container
+----
+
+* `$path` - The path to a blob
+* `$containerId` - The id of the container
+
+.Delete a blob
+[source,gherkin]
+----
+When I delete blob `test.json` from `vividus-private` blob container
+----
+
+=== Find
+
+Finds blobs with the path matching desired condition
+
+[source,gherkin]
+----
+When I find all blobs with path $comparisonRule `$expectedPath` from `$containerId` and save result to $scopes variable `$variableName`
+----
+
+* `$comparisonRule` - 
+* `$expectedPath` - The path to a blob
+* `$containerId` - The id of the container
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the blob
+
+.Delete a blob
+[source,gherkin]
+----
+When I find all blobs with path contains `json` from `vividus-blob` and save result to scenario variable `variableName`
+----
