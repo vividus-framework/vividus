@@ -167,26 +167,26 @@ jobs:
         name: System Tests - Allure report
         path: vividus-tests/output/reports/allure
 
-#     - name: LambdaTest - Desktop - Web - System tests
-#       if: matrix.platform == 'macos-latest'
-#       env:
-#         LAMBDATEST_USER: ${{ secrets.LAMBDATEST_USER }}
-#         LAMBDATEST_KEY: ${{ secrets.LAMBDATEST_KEY }}
-#       shell: bash
-#       run: |
-#         if [[ -n $LAMBDATEST_USER && -n $LAMBDATEST_KEY ]]; then
-#           declare -a profiles=( iexplore chrome firefox edge safari )
-#           for profile in "${profiles[@]}"; do
-#             ./gradlew :vividus-tests:runStories -x testVividusInitialization \
-#                                  -Pvividus.configuration.environments=system/lambdatest \
-#                                  -Pvividus.configuration.suites=lambdatest \
-#                                  -Pvividus.configuration.profiles=lambdatest/web,web/desktop/${profile} \
-#                                  -Pvividus.selenium.grid.username=${LAMBDATEST_USER} \
-#                                  -Pvividus.selenium.grid.password=${LAMBDATEST_KEY}
-#           done
-#         else
-#             echo No LAMBDATEST_USER and/or LAMBDATEST_KEY, LambdaTest integration tests will be skipped
-#         fi
+    - name: LambdaTest - Desktop - Web - System tests
+      if: matrix.platform == 'macos-latest'
+      env:
+        LAMBDATEST_USER: ${{ secrets.LAMBDATEST_USER }}
+        LAMBDATEST_KEY: ${{ secrets.LAMBDATEST_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $LAMBDATEST_USER && -n $LAMBDATEST_KEY ]]; then
+          declare -a profiles=( iexplore chrome firefox edge safari )
+          for profile in "${profiles[@]}"; do
+            ./gradlew :vividus-tests:runStories -x testVividusInitialization \
+                                 -Pvividus.configuration.environments=system/lambdatest \
+                                 -Pvividus.configuration.suites=lambdatest \
+                                 -Pvividus.configuration.profiles=lambdatest/web,web/desktop/${profile} \
+                                 -Pvividus.selenium.grid.username=${LAMBDATEST_USER} \
+                                 -Pvividus.selenium.grid.password=${LAMBDATEST_KEY}
+          done
+        else
+            echo No LAMBDATEST_USER and/or LAMBDATEST_KEY, LambdaTest integration tests will be skipped
+        fi
 
     - name: SauceLabs - Desktop - Web - System tests
       if: matrix.platform == 'ubuntu-latest'
