@@ -132,7 +132,7 @@ class DataFactoryStepsTests
             when(softAssert.assertEquals("The pipeline run status", SUCCEEDED, finalRunStatus)).thenReturn(
                     SUCCEEDED.equals(finalRunStatus));
 
-            steps.runPipeline(pipelineName, factoryName, resourceGroupName, Duration.ofSeconds(1));
+            steps.runPipeline(pipelineName, factoryName, resourceGroupName, Duration.ofSeconds(2));
 
             List<LoggingEvent> loggingEvents = new ArrayList<>();
             loggingEvents.add(info("The ID of the created pipeline run is {}", runId));
