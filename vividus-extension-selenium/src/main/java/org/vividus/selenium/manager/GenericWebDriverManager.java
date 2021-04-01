@@ -262,18 +262,18 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     @Override
     public boolean isOrientation(ScreenOrientation orientation)
     {
-        if (!isMobile())
+        if (isMobile())
         {
-            return false;
+            ScreenOrientation screenOrientation =
+                    webDriverManagerContext.getParameter(WebDriverManagerParameter.ORIENTATION);
+            if (screenOrientation == null)
+            {
+                screenOrientation = webDriverProvider.getUnwrapped(Rotatable.class).getOrientation();
+                webDriverManagerContext.putParameter(WebDriverManagerParameter.ORIENTATION, screenOrientation);
+            }
+            return orientation == screenOrientation;
         }
-        ScreenOrientation screenOrientation =
-                webDriverManagerContext.getParameter(WebDriverManagerParameter.ORIENTATION);
-        if (screenOrientation == null)
-        {
-            screenOrientation = webDriverProvider.getUnwrapped(Rotatable.class).getOrientation();
-            webDriverManagerContext.putParameter(WebDriverManagerParameter.ORIENTATION, screenOrientation);
-        }
-        return orientation == screenOrientation;
+        return false;
     }
 
     private static boolean checkCapabilities(Capabilities capabilities, BooleanSupplier supplier)
