@@ -431,8 +431,8 @@ The actions preformed by the step:
 ----
 Then number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $comparisonRule `$number`
 ----
-* `$httpMethods` - the comma-separated HTTP methods to filter by
-* `$urlPattern` - the regular expression to match HTTP request URL
+* `$httpMethods` - The comma-separated HTTP methods to filter by
+* `$urlPattern` - The regular expression to match HTTP request URL
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
 * `$number` - The number to compare with
 
@@ -585,7 +585,7 @@ Add headers to the proxied HTTP request satisfying the desired condition
 When I add headers to proxied requests with URL pattern which $comparisonRule `$url`:$headers
 ----
 * `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
-* `$url` - the input value of URL to filter by
+* `$url` - The input value of URL to filter by
 * `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
 
 .Add headers to the proxied HTTP request
@@ -648,6 +648,34 @@ Then number of elements found by `id(sw)` is = `0`
 ----
 
 
+=== Proxy - Mock response by methods with content
+
+{proxy}
+Mocks HTTP response by methods with a provided content
+
+[IMPORTANT]
+No actual request will be executed. Short-circuited response will be returned.
+
+[source,gherkin]
+----
+When I mock HTTP $httpMethods responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers
+----
+* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
+* `$rule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
+* `$url` - The input value of URL to filter by
+* `$code` - The response status code
+* `$content` - The content to send within a response
+* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
+
+.Hijack a page
+[source,gherkin]
+----
+When I mock HTTP POST responses with request URL which CONTAINS `example` using response code `202`, content `#{loadResource(mocked-example.json)}` and headers:
+|name        |value           |
+|Content-Type|application/json|
+----
+
+
 === Proxy - Mock response with content
 
 {proxy}
@@ -662,9 +690,9 @@ When I mock HTTP responses with request URL which $comparisonRule `$url` using r
 ----
 
 * `$rule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
-* `$url` - the input value of URL to filter by
-* `$code` - response status code
-* `$content` - content to send within a response
+* `$url` - The input value of URL to filter by
+* `$code` - The response status code
+* `$content` - The content to send within a response
 * `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
 
 .Hijack a page
@@ -690,8 +718,8 @@ When I mock HTTP responses with request URL which $comparisonRule `$url` using r
 ----
 
 * `$rule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
-* `$url` - the input value of URL to filter by
-* `$code` - response status code
+* `$url` - The input value of URL to filter by
+* `$code` - The response status code
 * `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
 
 .404 page
