@@ -66,6 +66,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private static final String ALLURE_CUSTOMIZATION_PATH = "/allure-customization/";
     private static final String ALLURE_CUSTOMIZATION_PATTERN = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
             + ALLURE_CUSTOMIZATION_PATH + "**";
+    private static final String STYLES_CSS = "styles.css";
 
     private File historyDirectory;
     private File reportDirectory;
@@ -179,7 +180,8 @@ public class AllureReportGenerator implements IAllureReportGenerator
                 new ExecutorPlugin()
         );
         List<Plugin> plugins = List.of(
-                new EmbeddedPlugin("behaviors", List.of("index.js"))
+                new EmbeddedPlugin("behaviors", List.of("index.js"), new BehaviorsPlugin()),
+                new EmbeddedPlugin("custom-logo", List.of(STYLES_CSS))
         );
         Configuration configuration = new ConfigurationBuilder()
                 .useDefault()
@@ -212,7 +214,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private void patchAllureFiles() throws IOException
     {
         File javascriptFile = new File(reportDirectory, "app.js");
-        File cssFile = new File(reportDirectory, "styles.css");
+        File cssFile = new File(reportDirectory, STYLES_CSS);
         String javascriptString = FileUtils.readFileToString(javascriptFile, StandardCharsets.UTF_8);
         String cssString = FileUtils.readFileToString(cssFile, StandardCharsets.UTF_8);
 
@@ -282,9 +284,14 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private static class EmbeddedPlugin extends DefaultPlugin
     {
-        EmbeddedPlugin(String id, List<String> jsFiles)
+        EmbeddedPlugin(String id, List<String> jsFiles, Extension extension)
         {
-            super(new PluginConfiguration().setId(id).setJsFiles(jsFiles), List.of(new BehaviorsPlugin()), null);
+            super(new PluginConfiguration().setId(id).setJsFiles(jsFiles), List.of(extension), null);
+        }
+
+        EmbeddedPlugin(String id, List<String> cssFiles)
+        {
+            super(new PluginConfiguration().setId(id).setCssFiles(cssFiles), List.of(), null);
         }
 
         @Override
