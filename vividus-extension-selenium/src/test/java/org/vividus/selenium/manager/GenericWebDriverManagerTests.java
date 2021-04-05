@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
@@ -242,15 +241,28 @@ class GenericWebDriverManagerTests
         assertTrue(driverManager.isIOS());
     }
 
+    static Stream<Arguments> tvOsArgs()
+    {
+        return Stream.of(
+            Arguments.of(MobilePlatform.TVOS, Boolean.TRUE.toString()),
+            Arguments.of(MobilePlatform.IOS, Boolean.FALSE.toString())
+        );
+    }
+
     @ParameterizedTest
-    @CsvSource({
-        MobilePlatform.TVOS + ", true",
-        MobilePlatform.IOS + ", false"
-    })
-    void testIsTvOS(String mobilePlatform, boolean expected)
+    @MethodSource("tvOsArgs")
+    void testIsTvOSStatic(String mobilePlatform, boolean expected)
     {
         assertEquals(expected, GenericWebDriverManager
                 .isTvOS(new DesiredCapabilities(Map.of(CapabilityType.PLATFORM_NAME, mobilePlatform))));
+    }
+
+    @ParameterizedTest
+    @MethodSource("tvOsArgs")
+    void testIsTvOS(String mobilePlatform, boolean expected)
+    {
+        mockWebDriverHavingCapabilities(Map.of(CapabilityType.PLATFORM_NAME, mobilePlatform));
+        assertEquals(expected, driverManager.isTvOS());
     }
 
     @Test
