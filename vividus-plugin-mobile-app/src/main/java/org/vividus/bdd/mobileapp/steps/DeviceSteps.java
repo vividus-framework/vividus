@@ -120,7 +120,7 @@ public class DeviceSteps
 
     private void pressKeys(List<String> keys)
     {
-        if (genericWebDriverManager.isIOSNativeApp())
+        if (genericWebDriverManager.isIOSNativeApp() || genericWebDriverManager.isTvOS())
         {
             keys.forEach(key -> javascriptActions.executeScript("mobile: pressButton", Map.of("name", key)));
         }

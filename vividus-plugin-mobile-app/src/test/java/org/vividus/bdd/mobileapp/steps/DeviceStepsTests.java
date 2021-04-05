@@ -88,11 +88,25 @@ class DeviceStepsTests
     }
 
     @Test
-    void shouldPressIOSKey()
+    void shouldPressKeyOnIOS()
+    {
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+
+        performPressAndroidKeyTest();
+    }
+
+    @Test
+    void shouldPressIOSKeyOnTvOS()
+    {
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isTvOS()).thenReturn(true);
+
+        performPressAndroidKeyTest();
+    }
+
+    private void performPressAndroidKeyTest()
     {
         String key = "Home";
-
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
 
         deviceSteps.pressKey(key);
 
@@ -117,6 +131,7 @@ class DeviceStepsTests
         ArgumentCaptor<KeyEvent> keyCaptor = ArgumentCaptor.forClass(KeyEvent.class);
         PressesKey pressesKey = mock(PressesKey.class);
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isTvOS()).thenReturn(false);
         when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
 
         run.run();
@@ -133,6 +148,7 @@ class DeviceStepsTests
         PressesKey pressesKey = mock(PressesKey.class);
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
         when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
+        when(genericWebDriverManager.isTvOS()).thenReturn(false);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> deviceSteps.pressKey("unsupported key"));
         assertEquals("Unsupported Android key: unsupported key", exception.getMessage());

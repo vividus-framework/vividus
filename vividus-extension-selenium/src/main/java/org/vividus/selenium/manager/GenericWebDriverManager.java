@@ -150,6 +150,12 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
                 || isDeviceAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD);
     }
 
+    @Override
+    public boolean isTvOS()
+    {
+        return isTvOS(getCapabilities());
+    }
+
     public static boolean isTvOS(Capabilities capabilities)
     {
         return isPlatformName(capabilities, MobilePlatform.TVOS);
