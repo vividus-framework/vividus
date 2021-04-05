@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,7 @@ class ProxyStepsTests
     private static final String MIME_TYPE = "mimeType";
     private static final String TEXT = "text";
     private static final String COMMENT = "comment";
+    private static final String CONTENT_LENGTH_VALUE = "6";
     private static final DefaultHttpHeaders HEADERS = new DefaultHttpHeaders();
     private static final Pattern URL_PATTERN = Pattern.compile(URL);
 
@@ -292,8 +293,43 @@ class ProxyStepsTests
         assertEquals(HttpResponseStatus.OK, response.status());
         assertEquals(VALUE1, response.content().toString(StandardCharsets.UTF_8));
         assertEquals(VALUE2, response.headers().get(KEY1));
-        assertEquals("6", response.headers().get(CONTENT_LENGTH));
+        assertEquals(CONTENT_LENGTH_VALUE, response.headers().get(CONTENT_LENGTH));
         assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
+    }
+
+    @Test
+    void shouldMockARequestWithTheContentByMethods()
+    {
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        when(messageInfo.getUrl()).thenReturn(URL);
+        HttpRequest request = mock(HttpRequest.class);
+        when(messageInfo.getOriginalRequest()).thenReturn(request);
+        when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
+        when(request.method()).thenReturn(io.netty.handler.codec.http.HttpMethod.POST);
+        DefaultHttpHeaders headers = new DefaultHttpHeaders();
+        headers.add(KEY1, VALUE2);
+        proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
+                URL, 200, VALUE1, headers);
+        verifyResponse(request, messageInfo);
+    }
+
+    @Test
+    void shouldMockARequestWithTheContentByMethodsNotMatch()
+    {
+        HttpMessageInfo messageInfo = mock(HttpMessageInfo.class);
+        when(messageInfo.getUrl()).thenReturn(URL);
+        HttpRequest request = mock(HttpRequest.class);
+        when(messageInfo.getOriginalRequest()).thenReturn(request);
+        when(request.method()).thenReturn(io.netty.handler.codec.http.HttpMethod.OPTIONS);
+        DefaultHttpHeaders headers = new DefaultHttpHeaders();
+        headers.add(KEY1, VALUE2);
+        proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
+                URL, 200, VALUE1, headers);
+        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
+        verify(proxy).addRequestFilter(filterCaptor.capture());
+        FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
+                messageInfo);
+        assertNull(response);
     }
 
     @Test
@@ -337,6 +373,19 @@ class ProxyStepsTests
         verify(nonFailingAssert).assertThat(eq(message), eq(actualMatchedEntriesNumber),
                 argThat(object -> object != null && object.toString()
                         .equals(rule.getComparisonRule(callsNumber).toString())));
+    }
+
+    private void verifyResponse(HttpRequest request, HttpMessageInfo messageInfo)
+    {
+        ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
+        verify(proxy).addRequestFilter(filterCaptor.capture());
+        FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
+                messageInfo);
+        assertEquals(HttpResponseStatus.OK, response.status());
+        assertEquals(VALUE1, response.content().toString(StandardCharsets.UTF_8));
+        assertEquals(VALUE2, response.headers().get(KEY1));
+        assertEquals(CONTENT_LENGTH_VALUE, response.headers().get(CONTENT_LENGTH));
+        assertEquals(HttpVersion.HTTP_1_1, response.protocolVersion());
     }
 
     private void mockSizeAssertion(String message, int actualMatchedEntriesNumber, ComparisonRule rule, int callsNumber)

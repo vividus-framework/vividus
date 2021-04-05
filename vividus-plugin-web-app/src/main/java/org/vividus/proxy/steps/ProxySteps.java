@@ -22,15 +22,19 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.browserup.bup.util.HttpMessageInfo;
 import com.browserup.harreader.model.HarEntry;
 import com.browserup.harreader.model.HarPostData;
 import com.browserup.harreader.model.HarPostDataParam;
@@ -131,7 +135,7 @@ public class ProxySteps
      * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
      * meta tag at the story level.
      * </p>
-     * The actions preformed by the step:
+     * The actions performed by the step:
      * <ul>
      * <li>extract HTTP messages from the recorded proxy archive</li>
      * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
@@ -171,7 +175,7 @@ public class ProxySteps
      * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
      * meta tag at the story level.
      * </p>
-     * The actions preformed by the step:
+     * The actions performed by the step:
      * <ul>
      * <li>extract HTTP messages from the recorded proxy archive</li>
      * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
@@ -210,7 +214,7 @@ public class ProxySteps
      * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
      * meta tag at the story level.
      * </p>
-     * The actions preformed by the step:
+     * The actions performed by the step:
      * <ul>
      * <li>extract HTTP messages from the recorded proxy archive</li>
      * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
@@ -303,8 +307,8 @@ public class ProxySteps
 
     /**
      * Waits for appearance of HTTP request matched <b>httpMethod</b> and <b>urlPattern</b> in proxy log
-     * @param httpMethods the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
-     * @param urlPattern the regular expression to match HTTP request URL
+     * @param httpMethods The "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
+     * @param urlPattern  The regular expression to match HTTP request URL
      */
     @When("I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log")
     public void waitRequestInProxyLog(Set<HttpMethod> httpMethods, Pattern urlPattern)
@@ -329,14 +333,15 @@ public class ProxySteps
     /**
      * Add headers to the proxied HTTP request satisfying the desired condition
      * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain"
-     * @param url The string value of URL to match comparison rule
-     * @param headers ExamplesTable representing the list of the headers with columns "name" and "value" specifying
-     * HTTP header names and values respectively
+     * @param url            The string value of URL to match comparison rule
+     * @param headers        ExamplesTable representing the list of the headers with columns "name" and
+     *                       "value" specifying HTTP header names and values respectively
      */
     @When("I add headers to proxied requests with URL pattern which $comparisonRule `$url`:$headers")
     public void addHeadersToProxyRequest(StringComparisonRule comparisonRule, String url, DefaultHttpHeaders headers)
     {
-        applyUrlFilter(comparisonRule, url, request -> {
+        Matcher<String> expected = comparisonRule.createMatcher(url);
+        applyUrlFilter(List.of(m -> expected.matches(m.getUrl())), request -> {
             request.headers().add(headers);
             return null;
         });
@@ -347,19 +352,77 @@ public class ProxySteps
      * Once the request is matched by URL comparison rule response will be returned. In this case no actual request will
      * be executed.
      * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
-     * @param url The string value of URL to match comparison rule
-     * @param responseCode The code will be used in response
-     * @param content The content will be used in the response
-     * @param headers ExamplesTable representing the list of the headers with columns "name" and "value" specifying
-     * HTTP header names and values respectively
+     * @param url            The string value of URL to match comparison rule
+     * @param responseCode   The code will be used in response
+     * @param content        The content will be used in the response
+     * @param headers        ExamplesTable representing the list of the headers with columns "name" and
+     *                       "value" specifying HTTP header names and values respectively
      */
     @When(value = "I mock HTTP responses with request URL which $comparisonRule `$url` using"
             + " response code `$responseCode`, content `$payload` and headers:$headers", priority = 1)
     public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode, Object content,
             DefaultHttpHeaders headers)
     {
+        mockHttpRequests(Optional.empty(), comparisonRule, url, responseCode, content, headers);
+    }
+
+    /**
+     * The step allows to mock HTTP request, and provide within response status code and headers.
+     * Once the request is matched by URL comparison rule response will be returned. In this case no actual request will
+     * be executed.
+     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
+     * @param url            The string value of URL to match comparison rule
+     * @param responseCode   The code will be used in response
+     * @param headers        ExamplesTable representing the list of the headers with columns "name" and
+     *                       "value" specifying HTTP header names and values respectively
+     */
+    @When("I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`"
+            + " and headers:$headers")
+    public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode,
+            DefaultHttpHeaders headers)
+    {
+        Matcher<String> expected = comparisonRule.createMatcher(url);
+        applyUrlFilter(List.of(m -> expected.matches(m.getUrl())), request -> {
+            DefaultHttpResponse mockedRequest =
+                new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.valueOf(responseCode));
+            mockedRequest.headers().add(headers);
+            return mockedRequest;
+        });
+    }
+
+    /**
+     * The step allows to mock HTTP request of specified method, and provide within response status code,
+     * headers and content. Once the request is matched by method and URL comparison rule response will be returned.
+     * In this case no actual request will be executed.
+     * @param httpMethods    The "or"-separated set of HTTP methods to filter by, e.g. 'GET or POST or PUT'
+     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
+     * @param url            The string value of URL to match comparison rule
+     * @param responseCode   The code will be used in response
+     * @param content        The content will be used in the response
+     * @param headers        ExamplesTable representing the list of the headers with columns "name" and
+     *                       "value" specifying HTTP header names and values respectively
+     */
+    @When(value = "I mock HTTP $httpMethods responses with request URL which $comparisonRule `$url` using"
+            + " response code `$responseCode`, content `$payload` and headers:$headers", priority = 1)
+    public void mockHttpRequests(Set<HttpMethod> httpMethods, StringComparisonRule comparisonRule, String url,
+            int responseCode, Object content, DefaultHttpHeaders headers)
+    {
+        mockHttpRequests(Optional.of(httpMethods), comparisonRule, url, responseCode, content, headers);
+    }
+
+    private void mockHttpRequests(Optional<Set<HttpMethod>> httpMethods, StringComparisonRule comparisonRule,
+            String url, int responseCode, Object content, DefaultHttpHeaders headers)
+    {
         byte[] contentBytes = getBytes(content);
-        applyUrlFilter(comparisonRule, url, request -> {
+        List<Predicate<HttpMessageInfo>> filters = new ArrayList<>();
+        Matcher<String> expected = comparisonRule.createMatcher(url);
+        filters.add(m -> expected.matches(m.getUrl()));
+        if (!httpMethods.isEmpty())
+        {
+            filters.add(m -> httpMethods.get().stream()
+                    .anyMatch(e -> m.getOriginalRequest().method().toString().equals(e.toString())));
+        }
+        applyUrlFilter(filters, request -> {
             HttpResponseStatus responseStatus = HttpResponseStatus.valueOf(responseCode);
             HttpVersion protocolVersion = request.protocolVersion();
 
@@ -369,29 +432,6 @@ public class ProxySteps
             HttpHeaders httpHeaders = mockedRequest.headers();
             httpHeaders.add("Content-Length", contentBytes.length);
             httpHeaders.add(headers);
-            return mockedRequest;
-        });
-    }
-
-    /**
-     * The step allows to mock HTTP request, and provide within response status code and headers.
-     * Once the request is matched by URL comparison rule response will be returned. In this case no actual request will
-     * be executed.
-     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
-     * @param url The string value of URL to match comparison rule
-     * @param responseCode The code will be used in response
-     * @param headers ExamplesTable representing the list of the headers with columns "name" and "value" specifying
-     * HTTP header names and values respectively
-     */
-    @When("I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`"
-            + " and headers:$headers")
-    public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode,
-            DefaultHttpHeaders headers)
-    {
-        applyUrlFilter(comparisonRule, url, request -> {
-            DefaultHttpResponse mockedRequest =
-                new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.valueOf(responseCode));
-            mockedRequest.headers().add(headers);
             return mockedRequest;
         });
     }
@@ -418,12 +458,12 @@ public class ProxySteps
         throw new IllegalArgumentException("Unsupported content type: " + content.getClass());
     }
 
-    private void applyUrlFilter(StringComparisonRule comparisonRule, String url,
+    private void applyUrlFilter(List<Predicate<HttpMessageInfo>> messageFilters,
             Function<HttpRequest, HttpResponse> requestProcessor)
     {
-        Matcher<String> expected = comparisonRule.createMatcher(url);
-        proxy.addRequestFilter((request, contents, messageInfo) -> {
-            if (expected.matches(messageInfo.getUrl()))
+        proxy.addRequestFilter((request, contents, messageInfo) ->
+        {
+            if (messageFilters.stream().allMatch(p -> p.test(messageInfo)))
             {
                 return requestProcessor.apply(request);
             }

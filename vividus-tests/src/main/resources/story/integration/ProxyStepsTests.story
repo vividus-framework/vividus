@@ -109,3 +109,12 @@ When I mock HTTP responses with request URL which CONTAINS `frames.html` using r
 When I clear proxy mocks
 Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
 Then number of elements found by `id(sw)` is = `0`
+
+Scenario: Verify step When I mock HTTP $httpMethods responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers
+Meta:
+    @requirementId 1104
+When I mock HTTP GET responses with request URL which CONTAINS `frames.html` using response code `200`, content `#{loadResource(page.html)}` and headers:
+|name        |value    |
+|Content-Type|text/html|
+Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+Then number of elements found by `id(sw)` is = `1`
