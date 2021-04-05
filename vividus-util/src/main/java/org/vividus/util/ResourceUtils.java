@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -114,10 +115,39 @@ public final class ResourceUtils
     }
 
     /**
+     * Creates an empty temporary file
+     *
+     * @param prefix the prefix string to be used in generating the file name
+     * @param suffix the suffix string to be used in generating the file name
+     * @return Path the path to the newly created file
+     * @throws IOException IOException if an I/O exception of some sort has occurred
+     */
+    public static Path createTempFile(String prefix, String suffix) throws IOException
+    {
+        Path tempFilePath = Files.createTempFile(prefix, suffix);
+        File tempFile = tempFilePath.toFile();
+        tempFile.deleteOnExit();
+        return tempFilePath;
+    }
+
+    /**
+     * Creates an empty temporary file
+     *
+     * @param baseFileName the base file name used to generate the prefix and the suffix for the creating temporary file
+     * @return Path the path to the newly created file
+     * @throws IOException IOException if an I/O exception of some sort has occurred
+     */
+    public static Path createTempFile(String baseFileName) throws IOException
+    {
+        return createTempFile(FilenameUtils.getBaseName(baseFileName), "." + FilenameUtils.getExtension(baseFileName));
+    }
+
+    /**
      * Creates a temporary file with the specified content
-     * @param prefix the prefix string to be used in generating the file's name
-     * @param suffix the suffix string to be used in generating the file's name
-     * @param data the content to write to the file
+     *
+     * @param prefix the prefix string to be used in generating the file name
+     * @param suffix the suffix string to be used in generating the file name
+     * @param data   the content to write to the file
      * @return Path the path to the newly created file
      * @throws IOException IOException if an I/O exception of some sort has occurred
      */

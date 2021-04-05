@@ -36,13 +36,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.azure.storage.blob.service.BlobStorageService;
 import org.vividus.bdd.context.BddVariableContext;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
-class BlobStepsTests
+class BlobStorageStepsTests
 {
     private static final String SUFFIX = "result.json";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
@@ -52,19 +51,16 @@ class BlobStepsTests
     private static final String KEY = "key";
     private static final String PATH = "path";
 
-    @Mock
-    private BddVariableContext bddVariableContext;
-    @Mock
-    private BlobStorageService blobStorageService;
+    @Mock private BddVariableContext bddVariableContext;
 
     @InjectMocks
-    private BlobSteps blobSteps;
+    private BlobStorageSteps blobStorageSteps;
 
     @Test
     void shouldReadTextContent()
     {
         when(blobStorageService.readBlob(KEY, PATH)).thenReturn(BYTES);
-        blobSteps.readBlob(PATH, KEY, SCOPES, VARIABLE_NAME);
+        blobStorageSteps.readBlob(PATH, KEY, SCOPES, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, VALUE);
     }
 
@@ -72,7 +68,7 @@ class BlobStepsTests
     void shouldSafeAFileToATempDirectory() throws IOException
     {
         when(blobStorageService.readBlob(KEY, PATH)).thenReturn(BYTES);
-        blobSteps.readBlobToFile(PATH, KEY, SUFFIX, SCOPES, VARIABLE_NAME);
+        blobStorageSteps.readBlobToFile(PATH, KEY, SUFFIX, SCOPES, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(eq(SCOPES), eq(VARIABLE_NAME), argThat(path ->
         {
             return path.toString().endsWith(SUFFIX) && VALUE.equals(readString((Path) path));
@@ -82,7 +78,7 @@ class BlobStepsTests
     @Test
     void shouldDeleteFile()
     {
-        blobSteps.deleteAFile(PATH, KEY);
+        blobStorageSteps.deleteAFile(PATH, KEY);
         verify(blobStorageService).delete(KEY, PATH);
         verifyNoInteractions(bddVariableContext);
     }
@@ -93,7 +89,7 @@ class BlobStepsTests
         List<Path> pathes = List.of(mock(Path.class));
         when(blobStorageService.findFiles(argThat(m -> "\"path\"".equals(m.toString())),
             eq(KEY))).thenReturn(pathes);
-        blobSteps.findFiles(StringComparisonRule.IS_EQUAL_TO, PATH, KEY, SCOPES, VARIABLE_NAME);
+        blobStorageSteps.findFiles(StringComparisonRule.IS_EQUAL_TO, PATH, KEY, SCOPES, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, pathes);
     }
 

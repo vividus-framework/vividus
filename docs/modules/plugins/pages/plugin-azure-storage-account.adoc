@@ -1,13 +1,13 @@
-= Azure Storage Blob Plugin
+= Azure Storage Account Plugin
 
-The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/storage/blobs/[Azure Blob Storage]
+The plugin provides functionality to interact with https://docs.microsoft.com/en-us/azure/storage/[Azure Storage Account].
 
 == Installation
 
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-blob', version: '{current-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-account', version: '{current-version}')
 ----
 
 == Configuration
@@ -24,7 +24,7 @@ azure.storage.blob.account.{account-name}.{property-name}=property value
 Where:
 
 . `account-name` - The name of the storage account
-. `property-name` - The name of the account property. One of: 
+. `property-name` - The name of the account property. One of:
 .. `name` - The name of the storage account
 .. `sas-token` - The https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS token]
 .. `container` - Comma-separated list of containers
@@ -99,7 +99,7 @@ Finds blobs with the path matching desired condition
 When I find all blobs with path $comparisonRule `$expectedPath` from `$containerId` and save result to $scopes variable `$variableName`
 ----
 
-* `$comparisonRule` - 
+* `$comparisonRule` -
 * `$expectedPath` - The path to a blob
 * `$containerId` - The id of the container
 * `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].

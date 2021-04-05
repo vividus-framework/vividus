@@ -48,6 +48,12 @@ public class PropertyParser implements IPropertyParser
     }
 
     @Override
+    public PropertyMappedCollection<String> readValues(String propertyPrefix)
+    {
+        return new PropertyMappedCollection<>(getPropertyValuesByPrefix(propertyPrefix));
+    }
+
+    @Override
     public Map<String, Object> getPropertyValuesTreeByPrefix(String propertyPrefix)
     {
         Map<String, Object> container = new HashMap<>();
