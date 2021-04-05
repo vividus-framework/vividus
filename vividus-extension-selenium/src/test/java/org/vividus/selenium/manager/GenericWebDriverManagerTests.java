@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
@@ -57,6 +58,7 @@ import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Window;
 import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.SauceLabsCapabilityType;
 
@@ -240,14 +242,15 @@ class GenericWebDriverManagerTests
         assertTrue(driverManager.isIOS());
     }
 
-    @Test
-    void testIsTvOS()
+    @ParameterizedTest
+    @CsvSource({
+        MobilePlatform.TVOS + ", true",
+        MobilePlatform.IOS + ", false"
+    })
+    void testIsTvOS(String mobilePlatform, boolean expected)
     {
-        Map<String, Object> capabilities = Map.of(
-                CapabilityType.PLATFORM_NAME, MobilePlatform.TVOS
-        );
-        mockWebDriverHavingCapabilities(capabilities);
-        assertTrue(driverManager.isIOS());
+        assertEquals(expected, GenericWebDriverManager
+                .isTvOS(new DesiredCapabilities(Map.of(CapabilityType.PLATFORM_NAME, mobilePlatform))));
     }
 
     @Test

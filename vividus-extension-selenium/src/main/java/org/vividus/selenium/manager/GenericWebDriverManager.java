@@ -146,9 +146,13 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     public static boolean isIOS(Capabilities capabilities)
     {
         return isPlatformName(capabilities, MobilePlatform.IOS)
-                || isPlatformName(capabilities, MobilePlatform.TVOS)
                 || isBrowserAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD)
                 || isDeviceAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD);
+    }
+
+    public static boolean isTvOS(Capabilities capabilities)
+    {
+        return isPlatformName(capabilities, MobilePlatform.TVOS);
     }
 
     @Override
