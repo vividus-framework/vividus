@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -142,5 +143,12 @@ public class ResourceUtilsTests
         String data = "data";
         Path tempFilePath = ResourceUtils.createTempFile("index", ".js", data);
         assertEquals(data, Files.readString(tempFilePath, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void shouldCreateTempFileUsingName() throws IOException
+    {
+        Path tempFilePath = ResourceUtils.createTempFile("test.json");
+        assertThat(tempFilePath.toString(), matchesPattern(".+test.+\\.json"));
     }
 }

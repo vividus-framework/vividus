@@ -82,11 +82,11 @@ public class BlobStorageSteps
      *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                          </ul>
      * @param variableName      The variable name to store the blob content.
-     * @throws IOException In case of error on blob downloading
+     * @throws IOException      In case of error on blob downloading
      */
     @When("I download blob with name `$blobName` from container `$containerName` in storage account "
             + "`$storageAccountKey` and save its content to $scopes variable `$variableName`")
-    public void readBlob(String blobName, String containerName, String storageAccountKey, Set<VariableScope> scopes,
+    public void downloadBlob(String blobName, String containerName, String storageAccountKey, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
@@ -115,12 +115,12 @@ public class BlobStorageSteps
      *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                          </ul>
      * @param variableName      The variable name to store the path to the temporary file with the blob content.
-     * @throws IOException In case of error on blob downloading or temporary file creation
+     * @throws IOException      In case of error on blob downloading or temporary file creation
      */
     @When("I download blob located at `$blobName` from container `$containerName` in storage account "
-            + "`$storageAccountKey`  to temporary file with name `$baseFileName` and save blobName to $scopes "
+            + "`$storageAccountKey` to temporary file with name `$baseFileName` and save blobName to $scopes "
             + "variable `$variableName`")
-    public void readBlobToFile(String blobName, String containerName, String storageAccountKey, String baseFileName,
+    public void downloadBlobToFile(String blobName, String containerName, String storageAccountKey, String baseFileName,
             Set<VariableScope> scopes, String variableName) throws IOException
     {
         String tempFilePath = ResourceUtils.createTempFile(baseFileName).toAbsolutePath().toString();
@@ -137,7 +137,7 @@ public class BlobStorageSteps
      */
     @When("I delete blob located at `$blobName` from container `$containerName` in storage account "
             + "`$storageAccountKey`")
-    public void deleteAFile(String blobName, String containerName, String storageAccountKey)
+    public void deleteABlob(String blobName, String containerName, String storageAccountKey)
     {
         createBlobClient(blobName, containerName, storageAccountKey).delete();
     }
@@ -163,15 +163,16 @@ public class BlobStorageSteps
      */
     @When("I find all blobs with name which $comparisonRule `$blobNameToMatch` from container `$containerName` in "
             + "storage account `$storageAccountKey` and save result to $scopes variable `$variableName`")
-    public void findFiles(StringComparisonRule rule, String blobNameToMatch, String containerName,
+    public void findBlobs(StringComparisonRule rule, String blobNameToMatch, String containerName,
             String storageAccountKey, Set<VariableScope> scopes, String variableName)
     {
         BlobContainerClient blobContainerClient = createBlobContainerClient(containerName, storageAccountKey);
         Matcher<String> nameMatcher = rule.createMatcher(blobNameToMatch);
-        List<String> blobNames = blobContainerClient.listBlobs().stream()
-                .map(BlobItem::getName)
-                .filter(nameMatcher::matches)
-                .collect(Collectors.toList());
+        List<String> blobNames = blobContainerClient.listBlobs()
+                                                    .stream()
+                                                    .map(BlobItem::getName)
+                                                    .filter(nameMatcher::matches)
+                                                    .collect(Collectors.toList());
         bddVariableContext.putVariable(scopes, variableName, blobNames);
     }
 

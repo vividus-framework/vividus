@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.util.property;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
@@ -125,5 +126,12 @@ class PropertyParserTests
             () -> parser.getPropertyValuesTreeByPrefix(PREFIX));
         assertThat("Path key 'other' from path 'other.prop1' is already used as a property key",
             equalTo(exception.getMessage()));
+    }
+
+    @Test
+    void shouldReadValuesByPrefix()
+    {
+        PropertyMappedCollection<String> propertiesByPrefix = parser.readValues(PREFIX);
+        assertThat(propertiesByPrefix.getData().values(), hasItems(VAL_1, VAL_2, VAL_3));
     }
 }
