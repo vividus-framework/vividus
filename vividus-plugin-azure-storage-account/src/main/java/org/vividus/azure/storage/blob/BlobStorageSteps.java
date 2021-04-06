@@ -118,7 +118,7 @@ public class BlobStorageSteps
      * @throws IOException      In case of error on blob downloading or temporary file creation
      */
     @When("I download blob located at `$blobName` from container `$containerName` in storage account "
-            + "`$storageAccountKey` to temporary file with name `$baseFileName` and save blobName to $scopes "
+            + "`$storageAccountKey` to temporary file with name `$baseFileName` and save path to $scopes "
             + "variable `$variableName`")
     public void downloadBlobToFile(String blobName, String containerName, String storageAccountKey, String baseFileName,
             Set<VariableScope> scopes, String variableName) throws IOException
@@ -159,7 +159,7 @@ public class BlobStorageSteps
      *                          <li><b>STORY</b> - the variable will be available within the whole story,
      *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                          </ul>
-     * @param variableName      The variable name to store the result.
+     * @param variableName      The variable name to store the list of found blob names.
      */
     @When("I find all blobs with name which $comparisonRule `$blobNameToMatch` from container `$containerName` in "
             + "storage account `$storageAccountKey` and save result to $scopes variable `$variableName`")

@@ -16,18 +16,17 @@ include::partial$azure-authentication.adoc[]
 
 === Properties
 
-Storage accounts are configured with a set of properties with the following format:
+The storage accounts endpoints are configured with the following property format:
 
 [source,properties]
 ----
-azure.storage.account.{account-name}.{property-name}=property value
+azure.storage-account.<key>=<endpoint>
 ----
 
-Where:
+where:
 
-. `account-name` - The name of the storage account
-. `property-name` - The name of the account property. One of:
-.. `endoint` - The storage account  endpoint
+. `key` - The logical key used to refer storage account in the steps.
+. `endpoint` - The storage account endpoint, e.g. `https://storageaccount.blob.core.windows.net/`
 
 == Steps
 
@@ -40,38 +39,38 @@ Downloads a blob text content
 When I download blob with name `$blobName` from container `$containerName` in storage account `$storageAccountKey` and save its content to $scopes variable `$variableName`
 ----
 
-* `$blobName` - The blob name
-* `$containerName` - The name of the container
-* `$storageAccountKey` - The key of storage account configuraiton
+* `$blobName` - The full path to a blob in the container.
+* `$containerName` - The name of the container.
+* `$storageAccountKey` - The key of storage account from the configuration.
 * `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store the blob
+* `$variableName` - The variable name to store the blob.
 
 .Download a blob
 [source,gherkin]
 ----
-When I download blob with name `test.json` from container `vividus` in storage account `testAccount` and save its content to scenario variable `blob`
+When I download blob with name `raw/test.json` from container `vividus` in storage account `test-account` and save its content to scenario variable `blob`
 ----
 
-=== Download to temp file
+=== Download blob to a temporary file
 
-Downloads blob to a local filesystem temp folder
+Downloads a blob to a local temporary file
 
 [source,gherkin]
 ----
-When I download blob located at `$blobName` from container `$containerName` in storage account `$storageAccountKey` to temporary file with name `$baseFileName` and save blobName to $scopes variable `$variableName`
+When I download blob located at `$blobName` from container `$containerName` in storage account `$storageAccountKey` to temporary file with name `$baseFileName` and save path to $scopes variable `$variableName`
 ----
 
-* `$blobName` - The name of the blob
-* `$containerName` - The name of the container
-* `$storageAccountKey` - The key of storage account configuraiton
-* `$baseFileName` - The temp file base name
+* `$blobName` - The full path to a blob in the container.
+* `$containerName` - The name of the container.
+* `$storageAccountKey` - The key of storage account from the configuration.
+* `$baseFileName` - The base file name used to generate the prefix and the suffix for the creating temporary file.
 * `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store the blob
+* `$variableName` - The variable name to store the path to the temporary file with the blob content.
 
-.Download a blob to a temp folder
+.Download a blob to a temporary file
 [source,gherkin]
 ----
-When I download blob located at `test.json` from container `vividus` in storage account `testAccount` to temporary file with name `test.json` and save blobName to scenario variable `pathToABlob`
+When I download blob located at `raw/test.json` from container `vividus` in storage account `test-account` to temporary file with name `test.json` and save blobName to scenario variable `pathToABlob`
 ----
 
 === Delete blob
@@ -83,35 +82,34 @@ Deletes a blob by the path
 When I delete blob located at `$blobName` from container `$containerName` in storage account `$storageAccountKey`
 ----
 
-* `$blobName` - The name of the blob
-* `$containerName` - The name of the container
-* `$storageAccountKey` - The key of storage account configuraiton
+* `$blobName` - The full path to a blob in the container.
+* `$containerName` - The name of the container.
+* `$storageAccountKey` - The key of storage account from the configuration.
 
 .Delete a blob
 [source,gherkin]
 ----
-When I delete blob `test.json` from `vividus-private` blob container
-When I delete blob located at `test.json` from container `vividus` in storage account `testAccount`
+When I delete blob located at `raw/test.json` from container `vividus` in storage account `test-account`
 ----
 
 === Find blobs
 
-Finds blobs with the path matching desired condition
+Finds the blobs with names matching the specified comparison rule.
 
 [source,gherkin]
 ----
 When I find all blobs with name which $comparisonRule `$blobNameToMatch` from container `$containerName` in storage account `$storageAccountKey` and save result to $scopes variable `$variableName`
 ----
 
-* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
-* `$blobNameToMatch` - The expected blob name
-* `$containerName` - The name of the container
-* `$storageAccountKey` - The key of storage account configuraiton
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[The blob name comparison rule].
+* `$blobNameToMatch` - The full or partial blob name to be matched.
+* `$containerName` - The name of the container.
+* `$storageAccountKey` - The key of storage account from the configuration.
 * `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store the blob
+* `$variableName` - The variable name to store the list of found blob names.
 
 .Find blobs
 [source,gherkin]
 ----
-When I find all blobs with name which contains `json` from container `vividus` in storage account `testAccount` and save result to scenario variable `blobsCollection`
+When I find all blobs with name which contains `json` from container `vividus` in storage account `test-account` and save result to scenario variable `blobsCollection`
 ----
