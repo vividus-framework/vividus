@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.util.BinaryData;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -67,9 +68,9 @@ public class BlobStorageSteps
     }
 
     /**
-     * Downloads the entire blob and saves its content as a text to a variable
+     * Downloads the entire blob from the container and saves its content as a text to a variable
      *
-     * @param blobName          The full path to a blob in the container.
+     * @param blobName          The full path to the blob in the container.
      * @param containerName     The name of the container to point to.
      * @param storageAccountKey The key to Storage Account endpoint.
      * @param scopes            The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
@@ -84,7 +85,8 @@ public class BlobStorageSteps
      * @param variableName      The variable name to store the blob content.
      * @throws IOException      In case of error on blob downloading
      */
-    @When("I download blob with name `$blobName` from container `$containerName` in storage account "
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    @When("I download blob with name `$blobName` from container `$containerName` of storage account "
             + "`$storageAccountKey` and save its content to $scopes variable `$variableName`")
     public void downloadBlob(String blobName, String containerName, String storageAccountKey, Set<VariableScope> scopes,
             String variableName) throws IOException
@@ -97,10 +99,10 @@ public class BlobStorageSteps
     }
 
     /**
-     * Downloads the entire blob into a temporary file with the specified name and saves the full path to the
-     * specified variable.
+     * Downloads the entire blob from the container into a temporary file with the specified name and saves the full
+     * path to the specified variable.
      *
-     * @param blobName          The full path to a blob in the container.
+     * @param blobName          The full path to the blob in the container.
      * @param containerName     The name of the container to point to.
      * @param baseFileName      The base file name used to generate the prefix and the suffix for the creating
      *                          temporary file.
@@ -117,7 +119,8 @@ public class BlobStorageSteps
      * @param variableName      The variable name to store the path to the temporary file with the blob content.
      * @throws IOException      In case of error on blob downloading or temporary file creation
      */
-    @When("I download blob located at `$blobName` from container `$containerName` in storage account "
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    @When("I download blob with name `$blobName` from container `$containerName` of storage account "
             + "`$storageAccountKey` to temporary file with name `$baseFileName` and save path to $scopes "
             + "variable `$variableName`")
     public void downloadBlobToFile(String blobName, String containerName, String storageAccountKey, String baseFileName,
@@ -129,21 +132,36 @@ public class BlobStorageSteps
     }
 
     /**
-     * Deletes the specified blob.
+     * Uploads the blob to the container.
      *
-     * @param blobName          The full path to a blob in the container.
+     * @param blobName          The full path to the creating blob in the container.
+     * @param data              The data to store as blob.
      * @param containerName     The name of the container to point to.
      * @param storageAccountKey The key to Storage Account endpoint.
      */
-    @When("I delete blob located at `$blobName` from container `$containerName` in storage account "
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    @When("I upload blob with name `$blobName` and `$data` to container `$containerName` of storage account "
             + "`$storageAccountKey`")
-    public void deleteABlob(String blobName, String containerName, String storageAccountKey)
+    public void uploadBlob(String blobName, String data, String containerName, String storageAccountKey)
+    {
+        createBlobClient(blobName, containerName, storageAccountKey).upload(BinaryData.fromString(data));
+    }
+
+    /**
+     * Deletes the specified blob from the container.
+     *
+     * @param blobName          The full path to the blob in the container.
+     * @param containerName     The name of the container to point to.
+     * @param storageAccountKey The key to Storage Account endpoint.
+     */
+    @When("I delete blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey`")
+    public void deleteBlob(String blobName, String containerName, String storageAccountKey)
     {
         createBlobClient(blobName, containerName, storageAccountKey).delete();
     }
 
     /**
-     * Finds the blobs with names matching the specified comparison rule.
+     * Finds the blobs with names matching the specified comparison rule in the container
      *
      * @param rule              The blob name comparison rule: "is equal to", "contains", "does not contain" or
      *                          "matches".
@@ -161,7 +179,8 @@ public class BlobStorageSteps
      *                          </ul>
      * @param variableName      The variable name to store the list of found blob names.
      */
-    @When("I find all blobs with name which $comparisonRule `$blobNameToMatch` from container `$containerName` in "
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    @When("I find all blobs with name which $comparisonRule `$blobNameToMatch` in container `$containerName` of "
             + "storage account `$storageAccountKey` and save result to $scopes variable `$variableName`")
     public void findBlobs(StringComparisonRule rule, String blobNameToMatch, String containerName,
             String storageAccountKey, Set<VariableScope> scopes, String variableName)

@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -63,7 +64,8 @@ class BlobStorageStepsTests
     private static final String BLOB = "BLOB";
     private static final String CONTAINER = "container";
     private static final String KEY = "KEY";
-    private static final byte[] BATES = BLOB.getBytes(StandardCharsets.UTF_8);
+    private static final String DATA = "data";
+    private static final byte[] BYTES = DATA.getBytes(StandardCharsets.UTF_8);
 
     @Mock private BddVariableContext bddVariableContext;
     @Mock private PropertyMappedCollection<String> storageAccountEndpoints;
@@ -79,7 +81,7 @@ class BlobStorageStepsTests
             {
                 try
                 {
-                    s.write(BATES);
+                    s.write(BYTES);
                 }
                 catch (IOException e)
                 {
@@ -88,12 +90,12 @@ class BlobStorageStepsTests
                 return true;
             }));
             steps.downloadBlob(BLOB, CONTAINER, KEY, SCOPES, VARIABLE);
-            verify(bddVariableContext).putVariable(SCOPES, VARIABLE, BLOB);
+            verify(bddVariableContext).putVariable(SCOPES, VARIABLE, DATA);
         });
     }
 
     @Test
-    void shouldDownloadBlobToAFile()
+    void shouldDownloadBlobToFile()
     {
         runWithClient((steps, client) ->
         {
@@ -107,12 +109,23 @@ class BlobStorageStepsTests
     }
 
     @Test
+    void shouldUploadBlob()
+    {
+        runWithClient((steps, client) ->
+        {
+            BlobClient blobClient = mockBlobClient(client);
+            steps.uploadBlob(BLOB, DATA, CONTAINER, KEY);
+            verify(blobClient).upload(argThat(data -> Arrays.equals(data.toBytes(), BYTES)));
+        });
+    }
+
+    @Test
     void shouldDeleteBlob()
     {
         runWithClient((steps, client) ->
         {
             BlobClient blobClient = mockBlobClient(client);
-            steps.deleteABlob(BLOB, CONTAINER, KEY);
+            steps.deleteBlob(BLOB, CONTAINER, KEY);
             verify(blobClient).delete();
         });
     }
