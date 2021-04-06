@@ -153,10 +153,8 @@ public final class ResourceUtils
      */
     public static Path createTempFile(String prefix, String suffix, String data) throws IOException
     {
-        Path tempFilePath = Files.createTempFile(prefix, suffix);
-        File tempFile = tempFilePath.toFile();
-        FileUtils.writeStringToFile(tempFile, data, StandardCharsets.UTF_8);
-        tempFile.deleteOnExit();
+        Path tempFilePath = createTempFile(prefix, suffix);
+        FileUtils.writeStringToFile(tempFilePath.toFile(), data, StandardCharsets.UTF_8);
         return tempFilePath;
     }
 
