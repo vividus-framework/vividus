@@ -12,101 +12,106 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-account
 
 == Configuration
 
-=== Storage account configuration
+include::partial$azure-authentication.adoc[]
+
+=== Properties
 
 Storage accounts are configured with a set of properties with the following format:
 
 [source,properties]
 ----
-azure.storage.blob.account.{account-name}.{property-name}=property value
+azure.storage.account.{account-name}.{property-name}=property value
 ----
 
 Where:
 
 . `account-name` - The name of the storage account
 . `property-name` - The name of the account property. One of:
-.. `name` - The name of the storage account
-.. `sas-token` - The https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS token]
-.. `container` - Comma-separated list of containers
+.. `endoint` - The storage account  endpoint
 
 == Steps
 
-=== Read
+=== Download blob
 
-Reads a blob text content
+Downloads a blob text content
 
 [source,gherkin]
 ----
-When I read blob `$path` from `$containerId` blob container and save its content to $scopes variable `$variableName
+When I download blob with name `$blobName` from container `$containerName` in storage account `$storageAccountKey` and save its content to $scopes variable `$variableName`
 ----
 
-* `$path` - The path to a blob
-* `$containerId` - The id of the container
+* `$blobName` - The blob name
+* `$containerName` - The name of the container
+* `$storageAccountKey` - The key of storage account configuraiton
 * `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the blob
 
-.Read a blob
+.Download a blob
 [source,gherkin]
 ----
-When I read blob `test.json` from `vividus` blob container and save its content to scenario variable `blob`
+When I download blob with name `test.json` from container `vividus` in storage account `testAccount` and save its content to scenario variable `blob`
 ----
 
-=== Copy
+=== Download to temp file
 
-Copies blob to a local filesystem temp folder
+Downloads blob to a local filesystem temp folder
 
 [source,gherkin]
 ----
-When I read blob `$path` from `$containerId` blob container to $filename temp file and save path to $scopes variable `$variableName`
+When I download blob located at `$blobName` from container `$containerName` in storage account `$storageAccountKey` to temporary file with name `$baseFileName` and save blobName to $scopes variable `$variableName`
 ----
 
-* `$path` - The path to a blob
-* `$containerId` - The id of the container
-* `$filename` - The temp file suffix
+* `$blobName` - The name of the blob
+* `$containerName` - The name of the container
+* `$storageAccountKey` - The key of storage account configuraiton
+* `$baseFileName` - The temp file base name
 * `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the blob
 
-.Save a blob to a temp folder
+.Download a blob to a temp folder
 [source,gherkin]
 ----
-When I read file `test.json` from `vividus-blob` blob container to test.json temp file and save path to scenario variable `blobPath`
+When I download blob located at `test.json` from container `vividus` in storage account `testAccount` to temporary file with name `test.json` and save blobName to scenario variable `pathToABlob`
 ----
 
-=== Delete
+=== Delete blob
 
 Deletes a blob by the path
 
 [source,gherkin]
 ----
-When I delete blob `$path` from `$containerId` blob container
+When I delete blob located at `$blobName` from container `$containerName` in storage account `$storageAccountKey`
 ----
 
-* `$path` - The path to a blob
-* `$containerId` - The id of the container
+* `$blobName` - The name of the blob
+* `$containerName` - The name of the container
+* `$storageAccountKey` - The key of storage account configuraiton
 
 .Delete a blob
 [source,gherkin]
 ----
 When I delete blob `test.json` from `vividus-private` blob container
+When I delete blob located at `test.json` from container `vividus` in storage account `testAccount`
 ----
 
-=== Find
+=== Find blobs
 
 Finds blobs with the path matching desired condition
 
 [source,gherkin]
 ----
-When I find all blobs with path $comparisonRule `$expectedPath` from `$containerId` and save result to $scopes variable `$variableName`
+When I find all blobs with name which $comparisonRule `$blobNameToMatch` from container `$containerName` in storage account `$storageAccountKey` and save result to $scopes variable `$variableName`
 ----
 
-* `$comparisonRule` -
-* `$expectedPath` - The path to a blob
-* `$containerId` - The id of the container
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
+* `$blobNameToMatch` - The expected blob name
+* `$containerName` - The name of the container
+* `$storageAccountKey` - The key of storage account configuraiton
 * `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the blob
 
-.Delete a blob
+.Find blobs
 [source,gherkin]
 ----
-When I find all blobs with path contains `json` from `vividus-blob` and save result to scenario variable `variableName`
+When I find all blobs with name which contains `json` from container `vividus` in storage account `testAccount` and save result to scenario variable `blobsCollection`
 ----

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
-   <Loggers>
-        <Logger name="com.azure.storage.blob.nio.AzureFileSystemProvider" level="trace" additivity="false">
-            <AppenderRef ref="console" />
-            <AppenderRef ref="file" />
-        </Logger>
-    </Loggers>
-</Configuration>

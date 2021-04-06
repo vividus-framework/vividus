@@ -12,11 +12,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-azure-data-factory', 
 
 == Configuration
 
-=== Authentication
-
-The authentication process relies on the configuration of the environment variables.
-
-See the official https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/identity/azure-identity#environment-variables["Azure identity"] guide to get more details on what types of authentication could be used.
+include::partial$azure-authentication.adoc[]
 
 == Properties
 
