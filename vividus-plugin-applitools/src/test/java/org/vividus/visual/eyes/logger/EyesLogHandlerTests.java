@@ -35,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.vividus.util.json.JsonUtils;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
 class EyesLogHandlerTests
@@ -61,8 +62,9 @@ class EyesLogHandlerTests
         String timestamp = "timestamp";
         String logString = "message";
         ClientEvent clientEvent = new ClientEvent(timestamp, logString, level);
-        new EyesLogHandler(EyesLogHandler.class).onMessage(clientEvent);
+        new EyesLogHandler(EyesLogHandler.class, new JsonUtils()).onMessage(clientEvent);
         assertThat(LOGGER.getLoggingEvents(), is(List.of(eventProducer.apply(String
-                .format("{\"timestamp\":\"%s\",\"event\":\"%s\",\"level\":%s}", timestamp, logString, logLevel)))));
+                .format("{%n  \"timestamp\" : \"%s\",%n  \"event\" : \"%s\",%n  \"level\" : %s%n}", timestamp,
+                        logString, logLevel)))));
     }
 }

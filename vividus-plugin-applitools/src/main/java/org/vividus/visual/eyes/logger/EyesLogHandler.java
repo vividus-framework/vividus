@@ -16,26 +16,25 @@
 
 package org.vividus.visual.eyes.logger;
 
-import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 
 import com.applitools.eyes.NullLogHandler;
 import com.applitools.eyes.logging.ClientEvent;
 import com.applitools.eyes.logging.TraceLevel;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.util.json.JsonUtils;
 
 public class EyesLogHandler extends NullLogHandler
 {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonUtils jsonUtils;
     private final Logger logger;
 
-    public EyesLogHandler(Class<?> clazz)
+    public EyesLogHandler(Class<?> clazz, JsonUtils jsonUtils)
     {
         logger = LoggerFactory.getLogger(clazz);
+        this.jsonUtils = jsonUtils;
     }
 
     @Override
@@ -63,14 +62,7 @@ public class EyesLogHandler extends NullLogHandler
 
     private void logMessage(ClientEvent event, Consumer<String> logger)
     {
-        try
-        {
-            logger.accept(objectMapper.writeValueAsString(event));
-        }
-        catch (JsonProcessingException e)
-        {
-            throw new UncheckedIOException(e);
-        }
+        logger.accept(jsonUtils.toPrettyJson(event));
     }
 
     @Override
