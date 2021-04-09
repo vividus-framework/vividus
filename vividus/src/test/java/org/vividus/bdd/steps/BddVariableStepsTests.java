@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,7 @@ import freemarker.template.TemplateException;
 @ExtendWith(MockitoExtension.class)
 class BddVariableStepsTests
 {
+    private static final String HEADER = "header";
     private static final String TABLES_ARE_EQUAL = "Tables are equal";
     private static final String KEY_1 = "k1";
     private static final String VALUE_1 = "v1";
@@ -309,13 +311,14 @@ class BddVariableStepsTests
 
     static Stream<Arguments> mapProvider()
     {
-        final String header = "header";
         final String parameters = "parameters";
         final String data = "data";
         final List<String> dataList = List.of(data);
         return Stream.of(
-            arguments(Map.of(header, data),     Map.of(header, dataList, parameters, Map.of(header, dataList))),
-            arguments(Map.of(parameters, data), Map.of(parameters, Map.of(parameters, dataList)))
+            arguments(Map.of(HEADER, data),     Map.of(KEY_1, VALUE_1, HEADER, dataList, parameters,
+                    Map.of(HEADER, dataList, KEY_1, VALUE_1))),
+            arguments(Map.of(parameters, data), Map.of(parameters, Map.of(parameters, dataList, KEY_1, VALUE_1,
+                    HEADER, VALUE_2)))
         );
     }
 
@@ -324,6 +327,8 @@ class BddVariableStepsTests
     void testInitVariableUsingTemplate(Map<String, String> dataModel, Map<String, ?> resultMap)
         throws IOException, TemplateException
     {
+        Map<String, Object> variables = new HashMap<>(Map.of(KEY_1, VALUE_1, HEADER, VALUE_2));
+        when(bddVariableContext.getVariables()).thenReturn(variables);
         String templatePath = "/templatePath";
         when(freemarkerProcessor.process(templatePath, resultMap, StandardCharsets.UTF_8)).thenReturn(VALUE_1);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);

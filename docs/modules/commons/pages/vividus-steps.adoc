@@ -11,7 +11,6 @@ Executes the steps while variable matches the comparison rule or until the maxim
 [IMPORTANT]
 If the maximum number of iterations is reached no failure or exception will occur.
 
-Syntax:
 [source,gherkin]
 ----
 When I execute steps at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
@@ -28,8 +27,6 @@ When I execute steps at most $max times while variable '$variableName' is $compa
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
 * `$expectedValue` - The expected value of the variable
 * `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute
-
-==== *_Usage_*
 
 .Click button 5 times
 [source,gherkin]
@@ -51,7 +48,6 @@ Executes the steps while variable matches the comparison rule or until the maxim
 [IMPORTANT]
 If the maximum number of iterations is reached no failure or exception will occur.
 
-Syntax:
 [source,gherkin]
 ----
 When I execute steps with delay `$delay` at most $max times while variable variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
@@ -69,8 +65,6 @@ When I execute steps with delay '$delay' at most $max times while variable '$var
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
 * `$expectedValue` - The expected value of the variable
 * `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute
-
-==== *_Usage_*
 
 .Click button 5 times with 1 second delay
 [source,gherkin]
@@ -92,7 +86,6 @@ Waits during specified period for debug purposes
 [WARNING]
 The step is for debugging purpose only
 
-Syntax:
 [source,gherkin]
 ----
 When I wait `$period` for debug
@@ -100,11 +93,43 @@ When I wait `$period` for debug
 
 * `$period` - total duration to wait in {iso-date-format-link} format
 
-==== *_Usage_*
-
 .Wait 30 seconds for debug
 [source,gherkin]
 ----
-Scenario: Wait for debug
 When I wait `PT30S` for debug
+----
+
+=== Initialize variable using template
+
+Initializes a variable with a result of the processed https://freemarker.apache.org/docs/dgui_template_overallstructure.html[Freemarker template]
+
+It's allowed to use `global`, `next batches`, `scenario` and `story` variables within templates by referring them using the variable reference notation. Note that the parameters passed to the step take precedence over the variables.
+
+[source,gherkin]
+----
+Given I initialize the $scopes variable `$variableName` using template `$templatePath` with parameters:$templateParameters
+----
+
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store a result.
+* `$templatePath` - The relative to `src/main/resources` path to a template.
+* `$templateParameters` - The template parameters.
+
+.Personal info template at templates/person.ftl
+[source,json]
+----
+{
+  "name": "${name[0]}",
+  "race": "${race[0]}",
+  "age": ${age}
+}
+----
+
+.Generate JSON from the personal info template
+[source,gherkin]
+----
+When I initialize the scenario variable `age` with value `4510`
+Given I initialize the scenario variable `personalInfo` using template `templates/person.ftl` with parameters:
+|name     |race  |
+|Dagoth Ur|Dunmer|
 ----

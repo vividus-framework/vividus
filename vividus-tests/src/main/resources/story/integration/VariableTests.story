@@ -138,3 +138,14 @@ Then `${${variable}} and ${${variable}}`                                  is equ
 Then `${composite:${composite${variable}}}`                               is equal to `expected`
 Then `#{eval(${non-existing:0} + 1)}`                                     is equal to `1`
 Then `#{replaceAllByRegExp("""\},\s\{ids=""", """""", """${complex}""")}` is equal to `[{ids=2077}]`
+
+Scenario: Use variables in template
+Meta:
+    @requirementId 1545
+When I initialize the scenario variable `scenarioVar` with value `1`
+When I initialize the scenario variable `overrideVar` with value `-1`
+When I initialize the story variable `storyVar` with value `2`
+Given I initialize the scenario variable `numbers` using template `data/resolve-variables.ftl` with parameters:
+|exampleParam|overrideVar|
+|3           |4          |
+Then `#{trim(${numbers})}` is equal to `12345`
