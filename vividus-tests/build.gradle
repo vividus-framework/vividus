@@ -15,6 +15,7 @@ dependencies {
     implementation project(':vividus-plugin-azure-cosmos-db')
     implementation project(':vividus-plugin-azure-event-grid')
     implementation project(':vividus-plugin-azure-functions')
+    implementation project(':vividus-plugin-azure-storage-account')
     implementation project(':vividus-plugin-azure-storage-queue')
     implementation project(':vividus-plugin-browserstack')
     implementation project(':vividus-plugin-db')

@@ -1,0 +1,135 @@
+= Azure Storage Account Plugin
+
+The plugin provides functionality to interact with https://docs.microsoft.com/en-us/azure/storage/[Azure Storage Account].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-account', version: '{current-version}')
+----
+
+== Configuration
+
+include::partial$azure-authentication.adoc[]
+
+=== Properties
+
+The storage accounts endpoints are configured with the following property format:
+
+[source,properties]
+----
+azure.storage-account.<key>=<endpoint>
+----
+
+where:
+
+. `key` - The logical key used to refer storage account in the steps.
+. `endpoint` - The storage account endpoint, e.g. `https://storageaccount.blob.core.windows.net/`
+
+== Steps
+
+=== Download the blob
+
+Downloads the entire blob from the container and saves its content as a text to a variable.
+
+[source,gherkin]
+----
+When I download blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey` and save its content to $scopes variable `$variableName`
+----
+
+* `$blobName` - The full path to a blob in the container.
+* `$containerName` - The name of the container to point to.
+* `$storageAccountKey` - The key of storage account from the configuration.
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the blob content.
+
+.Download the blob
+[source,gherkin]
+----
+When I download blob with name `raw/test.json` from container `vividus` of storage account `testaccount` and save its content to scenario variable `blob`
+----
+
+=== Download the blob to a temporary file
+
+Downloads the entire blob from the container into a temporary file with the specified name and saves the full path to the specified variable.
+
+[source,gherkin]
+----
+When I download blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey` to temporary file with name `$baseFileName` and save path to $scopes variable `$variableName`
+----
+
+* `$blobName` - The full path to a blob in the container.
+* `$containerName` - The name of the container to point to.
+* `$storageAccountKey` - The key of storage account from the configuration.
+* `$baseFileName` - The base file name used to generate the prefix and the suffix for the creating temporary file.
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the path to the temporary file with the blob content.
+
+.Download the blob to a temporary file
+[source,gherkin]
+----
+When I download blob with name `raw/test.json` from container `vividus` of storage account `testaccount` to temporary file with name `test.json` and save path to scenario variable `$pathToBlob`
+----
+
+=== Upload the blob
+
+Uploads the blob to the container.
+
+[source,gherkin]
+----
+When I upload blob with name `$blobName` and `$data` to container `$containerName` of storage account `$storageAccountKey`
+----
+
+* `$blobName` - The full path to a blob in the container.
+* `$data` - The data to store as blob.
+* `$containerName` - The name of the container to point to.
+* `$storageAccountKey` - The key of storage account from the configuration.
+
+.Upload the blob
+[source,gherkin]
+----
+When I upload blob with name `raw/test.jon` and `{"key":"value"}` to container `vividus` of storage account `testaccount`
+----
+
+=== Delete the blob
+
+Deletes the specified blob from the container.
+
+[source,gherkin]
+----
+When I delete blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey`
+----
+
+* `$blobName` - The full path to a blob in the container.
+* `$containerName` - The name of the container to point to.
+* `$storageAccountKey` - The key of storage account from the configuration.
+
+.Delete the blob
+[source,gherkin]
+----
+When I delete blob with name `raw/test.json` from container `vividus` of storage account `testaccount`
+----
+
+=== Find blobs
+
+Finds the blobs with names matching the specified comparison rule.
+
+[source,gherkin]
+----
+When I find all blobs with name which $comparisonRule `$blobNameToMatch` in container `$containerName` of storage account `$storageAccountKey` and save result to $scopes variable `$variableName`
+----
+
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[The blob name comparison rule].
+* `$blobNameToMatch` - The full or partial blob name to be matched.
+* `$containerName` - The name of the container to point to.
+* `$storageAccountKey` - The key of storage account from the configuration.
+* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the list of found blob names.
+
+.Find blobs
+[source,gherkin]
+----
+When I find all blobs with name which contains `json` in container `vividus` of storage account `testaccount` and save result to scenario variable `blobsCollection`
+----

@@ -10,6 +10,7 @@
 ** xref:plugin-azure-data-factory.adoc[Data Factory]
 ** xref:plugin-azure-event-grid.adoc[Event Grid]
 ** xref:plugin-azure-functions.adoc[Functions]
+** xref:plugin-azure-storage-account.adoc[Storage Account]
 ** xref:plugin-azure-storage-queue.adoc[Storage Queue]
 * xref:plugin-csv.adoc[CSV]
 * xref:plugin-datetime.adoc[Date/Time]
