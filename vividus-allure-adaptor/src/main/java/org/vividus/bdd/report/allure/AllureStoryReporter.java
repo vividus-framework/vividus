@@ -353,7 +353,8 @@ public class AllureStoryReporter extends ChainedStoryReporter
     public void afterStory(boolean givenStory)
     {
         super.afterStory(givenStory);
-        if (bddRunContext.getRunningStory().isNotExcluded())
+        RunningStory runningStory = bddRunContext.getRunningStory();
+        if (runningStory.isNotExcluded())
         {
             if (allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_AFTER_STORY_STEPS)
             {
@@ -606,13 +607,16 @@ public class AllureStoryReporter extends ChainedStoryReporter
                 .map(Story::getPath)
                 .collect(Collectors.joining(" > "));
 
-        List<Scenario> scenariosWithTitle = runningStory.getStory().getScenarios().stream()
-                .filter(scenario -> scenario.getTitle().equals(runningScenario.getScenario().getTitle()))
-                .collect(Collectors.toList());
+        String currentScenarioTitle = runningScenario.getScenario().getTitle();
+        long scenarioWithSameTitle = runningStory.getRanScenarios()
+                                                 .stream()
+                                                 .map(Scenario::getTitle)
+                                                 .filter(currentScenarioTitle::equals)
+                                                 .count();
         StringBuilder scenario = new StringBuilder(runningScenario.getTitle());
-        if (scenariosWithTitle.size() > 1)
+        if (scenarioWithSameTitle > 0)
         {
-            scenario.append('-').append(scenariosWithTitle.indexOf(runningScenario.getScenario()));
+            scenario.append('-').append(scenarioWithSameTitle - 1);
         }
         return String.format("[batch: %s][stories-chain: %s][scenario: %s]", getBatchName(), chainedStories, scenario);
     }

@@ -405,18 +405,23 @@ class AllureStoryReporterTests
     void testBeforeScenario()
     {
         RunningStory runningStory = mockRunningStoryWithSeverity(true);
+        Scenario scenario = createScenario("New Scenario", getScenarioMeta(true),
+                List.of());
+        runningStory.setRunningScenario(getRunningScenario(scenario, 0));
+        runningStory.setRunningScenario(getRunningScenario(scenario, 0));
         Story story = runningStory.getStory();
         boolean givenStory = false;
         mockStoryStart(givenStory);
         mockScenarioUid(true);
         when(bddRunContext.getStoriesChain()).thenReturn(new LinkedList<>(List.of(runningStory)));
         allureStoryReporter.beforeStory(story, givenStory);
-        Scenario scenario = story.getScenarios().get(0);
         allureStoryReporter.beforeScenario(scenario);
         verify(next).beforeScenario(scenario);
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
         verify(allureLifecycle).startTestCase(scenarioUid);
         assertTestResultLabel(LabelName.SEVERITY, "critical");
+        assertEquals("[batch: my-batch][stories-chain: name][scenario: New Scenario-1]",
+                testResultCaptor.getValue().getHistoryId());
     }
 
     @Test
@@ -487,7 +492,7 @@ class AllureStoryReporterTests
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
         assertTestResultLabel(LabelName.PARENT_SUITE, STORY_NAME);
         TestResult captured = testResultCaptor.getValue();
-        assertEquals("[batch: my-batch][stories-chain: name > given story][scenario: Scenario]",
+        assertEquals("[batch: my-batch][stories-chain: name > given story][scenario: Scenario-0]",
                 captured.getHistoryId());
     }
 
@@ -1132,7 +1137,12 @@ class AllureStoryReporterTests
 
     private Scenario createScenario(Properties scenarioMeta, List<String> steps)
     {
-        return new Scenario(SCENARIO, new Meta(scenarioMeta), GivenStories.EMPTY, ExamplesTable.EMPTY, steps);
+        return createScenario(SCENARIO, scenarioMeta, steps);
+    }
+
+    private Scenario createScenario(String name, Properties scenarioMeta, List<String> steps)
+    {
+        return new Scenario(name, new Meta(scenarioMeta), GivenStories.EMPTY, ExamplesTable.EMPTY, steps);
     }
 
     private RunningStory getRunningStory(Story story, RunningScenario runningScenario)
@@ -1189,7 +1199,7 @@ class AllureStoryReporterTests
             when(testContext.get(CURRENT_STEP_KEY)).thenReturn(linkedQueueItem);
         }
         lenient().when(allureRunContext.getStoryExecutionStage())
-                .thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
+                 .thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
     }
 
     private void mockStepUid()
