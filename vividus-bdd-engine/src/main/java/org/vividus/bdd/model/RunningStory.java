@@ -16,9 +16,12 @@
 
 package org.vividus.bdd.model;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 
+import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 
 public class RunningStory
@@ -28,6 +31,7 @@ public class RunningStory
     private boolean notExcluded;
     private RunningScenario runningScenario;
     private Deque<String> runningSteps = new LinkedList<>();
+    private List<Scenario> scenarios = new ArrayList<>();
 
     public Story getStory()
     {
@@ -76,6 +80,10 @@ public class RunningStory
     public void setRunningScenario(RunningScenario runningScenario)
     {
         this.runningScenario = runningScenario;
+        if (null != runningScenario)
+        {
+            scenarios.add(runningScenario.getScenario());
+        }
     }
 
     public String removeRunningStep()
@@ -91,6 +99,11 @@ public class RunningStory
     public Deque<String> getRunningSteps()
     {
         return new LinkedList<>(runningSteps);
+    }
+
+    public List<Scenario> getRanScenarios()
+    {
+        return new ArrayList<>(scenarios);
     }
 
     public void setRunningSteps(Deque<String> runningSteps)
