@@ -236,6 +236,15 @@ class JsonResponseValidationStepsTests
         verify(bddVariableContext).putVariable(scopes, VARIABLE_NAME, elementsNumber);
     }
 
+    @ParameterizedTest
+    @MethodSource("checkJsonElementsNumberDataProvider")
+    void testSaveElementsNumberFromJsonByJsonPath(String jsonPath, int elementsNumber)
+    {
+        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
+        jsonResponseValidationSteps.saveElementsNumberByJsonPath(JSON, jsonPath, scopes, VARIABLE_NAME);
+        verify(bddVariableContext).putVariable(scopes, VARIABLE_NAME, elementsNumber);
+    }
+
     @Test
     void testSaveJsonFromContextElementToVariable()
     {

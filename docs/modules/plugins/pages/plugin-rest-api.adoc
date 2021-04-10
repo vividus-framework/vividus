@@ -414,6 +414,26 @@ When I set number of elements found by JSON path `$jsonPath` to $scopes variable
 When I set number of elements found by JSON path `$..id` to scenario variable `idsCount`
 ----
 
+=== *Save number of elements from JSON*
+
+Saves number of elements found in the JSON by JSON path into a variable
+
+[source,gherkin]
+----
+When I save number of elements from `$json` found by JSON path `$jsonPath` to $scopes variable `$variableName`
+----
+
+* `json` - JSON data
+* `jsonPath` - {json-path}
+* `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes]
+* `$variableName` - the variable name
+
+.Save number of elements from the JSON
+[source,gherkin]
+----
+When I save number of elements from `[{"key" : "passed"}, {"key" : "failed"}]` found by JSON path `$..[?(@.key == "failed")]` to scenario variable `messageCount`
+----
+
 === *Perform steps on elements in JSON*
 
 Performs steps against all elements found by JSON path in JSON data

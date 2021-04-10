@@ -263,7 +263,29 @@ public class JsonResponseValidationSteps
     @When("I set number of elements found by JSON path `$jsonPath` to $scopes variable `$variableName`")
     public void saveElementsNumberByJsonPath(String jsonPath, Set<VariableScope> scopes, String variableName)
     {
-        bddVariableContext.putVariable(scopes, variableName, getElementsNumber(getActualJson(), jsonPath));
+        saveElementsNumberByJsonPath(getActualJson(), jsonPath, scopes, variableName);
+    }
+
+    /**
+     * Saves the found in JSON by JSON path elements' quantity to the variable with
+     * specified name and scope.
+     * @param json         A JSON string to extract value from
+     * @param jsonPath     A JSON path
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName A variable name
+     */
+    @When("I save number of elements from `$json` found by JSON path `$jsonPath` to $scopes variable `$variableName`")
+    public void saveElementsNumberByJsonPath(String json, String jsonPath, Set<VariableScope> scopes,
+            String variableName)
+    {
+        bddVariableContext.putVariable(scopes, variableName, getElementsNumber(json, jsonPath));
     }
 
     /**
