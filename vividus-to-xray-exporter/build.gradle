@@ -12,7 +12,7 @@ apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 project.description = 'Vividus to Xray exporter'
 
-configurations.testCompile {
+configurations.testImplementation {
     exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j18-impl'
     exclude group: 'ch.qos.logback', module: 'logback-classic'
 }
