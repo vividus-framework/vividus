@@ -24,7 +24,7 @@ dependencies {
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-safari-driver', version: seleniumVersion)
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-opera-driver', version: seleniumVersion)
     implementation(group: 'junit', name: 'junit', version: versions.junit4)
-    implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.3.1')
+    implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.4.0')
     implementation(group: 'io.netty', name: 'netty-all', version: '4.1.63.Final')
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
     implementation(group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText)
