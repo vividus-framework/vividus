@@ -90,7 +90,7 @@ When I upload blob with name `$blobName` and `$data` to container `$containerNam
 .Upload the blob
 [source,gherkin]
 ----
-When I upload blob with name `raw/test.jon` and `{"key":"value"}` to container `vividus` of storage account `testaccount`
+When I upload blob with name `raw/test.json` and `{"key":"value"}` to container `vividus` of storage account `testaccount`
 ----
 
 === Delete the blob
