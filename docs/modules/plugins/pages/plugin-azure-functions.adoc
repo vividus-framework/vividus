@@ -33,7 +33,7 @@ Triggers a function
 
 [source,gherkin]
 ----
-When I trigger funtion `$functionName` from function app `$functionAppName` in resource group `$resourceGroup` with payload:$payload and save response into $scopes variable `$variableNames`
+When I trigger function `$functionName` from function app `$functionAppName` in resource group `$resourceGroup` with payload:$payload and save response into $scopes variable `$variableNames`
 ----
 
 * `$functionName` - The name of the function to trigger
