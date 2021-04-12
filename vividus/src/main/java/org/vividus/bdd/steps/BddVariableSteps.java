@@ -83,6 +83,9 @@ public class BddVariableSteps
 
     /**
      * This step initializes BDD variable with a result of given template processing
+     * It's allowed to use <i>global</i>, <i>next batches</i>, <i>scenario</i> and <i>story</i> variables within
+     * templates by referring them using the variable reference notation. Note that the parameters passed to the
+     * step take precedence over the variables.
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      * <i>Available scopes:</i>
      * <ul>
@@ -122,7 +125,9 @@ public class BddVariableSteps
     public void initVariableUsingTemplate(Set<VariableScope> scopes, String variableName, String templatePath,
             ExamplesTable templateParameters) throws IOException, TemplateException
     {
-        Map<String, List<String>> dataModel = MapUtils.convertExamplesTableToMap(templateParameters);
+        Map<String, Object> dataModel = bddVariableContext.getVariables();
+        dataModel.putAll(MapUtils.convertExamplesTableToMap(templateParameters));
+
         Map<String, Object> parameters = new HashMap<>();
         String parametersKey = "parameters";
         parameters.put(parametersKey, dataModel);
