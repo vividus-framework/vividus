@@ -165,25 +165,30 @@ public class KafkaSteps
      * Drains the consumed messaged to the specified variable. If the consumer is not stopped, the new messages might
      * arrive after the draining. If the consumer is stopped, all the messages received from the consumer start or
      * after the last draining operation are stored to the variable.
-     *
-     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     *                     <i>Available scopes:</i>
-     *                     <ul>
-     *                     <li><b>STEP</b> - the variable will be available only within the step,
-     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     *                     <li><b>STORY</b> - the variable will be available within the whole story,
-     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     *                     </ul>
-     * @param variableName the variable name to store the messages. The messages are accessible via zero-based index,
-     *                     e.g. `${my-var[0]}` will return the first received message.
+     * @param queueOperation The one of: <br>
+     *                       <ul>
+     *                       <li><b>PEEK</b> - saves the messages consumed since the last drain or from the
+     *                       consumption start and doesn't change the consumer cursor position
+     *                       <li><b>DRAIN</b> - saves the messages consumed since the last drain or from the
+     *                       consumption start and moves the consumer cursor
+     *                       to the position after the last consumed message
+     *                       </ul>
+     * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                       <i>Available scopes:</i>
+     *                       <ul>
+     *                       <li><b>STEP</b> - the variable will be available only within the step,
+     *                       <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                       <li><b>STORY</b> - the variable will be available within the whole story,
+     *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                       </ul>
+     * @param variableName   the variable name to store the messages. The messages are accessible via zero-based index,
+     *                       e.g. `${my-var[0]}` will return the first received message.
      */
-    @When("I drain consumed Kafka messages to $scopes variable `$variableName`")
-    public void drainKafkaMessagesToVariable(Set<VariableScope> scopes, String variableName)
+    @When("I $queueOperation consumed Kafka messages to $scopes variable `$variableName`")
+    public void processKafkaMessages(QueueOperation queueOperation, Set<VariableScope> scopes,
+            String variableName)
     {
-        BlockingQueue<String> messagesQueue = testContext.get(MESSAGES_KEY);
-        List<String> messages = new ArrayList<>();
-        messagesQueue.drainTo(messages);
-        bddVariableContext.putVariable(scopes, variableName, messages);
+        bddVariableContext.putVariable(scopes, variableName, queueOperation.performOn(testContext.get(MESSAGES_KEY)));
     }
 
     @AfterStory
@@ -206,5 +211,29 @@ public class KafkaSteps
             throw new IllegalStateException(
                     "No Kafka message listener is running, did you forget to start consuming messages?");
         }
+    }
+
+    protected enum QueueOperation
+    {
+        PEEK
+        {
+            @Override
+            List<String> performOn(BlockingQueue<String> messagesQueue)
+            {
+                return new ArrayList<>(messagesQueue);
+            }
+        },
+        DRAIN
+        {
+            @Override
+            List<String> performOn(BlockingQueue<String> messagesQueue)
+            {
+                List<String> messages = new ArrayList<>();
+                messagesQueue.drainTo(messages);
+                return messages;
+            }
+        };
+
+        abstract List<String> performOn(BlockingQueue<String> messagesQueue);
     }
 }
