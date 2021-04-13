@@ -110,8 +110,7 @@ jobs:
                                             -Pvividus.allure.executor.build-name="Integration Tests ${GITHUB_RUN_ID}" \
                                             -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                             -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                            -Pvividus.allure.executor.report-name="Integration tests report" \
-                                            -Pvividus.statistics.print-failures=true
+                                            -Pvividus.allure.executor.report-name="Integration tests report"
 
     - name: Publish integration tests report
       if: matrix.platform == 'ubuntu-latest' && always()
