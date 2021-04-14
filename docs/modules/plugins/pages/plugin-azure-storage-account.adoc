@@ -79,7 +79,7 @@ Uploads the blob to the container.
 
 [source,gherkin]
 ----
-When I upload blob with name `$blobName` and `$data` to container `$containerName` of storage account `$storageAccountKey`
+When I upload blob with name `$blobName` and data `$data` to container `$containerName` of storage account `$storageAccountKey`
 ----
 
 * `$blobName` - The full path to a blob in the container.
