@@ -225,7 +225,7 @@ class WebSocketStepsTests
 
         when(jettyClient.doHandshake(handlerCaptor == null ? any() : handlerCaptor.capture(),
                 any(WebSocketHttpHeaders.class), eq(UriUtils.createUri(WEB_SOCKET_ADDR)))).thenReturn(future);
-        when(future.get(30, TimeUnit.SECONDS)).thenReturn(session);
+        when(future.get(60, TimeUnit.SECONDS)).thenReturn(session);
 
         return session;
     }

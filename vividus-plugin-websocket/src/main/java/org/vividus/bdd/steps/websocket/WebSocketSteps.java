@@ -51,7 +51,7 @@ import org.vividus.util.wait.DurationBasedWaiter;
 public class WebSocketSteps
 {
     private static final Object KEY = WebSocketContainer.class;
-    private static final long DEFAULT_TIMEOUT = 30;
+    private static final long DEFAULT_TIMEOUT = 60;
 
     private final Map<String, URI> webSocketConnections;
     private final TestContext testContext;
