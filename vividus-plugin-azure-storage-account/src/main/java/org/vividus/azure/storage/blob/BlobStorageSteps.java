@@ -140,7 +140,7 @@ public class BlobStorageSteps
      * @param storageAccountKey The key to Storage Account endpoint.
      */
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    @When("I upload blob with name `$blobName` and `$data` to container `$containerName` of storage account "
+    @When("I upload blob with name `$blobName` and data `$data` to container `$containerName` of storage account "
             + "`$storageAccountKey`")
     public void uploadBlob(String blobName, String data, String containerName, String storageAccountKey)
     {
