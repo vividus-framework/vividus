@@ -22,22 +22,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.Validate;
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.embedder.MatchingStepMonitor;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.Step;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.spring.ExtendedConfiguration;
 
 public class StepExamplesTableParser implements IStepExamplesTableParser
 {
     private static final String STEP_COLUMN_NAME = "step";
 
-    private final ExtendedConfiguration configuration;
+    private final Configuration configuration;
     private final InjectableStepsFactory stepsFactory;
 
-    public StepExamplesTableParser(ExtendedConfiguration configuration, InjectableStepsFactory stepsFactory,
+    public StepExamplesTableParser(Configuration configuration, InjectableStepsFactory stepsFactory,
             IBddRunContext bddRunContext)
     {
         this.configuration = configuration;

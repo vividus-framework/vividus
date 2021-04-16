@@ -18,13 +18,13 @@ package org.vividus.bdd.proxy;
 
 import javax.inject.Inject;
 
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.steps.Timing;
 import org.vividus.bdd.ChainedStoryReporter;
 import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.ControllingMetaTag;
 
@@ -35,7 +35,7 @@ public class ProxyAgentStoryReporter extends ChainedStoryReporter
 
     @Inject private IProxy proxy;
     @Inject private IBddRunContext bddRunContext;
-    @Inject private ExtendedConfiguration configuration;
+    @Inject private Configuration configuration;
 
     @Override
     public void beforeStory(Story story, boolean givenStory)

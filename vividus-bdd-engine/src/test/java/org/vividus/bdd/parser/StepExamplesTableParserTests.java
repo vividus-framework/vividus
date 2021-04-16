@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.embedder.MatchingStepMonitor;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Scenario;
@@ -45,7 +46,6 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.spring.ExtendedConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class StepExamplesTableParserTests
@@ -55,14 +55,9 @@ class StepExamplesTableParserTests
     private static final String ERROR_MESSAGE_PART = "The steps examples table must have only one column with the name"
         + " 'step', but got ";
 
-    @Mock
-    private ExtendedConfiguration configuration;
-
-    @Mock
-    private InjectableStepsFactory stepsFactory;
-
-    @InjectMocks
-    private StepExamplesTableParser stepExamplesTableParser;
+    @Mock private Configuration configuration;
+    @Mock private InjectableStepsFactory stepsFactory;
+    @InjectMocks private StepExamplesTableParser stepExamplesTableParser;
 
     @Test
     void testMoreThanOneColumnInStepsExampleTable()
