@@ -14,13 +14,14 @@ Then `${consumed-messages[0]}` is equal to `${message}`
 
 
 Scenario: Wait until expected message appears in the Kafka topic
+When I initialize the scenario variable `message-marker` with value `#{generate(regexify '[a-z]{8}')}`
 When I start consuming messages from Kafka topics `${topic}`
-When I send data `{"key" : "failed"}` to Kafka topic `${topic}`
-When I send data `{"key" : "passed"}` to Kafka topic `${topic}`
+When I send data `{"key" : "failed-${message-marker}"}` to Kafka topic `${topic}`
+When I send data `{"key" : "passed-${message-marker}"}` to Kafka topic `${topic}`
 When I execute steps with delay `PT1S` at most 30 times while variable `messageCount` is = `0`:
 |step                                                                                                                               |
 |When I peek consumed Kafka messages to scenario variable `messages`                                                                |
 |When I save number of elements from `${messages}` found by JSON path `$..[?(@.key == "failed")]` to scenario variable `messageCount`|
 When I drain consumed Kafka messages to scenario variable `consumed-messages`
-Then `${consumed-messages}` is equal to `[{"key" : "passed"}, {"key" : "failed"}]`
+Then `${consumed-messages}` is equal to `[{"key" : "failed-${message-marker}"}, {"key" : "passed-${message-marker}"}]`
 When I stop consuming messages from Kafka
