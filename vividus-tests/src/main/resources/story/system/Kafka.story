@@ -22,5 +22,5 @@ When I execute steps with delay `PT1S` at most 30 times while variable `messageC
 |When I peek consumed Kafka messages to scenario variable `messages`                                                                |
 |When I save number of elements from `${messages}` found by JSON path `$..[?(@.key == "failed")]` to scenario variable `messageCount`|
 When I drain consumed Kafka messages to scenario variable `consumed-messages`
-Then `${consumed-messages}` is equal to `[{"key" : "passed"}, {"key" : "failed"}]`
+Then `${consumed-messages}` is equal to `[{"key" : "failed"}, {"key" : "passed"}]`
 When I stop consuming messages from Kafka
