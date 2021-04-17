@@ -448,13 +448,13 @@ jobs:
     - name: Publish snapshot artifacts
       if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
       env:
-        BINTRAY_USER: ${{ secrets.ARTIFACTORY_SNAPSHOTS_PUBLISHER }}
-        BINTRAY_KEY: ${{ secrets.ARTIFCATORY_SNAPSHOTS_PASSWORD }}
+        ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_SNAPSHOTS_PUBLISHER_USERNAME }}
+        ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_SNAPSHOTS_PUBLISHER_PASSWORD }}
       run: |
         ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=https://vividuscentral.jfrog.io/artifactory/ \
                                         -Dartifactory.publish.repoKey=snapshots-local \
-                                        -Dartifactory.publish.username=$ARTIFACTORY_SNAPSHOTS_PUBLISHER \
-                                        -Dartifactory.publish.password=$ARTIFCATORY_SNAPSHOTS_PASSWORD \
+                                        -Dartifactory.publish.username=$ARTIFACTORY_USERNAME \
+                                        -Dartifactory.publish.password=$ARTIFACTORY_PASSWORD \
                                         -Dartifactory.publish.buildInfo=false
 
     - name: Publish release artifacts
