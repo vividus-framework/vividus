@@ -453,8 +453,8 @@ jobs:
       run: |
         ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=https://vividuscentral.jfrog.io/artifactory/ \
                                         -Dartifactory.publish.repoKey=snapshots-local \
-                                        -Dartifactory.publish.username=$ARTIFACTORY_SNAPSHOTS_PUBLISHER \
-                                        -Dartifactory.publish.password=$ARTIFCATORY_SNAPSHOTS_PASSWORD \
+                                        -Dartifactory.publish.username="$ARTIFACTORY_SNAPSHOTS_PUBLISHER" \
+                                        -Dartifactory.publish.password="$ARTIFCATORY_SNAPSHOTS_PASSWORD" \
                                         -Dartifactory.publish.buildInfo=false \
                                         --stacktrace
 
