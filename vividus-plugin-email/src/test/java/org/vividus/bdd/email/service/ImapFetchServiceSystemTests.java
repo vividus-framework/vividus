@@ -98,7 +98,7 @@ class ImapFetchServiceSystemTests
     @ParameterizedTest
     @CsvSource({
         "0,  7",
-        "10, 40"
+        "10, 50"
     })
     void testFetch(long deliveryDelay, long testTimeout) throws MessagingException
     {
