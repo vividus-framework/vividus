@@ -118,11 +118,11 @@ class MetadataLoggerTests
         statistic.incrementPassed();
         try (MockedStatic<StatisticsStoryReporter> reporter = mockStatic(StatisticsStoryReporter.class))
         {
-            reporter.when(() -> StatisticsStoryReporter.getStatistics()).thenReturn(
+            reporter.when(StatisticsStoryReporter::getStatistics).thenReturn(
                     Map.of(NodeType.STORY, statistic,
                            NodeType.SCENARIO, statistic,
                            NodeType.STEP, statistic));
-            reporter.when(() -> StatisticsStoryReporter.getFailures()).thenReturn(failures);
+            reporter.when(StatisticsStoryReporter::getFailures).thenReturn(failures);
             MetadataLogger.logEnvironmentMetadata();
             ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
             assertThat(loggingEvents, hasSize(1));

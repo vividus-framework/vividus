@@ -100,6 +100,7 @@ class VisualStepsTests
     static void beforeAll()
     {
         FACTORY.setScreenshotIndexer(Optional.empty());
+        FACTORY.setIndexers(Map.of());
     }
 
     @Test

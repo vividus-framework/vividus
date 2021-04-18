@@ -52,7 +52,7 @@ public class RunningScenario
 
     public String getTitle()
     {
-        return Optional.ofNullable(title).orElseGet(() -> scenario.getTitle());
+        return Optional.ofNullable(title).orElseGet(scenario::getTitle);
     }
 
     public void setTitle(String title)

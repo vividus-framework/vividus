@@ -51,7 +51,7 @@ class GenericRunnerTests
             GenericRunner genericRunner = new GenericRunner();
             assertEquals(embedder, genericRunner.configuredEmbedder());
             vividus.verify(Vividus::init);
-            metadataLogger.verify(() -> MetadataLogger.drawBanner());
+            metadataLogger.verify(MetadataLogger::drawBanner);
             metadataLogger.verify(() -> MetadataLogger.logPropertiesSecurely(systemProperties));
             metadataLogger.verify(() -> MetadataLogger.logPropertiesSecurely(springProperties));
         }

@@ -74,7 +74,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
     @Override
     public VisualCheckResult compareAgainst(VisualCheck visualCheck) throws IOException
     {
-        visualCheck.getAcceptableDiffPercentage().ifPresent(e -> this.setAcceptableDiffPercentage(e));
+        visualCheck.getAcceptableDiffPercentage().ifPresent(this::setAcceptableDiffPercentage);
         VisualCheckResult comparisonResult = new VisualCheckResult(visualCheck);
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
         comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
