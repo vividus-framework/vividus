@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,7 +195,7 @@ class DelegatingWebDriverTests
     void testGetTouchUnsupportedOperationException()
     {
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-            () -> delegatingWebDriver.getTouch());
+                delegatingWebDriver::getTouch);
         assertEquals(ADVANCED_INTERACTION_NOT_SUPPORTED, exception.getMessage());
     }
 
@@ -213,7 +213,7 @@ class DelegatingWebDriverTests
     void testGetKeyboardUnsupportedOperationException()
     {
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-            () -> delegatingWebDriver.getKeyboard());
+                delegatingWebDriver::getKeyboard);
         assertEquals(ADVANCED_INTERACTION_NOT_SUPPORTED, exception.getMessage());
     }
 
@@ -231,7 +231,7 @@ class DelegatingWebDriverTests
     void testGetMouseUnsupportedOperationException()
     {
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-            () -> delegatingWebDriver.getMouse());
+                delegatingWebDriver::getMouse);
         assertEquals(ADVANCED_INTERACTION_NOT_SUPPORTED, exception.getMessage());
     }
 
@@ -303,7 +303,7 @@ class DelegatingWebDriverTests
     void testGetCapabilitiesIllegalStateException()
     {
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> delegatingWebDriver.getCapabilities());
+                delegatingWebDriver::getCapabilities);
         assertEquals("Wrapped WebDriver doesn't implement HasCapabilities interface", exception.getMessage());
     }
 
@@ -337,7 +337,7 @@ class DelegatingWebDriverTests
     void testResetInputStateUnsupportedOperationException()
     {
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-            () -> delegatingWebDriver.resetInputState());
+                delegatingWebDriver::resetInputState);
         assertEquals(ADVANCED_INTERACTION_NOT_SUPPORTED, exception.getMessage());
     }
 }

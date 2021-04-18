@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ class ZephyrFacadeTests
         project.setVersions(List.of(version));
         when(jiraFacade.getProject(TEST)).thenReturn(project);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> zephyrFacade.prepareConfiguration());
+                zephyrFacade::prepareConfiguration);
         assertEquals("Version with name 'test' does not exist", exception.getMessage());
     }
 
@@ -119,7 +119,7 @@ class ZephyrFacadeTests
         when(client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT, PROJECT_ID, VERSION_ID))).
                 thenReturn("{\"-1\":{\"name\":\"test1\"},\"recordsCount\":1}");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> zephyrFacade.prepareConfiguration());
+                zephyrFacade::prepareConfiguration);
         assertEquals("Cycle with name 'test' does not exist", exception.getMessage());
     }
 
@@ -136,7 +136,7 @@ class ZephyrFacadeTests
         when(client.executeGet(String.format(GET_FOLDER_ID_ENDPOINT, CYCLE_ID, PROJECT_ID, VERSION_ID)))
             .thenReturn("[{\"folderId\":0,\"folderName\":\"test1\"}]");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> zephyrFacade.prepareConfiguration());
+                zephyrFacade::prepareConfiguration);
         assertEquals("Folder with name 'test' does not exist", exception.getMessage());
     }
 
@@ -151,7 +151,7 @@ class ZephyrFacadeTests
             .thenReturn(GET_FOLDER_ID_RESPONSE);
         when(client.executeGet(GET_STATUSES_ENDPOINT)).thenReturn("[{\"id\": 1, \"name\": \"PASSED\"}]");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> zephyrFacade.prepareConfiguration());
+                zephyrFacade::prepareConfiguration);
         assertEquals("Status 'test' does not exist", exception.getMessage());
     }
 

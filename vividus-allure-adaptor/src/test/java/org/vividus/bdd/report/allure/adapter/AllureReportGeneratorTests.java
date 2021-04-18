@@ -150,7 +150,7 @@ class AllureReportGeneratorTests
         {
             IOException ioException = new IOException();
             fileUtils.when(() -> FileUtils.cleanDirectory(reportDirectory)).thenThrow(ioException);
-            Exception thrown = assertThrows(IllegalStateException.class, () -> allureReportGenerator.start());
+            Exception thrown = assertThrows(IllegalStateException.class, allureReportGenerator::start);
             assertEquals(ioException, thrown.getCause());
         }
     }

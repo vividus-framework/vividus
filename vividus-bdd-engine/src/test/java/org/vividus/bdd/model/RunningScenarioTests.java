@@ -31,6 +31,7 @@ class RunningScenarioTests
     {
         String title  = "runningScenarioTitle";
         RunningScenario runningScenario = new RunningScenario();
+        runningScenario.setScenario(new Scenario(null, List.of()));
         runningScenario.setTitle(title);
         assertEquals(title, runningScenario.getTitle());
     }

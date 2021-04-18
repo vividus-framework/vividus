@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -99,6 +100,7 @@ class VisualTestingEngineTests
     static void beforeAll()
     {
         FACTORY.setScreenshotIndexer(Optional.empty());
+        FACTORY.setIndexers(Map.of());
     }
 
     @BeforeEach

@@ -40,6 +40,7 @@ class VisualCheckFactoryTests
     void shouldCreateVisualCheckWithoutIndexedBaseline()
     {
         visualCheckFactory.setScreenshotIndexer(Optional.empty());
+        visualCheckFactory.setIndexers(Map.of());
         VisualCheck check = visualCheckFactory.create(NAME, VisualActionType.COMPARE_AGAINST);
         assertAll(
             () -> assertEquals(NAME, check.getBaselineName()),
@@ -70,6 +71,7 @@ class VisualCheckFactoryTests
     void shouldCreateVisualCheckWithScreenshotConfiguration()
     {
         visualCheckFactory.setScreenshotIndexer(Optional.empty());
+        visualCheckFactory.setIndexers(Map.of());
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
         VisualCheck check = visualCheckFactory.create(NAME, VisualActionType.COMPARE_AGAINST,
                 screenshotConfiguration);
