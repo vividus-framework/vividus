@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -42,7 +43,6 @@ import org.mockito.stubbing.Answer;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
-import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.proxy.IProxy;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +53,7 @@ class ProxyAgentStoryReporterTests
 
     @Mock private IProxy proxy;
     @Mock private IBddRunContext bddRunContext;
-    @Mock private ExtendedConfiguration configuration;
+    @Mock private Configuration configuration;
     @Mock private StoryReporter next;
     @InjectMocks private ProxyAgentStoryReporter proxyAgentStoryReporter;
 

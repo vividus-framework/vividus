@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTableFactory;
@@ -43,7 +44,6 @@ import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.parser.IStepExamplesTableParser;
-import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.bdd.steps.SubSteps;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,7 +51,7 @@ class SubStepsConverterTests
 {
     private static final String STEPS_TO_EXECUTE = "stepsToExecute";
 
-    @Mock private ExtendedConfiguration configuration;
+    @Mock private Configuration configuration;
     @Mock private IBddRunContext bddRunContext;
     @Mock private Embedder embedder;
     @Mock private IStepExamplesTableParser stepExamplesTableParser;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -171,7 +172,7 @@ class BddStepsCounterTests extends SystemStreamTests
             ExtendedConfiguration configuration = new ExtendedConfiguration();
             configuration.useKeywords(new Keywords());
             configuration.useStoryParser(storyParser);
-            beanFactory.when(() -> BeanFactory.getBean(ExtendedConfiguration.class)).thenReturn(configuration);
+            beanFactory.when(() -> BeanFactory.getBean(Configuration.class)).thenReturn(configuration);
 
             InjectableStepsFactory stepFactory = mock(InjectableStepsFactory.class);
             beanFactory.when(() -> BeanFactory.getBean(InjectableStepsFactory.class)).thenReturn(stepFactory);

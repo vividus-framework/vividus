@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,15 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
-import org.vividus.bdd.spring.ExtendedConfiguration;
 
 @Named("MERGING")
 public class MergingTableTransformer implements ExtendedTableTransformer
 {
-    @Inject private ExtendedConfiguration configuration;
+    @Inject private Configuration configuration;
 
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)

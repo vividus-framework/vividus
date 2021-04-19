@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -46,7 +47,6 @@ import org.jbehave.core.steps.StepCandidate;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.StoryLoader;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
-import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
@@ -87,7 +87,7 @@ public final class BddStepsCounter
         IPathFinder pathFinder = BeanFactory.getBean(IPathFinder.class);
         String storyLocation = commandLine.hasOption(directoryOption.getOpt())
                 ? commandLine.getOptionValue(directoryOption.getOpt()) : DEFAULT_STORY_LOCATION;
-        ExtendedConfiguration configuration = BeanFactory.getBean(ExtendedConfiguration.class);
+        Configuration configuration = BeanFactory.getBean(Configuration.class);
 
         fillStepList(configuration, storyLoader, pathFinder, storyLocation);
         fillStepCandidates();
@@ -95,7 +95,7 @@ public final class BddStepsCounter
         printResults(commandLine, topOption, System.out);
     }
 
-    private void fillStepList(ExtendedConfiguration configuration, StoryLoader storyLoader, IPathFinder pathFinder,
+    private void fillStepList(Configuration configuration, StoryLoader storyLoader, IPathFinder pathFinder,
             String storyLocation) throws IOException
     {
         StoryParser storyParser = configuration.storyParser();
@@ -131,7 +131,7 @@ public final class BddStepsCounter
         }
     }
 
-    private void fillStepsWithStats(ExtendedConfiguration configuration)
+    private void fillStepsWithStats(Configuration configuration)
     {
         Keywords keywords = configuration.keywords();
         String previousNonAndStep = null;
