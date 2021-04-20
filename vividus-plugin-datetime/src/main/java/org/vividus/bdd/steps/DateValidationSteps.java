@@ -29,6 +29,8 @@ import org.vividus.util.DateUtils;
 
 public class DateValidationSteps
 {
+    private static final DateTimeFormatter[] FORMATS = { DateTimeFormatter.ISO_DATE_TIME, DateTimeFormatter.ISO_DATE };
+
     private final DateUtils dateUtils;
     private ISoftAssert softAssert;
 
@@ -110,16 +112,23 @@ public class DateValidationSteps
     @Then("the date '$date1' is $comparisonRule the date '$date2'")
     public void compareDates(String date1, ComparisonRule comparisonRule, String date2)
     {
-        try
+        for (int i = 0; i < FORMATS.length; i++)
         {
-            ZonedDateTime zonedDateTime1 = dateUtils.parseDateTime(date1, DateTimeFormatter.ISO_DATE_TIME);
-            ZonedDateTime zonedDateTime2 = dateUtils.parseDateTime(date2, DateTimeFormatter.ISO_DATE_TIME);
-            softAssert
-                    .assertThat("Compare dates", zonedDateTime1, comparisonRule.getComparisonRule(zonedDateTime2));
-        }
-        catch (DateTimeParseException e)
-        {
-            softAssert.recordFailedAssertion(e);
+            DateTimeFormatter format = FORMATS[i];
+            try
+            {
+                ZonedDateTime parsedDate1 = dateUtils.parseDateTime(date1, format);
+                ZonedDateTime parsedDate2 = dateUtils.parseDateTime(date2, format);
+                softAssert.assertThat("Compare dates", parsedDate1, comparisonRule.getComparisonRule(parsedDate2));
+                break;
+            }
+            catch (DateTimeParseException e)
+            {
+                if (i == FORMATS.length - 1)
+                {
+                    softAssert.recordFailedAssertion(e);
+                }
+            }
         }
     }
 

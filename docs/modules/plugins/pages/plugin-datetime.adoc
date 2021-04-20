@@ -269,60 +269,63 @@ Converts the input date to https://en.wikipedia.org/wiki/Unix_time[the unix epoc
 
 == Steps
 
-=== Dates comparison
+=== Compare date and current instant
 
-==== *_Info_*
-
-Validates the difference between the current date and the date under test in seconds.
-
-==== *_Wording_*
+Validates the difference between the current instant and the provided date in seconds.
 
 [source,gherkin]
 ----
 Then the date '$date' is $comparisonRule current for $seconds seconds
 ----
 
-==== *_Parameters_*
+* `$date` - The date in the {iso-date-format-link} format.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$seconds` - The amount of seconds between the current instant and the provided date.
 
-. `$date` - the date in the {iso-date-format-link} format
-. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
-. `$seconds` - the quantity of seconds between current and the date.
 
-==== *_Usage_*
-
-.Sample.story
+.Validate the date is less than current for 10 seconds
 [source,gherkin]
 ----
-Scenario: Validate the date is less than current for 10 seconds
 Then the date '2020-06-16T15:25:29.516580Z' is less than current for 10 seconds
 ----
 
+=== Compare two dates
 
-=== Dates comparison with custom date format
+Compares two dates according to the given comparison rule.
 
-==== *_Info_*
+[source,gherkin]
+----
+Then the date '$date1' is $comparisonRule the date '$date2'
+----
 
-Validates the difference between the current date and the date under test in seconds using custom date format.
+* `$date1` - The first date in the {iso-date-format-link} format.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$date2` - The second date in the {iso-date-format-link} format.
 
-==== *_Wording_*
+
+.Compare dates
+[source,gherkin]
+----
+Then the date '2021-04-20T01:02:03.004Z' is greater than the date '2021-04-20T01:02:03.003Z'
+Then the date '2021-04-19' is less than the date '2021-04-20'
+----
+
+=== Compare date with custom format and current instant
+
+Validates the difference between the current instant and the provided date in seconds using the custom date format.
 
 [source,gherkin]
 ----
 Then the date '$date' in the format '$format' is $comparisonRule current for $seconds seconds
 ----
 
-==== *_Parameters_*
+* `$date` - The date to validate.
+* `$format` - {java-date-time-formatter-link}.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$seconds` - The amount of seconds between the current instant and the provided date.
 
-. `$date` - the date to validate
-. `$format` - the date in {java-date-time-formatter-link}
-. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
-. `$seconds` - the quantity of seconds between current and the date
-
-==== *_Usage_*
-
-.Sample.story
+.Validate the date is greater than current for 10 seconds
 [source,gherkin]
 ----
-Scenario: Validate the date is greater than current for 10 seconds
 Then the date '2020-06-25T00:19:58.890007Z' in the format 'uuuu-MM-dd'T'HH:mm:ss.nnnX' is > current for 10 seconds
 ----
