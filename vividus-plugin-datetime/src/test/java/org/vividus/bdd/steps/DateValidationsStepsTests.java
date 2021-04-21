@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-import org.hamcrest.BaseMatcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,12 +46,10 @@ class DateValidationsStepsTests
     private static final String INVALID_DATE = "invalidDate";
     private static final String DATE_PATTERN = "uuuu-MM-dd'T'HH:mm:ss.nnnX";
     private static final ZoneId TIME_ZONE_ID = ZoneId.of("Z");
+    private static final DateUtils DATE_UTILS = new DateUtils(TIME_ZONE_ID);
 
-    @Mock
-    private ISoftAssert softAssert;
-
-    @InjectMocks
-    private final DateValidationSteps dateValidationsSteps = new DateValidationSteps(new DateUtils(TIME_ZONE_ID));
+    @Mock private ISoftAssert softAssert;
+    @InjectMocks private final DateValidationSteps dateValidationsSteps = new DateValidationSteps(DATE_UTILS);
 
     @Test
     void testIsDateLess()
@@ -70,9 +69,8 @@ class DateValidationsStepsTests
 
     private void verifyDateAssertion(String date)
     {
-        verify(softAssert)
-                .assertThat(eq(String.format("The difference between %s and the current date", date)), any(Long.class),
-                        verifyMatcher(TypeSafeMatcher.class, 0L));
+        verify(softAssert).assertThat(eq(String.format("The difference between %s and the current date", date)),
+                any(Long.class), verifyMatcher(0L));
     }
 
     @Test
@@ -117,9 +115,18 @@ class DateValidationsStepsTests
     {
         String date1 = "2017-02-22T07:06:04";
         String date2 = "2017-02-22T07:06:04Z";
-        LocalDateTime localDateTime1 = LocalDateTime.parse(date1);
-        ZonedDateTime zonedDateTime1 = localDateTime1.atZone(TIME_ZONE_ID);
+        ZonedDateTime zonedDateTime1 = LocalDateTime.parse(date1).atZone(TIME_ZONE_ID);
         ZonedDateTime zonedDateTime2 = ZonedDateTime.parse(date2);
+        verifyDatesComparison(date1, date2, zonedDateTime1, zonedDateTime2);
+    }
+
+    @Test
+    void testCompareDatesWithoutTime()
+    {
+        String date1 = "2021-04-19";
+        String date2 = "2021-04-20";
+        ZonedDateTime zonedDateTime1 = LocalDate.parse(date1, DateTimeFormatter.ISO_DATE).atStartOfDay(TIME_ZONE_ID);
+        ZonedDateTime zonedDateTime2 = LocalDate.parse(date2, DateTimeFormatter.ISO_DATE).atStartOfDay(TIME_ZONE_ID);
         verifyDatesComparison(date1, date2, zonedDateTime1, zonedDateTime2);
     }
 
@@ -127,8 +134,8 @@ class DateValidationsStepsTests
             ZonedDateTime zonedDateTime2)
     {
         dateValidationsSteps.compareDates(date1, ComparisonRule.EQUAL_TO, date2);
-        verify(softAssert).assertThat(eq("Compare dates"), eq(zonedDateTime1),
-                verifyMatcher(TypeSafeMatcher.class, zonedDateTime2));
+        verify(softAssert).assertThat(eq("Compare dates"), eq(zonedDateTime1), verifyMatcher(zonedDateTime2));
+        verifyNoMoreInteractions(softAssert);
     }
 
     @Test
@@ -145,8 +152,8 @@ class DateValidationsStepsTests
         verifyNoMoreInteractions(softAssert);
     }
 
-    private <T, K> T verifyMatcher(@SuppressWarnings("rawtypes") Class<? extends BaseMatcher> clazz, K matching)
+    private <T, K> T verifyMatcher(K matching)
     {
-        return argThat(arg -> clazz.isInstance(arg) && clazz.cast(arg).matches(matching));
+        return argThat(arg -> arg instanceof TypeSafeMatcher && ((TypeSafeMatcher<?>) arg).matches(matching));
     }
 }
