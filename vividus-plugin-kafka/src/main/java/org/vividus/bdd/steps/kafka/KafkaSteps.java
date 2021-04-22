@@ -16,6 +16,13 @@
 
 package org.vividus.bdd.steps.kafka;
 
+import static java.util.Map.entry;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +34,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -55,6 +64,8 @@ import org.vividus.util.wait.DurationBasedWaiter;
 
 public class KafkaSteps
 {
+    private static final String DOT = ".";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSteps.class);
 
     private static final int WAIT_TIMEOUT_IN_MINUTES = 10;
@@ -62,8 +73,8 @@ public class KafkaSteps
     private static final Class<?> LISTENER_KEY = GenericMessageListenerContainer.class;
     private static final Class<?> MESSAGES_KEY = ConsumerRecord.class;
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final DefaultKafkaConsumerFactory<Object, Object> consumerFactory;
+    private final Map<String, KafkaTemplate<String, String>> kafkaTemplates;
+    private final Map<String, DefaultKafkaConsumerFactory<Object, Object>> consumerFactories;
 
     private final TestContext testContext;
     private final IBddVariableContext bddVariableContext;
@@ -72,57 +83,72 @@ public class KafkaSteps
     public KafkaSteps(IPropertyParser propertyParser, TestContext testContext, IBddVariableContext bddVariableContext,
             SoftAssert softAssert)
     {
-        Map<String, Object> producerConfig = new HashMap<>();
-        producerConfig.putAll(propertyParser.getPropertyValuesByPrefix("kafka.producer."));
-        producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        DefaultKafkaProducerFactory<String, String> producerFactory = new DefaultKafkaProducerFactory<>(producerConfig);
-        this.kafkaTemplate = new KafkaTemplate<>(producerFactory);
-
-        Map<String, Object> consumerConfig = new HashMap<>();
-        consumerConfig.putAll(propertyParser.getPropertyValuesByPrefix("kafka.consumer."));
-        consumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        consumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        this.consumerFactory = new DefaultKafkaConsumerFactory<>(consumerConfig);
-
+        this.kafkaTemplates = convert("kafka.producer.", propertyParser, config -> {
+            config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+            config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+            DefaultKafkaProducerFactory<String, String> producerFactory =
+                new DefaultKafkaProducerFactory<>(config);
+            return new KafkaTemplate<>(producerFactory);
+        });
+        this.consumerFactories = convert("kafka.consumer.", propertyParser, config -> {
+            config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+            config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+            return new DefaultKafkaConsumerFactory<>(config);
+        });
         this.testContext = testContext;
         this.bddVariableContext = bddVariableContext;
         this.softAssert = softAssert;
     }
 
+    private <T> Map<String, T> convert(String propertiesPrefix, IPropertyParser propertyParser,
+            Function<Map<String, Object>, T> factoryCreator)
+    {
+        Map<String, Object> properties = new HashMap<>(propertyParser.getPropertyValuesByPrefix(propertiesPrefix));
+        return properties.entrySet()
+                         .stream()
+                         .collect(groupingBy(e -> substringBefore(e.getKey(), DOT),
+                                      mapping(e -> entry(substringAfter(e.getKey(), DOT), e.getValue()),
+                                          collectingAndThen(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue),
+                                          factoryCreator::apply))));
+    }
+
     /**
      * Send the data to the provided topic with no key or partition.
-     * @param data the data to send
-     * @param topic the topic name
-     * @throws InterruptedException if the current thread was interrupted while waiting
-     * @throws ExecutionException if the computation threw an exception
-     * @throws TimeoutException if the wait timed out
+     * @param data                  The data to send
+     * @param producerKey           The key of the producer configuration
+     * @param topic                 The topic name
+     * @throws InterruptedException If the current thread was interrupted while waiting
+     * @throws ExecutionException   If the computation threw an exception
+     * @throws TimeoutException     If the wait timed out
      */
-    @When("I send data `$data` to Kafka topic `$topic`")
-    public void sendData(String data, String topic) throws InterruptedException, ExecutionException, TimeoutException
+    @When("I send data `$data` to `$producerKey` Kafka topic `$topic`")
+    public void sendData(String data, String producerKey, String topic) throws InterruptedException, ExecutionException,
+        TimeoutException
     {
-        kafkaTemplate.send(topic, data).get(WAIT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
+        kafkaTemplates.get(producerKey).send(topic, data).get(WAIT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
     }
 
     /**
      * Starts the Kafka consumer with the provided configuration to listen the specified topics. The consumer must be
      * stopped when it's not needed.
      *
-     * @param topics the comma-separated set of topics to listen
+     * @param consumerKey The key of the producer configuration
+     * @param topics      The comma-separated set of topics to listen
      */
-    @When("I start consuming messages from Kafka topics `$topics`")
-    public void startKafkaListener(Set<String> topics)
+    @When("I start consuming messages from `$consumerKey` Kafka topics `$topics`")
+    public void startKafkaListener(String consumerKey, Set<String> topics)
     {
-        stopListener(false);
+        stopListener(getListeners().remove(consumerKey), false);
         BlockingQueue<String> messageQueue = new LinkedBlockingDeque<>();
-        testContext.put(MESSAGES_KEY, messageQueue);
+        testContext.get(MESSAGES_KEY, HashMap::new).put(consumerKey, messageQueue);
         ContainerProperties containerProperties = new ContainerProperties(topics.toArray(new String[0]));
         containerProperties.setMessageListener(
                 (MessageListener<String, String>) data -> messageQueue.add(data.value()));
-        GenericMessageListenerContainer<String, String> container = new KafkaMessageListenerContainer<>(consumerFactory,
-                containerProperties);
+        GenericMessageListenerContainer<String, String> container = new KafkaMessageListenerContainer<>(
+                consumerFactories.get(consumerKey), containerProperties);
         container.start();
-        testContext.put(LISTENER_KEY, container);
+        getListeners().put(consumerKey, container);
+
         LOGGER.info("Kafka message listener is started");
     }
 
@@ -131,6 +157,7 @@ public class KafkaSteps
      * matches to the rule or until the timeout is exceeded.
      *
      * @param timeout        The maximum time to wait for the messages in ISO-8601 format
+     * @param consumerKey    The key of the producer configuration
      * @param comparisonRule The rule to match the quantity of messages. The supported rules:
      *                       <ul>
      *                       <li>less than (&lt;)</li>
@@ -142,23 +169,32 @@ public class KafkaSteps
      *                       </ul>
      * @param expectedCount  The expected count of the messages to be matched by the rule
      */
-    @When("I wait with `$timeout` timeout until count of consumed Kafka messages is $comparisonRule `$expectedCount`")
-    public void waitForKafkaMessages(Duration timeout, ComparisonRule comparisonRule, int expectedCount)
+    @When("I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka messages is $comparisonRule"
+            + " `$expectedCount`")
+    public void waitForKafkaMessages(Duration timeout, String consumerKey, ComparisonRule comparisonRule,
+            int expectedCount)
     {
         Matcher<Integer> countMatcher = comparisonRule.getComparisonRule(expectedCount);
         Integer result = new DurationBasedWaiter(timeout, Duration.ofSeconds(1)).wait(
-                () -> testContext.<BlockingQueue<String>>get(MESSAGES_KEY).size(), countMatcher::matches);
+                () -> getMessagesBy(consumerKey).size(),
+                countMatcher::matches);
         softAssert.assertThat("Total count of consumed Kafka messages", result, countMatcher);
+    }
+
+    private BlockingQueue<String> getMessagesBy(String key)
+    {
+        return testContext.<Map<String, BlockingQueue<String>>>get(MESSAGES_KEY).get(key);
     }
 
     /**
      * Stops the Kafka consumer started by the corresponding step before. All recorded messages are kept and can be
      * drained into the variable using the step described above.
+     * @param consumerKey The key of the producer configuration
      */
-    @When("I stop consuming messages from Kafka")
-    public void stopKafkaListener()
+    @When("I stop consuming messages from `$consumerKey` Kafka")
+    public void stopKafkaListener(String consumerKey)
     {
-        stopListener(true);
+        stopListener(getListeners().remove(consumerKey), true);
     }
 
     /**
@@ -173,6 +209,7 @@ public class KafkaSteps
      *                       consumption start and moves the consumer cursor
      *                       to the position after the last consumed message
      *                       </ul>
+     * @param consumerKey    The key of the producer configuration
      * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      *                       <i>Available scopes:</i>
      *                       <ul>
@@ -184,33 +221,39 @@ public class KafkaSteps
      * @param variableName   the variable name to store the messages. The messages are accessible via zero-based index,
      *                       e.g. `${my-var[0]}` will return the first received message.
      */
-    @When("I $queueOperation consumed Kafka messages to $scopes variable `$variableName`")
-    public void processKafkaMessages(QueueOperation queueOperation, Set<VariableScope> scopes,
+    @When("I $queueOperation consumed `$consumerKey` Kafka messages to $scopes variable `$variableName`")
+    public void processKafkaMessages(QueueOperation queueOperation, String consumerKey, Set<VariableScope> scopes,
             String variableName)
     {
-        bddVariableContext.putVariable(scopes, variableName, queueOperation.performOn(testContext.get(MESSAGES_KEY)));
+        bddVariableContext.putVariable(scopes, variableName, queueOperation.performOn(getMessagesBy(consumerKey)));
     }
 
     @AfterStory
     public void cleanUp()
     {
-        stopListener(false);
+        Map<String, GenericMessageListenerContainer<String, String>> listeners = getListeners();
+        listeners.values().forEach(k -> stopListener(k, false));
+        listeners.clear();
     }
 
-    private void stopListener(boolean throwExceptionIfNoListener)
+    private void stopListener(GenericMessageListenerContainer<String, String> container,
+            boolean throwExceptionIfNoListener)
     {
-        GenericMessageListenerContainer<String, String> container = testContext.get(LISTENER_KEY);
         if (container != null)
         {
             container.stop();
             LOGGER.info("Kafka message listener is stopped");
-            testContext.remove(LISTENER_KEY);
         }
         else if (throwExceptionIfNoListener)
         {
             throw new IllegalStateException(
                     "No Kafka message listener is running, did you forget to start consuming messages?");
         }
+    }
+
+    private Map<String, GenericMessageListenerContainer<String, String>> getListeners()
+    {
+        return testContext.get(LISTENER_KEY, HashMap::new);
     }
 
     protected enum QueueOperation

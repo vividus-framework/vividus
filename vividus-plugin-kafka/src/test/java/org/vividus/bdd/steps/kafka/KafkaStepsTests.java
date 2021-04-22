@@ -22,20 +22,26 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +59,10 @@ import org.vividus.util.property.IPropertyParser;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class KafkaStepsTests
 {
+    private static final String KEY2 = "key2";
+
+    private static final Class<?> LISTENER_KEY = GenericMessageListenerContainer.class;
+
     private static final String LISTENER_IS_STOPPED = "Kafka message listener is stopped";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(KafkaSteps.class);
@@ -66,8 +76,8 @@ class KafkaStepsTests
     @BeforeEach
     void beforeEach()
     {
-        Map<String, String> producerConfigs = Map.of();
-        Map<String, String> consumerConfigs = Map.of();
+        Map<String, String> producerConfigs = Map.of("key.producer.propery", "value");
+        Map<String, String> consumerConfigs = Map.of("key2.consumer.property", "value2");
 
         when(propertyParser.getPropertyValuesByPrefix("kafka.producer.")).thenReturn(producerConfigs);
         when(propertyParser.getPropertyValuesByPrefix("kafka.consumer.")).thenReturn(consumerConfigs);
@@ -77,36 +87,46 @@ class KafkaStepsTests
     @Test
     void shouldThrowExceptionWhenTryingToStopNotRunningListener()
     {
-        when(testContext.get(GenericMessageListenerContainer.class)).thenReturn(null);
+        mockListeners(new HashMap<>());
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-                kafkaSteps::stopKafkaListener);
+                () -> kafkaSteps.stopKafkaListener(KEY2));
         assertEquals("No Kafka message listener is running, did you forget to start consuming messages?",
                 exception.getMessage());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void shouldStopListenerInAfterStory()
     {
-        @SuppressWarnings("rawtypes")
-        GenericMessageListenerContainer container = mock(GenericMessageListenerContainer.class);
-        Class<?> key = GenericMessageListenerContainer.class;
-        when(testContext.get(key)).thenReturn(container);
+        var container = mock(GenericMessageListenerContainer.class);
+        Map<String, GenericMessageListenerContainer<String, String>> listeners = new HashMap<>();
+        mockListeners(listeners);
+        listeners.put(KEY2, container);
         kafkaSteps.cleanUp();
         verify(container).stop();
-        verify(testContext).remove(key);
+        assertTrue(listeners.isEmpty());
         assertThat(logger.getLoggingEvents(), is(List.of(info(LISTENER_IS_STOPPED))));
     }
 
+    @SuppressWarnings("unchecked")
+    private void mockListeners(
+            Map<String, GenericMessageListenerContainer<String, String>> listeners)
+    {
+        when(testContext.get(eq(LISTENER_KEY), any(Supplier.class))).thenReturn(listeners);
+    }
+
+    @SuppressWarnings("unchecked")
     @Test
     void shouldDoNothingInAfterStoryWhenListenerIsStopped()
     {
-        when(testContext.get(GenericMessageListenerContainer.class)).thenReturn(null);
+        Map<String, GenericMessageListenerContainer<String, String>> listeners = new HashMap<>();
+        mockListeners(listeners);
         kafkaSteps.cleanUp();
         verifyNoMoreInteractions(testContext);
         assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     void shouldStopStartedKafkaListenerIfNewKafkaListenerIsCreated()
     {
@@ -115,18 +135,21 @@ class KafkaStepsTests
                 withSettings().extraInterfaces(GenericMessageListenerContainer.class)))
         {
             String topic = "topic";
-            kafkaSteps.startKafkaListener(Set.of(topic));
+            String consumerKey = KEY2;
+            Map<String, GenericMessageListenerContainer<String, String>> listeners = new HashMap<>();
+            mockListeners(listeners);
+            when(testContext.get(eq(ConsumerRecord.class), any(Supplier.class))).thenReturn(new HashMap<>());
+            kafkaSteps.startKafkaListener(consumerKey, Set.of(topic));
             KafkaMessageListenerContainer container = construction.constructed().get(0);
 
-            when(testContext.get(GenericMessageListenerContainer.class)).thenReturn(container);
+            assertThat(listeners.values(), hasSize(1));
+            assertEquals(container, listeners.get(consumerKey));
 
-            kafkaSteps.startKafkaListener(Set.of(topic));
+            kafkaSteps.startKafkaListener(consumerKey, Set.of(topic));
 
-            verify(testContext).put(GenericMessageListenerContainer.class, container);
-            verify(testContext).put(GenericMessageListenerContainer.class, construction.constructed().get(1));
+            assertThat(listeners.values(), hasSize(1));
+            assertEquals(construction.constructed().get(1), listeners.get(consumerKey));
             assertThat(construction.constructed(), hasSize(2));
-
-            verify(testContext).remove(GenericMessageListenerContainer.class);
 
             String listenerIsStarted = "Kafka message listener is started";
             assertThat(logger.getLoggingEvents(),
