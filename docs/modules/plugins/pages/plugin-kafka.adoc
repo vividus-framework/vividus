@@ -10,6 +10,27 @@ The plugin provides integration with an open-source distributed event streaming 
 implementation(group: 'org.vividus', name: 'vividus-plugin-kafka', version: '{current-version}')
 ----
 
+== Deprecations
+
+=== Steps
+
+The following list of steps is deprecated and will be removed in the future releases:
+
+[source,gherkin]
+----
+When I send data `$data` to Kafka topic `$topic`
+When I start consuming messages from Kafka topics `$topics`
+When I wait with `$timeout` timeout until count of consumed Kafka messages is $comparisonRule `$expectedCount`
+When I stop consuming messages from Kafka
+When I $queueOperation consumed Kafka messages to $scopes variable `$variableName`
+----
+
+=== Properties
+
+The generic (without producer and consumer keys) properties with `kafka.producer.` and `kafka.consumer.` prefixes are deprecated and will be removed in the future releases.
+
+The documentation for the deprecated steps and properties can be found in xref:0.3.4@vividus:plugins:plugin-kafka.adoc[Plugin Kafka 0.3.4]
+
 == Producer
 === Properties
 
@@ -22,14 +43,15 @@ NOTE: The properties marked with *bold* are mandatory.
 |Default
 |Description
 
-|[subs=+quotes]`*kafka.producer.bootstrap.servers*`
+|[subs=+quotes]`*kafka.producer.<producer-key>.bootstrap.servers*`
 |`<host>:<port>`
 |
 |A comma-separated list of host and port pairs that are the addresses of the Kafka brokers in a "bootstrap" Kafka cluster that a Kafka client connects to initially to bootstrap itself.
 
 |===
 
-All other optional https://kafka.apache.org/documentation/#producerconfigs[producer configs] can be set by prefixing regular Kafka properties with `kafka.producer.`.
+All other optional https://kafka.apache.org/documentation/#producerconfigs[producer configs] can be set by prefixing regular Kafka properties with `kafka.producer.<producer-key>`.
+Where `<producer-key>` is the key of the producer configuration which should be used as steps parameter.
 
 === Steps
 
@@ -39,8 +61,9 @@ Sends the data to the provided topic with no key or partition.
 
 [source,gherkin]
 ----
-When I send data `$data` to Kafka topic `$topic`
+When I send data `$data` to `$producerKey` Kafka topic `$topic`
 ----
+* `$producerKey` - the key of Kafka producer configuration
 * `$data` - the data to send
 * `$topic` - the topic name
 
@@ -49,7 +72,7 @@ When I send data `$data` to Kafka topic `$topic`
 .Send the data to the Kafka topic
 [source,gherkin]
 ----
-When I send data `my-data` to Kafka topic `my-topic`
+When I send data `my-data` to `dev` Kafka topic `my-topic`
 ----
 
 == Consumer
@@ -64,19 +87,20 @@ NOTE: The properties marked with *bold* are mandatory.
 |Default
 |Description
 
-|[subs=+quotes]`*kafka.consumer.bootstrap.servers*`
+|[subs=+quotes]`*kafka.consumer.<consumer-key>.bootstrap.servers*`
 |`<host>:<port>`
 |
 |A comma-separated list of host and port pairs that are the addresses of the Kafka brokers in a "bootstrap" Kafka cluster that a Kafka client connects to initially to bootstrap itself.
 
-|[subs=+quotes]`*kafka.consumer.group.id*`
+|[subs=+quotes]`*kafka.consumer.<consumer-key>.group.id*`
 |`<any-string>`
 |
 |A unique string that identifies the consumer group this consumer belongs to.
 
 |===
 
-All other optional https://kafka.apache.org/documentation/#consumerconfigs[consumer configs] can be set by prefixing regular Kafka properties with `kafka.consumer.`.
+All other optional https://kafka.apache.org/documentation/#consumerconfigs[consumer configs] can be set by prefixing regular Kafka properties with `kafka.consumer.<consumer-key>.`.
+Where `<consumer-key>` is the key of the consumer configuration which should be used as steps parameter.
 
 === Steps
 
@@ -86,8 +110,9 @@ Starts the Kafka consumer with the provided configuration to listen the specifie
 
 [source,gherkin]
 ----
-When I start consuming messages from Kafka topics `$topics`
+When I start consuming messages from `$consumerKey` Kafka topics `$topics`
 ----
+* `$consumerKey` - the key of the Kafka consumer configuration
 * `$topics` - the comma-separated set of topics to listen
 
 ==== *Drain/Peek the consumed messages*
@@ -96,9 +121,10 @@ Drains/Peeks the consumed messaged to the specified variable. If the consumer is
 
 [source,gherkin]
 ----
-When I $queueOperation consumed Kafka messages to $scopes variable `$variableName`
+When I $queueOperation consumed `$consumerKey` Kafka messages to $scopes variable `$variableName`
 ----
 * `$queueOperation` -  `DRAIN` - saves the messages consumed since the last drain or from the consumption start and moves the consumer cursor to the position after the last consumed message, `PEEK` - saves the messages consumed since the last drain or from the consumption start and doesn't change the consumer cursor position
+* `$consumerKey` - the key of the Kafka consumer configuration
 * `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes].
 * `$variableName` - the variable name to store the messages. The messages are accessible via zero-based index, e.g. `${my-var[0]}` will return the first received message.
 
@@ -108,9 +134,10 @@ Waits until the count of the consumed messaged (from the consumer start or after
 
 [source,gherkin]
 ----
-When I wait with `$timeout` timeout until count of consumed Kafka messages is $comparisonRule `$expectedCount`
+When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka messages is $comparisonRule `$expectedCount`
 ----
 * `$timeout` - the maximum time to wait for the messages in {iso-date-format-link} format
+* `$consumerKey` - the key of the Kafka consumer configuration
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[the comparison rule]
 * `$expectedCount` - the expected count of the messages to be matched by the rule
 
@@ -120,18 +147,19 @@ Stops the Kafka consumer started by the corresponding step before. All recorded 
 
 [source,gherkin]
 ----
-When I stop consuming messages from Kafka
+When I stop consuming messages from `$consumerKey` Kafka
 ----
+* `$consumerKey` - the key of the Kafka consumer configuration
 
 === Examples
 
 .Consume messages from the Kafka topic
 [source,gherkin]
 ----
-When I start consuming messages from Kafka topics `my-topic-1, my-topic-2`
+When I start consuming messages from `dev` Kafka topics `my-topic-1, my-topic-2`
 !-- Perform any actions triggering the publishing of messages to Kafka
-When I wait with `PT30S` timeout until count of consumed Kafka messages is greater than `1`
-When I stop consuming messages from Kafka
+When I wait with `PT30S` timeout until count of consumed `dev` Kafka messages is greater than `1`
+When I stop consuming messages from `dev` Kafka
 When I drain consumed Kafka messages to scenario variable `consumed-messages`
 Then `${consumed-messages[0]}` is equal to `some-expected-message`
 ----
@@ -139,22 +167,21 @@ Then `${consumed-messages[0]}` is equal to `some-expected-message`
 .Drain messages while listener is rinning
 [source,gherkin]
 ----
-When I start consuming messages from Kafka topics `my-topic-1, my-topic-2`
+When I start consuming messages from `prod` Kafka topics `my-topic-1, my-topic-2`
 !-- Perform any actions triggering the publishing of messages to Kafka
-When I drain consumed Kafka messages to scenario variable `messages-after-action-X`
+When I drain consumed `prod` Kafka messages to scenario variable `messages-after-action-X`
 !-- Perform more actions triggering the publishing of messages to Kafka
-When I drain consumed Kafka messages to scenario variable `messages-after-action-Y`
-When I stop consuming messages from Kafka
+When I drain consumed `prod` Kafka messages to scenario variable `messages-after-action-Y`
+When I stop consuming messages from `prod` Kafka
 ----
 
 .Peek messages while listener is rinning
 [source,gherkin]
 ----
-When I start consuming messages from Kafka topics `my-topic-1, my-topic-2`
+When I start consuming messages from `prod` Kafka topics `my-topic-1, my-topic-2`
 !-- Perform any actions triggering the publishing of messages to Kafka
-When I drain consumed Kafka messages to scenario variable `messages-after-action-X`
+When I drain consumed `prod` Kafka messages to scenario variable `messages-after-action-X`
 !-- Perform more actions triggering the publishing of messages to Kafka
-When I peek consumed Kafka messages to scenario variable `messages-after-action-Y`
-When I stop consuming messages from Kafka
+When I peek consumed `prod` Kafka messages to scenario variable `messages-after-action-Y`
+When I stop consuming messages from `prod` Kafka
 ----
-agn1a1vanovna

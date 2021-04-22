@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -69,6 +68,12 @@ class KafkaStepsIntegrationTests
 {
     static final String TOPIC = "test-topic";
 
+    private static final String DOT = ".";
+
+    private static final String CONSUMER = "keyConsumer";
+
+    private static final String PRODUCER = "keyProducer";
+
     private static final String ANY_DATA = "any-data";
 
     private static final String VARIABLE_NAME = "var";
@@ -91,12 +96,12 @@ class KafkaStepsIntegrationTests
         Map<String, String> producerConfigs = KafkaTestUtils.producerProps(embeddedKafkaBroker)
                 .entrySet().stream()
                 .filter(e -> e.getValue() instanceof String)
-                .collect(toMap(Entry::getKey, e -> (String) e.getValue()));
+                .collect(toMap(e -> PRODUCER + DOT + e.getKey(), e -> (String) e.getValue()));
 
         Map<String, String> consumerConfigs = KafkaTestUtils.consumerProps("testGroup", "true", embeddedKafkaBroker)
                 .entrySet().stream()
                 .filter(e -> e.getValue() instanceof String)
-                .collect(toMap(Entry::getKey, e -> (String) e.getValue()));
+                .collect(toMap(e -> CONSUMER + DOT + e.getKey(), e -> (String) e.getValue()));
         consumerConfigs.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         when(propertyParser.getPropertyValuesByPrefix("kafka.producer.")).thenReturn(producerConfigs);
@@ -108,15 +113,15 @@ class KafkaStepsIntegrationTests
     {
         return Stream.of(
                 Arguments.of((BiConsumer<KafkaSteps, IBddVariableContext>) (steps, context) -> {
-                    steps.processKafkaMessages(QueueOperation.DRAIN, SCOPES, VARIABLE_NAME);
-                    steps.processKafkaMessages(QueueOperation.DRAIN, SCOPES, VARIABLE_NAME);
+                    steps.processKafkaMessages(QueueOperation.DRAIN, CONSUMER, SCOPES, VARIABLE_NAME);
+                    steps.processKafkaMessages(QueueOperation.DRAIN, CONSUMER, SCOPES, VARIABLE_NAME);
                     InOrder ordered = Mockito.inOrder(context);
                     ordered.verify(context).putVariable(SCOPES, VARIABLE_NAME, List.of(ANY_DATA));
                     ordered.verify(context).putVariable(SCOPES, VARIABLE_NAME, List.of());
                 }),
                 Arguments.of((BiConsumer<KafkaSteps, IBddVariableContext>) (steps, context) -> {
-                    steps.processKafkaMessages(QueueOperation.PEEK, SCOPES, VARIABLE_NAME);
-                    steps.processKafkaMessages(QueueOperation.PEEK, SCOPES, VARIABLE_NAME);
+                    steps.processKafkaMessages(QueueOperation.PEEK, CONSUMER, SCOPES, VARIABLE_NAME);
+                    steps.processKafkaMessages(QueueOperation.PEEK, CONSUMER, SCOPES, VARIABLE_NAME);
                     verify(context, times(2)).putVariable(SCOPES, VARIABLE_NAME, List.of(ANY_DATA));
                 }));
     }
@@ -126,16 +131,16 @@ class KafkaStepsIntegrationTests
     void shouldProduceToAndConsumerFromKafka(BiConsumer<KafkaSteps, IBddVariableContext> test)
             throws InterruptedException, ExecutionException, TimeoutException
     {
-        kafkaSteps.startKafkaListener(Set.of(TOPIC));
+        kafkaSteps.startKafkaListener(CONSUMER, Set.of(TOPIC));
 
-        kafkaSteps.sendData(ANY_DATA, TOPIC);
+        kafkaSteps.sendData(ANY_DATA, PRODUCER, TOPIC);
 
         ComparisonRule comparisonRule = ComparisonRule.EQUAL_TO;
-        kafkaSteps.waitForKafkaMessages(Duration.ofSeconds(10), comparisonRule, 1);
+        kafkaSteps.waitForKafkaMessages(Duration.ofSeconds(10), CONSUMER, comparisonRule, 1);
         verify(softAssert).assertThat(eq("Total count of consumed Kafka messages"), eq(1),
                 argThat(matcher -> "a value equal to <1>".equals(matcher.toString())));
 
-        kafkaSteps.stopKafkaListener();
+        kafkaSteps.stopKafkaListener(CONSUMER);
         assertThat(logger.getLoggingEvents(),
                 is(List.of(info("Kafka message listener is started"), info("Kafka message listener is stopped"))));
 
