@@ -75,3 +75,15 @@ Scenario: Verify 'toBase64Gzip' expression
 Meta:
     @requirementId 1337
 Then `#{toBase64Gzip(vividus)}` is equal to `H4sIAAAAAAAAACvLLMtMKS0GANIHCdkHAAAA`
+
+Scenario: Use expressions in template
+Meta:
+    @requirementId 1545
+Given I initialize the SCENARIO variable `data` using template `data/expressions.ftl` with parameters:
+|param|
+|value|
+Then `${data}` is equal to `Vividus Expressions
+TG9yZCBEYWdvbiB3aWxsIHdlbGNvbWUgeW91ciBzb3VsIGluIE9ibGl2aW9uIQ==
+Mg==
+1986-04-26T01:23:40+04:00
+`

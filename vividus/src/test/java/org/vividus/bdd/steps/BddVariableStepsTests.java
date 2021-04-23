@@ -28,11 +28,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +37,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,14 +52,10 @@ import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
-import org.vividus.util.freemarker.FreemarkerProcessor;
-
-import freemarker.template.TemplateException;
 
 @ExtendWith(MockitoExtension.class)
 class BddVariableStepsTests
 {
-    private static final String HEADER = "header";
     private static final String TABLES_ARE_EQUAL = "Tables are equal";
     private static final String KEY_1 = "k1";
     private static final String VALUE_1 = "v1";
@@ -71,17 +63,10 @@ class BddVariableStepsTests
     private static final String VALUE_2 = "v2";
     private static final ExamplesTable SINGLE_VALUE_TABLE = new ExamplesTable("|k1|\n|v1|");
 
-    @Mock private FreemarkerProcessor freemarkerProcessor;
     @Mock private IBddVariableContext bddVariableContext;
     @Mock private ISoftAssert softAssert;
     @Mock private IAttachmentPublisher attachmentPublisher;
     @InjectMocks private BddVariableSteps bddVariableSteps;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        bddVariableSteps.setFreemarkerProcessor(freemarkerProcessor);
-    }
 
     @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
     static Stream<Arguments> stringsAsNumbers()
@@ -307,35 +292,6 @@ class BddVariableStepsTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> bddVariableSteps.tablesAreEqual("", null));
         assertEquals("'variable' should be empty list or list of maps structure", exception.getMessage());
-    }
-
-    static Stream<Arguments> mapProvider()
-    {
-        final String parameters = "parameters";
-        final String data = "data";
-        final List<String> dataList = List.of(data);
-        return Stream.of(
-            arguments(Map.of(HEADER, data),     Map.of(KEY_1, VALUE_1, HEADER, dataList, parameters,
-                    Map.of(HEADER, dataList, KEY_1, VALUE_1))),
-            arguments(Map.of(parameters, data), Map.of(parameters, Map.of(parameters, dataList, KEY_1, VALUE_1,
-                    HEADER, VALUE_2)))
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("mapProvider")
-    void testInitVariableUsingTemplate(Map<String, String> dataModel, Map<String, ?> resultMap)
-        throws IOException, TemplateException
-    {
-        Map<String, Object> variables = new HashMap<>(Map.of(KEY_1, VALUE_1, HEADER, VALUE_2));
-        when(bddVariableContext.getVariables()).thenReturn(variables);
-        String templatePath = "/templatePath";
-        when(freemarkerProcessor.process(templatePath, resultMap, StandardCharsets.UTF_8)).thenReturn(VALUE_1);
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        String variableName = "variableName";
-        bddVariableSteps.initVariableUsingTemplate(scopes, variableName, templatePath,
-                new ExamplesTable("").withRows(List.of(dataModel)));
-        verify(bddVariableContext).putVariable(scopes, variableName, VALUE_1);
     }
 
     @Test

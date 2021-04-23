@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class ResolvingExpressionsEagerlyTransformer implements ExtendedTableTran
 
     private void resolveExpressions(List<Map<String, String>> list)
     {
-        list.forEach(map -> map.entrySet()
-                .forEach(entry -> entry.setValue(String.valueOf(expressionAdaptor.process(entry.getValue())))));
+        list.forEach(map -> map.entrySet().forEach(
+                entry -> entry.setValue(String.valueOf(expressionAdaptor.processRawExpression(entry.getValue())))));
     }
 }

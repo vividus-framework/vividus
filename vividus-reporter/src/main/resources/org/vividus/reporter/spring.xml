@@ -7,9 +7,13 @@
     <bean id="attachmentPublisher" class="org.vividus.reporter.event.AttachmentPublisher">
         <property name="eventBus" ref="eventBus" />
         <property name="freemarkerProcessor">
-            <bean class="org.vividus.util.freemarker.FreemarkerProcessor">
-                <constructor-arg value="org.vividus.reporter.event.AttachmentPublisher" />
-                <constructor-arg value="/" />
+            <bean parent="abstractFreemarkerConfig">
+                <property name="templateLoader">
+                    <bean class="freemarker.cache.ClassTemplateLoader">
+                        <constructor-arg index="0" value="org.vividus.reporter.event.AttachmentPublisher" />
+                        <constructor-arg index="1" value="/" />
+                    </bean>
+                </property>
             </bean>
         </property>
     </bean>
