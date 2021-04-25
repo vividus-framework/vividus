@@ -28,8 +28,8 @@ public class BatchedPerformableTree extends PerformableTree
     @Override
     public void performBeforeOrAfterStories(RunContext context, Stage stage)
     {
-        if (reportBeforeStories && Stage.BEFORE.equals(stage) || (Stage.AFTER.equals(stage)
-                && (reportAfterStories || failFast && !context.getFailures().isEmpty())))
+        if (reportBeforeStories && Stage.BEFORE.equals(stage) || Stage.AFTER.equals(stage)
+                && (reportAfterStories || failFast && !context.getFailures().isEmpty()))
         {
             super.performBeforeOrAfterStories(context, stage);
         }
