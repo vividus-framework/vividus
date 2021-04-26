@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.NullStoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,13 +181,16 @@ public class StatisticsStoryReporter extends NullStoryReporter
     @Override
     public void beforeStep(Step step)
     {
-        Node node = new Node(NodeType.STEP);
-        if (isRoot())
+        if (step.getExecutionType() != StepExecutionType.COMMENT)
         {
-            context().getRoot().addChild(node);
-            return;
+            Node node = new Node(NodeType.STEP);
+            if (isRoot())
+            {
+                context().getRoot().addChild(node);
+                return;
+            }
+            context().getTail().addChild(node);
         }
-        context().getTail().addChild(node);
     }
 
     @Override
@@ -197,12 +201,6 @@ public class StatisticsStoryReporter extends NullStoryReporter
 
     @Override
     public void ignorable(String step)
-    {
-        updateStepStatus(Status.SKIPPED);
-    }
-
-    @Override
-    public void comment(String step)
     {
         updateStepStatus(Status.SKIPPED);
     }
