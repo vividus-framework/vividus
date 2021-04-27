@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ import org.vividus.testcontext.ThreadedTestContext;
 import org.vividus.util.json.JsonUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-@SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "AvoidDuplicateLiterals"})
+@SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
 class StatisticsStoryReporterTests
 {
     private static final String STEP_AS_STRING = "step";
@@ -114,28 +114,28 @@ class StatisticsStoryReporterTests
                 + "  },\n"
                 + "  \"SCENARIO\" : {\n"
                 + "    \"total\" : 10,\n"
-                + "    \"passed\" : 2,\n"
+                + "    \"passed\" : 3,\n"
                 + "    \"failed\" : 1,\n"
                 + "    \"broken\" : 1,\n"
-                + "    \"skipped\" : 3,\n"
+                + "    \"skipped\" : 2,\n"
                 + "    \"pending\" : 2,\n"
                 + "    \"knownIssue\" : 1\n"
                 + "  },\n"
                 + "  \"STEP\" : {\n"
-                + "    \"total\" : 20,\n"
+                + "    \"total\" : 18,\n"
                 + "    \"passed\" : 12,\n"
                 + "    \"failed\" : 1,\n"
                 + "    \"broken\" : 1,\n"
-                + "    \"skipped\" : 4,\n"
+                + "    \"skipped\" : 2,\n"
                 + "    \"pending\" : 1,\n"
                 + "    \"knownIssue\" : 1\n"
                 + "  },\n"
                 + "  \"GIVEN_STORY\" : {\n"
                 + "    \"total\" : 5,\n"
-                + "    \"passed\" : 1,\n"
+                + "    \"passed\" : 2,\n"
                 + "    \"failed\" : 0,\n"
                 + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 2,\n"
+                + "    \"skipped\" : 1,\n"
                 + "    \"pending\" : 2,\n"
                 + "    \"knownIssue\" : 0\n"
                 + "  }\n"
@@ -145,7 +145,7 @@ class StatisticsStoryReporterTests
     }
 
     @Test
-    void shouldReturnStatistics(@TempDir Path tempDirectory) throws IOException
+    void shouldReturnStatistics(@TempDir Path tempDirectory)
     {
         reporter.setStatisticsFolder(tempDirectory.toFile());
         reporterFlowProvider();
@@ -154,7 +154,7 @@ class StatisticsStoryReporterTests
         Assertions.assertAll(
             () -> assertEquals(1, output.get(NodeType.STORY).getTotal()),
             () -> assertEquals(10, output.get(NodeType.SCENARIO).getTotal()),
-            () -> assertEquals(20, output.get(NodeType.STEP).getTotal()),
+            () -> assertEquals(18, output.get(NodeType.STEP).getTotal()),
             () -> assertEquals(5, output.get(NodeType.GIVEN_STORY).getTotal()));
         verifyNoInteractions(bddRunContext);
     }
@@ -217,8 +217,8 @@ class StatisticsStoryReporterTests
 
         reporter.beforeStory(givenStory, true);
         reporter.beforeScenario(scenario);
-        reportStep(reporter, () -> reporter.comment(STEP_AS_STRING));
-        reportStep(reporter, () -> reporter.comment(STEP_AS_STRING));
+        reporter.beforeStep(new Step(StepExecutionType.COMMENT, STEP_AS_STRING));
+        reporter.comment(STEP_AS_STRING);
         reporter.afterScenario(null);
         reporter.afterStory(true);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
