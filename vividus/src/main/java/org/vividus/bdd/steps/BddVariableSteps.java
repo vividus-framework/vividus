@@ -19,8 +19,6 @@ package org.vividus.bdd.steps;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,28 +26,22 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.util.EnumUtils;
-import org.vividus.bdd.util.MapUtils;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
-import org.vividus.util.freemarker.FreemarkerProcessor;
-
-import freemarker.template.TemplateException;
 
 public class BddVariableSteps
 {
     private static final String TABLES_ARE_EQUAL = "Tables are equal";
 
-    private FreemarkerProcessor freemarkerProcessor;
     private final IBddVariableContext bddVariableContext;
     private final ISoftAssert softAssert;
     private final IAttachmentPublisher attachmentPublisher;
@@ -79,64 +71,6 @@ public class BddVariableSteps
                 return softAssert.assertTrue(TABLES_ARE_EQUAL, areAllResultsPassed(results));
             }
         };
-    }
-
-    /**
-     * This step initializes BDD variable with a result of given template processing
-     * It's allowed to use <i>global</i>, <i>next batches</i>, <i>scenario</i> and <i>story</i> variables within
-     * templates by referring them using the variable reference notation. Note that the parameters passed to the
-     * step take precedence over the variables.
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A name under which the value should be saved
-     * @param templatePath Freemarker template file path
-     * @param templateParameters Parameters processed by template. Any valid ExamplesTable.
-     * <p>For example, if template file is the following:</p>
-     * {<br>
-     *  "id": "12345",<br>
-     *  "version": 1,<br>
-     *  "dateTime": "${dateTime}",<br>
-     *  "adherenceDateTime": "${adherenceDateTime}",<br>
-     *  "didAdhere": true<br>
-     * }
-     * <p>Parameters required for Freemarker template in ExamplesTable will be the following:</p>
-     * <table border="1" style="width:70%">
-     * <caption>Table of parameters</caption>
-     * <tr>
-     * <td>dateTime</td>
-     * <td>adherenceDateTime</td>
-     * </tr>
-     * <tr>
-     * <td>2016-05-19T15:30:34</td>
-     * <td>2016-05-19T14:43:12</td>
-     * </tr>
-     * </table>
-     * @throws IOException in case of any error happened at I/O operations
-     * @throws TemplateException in case of any error at template processing
-     */
-    @Given("I initialize the $scopes variable `$variableName` using template `$templatePath` with parameters:"
-            + "$templateParameters")
-    public void initVariableUsingTemplate(Set<VariableScope> scopes, String variableName, String templatePath,
-            ExamplesTable templateParameters) throws IOException, TemplateException
-    {
-        Map<String, Object> dataModel = bddVariableContext.getVariables();
-        dataModel.putAll(MapUtils.convertExamplesTableToMap(templateParameters));
-
-        Map<String, Object> parameters = new HashMap<>();
-        String parametersKey = "parameters";
-        parameters.put(parametersKey, dataModel);
-        if (!dataModel.containsKey(parametersKey))
-        {
-            parameters.putAll(dataModel);
-        }
-        String value = freemarkerProcessor.process(templatePath, parameters, StandardCharsets.UTF_8);
-        bddVariableContext.putVariable(scopes, variableName, value);
     }
 
     /**
@@ -277,10 +211,5 @@ public class BddVariableSteps
     {
         attachmentPublisher.publishAttachment("/templates/maps-comparison-table.ftl",
                 Map.of("results", results), "Tables comparison result");
-    }
-
-    public void setFreemarkerProcessor(FreemarkerProcessor freemarkerProcessor)
-    {
-        this.freemarkerProcessor = freemarkerProcessor;
     }
 }

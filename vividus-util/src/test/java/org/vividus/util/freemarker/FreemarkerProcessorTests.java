@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 class FreemarkerProcessorTests
@@ -34,7 +35,13 @@ class FreemarkerProcessorTests
     private static final String RELATIVE_PATH = "test.ftl";
     private static final String EXPECTED_JSON = "{\"id\" : 12,\"name\" : someName,\"field\" : \"test field\"}";
 
-    private final FreemarkerProcessor freemarkerProcessor = new FreemarkerProcessor(FreemarkerProcessor.class);
+    private final FreemarkerProcessor freemarkerProcessor;
+
+    {
+        Configuration config = new Configuration(Configuration.VERSION_2_3_31);
+        config.setClassForTemplateLoading(FreemarkerProcessor.class, "");
+        freemarkerProcessor = new FreemarkerProcessor(config);
+    }
 
     @Test
     void testProcessAsStringTemplatePath() throws IOException, TemplateException

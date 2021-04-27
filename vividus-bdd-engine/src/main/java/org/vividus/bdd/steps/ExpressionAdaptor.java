@@ -19,6 +19,7 @@ package org.vividus.bdd.steps;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,12 +42,61 @@ public class ExpressionAdaptor
 
     private List<IExpressionProcessor<?>> processors;
 
-    public Object process(String value)
+    /**
+     * Processes the expression including nested ones.
+     * <br>
+     * Syntax:
+     * <br>
+     * <code>
+     * #{expression(arguments...)}
+     * #{expression(arguments..., #{expression(arguments...)})}
+     * </code>
+     * <br>
+     * Example:
+     * <br>
+     * <code>
+     * #{shiftDate("1942-12-02T01:23:40+04:00", "yyyy-MM-dd'T'HH:mm:ssz", "P43Y4M3W3D")}
+     * <br>
+     * #{encodeToBase64(#{fromEpochSecond(-523641111)})}
+     * </code>
+     *
+     * @param expression the expression to process
+     * @return the result of processed expression
+     */
+    public Object processRawExpression(String expression)
+    {
+        return processExpression(expression, () -> processExpression(expression,
+                List.of(RELUCTANT_EXPRESSION_PATTERN, GREEDY_EXPRESSION_PATTERN).iterator()));
+    }
+
+    /**
+     * Processes the expression excluding nested ones.
+     * <br>
+     * Syntax:
+     * <br>
+     * <code>
+     * expression(arguments...)
+     * </code>
+     * <br>
+     * Example:
+     * <br>
+     * <code>
+     * shiftDate("1942-12-02T01:23:40+04:00", "yyyy-MM-dd'T'HH:mm:ssz", "P43Y4M3W3D")
+     * </code>
+     *
+     * @param expression the expression to process
+     * @return the result of processed expression
+     */
+    public Object processExpression(String expression)
+    {
+        return processExpression(expression, () -> apply(expression));
+    }
+
+    private Object processExpression(String value, Supplier<Object> expressionResolver)
     {
         try
         {
-            return processExpression(value,
-                    List.of(RELUCTANT_EXPRESSION_PATTERN, GREEDY_EXPRESSION_PATTERN).iterator());
+            return expressionResolver.get();
         }
         catch (RuntimeException e)
         {

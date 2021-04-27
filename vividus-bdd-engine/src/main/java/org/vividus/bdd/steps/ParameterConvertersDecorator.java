@@ -127,6 +127,6 @@ public class ParameterConvertersDecorator extends ParameterConverters
 
     private Object processExpressions(String valueToConvert)
     {
-        return expressionAdaptor.process(valueToConvert);
+        return expressionAdaptor.processRawExpression(valueToConvert);
     }
 }

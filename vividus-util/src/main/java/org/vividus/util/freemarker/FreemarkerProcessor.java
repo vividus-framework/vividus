@@ -25,32 +25,14 @@ import java.nio.charset.StandardCharsets;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
 
 public class FreemarkerProcessor
 {
     private final Configuration configuration;
 
-    /**
-     * Configuration initialization
-     * @param resourceLoaderClass class for loading resources
-     */
-    public FreemarkerProcessor(Class<?> resourceLoaderClass)
+    public FreemarkerProcessor(Configuration configuration)
     {
-        this(resourceLoaderClass, "");
-    }
-
-    /**
-     * Configuration initialization
-     * @param resourceLoaderClass class for loading resources
-     * @param templatePath template path
-     */
-    public FreemarkerProcessor(Class<?> resourceLoaderClass, String templatePath)
-    {
-        configuration = new Configuration(Configuration.VERSION_2_3_31);
-        configuration.setClassForTemplateLoading(resourceLoaderClass, templatePath);
-        configuration.setDefaultEncoding(StandardCharsets.UTF_8.toString());
-        configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        this.configuration = configuration;
     }
 
     public byte[] process(String templateName, Object dataModel) throws IOException, TemplateException

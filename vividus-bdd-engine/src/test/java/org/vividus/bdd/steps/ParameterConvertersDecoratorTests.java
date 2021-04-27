@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ class ParameterConvertersDecoratorTests
         String convertedValue = "Varvar\r\nVarvar2";
         Type type = String.class;
         when(variableResolver.resolve(value)).thenReturn(convertedValue);
-        when(expressionAdaptor.process(convertedValue)).thenReturn(convertedValue);
+        when(expressionAdaptor.processRawExpression(convertedValue)).thenReturn(convertedValue);
         when(variableResolver.resolve(convertedValue)).thenReturn(convertedValue);
         String actual = (String) parameterConverters.convert(value, type);
         assertEquals("Varvar" + System.lineSeparator() + "Varvar2", actual);
@@ -96,10 +96,12 @@ class ParameterConvertersDecoratorTests
         String valueWithNestedVarReplaced = "${var#{eval(2 + 1)}}";
         when(variableResolver.resolve(value)).thenReturn(valueWithNestedVarReplaced);
         String valueWithExpressionProcessed = "${var3}";
-        when(expressionAdaptor.process(valueWithNestedVarReplaced)).thenReturn(valueWithExpressionProcessed);
+        when(expressionAdaptor.processRawExpression(valueWithNestedVarReplaced))
+                .thenReturn(valueWithExpressionProcessed);
         String valueWithExternalVarReplaced = "value";
         when(variableResolver.resolve(valueWithExpressionProcessed)).thenReturn(valueWithExternalVarReplaced);
-        when(expressionAdaptor.process(valueWithExternalVarReplaced)).thenReturn(valueWithExternalVarReplaced);
+        when(expressionAdaptor.processRawExpression(valueWithExternalVarReplaced))
+                .thenReturn(valueWithExternalVarReplaced);
         when(variableResolver.resolve(valueWithExternalVarReplaced)).thenReturn(valueWithExternalVarReplaced);
         String actual = (String) parameterConverters.convert(value, type);
         assertEquals(valueWithExternalVarReplaced, actual);
@@ -123,14 +125,14 @@ class ParameterConvertersDecoratorTests
             return arg.substring(0, prefixLength) + "#{removeWrappingDoubleQuotes(" + arg.substring(prefixLength,
                     endIndex) + ")}" + arg.substring(endIndex);
         });
-        when(expressionAdaptor.process(any())).then(
+        when(expressionAdaptor.processRawExpression(any())).then(
                 (Answer<String>) invocation -> invocation.getArgument(0));
         String actual = (String) parameterConverters.convert(value, type);
         String resolvedVariable = prefix + "#{removeWrappingDoubleQuotes(${value})}" + postfix;
         assertEquals(resolvedVariable, actual);
         verify(stepMonitor).convertedValueOfType(resolvedVariable, type, actual, queueOf(StringConverter.class));
         verify(variableResolver, times(17)).resolve(any());
-        verify(expressionAdaptor, times(17)).process(any());
+        verify(expressionAdaptor, times(17)).processRawExpression(any());
     }
 
     private Queue<Class<?>> queueOf(Class<?> clazz)
@@ -144,7 +146,7 @@ class ParameterConvertersDecoratorTests
         String value = "  ";
         List<Integer> convertedValue = List.of();
         Type type = new TypeLiteral<List<Integer>>() { }.value;
-        when(expressionAdaptor.process(value)).thenReturn(value);
+        when(expressionAdaptor.processRawExpression(value)).thenReturn(value);
         when(variableResolver.resolve(value)).thenReturn(value);
         List<Integer> actual = (List<Integer>) parameterConverters.convert(value, type);
         assertEquals(convertedValue, actual);
@@ -157,7 +159,7 @@ class ParameterConvertersDecoratorTests
         String value = " ";
         Optional<Integer> convertedValue = Optional.empty();
         Type type = new TypeLiteral<Optional<Integer>>() { }.value;
-        when(expressionAdaptor.process(value)).thenReturn(value);
+        when(expressionAdaptor.processRawExpression(value)).thenReturn(value);
         when(variableResolver.resolve(value)).thenReturn(value);
         Optional<Integer> actual = (Optional<Integer>) parameterConverters.convert(value, type);
         assertEquals(convertedValue, actual);
@@ -170,7 +172,7 @@ class ParameterConvertersDecoratorTests
         Integer baseConvertedValue = Integer.valueOf(VALUE);
         Optional<Integer> convertedValue = Optional.of(baseConvertedValue);
         Type type = new TypeLiteral<Optional<Integer>>() { }.value;
-        when(expressionAdaptor.process(VALUE)).thenReturn(VALUE);
+        when(expressionAdaptor.processRawExpression(VALUE)).thenReturn(VALUE);
         when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
         Optional<Integer> actual = (Optional<Integer>) parameterConverters.convert(VALUE, type);
         assertEquals(convertedValue, actual);
@@ -182,7 +184,7 @@ class ParameterConvertersDecoratorTests
     void shouldConvertStringsProcessedByExpressionAdapter()
     {
         when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
-        when(expressionAdaptor.process(VALUE)).thenReturn(VALUE);
+        when(expressionAdaptor.processRawExpression(VALUE)).thenReturn(VALUE);
         Type type = int.class;
         Object actual = parameterConverters.convert(VALUE, type);
         assertEquals(Integer.parseInt(VALUE), actual);
@@ -216,7 +218,7 @@ class ParameterConvertersDecoratorTests
     {
         when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
         Type type = Object.class;
-        when(expressionAdaptor.process(VALUE)).thenReturn(VALUE);
+        when(expressionAdaptor.processRawExpression(VALUE)).thenReturn(VALUE);
         String actual = (String) parameterConverters.convert(VALUE, type);
         assertEquals(VALUE, actual);
     }
@@ -251,14 +253,14 @@ class ParameterConvertersDecoratorTests
         String variableValue = "variableValue";
         String pathToTable = "/table-with-expression-and-variable.table";
         String tableAsString = String.format("|%s|%s|%n|%s|%s|", expressionKey, variableKey, expression, variable);
-        when(expressionAdaptor.process(pathToTable)).thenReturn(pathToTable);
+        when(expressionAdaptor.processRawExpression(pathToTable)).thenReturn(pathToTable);
         when(variableResolver.resolve(pathToTable)).thenReturn(pathToTable);
         when(variableResolver.resolve(expression)).thenReturn(expression);
-        when(expressionAdaptor.process(expression)).thenReturn(expressionValue);
+        when(expressionAdaptor.processRawExpression(expression)).thenReturn(expressionValue);
         when(variableResolver.resolve(expressionValue)).thenReturn(expressionValue);
-        when(expressionAdaptor.process(expressionValue)).thenReturn(expressionValue);
+        when(expressionAdaptor.processRawExpression(expressionValue)).thenReturn(expressionValue);
         when(variableResolver.resolve(variable)).thenReturn(variableValue);
-        when(expressionAdaptor.process(variableValue)).thenReturn(variableValue);
+        when(expressionAdaptor.processRawExpression(variableValue)).thenReturn(variableValue);
         when(variableResolver.resolve(variableValue)).thenReturn(variableValue);
         when(storyLoader.loadResourceAsText(pathToTable)).thenReturn(tableAsString);
         Object result = parameterConverters.convert(pathToTable, ExamplesTable.class);
@@ -272,7 +274,7 @@ class ParameterConvertersDecoratorTests
     {
         String pathToTable = "/empty-example-table.table";
         String tableAsString = "";
-        when(expressionAdaptor.process(pathToTable)).thenReturn(pathToTable);
+        when(expressionAdaptor.processRawExpression(pathToTable)).thenReturn(pathToTable);
         when(variableResolver.resolve(pathToTable)).thenReturn(pathToTable);
         when(storyLoader.loadResourceAsText(pathToTable)).thenReturn(tableAsString);
         Object result = parameterConverters.convert(pathToTable, ExamplesTable.class);
@@ -288,7 +290,7 @@ class ParameterConvertersDecoratorTests
         when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
         Type type = Object.class;
         Integer expected = Integer.valueOf(42);
-        when(expressionAdaptor.process(VALUE)).thenReturn(expected);
+        when(expressionAdaptor.processRawExpression(VALUE)).thenReturn(expected);
         assertEquals(expected, parameterConverters.convert(VALUE, type));
     }
 }
