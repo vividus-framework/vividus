@@ -41,13 +41,16 @@ public class FreemarkerSteps
     private final IBddVariableContext bddVariableContext;
     private final FreemarkerProcessor freemarkerProcessor;
 
-    public FreemarkerSteps(Configuration configuration, IBddVariableContext bddVariableContext,
-            ExpressionAdaptor expressionAdaptor)
+    private final boolean resolveBddVariables;
+
+    public FreemarkerSteps(boolean resolveBddVariables, Configuration configuration,
+            IBddVariableContext bddVariableContext, ExpressionAdaptor expressionAdaptor)
     {
         this.bddVariableContext = bddVariableContext;
         this.freemarkerProcessor = new FreemarkerProcessor(configuration);
         configuration.setSharedVariable("execVividusExpression",
                 new FreemarkerVividusExpressionProcessor(expressionAdaptor));
+        this.resolveBddVariables = resolveBddVariables;
     }
 
     /**
@@ -94,7 +97,11 @@ public class FreemarkerSteps
     public void initVariableUsingTemplate(Set<VariableScope> scopes, String variableName, String templatePath,
             ExamplesTable templateParameters) throws IOException, TemplateException
     {
-        Map<String, Object> dataModel = bddVariableContext.getVariables();
+        Map<String, Object> dataModel = new HashMap<>();
+        if (resolveBddVariables)
+        {
+            dataModel.putAll(bddVariableContext.getVariables());
+        }
         dataModel.putAll(MapUtils.convertExamplesTableToMap(templateParameters));
 
         Map<String, Object> parameters = new HashMap<>();

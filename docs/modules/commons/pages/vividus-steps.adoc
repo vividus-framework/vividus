@@ -103,7 +103,7 @@ When I wait `PT30S` for debug
 
 Initializes a variable with a result of the processed https://freemarker.apache.org/docs/dgui_template_overallstructure.html[Freemarker template]
 
-The `global`, `next batches`, `scenario` and `story` variables can be used within templates by referring them using the variable reference notation. Note that the parameters passed to the step take precedence over the variables.
+Set the `template-processor.resolve-bdd-variables` property to `true` value to be able to use `global`, `next batches`, `scenario` and `story` variables within templates. The variables can be referred using the variable reference notation. Note that the parameters passed to the step take precedence over the variables.
 
 The vividus expressions can be used within templates by using `${execVividusExpression('expression name', args)}` syntax. It's also allowed to use nested expressions by using the following syntax `${execVividusExpression('expression name', arg1, execVividusExpression('expression name', args))}`.
 

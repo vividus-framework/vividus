@@ -14,7 +14,8 @@
     <bean id="bddVariableSteps" class="org.vividus.bdd.steps.BddVariableSteps" />
 
     <bean id="freemarkerSteps" class="org.vividus.bdd.steps.FreemarkerSteps">
-        <constructor-arg index="0">
+        <constructor-arg index="0" value="${template-processor.resolve-bdd-variables}" />
+        <constructor-arg index="1">
             <bean parent="abstractFreemarkerConfig">
                 <property name="templateLoader">
                     <bean class="freemarker.cache.ClassTemplateLoader">
