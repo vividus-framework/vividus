@@ -11,7 +11,8 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-test-context')
     implementation project(':vividus-util')
-    implementation project(':vividus-extension-selenium')
+
+    api project(':vividus-extension-selenium')
 
     api(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: versions.ashot)
     api(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.1')

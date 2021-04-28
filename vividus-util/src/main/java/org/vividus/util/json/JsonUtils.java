@@ -31,15 +31,21 @@ import org.apache.commons.lang3.function.FailableSupplier;
 
 public class JsonUtils
 {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
 
     public JsonUtils()
     {
         this(PropertyNamingStrategies.LOWER_CAMEL_CASE);
     }
 
+    public JsonUtils(ObjectMapper mapper)
+    {
+        this.mapper = mapper;
+    }
+
     public JsonUtils(PropertyNamingStrategy namingStrategy)
     {
+        this(new ObjectMapper());
         mapper.setPropertyNamingStrategy(namingStrategy);
     }
 

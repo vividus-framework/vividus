@@ -1,13 +1,13 @@
-project.description = 'Vividus plugin for Visual Testing'
+project.description = 'Vividus plugin for Accessibility testing'
 
 dependencies {
-    implementation project(':vividus-bdd-engine')
-    implementation project(':vividus-plugin-web-app')
-    implementation project(':vividus-reporter')
+    api project(':vividus-bdd-engine')
     implementation project(':vividus-soft-assert')
+    implementation project(':vividus-reporter')
+    implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-util')
-    implementation project(':vividus-extension-visual-testing')
 
+    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)

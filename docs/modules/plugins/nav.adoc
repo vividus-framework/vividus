@@ -1,4 +1,5 @@
 .Plugins
+* xref:plugin-accessibility.adoc[Accessibility]
 * xref:plugin-applitools.adoc[Applitools*]
 * AWS
 ** xref:plugin-aws-dynamodb.adoc[DynamoDB]

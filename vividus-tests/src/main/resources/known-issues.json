@@ -67,5 +67,19 @@
     "scenarioPattern": "Verify wait for debug step",
     "storyPattern": "DebugSteps",
     "stepPattern": "When I wait .* for debug"
+  },
+  "VVD-11": {
+    "type": "Internal",
+    "assertionPattern": ".*accessibility violations of level Notice and above at .*2L.*",
+    "scenarioPattern": "Validate against WCAG2AAA",
+    "storyPattern": "Accessibility",
+    "stepPattern": "Then I test accessibility.*"
+  },
+  "VVD-12": {
+    "type": "Internal",
+    "assertionPattern": ".*accessibility violations of level Warning and above at .*1L.*",
+    "scenarioPattern": "Validate against Section 508",
+    "storyPattern": "Accessibility",
+    "stepPattern": "Then I test accessibility.*"
   }
 }
