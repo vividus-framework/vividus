@@ -7,6 +7,7 @@ runStories.treatKnownIssuesOnlyAsPassed = true
 
 dependencies {
     implementation project(':vividus')
+    implementation project(':vividus-plugin-accessibility')
     implementation project(':vividus-plugin-applitools')
     implementation project(':vividus-plugin-aws-dynamodb')
     implementation project(':vividus-plugin-aws-kinesis')
