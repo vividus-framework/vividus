@@ -12,15 +12,6 @@ updates:
   - ikalinin1
   - uarlouski
   ignore:
-  - dependency-name: com.amazonaws:aws-java-sdk-bom
-    versions:
-    - 1.11.1000
-    - 1.11.1004
-    - 1.11.950
-    - 1.11.954
-    - 1.11.964
-    - 1.11.991
-    - 1.11.996
   - dependency-name: io.appium:java-client
     versions:
     - 7.5.0
