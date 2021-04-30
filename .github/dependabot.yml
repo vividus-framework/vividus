@@ -1,0 +1,40 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: sunday
+    time: "02:00"
+  open-pull-requests-limit: 99
+  reviewers:
+  - valfirst
+  - ikalinin1
+  - uarlouski
+  ignore:
+  - dependency-name: io.appium:java-client
+    versions:
+    - 7.5.0
+    - 7.5.1
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: sunday
+    time: "02:00"
+  open-pull-requests-limit: 99
+  reviewers:
+  - valfirst
+  - ikalinin1
+  - uarlouski
+- package-ecosystem: gitsubmodule
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: sunday
+    time: "02:00"
+  open-pull-requests-limit: 99
+  reviewers:
+  - valfirst
+  - ikalinin1
+  - uarlouski
