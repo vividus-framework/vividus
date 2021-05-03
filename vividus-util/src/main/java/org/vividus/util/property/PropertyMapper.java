@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.function.IntFunction;
 import java.util.function.UnaryOperator;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 
@@ -40,17 +40,19 @@ import org.apache.commons.lang3.StringUtils;
 
 public class PropertyMapper implements IPropertyMapper
 {
-    private static final String PROPERTY_PREFIX_SEPARATOR = ".";
+    private final String propertyPrefixSeparator;
     private final JavaPropsMapper javaPropsMapper;
     private final PropertyParser propertyParser;
 
-    public PropertyMapper(PropertyParser propertyParser, Set<JsonDeserializer<?>> deserializers)
+    public PropertyMapper(String propertyPrefixSeparator, PropertyNamingStrategy namingStrategy,
+            PropertyParser propertyParser, Set<JsonDeserializer<?>> deserializers)
     {
+        this.propertyPrefixSeparator = propertyPrefixSeparator;
         this.propertyParser = propertyParser;
         SimpleModule module = new SimpleModule();
         deserializers.forEach(deserializer -> module.addDeserializer(getType(deserializer), deserializer));
         javaPropsMapper = new JavaPropsMapper();
-        javaPropsMapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE).registerModule(module);
+        javaPropsMapper.setPropertyNamingStrategy(namingStrategy).registerModule(module);
         javaPropsMapper.findAndRegisterModules();
     }
 
@@ -89,7 +91,7 @@ public class PropertyMapper implements IPropertyMapper
         Map<String, T> result = mapProducer.apply(keys.size());
         for (String key : keys)
         {
-            String propertyFamily = propertyPrefix + key + PROPERTY_PREFIX_SEPARATOR;
+            String propertyFamily = propertyPrefix + key + propertyPrefixSeparator;
             Map<String, String> objectProps = properties.entrySet().stream()
                     .filter(e -> e.getKey().startsWith(propertyFamily))
                     .collect(toMap(e -> StringUtils.removeStart(e.getKey(), propertyFamily), Entry::getValue));
@@ -106,12 +108,12 @@ public class PropertyMapper implements IPropertyMapper
         return (Class<T>) (type instanceof ParameterizedType ? ((ParameterizedType) type).getRawType() : type);
     }
 
-    private static Set<String> getKeys(Set<String> propertyNames, String propertyPrefix)
+    private Set<String> getKeys(Set<String> propertyNames, String propertyPrefix)
     {
         return propertyNames.stream().map(propertyName ->
         {
             String propertyNameWithoutPrefix = StringUtils.removeStart(propertyName, propertyPrefix);
-            return StringUtils.substringBefore(propertyNameWithoutPrefix, PROPERTY_PREFIX_SEPARATOR);
+            return StringUtils.substringBefore(propertyNameWithoutPrefix, propertyPrefixSeparator);
         }).collect(toSet());
     }
 }
