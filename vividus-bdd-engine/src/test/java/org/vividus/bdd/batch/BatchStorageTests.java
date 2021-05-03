@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,7 +90,8 @@ class BatchStorageTests
             "bdd.batch-2.fail-fast", "true"
         ));
 
-        IPropertyMapper propertyMapper = new PropertyMapper(propertyParser, Set.of());
+        IPropertyMapper propertyMapper = new PropertyMapper(".", PropertyNamingStrategies.KEBAB_CASE, propertyParser,
+                Set.of());
         batchStorage = new BatchStorage(propertyMapper, Long.toString(DEFAULT_TIMEOUT), DEFAULT_META_FILTERS, false);
     }
 

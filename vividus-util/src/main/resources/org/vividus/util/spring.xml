@@ -7,7 +7,12 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="propertyMapper" class="org.vividus.util.property.PropertyMapper" />
+    <bean id="propertyMapper" class="org.vividus.util.property.PropertyMapper" >
+        <constructor-arg index="0" value="${property-mapper.prefix-separator}" />
+        <constructor-arg index="1" >
+            <bean class="#{T(com.fasterxml.jackson.databind.PropertyNamingStrategies).${property-mapper.naming-strategy}.getClass().getName()}" />
+        </constructor-arg>
+    </bean>
 
     <bean id="jsonUtils-LowerCamelCase" class="org.vividus.util.json.JsonUtils">
         <constructor-arg>
