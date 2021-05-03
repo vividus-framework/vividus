@@ -181,8 +181,12 @@ public class VisualTestingSteps extends AbstractVisualSteps
 
     void runApplitoolsTest(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
-        VisualCheckResult visualCheckResult = execute(visualTestingService::run, () -> applitoolsVisualCheck,
-                "applitools-visual-comparison.ftl");
-        softAssert.assertTrue("Visual check passed", visualCheckResult.isPassed());
+        execute(visualTestingService::run, () -> applitoolsVisualCheck, "applitools-visual-comparison.ftl");
+    }
+
+    @Override
+    protected void verifyResult(VisualCheckResult result)
+    {
+        softAssert.assertTrue("Visual check passed", result.isPassed());
     }
 }
