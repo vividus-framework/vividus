@@ -93,27 +93,11 @@ public class VisualSteps extends AbstractVisualSteps
     private void performVisualAction(Supplier<VisualCheck> visualCheckFactory)
     {
         execute(check -> {
-            VisualCheckResult visualCheckResult = new VisualCheckResult(check);
             try
             {
-                if (check.getAction() == VisualActionType.COMPARE_AGAINST)
-                {
-                    visualCheckResult = visualTestingEngine.compareAgainst(check);
-                    if (visualCheckResult.getBaseline() == null)
-                    {
-                        softAssert.recordFailedAssertion(
-                                "Unable to find baseline with name: " + check.getBaselineName());
-                    }
-                    else
-                    {
-                        softAssert.assertTrue("Visual check passed", visualCheckResult.isPassed());
-                    }
-                }
-                else
-                {
-                    visualCheckResult = visualTestingEngine.establish(check);
-                }
-                return visualCheckResult;
+                return check.getAction() == VisualActionType.COMPARE_AGAINST
+                                         ? visualTestingEngine.compareAgainst(check)
+                                         : visualTestingEngine.establish(check);
             }
             catch (IOException | ResourceLoadException e)
             {
@@ -188,5 +172,23 @@ public class VisualSteps extends AbstractVisualSteps
     private Set<Locator> getLocatorsSet(Parameters rowAsParameters, IgnoreStrategy s)
     {
         return rowAsParameters.valueAs(s.name(), SET_BY, Set.of());
+    }
+
+    @Override
+    protected void verifyResult(VisualCheckResult result)
+    {
+        if (result.getActionType() == VisualActionType.ESTABLISH)
+        {
+            return;
+        }
+        if (result.getBaseline() == null)
+        {
+            softAssert.recordFailedAssertion(
+                    "Unable to find baseline with name: " + result.getBaselineName());
+        }
+        else
+        {
+            softAssert.assertTrue("Visual check passed", result.isPassed());
+        }
     }
 }

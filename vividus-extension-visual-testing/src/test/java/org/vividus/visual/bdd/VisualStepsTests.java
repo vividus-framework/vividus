@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,10 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
@@ -88,8 +90,10 @@ class VisualStepsTests
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> visualCheckResult;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
         assertSame(visualCheckResult, visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
-        verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of("result", visualCheckResult),
+        InOrder ordered = Mockito.inOrder(attachmentPublisher, visualCheckResult);
+        ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of("result", visualCheckResult),
                 "Visual comparison");
+        ordered.verify(visualCheckResult).getBaseline();
         verify(visualCheck).setSearchContext(searchContext);
     }
 
@@ -98,6 +102,12 @@ class VisualStepsTests
         private TestVisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher)
         {
             super(uiContext, attachmentPublisher);
+        }
+
+        @Override
+        protected void verifyResult(VisualCheckResult result)
+        {
+            result.getBaseline();
         }
     }
 }

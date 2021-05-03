@@ -143,6 +143,7 @@ class VisualStepsTests
         VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
         mockUiContext();
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
+        when(visualCheckResult.getBaselineName()).thenReturn(BASELINE);
         visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE);
         verify(softAssert, never()).assertTrue(VISUAL_CHECK_PASSED, false);
         verify(softAssert).recordFailedAssertion("Unable to find baseline with name: baseline");
@@ -246,6 +247,7 @@ class VisualStepsTests
         mockUiContext();
         VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.ESTABLISH);
         when(visualTestingEngine.establish(visualCheck)).thenReturn(visualCheckResult);
+        when(visualCheckResult.getActionType()).thenReturn(VisualActionType.ESTABLISH);
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
         verifyNoInteractions(softAssert);
         verifyCheckResultPublish();
