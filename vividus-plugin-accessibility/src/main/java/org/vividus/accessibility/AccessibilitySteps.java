@@ -90,9 +90,9 @@ public class AccessibilitySteps
                     .forEach(options -> {
                         List<AccessibilityViolation>  violations = accessibilityTestEngine.analyze(options);
                         ViolationLevel level = options.getLevel();
+                        publishAttachment(currentUrl, violations);
                         softAssert.assertThat(String.format(MESSAGE, level, currentUrl),
                             violations.stream().filter(v -> v.getTypeCode() <= level.getCode()).count(), equalTo(0L));
-                        publishAttachment(currentUrl, violations);
                     });
     }
 

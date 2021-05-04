@@ -88,22 +88,22 @@ class AccessibilityStepsTests
         when(accessibilityTestEngine.analyze(second)).thenReturn(List.of());
         accessibilitySteps.checkAccessibility(checkOptions);
         InOrder ordered = Mockito.inOrder(softAssert, attachmentPublisher);
-        ordered.verify(softAssert).assertThat(
-                eq(ASSERTION_MESSAGE),
-                eq(2L),
-                argThat(m -> MATCHER.equals(m.toString())));
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
                 Map.of(WARNING2, Map.of(CODE, List.of(warning)),
                        NOTICE2, Map.of(CODE, List.of(notice)),
                        ERROR2, Map.of(CODE, List.of(error))), TITLE);
         ordered.verify(softAssert).assertThat(
                 eq(ASSERTION_MESSAGE),
-                eq(0L),
+                eq(2L),
                 argThat(m -> MATCHER.equals(m.toString())));
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
                 Map.of(WARNING2, Map.of(),
                        ERROR2, Map.of(),
                        NOTICE2, Map.of()), TITLE);
+        ordered.verify(softAssert).assertThat(
+                eq(ASSERTION_MESSAGE),
+                eq(0L),
+                argThat(m -> MATCHER.equals(m.toString())));
     }
 
     private AccessibilityCheckOptions createOptions(AccessibilityStandard standard, ViolationLevel level,
