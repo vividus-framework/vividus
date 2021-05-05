@@ -333,3 +333,30 @@ Meta: @story_priority 15
 Scenario: Time consuming test
 When I perform highly time consuming task
 ----
+
+== Exit codes
+
+Tests execution returns following exit codes.
+
+[cols="1,2,1"]
+|===
+|Code
+|Description
+|Pipeline Status
+
+|0
+|Test report is generated, contains only passed tests
+|Green
+
+|1
+|Test report is generated, contains only passed and tests with known issues
+|Amber
+
+|2
+|Test report is generated, contains any tests except passed and with known issues or doesn't contain tests at all
+|Red
+
+|3
+|Test report isn't generated
+|Red
+|===
