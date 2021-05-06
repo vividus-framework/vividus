@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,13 +35,6 @@ public interface IBaseValidations
 
     WebElement assertIfElementExists(String businessDescription, List<WebElement> elements);
 
-    @Deprecated(since = "0.2.8", forRemoval = true)
-    WebElement assertIfElementExists(String businessDescription, String systemDescription, List<WebElement> elements);
-
-    @Deprecated(since = "0.2.8", forRemoval = true)
-    boolean assertElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
-            int number);
-
     /**
      * Assert that the number of elements in <b>elements</b> collection is <b>comparisonRule</b> <b>number</b>
      * @param description description of elements in the <b>elements</b> collection
@@ -54,10 +47,6 @@ public interface IBaseValidations
      */
     boolean assertElementsNumber(String description, List<WebElement> elements, ComparisonRule comparisonRule,
             int number);
-
-    @Deprecated(since = "0.2.8", forRemoval = true)
-    boolean assertLeastElementNumber(String businessDescription, String systemDescription, List<WebElement> elements,
-            int leastNumber);
 
     boolean assertExpectedCondition(String businessDescription, ExpectedCondition<?> expectedCondition);
 
@@ -145,19 +134,4 @@ public interface IBaseValidations
 
     boolean assertIfElementDoesNotExist(String businessDescription, SearchContext searchContext, Locator locator,
             boolean recordAssertionIfFail);
-
-    @Deprecated(since = "0.2.8", forRemoval = true)
-    boolean assertIfElementDoesNotExist(String businessDescription, String systemDescription, Locator locator);
-
-    @Deprecated(since = "0.2.8", forRemoval = true)
-    boolean assertIfElementDoesNotExist(String businessDescription, String systemDescription,
-            SearchContext searchContext, Locator locator);
-
-    @Deprecated(since = "0.2.8", forRemoval = true)
-    boolean assertIfElementDoesNotExist(String businessDescription, String systemDescription,
-            Locator locator, boolean recordAssertionIfFail);
-
-    @Deprecated(since = "0.2.8", forRemoval = true)
-    boolean assertIfElementDoesNotExist(String businessDescription, String systemDescription,
-            SearchContext searchContext, Locator locator, boolean recordAssertionIfFail);
 }
