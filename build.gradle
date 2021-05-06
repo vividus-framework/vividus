@@ -1,11 +1,3 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
-    }
-}
 ext.buildSystemDir = file("${System.env.VIVIDUS_BUILD_SYSTEM_HOME?:buildSystemRootDir}/${buildSystemVersion}")
 ext.gradleScriptDir =  new File(ext.buildSystemDir, 'gradle')
 apply from: "${gradleScriptDir}/project.gradle"
@@ -19,36 +11,12 @@ configure([project(':vividus-tests'), project(':vividus-docker-bundler')]) {
 
 def nonTestSubprojects = subprojects.findAll { !it.name.equals('vividus-tests') && !it.name.equals('vividus-docker-bundler') }
 configure(nonTestSubprojects) {
-    apply plugin: 'com.jfrog.bintray'
     apply from: "${buildSystemDir}/vividus-library-subproject.gradle"
 
     dependencies {
         modules {
             module('org.hamcrest:hamcrest-core') {
                 replacedBy('org.hamcrest:hamcrest', 'Use latest hamcrest version')
-            }
-        }
-    }
-
-    bintray {
-        user = System.getProperty('bintray.user')
-        key = System.getProperty('bintray.key')
-        publications = ['maven']
-
-        pkg {
-            repo = 'maven-releases'
-            name = "${project.group}.${project.name}"
-            desc = project.description
-            userOrg = 'vividus'
-            licenses = ['Apache-2.0']
-            websiteUrl = 'https://github.com/vividus-framework/vividus'
-            issueTrackerUrl = 'https://github.com/vividus-framework/vividus/issues'
-            vcsUrl = 'https://github.com/vividus-framework/vividus.git'
-            publicDownloadNumbers = true
-            version {
-                name = project.version
-                vcsTag = "release-${project.version}"
-                released  = new Date()
             }
         }
     }
