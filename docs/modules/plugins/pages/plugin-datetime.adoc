@@ -167,10 +167,10 @@ TIP: Since parameters of the expression comma-separated, meaningful commas (like
 |Expression
 |Result
 
-|`#{formatDateTo("2017-03-31T07:20:43.808Z", "yyyy-MM-dd'T'HH:mm:ss.SSSVV", EEE\, dd MMM yyyy HH:mm:ss ZZZZ)}`
+|`#{formatDateTo("2017-03-31T07:20:43.808Z", "yyyy-MM-dd\'T\'HH:mm:ss.SSSVV", EEE\, dd MMM yyyy HH:mm:ss ZZZZ)}`
 |Fri, 31 Mar 2017 07:20:43 GMT
 
-|`#{formatDateTo(Fri\, 31 Mar 2017 07:20:43 GMT, EEE\, dd MMM yyyy HH:mm:ss zzz, yyyy-MM-dd'T'HH:mm:ss)}`
+|`#{formatDateTo(Fri\, 31 Mar 2017 07:20:43 GMT, EEE\, dd MMM yyyy HH:mm:ss zzz, yyyy-MM-dd\'T\'HH:mm:ss)}`
 |2017-03-31T07:20:43
 |===
 
