@@ -36,7 +36,6 @@ import static org.mockito.Mockito.when;
 import static org.vividus.testdouble.TestLocatorType.SEARCH;
 import static org.vividus.ui.action.search.IElementAction.NOT_SET_CONTEXT;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -65,7 +64,6 @@ import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.validation.matcher.ExistsMatcher;
 import org.vividus.ui.validation.matcher.ExpectedConditionsMatcher;
-import org.vividus.ui.validation.matcher.NotExistsMatcher;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("MethodCount")
@@ -200,17 +198,6 @@ class BaseValidationsTests
     }
 
     @Test
-    void shouldNotSearchIfContextNullAssertIfElementDoesNotExist()
-    {
-        Locator locator = new Locator(SEARCH, XPATH_INT);
-        assertFalse(baseValidations.assertIfElementDoesNotExist(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, null, locator,
-                true));
-        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
-        verifyNoMoreInteractions(softAssert);
-        verifyNoInteractions(searchActions);
-    }
-
-    @Test
     void shouldNotSearchIfContextNullAssertIfNumberOfElementsFound()
     {
         Locator locator = new Locator(SEARCH, XPATH_INT);
@@ -245,53 +232,6 @@ class BaseValidationsTests
         assertFalse(spy.assertIfElementDoesNotExist(BUSINESS_DESCRIPTION, attributes, false));
         assertFalse(searchParameters.isWaitForElement());
         verifyNoInteractions(softAssert);
-    }
-
-    @Test
-    void testAssertIfElementDoesNotExistWithSystemDescription()
-    {
-        spy = Mockito.spy(baseValidations);
-        webElements = List.of(mockedWebElement);
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
-        SearchParameters searchParameters = new SearchParameters();
-        Locator attributes = new Locator(SEARCH, searchParameters);
-        when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(webElements);
-        assertFalse(spy.assertIfElementDoesNotExist(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, attributes));
-        assertFalse(searchParameters.isWaitForElement());
-        verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(SYSTEM_DESCRIPTION), eq(webElements),
-                argThat(matcher -> matcher instanceof NotExistsMatcher));
-    }
-
-    @Test
-    void testAssertIfElementDoesNotExistWithSystemDescriptionWhenNoFailedAssertionRecordingIsNeeded()
-    {
-        spy = Mockito.spy(baseValidations);
-        webElements = List.of(mockedWebElement);
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
-        SearchParameters searchParameters = new SearchParameters();
-        Locator attributes = new Locator(SEARCH, searchParameters);
-        when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(webElements);
-        assertFalse(spy.assertIfElementDoesNotExist(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, attributes, false));
-        assertFalse(searchParameters.isWaitForElement());
-        verifyNoInteractions(softAssert);
-    }
-
-    @Test
-    void testAssertIfElementExistsWithEmptyList()
-    {
-        spy = Mockito.spy(baseValidations);
-        assertNull(spy.assertIfElementExists(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, List.of()));
-    }
-
-    @Test
-    void testAssertIfElementExistsWithSeveralElementsInList()
-    {
-        spy = Mockito.spy(baseValidations);
-        List<WebElement> elements = Arrays.asList(mockedWebElement, mockedWebElement);
-        mockAssertingWebElements(elements);
-        assertNull(spy.assertIfElementExists(BUSINESS_DESCRIPTION, SYSTEM_DESCRIPTION, elements));
-        verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(SYSTEM_DESCRIPTION),
-                eq(elements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
     }
 
     @Test
