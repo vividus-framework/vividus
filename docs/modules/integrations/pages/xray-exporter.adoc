@@ -1,6 +1,6 @@
 = Xray Exporter
 
-Xray Exporter is a tool used to export test cases into Jira Xray Plugin. 
+Xray Exporter is a tool used to export test cases into Jira Xray Plugin.
 
 Features:
 
@@ -94,7 +94,7 @@ image::cucumber.png[Cucumber test case view]
 
 |<<#_cucumber_test_case_view, 3>>
 |`jira.fields-mapping.cucumber-scenario`
-|Key of a field containing body of cucumber scenario 
+|Key of a field containing body of cucumber scenario
 
 |===
 
@@ -214,10 +214,10 @@ Meta: @testCaseId TEST-435
 
 == Export
 ifeval::["{release-version}" == "false"]
-:jar-link: https://oss.jfrog.org/oss-snapshot-local/org/vividus/vividus-to-xray-exporter/{current-version}/vividus-to-xray-exporter-{current-version}.jar
+:jar-link: https://vividuscentral.jfrog.io/artifactory/snapshots/org/vividus/vividus-to-xray-exporter/{current-version}/vividus-to-xray-exporter-{current-version}.jar
 endif::[]
 ifeval::["{release-version}" == "true"]
-:jar-link: https://jcenter.bintray.com/org/vividus/vividus-to-xray-exporter/{current-version}/vividus-to-xray-exporter-{current-version}.jar
+:jar-link: https://vividuscentral.jfrog.io/artifactory/releases/org/vividus/vividus-to-xray-exporter/{current-version}/vividus-to-xray-exporter-{current-version}.jar
 endif::[]
 
 * Download {jar-link}[Exporter JAR]

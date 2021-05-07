@@ -461,9 +461,14 @@ jobs:
     - name: Publish release artifacts
       if: startsWith(github.ref, 'refs/tags/release-') && matrix.platform == 'ubuntu-latest'
       env:
-        BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-        BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
-      run: ./gradlew bintrayUpload -Dbintray.user=$BINTRAY_USER -Dbintray.key=$BINTRAY_KEY
+        ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_RELEASES_PUBLISHER_USERNAME }}
+        ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_RELEASES_PUBLISHER_PASSWORD }}
+      run: |
+        ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=https://vividuscentral.jfrog.io/artifactory/ \
+                                        -Dartifactory.publish.repoKey=releases-local \
+                                        -Dartifactory.publish.username=$ARTIFACTORY_USERNAME \
+                                        -Dartifactory.publish.password=$ARTIFACTORY_PASSWORD \
+                                        -Dartifactory.publish.buildInfo=false
 
     - name: Login to Docker Hub
       if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/release-')) && matrix.platform == 'ubuntu-latest'
