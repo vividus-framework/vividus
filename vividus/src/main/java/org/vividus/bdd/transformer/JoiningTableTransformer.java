@@ -32,7 +32,7 @@ public class JoiningTableTransformer implements ExtendedTableTransformer
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
-        JoinMode joinMode = getMandatoryEnumProperty(properties, "joinMode", JoinMode.class);
+        JoinMode joinMode = properties.getMandatoryEnumProperty("joinMode", JoinMode.class);
         ExamplesTable examplesTable = configuration.examplesTableFactory().createExamplesTable(tableAsString);
         return joinMode.join(examplesTable, properties);
     }

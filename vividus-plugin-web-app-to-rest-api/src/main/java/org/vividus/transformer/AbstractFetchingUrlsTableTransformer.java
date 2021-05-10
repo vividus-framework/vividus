@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
 
     private String build(Set<String> urls, TableProperties properties)
     {
-        String columnName = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, COLUMN_KEY);
+        String columnName = properties.getMandatoryNonBlankProperty(COLUMN_KEY);
         List<String> urlsList = new ArrayList<>(urls);
         return ExamplesTableProcessor
                 .buildExamplesTableFromColumns(List.of(columnName), List.of(urlsList), properties);

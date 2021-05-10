@@ -41,7 +41,7 @@ public class MergingTableTransformer implements ExtendedTableTransformer
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
-        MergeMode mergeMode = getMandatoryEnumProperty(properties, "mergeMode", MergeMode.class);
+        MergeMode mergeMode = properties.getMandatoryEnumProperty("mergeMode", MergeMode.class);
 
         List<String> tables = Optional.ofNullable(properties.getProperties().getProperty("tables"))
                 .stream()
