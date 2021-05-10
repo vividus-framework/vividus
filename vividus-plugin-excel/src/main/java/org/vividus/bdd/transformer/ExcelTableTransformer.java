@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         checkTableEmptiness(tableAsString);
-        String path = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "path");
-        String sheetName = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "sheet");
+        String path = properties.getMandatoryNonBlankProperty("path");
+        String sheetName = properties.getMandatoryNonBlankProperty("sheet");
         try
         {
             IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(path);
@@ -69,7 +69,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
                 List<String> data = Boolean.parseBoolean(joinValues) ? List.of(String.join(" ", result)) : result;
                 return build(List.of(column), List.of(data), properties);
             }
-            String range = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, RANGE);
+            String range = properties.getMandatoryNonBlankProperty(RANGE);
             Map<String, List<String>> exactDataTable = excelSheetParser.getDataAsTable(range);
             return build(exactDataTable.keySet(), exactDataTable.values(), properties);
         }

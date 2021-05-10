@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class CsvTableTransformer implements ExtendedTableTransformer
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         checkTableEmptiness(tableAsString);
-        String csvPath = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "csvPath");
+        String csvPath = properties.getMandatoryNonBlankProperty("csvPath");
         try
         {
             List<CSVRecord> result = csvReader.readCsvFile(findResource(getClass(), csvPath));

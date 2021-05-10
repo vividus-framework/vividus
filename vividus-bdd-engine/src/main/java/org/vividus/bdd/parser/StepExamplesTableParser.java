@@ -19,29 +19,33 @@ package org.vividus.bdd.parser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import com.google.common.base.Suppliers;
 
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.embedder.AllStepCandidates;
 import org.jbehave.core.embedder.MatchingStepMonitor;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.Step;
-import org.vividus.bdd.context.IBddRunContext;
+import org.jbehave.core.steps.StepCandidate;
 
 public class StepExamplesTableParser implements IStepExamplesTableParser
 {
     private static final String STEP_COLUMN_NAME = "step";
 
     private final Configuration configuration;
-    private final InjectableStepsFactory stepsFactory;
+    private final Supplier<List<StepCandidate>> regularSteps;
 
-    public StepExamplesTableParser(Configuration configuration, InjectableStepsFactory stepsFactory,
-            IBddRunContext bddRunContext)
+    public StepExamplesTableParser(Configuration configuration, InjectableStepsFactory stepsFactory)
     {
         this.configuration = configuration;
-        this.stepsFactory = stepsFactory;
+        this.regularSteps = Suppliers.memoize(
+                () -> new AllStepCandidates(stepsFactory.createCandidateSteps()).getRegularSteps());
     }
 
     @Override
@@ -61,8 +65,8 @@ public class StepExamplesTableParser implements IStepExamplesTableParser
         }
         Scenario scenario = new Scenario(stepsAsText);
         MatchingStepMonitor monitor = new MatchingStepMonitor(configuration.stepMonitor());
-        return configuration.stepCollector().collectScenarioSteps(stepsFactory.createCandidateSteps(),
-                scenario, currentExample, monitor);
+        return configuration.stepCollector().collectScenarioSteps(regularSteps.get(), scenario, currentExample,
+                monitor);
     }
 
     private static String getErrorMessage(List<String> headers)

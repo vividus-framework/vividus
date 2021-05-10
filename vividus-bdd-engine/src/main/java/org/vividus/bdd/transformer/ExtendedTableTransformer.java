@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,10 @@
 package org.vividus.bdd.transformer;
 
 import static org.apache.commons.lang3.Validate.isTrue;
-import static org.apache.commons.lang3.Validate.notBlank;
 
-import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
@@ -33,29 +30,6 @@ public interface ExtendedTableTransformer extends TableTransformer
     default void checkTableEmptiness(String tableAsString)
     {
         isTrue(StringUtils.isBlank(tableAsString), "Input table must be empty");
-    }
-
-    static String getMandatoryNonBlankProperty(TableProperties tableProperties, String propertyName)
-    {
-        String propertyValue = tableProperties.getProperties().getProperty(propertyName);
-        isTrue(propertyValue != null, "'%s' is not set in ExamplesTable properties", propertyName);
-        notBlank(propertyValue, "ExamplesTable property '%s' is blank", propertyName);
-        return propertyValue;
-    }
-
-    static int getMandatoryIntProperty(TableProperties tableProperties, String propertyName)
-    {
-        return Integer.parseInt(getMandatoryNonBlankProperty(tableProperties, propertyName));
-    }
-
-    default <E extends Enum<E>> E getMandatoryEnumProperty(TableProperties properties, String propertyName,
-            Class<E> enumClass)
-    {
-        String propertyValueStr = properties.getProperties().getProperty(propertyName);
-        E propertyValue = EnumUtils.getEnumIgnoreCase(enumClass, propertyValueStr);
-        isTrue(propertyValue != null, "Value of ExamplesTable property '%s' must be from range %s, but got '%s'",
-                propertyName, Arrays.toString(enumClass.getEnumConstants()), propertyValueStr);
-        return propertyValue;
     }
 
     default <T extends Entry<String, Function<String, R>>, R> R processCompetingMandatoryProperties(

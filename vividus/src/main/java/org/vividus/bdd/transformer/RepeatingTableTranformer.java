@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class RepeatingTableTranformer implements ExtendedTableTransformer
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
-        int times = ExtendedTableTransformer.getMandatoryIntProperty(properties, "times");
+        int times = properties.getMandatoryIntProperty("times");
         List<Map<String, String>> rows = nCopies(times, tableRows);
         return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(), rows, properties);
     }

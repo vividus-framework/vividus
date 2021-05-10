@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class SortingTableTransformer implements ExtendedTableTransformer
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
-        String byColumns = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "byColumns");
+        String byColumns = properties.getMandatoryNonBlankProperty("byColumns");
         List<String> headerValues = tableRows.getHeaders();
         List<String> columnsToCompare = Stream.of(StringUtils.split(byColumns, '|'))
                 .map(String::trim)

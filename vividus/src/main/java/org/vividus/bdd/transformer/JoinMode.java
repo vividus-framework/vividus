@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public enum JoinMode
         @Override
         protected String join(ExamplesTable table, TableProperties properties)
         {
-            String joinedColumn = ExtendedTableTransformer.getMandatoryNonBlankProperty(properties, "joinedColumn");
+            String joinedColumn = properties.getMandatoryNonBlankProperty("joinedColumn");
             Set<String> columnsToJoin = getColumnsToJoin(table, properties);
 
             List<Map<String, String>> rows = table.getRows();
