@@ -95,7 +95,7 @@ Saves network traffic captured during application run into variable. The network
 When I save BrowserStack network logs to $scopes variable `$variableName`
 ----
 
-. `$scopes` - xref:parameters:variable-scope.adoc[variable scopes]
+. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 . `$variableName` - name of variable to save network logs
 
 See <<_enable_network_capturing>>

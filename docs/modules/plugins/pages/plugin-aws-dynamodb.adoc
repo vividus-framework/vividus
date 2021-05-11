@@ -37,7 +37,7 @@ When I execute query `$partiqlQuery` against DynamoDB and save result as JSON to
 ----
 
 * `$partiqlQuery` - The {partiql} (A SQL-Compatible Query Language for Amazon DynamoDB) query representing the `SELECT` statement to execute.
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store results in JSON format.
 
 

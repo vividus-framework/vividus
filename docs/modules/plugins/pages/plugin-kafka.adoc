@@ -125,7 +125,7 @@ When I $queueOperation consumed `$consumerKey` Kafka messages to $scopes variabl
 ----
 * `$queueOperation` -  `DRAIN` - saves the messages consumed since the last drain or from the consumption start and moves the consumer cursor to the position after the last consumed message, `PEEK` - saves the messages consumed since the last drain or from the consumption start and doesn't change the consumer cursor position
 * `$consumerKey` - the key of the Kafka consumer configuration
-* `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - the variable name to store the messages. The messages are accessible via zero-based index, e.g. `${my-var[0]}` will return the first received message.
 
 ==== *Wait for the messages*

@@ -33,7 +33,7 @@ It's allowed to append a version number or alias to any of the formats. The leng
 If only the function name is specified, it is limited to 64 characters in length.
 +
 * `$payload` - The JSON that to provide to AWS Lambda function as input. Vividus performs a Base64 encoding on this field before sending this request to the AWS service. Users should not perform Base64 encoding on this field.
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store results. If the variable name is `my-var`, the following variables will be created:
 ** `${my-var.payload}` - the response from the function, or an error object
 ** `${my-var.status-code}` - the HTTP status code is in the 200 range for a successful request

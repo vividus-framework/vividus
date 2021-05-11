@@ -45,7 +45,7 @@ When I fetch object with key `$objectKey` from S3 bucket `$bucketName` and save 
 
 - `$objectKey` - the key under which the desired object is stored
 - `$bucketName` - the name of the bucket containing the desired object
-- `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes]
+- `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 - `$variableName` - the variable name
 
 .Download S3 object
@@ -115,7 +115,7 @@ The filters can be combined in any order and in any composition.
 ----
 
 - `$bucketName` - The name of the S3 bucket which objects keys are to be collected
-- `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes]
+- `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 - `$variableName` - The variable name to store the S3 objects keys. The keys are accessible via zero-based index, `${my-keys[0]}` will return the first found key.
 
 .Download the first found S3 object with the specified prefix

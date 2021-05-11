@@ -1,0 +1,66 @@
+= Variables
+
+Variables are names used to hold one or more values. Instead of repeating these
+values in multiple places in tests, the variable holds the results of
+a calculation, step execution, expression evaluation, or other value.
+
+VIVIDUS provides the following syntax to access variable value:
+[source,gherkin]
+----
+${variableName}
+----
+
+== Scopes
+
+Variables can have one of the following scopes.
+
+NOTE: The scopes names are case-insensitive
+
+[cols="1,6", options="header"]
+|===
+
+|Name
+|Description
+
+|step
+|The scope is used within nested steps and the variables are invalidated after the nested steps are executed.
+
+|scenario
+|Variable declared with the *scenario* scope is available in the rest of the scenario after its declaration. The *scenario*-scoped variables are invalidated once the scenario is completed.
+
+|story
+|Variable declared with the *story* scope is available in the rest of the story after its declaration. The *story*-scoped variables declared inside given stories are available in the parent story. The variables are invalidated once the story is completed.
+
+|next_batches
+|Variable declared with the *next_batches* scope is available in the next batches. The *next_batches*-scoped variable is not available in batch it's declared within.
+
+|global
+a|Such variables are declared only via properties with `bdd.variables.global.` prefix and available throughout the entire execution. An attempt to create the globally scoped variables during test execution leads to an error.
+
+.Declaring global variable `login-endpoint`
+[source,properties]
+----
+bdd.variables.global.login-endpoint=https://my-auth-server.com/api/login
+----
+
+.Using global variable `login-endpoint`
+[source,gherkin]
+----
+Given request body:
+{
+    "username":"user",
+    "password":"pass"
+}
+When I set request headers:
+\|name        \|value           \|
+\|Content-Type\|application/json\|
+When I issue a HTTP POST request for a resource with the URL '${login-endpoint}'
+Then the response code is equal to '200'
+----
+
+|===
+
+If variable with the specified name is not found in any of VIVIDUS scopes,
+search for OS environment variable will be performed. If no OS environment
+variable is available, the variable placeholder will be kept as is:
+`$\{variableName\}`

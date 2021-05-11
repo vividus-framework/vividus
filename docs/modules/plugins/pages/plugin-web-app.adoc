@@ -465,7 +465,7 @@ When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save
 ----
 * `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
 * `$urlPattern` - The regular expression to match HTTP request URL.
-* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to save the URL.
 
 .Validate the URL of the matching HTTP request
@@ -499,7 +499,7 @@ When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save
 ----
 * `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
 * `$urlPattern` - The regular expression to match HTTP request URL.
-* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to save the URL query. The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
 
 .Validate the URL query of the matching HTTP request
@@ -532,7 +532,7 @@ When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save
 ----
 * `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
 * `$urlPattern` - The regular expression to match HTTP request URL.
-* `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store results. If the variable name is `my-var`, the following variables will be created:
 ** `${my-var.query}` - The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
 ** `${my-var.requestBody.mimeType}` - The MIME type of posted data, the variable will not be created if MIME type is not present.

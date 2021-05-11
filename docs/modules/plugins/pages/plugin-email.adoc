@@ -52,7 +52,7 @@ When I fetch email message from `$serverKey` server filtered by $filters and sav
 
 . `$serverKey` - server `configuration` to identify a server to fetch a message from
 . `$filters` - <<_message_filters>>
-. `$scopes` - xref:parameters:variable-scope.adoc[Variable Scopes]
+. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 . `$variableName` - name to prefix text content references
 
 ==== *_Usage_*
