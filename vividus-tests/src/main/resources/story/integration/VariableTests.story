@@ -149,3 +149,6 @@ Given I initialize the scenario variable `numbers` using template `data/resolve-
 |exampleParam|overrideVar|
 |3           |4          |
 Then `#{trim(${numbers})}` is equal to `12345`
+
+Scenario: Use environment variable as Vividus variable
+Then `${java}` is equal to `${JAVA_HOME}`

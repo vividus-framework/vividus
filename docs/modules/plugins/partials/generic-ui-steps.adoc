@@ -136,7 +136,7 @@ When I save text of context element to $scopes variable `$variableName`
 
 ==== *_Parameters_*
 
-. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 . `$variableName` - name of a variable
 
 ==== *_Usage_*
@@ -168,7 +168,7 @@ When I save `$attributeName` attribute value of context element to $scopes varia
 ==== *_Parameters_*
 
 . `$attributeName` - name of an element's attribute
-. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 . `$variableName` - name of a variable
 
 ==== *_Usage_*
@@ -198,7 +198,7 @@ When I save `$attributeName` attribute value of element located `$locator` to $s
 
 . `$attributeName` - name of an element's attribute
 . `$locator` - <<_locator>>
-. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 . `$variableName` - name of a variable
 
 ==== *_Usage_*
@@ -226,7 +226,7 @@ When I save number of elements located `$locator` to $scopes variable `$variable
 ==== *_Parameters_*
 
 . `$locator` - <<_locator>>
-. `$scopes` - xref:parameters:variable-scope.adoc[The set of variable's scope]
+. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 . `$variableName` - name of a variable
 
 ==== *_Usage_*

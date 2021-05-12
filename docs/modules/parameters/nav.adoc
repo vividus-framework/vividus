@@ -2,4 +2,3 @@
 * xref:comparison-rule.adoc[Comparison Rule]
 * xref:collection-comparison-rule.adoc[Collection Comparison Rule]
 * xref:string-comparison-rule.adoc[String Comparison Rule]
-* xref:variable-scope.adoc[Variable Scope]

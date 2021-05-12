@@ -42,7 +42,7 @@ When I download blob with name `$blobName` from container `$containerName` of st
 * `$blobName` - The full path to a blob in the container.
 * `$containerName` - The name of the container to point to.
 * `$storageAccountKey` - The key of storage account from the configuration.
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the blob content.
 
 .Download the blob
@@ -64,7 +64,7 @@ When I download blob with name `$blobName` from container `$containerName` of st
 * `$containerName` - The name of the container to point to.
 * `$storageAccountKey` - The key of storage account from the configuration.
 * `$baseFileName` - The base file name used to generate the prefix and the suffix for the creating temporary file.
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the path to the temporary file with the blob content.
 
 .Download the blob to a temporary file
@@ -125,7 +125,7 @@ When I find all blobs with name which $comparisonRule `$blobNameToMatch` in cont
 * `$blobNameToMatch` - The full or partial blob name to be matched.
 * `$containerName` - The name of the container to point to.
 * `$storageAccountKey` - The key of storage account from the configuration.
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the list of found blob names.
 
 .Find blobs

@@ -60,7 +60,8 @@ public class Variables
                 .flatMap(Optional::stream)
                 .findFirst()
                 .or(() -> key.defaultValue)
-                .orElseGet(() -> getSystem(variableKey));
+                .or(() -> getSystemProperty(variableKey))
+                .orElseGet(() -> System.getenv(variableKey));
     }
 
     private Stream<Map<String, Object>> concatedVariables()
@@ -145,9 +146,9 @@ public class Variables
         return variable;
     }
 
-    private Object getSystem(String variableKey)
+    private Optional<String> getSystemProperty(String variableKey)
     {
-        return variableKey.isBlank() ? null : System.getProperty(variableKey);
+        return variableKey.isBlank() ? Optional.empty() : Optional.ofNullable(System.getProperty(variableKey));
     }
 
     public void putStepVariable(String variableKey, Object variableValue)

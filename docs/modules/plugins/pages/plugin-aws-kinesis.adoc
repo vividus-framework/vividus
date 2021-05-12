@@ -56,7 +56,7 @@ Get data records from a Kinesis data stream's shard and drain the consumed recor
 When I drain consumed Kinesis records to $scopes variable `$variableName`
 ----
 
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the records. The records are accessible via zero-based index, e.g. `${my-var[0]}` will return the first received record.
 
 === Examples

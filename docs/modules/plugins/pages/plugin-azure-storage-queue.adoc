@@ -24,10 +24,10 @@ azure.storage.queue.{queue-name}.{property-name}=property value
 Where:
 
 . `queue-name` - The name of the queue which will be used as a step parameter
-. `property-name` - The name of the queue property. One of: 
+. `property-name` - The name of the queue property. One of:
 .. `name` - The name of the queue
 .. `sas-token` - The https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS token]
-.. `queue` - The queue endpoint 
+.. `queue` - The queue endpoint
 
 == Steps
 
@@ -42,7 +42,7 @@ When I peek up to `$count` messages from queue `$queueName` and save result to $
 
 * `$count` - The nember of messages to peek
 * `$queueName` - The name of the queue
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store results in JSON format. If the variable name is `my-var`, the following variables will be created:
 ** `${my-var[0].messageId}` - The message id
 ** `${my-var[0].insertionTime}` - The message insertion time
@@ -67,7 +67,7 @@ When I send message `$message` to queue `$queueName` and save result to $scopes 
 
 * `$message` - The message to send
 * `$queueName` - The name of the queue
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store results in JSON format. If the variable name is `my-var`, the following variables will be created:
 ** `${my-var.messageId}` - The message id
 ** `${my-var.insertionTime}` - The message insertion time

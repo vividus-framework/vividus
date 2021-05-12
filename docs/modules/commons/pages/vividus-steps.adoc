@@ -112,7 +112,7 @@ The vividus expressions can be used within templates by using `${execVividusExpr
 Given I initialize the $scopes variable `$variableName` using template `$templatePath` with parameters:$templateParameters
 ----
 
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store a result.
 * `$templatePath` - The relative to `src/main/resources` path to a template.
 * `$templateParameters` - The template parameters.

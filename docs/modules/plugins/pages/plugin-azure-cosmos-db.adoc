@@ -24,7 +24,7 @@ azure.cosmos-db.container.{container-key}.{property-name}=property value
 Where:
 
 . `container-name` - The key of the container configuration
-. `property-name` - The name of the container property. One of: 
+. `property-name` - The name of the container property. One of:
 .. `container-id` - The id of the container
 .. `db-key` - The key of database configuration
 
@@ -36,7 +36,7 @@ azure.cosmos-db.database.{db-key}.{property-name}=property value
 Where:
 
 . `db-key` - The key of the database configuration
-. `property-name` - The name of the container property. One of: 
+. `property-name` - The name of the container property. One of:
 .. `db-id` - The id of the container
 .. `account-key` - The key of account configuration
 
@@ -48,7 +48,7 @@ azure.cosmos-db.account.{account-key}.{property-name}=property value
 Where:
 
 . `account-key` - The key of the account configuration
-. `property-name` - The name of the container property. One of: 
+. `property-name` - The name of the container property. One of:
 .. `key` - The key of the account
 .. `endpoint` - The endoint of the account
 
@@ -91,7 +91,7 @@ When I read item with `$id` id and `$partition` partition from CosmosDB containe
 * `$id` - The id of the item
 * `$partition` - The value of partition key
 * `$containerKey` - The key of the container
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store results in JSON format.
 
 .Read item
@@ -119,8 +119,8 @@ When I execute `$query` query against CosmosDB container `$containerKey` and sav
 
 * `$query` - The query to execute
 * `$containerKey` - The key of the container
-* `$scopes` - xref:parameters:variable-scope.adoc[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store results in JSON format. 
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store results in JSON format.
 
 .Execute query
 [source,gherkin]

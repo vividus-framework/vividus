@@ -1,4 +1,5 @@
 .Commons
+* xref:variables.adoc[Variables]
 * xref:expressions.adoc[Expressions]
 * xref:vividus-steps.adoc[Steps]
 * xref:table-transformers.adoc[Table Transformers]

@@ -86,7 +86,7 @@ When I create temporary excel file with content:$content and put path to $scopes
 ----
 
 - `$content` - the data to be put to the excel file. Any valid ExamplesTable
-- `$scopes` - xref:parameters:variable-scope.adoc[the comma-separated set of the variables scopes]
+- `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 - `$variableName` - the variable name
 
 .Create temporary excel file

@@ -95,7 +95,6 @@ class VariablesTests
     void shouldTryToReturnSystemPropertyIfPropertyByNameIsNotFoundInContext()
     {
         Variables variables = new Variables(Map.of());
-        variables.putStoryVariable(VARIABLE_KEY, List.of());
         assertNull(variables.getVariable(KEY));
         System.setProperty(KEY, VALUE);
         assertEquals(VALUE, variables.getVariable(KEY));
@@ -103,10 +102,17 @@ class VariablesTests
     }
 
     @Test
+    void shouldTryToReturnEnvironmentVariableIfPropertyByNameIsNotFoundInContext()
+    {
+        Map.Entry<String, String> environmentVariable = System.getenv().entrySet().iterator().next();
+        Variables variables = new Variables(Map.of());
+        assertEquals(environmentVariable.getValue(), variables.getVariable(environmentVariable.getKey()));
+    }
+
+    @Test
     void shouldReturnNullIfPropertyNotFound()
     {
         Variables variables = new Variables(Map.of());
-        variables.putStoryVariable(VARIABLE_KEY, List.of());
         assertNull(variables.getVariable(KEY));
     }
 
