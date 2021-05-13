@@ -125,7 +125,7 @@
     <script src="../../webjars/jquery/2.1.1/jquery.min.js"></script>
     <script src="../../webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="../../webjars/highlight.js/9.12.0/highlight.min.js"></script>
-    <script src="../../webjars/chart.js/2.4.0/Chart.min.js"></script>
+    <script src="../../webjars/chart.js/3.2.1/chart.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
             $(".sql").each(function(i,e) {
