@@ -115,7 +115,7 @@
                          </div>
                      </div>
                      <p align="center">
-                         <canvas id="statistics-pie-chart" style="max-width: 360px;"></canvas>
+                         <canvas id="statistics-pie-chart" style="max-width: 360px; max-height: 360px;"></canvas>
                      </p>
                 </div>
             </div>
