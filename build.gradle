@@ -52,7 +52,7 @@ ext {
         spring:                 '5.3.7',
         tika:                   '1.26',
         junit:                  '5.7.1',
-        mockito:                '3.9.0',
+        mockito:                '3.10.0',
         powermock:              '2.0.9',
         slf4jTest:              '2.1.1'
     ]
