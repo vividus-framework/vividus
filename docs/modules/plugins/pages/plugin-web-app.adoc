@@ -244,6 +244,46 @@ When I open URL `https://delayed.vividus.dev` in new window
 When I stop page loading
 ----
 
+=== Scroll context
+
+Scrolls the context to an edge
+
+[source,gherkin]
+----
+When I scroll context to $scrollDirection edge
+----
+* `$scrollDirection` - the direction of the scroll. One of:
+** `LEFT` - start of a page/element horizontally
+** `RIGHT` - end of a page/element horizontally
+** `TOP` - start of a page/element vertically
+** `BOTTOM` - end of a page/element vertically
+
+[TIP]
+If the context is not set, the whole page will be scrolled
+
+.Scroll login to a bottom
+[source,gherkin]
+----
+When I change context to element located `id(login)`
+When I scroll context to BOTTOM edge
+----
+
+=== Scroll element into view
+
+Scrolls an element into the view.
+
+[source,gherkin]
+----
+When I scroll element located `$locator` into view
+----
+* `$locator` - <<_locator>>
+
+.Scroll button into view
+[source,gherkin]
+----
+When I scroll element located `id(way_down_button)` into view
+----
+
 === Execute sequence of actions
 
 Executes the sequence of web actions
