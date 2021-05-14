@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,7 @@ public enum MergeMode
         }
 
         @Override
-        protected List<ExamplesTable> alignTables(List<ExamplesTable> examplesTables, String fillerValue,
-                TableProperties properties)
+        protected List<ExamplesTable> alignTables(List<ExamplesTable> examplesTables, String fillerValue)
         {
             List<String> mergedHeaders = mergeHeaders(examplesTables);
             return examplesTables.stream().map(table -> {
@@ -90,8 +89,7 @@ public enum MergeMode
         }
 
         @Override
-        protected List<ExamplesTable> alignTables(List<ExamplesTable> examplesTables, String fillerValue,
-                TableProperties properties)
+        protected List<ExamplesTable> alignTables(List<ExamplesTable> examplesTables, String fillerValue)
         {
             int maxRowCount = examplesTables.stream().mapToInt(ExamplesTable::getRowCount).max().orElse(0);
 
@@ -133,7 +131,7 @@ public enum MergeMode
             boolean appendTableProperties)
     {
         validate(tables, fillerValue.isEmpty());
-        List<ExamplesTable> tablesToMerge = fillerValue.map(v -> alignTables(tables, v, properties)).orElse(tables);
+        List<ExamplesTable> tablesToMerge = fillerValue.map(v -> alignTables(tables, v)).orElse(tables);
         List<List<String>> mergedRows = merge(tablesToMerge);
         List<String> mergeHeaders = mergeHeaders(tables);
         return ExamplesTableProcessor.buildExamplesTable(mergeHeaders, mergedRows, properties, true,
@@ -142,8 +140,7 @@ public enum MergeMode
 
     protected abstract void validateInput(ExamplesTable current, ExamplesTable next, boolean strict);
 
-    protected abstract List<ExamplesTable> alignTables(List<ExamplesTable> examplesTables, String fillerValue,
-            TableProperties properties);
+    protected abstract List<ExamplesTable> alignTables(List<ExamplesTable> examplesTables, String fillerValue);
 
     protected abstract List<List<String>> merge(List<ExamplesTable> examplesTables);
 
