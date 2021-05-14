@@ -190,7 +190,7 @@ jobs:
         fi
 
     - name: SauceLabs - Desktop - Web - System tests
-      if: matrix.platform == 'ubuntu-latest'
+      if: matrix.platform == 'windows-latest'
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
         SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
@@ -220,7 +220,7 @@ jobs:
         fi
 
     - name: SauceLabs - Tablet - Web - System tests
-      if: matrix.platform == 'ubuntu-latest'
+      if: matrix.platform == 'windows-latest'
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
         SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
@@ -241,7 +241,7 @@ jobs:
         fi
 
     - name: SauceLabs - Phone - Web - System tests
-      if: matrix.platform == 'ubuntu-latest'
+      if: matrix.platform == 'windows-latest'
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
         SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
@@ -298,7 +298,7 @@ jobs:
         path: vividus-tests/output/reports/sl-ios-allure
 
     - name: SauceLabs - Android - Mobile App - Run system tests
-      if: matrix.platform == 'ubuntu-latest'
+      if: matrix.platform == 'windows-latest'
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
         SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
@@ -327,7 +327,7 @@ jobs:
         fi
 
     - name: SauceLabs - Android - Mobile App - Publish system tests report
-      if: matrix.platform == 'ubuntu-latest' && always()
+      if: matrix.platform == 'windows-latest' && always()
       uses: actions/upload-artifact@v2
       with:
         name: SauceLabs - System Tests - Allure report - Android
