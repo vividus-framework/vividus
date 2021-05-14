@@ -4,6 +4,7 @@ tasks.artifactoryPublish.enabled = false
 tasks.publish.enabled = false
 
 runStories.treatKnownIssuesOnlyAsPassed = true
+debugStories.treatKnownIssuesOnlyAsPassed = true
 
 dependencies {
     implementation project(':vividus')
