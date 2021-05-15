@@ -16,56 +16,24 @@
 
 package org.vividus.bdd.transformer;
 
-import static java.util.function.Predicate.not;
-import static org.apache.commons.lang3.Validate.isTrue;
-
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 
 @Named("MERGING")
-public class MergingTableTransformer implements ExtendedTableTransformer
+public class MergingTableTransformer extends AbstractTableLoadingTransformer
 {
-    @Inject private Configuration configuration;
-
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         MergeMode mergeMode = properties.getMandatoryEnumProperty("mergeMode", MergeMode.class);
 
-        List<String> tables = Optional.ofNullable(properties.getProperties().getProperty("tables"))
-                .stream()
-                .map(t -> t.split("(?<!\\\\);"))
-                .flatMap(Stream::of)
-                .map(t -> t.replace("\\;", ";").trim())
-                .distinct()
-                .filter(not(String::isBlank))
-                .collect(Collectors.toList());
-
-        Stream<String> examplesTablesStream = tables.stream();
-        if (tableAsString.isBlank())
-        {
-            isTrue(tables.size() > 1, "Please, specify more than one unique table paths");
-        }
-        else
-        {
-            isTrue(!tables.isEmpty(), "Please, specify at least one table path");
-            examplesTablesStream = Stream.concat(examplesTablesStream, Stream.of(tableAsString));
-        }
-
-        List<ExamplesTable> examplesTables = examplesTablesStream
-                .map(p -> configuration.examplesTableFactory().createExamplesTable(p))
-                .collect(Collectors.toCollection(LinkedList::new));
+        List<ExamplesTable> examplesTables = loadTables(tableAsString, properties);
         String fillerValue = properties.getProperties().getProperty("fillerValue");
         return mergeMode.merge(examplesTables, properties, Optional.ofNullable(fillerValue));
     }

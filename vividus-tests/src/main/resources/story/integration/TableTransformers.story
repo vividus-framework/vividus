@@ -211,3 +211,23 @@ Then `<date3>` is equal to `line3 line6`
 Examples:
 {transformer=FROM_EXCEL, path=/data/complex-data.xlsx, sheet=range-all-cells, range=B2:D4}
 {transformer=JOINING, joinMode=rows}
+
+
+Scenario: Verify CARTESIAN_PRODUCT transformer
+When I initialize scenario variable `cartesianProductTable` with values:
+{transformer=CARTESIAN_PRODUCT, tables=/data/multirow.table}
+|col1 |col2 |col3 |
+|row11|row12|row13|
+|row21|row22|row23|
+|row31|row32|row33|
+Then `${cartesianProductTable}` is equal to table:
+|id|name   |planet  |col1 |col2 |col3 |
+|1 |Junit  |Jupiter |row11|row12|row13|
+|1 |Junit  |Jupiter |row21|row22|row23|
+|1 |Junit  |Jupiter |row31|row32|row33|
+|2 |Freddie|Mercury |row11|row12|row13|
+|2 |Freddie|Mercury |row21|row22|row23|
+|2 |Freddie|Mercury |row31|row32|row33|
+|3 |AWS    |Neptune |row11|row12|row13|
+|3 |AWS    |Neptune |row21|row22|row23|
+|3 |AWS    |Neptune |row31|row32|row33|

@@ -290,3 +290,40 @@ Examples:
 {transformer=JOINING, joinMode=columns, joinedColumn=header}
 /test1.table
 ----
+
+== CARTESIAN_PRODUCT
+
+`CARTESIAN_PRODUCT` transformer creates a https://en.wikipedia.org/wiki/Cartesian_product[cartesian product] from several tables.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`tables`
+|paths to examples tables or transformers to create a cartesian product
+
+|===
+
+[IMPORTANT]
+====
+* headers of input tables must be different
+* number of input tables must be more than 1
+====
+
+.Usage of CARTESIAN_PRODUCT transformer
+----
+{transformer=CARTESIAN_PRODUCT, tables=story/tables/test1.table;story/tables/test2.table}
+----
+
+.Usage of CARTESIAN_PRODUCT transformer with table body
+----
+{transformer=CARTESIAN_PRODUCT, tables=/data/some-table.table}
+|column1|
+|value1 |
+----
+
+.Usage of CARTESIAN_PRODUCT transformer with nested transformers
+----
+{transformer=CARTESIAN_PRODUCT, tables=\{transformer=REPEATING\, times=100\};\{transformer=FROM_CSV\, csvPath=/data/csv.csv\}}
+----
