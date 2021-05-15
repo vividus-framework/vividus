@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.vividus.azure.storage.blob;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -41,6 +43,9 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.lang3.function.FailableBiConsumer;
 import org.junit.jupiter.api.Test;
@@ -54,7 +59,7 @@ import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.util.property.PropertyMappedCollection;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class BlobStorageStepsTests
 {
     private static final String SECOND = "second";
@@ -66,6 +71,8 @@ class BlobStorageStepsTests
     private static final String KEY = "KEY";
     private static final String DATA = "data";
     private static final byte[] BYTES = DATA.getBytes(StandardCharsets.UTF_8);
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(BlobStorageSteps.class);
 
     @Mock private BddVariableContext bddVariableContext;
     @Mock private PropertyMappedCollection<String> storageAccountEndpoints;
@@ -127,6 +134,8 @@ class BlobStorageStepsTests
             BlobClient blobClient = mockBlobClient(client);
             steps.deleteBlob(BLOB, CONTAINER, KEY);
             verify(blobClient).delete();
+            assertThat(logger.getLoggingEvents(), is(List.of(
+                    info("The blob with name '{}' is successfully deleted from the container '{}'", BLOB, CONTAINER))));
         });
     }
 

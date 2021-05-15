@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import com.google.common.cache.LoadingCache;
 
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.bdd.context.BddVariableContext;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
@@ -45,6 +47,8 @@ import org.vividus.util.property.PropertyMappedCollection;
 
 public class BlobStorageSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlobStorageSteps.class);
+
     private final BddVariableContext bddVariableContext;
     private final PropertyMappedCollection<String> storageAccountEndpoints;
     private final TokenCredential credential;
@@ -158,6 +162,7 @@ public class BlobStorageSteps
     public void deleteBlob(String blobName, String containerName, String storageAccountKey)
     {
         createBlobClient(blobName, containerName, storageAccountKey).delete();
+        LOGGER.info("The blob with name '{}' is successfully deleted from the container '{}'", blobName, containerName);
     }
 
     /**
