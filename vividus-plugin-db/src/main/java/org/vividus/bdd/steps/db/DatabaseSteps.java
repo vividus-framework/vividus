@@ -314,13 +314,12 @@ public class DatabaseSteps
     }
 
     /**
-     * The step designed to compare the data received from SQL request against the examples table row
+     * The step is designed to compare the data retrieved by SQL request against the examples table.
      * The order of columns is ignored.
-     * Examples table could be build for example via GENERATE_FROM_CSV table transformer.
      * Consider complete example:
      * <br>When I execute SQL query `${source}` against `$dbKey` and save result to STORY variable `data`
      * <br>Then `${data}` matching rows using `` from `$dbKey` is equal to data from:
-     * <br>{transformer=GENERATE_FROM_CSV, csvPath=${path}/source.csv}
+     * <br>tables/data.table
      * @param data saved by step:
      * When I execute SQL query `$sqlQuery` against `$dbKey` and save result to $scopes variable `$data`"
      * @param keys comma-separated list of column's names to map resulting tables rows
