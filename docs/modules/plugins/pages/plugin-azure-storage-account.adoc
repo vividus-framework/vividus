@@ -26,7 +26,9 @@ azure.storage-account.<key>=<endpoint>
 where:
 
 . `key` - The logical key used to refer storage account in the steps.
-. `endpoint` - The storage account endpoint, e.g. `https://storageaccount.blob.core.windows.net/`
+. `endpoint` - The blob service URL, e.g. `https://storageaccount.blob.core.windows.net/`.
+It's allowed to use blob service https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS] URL here,
+in this case the authentication configuration is not requied.
 
 == Steps
 

@@ -59,7 +59,7 @@ public class BlobStorageSteps
                 @Override
                 public BlobServiceClient load(String endpoint)
                 {
-                    return new BlobServiceClientBuilder().endpoint(endpoint).credential(credential).buildClient();
+                    return new BlobServiceClientBuilder().credential(credential).endpoint(endpoint).buildClient();
                 }
             });
 

@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
@@ -50,6 +51,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.apache.commons.lang3.function.FailableBiConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
@@ -178,7 +180,7 @@ class BlobStorageStepsTests
                     when(mock.credential(defaultAzureCredential)).thenReturn(mock);
                     when(mock.endpoint(endpoint)).thenReturn(mock);
                     when(mock.buildClient()).thenReturn(blobServiceClient);
-                });)
+                }))
         {
             BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
             when(blobServiceClient.getBlobContainerClient(CONTAINER)).thenReturn(blobContainerClient);
@@ -186,6 +188,11 @@ class BlobStorageStepsTests
             testToRun.accept(steps, blobContainerClient);
             assertThat(credentialsBuilder.constructed(), hasSize(1));
             assertThat(serviceClientBuilder.constructed(), hasSize(1));
+            BlobServiceClientBuilder builder = serviceClientBuilder.constructed().get(0);
+            InOrder ordered = inOrder(builder);
+            ordered.verify(builder).credential(defaultAzureCredential);
+            ordered.verify(builder).endpoint(endpoint);
+            ordered.verify(builder).buildClient();
         }
         catch (IOException e)
         {
