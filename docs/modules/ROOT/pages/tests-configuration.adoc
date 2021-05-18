@@ -151,7 +151,7 @@ Meta tags can be used to reach several goals:
 === Levels
 Meta tags may be used at both story and scenario level. Meta tags specified at the story level are propagated to every scenario, if the same meta tag is used at the scenario level, then the scenario level value takes precedence.
 
-.Levels of meta tags 
+.Levels of meta tags
 [source,gherkin]
 ----
 !-- Story level
@@ -336,27 +336,27 @@ When I perform highly time consuming task
 
 == Exit codes
 
-Tests execution returns following exit codes.
+The tests execution returns one of the following exit codes.
 
-[cols="1,2,1"]
+[cols="1,8,1", options="header"]
 |===
 |Code
 |Description
-|Pipeline Status
+|Status
 
 |0
 |Test report is generated, contains only passed tests
-|Green
+|`GREEN`
 
 |1
 |Test report is generated, contains only passed and tests with known issues
-|Amber
+|`AMBER`
 
 |2
 |Test report is generated, contains any tests except passed and with known issues or doesn't contain tests at all
-|Red
+|`RED`
 
 |3
 |Test report isn't generated
-|Red
+|`RED`
 |===
