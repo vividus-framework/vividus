@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.embedder.PerformableTree.RunContext;
 import org.jbehave.core.embedder.PerformableTree.State;
+import org.jbehave.core.failures.PendingStepFound;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.Step;
@@ -87,6 +88,10 @@ public class SubSteps
         else if (rootCause instanceof Error)
         {
             throw (Error) rootCause;
+        }
+        else if (rootCause instanceof PendingStepFound)
+        {
+            throw new UUIDExceptionWrapper(rootCause);
         }
         return stepResult;
     }
