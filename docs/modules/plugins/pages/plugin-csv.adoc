@@ -10,6 +10,26 @@ The plugin provides the ability to work with CSV files.
 implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{current-version}')
 ----
 
+== Properties
+[cols="2,1,2,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`csv.delimiter-char`
+|<char>
+|`,`
+|The char used for value separation, must not be a line break character
+
+|`csv.escape-char`
+|<char>
+|`<disabled: no escape char>`
+|The char used to escape special characters in values, may be disabled
+
+|===
+
 == Table Transformers
 === FROM_CSV
 

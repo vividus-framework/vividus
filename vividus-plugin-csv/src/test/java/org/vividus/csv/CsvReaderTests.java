@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.vividus.csv;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,7 +44,7 @@ class CsvReaderTests
     private final CsvReader csvReader = new CsvReader();
 
     @Test
-    void testReadCsvFromPath() throws Exception
+    void testReadCsvFromPath() throws IOException, URISyntaxException
     {
         Path filePath = Paths.get(getCsvResource().toURI());
         List<Map<String, String>> result = csvReader.readCsvFile(filePath, FIRST_HEADER, SECOND_HEADER);
@@ -50,15 +52,15 @@ class CsvReaderTests
     }
 
     @Test
-    void testReadCsvWithEscapedDataFromPath() throws Exception
+    void testReadCsvWithEscapedDataFromPath() throws IOException, URISyntaxException
     {
         Path filePath = Paths.get(getCsvResource("unittest-escaped.csv").toURI());
-        List<Map<String, String>> result = new CsvReader('\\').readCsvFile(filePath, FIRST_HEADER, SECOND_HEADER);
+        List<Map<String, String>> result = new CsvReader(',', '\\').readCsvFile(filePath, FIRST_HEADER, SECOND_HEADER);
         assertEquals(List.of(Map.of(FIRST_HEADER, FIRST_VALUE, SECOND_HEADER, "value2 with \" inside")), result);
     }
 
     @Test
-    void testReadCsvFromStringWithoutHeaders() throws Exception
+    void testReadCsvFromStringWithoutHeaders() throws IOException
     {
         String csv = FIRST_VALUE + COMMA + SECOND_VALUE;
         List<Map<String, String>> result = csvReader.readCsvString(csv, FIRST_HEADER, SECOND_HEADER);
@@ -66,7 +68,7 @@ class CsvReaderTests
     }
 
     @Test
-    void testReadCsvFromStringWithHeaders() throws Exception
+    void testReadCsvFromStringWithHeaders() throws IOException
     {
         String csv = FIRST_HEADER + COMMA + SECOND_HEADER + "\n" + FIRST_VALUE + COMMA + SECOND_VALUE;
         List<Map<String, String>> result = csvReader.readCsvString(csv);
@@ -74,7 +76,7 @@ class CsvReaderTests
     }
 
     @Test
-    void testReadCsvFromUrl() throws Exception
+    void testReadCsvFromUrl() throws IOException
     {
         URL url = getCsvResource();
         List<CSVRecord> result = csvReader.readCsvFile(url, FIRST_HEADER, SECOND_HEADER);

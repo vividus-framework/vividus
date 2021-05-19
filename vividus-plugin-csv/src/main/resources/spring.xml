@@ -10,6 +10,7 @@
     <bean id="csvSteps" class="org.vividus.bdd.steps.csv.CsvSteps" />
 
     <bean class="org.vividus.csv.CsvReader">
+        <constructor-arg type="char" value="${csv.delimiter-char:,}" />
         <constructor-arg type="java.lang.Character" value="${csv.escape-char:#{null}}" />
     </bean>
 
