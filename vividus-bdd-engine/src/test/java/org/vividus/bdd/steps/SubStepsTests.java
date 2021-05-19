@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.embedder.PerformableTree.RunContext;
 import org.jbehave.core.embedder.PerformableTree.State;
 import org.jbehave.core.embedder.StoryManager;
+import org.jbehave.core.failures.PendingStepFound;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.Step;
@@ -169,6 +170,21 @@ class SubStepsTests
             UUIDExceptionWrapper actual = assertThrows(UUIDExceptionWrapper.class,
                     () -> subSteps.execute(stepContextInfoProvider));
             assertEquals(exception, actual);
+        }, ordered -> { });
+    }
+
+    @Test
+    void testExecuteSubStepWithPendingStepException()
+    {
+        StepResult stepResult = mock(StepResult.class);
+        testExecuteSubSteps(stepResult, step ->
+        {
+            PendingStepFound pending = new PendingStepFound("When I perform pending step");
+            when(stepResult.getFailure()).thenReturn(pending);
+            Optional<Supplier<String>> stepContextInfoProvider = Optional.empty();
+            UUIDExceptionWrapper actual = assertThrows(UUIDExceptionWrapper.class,
+                    () -> subSteps.execute(stepContextInfoProvider));
+            assertEquals(pending, actual.getCause());
         }, ordered -> { });
     }
 
