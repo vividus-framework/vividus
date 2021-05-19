@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ public class CsvReader
         this(CSVFormat.DEFAULT);
     }
 
-    public CsvReader(Character escape)
+    public CsvReader(char delimiter, Character escape)
     {
-        this(CSVFormat.DEFAULT.withEscape(escape));
+        this(CSVFormat.DEFAULT.withDelimiter(delimiter).withEscape(escape));
     }
 
     public CsvReader(CSVFormat csvFormat)
