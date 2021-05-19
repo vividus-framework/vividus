@@ -42,6 +42,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -416,11 +417,12 @@ class GenericWebDriverManagerTests
         assertFalse(driverManager.isAndroidNativeApp());
     }
 
-    @Test
-    void shouldBeIOSNativeApp()
+    @ParameterizedTest
+    @ValueSource(strings = {"ios", MobilePlatform.IOS})
+    void shouldBeIOSNativeApp(String platformName)
     {
         driverManager.setMobileApp(true);
-        mockWebDriverHavingCapabilities(Map.of(CapabilityType.PLATFORM_NAME, MobilePlatform.IOS));
+        mockWebDriverHavingCapabilities(Map.of(CapabilityType.PLATFORM_NAME, platformName));
         assertTrue(driverManager.isIOSNativeApp());
     }
 
