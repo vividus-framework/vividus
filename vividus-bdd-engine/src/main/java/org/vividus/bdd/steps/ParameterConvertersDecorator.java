@@ -56,6 +56,15 @@ public class ParameterConvertersDecorator extends ParameterConverters
         {
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
         }
+        return convertAdaptedValue(adaptedValue, type);
+    }
+
+    private Object convertAdaptedValue(Object adaptedValue, Type type)
+    {
+        if (type == DataWrapper.class)
+        {
+            return new DataWrapper(adaptedValue);
+        }
         boolean parametrizedType = type instanceof ParameterizedType;
         if (type != String.class && (type == adaptedValue.getClass()
                 || type instanceof Class<?> && ((Class<?>) type).isInstance(adaptedValue)

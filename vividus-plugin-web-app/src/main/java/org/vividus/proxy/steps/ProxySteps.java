@@ -21,7 +21,6 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +49,7 @@ import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
+import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.proxy.IProxy;
@@ -360,7 +360,7 @@ public class ProxySteps
      */
     @When(value = "I mock HTTP responses with request URL which $comparisonRule `$url` using"
             + " response code `$responseCode`, content `$payload` and headers:$headers", priority = 1)
-    public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode, Object content,
+    public void mockHttpRequests(StringComparisonRule comparisonRule, String url, int responseCode, DataWrapper content,
             DefaultHttpHeaders headers)
     {
         mockHttpRequests(Optional.empty(), comparisonRule, url, responseCode, content, headers);
@@ -405,15 +405,14 @@ public class ProxySteps
     @When(value = "I mock HTTP $httpMethods responses with request URL which $comparisonRule `$url` using"
             + " response code `$responseCode`, content `$payload` and headers:$headers", priority = 1)
     public void mockHttpRequests(Set<HttpMethod> httpMethods, StringComparisonRule comparisonRule, String url,
-            int responseCode, Object content, DefaultHttpHeaders headers)
+            int responseCode, DataWrapper content, DefaultHttpHeaders headers)
     {
         mockHttpRequests(Optional.of(httpMethods), comparisonRule, url, responseCode, content, headers);
     }
 
     private void mockHttpRequests(Optional<Set<HttpMethod>> httpMethods, StringComparisonRule comparisonRule,
-            String url, int responseCode, Object content, DefaultHttpHeaders headers)
+            String url, int responseCode, DataWrapper content, DefaultHttpHeaders headers)
     {
-        byte[] contentBytes = getBytes(content);
         List<Predicate<HttpMessageInfo>> filters = new ArrayList<>();
         Matcher<String> expected = comparisonRule.createMatcher(url);
         filters.add(m -> expected.matches(m.getUrl()));
@@ -422,6 +421,7 @@ public class ProxySteps
             filters.add(m -> httpMethods.get().stream()
                     .anyMatch(e -> m.getOriginalRequest().method().toString().equals(e.toString())));
         }
+        byte[] contentBytes = content.getBytes();
         applyUrlFilter(filters, request -> {
             HttpResponseStatus responseStatus = HttpResponseStatus.valueOf(responseCode);
             HttpVersion protocolVersion = request.protocolVersion();
@@ -443,19 +443,6 @@ public class ProxySteps
     public void resetMocks()
     {
         proxy.clearRequestFilters();
-    }
-
-    private byte[] getBytes(Object content)
-    {
-        if (content instanceof String)
-        {
-            return ((String) content).getBytes(StandardCharsets.UTF_8);
-        }
-        else if (content instanceof byte[])
-        {
-            return (byte[]) content;
-        }
-        throw new IllegalArgumentException("Unsupported content type: " + content.getClass());
     }
 
     private void applyUrlFilter(List<Predicate<HttpMessageInfo>> messageFilters,

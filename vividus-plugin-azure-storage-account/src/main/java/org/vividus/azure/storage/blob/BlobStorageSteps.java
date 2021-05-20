@@ -40,6 +40,7 @@ import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.context.BddVariableContext;
+import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.util.ResourceUtils;
@@ -143,12 +144,11 @@ public class BlobStorageSteps
      * @param containerName     The name of the container to point to.
      * @param storageAccountKey The key to Storage Account endpoint.
      */
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     @When("I upload blob with name `$blobName` and data `$data` to container `$containerName` of storage account "
             + "`$storageAccountKey`")
-    public void uploadBlob(String blobName, String data, String containerName, String storageAccountKey)
+    public void uploadBlob(String blobName, DataWrapper data, String containerName, String storageAccountKey)
     {
-        createBlobClient(blobName, containerName, storageAccountKey).upload(BinaryData.fromString(data));
+        createBlobClient(blobName, containerName, storageAccountKey).upload(BinaryData.fromBytes(data.getBytes()));
     }
 
     /**

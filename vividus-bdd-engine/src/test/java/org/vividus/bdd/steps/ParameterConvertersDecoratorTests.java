@@ -18,6 +18,7 @@ package org.vividus.bdd.steps;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -292,5 +293,17 @@ class ParameterConvertersDecoratorTests
         Integer expected = Integer.valueOf(42);
         when(expressionAdaptor.processRawExpression(VALUE)).thenReturn(expected);
         assertEquals(expected, parameterConverters.convert(VALUE, type));
+    }
+
+    @Test
+    void shouldReturnDataWrapper()
+    {
+        when(variableResolver.resolve(VALUE)).thenReturn(VALUE);
+        Class<DataWrapper> dataWrapperClass = DataWrapper.class;
+        byte[] expected = { 0, 1, 2 };
+        when(expressionAdaptor.processRawExpression(VALUE)).thenReturn(expected);
+        Object actual = parameterConverters.convert(VALUE, dataWrapperClass);
+        assertThat(actual, instanceOf(dataWrapperClass));
+        assertArrayEquals(expected, ((DataWrapper) actual).getBytes());
     }
 }
