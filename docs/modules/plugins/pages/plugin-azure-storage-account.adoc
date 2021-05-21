@@ -89,10 +89,16 @@ When I upload blob with name `$blobName` and data `$data` to container `$contain
 * `$containerName` - The name of the container to point to.
 * `$storageAccountKey` - The key of storage account from the configuration.
 
-.Upload the blob
+.Upload the text blob
 [source,gherkin]
 ----
 When I upload blob with name `raw/test.json` and data `{"test":"data"}` to container `vividus` of storage account `testaccount`
+----
+
+.Upload the binary blob
+[source,gherkin]
+----
+When I upload blob with name `folder/image.jpg` and data `#{loadBinaryResource(/data/image.jpg)}` to container `vividus` of storage account `testaccount`
 ----
 
 === Delete the blob

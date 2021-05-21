@@ -57,6 +57,7 @@ import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.BddVariableContext;
+import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.util.property.PropertyMappedCollection;
@@ -118,12 +119,23 @@ class BlobStorageStepsTests
     }
 
     @Test
-    void shouldUploadBlob()
+    void shouldUploadTextBlob()
     {
         runWithClient((steps, client) ->
         {
             BlobClient blobClient = mockBlobClient(client);
-            steps.uploadBlob(BLOB, DATA, CONTAINER, KEY);
+            steps.uploadBlob(BLOB, new DataWrapper(DATA), CONTAINER, KEY);
+            verify(blobClient).upload(argThat(data -> Arrays.equals(data.toBytes(), BYTES)));
+        });
+    }
+
+    @Test
+    void shouldUploadBinaryBlob()
+    {
+        runWithClient((steps, client) ->
+        {
+            BlobClient blobClient = mockBlobClient(client);
+            steps.uploadBlob(BLOB, new DataWrapper(BYTES), CONTAINER, KEY);
             verify(blobClient).upload(argThat(data -> Arrays.equals(data.toBytes(), BYTES)));
         });
     }

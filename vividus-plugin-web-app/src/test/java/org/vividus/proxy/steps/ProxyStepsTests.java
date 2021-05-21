@@ -19,7 +19,6 @@ package org.vividus.proxy.steps;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -66,6 +65,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.ComparisonRule;
+import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.proxy.IProxy;
@@ -101,23 +101,12 @@ class ProxyStepsTests
     private static final DefaultHttpHeaders HEADERS = new DefaultHttpHeaders();
     private static final Pattern URL_PATTERN = Pattern.compile(URL);
 
-    @Mock
-    private ISoftAssert nonFailingAssert;
-
-    @Mock
-    private IBddVariableContext bddVariableContext;
-
-    @Mock
-    private IProxy proxy;
-
-    @Mock
-    private IAttachmentPublisher attachmentPublisher;
-
-    @Mock
-    private IWebWaitActions waitActions;
-
-    @InjectMocks
-    private ProxySteps proxySteps;
+    @Mock private ISoftAssert nonFailingAssert;
+    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private IProxy proxy;
+    @Mock private IAttachmentPublisher attachmentPublisher;
+    @Mock private IWebWaitActions waitActions;
+    @InjectMocks private ProxySteps proxySteps;
 
     @Test
     void testClearProxyLog()
@@ -284,7 +273,7 @@ class ProxyStepsTests
         when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
-        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, content, headers);
+        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, new DataWrapper(content), headers);
 
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
@@ -309,7 +298,7 @@ class ProxyStepsTests
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
-                URL, 200, VALUE1, headers);
+                URL, 200, new DataWrapper(VALUE1), headers);
         verifyResponse(request, messageInfo);
     }
 
@@ -324,20 +313,12 @@ class ProxyStepsTests
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
-                URL, 200, VALUE1, headers);
+                URL, 200, new DataWrapper(VALUE1), headers);
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
         FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
                 messageInfo);
         assertNull(response);
-    }
-
-    @Test
-    void shouldThrowAnExceptionIfInvalidContentTypeIsUsed()
-    {
-        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
-                () -> proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, Class.class, null));
-        assertEquals("Unsupported content type: class java.lang.Class", iae.getMessage());
     }
 
     @Test
