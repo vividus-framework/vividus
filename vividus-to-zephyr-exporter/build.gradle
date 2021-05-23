@@ -1,5 +1,5 @@
 buildscript {
-    ext.springBootVersion = '2.4.5'
+    ext.springBootVersion = '2.5.0'
 
     repositories {
         gradlePluginPortal()
