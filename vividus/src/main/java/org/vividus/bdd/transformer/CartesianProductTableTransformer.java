@@ -83,7 +83,7 @@ public class CartesianProductTableTransformer extends AbstractTableLoadingTransf
                  examplesTableRows.add(tableRow);
              });
 
-        return new ExamplesTable("").withRows(examplesTableRows);
+        return ExamplesTable.empty().withRows(examplesTableRows);
     }
 
     private static List<List<String>> getRows(ExamplesTable table)
