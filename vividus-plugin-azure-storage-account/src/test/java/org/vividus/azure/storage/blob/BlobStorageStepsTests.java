@@ -44,6 +44,7 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobProperties;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -60,6 +61,7 @@ import org.vividus.bdd.context.BddVariableContext;
 import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -77,8 +79,9 @@ class BlobStorageStepsTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(BlobStorageSteps.class);
 
-    @Mock private BddVariableContext bddVariableContext;
     @Mock private PropertyMappedCollection<String> storageAccountEndpoints;
+    @Mock private BddVariableContext bddVariableContext;
+    @Mock private JsonUtils jsonUtils;
     @Mock private DefaultAzureCredential defaultAzureCredential;
 
     @Test
@@ -115,6 +118,21 @@ class BlobStorageStepsTests
             verify(blobClient).downloadToFile(argThat(filename -> filename.contains(baseFileName)));
             verify(bddVariableContext).putVariable(eq(SCOPES), eq(VARIABLE),
                     argThat(filename -> ((String) filename).contains(baseFileName)));
+        });
+    }
+
+    @Test
+    void shouldRetrieveBlobProperties()
+    {
+        runWithClient((steps, client) ->
+        {
+            BlobClient blobClient = mockBlobClient(client);
+            BlobProperties blobProperties = mock(BlobProperties.class);
+            when(blobClient.getProperties()).thenReturn(blobProperties);
+            String blobPropertiesAsJson = "{\"blob\":\"properties\"}";
+            when(jsonUtils.toJson(blobProperties)).thenReturn(blobPropertiesAsJson);
+            steps.retrieveBlobProperties(BLOB, CONTAINER, KEY, SCOPES, VARIABLE);
+            verify(bddVariableContext).putVariable(SCOPES, VARIABLE, blobPropertiesAsJson);
         });
     }
 
@@ -196,7 +214,7 @@ class BlobStorageStepsTests
         {
             BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
             when(blobServiceClient.getBlobContainerClient(CONTAINER)).thenReturn(blobContainerClient);
-            BlobStorageSteps steps = new BlobStorageSteps(storageAccountEndpoints, bddVariableContext);
+            BlobStorageSteps steps = new BlobStorageSteps(storageAccountEndpoints, bddVariableContext, jsonUtils);
             testToRun.accept(steps, blobContainerClient);
             assertThat(credentialsBuilder.constructed(), hasSize(1));
             assertThat(serviceClientBuilder.constructed(), hasSize(1));

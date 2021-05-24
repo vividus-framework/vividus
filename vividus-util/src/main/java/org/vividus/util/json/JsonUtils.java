@@ -45,7 +45,7 @@ public class JsonUtils
 
     public JsonUtils(PropertyNamingStrategy namingStrategy)
     {
-        this(new ObjectMapper());
+        this(new ObjectMapper().findAndRegisterModules());
         mapper.setPropertyNamingStrategy(namingStrategy);
     }
 

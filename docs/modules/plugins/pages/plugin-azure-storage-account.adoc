@@ -41,7 +41,7 @@ Downloads the entire blob from the container and saves its content as a text to 
 When I download blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey` and save its content to $scopes variable `$variableName`
 ----
 
-* `$blobName` - The full path to a blob in the container.
+* `$blobName` - The full path to the blob in the container.
 * `$containerName` - The name of the container to point to.
 * `$storageAccountKey` - The key of storage account from the configuration.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
@@ -62,7 +62,7 @@ Downloads the entire blob from the container into a temporary file with the spec
 When I download blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey` to temporary file with name `$baseFileName` and save path to $scopes variable `$variableName`
 ----
 
-* `$blobName` - The full path to a blob in the container.
+* `$blobName` - The full path to the blob in the container.
 * `$containerName` - The name of the container to point to.
 * `$storageAccountKey` - The key of storage account from the configuration.
 * `$baseFileName` - The base file name used to generate the prefix and the suffix for the creating temporary file.
@@ -75,6 +75,29 @@ When I download blob with name `$blobName` from container `$containerName` of st
 When I download blob with name `raw/test.json` from container `vividus` of storage account `testaccount` to temporary file with name `test.json` and save path to scenario variable `$pathToBlob`
 ----
 
+=== Retrieve the blob properties
+
+Retrieves the blob properties (all user-defined metadata, standard HTTP
+properties, and system properties for the blob) and saves them as JSON to a
+variable.
+
+[source,gherkin]
+----
+When("I retrieve properties of blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey` and save them to $scopes variable `$variableName`
+----
+
+* `$blobName` - The full path to the blob in the container.
+* `$containerName` - The name of the container to point to.
+* `$storageAccountKey` - The key of storage account from the configuration.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the blob properties.
+
+.Retrieve the blob properties
+[source,gherkin]
+----
+When I retrieve properties of blob with name `raw/test.json` from container `vividus` of storage account `testaccount` and save them to scenario variable `blob-properties`
+----
+
 === Upload the blob
 
 Uploads the blob to the container.
@@ -84,7 +107,7 @@ Uploads the blob to the container.
 When I upload blob with name `$blobName` and data `$data` to container `$containerName` of storage account `$storageAccountKey`
 ----
 
-* `$blobName` - The full path to a blob in the container.
+* `$blobName` - The full path to the blob in the container.
 * `$data` - The data to store as blob.
 * `$containerName` - The name of the container to point to.
 * `$storageAccountKey` - The key of storage account from the configuration.
@@ -110,7 +133,7 @@ Deletes the specified blob from the container.
 When I delete blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey`
 ----
 
-* `$blobName` - The full path to a blob in the container.
+* `$blobName` - The full path to the blob in the container.
 * `$containerName` - The name of the container to point to.
 * `$storageAccountKey` - The key of storage account from the configuration.
 

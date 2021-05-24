@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,7 +35,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class JsonUtilsTests
 {
-    private static final String JSON_STRING = "{\"id\":\"1\",\"firstName\":\"name\"}";
+    private static final String JSON_STRING = "{\"id\":\"1\",\"firstName\":\"name\",\"dateTime\":1621892175.000000000}";
     private static final String JSON_LIST_STRING = "[{\"id\":\"1\",\"first_name\":\"name1\"},"
             + " {\"id\":\"2\",\"first_name\":\"name2\"}]";
 
@@ -44,6 +46,7 @@ class JsonUtilsTests
         TEST_OBJECT = new TestClass();
         TEST_OBJECT.setId("1");
         TEST_OBJECT.setFirstName("name");
+        TEST_OBJECT.setDateTime(OffsetDateTime.of(2021, 5, 25, 0, 36, 15, 0, ZoneOffset.of("+3")));
     }
 
     private JsonUtils jsonUtils = new JsonUtils(PropertyNamingStrategies.LOWER_CAMEL_CASE);
@@ -59,7 +62,9 @@ class JsonUtilsTests
     void testToPrettyJsonSuccessDefault()
     {
         String actualJson = jsonUtils.toPrettyJson(TEST_OBJECT);
-        assertEquals(String.format("{%n  \"id\" : \"1\",%n  \"firstName\" : \"name\"%n}"), actualJson);
+        String expectedJson = String.format(
+                "{%n  \"id\" : \"1\",%n  \"firstName\" : \"name\",%n  \"dateTime\" : 1621892175.000000000%n}");
+        assertEquals(expectedJson, actualJson);
     }
 
     @Test
@@ -159,6 +164,7 @@ class JsonUtilsTests
     {
         private String id;
         private String firstName;
+        private OffsetDateTime dateTime;
 
         public String getId()
         {
@@ -178,6 +184,16 @@ class JsonUtilsTests
         public void setFirstName(String firstName)
         {
             this.firstName = firstName;
+        }
+
+        public OffsetDateTime getDateTime()
+        {
+            return dateTime;
+        }
+
+        public void setDateTime(OffsetDateTime dateTime)
+        {
+            this.dateTime = dateTime;
         }
 
         @Override

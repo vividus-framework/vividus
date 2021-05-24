@@ -31,6 +31,7 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobProperties;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -44,14 +45,17 @@ import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.util.ResourceUtils;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
 
 public class BlobStorageSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlobStorageSteps.class);
 
-    private final BddVariableContext bddVariableContext;
     private final PropertyMappedCollection<String> storageAccountEndpoints;
+    private final BddVariableContext bddVariableContext;
+    private final JsonUtils jsonUtils;
+
     private final TokenCredential credential;
 
     private final LoadingCache<String, BlobServiceClient> blobStorageClients = CacheBuilder.newBuilder()
@@ -65,10 +69,11 @@ public class BlobStorageSteps
             });
 
     public BlobStorageSteps(PropertyMappedCollection<String> storageAccountEndpoints,
-            BddVariableContext bddVariableContext)
+            BddVariableContext bddVariableContext, JsonUtils jsonUtils)
     {
-        this.bddVariableContext = bddVariableContext;
         this.storageAccountEndpoints = storageAccountEndpoints;
+        this.bddVariableContext = bddVariableContext;
+        this.jsonUtils = jsonUtils;
         this.credential = new DefaultAzureCredentialBuilder().build();
     }
 
@@ -134,6 +139,34 @@ public class BlobStorageSteps
         String tempFilePath = ResourceUtils.createTempFile(baseFileName).toAbsolutePath().toString();
         createBlobClient(blobName, containerName, storageAccountKey).downloadToFile(tempFilePath);
         bddVariableContext.putVariable(scopes, variableName, tempFilePath);
+    }
+
+    /**
+     * Retrieves the blob properties (all user-defined metadata, standard HTTP properties, and system properties for the
+     * blob) and saves them as JSON to a variable
+     *
+     * @param blobName          The full path to the blob in the container.
+     * @param containerName     The name of the container to point to.
+     * @param storageAccountKey The key to Storage Account endpoint.
+     * @param scopes            The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
+     *                          scopes.<br>
+     *                          <i>Available scopes:</i>
+     *                          <ul>
+     *                          <li><b>STEP</b> - the variable will be available only within the step,
+     *                          <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                          <li><b>STORY</b> - the variable will be available within the whole story,
+     *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                          </ul>
+     * @param variableName      The variable name to store the blob properties.
+     */
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    @When("I retrieve properties of blob with name `$blobName` from container `$containerName` of storage account "
+            + "`$storageAccountKey` and save them to $scopes variable `$variableName`")
+    public void retrieveBlobProperties(String blobName, String containerName, String storageAccountKey,
+            Set<VariableScope> scopes, String variableName)
+    {
+        BlobProperties blobProperties = createBlobClient(blobName, containerName, storageAccountKey).getProperties();
+        bddVariableContext.putVariable(scopes, variableName, jsonUtils.toJson(blobProperties));
     }
 
     /**
