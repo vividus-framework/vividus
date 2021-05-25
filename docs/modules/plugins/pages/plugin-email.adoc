@@ -72,7 +72,7 @@ When I fetch email message from `gmail` server filtered by
 |TO_RECIPIENTS |EQUAL_TO        |me <me@company.com>, boss <boss@company.com>|
 |REPLY_TO      |MATCHES         |(?i)[0-9]@.*                                |
  and save message content to SCENARIO variable `textContent`
-Then `textContent[1]` matches `.*Registration code.*`
+Then `${textContent[1]}` matches `.*Registration code.*`
 ----
 
 == Appendix
