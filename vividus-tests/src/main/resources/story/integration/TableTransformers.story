@@ -4,13 +4,6 @@ Meta:
     @epic vividus-bdd-engine
     @feature table-transformers
 
-Scenario: Verify FROM_CSV transformer
-Then `<country>` is equal to `Belarus`
-Then `<capital>` is equal to `Minsk`
-Then `<data>` is equal to `{"sheet": [{"cols": 1, "name": "A", "rows": 2}], "name": "tests"}`
-Examples:
-{transformer=FROM_CSV, csvPath=/data/csv.csv}
-
 Scenario: Verify JOINING transformer in default columns mode
 Then `<joinedColumn>` is equal to `A B`
 Examples:

@@ -31,6 +31,9 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{curr
 |===
 
 == Table Transformers
+
+NOTE: The table transformers properties marked with *bold* are mandatory.
+
 === FROM_CSV
 
 `FROM_CSV` transformer generates table from the given CSV file.
@@ -40,12 +43,23 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{curr
 |Parameter
 |Description
 
-|`csvPath`
-|relative path to the CSV file
+|[subs=+quotes]`*csvPath*`
+|The relative path of the CSV file
+
+|`delimiterChar`
+|The char used for value separation, must not be a line break character
 |===
 
-.Usage example
+If `delimiterChar` is not set, then the corresponding property will be used during parsing.
+
+.The transformer based on the default configuration
+[source,gherkin]
 ----
-Examples:
-{transformer=FROM_CSV, csvPath=/story/example.csv}
+{transformer=FROM_CSV, csvPath=/data/example.csv}
+----
+
+.The transformer with custom inlined configuration
+[source,gherkin]
+----
+{transformer=FROM_CSV, csvPath=/data/another-example.csv, delimiterChar=;}
 ----

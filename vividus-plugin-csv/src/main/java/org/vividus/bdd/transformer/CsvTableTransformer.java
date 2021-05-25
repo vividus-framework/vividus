@@ -17,15 +17,18 @@
 package org.vividus.bdd.transformer;
 
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.Validate.isTrue;
 import static org.vividus.util.ResourceUtils.findResource;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Named;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
@@ -35,11 +38,11 @@ import org.vividus.csv.CsvReader;
 @Named("FROM_CSV")
 public class CsvTableTransformer implements ExtendedTableTransformer
 {
-    private final CsvReader csvReader;
+    private final CSVFormat defaultCsvFormat;
 
-    public CsvTableTransformer(CsvReader csvReader)
+    public CsvTableTransformer(CSVFormat csvFormat)
     {
-        this.csvReader = csvReader;
+        this.defaultCsvFormat = csvFormat;
     }
 
     @Override
@@ -47,9 +50,19 @@ public class CsvTableTransformer implements ExtendedTableTransformer
     {
         checkTableEmptiness(tableAsString);
         String csvPath = properties.getMandatoryNonBlankProperty("csvPath");
+
+        CSVFormat csvFormat = defaultCsvFormat;
+        String delimiter = properties.getProperties().getProperty("delimiterChar");
+        if (delimiter != null)
+        {
+            int delimiterLength = delimiter.length();
+            isTrue(delimiterLength == 1, "CSV delimiter must be a single char, but value '%s' has length of %d",
+                    delimiter, delimiterLength);
+            csvFormat = csvFormat.withDelimiter(delimiter.charAt(0));
+        }
         try
         {
-            List<CSVRecord> result = csvReader.readCsvFile(findResource(getClass(), csvPath));
+            List<CSVRecord> result = new CsvReader(csvFormat).readCsvFile(findResource(getClass(), csvPath));
             return ExamplesTableProcessor.buildExamplesTable(result.get(0).toMap().keySet(), extractValues(result),
                     properties, true);
         }
@@ -62,7 +75,9 @@ public class CsvTableTransformer implements ExtendedTableTransformer
     private List<List<String>> extractValues(List<CSVRecord> data)
     {
         return data.stream()
-                .map(record -> new ArrayList<>(record.toMap().values()))
+                .map(CSVRecord::toMap)
+                .map(Map::values)
+                .map(ArrayList::new)
                 .collect(toList());
     }
 }

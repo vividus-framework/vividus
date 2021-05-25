@@ -9,10 +9,14 @@
 
     <bean id="csvSteps" class="org.vividus.bdd.steps.csv.CsvSteps" />
 
-    <bean class="org.vividus.csv.CsvReader">
+    <bean id="csvFormatFactory" class="org.vividus.csv.CsvFormatFactory">
         <constructor-arg type="char" value="${csv.delimiter-char:,}" />
         <constructor-arg type="java.lang.Character" value="${csv.escape-char:#{null}}" />
     </bean>
+
+    <bean factory-bean="csvFormatFactory" factory-method="getCsvFormat" />
+
+    <bean class="org.vividus.csv.CsvReader" />
 
     <util:list id="stepBeanNames-Csv" value-type="java.lang.String">
         <idref bean="csvSteps" />

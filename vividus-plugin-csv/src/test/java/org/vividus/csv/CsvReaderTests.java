@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +56,8 @@ class CsvReaderTests
     void testReadCsvWithEscapedDataFromPath() throws IOException, URISyntaxException
     {
         Path filePath = Paths.get(getCsvResource("unittest-escaped.csv").toURI());
-        List<Map<String, String>> result = new CsvReader(',', '\\').readCsvFile(filePath, FIRST_HEADER, SECOND_HEADER);
+        var csvFormat = CSVFormat.DEFAULT.withDelimiter(',').withEscape('\\');
+        List<Map<String, String>> result = new CsvReader(csvFormat).readCsvFile(filePath, FIRST_HEADER, SECOND_HEADER);
         assertEquals(List.of(Map.of(FIRST_HEADER, FIRST_VALUE, SECOND_HEADER, "value2 with \" inside")), result);
     }
 
