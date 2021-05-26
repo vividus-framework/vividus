@@ -159,6 +159,7 @@ the columns.
 * to merge tables in columns mode they must have the same number of rows + unique headers(keys)
 * number of unique tables paths must be more than 1
 * when using transformers in `tables` parameter it is necessary to escape brackets, commas and semicolon in them: for unary nested- "", for double - "\" etc.
+* empty tables are allowed
 ====
 
 .Usage of MERGING transformer with 'rows' merge mode
@@ -309,6 +310,7 @@ Examples:
 ====
 * headers of input tables must be different
 * number of input tables must be more than 1
+* empty tables are not allowed
 ====
 
 .Usage of CARTESIAN_PRODUCT transformer

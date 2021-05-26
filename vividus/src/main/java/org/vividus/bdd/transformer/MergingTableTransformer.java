@@ -28,6 +28,11 @@ import org.jbehave.core.model.TableParsers;
 @Named("MERGING")
 public class MergingTableTransformer extends AbstractTableLoadingTransformer
 {
+    public MergingTableTransformer()
+    {
+        super(false);
+    }
+
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {

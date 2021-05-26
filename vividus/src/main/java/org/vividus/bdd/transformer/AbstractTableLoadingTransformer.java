@@ -19,10 +19,11 @@ package org.vividus.bdd.transformer;
 import static java.util.function.Predicate.not;
 import static org.apache.commons.lang3.Validate.isTrue;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -36,6 +37,13 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
 {
     @Inject private Configuration configuration;
 
+    private final boolean forbidEmptyTables;
+
+    protected AbstractTableLoadingTransformer(boolean forbidEmptyTables)
+    {
+        this.forbidEmptyTables = forbidEmptyTables;
+    }
+
     protected List<ExamplesTable> loadTables(String tableAsString, TableProperties tableProperties)
     {
         List<String> tables = Optional.ofNullable(tableProperties.getProperties().getProperty("tables"))
@@ -47,7 +55,9 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
                 .filter(not(String::isBlank))
                 .collect(Collectors.toList());
 
-        Stream<String> examplesTablesStream = tables.stream();
+        ExamplesTableFactory factory = configuration.examplesTableFactory();
+
+        List<DescriptiveTable> descriptiveTables = new ArrayList<>();
         if (tableAsString.isBlank())
         {
             isTrue(tables.size() > 1, "Please, specify more than one unique table paths");
@@ -55,11 +65,55 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
         else
         {
             isTrue(!tables.isEmpty(), "Please, specify at least one table path");
-            examplesTablesStream = Stream.concat(examplesTablesStream, Stream.of(tableAsString));
+            descriptiveTables.add(new DescriptiveTable("input table", factory.createExamplesTable(tableAsString)));
         }
 
-        ExamplesTableFactory factory = configuration.examplesTableFactory();
-        return examplesTablesStream.map(factory::createExamplesTable)
-                                   .collect(Collectors.toCollection(LinkedList::new));
+        List<DescriptiveTable> pathTables = IntStream.range(0, tables.size())
+                 .mapToObj(index -> new DescriptiveTable(String.format("table at index %d", index + 1),
+                        factory.createExamplesTable(tables.get(index))))
+                 .collect(Collectors.toList());
+
+        descriptiveTables.addAll(0, pathTables);
+
+        if (forbidEmptyTables)
+        {
+            checkEmptyTables(descriptiveTables);
+        }
+
+        return descriptiveTables.stream()
+                                .map(DescriptiveTable::getTable)
+                                .collect(Collectors.toList());
+    }
+
+    private void checkEmptyTables(List<DescriptiveTable> tables)
+    {
+        List<String> emptyTables = tables.stream()
+                                         .filter(w -> w.getTable().getRowCount() == 0)
+                                         .map(DescriptiveTable::getDescription)
+                                         .collect(Collectors.toList());
+
+        isTrue(emptyTables.isEmpty(), "Empty ExamplesTable-s are not allowed, but %s is/are empty", emptyTables);
+    }
+
+    private static final class DescriptiveTable
+    {
+        private final String description;
+        private final ExamplesTable table;
+
+        DescriptiveTable(String description, ExamplesTable table)
+        {
+            this.description = description;
+            this.table = table;
+        }
+
+        String getDescription()
+        {
+            return description;
+        }
+
+        ExamplesTable getTable()
+        {
+            return table;
+        }
     }
 }
