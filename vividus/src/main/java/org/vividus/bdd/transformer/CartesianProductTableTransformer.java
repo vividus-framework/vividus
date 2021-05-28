@@ -39,6 +39,11 @@ import org.jbehave.core.model.TableParsers;
 @Named("CARTESIAN_PRODUCT")
 public class CartesianProductTableTransformer extends AbstractTableLoadingTransformer
 {
+    public CartesianProductTableTransformer()
+    {
+        super(true);
+    }
+
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
