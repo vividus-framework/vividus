@@ -393,8 +393,8 @@ class DatabaseStepsTests
                     QueryStatistic source = statistics.getSource();
                     return 0 == statistics.getMismatched()
                             && 1 == statistics.getTotalRows()
-                            && target.getExecutionTime().equals(EMPTY_TIME)
-                            && source.getExecutionTime().equals(EMPTY_TIME)
+                            && EMPTY_TIME.equals(target.getExecutionTime())
+                            && EMPTY_TIME.equals(source.getExecutionTime())
                             && target.getQuery() == null
                             && source.getQuery() == null
                             && 1 == target.getRowsQuantity()
@@ -435,8 +435,8 @@ class DatabaseStepsTests
                     QueryStatistic source = statistics.getSource();
                     return 1 == statistics.getMismatched()
                             && 1 == statistics.getTotalRows()
-                            && target.getExecutionTime().equals(EMPTY_TIME)
-                            && source.getExecutionTime().equals(EMPTY_TIME)
+                            && EMPTY_TIME.equals(target.getExecutionTime())
+                            && EMPTY_TIME.equals(source.getExecutionTime())
                             && target.getQuery() == null
                             && source.getQuery() == null
                             && 1 == target.getRowsQuantity()
