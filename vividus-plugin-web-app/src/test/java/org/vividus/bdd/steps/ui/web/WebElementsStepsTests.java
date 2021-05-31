@@ -37,8 +37,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
-import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.validation.IElementValidations;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.SearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -82,7 +82,7 @@ class WebElementsStepsTests
     private SearchActions searchActions;
 
     @Mock
-    private IDescriptiveSoftAssert softAssert;
+    private ISoftAssert softAssert;
 
     @Test
     void testCheckPageContainsTextThrowsWebDriverException()

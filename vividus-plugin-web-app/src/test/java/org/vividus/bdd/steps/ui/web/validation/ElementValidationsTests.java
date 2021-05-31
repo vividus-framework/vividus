@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.Dimension;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.WebElementActions;
 
@@ -58,7 +58,7 @@ class ElementValidationsTests
     private org.openqa.selenium.Dimension seleniumDimension;
 
     @Mock
-    private IDescriptiveSoftAssert descriptiveSoftAssert;
+    private ISoftAssert descriptiveSoftAssert;
 
     @Mock
     private IUiContext uiContext;

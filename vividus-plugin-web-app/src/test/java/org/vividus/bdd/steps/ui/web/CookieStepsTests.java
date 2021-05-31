@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.CookieManager;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.util.json.JsonUtils;
@@ -55,7 +55,7 @@ class CookieStepsTests
     private INavigateActions navigateActions;
 
     @Mock
-    private IDescriptiveSoftAssert softAssert;
+    private ISoftAssert softAssert;
 
     @Mock
     private CookieManager cookieManager;
