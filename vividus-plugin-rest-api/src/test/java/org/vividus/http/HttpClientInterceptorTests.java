@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,8 @@ import org.apache.http.protocol.HttpContext;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -74,11 +76,8 @@ class HttpClientInterceptorTests
     private static final String TEXT_PLAIN = "text/plain";
     private static final byte[] DATA = "data".getBytes(StandardCharsets.UTF_8);
 
-    @Mock
-    private IAttachmentPublisher attachmentPublisher;
-
-    @InjectMocks
-    private HttpClientInterceptor httpClientInterceptor;
+    @Mock private IAttachmentPublisher attachmentPublisher;
+    @InjectMocks private HttpClientInterceptor httpClientInterceptor;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(HttpClientInterceptor.class);
 
@@ -98,11 +97,12 @@ class HttpClientInterceptorTests
         testHttpRequestIsAttachedSuccessfully(httpRequest);
     }
 
-    @Test
-    void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsSet() throws IOException
+    @ParameterizedTest
+    @ValueSource(strings = {CONTENT_TYPE, "content-type"})
+    void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsSet(String contentTypeHeaderName) throws IOException
     {
         Header contentTypeHeader = mockContentTypeHeader();
-        when(contentTypeHeader.getName()).thenReturn(CONTENT_TYPE);
+        when(contentTypeHeader.getName()).thenReturn(contentTypeHeaderName);
         when(contentTypeHeader.getValue()).thenReturn(TEXT_PLAIN);
         testHttpRequestIsAttachedSuccessfully(new Header[] { contentTypeHeader }, null);
     }
