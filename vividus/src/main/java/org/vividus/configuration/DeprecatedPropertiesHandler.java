@@ -151,7 +151,7 @@ public class DeprecatedPropertiesHandler
         String propertyValue = value;
         if (invert && BOOLEAN.matcher(propertyValue).matches())
         {
-            propertyValue = propertyValue.equals(FALSE) ? "true" : FALSE;
+            propertyValue = FALSE.equals(propertyValue) ? "true" : FALSE;
         }
         replaceInProperties.put(newPropertyKey, propertyValue);
     }
