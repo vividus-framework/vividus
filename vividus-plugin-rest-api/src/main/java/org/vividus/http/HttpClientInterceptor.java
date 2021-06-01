@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,8 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
     private String getMimeType(Header[] headers)
     {
         Optional<Header> header = Stream.of(headers)
-                .filter(h -> HttpHeaders.CONTENT_TYPE.equals(h.getName()) && StringUtils.isNoneBlank(h.getValue()))
+                .filter(h -> HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(h.getName())
+                        && StringUtils.isNoneBlank(h.getValue()))
                 .findFirst();
         return header.isPresent() ? header.get().getElements()[0].getName() : ContentType.DEFAULT_TEXT.getMimeType();
     }
