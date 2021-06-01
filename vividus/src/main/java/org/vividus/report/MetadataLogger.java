@@ -144,7 +144,7 @@ public final class MetadataLogger
         table.setRenderer(AT_Renderer.create().setCWC(new CWC_LongestLine()));
         table.setPaddingLeftRight(1);
         table.setPaddingBottom(1);
-        table.setTextAlignment(TextAlignment.JUSTIFIED_LEFT);
+        table.setTextAlignment(TextAlignment.LEFT);
         message.format(table.render());
     }
 
