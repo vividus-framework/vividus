@@ -2,6 +2,7 @@ project.description = 'Vividus plugin for testing web applications'
 
 ext {
     seleniumVersion = '4.0.0-alpha-1'
+    nettyVersion = '4.1.65.Final'
 }
 
 dependencies {
@@ -26,11 +27,15 @@ dependencies {
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-opera-driver', version: seleniumVersion)
     implementation(group: 'junit', name: 'junit', version: versions.junit4)
     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '4.4.3')
-    implementation(group: 'io.netty', name: 'netty-all', version: '4.1.65.Final')
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
     implementation(group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+
+    // browserup-proxy depends on both netty-all and netty-core, so we need to align versions of all netty dependencies
+    // https://github.com/browserup/browserup-proxy/blob/26714e26fae728733a13a0f332bd0c6dcaa78de5/browserup-proxy-core/build.gradle#L60-L76
+    implementation(group: 'io.netty', name: 'netty-all', version: "${nettyVersion}")
+    implementation(group: 'io.netty', name: 'netty-codec', version: "${nettyVersion}")
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
