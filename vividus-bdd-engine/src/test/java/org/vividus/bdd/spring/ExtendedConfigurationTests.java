@@ -48,7 +48,8 @@ import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.ViewGenerator;
 import org.jbehave.core.steps.DelegatingStepMonitor;
-import org.jbehave.core.steps.ParameterConverters.ChainableParameterConverter;
+import org.jbehave.core.steps.ParameterConverters;
+import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,7 +100,7 @@ class ExtendedConfigurationTests
         when(configuration.examplesTableFactory()).thenReturn(examplesTableFactory);
 
         Map<Class<?>, Object> constructedMocks = new HashMap<>();
-        List<ChainableParameterConverter<?, ?>> parameterConverterList = List.of();
+        List<ParameterConverter<?, ?>> parameterConverterList = List.of();
 
         try (MockedConstruction<Keywords> ignoredKeywords = mockConstruction(
                 Keywords.class, (mock, context) -> {
@@ -110,8 +111,7 @@ class ExtendedConfigurationTests
             MockedConstruction<RegexStoryParser> ignoredParser = mockConstruction(
                 RegexStoryParser.class, (mock, context) -> {
                     assertEquals(1, context.getCount());
-                    assertEquals(List.of(constructedMocks.get(Keywords.class), examplesTableFactory),
-                            context.arguments());
+                    assertEquals(List.of(examplesTableFactory), context.arguments());
                     constructedMocks.put(RegexStoryParser.class, mock);
                 });
             MockedConstruction<ParameterConvertersDecorator> ignoredDecorator = mockConstruction(
@@ -164,7 +164,7 @@ class ExtendedConfigurationTests
         configuration.setCustomTableTransformers(Map.of(name, tableTransformer));
         configuration.init();
         String tableAsString = "tableAsString";
-        TableProperties tableProperties = new TableProperties(new Properties());
+        TableProperties tableProperties = new TableProperties(new ParameterConverters(), new Properties());
         configuration.tableTransformers().transform(name, tableAsString, null, tableProperties);
         verify(tableTransformer).transform(tableAsString, null, tableProperties);
     }

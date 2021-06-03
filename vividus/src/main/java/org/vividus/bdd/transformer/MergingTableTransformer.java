@@ -36,10 +36,11 @@ public class MergingTableTransformer extends AbstractTableLoadingTransformer
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
-        MergeMode mergeMode = properties.getMandatoryEnumProperty("mergeMode", MergeMode.class);
+        MergeMode mergeMode = properties.getMandatoryNonBlankProperty("mergeMode", MergeMode.class);
 
         List<ExamplesTable> examplesTables = loadTables(tableAsString, properties);
         String fillerValue = properties.getProperties().getProperty("fillerValue");
-        return mergeMode.merge(examplesTables, properties, Optional.ofNullable(fillerValue));
+        return mergeMode.merge(getConfiguration().parameterConverters(), examplesTables, properties,
+                Optional.ofNullable(fillerValue));
     }
 }

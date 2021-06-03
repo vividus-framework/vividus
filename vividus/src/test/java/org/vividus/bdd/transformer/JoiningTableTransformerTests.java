@@ -27,6 +27,8 @@ import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.steps.ParameterConverters;
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,14 +52,8 @@ class JoiningTableTransformerTests
     @Mock private Configuration configuration;
     @InjectMocks private JoiningTableTransformer joiningTableTransformer;
 
-    @Test
-    void testInvalidJoinMode()
-    {
-        Properties properties = new Properties();
-        properties.setProperty(JOIN_MODE, "invalidMode");
-        verifyIllegalArgumentException(properties, "Value of ExamplesTable property 'joinMode' must be from range "
-                + "[ROWS, COLUMNS], but got 'invalidMode'");
-    }
+    private final ParameterConverters parameterConverters = new ParameterConverters()
+            .addConverters(new FluentEnumConverter());
 
     @Test
     void testTransformInColumnsModeWithoutColumnName()
@@ -123,7 +119,7 @@ class JoiningTableTransformerTests
     private void assertJoin(String table, Properties properties, String expected)
     {
         when(configuration.examplesTableFactory()).thenReturn(factory);
-        TableProperties tableProperties = new TableProperties(properties);
+        TableProperties tableProperties = new TableProperties(parameterConverters, properties);
         assertEquals(expected, joiningTableTransformer.transform(table, null, tableProperties));
     }
 
@@ -142,7 +138,8 @@ class JoiningTableTransformerTests
     private void verifyIllegalArgumentException(Properties properties, String message)
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> joiningTableTransformer.transform(PATH, null, new TableProperties(properties)));
+            () -> joiningTableTransformer.transform(PATH, null,
+                    new TableProperties(parameterConverters, properties)));
         assertEquals(message, exception.getMessage());
     }
 }

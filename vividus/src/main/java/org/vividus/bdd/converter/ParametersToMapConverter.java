@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.converter.ui.web;
+package org.vividus.bdd.converter;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 
 import javax.inject.Named;
 
-import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
 
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-
 @Named
-public class ExamplesTableToDefaultHttpHeadersConverter extends AbstractParameterConverter<ExamplesTable,
-    DefaultHttpHeaders>
+public class ParametersToMapConverter extends AbstractParameterConverter<Parameters, Map<String, String>>
 {
     @Override
-    public DefaultHttpHeaders convertValue(ExamplesTable value, Type type)
+    public Map<String, String> convertValue(Parameters parameters, Type type)
     {
-        DefaultHttpHeaders httpHeaders = new DefaultHttpHeaders();
-        value.getRowsAsParameters(true)
-             .forEach(row -> httpHeaders.add(getRowValue("name", row), getRowValue("value", row)));
-        return httpHeaders;
-    }
-
-    private String getRowValue(String name, Parameters row)
-    {
-        return row.valueAs(name, String.class);
+        return parameters.values();
     }
 }

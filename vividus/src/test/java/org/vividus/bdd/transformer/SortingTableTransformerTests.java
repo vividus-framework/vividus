@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -34,20 +35,22 @@ class SortingTableTransformerTests
     private static final String TABLE_WITH_SAME_VALUES = "|key1|key2|\n|10|0|\n|1|0|";
     private static final String TABLE = "|key1|key2|\n|4|3|\n|1|0|";
     private final SortingTableTransformer transformer = new SortingTableTransformer();
+    private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @ParameterizedTest
     @MethodSource("tableSource")
     void testTransform(String expectedTable, Properties properties, String tableToTransform)
     {
-        assertEquals(expectedTable, transformer.transform(tableToTransform, new TableParsers(),
-                new TableProperties(properties)));
+        assertEquals(expectedTable, transformer.transform(tableToTransform, new TableParsers(parameterConverters),
+                new TableProperties(parameterConverters, properties)));
     }
 
     @Test
     void testFailOnMissingTableProperty()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE, new TableParsers(), new TableProperties(new Properties())));
+            () -> transformer.transform(TABLE, new TableParsers(parameterConverters),
+                    new TableProperties(parameterConverters, new Properties())));
         assertEquals("'byColumns' is not set in ExamplesTable properties", exception.getMessage());
     }
 

@@ -52,7 +52,7 @@ public enum JoinMode
         @Override
         protected String join(ExamplesTable table, TableProperties properties)
         {
-            String joinedColumn = properties.getMandatoryNonBlankProperty("joinedColumn");
+            String joinedColumn = properties.getMandatoryNonBlankProperty("joinedColumn", String.class);
             Set<String> columnsToJoin = getColumnsToJoin(table, properties);
 
             List<Map<String, String>> rows = table.getRows();

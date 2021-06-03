@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,11 +34,10 @@ import org.vividus.bdd.steps.ExpressionAdaptor;
 @ExtendWith(MockitoExtension.class)
 class ResolvingExpressionsEagerlyTransformerTests
 {
-    @Mock
-    private ExpressionAdaptor expressionAdaptor;
+    private final ParameterConverters parameterConverters = new ParameterConverters();
 
-    @InjectMocks
-    private ResolvingExpressionsEagerlyTransformer transformer;
+    @Mock private ExpressionAdaptor expressionAdaptor;
+    @InjectMocks private ResolvingExpressionsEagerlyTransformer transformer;
 
     @Test
     void shouldResolveDataRowsTest()
@@ -45,8 +45,8 @@ class ResolvingExpressionsEagerlyTransformerTests
         String table = "|header|\n|row1|\n|row2|";
         when(expressionAdaptor.processRawExpression("row1")).thenReturn("resolved_row1");
         when(expressionAdaptor.processRawExpression("row2")).thenReturn("resolved_row2");
-        String actual = transformer
-                .transform(table, new TableParsers(), new TableProperties(new Properties()));
+        String actual = transformer.transform(table, new TableParsers(parameterConverters),
+                new TableProperties(parameterConverters, new Properties()));
         assertEquals("|header|\n|resolved_row1|\n|resolved_row2|", actual);
     }
 
@@ -55,8 +55,8 @@ class ResolvingExpressionsEagerlyTransformerTests
     {
         String table = "|header|\n|row|";
         when(expressionAdaptor.processRawExpression("row")).thenReturn("resolved_row");
-        String actual = transformer
-                .transform(table, new TableParsers(), new TableProperties(new Properties()));
+        String actual = transformer.transform(table, new TableParsers(parameterConverters),
+                new TableProperties(parameterConverters, new Properties()));
         assertEquals("|header|\n|resolved_row|", actual);
     }
 }

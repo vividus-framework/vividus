@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -36,6 +37,8 @@ class ExamplesTableProcessorTests
     private static final List<String> VALUES2 = List.of("1", ZERO);
     private static final List<String> KEYS = List.of("key1", "key2");
     private static final String TABLE = "|key1|key2|\n|4|3|\n|1|0|";
+
+    private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @ParameterizedTest
     @MethodSource("tableToBuildSource")
@@ -95,13 +98,13 @@ class ExamplesTableProcessorTests
         String expectedTable = "{valueSeparator=!}\n|key1|key2|\n!a1!a2!";
         Properties properties = new Properties();
         properties.setProperty("valueSeparator", "!");
-        TableProperties tableProperties = new TableProperties(properties);
+        TableProperties tableProperties = new TableProperties(parameterConverters, properties);
         assertEquals(expectedTable,
                 ExamplesTableProcessor.buildExamplesTable(KEYS, List.of(values), tableProperties, false, true));
     }
 
     private TableProperties createProperties()
     {
-        return new TableProperties(new Properties());
+        return new TableProperties(parameterConverters, new Properties());
     }
 }

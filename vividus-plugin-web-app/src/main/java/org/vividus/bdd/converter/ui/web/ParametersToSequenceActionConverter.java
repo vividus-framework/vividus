@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,11 @@
 package org.vividus.bdd.converter.ui.web;
 
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
-import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.steps.ParameterConverters.AbstractChainableParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
@@ -34,36 +31,30 @@ import org.vividus.bdd.steps.ui.web.model.SequenceAction;
 import org.vividus.bdd.steps.ui.web.model.SequenceActionType;
 
 @Named
-public class StringToListSequenceActionConverter
-        extends AbstractChainableParameterConverter<ExamplesTable, List<SequenceAction>>
+public class ParametersToSequenceActionConverter extends AbstractParameterConverter<Parameters, SequenceAction>
 {
     private final StringToLocatorConverter stringToLocatorConverter;
     private final PointConverter pointConverter;
 
-    public StringToListSequenceActionConverter(StringToLocatorConverter stringToLocatorConverter,
-            PointConverter pointConverter)
+    public ParametersToSequenceActionConverter(StringToLocatorConverter stringToLocatorConverter,
+                                               PointConverter pointConverter)
     {
         this.stringToLocatorConverter = stringToLocatorConverter;
         this.pointConverter = pointConverter;
     }
 
     @Override
-    public List<SequenceAction> convertValue(ExamplesTable value, Type type)
+    public SequenceAction convertValue(Parameters parameters, Type type)
     {
-        return value.getRowsAsParameters().stream()
-            .map(params ->
-            {
-                SequenceActionType actionType = params.valueAs("type", SequenceActionType.class);
-                String argumentAsString = argumentAs(params, String.class);
-                if (argumentAsString.isEmpty() && actionType.isNullable())
-                {
-                    return new SequenceAction(actionType, null);
-                }
-                Type argumentType = actionType.getArgumentType();
-                return new SequenceAction(actionType, convertArgument(argumentAsString,
-                        argumentType, () -> argumentAs(params, argumentType)));
-            })
-            .collect(Collectors.toList());
+        SequenceActionType actionType = parameters.valueAs("type", SequenceActionType.class);
+        String argumentAsString = argumentAs(parameters, String.class);
+        if (argumentAsString.isEmpty() && actionType.isNullable())
+        {
+            return new SequenceAction(actionType, null);
+        }
+        Type argumentType = actionType.getArgumentType();
+        return new SequenceAction(actionType, convertArgument(argumentAsString,
+                argumentType, () -> argumentAs(parameters, argumentType)));
     }
 
     private <T> T argumentAs(Parameters parameters, Type type)

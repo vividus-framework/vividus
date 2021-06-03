@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 
 class DistinctingTableTransformerTests
@@ -50,7 +51,9 @@ class DistinctingTableTransformerTests
         DistinctingTableTransformer transformer = new DistinctingTableTransformer();
         Properties properties = new Properties();
         properties.setProperty("byColumnNames", "key1;key3");
-        String result = transformer.transform(TABLE, new TableParsers(), new TableProperties(properties));
+        ParameterConverters parameterConverters = new ParameterConverters();
+        String result = transformer.transform(TABLE, new TableParsers(parameterConverters),
+                new TableProperties(parameterConverters, properties));
         assertEquals(DISTINCT_TABLE, result);
     }
 }

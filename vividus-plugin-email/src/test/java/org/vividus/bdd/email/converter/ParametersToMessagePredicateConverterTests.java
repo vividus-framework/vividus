@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,8 @@
 
 package org.vividus.bdd.email.converter;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.util.List;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -31,7 +27,7 @@ import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class StringToListOfMessagePredicatesConverterTests
+class ParametersToMessagePredicateConverterTests
 {
     @Test
     void testConvertValue() throws MessagingException
@@ -41,11 +37,10 @@ class StringToListOfMessagePredicatesConverterTests
         when(message.getSubject()).thenReturn(text);
         ExamplesTable table = new ExamplesTable("|parameter|rule|value|\n|SUBJECT|EQUAL_TO|Text|");
 
-        StringToListOfMessagePredicatesConverter converter = new StringToListOfMessagePredicatesConverter();
-        List<FailablePredicate<Message, MessagingException>> filters = converter.convertValue(table, null);
+        ParametersToMessagePredicateConverter converter = new ParametersToMessagePredicateConverter();
+        FailablePredicate<Message, MessagingException> filter = converter.convertValue(table.getRowAsParameters(0),
+                null);
 
-        assertThat(filters, hasSize(1));
-        FailablePredicate<Message, MessagingException> filter = filters.get(0);
         Assertions.assertTrue(filter.test(message));
     }
 }

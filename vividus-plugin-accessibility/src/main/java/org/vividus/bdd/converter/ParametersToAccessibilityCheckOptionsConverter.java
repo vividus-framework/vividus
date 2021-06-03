@@ -27,8 +27,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.TypeLiteral;
-import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.steps.ParameterConverters.AbstractChainableParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -43,13 +42,13 @@ import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.UiContext;
 import org.vividus.ui.web.action.ICssSelectorFactory;
 
-public class ExamplesTableToAccessibilityCheckOptionsConverter
-    extends AbstractChainableParameterConverter<ExamplesTable, List<AccessibilityCheckOptions>>
+public class ParametersToAccessibilityCheckOptionsConverter
+    extends AbstractParameterConverter<Parameters, AccessibilityCheckOptions>
 {
     private static final String LEVEL = "level";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(
-            ExamplesTableToAccessibilityCheckOptionsConverter.class);
+            ParametersToAccessibilityCheckOptionsConverter.class);
 
     private static final String STANDARD = "standard";
 
@@ -57,8 +56,8 @@ public class ExamplesTableToAccessibilityCheckOptionsConverter
     private final ICssSelectorFactory cssSelectorFactory;
     private final ISearchActions searchActions;
 
-    public ExamplesTableToAccessibilityCheckOptionsConverter(UiContext uiContext,
-            ICssSelectorFactory cssSelectorFactory, ISearchActions searchActions)
+    public ParametersToAccessibilityCheckOptionsConverter(UiContext uiContext, ICssSelectorFactory cssSelectorFactory,
+            ISearchActions searchActions)
     {
         this.uiContext = uiContext;
         this.cssSelectorFactory = cssSelectorFactory;
@@ -66,15 +65,7 @@ public class ExamplesTableToAccessibilityCheckOptionsConverter
     }
 
     @Override
-    public List<AccessibilityCheckOptions> convertValue(ExamplesTable toConvert, Type type)
-    {
-        return toConvert.getRowsAsParameters()
-                        .stream()
-                        .map(this::toOptions)
-                        .collect(Collectors.toList());
-    }
-
-    private AccessibilityCheckOptions toOptions(Parameters row)
+    public AccessibilityCheckOptions convertValue(Parameters row, Type type)
     {
         AccessibilityStandard standardParameter = row.valueAs(STANDARD, AccessibilityStandard.class, null);
         checkNotNull(standardParameter, STANDARD);

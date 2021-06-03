@@ -14,33 +14,29 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.converter.ui.web;
+package org.vividus.bdd.email.converter;
 
 import java.lang.reflect.Type;
 
 import javax.inject.Named;
+import javax.mail.Message;
+import javax.mail.MessagingException;
 
-import org.jbehave.core.model.ExamplesTable;
+import org.apache.commons.lang3.function.FailablePredicate;
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
-
-import io.netty.handler.codec.http.DefaultHttpHeaders;
+import org.vividus.bdd.email.factory.EmailParameterFilterFactory;
 
 @Named
-public class ExamplesTableToDefaultHttpHeadersConverter extends AbstractParameterConverter<ExamplesTable,
-    DefaultHttpHeaders>
+public class ParametersToMessagePredicateConverter
+        extends AbstractParameterConverter<Parameters, FailablePredicate<Message, MessagingException>>
 {
     @Override
-    public DefaultHttpHeaders convertValue(ExamplesTable value, Type type)
+    public FailablePredicate<Message, MessagingException> convertValue(Parameters parameters, Type type)
     {
-        DefaultHttpHeaders httpHeaders = new DefaultHttpHeaders();
-        value.getRowsAsParameters(true)
-             .forEach(row -> httpHeaders.add(getRowValue("name", row), getRowValue("value", row)));
-        return httpHeaders;
-    }
-
-    private String getRowValue(String name, Parameters row)
-    {
-        return row.valueAs(name, String.class);
+        String ruleKey = parameters.valueAs("rule", String.class);
+        EmailParameterFilterFactory factory = parameters.valueAs("parameter", EmailParameterFilterFactory.class);
+        String value = parameters.valueAs("value", String.class);
+        return factory.createFilter(ruleKey, value);
     }
 }

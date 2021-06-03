@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,7 +38,8 @@ class FilteringTableTransformerTests
     private static final String TABLE = "|key1|key2|key3|\n|1|2|3|\n|4|5|6|\n|7|8|9|";
     private static final String BY_MAX_ROWS_PROPERTY = "byMaxRows";
 
-    private final TableParsers tableParsers = new TableParsers();
+    private final ParameterConverters parameterConverters = new ParameterConverters();
+    private final TableParsers tableParsers = new TableParsers(parameterConverters);
     private final FilteringTableTransformer transformer = new FilteringTableTransformer();
 
     @ParameterizedTest
@@ -45,7 +47,7 @@ class FilteringTableTransformerTests
     void testTransform(String tableToTransform, Properties properties, String expectedTable)
     {
         assertEquals(expectedTable, transformer.transform(tableToTransform, tableParsers,
-                new TableProperties(properties)));
+                new TableProperties(parameterConverters, properties)));
     }
 
     @Test
@@ -55,14 +57,15 @@ class FilteringTableTransformerTests
         Properties properties = new Properties();
         properties.setProperty(BY_MAX_ROWS_PROPERTY, "1");
         assertEquals("|key2|key3|key1|\n|2|3|1|", transformer.transform(table, tableParsers,
-                new TableProperties(properties)));
+                new TableProperties(parameterConverters, properties)));
     }
 
     @Test
     void testFailOnMissingProperties()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE, tableParsers, new TableProperties(new Properties())));
+            () -> transformer.transform(TABLE, tableParsers,
+                    new TableProperties(parameterConverters, new Properties())));
         assertEquals("At least one of the following properties should be specified: 'byMaxColumns', 'byMaxRows', "
                 + "'byColumnNames', 'column.<regex placeholder>', 'byRowIndexes'", exception.getMessage());
     }
@@ -70,7 +73,8 @@ class FilteringTableTransformerTests
     @Test
     void testFailOnConflictingPropertiesForColumns()
     {
-        TableProperties tableProperties = new TableProperties(createProperties(1, null, "key2", null));
+        TableProperties tableProperties = new TableProperties(parameterConverters,
+                createProperties(1, null, "key2", null));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform(TABLE, tableParsers, tableProperties));
         assertEquals("Conflicting properties declaration found: 'byMaxColumns' and 'byColumnNames'",
@@ -80,7 +84,8 @@ class FilteringTableTransformerTests
     @Test
     void testFailOnConflictingPropertiesForRows()
     {
-        TableProperties tableProperties = new TableProperties(createProperties(null, 1, null, "1;2"));
+        TableProperties tableProperties = new TableProperties(parameterConverters,
+                createProperties(null, 1, null, "1;2"));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform(TABLE, tableParsers, tableProperties));
         assertEquals("Conflicting properties declaration found: 'byMaxRows' and 'byRowIndexes'",
@@ -100,7 +105,8 @@ class FilteringTableTransformerTests
         properties.setProperty("column.capital", "false");
         properties.setProperty("column.founded", "\\d9[23](0|9)");
 
-        String transformed = transformer.transform(table, tableParsers, new TableProperties(properties));
+        String transformed = transformer.transform(table, tableParsers,
+                new TableProperties(parameterConverters, properties));
 
         String expected = "|city|rand|capital|founded|\n"
                         + "|Norilsk|1103|false|1920|\n"
@@ -116,7 +122,7 @@ class FilteringTableTransformerTests
         properties.setProperty("column.demo", ".*");
         properties.setProperty(BY_MAX_ROWS_PROPERTY, "2");
 
-        TableProperties tableProperties = new TableProperties(properties);
+        TableProperties tableProperties = new TableProperties(parameterConverters, properties);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform(TABLE, tableParsers, tableProperties));
         assertEquals("Filtering by regex is not allowed to be used together with the following properties:"

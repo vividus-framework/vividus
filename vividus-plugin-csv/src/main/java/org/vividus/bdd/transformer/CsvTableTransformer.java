@@ -49,7 +49,7 @@ public class CsvTableTransformer implements ExtendedTableTransformer
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         checkTableEmptiness(tableAsString);
-        String csvPath = properties.getMandatoryNonBlankProperty("csvPath");
+        String csvPath = properties.getMandatoryNonBlankProperty("csvPath", String.class);
 
         CSVFormat csvFormat = defaultCsvFormat;
         String delimiter = properties.getProperties().getProperty("delimiterChar");

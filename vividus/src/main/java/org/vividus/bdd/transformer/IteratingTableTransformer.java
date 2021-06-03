@@ -35,7 +35,7 @@ public class IteratingTableTransformer implements ExtendedTableTransformer
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         checkTableEmptiness(tableAsString);
-        int limit = properties.getMandatoryIntProperty("limit");
+        int limit = properties.getMandatoryNonBlankProperty("limit", int.class);
         List<String> column = Stream.iterate(0, i -> i + 1)
                 .limit(limit)
                 .map(String::valueOf)

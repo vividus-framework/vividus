@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 
 class RepeatingTableTranformerTests
@@ -31,6 +32,7 @@ class RepeatingTableTranformerTests
     private static final String ROW2 = "|r2v1|r2v2|\n";
     private static final String ROW1 = "|r1v1|r1v2|\n";
     private final RepeatingTableTranformer transformer = new RepeatingTableTranformer();
+    private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @Test
     void shouldGenerateRepearedTable()
@@ -47,8 +49,8 @@ class RepeatingTableTranformerTests
                    + ROW1
                    + ROW2
                    + ROW1
-                   + "|r2v1|r2v2|", transformer.transform(TABLE_AS_STRING, new TableParsers(),
-                       new TableProperties(properties)));
+                   + "|r2v1|r2v2|", transformer.transform(TABLE_AS_STRING, new TableParsers(parameterConverters),
+                       new TableProperties(parameterConverters, properties)));
     }
 
     @Test
@@ -56,7 +58,8 @@ class RepeatingTableTranformerTests
     {
         Properties properties = new Properties();
         IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE_AS_STRING, new TableParsers(), new TableProperties(properties)));
+            () -> transformer.transform(TABLE_AS_STRING, new TableParsers(parameterConverters),
+                    new TableProperties(parameterConverters, properties)));
         assertEquals("'times' is not set in ExamplesTable properties", iae.getMessage());
     }
 }

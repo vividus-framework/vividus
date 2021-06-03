@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
@@ -41,18 +42,13 @@ import org.vividus.bdd.steps.ui.web.model.SequenceActionType;
 import org.vividus.ui.action.search.Locator;
 
 @ExtendWith(MockitoExtension.class)
-class StringToListSequenceActionConverterTests
+class ParametersToSequenceActionConverterTests
 {
     private static final String TEXT = "text";
 
-    @Mock
-    private StringToLocatorConverter stringToLocatorConverter;
-
-    @Mock
-    private PointConverter pointConverter;
-
-    @InjectMocks
-    private StringToListSequenceActionConverter converter;
+    @Mock private StringToLocatorConverter stringToLocatorConverter;
+    @Mock private PointConverter pointConverter;
+    @InjectMocks private ParametersToSequenceActionConverter converter;
 
     @Test
     void testConvertValueLocator()
@@ -63,8 +59,7 @@ class StringToListSequenceActionConverterTests
         String value = "|type        |argument                  |\n"
                      + "|CLICK       |By.caseSensitiveText(text)|\n"
                      + "|DOUBLE_CLICK|By.caseSensitiveText(text)|";
-        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
-        assertThat(actions, hasSize(2));
+        List<SequenceAction> actions = asActions(value);
         verifySequenceAction(actions.get(0), SequenceActionType.CLICK, locator);
         verifySequenceAction(actions.get(1), SequenceActionType.DOUBLE_CLICK, locator);
         verify(stringToLocatorConverter, times(2)).convertValue(by, null);
@@ -80,7 +75,7 @@ class StringToListSequenceActionConverterTests
         String value = "|type   |argument          |\n"
                      + "|MOVE_TO|By.xpath(//button)|\n"
                      + "|CLICK  |                  |";
-        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
+        List<SequenceAction> actions = asActions(value);
         assertThat(actions, hasSize(2));
         verifySequenceAction(actions.get(0), SequenceActionType.MOVE_TO, locator);
         verifySequenceAction(actions.get(1), SequenceActionType.CLICK, null);
@@ -96,7 +91,7 @@ class StringToListSequenceActionConverterTests
         when(pointConverter.convertValue(pointAsString, null)).thenReturn(point);
         String value = "|type          |argument  |\n"
                      + "|MOVE_BY_OFFSET|(100, 100)|";
-        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
+        List<SequenceAction> actions = asActions(value);
         assertThat(actions, hasSize(1));
         verifySequenceAction(actions.get(0), SequenceActionType.MOVE_BY_OFFSET, point);
         verify(pointConverter).convertValue(pointAsString, null);
@@ -108,7 +103,7 @@ class StringToListSequenceActionConverterTests
     {
         String value = "|type      |argument|\n"
                      + "|ENTER_TEXT|text    |";
-        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
+        List<SequenceAction> actions = asActions(value);
         assertThat(actions, hasSize(1));
         verifySequenceAction(actions.get(0), SequenceActionType.ENTER_TEXT, TEXT);
         verifyNoMoreInteractions(stringToLocatorConverter, pointConverter);
@@ -119,10 +114,18 @@ class StringToListSequenceActionConverterTests
     {
         String value = "|type      |argument     |\n"
                      + "|PRESS_KEYS|value1,value2|";
-        List<SequenceAction> actions = converter.convertValue(new ExamplesTable(value), null);
+        List<SequenceAction> actions = asActions(value);
         assertThat(actions, hasSize(1));
         verifySequenceAction(actions.get(0), SequenceActionType.PRESS_KEYS, List.of("value1", "value2"));
         verifyNoMoreInteractions(stringToLocatorConverter, pointConverter);
+    }
+
+    private List<SequenceAction> asActions(String table)
+    {
+        return new ExamplesTable(table).getRowsAsParameters()
+                                       .stream()
+                                       .map(p -> converter.convertValue(p, null))
+                                       .collect(Collectors.toList());
     }
 
     private static void verifySequenceAction(SequenceAction action, SequenceActionType expectedType,

@@ -34,7 +34,7 @@ public class RepeatingTableTranformer implements ExtendedTableTransformer
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
-        int times = properties.getMandatoryIntProperty("times");
+        int times = properties.getMandatoryNonBlankProperty("times", int.class);
         List<Map<String, String>> rows = nCopies(times, tableRows);
         return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(), rows, properties);
     }

@@ -48,7 +48,7 @@ public class JsonRestApiTableTransformer implements ExtendedTableTransformer
     {
         checkTableEmptiness(tableAsString);
 
-        String columns = properties.getMandatoryNonBlankProperty("columns");
+        String columns = properties.getMandatoryNonBlankProperty("columns", String.class);
 
         String jsonData = processCompetingMandatoryProperties(properties,
                 entry("url", this::getJsonByUrl),

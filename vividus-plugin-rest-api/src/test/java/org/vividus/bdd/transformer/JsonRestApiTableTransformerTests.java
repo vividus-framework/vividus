@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,14 +51,11 @@ class JsonRestApiTableTransformerTests
     private static final String COLUMNS = "columns";
     private static final String VARIABLE = "variable";
 
-    @Mock
-    private IBddVariableContext bddVariableContext;
+    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private IHttpClient httpClient;
+    @InjectMocks private JsonRestApiTableTransformer jsonTableGenerator;
 
-    @Mock
-    private IHttpClient httpClient;
-
-    @InjectMocks
-    private JsonRestApiTableTransformer jsonTableGenerator;
+    private final ParameterConverters parameterConverters =  new ParameterConverters();
 
     @Test
     void testTransformFromUrl() throws IOException
@@ -117,10 +115,10 @@ class JsonRestApiTableTransformerTests
         assertEquals("'columns' is not set in ExamplesTable properties", exception.getMessage());
     }
 
-    private static TableProperties createProperties(Map<String, String> keyToJsonPathValue)
+    private TableProperties createProperties(Map<String, String> keyToJsonPathValue)
     {
         Properties properties = new Properties();
         properties.putAll(keyToJsonPathValue);
-        return new TableProperties(properties);
+        return new TableProperties(parameterConverters, properties);
     }
 }
