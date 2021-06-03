@@ -20,7 +20,7 @@ When I patch JSON `$sourceJson` using `$jsonPatch` and save result to $scopes va
 ----
 
 * `$sourceJson` - JSON data to be patched.
-* `$jsonPatch` - JSON data with required patch actions according to https://tools.ietf.org/html/rfc6902#page-6[RFC-6902]
+* `$jsonPatch` - JSON data with required patch actions according to https://datatracker.ietf.org/doc/html/rfc6902#section-4[RFC-6902]
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name
 
