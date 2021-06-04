@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,17 +64,12 @@ class SiteMapTableTransformerTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SiteMapTableTransformer.class);
 
-    @Mock
-    private ISiteMapParser siteMapParser;
+    @Mock private ISiteMapParser siteMapParser;
+    @Mock private WebApplicationConfiguration webApplicationConfiguration;
+    @Mock private HttpRedirectsProvider redirectsProvider;
+    @InjectMocks private SiteMapTableTransformer siteMapTableTransformer;
 
-    @Mock
-    private WebApplicationConfiguration webApplicationConfiguration;
-
-    @Mock
-    private HttpRedirectsProvider redirectsProvider;
-
-    @InjectMocks
-    private SiteMapTableTransformer siteMapTableTransformer;
+    private final ParameterConverters parameterConverters =  new ParameterConverters();
 
     @Test
     void testFetchUrls() throws SiteMapParseException
@@ -88,7 +84,7 @@ class SiteMapTableTransformerTests
     void testFetchUrlsWithoutSiteMapRelativeUrl()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> siteMapTableTransformer.fetchUrls(new TableProperties(new Properties())));
+            () -> siteMapTableTransformer.fetchUrls(new TableProperties(parameterConverters, new Properties())));
         assertEquals("'siteMapRelativeUrl' is not set in ExamplesTable properties", exception.getMessage());
     }
 
@@ -183,13 +179,13 @@ class SiteMapTableTransformerTests
         assertThat(actual, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
     }
 
-    private static TableProperties createTablePropertiesWithValueSeparator(String valueSeparator)
+    private TableProperties createTablePropertiesWithValueSeparator(String valueSeparator)
     {
-        return new TableProperties("siteMapRelativeUrl=" + SITEMAP_XML, DEFAULT_SEPARATOR, valueSeparator,
-                "!--");
+        return new TableProperties(parameterConverters, "siteMapRelativeUrl=" + SITEMAP_XML, DEFAULT_SEPARATOR,
+                valueSeparator, "!--");
     }
 
-    private static TableProperties createTableProperties()
+    private TableProperties createTableProperties()
     {
         return createTablePropertiesWithValueSeparator(DEFAULT_SEPARATOR);
     }

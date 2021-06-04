@@ -91,7 +91,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
 
     private String build(Set<String> urls, TableProperties properties)
     {
-        String columnName = properties.getMandatoryNonBlankProperty(COLUMN_KEY);
+        String columnName = properties.getMandatoryNonBlankProperty(COLUMN_KEY, String.class);
         List<String> urlsList = new ArrayList<>(urls);
         return ExamplesTableProcessor
                 .buildExamplesTableFromColumns(List.of(columnName), List.of(urlsList), properties);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -84,17 +85,12 @@ class HeadlessCrawlerTableTransformerTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(HeadlessCrawlerTableTransformer.class);
 
-    @Mock
-    private ICrawlControllerFactory crawlControllerFactory;
+    @Mock private ICrawlControllerFactory crawlControllerFactory;
+    @Mock private WebApplicationConfiguration webApplicationConfiguration;
+    @Mock private HttpRedirectsProvider redirectsProvider;
+    @InjectMocks private HeadlessCrawlerTableTransformer transformer;
 
-    @Mock
-    private WebApplicationConfiguration webApplicationConfiguration;
-
-    @Mock
-    private HttpRedirectsProvider redirectsProvider;
-
-    @InjectMocks
-    private HeadlessCrawlerTableTransformer transformer;
+    private final ParameterConverters parameterConverters =  new ParameterConverters();
 
     static Stream<Arguments> dataProviderOfFechingUrls()
     {
@@ -264,9 +260,9 @@ class HeadlessCrawlerTableTransformerTests
         return crawlController;
     }
 
-    private static TableProperties buildTableProperties()
+    private TableProperties buildTableProperties()
     {
-        return new TableProperties(new Properties());
+        return new TableProperties(parameterConverters, new Properties());
     }
 
     private static WebURL createWebUrl(String url)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -34,11 +35,12 @@ class FetchingUrlsTableTransformerTests
     private static final String URLS = "urls";
     private static final String COLUMN = "column";
     private final TestTransformer transformer = new TestTransformer();
+    private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @Test
     void testTransformFromResults()
     {
-        TableProperties properties = new TableProperties(new Properties());
+        TableProperties properties = new TableProperties(parameterConverters, new Properties());
         properties.getProperties().setProperty(COLUMN, URLS);
         assertEquals("|urls|\n|/first|\n|/second|\n|/fourth%25|\n|/third|", transformer.transform("", null,
                 properties));
@@ -49,7 +51,7 @@ class FetchingUrlsTableTransformerTests
     {
         Properties properties = new Properties();
         properties.setProperty(COLUMN, " ");
-        TableProperties tableProeprties = new TableProperties(properties);
+        TableProperties tableProeprties = new TableProperties(parameterConverters, properties);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform("", null, tableProeprties));
         assertEquals("ExamplesTable property 'column' is blank", exception.getMessage());
@@ -59,7 +61,7 @@ class FetchingUrlsTableTransformerTests
     void testTransformWithNotEmptyTableAsStringParameter()
     {
         Properties properties = new Properties();
-        TableProperties tableProeprties = new TableProperties(properties);
+        TableProperties tableProeprties = new TableProperties(parameterConverters, properties);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform("|first|", null, tableProeprties));
         assertEquals("Input table must be empty", exception.getMessage());

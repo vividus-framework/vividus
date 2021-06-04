@@ -14,7 +14,7 @@
 
     <bean id="accessibilitySteps" class="org.vividus.accessibility.AccessibilitySteps" />
 
-    <bean class="org.vividus.bdd.converter.ExamplesTableToAccessibilityCheckOptionsConverter" />
+    <bean class="org.vividus.bdd.converter.ParametersToAccessibilityCheckOptionsConverter" />
 
     <util:list id="stepBeanNames-Accessibility" value-type="java.lang.String">
         <idref bean="accessibilitySteps" />

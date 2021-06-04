@@ -37,7 +37,7 @@ public class SortingTableTransformer implements ExtendedTableTransformer
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
-        String byColumns = properties.getMandatoryNonBlankProperty("byColumns");
+        String byColumns = properties.getMandatoryNonBlankProperty("byColumns", String.class);
         List<String> headerValues = tableRows.getHeaders();
         List<String> columnsToCompare = Stream.of(StringUtils.split(byColumns, '|'))
                 .map(String::trim)

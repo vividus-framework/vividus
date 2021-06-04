@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.reporters.ViewGenerator;
 import org.jbehave.core.steps.DelegatingStepMonitor;
 import org.jbehave.core.steps.ParameterControls;
-import org.jbehave.core.steps.ParameterConverters.ChainableParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
@@ -51,7 +51,7 @@ public class ExtendedConfiguration extends Configuration
     private IPathFinder pathFinder;
     private VariableResolver variableResolver;
     private ExpressionAdaptor expressionAdaptor;
-    private List<ChainableParameterConverter<?, ?>> customConverters;
+    private List<ParameterConverter<?, ?>> customConverters;
     private List<StepMonitor> stepMonitors;
     private Map<String, TableTransformer> customTableTransformers;
     private String compositePaths;
@@ -67,7 +67,7 @@ public class ExtendedConfiguration extends Configuration
         useParameterControls(parameterControls);
         useParameterConverters(new ParameterConvertersDecorator(this, variableResolver, expressionAdaptor)
                 .addConverters(customConverters));
-        useStoryParser(new RegexStoryParser(keywords(), examplesTableFactory()));
+        useStoryParser(new RegexStoryParser(examplesTableFactory()));
         TableTransformers transformers = tableTransformers();
         customTableTransformers.forEach(transformers::useTransformer);
         useStepMonitor(new DelegatingStepMonitor(stepMonitors));
@@ -135,7 +135,7 @@ public class ExtendedConfiguration extends Configuration
     }
 
     @Inject
-    public void setCustomConverters(List<ChainableParameterConverter<?, ?>> customConverters)
+    public void setCustomConverters(List<ParameterConverter<?, ?>> customConverters)
     {
         this.customConverters = Collections.unmodifiableList(customConverters);
     }

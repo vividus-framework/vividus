@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class FluentEnumListConverterTests
         FluentEnumListConverter fluentEnumListConverter = new FluentEnumListConverter(new FluentTrimmedEnumConverter());
         Type type = new TypeLiteral<List<Option>>() { }.getType();
 
-        assertTrue(fluentEnumListConverter.accept(type));
+        assertTrue(fluentEnumListConverter.canConvertTo(type));
         List list = fluentEnumListConverter.convertValue("ignoring extra fields, ignoring values", type);
         assertIterableEquals(Arrays.asList(Option.IGNORING_EXTRA_FIELDS, Option.IGNORING_VALUES), list);
     }

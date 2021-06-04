@@ -95,6 +95,11 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
         isTrue(emptyTables.isEmpty(), "Empty ExamplesTable-s are not allowed, but %s is/are empty", emptyTables);
     }
 
+    protected Configuration getConfiguration()
+    {
+        return configuration;
+    }
+
     private static final class DescriptiveTable
     {
         private final String description;

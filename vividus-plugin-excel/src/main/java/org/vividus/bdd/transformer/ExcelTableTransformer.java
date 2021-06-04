@@ -49,8 +49,8 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         checkTableEmptiness(tableAsString);
-        String path = properties.getMandatoryNonBlankProperty("path");
-        String sheetName = properties.getMandatoryNonBlankProperty("sheet");
+        String path = properties.getMandatoryNonBlankProperty("path", String.class);
+        String sheetName = properties.getMandatoryNonBlankProperty("sheet", String.class);
         try
         {
             IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(path);
@@ -69,7 +69,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
                 List<String> data = Boolean.parseBoolean(joinValues) ? List.of(String.join(" ", result)) : result;
                 return build(List.of(column), List.of(data), properties);
             }
-            String range = properties.getMandatoryNonBlankProperty(RANGE);
+            String range = properties.getMandatoryNonBlankProperty(RANGE, String.class);
             Map<String, List<String>> exactDataTable = excelSheetParser.getDataAsTable(range);
             return build(exactDataTable.keySet(), exactDataTable.values(), properties);
         }

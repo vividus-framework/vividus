@@ -46,7 +46,7 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
         boolean throwException = !Optional.ofNullable(tableProperties.getProperty("ignoreErrors"))
                 .map(Boolean::valueOf)
                 .orElse(ignoreErrors);
-        String siteMapRelativeUrl = properties.getMandatoryNonBlankProperty("siteMapRelativeUrl");
+        String siteMapRelativeUrl = properties.getMandatoryNonBlankProperty("siteMapRelativeUrl", String.class);
 
         URI mainApplicationPage = getMainApplicationPageUri();
         Set<String> urls = siteMaps.stream().filter(

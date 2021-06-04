@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -48,6 +49,7 @@ class ExtendedTableTransformerTests
             return null;
         }
     };
+    private final ParameterConverters parameterConverters = new ParameterConverters();
 
     static Stream<Arguments> processValues()
     {
@@ -86,10 +88,10 @@ class ExtendedTableTransformerTests
                 entry(KEY_1, func), entry(KEY_2, func)).toString());
     }
 
-    private static TableProperties createProperties(Map<String, String> values)
+    private TableProperties createProperties(Map<String, String> values)
     {
         Properties properties = new Properties();
         properties.putAll(values);
-        return new TableProperties(properties);
+        return new TableProperties(parameterConverters, properties);
     }
 }

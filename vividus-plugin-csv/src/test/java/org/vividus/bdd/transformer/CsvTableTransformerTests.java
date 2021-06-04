@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import org.apache.commons.csv.CSVFormat;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,12 +52,14 @@ class CsvTableTransformerTests
             + "|USA|2|Washington|22|\n"
             + "|Armenia|3|Yerevan|33|";
 
+    private final ParameterConverters converters = new ParameterConverters();
+
     @Test
     void shouldCreateExamplesTableFromCsv()
     {
         var properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, CSV_FILE_NAME);
-        var tableProperties = new TableProperties(properties);
+        var tableProperties = new TableProperties(converters, properties);
         var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
         assertEquals(EXPECTED_EXAMPLES_TABLE, transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
     }
@@ -67,7 +70,7 @@ class CsvTableTransformerTests
         var properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, "test-with-semicolon.csv");
         properties.setProperty(DELIMITER_PROPERTY_NAME, ";");
-        var tableProperties = new TableProperties(properties);
+        var tableProperties = new TableProperties(converters, properties);
         var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
         assertEquals(EXPECTED_EXAMPLES_TABLE, transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
     }
@@ -75,7 +78,7 @@ class CsvTableTransformerTests
     @Test
     void testNoFilePathProvided()
     {
-        var tableProperties = new TableProperties(new Properties());
+        var tableProperties = new TableProperties(converters, new Properties());
         var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
@@ -87,7 +90,7 @@ class CsvTableTransformerTests
     {
         var properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, "");
-        var tableProperties = new TableProperties(properties);
+        var tableProperties = new TableProperties(converters, properties);
         var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
@@ -101,7 +104,7 @@ class CsvTableTransformerTests
         var properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, CSV_FILE_NAME);
         properties.setProperty(DELIMITER_PROPERTY_NAME, invalidDelimiter);
-        var tableProperties = new TableProperties(properties);
+        var tableProperties = new TableProperties(converters, properties);
         var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
@@ -115,7 +118,7 @@ class CsvTableTransformerTests
     {
         var properties = new Properties();
         properties.setProperty(CSV_PATH_PROPERTY_NAME, CSV_FILE_NAME);
-        var tableProperties = new TableProperties(properties);
+        var tableProperties = new TableProperties(converters, properties);
 
         URL csvResource = findResource(getClass(), CSV_FILE_NAME);
         var ioException = new IOException();

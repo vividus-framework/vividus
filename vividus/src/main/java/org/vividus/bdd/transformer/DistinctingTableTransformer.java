@@ -37,7 +37,7 @@ public class DistinctingTableTransformer extends AbstractFilteringTableTransform
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties tableProperties)
     {
-        String byColumnNames = tableProperties.getMandatoryNonBlankProperty(BY_COLUMNS_NAMES_PROPERTY);
+        String byColumnNames = tableProperties.getMandatoryNonBlankProperty(BY_COLUMNS_NAMES_PROPERTY, String.class);
         TableRows tableRows = tableParsers.parseRows(tableAsString, tableProperties);
         List<String> filteredColumnNames = filterColumnNames(tableRows.getHeaders(), byColumnNames);
         List<Map<String, String>> rows = tableRows.getRows();

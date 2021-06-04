@@ -19,7 +19,6 @@ package org.vividus.bdd.converter;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -37,13 +36,16 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.steps.ParameterControls;
 import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
+import org.jbehave.core.steps.Parameters;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,7 +65,7 @@ import org.vividus.ui.web.action.ICssSelectorFactory;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class})
-class ExamplesTableToAccessibilityCheckOptionsConverterTests
+class ParametersToAccessibilityCheckOptionsConverterTests
 {
     private static final Locator LOCATOR = new Locator(WebLocatorType.ID, "id");
 
@@ -73,25 +75,21 @@ class ExamplesTableToAccessibilityCheckOptionsConverterTests
 
     private static final String WARNING = "warning";
 
-    private static final String SEPARATOR = "|";
-
     private static final TestLogger LOGGER =
-            TestLoggerFactory.getTestLogger(ExamplesTableToAccessibilityCheckOptionsConverter.class);
+            TestLoggerFactory.getTestLogger(ParametersToAccessibilityCheckOptionsConverter.class);
 
     @Mock private UiContext uiContext;
     @Mock private ICssSelectorFactory cssSelectorFactory;
     @Mock private ISearchActions searchActions;
 
-    @InjectMocks private ExamplesTableToAccessibilityCheckOptionsConverter converter;
+    @InjectMocks private ParametersToAccessibilityCheckOptionsConverter converter;
 
     @Test
     void shouldConvertExamplesTableToOptionsWithMandatoryOptions()
     {
         ExamplesTable table = mockTable("|standard|level|\n|WCAG2AAA|error|");
-        List<AccessibilityCheckOptions> options = converter.convertValue(table, AccessibilityCheckOptions.class);
-        assertThat(options, hasSize(1));
-
-        AccessibilityCheckOptions checkOptions = options.get(0);
+        AccessibilityCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
+                AccessibilityCheckOptions.class);
 
         Assertions.assertAll(
                 () -> assertEquals("WCAG2AAA", checkOptions.getStandard()),
@@ -124,10 +122,9 @@ class ExamplesTableToAccessibilityCheckOptionsConverterTests
         String selectors = "a, div";
         when(cssSelectorFactory.getCssSelector(List.of(webElement))).thenReturn(selectors);
 
-        List<AccessibilityCheckOptions> options = converter.convertValue(table, AccessibilityCheckOptions.class);
+        AccessibilityCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
+                AccessibilityCheckOptions.class);
 
-        assertThat(options, hasSize(1));
-        AccessibilityCheckOptions checkOptions = options.get(0);
         Assertions.assertAll(
                 () -> assertEquals("WCAG2AA", checkOptions.getStandard()),
                 () -> assertEquals(ViolationLevel.ERROR, checkOptions.getLevel()),
@@ -143,10 +140,9 @@ class ExamplesTableToAccessibilityCheckOptionsConverterTests
     @ParameterizedTest
     void shouldThrowExpcetionWhenMandatoryParameterIsNotSet(String tableAsString, String notSetParameterName)
     {
-        ExamplesTable table = mockTable(String.format(tableAsString));
-        IllegalArgumentException exception =
-            assertThrows(IllegalArgumentException.class, () -> converter.convertValue(table,
-                AccessibilityCheckOptions.class));
+        Parameters row = mockTable(String.format(tableAsString)).getRowAsParameters(0);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> converter.convertValue(row, AccessibilityCheckOptions.class));
         assertEquals(notSetParameterName + " should be set", exception.getMessage());
         verifyNoInteractions(cssSelectorFactory, searchActions, uiContext);
         assertThat(LOGGER.getLoggingEvents(), empty());
@@ -161,7 +157,7 @@ class ExamplesTableToAccessibilityCheckOptionsConverterTests
                     return Set.of(LOCATOR);
                 }
                 ) { });
-        return new ExamplesTable(table, SEPARATOR, SEPARATOR, parameterConverters, new ParameterControls(),
-                new TableParsers(), new TableTransformers());
+        return new ExamplesTableFactory(new Keywords(), null, parameterConverters, new ParameterControls(),
+                new TableParsers(parameterConverters), new TableTransformers()).createExamplesTable(table);
     }
 }

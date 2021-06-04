@@ -28,6 +28,8 @@ import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.steps.ParameterConverters;
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -72,14 +74,8 @@ class MergingTableTransformerTests
     @Mock private Configuration configuration;
     @InjectMocks private MergingTableTransformer mergingTableTransformer;
 
-    @Test
-    void testInvalidMergeMode()
-    {
-        Properties properties = new Properties();
-        properties.setProperty(MERGE_MODE, "invalidMode");
-        verifyIllegalArgumentException(properties, "Value of ExamplesTable property 'mergeMode' must be from range "
-                + "[ROWS, COLUMNS], but got 'invalidMode'");
-    }
+    private final ParameterConverters parameterConverters = new ParameterConverters()
+            .addConverters(new FluentEnumConverter());
 
     @Test
     void testNotUniqueTablePaths()
@@ -282,7 +278,7 @@ class MergingTableTransformerTests
 
     private void assertMerge(String tableBody, Properties properties, String expected)
     {
-        TableProperties tableProperties = new TableProperties(properties);
+        TableProperties tableProperties = new TableProperties(parameterConverters, properties);
         assertEquals(expected, mergingTableTransformer.transform(tableBody, null, tableProperties));
     }
 
@@ -303,7 +299,8 @@ class MergingTableTransformerTests
     private void verifyIllegalArgumentException(String tableBody, Properties properties, String message)
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> mergingTableTransformer.transform(tableBody, null, new TableProperties(properties)));
+            () -> mergingTableTransformer.transform(tableBody, null,
+                    new TableProperties(parameterConverters, properties)));
         assertEquals(message, exception.getMessage());
     }
 }
