@@ -7,8 +7,7 @@ die () {
 
 getValue () {
     local value=$(grep "$1" $file | cut -d '=' -f2)
-    if [[ -z $value ]] ;
-    then
+    if [ -z $value ] ; then
         die "Unable to find $1 in $file"
     else
         echo $value
