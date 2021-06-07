@@ -402,7 +402,7 @@ class DatabaseStepsTests
                             && 1 == statistics.getMatched()
                             && 0 == source.getNoPair()
                             && 0 == target.getNoPair()
-                            && DB_URL.equals(source.getUrl())
+                            && source.getUrl() == null
                             && DB_URL.equals(target.getUrl());
                 }), eq(QUERIES_STATISTICS));
     }

@@ -271,7 +271,7 @@ public class DatabaseSteps
             List<Map<String, String>> table)
     {
         JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
-        QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate, jdbcTemplate);
+        QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate);
         Map<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table);
         statistics.getTarget().setRowsQuantity(sourceData.size());
 
@@ -332,7 +332,7 @@ public class DatabaseSteps
             List<Map<String, String>> table)
     {
         JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
-        QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate, jdbcTemplate);
+        QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate);
         statistics.getTarget().setRowsQuantity(data.size());
         Map<Object, Map<String, Object>> targetData = hashMap(keys, data.stream()
                 .map(m -> m.entrySet()
@@ -468,12 +468,22 @@ public class DatabaseSteps
         private final QueryStatistic source;
         private final QueryStatistic target;
 
+        private QueriesStatistic(JdbcTemplate targetJdbcTemplate)
+        {
+            source = new QueryStatistic();
+            target = createQueryStatistic(targetJdbcTemplate);
+        }
+
         private QueriesStatistic(JdbcTemplate sourceJdbcTemplate, JdbcTemplate targetJdbcTemplate)
         {
-            String sourceUrl = ((DriverManagerDataSource) sourceJdbcTemplate.getDataSource()).getUrl();
-            String targetUrl = ((DriverManagerDataSource) targetJdbcTemplate.getDataSource()).getUrl();
-            source = new QueryStatistic(sourceUrl);
-            target = new QueryStatistic(targetUrl);
+            source = createQueryStatistic(sourceJdbcTemplate);
+            target = createQueryStatistic(targetJdbcTemplate);
+        }
+
+        private QueryStatistic createQueryStatistic(JdbcTemplate jdbcTemplate)
+        {
+            String url = ((DriverManagerDataSource) jdbcTemplate.getDataSource()).getUrl();
+            return new QueryStatistic(url);
         }
 
         public long getMismatched()
@@ -515,10 +525,14 @@ public class DatabaseSteps
     public static final class QueryStatistic
     {
         private final StopWatch stopwatch = new StopWatch();
-        private final String url;
+        private String url;
         private long rowsQuantity;
         private String query;
         private long noPair;
+
+        private QueryStatistic()
+        {
+        }
 
         private QueryStatistic(String url)
         {
