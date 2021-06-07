@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHeaders;
@@ -61,9 +62,11 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
             HttpEntity entity = requestWithBody.getEntity();
             if (entity != null)
             {
-                mimeType = Optional.ofNullable(ContentType.getLenient(entity))
-                        .map(ContentType::getMimeType)
-                        .orElseGet(() -> getMimeType(requestWithBody.getAllHeaders()));
+                mimeType = getMimeType(requestWithBody.getAllHeaders())
+                        .orElseGet(() ->
+                                Optional.ofNullable(ContentType.getLenient(entity))
+                                        .orElse(ContentType.DEFAULT_TEXT).getMimeType()
+                        );
                 try (ByteArrayOutputStream baos = new ByteArrayOutputStream((int) entity.getContentLength()))
                 {
                     // https://github.com/apache/httpcomponents-client/commit/09cefc2b8970eea56d81b1a886d9bb769a48daf3
@@ -85,8 +88,8 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
     {
         Header[] headers = response.getResponseHeaders();
         String attachmentTitle = String.format("Response: %s %s", response.getMethod(), response.getFrom());
-        attachApiMessage(attachmentTitle, headers, response.getResponseBody(), getMimeType(headers),
-                response.getStatusCode());
+        String mimeType = getMimeType(headers).orElseGet(ContentType.DEFAULT_TEXT::getMimeType);
+        attachApiMessage(attachmentTitle, headers, response.getResponseBody(), mimeType, response.getStatusCode());
     }
 
     private void attachApiMessage(String title, Header[] headers, byte[] body, String mimeType, int statusCode)
@@ -100,12 +103,14 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
         attachmentPublisher.publishAttachment("/org/vividus/http/attachment/api-message.ftl", dataMap, title);
     }
 
-    private String getMimeType(Header[] headers)
+    private Optional<String> getMimeType(Header... headers)
     {
-        Optional<Header> header = Stream.of(headers)
+        return Stream.of(headers)
                 .filter(h -> HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(h.getName())
                         && StringUtils.isNoneBlank(h.getValue()))
-                .findFirst();
-        return header.isPresent() ? header.get().getElements()[0].getName() : ContentType.DEFAULT_TEXT.getMimeType();
+                .findFirst()
+                .map(Header::getElements)
+                .map(elements -> elements[0])
+                .map(HeaderElement::getName);
     }
 }
