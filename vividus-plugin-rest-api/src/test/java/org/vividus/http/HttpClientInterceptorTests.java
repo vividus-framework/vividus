@@ -85,9 +85,8 @@ class HttpClientInterceptorTests
     void testHttpRequestIsAttachedSuccessfully() throws IOException
     {
         Header entityContentTypeHeader = mockContentTypeHeader();
-        Header[] headers = {entityContentTypeHeader};
         when(entityContentTypeHeader.getElements()[0].getParameters()).thenReturn(new NameValuePair[0]).getMock();
-        testHttpRequestIsAttachedSuccessfully(headers, entityContentTypeHeader);
+        testHttpRequestIsAttachedSuccessfully(new Header[] {entityContentTypeHeader}, entityContentTypeHeader);
     }
 
     @Test
@@ -104,7 +103,10 @@ class HttpClientInterceptorTests
         Header contentTypeHeader = mockContentTypeHeader();
         when(contentTypeHeader.getName()).thenReturn(contentTypeHeaderName);
         when(contentTypeHeader.getValue()).thenReturn(TEXT_PLAIN);
-        testHttpRequestIsAttachedSuccessfully(new Header[] { contentTypeHeader }, null);
+        var httpEntity = mock(HttpEntity.class);
+        testHttpRequestIsAttachedSuccessfully(contentTypeHeader, httpEntity);
+        verify(httpEntity).getContentLength();
+        verify(httpEntity).writeTo(any(ByteArrayOutputStream.class));
     }
 
     @Test
@@ -179,6 +181,13 @@ class HttpClientInterceptorTests
         HeaderElement headerElement = mock(HeaderElement.class);
         when(headerElement.getName()).thenReturn(TEXT_PLAIN);
         return when(mock(Header.class).getElements()).thenReturn(new HeaderElement[] { headerElement }).getMock();
+    }
+
+    private void testHttpRequestIsAttachedSuccessfully(Header contentTypeHeader, HttpEntity httpEntity)
+    {
+        HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(new Header[] { contentTypeHeader },
+                httpEntity);
+        testHttpRequestIsAttachedSuccessfully(httpRequest);
     }
 
     private void testHttpRequestIsAttachedSuccessfully(Header[] allRequestHeaders, Header entityContentTypeHeader)
