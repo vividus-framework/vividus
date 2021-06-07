@@ -40,4 +40,5 @@ dependencies {
     implementation project(':vividus-plugin-excel')
 
     implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.20')
+    implementation(group: 'com.github.simoc', name: 'csvjdbc', version: 'd939a2f344')
 }
