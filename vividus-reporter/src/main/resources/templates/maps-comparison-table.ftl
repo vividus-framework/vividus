@@ -131,10 +131,10 @@
                     <#assign left = (cell.left)!"null">
                     <#assign right = (cell.right)!"null">
                     <td class="${class}">
-                        <span class="exceedable">${createCell(left)}</span>
+                        <span class="exceedable">${createCell(left)?no_esc}</span>
                     </td>
                     <td class="${class}">
-                        <span class="exceedable">${createCell(right)}</span>
+                        <span class="exceedable">${createCell(right)?no_esc}</span>
                     </td>
                     <#assign cellNumber++>
                 </#list>
