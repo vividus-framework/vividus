@@ -1,0 +1,52 @@
+= How to execute SQL against CSV resources
+
+Assuming there is a project containing VIVIDUS-based tests
+(e.g. https://github.com/vividus-framework/vividus-starter[VIVIDUS Starter])
+and the goal is to execute SQL queries against CSV resources to get the various
+subsets of the data.
+
+. Add the required dependencies (CSV and DB plugins, CSV driver) to the project `build.gradle`
++
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{current-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{current-version}')
+implementation(group: 'com.github.simoc', name: 'csvjdbc', version: 'd939a2f344')
+----
+
+. Configure connection to the CSV resources
++
+[source,properties]
+----
+db.connection.csv-data.driver-class-name=org.relique.jdbc.csv.CsvDriver
+db.connection.csv-data.url=jdbc:relique:csv:classpath:path/to/csv/data
+----
++
+`driver-class-name` should be the same for all CSV connections. `url`
+includes the mandatory path to CSV resources and may also contain
+https://github.com/simoc/csvjdbc/blob/master/docs/doc.md#driver-properties[a set of options configuring CSV parsing], e.g.:
++
+[source,properties]
+----
+db.connection.csv-data-2.driver-class-name=org.relique.jdbc.csv.CsvDriver
+db.connection.csv-data-2.url=jdbc:relique:csv:classpath:another/path?separator=;&quoteStyle=C
+----
+
+. Use the configured connection to execute SQL
++
+.Execute SQL against CSV
+[source,gherkin]
+----
+When I execute SQL query `
+SELECT * FROM capitals
+` against `csv-data` and save result to scenario variable `csv-records`
+Then `${csv-records}` matching rows using `country` from `csv-data` is equal to data from:
+|country |capital |population |
+|Belarus |Minsk   |1975000    |
+----
++
+where `capitals` is the name of CSV resource (the full resource path is
+`path/to/csv/data/capitals.csv`).
++
+The complete guide on SQL syntax and supported functions can be found in
+https://github.com/simoc/csvjdbc/blob/master/docs/doc.md#features[CSV Driver documentation].
