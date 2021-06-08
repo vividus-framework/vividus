@@ -290,21 +290,21 @@ class DatabaseStepsTests
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
                 argThat(r -> {
                     QueriesStatistic statistics = ((Map<String, QueriesStatistic>) r).get(STATISTICS);
-                    QueryStatistic target = statistics.getTarget();
-                    QueryStatistic source = statistics.getSource();
+                    QueryStatistic right = statistics.getRight();
+                    QueryStatistic left = statistics.getLeft();
                     return 3 == statistics.getMismatched()
                             && 3 == statistics.getTotalRows()
-                            && target.getExecutionTime().matches(DURATION_PATTERN)
-                            && source.getExecutionTime().matches(DURATION_PATTERN)
-                            && QUERY2.equals(target.getQuery())
-                            && QUERY.equals(source.getQuery())
-                            && 1 == target.getRowsQuantity()
-                            && 3 == source.getRowsQuantity()
+                            && right.getExecutionTime().matches(DURATION_PATTERN)
+                            && left.getExecutionTime().matches(DURATION_PATTERN)
+                            && QUERY2.equals(right.getQuery())
+                            && QUERY.equals(left.getQuery())
+                            && 1 == right.getRowsQuantity()
+                            && 3 == left.getRowsQuantity()
                             && 0 == statistics.getMatched()
-                            && 2 == source.getNoPair()
-                            && 1 == target.getNoPair()
-                            && DB_URL.equals(source.getUrl())
-                            && DB_URL.equals(target.getUrl());
+                            && 2 == left.getNoPair()
+                            && 1 == right.getNoPair()
+                            && DB_URL.equals(left.getUrl())
+                            && DB_URL.equals(right.getUrl());
                 }), eq(QUERIES_STATISTICS));
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_PATH), argThat(r ->
             ((Map<String, List<List<EntryComparisonResult>>>) r).get(RESULTS).size() == 3),
@@ -383,21 +383,21 @@ class DatabaseStepsTests
                 argThat(r -> {
                     @SuppressWarnings("unchecked")
                     QueriesStatistic statistics = ((Map<String, QueriesStatistic>) r).get(STATISTICS);
-                    QueryStatistic target = statistics.getTarget();
-                    QueryStatistic source = statistics.getSource();
+                    QueryStatistic right = statistics.getRight();
+                    QueryStatistic left = statistics.getLeft();
                     return 0 == statistics.getMismatched()
                             && 1 == statistics.getTotalRows()
-                            && EMPTY_TIME.equals(target.getExecutionTime())
-                            && EMPTY_TIME.equals(source.getExecutionTime())
-                            && target.getQuery() == null
-                            && source.getQuery() == null
-                            && 1 == target.getRowsQuantity()
-                            && 1 == source.getRowsQuantity()
+                            && EMPTY_TIME.equals(left.getExecutionTime())
+                            && EMPTY_TIME.equals(right.getExecutionTime())
+                            && left.getQuery() == null
+                            && right.getQuery() == null
+                            && 1 == left.getRowsQuantity()
+                            && 1 == right.getRowsQuantity()
                             && 1 == statistics.getMatched()
-                            && 0 == source.getNoPair()
-                            && 0 == target.getNoPair()
-                            && source.getUrl() == null
-                            && DB_URL.equals(target.getUrl());
+                            && 0 == right.getNoPair()
+                            && 0 == left.getNoPair()
+                            && right.getUrl() == null
+                            && DB_URL.equals(left.getUrl());
                 }), eq(QUERIES_STATISTICS));
     }
 
@@ -416,8 +416,8 @@ class DatabaseStepsTests
             EntryComparisonResult result = firstRowResults.get(0);
             return 1 == results.size()
                 && 1 == firstRowResults.size()
-                && VAL2.equals(result.getLeft())
-                && VAL1.equals(result.getRight())
+                && VAL2.equals(result.getRight())
+                && VAL1.equals(result.getLeft())
                 && !result.isPassed();
         }),
                eq(QUERIES_COMPARISON_RESULT));
@@ -425,19 +425,19 @@ class DatabaseStepsTests
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
                 argThat(r -> {
                     QueriesStatistic statistics = ((Map<String, QueriesStatistic>) r).get(STATISTICS);
-                    QueryStatistic target = statistics.getTarget();
-                    QueryStatistic source = statistics.getSource();
+                    QueryStatistic right = statistics.getRight();
+                    QueryStatistic left = statistics.getLeft();
                     return 1 == statistics.getMismatched()
                             && 1 == statistics.getTotalRows()
-                            && EMPTY_TIME.equals(target.getExecutionTime())
-                            && EMPTY_TIME.equals(source.getExecutionTime())
-                            && target.getQuery() == null
-                            && source.getQuery() == null
-                            && 1 == target.getRowsQuantity()
-                            && 1 == source.getRowsQuantity()
+                            && EMPTY_TIME.equals(right.getExecutionTime())
+                            && EMPTY_TIME.equals(left.getExecutionTime())
+                            && right.getQuery() == null
+                            && left.getQuery() == null
+                            && 1 == right.getRowsQuantity()
+                            && 1 == left.getRowsQuantity()
                             && 0 == statistics.getMatched()
-                            && 0 == source.getNoPair()
-                            && 0 == target.getNoPair();
+                            && 0 == left.getNoPair()
+                            && 0 == right.getNoPair();
                 }), eq(QUERIES_STATISTICS));
     }
 
@@ -503,8 +503,8 @@ class DatabaseStepsTests
             EntryComparisonResult result = firstRowResults.get(0);
             return 1 == results.size()
                 && 1 == firstRowResults.size()
-                && VAL2.equals(result.getLeft())
-                && VAL3.equals(result.getRight())
+                && VAL2.equals(result.getRight())
+                && VAL3.equals(result.getLeft())
                 && !result.isPassed();
         }),
                eq(QUERIES_COMPARISON_RESULT));

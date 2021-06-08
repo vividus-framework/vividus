@@ -33,31 +33,31 @@
         }
     </style>
 
-    <#assign source = statistics.source>
-    <#assign target = statistics.target>
+    <#assign left = statistics.left>
+    <#assign right = statistics.right>
     <div class="panel-group" id="accordion">
-        <#if source.query?has_content>
+        <#if left.query?has_content>
         <div class="panel panel-info">
             <div class="panel-heading">
                 <h4 class="panel-title toggleable">
-                    <a data-toggle="collapse" data-target="#collapse-source-sql" href="#collapse-source-sql" class="collapsed">Source query</a>
+                    <a data-toggle="collapse" data-target="#collapse-left-sql" href="#collapse-left-sql" class="collapsed">Left query</a>
                 </h4>
             </div>
-            <div id="collapse-source-sql" class="panel-collapse collapse">
-                <pre><code class="sql">${source.query}</code></pre>
+            <div id="collapse-left-sql" class="panel-collapse collapse">
+                <pre><code class="sql">${left.query}</code></pre>
             </div>
         </div>
         </#if>
 
-        <#if target.query?has_content>
+        <#if right.query?has_content>
         <div class="panel panel-info">
             <div class="panel-heading">
                 <h4 class="panel-title toggleable">
-                    <a data-toggle="collapse" data-target="#collapse-target-sql" href="#collapse-target-sql" class="collapsed">Target query</a>
+                    <a data-toggle="collapse" data-target="#collapse-right-sql" href="#collapse-right-sql" class="collapsed">Right query</a>
                 </h4>
             </div>
-            <div id="collapse-target-sql" class="panel-collapse collapse">
-                <pre><code class="sql">${target.query}</code></pre>
+            <div id="collapse-right-sql" class="panel-collapse collapse">
+                <pre><code class="sql">${right.query}</code></pre>
             </div>
         </div>
         </#if>
@@ -74,33 +74,33 @@
                         <thead>
                             <tr>
                                 <th>Parameter</th>
-                                <th>Source</th>
-                                <th>Target</th>
+                                <th>Left data source</th>
+                                <th>Right data source</th>
                             </tr>
                         </thead>
                         <tbody>
                             <#assign emptyTime="00:00:00.000">
-                            <#if !(source.getExecutionTime() == emptyTime && target.getExecutionTime() == emptyTime)>
+                            <#if !(left.getExecutionTime() == emptyTime && right.getExecutionTime() == emptyTime)>
                             <tr>
                                 <td>Execution time hh:mm:ss:SSS</td>
-                                <td>${source.getExecutionTime()}</td>
-                                <td>${target.getExecutionTime()}</td>
+                                <td>${left.getExecutionTime()}</td>
+                                <td>${right.getExecutionTime()}</td>
                             </tr>
                             </#if>
                             <tr>
                                 <td>Rows Quantity</td>
-                                <td>${source.rowsQuantity}</td>
-                                <td>${target.rowsQuantity}</td>
+                                <td>${left.rowsQuantity}</td>
+                                <td>${right.rowsQuantity}</td>
                             </tr>
                             <tr>
                                 <td>No pair found</td>
-                                <td>${source.noPair}</td>
-                                <td>${target.noPair}</td>
+                                <td>${left.noPair}</td>
+                                <td>${right.noPair}</td>
                             </tr>
                             <tr>
                                 <td>Connection</td>
-                                <td>${(source.url)!'N/A'}</td>
-                                <td>${(target.url)!'N/A'}</td>
+                                <td>${(left.url)!'N/A'}</td>
+                                <td>${(right.url)!'N/A'}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -111,7 +111,7 @@
                              <h4 style='text-align: center'>Total unique rows: ${statistics.totalRows}</h4>
                          </div>
                          <div class="col-xs-6">
-                            <h4 style='text-align: center'>Counts diffrence: ${(source.rowsQuantity - target.rowsQuantity)?abs}</h4>
+                            <h4 style='text-align: center'>Counts difference: ${(left.rowsQuantity - right.rowsQuantity)?abs}</h4>
                          </div>
                      </div>
                      <p align="center">

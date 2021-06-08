@@ -96,14 +96,8 @@
             <tr>
                 <th/>
                 <#list results[0] as cell>
-                    <th>
-                        Left table
-                        (${getClassName(cell.getLeftClassName())})
-                    </th>
-                    <th>
-                        Right table
-                        (${getClassName(cell.getRightClassName())})
-                    </th>
+                    <th>Left (${getClassName(cell.getLeftClassName())})</th>
+                    <th>Right (${getClassName(cell.getRightClassName())})</th>
                 </#list>
             </tr>
             <#else>
