@@ -1,6 +1,6 @@
 = Accessibility Plugin
 
-The plugin provides functionality to perform accessbility validations.
+The plugin provides functionality to perform accessibility validations.
 For more info please see https://squizlabs.github.io/HTML_CodeSniffer/[HTML Code Sniffer]
 Supported checks against following standards: https://squizlabs.github.io/HTML_CodeSniffer/Standards/WCAG2/[WCAG2] and https://squizlabs.github.io/HTML_CodeSniffer/Standards/Section508/[Section 508]
 
@@ -24,9 +24,9 @@ Then I test accessibility:$options
 * `$options` - The accessibility validation options. Where:
 ** [subs=+quotes]`*standard*` -  The accessibility stanadard to verify against. One of `WCAG2A`, `WCAG2AA`, `WCAG2AAA`, `Section 508`
 ** [subs=+quotes]`*level*` - The violation level used to check. One of `ERROR` - only errors will be validated, `WARNING` - error and warning will be validated, `NOTICE` - all the levels will be valiadted
-** `locators` - The comma-separeted xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elemements to verify
-** `elementsToIgnore` - The comma-separeted xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elemements to ignore
-** `violationsToIgnore` - The vilations codes which should be ignored
+** `locators` - The comma-separeted xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to verify
+** `elementsToIgnore` - The comma-separeted xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to ignore
+** `violationsToIgnore` - The violations codes which should be ignored
 ** `violationsToCheck` - The violations codes which should be checked
 
 [WARNING]
