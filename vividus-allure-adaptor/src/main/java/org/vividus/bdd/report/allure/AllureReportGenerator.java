@@ -223,7 +223,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
                 // Replacing of gray colors with #d35ebf in CSS does not affect the color used to draw
                 // <rect> HTML elements used to display trends
                 .replace("#aaa", brokenStatusColor)
-                .replace("unknown:\"Unknown\"", "unknown:\"Known\"")
+                .replace("\"unknown\":\"Unknown\"", "\"unknown\":\"Known\"")
                 .replace("\"failed\",\"broken\",\"passed\",\"skipped\",\"unknown\"",
                         "\"failed\",\"unknown\",\"passed\",\"broken\",\"skipped\"");
         cssString = cssString

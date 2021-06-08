@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class AllureReportPatchingConsistencyTests
     static Stream<Arguments> allureSourceContainsText()
     {
         return Stream.of(
-                Arguments.of(APP_JS, "unknown:\"Unknown\""),
+                Arguments.of(APP_JS, "\"unknown\":\"Unknown\""),
                 Arguments.of(APP_JS, "\"failed\",\"broken\",\"passed\",\"skipped\",\"unknown\""),
                 Arguments.of(STYLES_CSS, "#ffd050"),
                 Arguments.of(STYLES_CSS, "#d35ebe"),
@@ -49,15 +49,17 @@ class AllureReportPatchingConsistencyTests
 
     @ParameterizedTest
     @MethodSource("allureSourceContainsText")
-    void testAllureSourceContainsText(String fileName, String text) throws Exception
+    void testAllureSourceContainsText(String fileName, String text) throws IOException
     {
         assertTrue(readFile(fileName).contains(text));
     }
 
     private String readFile(String fileName) throws IOException
     {
-        InputStream is = getClass().getResourceAsStream(fileName);
-        assertNotNull(is);
-        return IOUtils.toString(is, StandardCharsets.UTF_8);
+        try (InputStream is = getClass().getResourceAsStream(fileName))
+        {
+            assertNotNull(is);
+            return IOUtils.toString(is, StandardCharsets.UTF_8);
+        }
     }
 }
