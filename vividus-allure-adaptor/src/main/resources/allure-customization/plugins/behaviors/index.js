@@ -1,4 +1,4 @@
-// Copy of https://github.com/allure-framework/allure2/blob/2.13.6/plugins/behaviors-plugin/src/dist/static/index.js
+// Copy of https://github.com/allure-framework/allure2/blob/2.14.0/plugins/behaviors-plugin/src/dist/static/index.js
 'use strict';
 
 allure.api.addTranslation('en', {
@@ -137,6 +137,20 @@ allure.api.addTranslation('kr', {
         behaviors: {
             name: '스토리별 기능',
             showAll: '전체 보기'
+        }
+    }
+});
+
+allure.api.addTranslation('fr', {
+    tab: {
+        behaviors: {
+            name: 'Comportements'
+        }
+    },
+    widget: {
+        behaviors: {
+            name: 'Thèmes par histoires',
+            showAll: 'Montrer tout'
         }
     }
 });
