@@ -1,1 +1,47 @@
-include::ROOT:page$under-construction.adoc[]
+= Relational Database Plugin
+
+The plugin provides capabilities to work with relational databases via
+https://en.wikipedia.org/wiki/Java_Database_Connectivity[JDBC] and contains
+a set of the steps for comparison of data tables.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{current-version}')
+----
+
+== Configuration
+
+=== Data Comparison
+
+[cols="4,2,1,4", options="header"]
+|===
+|Property name
+|Acceptable values
+|Default
+|Description
+
+
+|`db.duplicate-keys-strategy`
+a|`NOOP`
+
+`DISTINCT`
+|`NOOP`
+a|The strategy defining how records with duplicate keys should be handled:
+
+* `NOOP` - the records with duplicate keys are compared in the order they are returned by the query or presented in the expected data
+* `DISTINCT` - only 1 top record from left and right sides are compared, other records with duplicate keys are ignored
+
+|`db.diff-limit`
+|integer
+|`100`
+|The max number of records in the comparison result output
+
+|`db.query-timeout`
+|{iso-date-format-link} duration
+|`PT30M`
+|The maximum time to wait for DB query completion
+
+|===

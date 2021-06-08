@@ -74,7 +74,6 @@ import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.steps.db.DatabaseSteps.QueriesStatistic;
 import org.vividus.bdd.steps.db.DatabaseSteps.QueryStatistic;
-import org.vividus.bdd.util.RowsCollector;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
@@ -177,7 +176,7 @@ class DatabaseStepsTests
         mockDataSource(QUERY, DB_KEY2, mockResultSet(COL1, VAL1, COL2, VAL2, COL3, VAL3));
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         configureTimeout();
-        mockRowsFilterAsNOOP();
+        databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
         databaseSteps.compareData(QUERY, DB_KEY, QUERY, DB_KEY2, Set.of(COL1));
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL), any(Map.class),
                 eq(QUERIES_STATISTICS));
@@ -198,7 +197,7 @@ class DatabaseStepsTests
         };
         when(hashFunction.hashString(argThat(matcher), eq(StandardCharsets.UTF_8))).thenReturn(HASH1);
         configureTimeout();
-        mockRowsFilterAsNOOP();
+        databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
         databaseSteps.compareData(QUERY, DB_KEY, QUERY, DB_KEY2, Set.of());
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
                 any(Map.class), eq(QUERIES_STATISTICS));
@@ -267,11 +266,6 @@ class DatabaseStepsTests
                 + "When I execute SQL query '$sqlQuery' and save the result to the $scopes variable '$variableName'");
     }
 
-    private void mockRowsFilterAsNOOP()
-    {
-        databaseSteps.setRowsCollector(RowsCollector.NOOP);
-    }
-
     @SuppressWarnings("unchecked")
     @Test
     void shouldCompareQueriesResponsesAndPostDiffTable() throws InterruptedException,
@@ -291,7 +285,7 @@ class DatabaseStepsTests
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
         mockHashing();
         configureTimeout();
-        databaseSteps.setRowsCollector(RowsCollector.DISTINCT);
+        databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.DISTINCT);
         databaseSteps.compareData(QUERY, DB_KEY, QUERY2, DB_KEY2, Set.of(COL1));
         verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
                 argThat(r -> {
@@ -338,7 +332,7 @@ class DatabaseStepsTests
     void shouldLimitDiffTable() throws InterruptedException, ExecutionException, TimeoutException, SQLException
     {
         databaseSteps.setDiffLimit(1);
-        mockRowsFilterAsNOOP();
+        databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
         ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
         when(rsmd.getColumnCount()).thenReturn(1);
         when(rsmd.getColumnLabel(1)).thenReturn(COL1);
@@ -381,7 +375,7 @@ class DatabaseStepsTests
             List<Map<String, String>> table)
     {
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
-        mockRowsFilterAsNOOP();
+        databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
         mockDataSource();
         databaseSteps.compareData(data, Set.of(), DB_KEY, table);
         verify(attachmentPublisher, never()).publishAttachment(eq(TEMPLATE_PATH), any(), any());
@@ -412,7 +406,7 @@ class DatabaseStepsTests
     void shouldCompareDataVsExamplesTableAndPostReportFailedChecks()
     {
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
-        mockRowsFilterAsNOOP();
+        databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
         mockDataSource();
         databaseSteps.compareData(List.of(Map.of(COL1, VAL1)), Set.of(), DB_KEY, TABLE);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_PATH), argThat(r -> {
@@ -450,7 +444,7 @@ class DatabaseStepsTests
     @Test
     void testWaitUntilQueryReturnedDataEqualToTable() throws SQLException
     {
-        mockRowsFilterAsNOOP();
+        databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
         mockDataSource(QUERY, DB_KEY, mockResultSet(COL1, VAL2));
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, TABLE);
@@ -462,7 +456,7 @@ class DatabaseStepsTests
     @Test
     void testWaitTwiceUntilQueryReturnedDataEqualToTable() throws SQLException
     {
-        mockRowsFilterAsNOOP();
+        databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
 
         ResultSet rsFirst = mockResultSet(COL1, VAL1);
         ResultSet rsSecond = mockResultSet(COL1, VAL2);
@@ -483,7 +477,7 @@ class DatabaseStepsTests
     @Test
     void testWaitUntilQueryReturnedDataEqualToTableFailed() throws SQLException
     {
-        mockRowsFilterAsNOOP();
+        databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
 
         ResultSet rsFirst = mockResultSet(COL1, VAL1);
         ResultSet rsSecond = mockResultSet(COL1, VAL3);
