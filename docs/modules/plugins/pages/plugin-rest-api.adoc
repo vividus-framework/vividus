@@ -29,18 +29,18 @@ NOTE: The properties marked with *bold* are mandatory.
 4+^.^|_Configuration of HTTP retries on service unavailability_
 
 |`http.service-unavailable-retry.max-retries`
+|integer
 |`1`
-|`integer`
 |The maximum number of allowed retries if the server responds with a HTTP code from the retry code set defined below
 
 |`http.service-unavailable-retry.status-codes`
-|<empty>
 |set of integers
+|`<empty>`
 |The set of HTTP status codes to be retried. If it's empty, no retries will be performed
 
 |`http.service-unavailable-retry.retry-interval`
+|{iso-date-format-link} duration
 |`PT1S`
-|{iso-date-format-link}
 |The retry interval between subsequent requests
 
 |===
