@@ -17,7 +17,7 @@
         <property name="hashFunction">
             <bean class="com.google.common.hash.Hashing" factory-method="murmur3_128"/>
         </property>
-        <property name="rowsCollector" value="${db.rows-collector}" />
+        <property name="duplicateKeysStrategy" value="${db.duplicate-keys-strategy}" />
         <property name="diffLimit" value="${db.diff-limit}" />
     </bean>
 

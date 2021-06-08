@@ -15,7 +15,7 @@
 ** xref:plugin-azure-storage-queue.adoc[Storage Queue]
 * xref:plugin-csv.adoc[CSV]
 * xref:plugin-datetime.adoc[Date/Time]
-* xref:plugin-db.adoc[Relational DB*]
+* xref:plugin-db.adoc[Relational Database]
 * xref:plugin-electron.adoc[Electron*]
 * xref:plugin-email.adoc[Email]
 * xref:plugin-excel.adoc[Excel]

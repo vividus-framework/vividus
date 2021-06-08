@@ -34,6 +34,9 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 
@@ -50,7 +53,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.util.RowsCollector;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
@@ -69,7 +71,7 @@ public class DatabaseSteps
     private HashFunction hashFunction;
     private PropertyMappedCollection<DriverManagerDataSource> dataSources;
     private Duration dbQueryTimeout;
-    private RowsCollector rowsCollector;
+    private DuplicateKeysStrategy duplicateKeysStrategy;
     private int diffLimit;
 
     private final Map<String, JdbcTemplate> jdbcTemplates = new ConcurrentHashMap<>();
@@ -202,18 +204,28 @@ public class DatabaseSteps
     /**
      * Actions performed in the step:
      * <ul>
-     *     <li>executes provided SQL queries against databases by the provided keys</li>
-     *     <li>compares queries results </li>
+     *   <li>executes provided SQL queries against databases by the provided keys</li>
+     *   <li>compares queries results </li>
      * </ul>
-     * To limit DB query execution time you could use property:
-     * <b>db.query-timeout</b>
-     * Default timeout is 30 minutes
-     * To limit queries comparison result output you could use:
-     * <b>db.diff-limit</b>
-     * Default value is 100
-     * To workaround repeating rows you could use:
-     * <b>db.rows-collector</b>
-     * Possible values (NOOP - default, DISTINCT)
+     * <p>
+     *   Use the following property to set the maximum time to wait for DB query completion:
+     *   <code>db.query-timeout</code>.<br/>
+     *   The default timeout is 30 minutes.
+     * </p>
+     * <p>
+     *   Use the following property to configure the max number of records in the comparison result output:
+     *   <code>db.diff-limit</code>.<br/>
+     *   The default value is 100
+     * </p>
+     * <p>
+     *   Use the following property to handle rows with duplicate keys:
+     *   <code>db.duplicate-keys-strategy</code>.<br/>
+     * </p>
+     * Acceptable values:
+     * <ul>
+     *   <li><code>NOOP</code> (by default)</li>
+     *   <li><code>DISTINCT</code></li>
+     * </ul>
      * @see <a href="https://en.wikipedia.org/wiki/ISO_8601#Durations">Durations format</a>
      * @param sourceSqlQuery baseline SQL query
      * @param sourceDbKey key identifying source database connection
@@ -236,9 +248,9 @@ public class DatabaseSteps
         source.setQuery(sourceSqlQuery);
         QueryStatistic target = queriesStatistic.getTarget();
         target.setQuery(targetSqlQuery);
-        CompletableFuture<Map<Object, Map<String, Object>>> sourceData =
+        CompletableFuture<ListMultimap<Object, Map<String, Object>>> sourceData =
                 createCompletableRequest(sourceJdbcTemplate, sourceSqlQuery, keys, source);
-        CompletableFuture<Map<Object, Map<String, Object>>> targetData =
+        CompletableFuture<ListMultimap<Object, Map<String, Object>>> targetData =
                 createCompletableRequest(targetJdbcTemplate, targetSqlQuery, keys, target);
 
         List<List<EntryComparisonResult>> result = sourceData.thenCombine(targetData,
@@ -272,7 +284,7 @@ public class DatabaseSteps
     {
         JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
         QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate);
-        Map<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table);
+        ListMultimap<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table);
         statistics.getTarget().setRowsQuantity(sourceData.size());
 
         DurationBasedWaiter waiter = new DurationBasedWaiter(new WaitMode(duration, retryTimes));
@@ -280,7 +292,7 @@ public class DatabaseSteps
             () -> {
                 List<Map<String, Object>> data = jdbcTemplate.queryForList(sqlQuery);
                 statistics.getSource().setRowsQuantity(data.size());
-                Map<Object, Map<String, Object>> targetData = hashMap(Set.of(),
+                ListMultimap<Object, Map<String, Object>> targetData = hashMap(Set.of(),
                         data.stream().map(
                             m -> m.entrySet()
                                .stream()
@@ -334,17 +346,17 @@ public class DatabaseSteps
         JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
         QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate);
         statistics.getTarget().setRowsQuantity(data.size());
-        Map<Object, Map<String, Object>> targetData = hashMap(keys, data.stream()
+        ListMultimap<Object, Map<String, Object>> targetData = hashMap(keys, data.stream()
                 .map(m -> m.entrySet()
                            .stream()
                            .collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())))));
-        Map<Object, Map<String, Object>> sourceData = hashMap(keys, table);
+        ListMultimap<Object, Map<String, Object>> sourceData = hashMap(keys, table);
         statistics.getSource().setRowsQuantity(sourceData.size());
         List<List<EntryComparisonResult>> result = compareData(statistics, sourceData, targetData);
         verifyComparisonResult(statistics, filterPassedChecks(result));
     }
 
-    private BiFunction<Map<Object, Map<String, Object>>, Map<Object, Map<String, Object>>,
+    private BiFunction<ListMultimap<Object, Map<String, Object>>, ListMultimap<Object, Map<String, Object>>,
         List<List<EntryComparisonResult>>> compareQueryResults(QueriesStatistic queriesStatistic)
     {
         return (sourceQueryResult, targetQueryResult) -> compareData(queriesStatistic, sourceQueryResult,
@@ -352,34 +364,38 @@ public class DatabaseSteps
     }
 
     private List<List<EntryComparisonResult>> compareData(QueriesStatistic queriesStatistic,
-            Map<Object, Map<String, Object>> sourceData, Map<Object, Map<String, Object>> targetData)
+            ListMultimap<Object, Map<String, Object>> leftData, ListMultimap<Object, Map<String, Object>> rightData)
     {
         List<Pair<Map<String, Object>, Map<String, Object>>> comparison = new ArrayList<>();
-        sourceData.entrySet().stream()
-            .filter(e -> {
-                Map<String, Object> targetEntry = targetData.remove(e.getKey());
-                if (null != targetEntry)
-                {
-                    comparison.add(Pair.of(e.getValue(), targetEntry));
-                    return false;
-                }
-                return true;
-            })
-            .forEach(e -> comparison.add(Pair.of(e.getValue(), Map.of())));
+        Stream.concat(leftData.keySet().stream(), rightData.keySet().stream()).distinct().forEach(key ->
+        {
+            List<Map<String, Object>> left = leftData.get(key);
+            List<Map<String, Object>> right = rightData.get(key);
+            int leftSize = left.size();
+            int rightSize = right.size();
+            int size = duplicateKeysStrategy.getTargetSize(leftSize, rightSize);
+            for (int i = 0; i < size; i++)
+            {
+                Map<String, Object> leftValue = i < leftSize ? left.get(i) : Map.of();
+                Map<String, Object> rightValue = i < rightSize ? right.get(i) : Map.of();
+                comparison.add(Pair.of(leftValue, rightValue));
+            }
+        });
         queriesStatistic.getSource().setNoPair(comparison.stream()
-                .map(Pair::getValue)
+                .map(Pair::getRight)
                 .filter(Map::isEmpty)
                 .count());
-        queriesStatistic.getTarget().setNoPair(targetData.size());
-        targetData.values().forEach(value -> comparison.add(Pair.of(Map.of(), value)));
+        queriesStatistic.getTarget().setNoPair(comparison.stream()
+                .map(Pair::getLeft)
+                .filter(Map::isEmpty)
+                .count());
         List<List<EntryComparisonResult>> comparisonResult = comparison.stream()
                 .parallel()
                 .map(p -> ComparisonUtils.compareMaps(p.getLeft(), p.getRight()))
                 .collect(Collectors.toList());
-        long totalRows = comparisonResult.size();
         List<List<EntryComparisonResult>> mismatchedRows = filterPassedChecks(comparisonResult);
         queriesStatistic.setMismatched(mismatchedRows.size());
-        queriesStatistic.setTotalRows(totalRows);
+        queriesStatistic.setTotalRows(comparisonResult.size());
         return mismatchedRows.size() > diffLimit ? mismatchedRows.subList(0, diffLimit) : mismatchedRows;
     }
 
@@ -390,8 +406,8 @@ public class DatabaseSteps
                         .collect(Collectors.toList());
     }
 
-    private CompletableFuture<Map<Object, Map<String, Object>>> createCompletableRequest(JdbcTemplate jdbcTemplate,
-            String sqlRequest, Set<String> keys, QueryStatistic statistics)
+    private CompletableFuture<ListMultimap<Object, Map<String, Object>>> createCompletableRequest(
+            JdbcTemplate jdbcTemplate, String sqlRequest, Set<String> keys, QueryStatistic statistics)
     {
         return CompletableFuture.supplyAsync(() -> {
             statistics.start();
@@ -404,15 +420,14 @@ public class DatabaseSteps
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Object, Map<String, Object>> hashMap(Set<String> keys, List<?> r)
+    private ListMultimap<Object, Map<String, Object>> hashMap(Set<String> keys, List<?> r)
     {
         return hashMap(keys, ((List<Map<String, Object>>) r).stream());
     }
 
-    private Map<Object, Map<String, Object>> hashMap(Set<String> keys, Stream<Map<String, Object>> data)
+    private ListMultimap<Object, Map<String, Object>> hashMap(Set<String> keys, Stream<Map<String, Object>> data)
     {
-        return data.map(row -> Pair.of(hash(keys, row), row))
-                   .collect(rowsCollector.get());
+        return data.collect(Multimaps.toMultimap(row -> hash(keys, row), row -> row, ArrayListMultimap::create));
     }
 
     private HashCode hash(Set<String> keys, Map<String, Object> map)
@@ -451,9 +466,9 @@ public class DatabaseSteps
         this.hashFunction = hashFunction;
     }
 
-    public void setRowsCollector(RowsCollector rowsCollector)
+    public void setDuplicateKeysStrategy(DuplicateKeysStrategy duplicateKeysStrategy)
     {
-        this.rowsCollector = rowsCollector;
+        this.duplicateKeysStrategy = duplicateKeysStrategy;
     }
 
     public void setDiffLimit(int diffLimit)

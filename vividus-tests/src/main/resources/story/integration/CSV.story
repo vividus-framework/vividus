@@ -21,8 +21,9 @@ Examples:
 
 Scenario: Execute SQL against CSV
 When I execute SQL query `
-SELECT * FROM csv-with-semicolon
+SELECT * FROM csv-with-semicolon-and-duplicates
 ` against `csv-data` and save result to scenario variable `csv-records`
 Then `${csv-records}` matching rows using `country` from `csv-data` is equal to data from:
 |country|capital|data                                                             |
 |Belarus|Minsk  |{"sheet": [{"cols": 1, "name": "A", "rows": 2}], "name": "tests"}|
+|Belarus|Minsk  |plain text                                                       |
