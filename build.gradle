@@ -49,7 +49,7 @@ ext {
         jbehave:                '5.0.0-alpha.11',
         junit4:                 '4.13.1',
         slf4j:                  '2.0.0-alpha1',
-        spring:                 '5.3.7',
+        spring:                 '5.3.8',
         tika:                   '1.26',
         junit:                  '5.7.2',
         mockito:                '3.11.0',
