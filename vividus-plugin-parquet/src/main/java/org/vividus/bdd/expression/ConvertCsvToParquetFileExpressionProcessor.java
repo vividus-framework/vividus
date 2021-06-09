@@ -29,10 +29,12 @@ import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetFileWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
+import org.apache.parquet.hadoop.util.HadoopOutputFile;
 import org.vividus.csv.CsvReader;
 import org.vividus.util.ResourceUtils;
 
@@ -76,7 +78,7 @@ public class ConvertCsvToParquetFileExpressionProcessor extends AbstractExpressi
     {
         Schema schema = new Parser().parse(ResourceUtils.loadResource(avroSchemaPath));
         try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
-                .<GenericRecord>builder(new Path(file.toURI()))
+                .<GenericRecord>builder(HadoopOutputFile.fromPath(new Path(file.toURI()), new Configuration()))
                 .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
                 .withDataModel(GenericData.get())
                 .withSchema(schema)
