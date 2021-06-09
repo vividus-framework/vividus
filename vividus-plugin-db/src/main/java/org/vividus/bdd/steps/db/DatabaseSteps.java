@@ -30,7 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -141,8 +140,8 @@ public class DatabaseSteps
 
     /**
      * Joins two data sets from previously executed SQL queries;
-     * @param left data set to join
-     * @param right data set to join
+     * @param leftData data set to join
+     * @param rightData data set to join
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      * <i>Available scopes:</i>
      * <ul>
@@ -153,20 +152,20 @@ public class DatabaseSteps
      * </ul>
      * @param variableName a name of variable to store a result
      */
-    @When("I merge `$left` and `$right` and save result to $scopes variable `$variableName`")
-    public void joinDataSets(List<Map<String, Object>> left, List<Map<String, Object>> right,
+    @When("I merge `$leftData` and `$rightData` and save result to $scopes variable `$variableName`")
+    public void joinDataSets(List<Map<String, Object>> leftData, List<Map<String, Object>> rightData,
             Set<VariableScope> scopes, String variableName)
     {
-        List<Map<String, Object>> result = new ArrayList<>(left.size() + right.size());
-        if (!left.isEmpty() && !right.isEmpty())
+        List<Map<String, Object>> result = new ArrayList<>(leftData.size() + rightData.size());
+        if (!leftData.isEmpty() && !rightData.isEmpty())
         {
-            Set<String> leftHeader = left.get(0).keySet();
-            Set<String> rightHeader = right.get(0).keySet();
+            Set<String> leftHeader = leftData.get(0).keySet();
+            Set<String> rightHeader = rightData.get(0).keySet();
             Validate.isTrue(leftHeader.equals(rightHeader),
                     "Data sets should have same columns;\nLeft:  %s\nRight: %s", leftHeader, rightHeader);
         }
-        result.addAll(left);
-        result.addAll(right);
+        result.addAll(leftData);
+        result.addAll(rightData);
         bddVariableContext.putVariable(scopes, variableName, result);
     }
 
@@ -227,45 +226,45 @@ public class DatabaseSteps
      *   <li><code>DISTINCT</code></li>
      * </ul>
      * @see <a href="https://en.wikipedia.org/wiki/ISO_8601#Durations">Durations format</a>
-     * @param sourceSqlQuery baseline SQL query
-     * @param sourceDbKey key identifying source database connection
-     * @param targetSqlQuery checkpoint SQL query
-     * @param targetDbKey key identifying target database connection
+     * @param leftSqlQuery baseline SQL query
+     * @param leftDbKey key identifying the database connection for the left data set
+     * @param rightSqlQuery checkpoint SQL query
+     * @param rightDbKey key identifying the database connection for the right data set
      * @param keys comma-separated list of column's names to map resulting tables rows
      * @throws InterruptedException in case of thread interruption
      * @throws ExecutionException in case of any exception during DB query
      * @throws TimeoutException in case when timeout to execute DB query expires
      */
-    @Then("data from `$sourceSqlQuery` executed against `$sourceDbKey` is equal to data from `$targetSqlQuery` executed"
-            + " against `$targetDbKey` matching rows using keys:$keys")
-    public void compareData(String sourceSqlQuery, String sourceDbKey, String targetSqlQuery, String targetDbKey,
+    @Then("data from `$leftSqlQuery` executed against `$leftDbKey` is equal to data from `$rightSqlQuery` executed"
+            + " against `$rightDbKey` matching rows using keys:$keys")
+    public void compareData(String leftSqlQuery, String leftDbKey, String rightSqlQuery, String rightDbKey,
             Set<String> keys) throws InterruptedException, ExecutionException, TimeoutException
     {
-        JdbcTemplate sourceJdbcTemplate = getJdbcTemplate(sourceDbKey);
-        JdbcTemplate targetJdbcTemplate = getJdbcTemplate(targetDbKey);
-        QueriesStatistic queriesStatistic = new QueriesStatistic(sourceJdbcTemplate, targetJdbcTemplate);
-        QueryStatistic source = queriesStatistic.getSource();
-        source.setQuery(sourceSqlQuery);
-        QueryStatistic target = queriesStatistic.getTarget();
-        target.setQuery(targetSqlQuery);
-        CompletableFuture<ListMultimap<Object, Map<String, Object>>> sourceData =
-                createCompletableRequest(sourceJdbcTemplate, sourceSqlQuery, keys, source);
-        CompletableFuture<ListMultimap<Object, Map<String, Object>>> targetData =
-                createCompletableRequest(targetJdbcTemplate, targetSqlQuery, keys, target);
+        JdbcTemplate leftJdbcTemplate = getJdbcTemplate(leftDbKey);
+        JdbcTemplate rightJdbcTemplate = getJdbcTemplate(rightDbKey);
+        QueriesStatistic queriesStatistic = new QueriesStatistic(leftJdbcTemplate, rightJdbcTemplate);
+        QueryStatistic left = queriesStatistic.getLeft();
+        left.setQuery(leftSqlQuery);
+        QueryStatistic right = queriesStatistic.getRight();
+        right.setQuery(rightSqlQuery);
+        CompletableFuture<ListMultimap<Object, Map<String, Object>>> leftData =
+                createCompletableRequest(leftJdbcTemplate, leftSqlQuery, keys, left);
+        CompletableFuture<ListMultimap<Object, Map<String, Object>>> rightData =
+                createCompletableRequest(rightJdbcTemplate, rightSqlQuery, keys, right);
 
-        List<List<EntryComparisonResult>> result = sourceData.thenCombine(targetData,
-                compareQueryResults(queriesStatistic)).get(dbQueryTimeout.toMillis(),
-                        TimeUnit.MILLISECONDS);
+        List<List<EntryComparisonResult>> result = leftData.thenCombine(rightData,
+                (leftQueryResult, rightQueryResult) -> compareData(queriesStatistic, leftQueryResult, rightQueryResult))
+                .get(dbQueryTimeout.toMillis(), TimeUnit.MILLISECONDS);
 
         verifyComparisonResult(queriesStatistic, result);
     }
 
     /**
-     * The step waits until the <code>sqlQuery</code> returns the data equal to the examples table row
+     * The step waits until the <code>leftSqlQuery</code> returns the data equal to the right examples table row
      * The order of columns is ignored
      * Actions performed in the step:
      * <ul>
-     *     <li>run the <code>sqlQuery</code></li>
+     *     <li>run the <code>leftSqlQuery</code></li>
      *     <li>compares the response with the examples table row</li>
      *     <li>sleep for the <code>duration</code></li>
      *     <li>repeat all of the above until there are no more retry attempts or the response is equal
@@ -273,33 +272,28 @@ public class DatabaseSteps
      * </ul>
      * @param duration The time gap between two queries
      * @param retryTimes How many times request will be retried; duration/retryTimes=timeout between requests
-     * @param sqlQuery SQL query to execute
-     * @param dbKey Key identifying the database connection
-     * @param table Rows to compare data against
+     * @param leftSqlQuery SQL query to execute
+     * @param leftDbKey Key identifying the database connection
+     * @param rightTable Rows to compare data against
      */
-    @When("I wait for '$duration' duration retrying $retryTimes times while data from `$sqlQuery`"
-            + " executed against `$dbKey` is equal to data from:$table")
-    public void waitForDataAppearance(Duration duration, int retryTimes, String sqlQuery, String dbKey,
-            List<Map<String, String>> table)
+    @When("I wait for '$duration' duration retrying $retryTimes times while data from `$leftSqlQuery`"
+            + " executed against `$leftDbKey` is equal to data from:$rightTable")
+    public void waitForDataAppearance(Duration duration, int retryTimes, String leftSqlQuery, String leftDbKey,
+            List<Map<String, String>> rightTable)
     {
-        JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
-        QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate);
-        ListMultimap<Object, Map<String, Object>> sourceData = hashMap(Set.of(), table);
-        statistics.getTarget().setRowsQuantity(sourceData.size());
+        JdbcTemplate leftJdbcTemplate = getJdbcTemplate(leftDbKey);
+        QueriesStatistic statistics = new QueriesStatistic(leftJdbcTemplate);
+        ListMultimap<Object, Map<String, Object>> rightData = hashMap(Set.of(), rightTable);
+        statistics.getRight().setRowsQuantity(rightData.size());
 
         DurationBasedWaiter waiter = new DurationBasedWaiter(new WaitMode(duration, retryTimes));
         List<List<EntryComparisonResult>> comparisonResult = waiter.wait(
             () -> {
-                List<Map<String, Object>> data = jdbcTemplate.queryForList(sqlQuery);
-                statistics.getSource().setRowsQuantity(data.size());
-                ListMultimap<Object, Map<String, Object>> targetData = hashMap(Set.of(),
-                        data.stream().map(
-                            m -> m.entrySet()
-                               .stream()
-                               .collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())))
-                        )
-                );
-                return compareData(statistics, sourceData, targetData);
+                List<Map<String, Object>> left = leftJdbcTemplate.queryForList(leftSqlQuery);
+                statistics.getLeft().setRowsQuantity(left.size());
+                ListMultimap<Object, Map<String, Object>> leftData = hashMap(Set.of(),
+                        left.stream().map(this::convertValuesToString));
+                return compareData(statistics, leftData, rightData);
             },
             result -> {
                 boolean empty = result.isEmpty();
@@ -329,38 +323,29 @@ public class DatabaseSteps
      * The step is designed to compare the data retrieved by SQL request against the examples table.
      * The order of columns is ignored.
      * Consider complete example:
-     * <br>When I execute SQL query `${source}` against `$dbKey` and save result to STORY variable `data`
+     * <br>When I execute SQL query `${sqlQuery}` against `$dbKey` and save result to story variable `data`
      * <br>Then `${data}` matching rows using `` from `$dbKey` is equal to data from:
      * <br>tables/data.table
-     * @param data saved by step:
+     * @param leftData saved by step:
      * When I execute SQL query `$sqlQuery` against `$dbKey` and save result to $scopes variable `$data`"
      * @param keys comma-separated list of column's names to map resulting tables rows
      * (could be empty - all columns will be used)
-     * @param dbKey key identifying the database connection used to get data
-     * @param table rows to compare data against
+     * @param leftDbKey key identifying the database connection used to get data
+     * @param rightTable rows to compare data against
      */
-    @Then("`$data` matching rows using `$keys` from `$dbKey` is equal to data from:$table")
-    public void compareData(List<Map<String, Object>> data, Set<String> keys, String dbKey,
-            List<Map<String, String>> table)
+    @Then("`$leftData` matching rows using `$keys` from `$leftDbKey` is equal to data from:$rightTable")
+    public void compareData(List<Map<String, Object>> leftData, Set<String> keys, String leftDbKey,
+            List<Map<String, String>> rightTable)
     {
-        JdbcTemplate jdbcTemplate = getJdbcTemplate(dbKey);
-        QueriesStatistic statistics = new QueriesStatistic(jdbcTemplate);
-        statistics.getTarget().setRowsQuantity(data.size());
-        ListMultimap<Object, Map<String, Object>> targetData = hashMap(keys, data.stream()
-                .map(m -> m.entrySet()
-                           .stream()
-                           .collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())))));
-        ListMultimap<Object, Map<String, Object>> sourceData = hashMap(keys, table);
-        statistics.getSource().setRowsQuantity(sourceData.size());
-        List<List<EntryComparisonResult>> result = compareData(statistics, sourceData, targetData);
+        JdbcTemplate leftJdbcTemplate = getJdbcTemplate(leftDbKey);
+        QueriesStatistic statistics = new QueriesStatistic(leftJdbcTemplate);
+        statistics.getLeft().setRowsQuantity(leftData.size());
+        ListMultimap<Object, Map<String, Object>> left = hashMap(keys,
+                leftData.stream().map(this::convertValuesToString));
+        ListMultimap<Object, Map<String, Object>> right = hashMap(keys, rightTable);
+        statistics.getRight().setRowsQuantity(right.size());
+        List<List<EntryComparisonResult>> result = compareData(statistics, left, right);
         verifyComparisonResult(statistics, filterPassedChecks(result));
-    }
-
-    private BiFunction<ListMultimap<Object, Map<String, Object>>, ListMultimap<Object, Map<String, Object>>,
-        List<List<EntryComparisonResult>>> compareQueryResults(QueriesStatistic queriesStatistic)
-    {
-        return (sourceQueryResult, targetQueryResult) -> compareData(queriesStatistic, sourceQueryResult,
-                targetQueryResult);
     }
 
     private List<List<EntryComparisonResult>> compareData(QueriesStatistic queriesStatistic,
@@ -381,11 +366,11 @@ public class DatabaseSteps
                 comparison.add(Pair.of(leftValue, rightValue));
             }
         });
-        queriesStatistic.getSource().setNoPair(comparison.stream()
+        queriesStatistic.getLeft().setNoPair(comparison.stream()
                 .map(Pair::getRight)
                 .filter(Map::isEmpty)
                 .count());
-        queriesStatistic.getTarget().setNoPair(comparison.stream()
+        queriesStatistic.getRight().setNoPair(comparison.stream()
                 .map(Pair::getLeft)
                 .filter(Map::isEmpty)
                 .count());
@@ -417,6 +402,11 @@ public class DatabaseSteps
             return result;
         })
                 .thenApplyAsync(r -> hashMap(keys, r));
+    }
+
+    private Map<String, Object> convertValuesToString(Map<String, Object> map)
+    {
+        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())));
     }
 
     @SuppressWarnings("unchecked")
@@ -480,19 +470,19 @@ public class DatabaseSteps
     {
         private long totalRows;
         private long mismatched;
-        private final QueryStatistic source;
-        private final QueryStatistic target;
+        private final QueryStatistic left;
+        private final QueryStatistic right;
 
-        private QueriesStatistic(JdbcTemplate targetJdbcTemplate)
+        private QueriesStatistic(JdbcTemplate leftJdbcTemplate)
         {
-            source = new QueryStatistic();
-            target = createQueryStatistic(targetJdbcTemplate);
+            left = createQueryStatistic(leftJdbcTemplate);
+            right = new QueryStatistic();
         }
 
-        private QueriesStatistic(JdbcTemplate sourceJdbcTemplate, JdbcTemplate targetJdbcTemplate)
+        private QueriesStatistic(JdbcTemplate leftJdbcTemplate, JdbcTemplate rightJdbcTemplate)
         {
-            source = createQueryStatistic(sourceJdbcTemplate);
-            target = createQueryStatistic(targetJdbcTemplate);
+            left = createQueryStatistic(leftJdbcTemplate);
+            right = createQueryStatistic(rightJdbcTemplate);
         }
 
         private QueryStatistic createQueryStatistic(JdbcTemplate jdbcTemplate)
@@ -526,14 +516,14 @@ public class DatabaseSteps
             this.totalRows = totalRows;
         }
 
-        public QueryStatistic getSource()
+        public QueryStatistic getLeft()
         {
-            return source;
+            return left;
         }
 
-        public QueryStatistic getTarget()
+        public QueryStatistic getRight()
         {
-            return target;
+            return right;
         }
     }
 
