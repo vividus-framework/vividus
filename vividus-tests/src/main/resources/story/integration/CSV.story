@@ -20,6 +20,8 @@ Examples:
 {transformer=FROM_CSV, csvPath=/data/csv-with-semicolon.csv, delimiterChar=;}
 
 Scenario: Execute SQL against CSV
+Meta:
+    @requirementId 1655
 When I execute SQL query `
 SELECT * FROM csv-with-semicolon-and-duplicates
 ` against `csv-data` and save result to scenario variable `csv-records`
