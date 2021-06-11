@@ -206,17 +206,17 @@ public class DatabaseSteps
      * </ul>
      * <p>
      *   Use the following property to set the maximum time to wait for DB query completion:
-     *   <code>db.query-timeout</code>.<br/>
+     *   <code>db.query-timeout</code>.<br>
      *   The default timeout is 30 minutes.
      * </p>
      * <p>
      *   Use the following property to configure the max number of records in the comparison result output:
-     *   <code>db.diff-limit</code>.<br/>
+     *   <code>db.diff-limit</code>.<br>
      *   The default value is 100
      * </p>
      * <p>
      *   Use the following property to handle rows with duplicate keys:
-     *   <code>db.duplicate-keys-strategy</code>.<br/>
+     *   <code>db.duplicate-keys-strategy</code>.<br>
      * </p>
      * Acceptable values:
      * <ul>
