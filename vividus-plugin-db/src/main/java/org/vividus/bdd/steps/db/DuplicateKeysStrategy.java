@@ -21,7 +21,7 @@ public enum DuplicateKeysStrategy
     DISTINCT
     {
         @Override
-        public int getTargetSize(int leftSize, int rightSize)
+        public int getTargetSize(DataSetComparisonRule comparisonRule, int leftSize, int rightSize)
         {
             return 1;
         }
@@ -29,11 +29,11 @@ public enum DuplicateKeysStrategy
     NOOP
     {
         @Override
-        public int getTargetSize(int leftSize, int rightSize)
+        public int getTargetSize(DataSetComparisonRule comparisonRule, int leftSize, int rightSize)
         {
-            return Math.max(leftSize, rightSize);
+            return comparisonRule == DataSetComparisonRule.CONTAINS ? rightSize : Math.max(leftSize, rightSize);
         }
     };
 
-    public abstract int getTargetSize(int leftSize, int rightSize);
+    public abstract int getTargetSize(DataSetComparisonRule comparisonRule, int leftSize, int rightSize);
 }

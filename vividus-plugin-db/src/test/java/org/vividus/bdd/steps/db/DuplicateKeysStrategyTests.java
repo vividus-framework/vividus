@@ -27,18 +27,22 @@ class DuplicateKeysStrategyTests
     @Test
     void shouldAlwaysReturnOneForDistinctStrategy()
     {
-        assertEquals(1, DuplicateKeysStrategy.DISTINCT.getTargetSize(0, 0));
+        assertEquals(1, DuplicateKeysStrategy.DISTINCT.getTargetSize(null, 0, 0));
     }
 
     @ParameterizedTest
     @CsvSource({
-        "2, 3, 3",
-        "5, 4, 5",
-        "1, 0, 1",
-        "0, 1, 1"
+        "IS_EQUAL_TO, 2, 3, 3",
+        "CONTAINS,    2, 3, 3",
+        "IS_EQUAL_TO, 5, 4, 5",
+        "CONTAINS,    5, 4, 4",
+        "IS_EQUAL_TO, 1, 0, 1",
+        "CONTAINS,    1, 0, 0",
+        "IS_EQUAL_TO, 0, 1, 1"
     })
-    void shouldReturnMaxValueForNoopStrategy(int leftSize, int rightSize, int expected)
+    void shouldReturnMaxValueForNoopStrategy(DataSetComparisonRule comparisonRule, int leftSize, int rightSize,
+            int expected)
     {
-        assertEquals(expected, DuplicateKeysStrategy.NOOP.getTargetSize(leftSize, rightSize));
+        assertEquals(expected, DuplicateKeysStrategy.NOOP.getTargetSize(comparisonRule, leftSize, rightSize));
     }
 }

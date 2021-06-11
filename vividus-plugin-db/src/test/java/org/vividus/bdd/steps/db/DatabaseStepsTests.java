@@ -20,6 +20,8 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,6 +65,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -72,8 +75,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.steps.db.DatabaseSteps.QueriesStatistic;
-import org.vividus.bdd.steps.db.DatabaseSteps.QueryStatistic;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
@@ -100,15 +101,13 @@ class DatabaseStepsTests
 
     private static final String STATISTICS = "statistics";
 
-    private static final String QUERIES_COMPARISON_RESULT = "Queries comparison result";
-
-    private static final String QUERIES_STATISTICS_FTL = "queries-statistics.ftl";
-
-    private static final String QUERIES_STATISTICS = "Queries statistics";
+    private static final String DATA_SOURCES_STATISTICS_TITLE = "Data sources statistics";
+    private static final String DATA_SOURCES_STATISTICS_FTL = "data-sources-statistics.ftl";
 
     private static final String RESULTS = "results";
 
-    private static final String TEMPLATE_PATH = "/templates/maps-comparison-table.ftl";
+    private static final String DATA_SET_COMPARISON_FTL = "/templates/maps-comparison-table.ftl";
+    private static final String DATA_SETS_COMPARISON_TITLE = "Data sets comparison";
 
     private static final String QUERY_RESULTS_ARE_EQUAL = "Query results are equal";
 
@@ -122,6 +121,7 @@ class DatabaseStepsTests
 
     private static final String QUERY = "select col1 from table";
     private static final String QUERY2 = "select col1 from table2";
+    private static final Set<String> KEYS = Set.of(COL1);
 
     private static final HashCode HASH1 = Hashing.murmur3_128().hashString(VAL1, StandardCharsets.UTF_8);
 
@@ -142,14 +142,10 @@ class DatabaseStepsTests
 
     private final IAttachmentPublisher attachmentPublisher = mock(IAttachmentPublisher.class);
 
-    @Mock
-    private PropertyMappedCollection<DriverManagerDataSource> dataSources;
-
-    @Mock
-    private HashFunction hashFunction;
-
-    @InjectMocks
-    private final DatabaseSteps databaseSteps = new DatabaseSteps(bddVariableContext, attachmentPublisher, softAssert);
+    @Mock private PropertyMappedCollection<DriverManagerDataSource> dataSources;
+    @Mock private HashFunction hashFunction;
+    @InjectMocks private final DatabaseSteps databaseSteps = new DatabaseSteps(bddVariableContext, attachmentPublisher,
+            softAssert);
 
     @BeforeEach
     void beforeEach()
@@ -168,18 +164,36 @@ class DatabaseStepsTests
         verify(bddVariableContext).putVariable(variableScope, variableName, singletonList);
     }
 
-    @Test
-    void shouldCompareQueriesResponsesAndDontPostDiffInCaseOfEqualData() throws InterruptedException,
-        ExecutionException, TimeoutException, SQLException
+    static Stream<Arguments> matchingResultSets() throws SQLException
     {
-        mockDataSource(QUERY, DB_KEY, mockResultSet(COL1, VAL1, COL2, VAL2, COL3, VAL3));
-        mockDataSource(QUERY, DB_KEY2, mockResultSet(COL1, VAL1, COL2, VAL2, COL3, VAL3));
-        when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
+        return Stream.of(
+                arguments(
+                        DataSetComparisonRule.IS_EQUAL_TO,
+                        mockResultSet(COL1, VAL1, COL2, VAL2, COL3, VAL3),
+                        mockResultSet(COL1, VAL1, COL2, VAL2, COL3, VAL3)
+                ),
+                arguments(
+                        DataSetComparisonRule.CONTAINS,
+                        mockResultSet(COL1, VAL1, COL2, VAL2, COL3, VAL3),
+                        mockResultSet(COL2, VAL2)
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("matchingResultSets")
+    void shouldCompareQueriesResponsesAndDontPostDiffInCaseOfEqualData(DataSetComparisonRule comparisonRule,
+            ResultSet leftResultSet, ResultSet rightResultSet)
+            throws InterruptedException, ExecutionException, TimeoutException, SQLException
+    {
+        mockDataSource(QUERY, DB_KEY, leftResultSet);
+        mockDataSource(QUERY, DB_KEY2, rightResultSet);
+        when(softAssert.assertTrue(comparisonRule.getAssertionDescription(), true)).thenReturn(true);
         configureTimeout();
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
-        databaseSteps.compareData(QUERY, DB_KEY, QUERY, DB_KEY2, Set.of(COL1));
-        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL), any(Map.class),
-                eq(QUERIES_STATISTICS));
+        databaseSteps.compareData(QUERY, DB_KEY, comparisonRule, QUERY, DB_KEY2, KEYS);
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL), any(Map.class),
+                eq(DATA_SOURCES_STATISTICS_TITLE));
         verify(hashFunction, times(2)).hashString(any(), eq(StandardCharsets.UTF_8));
     }
 
@@ -198,9 +212,9 @@ class DatabaseStepsTests
         when(hashFunction.hashString(argThat(matcher), eq(StandardCharsets.UTF_8))).thenReturn(HASH1);
         configureTimeout();
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
-        databaseSteps.compareData(QUERY, DB_KEY, QUERY, DB_KEY2, Set.of());
-        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
-                any(Map.class), eq(QUERIES_STATISTICS));
+        databaseSteps.compareData(QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, QUERY, DB_KEY2, Set.of());
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
+                any(Map.class), eq(DATA_SOURCES_STATISTICS_TITLE));
         verify(hashFunction, times(2)).hashString(argThat(matcher), eq(StandardCharsets.UTF_8));
     }
 
@@ -286,10 +300,10 @@ class DatabaseStepsTests
         mockHashing();
         configureTimeout();
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.DISTINCT);
-        databaseSteps.compareData(QUERY, DB_KEY, QUERY2, DB_KEY2, Set.of(COL1));
-        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
+        databaseSteps.compareData(QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, QUERY2, DB_KEY2, KEYS);
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
                 argThat(r -> {
-                    QueriesStatistic statistics = ((Map<String, QueriesStatistic>) r).get(STATISTICS);
+                    DataSourceStatistics statistics = ((Map<String, DataSourceStatistics>) r).get(STATISTICS);
                     QueryStatistic right = statistics.getRight();
                     QueryStatistic left = statistics.getLeft();
                     return 3 == statistics.getMismatched()
@@ -305,10 +319,10 @@ class DatabaseStepsTests
                             && 1 == right.getNoPair()
                             && DB_URL.equals(left.getUrl())
                             && DB_URL.equals(right.getUrl());
-                }), eq(QUERIES_STATISTICS));
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_PATH), argThat(r ->
+                }), eq(DATA_SOURCES_STATISTICS_TITLE));
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SET_COMPARISON_FTL), argThat(r ->
             ((Map<String, List<List<EntryComparisonResult>>>) r).get(RESULTS).size() == 3),
-                eq(QUERIES_COMPARISON_RESULT));
+                eq(DATA_SETS_COMPARISON_TITLE));
     }
 
     private void mockHashing()
@@ -345,10 +359,10 @@ class DatabaseStepsTests
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
         mockHashing();
         configureTimeout();
-        databaseSteps.compareData(QUERY, DB_KEY, QUERY, DB_KEY2, Set.of(COL1));
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_PATH), argThat(r ->
+        databaseSteps.compareData(QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, QUERY, DB_KEY2, KEYS);
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SET_COMPARISON_FTL), argThat(r ->
             ((Map<String, List<List<EntryComparisonResult>>>) r).get(RESULTS).size() == 1),
-                eq(QUERIES_COMPARISON_RESULT));
+                eq(DATA_SETS_COMPARISON_TITLE));
     }
 
     @Test
@@ -357,88 +371,125 @@ class DatabaseStepsTests
         databaseSteps.setDbQueryTimeout(Duration.ofNanos(0));
         mockDataSourceRetrieval();
         assertThrows(TimeoutException.class,
-            () -> databaseSteps.compareData(QUERY, DB_KEY, QUERY, DB_KEY, Set.of(COL1)));
+            () -> databaseSteps.compareData(QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, QUERY, DB_KEY, KEYS));
         verifyNoInteractions(attachmentPublisher, softAssert);
     }
 
-    static Stream<Arguments> equalDataProvider()
+    static Stream<Arguments> matchingDataSets()
     {
         return Stream.of(
-                arguments(List.of(Map.of(COL1, VAL1)), List.of(Map.of(COL1, VAL1))),
-                arguments(List.of(Map.of(COL1, VAL1, COL2, VAL2)), List.of(Map.of(COL2, VAL2, COL1, VAL1)))
+                arguments(
+                        DataSetComparisonRule.IS_EQUAL_TO,
+                        List.of(Map.of(COL1, VAL1)),
+                        List.of(Map.of(COL1, VAL1))
+                ),
+                arguments(
+                        DataSetComparisonRule.CONTAINS,
+                        List.of(Map.of(COL1, VAL1)),
+                        List.of(Map.of(COL1, VAL1))
+                ),
+                arguments(
+                        DataSetComparisonRule.IS_EQUAL_TO,
+                        List.of(Map.of(COL1, VAL1, COL2, VAL2)),
+                        List.of(Map.of(COL2, VAL2, COL1, VAL1))
+                ),
+                arguments(
+                        DataSetComparisonRule.CONTAINS,
+                        List.of(Map.of(COL1, VAL1), Map.of(COL1, VAL2)),
+                        List.of(Map.of(COL1, VAL2))
+                )
         );
     }
 
     @ParameterizedTest
-    @MethodSource("equalDataProvider")
-    void shouldCompareDataVsExamplesTableAndNotPostReportIfDataEqual(List<Map<String, Object>> data,
-            List<Map<String, String>> table)
+    @MethodSource("matchingDataSets")
+    void shouldCompareDataVsExamplesTableAndNotPostReportIfDataEqual(DataSetComparisonRule comparisonRule,
+            List<Map<String, Object>> leftDataSet, List<Map<String, String>> rightDataSet)
     {
-        when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
+        when(softAssert.assertTrue(comparisonRule.getAssertionDescription(), true)).thenReturn(true);
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
+        mockHashing();
         mockDataSource();
-        databaseSteps.compareData(data, Set.of(), DB_KEY, table);
-        verify(attachmentPublisher, never()).publishAttachment(eq(TEMPLATE_PATH), any(), any());
-        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
-                argThat(r -> {
-                    @SuppressWarnings("unchecked")
-                    QueriesStatistic statistics = ((Map<String, QueriesStatistic>) r).get(STATISTICS);
-                    QueryStatistic right = statistics.getRight();
-                    QueryStatistic left = statistics.getLeft();
-                    return 0 == statistics.getMismatched()
-                            && 1 == statistics.getTotalRows()
-                            && EMPTY_TIME.equals(left.getExecutionTime())
-                            && EMPTY_TIME.equals(right.getExecutionTime())
-                            && left.getQuery() == null
-                            && right.getQuery() == null
-                            && 1 == left.getRowsQuantity()
-                            && 1 == right.getRowsQuantity()
-                            && 1 == statistics.getMatched()
-                            && 0 == right.getNoPair()
-                            && 0 == left.getNoPair()
-                            && right.getUrl() == null
-                            && DB_URL.equals(left.getUrl());
-                }), eq(QUERIES_STATISTICS));
+        databaseSteps.compareData(leftDataSet, Set.of(), DB_KEY, comparisonRule, rightDataSet);
+        verify(attachmentPublisher, never()).publishAttachment(eq(DATA_SET_COMPARISON_FTL), any(), any());
+        verifyQueryStatisticsPublishing(comparisonRule, leftDataSet, rightDataSet, 0, 1);
+    }
+
+    static Stream<Arguments> notMatchingDataSets()
+    {
+        return Stream.of(
+                arguments(
+                        DataSetComparisonRule.IS_EQUAL_TO,
+                        List.of(Map.of(COL1, VAL1, COL2, VAL1)),
+                        List.of(Map.of(COL1, VAL1, COL2, VAL2))
+                ),
+                arguments(
+                        DataSetComparisonRule.CONTAINS,
+                        List.of(Map.of(COL1, VAL1, COL2, VAL1)),
+                        List.of(Map.of(COL1, VAL1, COL2, VAL2))
+                ),
+                arguments(
+                        DataSetComparisonRule.CONTAINS,
+                        List.of(Map.of(COL1, VAL1, COL2, VAL1), Map.of(COL1, VAL1, COL2, VAL3)),
+                        List.of(Map.of(COL1, VAL1, COL2, VAL2))
+                )
+        );
     }
 
     @SuppressWarnings("unchecked")
-    @Test
-    void shouldCompareDataVsExamplesTableAndPostReportFailedChecks()
+    @ParameterizedTest
+    @MethodSource("notMatchingDataSets")
+    void shouldCompareDataVsExamplesTableAndPostReportFailedChecks(DataSetComparisonRule comparisonRule,
+            List<Map<String, Object>> leftDataSet, List<Map<String, String>> rightDataSet)
     {
-        when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
+        when(softAssert.assertTrue(comparisonRule.getAssertionDescription(), false)).thenReturn(false);
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
+        mockHashing();
         mockDataSource();
-        databaseSteps.compareData(List.of(Map.of(COL1, VAL1)), Set.of(), DB_KEY, TABLE);
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_PATH), argThat(r -> {
-            List<List<EntryComparisonResult>> results = (List<List<EntryComparisonResult>>) ((Map<?, ?>) r)
-                    .get(RESULTS);
-            List<EntryComparisonResult> firstRowResults = results.get(0);
-            EntryComparisonResult result = firstRowResults.get(0);
-            return 1 == results.size()
-                && 1 == firstRowResults.size()
-                && VAL2.equals(result.getRight())
-                && VAL1.equals(result.getLeft())
-                && !result.isPassed();
-        }),
-               eq(QUERIES_COMPARISON_RESULT));
-        verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, false);
-        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
-                argThat(r -> {
-                    QueriesStatistic statistics = ((Map<String, QueriesStatistic>) r).get(STATISTICS);
-                    QueryStatistic right = statistics.getRight();
-                    QueryStatistic left = statistics.getLeft();
-                    return 1 == statistics.getMismatched()
-                            && 1 == statistics.getTotalRows()
-                            && EMPTY_TIME.equals(right.getExecutionTime())
-                            && EMPTY_TIME.equals(left.getExecutionTime())
-                            && right.getQuery() == null
-                            && left.getQuery() == null
-                            && 1 == right.getRowsQuantity()
-                            && 1 == left.getRowsQuantity()
-                            && 0 == statistics.getMatched()
-                            && 0 == left.getNoPair()
-                            && 0 == right.getNoPair();
-                }), eq(QUERIES_STATISTICS));
+        databaseSteps.compareData(leftDataSet, KEYS, DB_KEY, comparisonRule, rightDataSet);
+        var resultsCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SET_COMPARISON_FTL), resultsCaptor.capture(),
+                eq(DATA_SETS_COMPARISON_TITLE));
+
+        List<List<EntryComparisonResult>> results = (List<List<EntryComparisonResult>>) ((Map<?, ?>) resultsCaptor
+                .getValue()).get(RESULTS);
+        assertEquals(1, results.size());
+        List<EntryComparisonResult> firstRowResults = results.get(0);
+        assertEquals(2, firstRowResults.size());
+        EntryComparisonResult result = firstRowResults.stream().filter(r -> COL2.equals(r.getKey())).findFirst().get();
+        assertEquals(VAL1, result.getLeft());
+        assertEquals(VAL2, result.getRight());
+        assertFalse(result.isPassed());
+
+        verifyQueryStatisticsPublishing(comparisonRule, leftDataSet, rightDataSet, 1, 0);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void verifyQueryStatisticsPublishing(DataSetComparisonRule comparisonRule,
+            List<Map<String, Object>> leftDataSet, List<Map<String, String>> rightDataSet, int expectedMismatched,
+            int expectedMatched)
+    {
+        var statisticsCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL), statisticsCaptor.capture(),
+                eq(DATA_SOURCES_STATISTICS_TITLE));
+        DataSourceStatistics statistics = ((Map<String, DataSourceStatistics>) statisticsCaptor.getValue()).get(
+                STATISTICS);
+        assertEquals(expectedMismatched, statistics.getMismatched());
+        assertEquals(1, statistics.getTotalRows());
+        assertEquals(expectedMatched, statistics.getMatched());
+        assertQueryStatistic(statistics.getLeft(), leftDataSet.size(),
+                comparisonRule == DataSetComparisonRule.CONTAINS ? null : 0L, DB_URL);
+        assertQueryStatistic(statistics.getRight(), rightDataSet.size(), 0L, null);
+    }
+
+    private void assertQueryStatistic(QueryStatistic actual, int expectedRowsQuantity, Long expectedNoPair,
+            String expectedUrl)
+    {
+        assertEquals(EMPTY_TIME, actual.getExecutionTime());
+        assertNull(actual.getQuery());
+        assertEquals(expectedRowsQuantity, actual.getRowsQuantity());
+        assertEquals(expectedNoPair, actual.getNoPair());
+        assertEquals(expectedUrl, actual.getUrl());
     }
 
     @Test
@@ -447,9 +498,9 @@ class DatabaseStepsTests
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
         mockDataSource(QUERY, DB_KEY, mockResultSet(COL1, VAL2));
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
-        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, TABLE);
-        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
-                any(Map.class), eq(QUERIES_STATISTICS));
+        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, TABLE);
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
+                any(Map.class), eq(DATA_SOURCES_STATISTICS_TITLE));
         verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, true);
     }
 
@@ -468,9 +519,9 @@ class DatabaseStepsTests
         when(dataSource.getConnection()).thenReturn(con);
 
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
-        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, TABLE);
-        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
-                any(Map.class), eq(QUERIES_STATISTICS));
+        databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, TABLE);
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
+                any(Map.class), eq(DATA_SOURCES_STATISTICS_TITLE));
         verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, true);
     }
 
@@ -488,14 +539,14 @@ class DatabaseStepsTests
         DriverManagerDataSource dataSource = mockDataSourceRetrieval();
         when(dataSource.getConnection()).thenReturn(con);
 
-        databaseSteps.waitForDataAppearance(
-                Duration.ofSeconds(2), 2, QUERY, DB_KEY, TABLE);
+        databaseSteps.waitForDataAppearance(Duration.ofSeconds(2), 2, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO,
+                TABLE);
         String logMessage = "SQL result data is not equal to expected data in {} records";
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(logMessage, 1), info(logMessage, 1))));
-        verify(attachmentPublisher).publishAttachment(eq(QUERIES_STATISTICS_FTL),
-                any(Map.class), eq(QUERIES_STATISTICS));
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
+                any(Map.class), eq(DATA_SOURCES_STATISTICS_TITLE));
         verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, false);
-        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_PATH), argThat(r -> {
+        verify(attachmentPublisher).publishAttachment(eq(DATA_SET_COMPARISON_FTL), argThat(r -> {
             @SuppressWarnings("unchecked")
             List<List<EntryComparisonResult>> results = (List<List<EntryComparisonResult>>) ((Map<?, ?>) r)
                     .get(RESULTS);
@@ -507,7 +558,7 @@ class DatabaseStepsTests
                 && VAL3.equals(result.getLeft())
                 && !result.isPassed();
         }),
-               eq(QUERIES_COMPARISON_RESULT));
+               eq(DATA_SETS_COMPARISON_TITLE));
     }
 
     @Test
@@ -574,7 +625,7 @@ class DatabaseStepsTests
         return dataSource;
     }
 
-    private ResultSet mockResultSet(String columnName, String value) throws SQLException
+    private static ResultSet mockResultSet(String columnName, String value) throws SQLException
     {
         ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
         when(rsmd.getColumnCount()).thenReturn(1);
@@ -586,7 +637,7 @@ class DatabaseStepsTests
         return rs;
     }
 
-    private ResultSet mockResultSet(String columnName1, String value1, String columnName2, String value2,
+    private static ResultSet mockResultSet(String columnName1, String value1, String columnName2, String value2,
             String columnName3, String value3) throws SQLException
     {
         ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
