@@ -33,6 +33,7 @@
         }
     </style>
 
+    <#outputformat "HTML">
     <#assign left = statistics.left>
     <#assign right = statistics.right>
     <div class="panel-group" id="accordion">
@@ -114,6 +115,7 @@
                 </div>
         </div>
     </div>
+    </#outputformat>
 
     <script src="../../webjars/jquery/2.1.1/jquery.min.js"></script>
     <script src="../../webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
