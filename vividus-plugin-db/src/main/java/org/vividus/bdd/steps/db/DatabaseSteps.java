@@ -40,8 +40,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -225,27 +223,30 @@ public class DatabaseSteps
      *   <li><code>NOOP</code> (by default)</li>
      *   <li><code>DISTINCT</code></li>
      * </ul>
-     * @see <a href="https://en.wikipedia.org/wiki/ISO_8601#Durations">Durations format</a>
-     * @param leftSqlQuery baseline SQL query
-     * @param leftDbKey key identifying the database connection for the left data set
-     * @param rightSqlQuery checkpoint SQL query
-     * @param rightDbKey key identifying the database connection for the right data set
-     * @param keys comma-separated list of column's names to map resulting tables rows
+     *
+     * @param leftSqlQuery   baseline SQL query
+     * @param leftDbKey      key identifying the database connection for the left data set
+     * @param comparisonRule The data set comparison rule: "is equal to" or "contains"
+     * @param rightSqlQuery  checkpoint SQL query
+     * @param rightDbKey     key identifying the database connection for the right data set
+     * @param keys           comma-separated list of column's names to map resulting tables rows
      * @throws InterruptedException in case of thread interruption
-     * @throws ExecutionException in case of any exception during DB query
-     * @throws TimeoutException in case when timeout to execute DB query expires
+     * @throws ExecutionException   in case of any exception during DB query
+     * @throws TimeoutException     in case when timeout to execute DB query expires
+     * @see <a href="https://en.wikipedia.org/wiki/ISO_8601#Durations">Durations format</a>
      */
-    @Then("data from `$leftSqlQuery` executed against `$leftDbKey` is equal to data from `$rightSqlQuery` executed"
+    @Then("data from `$leftSqlQuery` executed against `$leftDbKey` $comparisonRule data from `$rightSqlQuery` executed"
             + " against `$rightDbKey` matching rows using keys:$keys")
-    public void compareData(String leftSqlQuery, String leftDbKey, String rightSqlQuery, String rightDbKey,
-            Set<String> keys) throws InterruptedException, ExecutionException, TimeoutException
+    public void compareData(String leftSqlQuery, String leftDbKey, DataSetComparisonRule comparisonRule,
+            String rightSqlQuery, String rightDbKey, Set<String> keys)
+            throws InterruptedException, ExecutionException, TimeoutException
     {
         JdbcTemplate leftJdbcTemplate = getJdbcTemplate(leftDbKey);
         JdbcTemplate rightJdbcTemplate = getJdbcTemplate(rightDbKey);
-        QueriesStatistic queriesStatistic = new QueriesStatistic(leftJdbcTemplate, rightJdbcTemplate);
-        QueryStatistic left = queriesStatistic.getLeft();
+        DataSourceStatistics dataSourceStatistics = new DataSourceStatistics(leftJdbcTemplate, rightJdbcTemplate);
+        QueryStatistic left = dataSourceStatistics.getLeft();
         left.setQuery(leftSqlQuery);
-        QueryStatistic right = queriesStatistic.getRight();
+        QueryStatistic right = dataSourceStatistics.getRight();
         right.setQuery(rightSqlQuery);
         CompletableFuture<ListMultimap<Object, Map<String, Object>>> leftData =
                 createCompletableRequest(leftJdbcTemplate, leftSqlQuery, keys, left);
@@ -253,47 +254,51 @@ public class DatabaseSteps
                 createCompletableRequest(rightJdbcTemplate, rightSqlQuery, keys, right);
 
         List<List<EntryComparisonResult>> result = leftData.thenCombine(rightData,
-                (leftQueryResult, rightQueryResult) -> compareData(queriesStatistic, leftQueryResult, rightQueryResult))
+                (leftResult, rightResult) -> compareData(comparisonRule, dataSourceStatistics, leftResult, rightResult))
                 .get(dbQueryTimeout.toMillis(), TimeUnit.MILLISECONDS);
 
-        verifyComparisonResult(queriesStatistic, result);
+        verifyComparisonResult(comparisonRule, dataSourceStatistics, result);
     }
 
     /**
-     * The step waits until the <code>leftSqlQuery</code> returns the data equal to the right examples table row
+     * The step waits until the <code>leftSqlQuery</code> returns the data which matches to the right examples table
+     * rows according the specified comparison rule
      * The order of columns is ignored
      * Actions performed in the step:
      * <ul>
      *     <li>run the <code>leftSqlQuery</code></li>
      *     <li>compares the response with the examples table row</li>
      *     <li>sleep for the <code>duration</code></li>
-     *     <li>repeat all of the above until there are no more retry attempts or the response is equal
-     *     to the examples table row</li>
+     *     <li>repeat all of the above until there are no more retry attempts or the result set matches
+     *     to the right examples table rows according the specified comparison rule</li>
      * </ul>
-     * @param duration The time gap between two queries
-     * @param retryTimes How many times request will be retried; duration/retryTimes=timeout between requests
-     * @param leftSqlQuery SQL query to execute
-     * @param leftDbKey Key identifying the database connection
-     * @param rightTable Rows to compare data against
+     *
+     * @param duration       The time gap between two queries
+     * @param retryTimes     How many times request will be retried; duration/retryTimes=timeout between requests
+     * @param leftSqlQuery   SQL query to execute
+     * @param leftDbKey      Key identifying the database connection
+     * @param comparisonRule The data set comparison rule: "is equal to" or "contains"
+     * @param rightTable     Rows to compare data against
      */
     @When("I wait for '$duration' duration retrying $retryTimes times while data from `$leftSqlQuery`"
-            + " executed against `$leftDbKey` is equal to data from:$rightTable")
+            + " executed against `$leftDbKey` $comparisonRule data from:$rightTable")
     public void waitForDataAppearance(Duration duration, int retryTimes, String leftSqlQuery, String leftDbKey,
-            List<Map<String, String>> rightTable)
+            DataSetComparisonRule comparisonRule, List<Map<String, String>> rightTable)
     {
         JdbcTemplate leftJdbcTemplate = getJdbcTemplate(leftDbKey);
-        QueriesStatistic statistics = new QueriesStatistic(leftJdbcTemplate);
+        DataSourceStatistics statistic = new DataSourceStatistics(leftJdbcTemplate);
+        statistic.getLeft().setQuery(leftSqlQuery);
         ListMultimap<Object, Map<String, Object>> rightData = hashMap(Set.of(), rightTable);
-        statistics.getRight().setRowsQuantity(rightData.size());
+        statistic.getRight().setRowsQuantity(rightData.size());
 
         DurationBasedWaiter waiter = new DurationBasedWaiter(new WaitMode(duration, retryTimes));
         List<List<EntryComparisonResult>> comparisonResult = waiter.wait(
             () -> {
                 List<Map<String, Object>> left = leftJdbcTemplate.queryForList(leftSqlQuery);
-                statistics.getLeft().setRowsQuantity(left.size());
+                statistic.getLeft().setRowsQuantity(left.size());
                 ListMultimap<Object, Map<String, Object>> leftData = hashMap(Set.of(),
                         left.stream().map(this::convertValuesToString));
-                return compareData(statistics, leftData, rightData);
+                return compareData(comparisonRule, statistic, leftData, rightData);
             },
             result -> {
                 boolean empty = result.isEmpty();
@@ -305,17 +310,18 @@ public class DatabaseSteps
                 return empty;
             }
         );
-        verifyComparisonResult(statistics, filterPassedChecks(comparisonResult));
+        verifyComparisonResult(comparisonRule, statistic, filterPassedChecks(comparisonResult));
     }
 
-    private void verifyComparisonResult(QueriesStatistic statistics, List<List<EntryComparisonResult>> result)
+    private void verifyComparisonResult(DataSetComparisonRule comparisonRule, DataSourceStatistics dataSourceStatistics,
+            List<List<EntryComparisonResult>> result)
     {
-        attachmentPublisher.publishAttachment("queries-statistics.ftl", Map.of("statistics", statistics),
-                "Queries statistics");
-        if (!softAssert.assertTrue("Query results are equal", result.isEmpty()))
+        attachmentPublisher.publishAttachment("data-sources-statistics.ftl", Map.of("statistics", dataSourceStatistics),
+                "Data sources statistics");
+        if (!softAssert.assertTrue(comparisonRule.getAssertionDescription(), result.isEmpty()))
         {
             attachmentPublisher.publishAttachment("/templates/maps-comparison-table.ftl", Map.of("results", result),
-                    "Queries comparison result");
+                    "Data sets comparison");
         }
     }
 
@@ -326,39 +332,43 @@ public class DatabaseSteps
      * <br>When I execute SQL query `${sqlQuery}` against `$dbKey` and save result to story variable `data`
      * <br>Then `${data}` matching rows using `` from `$dbKey` is equal to data from:
      * <br>tables/data.table
-     * @param leftData saved by step:
-     * When I execute SQL query `$sqlQuery` against `$dbKey` and save result to $scopes variable `$data`"
-     * @param keys comma-separated list of column's names to map resulting tables rows
-     * (could be empty - all columns will be used)
-     * @param leftDbKey key identifying the database connection used to get data
-     * @param rightTable rows to compare data against
+     *
+     * @param leftData       saved by step:
+     *                       When I execute SQL query `$sqlQuery` against `$dbKey` and save result to $scopes
+     *                       variable `$data`"
+     * @param keys           comma-separated list of column's names to map resulting tables rows
+     *                       (could be empty - all columns will be used)
+     * @param leftDbKey      key identifying the database connection used to get data
+     * @param comparisonRule The data set comparison rule: "is equal to" or "contains"
+     * @param rightTable     rows to compare data against
      */
-    @Then("`$leftData` matching rows using `$keys` from `$leftDbKey` is equal to data from:$rightTable")
+    @Then("`$leftData` matching rows using `$keys` from `$leftDbKey` $comparisonRule data from:$rightTable")
     public void compareData(List<Map<String, Object>> leftData, Set<String> keys, String leftDbKey,
-            List<Map<String, String>> rightTable)
+            DataSetComparisonRule comparisonRule, List<Map<String, String>> rightTable)
     {
         JdbcTemplate leftJdbcTemplate = getJdbcTemplate(leftDbKey);
-        QueriesStatistic statistics = new QueriesStatistic(leftJdbcTemplate);
+        DataSourceStatistics statistics = new DataSourceStatistics(leftJdbcTemplate);
         statistics.getLeft().setRowsQuantity(leftData.size());
         ListMultimap<Object, Map<String, Object>> left = hashMap(keys,
                 leftData.stream().map(this::convertValuesToString));
         ListMultimap<Object, Map<String, Object>> right = hashMap(keys, rightTable);
         statistics.getRight().setRowsQuantity(right.size());
-        List<List<EntryComparisonResult>> result = compareData(statistics, left, right);
-        verifyComparisonResult(statistics, filterPassedChecks(result));
+        List<List<EntryComparisonResult>> result = compareData(comparisonRule, statistics, left, right);
+        verifyComparisonResult(comparisonRule, statistics, filterPassedChecks(result));
     }
 
-    private List<List<EntryComparisonResult>> compareData(QueriesStatistic queriesStatistic,
-            ListMultimap<Object, Map<String, Object>> leftData, ListMultimap<Object, Map<String, Object>> rightData)
+    private List<List<EntryComparisonResult>> compareData(DataSetComparisonRule comparisonRule,
+            DataSourceStatistics dataSourceStatistics, ListMultimap<Object, Map<String, Object>> leftData,
+            ListMultimap<Object, Map<String, Object>> rightData)
     {
         List<Pair<Map<String, Object>, Map<String, Object>>> comparison = new ArrayList<>();
-        Stream.concat(leftData.keySet().stream(), rightData.keySet().stream()).distinct().forEach(key ->
+        comparisonRule.collectComparisonKeys(leftData, rightData).forEach(key ->
         {
             List<Map<String, Object>> left = leftData.get(key);
             List<Map<String, Object>> right = rightData.get(key);
             int leftSize = left.size();
             int rightSize = right.size();
-            int size = duplicateKeysStrategy.getTargetSize(leftSize, rightSize);
+            int size = duplicateKeysStrategy.getTargetSize(comparisonRule, leftSize, rightSize);
             for (int i = 0; i < size; i++)
             {
                 Map<String, Object> leftValue = i < leftSize ? left.get(i) : Map.of();
@@ -366,21 +376,14 @@ public class DatabaseSteps
                 comparison.add(Pair.of(leftValue, rightValue));
             }
         });
-        queriesStatistic.getLeft().setNoPair(comparison.stream()
-                .map(Pair::getRight)
-                .filter(Map::isEmpty)
-                .count());
-        queriesStatistic.getRight().setNoPair(comparison.stream()
-                .map(Pair::getLeft)
-                .filter(Map::isEmpty)
-                .count());
+        comparisonRule.fillStatistics(dataSourceStatistics, comparison);
         List<List<EntryComparisonResult>> comparisonResult = comparison.stream()
                 .parallel()
                 .map(p -> ComparisonUtils.compareMaps(p.getLeft(), p.getRight()))
                 .collect(Collectors.toList());
         List<List<EntryComparisonResult>> mismatchedRows = filterPassedChecks(comparisonResult);
-        queriesStatistic.setMismatched(mismatchedRows.size());
-        queriesStatistic.setTotalRows(comparisonResult.size());
+        dataSourceStatistics.setMismatched(mismatchedRows.size());
+        dataSourceStatistics.setTotalRows(comparisonResult.size());
         return mismatchedRows.size() > diffLimit ? mismatchedRows.subList(0, diffLimit) : mismatchedRows;
     }
 
@@ -464,134 +467,5 @@ public class DatabaseSteps
     public void setDiffLimit(int diffLimit)
     {
         this.diffLimit = diffLimit;
-    }
-
-    public static final class QueriesStatistic
-    {
-        private long totalRows;
-        private long mismatched;
-        private final QueryStatistic left;
-        private final QueryStatistic right;
-
-        private QueriesStatistic(JdbcTemplate leftJdbcTemplate)
-        {
-            left = createQueryStatistic(leftJdbcTemplate);
-            right = new QueryStatistic();
-        }
-
-        private QueriesStatistic(JdbcTemplate leftJdbcTemplate, JdbcTemplate rightJdbcTemplate)
-        {
-            left = createQueryStatistic(leftJdbcTemplate);
-            right = createQueryStatistic(rightJdbcTemplate);
-        }
-
-        private QueryStatistic createQueryStatistic(JdbcTemplate jdbcTemplate)
-        {
-            String url = ((DriverManagerDataSource) jdbcTemplate.getDataSource()).getUrl();
-            return new QueryStatistic(url);
-        }
-
-        public long getMismatched()
-        {
-            return mismatched;
-        }
-
-        public long getMatched()
-        {
-            return totalRows - mismatched;
-        }
-
-        public void setMismatched(long mismatched)
-        {
-            this.mismatched = mismatched;
-        }
-
-        public long getTotalRows()
-        {
-            return totalRows;
-        }
-
-        public void setTotalRows(long totalRows)
-        {
-            this.totalRows = totalRows;
-        }
-
-        public QueryStatistic getLeft()
-        {
-            return left;
-        }
-
-        public QueryStatistic getRight()
-        {
-            return right;
-        }
-    }
-
-    public static final class QueryStatistic
-    {
-        private final StopWatch stopwatch = new StopWatch();
-        private String url;
-        private long rowsQuantity;
-        private String query;
-        private long noPair;
-
-        private QueryStatistic()
-        {
-        }
-
-        private QueryStatistic(String url)
-        {
-            this.url = url;
-        }
-
-        public void start()
-        {
-            stopwatch.start();
-        }
-
-        public void end()
-        {
-            stopwatch.stop();
-        }
-
-        public String getExecutionTime()
-        {
-            return DurationFormatUtils.formatDurationHMS(stopwatch.getTime());
-        }
-
-        public String getQuery()
-        {
-            return query;
-        }
-
-        public void setQuery(String query)
-        {
-            this.query = query;
-        }
-
-        public long getRowsQuantity()
-        {
-            return rowsQuantity;
-        }
-
-        public void setRowsQuantity(long rowsQuantity)
-        {
-            this.rowsQuantity = rowsQuantity;
-        }
-
-        public long getNoPair()
-        {
-            return noPair;
-        }
-
-        public void setNoPair(long noPair)
-        {
-            this.noPair = noPair;
-        }
-
-        public String getUrl()
-        {
-            return url;
-        }
     }
 }
