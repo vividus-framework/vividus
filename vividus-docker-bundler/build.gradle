@@ -1,5 +1,5 @@
 plugins {
-    id 'com.bmuschko.docker-remote-api' version '7.0.0'
+    id 'com.bmuschko.docker-remote-api' version '7.0.1'
 }
 
 project.description = 'Vividus Docker bundler'
