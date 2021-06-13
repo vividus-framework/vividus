@@ -38,9 +38,8 @@ public class EvalExpressionProcessor extends AbstractExpressionProcessor<String>
     private static final int EVAL_GROUP = 1;
     private static final Map<String, Object> NAMESPACES = Map.of("math", Math.class, "stringUtils", StringUtils.class);
 
-    // ThreadLocal is used as workaround for not released fix of issue https://issues.apache.org/jira/browse/JEXL-241
-    private final ThreadLocal<JexlEngine> jexlEngine = ThreadLocal
-            .withInitial(() -> new JexlBuilder().charset(StandardCharsets.UTF_8).namespaces(NAMESPACES).create());
+    private final JexlEngine jexlEngine = new JexlBuilder().charset(StandardCharsets.UTF_8).namespaces(NAMESPACES)
+            .create();
 
     private final IBddVariableContext bddVariableContext;
 
@@ -54,7 +53,7 @@ public class EvalExpressionProcessor extends AbstractExpressionProcessor<String>
     protected String evaluateExpression(Matcher expressionMatcher)
     {
         String expressionToEvaluate = expressionMatcher.group(EVAL_GROUP);
-        JexlScript jexlScript = jexlEngine.get().createScript(expressionToEvaluate);
+        JexlScript jexlScript = jexlEngine.createScript(expressionToEvaluate);
         return String.valueOf(jexlScript.execute(new JexlBddVariableContext(bddVariableContext)));
     }
 
