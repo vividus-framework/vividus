@@ -1,7 +1,7 @@
 project.description = 'Vividus plugin for REST API testing'
 
 ext.jsonPathVersion = '2.6.0'
-ext.aspectjVersion = '1.9.5'
+ext.aspectjVersion = '1.9.6'
 
 dependencies {
     api project(':vividus-bdd-engine')
