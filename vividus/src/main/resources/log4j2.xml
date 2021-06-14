@@ -33,6 +33,7 @@
         <Logger name="org.vividus.softassert.SoftAssert" level="DEBUG" additivity="false">
             <AppenderRef ref="console" />
             <AppenderRef ref="file" />
+            <AppenderRef ref="AllureLogAppender" level="INFO" />
         </Logger>
         <Logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="INFO" additivity="false">
             <AppenderRef ref="console" />
