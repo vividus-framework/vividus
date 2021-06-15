@@ -138,8 +138,8 @@ class VisualTestingEngineTests
     {
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
+        visualCheck.setAcceptableDiffPercentage(OptionalInt.of(acceptableDiffPercentage));
         mockGetCheckpointScreenshot(visualCheck);
-        visualTestingEngine.setAcceptableDiffPercentage(acceptableDiffPercentage);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
             () -> assertEquals(BASELINE_BASE64, checkResult.getBaseline()),

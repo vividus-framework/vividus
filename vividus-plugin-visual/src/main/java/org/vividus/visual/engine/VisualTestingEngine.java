@@ -74,7 +74,6 @@ public class VisualTestingEngine implements IVisualTestingEngine
     @Override
     public VisualCheckResult compareAgainst(VisualCheck visualCheck) throws IOException
     {
-        visualCheck.getAcceptableDiffPercentage().ifPresent(this::setAcceptableDiffPercentage);
         VisualCheckResult comparisonResult = new VisualCheckResult(visualCheck);
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
         comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
@@ -90,11 +89,12 @@ public class VisualTestingEngine implements IVisualTestingEngine
             baselineScreenshot = EMPTY_SCREENSHOT;
         }
 
+        int diffPercentage = visualCheck.getAcceptableDiffPercentage().orElse(this.acceptableDiffPercentage);
         int comparisonImageSize = calculateComparisonImageSize(baselineScreenshot, checkpoint);
-        ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, comparisonImageSize);
+        ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, comparisonImageSize, diffPercentage);
         comparisonResult.setPassed(!diff.hasDiff());
         comparisonResult.setDiff(imageToBase64(diff.getMarkedImage()));
-        LOGGER.atInfo().addArgument((double) acceptableDiffPercentage)
+        LOGGER.atInfo().addArgument((double) diffPercentage)
                        .addArgument(() -> Math.ceil((double) (diff.getDiffSize() * 100) / (double) comparisonImageSize))
                        .log("The acceptable visual difference percentage is {}% , but actual was {}%");
         if (overrideBaselines)
@@ -104,7 +104,8 @@ public class VisualTestingEngine implements IVisualTestingEngine
         return comparisonResult;
     }
 
-    private ImageDiff findImageDiff(Screenshot expected, Screenshot actual, int comparisonImageSize)
+    private ImageDiff findImageDiff(Screenshot expected, Screenshot actual, int comparisonImageSize,
+            int acceptableDiffPercentage)
     {
         PointsMarkupPolicy pointsMarkupPolicy = new PointsMarkupPolicy();
         pointsMarkupPolicy.setDiffSizeTrigger((int) (comparisonImageSize * acceptableDiffPercentage * 0.01));
