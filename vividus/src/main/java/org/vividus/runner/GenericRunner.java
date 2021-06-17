@@ -53,7 +53,6 @@ public class GenericRunner extends JUnitStories
 
     public GenericRunner()
     {
-        MetadataLogger.drawBanner();
         Vividus.init();
         batchedPathFinder = BeanFactory.getBean(IBatchedPathFinder.class);
         embedder = BeanFactory.getBean(embedderBeanName, Embedder.class);

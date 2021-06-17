@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+import org.vividus.report.MetadataLogger;
 import org.vividus.util.json.JsonPathUtils;
 
 import io.github.classgraph.ClassGraph;
@@ -43,6 +44,7 @@ public final class Vividus
         configureLog4j2();
         createJulToSlf4jBridge();
         configureFreemarkerLogger();
+        MetadataLogger.drawBanner();
         BeanFactory.open();
 
         // Load JsonPathUtils to configure JsonPath SPI
