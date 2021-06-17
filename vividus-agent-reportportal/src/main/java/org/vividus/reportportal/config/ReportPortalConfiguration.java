@@ -18,7 +18,6 @@ package org.vividus.reportportal.config;
 
 import java.util.List;
 
-import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
 import com.epam.reportportal.jbehave.ReportPortalViewGenerator;
 
 import org.jbehave.core.reporters.StoryReporter;
@@ -30,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.vividus.reportportal.config.condition.ReportPortalEnableCondition;
+import org.vividus.reportportal.jbehave.AdaptedReportPortalStoryReporter;
 import org.vividus.reportportal.listener.AssertionFailureListener;
 
 @Conditional(ReportPortalEnableCondition.class)
@@ -43,7 +43,7 @@ public class ReportPortalConfiguration implements InitializingBean
     @Override
     public void afterPropertiesSet()
     {
-        storyReporters.add(new ReportPortalStoryReporter());
+        storyReporters.add(new AdaptedReportPortalStoryReporter());
     }
 
     @Bean
