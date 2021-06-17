@@ -9,6 +9,9 @@
         </ReportPortalLog4j2Appender>
     </Appenders>
     <Loggers>
+        <Logger name="org.vividus.reportportal.listener.AttachmentListener" level="INFO" additivity="false">
+            <AppenderRef ref="ReportPortalAppender"/>
+        </Logger>
         <Root level="info">
             <AppenderRef ref="ReportPortalAppender" />
         </Root>
