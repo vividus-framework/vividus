@@ -5,19 +5,13 @@
        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
        default-lazy-init="true">
 
-    <bean id="caching-credentials" class="org.vividus.http.context.CachingCredentialsHttpContextFactory" >
-        <constructor-arg index="0" value="${jira.endpoint}"/>
-        <constructor-arg index="1" value="${jira.username}"/>
-        <constructor-arg index="2" value="${jira.password}"/>
-    </bean>
-
-    <bean id="noop" class="org.vividus.http.context.NoopHttpContextFactory" />
-
     <bean class="org.vividus.jira.JiraFacade" />
 
     <bean class="org.vividus.jira.JiraClient">
         <constructor-arg index="0" value="${jira.endpoint}" />
-        <constructor-arg index="1">
+        <constructor-arg index="1" value="${jira.username}"/>
+        <constructor-arg index="2" value="${jira.password}"/>
+        <constructor-arg index="3">
             <bean class="org.vividus.http.client.HttpClient" factory-bean="httpClientFactory"
                   factory-method="buildHttpClient">
                 <constructor-arg>
@@ -31,6 +25,5 @@
                 </constructor-arg>
             </bean>
         </constructor-arg>
-        <constructor-arg index="2" ref="${jira.http.context-type}" />
     </bean>
 </beans>

@@ -76,7 +76,7 @@ The Zephyr plugin for Jira has own configurable execution statuses. testExecutio
 
 |===
 
-include::partial$authorization.adoc[]
+include::partial$authentication.adoc[]
 
 == Scenario Meta Attributes
 

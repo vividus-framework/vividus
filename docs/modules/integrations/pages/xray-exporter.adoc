@@ -98,7 +98,7 @@ image::cucumber.png[Cucumber test case view]
 
 |===
 
-include::partial$authorization.adoc[]
+include::partial$authentication.adoc[]
 
 == Scenario Meta Attributes
 

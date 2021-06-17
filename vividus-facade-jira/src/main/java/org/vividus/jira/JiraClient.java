@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,15 @@
 
 package org.vividus.jira;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
@@ -28,9 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
+import org.vividus.http.client.ClientBuilderUtils;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
-import org.vividus.http.context.HttpContextFactory;
 
 public class JiraClient
 {
@@ -38,13 +42,29 @@ public class JiraClient
 
     private final String endpoint;
     private final IHttpClient httpClient;
-    private final HttpContextFactory httpContextFactory;
+    private final Supplier<HttpContext> httpContextFactory;
 
-    public JiraClient(String endpoint, IHttpClient httpClient, HttpContextFactory httpContextFactory)
+    public JiraClient(String endpoint, String username, String password, IHttpClient httpClient)
     {
+        if (username != null && password != null)
+        {
+            this.httpContextFactory = () ->
+            {
+                HttpContext httpContext = HttpClientContext.create();
+                httpContext.setAttribute(HttpClientContext.CREDS_PROVIDER,
+                        ClientBuilderUtils.createCredentialsProvider(username, password));
+                return httpContext;
+            };
+        }
+        else
+        {
+            isTrue(username == null && password == null, "The JIRA %s is missing",
+                    username == null ? "username" : "password");
+            this.httpContextFactory = () -> null;
+        }
+
         this.endpoint = endpoint;
         this.httpClient = httpClient;
-        this.httpContextFactory = httpContextFactory;
     }
 
     public String executeGet(String relativeUrl) throws IOException
@@ -78,8 +98,7 @@ public class JiraClient
 
         LOGGER.atInfo().addArgument(httpRequest::getRequestLine).log("Jira request: {}");
 
-        HttpContext httpContext = httpContextFactory.create();
-        HttpResponse httpResponse = httpClient.execute(httpRequest, httpContext);
+        HttpResponse httpResponse = httpClient.execute(httpRequest, httpContextFactory.get());
         int status = httpResponse.getStatusCode();
         if (status >= HttpStatus.SC_OK && status < HttpStatus.SC_MULTIPLE_CHOICES)
         {
