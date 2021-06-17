@@ -31,6 +31,8 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -38,7 +40,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
@@ -51,6 +55,8 @@ class VisualStepsTests
     private IUiContext uiContext;
     @Mock
     private IAttachmentPublisher attachmentPublisher;
+    @Mock
+    private ISoftAssert softAssert;
 
     @InjectMocks
     private TestVisualSteps visualSteps;
@@ -80,34 +86,37 @@ class VisualStepsTests
         verify(visualCheck).setSearchContext(searchContext);
     }
 
-    @Test
-    void shouldPublishAttachment()
+    @ParameterizedTest
+    @CsvSource(value = {"true, COMPARE_AGAINST", "false, CHECK_INEQUALITY_AGAINST"})
+    void shouldPublishAttachment(boolean passed, VisualActionType action)
     {
         SearchContext searchContext = mock(SearchContext.class);
         VisualCheck visualCheck = mock(VisualCheck.class);
         VisualCheckResult visualCheckResult = mock(VisualCheckResult.class);
+        when(visualCheckResult.getActionType()).thenReturn(action);
         when(uiContext.getSearchContext()).thenReturn(searchContext);
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> visualCheckResult;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
+        when(visualCheckResult.isPassed()).thenReturn(passed);
         assertSame(visualCheckResult, visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
-        InOrder ordered = Mockito.inOrder(attachmentPublisher, visualCheckResult);
+        InOrder ordered = Mockito.inOrder(attachmentPublisher, visualCheckResult, softAssert);
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of("result", visualCheckResult),
                 "Visual comparison");
-        ordered.verify(visualCheckResult).getBaseline();
+        ordered.verify(softAssert).assertTrue("Visual check passed", true);
         verify(visualCheck).setSearchContext(searchContext);
+    }
+
+    @Test
+    void shouldReturnsSoftAssert()
+    {
+        assertSame(softAssert, visualSteps.getSoftAssert());
     }
 
     private static final class TestVisualSteps extends AbstractVisualSteps
     {
-        private TestVisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher)
+        private TestVisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
         {
-            super(uiContext, attachmentPublisher);
-        }
-
-        @Override
-        protected void verifyResult(VisualCheckResult result)
-        {
-            result.getBaseline();
+            super(uiContext, attachmentPublisher, softAssert);
         }
     }
 }

@@ -22,6 +22,20 @@ When I <action> baseline with `context`
 When I change context to the page
 
 
+Scenario: Validation of CHECK_INEQUALITY_AGAINST action
+When I change context to element located `<firstP>`
+When I CHECK_INEQUALITY_AGAINST baseline with `full-page`
+When I change context to the page
+
+
+Scenario: Validation of CHECK_INEQUALITY_AGAINST action with step level parameters
+When I change context to element located `<firstP>`
+When I CHECK_INEQUALITY_AGAINST baseline with `full-page` ignoring:
+|REQUIRED_DIFF_PERCENTAGE|
+|85                      |
+When I change context to the page
+
+
 Scenario: Validation of step When I $actionType baseline with `$name` ignoring:$ignoredElements for full page with element cut
 When I <action> baseline with `full-page-element-cut` ignoring:
 |ELEMENT         |

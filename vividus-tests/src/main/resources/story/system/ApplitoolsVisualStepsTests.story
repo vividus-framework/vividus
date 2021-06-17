@@ -20,6 +20,10 @@ Scenario: Validation of step: 'When I $actionType baseline `$testName` in batch 
 When I change context to element located `<firstP>`
 When I <action> baseline `context` in batch `<batchName>` with Applitools
 
+Scenario: Validation of CHECK_INEQUALITY_AGAINST action
+When I change context to element located `<firstP>`
+When I CHECK_INEQUALITY_AGAINST baseline `full-page` in batch `<batchName>` with Applitools
+
 Scenario: Validation of step: 'When I run visual test with Applitools using:$applitoolsConfigurations' for full page with element cut
 When I change context to the page
 When I run visual test with Applitools using:

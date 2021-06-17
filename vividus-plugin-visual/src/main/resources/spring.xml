@@ -10,6 +10,7 @@
 
     <bean id="visualTestingEngine" class="org.vividus.visual.engine.VisualTestingEngine">
         <property name="acceptableDiffPercentage" value="${web.visual.acceptable-diff-percentage}" />
+        <property name="requiredDiffPercentage" value="${web.visual.required-diff-percentage}" />
         <property name="overrideBaselines" value="${web.visual.override-baselines}" />
     </bean>
 
