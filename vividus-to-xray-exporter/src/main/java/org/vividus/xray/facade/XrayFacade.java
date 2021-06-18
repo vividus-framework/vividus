@@ -113,7 +113,7 @@ public class XrayFacade
 
     private void checkIfIssueEditable(String issueKey) throws IOException, NonEditableIssueStatusException
     {
-        String status = jiraFacade.getIssueStatus(issueKey);
+        String status = jiraFacade.getIssue(issueKey).getStatus();
 
         if (editableStatuses.stream().noneMatch(s -> StringUtils.equalsIgnoreCase(s, status)))
         {

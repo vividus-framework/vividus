@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,31 @@
 
 package org.vividus.softassert.issue;
 
+import java.util.Map;
+
 public interface IIssueStateProvider
 {
-    String getIssueStatus(String issue);
+    IssueState getIssueState(String instance, String issue);
 
-    String getIssueResolution(String issue);
+    class IssueState
+    {
+        private final boolean fixed;
+        private final Map<String, String> details;
+
+        public IssueState(boolean fixed, Map<String, String> details)
+        {
+            this.fixed = fixed;
+            this.details = details;
+        }
+
+        public boolean isFixed()
+        {
+            return fixed;
+        }
+
+        public Map<String, String> getDetails()
+        {
+            return details;
+        }
+    }
 }

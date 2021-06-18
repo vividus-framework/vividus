@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,13 @@ package org.vividus.softassert.formatter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.google.common.base.Joiner;
 
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
@@ -29,7 +33,8 @@ import org.vividus.softassert.util.StackTraceFilter;
 
 public class AssertionFormatter implements IAssertionFormatter
 {
-    private static final char DOT_CHAR = '.';
+    private static final String SEPARATOR = ". ";
+
     private StackTraceFilter stackTraceFilter;
 
     @Override
@@ -38,21 +43,16 @@ public class AssertionFormatter implements IAssertionFormatter
         StringBuilder message = new StringBuilder(issue.isPotentiallyKnown() ? "Potentially known" : "Known")
                 .append(" issue: ")
                 .append(issue.getIdentifier())
-                .append(" (Type: ")
-                .append(issue.getType())
-                .append(DOT_CHAR);
-        String status = issue.getStatus();
-        if (status != null)
-        {
-            message.append(" Status: ").append(status);
-        }
-        String resolution = issue.getResolution();
-        if (resolution != null)
-        {
-            message.append(DOT_CHAR).append(" Resolution: ").append(resolution);
-        }
-        message.append("). ").append(description);
-        return message.toString();
+                .append(" (");
+
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("Type", issue.getType());
+        details.putAll(issue.getIssueDetails());
+
+        return message.append(Joiner.on(SEPARATOR).withKeyValueSeparator(": ").join(details).strip())
+                      .append("). ")
+                      .append(description)
+                      .toString();
     }
 
     @Override

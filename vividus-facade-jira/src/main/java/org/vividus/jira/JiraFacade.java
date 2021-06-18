@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.vividus.jira.databind.IssueLinkSerializer;
+import org.vividus.jira.databind.JiraIssueDeserializer;
 import org.vividus.jira.model.IssueLink;
-import org.vividus.jira.model.JiraEntity;
+import org.vividus.jira.model.JiraIssue;
 import org.vividus.jira.model.Project;
-import org.vividus.util.json.JsonPathUtils;
 
 public class JiraFacade
 {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .registerModule(new SimpleModule().addSerializer(IssueLink.class, new IssueLinkSerializer()))
+            .registerModule(new SimpleModule().addSerializer(IssueLink.class, new IssueLinkSerializer())
+                                              .addDeserializer(JiraIssue.class, new JiraIssueDeserializer()))
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private static final String REST_API_ENDPOINT = "/rest/api/latest/";
@@ -62,20 +63,14 @@ public class JiraFacade
         jiraClient.executePost("/rest/api/latest/issueLink", createLinkRequest);
     }
 
-    public String getIssueStatus(String issueKey) throws IOException
-    {
-        String issue = jiraClient.executeGet(ISSUE_ENDPOINT + issueKey);
-        return JsonPathUtils.getData(issue, "$.fields.status.name");
-    }
-
     public Project getProject(String projectKey) throws IOException
     {
         return getJiraEntity("project/", projectKey, Project.class);
     }
 
-    public JiraEntity getIssue(String issueKey) throws IOException
+    public JiraIssue getIssue(String issueKey) throws IOException
     {
-        return getJiraEntity(ISSUE, issueKey, JiraEntity.class);
+        return getJiraEntity(ISSUE, issueKey, JiraIssue.class);
     }
 
     private <T> T getJiraEntity(String relativeUrl, String entityKey, Class<T> entityType) throws IOException

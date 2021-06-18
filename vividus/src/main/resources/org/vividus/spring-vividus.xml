@@ -11,8 +11,6 @@
 
     <bean id="eventBus" class="com.google.common.eventbus.EventBus" />
 
-    <bean id="issueStateProvider" class="org.vividus.bdd.issue.IssueStateProvider" />
-
     <bean id="testInfoProvider" class="org.vividus.bdd.issue.TestInfoProvider">
         <property name="bddRunContext" ref="bddRunContext" />
     </bean>

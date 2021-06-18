@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class KnownIssueIdentifier
 {
     private KnownIssueType type;
+    private String bts;
     private Pattern testSuiteCompiledPattern;
     private Pattern testCaseCompiledPattern;
     private Pattern testStepCompiledPattern;
@@ -42,6 +43,16 @@ public class KnownIssueIdentifier
     public void setType(KnownIssueType type)
     {
         this.type = type;
+    }
+
+    public String getBts()
+    {
+        return bts;
+    }
+
+    public void setBts(String bts)
+    {
+        this.bts = bts;
     }
 
     public void setTestSuitePattern(String testSuitePattern)

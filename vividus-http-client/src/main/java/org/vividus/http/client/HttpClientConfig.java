@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ public class HttpClientConfig
     private String cookieSpec;
     private HttpRequestRetryHandler httpRequestRetryHandler;
     private ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy;
+    private boolean preemptiveAuthenticationEnabled;
 
     public boolean hasBaseUrl()
     {
@@ -297,5 +298,15 @@ public class HttpClientConfig
     public void setServiceUnavailableRetryStrategy(ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy)
     {
         this.serviceUnavailableRetryStrategy = serviceUnavailableRetryStrategy;
+    }
+
+    public boolean isPreemptiveAuthenticationEnabled()
+    {
+        return preemptiveAuthenticationEnabled;
+    }
+
+    public void setPreemptiveAuthenticationEnabled(boolean preemptiveAuthenticationEnabled)
+    {
+        this.preemptiveAuthenticationEnabled = preemptiveAuthenticationEnabled;
     }
 }

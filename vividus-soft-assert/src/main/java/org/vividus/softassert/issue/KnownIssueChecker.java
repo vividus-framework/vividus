@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,21 +22,24 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.vividus.softassert.issue.IIssueStateProvider.IssueState;
 import org.vividus.softassert.model.KnownIssue;
 
 public class KnownIssueChecker implements IKnownIssueChecker
 {
     private final IKnownIssueProvider knownIssueProvider;
     private final KnownIssueDataProvider knownIssueDataProvider;
+    private final Optional<IIssueStateProvider> issueStateProvider;
 
     private ITestInfoProvider testInfoProvider;
-    private IIssueStateProvider issueStateProvider;
     private boolean detectPotentiallyKnownIssues;
 
-    public KnownIssueChecker(IKnownIssueProvider knownIssueProvider, KnownIssueDataProvider knownIssueDataProvider)
+    public KnownIssueChecker(IKnownIssueProvider knownIssueProvider, KnownIssueDataProvider knownIssueDataProvider,
+            Optional<IIssueStateProvider> issueStateProvider)
     {
         this.knownIssueProvider = knownIssueProvider;
         this.knownIssueDataProvider = knownIssueDataProvider;
+        this.issueStateProvider = issueStateProvider;
     }
 
     @Override
@@ -60,24 +63,17 @@ public class KnownIssueChecker implements IKnownIssueChecker
 
     private void setState(KnownIssue knownIssue)
     {
-        if (issueStateProvider != null)
+        issueStateProvider.ifPresent(stateProider ->
         {
-            knownIssue.setStatus(issueStateProvider.getIssueStatus(knownIssue.getIdentifier()));
-            if (knownIssue.isClosed())
-            {
-                knownIssue.setResolution(issueStateProvider.getIssueResolution(knownIssue.getIdentifier()));
-            }
-        }
+            IssueState issueState = stateProider.getIssueState(knownIssue.getBts(), knownIssue.getIdentifier());
+            knownIssue.setFixed(issueState.isFixed());
+            knownIssue.setIssueDetails(issueState.getDetails());
+        });
     }
 
     public void setTestInfoProvider(ITestInfoProvider testInfoProvider)
     {
         this.testInfoProvider = testInfoProvider;
-    }
-
-    public void setIssueStateProvider(IIssueStateProvider issueStateProvider)
-    {
-        this.issueStateProvider = issueStateProvider;
     }
 
     public void setDetectPotentiallyKnownIssues(boolean detectPotentiallyKnownIssues)

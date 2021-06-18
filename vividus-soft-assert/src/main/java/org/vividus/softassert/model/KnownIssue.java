@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.softassert.model;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Objects;
 
 import org.vividus.softassert.issue.KnownIssueIdentifier;
@@ -26,20 +27,19 @@ public class KnownIssue implements Serializable
 {
     private static final long serialVersionUID = 5419047883822146063L;
 
-    private static final String FIXED_ISSUE_STATUSES_STRING = "closed";
-    private static final String FIXED_ISSUE_RESOLUTIONS_STRING = "fixed|done";
-
     private final String identifier;
+    private final String bts;
     private final KnownIssueType type;
     private final boolean potentiallyKnown;
     private final boolean failTestCaseFast;
     private final boolean failTestSuiteFast;
-    private String status;
-    private String resolution;
+    private boolean fixed;
+    private Map<String, String> issueDetails;
 
     public KnownIssue(String identifier, KnownIssueIdentifier issueIdentifier, boolean potentiallyKnown)
     {
         this.identifier = identifier;
+        this.bts = issueIdentifier.getBts();
         this.type = issueIdentifier.getType();
         this.failTestCaseFast = issueIdentifier.isFailTestCaseFast();
         this.failTestSuiteFast = issueIdentifier.isFailTestSuiteFast();
@@ -61,35 +61,29 @@ public class KnownIssue implements Serializable
         return potentiallyKnown;
     }
 
-    public String getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(String status)
-    {
-        this.status = status;
-    }
-
-    public String getResolution()
-    {
-        return resolution;
-    }
-
-    public void setResolution(String resolution)
-    {
-        this.resolution = resolution;
-    }
-
-    public boolean isClosed()
-    {
-        return status != null && status.length() > 0 && FIXED_ISSUE_STATUSES_STRING.contains(status.toLowerCase());
-    }
-
     public boolean isFixed()
     {
-        return isClosed() && resolution != null && resolution.length() > 0
-                && FIXED_ISSUE_RESOLUTIONS_STRING.contains(resolution.toLowerCase());
+        return fixed;
+    }
+
+    public void setFixed(boolean fixed)
+    {
+        this.fixed = fixed;
+    }
+
+    public Map<String, String> getIssueDetails()
+    {
+        return issueDetails;
+    }
+
+    public void setIssueDetails(Map<String, String> issueDetails)
+    {
+        this.issueDetails = issueDetails;
+    }
+
+    public String getBts()
+    {
+        return bts;
     }
 
     public boolean isFailTestCaseFast()
@@ -105,7 +99,7 @@ public class KnownIssue implements Serializable
     @Override
     public int hashCode()
     {
-        return Objects.hash(identifier, type, potentiallyKnown, failTestCaseFast, failTestSuiteFast, status);
+        return Objects.hash(identifier, type, potentiallyKnown, failTestCaseFast, failTestSuiteFast);
     }
 
     @Override
@@ -128,6 +122,6 @@ public class KnownIssue implements Serializable
                 && potentiallyKnown == other.potentiallyKnown
                 && failTestCaseFast == other.failTestCaseFast
                 && failTestSuiteFast == other.failTestSuiteFast
-                && Objects.equals(status, other.status) && type == other.type;
+                && type == other.type;
     }
 }

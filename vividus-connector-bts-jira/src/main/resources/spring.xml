@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+        default-lazy-init="true" >
+
+    <import resource="classpath:/org/vividus/jira/spring.xml" />
+
+    <bean class="org.vividus.jira.connector.JiraIssueStateProvider" >
+        <constructor-arg index="0" value="${known-issue.statuses}"/>
+        <constructor-arg index="1" value="${known-issue.resolutions}"/>
+    </bean>
+
+    <bean class="org.vividus.jira.connector.JiraFacadeProvider" >
+        <constructor-arg index="0">
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="bts." />
+                <constructor-arg value="org.vividus.jira.connector.JiraConfiguration" />
+            </bean>
+        </constructor-arg>
+    </bean>
+</beans>

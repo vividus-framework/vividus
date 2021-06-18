@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,30 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.issue;
+package org.vividus.jira.model;
 
-import org.vividus.softassert.issue.IIssueStateProvider;
-
-public class IssueStateProvider implements IIssueStateProvider
+public class JiraIssue extends JiraEntity
 {
-    private static final String UNKNOWN = "UNKNOWN";
+    private String status;
+    private String resolution;
 
-    @Override
-    public String getIssueStatus(String issue)
+    public String getStatus()
     {
-        return UNKNOWN;
+        return status;
     }
 
-    @Override
-    public String getIssueResolution(String issue)
+    public void setStatus(String status)
     {
-        return UNKNOWN;
+        this.status = status;
+    }
+
+    public String getResolution()
+    {
+        return resolution;
+    }
+
+    public void setResolution(String resolution)
+    {
+        this.resolution = resolution;
     }
 }

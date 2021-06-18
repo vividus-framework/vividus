@@ -1,0 +1,12 @@
+project.description = 'Vividus bug tracking system connector for JIRA'
+
+dependencies {
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-facade-jira')
+    implementation project(':vividus-http-client')
+    implementation project(':vividus-util')
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+}

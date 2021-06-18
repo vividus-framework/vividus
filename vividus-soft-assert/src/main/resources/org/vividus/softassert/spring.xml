@@ -10,7 +10,6 @@
         <property name="knownIssueChecker">
             <bean class="org.vividus.softassert.issue.KnownIssueChecker">
                 <property name="testInfoProvider" ref="testInfoProvider" />
-                <property name="issueStateProvider" ref="issueStateProvider" />
                 <property name="detectPotentiallyKnownIssues" value="${known-issue-provider.detect-potentially-known-issues}" />
             </bean>
         </property>
