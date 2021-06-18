@@ -4,6 +4,7 @@ dependencies {
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-plugin-web-app')
     implementation project(':vividus-reporter')
+    implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)

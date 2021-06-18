@@ -31,6 +31,7 @@ public class VisualCheck
     private String baselineName;
     private VisualActionType action;
     private OptionalInt acceptableDiffPercentage = OptionalInt.empty();
+    private OptionalInt requiredDiffPercentage = OptionalInt.empty();
     private Map<IgnoreStrategy, Set<Locator>> elementsToIgnore = Map.of();
     private Optional<ScreenshotConfiguration> screenshotConfiguration = Optional.empty();
     private SearchContext searchContext;
@@ -94,5 +95,15 @@ public class VisualCheck
     public void setSearchContext(SearchContext searchContext)
     {
         this.searchContext = searchContext;
+    }
+
+    public OptionalInt getRequiredDiffPercentage()
+    {
+        return requiredDiffPercentage;
+    }
+
+    public void setRequiredDiffPercentage(OptionalInt requiredDiffPercentage)
+    {
+        this.requiredDiffPercentage = requiredDiffPercentage;
     }
 }

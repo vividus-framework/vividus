@@ -49,23 +49,22 @@ public class VisualSteps extends AbstractVisualSteps
     private static final Type SET_BY = new TypeToken<Set<Locator>>() { }.getType();
 
     private static final String ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME = "ACCEPTABLE_DIFF_PERCENTAGE";
+    private static final String REQUIRED_DIFF_PERCENTAGE_COLUMN_NAME = "REQUIRED_DIFF_PERCENTAGE";
 
     private final IVisualTestingEngine visualTestingEngine;
-    private final ISoftAssert softAssert;
     private final IVisualCheckFactory visualCheckFactory;
 
     public VisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher,
             IVisualTestingEngine visualTestingEngine, ISoftAssert softAssert, IVisualCheckFactory visualCheckFactory)
     {
-        super(uiContext, attachmentPublisher);
+        super(uiContext, attachmentPublisher, softAssert);
         this.visualTestingEngine = visualTestingEngine;
-        this.softAssert = softAssert;
         this.visualCheckFactory = visualCheckFactory;
     }
 
     /**
      * Step establishes baseline or compares against existing one.
-     * @param actionType ESTABLISH, COMPARE_AGAINST
+     * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
      * @param name of baseline
      */
     @When("I $actionType baseline with `$name`")
@@ -76,7 +75,7 @@ public class VisualSteps extends AbstractVisualSteps
 
     /**
      * Step establishes baseline or compares against existing one.
-     * @param actionType ESTABLISH, COMPARE_AGAINST
+     * @param actionType ESTABLISH, COMPARE_AGAINST, or CHECK_INEQUALITY_AGAINST
      * @param name of baseline
      * @param screenshotConfiguration to make screenshot
      * Example:<br>
@@ -95,13 +94,13 @@ public class VisualSteps extends AbstractVisualSteps
         execute(check -> {
             try
             {
-                return check.getAction() == VisualActionType.COMPARE_AGAINST
-                                         ? visualTestingEngine.compareAgainst(check)
-                                         : visualTestingEngine.establish(check);
+                return check.getAction() == VisualActionType.ESTABLISH
+                                         ? visualTestingEngine.establish(check)
+                                         : visualTestingEngine.compareAgainst(check);
             }
             catch (IOException | ResourceLoadException e)
             {
-                softAssert.recordFailedAssertion(e);
+                getSoftAssert().recordFailedAssertion(e);
             }
             return null;
         }, visualCheckFactory, "visual-comparison.ftl");
@@ -109,24 +108,26 @@ public class VisualSteps extends AbstractVisualSteps
 
     /**
      * Step establishes baseline or compares against existing one.
-     * @param actionType ESTABLISH, COMPARE_AGAINST
+     * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
      * @param name of baseline
-     * @param ignoredElements examples table of strategies (ELEMENT, AREA) and locators to ignore<br>
+     * @param checkSettings examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`
+     *                      or `REQUIRED_DIFF_PERCANTAGE`<br>
      * Example:<br>
      * |ELEMENT            |AREA                  |<br>
      * |By.xpath(.//header)|By.cssSelector(footer)|
      */
-    @When("I $actionType baseline with `$name` ignoring:$ignoredElements")
-    public void runVisualTests(VisualActionType actionType, String name, ExamplesTable ignoredElements)
+    @When("I $actionType baseline with `$name` ignoring:$checkSettings")
+    public void runVisualTests(VisualActionType actionType, String name, ExamplesTable checkSettings)
     {
-        runVisualTests(() -> visualCheckFactory.create(name, actionType), ignoredElements);
+        runVisualTests(() -> visualCheckFactory.create(name, actionType), checkSettings);
     }
 
     /**
      * Step establishes baseline or compares against existing one.
-     * @param actionType ESTABLISH, COMPARE_AGAINST
+     * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
      * @param name of baseline
-     * @param ignoredElements examples table of strategies (ELEMENT, AREA) and locators to ignore<br>
+     * @param checkSettings examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`
+     *                      or `REQUIRED_DIFF_PERCANTAGE`<br>
      * Example:<br>
      * |ELEMENT            |AREA                  |<br>
      * |By.xpath(.//header)|By.cssSelector(footer)|
@@ -135,38 +136,53 @@ public class VisualSteps extends AbstractVisualSteps
      * |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
      * |By.xpath(.//header)|100           |100           |CEILING       |
      */
-    @When(value = "I $actionType baseline with `$name` ignoring:$ignoredElements using"
+    @When(value = "I $actionType baseline with `$name` ignoring:$checkSettings using"
             + " screenshot configuration:$screenshotConfiguration", priority = 1)
-    public void runVisualTests(VisualActionType actionType, String name, ExamplesTable ignoredElements,
+    public void runVisualTests(VisualActionType actionType, String name, ExamplesTable checkSettings,
             ScreenshotConfiguration screenshotConfiguration)
     {
-        runVisualTests(() -> visualCheckFactory.create(name, actionType, screenshotConfiguration), ignoredElements);
+        runVisualTests(() -> visualCheckFactory.create(name, actionType, screenshotConfiguration), checkSettings);
     }
 
-    private void runVisualTests(Supplier<VisualCheck> visualCheckFactory, ExamplesTable ignoredElements)
+    private void runVisualTests(Supplier<VisualCheck> visualCheckFactory, ExamplesTable checkSettings)
     {
-        int rowsSize = ignoredElements.getRows().size();
+        int rowsSize = checkSettings.getRows().size();
         if (rowsSize != 1)
         {
             throw new IllegalArgumentException("Only one row of locators to ignore supported, actual: "
             + rowsSize);
         }
-        Parameters rowAsParameters = ignoredElements.getRowAsParameters(0);
+        Parameters rowAsParameters = checkSettings.getRowAsParameters(0);
         Map<IgnoreStrategy, Set<Locator>> toIgnore = Stream.of(IgnoreStrategy.values())
                                                       .collect(Collectors.toMap(Function.identity(),
                                                           s -> getLocatorsSet(rowAsParameters, s)));
 
-        OptionalInt acceptableDiffPercentage = rowAsParameters.values()
-                .containsKey(ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME)
-                ? OptionalInt.of(rowAsParameters.valueAs(ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME, Integer.TYPE))
-                : OptionalInt.empty();
-
         performVisualAction(() -> {
             VisualCheck visualCheck = visualCheckFactory.get();
             visualCheck.setElementsToIgnore(toIgnore);
-            visualCheck.setAcceptableDiffPercentage(acceptableDiffPercentage);
+            setDiffPercentage(visualCheck, rowAsParameters);
             return visualCheck;
         });
+    }
+
+    private void setDiffPercentage(VisualCheck visualCheck, Parameters rowAsParameters)
+    {
+        if (visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST)
+        {
+            visualCheck.setRequiredDiffPercentage(getParameter(rowAsParameters, REQUIRED_DIFF_PERCENTAGE_COLUMN_NAME));
+        }
+        else
+        {
+            visualCheck.setAcceptableDiffPercentage(getParameter(rowAsParameters,
+                    ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME));
+        }
+    }
+
+    private OptionalInt getParameter(Parameters rowAsParameters, String paramterName)
+    {
+        return rowAsParameters.values().containsKey(paramterName)
+                ? OptionalInt.of(rowAsParameters.valueAs(paramterName, Integer.TYPE))
+                : OptionalInt.empty();
     }
 
     private Set<Locator> getLocatorsSet(Parameters rowAsParameters, IgnoreStrategy s)
@@ -183,12 +199,12 @@ public class VisualSteps extends AbstractVisualSteps
         }
         if (result.getBaseline() == null)
         {
-            softAssert.recordFailedAssertion(
+            getSoftAssert().recordFailedAssertion(
                     "Unable to find baseline with name: " + result.getBaselineName());
         }
         else
         {
-            softAssert.assertTrue("Visual check passed", result.isPassed());
+            super.verifyResult(result);
         }
     }
 }

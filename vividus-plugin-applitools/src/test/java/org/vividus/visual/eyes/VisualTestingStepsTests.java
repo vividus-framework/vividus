@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,13 @@ class VisualTestingStepsTests
     private static final VisualActionType ESTABLISH = VisualActionType.ESTABLISH;
 
     @Mock private VisualTestingService visualTestingService;
-    @Mock private ISoftAssert softAssert;
     @Mock private ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
+    private final ISoftAssert softAssert = mock(ISoftAssert.class);
     private final IUiContext uiContext = mock(IUiContext.class);
     private final IAttachmentPublisher attachmentPublisher = mock(IAttachmentPublisher.class);
 
     @InjectMocks private final VisualTestingSteps visualTestingSteps = new VisualTestingSteps(uiContext,
-            attachmentPublisher);
+            attachmentPublisher, softAssert);
 
     @BeforeEach
     void setUp()

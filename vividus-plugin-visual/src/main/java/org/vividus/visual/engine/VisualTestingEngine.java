@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 import org.vividus.visual.screenshot.ScreenshotProvider;
@@ -47,6 +48,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private final IBaselineRepository baselineRepository;
 
     private int acceptableDiffPercentage;
+    private int requiredDiffPercentage;
     private boolean overrideBaselines;
 
     public VisualTestingEngine(ScreenshotProvider screenshotProvider,
@@ -89,14 +91,17 @@ public class VisualTestingEngine implements IVisualTestingEngine
             baselineScreenshot = EMPTY_SCREENSHOT;
         }
 
-        int diffPercentage = visualCheck.getAcceptableDiffPercentage().orElse(this.acceptableDiffPercentage);
+        boolean inequalityCheck = visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST;
+        int diffPercentage = calculateDiffPercentage(visualCheck, inequalityCheck);
         int comparisonImageSize = calculateComparisonImageSize(baselineScreenshot, checkpoint);
         ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, comparisonImageSize, diffPercentage);
         comparisonResult.setPassed(!diff.hasDiff());
         comparisonResult.setDiff(imageToBase64(diff.getMarkedImage()));
-        LOGGER.atInfo().addArgument((double) diffPercentage)
+        LOGGER.atInfo()
+                       .addArgument(() -> inequalityCheck ? "required" : "acceptable")
+                       .addArgument((double) diffPercentage)
                        .addArgument(() -> Math.ceil((double) (diff.getDiffSize() * 100) / (double) comparisonImageSize))
-                       .log("The acceptable visual difference percentage is {}% , but actual was {}%");
+                       .log("The {} visual difference percentage is {}% , but actual was {}%");
         if (overrideBaselines)
         {
             baselineRepository.saveBaseline(checkpoint, visualCheck.getBaselineName());
@@ -104,11 +109,20 @@ public class VisualTestingEngine implements IVisualTestingEngine
         return comparisonResult;
     }
 
+    private int calculateDiffPercentage(VisualCheck visualCheck, boolean inequalityCheck)
+    {
+        if (inequalityCheck)
+        {
+            return visualCheck.getRequiredDiffPercentage().orElse(this.requiredDiffPercentage);
+        }
+        return visualCheck.getAcceptableDiffPercentage().orElse(this.acceptableDiffPercentage);
+    }
+
     private ImageDiff findImageDiff(Screenshot expected, Screenshot actual, int comparisonImageSize,
-            int acceptableDiffPercentage)
+            int diffPercentage)
     {
         PointsMarkupPolicy pointsMarkupPolicy = new PointsMarkupPolicy();
-        pointsMarkupPolicy.setDiffSizeTrigger((int) (comparisonImageSize * acceptableDiffPercentage * 0.01));
+        pointsMarkupPolicy.setDiffSizeTrigger((int) (comparisonImageSize * diffPercentage * 0.01));
         ImageDiffer differ = new ImageDiffer().withDiffMarkupPolicy(pointsMarkupPolicy.withDiffColor(DIFF_COLOR));
         return differ.makeDiff(expected, actual);
     }
@@ -133,5 +147,10 @@ public class VisualTestingEngine implements IVisualTestingEngine
     public void setAcceptableDiffPercentage(int acceptableDiffPercentage)
     {
         this.acceptableDiffPercentage = acceptableDiffPercentage;
+    }
+
+    public void setRequiredDiffPercentage(int requiredDiffPercentage)
+    {
+        this.requiredDiffPercentage = requiredDiffPercentage;
     }
 }

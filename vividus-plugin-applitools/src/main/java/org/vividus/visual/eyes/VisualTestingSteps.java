@@ -31,22 +31,20 @@ import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.service.VisualTestingService;
 import org.vividus.visual.model.VisualActionType;
-import org.vividus.visual.model.VisualCheckResult;
 
 public class VisualTestingSteps extends AbstractVisualSteps
 {
     @Inject private VisualTestingService visualTestingService;
-    @Inject private ISoftAssert softAssert;
     @Inject private ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
 
-    public VisualTestingSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher)
+    public VisualTestingSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
     {
-        super(uiContext, attachmentPublisher);
+        super(uiContext, attachmentPublisher, softAssert);
     }
 
     /**
      * Performs visual check on the Applitools service;
-     * @param actionType ESTABLISH or COMPARE_AGAINST
+     * @param actionType ESTABLISH, COMPARE_AGAINST, or CHECK_INEQUALITY_AGAINST
      * @param testName name of the test.
      * @param batchName name of the batch. Batch acts as group of tests.
      */
@@ -182,11 +180,5 @@ public class VisualTestingSteps extends AbstractVisualSteps
     void runApplitoolsTest(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
         execute(visualTestingService::run, () -> applitoolsVisualCheck, "applitools-visual-comparison.ftl");
-    }
-
-    @Override
-    protected void verifyResult(VisualCheckResult result)
-    {
-        softAssert.assertTrue("Visual check passed", result.isPassed());
     }
 }

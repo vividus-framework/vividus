@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -66,6 +68,8 @@ import org.vividus.visual.screenshot.IgnoreStrategy;
 @ExtendWith(MockitoExtension.class)
 class VisualStepsTests
 {
+    private static final String ACCEPTABLE_DIFF_PERCENTAGE = "ACCEPTABLE_DIFF_PERCENTAGE";
+
     private static final Locator DIV_LOCATOR = new Locator(WebLocatorType.XPATH, "//div");
 
     private static final Locator A_LOCATOR = new Locator(WebLocatorType.XPATH, ".//a");
@@ -103,14 +107,15 @@ class VisualStepsTests
         FACTORY.setIndexers(Map.of());
     }
 
-    @Test
-    void shouldAssertCheckResultForCompareAgainstActionAndPublishAttachment() throws IOException
+    @ParameterizedTest
+    @CsvSource(value = {"COMPARE_AGAINST", "CHECK_INEQUALITY_AGAINST"})
+    void shouldAssertCheckResultForCompareAgainstActionAndPublishAttachment(VisualActionType action) throws IOException
     {
-        VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
+        VisualCheck visualCheck = mockVisualCheckFactory(action);
         mockUiContext();
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
         mockCheckResult();
-        visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE);
+        visualSteps.runVisualTests(action, BASELINE);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
         assertEquals(Map.of(), visualCheck.getElementsToIgnore());
         verifyCheckResultPublish();
@@ -151,8 +156,22 @@ class VisualStepsTests
         verifyCheckResultPublish();
     }
 
-    @Test
-    void shouldAssertCheckResultForCompareAgainstActionAndUseStepLevelExclusions() throws IOException
+    private static Stream<Arguments> diffMethodSource()
+    {
+        return Stream.of(
+          Arguments.of(VisualActionType.COMPARE_AGAINST,
+                  (Function<VisualCheck, OptionalInt>) VisualCheck::getAcceptableDiffPercentage,
+                  ACCEPTABLE_DIFF_PERCENTAGE),
+          Arguments.of(VisualActionType.CHECK_INEQUALITY_AGAINST,
+                  (Function<VisualCheck, OptionalInt>) VisualCheck::getRequiredDiffPercentage,
+                  "REQUIRED_DIFF_PERCENTAGE")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("diffMethodSource")
+    void shouldAssertCheckResultAndUseStepLevelSettings(VisualActionType actionType,
+            Function<VisualCheck, OptionalInt> diffValueExtractor, String columnName) throws IOException
     {
         mockUiContext();
         ExamplesTable table = mock(ExamplesTable.class);
@@ -161,13 +180,13 @@ class VisualStepsTests
         when(table.getRowAsParameters(0)).thenReturn(row);
         Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
-        mockRow(row, elementsToIgnore, areasToIgnore, 50);
-        VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
+        mockRow(row, elementsToIgnore, areasToIgnore, 50, columnName);
+        VisualCheck visualCheck = mockVisualCheckFactory(actionType);
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
         mockCheckResult();
-        visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, table);
+        visualSteps.runVisualTests(actionType, BASELINE, table);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
-        assertEquals(OptionalInt.of(50), visualCheck.getAcceptableDiffPercentage());
+        assertEquals(OptionalInt.of(50), diffValueExtractor.apply(visualCheck));
         assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
                 visualCheck.getElementsToIgnore());
         verifyCheckResultPublish();
@@ -183,16 +202,16 @@ class VisualStepsTests
         when(table.getRowAsParameters(0)).thenReturn(row);
         Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
-        mockRow(row, elementsToIgnore, areasToIgnore, 50);
+        mockRow(row, elementsToIgnore, areasToIgnore);
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
         VisualCheck visualCheck = FACTORY.create(BASELINE, compareAgainst);
         when(visualCheckFactory.create(BASELINE, compareAgainst, screenshotConfiguration)).thenReturn(visualCheck);
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
         mockCheckResult();
-        visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, table, screenshotConfiguration);
+        visualSteps.runVisualTests(compareAgainst, BASELINE, table, screenshotConfiguration);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
-        assertEquals(OptionalInt.of(50), visualCheck.getAcceptableDiffPercentage());
+        assertEquals(OptionalInt.empty(), visualCheck.getRequiredDiffPercentage());
         assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
                 visualCheck.getElementsToIgnore());
         verifyCheckResultPublish();
@@ -222,14 +241,18 @@ class VisualStepsTests
         verifyNoInteractions(softAssert, visualTestingEngine, attachmentPublisher);
     }
 
-    private static void mockRow(Parameters row, Set<Locator> elementIgnore, Set<Locator> areaIgnore,
-            int acceptableDiffPercentage)
+    private static void mockRow(Parameters row, Set<Locator> elementIgnore, Set<Locator> areaIgnore)
     {
-        String keyName = "ACCEPTABLE_DIFF_PERCENTAGE";
         mockGettingValue(row, "ELEMENT", elementIgnore);
         mockGettingValue(row, "AREA", areaIgnore);
-        doReturn(Map.of(keyName, "50")).when(row).values();
-        doReturn(acceptableDiffPercentage).when(row).valueAs(keyName, Integer.TYPE);
+    }
+
+    private static void mockRow(Parameters row, Set<Locator> elementIgnore, Set<Locator> areaIgnore,
+            int acceptableDiffPercentage, String columnName)
+    {
+        mockRow(row, elementIgnore, areaIgnore);
+        doReturn(Map.of(columnName, "50")).when(row).values();
+        doReturn(acceptableDiffPercentage).when(row).valueAs(columnName, Integer.TYPE);
     }
 
     private static void mockGettingValue(Parameters row, String name, Set<Locator> result)
