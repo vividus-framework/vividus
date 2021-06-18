@@ -46,6 +46,7 @@ dependencies {
     implementation project(':vividus-plugin-web-app-to-rest-api')
     implementation project(':vividus-plugin-websocket')
     implementation project(':vividus-plugin-xml')
+    implementation project(':vividus-connector-bts-jira')
 
     implementation(group: 'org.postgresql', name: 'postgresql', version: '42.4.0')
     implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.39')

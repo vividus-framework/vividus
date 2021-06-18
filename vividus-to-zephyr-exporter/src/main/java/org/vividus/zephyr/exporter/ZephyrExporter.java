@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
-import org.vividus.jira.model.JiraEntity;
+import org.vividus.jira.model.JiraIssue;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.databind.TestCaseDeserializer;
@@ -78,7 +78,7 @@ public class ZephyrExporter
     private void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
             throws IOException, JiraConfigurationException
     {
-        JiraEntity issue = jiraFacade.getIssue(testCase.getKey());
+        JiraIssue issue = jiraFacade.getIssue(testCase.getKey());
         ZephyrExecution execution = new ZephyrExecution(configuration, issue.getId(), testCase.getStatus());
         OptionalInt executionId;
 

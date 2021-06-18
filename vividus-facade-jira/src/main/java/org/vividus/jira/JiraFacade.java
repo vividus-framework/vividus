@@ -25,15 +25,16 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.vividus.jira.databind.IssueLinkSerializer;
+import org.vividus.jira.databind.JiraIssueDeserializer;
 import org.vividus.jira.model.IssueLink;
-import org.vividus.jira.model.JiraEntity;
+import org.vividus.jira.model.JiraIssue;
 import org.vividus.jira.model.Project;
-import org.vividus.util.json.JsonPathUtils;
 
 public class JiraFacade
 {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .registerModule(new SimpleModule().addSerializer(IssueLink.class, new IssueLinkSerializer()))
+            .registerModule(new SimpleModule().addSerializer(IssueLink.class, new IssueLinkSerializer())
+                                              .addDeserializer(JiraIssue.class, new JiraIssueDeserializer()))
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private static final String REST_API_ENDPOINT = "/rest/api/latest/";
@@ -66,21 +67,15 @@ public class JiraFacade
         jiraClientProvider.getByIssueKey(inwardIssueKey).executePost("/rest/api/latest/issueLink", createLinkRequest);
     }
 
-    public String getIssueStatus(String issueKey) throws IOException, JiraConfigurationException
-    {
-        String issue = jiraClientProvider.getByIssueKey(issueKey).executeGet(ISSUE_ENDPOINT + issueKey);
-        return JsonPathUtils.getData(issue, "$.fields.status.name");
-    }
-
     public Project getProject(String projectKey) throws IOException, JiraConfigurationException
     {
         return getJiraEntity("project/", projectKey, () -> jiraClientProvider.getByProjectKey(projectKey),
                 Project.class);
     }
 
-    public JiraEntity getIssue(String issueKey) throws IOException, JiraConfigurationException
+    public JiraIssue getIssue(String issueKey) throws IOException, JiraConfigurationException
     {
-        return getJiraEntity(ISSUE, issueKey, JiraEntity.class);
+        return getJiraEntity(ISSUE, issueKey, JiraIssue.class);
     }
 
     private <T> T getJiraEntity(String relativeUrl, String entityKey, Class<T> entityType)

@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class KnownIssueIdentifier
 {
     private KnownIssueType type;
+    private String bts;
     private Pattern testSuiteCompiledPattern;
     private Pattern testCaseCompiledPattern;
     private Pattern testStepCompiledPattern;
@@ -41,6 +42,16 @@ public class KnownIssueIdentifier
     public void setType(KnownIssueType type)
     {
         this.type = type;
+    }
+
+    public String getBts()
+    {
+        return bts;
+    }
+
+    public void setBts(String bts)
+    {
+        this.bts = bts;
     }
 
     public void setTestSuitePattern(String testSuitePattern)

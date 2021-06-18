@@ -17,6 +17,7 @@
 package org.vividus.softassert.model;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -27,28 +28,25 @@ public class KnownIssue implements Serializable
 {
     private static final long serialVersionUID = 5419047883822146063L;
 
-    private static final String FIXED_ISSUE_STATUSES_STRING = "closed";
-    private static final String FIXED_ISSUE_RESOLUTIONS_STRING = "fixed|done";
-
     private final String identifier;
+    private final String bts;
     private final KnownIssueType type;
     private final boolean potentiallyKnown;
     private final boolean failTestCaseFast;
     private final boolean failTestSuiteFast;
     private final transient Optional<String> description;
-    private transient Optional<String> status;
-    private transient Optional<String> resolution;
+    private boolean fixed;
+    private Map<String, String> issueDetails;
 
     public KnownIssue(String identifier, KnownIssueIdentifier issueIdentifier, boolean potentiallyKnown)
     {
         this.identifier = identifier;
+        this.bts = issueIdentifier.getBts();
         this.type = issueIdentifier.getType();
         this.failTestCaseFast = issueIdentifier.isFailTestCaseFast();
         this.failTestSuiteFast = issueIdentifier.isFailTestSuiteFast();
         this.potentiallyKnown = potentiallyKnown;
         this.description = Optional.ofNullable(issueIdentifier.getDescription());
-        this.status = Optional.empty();
-        this.resolution = Optional.empty();
     }
 
     public String getIdentifier()
@@ -66,39 +64,30 @@ public class KnownIssue implements Serializable
         return potentiallyKnown;
     }
 
-    public Optional<String> getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(Optional<String> status)
-    {
-        this.status = status;
-    }
-
-    public Optional<String> getResolution()
-    {
-        return resolution;
-    }
-
-    public void setResolution(Optional<String> resolution)
-    {
-        this.resolution = resolution;
-    }
-
-    public boolean isClosed()
-    {
-        return contains(status, FIXED_ISSUE_STATUSES_STRING);
-    }
 
     public boolean isFixed()
     {
-        return isClosed() && contains(resolution, FIXED_ISSUE_RESOLUTIONS_STRING);
+        return fixed;
     }
 
-    private boolean contains(Optional<String> value, String values)
+    public void setFixed(boolean fixed)
     {
-        return value.filter(v -> v.length() > 0).filter(v -> values.contains(v.toLowerCase())).isPresent();
+        this.fixed = fixed;
+    }
+
+    public Map<String, String> getIssueDetails()
+    {
+        return issueDetails;
+    }
+
+    public void setIssueDetails(Map<String, String> issueDetails)
+    {
+        this.issueDetails = issueDetails;
+    }
+
+    public String getBts()
+    {
+        return bts;
     }
 
     public boolean isFailTestCaseFast()

@@ -30,7 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.jira.model.JiraEntity;
+import org.vividus.jira.model.JiraIssue;
 import org.vividus.jira.model.Project;
 
 @ExtendWith(MockitoExtension.class)
@@ -93,7 +93,7 @@ class JiraFacadeTests
     {
         when(jiraClientProvider.getByIssueKey(ISSUE_ID)).thenReturn(jiraClient);
         when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID)).thenReturn("{\"id\":\"001\"}");
-        JiraEntity issue = jiraFacade.getIssue(ISSUE_ID);
+        JiraIssue issue = jiraFacade.getIssue(ISSUE_ID);
         assertEquals("001", issue.getId());
     }
 

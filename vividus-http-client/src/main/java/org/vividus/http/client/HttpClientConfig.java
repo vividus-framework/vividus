@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright 2019-2022 the original author or authors.
+=======
+ * Copyright 2019-2021 the original author or authors.
+>>>>>>> 5f625fdc (jira draft)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +67,7 @@ public class HttpClientConfig
     private HttpRequestRetryHandler httpRequestRetryHandler;
     private ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy;
     private List<HttpResponseHandler> httpResponseHandlers;
+    private boolean preemptiveAuthenticationEnabled;
 
     public boolean hasBaseUrl()
     {
@@ -310,5 +315,15 @@ public class HttpClientConfig
     public void setHttpResponseHandlers(List<HttpResponseHandler> httpResponseHandlers)
     {
         this.httpResponseHandlers = httpResponseHandlers;
+    }
+
+    public boolean isPreemptiveAuthenticationEnabled()
+    {
+        return preemptiveAuthenticationEnabled;
+    }
+
+    public void setPreemptiveAuthenticationEnabled(boolean preemptiveAuthenticationEnabled)
+    {
+        this.preemptiveAuthenticationEnabled = preemptiveAuthenticationEnabled;
     }
 }

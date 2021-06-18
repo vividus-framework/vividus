@@ -16,11 +16,31 @@
 
 package org.vividus.softassert.issue;
 
-import java.util.Optional;
+import java.util.Map;
 
 public interface IIssueStateProvider
 {
-    Optional<String> getIssueStatus(String issue);
+    IssueState getIssueState(String instance, String issue);
 
-    Optional<String> getIssueResolution(String issue);
+    class IssueState
+    {
+        private final boolean fixed;
+        private final Map<String, String> details;
+
+        public IssueState(boolean fixed, Map<String, String> details)
+        {
+            this.fixed = fixed;
+            this.details = details;
+        }
+
+        public boolean isFixed()
+        {
+            return fixed;
+        }
+
+        public Map<String, String> getDetails()
+        {
+            return details;
+        }
+    }
 }

@@ -13,26 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.vividus.jira.model;
 
-package org.vividus.issue;
-
-import java.util.Optional;
-
-import org.vividus.softassert.issue.IIssueStateProvider;
-
-public class IssueStateProvider implements IIssueStateProvider
+public class JiraIssue extends JiraEntity
 {
-    private static final Optional<String> UNKNOWN = Optional.of("UNKNOWN");
+    private String status;
+    private String resolution;
 
-    @Override
-    public Optional<String> getIssueStatus(String issue)
+    public String getStatus()
     {
-        return UNKNOWN;
+        return status;
     }
 
-    @Override
-    public Optional<String> getIssueResolution(String issue)
+    public void setStatus(String status)
     {
-        return UNKNOWN;
+        this.status = status;
+    }
+
+    public String getResolution()
+    {
+        return resolution;
+    }
+
+    public void setResolution(String resolution)
+    {
+        this.resolution = resolution;
     }
 }

@@ -11,8 +11,6 @@
 
     <bean id="eventBus" class="com.google.common.eventbus.EventBus" />
 
-    <bean id="issueStateProvider" class="org.vividus.issue.IssueStateProvider" />
-
     <bean id="testInfoProvider" class="org.vividus.issue.TestInfoProvider" />
     <bean class="org.vividus.log.TestInfoLogger" />
 

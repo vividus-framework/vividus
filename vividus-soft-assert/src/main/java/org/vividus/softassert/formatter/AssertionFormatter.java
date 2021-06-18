@@ -19,9 +19,13 @@ package org.vividus.softassert.formatter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.google.common.base.Joiner;
 
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
@@ -29,7 +33,8 @@ import org.vividus.softassert.util.StackTraceFilter;
 
 public class AssertionFormatter implements IAssertionFormatter
 {
-    private static final char DOT_CHAR = '.';
+    private static final String SEPARATOR = ". ";
+
     private StackTraceFilter stackTraceFilter;
 
     @Override
@@ -37,21 +42,17 @@ public class AssertionFormatter implements IAssertionFormatter
     {
         StringBuilder message = new StringBuilder(issue.isPotentiallyKnown() ? "Potentially known" : "Known")
                 .append(" issue: ")
-                .append(issue.getIdentifier());
+                .append(issue.getIdentifier())
+                .append(" (");
 
-        issue.getDescription().ifPresent(desc -> message.append(" - ").append(desc));
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("Type", issue.getType());
+        details.putAll(issue.getIssueDetails());
 
-        message.append(" (Type: ")
-               .append(issue.getType())
-               .append(DOT_CHAR);
-
-        issue.getStatus().ifPresent(status -> message.append(" Status: ").append(status));
-
-        issue.getResolution().ifPresent(resolution -> message.append(DOT_CHAR)
-                .append(" Resolution: ").append(resolution));
-
-        message.append("). ").append(description);
-        return message.toString();
+        return message.append(Joiner.on(SEPARATOR).withKeyValueSeparator(": ").join(details).strip())
+                      .append("). ")
+                      .append(description)
+                      .toString();
     }
 
     @Override
