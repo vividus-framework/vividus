@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,84 +16,129 @@
 
 package org.vividus.azure.storage.queue;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.azure.core.credential.TokenCredential;
+import com.azure.core.util.BinaryData;
+import com.azure.core.util.Context;
+import com.azure.identity.DefaultAzureCredentialBuilder;
+import com.azure.storage.queue.QueueClient;
+import com.azure.storage.queue.QueueClientBuilder;
+import com.azure.storage.queue.models.PeekedMessageItem;
+import com.azure.storage.queue.models.SendMessageResult;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.azure.storage.queue.model.Queue;
 import org.vividus.bdd.context.BddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
 
 public class StorageQueueSteps
 {
-    private final StorageQueueService storageQueueService;
+    private final PropertyMappedCollection<String> storageQueueEndpoints;
     private final BddVariableContext bddVariableContext;
-    private final PropertyMappedCollection<Queue> queues;
+    private final JsonUtils jsonUtils;
+    private final Duration receiveTimeout;
 
-    public StorageQueueSteps(StorageQueueService storageQueueService, BddVariableContext bddVariableContext,
-            PropertyMappedCollection<Queue> queues)
+    private final TokenCredential credential;
+
+    private final LoadingCache<String, QueueClient> storageQueueClients = CacheBuilder.newBuilder()
+            .build(new CacheLoader<>()
+            {
+                @Override
+                public QueueClient load(String storageQueueEndpoint)
+                {
+                    return new QueueClientBuilder().credential(credential).endpoint(storageQueueEndpoint).buildClient();
+                }
+            });
+
+    public StorageQueueSteps(PropertyMappedCollection<String> storageQueueEndpoints,
+            Duration receiveTimeout, BddVariableContext bddVariableContext, JsonUtils jsonUtils)
     {
-        this.storageQueueService = storageQueueService;
+        this.storageQueueEndpoints = storageQueueEndpoints;
+        this.receiveTimeout = receiveTimeout;
         this.bddVariableContext = bddVariableContext;
-        this.queues = queues;
+        this.jsonUtils = jsonUtils;
+        this.credential = new DefaultAzureCredentialBuilder().build();
     }
 
     /**
-     * Peeks desired quantity of messages from the queue.
-     * @param messagesCount The count of messages to pick
-     * @param queueName     The name of the queue
-     * @param scopes        The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variables scopes<br>
-     *                      <i>Available scopes:</i>
-     *                      <ul>
-     *                      <li><b>STEP</b> - the variable will be available only within the step,
-     *                      <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     *                      <li><b>STORY</b> - the variable will be available within the whole story,
-     *                      <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     *                      </ul>scopes
-     * @param variableName  The variable name to store result. If the variable name is my-var, the following
-     *                      variables will be created:
-     *                      <ul>
-     *                      <li>${my-var[0].messageId} - the message id</li>
-     *                      <li>${my-var[0].insertionTime} - the message insertion time</li>
-     *                      <li>${my-var[0].expirationTime} - the message expiration time</li>
-     *                      <li>${my-var[0].messageText} - the message text</li>
-     *                      </ul>
+     * Peek messages from the front of the queue up to the maximum number of messages.
+     *
+     * @param maxMessagesNumber The maximum number of messages to peek, if there are less messages exist in the queue
+     *                          than requested all the messages will be peeked. The allowed range is 1 to 32 messages.
+     * @param storageQueueKey   The key to Storage Queue endpoint.
+     * @param scopes            The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variables
+     *                          scopes<br>
+     *                          <i>Available scopes:</i>
+     *                          <ul>
+     *                          <li><b>STEP</b> - the variable will be available only within the step,
+     *                          <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                          <li><b>STORY</b> - the variable will be available within the whole story,
+     *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                          </ul>scopes
+     * @param variableName      The variable name to store the list of found message bodies. The messages are
+     *                          accessible via zero-based index, e.g. <code>${my-keys[0]}</code> will return the
+     *                          first found message body.
      */
-    @When("I peek up to `$count` messages from queue `$queueName` and save result to $scopes variable `$variableName`")
-    public void peekMessages(int messagesCount, String queueName, Set<VariableScope> scopes, String variableName)
+    @When("I peek up to `$maxMessagesNumber` messages from queue `$storageQueueKey` and save result to $scopes "
+            + "variable `$variableName`")
+    public void peekMessages(int maxMessagesNumber, String storageQueueKey, Set<VariableScope> scopes,
+            String variableName)
     {
-        bddVariableContext.putVariable(scopes, variableName, storageQueueService.peekMessages(getQueue(queueName),
-                messagesCount));
-    }
-
-    private Queue getQueue(String queueName)
-    {
-        return queues.get(queueName, "No connection details provided for the queue: %s", queueName);
+        List<String> messages = getQueueClient(storageQueueKey)
+                .peekMessages(maxMessagesNumber, receiveTimeout, Context.NONE)
+                .stream()
+                .map(PeekedMessageItem::getBody)
+                .map(BinaryData::toString)
+                .collect(Collectors.toList());
+        bddVariableContext.putVariable(scopes, variableName, messages);
     }
 
     /**
-     * @param message       The message to send
-     * @param queueName     The name of the queue
-     * @param scopes        The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variables scopes<br>
-     *                      <i>Available scopes:</i>
-     *                      <ul>
-     *                      <li><b>STEP</b> - the variable will be available only within the step,
-     *                      <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     *                      <li><b>STORY</b> - the variable will be available within the whole story,
-     *                      <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     *                      </ul>scopes
-     * @param variableName  The variable name to store the result. If the variable name is <b>my-var</b>, the following
-     *                      variables will be created:
-     *                      <ul>
-     *                      <li>${my-var.messageId} - the message id</li>
-     *                      <li>${my-var.insertionTime} - the message insertion time</li>
-     *                      <li>${my-var.expirationTime} - the message expiration time</li>
-     *                      </ul>
+     * Sends a message that has a time-to-live of 7 days and is instantly visible.
+     *
+     * @param message         The message to send.
+     * @param storageQueueKey The key to Storage Queue endpoint.
+     * @param scopes          The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variables scopes<br>
+     *                        <i>Available scopes:</i>
+     *                        <ul>
+     *                        <li><b>STEP</b> - the variable will be available only within the step,
+     *                        <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                        <li><b>STORY</b> - the variable will be available within the whole story,
+     *                        <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                        </ul>scopes
+     * @param variableName    The name of the variable to save the send message result in JSON format.
      */
-    @When("I send message `$message` to queue `$queueName` and save result to $scopes variable `$variableName`")
-    public void sendMessage(String message, String queueName, Set<VariableScope> scopes, String variableName)
+    @When("I send message `$message` to queue `$storageQueueKey` and save result as JSON to $scopes variable "
+            + "`$variableName`")
+    public void sendMessage(String message, String storageQueueKey, Set<VariableScope> scopes, String variableName)
     {
-        bddVariableContext.putVariable(scopes, variableName, storageQueueService.sendMessage(getQueue(queueName),
-                message));
+        SendMessageResult sendMessageResult = getQueueClient(storageQueueKey).sendMessage(message);
+        bddVariableContext.putVariable(scopes, variableName, jsonUtils.toJson(sendMessageResult));
+    }
+
+    /**
+     * Deletes all messages from the queue.
+     *
+     * @param storageQueueKey The key to Storage Queue endpoint.
+     */
+    @When("I clear queue `$storageQueueKey`")
+    public void clearMessages(String storageQueueKey)
+    {
+        getQueueClient(storageQueueKey).clearMessages();
+    }
+
+    private QueueClient getQueueClient(String storageQueueKey)
+    {
+        String endpoint = storageQueueEndpoints.get(storageQueueKey,
+                "Storage queue with key '%s' is not configured in properties", storageQueueKey);
+        return storageQueueClients.getUnchecked(endpoint);
     }
 }
