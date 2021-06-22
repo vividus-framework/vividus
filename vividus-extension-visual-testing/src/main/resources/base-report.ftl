@@ -19,7 +19,7 @@
     <@custom_css />
     </style>
     <div class="container-fluid">
-    <#assign compare = result.actionType.name() == "COMPARE_AGAINST">
+    <#assign compare = result.actionType.name() != "ESTABLISH">
         <h3>Baseline name: ${result.baselineName}</h3>
         <#if compare>
         <div class="col-md">
