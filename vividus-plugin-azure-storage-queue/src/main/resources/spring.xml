@@ -7,20 +7,15 @@
     default-lazy-init="true">
 
     <bean id="storageQueueSteps" class="org.vividus.azure.storage.queue.StorageQueueSteps">
-        <constructor-arg>
-            <bean factory-bean="propertyMapper" factory-method="readValues">
-                <constructor-arg value="azure.storage.queue." />
-                <constructor-arg value="org.vividus.azure.storage.queue.model.Queue" />
+        <constructor-arg index="0">
+            <bean factory-bean="propertyParser" factory-method="readValues">
+                <constructor-arg value="azure.storage-queue." />
             </bean>
         </constructor-arg>
-        <constructor-arg>
-           <bean class="org.vividus.azure.storage.queue.StorageQueueService">
-               <property name="receiveTimeout" value="${azure.storage.queue.receive-timeout}" />
-           </bean>
-        </constructor-arg>
+        <constructor-arg index="1" value="${azure.storage-queue.receive-timeout}" />
     </bean>
 
-    <util:list id="stepBeanNames-Azure-Storage-Queue" value-type="java.lang.String">
+    <util:list id="stepBeanNames-Azure-StorageQueue" value-type="java.lang.String">
         <idref bean="storageQueueSteps" />
     </util:list>
 </beans>

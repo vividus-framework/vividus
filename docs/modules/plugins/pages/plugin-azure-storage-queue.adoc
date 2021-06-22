@@ -12,48 +12,47 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-queue',
 
 == Configuration
 
-=== Queues configuration
+include::partial$azure-authentication.adoc[]
 
-Queues are configured with a set of properties with the following format:
+=== Properties
+
+The storage queues endpoints are configured with the following property format:
 
 [source,properties]
 ----
-azure.storage.queue.{queue-name}.{property-name}=property value
+azure.storage-queue.<key>=<endpoint>
 ----
 
-Where:
+where:
 
-. `queue-name` - The name of the queue which will be used as a step parameter
-. `property-name` - The name of the queue property. One of:
-.. `name` - The name of the queue
-.. `sas-token` - The https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS token]
-.. `queue` - The queue endpoint
+. `key` - The logical key used to refer storage queue in the steps.
+. `endpoint` - The queue service URL, e.g. `https://storageaccount.queue.core.windows.net/`.
+It's allowed to use queue service https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS] URL here,
+in this case the authentication configuration is not required.
 
 == Steps
 
 === Peek messages
 
-Peeks messages from the queue
+Peeks messages from the front of the queue up to the maximum number of messages.
 
 [source,gherkin]
 ----
-When I peek up to `$count` messages from queue `$queueName` and save result to $scopes variable `$variableName`
+When I peek up to `$maxMessagesNumber` messages from queue `$storageQueueKey` and save result to $scopes variable `$variableName`
 ----
 
-* `$count` - The nember of messages to peek
-* `$queueName` - The name of the queue
+* `$maxMessagesNumber` - The maximum number of messages to peek, if there are less messages exist
+in the queue than requested all the messages will be peeked. The allowed range is 1 to 32 messages.
+* `$storageQueueKey` - The key of storage queue from the configuration.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store results in JSON format. If the variable name is `my-var`, the following variables will be created:
-** `${my-var[0].messageId}` - The message id
-** `${my-var[0].insertionTime}` - The message insertion time
-** `${my-var[0].expirationTime}` - The message expiration time
-** `${my-var[0].messageText}` - The message text
+* `$variableName` - The variable name to store the list of found message bodies. The messages are
+accessible via zero-based index, e.g. <code>${my-keys[0]}</code> will return the first found message body.
 
-.Peek the messages
+.Peek the first five messages and validate the first message
 [source,gherkin]
 ----
 When I peek up to `5` messages from queue `users` and save result to scenario variable `messages`
-Then `{"name" : "azure"}` is equal to `${messages[0].messageText}`
+Then `{"name" : "azure"}` is equal to `${messages[0]}`
 ----
 
 === Send message
@@ -62,18 +61,15 @@ Sends message to the queue
 
 [source,gherkin]
 ----
-When I send message `$message` to queue `$queueName` and save result to $scopes variable `$variableName`
+When I send message `$message` to queue `$storageQueueKey` and save result as JSON to $scopes variable `$variableName`
 ----
 
 * `$message` - The message to send
-* `$queueName` - The name of the queue
+* `$storageQueueKey` - The key of storage queue from the configuration.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store results in JSON format. If the variable name is `my-var`, the following variables will be created:
-** `${my-var.messageId}` - The message id
-** `${my-var.insertionTime}` - The message insertion time
-** `${my-var.expirationTime}` - The message expiration time
+* `$variableName` - The name of the variable to save the send message result in JSON format.
 
-.Send the messages
+.Send the message
 [source,gherkin]
 ----
 When I send message `{
@@ -86,5 +82,22 @@ When I send message `{
     "model": "xray"
   },
   "dataVersion": "1.0"
-}` to queue `users` and save result to scenario variable `result`
+}` to queue `users` and save result as JSON to scenario variable `result`
+----
+
+=== Clear the queue
+
+Deletes all messages from the queue.
+
+[source,gherkin]
+----
+When I clear queue `$storageQueueKey`
+----
+
+* `$storageQueueKey` - The key of storage queue from the configuration.
+
+.Clear the queue
+[source,gherkin]
+----
+When I clear queue `users`
 ----
