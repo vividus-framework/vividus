@@ -60,6 +60,7 @@ class VariablesTests
                 arguments("variableKey[0]",                  VARIABLE_KEY, null,                           null),
                 arguments("variableKey[0]:defaultValue",     VARIABLE_KEY, List.of(),                      DEFAULT_VALUE),
                 arguments("variableKey[0].key",              VARIABLE_KEY, List.of(Map.of(KEY, VALUE)),    VALUE),
+                arguments("variableKey[0].value",            VARIABLE_KEY, List.of(Map.of(VALUE, KEY)),    KEY),
                 arguments("variableKey[0].key:defaultValue", VARIABLE_KEY, List.of(),                      DEFAULT_VALUE),
                 arguments("variableKey.key",                 VARIABLE_KEY, Map.of(KEY, VALUE),             VALUE),
                 arguments("variableKey.key",                 VARIABLE_KEY, VALUE,                          VALUE),

@@ -96,30 +96,26 @@ public class Variables
         String variableKey = variableMatcher.group(VARIABLE_NAME_GROUP);
         return Optional.ofNullable(variables.get(variableKey))
                        .map(v -> resolveAsListItem(variableMatcher, v))
-                       .map(v -> resolveAsMapItem(variableMatcher, v))
-                       .map(v -> resolveAsObjectField(variableMatcher, v));
+                       .map(v -> resolveAsMapItemOrObjectField(variableMatcher, v));
     }
 
     @SuppressWarnings("unchecked")
-    private Object resolveAsMapItem(Matcher variableMatcher, Object variable)
+    private Object resolveAsMapItemOrObjectField(Matcher variableMatcher, Object variable)
     {
-        String mapKey = variableMatcher.group(MAP_KEY_GROUP);
-        if (mapKey != null && variable instanceof Map)
+        String key = variableMatcher.group(MAP_KEY_GROUP);
+        if (key == null)
+        {
+            return variable;
+        }
+        if (variable instanceof Map)
         {
             Map<String, Object> map = (Map<String, Object>) variable;
-            return Optional.ofNullable(map.get(mapKey)).or(() -> resolveAsCompound(map, mapKey)).orElse(null);
+            return Optional.ofNullable(map.get(key)).or(() -> resolveAsCompound(map, key)).orElse(null);
         }
-        return variable;
-    }
-
-    private Object resolveAsObjectField(Matcher variableMatcher, Object variable)
-    {
-        String fieldName = variableMatcher.group(MAP_KEY_GROUP);
-        if (fieldName != null)
+        else
         {
-            return Optional.ofNullable(readFieldSafely(variable, fieldName)).orElse(variable);
+            return Optional.ofNullable(readFieldSafely(variable, key)).orElse(variable);
         }
-        return variable;
     }
 
     private Object readFieldSafely(Object variable, String fieldName)
