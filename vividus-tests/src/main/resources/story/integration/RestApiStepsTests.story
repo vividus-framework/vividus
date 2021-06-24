@@ -39,5 +39,5 @@ Then the connection is secured using TLSv1.2 protocol
 
 Scenario: Verify step "Then sHTTP resources are valid:$resources"
 Then HTTP resources are valid:
-|url                                                    |
-|https://vividus-test-site.herokuapp.com/img/vividus.png|
+|url                                     |
+|${vividus-test-site-url}/img/vividus.png|
