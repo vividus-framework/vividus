@@ -137,8 +137,6 @@ When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `xpath(//android.widget.TextView[@text='Image'])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located `accessibilityId(select-image-accessibilityLabel)`
-When I tap on element located `xpath(//android.widget.TextView[@text='Choose from Library…'])`
-When I tap on element located `xpath(//android.widget.Button[@text='Allow'])`
 When I wait until element located `xpath(//android.widget.TextView[@text='Pictures'])` appears
 When I tap on element located `xpath(//android.widget.TextView[@text='Pictures'])`
 When I tap on element located `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
@@ -152,7 +150,6 @@ When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located `accessibilityId(select-image-testID)`
-When I tap on element located `accessibilityId(Choose from Library…)`
 When I wait until element located `accessibilityId(Recents)` appears
 When I tap on element located `accessibilityId(Recents)`
 When I tap on element located `xpath((//XCUIElementTypeCell[contains(@name, "Photo")])[last()])`
