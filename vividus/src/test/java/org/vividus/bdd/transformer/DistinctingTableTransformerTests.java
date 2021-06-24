@@ -18,8 +18,7 @@ package org.vividus.bdd.transformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Properties;
-
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterConverters;
@@ -27,33 +26,29 @@ import org.junit.jupiter.api.Test;
 
 class DistinctingTableTransformerTests
 {
-    private static final String TABLE =
-                      "|key1|key2|key3|\n"
-                    + "|a   |x   |a   |\n"
-                    + "|a   |y   |a   |\n"
-                    + "|b   |x   |a   |\n"
-                    + "|b   |y   |a   |\n"
-                    + "|b   |x   |b   |\n"
-                    + "|b   |y   |b   |\n"
-                    + "|a   |x   |b   |\n"
-                    + "|a   |y   |b   |";
-
-    private static final String DISTINCT_TABLE =
-                      "|key1|key3|\n"
-                    + "|a|a|\n"
-                    + "|b|a|\n"
-                    + "|b|b|\n"
-                    + "|a|b|";
-
     @Test
     void testDistinct()
     {
-        DistinctingTableTransformer transformer = new DistinctingTableTransformer();
-        Properties properties = new Properties();
-        properties.setProperty("byColumnNames", "key1;key3");
-        ParameterConverters parameterConverters = new ParameterConverters();
-        String result = transformer.transform(TABLE, new TableParsers(parameterConverters),
-                new TableProperties(parameterConverters, properties));
-        assertEquals(DISTINCT_TABLE, result);
+        var parameterConverters = new ParameterConverters();
+        var tableParsers = new TableParsers(parameterConverters);
+        var tableProperties = new TableProperties("byColumnNames=key1;key3", new Keywords(), parameterConverters);
+        var inputTable =
+                  "|key1|key2|key3|\n"
+                + "|a   |x   |a   |\n"
+                + "|a   |y   |a   |\n"
+                + "|b   |x   |a   |\n"
+                + "|b   |y   |a   |\n"
+                + "|b   |x   |b   |\n"
+                + "|b   |y   |b   |\n"
+                + "|a   |x   |b   |\n"
+                + "|a   |y   |b   |";
+        String result = new DistinctingTableTransformer().transform(inputTable, tableParsers, tableProperties);
+        var distinctTable =
+                  "|key1|key3|\n"
+                + "|a|a|\n"
+                + "|b|a|\n"
+                + "|b|b|\n"
+                + "|a|b|";
+        assertEquals(distinctTable, result);
     }
 }

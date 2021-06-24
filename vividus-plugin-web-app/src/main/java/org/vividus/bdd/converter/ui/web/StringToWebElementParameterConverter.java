@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import org.vividus.ui.action.SearchActions;
 import org.vividus.ui.web.util.ElementUtil;
 
 @Named
-public class StringToWebElementParameterConverter extends FunctionalParameterConverter<Supplier<Optional<WebElement>>>
+public class StringToWebElementParameterConverter
+        extends FunctionalParameterConverter<String, Supplier<Optional<WebElement>>>
 {
     public StringToWebElementParameterConverter(SearchActions searchActions, ElementUtil elementUtil)
     {

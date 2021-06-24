@@ -19,8 +19,7 @@ package org.vividus.bdd.transformer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Properties;
-
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterControls;
@@ -32,6 +31,7 @@ class ResolvingSelfReferencesEagerlyTransformerTests
 {
     private final ResolvingSelfReferencesEagerlyTransformer transformer = new ResolvingSelfReferencesEagerlyTransformer(
             new ParameterControls());
+    private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @ParameterizedTest
@@ -75,6 +75,6 @@ class ResolvingSelfReferencesEagerlyTransformerTests
     private String transform(String beforeTransform)
     {
         return transformer.transform(beforeTransform, new TableParsers(parameterConverters),
-                new TableProperties(parameterConverters, new Properties()));
+                new TableProperties("", keywords, parameterConverters));
     }
 }

@@ -18,10 +18,11 @@ package org.vividus.bdd.transformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import java.util.Properties;
 import java.util.stream.Stream;
 
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterConverters;
@@ -35,40 +36,35 @@ class SortingTableTransformerTests
     private static final String TABLE_WITH_SAME_VALUES = "|key1|key2|\n|10|0|\n|1|0|";
     private static final String TABLE = "|key1|key2|\n|4|3|\n|1|0|";
     private final SortingTableTransformer transformer = new SortingTableTransformer();
+    private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
+    private final TableParsers tableParsers = new TableParsers(parameterConverters);
+
+    // CHECKSTYLE:OFF
+    static Stream<Arguments> tableSource() {
+        return Stream.of(
+                arguments(TABLE,                                "byColumns=key5",      TABLE),
+                arguments("|key1|key2|\n|1|0|\n|4|3|",          "byColumns=key1",      TABLE),
+                arguments(TABLE_WITH_SAME_VALUES,               "byColumns=key2",      TABLE_WITH_SAME_VALUES),
+                arguments("|key1|key2|key3|\n|0|2|1|\n|0|2|5|", "byColumns=key1|key3", "|key1|key2|key3|\n|0|2|5|\n|0|2|1|")
+        );
+    }
+    // CHECKSTYLE:ON
 
     @ParameterizedTest
     @MethodSource("tableSource")
-    void testTransform(String expectedTable, Properties properties, String tableToTransform)
+    void testTransform(String expectedTable, String propertiesAsString, String tableToTransform)
     {
-        assertEquals(expectedTable, transformer.transform(tableToTransform, new TableParsers(parameterConverters),
-                new TableProperties(parameterConverters, properties)));
+        var tableProperties = new TableProperties(propertiesAsString, keywords, parameterConverters);
+        assertEquals(expectedTable, transformer.transform(tableToTransform, tableParsers, tableProperties));
     }
 
     @Test
     void testFailOnMissingTableProperty()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE, new TableParsers(parameterConverters),
-                    new TableProperties(parameterConverters, new Properties())));
+        var tableProperties = new TableProperties("", keywords, parameterConverters);
+        var exception = assertThrows(IllegalArgumentException.class,
+            () -> transformer.transform(TABLE, tableParsers, tableProperties));
         assertEquals("'byColumns' is not set in ExamplesTable properties", exception.getMessage());
     }
-
-    private static Properties createProperties(String keys)
-    {
-        Properties properties = new Properties();
-        properties.setProperty("byColumns", keys);
-        return properties;
-    }
-
-    // CHECKSTYLE:OFF
-    static Stream<Arguments> tableSource() {
-        return Stream.of(
-            Arguments.of(TABLE,                                createProperties("key5"),      TABLE),
-            Arguments.of("|key1|key2|\n|1|0|\n|4|3|",          createProperties("key1"),      TABLE),
-            Arguments.of(TABLE_WITH_SAME_VALUES,               createProperties("key2"),      TABLE_WITH_SAME_VALUES),
-            Arguments.of("|key1|key2|key3|\n|0|2|1|\n|0|2|5|", createProperties("key1|key3"), "|key1|key2|key3|\n|0|2|5|\n|0|2|1|")
-        );
-    }
-    // CHECKSTYLE:ON
 }

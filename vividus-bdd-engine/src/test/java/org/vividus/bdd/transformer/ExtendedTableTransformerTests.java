@@ -17,81 +17,57 @@
 package org.vividus.bdd.transformer;
 
 import static java.util.Map.entry;
+import static java.util.function.Function.identity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
-import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class ExtendedTableTransformerTests
 {
-    private static final String VALUE_1 = "value-1";
-    private static final String VALUE_2 = "value-2";
-    private static final String KEY_1 = "key-1";
-    private static final String KEY_2 = "key-2";
-
-    private static Function<String, String> func = Function.identity();
-    private final ExtendedTableTransformer transformer = new ExtendedTableTransformer()
-    {
-        @Override
-        public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
-        {
-            return null;
-        }
-    };
-    private final ParameterConverters parameterConverters = new ParameterConverters();
-
     static Stream<Arguments> processValues()
     {
         return Stream.of(
                 arguments("One of ExamplesTable properties must be set: either 'key-1' or 'key-2'",
-                          Map.of("1", VALUE_1, "2", VALUE_2)),
+                          "1=value-1, 2=value-2"),
                 arguments("Only one ExamplesTable property must be set, but found both 'key-1' and 'key-2'",
-                          Map.of(KEY_1, VALUE_1, KEY_2, VALUE_2))
+                          "key-1=value-1, key-2=value-2")
              );
-    }
-
-    static Stream<Arguments> processValuesExpected()
-    {
-        return Stream.of(
-                arguments(VALUE_2, Map.of("key", VALUE_1, KEY_2, VALUE_2)),
-                arguments(VALUE_1, Map.of(KEY_1, VALUE_1, "non-existent", VALUE_2))
-         );
     }
 
     @ParameterizedTest
     @MethodSource("processValues")
-    void testProcessCompetingMandatoryProperties(String expected, Map<String, String> values)
+    void testProcessCompetingMandatoryProperties(String expected, String properties)
     {
-        IllegalArgumentException exception =
-                    assertThrows(IllegalArgumentException.class, () ->
-                          transformer.processCompetingMandatoryProperties(createProperties(values),
-                                      entry(KEY_1, func), entry(KEY_2, func)));
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> processCompetingMandatoryProperties(properties));
         assertEquals(expected, exception.getMessage());
     }
 
     @ParameterizedTest
-    @MethodSource("processValuesExpected")
-    void testProcessCompetingMandatoryOneNullProperties(String expected, Map<String, String> values)
+    @CsvSource({
+            "value-2, 'key=value-1, key-2=value-2'",
+            "value-1, 'key-1=value-1, non-existent=value-2'"
+    })
+    void testProcessCompetingMandatoryOneNullProperties(String expected, String properties)
     {
-        assertEquals(expected, transformer.processCompetingMandatoryProperties(createProperties(values),
-                entry(KEY_1, func), entry(KEY_2, func)).toString());
+        assertEquals(expected, processCompetingMandatoryProperties(properties));
     }
 
-    private TableProperties createProperties(Map<String, String> values)
+    private String processCompetingMandatoryProperties(String propertiesAsString)
     {
-        Properties properties = new Properties();
-        properties.putAll(values);
-        return new TableProperties(parameterConverters, properties);
+        var tableProperties = new TableProperties(propertiesAsString, new Keywords(), new ParameterConverters());
+        ExtendedTableTransformer transformer = (tableAsString, tableParsers, properties) -> null;
+        return transformer.processCompetingMandatoryProperties(tableProperties, entry("key-1", identity()),
+                entry("key-2", identity()));
     }
 }

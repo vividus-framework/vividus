@@ -26,14 +26,15 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.commons.csv.CSVFormat;
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,85 +43,51 @@ import org.vividus.csv.CsvReader;
 @ExtendWith(MockitoExtension.class)
 class CsvTableTransformerTests
 {
-    private static final String CSV_PATH_PROPERTY_NAME = "csvPath";
-    private static final String DELIMITER_PROPERTY_NAME = "delimiterChar";
-
-    private static final String CSV_FILE_NAME = "test.csv";
     private static final String EMPTY_EXAMPLES_TABLE = "";
     private static final String EXPECTED_EXAMPLES_TABLE = "|Country|ID|Capital|Akey|\n"
             + "|Belarus|1|Minsk|11|\n"
             + "|USA|2|Washington|22|\n"
             + "|Armenia|3|Yerevan|33|";
 
+    private final Keywords keywords = new Keywords();
     private final ParameterConverters converters = new ParameterConverters();
 
-    @Test
-    void shouldCreateExamplesTableFromCsv()
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "csvPath=test.csv",
+            "csvPath=test-with-semicolon.csv, delimiterChar=;"
+    })
+    void shouldCreateExamplesTableFromCsv(String propertiesAsString)
     {
-        var properties = new Properties();
-        properties.setProperty(CSV_PATH_PROPERTY_NAME, CSV_FILE_NAME);
-        var tableProperties = new TableProperties(converters, properties);
+        var tableProperties = new TableProperties(propertiesAsString, keywords, converters);
         var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
         assertEquals(EXPECTED_EXAMPLES_TABLE, transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
-    }
-
-    @Test
-    void shouldCreateExamplesTableFromCsvWithSemicolonSeparator()
-    {
-        var properties = new Properties();
-        properties.setProperty(CSV_PATH_PROPERTY_NAME, "test-with-semicolon.csv");
-        properties.setProperty(DELIMITER_PROPERTY_NAME, ";");
-        var tableProperties = new TableProperties(converters, properties);
-        var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
-        assertEquals(EXPECTED_EXAMPLES_TABLE, transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
-    }
-
-    @Test
-    void testNoFilePathProvided()
-    {
-        var tableProperties = new TableProperties(converters, new Properties());
-        var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
-        assertEquals("'csvPath' is not set in ExamplesTable properties", exception.getMessage());
-    }
-
-    @Test
-    void testEmptyFilePathProvided()
-    {
-        var properties = new Properties();
-        properties.setProperty(CSV_PATH_PROPERTY_NAME, "");
-        var tableProperties = new TableProperties(converters, properties);
-        var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
-        assertEquals("ExamplesTable property 'csvPath' is blank", exception.getMessage());
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"--", ""})
-    void shouldThrowAnErrorIfInvalidDelimiterIsProvided(String invalidDelimiter)
+    @CsvSource({
+        "'',                                  'csvPath' is not set in ExamplesTable properties",
+        "'csvPath= ',                         ExamplesTable property 'csvPath' is blank",
+        "'csvPath=test.csv,delimiterChar=--', 'CSV delimiter must be a single char, but value ''--'' has length of 2'",
+        "'csvPath=test.csv,delimiterChar= ',  'CSV delimiter must be a single char, but value '''' has length of 0'"
+    })
+    void shouldThrowErrorIfInvalidParametersAreProvided(String propertiesAsString, String errorMessage)
     {
-        var properties = new Properties();
-        properties.setProperty(CSV_PATH_PROPERTY_NAME, CSV_FILE_NAME);
-        properties.setProperty(DELIMITER_PROPERTY_NAME, invalidDelimiter);
-        var tableProperties = new TableProperties(converters, properties);
+        var tableProperties = new TableProperties(propertiesAsString, keywords, converters);
         var transformer = new CsvTableTransformer(CSVFormat.DEFAULT);
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
-        assertEquals("CSV delimiter must be a single char, but value '" + invalidDelimiter + "' has length of "
-                + invalidDelimiter.length(), exception.getMessage());
+        assertEquals(errorMessage, exception.getMessage());
     }
 
     @SuppressWarnings("try")
     @Test
     void testCsvFileReaderExceptionCatching()
     {
-        var properties = new Properties();
-        properties.setProperty(CSV_PATH_PROPERTY_NAME, CSV_FILE_NAME);
-        var tableProperties = new TableProperties(converters, properties);
+        var csvFileName = "test.csv";
+        var tableProperties = new TableProperties("csvPath=" + csvFileName, keywords, converters);
 
-        URL csvResource = findResource(getClass(), CSV_FILE_NAME);
+        URL csvResource = findResource(getClass(), csvFileName);
         var ioException = new IOException();
         try (MockedConstruction<CsvReader> ignored = mockConstruction(CsvReader.class,
                 (mock, context) -> {

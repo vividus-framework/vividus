@@ -19,47 +19,47 @@ package org.vividus.bdd.transformer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Properties;
-
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 
-class RepeatingTableTranformerTests
+class RepeatingTableTransformerTests
 {
     private static final String TABLE_AS_STRING = "|h1|h2|\n|r1v1|r1v2|\n|r2v1|r2v2|";
     private static final String ROW2 = "|r2v1|r2v2|\n";
     private static final String ROW1 = "|r1v1|r1v2|\n";
     private final RepeatingTableTranformer transformer = new RepeatingTableTranformer();
+    private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @Test
-    void shouldGenerateRepearedTable()
+    void shouldGenerateRepeatedTable()
     {
-        Properties properties = new Properties();
-        properties.put("times", "5");
-        assertEquals("|h1|h2|\n"
-                   + ROW1
-                   + ROW2
-                   + ROW1
-                   + ROW2
-                   + ROW1
-                   + ROW2
-                   + ROW1
-                   + ROW2
-                   + ROW1
-                   + "|r2v1|r2v2|", transformer.transform(TABLE_AS_STRING, new TableParsers(parameterConverters),
-                       new TableProperties(parameterConverters, properties)));
+        var expected = "|h1|h2|\n"
+                + ROW1
+                + ROW2
+                + ROW1
+                + ROW2
+                + ROW1
+                + ROW2
+                + ROW1
+                + ROW2
+                + ROW1
+                + "|r2v1|r2v2|";
+        var tableParsers = new TableParsers(parameterConverters);
+        var tableProperties = new TableProperties("times=5", keywords, parameterConverters);
+        assertEquals(expected, transformer.transform(TABLE_AS_STRING, tableParsers, tableProperties));
     }
 
     @Test
     void shouldThrowAnExceptionIfNoPropertyPresent()
     {
-        Properties properties = new Properties();
-        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform(TABLE_AS_STRING, new TableParsers(parameterConverters),
-                    new TableProperties(parameterConverters, properties)));
-        assertEquals("'times' is not set in ExamplesTable properties", iae.getMessage());
+        var tableParsers = new TableParsers(parameterConverters);
+        var tableProperties = new TableProperties("", keywords, parameterConverters);
+        var exception = assertThrows(IllegalArgumentException.class,
+            () -> transformer.transform(TABLE_AS_STRING, tableParsers, tableProperties));
+        assertEquals("'times' is not set in ExamplesTable properties", exception.getMessage());
     }
 }

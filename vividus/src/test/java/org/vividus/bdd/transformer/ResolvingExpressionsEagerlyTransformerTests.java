@@ -19,8 +19,7 @@ package org.vividus.bdd.transformer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import java.util.Properties;
-
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterConverters;
@@ -45,8 +44,7 @@ class ResolvingExpressionsEagerlyTransformerTests
         String table = "|header|\n|row1|\n|row2|";
         when(expressionAdaptor.processRawExpression("row1")).thenReturn("resolved_row1");
         when(expressionAdaptor.processRawExpression("row2")).thenReturn("resolved_row2");
-        String actual = transformer.transform(table, new TableParsers(parameterConverters),
-                new TableProperties(parameterConverters, new Properties()));
+        String actual = transformer.transform(table, new TableParsers(parameterConverters), createTableProperties());
         assertEquals("|header|\n|resolved_row1|\n|resolved_row2|", actual);
     }
 
@@ -55,8 +53,12 @@ class ResolvingExpressionsEagerlyTransformerTests
     {
         String table = "|header|\n|row|";
         when(expressionAdaptor.processRawExpression("row")).thenReturn("resolved_row");
-        String actual = transformer.transform(table, new TableParsers(parameterConverters),
-                new TableProperties(parameterConverters, new Properties()));
+        String actual = transformer.transform(table, new TableParsers(parameterConverters), createTableProperties());
         assertEquals("|header|\n|resolved_row|", actual);
+    }
+
+    private TableProperties createTableProperties()
+    {
+        return new TableProperties("", new Keywords(), parameterConverters);
     }
 }
