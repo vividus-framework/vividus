@@ -40,7 +40,7 @@ public class MergingTableTransformer extends AbstractTableLoadingTransformer
 
         List<ExamplesTable> examplesTables = loadTables(tableAsString, properties);
         String fillerValue = properties.getProperties().getProperty("fillerValue");
-        return mergeMode.merge(getConfiguration().parameterConverters(), examplesTables, properties,
-                Optional.ofNullable(fillerValue));
+        return mergeMode.merge(getConfiguration().keywords(), getConfiguration().parameterConverters(), examplesTables,
+                properties, Optional.ofNullable(fillerValue));
     }
 }

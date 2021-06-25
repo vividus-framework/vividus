@@ -22,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,7 +36,6 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -43,6 +43,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
@@ -90,24 +91,25 @@ class HeadlessCrawlerTableTransformerTests
     @Mock private HttpRedirectsProvider redirectsProvider;
     @InjectMocks private HeadlessCrawlerTableTransformer transformer;
 
+    private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters =  new ParameterConverters();
 
-    static Stream<Arguments> dataProviderOfFechingUrls()
+    static Stream<Arguments> dataProviderOfFetchingUrls()
     {
         // @formatter:off
         return Stream.of(
-                Arguments.of(DEFAULT_RELATIVE_URL, toSet(PATH2, PATH3),      List.of(PATH2, SLASH_PATH3)),
-                Arguments.of(ROOT,                 toSet(PATH4, "path5"),    List.of("/path5", PATH4)),
-                Arguments.of("/go",                toSet("path6", "/path7"), List.of("/go/path7", "/go/path6")),
-                Arguments.of("/go/",               toSet("path8", "/path9"), List.of("/go/path8", "/go/path9")),
-                Arguments.of(DEFAULT_RELATIVE_URL, null,                     List.of())
+                arguments(DEFAULT_RELATIVE_URL, toSet(PATH2, PATH3),      List.of(PATH2, SLASH_PATH3)),
+                arguments(ROOT,                 toSet(PATH4, "path5"),    List.of("/path5", PATH4)),
+                arguments("/go",                toSet("path6", "/path7"), List.of("/go/path7", "/go/path6")),
+                arguments("/go/",               toSet("path8", "/path9"), List.of("/go/path8", "/go/path9")),
+                arguments(DEFAULT_RELATIVE_URL, null,                     List.of())
         );
         // @formatter:on
     }
 
     @ParameterizedTest
-    @MethodSource("dataProviderOfFechingUrls")
-    void testFetchUrlsSucessfully(String mainAppPageRelativeUrl, Set<String> seedRelativeUrlsProperty,
+    @MethodSource("dataProviderOfFetchingUrls")
+    void testFetchUrlsSuccessfully(String mainAppPageRelativeUrl, Set<String> seedRelativeUrlsProperty,
                                   List<String> expectedSeedRelativeUrls)
     {
         transformer.setSeedRelativeUrls(seedRelativeUrlsProperty);
@@ -262,7 +264,7 @@ class HeadlessCrawlerTableTransformerTests
 
     private TableProperties buildTableProperties()
     {
-        return new TableProperties(parameterConverters, new Properties());
+        return new TableProperties("", keywords, parameterConverters);
     }
 
     private static WebURL createWebUrl(String url)
@@ -274,6 +276,6 @@ class HeadlessCrawlerTableTransformerTests
 
     private static Set<String> toSet(String... strings)
     {
-        return new HashSet<>(asList(strings));
+        return new HashSet<>(List.of(strings));
     }
 }

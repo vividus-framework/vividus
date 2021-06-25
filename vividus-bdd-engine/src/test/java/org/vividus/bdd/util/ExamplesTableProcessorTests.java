@@ -20,9 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.stream.Stream;
 
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
@@ -38,6 +38,7 @@ class ExamplesTableProcessorTests
     private static final List<String> KEYS = List.of("key1", "key2");
     private static final String TABLE = "|key1|key2|\n|4|3|\n|1|0|";
 
+    private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @ParameterizedTest
@@ -96,15 +97,13 @@ class ExamplesTableProcessorTests
     {
         List<String> values = List.of("a1", "a2");
         String expectedTable = "{valueSeparator=!}\n|key1|key2|\n!a1!a2!";
-        Properties properties = new Properties();
-        properties.setProperty("valueSeparator", "!");
-        TableProperties tableProperties = new TableProperties(parameterConverters, properties);
+        TableProperties tableProperties = new TableProperties("valueSeparator=!", keywords, parameterConverters);
         assertEquals(expectedTable,
                 ExamplesTableProcessor.buildExamplesTable(KEYS, List.of(values), tableProperties, false, true));
     }
 
     private TableProperties createProperties()
     {
-        return new TableProperties(parameterConverters, new Properties());
+        return new TableProperties("", keywords, parameterConverters);
     }
 }

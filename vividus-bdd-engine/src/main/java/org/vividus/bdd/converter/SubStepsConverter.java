@@ -39,7 +39,7 @@ import org.vividus.bdd.parser.IStepExamplesTableParser;
 import org.vividus.bdd.steps.SubSteps;
 
 @Named
-public class SubStepsConverter extends FunctionalParameterConverter<SubSteps>
+public class SubStepsConverter extends FunctionalParameterConverter<String, SubSteps>
 {
     public SubStepsConverter(Configuration configuration, IBddRunContext bddRunContext, Embedder embedder,
             IStepExamplesTableParser stepExamplesTableParser)

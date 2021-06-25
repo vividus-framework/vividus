@@ -37,7 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
@@ -164,7 +163,7 @@ class ExtendedConfigurationTests
         configuration.setCustomTableTransformers(Map.of(name, tableTransformer));
         configuration.init();
         String tableAsString = "tableAsString";
-        TableProperties tableProperties = new TableProperties(new ParameterConverters(), new Properties());
+        TableProperties tableProperties = new TableProperties("", new Keywords(), new ParameterConverters());
         configuration.tableTransformers().transform(name, tableAsString, null, tableProperties);
         verify(tableTransformer).transform(tableAsString, null, tableProperties);
     }

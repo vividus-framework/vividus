@@ -19,14 +19,16 @@ package org.vividus.transformer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Properties;
+import java.util.List;
 import java.util.Set;
 
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 
@@ -35,46 +37,40 @@ class FetchingUrlsTableTransformerTests
     private static final String URLS = "urls";
     private static final String COLUMN = "column";
     private final TestTransformer transformer = new TestTransformer();
+    private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @Test
     void testTransformFromResults()
     {
-        TableProperties properties = new TableProperties(parameterConverters, new Properties());
-        properties.getProperties().setProperty(COLUMN, URLS);
-        assertEquals("|urls|\n|/first|\n|/second|\n|/fourth%25|\n|/third|", transformer.transform("", null,
-                properties));
+        var tableProperties = new TableProperties("", keywords, parameterConverters);
+        tableProperties.getProperties().setProperty(COLUMN, URLS);
+        var expected = "|urls|\n"
+                + "|/first|\n"
+                + "|/second|\n"
+                + "|/fourth%25|\n"
+                + "|/third|";
+        assertEquals(expected, transformer.transform("", null, tableProperties));
     }
 
-    @Test
-    void testTransformEmptyColumnName()
+    @ParameterizedTest
+    @CsvSource({
+            "'column= ', '',      ExamplesTable property 'column' is blank",
+            "'',         |first|, Input table must be empty"
+    })
+    void shouldHandleInvalidInputs(String propertiesAsString, String tableAsString, String errorMessage)
     {
-        Properties properties = new Properties();
-        properties.setProperty(COLUMN, " ");
-        TableProperties tableProeprties = new TableProperties(parameterConverters, properties);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform("", null, tableProeprties));
-        assertEquals("ExamplesTable property 'column' is blank", exception.getMessage());
-    }
-
-    @Test
-    void testTransformWithNotEmptyTableAsStringParameter()
-    {
-        Properties properties = new Properties();
-        TableProperties tableProeprties = new TableProperties(parameterConverters, properties);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> transformer.transform("|first|", null, tableProeprties));
-        assertEquals("Input table must be empty", exception.getMessage());
+        var tableProperties = new TableProperties(propertiesAsString, keywords, parameterConverters);
+        var exception = assertThrows(IllegalArgumentException.class,
+            () -> transformer.transform(tableAsString, null, tableProperties));
+        assertEquals(errorMessage, exception.getMessage());
     }
 
     @Test
     void testTransformWithoutMainApplicationPageUrl()
     {
-        WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(null,
-                AuthenticationMode.URL);
-        transformer.setWebApplicationConfiguration(webApplicationConfiguration);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                transformer::getMainApplicationPageUri);
+        transformer.setWebApplicationConfiguration(new WebApplicationConfiguration(null, AuthenticationMode.URL));
+        var exception = assertThrows(IllegalArgumentException.class, transformer::getMainApplicationPageUri);
         assertEquals("URL of the main application page should be non-blank", exception.getMessage());
     }
 
@@ -83,8 +79,7 @@ class FetchingUrlsTableTransformerTests
         @Override
         protected Set<String> fetchUrls(TableProperties properties)
         {
-            return new HashSet<>(Arrays.asList("http://someurl/first", "http://someurl.com/second",
-                    "/third", "/fourth%25"));
+            return new HashSet<>(List.of("http://someurl/first", "http://someurl.com/second", "/third", "/fourth%25"));
         }
     }
 }

@@ -19,8 +19,7 @@ package org.vividus.bdd.transformer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Properties;
-
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
@@ -29,22 +28,22 @@ class IteratingTableTransformerTests
 {
     private static final String TABLE = "";
     private final IteratingTableTransformer tableTransformer = new IteratingTableTransformer();
+    private final Keywords  keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @Test
     void shouldFailIfNoLimitSet()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> tableTransformer.transform(TABLE, null, new TableProperties(parameterConverters, new Properties())));
+        var tableProperties = new TableProperties("", keywords, parameterConverters);
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> tableTransformer.transform(TABLE, null, tableProperties));
         assertEquals("'limit' is not set in ExamplesTable properties", exception.getMessage());
     }
 
     @Test
     void shouldReturnTableWithDesiredQuantityOfRows()
     {
-        Properties properties = new Properties();
-        properties.put("limit", "2");
-        assertEquals("|iterator|\n|0|\n|1|",
-                tableTransformer.transform(TABLE, null, new TableProperties(parameterConverters, properties)));
+        var tableProperties = new TableProperties("limit=2", keywords, parameterConverters);
+        assertEquals("|iterator|\n|0|\n|1|", tableTransformer.transform(TABLE, null, tableProperties));
     }
 }

@@ -19,8 +19,7 @@ package org.vividus.bdd.transformer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Properties;
-
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +43,8 @@ class ExcelTableTransformerTests
 
     private final ExcelTableTransformer transformer = new ExcelTableTransformer();
 
-    private final TableProperties properties = new TableProperties(new ParameterConverters(), new Properties());
+    private final Keywords keywords = new Keywords();
+    private final TableProperties properties = new TableProperties("", keywords, new ParameterConverters());
 
     @BeforeEach
     void beforeEach()

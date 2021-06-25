@@ -238,7 +238,8 @@ class ParameterConvertersDecoratorTests
     void shouldSkipDecorationForSubSteps()
     {
         SubSteps subSteps = mock(SubSteps.class);
-        parameterConverters.addConverters(new FunctionalParameterConverter<>(SubSteps.class, s -> subSteps));
+        parameterConverters.addConverters(
+                new FunctionalParameterConverter<>(String.class, SubSteps.class, s -> subSteps));
         assertEquals(subSteps, parameterConverters.convert("sub-steps", SubSteps.class));
         verifyNoInteractions(variableResolver, expressionAdaptor);
     }

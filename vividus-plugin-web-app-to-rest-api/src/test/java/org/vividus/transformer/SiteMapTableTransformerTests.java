@@ -27,12 +27,12 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
@@ -50,16 +50,14 @@ import crawlercommons.sitemaps.SiteMapURL;
 @ExtendWith(MockitoExtension.class)
 class SiteMapTableTransformerTests
 {
-    private static final SiteMapURL PRODUCT_SITE_MAP_URL = createValidSiteMapURL("/product");
     private static final String SOME_URL = "http://www.some.url";
     private static final String NO_URLS_FOUND_MESSAGE = "No URLs found in sitemap, or all URLs were filtered";
     private static final String SITEMAP = "Sitemap";
     private static final String TRUE = "true";
     private static final String IGNORE_ERRORS_PROPERTY_NAME = "ignoreErrors";
-    private static final String DEFAULT_SEPARATOR = "|";
     private static final String SITEMAP_XML = "/org/vividus/sitemap/sitemap.xml";
     private static final URI MAIN_APP_PAGE = URI.create(SOME_URL);
-    private static final Set<SiteMapURL> SITEMAP_URLS = Set.of(PRODUCT_SITE_MAP_URL);
+    private static final Set<SiteMapURL> SITEMAP_URLS = Set.of(new SiteMapURL(SOME_URL + "/product", true));
     private static final String OUTGOING_ABSOLUT_URL = "http://www.some.url/product";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SiteMapTableTransformer.class);
@@ -69,6 +67,7 @@ class SiteMapTableTransformerTests
     @Mock private HttpRedirectsProvider redirectsProvider;
     @InjectMocks private SiteMapTableTransformer siteMapTableTransformer;
 
+    private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters =  new ParameterConverters();
 
     @Test
@@ -83,8 +82,9 @@ class SiteMapTableTransformerTests
     @Test
     void testFetchUrlsWithoutSiteMapRelativeUrl()
     {
+        var tableProperties = new TableProperties("", keywords, parameterConverters);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> siteMapTableTransformer.fetchUrls(new TableProperties(parameterConverters, new Properties())));
+            () -> siteMapTableTransformer.fetchUrls(tableProperties));
         assertEquals("'siteMapRelativeUrl' is not set in ExamplesTable properties", exception.getMessage());
     }
 
@@ -179,19 +179,8 @@ class SiteMapTableTransformerTests
         assertThat(actual, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
     }
 
-    private TableProperties createTablePropertiesWithValueSeparator(String valueSeparator)
-    {
-        return new TableProperties(parameterConverters, "siteMapRelativeUrl=" + SITEMAP_XML, DEFAULT_SEPARATOR,
-                valueSeparator, "!--");
-    }
-
     private TableProperties createTableProperties()
     {
-        return createTablePropertiesWithValueSeparator(DEFAULT_SEPARATOR);
-    }
-
-    private static SiteMapURL createValidSiteMapURL(String relativeURL)
-    {
-        return new SiteMapURL(SOME_URL + relativeURL, true);
+        return new TableProperties("siteMapRelativeUrl=" + SITEMAP_XML, keywords, parameterConverters);
     }
 }

@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
@@ -74,6 +75,7 @@ class MergingTableTransformerTests
     @Mock private Configuration configuration;
     @InjectMocks private MergingTableTransformer mergingTableTransformer;
 
+    private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters()
             .addConverters(new FluentEnumConverter());
 
@@ -278,7 +280,9 @@ class MergingTableTransformerTests
 
     private void assertMerge(String tableBody, Properties properties, String expected)
     {
-        TableProperties tableProperties = new TableProperties(parameterConverters, properties);
+        var tableProperties = new TableProperties("", keywords, parameterConverters);
+        tableProperties.getProperties().putAll(properties);
+        when(configuration.keywords()).thenReturn(keywords);
         assertEquals(expected, mergingTableTransformer.transform(tableBody, null, tableProperties));
     }
 
@@ -298,9 +302,10 @@ class MergingTableTransformerTests
 
     private void verifyIllegalArgumentException(String tableBody, Properties properties, String message)
     {
+        var tableProperties = new TableProperties("", keywords, parameterConverters);
+        tableProperties.getProperties().putAll(properties);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> mergingTableTransformer.transform(tableBody, null,
-                    new TableProperties(parameterConverters, properties)));
+            () -> mergingTableTransformer.transform(tableBody, null, tableProperties));
         assertEquals(message, exception.getMessage());
     }
 }

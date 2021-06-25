@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
@@ -48,7 +49,7 @@ public enum MergeMode
         }
 
         @Override
-        protected List<ExamplesTable> alignTables(ParameterConverters parameterConverters,
+        protected List<ExamplesTable> alignTables(Keywords keywords, ParameterConverters parameterConverters,
                 List<ExamplesTable> examplesTables, String fillerValue)
         {
             List<String> mergedHeaders = mergeHeaders(examplesTables);
@@ -58,11 +59,12 @@ public enum MergeMode
                 {
                     return table;
                 }
-                TableProperties tableProperties = new TableProperties(parameterConverters, table.getProperties());
+                TableProperties tableProperties = new TableProperties(table.getPropertiesAsString(), keywords,
+                        parameterConverters);
                 ExamplesTable supplementingTable = buildSupplementingTable(tableProperties, fillerValue, missingHeaders,
                         table.getRowCount());
-                String merged = COLUMNS.merge(parameterConverters, List.of(table, supplementingTable), tableProperties,
-                        Optional.empty(), true);
+                String merged = COLUMNS.merge(keywords, parameterConverters, List.of(table, supplementingTable),
+                        tableProperties, Optional.empty(), true);
                 return new ExamplesTable(merged);
             }).collect(Collectors.toList());
         }
@@ -91,7 +93,7 @@ public enum MergeMode
         }
 
         @Override
-        protected List<ExamplesTable> alignTables(ParameterConverters parameterConverters,
+        protected List<ExamplesTable> alignTables(Keywords keywords, ParameterConverters parameterConverters,
                 List<ExamplesTable> examplesTables, String fillerValue)
         {
             int maxRowCount = examplesTables.stream().mapToInt(ExamplesTable::getRowCount).max().orElse(0);
@@ -102,11 +104,12 @@ public enum MergeMode
                 {
                     return table;
                 }
-                TableProperties tableProperties = new TableProperties(parameterConverters, table.getProperties());
+                TableProperties tableProperties = new TableProperties(table.getPropertiesAsString(), keywords,
+                        parameterConverters);
                 ExamplesTable supplementingTable = buildSupplementingTable(tableProperties, fillerValue,
                         table.getHeaders(), missingRowCount);
-                String merged = ROWS.merge(parameterConverters, List.of(table, supplementingTable), tableProperties,
-                        Optional.empty(), true);
+                String merged = ROWS.merge(keywords, parameterConverters, List.of(table, supplementingTable),
+                        tableProperties, Optional.empty(), true);
                 return new ExamplesTable(merged);
             }).collect(Collectors.toList());
         }
@@ -126,17 +129,17 @@ public enum MergeMode
         }
     };
 
-    public String merge(ParameterConverters parameterConverters, List<ExamplesTable> tables, TableProperties properties,
-            Optional<String> fillerValue)
+    public String merge(Keywords keywords, ParameterConverters parameterConverters, List<ExamplesTable> tables,
+            TableProperties properties, Optional<String> fillerValue)
     {
-        return merge(parameterConverters, tables, properties, fillerValue, false);
+        return merge(keywords, parameterConverters, tables, properties, fillerValue, false);
     }
 
-    private String merge(ParameterConverters parameterConverters, List<ExamplesTable> tables,
+    private String merge(Keywords keywords, ParameterConverters parameterConverters, List<ExamplesTable> tables,
             TableProperties properties, Optional<String> fillerValue, boolean appendTableProperties)
     {
         validate(tables, fillerValue.isEmpty());
-        List<ExamplesTable> tablesToMerge = fillerValue.map(v -> alignTables(parameterConverters, tables, v))
+        List<ExamplesTable> tablesToMerge = fillerValue.map(v -> alignTables(keywords, parameterConverters, tables, v))
                 .orElse(tables);
         List<List<String>> mergedRows = merge(tablesToMerge);
         List<String> mergeHeaders = mergeHeaders(tables);
@@ -146,7 +149,7 @@ public enum MergeMode
 
     protected abstract void validateInput(ExamplesTable current, ExamplesTable next, boolean strict);
 
-    protected abstract List<ExamplesTable> alignTables(ParameterConverters parameterConverters,
+    protected abstract List<ExamplesTable> alignTables(Keywords keywords, ParameterConverters parameterConverters,
             List<ExamplesTable> examplesTables, String fillerValue);
 
     protected abstract List<List<String>> merge(List<ExamplesTable> examplesTables);

@@ -152,11 +152,7 @@ class ParametersToAccessibilityCheckOptionsConverterTests
     {
         ParameterConverters parameterConverters = new ParameterConverters();
         parameterConverters.addConverters(new FluentEnumConverter(),
-                new FunctionalParameterConverter<Set<Locator>>(value ->
-                {
-                    return Set.of(LOCATOR);
-                }
-                ) { });
+                new FunctionalParameterConverter<String, Set<Locator>>(value -> Set.of(LOCATOR)) { });
         return new ExamplesTableFactory(new Keywords(), null, parameterConverters, new ParameterControls(),
                 new TableParsers(parameterConverters), new TableTransformers()).createExamplesTable(table);
     }
