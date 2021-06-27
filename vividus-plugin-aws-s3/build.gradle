@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
-    implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.12.5')
+    implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.12.13')
     implementation(group: 'com.amazonaws', name: 'aws-java-sdk-s3')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
