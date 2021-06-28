@@ -98,8 +98,8 @@ class EvalExpressionProcessorTests
     {
         JexlException.Variable exception = assertThrows(JexlException.Variable.class,
             () -> processor.execute("eval(missingVar + 'val')"));
-        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.evaluateExpression:56@1:1 "
-                + "variable 'missingVar' is undefined", exception.getMessage());
+        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.evaluateExpression:56 variable "
+                + "'missingVar' is undefined", exception.getMessage());
     }
 
     @Test
