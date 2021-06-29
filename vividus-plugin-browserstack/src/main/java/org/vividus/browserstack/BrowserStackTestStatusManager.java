@@ -18,9 +18,9 @@ package org.vividus.browserstack;
 
 import com.browserstack.client.exception.BrowserStackException;
 
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.cloud.AbstractCloudTestStatusManager;
+import org.vividus.selenium.cloud.CloudTestStatusMapping;
 import org.vividus.testcontext.TestContext;
 
 public class BrowserStackTestStatusManager extends AbstractCloudTestStatusManager
@@ -30,7 +30,7 @@ public class BrowserStackTestStatusManager extends AbstractCloudTestStatusManage
     public BrowserStackTestStatusManager(IWebDriverProvider webDriverProvider, TestContext testContext,
             BrowserStackAutomateClient browserStackAutomateClient)
     {
-        super(webDriverProvider, testContext);
+        super(new CloudTestStatusMapping("passed", "failed"), webDriverProvider, testContext);
         this.browserStackAutomateClient = browserStackAutomateClient;
     }
 
@@ -39,8 +39,7 @@ public class BrowserStackTestStatusManager extends AbstractCloudTestStatusManage
     {
         try
         {
-            String sessionId = getWebDriverProvider().getUnwrapped(RemoteWebDriver.class).getSessionId().toString();
-            browserStackAutomateClient.updateSessionStatus(sessionId, status);
+            browserStackAutomateClient.updateSessionStatus(getSessionId(), status);
         }
         catch (BrowserStackException e)
         {

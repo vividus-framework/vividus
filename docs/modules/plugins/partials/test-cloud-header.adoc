@@ -1,0 +1,11 @@
+= {test-cloud-name} Plugin
+
+The plugin provides integration with continuous testing cloud {test-cloud-link}[{test-cloud-name}].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-{test-cloud-key}', version: '{current-version}')
+----

@@ -20,6 +20,7 @@ dependencies {
     implementation project(':vividus-plugin-azure-storage-account')
     implementation project(':vividus-plugin-azure-storage-queue')
     implementation project(':vividus-plugin-browserstack')
+    implementation project(':vividus-plugin-crossbrowsertesting')
     implementation project(':vividus-plugin-db')
     implementation project(':vividus-plugin-mobile-app')
     implementation project(':vividus-plugin-mongodb')

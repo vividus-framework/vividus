@@ -18,6 +18,7 @@ package org.vividus.saucelabs;
 
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.cloud.AbstractCloudTestStatusManager;
+import org.vividus.selenium.cloud.CloudTestStatusMapping;
 import org.vividus.testcontext.TestContext;
 import org.vividus.ui.action.JavascriptActions;
 
@@ -28,7 +29,7 @@ public class SauceLabsTestStatusManager extends AbstractCloudTestStatusManager
     public SauceLabsTestStatusManager(IWebDriverProvider webDriverProvider, TestContext testContext,
             JavascriptActions javascriptActions)
     {
-        super(webDriverProvider, testContext);
+        super(new CloudTestStatusMapping("passed", "failed"), webDriverProvider, testContext);
         this.javascriptActions = javascriptActions;
     }
 

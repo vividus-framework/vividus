@@ -16,16 +16,23 @@
 
 package org.vividus.selenium.cloud;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.error;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
+import java.util.List;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.Test;
@@ -38,6 +45,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher.GetCloudTestUrlException;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
 import org.vividus.testcontext.ThreadedTestContext;
@@ -47,12 +55,15 @@ class AbstractCloudTestLinkPublisherTests
 {
     private static final String SESSION_ID = "session-id";
     private static final String URL = "https://example.com";
+    private static final String TEST_CLOUD_NAME = "Test";
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private EventBus eventBus;
     @Mock private AfterWebDriverQuitEvent webDriverQuitEvent;
     @Spy private ThreadedTestContext testContext;
     @InjectMocks private TestCloudTestLinkPublisher linkPublisher;
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractCloudTestLinkPublisher.class);
 
     @Test
     void shouldPublishSessionLinkAfterScenario()
@@ -97,6 +108,23 @@ class AbstractCloudTestLinkPublisherTests
         verifyNoMoreInteractions(webDriverProvider);
     }
 
+    @Test
+    void shouldLogException() throws GetCloudTestUrlException
+    {
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+        mockDriverSession();
+
+        GetCloudTestUrlException thrown = mock(GetCloudTestUrlException.class);
+        TestCloudTestLinkPublisher spy = spy(linkPublisher);
+        doThrow(thrown).when(spy).getCloudTestUrl(SESSION_ID);
+
+        spy.resetState();
+        spy.publishCloudTestLinkAfterScenario();
+
+        assertThat(logger.getLoggingEvents(), is(List
+            .of(error(thrown, "Unable to get an URL for {} session with the ID {}", TEST_CLOUD_NAME, SESSION_ID))));
+    }
+
     private void mockDriverSession()
     {
         RemoteWebDriver remoteWebDriver = mock(RemoteWebDriver.class);
@@ -121,13 +149,13 @@ class AbstractCloudTestLinkPublisherTests
     {
         TestCloudTestLinkPublisher(IWebDriverProvider webDriverProvider, EventBus eventBus, TestContext testContext)
         {
-            super("Test", webDriverProvider, eventBus, testContext);
+            super(TEST_CLOUD_NAME, webDriverProvider, eventBus, testContext);
         }
 
         @Override
-        protected Optional<String> getCloudTestUrl(String sessionId)
+        protected String getCloudTestUrl(String sessionId) throws GetCloudTestUrlException
         {
-            return Optional.of(URL);
+            return URL;
         }
     }
 }

@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package org.vividus.lambdatest;
+package org.vividus.selenium.cloud;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import org.junit.jupiter.api.Test;
-
-class LambdaTestTestLinkPublisherTests
+public class CloudTestStatusMapping
 {
-    @Test
-    void shouldReturnSessionUrl()
+    private final String passed;
+    private final String failed;
+
+    public CloudTestStatusMapping(String passed, String failed)
     {
-        LambdaTestTestLinkPublisher publisher = new LambdaTestTestLinkPublisher(null, null, null);
-        assertEquals("https://automation.lambdatest.com/logs/?sessionID=session-id",
-                publisher.getCloudTestUrl("session-id"));
+        this.passed = passed;
+        this.failed = failed;
+    }
+
+    public String getPassed()
+    {
+        return passed;
+    }
+
+    public String getFailed()
+    {
+        return failed;
     }
 }

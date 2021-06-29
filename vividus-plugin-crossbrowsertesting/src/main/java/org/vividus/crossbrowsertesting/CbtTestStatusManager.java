@@ -14,28 +14,36 @@
  * limitations under the License.
  */
 
-package org.vividus.lambdatest;
+package org.vividus.crossbrowsertesting;
+
+import com.crossbrowsertesting.AutomatedTest;
+import com.crossbrowsertesting.Builders;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.cloud.AbstractCloudTestStatusManager;
 import org.vividus.selenium.cloud.CloudTestStatusMapping;
 import org.vividus.testcontext.TestContext;
-import org.vividus.ui.action.JavascriptActions;
 
-public class LambdaTestTestStatusManager extends AbstractCloudTestStatusManager
+public class CbtTestStatusManager extends AbstractCloudTestStatusManager
 {
-    private final JavascriptActions javascriptActions;
-
-    public LambdaTestTestStatusManager(IWebDriverProvider webDriverProvider, TestContext testContext,
-            JavascriptActions javascriptActions)
+    protected CbtTestStatusManager(String username, String password, IWebDriverProvider webDriverProvider,
+            TestContext testContext)
     {
-        super(new CloudTestStatusMapping("passed", "failed"), webDriverProvider, testContext);
-        this.javascriptActions = javascriptActions;
+        super(new CloudTestStatusMapping("pass", "fail"), webDriverProvider, testContext);
+        Builders.login(username, password);
     }
 
     @Override
     protected void updateCloudTestStatus(String status) throws UpdateCloudTestStatusException
     {
-        javascriptActions.executeScript("lambda-status=" + status);
+        try
+        {
+            new AutomatedTest(getSessionId()).setScore(status);
+        }
+        catch (UnirestException exception)
+        {
+            throw new UpdateCloudTestStatusException(exception);
+        }
     }
 }

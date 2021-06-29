@@ -18,14 +18,14 @@ package org.vividus.selenium.cloud;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeScenario;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
@@ -33,9 +33,12 @@ import org.vividus.testcontext.TestContext;
 
 public abstract class AbstractCloudTestLinkPublisher
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCloudTestLinkPublisher.class);
+
     private static final Object KEY = CloudTestLinkPublishState.class;
 
     private final String linkName;
+    private final String testCloudName;
 
     private final IWebDriverProvider webDriverProvider;
     private final EventBus eventBus;
@@ -45,12 +48,13 @@ public abstract class AbstractCloudTestLinkPublisher
             EventBus eventBus, TestContext testContext)
     {
         this.linkName = format("%s Test URL", testCloudName);
+        this.testCloudName = testCloudName;
         this.webDriverProvider = webDriverProvider;
         this.eventBus = eventBus;
         this.testContext = testContext;
     }
 
-    protected abstract Optional<String> getCloudTestUrl(String sessionId);
+    protected abstract String getCloudTestUrl(String sessionId) throws GetCloudTestUrlException;
 
     @BeforeScenario
     public void resetState()
@@ -83,9 +87,21 @@ public abstract class AbstractCloudTestLinkPublisher
         return testContext.get(KEY, CloudTestLinkPublishState.class);
     }
 
+    @SuppressWarnings("IllegalCatchExtended")
     private void publishCloudTestLink(String sessionId)
     {
-        getCloudTestUrl(sessionId).ifPresent(link -> eventBus.post(new LinkPublishEvent(linkName, link)));
+        try
+        {
+            eventBus.post(new LinkPublishEvent(linkName, getCloudTestUrl(sessionId)));
+        }
+        catch (Exception e)
+        {
+            LOGGER.atError()
+                  .addArgument(testCloudName)
+                  .addArgument(sessionId)
+                  .setCause(e)
+                  .log("Unable to get an URL for {} session with the ID {}");
+        }
     }
 
     private final class CloudTestLinkPublishState
@@ -100,6 +116,16 @@ public abstract class AbstractCloudTestLinkPublisher
         public void onPublishedAfterScenario()
         {
             this.publishedAfterScenario = true;
+        }
+    }
+
+    public static final class GetCloudTestUrlException extends Exception
+    {
+        private static final long serialVersionUID = -4333639036297482018L;
+
+        public GetCloudTestUrlException(Throwable cause)
+        {
+            super(cause);
         }
     }
 }

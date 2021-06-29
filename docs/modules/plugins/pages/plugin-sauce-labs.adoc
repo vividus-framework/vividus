@@ -1,16 +1,10 @@
 :grid-default-hostname: empty
+:test-cloud-name: SauceLabs
+:test-cloud-key: saucelabs
+:test-cloud-link: https://saucelabs.com/
+:test-cloud-capabilities: https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
 
-= Sauce Labs Plugin
-
-The plugin provides integration with continuous testing cloud https://saucelabs.com/[SauceLabs].
-
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-saucelabs', version: '{current-version}')
-----
+include::partial$test-cloud-header.adoc[]
 
 == Profiles
 
@@ -32,20 +26,7 @@ Required properties:
 * `selenium.grid.platform-version`
 |===
 
-Sauce Labs profiles can be enabled by adding the corresponding entry to `configuration.profiles` property.
-
-.Configure Chrome on Sauce Labs
-[source,properties,subs="attributes+"]
-----
-configuration.profiles=saucelabs/web,web/desktop/chrome
-----
-
-[IMPORTANT]
-Sauce Labs profile must be first.
-
-Explore https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/[Platform Configurator] to use advanced Sauce Labs configuration options.
-
-TIP: Links to SauceLabs test runs can be found in Allure report
+include::partial$test-cloud-usage.adoc[]
 
 == Properties
 

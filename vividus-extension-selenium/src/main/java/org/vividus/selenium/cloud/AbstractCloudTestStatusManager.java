@@ -18,6 +18,7 @@ package org.vividus.selenium.cloud;
 
 import com.google.common.eventbus.Subscribe;
 
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
@@ -32,11 +33,14 @@ public abstract class AbstractCloudTestStatusManager
 
     private static final Object KEY = CloudTestStatus.class;
 
+    private final CloudTestStatusMapping testStatusMapping;
     private final IWebDriverProvider webDriverProvider;
     private final TestContext testContext;
 
-    protected AbstractCloudTestStatusManager(IWebDriverProvider webDriverProvider, TestContext testContext)
+    protected AbstractCloudTestStatusManager(CloudTestStatusMapping testStatusMapping,
+            IWebDriverProvider webDriverProvider, TestContext testContext)
     {
+        this.testStatusMapping = testStatusMapping;
         this.webDriverProvider = webDriverProvider;
         this.testContext = testContext;
     }
@@ -58,7 +62,7 @@ public abstract class AbstractCloudTestStatusManager
     @Subscribe
     public final void updateCloudTestStatus(BeforeWebDriverQuitEvent event)
     {
-        String status = getCloudTestStatus().isFailed() ? "failed" : "passed";
+        String status = getCloudTestStatus().isFailed() ? testStatusMapping.getFailed() : testStatusMapping.getPassed();
         try
         {
             updateCloudTestStatus(status);
@@ -82,9 +86,9 @@ public abstract class AbstractCloudTestStatusManager
 
     protected abstract void updateCloudTestStatus(String status) throws UpdateCloudTestStatusException;
 
-    protected IWebDriverProvider getWebDriverProvider()
+    protected String getSessionId()
     {
-        return webDriverProvider;
+        return webDriverProvider.getUnwrapped(RemoteWebDriver.class).getSessionId().toString();
     }
 
     private final class CloudTestStatus

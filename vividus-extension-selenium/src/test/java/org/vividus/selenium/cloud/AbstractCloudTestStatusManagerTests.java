@@ -20,6 +20,7 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -44,6 +45,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.SessionId;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.cloud.AbstractCloudTestStatusManager.UpdateCloudTestStatusException;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
@@ -57,6 +60,7 @@ import org.vividus.testcontext.ThreadedTestContext;
 class AbstractCloudTestStatusManagerTests
 {
     private static final String PASSED = "passed";
+    private static final String FAILED = "failed";
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Spy private ThreadedTestContext testContext;
@@ -79,7 +83,7 @@ class AbstractCloudTestStatusManagerTests
         statusManager.setCloudTestStatusToFailure(new AssertionFailedEvent(assertionError));
         statusManager.updateCloudTestStatus(new BeforeWebDriverQuitEvent());
 
-        verify(statusManager).updateCloudTestStatus("failed");
+        verify(statusManager).updateCloudTestStatus(FAILED);
         verify(testContext, times(5)).get(any(Class.class), any(Supplier.class));
         verify(testContext).remove(any(Class.class));
         assertThat(logger.getLoggingEvents(), is(empty()));
@@ -149,11 +153,25 @@ class AbstractCloudTestStatusManagerTests
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
+    @Test
+    void shouldGetSessionId()
+    {
+        RemoteWebDriver remoteWebDriver = mock(RemoteWebDriver.class);
+        SessionId sessionId = mock(SessionId.class);
+
+        when(webDriverProvider.getUnwrapped(RemoteWebDriver.class)).thenReturn(remoteWebDriver);
+        when(remoteWebDriver.getSessionId()).thenReturn(sessionId);
+        String sessionIdAsString = "session-id";
+        when(sessionId.toString()).thenReturn(sessionIdAsString);
+
+        assertEquals(sessionIdAsString, statusManager.getSessionId());
+    }
+
     private static final class TestCloudTestStatusManager extends AbstractCloudTestStatusManager
     {
         TestCloudTestStatusManager(IWebDriverProvider webDriverProvider, TestContext testContext)
         {
-            super(webDriverProvider, testContext);
+            super(new CloudTestStatusMapping(PASSED, FAILED), webDriverProvider, testContext);
         }
 
         @Override

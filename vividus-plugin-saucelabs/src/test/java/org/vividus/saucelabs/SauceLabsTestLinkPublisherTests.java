@@ -18,20 +18,19 @@ package org.vividus.saucelabs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Optional;
-
 import com.saucelabs.saucerest.DataCenter;
 
 import org.junit.jupiter.api.Test;
+import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher.GetCloudTestUrlException;
 
 class SauceLabsTestLinkPublisherTests
 {
     @Test
-    void shouldReturnSessionUrl()
+    void shouldReturnSessionUrl() throws GetCloudTestUrlException
     {
         SauceLabsTestLinkPublisher linkPublisher = new SauceLabsTestLinkPublisher(DataCenter.EU, null, null,
                 null);
-        assertEquals(Optional.of("https://app.eu-central-1.saucelabs.com/tests/session-id"),
+        assertEquals("https://app.eu-central-1.saucelabs.com/tests/session-id",
                 linkPublisher.getCloudTestUrl("session-id"));
     }
 }

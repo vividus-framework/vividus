@@ -16,22 +16,14 @@
 
 package org.vividus.browserstack;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.error;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-import java.util.Optional;
-
 import com.browserstack.automate.model.Session;
 import com.browserstack.client.exception.BrowserStackException;
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
@@ -39,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher.GetCloudTestUrlException;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class BrowserStackTestLinkPublisherTests
@@ -50,27 +43,23 @@ class BrowserStackTestLinkPublisherTests
     @Mock private BrowserStackAutomateClient appAutomateClient;
     @InjectMocks private BrowserStackTestLinkPublisher linkPublisher;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(BrowserStackTestLinkPublisher.class);
-
     @Test
-    void shouldReturnSessionUrl() throws BrowserStackException
+    void shouldReturnSessionUrl() throws BrowserStackException, GetCloudTestUrlException
     {
         when(appAutomateClient.getSession(SESSION_ID)).thenReturn(session);
         when(session.getPublicUrl()).thenReturn(URL);
 
-        assertEquals(Optional.of(URL), linkPublisher.getCloudTestUrl(SESSION_ID));
-        assertThat(logger.getLoggingEvents(), is(empty()));
+        assertEquals(URL, linkPublisher.getCloudTestUrl(SESSION_ID));
     }
 
     @Test
-    void shouldLogExceptionsOccuredWhileGettingSessionLink() throws BrowserStackException
+    void shouldLogExceptionsOccuredWhileGettingSessionLink() throws BrowserStackException, GetCloudTestUrlException
     {
         BrowserStackException exception = mock(BrowserStackException.class);
         doThrow(exception).when(appAutomateClient).getSession(SESSION_ID);
 
-        assertEquals(Optional.empty(), linkPublisher.getCloudTestUrl(SESSION_ID));
-
-        assertThat(logger.getLoggingEvents(),
-            is(List.of(error(exception, "Unable to get an URL for BrowserStack session with the ID {}", SESSION_ID))));
+        GetCloudTestUrlException thrown = assertThrows(GetCloudTestUrlException.class,
+            () -> linkPublisher.getCloudTestUrl(SESSION_ID));
+        assertEquals(exception, thrown.getCause());
     }
 }

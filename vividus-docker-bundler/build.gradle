@@ -26,6 +26,7 @@ dependencies {
     implementation project(':vividus-plugin-azure-storage-queue')
     implementation project(':vividus-plugin-browserstack')
     implementation project(':vividus-plugin-csv')
+    implementation project(':vividus-plugin-crossbrowsertesting')
     implementation project(':vividus-plugin-datetime')
     implementation project(':vividus-plugin-db')
     implementation project(':vividus-plugin-electron')
