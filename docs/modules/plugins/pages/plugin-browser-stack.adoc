@@ -1,16 +1,10 @@
 :grid-default-hostname: hub-cloud.browserstack.com
+:test-cloud-name: BrowserStack
+:test-cloud-key: browserstack
+:test-cloud-link: https://www.browserstack.com/
+:test-cloud-capabilities: https://www.browserstack.com/app-automate/capabilities?tag=w3c
 
-= Browser Stack Plugin
-
-The plugin provides integration with continuous testing cloud https://www.browserstack.com/[BrowserStack].
-
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-browserstack', version: '{current-version}')
-----
+include::partial$test-cloud-header.adoc[]
 
 == Profiles
 
@@ -30,20 +24,7 @@ Required properties:
 * `selenium.grid.device-name`
 |===
 
-Browser Stack profiles can be enabled by adding the corresponding entry to `configuration.profiles` property.
-
-.Configure Chrome on Browser Labs
-[source,properties,subs="attributes+"]
-----
-configuration.profiles=browserstack/web,web/desktop/chrome
-----
-
-[IMPORTANT]
-Browser Stack profile must be first.
-
-Explore https://www.browserstack.com/app-automate/capabilities?tag=w3c[Capabilities Builder] for more fine-grained Browser Stack configuration.
-
-TIP: Links to BrowserStack test runs can be found in Allure report
+include::partial$test-cloud-usage.adoc[]
 
 == Properties
 

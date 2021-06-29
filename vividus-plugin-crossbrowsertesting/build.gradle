@@ -1,0 +1,14 @@
+project.description = 'Vividus plugin for CrossBrowserTesting'
+
+dependencies {
+    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-extension-selenium')
+
+    // https://github.com/uarlouski/cbthelper-java/tree/master
+    implementation(group: 'com.github.uarlouski', name: 'cbthelper-java', version: 'ac68dae3ab')
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}

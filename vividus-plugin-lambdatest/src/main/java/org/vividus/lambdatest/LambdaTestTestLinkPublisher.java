@@ -18,8 +18,6 @@ package org.vividus.lambdatest;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.selenium.IWebDriverProvider;
@@ -35,8 +33,8 @@ public class LambdaTestTestLinkPublisher extends AbstractCloudTestLinkPublisher
     }
 
     @Override
-    protected Optional<String> getCloudTestUrl(String sessionId)
+    protected String getCloudTestUrl(String sessionId)
     {
-        return Optional.of(format("https://automation.lambdatest.com/logs/?sessionID=%s", sessionId));
+        return format("https://automation.lambdatest.com/logs/?sessionID=%s", sessionId);
     }
 }

@@ -36,3 +36,4 @@
 ** xref:plugin-browser-stack.adoc[Browser Stack]
 ** xref:plugin-lambda-test.adoc[LambdaTest]
 ** xref:plugin-sauce-labs.adoc[Sauce Labs]
+** xref:plugin-cross-browser-testing.adoc[SmartBear: CrossBrowserTesting]

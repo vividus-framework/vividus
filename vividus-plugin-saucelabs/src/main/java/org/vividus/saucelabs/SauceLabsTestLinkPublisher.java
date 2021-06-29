@@ -18,8 +18,6 @@ package org.vividus.saucelabs;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import com.google.common.eventbus.EventBus;
 import com.saucelabs.saucerest.DataCenter;
 
@@ -39,8 +37,8 @@ public class SauceLabsTestLinkPublisher extends AbstractCloudTestLinkPublisher
     }
 
     @Override
-    protected Optional<String> getCloudTestUrl(String sessionId)
+    protected String getCloudTestUrl(String sessionId) throws GetCloudTestUrlException
     {
-        return Optional.of(format("%stests/%s", sauceLabsUrl, sessionId));
+        return format("%stests/%s", sauceLabsUrl, sessionId);
     }
 }

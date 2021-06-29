@@ -1,8 +1,8 @@
-:grid-default-hostname: hub.lambdatest.com
-:test-cloud-name: LambdaTest
-:test-cloud-key: lambdatest
-:test-cloud-link: https://www.lambdatest.com/
-:test-cloud-capabilities: https://www.lambdatest.com/capabilities-generator/
+:grid-default-hostname: hub.crossbrowsertesting.com
+:test-cloud-name: CrossBrowserTesting
+:test-cloud-key: crossbrowsertesting
+:test-cloud-link: https://crossbrowsertesting.com/
+:test-cloud-capabilities: https://support.smartbear.com/crossbrowsertesting/docs/automated-testing/automation-capabilities.html
 
 include::partial$test-cloud-header.adoc[]
 
@@ -11,7 +11,7 @@ include::partial$test-cloud-header.adoc[]
 [cols="1,2"]
 |===
 
-|`lambdatest/web`
+|`crossbrowsertesting/web`
 |Use in conjunction with web application profiles.
 
 |===

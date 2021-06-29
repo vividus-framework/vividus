@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package org.vividus.lambdatest;
+package org.vividus.selenium.crossbrowsertesting;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
 
-import org.junit.jupiter.api.Test;
-
-class LambdaTestTestLinkPublisherTests
+public class CbtCapabilitiesConfigurer extends AbstractDesiredCapabilitiesConfigurer
 {
-    @Test
-    void shouldReturnSessionUrl()
+    protected CbtCapabilitiesConfigurer(IBddRunContext bddRunContext)
     {
-        LambdaTestTestLinkPublisher publisher = new LambdaTestTestLinkPublisher(null, null, null);
-        assertEquals("https://automation.lambdatest.com/logs/?sessionID=session-id",
-                publisher.getCloudTestUrl("session-id"));
+        super(bddRunContext);
+    }
+
+    @Override
+    public void configure(DesiredCapabilities desiredCapabilities)
+    {
+        configureTestName(desiredCapabilities, "name");
     }
 }

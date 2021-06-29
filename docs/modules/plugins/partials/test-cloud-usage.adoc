@@ -1,0 +1,14 @@
+{test-cloud-name} profiles can be enabled by adding the corresponding entry to `configuration.profiles` property.
+
+.Configure Chrome on {test-cloud-name}
+[source,properties,subs="attributes+"]
+----
+configuration.profiles={test-cloud-key}/web,web/desktop/chrome
+----
+
+[IMPORTANT]
+{test-cloud-name} profile must be first.
+
+Explore {test-cloud-capabilities}[{test-cloud-name} Capabilities] for more fine-grained configuration.
+
+TIP: Links to {test-cloud-name} test runs can be found in Allure report

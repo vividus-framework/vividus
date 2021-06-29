@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-package org.vividus.browserstack;
+package org.vividus.crossbrowsertesting;
 
-import com.browserstack.client.exception.BrowserStackException;
+import com.crossbrowsertesting.AutomatedTest;
+import com.crossbrowsertesting.Builders;
 import com.google.common.eventbus.EventBus;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher;
 import org.vividus.testcontext.TestContext;
 
-public class BrowserStackTestLinkPublisher extends AbstractCloudTestLinkPublisher
+public class CbtTestLinkPublisher extends AbstractCloudTestLinkPublisher
 {
-    private final BrowserStackAutomateClient appAutomateClient;
-
-    public BrowserStackTestLinkPublisher(IWebDriverProvider webDriverProvider, EventBus eventBus,
-            TestContext testContext, BrowserStackAutomateClient appAutomateClient)
+    protected CbtTestLinkPublisher(String username, String password, IWebDriverProvider webDriverProvider,
+            EventBus eventBus, TestContext testContext)
     {
-        super("BrowserStack", webDriverProvider, eventBus, testContext);
-        this.appAutomateClient = appAutomateClient;
+        super("CrossBrowserTesting", webDriverProvider, eventBus, testContext);
+        Builders.login(username, password);
     }
 
     @Override
-    public String getCloudTestUrl(String sessionId) throws GetCloudTestUrlException
+    protected String getCloudTestUrl(String sessionId) throws GetCloudTestUrlException
     {
         try
         {
-            return appAutomateClient.getSession(sessionId).getPublicUrl();
+            return new AutomatedTest(sessionId).getWebUrl();
         }
-        catch (BrowserStackException e)
+        catch (UnirestException exception)
         {
-            throw new GetCloudTestUrlException(e);
+            throw new GetCloudTestUrlException(exception);
         }
     }
 }
