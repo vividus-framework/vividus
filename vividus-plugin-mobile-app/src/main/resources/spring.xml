@@ -37,6 +37,8 @@
 
     <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
 
+    <bean id="keyboardSteps" class="org.vividus.bdd.mobileapp.steps.KeyboardSteps" />
+
     <bean id="touchSteps" class="org.vividus.bdd.mobileapp.steps.TouchSteps" />
 
     <bean id="setContextSteps" class="org.vividus.bdd.mobileapp.steps.SetContextSteps" />
@@ -95,6 +97,7 @@
         <idref bean="applicationSteps" />
         <idref bean="webDriverSetupSteps" />
         <idref bean="touchSteps" />
+        <idref bean="keyboardSteps" />
         <idref bean="deviceSteps" />
         <idref bean="elementSteps" />
         <idref bean="setContextSteps" />
