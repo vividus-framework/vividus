@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.bdd.mobileapp.steps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -28,16 +30,21 @@ import static org.mockito.Mockito.when;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
@@ -47,10 +54,16 @@ import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.mobileapp.action.KeyboardActions;
 import org.vividus.mobileapp.action.TouchActions;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.JavascriptActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
+
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
+import io.appium.java_client.android.nativekey.PressesKey;
 
 @ExtendWith(MockitoExtension.class)
 class TouchStepsTests
@@ -58,6 +71,8 @@ class TouchStepsTests
     private static final String TEXT = "text";
     private static final String ELEMENT_TO_TAP = "The element to tap";
     private static final String ELEMENT_TO_TYPE_TEXT = "The element to type text";
+    private static final String NAME = "name";
+    private static final String MOBILE_PRESS_BUTTON = "mobile: pressButton";
 
     @Mock private IBaseValidations baseValidations;
     @Mock private TouchActions touchActions;
@@ -65,6 +80,8 @@ class TouchStepsTests
     @Mock private ISearchActions searchActions;
     @Mock private Locator locator;
     @Mock private GenericWebDriverManager genericWebDriverManager;
+    @Mock private JavascriptActions javascriptActions;
+    @Mock private IWebDriverProvider webDriverProvider;
     @InjectMocks private TouchSteps touchSteps;
 
     @AfterEach
@@ -194,6 +211,103 @@ class TouchStepsTests
         touchSteps.swipeToElement(SwipeDirection.UP, locator, Duration.ZERO);
 
         verifyNoMoreInteractions(parameters);
+    }
+
+    @Test
+    void shouldPressKeyOnIOS()
+    {
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+
+        performPressdKeyTest();
+    }
+
+    @Test
+    void shouldPressIOSKeyOnTvOS()
+    {
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isTvOS()).thenReturn(true);
+
+        performPressdKeyTest();
+    }
+
+    @Test
+    void shouldTypeIOSKeyOnTvOS()
+    {
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isTvOS()).thenReturn(true);
+        InOrder ordered = Mockito.inOrder(javascriptActions);
+        touchSteps.typeKeys("home");
+        ordered.verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, "h"));
+        ordered.verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, "o"));
+        ordered.verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, "m"));
+        ordered.verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, "e"));
+        verifyNoInteractions(webDriverProvider);
+    }
+
+    private void performPressdKeyTest()
+    {
+        String key = "Home";
+
+        touchSteps.pressKey(key);
+
+        verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, key));
+        verifyNoInteractions(webDriverProvider);
+    }
+
+    @Test
+    void shouldPressAndroidKey()
+    {
+        performPressAndroidKeyTest(() -> touchSteps.pressKey(AndroidKey.SPACE.name()));
+    }
+
+    @Test
+    void shouldPressAndroidKeys()
+    {
+        performPressAndroidKeyTest(() -> touchSteps.pressKeys(new ExamplesTable("|key|\n|SPACE|")));
+    }
+
+    @CsvSource(value = { "' ',62", "0, 7", "1, 8", "2, 9", "3, 10", "4, 11", "5, 12", "6, 13", "7, 14", "8, 15",
+            "9, 16", "a, 29" })
+    @ParameterizedTest
+    void shouldTypeAndroidKeys(String key, int expectedCode)
+    {
+        when(genericWebDriverManager.isAndroid()).thenReturn(true);
+        performPressAndroidKeyTest(() -> touchSteps.typeKeys(key), expectedCode);
+    }
+
+    private void performPressAndroidKeyTest(Runnable run)
+    {
+        performPressAndroidKeyTest(run, 62);
+    }
+
+    private void performPressAndroidKeyTest(Runnable run, int exptectedCode)
+    {
+        ArgumentCaptor<KeyEvent> keyCaptor = ArgumentCaptor.forClass(KeyEvent.class);
+        PressesKey pressesKey = mock(PressesKey.class);
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isTvOS()).thenReturn(false);
+        when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
+
+        run.run();
+
+        verify(pressesKey).pressKey(keyCaptor.capture());
+
+        assertEquals(Map.of("keycode", exptectedCode), keyCaptor.getValue().build());
+        verifyNoMoreInteractions(webDriverProvider, genericWebDriverManager);
+    }
+
+    @Test
+    void shouldNotPressUnsupportedAndroidKey()
+    {
+        PressesKey pressesKey = mock(PressesKey.class);
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
+        when(genericWebDriverManager.isTvOS()).thenReturn(false);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> touchSteps.pressKey("unsupported key"));
+        assertEquals("Unsupported Android key: unsupported key", exception.getMessage());
+        verifyNoMoreInteractions(webDriverProvider, genericWebDriverManager);
+        verifyNoInteractions(pressesKey);
     }
 
     private SearchParameters initSwipeMocks()

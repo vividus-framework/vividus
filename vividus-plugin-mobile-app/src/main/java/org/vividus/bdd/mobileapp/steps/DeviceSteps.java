@@ -17,24 +17,12 @@
 package org.vividus.bdd.mobileapp.steps;
 
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
-import org.jbehave.core.model.ExamplesTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.mobileapp.action.DeviceActions;
-import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.GenericWebDriverManager;
-import org.vividus.ui.action.JavascriptActions;
-
-import io.appium.java_client.android.nativekey.AndroidKey;
-import io.appium.java_client.android.nativekey.KeyEvent;
-import io.appium.java_client.android.nativekey.PressesKey;
 
 public class DeviceSteps
 {
@@ -42,19 +30,11 @@ public class DeviceSteps
 
     private final DeviceActions deviceActions;
     private final String folderForFileUpload;
-    private final GenericWebDriverManager genericWebDriverManager;
-    private final JavascriptActions javascriptActions;
-    private final IWebDriverProvider webDriverProvider;
 
-    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions,
-            GenericWebDriverManager genericWebDriverManager, JavascriptActions javascriptActions,
-            IWebDriverProvider webDriverProvider)
+    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions)
     {
         this.folderForFileUpload = folderForFileUpload;
         this.deviceActions = deviceActions;
-        this.genericWebDriverManager = genericWebDriverManager;
-        this.javascriptActions = javascriptActions;
-        this.webDriverProvider = webDriverProvider;
     }
 
     /**
@@ -70,72 +50,5 @@ public class DeviceSteps
 
         String fileName = FilenameUtils.getName(filePath);
         deviceActions.pushFile(Paths.get(folderForFileUpload, fileName).toString(), filePath);
-    }
-
-    /**
-     * Presses the key
-     * <br>
-     * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
-     * <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
-     * Android keys</a> for available values
-     * <br>
-     * Example:
-     * <br>
-     * <code>
-     * When I press $key key
-     * </code>
-     *
-     * @param key the key to press
-     */
-    @When("I press $key key")
-    public void pressKey(String key)
-    {
-        pressKeys(List.of(key));
-    }
-
-    /**
-     * Presses the keys
-     * <br>
-     * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
-     * <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
-     * Android keys</a> for available values
-     * <br>
-     * Example:
-     * <br>
-     * <code>
-     * When I press keys:
-     * <br>
-     * |key |
-     * <br>
-     * |Home|
-     * </code>
-     *
-     * @param keys the keys to press
-     */
-    @When("I press keys:$keys")
-    public void pressKeys(ExamplesTable keys)
-    {
-        pressKeys(keys.getColumn("key"));
-    }
-
-    private void pressKeys(List<String> keys)
-    {
-        if (genericWebDriverManager.isIOSNativeApp() || genericWebDriverManager.isTvOS())
-        {
-            keys.forEach(key -> javascriptActions.executeScript("mobile: pressButton", Map.of("name", key)));
-        }
-        else
-        {
-            PressesKey pressesKey = webDriverProvider.getUnwrapped(PressesKey.class);
-            keys.stream()
-                .map(key ->
-                {
-                    AndroidKey androidKey = EnumUtils.getEnumIgnoreCase(AndroidKey.class, key);
-                    Validate.isTrue(androidKey != null, "Unsupported Android key: %s", key);
-                    return androidKey;
-                })
-                .map(KeyEvent::new)
-                .forEach(pressesKey::pressKey);
-        }
     }
 }

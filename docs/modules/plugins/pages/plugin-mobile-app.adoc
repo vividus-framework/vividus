@@ -658,4 +658,24 @@ When I press keys:
 |$  |
 ----
 
+=== Type text sequentially
+
+Types the provided text
+
+[WARNING]
+All the characters will be treated as is and passed sequentially. To send special key like `HOME` please use <<_press_keys>>
+
+[source,gherkin]
+----
+When I type text `$text`
+----
+
+. `$text` - The text to type
+
+.Enter password
+[source,gherkin]
+----
+When I type text `pas1$`
+----
+
 include::partial$generic-ui-steps.adoc[]
