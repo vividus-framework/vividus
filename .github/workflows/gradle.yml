@@ -435,6 +435,12 @@ jobs:
                                 -Pvividus.configuration.suites=failFast \
                                 -PexpectedRunStatistics="resources/main/failFast/expected.json"
 
+    - name: Publish artifacts to GitHub packages
+      if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/release-')) && matrix.platform == 'ubuntu-latest'
+      run: ./gradlew publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Publish snapshot artifacts
       if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
       env:
