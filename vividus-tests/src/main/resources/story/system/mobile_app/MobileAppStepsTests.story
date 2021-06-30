@@ -83,10 +83,26 @@ When I navigate back
 Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `0`
 
 
-Scenario: Verify step: 'When I type `$text` in field located `$locator`'
+Scenario: Verify step: 'When I type text `$text`'
+Meta:
+    @targetPlatform android
+
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `xpath(<menuInputXpath>)`
+Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `0`
+When I tap on element located `accessibilityId(<nameInputAccessibilityId>)`
 When I initialize the story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
+When I type text `${text}`
+Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
+When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
+Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `0`
+When I navigate back
+
+
+Scenario: Verify step: 'When I type `$text` in field located `$locator`'
+When I initialize the story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<menuInputXpath>)`
 When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityId>)`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 

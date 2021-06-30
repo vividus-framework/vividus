@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.vividus.bdd.mobileapp.model.SwipeDirection;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
-import org.vividus.mobileapp.action.KeyboardActions;
 import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.ui.action.ISearchActions;
@@ -40,16 +39,14 @@ public class TouchSteps
     private static final float VISIBILITY_BOTTOM_INDENT_COEFFICIENT = 0.25f;
 
     private final TouchActions touchActions;
-    private final KeyboardActions keyboardActions;
     private final IBaseValidations baseValidations;
     private final ISearchActions searchActions;
     private final GenericWebDriverManager genericWebDriverManager;
 
-    public TouchSteps(TouchActions touchActions, KeyboardActions keyboardActions, IBaseValidations baseValidations,
+    public TouchSteps(TouchActions touchActions, IBaseValidations baseValidations,
             ISearchActions searchActions, GenericWebDriverManager genericWebDriverManager)
     {
         this.touchActions = touchActions;
-        this.keyboardActions = keyboardActions;
         this.baseValidations = baseValidations;
         this.searchActions = searchActions;
         this.genericWebDriverManager = genericWebDriverManager;
@@ -88,40 +85,6 @@ public class TouchSteps
     public void tapByLocator(Locator locator)
     {
         findElementToTap(locator).ifPresent(touchActions::tap);
-    }
-
-    /**
-     * Type <b>text</b> into the <b>element</b>
-     * <br>
-     * The atomic actions performed are:
-     * <ol>
-     * <li>type text into the element</li>
-     * <li>hide keyboard</li>
-     * </ol>
-     * @param text text to type into the element
-     * @param locator locator to find an element
-     */
-    @When("I type `$text` in field located `$locator`")
-    public void typeTextInField(String text, Locator locator)
-    {
-        baseValidations.assertElementExists("The element to type text", locator)
-                .ifPresent(e -> keyboardActions.typeText(e, text));
-    }
-
-    /**
-     * Clear a field located by the <b>locator</b>
-     * <br>
-     * The atomic actions performed are:
-     * <ol>
-     * <li>clear the field</li>
-     * <li>hide keyboard</li>
-     * </ol>
-     * @param locator locator to find a field
-     */
-    @When("I clear field located `$locator`")
-    public void clearTextInField(Locator locator)
-    {
-        baseValidations.assertElementExists("The element to clear", locator).ifPresent(keyboardActions::clearText);
     }
 
     /**

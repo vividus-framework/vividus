@@ -19,38 +19,23 @@ package org.vividus.bdd.mobileapp.steps;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.mobileapp.action.DeviceActions;
-import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.GenericWebDriverManager;
-import org.vividus.ui.action.JavascriptActions;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.appium.java_client.android.nativekey.AndroidKey;
-import io.appium.java_client.android.nativekey.KeyEvent;
-import io.appium.java_client.android.nativekey.PressesKey;
 
 @SuppressFBWarnings("DMI_HARDCODED_ABSOLUTE_FILENAME")
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -59,9 +44,6 @@ class DeviceStepsTests
     private static final String DEVICE_FOLDER = "/device/folder";
 
     @Mock private DeviceActions deviceActions;
-    @Mock private GenericWebDriverManager genericWebDriverManager;
-    @Mock private JavascriptActions javascriptActions;
-    @Mock private IWebDriverProvider webDriverProvider;
     private DeviceSteps deviceSteps;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DeviceSteps.class);
@@ -69,8 +51,7 @@ class DeviceStepsTests
     @BeforeEach
     void init()
     {
-        deviceSteps = new DeviceSteps(DEVICE_FOLDER, deviceActions, genericWebDriverManager, javascriptActions,
-                webDriverProvider);
+        deviceSteps = new DeviceSteps(DEVICE_FOLDER, deviceActions);
     }
 
     @Test
@@ -85,74 +66,5 @@ class DeviceStepsTests
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Uploading file '{}' to a device at '{}' folder", filePath, DEVICE_FOLDER)
         )));
-    }
-
-    @Test
-    void shouldPressKeyOnIOS()
-    {
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
-
-        performPressAndroidKeyTest();
-    }
-
-    @Test
-    void shouldPressIOSKeyOnTvOS()
-    {
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
-        when(genericWebDriverManager.isTvOS()).thenReturn(true);
-
-        performPressAndroidKeyTest();
-    }
-
-    private void performPressAndroidKeyTest()
-    {
-        String key = "Home";
-
-        deviceSteps.pressKey(key);
-
-        verify(javascriptActions).executeScript("mobile: pressButton", Map.of("name", key));
-        verifyNoInteractions(webDriverProvider);
-    }
-
-    @Test
-    void shouldPressAndroidKey()
-    {
-        performPressAndroidKeyTest(() -> deviceSteps.pressKey(AndroidKey.SPACE.name()));
-    }
-
-    @Test
-    void shouldPressAndroidKeys()
-    {
-        performPressAndroidKeyTest(() -> deviceSteps.pressKeys(new ExamplesTable("|key|\n|SPACE|")));
-    }
-
-    private void performPressAndroidKeyTest(Runnable run)
-    {
-        ArgumentCaptor<KeyEvent> keyCaptor = ArgumentCaptor.forClass(KeyEvent.class);
-        PressesKey pressesKey = mock(PressesKey.class);
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
-        when(genericWebDriverManager.isTvOS()).thenReturn(false);
-        when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
-
-        run.run();
-
-        verify(pressesKey).pressKey(keyCaptor.capture());
-
-        assertEquals(Map.of("keycode", 62), keyCaptor.getValue().build());
-        verifyNoMoreInteractions(webDriverProvider, genericWebDriverManager);
-    }
-
-    @Test
-    void shouldNotPressUnsupportedAndroidKey()
-    {
-        PressesKey pressesKey = mock(PressesKey.class);
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
-        when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
-        when(genericWebDriverManager.isTvOS()).thenReturn(false);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> deviceSteps.pressKey("unsupported key"));
-        assertEquals("Unsupported Android key: unsupported key", exception.getMessage());
-        verifyNoMoreInteractions(webDriverProvider, genericWebDriverManager);
-        verifyNoInteractions(pressesKey);
     }
 }

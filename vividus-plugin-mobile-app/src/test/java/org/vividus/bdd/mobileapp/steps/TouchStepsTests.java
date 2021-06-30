@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ import org.openqa.selenium.WebElement;
 import org.vividus.bdd.mobileapp.model.SwipeDirection;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
-import org.vividus.mobileapp.action.KeyboardActions;
 import org.vividus.mobileapp.action.TouchActions;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
@@ -55,22 +55,20 @@ import org.vividus.ui.action.search.SearchParameters;
 @ExtendWith(MockitoExtension.class)
 class TouchStepsTests
 {
-    private static final String TEXT = "text";
     private static final String ELEMENT_TO_TAP = "The element to tap";
-    private static final String ELEMENT_TO_TYPE_TEXT = "The element to type text";
 
     @Mock private IBaseValidations baseValidations;
     @Mock private TouchActions touchActions;
-    @Mock private KeyboardActions keyboardActions;
     @Mock private ISearchActions searchActions;
     @Mock private Locator locator;
     @Mock private GenericWebDriverManager genericWebDriverManager;
+    @Mock private IWebDriverProvider webDriverProvider;
     @InjectMocks private TouchSteps touchSteps;
 
     @AfterEach
     void afterEach()
     {
-        verifyNoMoreInteractions(touchActions, keyboardActions, baseValidations, searchActions, locator);
+        verifyNoMoreInteractions(touchActions, baseValidations, searchActions, locator);
     }
 
     @Test
@@ -103,31 +101,6 @@ class TouchStepsTests
     {
         when(baseValidations.assertElementExists(ELEMENT_TO_TAP, locator)).thenReturn(Optional.empty());
         touchSteps.tapByLocator(locator);
-    }
-
-    @Test
-    void testTypeTextInField()
-    {
-        WebElement element = mock(WebElement.class);
-        when(baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)).thenReturn(Optional.of(element));
-        touchSteps.typeTextInField(TEXT, locator);
-        verify(keyboardActions).typeText(element, TEXT);
-    }
-
-    @Test
-    void testTypeTextInFieldElementIsEmpty()
-    {
-        when(baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)).thenReturn(Optional.empty());
-        touchSteps.typeTextInField(TEXT, locator);
-    }
-
-    @Test
-    void shouldClearTextInField()
-    {
-        WebElement element = mock(WebElement.class);
-        when(baseValidations.assertElementExists("The element to clear", locator)).thenReturn(Optional.of(element));
-        touchSteps.clearTextInField(locator);
-        verify(keyboardActions).clearText(element);
     }
 
     @ParameterizedTest
