@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -409,7 +410,9 @@ public class DatabaseSteps
 
     private Map<String, Object> convertValuesToString(Map<String, Object> map)
     {
-        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())));
+        Map<String, Object> result = new HashMap<>();
+        map.forEach((key, value) -> result.put(key, value == null ? null : value.toString()));
+        return result;
     }
 
     @SuppressWarnings("unchecked")
