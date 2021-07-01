@@ -353,6 +353,42 @@ When I initialize the scenario variable `my-data` with value `#{resourceToBase64
 
 == Script evaluation
 
+=== `eval`
+
+Evaluates https://commons.apache.org/proper/commons-jexl/[JEXL] script and converts result to a string.
+
+[source, subs="+quotes"]
+----
+#{eval(*$script*)}
+----
+
+* *`$script`* - valid https://commons.apache.org/proper/commons-jexl/reference/syntax.html[JEXL] script to be evaluated
+
+[TIP]
+* Any Vividus variable is accessible in the JEXL script by its name
+
+
+.Evaluate JEXL script
+[source,gherkin]
+----
+Scenario: Verify eval expression
+Then `#{<expression>}` is = `<expected>`
+Examples:
+|expected          |expression                                                        |
+|null              |eval(null)                                                        |
+|28                |eval(16 + 2 * 6)                                                  |
+|10                |eval(math:abs(-10))                                               |
+|here              |eval(stringUtils:substringAfterLast('namescpaces are %here', '%'))|
+|108               |eval((16 + 2) * 6)                                                |
+|-6                |eval(100 / 5 - 16 * 2 + 6)                                        |
+|true              |eval(`string\n1` == `string\n1`)                                  |
+|false             |eval(`string\n1` == `string1`)                                    |
+|I Am FINE         |eval(wordUtils:capitalize('i am FINE'))                           |
+|i am fINE         |eval(wordUtils:uncapitalize('I Am FINE'))                         |
+|tHE DOG HAS A bone|eval(wordUtils:swapCase('The dog has a BONE'))                    |
+|FRD               |eval(wordUtils:initials('Fus Ro Dah'))                            |
+----
+
 === `evalGroovy`
 
 Evaluates groovy script and converts result to a string.

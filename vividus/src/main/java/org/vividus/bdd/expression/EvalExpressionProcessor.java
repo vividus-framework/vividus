@@ -28,6 +28,7 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.vividus.bdd.context.IBddVariableContext;
 
 @Named
@@ -36,7 +37,8 @@ public class EvalExpressionProcessor extends AbstractExpressionProcessor<String>
     private static final Pattern EVAL_PATTERN = Pattern.compile("^eval\\((.*)\\)$", Pattern.CASE_INSENSITIVE
             | Pattern.DOTALL);
     private static final int EVAL_GROUP = 1;
-    private static final Map<String, Object> NAMESPACES = Map.of("math", Math.class, "stringUtils", StringUtils.class);
+    private static final Map<String, Object> NAMESPACES = Map.of("math", Math.class, "stringUtils", StringUtils.class,
+            "wordUtils", WordUtils.class);
 
     private final JexlEngine jexlEngine = new JexlBuilder().charset(StandardCharsets.UTF_8).namespaces(NAMESPACES)
             .create();

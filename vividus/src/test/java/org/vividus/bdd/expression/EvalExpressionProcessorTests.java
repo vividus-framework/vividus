@@ -57,7 +57,11 @@ class EvalExpressionProcessorTests
                 Arguments.of("eval(`string\n1` == `string\n1`)", TRUE),
                 Arguments.of("eval(`string\n1` == `string1`)", FALSE),
                 Arguments.of("eval(`string\n1` == 'string1')", FALSE),
-                Arguments.of("eval(var t = 20; var s = function(x, y) {x + y + t}; t = 54; s(15, 7))", "42")
+                Arguments.of("eval(var t = 20; var s = function(x, y) {x + y + t}; t = 54; s(15, 7))", "42"),
+                Arguments.of("eval(wordUtils:capitalize('i am FINE'))", "I Am FINE"),
+                Arguments.of("eval(wordUtils:uncapitalize('I Am FINE'))", "i am fINE"),
+                Arguments.of("eval(wordUtils:swapCase('The dog has a BONE'))", "tHE DOG HAS A bone"),
+                Arguments.of("eval(wordUtils:initials('Fus Ro Dah'))", "FRD")
         );
     }
 
@@ -98,7 +102,7 @@ class EvalExpressionProcessorTests
     {
         JexlException.Variable exception = assertThrows(JexlException.Variable.class,
             () -> processor.execute("eval(missingVar + 'val')"));
-        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.evaluateExpression:56 variable "
+        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.evaluateExpression:58 variable "
                 + "'missingVar' is undefined", exception.getMessage());
     }
 
@@ -107,7 +111,7 @@ class EvalExpressionProcessorTests
     {
         JexlException.Parsing exception = assertThrows(JexlException.Parsing.class,
             () -> processor.execute("eval(var + 'val')"));
-        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.evaluateExpression:56@1:1 parsing error"
+        assertEquals("org.vividus.bdd.expression.EvalExpressionProcessor.evaluateExpression:58@1:1 parsing error"
                 + " in 'var'", exception.getMessage());
     }
 }

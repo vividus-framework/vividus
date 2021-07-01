@@ -29,15 +29,20 @@ Then `777` is = `#{diffDate(2019-01-01T12:00:00.223Z,yyyy-MM-dd'T'HH:mm:ss.SSSVV
 Scenario: Verify eval expression
 Then `#{<expression>}` is = `<expected>`
 Examples:
-|expected|expression                                                        |
-|null    |eval(null)                                                        |
-|28      |eval(16 + 2 * 6)                                                  |
-|10      |eval(math:abs(-10))                                               |
-|here    |eval(stringUtils:substringAfterLast('namescpaces are %here', '%'))|
-|108     |eval((16 + 2) * 6)                                                |
-|-6      |eval(100 / 5 - 16 * 2 + 6)                                        |
-|true    |eval(`string\n1` == `string\n1`)                                  |
-|false   |eval(`string\n1` == `string1`)                                    |
+|expression                                                        |expected          |
+|eval(null)                                                        |null              |
+|eval(16 + 2 * 6)                                                  |28                |
+|eval(math:abs(-10))                                               |10                |
+|eval(stringUtils:substringAfterLast('namescpaces are %here', '%'))|here              |
+|eval((16 + 2) * 6)                                                |108               |
+|eval(100 / 5 - 16 * 2 + 6)                                        |-6                |
+|eval(`string\n1` == `string\n1`)                                  |true              |
+|eval(`string\n1` == `string1`)                                    |false             |
+|eval(wordUtils:capitalize('i am FINE'))                           |I Am FINE         |
+|eval(wordUtils:uncapitalize('I Am FINE'))                         |i am fINE         |
+|eval(wordUtils:swapCase('The dog has a BONE'))                    |tHE DOG HAS A bone|
+|eval(wordUtils:initials('Fus Ro Dah'))                            |FRD               |
+
 
 Scenario: Verify eval has an access to a variable context
 Meta:
