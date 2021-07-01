@@ -397,6 +397,11 @@ class DatabaseStepsTests
                         DataSetComparisonRule.CONTAINS,
                         List.of(Map.of(COL1, VAL1), Map.of(COL1, VAL2)),
                         List.of(Map.of(COL1, VAL2))
+                ),
+                arguments(
+                        DataSetComparisonRule.IS_EQUAL_TO,
+                        List.of(Collections.singletonMap(COL1, null)),
+                        List.of(Collections.singletonMap(COL2, null))
                 )
         );
     }

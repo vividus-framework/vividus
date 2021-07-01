@@ -334,6 +334,23 @@ Scenario: Time consuming test
 When I perform highly time consuming task
 ----
 
+== ExamplesTable
+
+=== Mapping values to `null`-s
+
+By default all empty values in `ExamplesTable` are treated as empty strings. However
+it might be required to map certain values to `null`-s. It can be done at the step
+implementation level or by applying the generic approach at the table level:
+
+[source,gherkin]
+----
+{nullPlaceholder=NULL}
+|header |
+|value 1|
+|NULL   |
+|value 3|
+----
+
 == Exit codes
 
 The tests execution returns one of the following exit codes.
