@@ -80,6 +80,9 @@ Converts an input string to upper case.
 
 === `capitalize`
 
+[WARNING]
+Deprecated, will be removed in VIVIDUS 0.4.0 use <<_capitilizeFirstWord>> instead
+
 Capitalizes an input string, changing the first character to title case. No other characters are changed.
 
 [source, subs="+quotes"]
@@ -97,7 +100,67 @@ Capitalizes an input string, changing the first character to title case. No othe
 |`ABc`
 |===
 
+=== `capitalizeFirstWord`
+
+Capitalizes an input string, changing the first character to title case. No other characters are changed.
+
+[source, subs="+quotes"]
+----
+#{capitalizeFirstWord(*$input*)}
+----
+
+* *`$input`* - any string to be capitalized
+
+.Examples of the expressions capitalizing strings
+|===
+|Expression |Result
+
+|`#{capitalizeFirstWord(aBc)}`
+|`ABc`
+|===
+
+=== `capitalizeWords`
+
+Capitalizes all the whitespace separated words in the input string. Only the first character of each word is changed.
+
+[source, subs="+quotes"]
+----
+#{capitalizeWords(*$input*)}
+----
+
+* *`$input`* - any string to be capitalized
+
+.Examples of the expressions capitalizing words in the string
+|===
+|Expression |Result
+
+|`#{capitalizeWords(aBc dEf)}`
+|`ABc DEf`
+|===
+
+=== `capitalizeWordsFully`
+
+Converts all the whitespace separated words in a String into capitalized words, that is each word is made up of a titlecase character and then a series of lowercase characters.
+
+[source, subs="+quotes"]
+----
+#{capitalizeWordsFully(*$input*)}
+----
+
+* *`$input`* - any string to be capitalized
+
+.Examples of the expressions capitalizing strings
+|===
+|Expression |Result
+
+|`#{capitalizeWordsFully(aBc dEf)}`
+|`Abc Def`
+|===
+
 === `uncapitalize`
+
+[WARNING]
+Deprecated, will be removed in VIVIDUS 0.4.0 use <<_uncapitilizeFirstWord>> instead
 
 Uncapitalizes an input string, changing the first character to lower case. No other characters are changed.
 
@@ -114,6 +177,44 @@ Uncapitalizes an input string, changing the first character to lower case. No ot
 
 |`#{uncapitalize(ABc)}`
 |`aBc`
+|===
+
+=== `uncapitalizeFirstWord`
+
+Uncapitalizes an input string, changing the first character to title case. No other characters are changed.
+
+[source, subs="+quotes"]
+----
+#{uncapitalizeFirstWord(*$input*)}
+----
+
+* *`$input`* - any string to be capitalized
+
+.Examples of the expressions capitalizing strings
+|===
+|Expression |Result
+
+|`#{uncapitalizeFirstWord(ABc)}`
+|`aBc`
+|===
+
+=== `uncapitalizeWords`
+
+Uncapitalizes all the whitespace separated words in the input string. Only the first character of each word is changed.
+
+[source, subs="+quotes"]
+----
+#{uncapitalizeWords(*$input*)}
+----
+
+* *`$input`* - any string to be capitalized
+
+.Examples of the expressions capitalizing words in the string
+|===
+|Expression |Result
+
+|`#{uncapitalizeWords(ABc DEf)}`
+|`aBc eEf`
 |===
 
 === `trim`
