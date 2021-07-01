@@ -81,7 +81,7 @@ Converts an input string to upper case.
 === `capitalize`
 
 [WARNING]
-Deprecated, will be removed in VIVIDUS 0.4.0 use <<_capitilizeFirstWord>> instead
+Deprecated, will be removed in VIVIDUS 0.4.0 use <<_capitalizefirstword>> instead
 
 Capitalizes an input string, changing the first character to title case. No other characters are changed.
 
@@ -160,7 +160,7 @@ Converts all the whitespace separated words in a String into capitalized words, 
 === `uncapitalize`
 
 [WARNING]
-Deprecated, will be removed in VIVIDUS 0.4.0 use <<_uncapitilizeFirstWord>> instead
+Deprecated, will be removed in VIVIDUS 0.4.0 use <<_uncapitalizefirstword>> instead
 
 Uncapitalizes an input string, changing the first character to lower case. No other characters are changed.
 
