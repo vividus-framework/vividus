@@ -87,3 +87,15 @@ TG9yZCBEYWdvbiB3aWxsIHdlbGNvbWUgeW91ciBzb3VsIGluIE9ibGl2aW9uIQ==
 Mg==
 1986-04-26T01:23:40+04:00
 `
+
+Scenario: Verify capitlizing/uncapitalizing expressions
+Then `#{<expression>}` is = `<expected>`
+Examples:
+|expression                   |expected  |
+|capitalize(aBc)              |ABc       |
+|capitalizeFirstWord(aBc)     |ABc       |
+|capitalizeWords(aBc dEf)     |ABc DEf   |
+|capitalizeWordsFully(aBc dEf)|Abc Def   |
+|uncapitalize(ABc)            |aBc       |
+|uncapitalizeFirstWord(ABc)   |aBc       |
+|uncapitalizeWords(ABc DEf)   |aBc dEf   |

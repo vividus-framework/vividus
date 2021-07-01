@@ -37,6 +37,7 @@ import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.vividus.util.ILocationProvider;
 import org.vividus.util.ResourceUtils;
 
@@ -59,21 +60,27 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
     public StringsExpressionProcessor(ILocationProvider locationProvider)
     {
         super(List.of(
-            new UnaryExpressionProcessor("trim",              StringUtils::trim),
-            new UnaryExpressionProcessor("toLowerCase",       StringUtils::lowerCase),
-            new UnaryExpressionProcessor("toUpperCase",       StringUtils::upperCase),
-            new UnaryExpressionProcessor("capitalize",        StringUtils::capitalize),
-            new UnaryExpressionProcessor("uncapitalize",      StringUtils::uncapitalize),
-            new UnaryExpressionProcessor("generate",          input -> generate(locationProvider.getLocale(), input)),
-            new UnaryExpressionProcessor("generateLocalized", generateLocalized()),
-            new UnaryExpressionProcessor("loadResource",      ResourceUtils::loadResource),
-            new UnaryExpressionProcessor("resourceToBase64",  input -> Base64.getEncoder()
+            new UnaryExpressionProcessor("trim",                   StringUtils::trim),
+            new UnaryExpressionProcessor("toLowerCase",            StringUtils::lowerCase),
+            new UnaryExpressionProcessor("toUpperCase",            StringUtils::upperCase),
+            new UnaryExpressionProcessor("capitalize",             StringUtils::capitalize),
+            new UnaryExpressionProcessor("capitalizeFirstWord",    StringUtils::capitalize),
+            new UnaryExpressionProcessor("capitalizeWords",        WordUtils::capitalize),
+            new UnaryExpressionProcessor("capitalizeWordsFully",   WordUtils::capitalizeFully),
+            new UnaryExpressionProcessor("uncapitalize",           StringUtils::uncapitalize),
+            new UnaryExpressionProcessor("uncapitalizeFirstWord",  StringUtils::uncapitalize),
+            new UnaryExpressionProcessor("uncapitalizeWords",      WordUtils::uncapitalize),
+            new UnaryExpressionProcessor("generate",               input -> generate(locationProvider.getLocale(),
+                    input)),
+            new UnaryExpressionProcessor("generateLocalized",      generateLocalized()),
+            new UnaryExpressionProcessor("loadResource",           ResourceUtils::loadResource),
+            new UnaryExpressionProcessor("resourceToBase64",       input -> Base64.getEncoder()
                     .encodeToString(ResourceUtils.loadResourceAsByteArray(input))),
-            new UnaryExpressionProcessor("decodeFromBase64",  input -> new String(Base64.getDecoder()
+            new UnaryExpressionProcessor("decodeFromBase64",       input -> new String(Base64.getDecoder()
                     .decode(input.getBytes(UTF_8)), UTF_8)),
-            new UnaryExpressionProcessor("encodeToBase64",    input -> encodeToBase64(input.getBytes(UTF_8))),
-            new UnaryExpressionProcessor("anyOf",             StringsExpressionProcessor::anyOf),
-            new UnaryExpressionProcessor("toBase64Gzip",      StringsExpressionProcessor::toBase64Gzip)
+            new UnaryExpressionProcessor("encodeToBase64",         input -> encodeToBase64(input.getBytes(UTF_8))),
+            new UnaryExpressionProcessor("anyOf",                  StringsExpressionProcessor::anyOf),
+            new UnaryExpressionProcessor("toBase64Gzip",           StringsExpressionProcessor::toBase64Gzip)
         ));
     }
 
