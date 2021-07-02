@@ -33,7 +33,7 @@
 * xref:plugin-websocket.adoc[WebSockets]
 * xref:plugin-xml.adoc[XML*]
 * Testing Clouds
-** xref:plugin-browser-stack.adoc[Browser Stack]
+** xref:plugin-browserstack.adoc[BrowserStack]
 ** xref:plugin-lambda-test.adoc[LambdaTest]
 ** xref:plugin-sauce-labs.adoc[Sauce Labs]
 ** xref:plugin-cross-browser-testing.adoc[SmartBear: CrossBrowserTesting]

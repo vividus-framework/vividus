@@ -28,8 +28,8 @@ include::partial$test-cloud-usage.adoc[]
 
 == Properties
 
-* Browser Stack specific properties must be prepended with `selenium.grid.capabilities.bstack\:options.` prefix, meaning given a property `projectName` with a value `My Project` the resulting property will be `selenium.grid.capabilities.bstack\:options.projectName=My Project`
-* Appium specific properties in Browser Stack must be prepended with `selenium.grid.capabilities.appium\:options.` prefix, meaning given a property `clearSystemFiles` with a value `true` the resulting property will be `selenium.grid.capabilities.appium\:options.clearSystemFiles=true`
+* BrowserStack specific properties must be prepended with `selenium.grid.capabilities.bstack\:options.` prefix, meaning given a property `projectName` with a value `My Project` the resulting property will be `selenium.grid.capabilities.bstack\:options.projectName=My Project`
+* Appium specific properties in BrowserStack must be prepended with `selenium.grid.capabilities.appium\:options.` prefix, meaning given a property `clearSystemFiles` with a value `true` the resulting property will be `selenium.grid.capabilities.appium\:options.clearSystemFiles=true`
 
 [cols="3,1,1,3", options="header"]
 
@@ -46,7 +46,7 @@ include::partial$selenium-grid-properties.adoc[]
 a|`true`
 `false`
 |`false`
-|Enables https://www.browserstack.com/local-testing[Browser Stack Local]
+|Enables https://www.browserstack.com/local-testing[BrowserStack Local]
 
 |===
 
