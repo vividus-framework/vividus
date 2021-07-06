@@ -54,7 +54,7 @@ public final class MetadataLogger
     private static final String NEW_LINE = "%n";
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataLogger.class);
     private static final Pattern SECURE_KEY_PATTERN = Pattern
-            .compile(".*(password|access-?key|api-?key|secret|token).*", Pattern.CASE_INSENSITIVE);
+            .compile(".*(password|((access|api|private)-)?(key|secret|token)).*", Pattern.CASE_INSENSITIVE);
     private static final int HORIZONTAL_RULE_LENGTH = 60;
 
     private MetadataLogger()

@@ -67,7 +67,8 @@ class MetadataLoggerTests
             "secure.admin-password",
             "secure.api-key",
             "secure.access-token",
-            "secure.secret-phrase"
+            "secure.secret-phrase",
+            "secure.private-key"
     })
     void testLogPropertiesSecurely(String key)
     {
