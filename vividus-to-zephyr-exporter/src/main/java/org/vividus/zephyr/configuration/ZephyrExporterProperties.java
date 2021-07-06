@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ public class ZephyrExporterProperties
 
     private List<TestCaseStatus> statusesOfTestCasesToAddToExecution;
 
+    private String jiraServerKey;
+
     public Path getSourceDirectory()
     {
         return sourceDirectory;
@@ -62,5 +64,15 @@ public class ZephyrExporterProperties
     public void setStatusesOfTestCasesToAddToExecution(List<TestCaseStatus> statusesOfTestCasesToAddToExecution)
     {
         this.statusesOfTestCasesToAddToExecution = statusesOfTestCasesToAddToExecution;
+    }
+
+    public String getJiraServerKey()
+    {
+        return jiraServerKey;
+    }
+
+    public void setJiraServerKey(String jiraServerKey)
+    {
+        this.jiraServerKey = jiraServerKey;
     }
 }

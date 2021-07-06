@@ -17,7 +17,6 @@
 package org.vividus.xray.exporter;
 
 import static java.lang.System.lineSeparator;
-import static java.util.Map.Entry;
 import static java.util.Map.entry;
 import static org.apache.commons.lang3.Validate.notEmpty;
 
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
 import org.vividus.bdd.model.jbehave.Meta;
 import org.vividus.bdd.model.jbehave.Scenario;
 import org.vividus.bdd.model.jbehave.Story;
+import org.vividus.jira.JiraClientProvider.JiraConfigurationException;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.converter.CucumberScenarioConverter;
 import org.vividus.xray.converter.CucumberScenarioConverter.CucumberScenario;
@@ -89,7 +90,7 @@ public class XrayExporter
         TestCaseType.CUCUMBER, (title, scenario) -> createCucumberTestCaseParameters(scenario)
     );
 
-    public void exportResults() throws IOException
+    public void exportResults() throws IOException, JiraConfigurationException
     {
         List<Entry<String, Scenario>> testCases = new ArrayList<>();
         for (Story story : readStories())
@@ -108,7 +109,8 @@ public class XrayExporter
         publishErrors();
     }
 
-    private void addTestCasesToTestSet(List<Entry<String, Scenario>> testCases) throws IOException
+    private void addTestCasesToTestSet(List<Entry<String, Scenario>> testCases)
+            throws IOException, JiraConfigurationException
     {
         String testSetKey = xrayExporterOptions.getTestSetKey();
         if (testSetKey != null)
@@ -121,7 +123,8 @@ public class XrayExporter
         }
     }
 
-    private void addTestCasesToTestExecution(List<Entry<String, Scenario>> testCases) throws IOException
+    private void addTestCasesToTestExecution(List<Entry<String, Scenario>> testCases)
+            throws IOException, JiraConfigurationException
     {
         String testExecutionKey = xrayExporterOptions.getTestExecutionKey();
         if (testExecutionKey != null)
@@ -162,7 +165,7 @@ public class XrayExporter
             createTestsLink(testCaseId, scenarioMeta);
             return Optional.of(entry(testCaseId, scenario));
         }
-        catch (IOException | SyntaxException | NonEditableIssueStatusException e)
+        catch (IOException | SyntaxException | NonEditableIssueStatusException | JiraConfigurationException e)
         {
             errors.add(new ErrorExportEntry(storyTitle, scenarioTitle, e.getMessage()));
             LOGGER.atError().setCause(e).log("Got an error while exporting");
@@ -221,7 +224,8 @@ public class XrayExporter
         LOGGER.atInfo().log("Export successful");
     }
 
-    private void createTestsLink(String testCaseId, List<Meta> scenarioMeta) throws IOException, SyntaxException
+    private void createTestsLink(String testCaseId, List<Meta> scenarioMeta)
+            throws IOException, SyntaxException, JiraConfigurationException
     {
         String requirementId = ensureOneValueOrNull(scenarioMeta, "requirementId");
         if (requirementId != null)

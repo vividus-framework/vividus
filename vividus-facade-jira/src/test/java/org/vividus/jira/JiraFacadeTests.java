@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.jira;
 
+import static java.util.Optional.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.jira.JiraClientProvider.JiraConfigurationException;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.jira.model.Project;
 
@@ -40,6 +42,7 @@ class JiraFacadeTests
     private static final String ISSUE_ENDPOINT = "/rest/api/latest/issue/";
 
     @Mock private JiraClient jiraClient;
+    @Mock private JiraClientProvider jiraClientProvider;
     @InjectMocks private JiraFacade jiraFacade;
 
     @AfterEach
@@ -49,54 +52,61 @@ class JiraFacadeTests
     }
 
     @Test
-    void shouldCreateIssue() throws IOException
+    void shouldCreateIssue() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, empty())).thenReturn(jiraClient);
         when(jiraClient.executePost(ISSUE_ENDPOINT, ISSUE_BODY)).thenReturn(ISSUE_ID);
-        String issueId = jiraFacade.createIssue(ISSUE_BODY);
+        String issueId = jiraFacade.createIssue(ISSUE_BODY, empty());
         assertEquals(ISSUE_ID, issueId);
     }
 
     @Test
-    void shouldUpdateIssue() throws IOException
+    void shouldUpdateIssue() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(ISSUE_ID, empty())).thenReturn(jiraClient);
         when(jiraClient.executePut(ISSUE_ENDPOINT + ISSUE_ID, ISSUE_BODY)).thenReturn(ISSUE_ID);
-        String issueId = jiraFacade.updateIssue(ISSUE_ID, ISSUE_BODY);
+        String issueId = jiraFacade.updateIssue(ISSUE_ID, ISSUE_BODY, empty());
         assertEquals(ISSUE_ID, issueId);
     }
 
     @Test
-    void shouldCreateIssueLink() throws IOException
+    void shouldCreateIssueLink() throws IOException, JiraConfigurationException
     {
         String requirementKey = "requirement id";
         String linkRequest = "{\"type\":{\"name\":\"Tests\"},\"inwardIssue\":{\"key\":\"issue id\"},"
                 + "\"outwardIssue\":{\"key\":\"requirement id\"}}";
-        jiraFacade.createIssueLink(ISSUE_ID, requirementKey, "Tests");
+        when(jiraClientProvider.get(ISSUE_ID, empty())).thenReturn(jiraClient);
+        jiraFacade.createIssueLink(ISSUE_ID, requirementKey, "Tests", empty());
         verify(jiraClient).executePost("/rest/api/latest/issueLink", linkRequest);
     }
 
     @Test
-    void shouldReturnIssueStatue() throws IOException
+    void shouldReturnIssueStatue() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(ISSUE_ID, empty())).thenReturn(jiraClient);
         when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID))
                 .thenReturn("{\"fields\":{\"status\": {\"name\" : \"Open\"}}}");
-        assertEquals("Open", jiraFacade.getIssueStatus(ISSUE_ID));
+        assertEquals("Open", jiraFacade.getIssueStatus(ISSUE_ID, empty()));
     }
 
     @Test
-    void shouldGetIssue() throws IOException
+    void shouldGetIssue() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(ISSUE_ID, empty())).thenReturn(jiraClient);
         when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID)).thenReturn("{\"id\":\"001\"}");
-        JiraEntity issue = jiraFacade.getIssue(ISSUE_ID);
+        JiraEntity issue = jiraFacade.getIssue(ISSUE_ID, empty());
         assertEquals("001", issue.getId());
     }
 
     @Test
-    void shouldGetProject() throws IOException
+    void shouldGetProject() throws IOException, JiraConfigurationException
     {
+        String projectKey = "TEST";
+        when(jiraClientProvider.get(projectKey, empty())).thenReturn(jiraClient);
         when(jiraClient.executeGet("/rest/api/latest/project/TEST")).thenReturn("{\"id\": \"002\", \"key\": \"TEST\", "
                 + "\"versions\": [{\"id\": \"0021\", \"name\": \"Release 1.0\"}, "
                 + "{\"id\": \"0022\", \"name\": \"Release 2.0\"}]}");
-        Project project = jiraFacade.getProject("TEST");
+        Project project = jiraFacade.getProject(projectKey, empty());
         assertEquals("002", project.getId());
         assertEquals(2, project.getVersions().size());
         assertEquals("0021", project.getVersions().get(0).getId());

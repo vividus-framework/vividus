@@ -63,6 +63,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.model.jbehave.Scenario;
+import org.vividus.jira.JiraClientProvider.JiraConfigurationException;
 import org.vividus.util.ResourceUtils;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.exception.SyntaxException;
@@ -109,7 +110,8 @@ class XrayExporterTests
     }
 
     @Test
-    void shouldExportCucumberTestCaseWithoutTestCaseId() throws URISyntaxException, IOException
+    void shouldExportCucumberTestCaseWithoutTestCaseId()
+            throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("createcucumber");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
@@ -133,7 +135,8 @@ class XrayExporterTests
     }
 
     @Test
-    void shouldUpdateExistingCucumberTestCase() throws URISyntaxException, IOException, NonEditableIssueStatusException
+    void shouldUpdateExistingCucumberTestCase()
+            throws URISyntaxException, IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("updatecucumber");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
@@ -151,7 +154,7 @@ class XrayExporterTests
 
     @Test
     void shouldExportTestWithLabelsAndComponentsAndUpdatableTestCaseId()
-            throws URISyntaxException, IOException, NonEditableIssueStatusException
+            throws URISyntaxException, IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("componentslabelsupdatabletci");
         String testSetKey = "TEST-SET";
@@ -183,7 +186,7 @@ class XrayExporterTests
 
     @Test
     void shouldExportTestCaseIfPreviousTestCaseExportAttemptThrownIOException()
-            throws URISyntaxException, IOException, NonEditableIssueStatusException
+            throws URISyntaxException, IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("continueiferror");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
@@ -205,7 +208,7 @@ class XrayExporterTests
     }
 
     @Test
-    void shouldNotExportSkippedTest() throws URISyntaxException, IOException
+    void shouldNotExportSkippedTest() throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("skipped");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
@@ -228,7 +231,7 @@ class XrayExporterTests
     }
 
     @Test
-    void shouldExportNewTestAndLinkToRequirements() throws URISyntaxException, IOException
+    void shouldExportNewTestAndLinkToRequirements() throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("createandlink");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
@@ -246,7 +249,7 @@ class XrayExporterTests
     }
 
     @Test
-    void shouldFailIfMoreThanOneIdIsSpecified() throws URISyntaxException, IOException
+    void shouldFailIfMoreThanOneIdIsSpecified() throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("morethanoneid");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));

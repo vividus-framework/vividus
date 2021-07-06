@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Test;
@@ -34,11 +35,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.jira.JiraClient;
+import org.vividus.jira.JiraClientProvider;
+import org.vividus.jira.JiraClientProvider.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.Project;
 import org.vividus.jira.model.Version;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
+import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,21 +66,17 @@ class ZephyrFacadeTests
     private static final String ISSUE_ID = "111";
     private static final String TEST = "test";
 
-    @Mock
-    private JiraFacade jiraFacade;
-
-    @Mock
-    private JiraClient client;
-
-    @Mock
-    private ZephyrExporterConfiguration zephyrExporterConfiguration;
-
-    @InjectMocks
-    private ZephyrFacade zephyrFacade;
+    @Mock private JiraFacade jiraFacade;
+    @Mock private JiraClient client;
+    @Mock private JiraClientProvider jiraClientProvider;
+    @Mock private ZephyrExporterConfiguration zephyrExporterConfiguration;
+    @Mock private ZephyrExporterProperties zephyrExporterProperties;
+    @InjectMocks private ZephyrFacade zephyrFacade;
 
     @Test
-    void testCreateExecution() throws IOException
+    void testCreateExecution() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         String execution = "{\"cycleId\": \"11113\",\"issueId\": \"11115\",\"projectId\": \"11111\","
                 + "\"versionId\": \"11112\",\"folderId\": 11114}";
         when(client.executePost(ZAPI_ENDPOINT + "execution/", execution)).thenReturn(
@@ -85,15 +85,16 @@ class ZephyrFacadeTests
     }
 
     @Test
-    void testUpdateExecutionStatus() throws IOException
+    void testUpdateExecutionStatus() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         String executionBody = "{\"status\": \"1\"}";
         zephyrFacade.updateExecutionStatus(11_116, executionBody);
         verify(client).executePut(String.format(ZAPI_ENDPOINT + "execution/%s/execute", "11116"), executionBody);
     }
 
     @Test
-    void testFindVersionIdDoesNotExist() throws IOException
+    void testFindVersionIdDoesNotExist() throws IOException, JiraConfigurationException
     {
         when(zephyrExporterConfiguration.getProjectKey()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
@@ -103,15 +104,16 @@ class ZephyrFacadeTests
         Project project = new Project();
         project.setId("11110");
         project.setVersions(List.of(version));
-        when(jiraFacade.getProject(TEST)).thenReturn(project);
+        when(jiraFacade.getProject(TEST, Optional.empty())).thenReturn(project);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 zephyrFacade::prepareConfiguration);
         assertEquals("Version with name 'test' does not exist", exception.getMessage());
     }
 
     @Test
-    void testFindCycleIdDoesNotExist() throws IOException
+    void testFindCycleIdDoesNotExist() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         when(zephyrExporterConfiguration.getProjectKey()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
@@ -124,8 +126,9 @@ class ZephyrFacadeTests
     }
 
     @Test
-    void testFindFolderIdDoesNotExist() throws IOException
+    void testFindFolderIdDoesNotExist() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         when(zephyrExporterConfiguration.getProjectKey()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
@@ -141,8 +144,9 @@ class ZephyrFacadeTests
     }
 
     @Test
-    void testGetExecutionStatusesDoNotExist() throws IOException
+    void testGetExecutionStatusesDoNotExist() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         setConfiguration();
         mockJiraProjectRetrieve();
         when(client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT, PROJECT_ID, VERSION_ID)))
@@ -156,8 +160,9 @@ class ZephyrFacadeTests
     }
 
     @Test
-    void testPrepareConfiguration() throws IOException
+    void testPrepareConfiguration() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         setConfiguration();
         mockJiraProjectRetrieve();
         when(client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT, PROJECT_ID, VERSION_ID)))
@@ -175,8 +180,9 @@ class ZephyrFacadeTests
     }
 
     @Test
-    void testPrepareConfigurationWithoutFolder() throws IOException
+    void testPrepareConfigurationWithoutFolder() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         when(zephyrExporterConfiguration.getProjectKey()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
@@ -198,8 +204,9 @@ class ZephyrFacadeTests
     }
 
     @Test
-    void testFindExecutionId() throws IOException
+    void testFindExecutionId() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getFolderName()).thenReturn(TEST);
@@ -208,8 +215,9 @@ class ZephyrFacadeTests
     }
 
     @Test
-    void testFindExecutionIdWithoutFolder() throws IOException
+    void testFindExecutionIdWithoutFolder() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getFolderName()).thenReturn("");
@@ -219,8 +227,9 @@ class ZephyrFacadeTests
     }
 
     @Test
-    void testExecutionIdNotFound() throws IOException
+    void testExecutionIdNotFound() throws IOException, JiraConfigurationException
     {
+        when(jiraClientProvider.get(null, Optional.empty())).thenReturn(client);
         when(zephyrExporterConfiguration.getVersionName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getFolderName()).thenReturn("test2");
@@ -228,7 +237,7 @@ class ZephyrFacadeTests
         assertEquals(OptionalInt.empty(), zephyrFacade.findExecutionId(ISSUE_ID));
     }
 
-    private void mockJiraProjectRetrieve() throws IOException
+    private void mockJiraProjectRetrieve() throws IOException, JiraConfigurationException
     {
         Version version = new Version();
         version.setId(VERSION_ID);
@@ -236,7 +245,7 @@ class ZephyrFacadeTests
         Project project = new Project();
         project.setId(PROJECT_ID);
         project.setVersions(List.of(version));
-        when(jiraFacade.getProject(zephyrExporterConfiguration.getProjectKey()))
+        when(jiraFacade.getProject(zephyrExporterConfiguration.getProjectKey(), Optional.empty()))
             .thenReturn(project);
     }
 

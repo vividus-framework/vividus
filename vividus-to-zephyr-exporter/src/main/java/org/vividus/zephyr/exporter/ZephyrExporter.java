@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.zephyr.exporter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.jira.JiraClientProvider.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
@@ -49,8 +51,8 @@ public class ZephyrExporter
     private ZephyrExporterProperties zephyrExporterProperties;
     private final ObjectMapper objectMapper;
 
-    public ZephyrExporter(JiraFacade jiraFacade, ZephyrFacade zephyrFacade, TestCaseParser testCaseParser,
-            ZephyrExporterProperties zephyrExporterProperties) throws IOException
+    public ZephyrExporter(JiraFacade jiraFacade, ZephyrFacade zephyrFacade,
+            TestCaseParser testCaseParser, ZephyrExporterProperties zephyrExporterProperties)
     {
         this.jiraFacade = jiraFacade;
         this.zephyrFacade = zephyrFacade;
@@ -61,7 +63,7 @@ public class ZephyrExporter
             .registerModule(new SimpleModule().addDeserializer(TestCase.class, new TestCaseDeserializer()));
     }
 
-    public void exportResults() throws IOException
+    public void exportResults() throws IOException, JiraConfigurationException
     {
         List<TestCase> testCasesForImporting = testCaseParser.createTestCases(objectMapper);
         ZephyrConfiguration configuration = zephyrFacade.prepareConfiguration();
@@ -71,9 +73,11 @@ public class ZephyrExporter
         }
     }
 
-    private void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration) throws IOException
+    private void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
+            throws IOException, JiraConfigurationException
     {
-        JiraEntity issue = jiraFacade.getIssue(testCase.getKey());
+        JiraEntity issue = jiraFacade.getIssue(testCase.getKey(),
+                Optional.ofNullable(zephyrExporterProperties.getJiraServerKey()));
         ZephyrExecution execution = new ZephyrExecution(configuration, issue.getId(), testCase.getStatus());
         OptionalInt executionId;
 
