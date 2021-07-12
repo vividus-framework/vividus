@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     implementation(group: 'com.microsoft.azure.datafactory.v2018_06_01', name: 'azure-mgmt-datafactory', version: '1.0.0-beta-7')
-    implementation(group: 'com.azure', name: 'azure-identity', version: '1.3.1')
+    implementation(group: 'com.azure', name: 'azure-identity', version: '1.3.3')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
