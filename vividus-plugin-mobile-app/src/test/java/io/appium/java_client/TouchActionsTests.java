@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,9 @@ class TouchActionsTests
     private static final String RELEASE = "{action=release, options={}}";
     private static final Duration DURATION = Duration.ofSeconds(1);
     private static final String SCROLL_UP = ACTIONS_OPEN
-            + "{action=press, options={x=1, y=640}}, "
+            + "{action=press, options={x=300, y=640}}, "
             + WAIT
-            + "{action=moveTo, options={x=1, y=160}}, "
+            + "{action=moveTo, options={x=300, y=160}}, "
             + RELEASE
             + ACTIONS_CLOSE;
     private static final String BLACK_IMAGE = "black.png";
@@ -73,7 +73,7 @@ class TouchActionsTests
     private static final Dimension DIMENSION = new Dimension(600, 800);
 
     @Spy private MobileApplicationConfiguration mobileApplicationConfiguration = new MobileApplicationConfiguration(
-            Duration.ZERO, 5);
+            Duration.ZERO, 5, 50);
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private RemoteWebElement element;
     @Mock private PerformsTouchActions performsTouchActions;
@@ -193,6 +193,7 @@ class TouchActionsTests
     @Test
     void shouldPerformVerticalSwipe()
     {
+        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
         touchActions.performVerticalSwipe(640, 160, DURATION);
         verifySwipe(1);
     }
@@ -209,6 +210,7 @@ class TouchActionsTests
     {
         verify(mobileApplicationConfiguration).getSwipeStabilizationDuration();
         verify(mobileApplicationConfiguration).getSwipeLimit();
+        verify(mobileApplicationConfiguration).getSwipeVerticalXPosition();
         verifyNoMoreInteractions(mobileApplicationConfiguration);
     }
 

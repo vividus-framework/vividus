@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,23 @@ package org.vividus.bdd.mobileapp.configuration;
 
 import java.time.Duration;
 
+import org.apache.commons.lang3.Validate;
+
 public class MobileApplicationConfiguration
 {
     private final Duration swipeStabilizationDuration;
     private final int swipeLimit;
+    private final int swipeVerticalXPosition;
 
-    public MobileApplicationConfiguration(Duration swipeStabilizationDuration, int swipeLimit)
+    @SuppressWarnings("MagicNumber")
+    public MobileApplicationConfiguration(Duration swipeStabilizationDuration, int swipeLimit,
+            int swipeVerticalXPosition)
     {
         this.swipeStabilizationDuration = swipeStabilizationDuration;
         this.swipeLimit = swipeLimit;
+        Validate.isTrue(swipeVerticalXPosition >= 0 && swipeVerticalXPosition <= 100,
+            "The x percentage value must be between 0 and 100, but got: %d", swipeVerticalXPosition);
+        this.swipeVerticalXPosition = swipeVerticalXPosition;
     }
 
     public Duration getSwipeStabilizationDuration()
@@ -37,5 +45,10 @@ public class MobileApplicationConfiguration
     public int getSwipeLimit()
     {
         return swipeLimit;
+    }
+
+    public int getSwipeVerticalXPosition()
+    {
+        return swipeVerticalXPosition;
     }
 }

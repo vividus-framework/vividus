@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,21 +25,20 @@ import org.openqa.selenium.Point;
 
 class SwipeDirectionTests
 {
-    private static final int SWIPE_X = 1;
-
     @CsvSource({
-        "UP,   1436, 358 ",
-        "DOWN, 358 , 1436"
+        "UP,   1436, 358,  50,  540",
+        "DOWN, 358 , 1436, 0,   1",
+        "DOWN, 358 , 1436, 100, 1079"
     })
     @ParameterizedTest
-    void shouldCalculateCoordinates(SwipeDirection direction, int fromY, int toY)
+    void shouldCalculateCoordinates(SwipeDirection direction, int fromY, int toY, int xPercentage, int x)
     {
         Dimension dimension = new Dimension(1080, 1794);
 
-        SwipeCoordinates coordinates = direction.calculateCoordinates(dimension);
+        SwipeCoordinates coordinates = direction.calculateCoordinates(dimension, xPercentage);
 
-        assertPoint(coordinates.getStart(), SWIPE_X, fromY);
-        assertPoint(coordinates.getEnd(), SWIPE_X, toY);
+        assertPoint(coordinates.getStart(), x, fromY);
+        assertPoint(coordinates.getEnd(), x, toY);
     }
 
     private static void assertPoint(Point point, int x, int y)

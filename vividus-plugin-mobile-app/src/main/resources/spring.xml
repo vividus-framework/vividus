@@ -54,6 +54,7 @@
     <bean class="org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration" >
         <constructor-arg index="0" value="${mobile-application.swipe.stabilization-duration}" />
         <constructor-arg index="1" value="${mobile-application.swipe.limit}" />
+        <constructor-arg index="2" value="${mobile-application.swipe.vertical.x-position}" />
     </bean>
 
     <bean class="org.vividus.selenium.mobileapp.MobileAppDriverFactory"
