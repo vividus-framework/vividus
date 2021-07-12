@@ -1,16 +1,13 @@
-Description: Integration tests for FieldSteps class. Page for verification origin:
-https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
-
 Meta:
     @epic vividus-plugin-web-app
 
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on a page with the URL 'https://mdn.mozillademos.org/en-US/docs/Web/HTML/Element/input$samples/caret-color'
+Given I am on a page with the URL '${vividus-test-site-url}/inputs.html'
 Examples:
-|inputLocator    |inputId  |
-|By.id(textInput)|textInput|
+|inputLocator|inputId|
+|By.id(text) |text   |
 
 Scenario: Step verification Then field located `$locator` does not exist
 Then field located `By.xpath(//noSuchField):a->filter.textPart(text)` does not exist
@@ -26,14 +23,11 @@ Then field value is `texttext`
 
 Scenario: Step verification When I clear field located `$locator`
 When I clear field located `<inputLocator>`
-When I perform javascript 'return document.querySelector('#textInput').value' and save result to the 'Scenario' variable 'fieldValue'
 Then field value is ``
 
 Scenario: Step verification When I enter `$text` in field located `$locator`
 When I enter `text` in field located `<inputLocator>`
 Then field value is `text`
-
-!-- Composites down there
 
 Scenario: Step verification When I clear field located `$locator` using keyboard
 When I clear field located `<inputLocator>` using keyboard
