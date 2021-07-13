@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,24 +23,43 @@ public enum SwipeDirection
     UP
     {
         @Override
-        public SwipeCoordinates calculateCoordinates(Dimension dimension)
+        public SwipeCoordinates calculateCoordinates(Dimension dimension, int xOffsetPercentage)
         {
             int indent = dimension.getHeight() / VERTICAL_INDENT_COEFFICIENT;
-            return new SwipeCoordinates(SWIPE_X, dimension.getHeight() - indent, SWIPE_X, indent);
+            return createCoordinates(dimension.getHeight() - indent, indent, dimension.getWidth(), xOffsetPercentage);
         }
     },
     DOWN
     {
         @Override
-        public SwipeCoordinates calculateCoordinates(Dimension dimension)
+        public SwipeCoordinates calculateCoordinates(Dimension dimension, int xOffsetPercentage)
         {
             int indent = dimension.getHeight() / VERTICAL_INDENT_COEFFICIENT;
-            return new SwipeCoordinates(SWIPE_X, indent, SWIPE_X, dimension.getHeight() - indent);
+            return createCoordinates(indent, dimension.getHeight() - indent, dimension.getWidth(), xOffsetPercentage);
         }
     };
 
     private static final int VERTICAL_INDENT_COEFFICIENT = 5;
-    private static final int SWIPE_X = 1;
 
-    public abstract SwipeCoordinates calculateCoordinates(Dimension dimension);
+    public abstract SwipeCoordinates calculateCoordinates(Dimension dimension, int xOffsetPercentage);
+
+    public static SwipeCoordinates createCoordinates(int startY, int endY, int width, int xOffsetPercentage)
+    {
+        int x = calculateX(width, xOffsetPercentage);
+        return new SwipeCoordinates(x, startY, x, endY);
+    }
+
+    @SuppressWarnings("MagicNumber")
+    private static int calculateX(int width, int percentage)
+    {
+        if (percentage == 0)
+        {
+            return 1;
+        }
+        if (percentage == 100)
+        {
+            return width - 1;
+        }
+        return width * percentage / 100;
+    }
 }

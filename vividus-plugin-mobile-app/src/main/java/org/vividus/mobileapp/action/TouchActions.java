@@ -130,7 +130,8 @@ public class TouchActions
         Duration stabilizationDuration = mobileApplicationConfiguration.getSwipeStabilizationDuration();
         int swipeLimit = mobileApplicationConfiguration.getSwipeLimit();
         BufferedImage previousFrame = null;
-        SwipeCoordinates swipeCoordinates = direction.calculateCoordinates(genericWebDriverManager.getSize());
+        SwipeCoordinates swipeCoordinates = direction.calculateCoordinates(genericWebDriverManager.getSize(),
+                mobileApplicationConfiguration.getSwipeVerticalXPosition());
         for (int count = 0; count <= swipeLimit; count++)
         {
             swipe(swipeCoordinates, swipeDuration);
@@ -164,7 +165,8 @@ public class TouchActions
      */
     public void performVerticalSwipe(int startY, int endY, Duration swipeDuration)
     {
-        swipe(new SwipeCoordinates(1, startY, 1, endY), swipeDuration);
+        swipe(SwipeDirection.createCoordinates(startY, endY, genericWebDriverManager.getSize().getWidth(),
+                mobileApplicationConfiguration.getSwipeVerticalXPosition()), swipeDuration);
     }
 
     private BufferedImage takeScreenshot()

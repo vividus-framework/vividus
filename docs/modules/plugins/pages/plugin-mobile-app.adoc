@@ -445,6 +445,7 @@ When I swipe $direction to element located `$locator` with duration $swipeDurati
 
 * `mobile-application.swipe.limit` - defines max numbers of swipes to perform (if it's reached the swipe process is stopped and the error is thrown)
 * `mobile-application.swipe.stabilization-duration` - defines a duration to wait after swipe until view becomes stable
+* `mobile-application.swipe.vertical.x-position` - defines a vertical swipe `x` axis position in percentage from `0` to `100`, where `0` corresponds to `x=1` and `100` corresponds to `x = mobile screen width - 1`, default value is `0`
 
 ==== *_Parameters_*
 
