@@ -122,6 +122,7 @@ Given I initialize the $scopes variable `$variableName` using template `$templat
 ----
 {
   "id": ${execVividusExpression('randomInt', 1, 10)},
+  "postalCode": ${execVividusExpression('generate', "Number.digits '6'")},
   "hash": "${execVividusExpression('encodeToBase64', execVividusExpression('randomInt', 100, 1000))}",
   "name": "${name[0]}",
   "race": "${race[0]}",
