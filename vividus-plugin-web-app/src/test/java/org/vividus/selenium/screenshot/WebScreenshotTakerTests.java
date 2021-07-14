@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -58,8 +55,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -212,31 +207,6 @@ class WebScreenshotTakerTests
     }
 
     @Test
-    void testTakeViewportScreenshot()
-    {
-        WebScreenshotTaker spy = Mockito.spy(screenshotTaker);
-        doReturn(Optional.of(mock(Screenshot.class))).when(spy).takeScreenshot(SCREENSHOT_NAME, List.of(), true);
-        spy.takeScreenshot(SCREENSHOT_NAME, true);
-        verify(spy).takeScreenshot(SCREENSHOT_NAME, List.of(), true);
-    }
-
-    @Test
-    void testTakeViewportScreenshotByPath(@TempDir Path tempDir) throws Exception
-    {
-        mockTakeScreenshotWithHighlights();
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(ashotFactory.create(true, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
-        when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
-        Path filePath = tempDir.resolve(SCREENSHOT_NAME_GENERATED);
-        screenshotTaker.takeScreenshot(filePath, true);
-        verify(eventBus).post(argThat(e -> filePath.equals(((ScreenshotTakeEvent) e).getScreenshotFilePath())));
-        assertTrue(Files.exists(filePath));
-        assertThat(testLogger.getLoggingEvents(), equalTo(List.of(
-                info(SCREENSHOT_WAS_TAKEN, filePath.toAbsolutePath()))));
-    }
-
-    @Test
     void testTakeViewportScreenshotByPathNotViewport(@TempDir Path tempDir) throws Exception
     {
         mockTakeScreenshotWithHighlights();
@@ -270,72 +240,6 @@ class WebScreenshotTakerTests
         assertTrue(Files.exists(absolutePath));
         assertThat(testLogger.getLoggingEvents(), equalTo(List.of(
                 info(SCREENSHOT_WAS_TAKEN, absolutePath.toAbsolutePath()))));
-    }
-
-    @Test
-    void testTakeViewportScreenshotByElements()
-    {
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME))
-                .thenReturn(SCREENSHOT_NAME_GENERATED);
-        when(ashotFactory.create(true, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
-        mockTakeScreenshotWithHighlights();
-        when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
-        Optional<Screenshot> takenScreenshot = screenshotTaker.takeScreenshot(SCREENSHOT_NAME, List.of(), true);
-        assertTrue(takenScreenshot.isPresent());
-        Screenshot screenshot = takenScreenshot.get();
-        assertEquals(SCREENSHOT_NAME_GENERATED, screenshot.getFileName());
-    }
-
-    @Test
-    void testTakeScreenshotAsBytesWebElement() throws Exception
-    {
-        when(screenshotConfiguration.getScrollableElement()).thenReturn(Optional::empty);
-        WebElement context = mock(WebElement.class);
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
-        when(scrollbarHandler.performActionWithHiddenScrollbars(argThat(s -> {
-            s.get();
-            return true;
-        }))).thenReturn(SCREENSHOT);
-        assertScreenshot(screenshotTaker.takeScreenshot(SCREENSHOT_NAME, context));
-        verify(ASHOT).takeScreenshot(webDriver, context);
-    }
-
-    @Test
-    void testTakeScreenshotAsBytesFullpage() throws Exception
-    {
-        when(screenshotConfiguration.getScrollableElement()).thenReturn(Optional::empty);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(scrollbarHandler.performActionWithHiddenScrollbars(argThat(s -> {
-            s.get();
-            return true;
-        }))).thenReturn(SCREENSHOT);
-        when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
-        assertScreenshot(screenshotTaker.takeScreenshot(SCREENSHOT_NAME, webDriver));
-    }
-
-    @Test
-    void testTakeScreenshotAsBytesException()
-    {
-        when(screenshotConfiguration.getScrollableElement()).thenReturn(Optional::empty);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(scrollbarHandler.performActionWithHiddenScrollbars(argThat(s -> {
-            s.get();
-            return true;
-        }))).thenReturn(SCREENSHOT);
-        try (MockedStatic<ImageTool> imageTool = mockStatic(ImageTool.class))
-        {
-            IOException ioException = new IOException();
-            imageTool.when(() -> ImageTool.toByteArray(SCREENSHOT)).thenThrow(ioException);
-            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
-                    () -> screenshotTaker.takeScreenshot(SCREENSHOT_NAME, webDriver));
-            assertEquals(ioException, illegalStateException.getCause());
-        }
     }
 
     @Test
