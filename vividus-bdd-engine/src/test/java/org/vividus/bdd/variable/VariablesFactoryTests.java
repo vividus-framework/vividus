@@ -86,11 +86,4 @@ class VariablesFactoryTests
         assertEquals(BATCH, variables.getVariable(KEY2));
         assertEquals(GLOBAL, variables.getVariable(KEY3));
     }
-
-    @Test
-    void shouldProvideGlobalVariables() throws IOException
-    {
-        variablesFactory.init();
-        assertEquals(GLOBAL_VARIABLES, variablesFactory.getGlobalVariables());
-    }
 }

@@ -121,8 +121,6 @@ class BddVariableContextTests
         assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
         variables.clearScenarioVariables();
         assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
-        variables.clearStoryVariables();
-        assertNull(variables.getVariable(VARIABLE_KEY));
         List<LoggingEvent> loggingEvents = logger.getLoggingEvents();
         assertThat(loggingEvents, hasSize(4));
         assertThat(loggingEvents, hasItems(

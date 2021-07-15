@@ -182,11 +182,6 @@ public class Variables
         scenarioVariables.clear();
     }
 
-    public void clearStoryVariables()
-    {
-        storyVariables.clear();
-    }
-
     private static final class VariableKey
     {
         private static final char COLON = ':';
