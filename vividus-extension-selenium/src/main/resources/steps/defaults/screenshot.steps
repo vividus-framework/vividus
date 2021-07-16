@@ -1,0 +1,5 @@
+Composite: When I take a screenshot
+When I take screenshot
+
+Composite: When I take a screenshot to '$path'
+When I take screenshot and save it to folder `<path>`
