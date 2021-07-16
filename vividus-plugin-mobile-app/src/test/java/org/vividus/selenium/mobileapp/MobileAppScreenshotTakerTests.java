@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
+
+import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,9 +45,14 @@ import org.vividus.selenium.screenshot.Screenshot;
 @ExtendWith(MockitoExtension.class)
 class MobileAppScreenshotTakerTests
 {
+    private static final String FILE_NAME = "file-name";
+    private static final String SCREENSHOT_NAME = "screenshot-name";
+    private static final byte[] DATA = { 1, 0, 1};
+
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private TakesScreenshot takesScreenshot;
+    @Mock private EventBus eventBus;
     @InjectMocks private MobileAppScreenshotTaker screenshotTaker;
 
     @AfterEach
@@ -53,19 +64,38 @@ class MobileAppScreenshotTakerTests
     @Test
     void shouldTakeScreenshot()
     {
-        String screenshotName = "screenshot-name";
-        String fileName = "file-name";
-        byte[] data = { 0 };
-
-        when(screenshotFileNameGenerator.generateScreenshotFileName(screenshotName)).thenReturn(fileName);
+        when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME)).thenReturn(FILE_NAME);
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
-        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(data);
+        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(DATA);
 
-        Optional<Screenshot> takenScreenshot = screenshotTaker.takeScreenshot(screenshotName);
+        Optional<Screenshot> takenScreenshot = screenshotTaker.takeScreenshot(SCREENSHOT_NAME);
         assertTrue(takenScreenshot.isPresent());
         Screenshot screenshot = takenScreenshot.get();
-        assertEquals(fileName, screenshot.getFileName());
-        assertArrayEquals(data, screenshot.getData());
+        assertEquals(FILE_NAME, screenshot.getFileName());
+        assertArrayEquals(DATA, screenshot.getData());
+        verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
+    }
+
+    @Test
+    void shouldSaveScreenshotAsAFile() throws IOException
+    {
+        when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME)).thenReturn(FILE_NAME);
+        when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
+        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(DATA);
+
+        Path takenScreenshot = screenshotTaker.takeScreenshotAsFile(SCREENSHOT_NAME);
+        assertArrayEquals(DATA, Files.readAllBytes(takenScreenshot));
+        verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
+    }
+
+    @Test
+    void shouldSaveScreenshotToAPath(@TempDir Path path) throws IOException
+    {
+        when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
+        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(DATA);
+
+        Path takenScreenshot = screenshotTaker.takeScreenshot(path.resolve(FILE_NAME));
+        assertArrayEquals(DATA, Files.readAllBytes(takenScreenshot));
         verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
     }
 }

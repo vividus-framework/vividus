@@ -129,8 +129,17 @@
     <bean id="genericSetVariableSteps" class="org.vividus.bdd.steps.ui.GenericSetVariableSteps" />
     <bean id="genericSetContextSteps" class="org.vividus.bdd.steps.ui.GenericSetContextSteps" />
     <bean id="navigationSteps" class="org.vividus.bdd.steps.ui.NavigationSteps" />
+    <bean id="screenshotTakingSteps" class="org.vividus.bdd.steps.ui.ScreenshotTakingSteps" />
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />
+
+    <bean class="org.vividus.selenium.screenshot.AbstractScreenshotTaker" id="abstractScreenshotTaker" abstract="true">
+        <property name="screenshotDirectory">
+            <bean class="java.io.File">
+                <constructor-arg value="${ui.screenshot.directory}" />
+            </bean>
+        </property>
+    </bean>
 
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
         <idref bean="genericElementSteps" />
@@ -138,6 +147,7 @@
         <idref bean="genericSetVariableSteps" />
         <idref bean="genericSetContextSteps" />
         <idref bean="navigationSteps" />
+        <idref bean="screenshotTakingSteps" />
     </util:list>
 
     <util:map id="propertyEditors-UI" key-type="java.lang.Class">
