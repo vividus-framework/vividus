@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,11 +77,6 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
         return takeScreenshot(screenshotName, List.of());
     }
 
-    public Optional<Screenshot> takeScreenshot(String screenshotName, boolean viewportScreenshot)
-    {
-        return takeScreenshot(screenshotName, List.of(), viewportScreenshot);
-    }
-
     public Path takeScreenshotAsFile(String screenshotName) throws IOException
     {
         return takeScreenshot(() -> new File(screenshotDirectory, generateScreenshotFileName(screenshotName)).toPath(),
@@ -93,36 +88,9 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
         takeScreenshot(() -> screenshotFilePath, false);
     }
 
-    public void takeScreenshot(Path screenshotFilePath, boolean viewportScreenshot) throws IOException
-    {
-        takeScreenshot(() -> screenshotFilePath, viewportScreenshot);
-    }
-
     public Optional<Screenshot> takeScreenshot(String screenshotName, List<WebElement> webElementsToHighlight)
     {
-        return takeScreenshot(screenshotName, webElementsToHighlight, false);
-    }
-
-    public Optional<Screenshot> takeScreenshot(String screenshotName, List<WebElement> webElementsToHighlight,
-            boolean viewportScreenshot)
-    {
-        byte[] screenshotData = takeScreenshotAsByteArray(webElementsToHighlight, viewportScreenshot);
-        return createScreenshot(screenshotData, screenshotName);
-    }
-
-    public Optional<Screenshot> takeScreenshot(String screenshotName, SearchContext searchContext)
-    {
-        byte[] screenshotData = takeScreenshotAsByteArray(() ->
-        {
-            try
-            {
-                return ImageTool.toByteArray(takeAshotScreenshot(searchContext, Optional.empty()));
-            }
-            catch (IOException e)
-            {
-                throw new IllegalStateException(e);
-            }
-        });
+        byte[] screenshotData = takeScreenshotAsByteArray(webElementsToHighlight, false);
         return createScreenshot(screenshotData, screenshotName);
     }
 
