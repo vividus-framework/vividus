@@ -77,7 +77,7 @@ class WebScreenshotTakerTests
     private static final ru.yandex.qatools.ashot.Screenshot SCREENSHOT =
             new ru.yandex.qatools.ashot.Screenshot(loadImage());
 
-    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(WebScreenshotTaker.class);
+    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(AbstractScreenshotTaker.class);
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;

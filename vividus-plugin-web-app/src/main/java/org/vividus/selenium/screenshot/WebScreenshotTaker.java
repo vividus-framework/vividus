@@ -16,9 +16,7 @@
 
 package org.vividus.selenium.screenshot;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +24,6 @@ import java.util.function.Supplier;
 
 import com.google.common.eventbus.EventBus;
 
-import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -43,14 +40,11 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebScreenshotTaker.class);
 
-    private final IScreenshotFileNameGenerator screenshotFileNameGenerator;
     private final IWebElementHighlighter webElementHighlighter;
-    private final EventBus eventBus;
     private final IScrollbarHandler scrollbarHandler;
     private final IAshotFactory ashotFactory;
     private final ScreenshotDebugger screenshotDebugger;
 
-    private File screenshotDirectory;
     private boolean fullPageScreenshots;
     private int indent;
     private HighlighterType highlighterType;
@@ -62,10 +56,8 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
             EventBus eventBus, IScrollbarHandler scrollbarHandler, IAshotFactory ashotFactory,
             ScreenshotDebugger screenshotDebugger)
     {
-        super(webDriverProvider);
-        this.screenshotFileNameGenerator = screenshotFileNameGenerator;
+        super(webDriverProvider, eventBus, screenshotFileNameGenerator);
         this.webElementHighlighter = webElementHighlighter;
-        this.eventBus = eventBus;
         this.scrollbarHandler = scrollbarHandler;
         this.ashotFactory = ashotFactory;
         this.screenshotDebugger = screenshotDebugger;
@@ -77,15 +69,16 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
         return takeScreenshot(screenshotName, List.of());
     }
 
+    @Override
     public Path takeScreenshotAsFile(String screenshotName) throws IOException
     {
-        return takeScreenshot(() -> new File(screenshotDirectory, generateScreenshotFileName(screenshotName)).toPath(),
-                false);
+        return takeScreenshot(generateScreenshotPath(screenshotName), false);
     }
 
-    public void takeScreenshot(Path screenshotFilePath) throws IOException
+    @Override
+    public Path takeScreenshot(Path screenshotFilePath) throws IOException
     {
-        takeScreenshot(() -> screenshotFilePath, false);
+        return takeScreenshot(screenshotFilePath, false);
     }
 
     public Optional<Screenshot> takeScreenshot(String screenshotName, List<WebElement> webElementsToHighlight)
@@ -130,51 +123,27 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
                 : Optional.empty();
     }
 
-    private Path takeScreenshot(Supplier<Path> screenshotFilePathSupplier,
-            boolean viewportScreenshot) throws IOException
+    private Path takeScreenshot(Path screenshotFilePathSupplier, boolean viewportScreenshot) throws IOException
     {
-        byte[] screenshotData = takeScreenshotAsByteArray(List.of(), viewportScreenshot);
-        if (screenshotData.length > 0)
-        {
-            Path screenshotFilePath = screenshotFilePathSupplier.get();
-            Path parent = screenshotFilePath.getParent();
-            if (parent != null)
-            {
-                FileUtils.forceMkdir(parent.toFile());
-            }
-            Files.write(screenshotFilePath, screenshotData);
-
-            LOGGER.info("Screenshot was taken: {}", screenshotFilePath.toAbsolutePath());
-
-            eventBus.post(new ScreenshotTakeEvent(screenshotFilePath));
-            return screenshotFilePath;
-        }
-        return null;
+        return takeScreenshotAsFile(screenshotFilePathSupplier,
+                () -> takeScreenshotAsByteArray(List.of(), viewportScreenshot));
     }
 
     private byte[] takeScreenshotAsByteArray(List<WebElement> webElements, boolean viewportScreenshot)
     {
-        return takeScreenshotAsByteArray(() ->
+        if (getWebDriverProvider().isWebDriverInitialized())
         {
             byte[] screenshotData;
             if (HighlighterType.DEFAULT == highlighterType)
             {
                 screenshotData = webElementHighlighter.takeScreenshotWithHighlights(
-                    () -> takeScreenshotAsByteArrayImpl(webElements, viewportScreenshot));
+                        () -> takeScreenshotAsByteArrayImpl(webElements, viewportScreenshot));
             }
             else
             {
                 screenshotData = takeScreenshotAsByteArrayImpl(webElements, viewportScreenshot);
             }
             return screenshotData;
-        });
-    }
-
-    private byte[] takeScreenshotAsByteArray(Supplier<byte[]> screenshotDataSupplier)
-    {
-        if (getWebDriverProvider().isWebDriverInitialized())
-        {
-            return screenshotDataSupplier.get();
         }
         LOGGER.info("WebDriver is not initialized");
         return new byte[0];
@@ -207,16 +176,6 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
     private AShot createAShot(boolean viewportScreenshot, Optional<ScreenshotConfiguration> screenshotConfiguration)
     {
         return ashotFactory.create(viewportScreenshot, screenshotConfiguration);
-    }
-
-    private String generateScreenshotFileName(String screenshotName)
-    {
-        return screenshotFileNameGenerator.generateScreenshotFileName(screenshotName);
-    }
-
-    public void setScreenshotDirectory(File screenshotDirectory)
-    {
-        this.screenshotDirectory = screenshotDirectory;
     }
 
     public void setFullPageScreenshots(boolean fullPageScreenshots)

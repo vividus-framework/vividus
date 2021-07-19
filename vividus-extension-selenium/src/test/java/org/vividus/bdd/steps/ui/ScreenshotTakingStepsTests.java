@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.bdd.steps.ui;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.selenium.screenshot.WebScreenshotTaker;
+import org.vividus.selenium.screenshot.ScreenshotTaker;
 
 @ExtendWith(MockitoExtension.class)
 class ScreenshotTakingStepsTests
@@ -34,7 +35,7 @@ class ScreenshotTakingStepsTests
     private static final String PATH = "path";
 
     @Mock
-    private WebScreenshotTaker screenshotTaker;
+    private ScreenshotTaker screenshotTaker;
 
     @InjectMocks
     private ScreenshotTakingSteps screenshotTakingSteps;
@@ -49,7 +50,8 @@ class ScreenshotTakingStepsTests
     @Test
     void testWhenITakeScreenshotToPath() throws IOException
     {
-        screenshotTakingSteps.whenITakeScreenshotToPath(PATH);
-        verify(screenshotTaker).takeScreenshot(Paths.get(PATH));
+        Path screenshotFilePath = Paths.get(PATH);
+        screenshotTakingSteps.whenITakeScreenshotToPath(screenshotFilePath);
+        verify(screenshotTaker).takeScreenshot(screenshotFilePath);
     }
 }

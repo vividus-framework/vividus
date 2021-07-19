@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,22 @@
 package org.vividus.bdd.steps.ui;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.selenium.screenshot.WebScreenshotTaker;
+import org.vividus.selenium.screenshot.ScreenshotTaker;
 
 public class ScreenshotTakingSteps
 {
-    @Inject private WebScreenshotTaker screenshotTaker;
+    @Inject private ScreenshotTaker screenshotTaker;
 
     /**
      * Takes a screenshot and saves it to the default location
      * @throws IOException If an input or output exception occurred
      */
-    @When("I take a screenshot")
+    @When("I take screenshot")
     public void whenITakeScreenshot() throws IOException
     {
         screenshotTaker.takeScreenshotAsFile("Step_Screenshot");
@@ -51,9 +51,9 @@ public class ScreenshotTakingSteps
      * @param path Path to the location for saving the screenshot
      * @throws IOException If an input or output exception occurred
      */
-    @When("I take a screenshot to '$path'")
-    public void whenITakeScreenshotToPath(String path) throws IOException
+    @When("I take screenshot and save it to folder `$path`")
+    public void whenITakeScreenshotToPath(Path path) throws IOException
     {
-        screenshotTaker.takeScreenshot(Paths.get(path));
+        screenshotTaker.takeScreenshot(path);
     }
 }
