@@ -397,3 +397,46 @@ Given I am on a page with the URL 'https://grocery.by'
 When I click on element located `By.id(a-z)`
 Then elements located `By.xpath(//span[@id='item-to-purchase'])` are sorted by text in ascending order
 ----
+
+=== Take a screenshot
+
+==== *_Info_*
+
+Takes a screenshot and saves it to the default folder defined by the property `ui.screenshots.directory`.
+
+TIP: The full path to the screenshot is posted to the logs and the report.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I take screenshot
+----
+
+=== Take a screenshot and save it to the folder
+
+==== *_Info_*
+
+Takes a screenshot and saves it to the default folder defined by user
+
+TIP: Full path to a screenshot will be posted to logs and allure
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I take screenshot and save it to folder `$path`
+----
+
+==== *_Parameters_*
+
+. `$path` - an absolute or relative path to the folder to save taken screenshot
+
+==== *_Usage_*
+
+.Take a screenshot to a path
+[source,gherkin]
+----
+Scenario: Take a screenshot to a path
+When I take screenshot to path `${screenshot-directory}/#{generate(Ancient.god)}.png`
+----

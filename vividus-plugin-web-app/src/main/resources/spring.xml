@@ -49,12 +49,7 @@
 
     <bean id="elementUtil" class="org.vividus.ui.web.util.ElementUtil" />
 
-    <bean class="org.vividus.selenium.screenshot.WebScreenshotTaker">
-        <property name="screenshotDirectory">
-            <bean class="java.io.File">
-                <constructor-arg value="${selenium.screenshot.directory}" />
-            </bean>
-        </property>
+    <bean class="org.vividus.selenium.screenshot.WebScreenshotTaker" parent="abstractScreenshotTaker">
         <property name="fullPageScreenshots" value="${selenium.screenshot.full-page}" />
         <property name="indent" value="${selenium.screenshot.indent}" />
         <property name="highlighterType" value="${selenium.screenshot.highlighter}" />
@@ -233,8 +228,6 @@
         <property name="windowsStrategy" value="${selenium.windows-strategy}" />
     </bean>
 
-    <bean id="screenshotTakingSteps" class="org.vividus.bdd.steps.ui.ScreenshotTakingSteps" />
-
     <bean id="proxySteps" class="org.vividus.proxy.steps.ProxySteps" />
 
     <bean class="org.vividus.bdd.monitor.WebScreenshotOnFailureMonitor" parent="abstractScreenshotOnFailureMonitor"/>
@@ -332,7 +325,6 @@
         <idref bean="nestedSteps" />
         <idref bean="actionSteps" />
         <idref bean="webUiVividusSetupSteps" />
-        <idref bean="screenshotTakingSteps" />
         <idref bean="localStorageSteps" />
         <idref bean="proxySteps" />
         <idref bean="dragAndDropSteps" />

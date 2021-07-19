@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.vividus.selenium.mobileapp;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Optional;
+
+import com.google.common.eventbus.EventBus;
 
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.AbstractScreenshotTaker;
@@ -25,19 +29,28 @@ import org.vividus.selenium.screenshot.Screenshot;
 
 public class MobileAppScreenshotTaker extends AbstractScreenshotTaker
 {
-    private final IScreenshotFileNameGenerator screenshotFileNameGenerator;
-
     public MobileAppScreenshotTaker(IWebDriverProvider webDriverProvider,
-            IScreenshotFileNameGenerator screenshotFileNameGenerator)
+            IScreenshotFileNameGenerator screenshotFileNameGenerator, EventBus eventBus)
     {
-        super(webDriverProvider);
-        this.screenshotFileNameGenerator = screenshotFileNameGenerator;
+        super(webDriverProvider, eventBus, screenshotFileNameGenerator);
     }
 
     @Override
     public Optional<Screenshot> takeScreenshot(String screenshotName)
     {
-        String fileName = screenshotFileNameGenerator.generateScreenshotFileName(screenshotName);
+        String fileName = generateScreenshotFileName(screenshotName);
         return Optional.of(new Screenshot(fileName, getScreenshotBytes()));
+    }
+
+    @Override
+    public Path takeScreenshotAsFile(String screenshotName) throws IOException
+    {
+        return takeScreenshot(generateScreenshotPath(screenshotName));
+    }
+
+    @Override
+    public Path takeScreenshot(Path screenshotFilePath) throws IOException
+    {
+        return takeScreenshotAsFile(screenshotFilePath, this::getScreenshotBytes);
     }
 }
