@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,12 +78,13 @@ class MobileAppScreenshotTakerTests
     }
 
     @Test
-    void shouldSaveScreenshotAsAFile() throws IOException
+    void shouldSaveScreenshotAsAFile(@TempDir File tempDir) throws IOException
     {
         when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME)).thenReturn(FILE_NAME);
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
         when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(DATA);
 
+        screenshotTaker.setScreenshotDirectory(tempDir);
         Path takenScreenshot = screenshotTaker.takeScreenshotAsFile(SCREENSHOT_NAME);
         assertArrayEquals(DATA, Files.readAllBytes(takenScreenshot));
         verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
