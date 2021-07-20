@@ -13,7 +13,7 @@ dependencies {
 
     implementation(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310')
 
-    implementation(group: 'commons-io', name: 'commons-io', version: versions.commonsIo)
+    implementation(group: 'commons-io', name: 'commons-io', version: '2.11.0')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
     implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: "${jsonPathVersion}")
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)

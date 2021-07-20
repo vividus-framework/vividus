@@ -50,7 +50,6 @@ ext {
     versions = [
         allure:                 '2.14.0',
         ashot:                  '1.5.4',
-        commonsIo:              '2.11.0',
         commonsLang3:           '3.12.0',
         commonsText:            '1.9',
         commonsCollections4:    '4.4',
