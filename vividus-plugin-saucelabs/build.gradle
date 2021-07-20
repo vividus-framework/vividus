@@ -7,7 +7,6 @@ dependencies {
 
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.152') {
-        exclude module: 'sauce-connect'
         exclude group: 'com.google.collections', module: 'google-collections'
     }
 
