@@ -131,6 +131,7 @@ class DatabaseStepsTests
 
     private static final String MISSING_DB_CONFIG_ERROR = "Database connection with key '%s' is not configured in "
             + "properties";
+    private static final String LOG_EXECUTING_SQL_QUERY = "Executing SQL query: {}";
 
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(DatabaseSteps.class);
 
@@ -162,6 +163,7 @@ class DatabaseStepsTests
         String variableName = "var";
         databaseSteps.executeSql(QUERY, DB_KEY, variableScope, variableName);
         verify(bddVariableContext).putVariable(variableScope, variableName, singletonList);
+        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(LOG_EXECUTING_SQL_QUERY, QUERY))));
     }
 
     static Stream<Arguments> matchingResultSets() throws SQLException
@@ -228,7 +230,10 @@ class DatabaseStepsTests
         DriverManagerDataSource dataSource = mockDataSourceRetrieval();
         when(dataSource.getConnection()).thenReturn(con);
         databaseSteps.executeSql(QUERY, DB_KEY);
-        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info("Executed query: {}\nAffected rows:{}", QUERY, 1))));
+        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(
+                info(LOG_EXECUTING_SQL_QUERY, QUERY),
+                info("The number of affected rows: {}", 1)
+        )));
     }
 
     @SuppressFBWarnings("ODR_OPEN_DATABASE_RESOURCE")
@@ -278,6 +283,7 @@ class DatabaseStepsTests
         assertEquals(actual.getMessage(), "Exception occured during query execution.\n"
                 + "If you are trying execute SELECT query consider using step:"
                 + "When I execute SQL query '$sqlQuery' and save the result to the $scopes variable '$variableName'");
+        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(LOG_EXECUTING_SQL_QUERY, QUERY))));
     }
 
     @SuppressWarnings("unchecked")

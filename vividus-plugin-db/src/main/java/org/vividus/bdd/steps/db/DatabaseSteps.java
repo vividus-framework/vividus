@@ -133,6 +133,7 @@ public class DatabaseSteps
             + " `$variableName`", priority = 1)
     public void executeSql(String sqlQuery, String dbKey, Set<VariableScope> scopes, String variableName)
     {
+        logSqlQuery(sqlQuery);
         List<Map<String, Object>> result = getJdbcTemplate(dbKey).queryForList(sqlQuery);
         bddVariableContext.putVariable(scopes, variableName, result);
     }
@@ -186,9 +187,11 @@ public class DatabaseSteps
     @When("I execute SQL query `$sqlQuery` against `$dbKey`")
     public void executeSql(String sqlQuery, String dbKey)
     {
+        logSqlQuery(sqlQuery);
         try
         {
-            LOGGER.info("Executed query: {}\nAffected rows:{}", sqlQuery, getJdbcTemplate(dbKey).update(sqlQuery));
+            int numberOfAffectedRows = getJdbcTemplate(dbKey).update(sqlQuery);
+            LOGGER.info("The number of affected rows: {}", numberOfAffectedRows);
         }
         catch (DataIntegrityViolationException e)
         {
@@ -435,6 +438,11 @@ public class DatabaseSteps
                            .map(Object::toString)
                            .sorted()
                            .collect(Collectors.joining()), StandardCharsets.UTF_8);
+    }
+
+    private void logSqlQuery(String sqlQuery)
+    {
+        LOGGER.info("Executing SQL query: {}", sqlQuery);
     }
 
     private JdbcTemplate getJdbcTemplate(String dbKey)
