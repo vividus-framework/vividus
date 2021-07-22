@@ -24,9 +24,11 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
+import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
-import java.util.function.UnaryOperator;
 
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration;
@@ -42,6 +44,7 @@ import org.vividus.util.Sleeper;
 import io.appium.java_client.PerformsTouchActions;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.touch.offset.ElementOption;
+import io.appium.java_client.touch.offset.PointOption;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
 @TakeScreenshotOnFailure
@@ -71,11 +74,12 @@ public class TouchActions
      * <li>press on the element</li>
      * <li>release</li>
      * </ol>
+     * If the <b>element</b> is not visible, the tap is performed using coordinates
      * @param element element to tap, must not be {@code null}
      */
     public void tap(WebElement element)
     {
-        performAction(b -> b.tap(elementOption(element)));
+        buildTapAction(element, TouchAction::tap, TouchAction::tap).perform();
     }
 
     /**
@@ -87,15 +91,37 @@ public class TouchActions
      * <li>wait for the duration</li>
      * <li>release</li>
      * </ol>
+     * If the <b>element</b> is not visible, the tap is performed using coordinates
      * @param element element to tap, must not be {@code null}
      * @param duration between an element is pressed and released in
      * <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format, must not be {@code null}
      */
     public void tap(WebElement element, Duration duration)
     {
-        performAction(b -> b.press(elementOption(element))
-                            .waitAction(waitOptions(duration))
-                            .release());
+        buildTapAction(element, TouchAction::press, TouchAction::press)
+                .waitAction(waitOptions(duration))
+                .release()
+                .perform();
+    }
+
+    private TouchAction<?> buildTapAction(WebElement element, BiConsumer<TouchAction<?>, ElementOption> tapByElement,
+            BiConsumer<TouchAction<?>, PointOption<?>> tapByCoordinates)
+    {
+        TouchAction<?> touchActions = newTouchActions();
+        // Workaround for known Appium/iOS/XCUITest issue:
+        // https://github.com/appium/appium/issues/4131#issuecomment-64504187
+        // https://discuss.appium.io/t/ios-visible-false-event-elements-are-visible-on-screen/27630/6
+        if (!element.isDisplayed())
+        {
+            Point elementCenter = getCenter(element);
+            if (isInViewport(elementCenter))
+            {
+                tapByCoordinates.accept(touchActions, point(elementCenter));
+                return touchActions;
+            }
+        }
+        tapByElement.accept(touchActions, element(WebDriverUtil.unwrap(element, RemoteWebElement.class)));
+        return touchActions;
     }
 
     /**
@@ -183,21 +209,34 @@ public class TouchActions
 
     private void swipe(SwipeCoordinates coordinates, Duration swipeDuration)
     {
-        performAction(b -> b.press(point(coordinates.getStart()))
-                            .waitAction(waitOptions(swipeDuration))
-                            .moveTo(point(coordinates.getEnd()))
-                            .release());
+        newTouchActions()
+                .press(point(coordinates.getStart()))
+                .waitAction(waitOptions(swipeDuration))
+                .moveTo(point(coordinates.getEnd()))
+                .release()
+                .perform();
     }
 
-    private static ElementOption elementOption(WebElement webElement)
+    private static Point getCenter(WebElement element)
     {
-        return element(WebDriverUtil.unwrap(webElement, RemoteWebElement.class));
+        Point upperLeft = element.getLocation();
+        Dimension size = element.getSize();
+        return new Point(upperLeft.x + size.getWidth() / 2, upperLeft.y + size.getHeight() / 2);
     }
 
-    private void performAction(UnaryOperator<TouchAction<?>> actionBuilder)
+    private boolean isInViewport(Point point)
     {
-        PerformsTouchActions performsTouchActions = webDriverProvider.getUnwrapped(PerformsTouchActions.class);
-        TouchAction<?> touchAction = new TouchAction<>(performsTouchActions);
-        actionBuilder.apply(touchAction).perform();
+        Dimension viewport = genericWebDriverManager.getSize();
+        return isValueInInterval(point.x, viewport.getWidth()) && isValueInInterval(point.y, viewport.getHeight());
+    }
+
+    private static boolean isValueInInterval(int value, int rightEnd)
+    {
+        return 0 <= value && value < rightEnd;
+    }
+
+    private TouchAction<?> newTouchActions()
+    {
+        return new TouchAction<>(webDriverProvider.getUnwrapped(PerformsTouchActions.class));
     }
 }
