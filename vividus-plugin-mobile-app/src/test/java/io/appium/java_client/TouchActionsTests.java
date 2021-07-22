@@ -39,11 +39,15 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration;
 import org.vividus.bdd.mobileapp.model.SwipeDirection;
@@ -58,8 +62,11 @@ class TouchActionsTests
 {
     private static final String ACTIONS_OPEN = "{actions=[";
     private static final String ACTIONS_CLOSE = "]}";
+
+    private static final String PRESS = "{action=press, options={element=elementId}}, ";
     private static final String WAIT = "{action=wait, options={ms=1000}}, ";
     private static final String RELEASE = "{action=release, options={}}";
+
     private static final Duration DURATION = Duration.ofSeconds(1);
     private static final String SCROLL_UP = ACTIONS_OPEN
             + "{action=press, options={x=300, y=640}}, "
@@ -72,8 +79,8 @@ class TouchActionsTests
     private static final String ELEMENT_ID = "elementId";
     private static final Dimension DIMENSION = new Dimension(600, 800);
 
-    @Spy private MobileApplicationConfiguration mobileApplicationConfiguration = new MobileApplicationConfiguration(
-            Duration.ZERO, 5, 50);
+    @Spy private final MobileApplicationConfiguration mobileApplicationConfiguration =
+            new MobileApplicationConfiguration(Duration.ZERO, 5, 50);
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private RemoteWebElement element;
     @Mock private PerformsTouchActions performsTouchActions;
@@ -89,27 +96,70 @@ class TouchActionsTests
     }
 
     @Test
-    void shouldTapOnElement()
+    void shouldTapOnVisibleElement()
     {
+        when(element.isDisplayed()).thenReturn(true);
         when(element.getId()).thenReturn(ELEMENT_ID);
 
         touchActions.tap(element, Duration.ofSeconds(1));
 
-        verify(performsTouchActions).performTouchAction(argThat(arg ->
-        {
-            String parameters = arg.getParameters().toString();
-            String actions = ACTIONS_OPEN + "{action=press, options={element=elementId}}, "
-                                          + WAIT
-                                          + RELEASE
-                                          + ACTIONS_CLOSE;
-            return actions.equals(parameters);
-        }));
+        var touchActionCaptor = ArgumentCaptor.forClass(TouchAction.class);
+        verify(performsTouchActions).performTouchAction(touchActionCaptor.capture());
+        String actions = ACTIONS_OPEN + PRESS
+                + WAIT
+                + RELEASE
+                + ACTIONS_CLOSE;
+        assertEquals(actions, touchActionCaptor.getValue().getParameters().toString());
     }
 
     @Test
-    void shouldTapOnElementWithoutWaitIfDurationIsZero()
+    void shouldTapOnInvisibleElement()
+    {
+        when(element.isDisplayed()).thenReturn(false);
+        when(element.getLocation()).thenReturn(new Point(1, 3));
+        when(element.getSize()).thenReturn(new Dimension(2, 4));
+        when(genericWebDriverManager.getSize()).thenReturn(new Dimension(100, 200));
+
+        touchActions.tap(element, Duration.ofSeconds(1));
+
+        var touchActionCaptor = ArgumentCaptor.forClass(TouchAction.class);
+        verify(performsTouchActions).performTouchAction(touchActionCaptor.capture());
+        String actions = ACTIONS_OPEN + "{action=press, options={x=2, y=5}}, "
+                + WAIT
+                + RELEASE
+                + ACTIONS_CLOSE;
+        assertEquals(actions, touchActionCaptor.getValue().getParameters().toString());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "100, 200",
+            "1,   -3"
+    })
+    void shouldTapOnInvisibleElementOutsideViewport(int x, int y)
+    {
+        when(element.isDisplayed()).thenReturn(false);
+        when(element.getLocation()).thenReturn(new Point(x, y));
+        when(element.getSize()).thenReturn(new Dimension(2, 4));
+        when(genericWebDriverManager.getSize()).thenReturn(new Dimension(100, 200));
+        when(element.getId()).thenReturn(ELEMENT_ID);
+
+        touchActions.tap(element, Duration.ofSeconds(1));
+
+        var touchActionCaptor = ArgumentCaptor.forClass(TouchAction.class);
+        verify(performsTouchActions).performTouchAction(touchActionCaptor.capture());
+        String actions = ACTIONS_OPEN + PRESS
+                + WAIT
+                + RELEASE
+                + ACTIONS_CLOSE;
+        assertEquals(actions, touchActionCaptor.getValue().getParameters().toString());
+    }
+
+    @Test
+    void shouldTapOnVisibleElementWithoutWaitIfDurationIsZero()
     {
         when(element.getId()).thenReturn(ELEMENT_ID);
+        when(element.isDisplayed()).thenReturn(true);
 
         touchActions.tap(element);
 
