@@ -42,7 +42,7 @@
     "scenarioPattern": "Known issue should should stop scenario if it's marked as fail test case fast",
     "storyPattern": "KnownIssues",
     "stepPattern": "Then `vividus` matches.*",
-    "failTestCaseFast": true
+    "failScenarioFast": true
   },
   "VVD-8": {
     "type": "Internal",
@@ -50,8 +50,8 @@
     "scenarioPattern": "Known issue should should stop scenario and the rest of the story if it's marked as fail test case and test suite fast",
     "storyPattern": "KnownIssues",
     "stepPattern": "Then `vividus` matches.*",
-    "failTestCaseFast": true,
-    "failTestSuiteFast": true
+    "failScenarioFast": true,
+    "failStoryFast": true
   },
   "VVD-9": {
     "type": "Internal",
@@ -59,7 +59,7 @@
     "scenarioPattern": "Known issue should be detected in sub-steps",
     "storyPattern": "KnownIssues",
     "stepPattern": "When I use composite step in known-issues",
-    "failTestCaseFast": true
+    "failScenarioFast": true
   },
   "VVD-10": {
     "type": "Internal",
