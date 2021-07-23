@@ -53,6 +53,9 @@
                 <constructor-arg index="2" value="${http.service-unavailable-retry.status-codes}" />
             </bean>
         </property>
+        <property name="username" value="${http.auth.username}" />
+        <property name="password" value="${http.auth.password}" />
+        <property name="preemptiveAuthEnabled" value="${http.auth.preemptive-auth-enabled}" />
     </bean>
 
     <bean id="localDnsStorage" factory-bean="propertyParser"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,8 @@ import org.junit.jupiter.api.Test;
 class HttpClientConfigTests
 {
     private static final String BASE_URL = "http://somewh.ere/";
-    private static final String CREDENTIALS = "user:pass";
+    private static final String USERNAME = "user";
+    private static final String PASSWORD = "pass";
     private static final AuthScope AUTH_SCOPE = new AuthScope("host", 1, "realm");
     private final HttpClientConfig config = new HttpClientConfig();
 
@@ -83,36 +84,29 @@ class HttpClientConfigTests
     }
 
     @Test
-    void testHasCredentialsExists()
+    void testGetAndSetUsername()
     {
-        config.setCredentials(CREDENTIALS);
-        assertTrue(config.hasCredentials());
+        config.setUsername(USERNAME);
+        assertEquals(USERNAME, config.getUsername());
     }
 
     @Test
-    void testGetAndSetCredentials()
+    void testGetAndSetPassword()
     {
-        config.setCredentials(CREDENTIALS);
-        assertEquals(CREDENTIALS, config.getCredentials());
+        config.setPassword(PASSWORD);
+        assertEquals(PASSWORD, config.getPassword());
     }
 
     @Test
-    void testDefaultCredentials()
+    void testDefaultUsername()
     {
-        assertNull(config.getCredentials());
+        assertNull(config.getUsername());
     }
 
     @Test
-    void testHasCredentialsEmpty()
+    void testDefaultPassword()
     {
-        config.setCredentials("");
-        assertFalse(config.hasCredentials());
-    }
-
-    @Test
-    void testHasCredentialsNotExists()
-    {
-        assertFalse(config.hasCredentials());
+        assertNull(config.getPassword());
     }
 
     @Test

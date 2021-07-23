@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class CookieStoreCollectorTests
     {
         Cookie cookie1 = new BasicClientCookie("name", "value");
         Cookie cookie2 = new BasicClientCookie("name2", "value2");
-        CookieStore cookieStore = Stream.of(cookie1, cookie2).parallel().collect(ClientBuilderUtils.toCookieStore());
+        CookieStore cookieStore = Stream.of(cookie1, cookie2).parallel().collect(new CookieStoreCollector());
         assertEquals(cookieStore.getCookies(), List.of(cookie1, cookie2));
     }
 }

@@ -9,9 +9,7 @@
 
     <bean class="org.vividus.jira.JiraClient">
         <constructor-arg index="0" value="${jira.endpoint}" />
-        <constructor-arg index="1" value="${jira.username}"/>
-        <constructor-arg index="2" value="${jira.password}"/>
-        <constructor-arg index="3">
+        <constructor-arg index="1">
             <bean class="org.vividus.http.client.HttpClient" factory-bean="httpClientFactory"
                   factory-method="buildHttpClient">
                 <constructor-arg>
@@ -21,6 +19,9 @@
                                 <constructor-arg value="jira.http.header." />
                             </bean>
                         </property>
+                        <property name="username" value="${jira.username}" />
+                        <property name="password" value="${jira.password}" />
+                        <property name="preemptiveAuthEnabled" value="${jira.preemptive-auth-enabled}" />
                     </bean>
                 </constructor-arg>
             </bean>

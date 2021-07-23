@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package org.vividus.http.client;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -40,9 +44,12 @@ import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpRequestRetryHandler;
@@ -53,11 +60,17 @@ import org.apache.http.conn.DnsResolver;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
@@ -70,7 +83,8 @@ class HttpClientFactoryTests
 {
     private static final AuthScope AUTH_SCOPE = new AuthScope("host1", 1);
     private static final Map<String, String> HEADERS = Collections.singletonMap("header1", "value1");
-    private static final String CREDS = "username:pass";
+    private static final String USERNAME = "username";
+    private static final String PASSWORD = "password";
 
     @Mock private SslContextFactory sslContextFactory;
     @Mock private IKeyStoreFactory keyStoreFactory;
@@ -78,7 +92,6 @@ class HttpClientFactoryTests
 
     @Mock private HttpClientBuilder mockedHttpClientBuilder;
     @Mock private CloseableHttpClient mockedApacheHttpClient;
-    @Mock private CredentialsProvider credentialsProvider;
 
     private final HttpClientConfig config = new HttpClientConfig();
 
@@ -92,19 +105,49 @@ class HttpClientFactoryTests
     }
 
     @Test
-    void testBuildHttpClientWithFullAuthentication() throws GeneralSecurityException
+    void testBuildHttpClientWithFullAuthenticationNoPreemptive() throws GeneralSecurityException
     {
-        config.setCredentials(CREDS);
+        config.setUsername(USERNAME);
+        config.setPassword(PASSWORD);
         config.setAuthScope(AUTH_SCOPE);
 
-        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class))
+        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
+                BasicCredentialsProvider.class))
         {
-            clientBuilderUtils.when(() -> ClientBuilderUtils.createCredentialsProvider(AUTH_SCOPE, CREDS)).thenReturn(
-                    credentialsProvider);
+            testBuildHttpClientUsingConfig();
+
+            CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
+            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
+            verify(credentialsProvider).setCredentials(eq(AUTH_SCOPE), argThat(usernamePasswordCredentialsMatcher()));
+            verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
+        }
+    }
+
+    @Test
+    void testBuildHttpClientWithFullAuthenticationPreemptive() throws GeneralSecurityException
+    {
+        config.setUsername(USERNAME);
+        config.setPassword(PASSWORD);
+        config.setPreemptiveAuthEnabled(true);
+
+        Header header = mock(Header.class);
+        try (MockedConstruction<BasicScheme> basicSchemeConstruction = mockConstruction(BasicScheme.class,
+                (scheme, context) -> when(scheme.authenticate(argThat(usernamePasswordCredentialsMatcher()),
+                        any(HttpRequest.class), any(HttpContext.class))).thenReturn(header)))
+        {
+            HttpRequest request = mock(HttpRequest.class);
+            HttpContext context = mock(HttpContext.class);
+            doAnswer(args ->
+            {
+                HttpRequestInterceptor interceptor = args.getArgument(0);
+                interceptor.process(request, context);
+                return null;
+            }).when(mockedHttpClientBuilder).addInterceptorFirst(any(HttpRequestInterceptor.class));
 
             testBuildHttpClientUsingConfig();
 
-            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
+            verify(request).addHeader(header);
+            verify(mockedHttpClientBuilder, never()).setDefaultCredentialsProvider(any());
             verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
         }
     }
@@ -112,51 +155,81 @@ class HttpClientFactoryTests
     @Test
     void testBuildHttpClientWithAuthentication() throws GeneralSecurityException
     {
-        config.setCredentials(CREDS);
+        config.setUsername(USERNAME);
+        config.setPassword(PASSWORD);
 
-        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class))
+        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
+                BasicCredentialsProvider.class))
         {
-            clientBuilderUtils.when(
-                    () -> ClientBuilderUtils.createCredentialsProvider(ClientBuilderUtils.DEFAULT_AUTH_SCOPE, CREDS))
-                    .thenReturn(credentialsProvider);
-
             testBuildHttpClientUsingConfig();
 
+            CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
             verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
+            verify(credentialsProvider).setCredentials(eq(AuthScope.ANY),
+                    argThat(usernamePasswordCredentialsMatcher()));
             verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
+            verify(mockedHttpClientBuilder, never()).addInterceptorFirst(any(HttpRequestInterceptor.class));
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "username,,The password is missing",
+        ",password,The username is missing"
+    })
+    void testBuildHttpClientWithAuthenticationInvalidUsernameAndPasswordParams(String username, String password,
+            String message)
+    {
+        config.setUsername(username);
+        config.setPassword(password);
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+            () -> httpClientFactory.buildHttpClient(config));
+        assertEquals(message, thrown.getMessage());
+    }
+
+    @Test
+    void testBuildHttpClientWithAuthenticationInvalidPreemptiveAuthParams()
+    {
+        config.setPreemptiveAuthEnabled(true);
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+            () -> httpClientFactory.buildHttpClient(config));
+        assertEquals("Preemptive authentication requires username and password to be set", thrown.getMessage());
     }
 
     @Test
     void testBuildHttpClientAuthenticationWithoutPass() throws GeneralSecurityException
     {
-        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class))
+        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
+                BasicCredentialsProvider.class))
         {
             testBuildHttpClientUsingConfig();
 
             verify(mockedHttpClientBuilder, never()).setDefaultCredentialsProvider(any(CredentialsProvider.class));
             verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
-            clientBuilderUtils.verifyNoInteractions();
+            assertThat(credentialsProviderConstruction.constructed(), hasSize(0));
         }
     }
 
     @Test
     void testBuildTrustedHttpClient() throws GeneralSecurityException
     {
-        config.setCredentials(CREDS);
+        config.setUsername(USERNAME);
+        config.setPassword(PASSWORD);
         config.setSslCertificateCheckEnabled(false);
 
         SSLContext sslContext = mock(SSLContext.class);
         when(sslContextFactory.getTrustingAllSslContext(SSLConnectionSocketFactory.SSL)).thenReturn(sslContext);
         testBuildHttpClientUsingConfig();
-        verify(mockedHttpClientBuilder, never()).setDefaultCredentialsProvider(credentialsProvider);
         verify(mockedHttpClientBuilder).setSSLContext(sslContext);
     }
 
     @Test
     void testBuildHostnameVerifierHttpClient() throws GeneralSecurityException
     {
-        config.setCredentials(CREDS);
+        config.setUsername(USERNAME);
+        config.setPassword(PASSWORD);
         config.setSslHostnameVerificationEnabled(false);
         testBuildHttpClientUsingConfig();
         verify(mockedHttpClientBuilder).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
@@ -174,21 +247,25 @@ class HttpClientFactoryTests
     @Test
     void testBuildCircularRedirects() throws GeneralSecurityException
     {
+        config.setUsername(USERNAME);
+        config.setPassword(PASSWORD);
         config.setCircularRedirectsAllowed(true);
-        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class);
+
+        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
+                BasicCredentialsProvider.class);
                 MockedStatic<HttpClientBuilder> httpClientBuilder = mockStatic(HttpClientBuilder.class);
                 MockedConstruction<HttpClient> httpClient = mockConstruction(HttpClient.class))
         {
-            clientBuilderUtils.when(
-                    () -> ClientBuilderUtils.createCredentialsProvider(any(AuthScope.class), anyString())).thenReturn(
-                    credentialsProvider);
-
             httpClientBuilder.when(HttpClientBuilder::create).thenReturn(mockedHttpClientBuilder);
             when(mockedHttpClientBuilder.build()).thenReturn(mockedApacheHttpClient);
 
             IHttpClient actualClient = httpClientFactory.buildHttpClient(config);
             assertEquals(httpClient.constructed(), List.of(actualClient));
             verify(mockedHttpClientBuilder).setDefaultRequestConfig(argThat(RequestConfig::isCircularRedirectsAllowed));
+            CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
+            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
+            verify(credentialsProvider).setCredentials(eq(AuthScope.ANY),
+                    argThat(usernamePasswordCredentialsMatcher()));
         }
     }
 
@@ -198,7 +275,8 @@ class HttpClientFactoryTests
         String baseUrl = "http://somewh.ere/";
         config.setBaseUrl(baseUrl);
         config.setHeadersMap(HEADERS);
-        config.setCredentials(CREDS);
+        config.setUsername(USERNAME);
+        config.setPassword(PASSWORD);
         config.setAuthScope(AUTH_SCOPE);
         config.setSslCertificateCheckEnabled(true);
         config.setSkipResponseEntity(true);
@@ -218,16 +296,16 @@ class HttpClientFactoryTests
         when(sslContextFactory.getSslContext(SSLConnectionSocketFactory.SSL, keyStore, privateKeyPassword)).thenReturn(
                 sslContext);
 
-        try (MockedStatic<ClientBuilderUtils> clientBuilderUtils = mockStatic(ClientBuilderUtils.class))
+        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
+                BasicCredentialsProvider.class))
         {
-            clientBuilderUtils.when(() -> ClientBuilderUtils.createCredentialsProvider(AUTH_SCOPE, CREDS)).thenReturn(
-                    credentialsProvider);
-
             testBuildHttpClientUsingConfig(httpClient -> verify(httpClient).setHttpHost(HttpHost.create(baseUrl)));
             verify(mockedHttpClientBuilder).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
 
             verify(mockedHttpClientBuilder).setSSLContext(sslContext);
+            CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
             verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
+            verify(credentialsProvider).setCredentials(eq(AUTH_SCOPE), argThat(usernamePasswordCredentialsMatcher()));
             verify(mockedHttpClientBuilder).setDefaultCookieStore(cookieStore);
             verify(mockedHttpClientBuilder).setDnsResolver(resolver);
             verify(mockedHttpClientBuilder).useSystemProperties();
@@ -294,6 +372,15 @@ class HttpClientFactoryTests
             verify(mockedHttpClientBuilder).setDefaultSocketConfig(
                     argThat(socketConfig -> socketConfig.getSoTimeout() == socketTimeout));
         }
+    }
+
+    private ArgumentMatcher<Credentials> usernamePasswordCredentialsMatcher()
+    {
+        return arg ->
+        {
+            UsernamePasswordCredentials credentials = (UsernamePasswordCredentials) arg;
+            return USERNAME.equals(credentials.getUserName()) && PASSWORD.equals(credentials.getPassword());
+        };
     }
 
     private void verifyDefaultHeaderSetting(Entry<String, String> headerEntry)

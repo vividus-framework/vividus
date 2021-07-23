@@ -30,21 +30,15 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.protocol.HttpContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpResponse;
@@ -56,8 +50,6 @@ class JiraClientTests
     private static final String JIRA_URI = "https://jira.com";
     private static final String RESPONSE_BODY_AS_STRING = "{test}";
     private static final String GET = "GET";
-    private static final String USERNAME = "username";
-    private static final String PASSWORD = "password";
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(JiraClient.class);
 
@@ -65,12 +57,17 @@ class JiraClientTests
 
     private JiraClient jiraClient;
 
+    @BeforeEach
+    void init()
+    {
+        jiraClient = new JiraClient(JIRA_URI, httpClient);
+    }
+
     @Test
     void testExecuteGet() throws IOException
     {
-        init(null, null);
         String relativeUrl = "/testGet";
-        String body = mockHttpMethodExecution(HttpGet.class, HttpStatus.SC_OK, relativeUrl, ctx -> ctx == null);
+        String body = mockHttpMethodExecution(HttpGet.class, HttpStatus.SC_OK, relativeUrl);
         assertEquals(body, jiraClient.executeGet(relativeUrl));
         checkLogger(GET, relativeUrl);
     }
@@ -79,9 +76,8 @@ class JiraClientTests
     @ValueSource(ints = { HttpStatus.SC_PROCESSING, HttpStatus.SC_MULTIPLE_CHOICES })
     void testExecuteGetThrownUnexpectedStatusCode(int statusCode) throws IOException
     {
-        init(USERNAME, PASSWORD);
         String relativeUrl = "/testGetUnexpectedStatusCode";
-        mockHttpMethodExecution(HttpGet.class, statusCode, relativeUrl, contextMatcher());
+        mockHttpMethodExecution(HttpGet.class, statusCode, relativeUrl);
         IOException exception = assertThrows(IOException.class, () -> jiraClient.executeGet(relativeUrl));
         assertEquals("Unexpected status code: " + statusCode,
                 exception.getMessage());
@@ -95,9 +91,8 @@ class JiraClientTests
     @Test
     void testExecutePost() throws IOException
     {
-        init(USERNAME, PASSWORD);
         String relativeUrl = "/testPost";
-        String body = mockHttpMethodExecution(HttpPost.class, HttpStatus.SC_OK, relativeUrl, contextMatcher());
+        String body = mockHttpMethodExecution(HttpPost.class, HttpStatus.SC_OK, relativeUrl);
         assertEquals(body, jiraClient.executePost(relativeUrl, "{\"key\":\"value\"}"));
         checkLogger("POST", relativeUrl);
     }
@@ -105,50 +100,25 @@ class JiraClientTests
     @Test
     void testExecutePut() throws IOException
     {
-        init(USERNAME, PASSWORD);
         String relativeUrl = "/testPut";
-        mockHttpMethodExecution(HttpPut.class, HttpStatus.SC_OK, relativeUrl, contextMatcher());
+        mockHttpMethodExecution(HttpPut.class, HttpStatus.SC_OK, relativeUrl);
         jiraClient.executePut(relativeUrl, "{\"status\":\"1\"}");
         verify(httpClient).execute(argThat(httpRequest -> httpRequest instanceof HttpPut
-                && "https://jira.com/testPut".equals(httpRequest.getURI().toString())),
-                argThat(contextMatcher()));
+                && "https://jira.com/testPut".equals(httpRequest.getURI().toString())));
         checkLogger("PUT", relativeUrl);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "username,,The JIRA password is missing",
-        ",password,The JIRA username is missing"
-    })
-    void testExecuteRequestWithWrongSettings(String username, String password, String message) throws IOException
-    {
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-            () -> new JiraClient(JIRA_URI, username, password, httpClient));
-        assertEquals(message, thrown.getMessage());
-    }
-
     private String mockHttpMethodExecution(Class<? extends HttpRequestBase> requestClass, int statusCode,
-            String relativeUrl, ArgumentMatcher<HttpContext> contextMatcher) throws IOException
+            String relativeUrl) throws IOException
     {
         HttpResponse response = new HttpResponse();
         response.setStatusCode(statusCode);
         response.setResponseBody(RESPONSE_BODY_AS_STRING.getBytes(StandardCharsets.UTF_8));
         String expectedUrl = JIRA_URI + relativeUrl;
         when(httpClient.execute(argThat(httpRequest -> requestClass.isInstance(httpRequest)
-                && expectedUrl.equals(httpRequest.getURI().toString())), argThat(contextMatcher)))
+                && expectedUrl.equals(httpRequest.getURI().toString()))))
                         .thenReturn(response);
         return response.getResponseBodyAsString();
-    }
-
-    private ArgumentMatcher<HttpContext> contextMatcher()
-    {
-        return context ->
-        {
-            CredentialsProvider provider = (CredentialsProvider) context.getAttribute(HttpClientContext.CREDS_PROVIDER);
-            Credentials credentials = provider.getCredentials(AuthScope.ANY);
-            return USERNAME.equals(credentials.getUserPrincipal().getName())
-                    && PASSWORD.equals(credentials.getPassword());
-        };
     }
 
     private void checkLogger(String method, String relativeUrl)
@@ -156,10 +126,5 @@ class JiraClientTests
         assertEquals(1, testLogger.getLoggingEvents().size());
         assertEquals("Jira request: " + method + " https://jira.com" + relativeUrl + " HTTP/1.1",
                 testLogger.getLoggingEvents().get(0).getFormattedMessage());
-    }
-
-    private void init(String username, String password)
-    {
-        jiraClient = new JiraClient(JIRA_URI, username, password, httpClient);
     }
 }
