@@ -110,7 +110,7 @@ the columns.
 |the names of the columns to keep separated by semicolon
 
 |`byRowIndexes`
-|the zero-based rows indices of the rows to keep separated by semicolon
+|the zero-based indices of the rows to keep separated by semicolon
 |===
 
 [IMPORTANT]
