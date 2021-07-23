@@ -101,16 +101,16 @@ the columns.
 |Description
 
 |`byMaxColumns`
-|the maximum number of columns to keep in the resulting table
+|the maximum number of columns to keep
 
 |`byMaxRows`
-|the maximum number of rows to keep in the resulting table
+|the maximum number of rows to keep
 
 |`byColumnNames`
-|the names of the columns to keep in the resulting table
+|the names of the columns to keep separated by semicolon
 
 |`byRowIndexes`
-|the indexes of the rows to keep in the resulting table
+|the zero-based rows indices of the rows to keep separated by semicolon
 |===
 
 [IMPORTANT]
