@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ import org.apache.http.message.BasicHeader;
 public class HttpClientConfig
 {
     private String baseUrl;
-    private String credentials;
+    private String username;
+    private String password;
     private AuthScope authScope;
     private Map<String, String> headersMap;
     private boolean sslCertificateCheckEnabled = true;
@@ -57,6 +58,7 @@ public class HttpClientConfig
     private String cookieSpec;
     private HttpRequestRetryHandler httpRequestRetryHandler;
     private ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy;
+    private boolean preemptiveAuthEnabled;
 
     public boolean hasBaseUrl()
     {
@@ -71,11 +73,6 @@ public class HttpClientConfig
     public void setBaseUrl(String baseUrl)
     {
         this.baseUrl = baseUrl;
-    }
-
-    public boolean hasCredentials()
-    {
-        return credentials != null && !credentials.isEmpty();
     }
 
     public boolean hasAuthScope()
@@ -124,14 +121,24 @@ public class HttpClientConfig
         this.sslHostnameVerificationEnabled = sslHostnameVerificationEnabled;
     }
 
-    public String getCredentials()
+    public String getUsername()
     {
-        return credentials;
+        return username;
     }
 
-    public void setCredentials(String credentials)
+    public void setUsername(String username)
     {
-        this.credentials = credentials;
+        this.username = username;
+    }
+
+    public String getPassword()
+    {
+        return password;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
     }
 
     public HttpClientConnectionManager getConnectionManager()
@@ -297,5 +304,15 @@ public class HttpClientConfig
     public void setServiceUnavailableRetryStrategy(ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy)
     {
         this.serviceUnavailableRetryStrategy = serviceUnavailableRetryStrategy;
+    }
+
+    public boolean isPreemptiveAuthEnabled()
+    {
+        return preemptiveAuthEnabled;
+    }
+
+    public void setPreemptiveAuthEnabled(boolean preemptiveAuthEnabled)
+    {
+        this.preemptiveAuthEnabled = preemptiveAuthEnabled;
     }
 }

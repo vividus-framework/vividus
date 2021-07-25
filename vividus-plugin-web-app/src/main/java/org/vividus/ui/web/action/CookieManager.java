@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.http.client.ClientBuilderUtils;
+import org.vividus.http.client.CookieStoreCollector;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.util.InternetUtils;
 
@@ -88,7 +88,7 @@ public class CookieManager implements ICookieManager
     public CookieStore getCookiesAsHttpCookieStore()
     {
         return getCookies().stream().map(CookieManager::createHttpClientCookie).collect(
-                ClientBuilderUtils.toCookieStore());
+                new CookieStoreCollector());
     }
 
     private static org.apache.http.cookie.Cookie createHttpClientCookie(Cookie seleniumCookie)

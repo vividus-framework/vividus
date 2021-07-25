@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,30 @@
 
 package org.vividus.http.client;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Optional;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.ContextAwareAuthScheme;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.vividus.http.keystore.IKeyStoreFactory;
 
@@ -54,14 +64,8 @@ public class HttpClientFactory implements IHttpClientFactory
         {
             builder.setDefaultCookieStore(config.getCookieStore());
         }
-        if (config.hasCredentials())
-        {
-            AuthScope authScope = config.hasAuthScope() ? config.getAuthScope()
-                    : ClientBuilderUtils.DEFAULT_AUTH_SCOPE;
-            CredentialsProvider credProvider = ClientBuilderUtils.createCredentialsProvider(authScope,
-                    config.getCredentials());
-            builder.setDefaultCredentialsProvider(credProvider);
-        }
+
+        configureAuth(config, builder);
 
         createSslContext(config.isSslCertificateCheckEnabled()).ifPresent(builder::setSSLContext);
 
@@ -113,6 +117,39 @@ public class HttpClientFactory implements IHttpClientFactory
             return Optional.of(sslContextFactory.getSslContext(protocol, keyStore.get(), privateKeyPassword));
         }
         return Optional.empty();
+    }
+
+    private void configureAuth(HttpClientConfig config, HttpClientBuilder builder)
+    {
+        String username = config.getUsername();
+        String password = config.getPassword();
+
+        if (username == null && password == null)
+        {
+            isTrue(!config.isPreemptiveAuthEnabled(),
+                    "Preemptive authentication requires username and password to be set");
+            return;
+        }
+
+        isTrue(username != null && password != null, "The %s is missing", username == null ? "username" : "password");
+
+        Credentials credentials = new UsernamePasswordCredentials(username, password);
+        if (config.isPreemptiveAuthEnabled())
+        {
+            builder.addInterceptorFirst((HttpRequestInterceptor) (req, ctx) ->
+            {
+                ContextAwareAuthScheme scheme = new BasicScheme(StandardCharsets.UTF_8);
+                Header authHeader = scheme.authenticate(credentials, req, ctx);
+                req.addHeader(authHeader);
+            });
+        }
+        else
+        {
+            AuthScope authScope = config.hasAuthScope() ? config.getAuthScope() : AuthScope.ANY;
+            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(authScope, credentials);
+            builder.setDefaultCredentialsProvider(credentialsProvider);
+        }
     }
 
     public void setPrivateKeyPassword(String privateKeyPassword)

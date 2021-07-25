@@ -43,6 +43,21 @@ NOTE: The properties marked with *bold* are mandatory.
 |`PT1S`
 |The retry interval between subsequent requests
 
+|`http.auth.username`
+|character sequence
+|`<empty>`
+|The username, presence of this property requires the `http.auth.password` to be also set
+
+|`http.auth.password`
+|character sequence
+|`<empty>`
+|The password, presence of this property requires the `http.auth.username` to be also set
+
+|`http.auth.preemptive-auth-enabled`
+|`boolean`
+|`false`
+|If enabled the HTTP client will send the basic authentication data even before the service gives an unauthorized response (401), useful when the service doesn't support unauthorized response (401) or to reduce the overhead of making the connection
+
 |===
 
 == Expressions

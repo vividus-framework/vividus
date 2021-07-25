@@ -16,23 +16,17 @@
 
 package org.vividus.jira;
 
-import static org.apache.commons.lang3.Validate.isTrue;
-
 import java.io.IOException;
-import java.util.function.Supplier;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
-import org.vividus.http.client.ClientBuilderUtils;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 
@@ -42,27 +36,9 @@ public class JiraClient
 
     private final String endpoint;
     private final IHttpClient httpClient;
-    private final Supplier<HttpContext> httpContextFactory;
 
-    public JiraClient(String endpoint, String username, String password, IHttpClient httpClient)
+    public JiraClient(String endpoint, IHttpClient httpClient)
     {
-        if (username != null && password != null)
-        {
-            this.httpContextFactory = () ->
-            {
-                HttpContext httpContext = HttpClientContext.create();
-                httpContext.setAttribute(HttpClientContext.CREDS_PROVIDER,
-                        ClientBuilderUtils.createCredentialsProvider(username, password));
-                return httpContext;
-            };
-        }
-        else
-        {
-            isTrue(username == null && password == null, "The JIRA %s is missing",
-                    username == null ? "username" : "password");
-            this.httpContextFactory = () -> null;
-        }
-
         this.endpoint = endpoint;
         this.httpClient = httpClient;
     }
@@ -98,7 +74,7 @@ public class JiraClient
 
         LOGGER.atInfo().addArgument(httpRequest::getRequestLine).log("Jira request: {}");
 
-        HttpResponse httpResponse = httpClient.execute(httpRequest, httpContextFactory.get());
+        HttpResponse httpResponse = httpClient.execute(httpRequest);
         int status = httpResponse.getStatusCode();
         if (status >= HttpStatus.SC_OK && status < HttpStatus.SC_MULTIPLE_CHOICES)
         {

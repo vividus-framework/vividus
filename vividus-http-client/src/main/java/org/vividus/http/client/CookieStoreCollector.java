@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 
-class CookieStoreCollector implements Collector<Cookie, CookieStore, CookieStore>
+public class CookieStoreCollector implements Collector<Cookie, CookieStore, CookieStore>
 {
     @Override
     public BiConsumer<CookieStore, Cookie> accumulator()
