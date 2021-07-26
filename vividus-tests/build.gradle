@@ -34,7 +34,6 @@ dependencies {
     implementation project(':vividus-plugin-lambdatest')
     implementation project(':vividus-plugin-mobile-app')
     implementation project(':vividus-plugin-mongodb')
-    implementation project(':vividus-plugin-parquet')
     implementation project(':vividus-plugin-rest-api')
     implementation project(':vividus-plugin-saucelabs')
     implementation project(':vividus-plugin-ssh')
