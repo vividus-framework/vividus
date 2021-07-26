@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.xray.reader;
+package org.vividus.bdd.output;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -34,26 +36,37 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.vividus.bdd.model.jbehave.Story;
 import org.vividus.util.ResourceUtils;
-import org.vividus.xray.reader.JsonResourceReader.FileEntry;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
-class JsonResourceReaderTests
+class OutputReaderTests
 {
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(JsonResourceReader.class);
+    private static final String PARSING_MESSAGE = "Parsing {}";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(OutputReader.class);
 
     @Test
-    void shouldReadJson() throws URISyntaxException, IOException
+    void shouldReadStoriesFromJsons() throws URISyntaxException, IOException
     {
         Path path = Paths.get(ResourceUtils.findResource(getClass(), "data").toURI());
-        List<FileEntry> fileEntries = JsonResourceReader.readFrom(path);
-        assertThat(fileEntries, hasSize(1));
+        String jsonPath = path.resolve("file.json").toString();
+        List<Story> stories = OutputReader.readStoriesFromJsons(path);
+        assertThat(stories, hasSize(1));
         assertThat(logger.getLoggingEvents(), is(List.of(
-            info("Reading JSON files from filesystem by path {}", path),
-            info("Content of file '{}' is not JSON", path.resolve("image.png").toString())
+            info("JSON files: {}", jsonPath),
+            info(PARSING_MESSAGE, jsonPath)
         )));
-        FileEntry fileEntry = fileEntries.get(0);
-        assertEquals(path.resolve("file.json").toString(), fileEntry.getPath());
-        assertEquals("{}", fileEntry.getContent().strip());
+    }
+
+    @Test
+    void shouldThrowExceptionIfJsonDirectoryIsEmpty(@TempDir Path directory)
+    {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+            () -> OutputReader.readStoriesFromJsons(directory));
+        String expected = "The directory '" + directory.toString() + "' does not contain needed JSON files";
+        assertEquals(expected, thrown.getMessage());
+        assertThat(logger.getLoggingEvents(), empty());
     }
 }

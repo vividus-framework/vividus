@@ -62,10 +62,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.model.jbehave.NotUniqueMetaValueException;
 import org.vividus.bdd.model.jbehave.Scenario;
 import org.vividus.util.ResourceUtils;
 import org.vividus.xray.configuration.XrayExporterOptions;
-import org.vividus.xray.exception.SyntaxException;
 import org.vividus.xray.facade.AbstractTestCaseParameters;
 import org.vividus.xray.facade.CucumberTestCaseParameters;
 import org.vividus.xray.facade.ManualTestCaseParameters;
@@ -254,13 +254,13 @@ class XrayExporterTests
         xrayExporter.exportResults();
 
         List<LoggingEvent> loggingEvents = new ArrayList<>(logger.getLoggingEvents());
-        LoggingEvent errorEvent = loggingEvents.remove(4);
+        LoggingEvent errorEvent = loggingEvents.remove(2);
         assertEquals(ERROR_MESSAGE, errorEvent.getMessage());
         Optional<Throwable> eventThorable = errorEvent.getThrowable();
         assertTrue(eventThorable.isPresent());
         Throwable throwable = eventThorable.get();
-        assertThat(throwable, instanceOf(SyntaxException.class));
-        String errorMessage = "Only one 'testCaseId' can be specified for a test case, but got: STUB-0, STUB-1, STUB-2";
+        assertThat(throwable, instanceOf(NotUniqueMetaValueException.class));
+        String errorMessage = "Expected only one value for the 'testCaseId' meta, but got: STUB-0, STUB-1, STUB-2";
         assertEquals(errorMessage, throwable.getMessage());
         validateLogs(loggingEvents, jsonResultsUri, getExportingScenarioEvent(), getReportErrorEvent(errorMessage));
     }
@@ -300,11 +300,7 @@ class XrayExporterTests
 
     private void validateLogs(List<LoggingEvent> loggingEvents, URI jsonResultsUri, LoggingEvent... additionalEvents)
     {
-        String absolutePath = Paths.get(jsonResultsUri).toFile().getAbsolutePath();
-        String filePath = Paths.get(absolutePath, "test-case-execution-report.json").toString();
         List<LoggingEvent> events = new ArrayList<>();
-        events.add(info("JSON files: {}", filePath));
-        events.add(info("Parsing {}", filePath));
         events.add(info("Exporting scenarios from {} story", STORY_TITLE));
         Stream.of(additionalEvents).forEach(events::add);
         assertThat(loggingEvents, is(events));
