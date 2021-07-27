@@ -16,9 +16,17 @@
 
 package org.vividus.bdd.model.jbehave;
 
+import static org.vividus.bdd.model.MetaWrapper.META_VALUES_SEPARATOR;
+
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class Scenario extends AbstractStepsContainer
 {
@@ -91,5 +99,73 @@ public class Scenario extends AbstractStepsContainer
                        .map(Example::getSteps)
                        .filter(Objects::nonNull)
                        .orElse(List.of());
+    }
+
+    /**
+     * Get unique <b>meta</b> value
+     *
+     * <p>If the <b>meta</b> does not exist or has no value, an empty {@link Optional} will be returned
+     *
+     * <p><i>Notes</i>
+     * <ul>
+     * <li><b>meta</b> value is trimmed upon returning</li>
+     * <li><i>;</i> char is used as a separator for <b>meta</b> with multiple values</li>
+     * </ul>
+     *
+     * @param metaName the meta name
+     * @return the meta value
+     * @throws NotUniqueMetaValueException if the <b>meta</b> has more than one value
+     */
+    public Optional<String> getUniqueMetaValue(String metaName) throws NotUniqueMetaValueException
+    {
+        Set<String> values = getMetaValues(metaName);
+        if (values.size() > 1)
+        {
+            throw new NotUniqueMetaValueException(metaName, values);
+        }
+        return values.isEmpty() ? Optional.empty() : Optional.of(values.iterator().next());
+    }
+
+    /**
+     * Get all <b>meta</b> values
+     *
+     * <p><i>Notes</i>
+     * <ul>
+     * <li><b>meta</b>s without value are ignored</li>
+     * <li><b>meta</b> values are trimmed upon returning</li>
+     * <li><i>;</i> char is used as a separator for <b>meta</b> with multiple values</li>
+     * </ul>
+     *
+     * @param metaName the meta name
+     * @return  the meta values
+     */
+    public Set<String> getMetaValues(String metaName)
+    {
+        return getMetaStream().filter(m -> metaName.equals(m.getName()))
+                              .map(Meta::getValue)
+                              .filter(StringUtils::isNotEmpty)
+                              .map(String::trim)
+                              .map(value -> StringUtils.splitPreserveAllTokens(value, META_VALUES_SEPARATOR))
+                              .flatMap(Stream::of)
+                              .map(String::trim)
+                              .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    /**
+     * Determine if scenario has <b>meta</b> with the name
+     *
+     * @param metaName the meta name
+     * @return {@code true} if scenario has meta with the name
+     */
+    public boolean hasMetaWithName(String metaName)
+    {
+        return getMetaStream().anyMatch(m -> metaName.equals(m.getName()));
+    }
+
+    private Stream<Meta> getMetaStream()
+    {
+        return Optional.ofNullable(getMeta())
+                       .map(List::stream)
+                       .orElseGet(Stream::empty);
     }
 }

@@ -17,35 +17,27 @@
 package org.vividus.xray.exporter;
 
 import static java.lang.System.lineSeparator;
-import static java.util.Map.Entry;
 import static java.util.Map.entry;
-import static org.apache.commons.lang3.Validate.notEmpty;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableBiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.vividus.bdd.model.jbehave.Meta;
+import org.vividus.bdd.model.jbehave.NotUniqueMetaValueException;
 import org.vividus.bdd.model.jbehave.Scenario;
 import org.vividus.bdd.model.jbehave.Story;
+import org.vividus.bdd.output.OutputReader;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.converter.CucumberScenarioConverter;
 import org.vividus.xray.converter.CucumberScenarioConverter.CucumberScenario;
@@ -61,16 +53,11 @@ import org.vividus.xray.factory.TestExecutionFactory;
 import org.vividus.xray.model.AbstractTestCase;
 import org.vividus.xray.model.TestCaseType;
 import org.vividus.xray.model.TestExecution;
-import org.vividus.xray.reader.JsonResourceReader;
-import org.vividus.xray.reader.JsonResourceReader.FileEntry;
-import org.vividus.xray.util.StoryUtils;
 
 @Component
 public class XrayExporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(XrayExporter.class);
-
-    private static final String SEMICOLON = ";";
 
     @Autowired private XrayExporterOptions xrayExporterOptions;
     @Autowired private XrayFacade xrayFacade;
@@ -92,11 +79,11 @@ public class XrayExporter
     public void exportResults() throws IOException
     {
         List<Entry<String, Scenario>> testCases = new ArrayList<>();
-        for (Story story : readStories())
+        for (Story story : OutputReader.readStoriesFromJsons(xrayExporterOptions.getJsonResultsDirectory()))
         {
             LOGGER.atInfo().addArgument(story::getPath).log("Exporting scenarios from {} story");
 
-            for (Scenario scenario : StoryUtils.getFoldedScenarios(story))
+            for (Scenario scenario : story.getFoldedScenarios())
             {
                 exportScenario(story.getPath(), scenario).ifPresent(testCases::add);
             }
@@ -135,8 +122,7 @@ public class XrayExporter
     {
         String scenarioTitle = scenario.getTitle();
 
-        List<Meta> scenarioMeta = scenario.getMeta();
-        if (isSkipped(scenarioMeta))
+        if (scenario.hasMetaWithName("xray.skip-export"))
         {
             LOGGER.atInfo().addArgument(scenarioTitle).log("Skip export of {} scenario");
             return Optional.empty();
@@ -147,7 +133,7 @@ public class XrayExporter
         {
             TestCaseType testCaseType = TestCaseType.getTestCaseType(scenario);
 
-            String testCaseId = ensureOneValueOrNull(scenarioMeta, "testCaseId");
+            String testCaseId = scenario.getUniqueMetaValue("testCaseId").orElse(null);
 
             AbstractTestCaseParameters parameters = parameterFactories.get(testCaseType).apply(scenarioTitle, scenario);
             AbstractTestCase testCase = testCaseFactories.get(testCaseType).apply(parameters);
@@ -159,10 +145,10 @@ public class XrayExporter
             {
                 testCaseId = xrayFacade.createTestCase(testCase);
             }
-            createTestsLink(testCaseId, scenarioMeta);
+            createTestsLink(testCaseId, scenario);
             return Optional.of(entry(testCaseId, scenario));
         }
-        catch (IOException | SyntaxException | NonEditableIssueStatusException e)
+        catch (IOException | SyntaxException | NonEditableIssueStatusException | NotUniqueMetaValueException e)
         {
             errors.add(new ErrorExportEntry(storyTitle, scenarioTitle, e.getMessage()));
             LOGGER.atError().setCause(e).log("Got an error while exporting");
@@ -192,10 +178,9 @@ public class XrayExporter
     private <T extends AbstractTestCaseParameters> void fillTestCaseParameters(T parameters, TestCaseType type,
             Scenario scenario)
     {
-        List<Meta> scenarioMeta = scenario.getMeta();
         parameters.setType(type);
-        parameters.setLabels(getMetaValues(scenarioMeta, "xray.labels"));
-        parameters.setComponents(getMetaValues(scenarioMeta, "xray.components"));
+        parameters.setLabels(scenario.getMetaValues("xray.labels"));
+        parameters.setComponents(scenario.getMetaValues("xray.components"));
         parameters.setSummary(scenario.getTitle());
     }
 
@@ -221,82 +206,13 @@ public class XrayExporter
         LOGGER.atInfo().log("Export successful");
     }
 
-    private void createTestsLink(String testCaseId, List<Meta> scenarioMeta) throws IOException, SyntaxException
+    private void createTestsLink(String testCaseId, Scenario scenario) throws IOException, NotUniqueMetaValueException
     {
-        String requirementId = ensureOneValueOrNull(scenarioMeta, "requirementId");
-        if (requirementId != null)
+        Optional<String> requirementId = scenario.getUniqueMetaValue("requirementId");
+        if (requirementId.isPresent())
         {
-            xrayFacade.createTestsLink(testCaseId, requirementId);
+            xrayFacade.createTestsLink(testCaseId, requirementId.get());
         }
-    }
-
-    private List<Story> readStories() throws IOException
-    {
-        ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                false);
-
-        List<Story> stories = new ArrayList<>();
-        for (FileEntry jsonResult : getJsonResultsFiles())
-        {
-            LOGGER.atInfo().addArgument(jsonResult::getPath).log("Parsing {}");
-            stories.add(objectMapper.readValue(jsonResult.getContent(), Story.class));
-        }
-        return stories;
-    }
-
-    private List<FileEntry> getJsonResultsFiles() throws IOException
-    {
-        Path jsonResiltsDirectory = xrayExporterOptions.getJsonResultsDirectory();
-        List<FileEntry> jsonFiles = JsonResourceReader.readFrom(jsonResiltsDirectory);
-
-        notEmpty(jsonFiles, "The directory '%s' does not contain needed JSON files", jsonResiltsDirectory);
-        String jsonFilePaths = jsonFiles.stream().map(FileEntry::getPath)
-                .collect(Collectors.collectingAndThen(Collectors.toList(), XrayExporter::join));
-        LOGGER.atInfo().addArgument(jsonFilePaths).log("JSON files: {}");
-        return jsonFiles;
-    }
-
-    private static Set<String> getMetaValues(List<Meta> scenarioMeta, String metaName)
-    {
-        return getMetaValuesStream(scenarioMeta, metaName).collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    private static String ensureOneValueOrNull(List<Meta> scenarioMeta, String metaName) throws SyntaxException
-    {
-        List<String> values = getMetaValuesStream(scenarioMeta, metaName).collect(Collectors.toList());
-        if (values.size() > 1)
-        {
-            throw new SyntaxException(String.format("Only one '%s' can be specified for a test case, but got: %s",
-                    metaName, join(values)));
-        }
-        return values.isEmpty() ? null : values.iterator().next();
-    }
-
-    private static String join(Iterable<String> iterable)
-    {
-        return StringUtils.join(iterable, ", ");
-    }
-
-    private static Stream<String> getMetaValuesStream(List<Meta> scenarioMeta, String metaName)
-    {
-        return asStream(scenarioMeta).filter(m -> metaName.equals(m.getName()) && !m.getValue().isEmpty())
-                                     .map(Meta::getValue)
-                                     .map(String::trim)
-                                     .map(value -> StringUtils.splitPreserveAllTokens(value, SEMICOLON))
-                                     .flatMap(Stream::of)
-                                     .map(String::trim);
-    }
-
-    private static boolean isSkipped(List<Meta> scenarioMeta)
-    {
-        return asStream(scenarioMeta).anyMatch(m -> "xray.skip-export".equals(m.getName()));
-    }
-
-    private static Stream<Meta> asStream(List<Meta> scenarioMeta)
-    {
-        return Optional.ofNullable(scenarioMeta)
-                       .map(List::stream)
-                       .orElseGet(Stream::empty);
     }
 
     private static final class ErrorExportEntry

@@ -22,10 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
@@ -43,6 +47,7 @@ import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.Test;
+import org.vividus.util.ResourceUtils;
 
 class StoryTests
 {
@@ -56,6 +61,11 @@ class StoryTests
     private static final String SCENARIO_TITLE = "scenarioTitle";
     private static final String COMMENT = "comment";
     private static final String TABLE_VALUE = "table-value-";
+    private static final String LIFECYCLE_KEY = "lifecycle-key-";
+    private static final String LIFECYCLE_VALUE = "lifecycle-val-";
+    private static final String SCENARIO_KEY = "scenario-key-";
+    private static final String SCENARIO_VALUE = "scenario-val-";
+    private static final String STORY = "story.json";
 
     private static final org.jbehave.core.model.Story TEST_STORY = new org.jbehave.core.model.Story(STORY_PATH);
     private static final org.jbehave.core.model.Scenario TEST_SCENARIO = new org.jbehave.core.model.Scenario(
@@ -133,6 +143,81 @@ class StoryTests
         });
     }
 
+    @Test
+    void shouldAppendLifecycleExamplesToScenarioWithoutLocalExamples()
+    {
+        Parameters params = readStory(STORY).getFoldedScenarios().get(0).getExamples().getParameters();
+        assertEquals(List.of(LIFECYCLE_KEY + 1, LIFECYCLE_KEY + 2), params.getNames());
+        assertEquals(List.of(
+            List.of(LIFECYCLE_VALUE + 11, LIFECYCLE_VALUE + 21),
+            List.of(LIFECYCLE_VALUE + 12, LIFECYCLE_VALUE + 22)
+        ), params.getValues());
+    }
+
+    @Test
+    void shouldAppendLifecycleExamplesToScenarioWithSingleLocalExamples()
+    {
+        Parameters params = readStory(STORY).getFoldedScenarios().get(1).getExamples().getParameters();
+        assertEquals(List.of(
+            SCENARIO_KEY + 1, SCENARIO_KEY + 2, LIFECYCLE_KEY + 1, LIFECYCLE_KEY + 2
+        ), params.getNames());
+        assertEquals(List.of(
+            List.of(SCENARIO_VALUE + 11, SCENARIO_VALUE + 21, LIFECYCLE_VALUE + 11, LIFECYCLE_VALUE + 21),
+            List.of(SCENARIO_VALUE + 11, SCENARIO_VALUE + 21, LIFECYCLE_VALUE + 12, LIFECYCLE_VALUE + 22)
+        ), params.getValues());
+    }
+
+    @Test
+    void shouldAppendLifecycleExamplesToScenarioWithMultipleLocalExamples()
+    {
+        Parameters params = readStory(STORY).getFoldedScenarios().get(2).getExamples().getParameters();
+        assertEquals(List.of(
+            SCENARIO_KEY + 1, SCENARIO_KEY + 2, LIFECYCLE_KEY + 1, LIFECYCLE_KEY + 2
+        ), params.getNames());
+        assertEquals(List.of(
+            List.of(SCENARIO_VALUE + 11, SCENARIO_VALUE + 21, LIFECYCLE_VALUE + 11, LIFECYCLE_VALUE + 21),
+            List.of(SCENARIO_VALUE + 11, SCENARIO_VALUE + 21, LIFECYCLE_VALUE + 12, LIFECYCLE_VALUE + 22),
+            List.of(SCENARIO_VALUE + 12, SCENARIO_VALUE + 22, LIFECYCLE_VALUE + 11, LIFECYCLE_VALUE + 21),
+            List.of(SCENARIO_VALUE + 12, SCENARIO_VALUE + 22, LIFECYCLE_VALUE + 12, LIFECYCLE_VALUE + 22),
+            List.of(SCENARIO_VALUE + 13, SCENARIO_VALUE + 23, LIFECYCLE_VALUE + 11, LIFECYCLE_VALUE + 21),
+            List.of(SCENARIO_VALUE + 13, SCENARIO_VALUE + 23, LIFECYCLE_VALUE + 12, LIFECYCLE_VALUE + 22)
+        ), params.getValues());
+    }
+
+    @Test
+    void shouldNotProcessScenarioWithoutLifecycle()
+    {
+        Story story = spy(Story.class);
+        Scenario scenario = mock(Scenario.class);
+        story.setScenarios(List.of(scenario));
+        assertEquals(List.of(scenario), story.getFoldedScenarios());
+        verifyNoInteractions(scenario);
+    }
+
+    @Test
+    void shouldNotProcessScenarioWithoutLifecycleParameters()
+    {
+        Story story = spy(Story.class);
+        Scenario scenario = mock(Scenario.class);
+        story.setScenarios(List.of(scenario));
+        story.setLifecycle(mock(Lifecycle.class));
+        assertEquals(List.of(scenario), story.getFoldedScenarios());
+        verifyNoInteractions(scenario);
+    }
+
+    @Test
+    void shouldHandleStoryWithOneScenario()
+    {
+        Parameters params = readStory("single-scenario-story.json").getFoldedScenarios().get(0).getExamples()
+                .getParameters();
+        assertEquals(List.of(
+            SCENARIO_KEY + 1, SCENARIO_KEY + 2, LIFECYCLE_KEY + 1, LIFECYCLE_KEY + 2
+        ), params.getNames());
+        assertEquals(List.of(
+            List.of(SCENARIO_VALUE + 11, SCENARIO_VALUE + 21, LIFECYCLE_VALUE + 11, LIFECYCLE_VALUE + 21)
+        ), params.getValues());
+    }
+
     private static void reportStep(StoryReporter reporter, Stage stage)
     {
         reporter.beforeScenarioSteps(stage);
@@ -188,5 +273,20 @@ class StoryTests
     {
         assertEquals(1L, scenario.getStart());
         assertEquals(2L, scenario.getEnd());
+    }
+
+    private static Story readStory(String resource)
+    {
+        try
+        {
+            ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                    false);
+            String json = ResourceUtils.loadResource(StoryTests.class, resource);
+            return mapper.readValue(json, Story.class);
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
     }
 }
