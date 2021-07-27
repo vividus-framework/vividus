@@ -16,7 +16,6 @@ dependencies {
 
     implementation(group: 'org.springframework', name: 'spring-core', version: versions.spring)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-    implementation(group: 'ru.yandex.qatools.clay', name: 'clay-utils', version: '2.5')
     implementation(group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy, classifier: 'indy')
     implementation(group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
