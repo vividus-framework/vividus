@@ -12,5 +12,6 @@
 **/.idea
 
 #Build Dirs#
-output/
-.out/**
+/output/
+/*/output/
+/.out/**
