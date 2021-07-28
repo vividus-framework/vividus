@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,6 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
@@ -58,7 +56,9 @@ class KeyboardActionsTests
 {
     private static final String TEXT = "text";
     private static final Locator KEYBOARD_RETURN_LOCATOR = new Locator(AppiumLocatorType.XPATH,
-            new SearchParameters("//XCUIElementTypeKeyboard//XCUIElementTypeButton", Visibility.VISIBLE, false));
+            new SearchParameters("(//XCUIElementTypeKeyboard//XCUIElementTypeButton)[last()]", Visibility.VISIBLE,
+                    false));
+    private static final String XCUIELEMENT_TYPE_TEXT_VIEW = "XCUIElementTypeTextView";
 
     @Mock private TouchActions touchActions;
     @Mock private IWebDriverProvider webDriverProvider;
@@ -77,13 +77,12 @@ class KeyboardActionsTests
         verifyNoMoreInteractions(hidesKeyboard, searchActions, genericWebDriverManager);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    void shouldTypeTextForNotRealDevices(boolean iosNativeApp)
+    @Test
+    void shouldTypeTextForNotRealDevices()
     {
         init(false);
 
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(iosNativeApp);
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
         when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
 
         keyboardActions.typeText(element, TEXT);
@@ -128,32 +127,32 @@ class KeyboardActionsTests
     }
 
     @Test
-    void shouldClearText()
-    {
-        init(false);
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
-        when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
-
-        keyboardActions.clearText(element);
-
-        verify(element).clear();
-        verify(hidesKeyboard).hideKeyboard();
-    }
-
-    @Test
     void shouldClearTextButNotCloseKeyboardIfElementIsTypeTextView()
     {
         init(true);
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
-        String typeTextView = "XCUIElementTypeTextView";
-        when(element.getTagName()).thenReturn(typeTextView);
+        when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
 
         keyboardActions.clearText(element);
 
         verify(element).clear();
         verifyNoInteractions(hidesKeyboard);
         assertThat(logger.getLoggingEvents(), is(List.of(warn("Skip hiding keyboard for {}. Use the tap step to tap"
-            + " outside the {} to hide the keyboard", typeTextView))));
+            + " outside the {} to hide the keyboard", XCUIELEMENT_TYPE_TEXT_VIEW))));
+    }
+
+    @Test
+    void shouldClearTextAndCloseKeyboardIfElementIsTypeTextViewForSimulator()
+    {
+        init(false);
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
+        when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
+
+        keyboardActions.clearText(element);
+
+        verify(element).clear();
+        verify(hidesKeyboard).hideKeyboard();
     }
 
     void init(boolean realDevice)
