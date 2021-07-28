@@ -31,7 +31,12 @@ import org.apache.commons.lang3.StringUtils;
 
 public class PropertyParser implements IPropertyParser
 {
-    private Properties properties;
+    private final Properties properties;
+
+    public PropertyParser(Properties properties)
+    {
+        this.properties = properties;
+    }
 
     @Override
     public Map<String, String> getPropertiesByPrefix(String propertyPrefix)
@@ -106,10 +111,5 @@ public class PropertyParser implements IPropertyParser
     {
         return properties.entrySet().stream().filter(filter)
                 .collect(toMap(p -> (String) p.getKey(), p -> (String) p.getValue()));
-    }
-
-    public void setProperties(Properties properties)
-    {
-        this.properties = (Properties) properties.clone();
     }
 }
