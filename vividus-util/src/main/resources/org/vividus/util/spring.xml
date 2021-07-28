@@ -8,9 +8,9 @@
     default-lazy-init="true">
 
     <bean id="propertyMapper" class="org.vividus.util.property.PropertyMapper" >
-        <constructor-arg index="0" value="${property-mapper.prefix-separator}" />
+        <constructor-arg index="0" value="${property-mapper.prefix-separator:.}" />
         <constructor-arg index="1" >
-            <bean class="#{T(com.fasterxml.jackson.databind.PropertyNamingStrategies).${property-mapper.naming-strategy}.getClass().getName()}" />
+            <bean class="#{T(com.fasterxml.jackson.databind.PropertyNamingStrategies).${property-mapper.naming-strategy:KEBAB_CASE}.getClass().getName()}" />
         </constructor-arg>
     </bean>
 
