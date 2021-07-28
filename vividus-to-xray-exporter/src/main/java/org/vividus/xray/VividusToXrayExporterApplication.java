@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  */
 
 package org.vividus.xray;
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -50,15 +54,13 @@ public class VividusToXrayExporterApplication
     @Bean("propertyParser")
     public PropertyParser propertyParser(ConfigurableEnvironment environment)
     {
-        Properties properties = new Properties();
-        environment.getPropertySources().stream()
-                                        .filter(MapPropertySource.class::isInstance)
-                                        .map(MapPropertySource.class::cast)
-                                        .map(MapPropertySource::getPropertyNames)
-                                        .flatMap(Stream::of)
-                                        .forEach(prop -> properties.put(prop, environment.getProperty(prop)));
-        PropertyParser propertyParser = new PropertyParser();
-        propertyParser.setProperties(properties);
-        return propertyParser;
+        return environment.getPropertySources()
+                          .stream()
+                          .filter(MapPropertySource.class::isInstance)
+                          .map(MapPropertySource.class::cast)
+                          .map(MapPropertySource::getPropertyNames)
+                          .flatMap(Stream::of)
+                          .collect(collectingAndThen(toMap(identity(), environment::getProperty, (l, r) -> l,
+                                  Properties::new), PropertyParser::new));
     }
 }

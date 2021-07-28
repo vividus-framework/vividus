@@ -10,9 +10,7 @@
         </constructor-arg>
     </bean>
 
-    <bean id="propertyParser" class="org.vividus.util.property.PropertyParser">
-        <property name="properties" ref="properties" />
-    </bean>
+    <bean id="propertyParser" class="org.vividus.util.property.PropertyParser" />
 
     <bean id="configurationResolver" class="org.vividus.configuration.ConfigurationResolver"
         factory-method="getInstance" />

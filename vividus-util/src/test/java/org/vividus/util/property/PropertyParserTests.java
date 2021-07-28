@@ -59,8 +59,7 @@ class PropertyParserTests
         properties = new Properties();
         expectedPropertyValues.forEach((key, value) -> properties.put(PREFIX + key, value));
         properties.put(PREFIX + OTHER_PROP3, VAL_3);
-        parser = new PropertyParser();
-        parser.setProperties(properties);
+        parser = new PropertyParser(properties);
     }
 
     @Test
@@ -101,7 +100,7 @@ class PropertyParserTests
         String val5 = "val5";
         properties.put(PREFIX + "other.other1.prop4", val4);
         properties.put(PREFIX + "other.other1.prop5", val5);
-        parser.setProperties(properties);
+
         Map<String, Object> actualPropertyValues = parser.getPropertyValuesTreeByPrefix(PREFIX);
         Map<String, Object> expected = Map.of(
                 PROP_1, VAL_1,
@@ -121,7 +120,7 @@ class PropertyParserTests
     {
         properties.put(PREFIX + OTHER, VAL_1);
         properties.put(PREFIX + OTHER + DOT + PROP_1, VAL_1);
-        parser.setProperties(properties);
+
         Exception exception = Assertions.assertThrows(IllegalArgumentException.class,
             () -> parser.getPropertyValuesTreeByPrefix(PREFIX));
         assertThat("Path key 'other' from path 'other.prop1' is already used as a property key",
