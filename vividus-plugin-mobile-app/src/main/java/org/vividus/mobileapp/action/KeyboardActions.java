@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,33 +92,35 @@ public class KeyboardActions
         performOnElement.accept(webElement);
 
         // https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
-        if (genericWebDriverManager.isIOSNativeApp() && realDevice)
+        if (genericWebDriverManager.isIOSNativeApp())
         {
             String tagName = webElement.getTagName();
             /*
-             * Tap on 'Return' doesn't close the keyboard for XCUIElementTypeTextView element, the only way to close the
-             * keyboard is to tap on any element outside the text view.
+             * Tap on 'Return' doesn't close the keyboard for XCUIElementTypeTextView element, the only way to
+             * close the keyboard is to tap on any element outside the text view.
              */
-            if ("XCUIElementTypeTextView".equals(tagName))
+            if (!"XCUIElementTypeTextView".equals(tagName))
             {
-                LOGGER.atWarn().addArgument(tagName).log("Skip hiding keyboard for {}. Use the tap step to tap outside"
-                        + " the {} to hide the keyboard");
+                /*
+                 * Handle closing the keyboard as it's done in WDA
+                 * https://github.com/appium/WebDriverAgent/pull/453/files
+                 */
+                Locator dismissKeyboardButtonLocator = new Locator(AppiumLocatorType.XPATH,
+                        new SearchParameters("(//XCUIElementTypeKeyboard//XCUIElementTypeButton)[last()]",
+                                Visibility.VISIBLE, false));
+                List<WebElement> buttons = searchActions.findElements(webDriverProvider.get(),
+                        dismissKeyboardButtonLocator);
+                isTrue(!buttons.isEmpty(), "Unable to find a button to close the keyboard");
+                touchActions.tap(buttons.get(0));
                 return;
             }
-            /*
-             * Handle closing the keyboard as it's done in appium
-             * https://github.com/appium/appium-xcuitest-driver/blob/master/lib/commands/general.js#L199
-             */
-            Locator keyboardButtonsLocator = new Locator(AppiumLocatorType.XPATH, new SearchParameters(
-                    "//XCUIElementTypeKeyboard//XCUIElementTypeButton", Visibility.VISIBLE, false));
-            List<WebElement> buttons = searchActions.findElements(webDriverProvider.get(), keyboardButtonsLocator);
-            int size = buttons.size();
-            isTrue(size > 0, "Unable to find a button to close the keyboard");
-            touchActions.tap(buttons.get(--size));
+            else if (realDevice)
+            {
+                LOGGER.atWarn().addArgument(tagName).log("Skip hiding keyboard for {}. Use the tap step to tap"
+                        + " outside the {} to hide the keyboard");
+                return;
+            }
         }
-        else
-        {
-            webDriverProvider.getUnwrapped(HidesKeyboard.class).hideKeyboard();
-        }
+        webDriverProvider.getUnwrapped(HidesKeyboard.class).hideKeyboard();
     }
 }
