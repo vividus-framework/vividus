@@ -19,6 +19,7 @@ package org.vividus.mobileapp.action;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -49,6 +50,7 @@ import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.mobile.action.search.AppiumLocatorType;
 
+import io.appium.java_client.HasOnScreenKeyboard;
 import io.appium.java_client.HidesKeyboard;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -93,6 +95,22 @@ class KeyboardActionsTests
     }
 
     @Test
+    void shouldClearTextInEmptyElement()
+    {
+        init(false);
+
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        enableOnScreenKeyboard(false);
+        when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
+
+        keyboardActions.clearText(element);
+
+        verify(element).clear();
+        verify(hidesKeyboard).hideKeyboard();
+        assertThat(logger.getLoggingEvents(), is(empty()));
+    }
+
+    @Test
     void shouldTypeTextAndHideForIOSRealDevice()
     {
         init(true);
@@ -101,6 +119,7 @@ class KeyboardActionsTests
         WebElement returnButton = mock(WebElement.class);
 
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        enableOnScreenKeyboard(true);
         when(webDriverProvider.get()).thenReturn(context);
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
 
@@ -118,6 +137,7 @@ class KeyboardActionsTests
         WebDriver context = mock(WebDriver.class);
 
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        enableOnScreenKeyboard(true);
         when(webDriverProvider.get()).thenReturn(context);
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of());
 
@@ -131,6 +151,7 @@ class KeyboardActionsTests
     {
         init(true);
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        enableOnScreenKeyboard(true);
         when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
 
         keyboardActions.clearText(element);
@@ -146,6 +167,7 @@ class KeyboardActionsTests
     {
         init(false);
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        enableOnScreenKeyboard(true);
         when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
         when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
 
@@ -159,5 +181,12 @@ class KeyboardActionsTests
     {
         keyboardActions = new KeyboardActions(realDevice, touchActions, webDriverProvider,
                 genericWebDriverManager, searchActions);
+    }
+
+    private void enableOnScreenKeyboard(boolean keyboardShown)
+    {
+        HasOnScreenKeyboard webDriverWithOnScreenKeyboard = mock(HasOnScreenKeyboard.class);
+        when(webDriverProvider.getUnwrapped(HasOnScreenKeyboard.class)).thenReturn(webDriverWithOnScreenKeyboard);
+        when(webDriverWithOnScreenKeyboard.isKeyboardShown()).thenReturn(keyboardShown);
     }
 }

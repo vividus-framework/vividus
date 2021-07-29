@@ -32,6 +32,7 @@ import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.mobile.action.search.AppiumLocatorType;
 
+import io.appium.java_client.HasOnScreenKeyboard;
 import io.appium.java_client.HidesKeyboard;
 
 public class KeyboardActions
@@ -91,8 +92,11 @@ public class KeyboardActions
     {
         performOnElement.accept(webElement);
 
-        // https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
-        if (genericWebDriverManager.isIOSNativeApp())
+        // 1. https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
+        // 2. The keyboard is not shown in some cases: e.g. when trying to clear an empty field. So we need to check
+        // whether the keyboard is shown at first
+        if (genericWebDriverManager.isIOSNativeApp() && webDriverProvider.getUnwrapped(HasOnScreenKeyboard.class)
+                .isKeyboardShown())
         {
             String tagName = webElement.getTagName();
             /*
