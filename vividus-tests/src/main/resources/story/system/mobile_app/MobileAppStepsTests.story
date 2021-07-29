@@ -116,6 +116,10 @@ Scenario: Verify step: 'When I clear field located `$locator`' and Appium XPath 
 When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
 Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
 
+!-- There should be no error when trying to clear an empty field
+When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
+Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
+
 
 Scenario: Verify step: 'When I wait until element located `$locator` disappears'
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
