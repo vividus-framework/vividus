@@ -9,13 +9,15 @@ buildscript {
     }
 }
 apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
-apply plugin: io.spring.gradle.dependencymanagement.DependencyManagementPlugin
 
 project.description = 'Vividus to Zephyr exporter'
 
 dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-facade-jira')
+
+    // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
+    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: "${springBootVersion}")
 
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
