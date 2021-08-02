@@ -29,6 +29,6 @@ class CsvFormatFactoryTests
         var delimiter = ';';
         var escapeChar = '\\';
         var actual = new CsvFormatFactory(delimiter, escapeChar).getCsvFormat();
-        assertEquals(CSVFormat.DEFAULT.withDelimiter(delimiter).withEscape(escapeChar), actual);
+        assertEquals(CSVFormat.DEFAULT.builder().setDelimiter(delimiter).setEscape(escapeChar).build(), actual);
     }
 }
