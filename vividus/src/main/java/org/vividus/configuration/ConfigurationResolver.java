@@ -114,10 +114,12 @@ public final class ConfigurationResolver
 
         for (Entry<Object, Object> entry : properties.entrySet())
         {
-            String key = (String) entry.getKey();
-            String value = (String) entry.getValue();
-            deprecatedPropertiesHandler.warnIfDeprecated(key, value);
-            entry.setValue(propertyPlaceholderHelper.replacePlaceholders(value, properties::getProperty));
+            Object value = entry.getValue();
+            deprecatedPropertiesHandler.warnIfDeprecated((String) entry.getKey(), value);
+            if (value instanceof String)
+            {
+                entry.setValue(propertyPlaceholderHelper.replacePlaceholders((String) value, properties::getProperty));
+            }
         }
         deprecatedPropertiesHandler.removeDeprecated(properties);
         resolveSpelExpressions(properties, false);
@@ -245,18 +247,23 @@ public final class ConfigurationResolver
         SpelExpressionParser spelExpressionParser = new SpelExpressionParser();
         for (Entry<Object, Object> entry : properties.entrySet())
         {
-            String value = (String) entry.getValue();
-            if (propertyPlaceholders.stream().flatMap(Set::stream).noneMatch(value::contains))
+            Object value = entry.getValue();
+            if (value instanceof String)
             {
-                try
+                String strValue = (String) value;
+                if (propertyPlaceholders.stream().flatMap(Set::stream).noneMatch(strValue::contains))
                 {
-                    entry.setValue(
-                            spelExpressionParser.parseExpression(value, ParserContext.TEMPLATE_EXPRESSION).getValue());
-                }
-                catch (Exception e)
-                {
-                    throw new IllegalStateException("Exception during evaluation of expression " + value
-                            + " for property '" + entry.getKey() + "'", e);
+                    try
+                    {
+                        entry.setValue(spelExpressionParser.parseExpression(strValue, ParserContext.TEMPLATE_EXPRESSION)
+                                .getValue());
+                    }
+                    catch (Exception e)
+                    {
+                        throw new IllegalStateException(
+                                "Exception during evaluation of expression " + strValue + " for property '" + entry
+                                        .getKey() + "'", e);
+                    }
                 }
             }
         }

@@ -26,8 +26,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.Maps;
-
 import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,15 +153,19 @@ public final class MetadataLogger
 
     public static void logPropertiesSecurely(Properties properties)
     {
-        Maps.fromProperties(properties).entrySet().stream()
-            .sorted(Entry.comparingByKey())
-            .forEach(MetadataLogger::logPropertySecurely);
+        properties.entrySet()
+                .stream()
+                .map(e -> Map.entry((String) e.getKey(), e.getValue()))
+                .sorted(Entry.comparingByKey())
+                .forEach(MetadataLogger::logPropertySecurely);
     }
 
-    private static void logPropertySecurely(Entry<String, String> entry)
+    private static void logPropertySecurely(Entry<String, Object> entry)
     {
         String key = entry.getKey();
-        String value = SECURE_KEY_PATTERN.matcher(key).matches() ? "****" : entry.getValue();
-        LOGGER.info("{}={}", key, value);
+        LOGGER.atInfo()
+                .addArgument(key)
+                .addArgument(() -> SECURE_KEY_PATTERN.matcher(key).matches() ? "****" : entry.getValue())
+                .log("{}={}");
     }
 }

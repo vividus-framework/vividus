@@ -78,21 +78,24 @@ public class DeprecatedPropertiesHandler
         placeholderWarnMsg = String.format(PLACEHOLDER_WARN_MSG_FORMAT, placeholderPrefix, placeholderSuffix);
     }
 
-    public void warnIfDeprecated(String key, String value)
+    public void warnIfDeprecated(String key, Object value)
     {
         if (isDeprecated(key))
         {
             warnDeprecated(DEPRECATED_WARN_MSG, key, getDeprecatedProperty(key).getNewKey(key));
         }
 
-        Matcher placeholderMatcher = placeholderPattern.matcher(value);
-        while (placeholderMatcher.find())
+        if (value instanceof String)
         {
-            String placeholderKey = placeholderMatcher.group(1);
-            if (isDeprecated(placeholderKey))
+            Matcher placeholderMatcher = placeholderPattern.matcher((String) value);
+            while (placeholderMatcher.find())
             {
-                warnDeprecated(placeholderWarnMsg, key, placeholderKey,
-                        getDeprecatedProperty(placeholderKey).getNewKey(placeholderKey));
+                String placeholderKey = placeholderMatcher.group(1);
+                if (isDeprecated(placeholderKey))
+                {
+                    warnDeprecated(placeholderWarnMsg, key, placeholderKey,
+                            getDeprecatedProperty(placeholderKey).getNewKey(placeholderKey));
+                }
             }
         }
     }

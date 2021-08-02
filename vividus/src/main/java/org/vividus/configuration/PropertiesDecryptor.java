@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,28 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.encryption.StringEncryptor;
 
-public final class StringEncryptor
+public final class PropertiesDecryptor
 {
     private static final Pattern ENCRYPTED_PROPERTY_PATTERN = Pattern.compile("ENC\\((.*)\\)");
 
-    private StringEncryptor()
+    private PropertiesDecryptor()
     {
     }
 
-    public static Properties decryptProperties(StandardPBEStringEncryptor standardPBEStringEncryptor,
-            Properties properties)
+    public static Properties decryptProperties(StringEncryptor stringEncryptor, Properties properties)
     {
         for (Map.Entry<Object, Object> entry : properties.entrySet())
         {
-            String value = (String) entry.getValue();
-            Matcher matcher = ENCRYPTED_PROPERTY_PATTERN.matcher(value);
-            if (matcher.matches())
+            Object value = entry.getValue();
+            if (value instanceof String)
             {
-                entry.setValue(standardPBEStringEncryptor.decrypt(matcher.group(1)));
+                Matcher matcher = ENCRYPTED_PROPERTY_PATTERN.matcher((String) value);
+                if (matcher.matches())
+                {
+                    entry.setValue(stringEncryptor.decrypt(matcher.group(1)));
+                }
             }
         }
         return properties;
