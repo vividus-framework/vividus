@@ -19,13 +19,16 @@ package org.vividus.configuration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class DeprecatedPropertiesHandlerTests
 {
@@ -37,18 +40,8 @@ class DeprecatedPropertiesHandlerTests
 
     private static final String PROP2 = "norm2";
 
-    private static final String DEPR_PROP1 = "depr1";
-
-    private static final String DEPR_PROP2 = "depr2";
-
-    private static final String DEPR_PLACEHOLDER1 = "${depr1}";
-
-    private static final String DEPR_PLACEHOLDER2 = "${depr2}";
-
-    private static final String DEPR_PROPERTY_WARN_MSG = "Deprecated property found: '{}'. Use '{}' instead";
-
-    private static final String DEPR_PLACEHOLDER_WARN_MSG = "Property '{}' uses deprecated placeholder '${{}}'."
-            + " Use '${{}}' instead";
+    private static final String DEPR_PROP1 = "deprecated-1";
+    private static final String DEPR_PROP2 = "deprecated-2";
 
     private static final String VALUE = "value";
 
@@ -66,20 +59,32 @@ class DeprecatedPropertiesHandlerTests
         handler = new DeprecatedPropertiesHandler(deprecatedProps, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
     }
 
+    static Stream<Object> deprecatedPropertyValues()
+    {
+        return Stream.of("deprVal1", 2);
+    }
+
+    @ParameterizedTest
+    @MethodSource("deprecatedPropertyValues")
+    void shouldWarnOnDeprecatedProperty(Object propertyValue)
+    {
+        DeprecatedPropertiesHandler spy = spy(handler);
+
+        spy.warnIfDeprecated(DEPR_PROP1, propertyValue);
+
+        verify(spy).warnDeprecated("Deprecated property found: '{}'. Use '{}' instead", DEPR_PROP1, PROP1);
+    }
+
     @Test
     void testDeprecatedProperty()
     {
-        DeprecatedPropertiesHandler spy = Mockito.spy(handler);
+        DeprecatedPropertiesHandler spy = spy(handler);
 
-        spy.warnIfDeprecated(DEPR_PROP1, "deprVal1");
-        verify(spy).warnDeprecated(DEPR_PROPERTY_WARN_MSG, DEPR_PROP1, PROP1);
+        spy.warnIfDeprecated(PROP2, " ${property-1} and ${deprecated-1} and ${deprecated-2} and ${non-deprecated-2}");
 
-        spy.warnIfDeprecated(PROP1, DEPR_PLACEHOLDER2);
-        verify(spy).warnDeprecated(DEPR_PLACEHOLDER_WARN_MSG, PROP1, DEPR_PROP2, PROP2);
-
-        spy.warnIfDeprecated(PROP2, DEPR_PLACEHOLDER1 + "something" + DEPR_PLACEHOLDER2);
-        verify(spy).warnDeprecated(DEPR_PLACEHOLDER_WARN_MSG, PROP2, DEPR_PROP1, PROP1);
-        verify(spy).warnDeprecated(DEPR_PLACEHOLDER_WARN_MSG, PROP2, DEPR_PROP2, PROP2);
+        String deprecatePlaceholderMessage = "Property '{}' uses deprecated placeholder '${{}}'. Use '${{}}' instead";
+        verify(spy).warnDeprecated(deprecatePlaceholderMessage, PROP2, DEPR_PROP1, PROP1);
+        verify(spy).warnDeprecated(deprecatePlaceholderMessage, PROP2, DEPR_PROP2, PROP2);
     }
 
     @Test
@@ -162,7 +167,7 @@ class DeprecatedPropertiesHandlerTests
     @Test
     void testReplaceDeprecatedSinglePropertiesList()
     {
-        DeprecatedPropertiesHandler spy = Mockito.spy(handler);
+        DeprecatedPropertiesHandler spy = spy(handler);
         Properties props = new Properties();
         spy.replaceDeprecated(props);
         verify(spy).replaceDeprecated(props, props);

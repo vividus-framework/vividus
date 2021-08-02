@@ -3,8 +3,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="properties" class="org.vividus.configuration.StringEncryptor" factory-method="decryptProperties">
-        <constructor-arg ref="standardPBEStringEncryptor"/>
+    <bean id="properties" class="org.vividus.configuration.PropertiesDecryptor" factory-method="decryptProperties">
+        <constructor-arg ref="stringEncryptor"/>
         <constructor-arg>
             <bean factory-bean="configurationResolver" factory-method="getProperties"/>
         </constructor-arg>
@@ -16,14 +16,14 @@
         factory-method="getInstance" />
 
     <bean class="org.jasypt.spring4.properties.EncryptablePropertyPlaceholderConfigurer">
-        <constructor-arg ref="standardPBEStringEncryptor"/>
+        <constructor-arg ref="stringEncryptor"/>
         <property name="systemPropertiesMode" value="#{T(org.springframework.beans.factory.config.PropertyPlaceholderConfigurer).SYSTEM_PROPERTIES_MODE_OVERRIDE}" />
 
         <property name="nullValue" value="" />
         <property name="properties" ref="properties" />
     </bean>
 
-    <bean id ="standardPBEStringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+    <bean id ="stringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
         <property name="config">
             <bean class="org.jasypt.encryption.pbe.config.SimplePBEConfig">
                 <property name="algorithm" value="PBEWithMD5AndDES"/>

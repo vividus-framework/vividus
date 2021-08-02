@@ -57,7 +57,6 @@ import org.vividus.util.ResourceUtils;
 class MetadataLoggerTests
 {
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(MetadataLogger.class);
-    private static final String VALUE = "value";
     private static final String FORMAT = "{}={}";
     private static final String MESSAGE = "This is a very long message that should be wrapped to defined cell size";
 
@@ -72,16 +71,27 @@ class MetadataLoggerTests
     })
     void testLogPropertiesSecurely(String key)
     {
-        MetadataLogger.logPropertiesSecurely(createProperties(key, VALUE));
+        Properties properties = new Properties();
+        properties.put(key, "value");
+        MetadataLogger.logPropertiesSecurely(properties);
         assertThat(LOGGER.getLoggingEvents(), is(List.of(info(FORMAT, key, "****"))));
     }
 
     @Test
     void testLogPropertiesSecurelyPlainProperties()
     {
-        String key = "simple.ignore-failure";
-        MetadataLogger.logPropertiesSecurely(createProperties(key, VALUE));
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(info(FORMAT, key, VALUE))));
+        String keyString = "simple.ignore-failure";
+        String valueString = "string";
+        String keyInt = "simple.int";
+        int valueInt = 2;
+        Properties properties = new Properties();
+        properties.put(keyString, valueString);
+        properties.put(keyInt, valueInt);
+        MetadataLogger.logPropertiesSecurely(properties);
+        assertThat(LOGGER.getLoggingEvents(), is(List.of(
+                info(FORMAT, keyString, valueString),
+                info(FORMAT, keyInt, valueInt)
+        )));
     }
 
     @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "LineLength"})
@@ -171,12 +181,5 @@ class MetadataLoggerTests
     {
         MetadataLogger.drawBanner();
         assertThat(LOGGER.getLoggingEvents(), is(List.of(info("\n{}", ResourceUtils.loadResource("banner.vividus")))));
-    }
-
-    private static Properties createProperties(String key, String value)
-    {
-        Properties properties = new Properties();
-        properties.put(key, value);
-        return properties;
     }
 }
