@@ -24,7 +24,7 @@ public class CsvFormatFactory
 
     public CsvFormatFactory(char delimiter, Character escape)
     {
-        this.csvFormat = CSVFormat.DEFAULT.withDelimiter(delimiter).withEscape(escape);
+        this.csvFormat = CSVFormat.DEFAULT.builder().setDelimiter(delimiter).setEscape(escape).build();
     }
 
     public CSVFormat getCsvFormat()
