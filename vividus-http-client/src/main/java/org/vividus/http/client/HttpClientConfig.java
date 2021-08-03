@@ -31,6 +31,7 @@ import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.conn.DnsResolver;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
+import org.vividus.http.handler.HttpResponseHandler;
 
 @SuppressWarnings("MethodCount")
 public class HttpClientConfig
@@ -59,6 +60,7 @@ public class HttpClientConfig
     private HttpRequestRetryHandler httpRequestRetryHandler;
     private ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy;
     private boolean preemptiveAuthEnabled;
+    private List<HttpResponseHandler> httpResponseHandlers;
 
     public boolean hasBaseUrl()
     {
@@ -314,5 +316,15 @@ public class HttpClientConfig
     public void setPreemptiveAuthEnabled(boolean preemptiveAuthEnabled)
     {
         this.preemptiveAuthEnabled = preemptiveAuthEnabled;
+    }
+
+    public List<HttpResponseHandler> getHttpResponseHandlers()
+    {
+        return httpResponseHandlers;
+    }
+
+    public void setHttpResponseHandlers(List<HttpResponseHandler> httpResponseHandlers)
+    {
+        this.httpResponseHandlers = httpResponseHandlers;
     }
 }

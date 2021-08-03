@@ -76,6 +76,7 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.http.handler.HttpResponseHandler;
 import org.vividus.http.keystore.IKeyStoreFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -285,6 +286,8 @@ class HttpClientFactoryTests
         config.setSslHostnameVerificationEnabled(false);
         DnsResolver resolver = mock(DnsResolver.class);
         config.setDnsResolver(resolver);
+        HttpResponseHandler handler = mock(HttpResponseHandler.class);
+        config.setHttpResponseHandlers(List.of(handler));
 
         KeyStore keyStore = mock(KeyStore.class);
         when(keyStoreFactory.getKeyStore()).thenReturn(Optional.of(keyStore));
@@ -299,7 +302,11 @@ class HttpClientFactoryTests
         try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
                 BasicCredentialsProvider.class))
         {
-            testBuildHttpClientUsingConfig(httpClient -> verify(httpClient).setHttpHost(HttpHost.create(baseUrl)));
+            testBuildHttpClientUsingConfig(httpClient ->
+            {
+                verify(httpClient).setHttpHost(HttpHost.create(baseUrl));
+                verify(httpClient).setHttpResponseHandlers(List.of(handler));
+            });
             verify(mockedHttpClientBuilder).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
 
             verify(mockedHttpClientBuilder).setSSLContext(sslContext);

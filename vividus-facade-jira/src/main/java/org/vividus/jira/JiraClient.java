@@ -19,21 +19,15 @@ package org.vividus.jira;
 import java.io.IOException;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
-import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 
 public class JiraClient
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JiraClient.class);
-
     private final String endpoint;
     private final IHttpClient httpClient;
 
@@ -72,15 +66,6 @@ public class JiraClient
                 .withContent(content)
                 .build();
 
-        LOGGER.atInfo().addArgument(httpRequest::getRequestLine).log("Jira request: {}");
-
-        HttpResponse httpResponse = httpClient.execute(httpRequest);
-        int status = httpResponse.getStatusCode();
-        if (status >= HttpStatus.SC_OK && status < HttpStatus.SC_MULTIPLE_CHOICES)
-        {
-            return httpResponse.getResponseBodyAsString();
-        }
-        LOGGER.atError().addArgument(httpResponse).log("Jira response: {}");
-        throw new IOException("Unexpected status code: " + status);
+        return httpClient.execute(httpRequest).getResponseBodyAsString();
     }
 }

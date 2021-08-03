@@ -21,6 +21,7 @@ import static org.apache.commons.lang3.Validate.isTrue;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.List;
 import java.util.Optional;
 
 import javax.net.ssl.SSLContext;
@@ -101,6 +102,7 @@ public class HttpClientFactory implements IHttpClientFactory
             httpClient.setHttpHost(HttpHost.create(config.getBaseUrl()));
         }
         httpClient.setSkipResponseEntity(config.isSkipResponseEntity());
+        httpClient.setHttpResponseHandlers(Optional.ofNullable(config.getHttpResponseHandlers()).orElseGet(List::of));
         return httpClient;
     }
 
