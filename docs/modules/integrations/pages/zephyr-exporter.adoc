@@ -109,11 +109,6 @@ When I wait until scroll is finished
 Then page is scrolled to element located `id(toClick)`
 ----
 
-== Export
+:service-key: zephyr
 
-* Download Zephyr Exporter JAR
-* Create a file named `application.properties` and put there all necessary properties
-* Run the following command with replacing `<jar name>` with existing jar name previously downloaded
-```bash
-java -jar <jar name> -Dspring.config.location=classpath:/application.properties,./application.properties
-```
+include::partial$export.adoc[]

@@ -1,0 +1,14 @@
+== Export
+ifeval::["{release-version}" == "false"]
+:jar-link: https://vividuscentral.jfrog.io/artifactory/snapshots/org/vividus/vividus-to-{service-key}-exporter/{current-version}/vividus-to-{service-key}-exporter-{current-version}.jar
+endif::[]
+ifeval::["{release-version}" == "true"]
+:jar-link: https://vividuscentral.jfrog.io/artifactory/releases/org/vividus/vividus-to-{service-key}-exporter/{current-version}/vividus-to-{service-key}-exporter-{current-version}.jar
+endif::[]
+
+* Download {jar-link}[Exporter JAR]
+* Create a file called `application.properties` and put there all necessary properties
+* Run the following command with replacing `<jar name>` with existing jar name previously downloaded
+```bash
+java -jar <jar name> -Dspring.config.location=classpath:/application.properties,./application.properties
+```
