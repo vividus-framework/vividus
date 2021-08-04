@@ -22,6 +22,15 @@
                         <property name="username" value="${jira.username}" />
                         <property name="password" value="${jira.password}" />
                         <property name="preemptiveAuthEnabled" value="${jira.preemptive-auth-enabled}" />
+                        <property name="httpResponseHandlers">
+                            <list>
+                                <bean class="org.vividus.http.handler.StatusCodeValidatingHandler" >
+                                    <constructor-arg index="0" value="200" />
+                                    <constructor-arg index="1" value="299" />
+                                    <constructor-arg index="2" value="JIRA" />
+                                </bean>
+                            </list>
+                        </property>
                     </bean>
                 </constructor-arg>
             </bean>

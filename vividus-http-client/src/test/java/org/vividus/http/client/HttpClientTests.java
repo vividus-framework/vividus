@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
+import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -45,12 +46,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HttpContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.vividus.http.handler.HttpResponseHandler;
 import org.vividus.util.Sleeper;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,14 +67,16 @@ class HttpClientTests
     private static final String VIVIDUS_ORG = "https://www.vividus.org/";
     private static final URI URI_TO_GO = URI.create(VIVIDUS_ORG);
 
-    @Mock
-    private Header header;
+    @Mock private HttpResponseHandler handler;
+    @Mock private Header header;
+    @Mock private CloseableHttpClient closeableHttpClient;
+    @InjectMocks private HttpClient httpClient;
 
-    @Mock
-    private CloseableHttpClient closeableHttpClient;
-
-    @InjectMocks
-    private HttpClient httpClient;
+    @BeforeEach
+    void init()
+    {
+        httpClient.setHttpResponseHandlers(List.of(handler));
+    }
 
     @Test
     void testClose() throws Exception
@@ -114,6 +119,7 @@ class HttpClientTests
         assertArrayEquals(headers, httpResponse.getResponseHeaders());
         assertEquals(statusCode, httpResponse.getStatusCode());
         assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
+        verify(handler).handle(httpResponse);
     }
 
     @Test
@@ -159,6 +165,7 @@ class HttpClientTests
         assertEquals(statusCode, httpResponse.getStatusCode());
         assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
         assertThat(httpResponse.getResponseHeaders(), is(equalTo(headers)));
+        verify(handler).handle(httpResponse);
     }
 
     @Test
@@ -181,6 +188,7 @@ class HttpClientTests
         assertEquals(statusCode, httpResponse.getStatusCode());
         assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
         assertThat(httpResponse.getResponseHeaders(), is(equalTo(headers)));
+        verify(handler).handle(httpResponse);
     }
 
     @Test
@@ -205,6 +213,7 @@ class HttpClientTests
         assertNull(httpResponse.getResponseBody());
         assertEquals(statusCode, httpResponse.getStatusCode());
         assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
+        verify(handler).handle(httpResponse);
     }
 
     private static Answer<CloseableHttpResponse> getAnswerWithSleep(CloseableHttpResponse closeableHttpResponse)

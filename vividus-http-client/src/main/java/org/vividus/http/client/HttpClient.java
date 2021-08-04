@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.http.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.http.HttpEntity;
@@ -31,6 +32,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.http.handler.HttpResponseHandler;
 
 public class HttpClient implements IHttpClient, AutoCloseable
 {
@@ -39,6 +41,7 @@ public class HttpClient implements IHttpClient, AutoCloseable
     private CloseableHttpClient closeableHttpClient;
     private HttpHost httpHost;
     private boolean skipResponseEntity;
+    private List<HttpResponseHandler> httpResponseHandlers;
 
     @Override
     public HttpHost getHttpHost()
@@ -105,6 +108,12 @@ public class HttpClient implements IHttpClient, AutoCloseable
         }
         watch.stop();
         httpResponse.setResponseTimeInMs(watch.getTime());
+
+        for (HttpResponseHandler handler : httpResponseHandlers)
+        {
+            handler.handle(httpResponse);
+        }
+
         return httpResponse;
     }
 
@@ -121,6 +130,11 @@ public class HttpClient implements IHttpClient, AutoCloseable
     public void setSkipResponseEntity(boolean skipResponseEntity)
     {
         this.skipResponseEntity = skipResponseEntity;
+    }
+
+    public void setHttpResponseHandlers(List<HttpResponseHandler> httpResponseHandlers)
+    {
+        this.httpResponseHandlers = httpResponseHandlers;
     }
 
     @Override
