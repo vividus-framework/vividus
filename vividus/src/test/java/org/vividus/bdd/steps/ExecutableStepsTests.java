@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,12 +139,12 @@ class ExecutableStepsTests
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { -1, 51 })
+    @ValueSource(ints = { -1, 1001 })
     void testPerformStepsNumberTimesWrongExecutionsNumber(int number)
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> executableSteps.performStepsNumberTimes(number, subSteps));
-        assertEquals("Please, specify executions number in the range from 0 to 50", exception.getMessage());
+        assertEquals("Please, specify executions number in the range from 0 to 1000", exception.getMessage());
         verifyNoInteractions(subSteps);
     }
 
@@ -163,7 +163,7 @@ class ExecutableStepsTests
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> executableSteps
                 .executeStepsWhileConditionIsTrueWithStep(ComparisonRule.LESS_THAN, 5, -2, 1, subSteps));
-        assertEquals("Number of iterations has exceeded allowable limit 50", exception.getMessage());
+        assertEquals("Number of iterations has exceeded allowable limit 1000", exception.getMessage());
         verifyNoInteractions(bddVariableContext, subSteps);
     }
 }

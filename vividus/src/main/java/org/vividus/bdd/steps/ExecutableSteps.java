@@ -34,7 +34,7 @@ import org.vividus.util.wait.MaxTimesBasedWaiter;
 
 public class ExecutableSteps
 {
-    public static final int EXECUTIONS_NUMBER_THRESHOLD = 50;
+    public static final int EXECUTIONS_NUMBER_THRESHOLD = 1000;
 
     private final IBddVariableContext bddVariableContext;
     private final VariableComparator variableComparator;
