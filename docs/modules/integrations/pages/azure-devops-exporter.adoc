@@ -1,0 +1,80 @@
+= Azure DevOps Exporter
+
+Azure DevOps Exporter is a tool used to export test cases into https://azure.microsoft.com/en-us/services/devops/test-plans/[Azure Test Plans].
+
+Features:
+
+* Create and update test cases
+
+== Azure DevOps Export Properties
+
+[cols="2,1,3", options="header"]
+|===
+
+|Property
+|Required
+|Description
+
+|`azure-devops-exporter.json-results-directory`
+|true
+a|Path to directory with test execution JSON results.
+
+The path is managed by the `bdd.report-directory` property which default value is `output/reports/jbehave` relatively to the tests directory.
+
+Please make sure that the `bdd.configuration.formats` property includes JSON value in order to generate test execution results.
+
+|`azure-devops-exporter.organization`
+|true
+|The name of the Azure DevOps organization.
+
+|`azure-devops-exporter.project`
+|true
+|Project ID or project name
+
+|`azure-devops-exporter.area`
+|true
+|The area of the product with which a test case is associated
+
+|===
+
+== Authentication properties
+
+[cols="1,1,3", options="header"]
+|===
+
+|Property
+|Acceptable values
+|Description
+
+|azure-devops.username
+|`string`
+|Username from Azure DevOps
+
+|azure-devops.password
+|`string`
+|Personal access token
+
+|===
+
+== Scenario Meta Attributes
+
+[cols="2,2,3", options="header"]
+|===
+
+|Name
+|Example
+|Description
+
+|`testCaseId`
+|`@testCaseId STUB-0`
+|Map scenario to Azure DevOps test case in 1 to 1 relation
+
+|`azure-devops.skip-export`
+|`@azure-devops.skip-export`
+|Skip test case while exporting
+
+|===
+
+:service-key: azure-devops
+
+include::partial$export.adoc[]

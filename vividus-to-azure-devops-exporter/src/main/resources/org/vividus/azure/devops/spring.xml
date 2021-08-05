@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-lazy-init="true">
+
+    <bean class="org.vividus.azure.devops.client.AzureDevOpsClient">
+        <constructor-arg index="0">
+            <bean class="org.vividus.http.client.HttpClient" factory-bean="httpClientFactory"
+                  factory-method="buildHttpClient" >
+                <constructor-arg>
+                    <bean parent="httpClientConfig">
+                        <property name="username" value="${azure-devops.username}" />
+                        <property name="password" value="${azure-devops.password}" />
+                        <property name="preemptiveAuthEnabled" value="${azure-devops.preemptive-auth-enabled}" />
+                        <property name="httpResponseHandlers">
+                             <list>
+                                 <bean class="org.vividus.http.handler.StatusCodeValidatingHandler" >
+                                     <constructor-arg index="0" value="200" />
+                                     <constructor-arg index="1" value="299" />
+                                     <constructor-arg index="2" value="Azure DevOps" />
+                                 </bean>
+                             </list>
+                         </property>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+</beans>

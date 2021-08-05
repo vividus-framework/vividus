@@ -1,0 +1,86 @@
+{
+  "id": "3a86b5f7-8ec8-4974-9d93-ab7fba28e17a",
+  "path": "storyPath",
+  "title": "",
+  "beforeStorySteps": [],
+  "scenarios": [
+    {
+      "keyword": "Scenario:",
+      "id": "fc964fce-c40d-4335-9c57-9886e37889d3",
+      "title": "Create test case",
+      "meta": [
+        {
+          "keyword": "@",
+          "name": "testCaseId",
+          "value": ""
+        }
+      ],
+      "beforeScenarioSteps": [],
+      "steps": [
+        {
+          "outcome": "successful",
+          "value": "Given I setup test environment"
+        },
+        {
+          "outcome": "successful",
+          "value": "When I perform action on test environment"
+        },
+        {
+          "outcome": "successful",
+          "value": "Then I verify changes on test environment"
+        }
+      ],
+      "afterScenarioSteps": [],
+      "start": 1627988025612,
+      "end": 1627988026370
+    },
+    {
+      "keyword": "Scenario:",
+      "id": "fc964fce-c40d-4335-9c57-9886e37889d3",
+      "title": "Update test case",
+      "meta": [
+        {
+          "keyword": "@",
+          "name": "testCaseId",
+          "value": "STUB-0"
+        }
+      ],
+      "beforeScenarioSteps": [],
+      "steps": [
+        {
+          "outcome": "successful",
+          "value": "Given I setup test environment"
+        },
+        {
+          "outcome": "successful",
+          "value": "When I perform action on test environment"
+        },
+        {
+          "outcome": "successful",
+          "value": "Then I verify changes on test environment"
+        }
+      ],
+      "afterScenarioSteps": [],
+      "start": 1627988025612,
+      "end": 1627988026370
+    },
+    {
+      "keyword": "Scenario:",
+      "id": "fc964fce-c40d-4335-9c57-9886e37889d3",
+      "title": "Skip test case",
+      "meta": [
+        {
+          "keyword": "@",
+          "name": "azure-devops.skip-export",
+          "value": ""
+        }
+      ],
+      "beforeScenarioSteps": [],
+      "steps": [],
+      "afterScenarioSteps": [],
+      "start": 1627988025612,
+      "end": 1627988026370
+    }
+  ],
+  "afterStorySteps": []
+}

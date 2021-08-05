@@ -48,6 +48,7 @@ include 'vividus-plugin-web-app-to-rest-api'
 include 'vividus-plugin-web-app'
 include 'vividus-plugin-websocket'
 include 'vividus-plugin-xml'
+include 'vividus-to-azure-devops-exporter'
 include 'vividus-to-xray-exporter'
 include 'vividus-to-zephyr-exporter'
 
