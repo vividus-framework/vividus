@@ -1,7 +1,6 @@
 project.description = 'Vividus plugin for REST API testing'
 
 ext.jsonPathVersion = '2.6.0'
-ext.aspectjVersion = '1.9.7'
 
 dependencies {
     api project(':vividus-bdd-engine')
@@ -24,8 +23,6 @@ dependencies {
         exclude (group: 'io.qameta.allure')
     }
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
-    runtimeOnly(group: 'org.aspectj', name: 'aspectjrt', version: aspectjVersion)
-    runtimeOnly(group: 'org.aspectj', name: 'aspectjweaver', version: aspectjVersion)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')

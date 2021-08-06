@@ -151,7 +151,7 @@ class HttpClientInterceptorTests
     }
 
     @Test
-    void testHttpResponseIsAttachedSuccessfully()
+    void testHttpResponseIsAttachedSuccessfully() throws IOException
     {
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpResponse.getResponseBody()).thenReturn(DATA);
@@ -159,20 +159,20 @@ class HttpClientInterceptorTests
         when(httpResponse.getMethod()).thenReturn(METHOD);
         when(httpResponse.getFrom()).thenReturn(URI.create(ENDPOINT));
         when(httpResponse.getResponseHeaders()).thenReturn(new Header[] { mock(Header.class) });
-        httpClientInterceptor.attachResponse(httpResponse);
+        httpClientInterceptor.handle(httpResponse);
         ArgumentCaptor<Map<String, Integer>> argumentCaptor = verifyPublishAttachment(RESPONSE);
         assertEquals(HttpStatus.SC_OK, argumentCaptor.getValue().get("statusCode").intValue());
     }
 
     @Test
-    void testNoHttpResponseBodyIsAttached()
+    void testNoHttpResponseBodyIsAttached() throws IOException
     {
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpResponse.getResponseBody()).thenReturn(null);
         when(httpResponse.getMethod()).thenReturn(METHOD);
         when(httpResponse.getFrom()).thenReturn(URI.create(ENDPOINT));
         when(httpResponse.getResponseHeaders()).thenReturn(new Header[0]);
-        httpClientInterceptor.attachResponse(httpResponse);
+        httpClientInterceptor.handle(httpResponse);
         verifyPublishAttachment(RESPONSE);
     }
 

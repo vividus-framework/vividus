@@ -38,9 +38,10 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.http.handler.HttpResponseHandler;
 import org.vividus.reporter.event.IAttachmentPublisher;
 
-public class HttpClientInterceptor implements HttpRequestInterceptor
+public class HttpClientInterceptor implements HttpRequestInterceptor, HttpResponseHandler
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientInterceptor.class);
 
@@ -84,7 +85,8 @@ public class HttpClientInterceptor implements HttpRequestInterceptor
         attachApiMessage(attachmentTitle, request.getAllHeaders(), body, mimeType, -1);
     }
 
-    public void attachResponse(HttpResponse response)
+    @Override
+    public void handle(HttpResponse response) throws IOException
     {
         Header[] headers = response.getResponseHeaders();
         String attachmentTitle = String.format("Response: %s %s", response.getMethod(), response.getFrom());
