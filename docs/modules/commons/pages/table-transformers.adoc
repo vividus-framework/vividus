@@ -1,12 +1,35 @@
 = Table Transformers
 
-Vividus provides a set of pre-registered table transformers. Also Vividus plugins may register own table transformers (they are documented in the corresponding plugins sections). It's allowed to define a chain of transformers, in this case the transformers are applied sequentially from top to bottom.
+VIVIDUS provides a set of pre-registered table transformers. Also plugins may register own table transformers (they are documented in the corresponding plugins articles). It's allowed to define a chain of transformers, in this case the transformers are applied sequentially from top to bottom.
 
-== FROM_LANDSCAPE
+== Escape special characters
+
+The special characters `,` `{` `}` must be escaped in the transformer properties using character `\`.
+
+.Escaping special characters in transformer properties
+[source,gherkin]
+----
+{transformer=MY_TRANSFORMER, countries=\{Australia\,Canada\}}
+----
+In the example above the transformer will have a single property with name `countries` and value `{Australia,Canada}`.
+
+== Using global variables
+
+VIVIDUS global variables can be used in transformer properties (pay attention to escaping of variables placeholders)
+
+.Usage of global variable `$\{locale}` in transformer property
+[source,gherkin]
+----
+{transformer=ONE_MORE_MY_TRANSFORMER, tables=/$\{locale\}/table1.table;/$\{locale\}/table2.table}
+----
+
+== Available transformers
+=== FROM_LANDSCAPE
 
 `FROM_LANDSCAPE` transformer is designed to transform the table from a landscape form.
 
 .Usage of FROM_LANDSCAPE transformer
+[source,gherkin]
 ----
 {transformer=FROM_LANDSCAPE}
 |header 1|value 11| ... | value m1|
@@ -14,11 +37,12 @@ Vividus provides a set of pre-registered table transformers. Also Vividus plugin
 |header n|value 1n| .... |value mn|
 ----
 
-== FORMATTING
+=== FORMATTING
 
 `FORMATTING` transformer formats the table according to the max width of each column. Also this transformer removes the commented lines.
 
 .Usage of FORMATTING transformer
+[source,gherkin]
 ----
 {transformer=FORMATTING}
 |key|
@@ -27,7 +51,7 @@ Vividus provides a set of pre-registered table transformers. Also Vividus plugin
 |longValue|
 ----
 
-== REPLACING
+=== REPLACING
 
 `REPLACING` transformer replaces all substrings inside table values with replacement according to the given parameters.
 
@@ -44,13 +68,14 @@ Vividus provides a set of pre-registered table transformers. Also Vividus plugin
 |===
 
 .Usage of REPLACING transformer
+[source,gherkin]
 ----
 {transformer=REPLACING, replacing=k, replacement=l}
 |key  |
 |vakue|
 ----
 
-== SORTING
+=== SORTING
 
 `SORTING` transformer is designed to sort the table rows by the values in
 the columns.
@@ -66,6 +91,7 @@ the columns.
 
 
 .Usage of SORTING transformer
+[source,gherkin]
 ----
 {transformer=SORTING, byColumns=key|key1}
 |key   |key1  |
@@ -73,7 +99,7 @@ the columns.
 |value1|value2|
 ----
 
-== ITERATING
+=== ITERATING
 
 `ITERATING` transformer generates simple one-column table with header `iterator` and numbers as values: 0, 1, 2... .
 
@@ -87,11 +113,12 @@ the columns.
 |===
 
 .Usage of ITERATING transformer
+[source,gherkin]
 ----
 {transformer=ITERATING, limit=5}
 ----
 
-== FILTERING
+=== FILTERING
 
 `FILTERING` transformer filters the table using the specified parameters.
 
@@ -117,6 +144,7 @@ the columns.
 `byMaxColumns` and `byColumnNames` are competing properties and only one can be specified at the same time. The same restriction is applied to the properties `byMaxRows` and `byRowIndexes`.
 
 .Usage of FILTERING transformer with filtering by column names and by max number of rows
+[source,gherkin]
 ----
 {transformer=FILTERING, byColumnNames=key1;key3, byMaxRows=1}
 |key1  |key2  |key3  |
@@ -125,6 +153,7 @@ the columns.
 ----
 
 .Usage of FILTERING transformer with filtering by max number of columns and by row indexes
+[source,gherkin]
 ----
 {transformer=FILTERING, byMaxColumns=2, byRowIndexes=0;2}
 |key1  |key2  |key3  |
@@ -133,7 +162,7 @@ the columns.
 |value7|value8|value9|
 ----
 
-== MERGING
+=== MERGING
 
 `MERGING` transformer merges several tables into one.
 
@@ -163,21 +192,25 @@ the columns.
 ====
 
 .Usage of MERGING transformer with 'rows' merge mode
+[source,gherkin]
 ----
 {transformer=MERGING, mergeMode=rows, tables=story/tables/test1.table;story/tables/test2.table}
 ----
 
 .Usage of MERGING transformer with 'columns' merge mode
+[source,gherkin]
 ----
 {transformer=MERGING, mergeMode=columns, tables=story/tables/test1.table;story/tables/test2.table;story/tables/test3.table}
 ----
 
 .Usage of MERGING transformer with nested tables
+[source,gherkin]
 ----
 {transformer=MERGING, mergeMode=columns, fillerValue=null, tables=\{transformer=FROM_EXCEL\, path=TestTemplate.xlsx\, sheet=Data\, addresses=A2\;A3\, column=test1\};\{transformer=FROM_EXCEL\, path=TestTemplate.xlsx\, sheet=Data\, range=B2:B4\, column=test2\}}
 ----
 
 .Usage of nested MERGING transformers
+[source,gherkin]
 ----
 {
  transformer=MERGING,
@@ -216,13 +249,14 @@ the columns.
 ----
 
 .Usage of MERGING transformer with table body
+[source,gherkin]
 ----
 {transformer=MERGING, mergeMode=columns, tables=/data/some-table.table}
 |column1|
 |value1 |
 ----
 
-== JOINING
+=== JOINING
 
 `JOINING` transformer joins values from rows/columns of the table.
 
@@ -244,7 +278,8 @@ the columns.
 [IMPORTANT]
 `JOINING` transformer should be the last while joining columns/rows of the table which created using another transformer.
 
-.Usage of JOINING transformer with 'columns' join mode
+.Usage of JOINING transformer with `columns` join mode
+[source,gherkin]
 ----
 Scenario: Verify JOINING transformer in default columns mode
 Then `<joinedColumn>` is equal to `A B`
@@ -254,8 +289,8 @@ Examples:
 |A      |B      |
 ----
 
-
-.Usage of JOINING transformer with 'columns' join mode and definition of columns to join
+.Usage of JOINING transformer with `columns` join mode and definition of columns to join
+[source,gherkin]
 ----
 Scenario: Verify JOINING transformer in configured columns mode
 Then `<joinedColumn>` is equal to `B D`
@@ -265,7 +300,8 @@ Examples:
 |A      |B      |C      |D      |
 ----
 
-.Usage of JOINING transformer with 'rows' join mode
+.Usage of JOINING transformer with `rows` join mode
+[source,gherkin]
 ----
 Scenario: Verify JOINING transformer in default rows mode
 Then `<column1>` is equal to `A B`
@@ -278,6 +314,7 @@ Examples:
 ----
 
 .Usage of JOINING transformer in the chain of transformers
+[source,gherkin]
 ----
 {transformer=MERGING, mergeMode=columns, tables=
   \{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=A4:A5\, column=header1\, joinValues=true\};
@@ -287,12 +324,13 @@ Examples:
 ----
 
 .Usage of JOINING transformer with table body containing path to table file
+[source,gherkin]
 ----
 {transformer=JOINING, joinMode=columns, joinedColumn=header}
 /test1.table
 ----
 
-== CARTESIAN_PRODUCT
+=== CARTESIAN_PRODUCT
 
 `CARTESIAN_PRODUCT` transformer creates a https://en.wikipedia.org/wiki/Cartesian_product[cartesian product] from several tables.
 
@@ -314,11 +352,13 @@ Examples:
 ====
 
 .Usage of CARTESIAN_PRODUCT transformer
+[source,gherkin]
 ----
 {transformer=CARTESIAN_PRODUCT, tables=story/tables/test1.table;story/tables/test2.table}
 ----
 
 .Usage of CARTESIAN_PRODUCT transformer with table body
+[source,gherkin]
 ----
 {transformer=CARTESIAN_PRODUCT, tables=/data/some-table.table}
 |column1|
@@ -326,6 +366,7 @@ Examples:
 ----
 
 .Usage of CARTESIAN_PRODUCT transformer with nested transformers
+[source,gherkin]
 ----
 {transformer=CARTESIAN_PRODUCT, tables=\{transformer=REPEATING\, times=100\};\{transformer=FROM_CSV\, csvPath=/data/csv.csv\}}
 ----
