@@ -1,0 +1,16 @@
+.side-nav__brand span {
+  display: none;
+}
+.side-nav__brand:after {
+  content: 'VIVIDUS';
+  padding-left: 15px;
+}
+.side-nav__footer :last-child .side-nav__collapse .side-nav__text::after {
+  content: 'Powered by Allure';
+  color: #999;
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding-top: 20px;
+  font-size: 11px;
+}

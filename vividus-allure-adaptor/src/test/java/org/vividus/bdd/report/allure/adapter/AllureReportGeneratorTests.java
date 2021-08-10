@@ -233,7 +233,7 @@ class AllureReportGeneratorTests
                             Configuration config = (Configuration) arguments.get(0);
 
                             List<Plugin> plugins = config.getPlugins();
-                            assertEquals(2, plugins.size());
+                            assertEquals(3, plugins.size());
 
                             Extension extension = plugins.get(0).getExtensions().get(0);
                             assertEquals(BehaviorsPlugin.class, extension.getClass());
