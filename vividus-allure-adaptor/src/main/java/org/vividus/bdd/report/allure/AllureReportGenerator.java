@@ -181,7 +181,8 @@ public class AllureReportGenerator implements IAllureReportGenerator
         );
         List<Plugin> plugins = List.of(
                 new EmbeddedPlugin("behaviors", List.of("index.js"), new BehaviorsPlugin()),
-                new EmbeddedPlugin("custom-logo", List.of(STYLES_CSS))
+                new EmbeddedPlugin("custom-logo", List.of(STYLES_CSS)),
+                new EmbeddedPlugin("custom-title", List.of(STYLES_CSS))
         );
         Configuration configuration = new ConfigurationBuilder()
                 .useDefault()
