@@ -19,6 +19,7 @@ package org.vividus.selenium.mobileapp;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -40,8 +41,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory;
 import org.vividus.selenium.screenshot.IScreenshotFileNameGenerator;
 import org.vividus.selenium.screenshot.Screenshot;
+import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class MobileAppScreenshotTakerTests
@@ -54,6 +57,7 @@ class MobileAppScreenshotTakerTests
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private TakesScreenshot takesScreenshot;
     @Mock private EventBus eventBus;
+    @Mock private MobileAppAshotFactory ashotFactory;
     @InjectMocks private MobileAppScreenshotTaker screenshotTaker;
 
     @AfterEach
@@ -99,5 +103,13 @@ class MobileAppScreenshotTakerTests
         Path takenScreenshot = screenshotTaker.takeScreenshot(path.resolve(FILE_NAME));
         assertArrayEquals(DATA, Files.readAllBytes(takenScreenshot));
         verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
+    }
+
+    @Test
+    void shouldDelegateAshotCreationToAshotFactory()
+    {
+        Optional<ScreenshotConfiguration> configuration = Optional.empty();
+        screenshotTaker.crateAshot(configuration);
+        verify(ashotFactory).create(configuration);
     }
 }

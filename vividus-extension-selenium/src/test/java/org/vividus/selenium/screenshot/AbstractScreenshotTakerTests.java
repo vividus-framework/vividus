@@ -26,10 +26,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -52,13 +54,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.util.ResourceUtils;
+
+import ru.yandex.qatools.ashot.AShot;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AbstractScreenshotTakerTests
 {
+    private static final String AFTER_A_SHOT = "After_AShot";
+
     private static final String IMAGE_PNG = "image.png";
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(AbstractScreenshotTaker.class);
@@ -67,6 +76,8 @@ class AbstractScreenshotTakerTests
     @Mock private TakesScreenshot takesScreenshot;
     @Mock private EventBus eventBus;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
+    @Mock private ScreenshotDebugger screenshotDebugger;
+    @Mock private AShot ashot;
     @InjectMocks private TestScreenshotTaker testScreenshotTaker;
 
     @AfterEach
@@ -134,12 +145,40 @@ class AbstractScreenshotTakerTests
         assertSame(webDriverProvider, testScreenshotTaker.getWebDriverProvider());
     }
 
+    @Test
+    void shouldTakeAshotScreenshot()
+    {
+        WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(SearchContext.class));
+        ru.yandex.qatools.ashot.Screenshot screenshot = mock(ru.yandex.qatools.ashot.Screenshot.class);
+        when(ashot.takeScreenshot(webDriver)).thenReturn(screenshot);
+        testScreenshotTaker.takeAshotScreenshot(webDriver, Optional.empty());
+        verify(ashot).takeScreenshot(webDriver);
+        verify(screenshotDebugger).debug(TestScreenshotTaker.class, AFTER_A_SHOT, null);
+    }
+
+    @Test
+    void shouldTakeAshotScreenshotWithElementAsTheContext()
+    {
+        WebElement webElement = mock(WebElement.class, withSettings().extraInterfaces(SearchContext.class));
+        WebDriver webDriver = mock(WebDriver.class);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        ru.yandex.qatools.ashot.Screenshot screenshot = mock(ru.yandex.qatools.ashot.Screenshot.class);
+        when(ashot.takeScreenshot(webDriver, webElement)).thenReturn(screenshot);
+        testScreenshotTaker.takeAshotScreenshot(webElement, Optional.empty());
+        verify(ashot).takeScreenshot(webDriver, webElement);
+        verify(screenshotDebugger).debug(TestScreenshotTaker.class, AFTER_A_SHOT, null);
+    }
+
     private static class TestScreenshotTaker extends AbstractScreenshotTaker
     {
+        private final AShot ashot;
+
         TestScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
-                IScreenshotFileNameGenerator screenshotFileNameGenerator)
+                IScreenshotFileNameGenerator screenshotFileNameGenerator, ScreenshotDebugger screenshotDebugger,
+                AShot ashot)
         {
-            super(webDriverProvider, eventBus, screenshotFileNameGenerator);
+            super(webDriverProvider, eventBus, screenshotFileNameGenerator, screenshotDebugger);
+            this.ashot = ashot;
         }
 
         @Override
@@ -158,6 +197,12 @@ class AbstractScreenshotTakerTests
         public Path takeScreenshot(Path screenshotFilePath) throws IOException
         {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        protected AShot crateAshot(Optional<ScreenshotConfiguration> screenshotConfiguration)
+        {
+            return ashot;
         }
     }
 }

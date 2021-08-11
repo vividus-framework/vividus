@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 
+import org.openqa.selenium.SearchContext;
+
 public interface ScreenshotTaker
 {
     Optional<Screenshot> takeScreenshot(String screenshotName);
@@ -30,4 +32,7 @@ public interface ScreenshotTaker
     Path takeScreenshotAsFile(String screenshotName) throws IOException;
 
     Path takeScreenshot(Path screenshotFilePath) throws IOException;
+
+    ru.yandex.qatools.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
+            Optional<ScreenshotConfiguration> screenshotConfiguration);
 }

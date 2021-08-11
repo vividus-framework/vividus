@@ -19,7 +19,7 @@
 
     <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory" />
 
-    <bean id="genericWebDriverManager" class="org.vividus.selenium.manager.GenericWebDriverManager">
+    <bean id="genericWebDriverManager" class="org.vividus.selenium.manager.GenericWebDriverManager" abstract="true">
         <property name="mobileApp" value="${mobile-app}" />
     </bean>
 
@@ -141,6 +141,13 @@
         </property>
     </bean>
 
+    <bean id="abstractAshotFactory" class="org.vividus.selenium.screenshot.AbstractAshotFactory" abstract="true" />
+
+    <bean id="screenshotDebugger" class="org.vividus.selenium.screenshot.FilesystemScreenshotDebugger"
+        init-method="cleanUp">
+        <property name="debugScreenshotsLocation" value="${ui.screenshot.debug-directory}" />
+    </bean>
+
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
         <idref bean="genericElementSteps" />
         <idref bean="genericWaitSteps" />
@@ -163,4 +170,13 @@
             <bean class="org.vividus.beans.DurationPropertyEditor" />
         </entry>
     </util:map>
+
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="org.vividus.spring.StringToLocatorConverter" />
+                <bean class="org.vividus.spring.StringToLocatorSetConverter" />
+            </set>
+        </property>
+    </bean>
  </beans>

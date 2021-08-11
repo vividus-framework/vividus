@@ -54,7 +54,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.bdd.resource.ResourceLoadException;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
+import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -108,7 +108,7 @@ class VisualStepsTests
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"COMPARE_AGAINST", "CHECK_INEQUALITY_AGAINST"})
+    @CsvSource({"COMPARE_AGAINST", "CHECK_INEQUALITY_AGAINST"})
     void shouldAssertCheckResultForCompareAgainstActionAndPublishAttachment(VisualActionType action) throws IOException
     {
         VisualCheck visualCheck = mockVisualCheckFactory(action);
@@ -131,7 +131,7 @@ class VisualStepsTests
     {
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
         mockUiContext();
-        ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
+        WebScreenshotConfiguration screenshotConfiguration = mock(WebScreenshotConfiguration.class);
         VisualCheck visualCheck = FACTORY.create(BASELINE, compareAgainst);
         when(visualCheckFactory.create(BASELINE, compareAgainst, screenshotConfiguration)).thenReturn(visualCheck);
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
@@ -203,7 +203,7 @@ class VisualStepsTests
         Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore);
-        ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
+        WebScreenshotConfiguration screenshotConfiguration = mock(WebScreenshotConfiguration.class);
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
         VisualCheck visualCheck = FACTORY.create(BASELINE, compareAgainst);
         when(visualCheckFactory.create(BASELINE, compareAgainst, screenshotConfiguration)).thenReturn(visualCheck);

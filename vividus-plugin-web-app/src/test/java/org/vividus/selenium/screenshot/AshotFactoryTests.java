@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -36,7 +37,14 @@ import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverFactory;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
+import org.vividus.selenium.screenshot.strategies.AdjustingViewportPastingDecorator;
+import org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy;
+import org.vividus.selenium.screenshot.strategies.StickyHeaderCutStrategy;
+import org.vividus.selenium.screenshot.strategies.ViewportPastingScreenshotShootingStrategy;
+import org.vividus.selenium.screenshot.strategies.ViewportShootingStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
+import org.vividus.util.property.PropertyMappedCollection;
 
 import io.appium.java_client.remote.MobileCapabilityType;
 import ru.yandex.qatools.ashot.AShot;
@@ -49,29 +57,36 @@ import ru.yandex.qatools.ashot.shooting.cutter.FixedCutStrategy;
 @ExtendWith(MockitoExtension.class)
 class AshotFactoryTests
 {
+    private static final String VIEWPORT_PASTING = "VIEWPORT_PASTING";
     private static final String SHOOTING_STRATEGY = "shootingStrategy";
     private static final String COORDS_PROVIDER = "coordsProvider";
     private static final int TEN = 10;
+    private static final String SIMPLE = "SIMPLE";
 
     @Mock private ShootingStrategy baseShootingStrategy;
     @Mock private IWebDriverFactory webDriverFactory;
     @Mock private IWebDriverManager webDriverManager;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private ScreenshotDebugger screenshotDebugger;
+    @Mock private PropertyMappedCollection<WebScreenshotConfiguration> ashotConfigurations;
     @InjectMocks private AshotFactory ashotFactory;
 
     @BeforeEach
     void beforeEach()
     {
+        ashotFactory.setAshotConfigurations(ashotConfigurations);
         when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
     }
 
     @Test
-    void shouldCreateAshotViaScreenshotShootingStrategyIfThereIfConfigurationNotFound() throws IllegalAccessException
+    void shouldCreateAshotViaScreenshotShootingStrategyIfThereIsNoConfigurationFound() throws IllegalAccessException
     {
+        ashotFactory.setShootingStrategy(SHOOTING_STRATEGY);
+        ashotFactory.setStrategies(Map.of(VIEWPORT_PASTING, new ViewportPastingScreenshotShootingStrategy()));
+        when(ashotConfigurations.getNullable(SHOOTING_STRATEGY)).thenReturn(Optional.empty());
         mockDeviceAndOrientation();
-        ashotFactory.setScreenshotShootingStrategy(ScreenshotShootingStrategy.VIEWPORT_PASTING);
-        AShot aShot = ashotFactory.create(false, Optional.empty());
+        ashotFactory.setScreenshotShootingStrategy(VIEWPORT_PASTING);
+        AShot aShot = ashotFactory.create(Optional.empty());
         assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
         assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true),
                 instanceOf(AdjustingViewportPastingDecorator.class));
@@ -87,34 +102,38 @@ class AshotFactoryTests
     @Test
     void shouldCreateAshotViaScreenshotShootingStrategyUsingStrategyFromConfiguration() throws IllegalAccessException
     {
+        ashotFactory.setShootingStrategy(SHOOTING_STRATEGY);
+        ashotFactory.setStrategies(Map.of(VIEWPORT_PASTING, new ViewportPastingScreenshotShootingStrategy()));
+        ashotFactory.setScreenshotShootingStrategy(SIMPLE);
+        WebScreenshotConfiguration screenshotConfiguration = new WebScreenshotConfiguration();
+        screenshotConfiguration.setShootingStrategy(Optional.of(VIEWPORT_PASTING));
+        when(ashotConfigurations.getNullable(SHOOTING_STRATEGY)).thenReturn(Optional.empty());
         mockDeviceAndOrientation();
-        ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration();
-        screenshotConfiguration.setScreenshotShootingStrategy(Optional.of(ScreenshotShootingStrategy.SIMPLE));
-        AShot aShot = ashotFactory.create(false, Optional.of(screenshotConfiguration));
+        AShot aShot = ashotFactory.create(Optional.of(screenshotConfiguration));
         assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
-        assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true), instanceOf(ScalingDecorator.class));
+        assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true),
+                instanceOf(AdjustingViewportPastingDecorator.class));
     }
 
     @Test
     void shouldCreateAshotViaWithSimpleCoords() throws IllegalAccessException
     {
-        ashotFactory.setScreenshotShootingStrategy(ScreenshotShootingStrategy.SIMPLE);
-        ShootingStrategy strategy = ScreenshotShootingStrategy.SIMPLE
-                .getDecoratedShootingStrategy(baseShootingStrategy, false, false, null);
-        AShot aShot = ashotFactory.create(false, Optional.empty());
+        ashotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy()));
+        ashotFactory.setScreenshotShootingStrategy(SIMPLE);
+        AShot aShot = ashotFactory.create(Optional.empty());
         assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
-        assertEquals(strategy, baseShootingStrategy);
+        assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true), instanceOf(ViewportShootingStrategy.class));
     }
 
     @Test
     void shouldCreateAshotWithCuttingStrategiesForNativeWebHeadersFooters() throws IllegalAccessException
     {
-        ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration();
+        WebScreenshotConfiguration screenshotConfiguration = new WebScreenshotConfiguration();
         screenshotConfiguration.setNativeFooterToCut(TEN);
         screenshotConfiguration.setWebHeaderToCut(TEN);
-        screenshotConfiguration.setScreenshotShootingStrategy(Optional.empty());
+        screenshotConfiguration.setShootingStrategy(Optional.empty());
 
-        AShot aShot = ashotFactory.create(false, Optional.of(screenshotConfiguration));
+        AShot aShot = ashotFactory.create(Optional.of(screenshotConfiguration));
 
         assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
         ShootingStrategy viewportPastingDecorator = getShootingStrategy(aShot);
@@ -149,11 +168,11 @@ class AshotFactoryTests
     void shouldCreateAshotUsingScrollableElement() throws IllegalAccessException
     {
         WebElement webElement = mock(WebElement.class);
-        ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration();
+        WebScreenshotConfiguration screenshotConfiguration = new WebScreenshotConfiguration();
         screenshotConfiguration.setScrollableElement(() -> Optional.of(webElement));
         screenshotConfiguration.setCoordsProvider("CEILING");
-        screenshotConfiguration.setScreenshotShootingStrategy(Optional.empty());
-        AShot aShot = ashotFactory.create(false, Optional.of(screenshotConfiguration));
+        screenshotConfiguration.setShootingStrategy(Optional.empty());
+        AShot aShot = ashotFactory.create(Optional.of(screenshotConfiguration));
 
         assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
         ShootingStrategy scrollableElementAwareDecorator = getShootingStrategy(aShot);

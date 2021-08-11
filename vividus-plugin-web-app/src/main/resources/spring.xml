@@ -53,13 +53,6 @@
         <property name="fullPageScreenshots" value="${selenium.screenshot.full-page}" />
         <property name="indent" value="${selenium.screenshot.indent}" />
         <property name="highlighterType" value="${selenium.screenshot.highlighter}" />
-        <property name="shootingStrategy" value="${selenium.screenshot.shooting-strategy}" />
-        <property name="ashotConfigurations">
-            <bean factory-bean="propertyMapper" factory-method="readValues">
-                <constructor-arg value="selenium.screenshot.strategy." />
-                <constructor-arg value="org.vividus.selenium.screenshot.ScreenshotConfiguration"/>
-            </bean>
-        </property>
     </bean>
 
     <bean id="screenshotDebugger" class="org.vividus.selenium.screenshot.FilesystemScreenshotDebugger"
@@ -67,9 +60,22 @@
         <property name="debugScreenshotsLocation" value="${selenium.screenshot.debug-directory}" />
     </bean>
 
-    <bean id="ashotFactory" class="org.vividus.selenium.screenshot.AshotFactory">
+    <bean id="ashotFactory" class="org.vividus.selenium.screenshot.AshotFactory" parent="abstractAshotFactory">
+        <property name="shootingStrategy" value="${web.screenshot.strategy}" />
         <property name="screenshotShootingStrategy" value="${selenium.screenshot.strategy}" />
+        <property name="ashotConfigurations">
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="web.screenshot.strategy." />
+                <constructor-arg value="org.vividus.selenium.screenshot.WebScreenshotConfiguration"/>
+            </bean>
+        </property>
     </bean>
+
+    <bean id="SIMPLE" class="org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy" />
+    <bean id="VIEWPORT_PASTING" class="org.vividus.selenium.screenshot.strategies.ViewportPastingScreenshotShootingStrategy" />
+    <bean id="DEVICE_DEPENDENT" class="org.vividus.selenium.screenshot.strategies.DeviceDependentScreenshotShootingStrategy" />
+    <bean id="PHONE_ANDROID_PORTRAIT" class="org.vividus.selenium.screenshot.strategies.PhoneAndroidScreenshotShootingStrategy" />
+    <bean id="PHONE_ANDROID_LANDSCAPE" class="org.vividus.selenium.screenshot.strategies.PhoneAndroidScreenshotShootingStrategy" />
 
     <bean id="scrollbarHandler" class="org.vividus.selenium.screenshot.ScrollbarHandler">
         <property name="webDriverManager" ref="webDriverManager" />

@@ -33,7 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
+import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
@@ -88,7 +88,7 @@ class VisualTestingStepsTests
         ApplitoolsVisualCheck check = mock(ApplitoolsVisualCheck.class);
         ApplitoolsVisualCheckResult result = mock(ApplitoolsVisualCheckResult.class);
         when(visualTestingService.run(check)).thenReturn(result);
-        ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
+        WebScreenshotConfiguration screenshotConfiguration = mock(WebScreenshotConfiguration.class);
         visualTestingSteps.performCheck(List.of(check, check), screenshotConfiguration);
         verifyVisualCheck(result, 2);
         verify(check, times(2)).setScreenshotConfiguration(Optional.of(screenshotConfiguration));

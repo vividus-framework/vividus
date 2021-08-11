@@ -21,6 +21,8 @@ project.description = 'Vividus extension for selenium'
          exclude module: 'selenium-java'
      }
 
+     api(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: versions.ashot)
+
      api(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
      implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
 

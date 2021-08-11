@@ -20,43 +20,43 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-visual', version: '{c
 |Default
 |Description
 
-|`web.visual.ignored-elements`
+|`ui.visual.ignored-elements`
 |xref:plugin-web-app.adoc#_locator[locators]
 |`empty`
 |The comma-separated list of locators of elements to ignore element areas
 
-|`web.visual.ignored-areas`
+|`ui.visual.ignored-areas`
 |xref:plugin-web-app.adoc#_locator[locators]
 |`empty`
 |The comma-separated list of locators of elements to ignore page areas
 
-|`web.visual.baselines-folder`
+|`ui.visual.baselines-folder`
 |`string`
 |`./baseline`
 |The path to folder for saving baselines (root folder is `src/main/resources`).
 For example, `web.visual.baselines-folder=C:/Workspace/vividus-tests/src/main/resources/baselines`
 
-|`web.visual.indexer`
+|`ui.visual.indexer`
 |scenario
 |`empty`
 |Used to append scenario based index to a baseline name
 
-|`web.visual.override-baselines`
+|`ui.visual.override-baselines`
 |`true` `false`
 |`false`
 |Used for overriding existing ones or creating not existing baselines during compare action
 
-|`web.visual.acceptable-diff-percentage`
+|`ui.visual.acceptable-diff-percentage`
 |percentage numbers
 |`0`
 |Add ability to configure sensitivity for visual checks
 
-|`web.visual.required-diff-percentage`
+|`ui.visual.required-diff-percentage`
 |percentage numbers
 |`70`
 |Defines required difference baseline vs checkpoint to consider them inequal
 
-|`selenium.screenshot.debug-directory`
+|`ui.screenshot.debug-directory`
 |`string`
 |`false`
 |The path to folder for saving debug screenshots. For example, `web.visual.baselines-folder=C:/temp/debug`
@@ -115,14 +115,14 @@ Work the same way as <<_compare_against>> except it checks if actual appearance 
 
 In order to support screenshot taking configuration per-project/per-step basis framework provides following approach.
 
-=== Property based configuration
+=== Web Applications
 
-Property based configuration could be specified using `selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>= pattern`,
+Property based configuration could be specified using `web.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>= pattern`,
 where:
 `YOUR_STRATEGY_NAME` - name of the custom strategy;
 `PROPERTY_NAME` - name of the property you want specify.
 
-==== Available properties (all of there not mandatory):
+==== Properties based configuration:
 
 [cols="3,1,3", options="header"]
 |===
@@ -130,49 +130,45 @@ where:
 |Acceptable values
 |Description
 
-|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.web-header-to-cut`
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.web-header-to-cut`
 |size in pixels
 |Web header to cut (could be useful if your site has sticky header)
 
-|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.web-footer-to-cut`
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.web-footer-to-cut`
 |size in pixels
 |Web footer to cut (could be useful if your site has sticky footer)
 
-|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-header-to-cut`
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-header-to-cut`
 |size in pixels
 |Native header to cut
 
-|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`
 |size in pixels
 |Native footer to cut
 
-|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.coords-provider`
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.coords-provider`
 |`WEB_DRIVER` `CEILING`
 |Adds margins to coordinates, default one
 
-|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.scroll-timeout`
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.scroll-timeout`
 |time in millis
 |Timeout for scrolling during performing visual check
 
-|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.scrollable-element`
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.scrollable-element`
 |locator
 |Locator of element for performing scroll action during visual check
 
-|`selenium.screenshot.strategy.<YOUR_STRATEGY_NAME>.screenshot-shooting-strategy`
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.shooting-strategy`
 |`SIMPLE` `VIEWPORT_PASTING` `DEVICE_DEPENDENT` `PHONE_ANDROID_PORTRAIT` `PHONE_ANDROID_LANDSCAPE`
 |Screenshot shooting strategy name (`VIEWPORT_PASTING` by default)
 
-|`selenium.screenshot.shooting-strategy=YOUR_STRATEGY_NAME`
+|`web.screenshot.strategy=YOUR_STRATEGY_NAME`
 |string
 |After configuration necessary properties use this one to enable your custom strategy
 
 |===
 
-Please see the image to get a clue about difference between native/web footer/header to cut.
-
-image::example.png[Difference between native/web footer/header image]
-
-=== Step based configuration
+==== Step based configuration
 
 To use custom configuration per step, two new steps were implemented.
 
@@ -190,12 +186,12 @@ When I $visualAction baseline with `$baselineName` ignoring:$ignoringElement usi
 
 [source,gherkin]
 ----
-selenium.screenshot.strategy.bombaysapphire.web-header-to-cut=80
-selenium.screenshot.strategy.bombaysapphire.web-footer-to-cut=0
-selenium.screenshot.strategy.bombaysapphire.scrollable-element=By.cssSelector(.page__inner)
-selenium.screenshot.strategy.bombaysapphire.scroll-timeout=PT1S
-selenium.screenshot.strategy.bombaysapphire.screenshot-shooting-strategy=SIMPLE
-selenium.screenshot.shooting-strategy=bombaysapphire
+web.screenshot.strategy.bombaysapphire.web-header-to-cut=80
+web.screenshot.strategy.bombaysapphire.web-footer-to-cut=0
+web.screenshot.strategy.bombaysapphire.scrollable-element=By.cssSelector(.page__inner)
+web.screenshot.strategy.bombaysapphire.scroll-timeout=PT1S
+web.screenshot.strategy.bombaysapphire.shooting-strategy=SIMPLE
+web.screenshot.strategy=bombaysapphire
 ----
 
 ==== *Examples of usage step based configuration:*
@@ -203,8 +199,59 @@ selenium.screenshot.shooting-strategy=bombaysapphire
 [source,gherkin]
 ----
 When I <action> baseline with `scrollable-element-context` using screenshot configuration:
-|scrollableElement                    |webHeaderToCut|webFooterToCut|scrollTimeout|screenshotShootingStrategy|
-|By.xpath(//div[@class="page__inner"])|80            |0             |PT1S         |SIMPLE                    |
+|scrollableElement                    |webHeaderToCut|webFooterToCut|scrollTimeout|shootingStrategy|
+|By.xpath(//div[@class="page__inner"])|80            |0             |PT1S         |SIMPLE          |
+----
+
+Please see the image to get a clue about difference between native/web footer/header to cut.
+
+image::example.png[Difference between native/web footer/header image]
+
+=== Mobile Native Applications
+
+Property based configuration could be specified using `mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>= pattern`,
+where:
+`YOUR_STRATEGY_NAME` - name of the custom strategy;
+`PROPERTY_NAME` - name of the property you want specify.
+
+==== Properties based configuration:
+
+[cols="3,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Description
+
+|`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`
+|size in pixels
+|Native footer to cut
+
+|`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.shooting-strategy`
+|`SIMPLE`
+|Screenshot shooting strategy name (`SIMPLE` by default)
+
+|`mobile.screenshot.strategy=YOUR_STRATEGY_NAME`
+|string
+|After configuration necessary properties use this one to enable your custom strategy
+
+|===
+
+==== *Examples of usage property based configuration:*
+
+[source,gherkin]
+----
+mobile.screenshot.strategy.bombaysapphire.native-footer-to-cut=100
+mobile.screenshot.strategy.bombaysapphire.shooting-strategy=SIMPLE
+mobile.screenshot.strategy=bombaysapphire
+----
+
+==== *Examples of usage step based configuration:*
+
+[source,gherkin]
+----
+When I <action> baseline with `scrollable-element-context` using screenshot configuration:
+|nativeFooterToCut|shootingStrategy|
+|51               |SIMPLE          |
 ----
 
 == Steps

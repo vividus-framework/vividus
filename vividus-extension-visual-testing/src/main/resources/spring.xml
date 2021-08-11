@@ -4,26 +4,30 @@
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
-       default-lazy-init="true" profile="web">
+       default-lazy-init="true">
 
-    <bean id="screenshotProvider" class="org.vividus.visual.screenshot.AshotScreenshotProvider">
-        <property name="ignoreStrategies">
-            <util:map key-type="org.vividus.visual.screenshot.IgnoreStrategy" map-class="java.util.LinkedHashMap">
-                <entry key="ELEMENT" value="${web.visual.ignored-elements}"/>
-                <entry key="AREA" value="${web.visual.ignored-areas}"/>
-            </util:map>
-        </property>
-    </bean>
+    <beans profile="web">
+        <bean id="coordsProvider" class="org.vividus.visual.screenshot.AdjustingCoordsProvider" />
+    </beans>
 
-    <bean id="adjustingCoordsProvider" class="org.vividus.visual.screenshot.AdjustingCoordsProvider" />
+    <beans profile="web,mobile_app">
+        <bean id="screenshotProvider" class="org.vividus.visual.screenshot.AshotScreenshotProvider">
+            <property name="ignoreStrategies">
+                <util:map key-type="org.vividus.visual.screenshot.IgnoreStrategy" map-class="java.util.LinkedHashMap">
+                    <entry key="ELEMENT" value="${ui.visual.ignored-elements}"/>
+                    <entry key="AREA" value="${ui.visual.ignored-areas}"/>
+                </util:map>
+            </property>
+        </bean>
 
-    <bean id="scenario" class="org.vividus.visual.screenshot.ScenarioBasedIndexer" />
+        <bean id="scenario" class="org.vividus.visual.screenshot.ScenarioBasedIndexer" />
 
-    <bean id="visualCheckFactory" class="org.vividus.visual.VisualCheckFactory" >
-        <property name="screenshotIndexer" value="${web.visual.indexer}" />
-    </bean>
+        <bean id="visualCheckFactory" class="org.vividus.visual.VisualCheckFactory" >
+            <property name="screenshotIndexer" value="${ui.visual.indexer}" />
+        </bean>
 
-    <util:list id="stepBeanNames-Visual-Hooks">
-        <idref bean="scenario" />
-    </util:list>
+        <util:list id="stepBeanNames-Visual-Hooks">
+            <idref bean="scenario" />
+        </util:list>
+    </beans>
 </beans>

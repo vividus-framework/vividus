@@ -10,6 +10,8 @@
      default-lazy-init="true" profile="mobile_app">
 
      <context:component-scan base-package="org.vividus.bdd.mobileapp.variable"/>
+     <context:component-scan base-package="org.vividus.selenium.mobileapp.screenshot.strategies"/>
+     <context:component-scan base-package="org.vividus.bdd.mobileapp.converter"/>
 
      <bean class="org.vividus.bdd.mobileapp.configuration.MobileEnvironment">
          <constructor-arg index="0" value="${mobile-environment.real-device}" />
@@ -93,6 +95,20 @@
     <bean class="org.vividus.ui.mobile.action.search.ElementAttributeFilter" />
 
     <bean class="org.vividus.ui.mobile.action.MobileAppElementActions" />
+
+    <bean id="ashotFactory" class="org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory" parent="abstractAshotFactory">
+        <property name="ashotConfigurations">
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="mobile.screenshot.strategy." />
+                <constructor-arg value="org.vividus.selenium.screenshot.ScreenshotConfiguration"/>
+            </bean>
+        </property>
+        <property name="shootingStrategy" value="${mobile.screenshot.strategy}" />
+    </bean>
+
+    <bean id="mobileAppWebDriverManager" class="org.vividus.selenium.mobileapp.MobileAppWebDriverManager" parent="genericWebDriverManager"/>
+
+    <bean id="coordsProvider" class="org.vividus.selenium.mobileapp.screenshot.NativeHeaderAwareCoordsProvider" />
 
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
         <idref bean="applicationSteps" />
