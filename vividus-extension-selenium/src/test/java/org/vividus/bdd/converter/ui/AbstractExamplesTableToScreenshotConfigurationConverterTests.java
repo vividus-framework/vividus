@@ -46,7 +46,7 @@ class AbstractExamplesTableToScreenshotConfigurationConverterTests
         ExamplesTable table = new ExamplesTable("|nativeFooterToCut|\n|101|\n|102|");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> CONVERTER.convertValue(table, ScreenshotConfiguration.class));
-        assertEquals("Only one row is accepatble for screenshot configurations", exception.getMessage());
+        assertEquals("Only one row is acceptable for screenshot configurations", exception.getMessage());
     }
 
     private static final class TestExamplesTableToScreenshotConfigurationConverter
