@@ -1,3 +1,5 @@
+:azure-service-name: functions
+
 = Azure functions Plugin
 
 The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/functions/[Azure Functions]
@@ -14,16 +16,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-azure-functions', ver
 
 include::partial$azure-authentication.adoc[]
 
-=== Azure Environment selection
-
-The Azure environment could be selected via a property: `azure.functions.environment`
-The default value is AZURE
-
-Possible values are: AZURE, AZURE_CHINA, AZURE_GERMANY, AZURE_US_GOVERNMENT
-
-=== Azure Subscription selection
-
-The azure subscription should be configured via `AZURE_SUBSCRIPTION_ID` environment variable
+include::partial$azure-profile-and-subscription.adoc[]
 
 == Steps
 

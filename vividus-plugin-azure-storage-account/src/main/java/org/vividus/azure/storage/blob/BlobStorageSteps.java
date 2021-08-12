@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.util.BinaryData;
-import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -40,7 +39,7 @@ import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.context.BddVariableContext;
+import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
@@ -53,10 +52,9 @@ public class BlobStorageSteps
     private static final Logger LOGGER = LoggerFactory.getLogger(BlobStorageSteps.class);
 
     private final PropertyMappedCollection<String> storageAccountEndpoints;
-    private final BddVariableContext bddVariableContext;
-    private final JsonUtils jsonUtils;
-
     private final TokenCredential credential;
+    private final IBddVariableContext bddVariableContext;
+    private final JsonUtils jsonUtils;
 
     private final LoadingCache<String, BlobServiceClient> blobStorageClients = CacheBuilder.newBuilder()
             .build(new CacheLoader<>()
@@ -68,13 +66,13 @@ public class BlobStorageSteps
                 }
             });
 
-    public BlobStorageSteps(PropertyMappedCollection<String> storageAccountEndpoints,
-            BddVariableContext bddVariableContext, JsonUtils jsonUtils)
+    public BlobStorageSteps(PropertyMappedCollection<String> storageAccountEndpoints, TokenCredential credential,
+            IBddVariableContext bddVariableContext, JsonUtils jsonUtils)
     {
         this.storageAccountEndpoints = storageAccountEndpoints;
+        this.credential = credential;
         this.bddVariableContext = bddVariableContext;
         this.jsonUtils = jsonUtils;
-        this.credential = new DefaultAzureCredentialBuilder().build();
     }
 
     /**

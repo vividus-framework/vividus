@@ -6,6 +6,8 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
+    <bean class="org.vividus.azure.identity.CredentialFactory" factory-method="createTokenCredential" />
+
     <bean id="blobSteps" class="org.vividus.azure.storage.blob.BlobStorageSteps">
         <constructor-arg>
             <bean factory-bean="propertyParser" factory-method="readValues">
@@ -14,7 +16,16 @@
         </constructor-arg>
     </bean>
 
+    <bean id="storageAccountManagementSteps" class="org.vividus.azure.storage.StorageAccountManagementSteps">
+        <constructor-arg>
+            <bean class="com.azure.core.management.profile.AzureProfile">
+                <constructor-arg type="com.azure.core.management.AzureEnvironment" value="${azure.storage-account.environment}" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
     <util:list id="stepBeanNames-Azure-StorageAccount" value-type="java.lang.String">
         <idref bean="blobSteps" />
+        <idref bean="storageAccountManagementSteps" />
     </util:list>
 </beans>
