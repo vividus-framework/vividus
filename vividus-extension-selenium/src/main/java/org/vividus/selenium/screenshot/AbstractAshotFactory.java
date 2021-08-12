@@ -55,14 +55,11 @@ public abstract class AbstractAshotFactory<T extends ScreenshotConfiguration> im
     protected ShootingStrategy configureNativePartialsToCut(int headerToCut, T screenshotConfiguration,
             ShootingStrategy decorated)
     {
-        ShootingStrategy toDecorate = decorated;
         int nativeFooterToCut = screenshotConfiguration.getNativeFooterToCut();
         int nativeHeaderToCut = headerToCut;
-        if (anyNotZero(nativeFooterToCut, nativeHeaderToCut))
-        {
-            toDecorate = cutting(decorated, new FixedCutStrategy(nativeHeaderToCut, nativeFooterToCut));
-        }
-        return toDecorate;
+        return anyNotZero(nativeFooterToCut, nativeHeaderToCut) 
+                ? cutting(decorated, new FixedCutStrategy(nativeHeaderToCut, nativeFooterToCut))
+                : decorated;
     }
 
     protected ScreenshotShootingStrategy getStrategyBy(String strategyName)

@@ -34,7 +34,7 @@ public abstract class AbstractExamplesTableToScreenshotConfigurationConverter<T 
     private static <T extends ScreenshotConfiguration> T covert(Class<T> clazz, ExamplesTable examplesTable)
     {
         List<T> configurations = examplesTable.getRowsAs(clazz);
-        Validate.isTrue(configurations.size() == 1, "Only one row is accepatble for screenshot configurations");
+        Validate.isTrue(configurations.size() == 1, "Only one row is acceptable for screenshot configurations");
         return configurations.get(0);
     }
 }
