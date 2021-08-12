@@ -1,3 +1,5 @@
+:azure-service-name: storage-account
+
 = Azure Storage Account Plugin
 
 The plugin provides functionality to interact with https://docs.microsoft.com/en-us/azure/storage/[Azure Storage Account].
@@ -10,13 +12,15 @@ The plugin provides functionality to interact with https://docs.microsoft.com/en
 implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-account', version: '{current-version}')
 ----
 
-== Configuration
+== Common configuration
 
 include::partial$azure-authentication.adoc[]
 
+== Blob storage
+
 === Properties
 
-The storage accounts endpoints are configured with the following property format:
+The blob storages endpoints are configured with the following property format:
 
 [source,properties]
 ----
@@ -25,14 +29,14 @@ azure.storage-account.<key>=<endpoint>
 
 where:
 
-. `key` - The logical key used to refer storage account in the steps.
-. `endpoint` - The blob service URL, e.g. `https://storageaccount.blob.core.windows.net/`.
+. `key` - The logical key used to refer the blob storage in the steps.
+. `endpoint` - The blob service URL, e.g. `https://mystorage.blob.core.windows.net/`.
 It's allowed to use blob service https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS] URL here,
 in this case the authentication configuration is not required.
 
-== Steps
+=== Steps
 
-=== Download the blob
+==== Download the blob
 
 Downloads the entire blob from the container and saves its content as a text to a variable.
 
@@ -53,7 +57,7 @@ When I download blob with name `$blobName` from container `$containerName` of st
 When I download blob with name `raw/test.json` from container `vividus` of storage account `testaccount` and save its content to scenario variable `blob`
 ----
 
-=== Download the blob to a temporary file
+==== Download the blob to a temporary file
 
 Downloads the entire blob from the container into a temporary file with the specified name and saves the full path to the specified variable.
 
@@ -75,7 +79,7 @@ When I download blob with name `$blobName` from container `$containerName` of st
 When I download blob with name `raw/test.json` from container `vividus` of storage account `testaccount` to temporary file with name `test.json` and save path to scenario variable `$pathToBlob`
 ----
 
-=== Retrieve the blob properties
+==== Retrieve the blob properties
 
 Retrieves the blob properties (all user-defined metadata, standard HTTP
 properties, and system properties for the blob) and saves them as JSON to a
@@ -83,7 +87,7 @@ variable.
 
 [source,gherkin]
 ----
-When("I retrieve properties of blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey` and save them to $scopes variable `$variableName`
+When I retrieve properties of blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey` and save them to $scopes variable `$variableName`
 ----
 
 * `$blobName` - The full path to the blob in the container.
@@ -98,7 +102,7 @@ When("I retrieve properties of blob with name `$blobName` from container `$conta
 When I retrieve properties of blob with name `raw/test.json` from container `vividus` of storage account `testaccount` and save them to scenario variable `blob-properties`
 ----
 
-=== Upload the blob
+==== Upload the blob
 
 Uploads the blob to the container.
 
@@ -124,7 +128,7 @@ When I upload blob with name `raw/test.json` and data `{"test":"data"}` to conta
 When I upload blob with name `folder/image.jpg` and data `#{loadBinaryResource(/data/image.jpg)}` to container `vividus` of storage account `testaccount`
 ----
 
-=== Delete the blob
+==== Delete the blob
 
 Deletes the specified blob from the container.
 
@@ -143,7 +147,7 @@ When I delete blob with name `$blobName` from container `$containerName` of stor
 When I delete blob with name `raw/test.json` from container `vividus` of storage account `testaccount`
 ----
 
-=== Find blobs
+==== Find blobs
 
 Finds the blobs with names matching the specified comparison rule.
 
@@ -163,4 +167,38 @@ When I find all blobs with name which $comparisonRule `$blobNameToMatch` in cont
 [source,gherkin]
 ----
 When I find all blobs with name which contains `json` in container `vividus` of storage account `testaccount` and save result to scenario variable `blobsCollection`
+----
+
+== Storage account management
+
+=== Configuration
+
+include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
+
+=== Steps
+
+==== Collect storage accounts info
+
+Collects storage accounts info in the specified resource group and saves it as
+JSON to a variable.
+
+[source,gherkin]
+----
+When I collect storage accounts in resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
+----
+
+* `$resourceGroupName` - The name of the resource group to list the storage accounts from.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the info about storage accounts as JSON.
+
+[IMPORTANT]
+====
+The client should have permission to run action `Microsoft.Storage/storageAccounts/read`
+over scope `/subscriptions/{subscription ID}/resourceGroups/{resource group name}/providers/Microsoft.Storage`.
+====
+
+.Collect storage accounts info
+[source,gherkin]
+----
+When I collect storage accounts in resource group `TEST-SA` and save them as JSON to scenario variable `storage-accounts`
 ----

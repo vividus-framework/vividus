@@ -1,0 +1,16 @@
+=== Azure environment selection
+
+https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-national-cloud[Azure environment]
+could be selected via a property: `azure.{azure-service-name}.environment`.
+The default value is `AZURE`.
+
+The allowed values are:
+
+- `AZURE`
+- `AZURE_CHINA`
+- `AZURE_GERMANY`
+- `AZURE_US_GOVERNMENT`
+
+=== Azure subscription selection
+
+Azure subscription must be configured via `AZURE_SUBSCRIPTION_ID` environment variable.

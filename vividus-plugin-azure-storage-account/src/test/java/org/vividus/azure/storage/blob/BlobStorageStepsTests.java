@@ -36,9 +36,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.rest.PagedIterable;
-import com.azure.identity.DefaultAzureCredential;
-import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -57,7 +56,7 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.BddVariableContext;
+import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
@@ -80,9 +79,9 @@ class BlobStorageStepsTests
     private final TestLogger logger = TestLoggerFactory.getTestLogger(BlobStorageSteps.class);
 
     @Mock private PropertyMappedCollection<String> storageAccountEndpoints;
-    @Mock private BddVariableContext bddVariableContext;
+    @Mock private IBddVariableContext bddVariableContext;
     @Mock private JsonUtils jsonUtils;
-    @Mock private DefaultAzureCredential defaultAzureCredential;
+    @Mock private TokenCredential tokenCredential;
 
     @Test
     void shouldDownloadBlob()
@@ -201,26 +200,22 @@ class BlobStorageStepsTests
         String endpoint = "endpoint";
         when(storageAccountEndpoints.get(KEY,
                 "Storage account with key '%s' is not configured in properties", KEY)).thenReturn(endpoint);
-        try (MockedConstruction<DefaultAzureCredentialBuilder> credentialsBuilder =
-                mockConstruction(DefaultAzureCredentialBuilder.class, (mock, context) -> {
-                    when(mock.build()).thenReturn(defaultAzureCredential);
-                });
-             MockedConstruction<BlobServiceClientBuilder> serviceClientBuilder =
+        try (MockedConstruction<BlobServiceClientBuilder> serviceClientBuilder =
                 mockConstruction(BlobServiceClientBuilder.class, (mock, context) -> {
-                    when(mock.credential(defaultAzureCredential)).thenReturn(mock);
+                    when(mock.credential(tokenCredential)).thenReturn(mock);
                     when(mock.endpoint(endpoint)).thenReturn(mock);
                     when(mock.buildClient()).thenReturn(blobServiceClient);
                 }))
         {
             BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
             when(blobServiceClient.getBlobContainerClient(CONTAINER)).thenReturn(blobContainerClient);
-            BlobStorageSteps steps = new BlobStorageSteps(storageAccountEndpoints, bddVariableContext, jsonUtils);
+            BlobStorageSteps steps = new BlobStorageSteps(storageAccountEndpoints, tokenCredential,
+                    bddVariableContext, jsonUtils);
             testToRun.accept(steps, blobContainerClient);
-            assertThat(credentialsBuilder.constructed(), hasSize(1));
             assertThat(serviceClientBuilder.constructed(), hasSize(1));
             BlobServiceClientBuilder builder = serviceClientBuilder.constructed().get(0);
             InOrder ordered = inOrder(builder);
-            ordered.verify(builder).credential(defaultAzureCredential);
+            ordered.verify(builder).credential(tokenCredential);
             ordered.verify(builder).endpoint(endpoint);
             ordered.verify(builder).buildClient();
         }
