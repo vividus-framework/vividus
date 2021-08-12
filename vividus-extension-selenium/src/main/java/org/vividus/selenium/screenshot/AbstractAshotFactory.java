@@ -57,7 +57,7 @@ public abstract class AbstractAshotFactory<T extends ScreenshotConfiguration> im
     {
         int nativeFooterToCut = screenshotConfiguration.getNativeFooterToCut();
         int nativeHeaderToCut = headerToCut;
-        return anyNotZero(nativeFooterToCut, nativeHeaderToCut) 
+        return anyNotZero(nativeFooterToCut, nativeHeaderToCut)
                 ? cutting(decorated, new FixedCutStrategy(nativeHeaderToCut, nativeFooterToCut))
                 : decorated;
     }
