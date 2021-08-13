@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.util.BinaryData;
 import com.azure.core.util.Context;
-import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.storage.queue.QueueClient;
 import com.azure.storage.queue.QueueClientBuilder;
 import com.azure.storage.queue.models.PeekedMessageItem;
@@ -34,7 +33,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.bdd.context.BddVariableContext;
+import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
@@ -42,11 +41,11 @@ import org.vividus.util.property.PropertyMappedCollection;
 public class StorageQueueSteps
 {
     private final PropertyMappedCollection<String> storageQueueEndpoints;
-    private final BddVariableContext bddVariableContext;
+    private final IBddVariableContext bddVariableContext;
     private final JsonUtils jsonUtils;
     private final Duration receiveTimeout;
 
-    private final TokenCredential credential;
+    private final TokenCredential tokenCredential;
 
     private final LoadingCache<String, QueueClient> storageQueueClients = CacheBuilder.newBuilder()
             .build(new CacheLoader<>()
@@ -54,18 +53,21 @@ public class StorageQueueSteps
                 @Override
                 public QueueClient load(String storageQueueEndpoint)
                 {
-                    return new QueueClientBuilder().credential(credential).endpoint(storageQueueEndpoint).buildClient();
+                    return new QueueClientBuilder()
+                            .credential(tokenCredential)
+                            .endpoint(storageQueueEndpoint)
+                            .buildClient();
                 }
             });
 
-    public StorageQueueSteps(PropertyMappedCollection<String> storageQueueEndpoints,
-            Duration receiveTimeout, BddVariableContext bddVariableContext, JsonUtils jsonUtils)
+    public StorageQueueSteps(PropertyMappedCollection<String> storageQueueEndpoints, Duration receiveTimeout,
+            TokenCredential tokenCredential, IBddVariableContext bddVariableContext, JsonUtils jsonUtils)
     {
         this.storageQueueEndpoints = storageQueueEndpoints;
         this.receiveTimeout = receiveTimeout;
         this.bddVariableContext = bddVariableContext;
         this.jsonUtils = jsonUtils;
-        this.credential = new DefaultAzureCredentialBuilder().build();
+        this.tokenCredential = tokenCredential;
     }
 
     /**

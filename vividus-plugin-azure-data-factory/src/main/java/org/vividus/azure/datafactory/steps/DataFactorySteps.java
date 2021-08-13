@@ -22,7 +22,6 @@ import java.util.Map;
 import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
-import com.azure.identity.EnvironmentCredentialBuilder;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.management.datafactory.v2018_06_01.PipelineRun;
@@ -44,15 +43,14 @@ public class DataFactorySteps
     private final ISoftAssert softAssert;
 
     public DataFactorySteps(AzureEnvironment environment, String tenantId, String subscriptionId,
-            ISoftAssert softAssert)
+            TokenCredential tokenCredential, ISoftAssert softAssert)
     {
-        TokenCredential credential = new EnvironmentCredentialBuilder().build();
         AzureTokenCredentials azureTokenCredentials = new AzureTokenCredentials(environment, tenantId)
         {
             @Override
             public String getToken(String resource)
             {
-                return credential.getToken(new TokenRequestContext().addScopes(resource + "/.default"))
+                return tokenCredential.getToken(new TokenRequestContext().addScopes(resource + "/.default"))
                         .map(AccessToken::getToken)
                         .block();
             }

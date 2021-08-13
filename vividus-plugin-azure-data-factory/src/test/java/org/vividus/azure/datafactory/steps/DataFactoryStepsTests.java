@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
@@ -36,9 +35,8 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import com.azure.core.credential.AccessToken;
+import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
-import com.azure.identity.EnvironmentCredential;
-import com.azure.identity.EnvironmentCredentialBuilder;
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -59,7 +57,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.ISoftAssert;
@@ -145,21 +142,15 @@ class DataFactoryStepsTests
         });
     }
 
-    @SuppressWarnings({ "try", "unchecked" })
+    @SuppressWarnings("unchecked")
     private void executeSteps(BiConsumer<DataFactoryManager, DataFactorySteps> consumer) throws IOException
     {
         AzureEnvironment environment = AzureEnvironment.AZURE;
         String tenantId = "tenant-id";
         String subscriptionId = "subscription-id";
 
-        EnvironmentCredential credential = mock(EnvironmentCredential.class);
-        try (MockedConstruction<EnvironmentCredentialBuilder> ignoredBuilder = mockConstruction(
-                EnvironmentCredentialBuilder.class, (mock, context) -> {
-                    assertEquals(1, context.getCount());
-                    assertEquals(List.of(), context.arguments());
-                    when(mock.build()).thenReturn(credential);
-                });
-            MockedStatic<DataFactoryManager> managerFactory = mockStatic(DataFactoryManager.class))
+        TokenCredential tokenCredential = mock(TokenCredential.class);
+        try (MockedStatic<DataFactoryManager> managerFactory = mockStatic(DataFactoryManager.class))
         {
             ArgumentCaptor<AzureTokenCredentials> azureTokenCredentialsCaptor = ArgumentCaptor.forClass(
                     AzureTokenCredentials.class);
@@ -172,12 +163,13 @@ class DataFactoryStepsTests
 
             managerFactory.when(DataFactoryManager::configure).thenReturn(configurable);
 
-            DataFactorySteps steps = new DataFactorySteps(environment, tenantId, subscriptionId, softAssert);
+            DataFactorySteps steps = new DataFactorySteps(environment, tenantId, subscriptionId, tokenCredential,
+                    softAssert);
 
             String token = "token";
             ArgumentCaptor<TokenRequestContext> tokenRequestContextCaptor = ArgumentCaptor.forClass(
                     TokenRequestContext.class);
-            when(credential.getToken(tokenRequestContextCaptor.capture())).thenReturn(
+            when(tokenCredential.getToken(tokenRequestContextCaptor.capture())).thenReturn(
                     Mono.fromSupplier(() -> new AccessToken(token, OffsetDateTime.MAX)));
 
             String resource = "resource";

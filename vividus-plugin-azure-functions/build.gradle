@@ -4,9 +4,8 @@ dependencies {
     api project(':vividus-bdd-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
+    implementation project(':vividus-extension-azure')
     implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-appservice', version: '2.6.0')
-    implementation(group: 'com.azure', name: 'azure-identity', version: '1.3.4')
-
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)

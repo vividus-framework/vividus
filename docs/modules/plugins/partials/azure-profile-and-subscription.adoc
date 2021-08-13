@@ -1,10 +1,12 @@
 === Azure environment selection
 
 https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-national-cloud[Azure environment]
-could be selected via a property: `azure.{azure-service-name}.environment`.
-The default value is `AZURE`.
+could be optionally specified using either global property `azure.environment`
+(sets the environment for all Azure plugins) or plugin-specific property
+`azure.{azure-service-name}.environment`. The plugin-specific property takes
+precedence over the global one. The default value is `AZURE`.
 
-The allowed values are:
+The supported environments are only:
 
 - `AZURE`
 - `AZURE_CHINA`

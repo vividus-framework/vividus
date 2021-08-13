@@ -39,6 +39,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.azure.util.InnersJacksonAdapter;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 
@@ -69,7 +70,8 @@ class StorageAccountManagementStepsTests
             storageAccount.withAllowBlobPublicAccess(Boolean.TRUE);
             storageAccount.withTags(Map.of());
             when(storageAccounts.stream()).thenReturn(Stream.of(storageAccount));
-            var steps = new StorageAccountManagementSteps(azureProfile, tokenCredential, bddVariableContext);
+            var steps = new StorageAccountManagementSteps(azureProfile, tokenCredential, new InnersJacksonAdapter(),
+                    bddVariableContext);
             var scopes = Set.of(VariableScope.STORY);
             var varName = "varName";
             steps.listStorageAccounts(resourceGroupName, scopes, varName);
