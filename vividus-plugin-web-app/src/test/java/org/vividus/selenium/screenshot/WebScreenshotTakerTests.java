@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -37,7 +36,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -61,7 +59,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.util.ResourceUtils;
-import org.vividus.util.property.PropertyMappedCollection;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.util.ImageTool;
@@ -69,13 +66,13 @@ import ru.yandex.qatools.ashot.util.ImageTool;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class WebScreenshotTakerTests
 {
+    private static final BufferedImage IMAGE = loadImage();
     private static final String SCREENSHOT_WAS_TAKEN = "Screenshot was taken: {}";
     private static final AShot ASHOT = mock(AShot.class);
-    private static final String STRATEGY = "strategy";
     private static final String SCREENSHOT_NAME = "screenshotName";
     private static final String SCREENSHOT_NAME_GENERATED = SCREENSHOT_NAME + "Generated";
     private static final ru.yandex.qatools.ashot.Screenshot SCREENSHOT =
-            new ru.yandex.qatools.ashot.Screenshot(loadImage());
+            new ru.yandex.qatools.ashot.Screenshot(IMAGE);
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(AbstractScreenshotTaker.class);
 
@@ -83,25 +80,21 @@ class WebScreenshotTakerTests
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private IWebElementHighlighter webElementHighlighter;
     @Mock private EventBus eventBus;
-    @Mock private IScrollbarHandler scrollbarHandler;
-    @Mock private IAshotFactory ashotFactory;
+    @Mock private IAshotFactory<WebScreenshotConfiguration> ashotFactory;
     @Mock private ScreenshotDebugger screenshotDebugger;
-    @InjectMocks private WebScreenshotTaker screenshotTaker;
-
     @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
 
+    @InjectMocks private WebScreenshotTaker screenshotTaker;
+
     @Mock
-    private ScreenshotConfiguration screenshotConfiguration;
+    private WebScreenshotConfiguration screenshotConfiguration;
 
     @BeforeEach
     void beforeEach()
     {
         screenshotTaker.setHighlighterType(HighlighterType.DEFAULT);
         screenshotTaker.setIndent(1);
-        screenshotTaker.setShootingStrategy(STRATEGY);
-        screenshotTaker.setAshotConfigurations(
-                new PropertyMappedCollection<>(Map.of(STRATEGY, screenshotConfiguration)));
     }
 
     @SuppressWarnings("unchecked")
@@ -130,7 +123,7 @@ class WebScreenshotTakerTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME))
                 .thenReturn(SCREENSHOT_NAME_GENERATED);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
+        when(ashotFactory.create(Optional.empty())).thenReturn(ASHOT);
         mockTakeScreenshotWithHighlights();
         List<WebElement> webElements = List.of(mock(WebElement.class));
         when(ASHOT.takeScreenshot(webDriver, webElements)).thenReturn(SCREENSHOT);
@@ -154,7 +147,7 @@ class WebScreenshotTakerTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME))
                 .thenReturn(SCREENSHOT_NAME_GENERATED);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
+        when(ashotFactory.create(Optional.empty())).thenReturn(ASHOT);
         screenshotTaker.setHighlighterType(HighlighterType.BLUR);
         List<WebElement> webElements = List.of(mock(WebElement.class));
         when(ASHOT.takeScreenshot(webDriver, webElements)).thenReturn(SCREENSHOT);
@@ -169,7 +162,7 @@ class WebScreenshotTakerTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME))
                 .thenReturn(SCREENSHOT_NAME_GENERATED);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
+        when(ashotFactory.create(Optional.empty())).thenReturn(ASHOT);
         mockTakeScreenshotWithHighlights();
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
         Optional<Screenshot> screen = screenshotTaker.takeScreenshot(SCREENSHOT_NAME, List.of());
@@ -183,7 +176,7 @@ class WebScreenshotTakerTests
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME))
                 .thenReturn(SCREENSHOT_NAME_GENERATED);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
+        when(ashotFactory.create(Optional.empty())).thenReturn(ASHOT);
         screenshotTaker.setFullPageScreenshots(true);
         mockTakeScreenshotWithHighlights();
         List<WebElement> webElements = Collections.singletonList(mock(WebElement.class));
@@ -199,7 +192,7 @@ class WebScreenshotTakerTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME))
                 .thenReturn(SCREENSHOT_NAME_GENERATED);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
+        when(ashotFactory.create(Optional.empty())).thenReturn(ASHOT);
         screenshotTaker.setHighlighterType(HighlighterType.MONOCHROME);
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
         Optional<Screenshot> screen = screenshotTaker.takeScreenshot(SCREENSHOT_NAME);
@@ -212,7 +205,7 @@ class WebScreenshotTakerTests
         mockTakeScreenshotWithHighlights();
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
+        when(ashotFactory.create(Optional.empty())).thenReturn(ASHOT);
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
         Path filePath = tempDir.resolve(SCREENSHOT_NAME_GENERATED);
         screenshotTaker.takeScreenshot(filePath);
@@ -228,7 +221,7 @@ class WebScreenshotTakerTests
         mockTakeScreenshotWithHighlights();
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(ashotFactory.create(false, Optional.of(screenshotConfiguration))).thenReturn(ASHOT);
+        when(ashotFactory.create(Optional.empty())).thenReturn(ASHOT);
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
         String fileName = "screenshotName.png";
         screenshotTaker.setScreenshotDirectory(tempDir.toFile());
@@ -245,19 +238,15 @@ class WebScreenshotTakerTests
     @Test
     void shouldTakeAShotScreenshotWithCustomConfiguration() throws IOException
     {
-        ScreenshotConfiguration configurationMock = mock(ScreenshotConfiguration.class);
+        WebScreenshotConfiguration configurationMock = mock(WebScreenshotConfiguration.class);
         Optional<ScreenshotConfiguration> screenshotConfiguration = Optional.of(configurationMock);
-        WebElement scrollableElement = mock(WebElement.class);
-        when(configurationMock.getScrollableElement()).thenReturn(() -> Optional.of(scrollableElement));
-        when(ashotFactory.create(false, screenshotConfiguration)).thenReturn(ASHOT);
-        when(scrollbarHandler.performActionWithHiddenScrollbars(argThat(s -> {
-            s.get();
-            return true;
-        }), eq(scrollableElement))).thenReturn(SCREENSHOT);
+        when(ashotFactory.create(Optional.of(configurationMock))).thenReturn(ASHOT);
+        when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
         assertArrayEquals(ImageTool.toByteArray(SCREENSHOT),
                 ImageTool.toByteArray(screenshotTaker.takeAshotScreenshot(webDriver,
                         screenshotConfiguration)));
         verify(ASHOT).takeScreenshot(webDriver);
+        verify(screenshotDebugger).debug(WebScreenshotTaker.class, "After_AShot", IMAGE);
     }
 
     private void assertScreenshotWithHighlighter(Optional<Screenshot> actualScreenshot) throws IOException

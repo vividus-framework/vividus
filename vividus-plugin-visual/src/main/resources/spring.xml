@@ -4,18 +4,18 @@
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
-       default-lazy-init="true" profile="web">
+       default-lazy-init="true" profile="web,mobile_app">
 
     <bean id="visualSteps" class="org.vividus.visual.VisualSteps" />
 
     <bean id="visualTestingEngine" class="org.vividus.visual.engine.VisualTestingEngine">
-        <property name="acceptableDiffPercentage" value="${web.visual.acceptable-diff-percentage}" />
-        <property name="requiredDiffPercentage" value="${web.visual.required-diff-percentage}" />
-        <property name="overrideBaselines" value="${web.visual.override-baselines}" />
+        <property name="acceptableDiffPercentage" value="${ui.visual.acceptable-diff-percentage}" />
+        <property name="requiredDiffPercentage" value="${ui.visual.required-diff-percentage}" />
+        <property name="overrideBaselines" value="${ui.visual.override-baselines}" />
     </bean>
 
     <bean id="fileSystemBaselineRepository" class="org.vividus.visual.engine.FileSystemBaselineRepository">
-        <property name="baselinesFolder" value="${web.visual.baselines-folder}" />
+        <property name="baselinesFolder" value="${ui.visual.baselines-folder}" />
     </bean>
 
     <util:list id="stepBeanNames-Visual">

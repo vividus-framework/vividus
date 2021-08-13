@@ -23,16 +23,25 @@ import java.util.Optional;
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory;
 import org.vividus.selenium.screenshot.AbstractScreenshotTaker;
 import org.vividus.selenium.screenshot.IScreenshotFileNameGenerator;
 import org.vividus.selenium.screenshot.Screenshot;
+import org.vividus.selenium.screenshot.ScreenshotConfiguration;
+import org.vividus.selenium.screenshot.ScreenshotDebugger;
+
+import ru.yandex.qatools.ashot.AShot;
 
 public class MobileAppScreenshotTaker extends AbstractScreenshotTaker
 {
+    private final MobileAppAshotFactory mobileAppAshotFactory;
+
     public MobileAppScreenshotTaker(IWebDriverProvider webDriverProvider,
-            IScreenshotFileNameGenerator screenshotFileNameGenerator, EventBus eventBus)
+            IScreenshotFileNameGenerator screenshotFileNameGenerator, EventBus eventBus,
+            MobileAppAshotFactory mobileAppAshotFactory, ScreenshotDebugger screenshotDebugger)
     {
-        super(webDriverProvider, eventBus, screenshotFileNameGenerator);
+        super(webDriverProvider, eventBus, screenshotFileNameGenerator, screenshotDebugger);
+        this.mobileAppAshotFactory = mobileAppAshotFactory;
     }
 
     @Override
@@ -52,5 +61,11 @@ public class MobileAppScreenshotTaker extends AbstractScreenshotTaker
     public Path takeScreenshot(Path screenshotFilePath) throws IOException
     {
         return takeScreenshotAsFile(screenshotFilePath, this::getScreenshotBytes);
+    }
+
+    @Override
+    protected AShot crateAshot(Optional<ScreenshotConfiguration> screenshotConfiguration)
+    {
+        return mobileAppAshotFactory.create(screenshotConfiguration);
     }
 }

@@ -23,7 +23,7 @@ import javax.inject.Inject;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
+import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.visual.bdd.AbstractVisualSteps;
@@ -169,7 +169,7 @@ public class VisualTestingSteps extends AbstractVisualSteps
     @When(value = "I run visual test with Applitools using:$applitoolsConfigurations and screenshot"
             + " config:$screenshotConfiguration", priority = 1)
     public void performCheck(List<ApplitoolsVisualCheck> applitoolsConfigurations,
-            ScreenshotConfiguration screenshotConfiguration)
+            WebScreenshotConfiguration screenshotConfiguration)
     {
         applitoolsConfigurations.forEach(check -> {
             check.setScreenshotConfiguration(Optional.of(screenshotConfiguration));

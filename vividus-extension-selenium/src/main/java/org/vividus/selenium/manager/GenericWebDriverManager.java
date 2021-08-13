@@ -296,6 +296,11 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         return webDriverProvider.get();
     }
 
+    protected IWebDriverProvider getWebDriverProvider()
+    {
+        return webDriverProvider;
+    }
+
     public void setMobileApp(boolean mobileApp)
     {
         this.mobileApp = mobileApp;

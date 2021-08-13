@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
-import org.vividus.selenium.screenshot.WebScreenshotTaker;
+import org.vividus.selenium.screenshot.ScreenshotTaker;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.model.VisualCheck;
@@ -37,7 +37,7 @@ import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 
 public class AshotScreenshotProvider implements ScreenshotProvider
 {
-    private final WebScreenshotTaker screenshotTaker;
+    private final ScreenshotTaker screenshotTaker;
     private final ISearchActions searchActions;
     private final ScreenshotDebugger screenshotDebugger;
     private final CoordsProvider coordsProvider;
@@ -45,7 +45,7 @@ public class AshotScreenshotProvider implements ScreenshotProvider
 
     private Map<IgnoreStrategy, Set<Locator>> ignoreStrategies;
 
-    public AshotScreenshotProvider(WebScreenshotTaker screenshotTaker, ISearchActions searchActions,
+    public AshotScreenshotProvider(ScreenshotTaker screenshotTaker, ISearchActions searchActions,
             ScreenshotDebugger screenshotDebugger, CoordsProvider coordsProvider, IWebDriverProvider webDrvierProvider)
     {
         this.screenshotTaker = screenshotTaker;
@@ -58,8 +58,8 @@ public class AshotScreenshotProvider implements ScreenshotProvider
     @Override
     public Screenshot take(VisualCheck visualCheck)
     {
-        Screenshot screenshot = screenshotTaker.takeAshotScreenshot(
-                visualCheck.getSearchContext(), visualCheck.getScreenshotConfiguration());
+        Screenshot screenshot = screenshotTaker.takeAshotScreenshot(visualCheck.getSearchContext(),
+                visualCheck.getScreenshotConfiguration());
         BufferedImage original = screenshot.getImage();
         Map<IgnoreStrategy, Set<Locator>> stepLevelElementsToIgnore = visualCheck.getElementsToIgnore();
         for (Map.Entry<IgnoreStrategy, Set<Locator>> strategy : ignoreStrategies.entrySet())

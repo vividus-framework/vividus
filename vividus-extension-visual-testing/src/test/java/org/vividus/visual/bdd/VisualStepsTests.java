@@ -87,7 +87,7 @@ class VisualStepsTests
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"true, COMPARE_AGAINST", "false, CHECK_INEQUALITY_AGAINST"})
+    @CsvSource({"true, COMPARE_AGAINST", "false, CHECK_INEQUALITY_AGAINST"})
     void shouldPublishAttachment(boolean passed, VisualActionType action)
     {
         SearchContext searchContext = mock(SearchContext.class);

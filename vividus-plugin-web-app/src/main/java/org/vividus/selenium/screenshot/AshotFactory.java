@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,56 +19,58 @@ package org.vividus.selenium.screenshot;
 import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.cutting;
 
 import java.util.Optional;
-import java.util.function.Supplier;
-
-import javax.inject.Inject;
-
-import com.google.common.base.Suppliers;
 
 import org.openqa.selenium.ScreenOrientation;
 import org.vividus.selenium.IWebDriverFactory;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
+import org.vividus.selenium.screenshot.strategies.AdjustingViewportPastingDecorator;
+import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
+import org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy;
+import org.vividus.selenium.screenshot.strategies.StickyHeaderCutStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
 import io.appium.java_client.remote.MobileCapabilityType;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
-import ru.yandex.qatools.ashot.shooting.cutter.FixedCutStrategy;
 
-public class AshotFactory implements IAshotFactory
+public class AshotFactory extends AbstractAshotFactory<WebScreenshotConfiguration>
 {
-    private ScreenshotShootingStrategy screenshotShootingStrategy;
+    private final IWebDriverFactory webDriverFactory;
+    private final IWebDriverManager webDriverManager;
+    private final ScreenshotDebugger screenshotDebugger;
+    private final IScrollbarHandler scrollbarHandler;
+    private final WebJavascriptActions javascriptActions;
+    private String screenshotShootingStrategy;
 
-    @Inject private IWebDriverFactory webDriverFactory;
-    @Inject private IWebDriverManager webDriverManager;
-    @Inject private WebJavascriptActions javascriptActions;
-    @Inject private ScreenshotDebugger screenshotDebugger;
-
-    private final Supplier<ShootingStrategy> baseShootingStrategy = Suppliers.memoize(
-        () -> ShootingStrategies.scaling((float) javascriptActions.getDevicePixelRatio()));
-
-    @Override
-    public AShot create(boolean viewportScreenshot, Optional<ScreenshotConfiguration> screenshotConfiguration)
+    protected AshotFactory(WebJavascriptActions javascriptActions, IWebDriverFactory webDriverFactory,
+            IWebDriverManager webDriverManager, ScreenshotDebugger screenshotDebugger,
+            IScrollbarHandler scrollbarHandler)
     {
-        return screenshotConfiguration.map(
-            ashotConfiguration -> ashotConfiguration.getScreenshotShootingStrategy()
-                    .map(sss -> createAShot(baseShootingStrategy.get(), sss, viewportScreenshot))
-                    .orElseGet(() -> createAshot(ashotConfiguration)))
-                .orElseGet(() -> createAShot(baseShootingStrategy.get(), viewportScreenshot));
+        this.javascriptActions = javascriptActions;
+        this.webDriverFactory = webDriverFactory;
+        this.webDriverManager = webDriverManager;
+        this.screenshotDebugger = screenshotDebugger;
+        this.scrollbarHandler = scrollbarHandler;
     }
 
-    private AShot createAshot(ScreenshotConfiguration screenshotConfiguration)
+    @Override
+    public AShot create(Optional<WebScreenshotConfiguration> screenshotConfiguration)
     {
-        ShootingStrategy decorated = baseShootingStrategy.get();
+        return getAshotConfiguration(screenshotConfiguration, (c, b) -> c)
+                      .map(ashotConfiguration -> ashotConfiguration.getShootingStrategy()
+                                                                   .map(this::createAShot)
+                                                                   .orElseGet(() -> createAShot(ashotConfiguration)))
+                      .orElseGet(() -> createAShot(screenshotShootingStrategy));
+    }
 
-        int nativeFooterToCut = screenshotConfiguration.getNativeFooterToCut();
-        int nativeHeaderToCut = screenshotConfiguration.getNativeHeaderToCut();
-        if (anyNotZero(nativeFooterToCut, nativeHeaderToCut))
-        {
-            decorated = cutting(baseShootingStrategy.get(), new FixedCutStrategy(nativeHeaderToCut, nativeFooterToCut));
-        }
+    private AShot createAShot(WebScreenshotConfiguration screenshotConfiguration)
+    {
+        ShootingStrategy decorated = getBaseShootingStrategy();
+
+        decorated = configureNativePartialsToCut(screenshotConfiguration.getNativeHeaderToCut(),
+                screenshotConfiguration, decorated);
 
         int footerToCut = screenshotConfiguration.getWebFooterToCut();
         int headerToCut = screenshotConfiguration.getWebHeaderToCut();
@@ -81,12 +83,13 @@ public class AshotFactory implements IAshotFactory
                 screenshotConfiguration))
                 .withDebugger(screenshotDebugger);
 
-        return new AShot().shootingStrategy(decorated)
+        return new ScrollbarHidingAshot(screenshotConfiguration.getScrollableElement().get(), scrollbarHandler)
+                .shootingStrategy(decorated)
                 .coordsProvider(screenshotConfiguration.getCoordsProvider().create(javascriptActions));
     }
 
     private ShootingStrategy decorateWithViewportPasting(ShootingStrategy toDecorate,
-            ScreenshotConfiguration screenshotConfiguration)
+            WebScreenshotConfiguration screenshotConfiguration)
     {
         return ((DebuggingViewportPastingDecorator) screenshotConfiguration.getScrollableElement().get()
                        .map(e -> (ShootingStrategy) new AdjustingScrollableElementAwareViewportPastingDecorator(
@@ -97,30 +100,27 @@ public class AshotFactory implements IAshotFactory
                        .withScrollTimeout(((Long) screenshotConfiguration.getScrollTimeout().toMillis()).intValue());
     }
 
-    private AShot createAShot(ShootingStrategy baseShootingStrategy, boolean viewportScreenshot)
+    private AShot createAShot(String screenshotShootingStrategyName)
     {
-        return createAShot(baseShootingStrategy, screenshotShootingStrategy, viewportScreenshot);
-    }
-
-    private AShot createAShot(ShootingStrategy baseShootingStrategy,
-            ScreenshotShootingStrategy screenshotShootingStrategy, boolean viewportScreenshot)
-    {
+        ScreenshotShootingStrategy configured = getStrategyBy(screenshotShootingStrategyName);
         String deviceName = webDriverFactory.getCapability(MobileCapabilityType.DEVICE_NAME, false);
         boolean landscapeOrientation = webDriverManager.isOrientation(ScreenOrientation.LANDSCAPE);
-        ShootingStrategy shootingStrategy = screenshotShootingStrategy.getDecoratedShootingStrategy(
-                baseShootingStrategy, viewportScreenshot, landscapeOrientation, deviceName);
-        return new AShot().shootingStrategy(shootingStrategy)
-                .coordsProvider(screenshotShootingStrategy == ScreenshotShootingStrategy.SIMPLE
+        ShootingStrategy baseShootingStrategy = getBaseShootingStrategy();
+        ShootingStrategy shootingStrategy = configured.getDecoratedShootingStrategy(
+                baseShootingStrategy, landscapeOrientation, deviceName);
+        return new ScrollbarHidingAshot(Optional.empty(), scrollbarHandler).shootingStrategy(shootingStrategy)
+                .coordsProvider(configured instanceof SimpleScreenshotShootingStrategy
                         ? CeilingJsCoordsProvider.getSimple(javascriptActions)
                         : CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions));
     }
 
-    private boolean anyNotZero(int first, int second)
+    @Override
+    protected double getDpr()
     {
-        return first > 0 || second > 0;
+        return javascriptActions.getDevicePixelRatio();
     }
 
-    public void setScreenshotShootingStrategy(ScreenshotShootingStrategy screenshotShootingStrategy)
+    public void setScreenshotShootingStrategy(String screenshotShootingStrategy)
     {
         this.screenshotShootingStrategy = screenshotShootingStrategy;
     }

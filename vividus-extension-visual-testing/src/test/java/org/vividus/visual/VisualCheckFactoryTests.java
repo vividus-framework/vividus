@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Test;
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
+import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.screenshot.IScreenshotIndexer;
@@ -72,7 +72,7 @@ class VisualCheckFactoryTests
     {
         visualCheckFactory.setScreenshotIndexer(Optional.empty());
         visualCheckFactory.setIndexers(Map.of());
-        ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
+        WebScreenshotConfiguration screenshotConfiguration = mock(WebScreenshotConfiguration.class);
         VisualCheck check = visualCheckFactory.create(NAME, VisualActionType.COMPARE_AGAINST,
                 screenshotConfiguration);
         assertAll(

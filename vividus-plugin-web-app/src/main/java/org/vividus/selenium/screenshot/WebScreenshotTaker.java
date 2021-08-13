@@ -20,17 +20,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import com.google.common.eventbus.EventBus;
 
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.util.property.PropertyMappedCollection;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.cropper.indent.IndentCropper;
@@ -41,26 +38,20 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
     private static final Logger LOGGER = LoggerFactory.getLogger(WebScreenshotTaker.class);
 
     private final IWebElementHighlighter webElementHighlighter;
-    private final IScrollbarHandler scrollbarHandler;
-    private final IAshotFactory ashotFactory;
-    private final ScreenshotDebugger screenshotDebugger;
+    private final IAshotFactory<WebScreenshotConfiguration> ashotFactory;
 
     private boolean fullPageScreenshots;
     private int indent;
     private HighlighterType highlighterType;
-    private String shootingStrategy;
-    private PropertyMappedCollection<ScreenshotConfiguration> ashotConfigurations;
 
     public WebScreenshotTaker(IWebDriverProvider webDriverProvider,
             IScreenshotFileNameGenerator screenshotFileNameGenerator, IWebElementHighlighter webElementHighlighter,
-            EventBus eventBus, IScrollbarHandler scrollbarHandler, IAshotFactory ashotFactory,
+            EventBus eventBus, IAshotFactory<WebScreenshotConfiguration> ashotFactory,
             ScreenshotDebugger screenshotDebugger)
     {
-        super(webDriverProvider, eventBus, screenshotFileNameGenerator);
+        super(webDriverProvider, eventBus, screenshotFileNameGenerator, screenshotDebugger);
         this.webElementHighlighter = webElementHighlighter;
-        this.scrollbarHandler = scrollbarHandler;
         this.ashotFactory = ashotFactory;
-        this.screenshotDebugger = screenshotDebugger;
     }
 
     @Override
@@ -72,48 +63,25 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
     @Override
     public Path takeScreenshotAsFile(String screenshotName) throws IOException
     {
-        return takeScreenshot(generateScreenshotPath(screenshotName), false);
+        return takeScreenshotTo(generateScreenshotPath(screenshotName));
     }
 
     @Override
     public Path takeScreenshot(Path screenshotFilePath) throws IOException
     {
-        return takeScreenshot(screenshotFilePath, false);
+        return takeScreenshotTo(screenshotFilePath);
+    }
+
+    @Override
+    protected AShot crateAshot(Optional<ScreenshotConfiguration> screenshotConfiguration)
+    {
+        return ashotFactory.create(screenshotConfiguration.map(WebScreenshotConfiguration.class::cast));
     }
 
     public Optional<Screenshot> takeScreenshot(String screenshotName, List<WebElement> webElementsToHighlight)
     {
-        byte[] screenshotData = takeScreenshotAsByteArray(webElementsToHighlight, false);
+        byte[] screenshotData = takeScreenshotAsByteArray(webElementsToHighlight);
         return createScreenshot(screenshotData, screenshotName);
-    }
-
-    private ru.yandex.qatools.ashot.Screenshot takeScreenshot(SearchContext searchContext, AShot aShot,
-            Optional<WebElement> scrollableElement)
-    {
-        Supplier<ru.yandex.qatools.ashot.Screenshot> screenshotTaker = () -> searchContext instanceof WebDriver
-                ? aShot.takeScreenshot((WebDriver) searchContext)
-                : aShot.takeScreenshot(getWebDriverProvider().get(), (WebElement) searchContext);
-
-        ru.yandex.qatools.ashot.Screenshot screenshot =
-                scrollableElement.map(e -> scrollbarHandler.performActionWithHiddenScrollbars(screenshotTaker, e))
-            .orElseGet(() -> scrollbarHandler.performActionWithHiddenScrollbars(screenshotTaker));
-
-        screenshotDebugger.debug(this.getClass(), "After_AShot", screenshot.getImage());
-        return screenshot;
-    }
-
-    public ru.yandex.qatools.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
-            Optional<ScreenshotConfiguration> screenshotConfiguration)
-    {
-        Optional<ScreenshotConfiguration> configuration = screenshotConfiguration.or(this::getConfiguration);
-        AShot aShot = createAShot(false, configuration);
-        return takeScreenshot(searchContext, aShot,
-                configuration.map(ScreenshotConfiguration::getScrollableElement).flatMap(Supplier::get));
-    }
-
-    private Optional<ScreenshotConfiguration> getConfiguration()
-    {
-        return ashotConfigurations.getNullable(shootingStrategy);
     }
 
     private Optional<Screenshot> createScreenshot(byte[] screenshotData, String screenshotName)
@@ -123,13 +91,13 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
                 : Optional.empty();
     }
 
-    private Path takeScreenshot(Path screenshotFilePathSupplier, boolean viewportScreenshot) throws IOException
+    private Path takeScreenshotTo(Path screenshotFilePathSupplier) throws IOException
     {
         return takeScreenshotAsFile(screenshotFilePathSupplier,
-                () -> takeScreenshotAsByteArray(List.of(), viewportScreenshot));
+                () -> takeScreenshotAsByteArray(List.of()));
     }
 
-    private byte[] takeScreenshotAsByteArray(List<WebElement> webElements, boolean viewportScreenshot)
+    private byte[] takeScreenshotAsByteArray(List<WebElement> webElements)
     {
         if (getWebDriverProvider().isWebDriverInitialized())
         {
@@ -137,11 +105,11 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
             if (HighlighterType.DEFAULT == highlighterType)
             {
                 screenshotData = webElementHighlighter.takeScreenshotWithHighlights(
-                        () -> takeScreenshotAsByteArrayImpl(webElements, viewportScreenshot));
+                        () -> takeScreenshotAsByteArrayImpl(webElements));
             }
             else
             {
-                screenshotData = takeScreenshotAsByteArrayImpl(webElements, viewportScreenshot);
+                screenshotData = takeScreenshotAsByteArrayImpl(webElements);
             }
             return screenshotData;
         }
@@ -149,12 +117,12 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
         return new byte[0];
     }
 
-    private byte[] takeScreenshotAsByteArrayImpl(List<WebElement> webElements, boolean viewportScreenshot)
+    private byte[] takeScreenshotAsByteArrayImpl(List<WebElement> webElements)
     {
         WebDriver webDriver = getWebDriverProvider().get();
         try
         {
-            AShot aShot = createAShot(viewportScreenshot);
+            AShot aShot = ashotFactory.create(Optional.empty());
             IndentCropper indentCropper = new IndentCropper(fullPageScreenshots ? Integer.MAX_VALUE : indent);
             highlighterType.addIndentFilter(indentCropper);
             aShot.imageCropper(indentCropper);
@@ -166,16 +134,6 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
         {
             throw new IllegalStateException(e);
         }
-    }
-
-    private AShot createAShot(boolean viewportScreenshot)
-    {
-        return ashotFactory.create(viewportScreenshot, getConfiguration());
-    }
-
-    private AShot createAShot(boolean viewportScreenshot, Optional<ScreenshotConfiguration> screenshotConfiguration)
-    {
-        return ashotFactory.create(viewportScreenshot, screenshotConfiguration);
     }
 
     public void setFullPageScreenshots(boolean fullPageScreenshots)
@@ -191,15 +149,5 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
     public void setHighlighterType(HighlighterType highlighterType)
     {
         this.highlighterType = highlighterType;
-    }
-
-    public void setShootingStrategy(String shootingStrategy)
-    {
-        this.shootingStrategy = shootingStrategy;
-    }
-
-    public void setAshotConfigurations(PropertyMappedCollection<ScreenshotConfiguration> ashotConfigurations)
-    {
-        this.ashotConfigurations = ashotConfigurations;
     }
 }
