@@ -24,16 +24,12 @@ import java.util.Set;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.core.util.serializer.JacksonAdapter;
 import com.azure.core.util.serializer.SerializerEncoding;
 import com.azure.resourcemanager.storage.StorageManager;
 import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.Annotated;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 
 import org.jbehave.core.annotations.When;
+import org.vividus.azure.util.InnersJacksonAdapter;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 
@@ -41,43 +37,22 @@ public class StorageAccountManagementSteps
 {
     private final StorageManager storageManager;
     private final IBddVariableContext bddVariableContext;
-    private final JacksonAdapter jacksonAdapter;
+    private final InnersJacksonAdapter innersJacksonAdapter;
 
     public StorageAccountManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            IBddVariableContext bddVariableContext)
+            InnersJacksonAdapter innersJacksonAdapter, IBddVariableContext bddVariableContext)
     {
         this.storageManager = StorageManager.authenticate(tokenCredential, azureProfile);
         this.bddVariableContext = bddVariableContext;
-
-        JacksonAnnotationIntrospector annotationIntrospector = new JacksonAnnotationIntrospector()
-        {
-            @Override
-            public Access findPropertyAccess(Annotated annotated)
-            {
-                Access access = super.findPropertyAccess(annotated);
-                return access == Access.WRITE_ONLY ? Access.AUTO : access;
-            }
-        };
-        this.jacksonAdapter = new JacksonAdapter()
-        {
-            private ObjectMapper objectMapper;
-
-            @Override
-            protected ObjectMapper simpleMapper()
-            {
-                if (this.objectMapper == null)
-                {
-                    this.objectMapper = super.simpleMapper().setAnnotationIntrospector(annotationIntrospector);
-                }
-                return objectMapper;
-            }
-        };
+        this.innersJacksonAdapter = innersJacksonAdapter;
     }
 
     /**
-     * Collects storage accounts info in the specified resource group and saves it as JSON to a variable
+     * Collects the info about all the storage accounts under the specified resource group and saves it as JSON to a
+     * variable. Note that storage keys are not returned.
      *
-     * @param resourceGroupName the name of the resource group to list the storage accounts from
+     * @param resourceGroupName The name of the resource group within the user's subscription to list the storage
+     *                          accounts from. The name is case-insensitive.
      * @param scopes            The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
      *                          scopes.<br>
      *                          <i>Available scopes:</i>
@@ -101,6 +76,6 @@ public class StorageAccountManagementSteps
                 .collect(toList());
 
         bddVariableContext.putVariable(scopes, variableName,
-                jacksonAdapter.serialize(storageAccounts, SerializerEncoding.JSON));
+                innersJacksonAdapter.serialize(storageAccounts, SerializerEncoding.JSON));
     }
 }

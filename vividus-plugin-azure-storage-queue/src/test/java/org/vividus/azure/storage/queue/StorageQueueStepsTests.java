@@ -29,11 +29,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.util.BinaryData;
 import com.azure.core.util.Context;
-import com.azure.identity.DefaultAzureCredential;
-import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.storage.queue.QueueClient;
 import com.azure.storage.queue.QueueClientBuilder;
 import com.azure.storage.queue.models.PeekedMessageItem;
@@ -44,7 +43,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.BddVariableContext;
+import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
@@ -59,9 +58,9 @@ class StorageQueueStepsTests
     private static final String VARIABLE_NAME = "variableName";
 
     @Mock private PropertyMappedCollection<String> storageQueueEndpoints;
-    @Mock private BddVariableContext bddVariableContext;
+    @Mock private IBddVariableContext bddVariableContext;
     @Mock private JsonUtils jsonUtils;
-    @Mock private DefaultAzureCredential defaultAzureCredential;
+    @Mock private TokenCredential tokenCredential;
 
     @Test
     void shouldPeekMessagesFromTheQueue()
@@ -110,24 +109,20 @@ class StorageQueueStepsTests
         var endpoint = "https://accountName.queue.core.windows.net/queueName";
         when(storageQueueEndpoints.get(KEY, "Storage queue with key '%s' is not configured in properties", KEY))
                 .thenReturn(endpoint);
-        try (MockedConstruction<DefaultAzureCredentialBuilder> credentialsBuilder =
-                mockConstruction(DefaultAzureCredentialBuilder.class,
-                    (mock, context) -> when(mock.build()).thenReturn(defaultAzureCredential));
-            MockedConstruction<QueueClientBuilder> queueClientBuilder =
+        try (MockedConstruction<QueueClientBuilder> queueClientBuilder =
                 mockConstruction(QueueClientBuilder.class, (mock, context) -> {
-                    when(mock.credential(defaultAzureCredential)).thenReturn(mock);
+                    when(mock.credential(tokenCredential)).thenReturn(mock);
                     when(mock.endpoint(endpoint)).thenReturn(mock);
                     when(mock.buildClient()).thenReturn(queueClient);
                 }))
         {
-            StorageQueueSteps steps = new StorageQueueSteps(storageQueueEndpoints, RECEIVE_TIMEOUT, bddVariableContext,
-                    jsonUtils);
+            StorageQueueSteps steps = new StorageQueueSteps(storageQueueEndpoints, RECEIVE_TIMEOUT, tokenCredential,
+                    bddVariableContext, jsonUtils);
             testToRun.accept(steps, queueClient);
-            assertThat(credentialsBuilder.constructed(), hasSize(1));
             assertThat(queueClientBuilder.constructed(), hasSize(1));
             QueueClientBuilder builder = queueClientBuilder.constructed().get(0);
             var ordered = inOrder(builder);
-            ordered.verify(builder).credential(defaultAzureCredential);
+            ordered.verify(builder).credential(tokenCredential);
             ordered.verify(builder).endpoint(endpoint);
             ordered.verify(builder).buildClient();
         }

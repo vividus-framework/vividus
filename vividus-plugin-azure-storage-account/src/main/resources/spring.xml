@@ -6,8 +6,6 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean class="org.vividus.azure.identity.CredentialFactory" factory-method="createTokenCredential" />
-
     <bean id="blobSteps" class="org.vividus.azure.storage.blob.BlobStorageSteps">
         <constructor-arg>
             <bean factory-bean="propertyParser" factory-method="readValues">
