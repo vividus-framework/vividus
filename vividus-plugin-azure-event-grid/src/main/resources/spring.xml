@@ -18,7 +18,16 @@
         </constructor-arg>
     </bean>
 
+    <bean id="eventGridManagementSteps" class="org.vividus.azure.eventgrid.EventGridManagementSteps">
+        <constructor-arg>
+            <bean class="com.azure.core.management.profile.AzureProfile">
+                <constructor-arg type="com.azure.core.management.AzureEnvironment" value="${azure.event-grid.environment}" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
     <util:list id="stepBeanNames-Azure-Event-Grid" value-type="java.lang.String">
         <idref bean="eventGridSteps" />
+        <idref bean="eventGridManagementSteps" />
     </util:list>
 </beans>

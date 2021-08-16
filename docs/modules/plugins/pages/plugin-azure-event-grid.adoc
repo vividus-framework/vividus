@@ -1,3 +1,5 @@
+:azure-service-name: event-grid
+
 = Azure Event Grid Plugin
 
 The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/event-grid/[Event Grid]
@@ -10,7 +12,7 @@ The plugin provides functionality to interact with https://azure.microsoft.com/e
 implementation(group: 'org.vividus', name: 'vividus-plugin-azure-event-grid', version: '{current-version}')
 ----
 
-== Configuration
+== Interaction with topics
 
 === Topics configuration
 
@@ -24,14 +26,14 @@ azure.event-grid.{topic-name}.{property-name}=property value
 Where:
 
 . `topic-name` - The name of the topic which will be used as a step parameter
-. `property-name` - The name of the topic property. One of: 
+. `property-name` - The name of the topic property. One of:
 .. `key` - The topic access key
 .. `event-schema` - The kind of https://docs.microsoft.com/en-us/azure/event-grid/event-schema[schema] (GRID, CLOUD or CUSTOM)
-.. `endpoint` - The topic endpoint 
+.. `endpoint` - The topic endpoint
 
-== Steps
+=== Steps
 
-=== Publish event
+==== Publish event
 
 Publishes an event to a topic
 
@@ -58,4 +60,40 @@ When I send event to `create-user` topic with payload:
   },
   "dataVersion": "1.0"
 }
+----
+
+== Topic management
+
+=== Configuration
+
+include::partial$azure-authentication.adoc[leveloffset=+1]
+
+include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
+
+=== Steps
+
+==== Collect system topics info
+
+Collects system topics info in the specified resource group and saves it as
+JSON to a variable.
+
+[source,gherkin]
+----
+When I collect system topics in resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
+----
+
+* `$resourceGroupName` - The name of the resource group to list the system topics from.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the info about system topics as JSON.
+
+[IMPORTANT]
+====
+The client should have permission to run action `Microsoft.EventGrid/systemTopics/read`
+over scope `/subscriptions/{subscription ID}/resourceGroups/{resource group name}/providers/Microsoft.EventGrid`.
+====
+
+.Collect system topics info
+[source,gherkin]
+----
+When I collect system topics in resource group `TEST-SA` and save them as JSON to scenario variable `system-topics`
 ----
