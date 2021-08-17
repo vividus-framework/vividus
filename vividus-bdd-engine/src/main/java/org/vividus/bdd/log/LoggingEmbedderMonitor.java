@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.bdd.log;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 
 import org.jbehave.core.embedder.EmbedderControls;
 import org.jbehave.core.embedder.PrintStreamEmbedderMonitor;
@@ -35,26 +36,32 @@ public class LoggingEmbedderMonitor extends PrintStreamEmbedderMonitor
     }
 
     @Override
-    public void runningStory(String path)
+    public void batchFailed(BatchFailures failures)
     {
-        // Nothing to do
+        // Skip logging
     }
 
     @Override
-    public void batchFailed(BatchFailures failures)
+    public void runningStory(String path)
     {
-        // Nothing to do
+        // Skip logging
     }
 
     @Override
     public void processingSystemProperties(Properties properties)
     {
-        // Nothing to do
+        // Skip logging
+    }
+
+    @Override
+    public void usingExecutorService(ExecutorService executorService)
+    {
+        // Skip logging
     }
 
     @Override
     public void usingControls(EmbedderControls embedderControls)
     {
-        // Nothing to doF
+        // Skip logging
     }
 }
