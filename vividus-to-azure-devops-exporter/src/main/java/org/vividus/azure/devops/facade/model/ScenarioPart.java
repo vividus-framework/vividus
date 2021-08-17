@@ -14,23 +14,9 @@
  * limitations under the License.
  */
 
-package org.vividus.xray.facade;
+package org.vividus.azure.devops.facade.model;
 
-import java.util.List;
-
-import org.vividus.bdd.output.ManualTestStep;
-
-public class ManualTestCaseParameters extends AbstractTestCaseParameters
+public enum ScenarioPart
 {
-    private List<ManualTestStep> steps;
-
-    public List<ManualTestStep> getSteps()
-    {
-        return steps;
-    }
-
-    public void setSteps(List<ManualTestStep> steps)
-    {
-        this.steps = steps;
-    }
+    MANUAL, AUTOMATED;
 }

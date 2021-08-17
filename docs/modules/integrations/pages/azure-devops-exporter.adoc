@@ -8,32 +8,44 @@ Features:
 
 == Azure DevOps Export Properties
 
-[cols="2,1,3", options="header"]
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="2,1,1,3", options="header"]
 |===
 
 |Property
-|Required
+|Default value
+|Acceptable values
 |Description
 
-|`azure-devops-exporter.json-results-directory`
-|true
+|`*azure-devops-exporter.json-results-directory*`
+|
+|string
 a|Path to directory with test execution JSON results.
 
 The path is managed by the `bdd.report-directory` property which default value is `output/reports/jbehave` relatively to the tests directory.
 
 Please make sure that the `bdd.configuration.formats` property includes JSON value in order to generate test execution results.
 
-|`azure-devops-exporter.organization`
-|true
+|`*azure-devops-exporter.organization*`
+|
+|string
 |The name of the Azure DevOps organization.
 
-|`azure-devops-exporter.project`
-|true
-|Project ID or project name
+|`*azure-devops-exporter.project*`
+|
+|string
+|Project ID or project name.
 
-|`azure-devops-exporter.area`
-|true
-|The area of the product with which a test case is associated
+|`*azure-devops-exporter.area*`
+|
+|string
+|The area of the product which a test case is associated with.
+
+|`azure-devops-exporter.section-mapping.steps`
+|`AUTOMATED`
+|`AUTOMATED` or `MANUAL`
+|The scenario part to export into `Steps` section of `Test Case` work item, the remaining scenario part is exported into `Summary` section.
 
 |===
 

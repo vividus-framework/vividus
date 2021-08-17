@@ -162,6 +162,11 @@ public class Scenario extends AbstractStepsContainer
         return getMetaStream().anyMatch(m -> metaName.equals(m.getName()));
     }
 
+    public boolean isManual()
+    {
+        return collectSteps().stream().allMatch(Step::isManual);
+    }
+
     private Stream<Meta> getMetaStream()
     {
         return Optional.ofNullable(getMeta())

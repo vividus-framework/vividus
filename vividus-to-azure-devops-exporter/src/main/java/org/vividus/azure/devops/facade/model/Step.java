@@ -32,13 +32,13 @@ public final class Step
     private final List<ParameterizedString> parameterizedStrings;
     private final Object description;
 
-    public Step(int id, String actionText)
+    public Step(int id, String actionText, String resultText)
     {
         this.id = String.valueOf(id);
         this.type = "ActionStep";
         this.parameterizedStrings = List.of(
             new ParameterizedString(actionText),
-            new ParameterizedString()
+            new ParameterizedString(resultText)
         );
         this.description = new Object();
     }

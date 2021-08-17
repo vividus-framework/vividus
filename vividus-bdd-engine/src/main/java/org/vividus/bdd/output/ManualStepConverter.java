@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.vividus.xray.converter;
+package org.vividus.bdd.output;
 
 import static java.lang.System.lineSeparator;
+import static org.apache.commons.lang3.StringUtils.join;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +30,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.bdd.model.jbehave.Step;
-import org.vividus.xray.exception.SyntaxException;
-import org.vividus.xray.model.ManualTestStep;
 
 public final class ManualStepConverter
 {
@@ -48,6 +47,7 @@ public final class ManualStepConverter
 
     private static final Pattern STEP_BLOCK_PATTERN = Pattern.compile(String.format("%1$s.*?(?=^%1$s|\\Z)", STEP_SIGN),
             DOTALL_MULTILINE_MODE);
+    private static final Pattern MANUAL_IDENTIFIER_PATTERN = Pattern.compile("!--\\s*-?\\s*");
 
     private static final String REQUIRED_PART_FORMAT = "\\A%s(.*?)(?=^%s|^%s|\\Z)";
     private static final String OPTIONAL_PARTS_FORMAT = "^%s(.*?)(?=^%s|^%s|\\Z)";
@@ -75,11 +75,9 @@ public final class ManualStepConverter
             throw new SyntaxException(getErrorMessage(storyTitle, scenarioTitle));
         }
 
-        String manualScenario = steps.stream().map(Step::getValue)
-                .map(v -> RegExUtils.replaceAll(v, "!--\\s*-?\\s*", StringUtils.EMPTY))
-                .collect(Collectors.joining(lineSeparator()));
+        String manualScenario = join(cutManualIdentifier(steps), lineSeparator());
 
-        if (!manualScenario.startsWith(STEP_SIGN))
+        if (!startsWithManualKeyword(manualScenario))
         {
             throw new SyntaxException(getErrorMessage(storyTitle, scenarioTitle));
         }
@@ -96,6 +94,23 @@ public final class ManualStepConverter
             manualSteps.add(manualTestStep);
         }
         return manualSteps;
+    }
+
+    public static boolean startsWithManualKeyword(String value)
+    {
+        return value.startsWith(STEP_SIGN);
+    }
+
+    public static List<String> cutManualIdentifier(List<Step> steps)
+    {
+        return steps.stream().map(Step::getValue)
+                             .map(ManualStepConverter::cutManualIdentifier)
+                             .collect(Collectors.toList());
+    }
+
+    public static String cutManualIdentifier(String step)
+    {
+        return RegExUtils.replaceFirst(step, MANUAL_IDENTIFIER_PATTERN, StringUtils.EMPTY);
     }
 
     private static String extractFirstByPattern(Pattern pattern, String data, String target)

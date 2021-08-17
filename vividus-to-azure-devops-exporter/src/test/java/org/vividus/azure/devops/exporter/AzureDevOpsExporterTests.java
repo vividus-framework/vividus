@@ -45,7 +45,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.azure.devops.configuration.AzureDevOpsExporterOptions;
 import org.vividus.azure.devops.facade.AzureDevOpsFacade;
+import org.vividus.bdd.model.jbehave.Scenario;
 import org.vividus.bdd.model.jbehave.Step;
+import org.vividus.bdd.output.SyntaxException;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -57,21 +59,21 @@ class AzureDevOpsExporterTests
     private static final String CREATE_TITLE = "Create test case";
     private static final String UPDATE_TITLE = "Update test case";
 
-    @Captor private ArgumentCaptor<List<Step>> stepsCaptor;
+    @Captor private ArgumentCaptor<Scenario> scenarioCaptor;
     @Mock private AzureDevOpsFacade facade;
     private AzureDevOpsExporter exporter;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AzureDevOpsExporter.class);
 
     @Test
-    void shouldExportScenarios() throws IOException
+    void shouldExportScenarios() throws IOException, SyntaxException
     {
         init("export");
 
         exporter.exportResults();
 
-        verify(facade).updateTestCase(eq("STUB-0"), eq(UPDATE_TITLE), stepsCaptor.capture());
-        verify(facade).createTestCase(eq(CREATE_TITLE), stepsCaptor.capture());
+        verify(facade).updateTestCase(eq("STUB-0"), eq(STORY_PATH), scenarioCaptor.capture());
+        verify(facade).createTestCase(eq(STORY_PATH), scenarioCaptor.capture());
 
         assertThat(logger.getLoggingEvents(), is(List.of(
             info(EXPORT_STORY_LOG, STORY_PATH),
@@ -80,16 +82,16 @@ class AzureDevOpsExporterTests
             info("Skip export of {} scenario", "Skip test case")
         )));
 
-        stepsCaptor.getAllValues().forEach(this::assertSteps);
+        scenarioCaptor.getAllValues().forEach(this::assertScenario);
     }
 
     @Test
-    void shouldLogErrorsWhileExport() throws IOException
+    void shouldLogErrorsWhileExport() throws IOException, SyntaxException
     {
         init("error");
 
         IOException exception = mock(IOException.class);
-        doThrow(exception).when(facade).createTestCase(any(), any());
+        doThrow(exception).when(facade).createTestCase(eq(STORY_PATH), any());
 
         exporter.exportResults();
 
@@ -108,8 +110,9 @@ class AzureDevOpsExporterTests
         this.exporter = new AzureDevOpsExporter(options, facade);
     }
 
-    private void assertSteps(List<Step> steps)
+    private void assertScenario(Scenario scenario)
     {
+        List<Step> steps = scenario.collectSteps();
         assertThat(steps, hasSize(3));
         assertAll(
             () -> assertEquals("Given I setup test environment", steps.get(0).getValue()),

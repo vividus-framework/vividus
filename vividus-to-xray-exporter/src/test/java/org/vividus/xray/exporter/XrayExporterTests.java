@@ -64,6 +64,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.model.jbehave.NotUniqueMetaValueException;
 import org.vividus.bdd.model.jbehave.Scenario;
+import org.vividus.bdd.output.ManualTestStep;
 import org.vividus.util.ResourceUtils;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.facade.AbstractTestCaseParameters;
@@ -75,7 +76,6 @@ import org.vividus.xray.factory.TestCaseFactory;
 import org.vividus.xray.factory.TestExecutionFactory;
 import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
-import org.vividus.xray.model.ManualTestStep;
 import org.vividus.xray.model.TestCaseType;
 import org.vividus.xray.model.TestExecution;
 

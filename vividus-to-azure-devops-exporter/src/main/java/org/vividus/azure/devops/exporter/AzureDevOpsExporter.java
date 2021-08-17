@@ -28,6 +28,7 @@ import org.vividus.bdd.model.jbehave.NotUniqueMetaValueException;
 import org.vividus.bdd.model.jbehave.Scenario;
 import org.vividus.bdd.model.jbehave.Story;
 import org.vividus.bdd.output.OutputReader;
+import org.vividus.bdd.output.SyntaxException;
 
 @Component
 public class AzureDevOpsExporter
@@ -49,11 +50,11 @@ public class AzureDevOpsExporter
         {
             LOGGER.atInfo().addArgument(story::getPath).log("Exporting scenarios from {} story");
 
-            story.getFoldedScenarios().forEach(this::exportScenario);
+            story.getFoldedScenarios().forEach(scenario -> exportScenario(story.getPath(), scenario));
         }
     }
 
-    private void exportScenario(Scenario scenario)
+    private void exportScenario(String storyPath, Scenario scenario)
     {
         if (scenario.hasMetaWithName("azure-devops.skip-export"))
         {
@@ -69,14 +70,14 @@ public class AzureDevOpsExporter
 
             if (testCaseId.isPresent())
             {
-                facade.updateTestCase(testCaseId.get(), scenario.getTitle(), scenario.collectSteps());
+                facade.updateTestCase(testCaseId.get(), storyPath, scenario);
             }
             else
             {
-                facade.createTestCase(scenario.getTitle(), scenario.collectSteps());
+                facade.createTestCase(storyPath, scenario);
             }
         }
-        catch (IOException | NotUniqueMetaValueException e)
+        catch (IOException | NotUniqueMetaValueException | SyntaxException e)
         {
             LOGGER.atError().setCause(e).log("Got an error while exporting");
         }

@@ -26,11 +26,6 @@ public final class ParameterizedString
     @JacksonXmlText
     private final String text;
 
-    public ParameterizedString()
-    {
-        this(null);
-    }
-
     public ParameterizedString(String text)
     {
         this.text = text;

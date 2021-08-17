@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 import org.vividus.bdd.model.jbehave.AbstractStepsContainer;
 import org.vividus.bdd.model.jbehave.Scenario;
 import org.vividus.xray.configuration.XrayExporterOptions;
-import org.vividus.xray.model.TestCaseType;
 import org.vividus.xray.model.TestExecution;
 import org.vividus.xray.model.TestExecutionItem;
 import org.vividus.xray.model.TestExecutionItemStatus;
@@ -59,7 +58,7 @@ public class TestExecutionFactory
         test.setTestKey(scenarioEntry.getKey());
 
         Scenario scenario = scenarioEntry.getValue();
-        if (TestCaseType.getTestCaseType(scenario) == TestCaseType.MANUAL)
+        if (scenario.isManual())
         {
             test.setStatus(TestExecutionItemStatus.TODO);
             return test;
