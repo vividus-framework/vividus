@@ -492,7 +492,7 @@ When I find > `0` JSON elements from `
     }
   ]
 }
-` by `$.accounts.*` and for each element docs
+` by `$.accounts.*` and for each element do
 |step                                                                                 |
 |Then number of JSON elements by JSON path `$[?(@.accountId =~ /\d+/i)]` is equal to 1|
 ----
