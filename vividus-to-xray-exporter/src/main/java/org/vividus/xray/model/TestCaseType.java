@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,11 @@
 package org.vividus.xray.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.vividus.bdd.model.jbehave.Scenario;
-import org.vividus.bdd.model.jbehave.Step;
 
 public enum TestCaseType
 {
-    MANUAL, CUCUMBER;
-
-    public static TestCaseType getTestCaseType(Scenario scenario)
-    {
-        return scenario.collectSteps().stream().map(Step::getOutcome).allMatch("comment"::equals)
-                  ? MANUAL
-                  : CUCUMBER;
-    }
+    MANUAL,
+    CUCUMBER;
 
     public String getValue()
     {

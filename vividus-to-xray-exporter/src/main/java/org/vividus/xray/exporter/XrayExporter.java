@@ -37,12 +37,12 @@ import org.springframework.stereotype.Component;
 import org.vividus.bdd.model.jbehave.NotUniqueMetaValueException;
 import org.vividus.bdd.model.jbehave.Scenario;
 import org.vividus.bdd.model.jbehave.Story;
+import org.vividus.bdd.output.ManualStepConverter;
 import org.vividus.bdd.output.OutputReader;
+import org.vividus.bdd.output.SyntaxException;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.converter.CucumberScenarioConverter;
 import org.vividus.xray.converter.CucumberScenarioConverter.CucumberScenario;
-import org.vividus.xray.converter.ManualStepConverter;
-import org.vividus.xray.exception.SyntaxException;
 import org.vividus.xray.facade.AbstractTestCaseParameters;
 import org.vividus.xray.facade.CucumberTestCaseParameters;
 import org.vividus.xray.facade.ManualTestCaseParameters;
@@ -131,7 +131,7 @@ public class XrayExporter
 
         try
         {
-            TestCaseType testCaseType = TestCaseType.getTestCaseType(scenario);
+            TestCaseType testCaseType = scenario.isManual() ? TestCaseType.MANUAL : TestCaseType.CUCUMBER;
 
             String testCaseId = scenario.getUniqueMetaValue("testCaseId").orElse(null);
 

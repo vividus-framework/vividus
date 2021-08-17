@@ -22,15 +22,20 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -39,6 +44,8 @@ class ScenarioTests
 {
     private static final String META = "meta";
     private static final String VALUE = "value";
+    private static final String COMMENT = "comment";
+    private static final String SUCCESS = "success";
 
     @Mock private Step step;
 
@@ -119,6 +126,32 @@ class ScenarioTests
         Scenario scenario = new Scenario();
         scenario.setMeta(List.of(createMeta(META, VALUE)));
         assertTrue(scenario.hasMetaWithName(META));
+    }
+
+    static Stream<Arguments> steps()
+    {
+        return Stream.of(
+            arguments(true, List.of(createStep(COMMENT), createStep(COMMENT), createStep(COMMENT))),
+            arguments(false, List.of(createStep(SUCCESS), createStep(COMMENT), createStep(COMMENT))),
+            arguments(false, List.of(createStep(SUCCESS), createStep(SUCCESS), createStep(SUCCESS)))
+        );
+    }
+
+    @MethodSource("steps")
+    @ParameterizedTest
+    void shouldDetermineTestCaseType(boolean manual, List<Step> steps)
+    {
+        Scenario scenario = new Scenario();
+        scenario.setSteps(steps);
+        assertEquals(manual, scenario.isManual());
+    }
+
+    private static Step createStep(String outcome)
+    {
+        Step step = new Step();
+        step.setOutcome(outcome);
+        step.setValue(VALUE);
+        return step;
     }
 
     private static Meta createMeta(String name, String value)

@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package org.vividus.xray.facade;
+package org.vividus.azure.devops.configuration;
 
-import java.util.List;
+import org.vividus.azure.devops.facade.model.ScenarioPart;
 
-import org.vividus.bdd.output.ManualTestStep;
-
-public class ManualTestCaseParameters extends AbstractTestCaseParameters
+public class SectionMapping
 {
-    private List<ManualTestStep> steps;
+    private ScenarioPart steps;
 
-    public List<ManualTestStep> getSteps()
+    public ScenarioPart getSteps()
     {
         return steps;
     }
 
-    public void setSteps(List<ManualTestStep> steps)
+    public void setSteps(ScenarioPart steps)
     {
         this.steps = steps;
     }

@@ -27,6 +27,7 @@ public class AzureDevOpsExporterOptions
     private String organization;
     private String project;
     private String area;
+    private SectionMapping sectionMapping;
 
     public Path getJsonResultsDirectory()
     {
@@ -66,5 +67,15 @@ public class AzureDevOpsExporterOptions
     public void setArea(String area)
     {
         this.area = area;
+    }
+
+    public SectionMapping getSectionMapping()
+    {
+        return sectionMapping;
+    }
+
+    public void setSectionMapping(SectionMapping sectionMapping)
+    {
+        this.sectionMapping = sectionMapping;
     }
 }
