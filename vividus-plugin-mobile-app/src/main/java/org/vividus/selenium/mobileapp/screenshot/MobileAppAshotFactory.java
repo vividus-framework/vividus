@@ -23,15 +23,18 @@ import org.vividus.selenium.screenshot.AbstractAshotFactory;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 
 import ru.yandex.qatools.ashot.AShot;
+import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
 public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfiguration>
 {
     private final MobileAppWebDriverManager mobileAppWebDriverManager;
+    private final CoordsProvider coordsProvider;
 
-    public MobileAppAshotFactory(MobileAppWebDriverManager genericWebDriverManager)
+    public MobileAppAshotFactory(MobileAppWebDriverManager genericWebDriverManager, CoordsProvider coordsProvider)
     {
         this.mobileAppWebDriverManager = genericWebDriverManager;
+        this.coordsProvider = coordsProvider;
     }
 
     @Override
@@ -51,7 +54,7 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfig
         ShootingStrategy strategy = getStrategyBy(ashotConfig.getShootingStrategy().get())
             .getDecoratedShootingStrategy(getBaseShootingStrategy(), false, null);
         strategy = configureNativePartialsToCut(mobileAppWebDriverManager.getStatusBarSize(), ashotConfig, strategy);
-        return new AShot().shootingStrategy(strategy);
+        return new AShot().shootingStrategy(strategy).coordsProvider(coordsProvider);
     }
 
     @Override
