@@ -127,8 +127,8 @@ class ResourceCheckStepsTests
           + "<title>Title of the document</title>\r\n"
           + "</head>\r\n"
           + "<body>\r\n"
-          + "  <a id='about' href='https://vividus.org/about'>About</a>\r\n"
-          + "  <video id='about'>Some video without attributes</a>\r\n"
+          + "  <a id='link-id' href='https://vividus.org/about'>About</a>\r\n"
+          + "  <video id='video-id'>Some video without attributes</a>\r\n"
           + "</body>\r\n"
           + "</html>\r\n";
 
@@ -235,10 +235,10 @@ class ResourceCheckStepsTests
                     .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
-            validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, "#link-id", CheckStatus.PASSED);
             return true;
         }), eq(REPORT_NAME));
-        verify(softAssert).recordFailedAssertion("Element by selector #about doesn't contain href/src attributes");
+        verify(softAssert).recordFailedAssertion("Element by selector #video-id doesn't contain href/src attributes");
     }
 
     @Test
