@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.vividus.util.pool;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.Duration;
+import java.util.function.Consumer;
+
 import org.junit.jupiter.api.Test;
 
 class UnsafeGenericObjectPoolTests
@@ -26,38 +29,52 @@ class UnsafeGenericObjectPoolTests
     private static final String VALUE = "value";
 
     @Test
+    void shouldSetMaxWait()
+    {
+        testSimplePool(pool -> assertEquals(Duration.ofMinutes(5), pool.getMaxWaitDuration()));
+    }
+
+    @Test
     void testApply()
     {
-        assertEquals(VALUE, new UnsafeGenericObjectPool<>(() -> VALUE).apply(pooled -> pooled));
+        testSimplePool(pool -> assertEquals(VALUE, pool.apply(pooled -> pooled)));
     }
 
     @Test
     void testAccept()
     {
-        new UnsafeGenericObjectPool<>(() -> VALUE).accept(pooled -> assertEquals(VALUE, pooled));
+        testSimplePool(pool -> pool.accept(pooled -> assertEquals(VALUE, pooled)));
     }
 
     @Test
     void testApplyWithExceptionAtCreation()
     {
-        IllegalArgumentException exception = new IllegalArgumentException();
-        IllegalStateException actual = assertThrows(IllegalStateException.class,
-            () -> new UnsafeGenericObjectPool<>(() ->
-            {
-                throw exception;
-            }).apply(pooled -> pooled));
-        assertEquals(exception, actual.getCause());
+        var exception = new IllegalArgumentException();
+        try (var pool = new UnsafeGenericObjectPool<>(() -> { throw exception; }))
+        {
+            var actual = assertThrows(IllegalStateException.class, () -> pool.apply(pooled -> pooled));
+            assertEquals(exception, actual.getCause());
+        }
     }
 
     @Test
     void testApplyWithExceptionAtAppliance()
     {
-        IllegalArgumentException exception = new IllegalArgumentException();
-        IllegalStateException actual = assertThrows(IllegalStateException.class,
-            () -> new UnsafeGenericObjectPool<>(() -> VALUE).apply(pooled ->
-            {
+        testSimplePool(pool ->
+        {
+            IllegalArgumentException exception = new IllegalArgumentException();
+            var actual = assertThrows(IllegalStateException.class, () -> pool.apply(pooled -> {
                 throw exception;
             }));
-        assertEquals(exception, actual.getCause());
+            assertEquals(exception, actual.getCause());
+        });
+    }
+
+    private void testSimplePool(Consumer<UnsafeGenericObjectPool<String>> test)
+    {
+        try (var pool = new UnsafeGenericObjectPool<>(() -> VALUE))
+        {
+            test.accept(pool);
+        }
     }
 }
