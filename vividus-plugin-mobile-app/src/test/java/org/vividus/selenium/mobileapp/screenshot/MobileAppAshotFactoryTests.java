@@ -19,6 +19,7 @@ package org.vividus.selenium.mobileapp.screenshot;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +40,7 @@ import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.util.property.PropertyMappedCollection;
 
 import ru.yandex.qatools.ashot.AShot;
+import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
 import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
 
@@ -53,6 +55,7 @@ class MobileAppAshotFactoryTests
 
     @Mock private WebDriverProvider webDriverProvider;
     @Mock private MobileAppWebDriverManager mobileAppWebDriverManager;
+    @Mock private CoordsProvider coordsProvider;
     @InjectMocks private MobileAppAshotFactory ashotFactory;
 
     @Test
@@ -86,6 +89,7 @@ class MobileAppAshotFactoryTests
         CuttingDecorator strategy = (CuttingDecorator) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
         CutStrategy cutStrategy = (CutStrategy) FieldUtils.readField(strategy, CUT_STRATEGY, true);
         assertEquals(10, cutStrategy.getFooterHeight(null));
+        assertSame(coordsProvider, FieldUtils.readField(aShot, "coordsProvider", true));
     }
 
     @SuppressWarnings("unchecked")
