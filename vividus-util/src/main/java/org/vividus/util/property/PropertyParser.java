@@ -110,6 +110,6 @@ public class PropertyParser implements IPropertyParser
     private Map<String, String> filterProperties(Predicate<? super Entry<Object, Object>> filter)
     {
         return properties.entrySet().stream().filter(filter)
-                .collect(toMap(p -> (String) p.getKey(), p -> (String) p.getValue()));
+                .collect(toMap(p -> (String) p.getKey(), p -> p.getValue().toString()));
     }
 }

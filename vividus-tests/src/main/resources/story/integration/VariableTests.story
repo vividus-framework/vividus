@@ -152,3 +152,6 @@ Then `#{trim(${numbers})}` is equal to `12345`
 
 Scenario: Use environment variable as Vividus variable
 Then `${java}` is equal to `${JAVA_HOME}`
+
+Scenario: Compare variable with int value
+Then `${property-with-int-value}` is equal to `4`
