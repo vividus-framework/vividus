@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.util.pool;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -25,12 +26,12 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 
 public class UnsafeGenericObjectPool<T> extends GenericObjectPool<T>
 {
-    private static final int MAX_WAIT_MILLIS = 300_000;
+    private static final Duration MAX_WAIT_DURATION = Duration.ofMinutes(5);
 
     public UnsafeGenericObjectPool(PooledObjectFactory<T> factory)
     {
         super(factory);
-        setMaxWaitMillis(MAX_WAIT_MILLIS);
+        setMaxWait(MAX_WAIT_DURATION);
     }
 
     public UnsafeGenericObjectPool(Supplier<T> supplier)
