@@ -44,6 +44,8 @@ class PropertyParserTests
     private static final String VAL_3 = "val3";
     private static final String PROP_3 = "prop3";
     private static final String OTHER_PROP3 = OTHER + DOT + PROP_3;
+    private static final String NUMBER_KEY = "number";
+    private static final String NUMBER_VALUE = "911";
 
     private PropertyParser parser;
     private Map<String, String> expectedPropertyValues;
@@ -59,14 +61,19 @@ class PropertyParserTests
         properties = new Properties();
         expectedPropertyValues.forEach((key, value) -> properties.put(PREFIX + key, value));
         properties.put(PREFIX + OTHER_PROP3, VAL_3);
+        properties.put(PREFIX + NUMBER_KEY, Integer.parseInt(NUMBER_VALUE));
         parser = new PropertyParser(properties);
     }
 
     @Test
     void testGetPropertiesByPrefix()
     {
-        Map<String, String> propertiesByPrefix = parser.getPropertiesByPrefix(PREFIX);
-        assertThat(propertiesByPrefix.entrySet(), equalTo(properties.entrySet()));
+        assertEquals(Map.of(
+            PREFIX + PROP_2, VAL_2,
+            PREFIX + PROP_1, VAL_1,
+            PREFIX + NUMBER_KEY, NUMBER_VALUE,
+            PREFIX + OTHER_PROP3, VAL_3
+        ), parser.getPropertiesByPrefix(PREFIX));
     }
 
     @Test
@@ -75,6 +82,7 @@ class PropertyParserTests
         Map<String, String> actualPropertyValues = parser.getPropertyValuesByPrefix(PREFIX);
         Map<String, String> expected = new HashMap<>(expectedPropertyValues);
         expected.put(OTHER_PROP3, VAL_3);
+        expected.put(NUMBER_KEY, NUMBER_VALUE);
         assertThat(actualPropertyValues.entrySet(), equalTo(expected.entrySet()));
     }
 
@@ -105,6 +113,7 @@ class PropertyParserTests
         Map<String, Object> expected = Map.of(
                 PROP_1, VAL_1,
                 PROP_2, VAL_2,
+                NUMBER_KEY, NUMBER_VALUE,
                 OTHER, Map.of(
                         PROP_3, VAL_3,
                         "other1", Map.of(
