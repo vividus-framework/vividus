@@ -1,3 +1,5 @@
+:azure-service-name: data-factory
+
 = Azure Data Factory Plugin
 
 The plugin provides functionality to interact with https://docs.microsoft.com/en-us/azure/data-factory/[Azure Data Factory]
@@ -14,41 +16,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-azure-data-factory', 
 
 include::partial$azure-authentication.adoc[]
 
-== Properties
-
-NOTE: The properties marked with *bold* are mandatory.
-
-[cols="6,4,2,4", options="header"]
-|===
-|Property name
-|Acceptable values
-|Default
-|Description
-
-
-|[subs=+quotes]`*azure.data-factory.environment*`
-a|`AZURE`
-
-`AZURE_CHINA`
-
-`AZURE_GERMANY`
-
-`AZURE_US_GOVERNMENT`
-|`AZURE`
-|The Azure environment
-
-|[subs=+quotes]`*azure.data-factory.tenant-id*`
-|UUID
-|`<empty>`
-|The Azure tenant ID
-
-|[subs=+quotes]`*azure.data-factory.subscription-id*`
-|UUID
-|`<empty>`
-|The Azure subscription ID
-
-|===
-
+include::partial$azure-profile-and-subscription.adoc[]
 
 == Steps
 
