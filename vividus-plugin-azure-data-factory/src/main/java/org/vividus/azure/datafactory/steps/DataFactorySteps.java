@@ -17,15 +17,11 @@
 package org.vividus.azure.datafactory.steps;
 
 import java.time.Duration;
-import java.util.Map;
 
-import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.credential.TokenRequestContext;
-import com.microsoft.azure.AzureEnvironment;
-import com.microsoft.azure.credentials.AzureTokenCredentials;
-import com.microsoft.azure.management.datafactory.v2018_06_01.PipelineRun;
-import com.microsoft.azure.management.datafactory.v2018_06_01.implementation.DataFactoryManager;
+import com.azure.core.management.profile.AzureProfile;
+import com.azure.resourcemanager.datafactory.DataFactoryManager;
+import com.azure.resourcemanager.datafactory.models.PipelineRun;
 
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
@@ -42,20 +38,9 @@ public class DataFactorySteps
     private final DataFactoryManager dataFactoryManager;
     private final ISoftAssert softAssert;
 
-    public DataFactorySteps(AzureEnvironment environment, String tenantId, String subscriptionId,
-            TokenCredential tokenCredential, ISoftAssert softAssert)
+    public DataFactorySteps(AzureProfile azureProfile, TokenCredential tokenCredential, ISoftAssert softAssert)
     {
-        AzureTokenCredentials azureTokenCredentials = new AzureTokenCredentials(environment, tenantId)
-        {
-            @Override
-            public String getToken(String resource)
-            {
-                return tokenCredential.getToken(new TokenRequestContext().addScopes(resource + "/.default"))
-                        .map(AccessToken::getToken)
-                        .block();
-            }
-        };
-        this.dataFactoryManager = DataFactoryManager.configure().authenticate(azureTokenCredentials, subscriptionId);
+        this.dataFactoryManager = DataFactoryManager.authenticate(tokenCredential, azureProfile);
         this.softAssert = softAssert;
     }
 
@@ -72,15 +57,7 @@ public class DataFactorySteps
             + " with wait timeout `$waitTimeout`")
     public void runPipeline(String pipelineName, String factoryName, String resourceGroupName, Duration waitTimeout)
     {
-        String runId = dataFactoryManager
-                .pipelines()
-                .inner()
-                .createRunWithServiceResponseAsync(resourceGroupName, factoryName, pipelineName, null, null, null, null,
-                        Map.of())
-                .toBlocking()
-                .single()
-                .body()
-                .runId();
+        String runId = dataFactoryManager.pipelines().createRun(resourceGroupName, factoryName, pipelineName).runId();
         LOGGER.info("The ID of the created pipeline run is {}", runId);
         PipelineRun pipelineRun = new DurationBasedWaiter(new WaitMode(waitTimeout, RETRY_TIMES)).wait(
                 () -> getPipelineRun(resourceGroupName, factoryName, runId),
@@ -93,11 +70,7 @@ public class DataFactorySteps
 
     private PipelineRun getPipelineRun(String resourceGroupName, String factoryName, String runId)
     {
-        PipelineRun pipelineRun = dataFactoryManager
-                .pipelineRuns()
-                .getAsync(resourceGroupName, factoryName, runId)
-                .toBlocking()
-                .single();
+        PipelineRun pipelineRun = dataFactoryManager.pipelineRuns().get(resourceGroupName, factoryName, runId);
         LOGGER.atInfo().addArgument(pipelineRun::status).log("The current pipeline run status is \"{}\"");
         return pipelineRun;
     }

@@ -20,49 +20,34 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 
-import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.credential.TokenRequestContext;
+import com.azure.core.management.profile.AzureProfile;
+import com.azure.resourcemanager.datafactory.DataFactoryManager;
+import com.azure.resourcemanager.datafactory.models.CreateRunResponse;
+import com.azure.resourcemanager.datafactory.models.PipelineRun;
+import com.azure.resourcemanager.datafactory.models.PipelineRuns;
+import com.azure.resourcemanager.datafactory.models.Pipelines;
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-import com.microsoft.azure.AzureEnvironment;
-import com.microsoft.azure.credentials.AzureTokenCredentials;
-import com.microsoft.azure.management.datafactory.v2018_06_01.PipelineRun;
-import com.microsoft.azure.management.datafactory.v2018_06_01.PipelineRuns;
-import com.microsoft.azure.management.datafactory.v2018_06_01.Pipelines;
-import com.microsoft.azure.management.datafactory.v2018_06_01.implementation.CreateRunResponseInner;
-import com.microsoft.azure.management.datafactory.v2018_06_01.implementation.DataFactoryManager;
-import com.microsoft.azure.management.datafactory.v2018_06_01.implementation.DataFactoryManager.Configurable;
-import com.microsoft.azure.management.datafactory.v2018_06_01.implementation.PipelinesInner;
-import com.microsoft.rest.ServiceResponse;
 
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.ISoftAssert;
-
-import reactor.core.publisher.Mono;
-import rx.Observable;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class DataFactoryStepsTests
@@ -71,28 +56,30 @@ class DataFactoryStepsTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DataFactorySteps.class);
 
+    @Mock private AzureProfile azureProfile;
+    @Mock private TokenCredential tokenCredential;
     @Mock private ISoftAssert softAssert;
 
     @Test
-    void shouldRunSuccessfulPipeline() throws IOException
+    void shouldRunSuccessfulPipeline()
     {
         shouldRunPipeline(mock(PipelineRun.class), SUCCEEDED, List.of());
     }
 
     @Test
-    void shouldRunFailingPipeline() throws IOException
+    void shouldRunFailingPipeline()
     {
-        String errorMessage = "error message";
+        var errorMessage = "error message";
         PipelineRun finalPipelineRunState = mock(PipelineRun.class);
         when(finalPipelineRunState.message()).thenReturn(errorMessage);
-        String actualStatus = "Failed";
+        var actualStatus = "Failed";
 
         shouldRunPipeline(finalPipelineRunState, actualStatus,
                 List.of(error("The pipeline run message: {}", errorMessage)));
     }
 
     private void shouldRunPipeline(PipelineRun finalPipelineRunState, String finalRunStatus,
-            List<LoggingEvent> additionalLoggingEvents) throws IOException
+            List<LoggingEvent> additionalLoggingEvents)
     {
         String pipelineName = "pipelineName";
         String factoryName = "factoryName";
@@ -100,29 +87,25 @@ class DataFactoryStepsTests
         String runId = "run-id";
 
         executeSteps((dataFactoryManager, steps) -> {
-            PipelinesInner pipelinesInner = mock(PipelinesInner.class);
-            Observable<ServiceResponse<CreateRunResponseInner>> observablePipeline = Observable.from(
-                    List.of(new ServiceResponse<>(new CreateRunResponseInner().withRunId(runId), null)));
+            var createRunResponse = mock(CreateRunResponse.class);
+            when(createRunResponse.runId()).thenReturn(runId);
 
-            when(pipelinesInner.createRunWithServiceResponseAsync(resourceGroupName, factoryName, pipelineName, null,
-                    null, null, null, Map.of())).thenReturn(observablePipeline);
-
-            Pipelines pipelines = mock(Pipelines.class);
-            when(pipelines.inner()).thenReturn(pipelinesInner);
+            var pipelines = mock(Pipelines.class);
+            when(pipelines.createRun(resourceGroupName, factoryName, pipelineName)).thenReturn(createRunResponse);
 
             when(dataFactoryManager.pipelines()).thenReturn(pipelines);
 
-            String firstRunStatus = "InProgress";
-            PipelineRun pipelineRun1 = mock(PipelineRun.class);
+            var firstRunStatus = "InProgress";
+            var pipelineRun1 = mock(PipelineRun.class);
             when(pipelineRun1.status()).thenReturn(firstRunStatus);
 
-            when(finalPipelineRunState.runEnd()).thenReturn(DateTime.now());
+            when(finalPipelineRunState.runEnd()).thenReturn(OffsetDateTime.now());
             when(finalPipelineRunState.status()).thenReturn(finalRunStatus);
 
-            PipelineRuns pipelineRuns = mock(PipelineRuns.class);
-            when(pipelineRuns.getAsync(resourceGroupName, factoryName, runId))
-                    .thenReturn(Observable.from(List.of(pipelineRun1)))
-                    .thenReturn(Observable.from(List.of(finalPipelineRunState)));
+            var pipelineRuns = mock(PipelineRuns.class);
+            when(pipelineRuns.get(resourceGroupName, factoryName, runId))
+                    .thenReturn(pipelineRun1)
+                    .thenReturn(finalPipelineRunState);
 
             when(dataFactoryManager.pipelineRuns()).thenReturn(pipelineRuns);
 
@@ -133,7 +116,7 @@ class DataFactoryStepsTests
 
             List<LoggingEvent> loggingEvents = new ArrayList<>();
             loggingEvents.add(info("The ID of the created pipeline run is {}", runId));
-            String currentStatusLogMessageFormat = "The current pipeline run status is \"{}\"";
+            var currentStatusLogMessageFormat = "The current pipeline run status is \"{}\"";
             loggingEvents.add(info(currentStatusLogMessageFormat, firstRunStatus));
             loggingEvents.add(info(currentStatusLogMessageFormat, finalRunStatus));
             loggingEvents.addAll(additionalLoggingEvents);
@@ -142,42 +125,15 @@ class DataFactoryStepsTests
         });
     }
 
-    @SuppressWarnings("unchecked")
-    private void executeSteps(BiConsumer<DataFactoryManager, DataFactorySteps> consumer) throws IOException
+    private void executeSteps(BiConsumer<DataFactoryManager, DataFactorySteps> consumer)
     {
-        AzureEnvironment environment = AzureEnvironment.AZURE;
-        String tenantId = "tenant-id";
-        String subscriptionId = "subscription-id";
-
-        TokenCredential tokenCredential = mock(TokenCredential.class);
-        try (MockedStatic<DataFactoryManager> managerFactory = mockStatic(DataFactoryManager.class))
+        try (MockedStatic<DataFactoryManager> dataFactoryManagerStaticMock = mockStatic(DataFactoryManager.class))
         {
-            ArgumentCaptor<AzureTokenCredentials> azureTokenCredentialsCaptor = ArgumentCaptor.forClass(
-                    AzureTokenCredentials.class);
-
-            DataFactoryManager manager = mock(DataFactoryManager.class);
-
-            Configurable configurable = mock(Configurable.class);
-            when(configurable.authenticate(azureTokenCredentialsCaptor.capture(), eq(subscriptionId))).thenReturn(
-                    manager);
-
-            managerFactory.when(DataFactoryManager::configure).thenReturn(configurable);
-
-            DataFactorySteps steps = new DataFactorySteps(environment, tenantId, subscriptionId, tokenCredential,
-                    softAssert);
-
-            String token = "token";
-            ArgumentCaptor<TokenRequestContext> tokenRequestContextCaptor = ArgumentCaptor.forClass(
-                    TokenRequestContext.class);
-            when(tokenCredential.getToken(tokenRequestContextCaptor.capture())).thenReturn(
-                    Mono.fromSupplier(() -> new AccessToken(token, OffsetDateTime.MAX)));
-
-            String resource = "resource";
-            assertEquals(token, azureTokenCredentialsCaptor.getValue().getToken(resource));
-
-            assertEquals(List.of(resource + "/.default"), tokenRequestContextCaptor.getValue().getScopes());
-
-            consumer.accept(manager, steps);
+            var dataFactoryManager = mock(DataFactoryManager.class);
+            dataFactoryManagerStaticMock.when(() -> DataFactoryManager.authenticate(tokenCredential, azureProfile))
+                    .thenReturn(dataFactoryManager);
+            var steps = new DataFactorySteps(azureProfile, tokenCredential, softAssert);
+            consumer.accept(dataFactoryManager, steps);
         }
     }
 }
