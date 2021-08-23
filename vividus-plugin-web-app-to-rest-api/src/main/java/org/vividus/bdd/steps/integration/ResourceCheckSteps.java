@@ -16,8 +16,11 @@
 
 package org.vividus.bdd.steps.integration;
 
+import static org.vividus.util.HtmlUtils.getElements;
+
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -43,14 +46,14 @@ import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.softassert.SoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
-import org.vividus.util.HtmlUtils;
 import org.vividus.util.UriUtils;
 import org.vividus.validator.model.WebPageResourceValidation;
 
 public class ResourceCheckSteps
 {
     private static final Set<String> ALLOWED_SCHEMES = Set.of("http", "https");
-    private static final String EXCLUDE_PATTERN = "#";
+    private static final String URL_FRAGMENT = "#";
+    private static final String HREF_ATTR = "href";
 
     private final ResourceValidator<WebPageResourceValidation> resourceValidator;
     private final AttachmentPublisher attachmentPublisher;
@@ -79,8 +82,8 @@ public class ResourceCheckSteps
 
     public void init()
     {
-        excludeHrefsPattern = Pattern.compile(uriToIgnoreRegex.map(p -> p + "|" + EXCLUDE_PATTERN)
-                                                           .orElse(EXCLUDE_PATTERN));
+        excludeHrefsPattern = Pattern.compile(uriToIgnoreRegex.map(p -> p + "|" + URL_FRAGMENT)
+                                                           .orElse(URL_FRAGMENT));
     }
 
     /**
@@ -101,7 +104,7 @@ public class ResourceCheckSteps
     public void checkResources(String cssSelector, String html) throws InterruptedException, ExecutionException
     {
         execute(() -> {
-            Stream<Element> resourcesToValidate = getElements(cssSelector, html);
+            Collection<Element> resourcesToValidate = getElements(html, cssSelector);
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
                 p -> new WebPageResourceValidation(p.getLeft(), p.getRight()));
             validateResources(validations);
@@ -124,16 +127,11 @@ public class ResourceCheckSteps
                 : resourceValidator.perform(r);
     }
 
-    private Stream<Element> getElements(String cssSelector, String html)
-    {
-        return HtmlUtils.getElements(html, cssSelector).parallelStream();
-    }
-
-    private Stream<WebPageResourceValidation> createResourceValidations(Stream<Element> elements,
+    private Stream<WebPageResourceValidation> createResourceValidations(Collection<Element> elements,
             Function<Pair<URI, String>, WebPageResourceValidation> resourceValidationFactory)
     {
-        return elements.map(e ->
-            Pair.of(getElementAttribute(e, "href").orElseGet(() -> e.attr("src")).trim(), getSelector(e)))
+        return elements.parallelStream().map(e ->
+            Pair.of(getHrefAttribute(e).orElseGet(() -> e.attr("src")).trim(), getSelector(e)))
                        .filter(p -> !p.getKey().isEmpty() || softAssert.recordFailedAssertion(
                         "Element by selector " + p.getValue() + " doesn't contain href/src attributes"))
                        .map(p -> Pair.of(createUri(p.getKey()), p.getValue()))
@@ -160,9 +158,22 @@ public class ResourceCheckSteps
         }
     }
 
-    private Optional<String> getElementAttribute(Element element, String attributeKey)
+    private static Optional<String> getHrefAttribute(Element element)
     {
-        return element.hasAttr(attributeKey) ? Optional.of(element.attr(attributeKey)) : Optional.empty();
+        String href = element.attr(HREF_ATTR);
+        if (!href.isEmpty())
+        {
+            if (URL_FRAGMENT.equals(href))
+            {
+                return Optional.of(href);
+            }
+
+            String absUrl = element.absUrl(HREF_ATTR);
+            // For scripts e.g. href="javascript:alert('...');" the abs url will be empty
+            return Optional.of(absUrl.isEmpty() ? href : absUrl);
+        }
+
+        return Optional.empty();
     }
 
     private URI createUri(String uri)
@@ -210,7 +221,7 @@ public class ResourceCheckSteps
                              httpRequestExecutor.executeHttpRequest(HttpMethod.GET, pageURL, Optional.empty());
                              return Optional.ofNullable(httpTestContext.getResponse())
                                             .map(HttpResponse::getResponseBodyAsString)
-                                            .map(b -> createResourceValidations(getElements(cssSelector, b),
+                                            .map(b -> createResourceValidations(getElements(pageURL, b, cssSelector),
                                                 p -> new WebPageResourceValidation(p.getLeft(), p.getRight(), pageURL)))
                                             .orElseGet(() ->
                                                         Stream.of(brokenResourceValidation(pageURL, Optional.empty())));

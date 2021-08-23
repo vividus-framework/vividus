@@ -10,6 +10,39 @@ The plugin provides the integration between web application testing functionalit
 implementation(group: 'org.vividus', name: 'vividus-plugin-web-app-to-rest-api', version: '{current-version}')
 ----
 
+== Steps
+
+=== Validate resources
+
+Validates resources on web pages
+
+Resource validation logic:
+
+. If the `pages` row contains relative URL then it gets resolved against URL in `web-application.main-page-url` property, i.e. if the main page URL is `https://elderscrolls.bethesda.net/` and relative URL is `/skyrim10` the resulting URL will be `https://elderscrolls.bethesda.net/skyrim10`
+. Collect elements by the CSS selector from each page
+. Get either `href` or `src` attribute value from each element, if neither of the attributes exists the validation fails
+. For each received value execute https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD[HEAD] request
+.. If the status code is https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200[200 OK] then the resource validation is considered as passed
+.. If the status code is one of https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404[404 Not Found], https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405[405 Method Not Allowed], https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/501[501 Not Implemented], https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503[503 Service Unavailable] then GET request will be executed
+.. If the https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET[GET] status code is https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200[200 OK] then the resource validation is considered as passed, otherwise failed
+
+[source,gherkin]
+----
+Then all resources by selector `$cssSelector` are valid on:$pages
+----
+
+. `$cssSelector` - The https://www.w3schools.com/cssref/css_selectors.asp[CSS selector]
+. `$pages` - The pages to validate resources on
+
+.Validate resources
+[source,gherkin]
+----
+Then all resources by selector a are valid on:
+|pages                        |
+|https://vividus.org/         |
+|/test-automation-made-awesome|
+----
+
 == Table Transformers
 
 === FROM_SITEMAP
