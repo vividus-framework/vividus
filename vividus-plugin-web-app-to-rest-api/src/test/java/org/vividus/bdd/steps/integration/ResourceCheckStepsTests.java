@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
@@ -56,6 +58,7 @@ import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.softassert.SoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
+import org.vividus.util.Sleeper;
 import org.vividus.validator.model.WebPageResourceValidation;
 
 @ExtendWith(MockitoExtension.class)
@@ -193,7 +196,11 @@ class ResourceCheckStepsTests
         resourceCheckSteps.init();
         ExamplesTable examplesTable =
                 new ExamplesTable("|pages|\n|https://first.page|\n|https://second.page|");
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
+        lenient().doAnswer(call ->
+        {
+            Sleeper.sleep(5, TimeUnit.SECONDS);
+            return null;
+        }).when(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL, Optional.empty());
@@ -204,9 +211,9 @@ class ResourceCheckStepsTests
             assertThat(validationsToReport, hasSize(8));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations.next(), SERENITY_URI, HTTP_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/faq"), RELATIVE_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
-            validate(resourceValidations.next(), FAQ_URI, RELATIVE_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), SHARP_URI, SHARP_ID, CheckStatus.FILTERED);
             validate(resourceValidations.next(), FTP_URI, FTP_ID, CheckStatus.FILTERED);
             validate(resourceValidations.next(), JS_URI, JS_ID, CheckStatus.FILTERED);
