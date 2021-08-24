@@ -46,9 +46,9 @@ When I click on a link with the URL containing 'ementId' and the text 'Link to a
 Then the page with the URL '${vividus-test-site-url}/links.html#ElementId' is loaded
 
 Scenario: Step verification When I click on an image with the tooltip '$tooltipImage'
-Given I am on a page with the URL 'http://www.echoecho.com/htmllinks06.htm'
+Given I am on a page with the URL 'https://www.echoecho.com/htmllinks06.htm'
 When I click on an image with the tooltip 'Link to this page'
-Then the page with the URL 'http://www.echoecho.com/myfile.htm' is loaded
+Then the page with the URL 'https://www.echoecho.com/myfile.htm' is loaded
 
 Scenario: Step verification When I click on a link with the text '$text' and URL '$URL'
 Given I am on a page with the URL '<linksUrl>'
