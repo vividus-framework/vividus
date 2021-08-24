@@ -1,5 +1,10 @@
 project.description = 'Vividus plugin for Sauce Labs'
 
+//https://github.com/powermock/powermock/issues/1094
+test {
+    jvmArgs '--illegal-access=warn'
+}
+
 dependencies {
     implementation project(':vividus-bdd-engine')
     implementation project(':vividus-util')
