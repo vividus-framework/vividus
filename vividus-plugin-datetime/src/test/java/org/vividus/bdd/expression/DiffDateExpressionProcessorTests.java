@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,9 +80,9 @@ class DiffDateExpressionProcessorTests
     void testExecuteUnsupportedSymbols()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> processor.execute(
-                "diffDate(2019-01-01T12:00:00.333Z, Byyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.333Z, "
+                "diffDate(2019-01-01T12:00:00.333Z, fyyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.333Z, "
                         + "yyyy-MM-dd'T'HH:mm:ss.SSSVV)"));
-        assertEquals("Unknown pattern letter: B", exception.getMessage());
+        assertEquals("Unknown pattern letter: f", exception.getMessage());
     }
 
     @Test

@@ -84,7 +84,7 @@ class StringsExpressionProcessorTests
                 arguments("anyOf()",                                                       EMPTY),
                 arguments("anyOf(,)",                                                      EMPTY),
                 arguments("anyOf(\\,)",                                                    ","),
-                arguments("toBase64Gzip(vividus)",                                         "H4sIAAAAAAAAACvLLMtMKS0GANIHCdkHAAAA")
+                arguments("toBase64Gzip(vividus)",                                         "H4sIAAAAAAAA/yvLLMtMKS0GANIHCdkHAAAA")
         );
         // CHECKSTYLE:ON
     }

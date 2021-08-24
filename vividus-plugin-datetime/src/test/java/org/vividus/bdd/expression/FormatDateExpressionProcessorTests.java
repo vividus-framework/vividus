@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,8 +107,8 @@ class FormatDateExpressionProcessorTests
     void testExecuteOutputFormatWithUnsupportedSymbols()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> processor.execute("formatDate(1994-11-05T08:15:30Z, Byyyy-MM-dd, GMT)"));
-        assertEquals("Unknown pattern letter: B", exception.getMessage());
+            () -> processor.execute("formatDate(1994-11-05T08:15:30Z, fyyyy-MM-dd, GMT)"));
+        assertEquals("Unknown pattern letter: f", exception.getMessage());
     }
 
     @Test

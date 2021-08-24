@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,8 @@ class ShiftDateExpressionProcessorTests
     void testExecuteUnsupportedSymbols()
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> processor
-                .execute(SHIFT_DATE + INPUT_DATE + COMMA + "Byyyy-MM-dd'T'HH:mm:ss.SSSVV" + COMMA + "-P1Y)"));
-        assertEquals("Unknown pattern letter: B", exception.getMessage());
+                .execute(SHIFT_DATE + INPUT_DATE + COMMA + "fyyyy-MM-dd'T'HH:mm:ss.SSSVV" + COMMA + "-P1Y)"));
+        assertEquals("Unknown pattern letter: f", exception.getMessage());
     }
 
     @Test
