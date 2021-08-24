@@ -56,7 +56,7 @@ class CsvReaderTests
     void testReadCsvWithEscapedDataFromPath() throws IOException, URISyntaxException
     {
         Path filePath = Paths.get(getCsvResource("unittest-escaped.csv").toURI());
-        var csvFormat = CSVFormat.DEFAULT.withDelimiter(',').withEscape('\\');
+        var csvFormat = CSVFormat.DEFAULT.builder().setDelimiter(',').setEscape('\\').build();
         List<Map<String, String>> result = new CsvReader(csvFormat).readCsvFile(filePath, FIRST_HEADER, SECOND_HEADER);
         assertEquals(List.of(Map.of(FIRST_HEADER, FIRST_VALUE, SECOND_HEADER, "value2 with \" inside")), result);
     }
