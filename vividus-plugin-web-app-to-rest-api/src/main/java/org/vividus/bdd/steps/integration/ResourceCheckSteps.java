@@ -183,7 +183,7 @@ public class ResourceCheckSteps
         {
             return uriToCheck;
         }
-        return UriUtils.buildNewUrl(webApplicationConfiguration.getMainApplicationPageUrl(), uriToCheck.getPath());
+        return UriUtils.buildNewUrl(webApplicationConfiguration.getMainApplicationPageUrl(), uri);
     }
 
     /**

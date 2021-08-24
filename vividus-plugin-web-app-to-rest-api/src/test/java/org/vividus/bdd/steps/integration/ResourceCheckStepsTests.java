@@ -90,6 +90,10 @@ class ResourceCheckStepsTests
     private static final URI VIVIDUS_URI = URI.create("https://vividus.org");
     private static final URI VIVIDUS_ABOUT_URI = URI.create("https://vividus.org/about");
     private static final URI SERENITY_URI = URI.create("http://www.thucydides.info");
+    private static final URI VIVIDUS_QUERY_URI_1 = URI.create("https://vividus.org/products?name=pelmeshki");
+    private static final String SELECTOR_QUERY_1 = "#query-params-one";
+    private static final URI VIVIDUS_QUERY_URI_2 = URI.create("https://vividus.org/products?name=smetanka");
+    private static final String SELECTOR_QUERY_2 = "#query-params-two";
 
     private static final String FIRST_PAGE =
           "<!DOCTYPE html>\n"
@@ -107,6 +111,8 @@ class ResourceCheckStepsTests
         + "  <a id='mailto' href='mailto:by.kalinin@gmail.com'>Say hi</a>\n"
         + "  <a id='http' href='http://www.thucydides.info'>Just ignore it</a>\n"
         + "  <a id='ftp' href='ftp://all-the-date.here'>Not supported scheme</a>\n"
+        + "  <a id='query-params-one' href='/products?name=pelmeshki'>Dumplings</a>\n"
+        + "  <a id='query-params-two' href='/products?name=smetanka'>Sour cream</a>\n"
         + "  <img id='image' src='https://avatars0.githubusercontent.com/u/48793437?s=200&v=4'/>\n"
         + "  <img class='image (gif)' src='https://github.githubassets.com/images/spinners/octocat-spinner-32.gif'/>\n"
         + "  <iframe src='https://selenide.org'/>"
@@ -169,13 +175,15 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(9));
+            assertThat(validationsToReport, hasSize(11));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
             validate(resourceValidations, gifImageUri, N_A, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, VIVIDUS_QUERY_URI_1, SELECTOR_QUERY_1, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, VIVIDUS_QUERY_URI_2, SELECTOR_QUERY_2, CheckStatus.PASSED, N_A);
             validate(resourceValidations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, FTP_URI, FTP_ID, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, JS_URI, JS_ID, CheckStatus.FILTERED, N_A);
@@ -208,10 +216,14 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(8));
+            assertThat(validationsToReport, hasSize(10));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations.next(), SERENITY_URI, HTTP_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/faq"), RELATIVE_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/products?name=pelmeshki"),
+                    SELECTOR_QUERY_1, CheckStatus.PASSED);
+            validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/products?name=smetanka"),
+                    SELECTOR_QUERY_2, CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), SHARP_URI, SHARP_ID, CheckStatus.FILTERED);
@@ -347,10 +359,12 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(7));
+            assertThat(validationsToReport, hasSize(9));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, VIVIDUS_QUERY_URI_1, SELECTOR_QUERY_1, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, VIVIDUS_QUERY_URI_2, SELECTOR_QUERY_2, CheckStatus.PASSED, N_A);
             validate(resourceValidations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, FTP_URI, FTP_ID, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.FILTERED, N_A);
