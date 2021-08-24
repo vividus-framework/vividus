@@ -79,7 +79,7 @@ Then `${var}` is equal to `42 and 24`
 Scenario: Verify 'toBase64Gzip' expression
 Meta:
     @requirementId 1337
-Then `#{toBase64Gzip(vividus)}` is equal to `H4sIAAAAAAAAACvLLMtMKS0GANIHCdkHAAAA`
+Then `#{toBase64Gzip(vividus)}` is equal to `H4sIAAAAAAAA/yvLLMtMKS0GANIHCdkHAAAA`
 
 Scenario: Use expressions in template
 Meta:
