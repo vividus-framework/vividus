@@ -79,6 +79,6 @@ public class CsvReader
 
     private Stream<CSVRecord> readCsvFile(Reader reader, String... header) throws IOException
     {
-        return StreamSupport.stream(csvFormat.withHeader(header).parse(reader).spliterator(), false);
+        return StreamSupport.stream(csvFormat.builder().setHeader(header).build().parse(reader).spliterator(), false);
     }
 }

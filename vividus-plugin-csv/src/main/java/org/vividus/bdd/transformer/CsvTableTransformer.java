@@ -58,7 +58,7 @@ public class CsvTableTransformer implements ExtendedTableTransformer
             int delimiterLength = delimiter.length();
             isTrue(delimiterLength == 1, "CSV delimiter must be a single char, but value '%s' has length of %d",
                     delimiter, delimiterLength);
-            csvFormat = csvFormat.withDelimiter(delimiter.charAt(0));
+            csvFormat = csvFormat.builder().setDelimiter(delimiter.charAt(0)).build();
         }
         try
         {
