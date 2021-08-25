@@ -1,0 +1,100 @@
+= Jenkins pipeline using browser proxy in Docker container
+
+```groovy
+def vividusNetwork = 'vividus-grid'<1>
+def vividusHub = 'vividus-hub'<2>
+def vividusBrowser = 'vividus-browser'<3>
+def vividusProxyHost = 'vividus-proxy-host'<4>
+def seleniumVersion = '3.141.59-20210804'<5>
+def overridings = """
+                        proxy.host=${vividusProxyHost}<4>
+                        proxy.connectable-host=${vividusProxyHost}<4>
+                        selenium.grid.enabled=true
+                        selenium.grid.url=http://${vividusHub}:4444/wd/hub<2>
+                        selenium.grid.capabilities.platformName=LINUX
+                  """
+def projectName = 'vividus-test-project'<6>
+def scmCredentialId = 'vividus'<7>
+def gitUrl = 'git@github.com:vividus/vividus-test-project.git'<8>
+
+pipeline {
+  agent {
+    label 'docker'
+  }
+
+  stages {
+    stage('Start Selenium Grid') {
+        steps {
+           sh "docker network create ${vividusNetwork}"<1>
+           sh "docker run -d --net ${vividusNetwork} --name ${vividusHub} selenium/hub:${seleniumVersion}"<2>
+           sh "docker run -d --net ${vividusNetwork} -e HUB_HOST=${vividusHub} -e SCREEN_WIDTH=1920 -e SCREEN_HEIGHT=1080 --shm-size=2g --name ${vividusBrowser} selenium/node-chrome:${seleniumVersion}"<3><5>
+        }
+    }
+
+    stage('Load Source') {
+        steps {
+            checkout([$class: 'GitSCM',
+                branches: [[name: 'master']],
+                doGenerateSubmoduleConfigurations: false,
+                extensions: [
+                    [$class: 'RelativeTargetDirectory', relativeTargetDir: projectName],<6>
+                    [$class: 'SubmoduleOption',
+                    disableSubmodules: false,
+                    parentCredentials: true,
+                    recursiveSubmodules: true,
+                    reference: '',
+                    trackingSubmodules: false]
+                ],
+                submoduleCfg: [],
+                userRemoteConfigs: [[credentialsId: scmCredentialId, url: gitUrl]]])<7> <8>
+        }
+    }
+
+    stage('Run Tests Using Docker') {
+        steps {
+                sh "docker ps -a"
+                withDockerContainer(image: 'openjdk:16.0.2-oraclelinux8', args: "--net ${vividusNetwork} --name ${vividusProxyHost}") {<1> <4>
+                dir(projectName) {<6>
+                    sh """
+                        echo -e "${overridings}" > overriding.properties
+                        mv -f overriding.properties src/main/resources/overriding.properties
+                        ./gradlew runStories
+                        echo \${EXIT_CODE} > output/exit_code.txt
+                     """
+                    archiveArtifacts 'output/reports/**'
+                    sh 'exit $(cat output/exit_code.txt)'
+                }
+            }
+        }
+    }
+  }
+
+  post {
+        always {
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: "${projectName}/output/reports/allure",<6>
+                reportFiles: 'index.html',
+                reportName: 'Allure Report',
+                reportTitles: ''
+            ])
+            cleanWs()
+            sh "docker rm -vf ${vividusBrowser} || true"
+            sh "docker rm -vf ${vividusHub} || true"
+            sh "docker network rm ${vividusNetwork} || true"
+        }
+    }
+}
+```
+<1> *vividusNetwork* - name of docker network
+<2> *vividusHub* - name of docker hub; this variable value is part of parameter for property `*selenium.grid.url*`
+<3> *vividusBrowser* - name of docker container with browser
+<4> *vividusProxyHost* - parameter, which is passed as name of docker container in `*dockerFingerprintRun*` for run tests; need to assign this variable as value for `*proxy.host*` and `*proxy.connectable-host*` properties
+<5> *seleniumVersion* - https://github.com/seleniumhq/docker-selenium/releases[grid version]
+<6> *projectName* - test project name
+<7> *scmCredentialId* - https://www.jenkins.io/doc/book/using/using-credentials/[credentials for interacting with test repository]
+<8> *gitUrl* - git url to test project
+
+NOTE: For more information about pipeline syntax and jenkins directives read https://www.jenkins.io/doc/book/pipeline/syntax/[jenkins documentation].
