@@ -1,3 +1,5 @@
 .User Guides
 * Data Testing
 ** xref:execute-sql-against-csv.adoc[Execute SQL against CSV]
+* CI Integration
+** xref:pipeline-with-proxy.adoc[Jenkins pipeline with browser proxy]
