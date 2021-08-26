@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class CookieSteps
      * <li>Refreshes the current page</li>
      * </ul>
      */
-    @When("I remove all cookies from the current domain")
+    @When("I remove all cookies from current domain")
     public void whenIRemoveAllCookiesFromTheCurrentDomain()
     {
         cookieManager.deleteAllCookies();
@@ -91,7 +91,7 @@ public class CookieSteps
      * </ul>
      * @param cookieName Cookie name
      */
-    @When("I remove a cookie with the name '$cookieName' from the current domain")
+    @When("I remove cookie with name `$cookieName` from current domain")
     public void whenIRemoveCookieWithNameFromCurrentDomain(String cookieName)
     {
         cookieManager.deleteCookie(cookieName);
@@ -103,7 +103,7 @@ public class CookieSteps
      * @param cookieName Cookie name
      * @return Optional containing cookie
      */
-    @Then("a cookie with the name '$cookieName' is set")
+    @Then("cookie with name `$cookieName` is set")
     public Optional<Cookie> thenCookieWithNameIsSet(String cookieName)
     {
         Cookie cookie = cookieManager.getCookie(cookieName);
@@ -135,7 +135,7 @@ public class CookieSteps
      * Checks if cookie with name <code>cookieName</code> is not set
      * @param cookieName Cookie name
      */
-    @Then("a cookie with the name '$cookieName' is not set")
+    @Then("cookie with name `$cookieName` is not set")
     public void thenCookieWithNameIsNotSet(String cookieName)
     {
         Cookie cookie = cookieManager.getCookie(cookieName);
