@@ -16,7 +16,6 @@ dependencies {
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-    implementation(group: 'org.apache.tika', name: 'tika-core', version: versions.tika)
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 
-import org.apache.tika.mime.MediaType;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.email.model.EmailMessage;
@@ -88,8 +88,8 @@ public class EmailMessageFactory
                 continue;
             }
             String contentType = part.getContentType();
-            MediaType mediaType = MediaType.parse(part.getContentType());
-            if (!"text".equals(mediaType.getType()))
+            String type = StringUtils.substringBefore(contentType, '/');
+            if (!"text".equalsIgnoreCase(type))
             {
                 LOGGER.info("Skip saving of content with the content type '{}'", contentType);
                 continue;
