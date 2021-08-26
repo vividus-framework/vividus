@@ -629,6 +629,25 @@ When I remove cookie with name `$cookieName` from current domain
 When I remove cookie with name `JSESSIONID` from current domain
 ----
 
+==== Remove cookie without apply
+
+Removes the certain cookie from the current domain, but does not apply the
+changes in cookies. The current page must be refreshed or the navigation must
+be performed to apply the cookie changes.
+
+[source,gherkin]
+----
+When I remove cookie with name `$cookieName` from current domain without applying changes
+----
+* `$cookieName` - The name of the cookie to remove.
+
+.Remove the session cookie
+[source,gherkin]
+----
+When I remove cookie with name `JSESSIONID` from current domain without applying changes
+When I refresh the page
+----
+
 ==== Remove all cookies
 
 Removes all cookies from the current domain. The actions performed by the step:
@@ -639,6 +658,17 @@ Removes all cookies from the current domain. The actions performed by the step:
 [source,gherkin]
 ----
 When I remove all cookies from current domain
+----
+
+==== Remove all cookies without apply
+
+Removes all cookies from the current domain, but does not apply the changes in
+cookies. The current page must be refreshed or the navigation must be performed
+to apply the cookie changes.
+
+[source,gherkin]
+----
+When I remove all cookies from current domain without applying changes
 ----
 
 

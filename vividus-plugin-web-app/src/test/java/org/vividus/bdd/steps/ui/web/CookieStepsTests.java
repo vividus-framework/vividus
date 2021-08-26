@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,47 +49,53 @@ import org.vividus.util.json.JsonUtils;
 @ExtendWith(MockitoExtension.class)
 class CookieStepsTests
 {
-    private static final String TEST_URL = "http://www.vividus.org";
     private static final String NAME = "name";
 
-    @Mock
-    private INavigateActions navigateActions;
-
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private CookieManager cookieManager;
-
-    @Mock
-    private Cookie cookie;
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private IBddVariableContext bddVariableContext;
-
-    @Mock
-    private JsonUtils jsonUtils;
-
-    @InjectMocks
-    private CookieSteps cookieSteps;
+    @Mock private INavigateActions navigateActions;
+    @Mock private ISoftAssert softAssert;
+    @Mock private CookieManager cookieManager;
+    @Mock private Cookie cookie;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private JsonUtils jsonUtils;
+    @InjectMocks private CookieSteps cookieSteps;
 
     @Test
-    void testWhenIRemoveAllCookiesFromTheCurrentDomain()
+    void shouldRemoveAllCookies()
     {
-        cookieSteps.whenIRemoveAllCookiesFromTheCurrentDomain();
-        verify(navigateActions).refresh();
-        verify(cookieManager).deleteAllCookies();
+        cookieSteps.removeAllCookies();
+        var ordered = inOrder(cookieManager, navigateActions);
+        ordered.verify(cookieManager).deleteAllCookies();
+        ordered.verify(navigateActions).refresh();
+        ordered.verifyNoMoreInteractions();
     }
 
     @Test
-    void testWhenIRemoveCookieWithNameFromCurrentDomain()
+    void shouldRemoveAllCookiesWithoutApplyingChanges()
     {
-        cookieSteps.whenIRemoveCookieWithNameFromCurrentDomain(NAME);
-        verify(navigateActions).refresh();
-        verify(cookieManager).deleteCookie(NAME);
+        cookieSteps.removeAllCookiesWithoutApply();
+        var ordered = inOrder(cookieManager, navigateActions);
+        ordered.verify(cookieManager).deleteAllCookies();
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldRemoveCookie()
+    {
+        cookieSteps.removeCookie(NAME);
+        var ordered = inOrder(cookieManager, navigateActions);
+        ordered.verify(cookieManager).deleteCookie(NAME);
+        ordered.verify(navigateActions).refresh();
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldRemoveCookieWithoutApplyingChanges()
+    {
+        cookieSteps.removeCookieWithoutApply(NAME);
+        var ordered = inOrder(cookieManager, navigateActions);
+        ordered.verify(cookieManager).deleteCookie(NAME);
+        ordered.verifyNoMoreInteractions();
     }
 
     @Test
@@ -131,11 +138,12 @@ class CookieStepsTests
     @Test
     void testSetAllCookies()
     {
-        mockGetCurrentPageUrl(TEST_URL);
+        String testUrl = "https://www.vividus.org";
+        mockGetCurrentPageUrl(testUrl);
         String tableAsString = "|cookieName|cookieValue|path|\n|hcpsid|1|/|\n|hcpsid|1|/|";
         ExamplesTable table = new ExamplesTable(tableAsString);
         cookieSteps.setAllCookies(table);
-        verify(cookieManager, times(2)).addCookie("hcpsid", "1", "/", TEST_URL);
+        verify(cookieManager, times(2)).addCookie("hcpsid", "1", "/", testUrl);
         verify(navigateActions).refresh();
     }
 
