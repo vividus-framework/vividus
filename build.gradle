@@ -65,6 +65,6 @@ ext {
         junit:                  '5.7.2',
         mockito:                '3.12.3',
         powermock:              '2.0.9',
-        slf4jTest:              '2.3.0'
+        slf4jTest:              '2.4.0'
     ]
 }
