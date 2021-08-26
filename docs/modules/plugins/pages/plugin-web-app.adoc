@@ -500,6 +500,148 @@ When I select `Red` in dropdown located `id(colors)`
 ----
 
 
+=== Cookie Steps
+
+==== Validate cookie presence
+
+Validates whether the certain cookie is set.
+
+[source,gherkin]
+----
+Then cookie with name `$cookieName` is set
+----
+* `$cookieName` - The name of the cookie to check presence.
+
+.Check the session cookie is present
+[source,gherkin]
+----
+Then cookie with name `JSESSIONID` is set
+----
+
+==== Validate cookie absence
+
+Validates whether the certain cookie is not set.
+
+[source,gherkin]
+----
+Then cookie with name `$cookieName` is not set
+----
+* `$cookieName` - The name of the cookie to check absence.
+
+.Check the session cookie is not present
+[source,gherkin]
+----
+Then cookie with name `JSESSIONID` is not set
+----
+
+==== Set cookies
+
+Adds the cookies provided in the input ExamplesTable. It's allowed to add the
+cookies for the current domain only: make sure the web browser is opened at the
+expected domain. The actions performed by the step:
+
+* add the cookies;
+* refresh the current page (this action is required to apply the changes in cookies).
+
+[source,gherkin]
+----
+When I set all cookies for current domain:$parameters
+----
+* `$parameters` - The parameters of the cookies to set as ExamplesTable:
++
+[cols="1,2", options="header"]
+|===
+
+|Column Name
+|Description
+
+|`cookieName`
+|the name of the cookie to set
+
+|`cookieValue`
+|the value of the cookie to set
+
+|`path`
+|the path of the cookie to set
+
+|===
+
+.Set the cookie for the current domain
+[source,gherkin]
+----
+When I set all cookies for current domain:
+|cookieName   |cookieValue |path |
+|cookieAgreed |2           |/    |
+----
+
+==== Get cookie value
+
+Finds the cookie by the name and saves its value to a variable.
+
+[source,gherkin]
+----
+When I save value of cookie with name `$cookieName` to $scopes variable `$variableName`
+----
+* `$cookieName` - The name of the cookie to save the value.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to save the cookie value.
+
+.Get the value of the session cookie
+[source,gherkin]
+----
+When I save value of cookie with name `JSESSIONID` to scenario variable `session-id`
+----
+
+==== Get cookie
+
+Finds the cookie by the name and saves all its parameters as JSON to a variable.
+
+[source,gherkin]
+----
+When I save cookie with name `$cookieName` as JSON to $scopes variable `$variableName`
+----
+* `$cookieName` - The name of the cookie to save.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to save the cookie.
+
+.Get the session cookie
+[source,gherkin]
+----
+When I save cookie with name `JSESSIONID` as JSON to scenario variable `session-id`
+----
+
+==== Remove cookie
+
+Removes the certain cookie from the current domain. The actions performed by the step:
+
+* remove the certain cookie the from current domain;
+* refresh the current page (this action is required to apply the changes in cookies).
+
+[source,gherkin]
+----
+When I remove cookie with name `$cookieName` from current domain
+----
+* `$cookieName` - The name of the cookie to remove.
+
+.Remove the session cookie
+[source,gherkin]
+----
+When I remove cookie with name `JSESSIONID` from current domain
+----
+
+==== Remove all cookies
+
+Removes all cookies from the current domain. The actions performed by the step:
+
+* remove all cookies from the current domain;
+* refresh the current page (this action is required to apply the changes in cookies).
+
+[source,gherkin]
+----
+When I remove all cookies from current domain
+----
+
+
 === Proxy Steps
 ==== Check the number of HTTP requests
 

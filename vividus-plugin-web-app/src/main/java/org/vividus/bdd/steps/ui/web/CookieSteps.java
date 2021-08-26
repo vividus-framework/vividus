@@ -57,14 +57,10 @@ public class CookieSteps
 
     /**
      * Removes all cookies from the current domain
-     * <p>
-     * <b>Cookie</b> is a text file, which contains data sent from a website and
-     * stored in the user's web browser while the user is browsing it.
-     * </p>
-     * <p>Actions performed at this step:</p>
+     * <p>The actions performed by the step:</p>
      * <ul>
-     * <li>Removes all cookies from the current domain</li>
-     * <li>Refreshes the current page</li>
+     * <li>remove all cookies from the current domain;</li>
+     * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
      * </ul>
      */
     @When("I remove all cookies from current domain")
@@ -75,21 +71,14 @@ public class CookieSteps
     }
 
     /**
-     * Removes certain cookie from current domain
-     * <p>
-     * <b>Cookie</b> is a text file, which contains data sent from a website and
-     * stored in the user's web browser while the user is browsing it.
-     * </p>
-     * <p>
-     * <b>Domain</b> is an identification string that defines a realm of
-     * administrative autonomy, authority or control within the Internet.
-     * </p>
-     * <p>Actions performed at this step:</p>
+     * Removes the certain cookie from the current domain
+     * <p>The actions performed by the step:</p>
      * <ul>
-     * <li>Removes certain cookie from current domain</li>
-     * <li>Refreshes the current page</li>
+     * <li>remove the certain cookie the from current domain;</li>
+     * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
      * </ul>
-     * @param cookieName Cookie name
+     *
+     * @param cookieName The name of the cookie to remove
      */
     @When("I remove cookie with name `$cookieName` from current domain")
     public void whenIRemoveCookieWithNameFromCurrentDomain(String cookieName)
@@ -99,9 +88,10 @@ public class CookieSteps
     }
 
     /**
-     * Checks if cookie with name <code>cookieName</code> is set
-     * @param cookieName Cookie name
-     * @return Optional containing cookie
+     * Validates whether the certain cookie is set
+     *
+     * @param cookieName The name of the cookie to check presence.
+     * @return The cookie if present
      */
     @Then("cookie with name `$cookieName` is set")
     public Optional<Cookie> thenCookieWithNameIsSet(String cookieName)
@@ -112,28 +102,31 @@ public class CookieSteps
     }
 
     /**
-    * Saves cookie value into variable
-    * @param name Cookie name
-    * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-    * <i>Available scopes:</i>
-    * <ul>
-    * <li><b>STEP</b> - the variable will be available only within the step,
-    * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-    * <li><b>STORY</b> - the variable will be available within the whole story,
-    * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-    * </ul>
-    * @param variableName to save
-    */
-    @When("I save value of cookie with name `$name` to $scopes variable `$variableName`")
-    public void saveCookieIntoVariable(String name, Set<VariableScope> scopes, String variableName)
+     * Finds the cookie by the name and saves its value to a variable
+     *
+     * @param cookieName   The name of the cookie to save the value.
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
+     *                     scopes.<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The variable name to save the cookie value.
+     */
+    @When("I save value of cookie with name `$cookieName` to $scopes variable `$variableName`")
+    public void saveCookieIntoVariable(String cookieName, Set<VariableScope> scopes, String variableName)
     {
-        thenCookieWithNameIsSet(name).map(Cookie::getValue)
+        thenCookieWithNameIsSet(cookieName).map(Cookie::getValue)
                 .ifPresent(v -> bddVariableContext.putVariable(scopes, variableName, v));
     }
 
     /**
-     * Checks if cookie with name <code>cookieName</code> is not set
-     * @param cookieName Cookie name
+     * Validates whether the certain cookie is not set
+     *
+     * @param cookieName The name of the cookie to check absence
      */
     @Then("cookie with name `$cookieName` is not set")
     public void thenCookieWithNameIsNotSet(String cookieName)
@@ -143,46 +136,27 @@ public class CookieSteps
     }
 
     /**
-     * Adds certain cookies with parameters described in examples table
-     * You are able to add the cookies for the current domain only. Make sure you are at the right URL.
-     * <p>
-     * <b>cookieName</b> name of cookie to set
-     * </p>
-     * <p>
-     * <b>cookieValue</b> cookie value to set
-     * </p>
-     * <p>
-     * <b>path</b> of cookie to set
-     * </p>
+     * Adds the cookies provided in the input ExamplesTable. It's allowed to add the cookies for the current domain
+     * only: make sure the web browser is opened at the expected domain.
+     * <p>The actions performed by the step:</p>
      * <ul>
-     * <li>Adds cookies</li>
-     * <li>Refreshes the current page</li>
+     * <li>add the cookies;</li>
+     * <li>refresh the current page (this action is required to apply the changes in cookies).</li>
      * </ul>
-     * <p><b>Example:</b></p>
-     * <table border="1" style="width:70%">
-     * <caption>Table of parameters</caption>
-     * <thead>
-     * <tr>
-     * <td><b>cookieName</b></td>
-     * <td><b>cookieValue</b></td>
-     * <td><b>path</b></td>
-     * </tr>
-     * </thead>
-     * <tbody>
-     * <tr>
-     * <td>cookieAgreed</td>
-     * <td>2</td>
-     * <td>/</td>
-     * </tr>
-     * </tbody>
-     * </table>
-     * <br>Usage example:
+     * <p>The cookie parameters to be defined in the ExamplesTable</p>
+     * <ul>
+     * <li><b>cookieName</b> - the name of the cookie to set</li>
+     * <li><b>cookieValue</b> - the value of the cookie to set</li>
+     * <li><b>path</b> - the path of the cookie to set</li>
+     * </ul>
+     * <p>Usage example:</p>
      * <code>
      * <br>When I set all cookies for current domain:
-     * <br>|cookieName    |cookieValue|path|
-     * <br>|cookieAgreed  |2          |/   |
+     * <br>|cookieName   |cookieValue |path |
+     * <br>|cookieAgreed |2           |/    |
      * </code>
-     * @param parameters cookies description
+     *
+     * @param parameters The parameters of the cookies to set as ExamplesTable
      */
     @When("I set all cookies for current domain:$parameters")
     public void setAllCookies(ExamplesTable parameters)
@@ -198,17 +172,19 @@ public class CookieSteps
     }
 
     /**
-     * Saves cookie as JSON to scope variable
-     * @param cookieName name of cookie to save
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName name of variable
+     * Finds the cookie by the name and saves all its parameters as JSON to a variable.
+     *
+     * @param cookieName   The name of the cookie to save.
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
+     *                     scopes.<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The variable name to save the cookie.
      */
     @When("I save cookie with name `$cookieName` as JSON to $scopes variable `$variableName`")
     public void saveCookieAsJson(String cookieName, Set<VariableScope> scopes, String variableName)
