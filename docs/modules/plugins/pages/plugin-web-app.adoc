@@ -19,74 +19,75 @@ include::partial$locator-header.adoc[]
 
 === Locator Types
 
-[cols="1,2,1", options="header"]
+[cols="2,3,3", options="header"]
 |===
 
 |Type
 |Description
 |Example
 
-|linkText
-|text of the link
-|linkText(Google)
 
-|linkUrl
-|*href* attribute of the link element
-|linkUrl(/faq)
-
-|linkUrlPart
-|part of a *href* attribute of the link element
-|linkUrlPart(faq)
-
-|caseSensitiveText
-|case sensitive text of an element
-|caseSensitiveText(Description)
-
-|caseInsensitiveText
-|case insensitive text of an element
-|caseInsensitiveText(description)
-
-|XPath
-|https://developer.mozilla.org/en-US/docs/Web/XPath[Xpath to locate an element]
-|xpath(//a)
-
-|cssSelector
-|CSS selector to an element
-|cssSelector(.menu-item)
-
-|tagName
-|name of an element tagName
-|tagName(a)
-
-|imageSrc
-|shortcut to a *.//img[@src='<value>>']*
-|imgSrc(/images/kote.png)
-
-|imageSrcPart
-|shortcut to a *.//img[contains(@src,'<value>>')]']*
-|imgSrcPart(kote.png)
-
-|buttonName
-|elements of type button or input with text or any attribute value
-|buttonName(submit)
-
-|fieldName
-|input or textarea with text or any attribute value
-|fieldName(editor)
-
-|checkboxName
-|input element with @type="checkbox" and text value
-|checkboxName(allow)
-
-|id
+|`id`
 |id attribute of an element
 |id(submitForm)
 
-|className
+|`cssSelector`
+|CSS selector to an element
+|cssSelector(.menu-item)
+
+|`xPath`
+|https://developer.mozilla.org/en-US/docs/Web/XPath[Xpath to locate an element]
+|xpath(//a)
+
+|`tagName`
+|name of an element tagName
+|tagName(a)
+
+|`className`
 |CSS class name
 |className(bold)
 
-|elementName
+|`linkText`
+|text of the link
+|linkText(Google)
+
+|`linkUrl`
+|*href* attribute of the link element
+|linkUrl(/faq)
+
+|`linkUrlPart`
+|part of a *href* attribute of the link element
+|linkUrlPart(faq)
+
+|`caseSensitiveText`
+|case sensitive text of an element
+|caseSensitiveText(Description)
+
+|`caseInsensitiveText`
+|case insensitive text of an element
+|caseInsensitiveText(description)
+
+|`imageSrc`
+|shortcut to a *.//img[@src='<value>>']*
+|imgSrc(/images/kote.png)
+
+|`imageSrcPart`
+|shortcut to a *.//img[contains(@src,'<value>>')]']*
+|imgSrcPart(kote.png)
+
+|`buttonName`
+|elements of type button or input with text or any attribute value
+|buttonName(submit)
+
+|`fieldName`
+|input or textarea with text or any attribute value
+|fieldName(editor)
+
+|`checkboxName`
+|input element with @type="checkbox" and text value
+|checkboxName(allow)
+
+|`elementName`
 |Any attribute or text value
 |elementName(OK)
 
@@ -96,7 +97,8 @@ include::partial$visibility-types.adoc[]
 
 === Filter types
 
-Filter are applied after elements search via locator. Elements not matching filter condition will be sorted out without additional notice.
+The filters are applied after elements search using of the locators specified above.
+The elements not matching the filter condition are sorted out without any notice.
 
 [cols="1,2,3", options="header"]
 |===
@@ -105,60 +107,59 @@ Filter are applied after elements search via locator. Elements not matching filt
 |Description
 |Example
 
-|state
-|
-element xref:parameters:state.adoc[State]
+include::partial$common-filters.adoc[]
+
+|`state`
+|element xref:parameters:state.adoc[State]
 |id(v1)->filter.state(VISIBLE)
 
-|caseSensitiveText
+|`caseSensitiveText`
 |element text should match case sensitively
 |id(v1)->filter.caseSensitiveText(text)
 
-|classAttributePart
+|`classAttributePart`
 |class attribute should contain part
 |id(v1)->filter.classAttributePart(clazz)
 
-|linkUrl
+|`linkUrl`
 |*href* attribute of the link element
 |id(v1)->filter.linkUrl(/url)
 
-|linkUrlPart
+|`linkUrlPart`
 |part of *href* attribute of the link element
 |id(v1)->filter.linkUrlPart(/url)
 
-|tooltip
+|`tooltip`
 |title attribute value
 |id(v1)->filter.tooltip(title)
 
-|imageSrcPart
+|`imageSrcPart`
 |src attribute should contain value
 |id(v1)->filter.imageSrcPart(part)
 
-|textPart
+|`textPart`
 |text of an element should contain value
 |id(v1)->filter.textPart(part)
 
-|placeholder
+|`placeholder`
 |Placeholder attribute should be equal to a value
 |id(v1)->filter.placeholder(placeholder-value)
 
-|validationIconSource
+|`validationIconSource`
 |CSS property background-image should match
 |id(v1)->filter.validationIconSource(src)
 
-|fieldText
+|`fieldText`
 |field text should match expected value
 |id(v1)->filter.fieldText(value)
 
-|fieldTextPart
+|`fieldTextPart`
 |field text should contain expected value
 |id(v1)->filter.fieldTextPart(value)
 
-|dropDownText
+|`dropDownText`
 |any of select options should be equal to a value
 |id(v1)->filter.dropDownText(value)
-
-include::partial$common-filters.adoc[]
 
 |===
 
@@ -206,6 +207,51 @@ include::partial$selenium-grid-properties.adoc[]
 
 `@proxy` - some steps require proxy to be turned on: it can be done by setting the corresponding properties or by switching on this meta tag at story level.
 
+
+include::partial$dynamic-variables-header.adoc[]
+
+=== Context element rectangle
+
+The set of dynamic variables provides ability to access context element
+coordinates, width and height.
+
+[IMPORTANT]
+
+The variables rely on the contextual approach: it is necessary to switch context
+to the target element.
+
+
+==== *Variable name*
+
+[cols="1,3", options="header"]
+|===
+
+|Variable name
+|Description
+
+|`context-height`
+|the height of the context element
+
+|`context-width`
+|the width of the context element
+
+|`context-x-coordinate`
+|the absolute `X` coordinate of the context element
+
+|`context-y-coordinate`
+|the absolute `Y` coordinate of the context element
+
+|===
+
+.Check the size and the location of the image
+[source,gherkin]
+----
+When I change context to element located `tagName(img)`
+Then `${context-height}` is > `0`
+Then `${context-width}` is > `0`
+Then `${context-x-coordinate}` is > `0`
+Then `${context-y-coordinate}` is > `0`
+----
 
 == Steps
 
@@ -368,9 +414,11 @@ When I execute sequence of actions:
 
 include::partial$generic-ui-steps.adoc[]
 
-=== Dropdown: verify available options.
+=== Dropdown Steps
+==== Validate available options
 
-Verifies if dropdown located by locator exists and has expected list of options
+Validates whether the dropdown located by locator exists and contains the list
+of the expected options.
 
 [source,gherkin]
 ----
@@ -379,7 +427,7 @@ Then dropdown located `$locator` contains options: $option
 * `$locator` - <<_locator>>
 * `$options` - examples table describing expected options
 
-.Dropdown.story
+.Validate dropdown contains a set of colors
 [source,gherkin]
 ----
 Then a drop down with the name 'colors' contains the items:
@@ -389,12 +437,10 @@ Then a drop down with the name 'colors' contains the items:
 |true |Blue |
 ----
 
-[IMPORTANT]
-
-Item - is an option. State - true/false describes if option selected
+IMPORTANT: The item is an option. The state (`true` or `false`) specifies whether the item is selected.
 
 
-=== Dropdown: verify first selected option
+==== Validate the first selected option
 
 Verifies if dropdown located by locator exists and first selected option.
 
@@ -412,7 +458,7 @@ Then dropdown located `id(colors)` exists and selected option is `Blue`
 ----
 
 
-=== Dropdown: add text to a mutli-select
+==== Add an option to the mutli-select dropdown
 
 Selects option in multi-select dropdown
 
@@ -433,7 +479,7 @@ When I add `Two` to selection in dropdown located `id(numbers)`
 ----
 
 
-=== Dropdown: select option
+==== Select the option
 
 Selects option in dropdown
 
@@ -454,7 +500,8 @@ When I select `Red` in dropdown located `id(colors)`
 ----
 
 
-=== Proxy - Check the number of HTTP requests
+=== Proxy Steps
+==== Check the number of HTTP requests
 
 {proxy}
 
@@ -483,7 +530,7 @@ Then number of HTTP GET, POST requests with URL pattern `http://httpbin\.org/get
 ----
 
 
-=== Proxy - Save the URL
+==== Capture the request URL
 
 Save the URL from the request with given URL-pattern into the variable with specified name and the scopes.
 
@@ -517,7 +564,7 @@ Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
 ----
 
 
-=== Proxy - Save the URL query
+==== Capture the URL query
 
 Save the URL query parameters from the request with given URL-pattern into the variable with specified name and the scopes.
 
@@ -553,7 +600,7 @@ Then `${query}` is equal to `{q=[vividus]}`
 ----
 
 
-=== Proxy - Save the HTTP message
+==== Capture the HTTP request
 
 {proxy}
 The actions preformed by the step:
@@ -593,7 +640,7 @@ Then `${data.responseStatus}` is equal to `200`
 ----
 
 
-=== Proxy - Wait for the HTTP request
+==== Wait for the HTTP request
 
 {proxy}
 Waits for the HTTP requests matching the provided HTTP methods and URL regular expression.
@@ -615,7 +662,7 @@ Then number of HTTP GET or POST requests with URL pattern `http://httpbin\.org/g
 ----
 
 
-=== Proxy - Add headers to the HTTP request
+==== Add headers to the HTTP request
 
 {proxy}
 Add headers to the proxied HTTP request satisfying the desired condition
@@ -647,7 +694,7 @@ Then a JSON element from '${response}' by the JSON path '$.headers' is equal to 
 ----
 
 
-=== Proxy - Clear Log
+==== Clear the recordings
 
 {proxy}
 The step clears the HTTP requests and responses recorded by the proxy
@@ -666,7 +713,7 @@ Then number of HTTP GET requests with URL pattern `http://httpbin\.org/get` is e
 ----
 
 
-=== Proxy - Clear Mocks
+==== Clear the mocks
 
 {proxy}
 The step clears previously created mocks
@@ -688,7 +735,7 @@ Then number of elements found by `id(sw)` is = `0`
 ----
 
 
-=== Proxy - Mock response by methods with content
+==== Mock the HTTP response by methods with content
 
 {proxy}
 Mocks HTTP response by methods with a provided content
@@ -716,7 +763,7 @@ When I mock HTTP POST responses with request URL which CONTAINS `example` using 
 ----
 
 
-=== Proxy - Mock response with content
+==== Mock the HTTP response with content
 
 {proxy}
 Mocks HTTP response with a provided content
@@ -744,7 +791,7 @@ When I mock HTTP responses with request URL which CONTAINS `example.com` using r
 ----
 
 
-=== Proxy - Mock response without content
+==== Mock the HTTP response without content
 
 {proxy}
 Mocks HTTP response
@@ -768,50 +815,4 @@ When I mock HTTP responses with request URL which $comparisonRule `$url` using r
 When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `404` and headers:
 |name          |value|
 |Content-Length|0    |
-----
-
-
-include::partial$dynamic-variables-header.adoc[]
-
-=== Context element rectangle
-
-Provides possibility to access context element coordinates, width and height.
-
-[IMPORTANT]
-
-Variable uses contextual approach. So it is necessary to switch context to a target element.
-
-
-==== *Variable name*
-
-[cols="1,3", options="header"]
-|===
-
-|Variable name
-|Description
-
-|context-height
-|provided context element height
-
-|context-width
-|provided context element width
-
-|context-x-coordinate
-|provided context element absolute X coordinate
-
-|context-y-coordinate
-|provided context element absolute Y coordinate
-
-|===
-
-
-==== *Usage example*
-
-[source,gherkin]
-----
-When I change context to element located `tagName(img)`
-Then `${context-height}` is > `0`
-Then `${context-width}` is > `0`
-Then `${context-x-coordinate}` is > `0`
-Then `${context-y-coordinate}` is > `0`
 ----
