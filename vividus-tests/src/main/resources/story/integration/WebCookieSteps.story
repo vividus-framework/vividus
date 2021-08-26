@@ -11,6 +11,7 @@ When I set all cookies for current domain:
 Then a cookie with the name 'cookieName1' is set
 When I remove a cookie with the name 'cookieName1' from the current domain
 Then a cookie with the name 'cookieName1' is not set
-When I remove all cookies from the current domain
+When I remove cookie with name `cookieName2` from current domain without applying changes
 Then cookie with name `cookieName2` is not set
+When I remove all cookies from the current domain
 Then cookie with name `cookieName3` is not set

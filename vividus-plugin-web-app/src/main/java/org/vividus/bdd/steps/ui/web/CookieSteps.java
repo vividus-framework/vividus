@@ -64,10 +64,20 @@ public class CookieSteps
      * </ul>
      */
     @When("I remove all cookies from current domain")
-    public void whenIRemoveAllCookiesFromTheCurrentDomain()
+    public void removeAllCookies()
+    {
+        removeAllCookiesWithoutApply();
+        navigateActions.refresh();
+    }
+
+    /**
+     * Removes all cookies from the current domain, but does not apply the changes in cookies. The current page must be
+     * refreshed or the navigation must be performed to apply the cookie changes.
+     */
+    @When("I remove all cookies from current domain without applying changes")
+    public void removeAllCookiesWithoutApply()
     {
         cookieManager.deleteAllCookies();
-        navigateActions.refresh();
     }
 
     /**
@@ -81,10 +91,22 @@ public class CookieSteps
      * @param cookieName The name of the cookie to remove
      */
     @When("I remove cookie with name `$cookieName` from current domain")
-    public void whenIRemoveCookieWithNameFromCurrentDomain(String cookieName)
+    public void removeCookie(String cookieName)
+    {
+        removeCookieWithoutApply(cookieName);
+        navigateActions.refresh();
+    }
+
+    /**
+     * Removes the certain cookie from the current domain, but does not apply the changes in cookies. The current
+     * page must be refreshed or the navigation must be performed to apply the cookie changes.
+     *
+     * @param cookieName The name of the cookie to remove
+     */
+    @When("I remove cookie with name `$cookieName` from current domain without applying changes")
+    public void removeCookieWithoutApply(String cookieName)
     {
         cookieManager.deleteCookie(cookieName);
-        navigateActions.refresh();
     }
 
     /**
