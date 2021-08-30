@@ -322,7 +322,7 @@ class ResourceCheckStepsTests
     }
 
     @Test
-    void shouldReportExceptionOccuredInExecutingThread() throws InterruptedException, ExecutionException
+    void shouldReportExceptionOccurredInExecutingThread() throws InterruptedException, ExecutionException
     {
         InterruptedException interruptedException = new InterruptedException();
         doNothing().when(executor).execute(argThat(r -> true), argThat(v -> {

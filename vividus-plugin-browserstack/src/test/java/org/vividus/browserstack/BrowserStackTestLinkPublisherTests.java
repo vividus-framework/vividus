@@ -53,7 +53,7 @@ class BrowserStackTestLinkPublisherTests
     }
 
     @Test
-    void shouldLogExceptionsOccuredWhileGettingSessionLink() throws BrowserStackException, GetCloudTestUrlException
+    void shouldLogExceptionsOccurredWhileGettingSessionLink() throws BrowserStackException, GetCloudTestUrlException
     {
         BrowserStackException exception = mock(BrowserStackException.class);
         doThrow(exception).when(appAutomateClient).getSession(SESSION_ID);

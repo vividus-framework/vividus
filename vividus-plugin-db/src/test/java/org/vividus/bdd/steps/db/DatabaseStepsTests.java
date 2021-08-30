@@ -280,7 +280,7 @@ class DatabaseStepsTests
         IllegalStateException actual = assertThrows(IllegalStateException.class,
             () -> databaseSteps.executeSql(QUERY, DB_KEY));
         assertEquals(cause, actual.getCause());
-        assertEquals(actual.getMessage(), "Exception occured during query execution.\n"
+        assertEquals(actual.getMessage(), "Exception occurred during query execution.\n"
                 + "If you are trying execute SELECT query consider using step:"
                 + "When I execute SQL query '$sqlQuery' and save the result to the $scopes variable '$variableName'");
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(LOG_EXECUTING_SQL_QUERY, QUERY))));
