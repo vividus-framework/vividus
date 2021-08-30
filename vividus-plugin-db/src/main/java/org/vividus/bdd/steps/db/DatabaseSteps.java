@@ -195,7 +195,7 @@ public class DatabaseSteps
         }
         catch (DataIntegrityViolationException e)
         {
-            throw new IllegalStateException("Exception occured during query execution.\n"
+            throw new IllegalStateException("Exception occurred during query execution.\n"
                 + "If you are trying execute SELECT query consider using step:"
                 + "When I execute SQL query '$sqlQuery' and save the result to the $scopes variable '$variableName'",
                 e);

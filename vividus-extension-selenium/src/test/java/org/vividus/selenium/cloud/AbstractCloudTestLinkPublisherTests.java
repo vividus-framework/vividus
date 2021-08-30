@@ -93,7 +93,7 @@ class AbstractCloudTestLinkPublisherTests
     }
 
     @Test
-    void shouldPublishSessionLinkAfterScenarioIfMultipleWebDriverSessionReCreationOccured()
+    void shouldPublishSessionLinkAfterScenarioIfMultipleWebDriverSessionReCreationOccurred()
     {
         when(webDriverQuitEvent.getSessionId()).thenReturn(SESSION_ID);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
