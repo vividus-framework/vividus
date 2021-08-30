@@ -38,7 +38,8 @@ dependencies {
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl')
 
-    implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.12.4')
+    implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.12.4')
+    implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml')
 
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
