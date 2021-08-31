@@ -14,3 +14,5 @@
 |startElementAccessibilityId|history-start-accessibilityLabel                     |
 |endElementAccessibilityId  |history-end-accessibilityLabel                       |
 |nameInputXpath             |//android.widget.EditText[@text='Enter your name...']|
+|action                     |COMPARE_AGAINST                                      |
+|scrollViewXpath            |//android.widget.ScrollView                          |

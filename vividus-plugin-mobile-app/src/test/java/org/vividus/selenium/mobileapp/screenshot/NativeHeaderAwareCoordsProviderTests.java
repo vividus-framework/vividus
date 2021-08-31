@@ -17,6 +17,7 @@
 package org.vividus.selenium.mobileapp.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
@@ -29,6 +30,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
+import org.vividus.ui.context.IUiContext;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
 
@@ -37,6 +39,8 @@ class NativeHeaderAwareCoordsProviderTests
 {
     @Mock private MobileAppWebDriverManager driverManager;
     @Mock private WebElement webElement;
+    @Mock private IUiContext uiContext;
+
     @InjectMocks private NativeHeaderAwareCoordsProvider coordsProvider;
 
     @Test
@@ -50,5 +54,36 @@ class NativeHeaderAwareCoordsProviderTests
                              () -> assertEquals(134, coords.getY()),
                              () -> assertEquals(1, coords.getWidth()),
                              () -> assertEquals(1, coords.getHeight()));
+    }
+
+    @Test
+    void shouldAdjustElementCoordsToTheCurrentSearchContext()
+    {
+        WebElement contextElement = mock(WebElement.class);
+        when(contextElement.getLocation()).thenReturn(new Point(10, 10));
+        when(contextElement.getSize()).thenReturn(new Dimension(100, 50));
+        when(webElement.getLocation()).thenReturn(new Point(5, 15));
+        when(webElement.getSize()).thenReturn(new Dimension(150, 30));
+        when(uiContext.getSearchContext()).thenReturn(contextElement);
+        Coords coords = coordsProvider.ofElement(null, webElement);
+        Assertions.assertAll(() -> assertEquals(0, coords.getX()),
+                             () -> assertEquals(5, coords.getY()),
+                             () -> assertEquals(100, coords.getWidth()),
+                             () -> assertEquals(30, coords.getHeight()));
+    }
+
+    @Test
+    void shouldNotAdjustCoordsForTheCurrentSearchContext()
+    {
+        WebElement contextElement = mock(WebElement.class);
+        when(contextElement.getLocation()).thenReturn(new Point(10, 10));
+        when(contextElement.getSize()).thenReturn(new Dimension(100, 50));
+        when(uiContext.getSearchContext()).thenReturn(contextElement);
+        Coords coords = coordsProvider.ofElement(null, contextElement);
+        Assertions.assertAll(
+                () -> assertEquals(10, coords.getX()),
+                () -> assertEquals(10, coords.getY()),
+                () -> assertEquals(100, coords.getWidth()),
+                () -> assertEquals(50, coords.getHeight()));
     }
 }
