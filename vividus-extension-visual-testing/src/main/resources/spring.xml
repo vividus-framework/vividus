@@ -7,7 +7,7 @@
        default-lazy-init="true">
 
     <beans profile="web">
-        <bean id="coordsProvider" class="org.vividus.visual.screenshot.AdjustingCoordsProvider" />
+        <bean id="coordsProvider" class="org.vividus.visual.screenshot.WebAdjustingCoordsProvider" />
     </beans>
 
     <beans profile="web,mobile_app">

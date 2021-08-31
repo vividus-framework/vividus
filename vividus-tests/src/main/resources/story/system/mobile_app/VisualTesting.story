@@ -3,8 +3,7 @@ Meta:
 
 Lifecycle:
 Examples:
-|action         |
-|COMPARE_AGAINST|
+/data/tables/system/mobile_app/locators/${target-platform}.table
 
 
 Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
@@ -52,3 +51,13 @@ Examples:
 |cut-type|
 |ELEMENT |
 |AREA    |
+
+
+Scenario: Verify contextual check with ignored element
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<menuScrollViewXpath>)`
+When I wait until element located `xpath(<scrollViewXpath>)` appears
+When I change context to element located `xpath(<scrollViewXpath>)`
+When I <action> baseline with `${target-platform}-context-with-ignore` ignoring:
+|ELEMENT                                          |
+|By.accessibilityId(<startElementAccessibilityId>)|

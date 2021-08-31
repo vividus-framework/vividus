@@ -19,25 +19,33 @@ package org.vividus.selenium.mobileapp.screenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
+import org.vividus.selenium.screenshot.AbstractAdjustingCoordsProvider;
+import org.vividus.ui.context.IUiContext;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
-import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
 
-public class NativeHeaderAwareCoordsProvider extends WebDriverCoordsProvider
+public class NativeHeaderAwareCoordsProvider extends AbstractAdjustingCoordsProvider
 {
     private static final long serialVersionUID = 2966521618709606533L;
 
     private final transient MobileAppWebDriverManager mobileAppWebDriverManager;
 
-    public NativeHeaderAwareCoordsProvider(MobileAppWebDriverManager mobileAppWebDriverManager)
+    public NativeHeaderAwareCoordsProvider(MobileAppWebDriverManager mobileAppWebDriverManager, IUiContext uiContext)
     {
+        super(uiContext);
         this.mobileAppWebDriverManager = mobileAppWebDriverManager;
     }
 
     @Override
     public Coords ofElement(WebDriver driver, WebElement element)
     {
-        Coords coords = super.ofElement(driver, element);
+        Coords coords = getCoords(element);
+        return getUiContext().getSearchContext() == element ? coords : adjustToSearchContext(coords);
+    }
+
+    protected Coords getCoords(WebElement element)
+    {
+        Coords coords = super.ofElement(null, element);
         return new Coords(coords.x, coords.y - mobileAppWebDriverManager.getStatusBarSize(), coords.width,
                 coords.height);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,16 @@
 package org.vividus.visual.screenshot;
 
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.selenium.screenshot.AbstractAdjustingCoordsProvider;
 import org.vividus.selenium.screenshot.IScrollbarHandler;
 import org.vividus.ui.context.IUiContext;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
-import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
 
-public class AdjustingCoordsProvider extends WebDriverCoordsProvider
+public class WebAdjustingCoordsProvider extends AbstractAdjustingCoordsProvider
 {
     private static final long serialVersionUID = 3963826455192835938L;
 
@@ -35,14 +34,12 @@ public class AdjustingCoordsProvider extends WebDriverCoordsProvider
 
     private final transient IScrollbarHandler scrollbarHandler;
 
-    private final transient IUiContext uiContext;
-
-    public AdjustingCoordsProvider(IWebDriverManager webDriverManager, IScrollbarHandler scrollbarHandler,
+    public WebAdjustingCoordsProvider(IWebDriverManager webDriverManager, IScrollbarHandler scrollbarHandler,
             IUiContext uiContext)
     {
+        super(uiContext);
         this.webDriverManager = webDriverManager;
         this.scrollbarHandler = scrollbarHandler;
-        this.uiContext = uiContext;
     }
 
     @Override
@@ -55,22 +52,13 @@ public class AdjustingCoordsProvider extends WebDriverCoordsProvider
             {
                 coords.y += Math.toIntExact(getYOffset(driver));
             }
-            return adjustToSearchContext(driver, coords);
+            return adjustToSearchContext(coords);
         });
     }
 
-    private Coords adjustToSearchContext(WebDriver driver, Coords coords)
+    protected Coords getCoords(WebElement webElement)
     {
-        SearchContext searchContext = uiContext.getSearchContext();
-        if (searchContext instanceof WebElement)
-        {
-            Coords searchContextCoords = super.ofElement(driver, (WebElement) searchContext);
-            Coords intersected = coords.intersection(searchContextCoords);
-            intersected.x = intersected.x - searchContextCoords.x;
-            intersected.y = intersected.y - searchContextCoords.y;
-            return intersected;
-        }
-        return coords;
+        return super.ofElement(null, webElement);
     }
 
     private long getYOffset(WebDriver webDriver)
