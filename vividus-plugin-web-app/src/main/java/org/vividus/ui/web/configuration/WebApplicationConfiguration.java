@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,14 @@ public class WebApplicationConfiguration
     public URI getMainApplicationPageUrl()
     {
         return configurationStorage.get().getMainApplicationPageUri();
+    }
+
+    /**
+     * @return the main application page URL or null if it's not set
+     */
+    public URI getMainApplicationPageUrlUnsafely()
+    {
+        return configurationStorage.get().getMainApplicationPageUriUnsafely();
     }
 
     public AuthenticationMode getAuthenticationMode()
@@ -134,6 +142,12 @@ public class WebApplicationConfiguration
                 this.authenticationMode = authenticationMode;
                 updateUri();
             }
+        }
+
+        @SuppressWarnings("SimpleAccessorNameNotation")
+        private URI getMainApplicationPageUriUnsafely()
+        {
+            return mainApplicationPageUri;
         }
 
         private URI getMainApplicationPageUri()

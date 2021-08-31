@@ -81,6 +81,7 @@ class ResourceCheckStepsTests
     private static final String SHARP_ID = "#sharp";
     private static final URI SHARP_URI = URI.create("#");
     private static final URI FAQ_URI = URI.create("https://vividus.org/faq");
+    private static final String FAQ_URL = "/faq";
     private static final String ABOUT_ID = "#about";
     private static final String RELATIVE_ID = "#relative";
     private static final String HTTPS_ID = "#https";
@@ -168,7 +169,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.init();
         URI imageUri = URI.create("https://avatars0.githubusercontent.com/u/48793437?s=200&v=4");
         URI gifImageUri = URI.create("https://github.githubassets.com/images/spinners/octocat-spinner-32.gif");
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
+        when(webApplicationConfiguration.getMainApplicationPageUrlUnsafely()).thenReturn(VIVIDUS_URI);
         resourceCheckSteps.checkResources("a, img", FIRST_PAGE);
 
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
@@ -190,6 +191,55 @@ class ResourceCheckStepsTests
             validate(resourceValidations, MAILTO_URI, MAILTO_ID, CheckStatus.FILTERED, N_A);
             return true;
         }), eq(REPORT_NAME));
+    }
+
+    @Test
+    void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromHtmlDocument()
+            throws InterruptedException, ExecutionException
+    {
+        mockResourceValidator();
+        runExecutor();
+        resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
+        resourceCheckSteps.init();
+        when(webApplicationConfiguration.getMainApplicationPageUrlUnsafely()).thenReturn(null);
+
+        String html = "<!DOCTYPE html><html><head></head><body><a id='about' href='/faq'>FAQ</a></body></html>";
+        resourceCheckSteps.checkResources(LINK_SELECTOR, html);
+
+        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
+            @SuppressWarnings(UNCHECKED)
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
+            assertThat(validationsToReport, hasSize(1));
+            validate(validationsToReport.iterator(), URI.create(FAQ_URL), ABOUT_ID, CheckStatus.BROKEN, N_A);
+            return true;
+        }), eq(REPORT_NAME));
+        verify(softAssert).recordFailedAssertion(
+                "Unable to resolve /faq resource since the main application page URL is not set");
+    }
+
+    @Test
+    void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromPage()
+            throws IOException, InterruptedException, ExecutionException
+    {
+        mockResourceValidator();
+        runExecutor();
+        resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
+        resourceCheckSteps.init();
+        ExamplesTable examplesTable = new ExamplesTable("|pages|\n|/faq|");
+        resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
+
+        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
+            @SuppressWarnings(UNCHECKED)
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
+            assertThat(validationsToReport, hasSize(1));
+            validate(validationsToReport.iterator(), null, N_A, CheckStatus.BROKEN, FAQ_URL);
+            return true;
+        }), eq(REPORT_NAME));
+        verifyNoInteractions(httpRequestExecutor);
+        verify(softAssert)
+                .recordFailedAssertion("Unable to resolve /faq page since the main application page URL is not set");
     }
 
     @Test
@@ -219,7 +269,7 @@ class ResourceCheckStepsTests
             assertThat(validationsToReport, hasSize(10));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations.next(), SERENITY_URI, HTTP_ID, CheckStatus.PASSED);
-            validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/faq"), RELATIVE_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + FAQ_URL), RELATIVE_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/products?name=pelmeshki"),
                     SELECTOR_QUERY_1, CheckStatus.PASSED);
             validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/products?name=smetanka"),
@@ -353,7 +403,7 @@ class ResourceCheckStepsTests
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.of("^((?!https).)*"));
         resourceCheckSteps.init();
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(VIVIDUS_URI);
+        when(webApplicationConfiguration.getMainApplicationPageUrlUnsafely()).thenReturn(VIVIDUS_URI);
         resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
