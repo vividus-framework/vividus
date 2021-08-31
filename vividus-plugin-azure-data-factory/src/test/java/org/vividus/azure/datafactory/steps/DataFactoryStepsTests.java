@@ -18,6 +18,7 @@ package org.vividus.azure.datafactory.steps;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
@@ -52,7 +53,19 @@ import org.vividus.softassert.ISoftAssert;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class DataFactoryStepsTests
 {
+    private static final String RESOURCE_GROUP_NAME = "resourceGroupName";
+    private static final String FACTORY_NAME = "factoryName";
+    private static final String PIPELINE_NAME = "pipelineName";
+    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(2);
+
     private static final String SUCCEEDED = "Succeeded";
+    private static final String FAILED = "Failed";
+
+    private static final String DEPRECATION_NOTICE =
+            "This step is deprecated and will be removed in VIVIDUS 0.4.0. The replacement is \"When I run "
+                    + "pipeline `$pipelineName` in Data Factory `$factoryName` from resource group "
+                    + "`$resourceGroupName` with wait timeout `$waitTimeout` and expect run status to be equal to"
+                    + " `$expectedPipelineRunStatus`\"";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DataFactorySteps.class);
 
@@ -61,29 +74,41 @@ class DataFactoryStepsTests
     @Mock private ISoftAssert softAssert;
 
     @Test
+    @SuppressWarnings("removal")
     void shouldRunSuccessfulPipeline()
     {
-        shouldRunPipeline(mock(PipelineRun.class), SUCCEEDED, List.of());
+        shouldRunPipeline(mock(PipelineRun.class), SUCCEEDED, SUCCEEDED, (steps, loggingEvents) -> {
+            loggingEvents.add(0, warn(DEPRECATION_NOTICE));
+            steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT);
+        });
     }
 
     @Test
+    @SuppressWarnings("removal")
     void shouldRunFailingPipeline()
     {
         var errorMessage = "error message";
         PipelineRun finalPipelineRunState = mock(PipelineRun.class);
         when(finalPipelineRunState.message()).thenReturn(errorMessage);
-        var actualStatus = "Failed";
 
-        shouldRunPipeline(finalPipelineRunState, actualStatus,
-                List.of(error("The pipeline run message: {}", errorMessage)));
+        shouldRunPipeline(finalPipelineRunState, FAILED, SUCCEEDED, (steps, loggingEvents) -> {
+            loggingEvents.add(0, warn(DEPRECATION_NOTICE));
+            loggingEvents.add(error("The pipeline run message: {}", errorMessage));
+            steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT);
+        });
     }
 
-    private void shouldRunPipeline(PipelineRun finalPipelineRunState, String finalRunStatus,
-            List<LoggingEvent> additionalLoggingEvents)
+    @Test
+    void shouldRunFailingPipelineAsExpected()
     {
-        String pipelineName = "pipelineName";
-        String factoryName = "factoryName";
-        String resourceGroupName = "resourceGroupName";
+        shouldRunPipeline(mock(PipelineRun.class), FAILED, FAILED, (steps, loggingEvents) -> {
+            steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT, FAILED);
+        });
+    }
+
+    private void shouldRunPipeline(PipelineRun finalPipelineRunState, String finalRunStatus, String expectedRunStatus,
+            BiConsumer<DataFactorySteps, List<LoggingEvent>> pipelineRunner)
+    {
         String runId = "run-id";
 
         executeSteps((dataFactoryManager, steps) -> {
@@ -91,7 +116,7 @@ class DataFactoryStepsTests
             when(createRunResponse.runId()).thenReturn(runId);
 
             var pipelines = mock(Pipelines.class);
-            when(pipelines.createRun(resourceGroupName, factoryName, pipelineName)).thenReturn(createRunResponse);
+            when(pipelines.createRun(RESOURCE_GROUP_NAME, FACTORY_NAME, PIPELINE_NAME)).thenReturn(createRunResponse);
 
             when(dataFactoryManager.pipelines()).thenReturn(pipelines);
 
@@ -103,23 +128,22 @@ class DataFactoryStepsTests
             when(finalPipelineRunState.status()).thenReturn(finalRunStatus);
 
             var pipelineRuns = mock(PipelineRuns.class);
-            when(pipelineRuns.get(resourceGroupName, factoryName, runId))
+            when(pipelineRuns.get(RESOURCE_GROUP_NAME, FACTORY_NAME, runId))
                     .thenReturn(pipelineRun1)
                     .thenReturn(finalPipelineRunState);
 
             when(dataFactoryManager.pipelineRuns()).thenReturn(pipelineRuns);
 
-            when(softAssert.assertEquals("The pipeline run status", SUCCEEDED, finalRunStatus)).thenReturn(
-                    SUCCEEDED.equals(finalRunStatus));
-
-            steps.runPipeline(pipelineName, factoryName, resourceGroupName, Duration.ofSeconds(2));
+            when(softAssert.assertEquals("The pipeline run status", expectedRunStatus, finalRunStatus)).thenReturn(
+                    expectedRunStatus.equals(finalRunStatus));
 
             List<LoggingEvent> loggingEvents = new ArrayList<>();
             loggingEvents.add(info("The ID of the created pipeline run is {}", runId));
             var currentStatusLogMessageFormat = "The current pipeline run status is \"{}\"";
             loggingEvents.add(info(currentStatusLogMessageFormat, firstRunStatus));
             loggingEvents.add(info(currentStatusLogMessageFormat, finalRunStatus));
-            loggingEvents.addAll(additionalLoggingEvents);
+
+            pipelineRunner.accept(steps, loggingEvents);
 
             assertThat(logger.getLoggingEvents(), is(loggingEvents));
         });
