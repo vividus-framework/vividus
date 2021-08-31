@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,9 @@ class WebApplicationConfigurationTests
     {
         WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(MAIN_APP_URL,
                 AuthenticationMode.URL);
-        URI actualUrl = webApplicationConfiguration.getMainApplicationPageUrl();
-        assertEquals(URI.create(MAIN_APP_URL), actualUrl);
+        URI mainAppUri = URI.create(MAIN_APP_URL);
+        assertEquals(mainAppUri, webApplicationConfiguration.getMainApplicationPageUrl());
+        assertEquals(mainAppUri, webApplicationConfiguration.getMainApplicationPageUrlUnsafely());
     }
 
     @Test
@@ -67,6 +68,13 @@ class WebApplicationConfigurationTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 webApplicationConfiguration::getMainApplicationPageUrl);
         assertEquals("URL of the main application page should be non-blank", exception.getMessage());
+    }
+
+    @Test
+    void shouldCheckIfTheMainApplicationUrlIsNotSet()
+    {
+        WebApplicationConfiguration webApplicationConfiguration = new WebApplicationConfiguration(null, null);
+        assertNull(webApplicationConfiguration.getMainApplicationPageUrlUnsafely());
     }
 
     @Test
