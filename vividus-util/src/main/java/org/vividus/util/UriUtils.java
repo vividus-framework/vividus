@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,13 +109,13 @@ public final class UriUtils
     {
         try
         {
-            String decodedUrl = decodeUrl(url);
-
-            int schemeSeparatorIndex = decodedUrl.indexOf(SCHEME_SEPARATOR);
+            int schemeSeparatorIndex = url.indexOf(SCHEME_SEPARATOR);
             if (schemeSeparatorIndex < 0)
             {
                 throw new IllegalArgumentException("Scheme is missing in URL: " + url);
             }
+
+            String decodedUrl = decodeUrl(url);
             String scheme = decodedUrl.substring(0, schemeSeparatorIndex);
             String decodedFragment = extractDecodedFragment(url);
 
