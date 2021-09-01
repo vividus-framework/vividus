@@ -46,9 +46,9 @@ class HttpResourceValidationStepsTests
     {
         String passedUrl = "https://docs.vividus.dev";
         ResourceValidation passed = createResourceValidation(passedUrl, CheckStatus.PASSED);
-        String failedUrl1 = "http://durgasoft.com​";
+        String failedUrl1 = "http://durgasoft.com";
         ResourceValidation failed1 = createResourceValidation(failedUrl1, CheckStatus.FAILED);
-        String failedUrl2 = "http://example.com​";
+        String failedUrl2 = "http://example.com";
         ResourceValidation failed2 = createResourceValidation(failedUrl2, CheckStatus.FAILED);
 
         when(resourceValidator.perform(passed)).thenReturn(passed);
