@@ -52,17 +52,44 @@ public class DataFactorySteps
      * @param factoryName       The name of the factory.
      * @param resourceGroupName The name of the resource group of the factory.
      * @param waitTimeout       The maximum duration of time to wait for the pipeline completion.
+     * @deprecated Use step:
+     * When I run pipeline `$pipelineName` in Data Factory `$factoryName` from resource group `$resourceGroupName`
+     * with wait timeout `$waitTimeout` and expect run status to be equal to `$expectedPipelineRunStatus`
      */
     @When("I run pipeline `$pipelineName` in Data Factory `$factoryName` from resource group `$resourceGroupName`"
             + " with wait timeout `$waitTimeout`")
+    @Deprecated(since = "0.3.8", forRemoval = true)
     public void runPipeline(String pipelineName, String factoryName, String resourceGroupName, Duration waitTimeout)
+    {
+        LOGGER.warn(
+                "This step is deprecated and will be removed in VIVIDUS 0.4.0. The replacement is \"When I run "
+                        + "pipeline `$pipelineName` in Data Factory `$factoryName` from resource group "
+                        + "`$resourceGroupName` with wait timeout `$waitTimeout` and expect run status to be equal to"
+                        + " `$expectedPipelineRunStatus`\"");
+        runPipeline(pipelineName, factoryName, resourceGroupName, waitTimeout, "Succeeded");
+    }
+
+    /**
+     * Creates a run of a pipeline in Data Factory, waits for its completion or until the timeout is reached and
+     * validates the run status is equal to the expected one.
+     *
+     * @param pipelineName              The name of the pipeline to run.
+     * @param factoryName               The name of the factory.
+     * @param resourceGroupName         The name of the resource group of the factory.
+     * @param waitTimeout               The maximum duration of time to wait for the pipeline completion.
+     * @param expectedPipelineRunStatus The expected pipeline run status, e.g. Succeeded
+     */
+    @When("I run pipeline `$pipelineName` in Data Factory `$factoryName` from resource group `$resourceGroupName`"
+            + " with wait timeout `$waitTimeout` and expect run status to be equal to `$expectedPipelineRunStatus`")
+    public void runPipeline(String pipelineName, String factoryName, String resourceGroupName, Duration waitTimeout,
+            String expectedPipelineRunStatus)
     {
         String runId = dataFactoryManager.pipelines().createRun(resourceGroupName, factoryName, pipelineName).runId();
         LOGGER.info("The ID of the created pipeline run is {}", runId);
         PipelineRun pipelineRun = new DurationBasedWaiter(new WaitMode(waitTimeout, RETRY_TIMES)).wait(
                 () -> getPipelineRun(resourceGroupName, factoryName, runId),
                 run -> run.runEnd() != null);
-        if (!softAssert.assertEquals("The pipeline run status", "Succeeded", pipelineRun.status()))
+        if (!softAssert.assertEquals("The pipeline run status", expectedPipelineRunStatus, pipelineRun.status()))
         {
             LOGGER.atError().addArgument(pipelineRun::message).log("The pipeline run message: {}");
         }
