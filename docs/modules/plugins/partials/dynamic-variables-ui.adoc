@@ -1,0 +1,42 @@
+=== Context element rectangle
+
+The set of dynamic variables provides ability to access context element
+coordinates, width and height.
+
+[IMPORTANT]
+
+The variables rely on the contextual approach: it is necessary to switch context
+to the target element.
+
+
+==== *Variable name*
+
+[cols="1,3", options="header"]
+|===
+
+|Variable name
+|Description
+
+|`context-height`
+|the height of the context element
+
+|`context-width`
+|the width of the context element
+
+|`context-x-coordinate`
+|the absolute `X` coordinate of the context element
+
+|`context-y-coordinate`
+|the absolute `Y` coordinate of the context element
+
+|===
+
+.Check the size and the location of the image
+[source,gherkin]
+----
+When I change context to element located `id(userpic)`
+Then `${context-height}` is > `0`
+Then `${context-width}` is > `0`
+Then `${context-x-coordinate}` is > `0`
+Then `${context-y-coordinate}` is > `0`
+----

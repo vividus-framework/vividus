@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.variable.ui.web;
+package org.vividus.bdd.variable.ui;
 
 import javax.inject.Named;
 
 import org.openqa.selenium.Rectangle;
 import org.vividus.ui.context.UiContext;
 
-@Named("context-height")
-public class SearchContextHeightDynamicVariable extends AbstractContextProvidingDynamicVariable
+@Named("context-y-coordinate")
+public class SearchContextYCoordinateDynamicVariable extends AbstractContextProvidingDynamicVariable
 {
-    public SearchContextHeightDynamicVariable(UiContext uiContext)
+    public SearchContextYCoordinateDynamicVariable(UiContext uiContext)
     {
         super(uiContext);
     }
@@ -32,6 +32,6 @@ public class SearchContextHeightDynamicVariable extends AbstractContextProviding
     @Override
     public String getValue()
     {
-        return getContextRectValue(Rectangle::getHeight);
+        return getContextRectValue(Rectangle::getY);
     }
 }

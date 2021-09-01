@@ -14,6 +14,15 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
+Scenario: Validate coordinate/size dynamic variables
+When I change context to element located `xpath(<textElementXpath>)->filter.text(Home)`
+Then `${context-height}`            is > `0`
+Then `${context-width}`             is > `0`
+Then `${context-x-coordinate}`      is > `0`
+Then `${context-y-coordinate}`      is > `0`
+When I reset context
+
+
 Scenario: Verify steps: 'When I press $key key', 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`', 'When I press keys:$keys' and Text Part Filter and Text Filter
 Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `1`
 When I press Home key
@@ -206,6 +215,7 @@ When I switch to web view with index `1`
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `1`
 When I switch to native context
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `0`
+
 
 Scenario: Verify step: 'When I close mobile application'
 When I close mobile application

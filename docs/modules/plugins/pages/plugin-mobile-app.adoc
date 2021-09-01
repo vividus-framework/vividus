@@ -222,6 +222,8 @@ ${clipboard-text}
 Then `${clipboard-text}` is equal to `uarlouski@gmail.com`
 ----
 
+include::partial$dynamic-variables-ui.adoc[]
+
 == Steps
 
 === Start mobile application
