@@ -1,11 +1,6 @@
-* text eol=lf
-*.xlsx -text
-*.png -text
-*.pdf -text
-*.jpg -text
-*.jar -text
-*.zip -text
-*.bat -text
-*.zip -text
-*.exe -text
-*.parquet -text
+* text=auto eol=lf
+
+*.bat text eol=crlf
+
+*.jar binary
+*.parquet binary
