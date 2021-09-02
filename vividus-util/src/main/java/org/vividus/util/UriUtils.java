@@ -16,11 +16,16 @@
 
 package org.vividus.util;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,12 +37,14 @@ import org.apache.commons.lang3.StringUtils;
 public final class UriUtils
 {
     private static final char SCHEME_SEPARATOR = ':';
+    private static final char USER_PASSWORD_SEPARATOR = ':';
     private static final String USER_INFO_SEPARATOR = "@";
     private static final char QUERY_SEPARATOR = '?';
     private static final char FRAGMENT_SEPARATOR = '#';
     private static final char SLASH = '/';
     private static final String ENCODED_AMPERSAND = "%26";
     private static final String DOUBLE_ENCODED_AMPERSAND = "%2526";
+    private static final String SCHEME_AUTHORITY_SEPARATOR = "://";
 
     private UriUtils()
     {
@@ -115,15 +122,18 @@ public final class UriUtils
                 throw new IllegalArgumentException("Scheme is missing in URL: " + url);
             }
 
-            String decodedUrl = decodeUrl(url);
-            String scheme = decodedUrl.substring(0, schemeSeparatorIndex);
+            String scheme = url.substring(0, schemeSeparatorIndex);
             String decodedFragment = extractDecodedFragment(url);
 
             if (scheme.startsWith("http"))
             {
-                return buildUrl(decodedUrl, decodedFragment);
+                String schemePart = scheme + SCHEME_AUTHORITY_SEPARATOR;
+                String userInfo = getUserInfo(scheme, url);
+                String decodedUrl = decodeUrl(substringAfter(url, schemePart + userInfo));
+                return buildUrl(schemePart + encodeUserInfo(userInfo) + decodedUrl, decodedFragment);
             }
 
+            String decodedUrl = decodeUrl(url);
             URI uri = new URI(scheme, removeFragment(decodedUrl, decodedFragment), decodedFragment);
             StringBuilder result = new StringBuilder(uri.getRawSchemeSpecificPart());
             if (decodedFragment != null)
@@ -136,6 +146,27 @@ public final class UriUtils
         {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    private static String getUserInfo(String scheme, String url)
+    {
+        String noSchemeUrl = substringAfter(url, scheme + SCHEME_AUTHORITY_SEPARATOR);
+        String authority = substringBefore(noSchemeUrl, SLASH);
+        int userInfoIndex = authority.lastIndexOf(USER_INFO_SEPARATOR);
+        return userInfoIndex > 0 ? authority.substring(0, userInfoIndex) : EMPTY;
+    }
+
+    private static String encodeUserInfo(String userInfo)
+    {
+        if (userInfo.isEmpty())
+        {
+            return EMPTY;
+        }
+
+        UserInfo info = parseUserInfo(userInfo);
+        String username = decodeData(info.getUser());
+        String password = decodeData(info.getPassword());
+        return encodeData(username) + USER_PASSWORD_SEPARATOR + encodeData(password);
     }
 
     private static URI buildUrl(String decodedUrl, String decodedFragment)
@@ -161,7 +192,9 @@ public final class UriUtils
             }
             ref = decodedFragment;
         }
-        return normalizeToRfc3986(new URI(uri.getProtocol(), uri.getAuthority(), path, query, ref));
+        String userInfo = uri.getUserInfo() != null ? decodeData(uri.getUserInfo()) : null;
+        URI uriToNormalize = new URI(uri.getProtocol(), userInfo, uri.getHost(), uri.getPort(), path, query, ref);
+        return normalizeToRfc3986(uriToNormalize);
     }
 
     private static String encodePlusCharacter(String data)
@@ -178,7 +211,17 @@ public final class UriUtils
 
     private static String decode(String data)
     {
-        return URLDecoder.decode(encodePlusCharacter(data), StandardCharsets.UTF_8);
+        return decodeData(encodePlusCharacter(data));
+    }
+
+    private static String decodeData(String data)
+    {
+        return URLDecoder.decode(data, StandardCharsets.UTF_8);
+    }
+
+    private static String encodeData(String data)
+    {
+        return URLEncoder.encode(data, StandardCharsets.UTF_8);
     }
 
     private static String extractDecodedFragment(String url)

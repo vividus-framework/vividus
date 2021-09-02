@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,6 +235,19 @@ class UriUtilsTests
         UserInfo userInfo = UriUtils.getUserInfo(URI_WITH_USER_INFO);
         assertEquals(USER, userInfo.getUser());
         assertEquals(PASSWORD, userInfo.getPassword());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "https://user:p@a%5Ess%40@somehost:8080/path,  user:p@a^ss@",
+        "https://user name:pass word@somehost,         user name:pass word",
+        "https://user%20name:pass word@somehost/,      user name:pass word",
+        "https://user name:pass%20word@somehost?query, user name:pass word"
+    })
+    void testSpecialSymbolsInUserInfo(String uriAsString, String userInfo)
+    {
+        URI uri = UriUtils.createUri(uriAsString);
+        assertEquals(userInfo, uri.getUserInfo());
     }
 
     @Test
