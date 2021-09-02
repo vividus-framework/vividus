@@ -25,16 +25,24 @@ public class MobileApplicationConfiguration
     private final Duration swipeStabilizationDuration;
     private final int swipeLimit;
     private final int swipeVerticalXPosition;
+    private final int swipeHorizontalYPosition;
 
-    @SuppressWarnings("MagicNumber")
     public MobileApplicationConfiguration(Duration swipeStabilizationDuration, int swipeLimit,
-            int swipeVerticalXPosition)
+            int swipeVerticalXPosition, int swipeHorizontalYPosition)
     {
+        validatePosition("x", swipeVerticalXPosition);
+        validatePosition("y", swipeHorizontalYPosition);
         this.swipeStabilizationDuration = swipeStabilizationDuration;
         this.swipeLimit = swipeLimit;
-        Validate.isTrue(swipeVerticalXPosition >= 0 && swipeVerticalXPosition <= 100,
-            "The x percentage value must be between 0 and 100, but got: %d", swipeVerticalXPosition);
         this.swipeVerticalXPosition = swipeVerticalXPosition;
+        this.swipeHorizontalYPosition = swipeHorizontalYPosition;
+    }
+
+    @SuppressWarnings("MagicNumber")
+    private void validatePosition(String name, int value)
+    {
+        Validate.isTrue(value >= 0 && value <= 100,
+            "The %s percentage value must be between 0 and 100, but got: %d", name, value);
     }
 
     public Duration getSwipeStabilizationDuration()
@@ -50,5 +58,10 @@ public class MobileApplicationConfiguration
     public int getSwipeVerticalXPosition()
     {
         return swipeVerticalXPosition;
+    }
+
+    public int getSwipeHorizontalYPosition()
+    {
+        return swipeHorizontalYPosition;
     }
 }

@@ -16,3 +16,4 @@
 |nameInputXpath             |//android.widget.EditText[@text='Enter your name...']|
 |action                     |COMPARE_AGAINST                                      |
 |scrollViewXpath            |//android.widget.ScrollView                          |
+|carouselViewXpath          |//android.widget.TextView[@text='Carousel']          |

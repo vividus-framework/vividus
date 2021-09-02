@@ -157,7 +157,7 @@ public class TouchActions
         int swipeLimit = mobileApplicationConfiguration.getSwipeLimit();
         BufferedImage previousFrame = null;
         SwipeCoordinates swipeCoordinates = direction.calculateCoordinates(genericWebDriverManager.getSize(),
-                mobileApplicationConfiguration.getSwipeVerticalXPosition());
+                mobileApplicationConfiguration);
         for (int count = 0; count <= swipeLimit; count++)
         {
             swipe(swipeCoordinates, swipeDuration);

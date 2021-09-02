@@ -80,7 +80,7 @@ class TouchActionsTests
     private static final Dimension DIMENSION = new Dimension(600, 800);
 
     @Spy private final MobileApplicationConfiguration mobileApplicationConfiguration =
-            new MobileApplicationConfiguration(Duration.ZERO, 5, 50);
+            new MobileApplicationConfiguration(Duration.ZERO, 5, 50, 0);
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private RemoteWebElement element;
     @Mock private PerformsTouchActions performsTouchActions;

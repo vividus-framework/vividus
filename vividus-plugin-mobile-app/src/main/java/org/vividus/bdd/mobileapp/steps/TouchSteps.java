@@ -109,7 +109,7 @@ public class TouchSteps
         }
 
         if (baseValidations.assertElementsNumber(String.format("The element by locator %s exists", locator), elements,
-                ComparisonRule.EQUAL_TO, 1))
+                ComparisonRule.EQUAL_TO, 1) && (SwipeDirection.UP == direction || SwipeDirection.DOWN == direction))
         {
             adjustVerticalPosition(elements.get(0), swipeDuration);
         }

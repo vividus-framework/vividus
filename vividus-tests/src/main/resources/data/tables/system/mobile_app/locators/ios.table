@@ -16,3 +16,4 @@
 |nameInputXpath             |//XCUIElementTypeTextField[@value='Enter your name...']|
 |action                     |COMPARE_AGAINST                                        |
 |scrollViewXpath            |//XCUIElementTypeScrollView                            |
+|carouselViewXpath          |//XCUIElementTypeButton[@name='Carousel']              |

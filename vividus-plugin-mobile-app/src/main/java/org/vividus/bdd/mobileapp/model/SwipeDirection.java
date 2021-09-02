@@ -17,40 +17,71 @@
 package org.vividus.bdd.mobileapp.model;
 
 import org.openqa.selenium.Dimension;
+import org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration;
 
 public enum SwipeDirection
 {
     UP
     {
         @Override
-        public SwipeCoordinates calculateCoordinates(Dimension dimension, int xOffsetPercentage)
+        public SwipeCoordinates calculateCoordinates(Dimension dimension,
+                MobileApplicationConfiguration mobileApplicationConfiguration)
         {
             int indent = dimension.getHeight() / VERTICAL_INDENT_COEFFICIENT;
-            return createCoordinates(dimension.getHeight() - indent, indent, dimension.getWidth(), xOffsetPercentage);
+            return createCoordinates(dimension.getHeight() - indent, indent, dimension.getWidth(),
+                    mobileApplicationConfiguration.getSwipeVerticalXPosition());
         }
     },
     DOWN
     {
         @Override
-        public SwipeCoordinates calculateCoordinates(Dimension dimension, int xOffsetPercentage)
+        public SwipeCoordinates calculateCoordinates(Dimension dimension,
+                MobileApplicationConfiguration mobileApplicationConfiguration)
         {
             int indent = dimension.getHeight() / VERTICAL_INDENT_COEFFICIENT;
-            return createCoordinates(indent, dimension.getHeight() - indent, dimension.getWidth(), xOffsetPercentage);
+            return createCoordinates(indent, dimension.getHeight() - indent, dimension.getWidth(),
+                    mobileApplicationConfiguration.getSwipeVerticalXPosition());
+        }
+    },
+    LEFT
+    {
+        @Override
+        public SwipeCoordinates calculateCoordinates(Dimension dimension,
+                MobileApplicationConfiguration mobileApplicationConfiguration)
+        {
+            int indent = dimension.getWidth() / HORIZONTAL_INDENT_COEFFICIENT;
+            int y = calculateCoordinate(dimension.getHeight(),
+                    mobileApplicationConfiguration.getSwipeHorizontalYPosition());
+            return new SwipeCoordinates(dimension.getWidth() - indent, y, indent, y);
+        }
+    },
+    RIGHT
+    {
+        @Override
+        public SwipeCoordinates calculateCoordinates(Dimension dimension,
+                MobileApplicationConfiguration mobileApplicationConfiguration)
+        {
+            int indent = dimension.getWidth() / HORIZONTAL_INDENT_COEFFICIENT;
+            int y = calculateCoordinate(dimension.getHeight(),
+                    mobileApplicationConfiguration.getSwipeHorizontalYPosition());
+            return new SwipeCoordinates(indent, y, dimension.getWidth() - indent, y);
         }
     };
 
     private static final int VERTICAL_INDENT_COEFFICIENT = 5;
+    private static final int HORIZONTAL_INDENT_COEFFICIENT = 8;
 
-    public abstract SwipeCoordinates calculateCoordinates(Dimension dimension, int xOffsetPercentage);
+    public abstract SwipeCoordinates calculateCoordinates(Dimension dimension,
+            MobileApplicationConfiguration mobileApplicationConfiguration);
 
     public static SwipeCoordinates createCoordinates(int startY, int endY, int width, int xOffsetPercentage)
     {
-        int x = calculateX(width, xOffsetPercentage);
+        int x = calculateCoordinate(width, xOffsetPercentage);
         return new SwipeCoordinates(x, startY, x, endY);
     }
 
     @SuppressWarnings("MagicNumber")
-    private static int calculateX(int width, int percentage)
+    private static int calculateCoordinate(int dimension, int percentage)
     {
         if (percentage == 0)
         {
@@ -58,8 +89,8 @@ public enum SwipeDirection
         }
         if (percentage == 100)
         {
-            return width - 1;
+            return dimension - 1;
         }
-        return width * percentage / 100;
+        return dimension * percentage / 100;
     }
 }

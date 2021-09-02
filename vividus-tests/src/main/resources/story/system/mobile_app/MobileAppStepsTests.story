@@ -217,5 +217,21 @@ When I switch to native context
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `0`
 
 
+Scenario: Verify step: 'When I swipe $direction to element located `$locator` with duration $swipeDuration'
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<carouselViewXpath>)`
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+When I swipe LEFT to element located `accessibilityId(<secondItemAccessibilityId>)` with duration PT1S
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I swipe RIGHT to element located `accessibilityId(<firstItemAccessibilityId>)` with duration PT1S
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
+
+Examples:
+|firstItemAccessibilityId|secondItemAccessibilityId|
+|Item 1                  |Item 2                   |
+
+
 Scenario: Verify step: 'When I close mobile application'
 When I close mobile application
