@@ -22,3 +22,12 @@ VIVIDUS is developed for testers to create automated tests for any kind of appli
 == Releases
 
 See the https://github.com/vividus-framework/vividus/releases[release history] to get the news.
+
+=== Release notifications
+
+It's possible to receive ongoing updates about releases on GitHub through a subscription:
+
+- open https://github.com/vividus-framework/vividus/[main VIVIDUS repository]
+- subscribe to release notifications
++
+image::subscribe-to-releases.gif[Subscribe to releases,width=70%]
