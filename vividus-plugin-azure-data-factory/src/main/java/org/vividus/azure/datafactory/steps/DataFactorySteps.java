@@ -79,8 +79,9 @@ public class DataFactorySteps
      * @param waitTimeout               The maximum duration of time to wait for the pipeline completion.
      * @param expectedPipelineRunStatus The expected pipeline run status, e.g. Succeeded
      */
-    @When("I run pipeline `$pipelineName` in Data Factory `$factoryName` from resource group `$resourceGroupName`"
-            + " with wait timeout `$waitTimeout` and expect run status to be equal to `$expectedPipelineRunStatus`")
+    @When(value = "I run pipeline `$pipelineName` in Data Factory `$factoryName` from resource group "
+            + "`$resourceGroupName` with wait timeout `$waitTimeout` and expect run status to be equal to "
+            + "`$expectedPipelineRunStatus`", priority = 1)
     public void runPipeline(String pipelineName, String factoryName, String resourceGroupName, Duration waitTimeout,
             String expectedPipelineRunStatus)
     {
