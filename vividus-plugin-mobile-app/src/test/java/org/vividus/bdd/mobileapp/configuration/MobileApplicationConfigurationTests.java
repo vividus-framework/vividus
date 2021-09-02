@@ -26,11 +26,21 @@ class MobileApplicationConfigurationTests
 {
     @ValueSource(ints = { -1, 101 })
     @ParameterizedTest
-    void shouldFailIfPercentageIsNotValid(int invalidPercentage)
+    void shouldFailIfXPercentageIsNotValid(int invalidPercentage)
     {
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-            () -> new MobileApplicationConfiguration(null, 0, invalidPercentage));
+            () -> new MobileApplicationConfiguration(null, 0, invalidPercentage, 0));
         assertEquals("The x percentage value must be between 0 and 100, but got: " + invalidPercentage,
+                thrown.getMessage());
+    }
+
+    @ValueSource(ints = { -1, 101 })
+    @ParameterizedTest
+    void shouldFailIfYPercentageIsNotValid(int invalidPercentage)
+    {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+            () -> new MobileApplicationConfiguration(null, 0, 0, invalidPercentage));
+        assertEquals("The y percentage value must be between 0 and 100, but got: " + invalidPercentage,
                 thrown.getMessage());
     }
 }

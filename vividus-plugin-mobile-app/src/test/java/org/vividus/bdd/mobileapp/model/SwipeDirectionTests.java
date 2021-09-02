@@ -17,11 +17,14 @@
 package org.vividus.bdd.mobileapp.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
+import org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration;
 
 class SwipeDirectionTests
 {
@@ -34,11 +37,30 @@ class SwipeDirectionTests
     void shouldCalculateCoordinates(SwipeDirection direction, int fromY, int toY, int xPercentage, int x)
     {
         Dimension dimension = new Dimension(1080, 1794);
-
-        SwipeCoordinates coordinates = direction.calculateCoordinates(dimension, xPercentage);
+        MobileApplicationConfiguration configuration = mock(MobileApplicationConfiguration.class);
+        when(configuration.getSwipeVerticalXPosition()).thenReturn(xPercentage);
+        SwipeCoordinates coordinates = direction.calculateCoordinates(dimension, configuration);
 
         assertPoint(coordinates.getStart(), x, fromY);
         assertPoint(coordinates.getEnd(), x, toY);
+    }
+
+    @CsvSource({
+        "LEFT,  945,  135,  50,  897",
+        "RIGHT, 135 , 945,  0,   1",
+        "RIGHT, 135 , 945,  100, 1793"
+    })
+    @ParameterizedTest
+    void shouldCalculateCoordinatesForHorizontalSwipe(SwipeDirection direction, int fromX, int toX, int yPercentage,
+            int y)
+    {
+        Dimension dimension = new Dimension(1080, 1794);
+        MobileApplicationConfiguration configuration = mock(MobileApplicationConfiguration.class);
+        when(configuration.getSwipeHorizontalYPosition()).thenReturn(yPercentage);
+        SwipeCoordinates coordinates = direction.calculateCoordinates(dimension, configuration);
+
+        assertPoint(coordinates.getStart(), fromX, y);
+        assertPoint(coordinates.getEnd(), toX, y);
     }
 
     private static void assertPoint(Point point, int x, int y)
