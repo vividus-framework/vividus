@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import freemarker.template.Configuration;
@@ -35,8 +36,10 @@ class FreemarkerProcessorTests
     private static final String RELATIVE_PATH = "test.ftl";
     private static final String EXPECTED_JSON = "{\"id\" : 12,\"name\" : someName,\"field\" : \"test field\"}";
 
-    private final FreemarkerProcessor freemarkerProcessor;
+    private FreemarkerProcessor freemarkerProcessor;
 
+    @BeforeEach
+    void beforeEach()
     {
         Configuration config = new Configuration(Configuration.VERSION_2_3_31);
         config.setClassForTemplateLoading(FreemarkerProcessor.class, "");

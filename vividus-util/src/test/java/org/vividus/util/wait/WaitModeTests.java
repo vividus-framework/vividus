@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ class WaitModeTests
     @Test
     void testCalculatePollingTimeout()
     {
-        WaitMode mode = new WaitMode(Duration.ofMillis(30000), 5);
+        WaitMode mode = new WaitMode(Duration.ofMillis(30_000), 5);
         Assertions.assertEquals(6, mode.calculatePollingTimeout(TimeUnit.SECONDS));
     }
 }

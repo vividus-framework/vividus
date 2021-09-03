@@ -19,6 +19,7 @@ package org.vividus.util;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -204,7 +205,7 @@ public final class UriUtils
 
     private static String decodeUrl(String url)
     {
-        String query = StringUtils.substringBeforeLast(StringUtils.substringAfter(url, QUERY_SEPARATOR), "#");
+        String query = substringBeforeLast(substringAfter(url, QUERY_SEPARATOR), "#");
         return decode(!query.isEmpty() ? url.replace(query, query.replace(ENCODED_AMPERSAND, DOUBLE_ENCODED_AMPERSAND))
                 : url);
     }
