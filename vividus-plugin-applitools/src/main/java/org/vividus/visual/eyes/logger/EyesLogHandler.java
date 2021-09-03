@@ -57,6 +57,7 @@ public class EyesLogHandler extends NullLogHandler
             case Notice:
             default:
                 logMessage(event, logger::info);
+                break;
         }
     }
 

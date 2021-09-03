@@ -56,6 +56,7 @@ public class WebAdjustingCoordsProvider extends AbstractAdjustingCoordsProvider
         });
     }
 
+    @Override
     protected Coords getCoords(WebElement webElement)
     {
         return super.ofElement(null, webElement);
