@@ -17,7 +17,6 @@
 package org.vividus.selenium.screenshot;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,25 +32,23 @@ import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.cropper.indent.IndentCropper;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
-public class WebScreenshotTaker extends AbstractScreenshotTaker
+public class WebScreenshotTaker extends AbstractScreenshotTaker<WebScreenshotConfiguration>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebScreenshotTaker.class);
 
     private final IWebElementHighlighter webElementHighlighter;
-    private final IAshotFactory<WebScreenshotConfiguration> ashotFactory;
 
     private boolean fullPageScreenshots;
     private int indent;
     private HighlighterType highlighterType;
 
-    public WebScreenshotTaker(IWebDriverProvider webDriverProvider,
-            IScreenshotFileNameGenerator screenshotFileNameGenerator, IWebElementHighlighter webElementHighlighter,
-            EventBus eventBus, IAshotFactory<WebScreenshotConfiguration> ashotFactory,
-            ScreenshotDebugger screenshotDebugger)
+    public WebScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
+            IScreenshotFileNameGenerator screenshotFileNameGenerator,
+            AshotFactory<WebScreenshotConfiguration> ashotFactory, ScreenshotDebugger screenshotDebugger,
+            IWebElementHighlighter webElementHighlighter)
     {
-        super(webDriverProvider, eventBus, screenshotFileNameGenerator, screenshotDebugger);
+        super(webDriverProvider, eventBus, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
         this.webElementHighlighter = webElementHighlighter;
-        this.ashotFactory = ashotFactory;
     }
 
     @Override
@@ -61,40 +58,17 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
     }
 
     @Override
-    public Path takeScreenshotAsFile(String screenshotName) throws IOException
+    protected byte[] takeScreenshotAsByteArray()
     {
-        return takeScreenshotTo(generateScreenshotPath(screenshotName));
-    }
-
-    @Override
-    public Path takeScreenshot(Path screenshotFilePath) throws IOException
-    {
-        return takeScreenshotTo(screenshotFilePath);
-    }
-
-    @Override
-    protected AShot crateAshot(Optional<ScreenshotConfiguration> screenshotConfiguration)
-    {
-        return ashotFactory.create(screenshotConfiguration.map(WebScreenshotConfiguration.class::cast));
+        return takeScreenshotAsByteArray(List.of());
     }
 
     public Optional<Screenshot> takeScreenshot(String screenshotName, List<WebElement> webElementsToHighlight)
     {
         byte[] screenshotData = takeScreenshotAsByteArray(webElementsToHighlight);
-        return createScreenshot(screenshotData, screenshotName);
-    }
-
-    private Optional<Screenshot> createScreenshot(byte[] screenshotData, String screenshotName)
-    {
         return screenshotData.length > 0
                 ? Optional.of(new Screenshot(generateScreenshotFileName(screenshotName), screenshotData))
                 : Optional.empty();
-    }
-
-    private Path takeScreenshotTo(Path screenshotFilePathSupplier) throws IOException
-    {
-        return takeScreenshotAsFile(screenshotFilePathSupplier,
-                () -> takeScreenshotAsByteArray(List.of()));
     }
 
     private byte[] takeScreenshotAsByteArray(List<WebElement> webElements)
@@ -122,7 +96,7 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker
         WebDriver webDriver = getWebDriverProvider().get();
         try
         {
-            AShot aShot = ashotFactory.create(Optional.empty());
+            AShot aShot = crateAshot(Optional.empty());
             IndentCropper indentCropper = new IndentCropper(fullPageScreenshots ? Integer.MAX_VALUE : indent);
             highlighterType.addIndentFilter(indentCropper);
             aShot.imageCropper(indentCropper);

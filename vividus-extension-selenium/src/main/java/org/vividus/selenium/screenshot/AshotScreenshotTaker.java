@@ -18,9 +18,10 @@ package org.vividus.selenium.screenshot;
 
 import java.util.Optional;
 
-import ru.yandex.qatools.ashot.AShot;
+import org.openqa.selenium.SearchContext;
 
-public interface IAshotFactory<T extends ScreenshotConfiguration>
+public interface AshotScreenshotTaker<T extends ScreenshotConfiguration>
 {
-    AShot create(Optional<T> screenshotConfiguration);
+    ru.yandex.qatools.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
+            Optional<T> screenshotConfiguration);
 }

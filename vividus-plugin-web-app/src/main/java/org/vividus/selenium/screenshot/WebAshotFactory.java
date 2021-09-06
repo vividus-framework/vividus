@@ -35,7 +35,7 @@ import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
-public class AshotFactory extends AbstractAshotFactory<WebScreenshotConfiguration>
+public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotConfiguration>
 {
     private final IWebDriverFactory webDriverFactory;
     private final IWebDriverManager webDriverManager;
@@ -44,7 +44,7 @@ public class AshotFactory extends AbstractAshotFactory<WebScreenshotConfiguratio
     private final WebJavascriptActions javascriptActions;
     private String screenshotShootingStrategy;
 
-    protected AshotFactory(WebJavascriptActions javascriptActions, IWebDriverFactory webDriverFactory,
+    protected WebAshotFactory(WebJavascriptActions javascriptActions, IWebDriverFactory webDriverFactory,
             IWebDriverManager webDriverManager, ScreenshotDebugger screenshotDebugger,
             IScrollbarHandler scrollbarHandler)
     {

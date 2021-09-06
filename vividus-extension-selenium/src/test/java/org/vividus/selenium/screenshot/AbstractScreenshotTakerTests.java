@@ -77,7 +77,7 @@ class AbstractScreenshotTakerTests
     @Mock private EventBus eventBus;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private ScreenshotDebugger screenshotDebugger;
-    @Mock private AShot ashot;
+    @Mock private AshotFactory<ScreenshotConfiguration> ashotFactory;
     @InjectMocks private TestScreenshotTaker testScreenshotTaker;
 
     @AfterEach
@@ -86,13 +86,18 @@ class AbstractScreenshotTakerTests
         verifyNoMoreInteractions(webDriverProvider, takesScreenshot);
     }
 
-    @Test
-    void shouldTakeViewportScreenshot() throws IOException
+    private void mockScreenshotTaking()
     {
         byte[] bytes = ResourceUtils.loadResourceAsByteArray(getClass(), IMAGE_PNG);
 
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
         when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(bytes);
+    }
+
+    @Test
+    void shouldTakeViewportScreenshot() throws IOException
+    {
+        mockScreenshotTaking();
 
         BufferedImage image = testScreenshotTaker.takeViewportScreenshot();
 
@@ -109,18 +114,21 @@ class AbstractScreenshotTakerTests
     }
 
     @Test
-    void shouldGeneratePathStartingWithScrerenshotDirectoryToAScreenshotWithFileName(@TempDir File tempDir)
+    void shouldGeneratePathStartingWithScreenshotDirectoryToAScreenshotWithFileName(@TempDir File tempDir)
+            throws IOException
     {
+        mockScreenshotTaking();
         String screenshotName = "image";
         testScreenshotTaker.setScreenshotDirectory(tempDir);
         when(screenshotFileNameGenerator.generateScreenshotFileName(screenshotName)).thenReturn(IMAGE_PNG);
-        assertEquals(tempDir.toPath().resolve(IMAGE_PNG), testScreenshotTaker.generateScreenshotPath(screenshotName));
+        assertEquals(tempDir.toPath().resolve(IMAGE_PNG), testScreenshotTaker.takeScreenshotAsFile(screenshotName));
     }
 
     @Test
     void shouldNotPublishEmptyScreenshotData(@TempDir Path path) throws IOException
     {
-        assertNull(testScreenshotTaker.takeScreenshotAsFile(path.resolve(IMAGE_PNG), () ->  new byte[0]));
+        testScreenshotTaker.screenshot = new byte[0];
+        assertNull(testScreenshotTaker.takeScreenshot(path.resolve(IMAGE_PNG)));
         verifyNoInteractions(eventBus);
         assertThat(testLogger.getLoggingEvents(), empty());
     }
@@ -129,12 +137,11 @@ class AbstractScreenshotTakerTests
     void shouldPublishScreenshot(@TempDir Path path) throws IOException
     {
         testScreenshotTaker.setScreenshotDirectory(path.toFile());
-        byte[] screenshot = new byte[1];
-        Path screenshotPath = testScreenshotTaker
-                .takeScreenshotAsFile(path.resolve(IMAGE_PNG), () ->  screenshot);
+        testScreenshotTaker.screenshot = new byte[1];
+        Path screenshotPath = testScreenshotTaker.takeScreenshot(path.resolve(IMAGE_PNG));
         verify(eventBus).post(argThat(s -> screenshotPath.equals(((ScreenshotTakeEvent) s).getScreenshotFilePath())));
         assertTrue(Files.exists(screenshotPath));
-        assertArrayEquals(screenshot, Files.readAllBytes(screenshotPath));
+        assertArrayEquals(testScreenshotTaker.screenshot, Files.readAllBytes(screenshotPath));
         assertThat(testLogger.getLoggingEvents(), equalTo(List.of(
                 info("Screenshot was taken: {}", screenshotPath.toAbsolutePath()))));
     }
@@ -149,6 +156,8 @@ class AbstractScreenshotTakerTests
     void shouldTakeAshotScreenshot()
     {
         WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(SearchContext.class));
+        AShot ashot = mock(AShot.class);
+        when(ashotFactory.create(Optional.empty())).thenReturn(ashot);
         ru.yandex.qatools.ashot.Screenshot screenshot = mock(ru.yandex.qatools.ashot.Screenshot.class);
         when(ashot.takeScreenshot(webDriver)).thenReturn(screenshot);
         testScreenshotTaker.takeAshotScreenshot(webDriver, Optional.empty());
@@ -162,6 +171,8 @@ class AbstractScreenshotTakerTests
         WebElement webElement = mock(WebElement.class, withSettings().extraInterfaces(SearchContext.class));
         WebDriver webDriver = mock(WebDriver.class);
         when(webDriverProvider.get()).thenReturn(webDriver);
+        AShot ashot = mock(AShot.class);
+        when(ashotFactory.create(Optional.empty())).thenReturn(ashot);
         ru.yandex.qatools.ashot.Screenshot screenshot = mock(ru.yandex.qatools.ashot.Screenshot.class);
         when(ashot.takeScreenshot(webDriver, webElement)).thenReturn(screenshot);
         testScreenshotTaker.takeAshotScreenshot(webElement, Optional.empty());
@@ -169,16 +180,15 @@ class AbstractScreenshotTakerTests
         verify(screenshotDebugger).debug(TestScreenshotTaker.class, AFTER_A_SHOT, null);
     }
 
-    private static class TestScreenshotTaker extends AbstractScreenshotTaker
+    private static class TestScreenshotTaker extends AbstractScreenshotTaker<ScreenshotConfiguration>
     {
-        private final AShot ashot;
+        private byte[] screenshot;
 
         TestScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
-                IScreenshotFileNameGenerator screenshotFileNameGenerator, ScreenshotDebugger screenshotDebugger,
-                AShot ashot)
+                IScreenshotFileNameGenerator screenshotFileNameGenerator,
+                AshotFactory<ScreenshotConfiguration> ashotFactory, ScreenshotDebugger screenshotDebugger)
         {
-            super(webDriverProvider, eventBus, screenshotFileNameGenerator, screenshotDebugger);
-            this.ashot = ashot;
+            super(webDriverProvider, eventBus, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
         }
 
         @Override
@@ -188,21 +198,9 @@ class AbstractScreenshotTakerTests
         }
 
         @Override
-        public Path takeScreenshotAsFile(String screenshotName) throws IOException
+        protected byte[] takeScreenshotAsByteArray()
         {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Path takeScreenshot(Path screenshotFilePath) throws IOException
-        {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        protected AShot crateAshot(Optional<ScreenshotConfiguration> screenshotConfiguration)
-        {
-            return ashot;
+            return screenshot == null ? super.takeScreenshotAsByteArray() : screenshot;
         }
     }
 }

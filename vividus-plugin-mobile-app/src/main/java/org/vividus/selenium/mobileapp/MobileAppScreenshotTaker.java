@@ -16,56 +16,31 @@
 
 package org.vividus.selenium.mobileapp;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory;
 import org.vividus.selenium.screenshot.AbstractScreenshotTaker;
+import org.vividus.selenium.screenshot.AshotFactory;
 import org.vividus.selenium.screenshot.IScreenshotFileNameGenerator;
 import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
 
-import ru.yandex.qatools.ashot.AShot;
-
-public class MobileAppScreenshotTaker extends AbstractScreenshotTaker
+public class MobileAppScreenshotTaker extends AbstractScreenshotTaker<ScreenshotConfiguration>
 {
-    private final MobileAppAshotFactory mobileAppAshotFactory;
-
-    public MobileAppScreenshotTaker(IWebDriverProvider webDriverProvider,
-            IScreenshotFileNameGenerator screenshotFileNameGenerator, EventBus eventBus,
-            MobileAppAshotFactory mobileAppAshotFactory, ScreenshotDebugger screenshotDebugger)
+    public MobileAppScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
+            IScreenshotFileNameGenerator screenshotFileNameGenerator,
+            AshotFactory<ScreenshotConfiguration> ashotFactory, ScreenshotDebugger screenshotDebugger)
     {
-        super(webDriverProvider, eventBus, screenshotFileNameGenerator, screenshotDebugger);
-        this.mobileAppAshotFactory = mobileAppAshotFactory;
+        super(webDriverProvider, eventBus, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
     }
 
     @Override
     public Optional<Screenshot> takeScreenshot(String screenshotName)
     {
         String fileName = generateScreenshotFileName(screenshotName);
-        return Optional.of(new Screenshot(fileName, getScreenshotBytes()));
-    }
-
-    @Override
-    public Path takeScreenshotAsFile(String screenshotName) throws IOException
-    {
-        return takeScreenshot(generateScreenshotPath(screenshotName));
-    }
-
-    @Override
-    public Path takeScreenshot(Path screenshotFilePath) throws IOException
-    {
-        return takeScreenshotAsFile(screenshotFilePath, this::getScreenshotBytes);
-    }
-
-    @Override
-    protected AShot crateAshot(Optional<ScreenshotConfiguration> screenshotConfiguration)
-    {
-        return mobileAppAshotFactory.create(screenshotConfiguration);
+        return Optional.of(new Screenshot(fileName, takeScreenshotAsByteArray()));
     }
 }

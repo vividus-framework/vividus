@@ -80,7 +80,7 @@ class WebScreenshotTakerTests
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private IWebElementHighlighter webElementHighlighter;
     @Mock private EventBus eventBus;
-    @Mock private IAshotFactory<WebScreenshotConfiguration> ashotFactory;
+    @Mock private AshotFactory<WebScreenshotConfiguration> ashotFactory;
     @Mock private ScreenshotDebugger screenshotDebugger;
     @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
@@ -239,7 +239,7 @@ class WebScreenshotTakerTests
     void shouldTakeAShotScreenshotWithCustomConfiguration() throws IOException
     {
         WebScreenshotConfiguration configurationMock = mock(WebScreenshotConfiguration.class);
-        Optional<ScreenshotConfiguration> screenshotConfiguration = Optional.of(configurationMock);
+        Optional<WebScreenshotConfiguration> screenshotConfiguration = Optional.of(configurationMock);
         when(ashotFactory.create(Optional.of(configurationMock))).thenReturn(ASHOT);
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
         assertArrayEquals(ImageTool.toByteArray(SCREENSHOT),

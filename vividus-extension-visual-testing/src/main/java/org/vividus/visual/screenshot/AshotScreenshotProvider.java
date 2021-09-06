@@ -25,8 +25,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.screenshot.AshotScreenshotTaker;
+import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.model.VisualCheck;
@@ -37,7 +38,7 @@ import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 
 public class AshotScreenshotProvider implements ScreenshotProvider
 {
-    private final ScreenshotTaker screenshotTaker;
+    private final AshotScreenshotTaker<ScreenshotConfiguration> ashotScreenshotTaker;
     private final ISearchActions searchActions;
     private final ScreenshotDebugger screenshotDebugger;
     private final CoordsProvider coordsProvider;
@@ -45,20 +46,22 @@ public class AshotScreenshotProvider implements ScreenshotProvider
 
     private Map<IgnoreStrategy, Set<Locator>> ignoreStrategies;
 
-    public AshotScreenshotProvider(ScreenshotTaker screenshotTaker, ISearchActions searchActions,
-            ScreenshotDebugger screenshotDebugger, CoordsProvider coordsProvider, IWebDriverProvider webDrvierProvider)
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public AshotScreenshotProvider(AshotScreenshotTaker ashotScreenshotTaker,
+            ISearchActions searchActions, ScreenshotDebugger screenshotDebugger, CoordsProvider coordsProvider,
+            IWebDriverProvider webDriverProvider)
     {
-        this.screenshotTaker = screenshotTaker;
+        this.ashotScreenshotTaker = ashotScreenshotTaker;
         this.searchActions = searchActions;
         this.screenshotDebugger = screenshotDebugger;
         this.coordsProvider = coordsProvider;
-        this.webDriverProvider = webDrvierProvider;
+        this.webDriverProvider = webDriverProvider;
     }
 
     @Override
     public Screenshot take(VisualCheck visualCheck)
     {
-        Screenshot screenshot = screenshotTaker.takeAshotScreenshot(visualCheck.getSearchContext(),
+        Screenshot screenshot = ashotScreenshotTaker.takeAshotScreenshot(visualCheck.getSearchContext(),
                 visualCheck.getScreenshotConfiguration());
         BufferedImage original = screenshot.getImage();
         Map<IgnoreStrategy, Set<Locator>> stepLevelElementsToIgnore = visualCheck.getElementsToIgnore();
