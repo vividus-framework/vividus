@@ -177,17 +177,24 @@ Then the page title is equal to 'Google'
 
 === Properties
 
-The prorerty `bdd.all-meta-filters` is used to override values of the default meta filters based on the tags: `@skip`, `@layout`, `@browserWindowSize` and etc.
+The property `bdd.meta-filters` is used to filter tests to be executed and
+relies on Groovy syntax.
 
-The property `bdd.meta-filters` relies on groovy synax can be used to filters tests to be executed.
+.Execute stoies and scenarios marked with '@group Login' tag and matching default filters
+[source,properties]
+----
+bdd.meta-filters=group == 'Login'
+----
+
+The prorerty `bdd.all-meta-filters` is used to override values of the default
+meta filters based on the tags: `@skip`, `@layout`, `@browserWindowSize` etc.
 
 .Execute stoies and scenarios marked with '@group Login' tag and without '@skip' tag
 [source,properties]
 ----
-bdd.meta-filters=groovy: (group == 'Login' && !skip)
+bdd.all-meta-filters=groovy: (group == 'Login' && !skip)
 ----
 
-The following meta tags are available out of the box.
 
 === 1D tags (@key)
 [cols="1,4", options="header"]
