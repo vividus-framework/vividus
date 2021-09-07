@@ -195,6 +195,26 @@ meta filters based on the tags: `@skip`, `@layout`, `@browserWindowSize` etc.
 bdd.all-meta-filters=groovy: (group == 'Login' && !skip)
 ----
 
+==== Limitations
+
+Since meta filters properties are based on Groovy, meta tags names support
+https://groovy-lang.org/syntax.html#_normal_identifiers[only normal Groovy identifiers]
+by default. If it's required to use arbitrary characters in meta tags names
+(e.g.follow kebab-case notation which actively relies on the hyphen char), then
+https://groovy-lang.org/syntax.html#_quoted_identifiers[quoted identifiers] or
+subscript operator must be used in the properties.
+
+.Execute stoies and scenarios not marked with '@test-stand' tag (quoted identifiers approach)
+[source,properties]
+----
+bdd.all-meta-filters=groovy: !this.'test-stand'
+----
+
+.Execute stoies and scenarios not marked with '@test-stand' tag (subscript operator approach)
+[source,properties]
+----
+bdd.all-meta-filters=groovy: !this['test-stand']
+----
 
 === 1D tags (@key)
 [cols="1,4", options="header"]
