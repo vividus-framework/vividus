@@ -32,7 +32,7 @@ import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 import ru.yandex.qatools.ashot.shooting.cutter.FixedCutStrategy;
 
-public abstract class AbstractAshotFactory<T extends ScreenshotConfiguration> implements IAshotFactory<T>
+public abstract class AbstractAshotFactory<T extends ScreenshotConfiguration> implements AshotFactory<T>
 {
     private PropertyMappedCollection<T> ashotConfigurations;
     private String shootingStrategy;

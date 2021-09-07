@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
 
@@ -42,73 +41,50 @@ import org.vividus.selenium.IWebDriverProvider;
 
 import ru.yandex.qatools.ashot.AShot;
 
-public abstract class AbstractScreenshotTaker implements ScreenshotTaker
+public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
+        implements ScreenshotTaker, AshotScreenshotTaker<T>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScreenshotTaker.class);
 
     private final IWebDriverProvider webDriverProvider;
     private final EventBus eventBus;
     private final IScreenshotFileNameGenerator screenshotFileNameGenerator;
+    private final AshotFactory<T> ashotFactory;
     private final ScreenshotDebugger screenshotDebugger;
 
     private File screenshotDirectory;
 
     protected AbstractScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
-            IScreenshotFileNameGenerator screenshotFileNameGenerator, ScreenshotDebugger screenshotDebugger)
+            IScreenshotFileNameGenerator screenshotFileNameGenerator, AshotFactory<T> ashotFactory,
+            ScreenshotDebugger screenshotDebugger)
     {
         this.webDriverProvider = webDriverProvider;
         this.eventBus = eventBus;
         this.screenshotFileNameGenerator = screenshotFileNameGenerator;
+        this.ashotFactory = ashotFactory;
         this.screenshotDebugger = screenshotDebugger;
     }
 
     @Override
     public BufferedImage takeViewportScreenshot() throws IOException
     {
-        try (InputStream inputStream = new ByteArrayInputStream(getScreenshotBytes()))
+        try (InputStream inputStream = new ByteArrayInputStream(takeScreenshotAsByteArray()))
         {
             return ImageIO.read(inputStream);
         }
     }
 
     @Override
-    public ru.yandex.qatools.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
-            Optional<ScreenshotConfiguration> screenshotConfiguration)
+    public Path takeScreenshotAsFile(String screenshotName) throws IOException
     {
-        return takeScreenshot(searchContext, crateAshot(screenshotConfiguration));
+        Path screenshotFilePath = new File(screenshotDirectory, generateScreenshotFileName(screenshotName)).toPath();
+        return takeScreenshot(screenshotFilePath);
     }
 
-    private ru.yandex.qatools.ashot.Screenshot takeScreenshot(SearchContext searchContext, AShot aShot)
+    @Override
+    public Path takeScreenshot(Path screenshotFilePath) throws IOException
     {
-        ru.yandex.qatools.ashot.Screenshot screenshot = searchContext instanceof WebDriver
-                ? aShot.takeScreenshot((WebDriver) searchContext)
-                : aShot.takeScreenshot(getWebDriverProvider().get(), (WebElement) searchContext);
-
-        screenshotDebugger.debug(this.getClass(), "After_AShot", screenshot.getImage());
-        return screenshot;
-    }
-
-    protected abstract AShot crateAshot(Optional<ScreenshotConfiguration> screenshotConfiguration);
-
-    protected Path takeScreenshotAsFile(Path pathProvider, Supplier<byte[]> screenshotTaker) throws IOException
-    {
-        return takeScreenshot(pathProvider, screenshotTaker);
-    }
-
-    protected String generateScreenshotFileName(String screenshotName)
-    {
-        return screenshotFileNameGenerator.generateScreenshotFileName(screenshotName);
-    }
-
-    protected Path generateScreenshotPath(String screenshotName)
-    {
-        return new File(screenshotDirectory, generateScreenshotFileName(screenshotName)).toPath();
-    }
-
-    private Path takeScreenshot(Path screenshotFilePath,
-            Supplier<byte[]> screenshotTaker) throws IOException
-    {
-        byte[] screenshotData = screenshotTaker.get();
+        byte[] screenshotData = takeScreenshotAsByteArray();
         if (screenshotData.length > 0)
         {
             Path parent = screenshotFilePath.getParent();
@@ -126,7 +102,34 @@ public abstract class AbstractScreenshotTaker implements ScreenshotTaker
         return null;
     }
 
-    protected byte[] getScreenshotBytes()
+    @Override
+    public ru.yandex.qatools.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
+            Optional<T> screenshotConfiguration)
+    {
+        return takeScreenshot(searchContext, crateAshot(screenshotConfiguration));
+    }
+
+    private ru.yandex.qatools.ashot.Screenshot takeScreenshot(SearchContext searchContext, AShot aShot)
+    {
+        ru.yandex.qatools.ashot.Screenshot screenshot = searchContext instanceof WebDriver
+                ? aShot.takeScreenshot((WebDriver) searchContext)
+                : aShot.takeScreenshot(getWebDriverProvider().get(), (WebElement) searchContext);
+
+        screenshotDebugger.debug(this.getClass(), "After_AShot", screenshot.getImage());
+        return screenshot;
+    }
+
+    protected AShot crateAshot(Optional<T> screenshotConfiguration)
+    {
+        return ashotFactory.create(screenshotConfiguration);
+    }
+
+    protected String generateScreenshotFileName(String screenshotName)
+    {
+        return screenshotFileNameGenerator.generateScreenshotFileName(screenshotName);
+    }
+
+    protected byte[] takeScreenshotAsByteArray()
     {
         return webDriverProvider.getUnwrapped(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
     }

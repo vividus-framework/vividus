@@ -60,7 +60,7 @@
         <property name="debugScreenshotsLocation" value="${selenium.screenshot.debug-directory}" />
     </bean>
 
-    <bean id="ashotFactory" class="org.vividus.selenium.screenshot.AshotFactory" parent="abstractAshotFactory">
+    <bean class="org.vividus.selenium.screenshot.WebAshotFactory" parent="abstractAshotFactory">
         <property name="shootingStrategy" value="${web.screenshot.strategy}" />
         <property name="screenshotShootingStrategy" value="${selenium.screenshot.strategy}" />
         <property name="ashotConfigurations">

@@ -16,18 +16,11 @@
 
 package org.vividus.selenium.screenshot;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 
-public interface ScreenshotTaker
+import ru.yandex.qatools.ashot.AShot;
+
+public interface AshotFactory<T extends ScreenshotConfiguration>
 {
-    Optional<Screenshot> takeScreenshot(String screenshotName);
-
-    BufferedImage takeViewportScreenshot() throws IOException;
-
-    Path takeScreenshotAsFile(String screenshotName) throws IOException;
-
-    Path takeScreenshot(Path screenshotFilePath) throws IOException;
+    AShot create(Optional<T> screenshotConfiguration);
 }
