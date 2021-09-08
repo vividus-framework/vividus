@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,23 +34,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.vividus.bdd.resource.BddResourceLoader;
 import org.vividus.bdd.resource.ResourceLoadException;
-import org.vividus.bdd.steps.VariableResolver;
 
 @ExtendWith(MockitoExtension.class)
 class ExamplesTableFileLoaderTests
 {
-    private static final String PRE_PROCESSED = "${unit}test.table";
     private static final String TABLE_FILENAME = "unittest.table";
     private static final String TABLE_CONTENT = "|header1|";
 
-    @Mock
-    private BddResourceLoader bddResourceLoader;
-
-    @Mock
-    private VariableResolver variableResolver;
-
-    @InjectMocks
-    private ExamplesTableFileLoader examplesTableFileLoader;
+    @Mock private BddResourceLoader bddResourceLoader;
+    @InjectMocks private ExamplesTableFileLoader examplesTableFileLoader;
 
     private final ResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
 
@@ -58,9 +50,8 @@ class ExamplesTableFileLoaderTests
     void testLoadExamplesTable()
     {
         Resource resource = resourceLoader.getResource(TABLE_FILENAME);
-        when(variableResolver.resolve(PRE_PROCESSED)).thenReturn(TABLE_FILENAME);
         when(bddResourceLoader.getResource(TABLE_FILENAME)).thenReturn(resource);
-        String actual = examplesTableFileLoader.loadExamplesTable(PRE_PROCESSED);
+        String actual = examplesTableFileLoader.loadExamplesTable(TABLE_FILENAME);
         assertEquals(TABLE_CONTENT, actual.trim());
     }
 
@@ -68,26 +59,24 @@ class ExamplesTableFileLoaderTests
     void shouldCacheExamplesTableByPath()
     {
         Resource resource = resourceLoader.getResource(TABLE_FILENAME);
-        when(variableResolver.resolve(PRE_PROCESSED)).thenReturn(TABLE_FILENAME);
         when(bddResourceLoader.getResource(TABLE_FILENAME)).thenReturn(resource);
         examplesTableFileLoader.setCacheTables(true);
-        assertEquals(TABLE_CONTENT, examplesTableFileLoader.loadExamplesTable(PRE_PROCESSED).trim());
-        assertEquals(TABLE_CONTENT, examplesTableFileLoader.loadExamplesTable(PRE_PROCESSED).trim());
+        assertEquals(TABLE_CONTENT, examplesTableFileLoader.loadExamplesTable(TABLE_FILENAME).trim());
+        assertEquals(TABLE_CONTENT, examplesTableFileLoader.loadExamplesTable(TABLE_FILENAME).trim());
         verify(bddResourceLoader).getResource(TABLE_FILENAME);
     }
 
     @Test
     void testLoadExamplesTableWithIOException() throws IOException
     {
-        String resourcePath = "resourcePath";
+        var resourcePath = "resourcePath";
         Resource resource = mock(Resource.class);
-        when(variableResolver.resolve(PRE_PROCESSED)).thenReturn(resourcePath);
         when(bddResourceLoader.getResource(resourcePath)).thenReturn(resource);
         String exceptionMessage = "Resource IOException";
         IOException ioException = new IOException(exceptionMessage);
         when(resource.getInputStream()).thenThrow(ioException);
         ResourceLoadException exception = assertThrows(ResourceLoadException.class,
-            () -> examplesTableFileLoader.loadExamplesTable(PRE_PROCESSED));
+            () -> examplesTableFileLoader.loadExamplesTable(resourcePath));
         assertEquals(exceptionMessage, exception.getMessage());
         assertEquals(ioException, exception.getCause());
     }

@@ -44,7 +44,6 @@
 
     <bean id="examplesTableLoader" class="org.vividus.bdd.examples.ExamplesTableFileLoader">
         <property name="bddResourceLoader" ref="bddResourceLoader" />
-        <property name="variableResolver" ref="variableResolver" />
         <property name="cacheTables" value="${bdd.cache-examples-table}" />
     </bean>
 

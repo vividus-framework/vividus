@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,29 +26,17 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.Resource;
 import org.vividus.bdd.resource.IBddResourceLoader;
 import org.vividus.bdd.resource.ResourceLoadException;
-import org.vividus.bdd.steps.VariableResolver;
 
 public class ExamplesTableFileLoader implements IExamplesTableLoader
 {
     private static final Map<String, String> TABLES_CACHE = new ConcurrentHashMap<>();
     private IBddResourceLoader bddResourceLoader;
-    private VariableResolver variableResolver;
     private boolean cacheTables;
 
     @Override
-    public String loadExamplesTable(String exampleTablePath)
+    public String loadExamplesTable(String tablePath)
     {
-        String tablePath = (String) variableResolver.resolve(exampleTablePath);
-        String table;
-        if (cacheTables)
-        {
-            table = TABLES_CACHE.computeIfAbsent(tablePath, this::loadTable);
-        }
-        else
-        {
-            table = loadTable(tablePath);
-        }
-        return table;
+        return cacheTables ? TABLES_CACHE.computeIfAbsent(tablePath, this::loadTable) : loadTable(tablePath);
     }
 
     private String loadTable(String exampleTablePath)
@@ -67,11 +55,6 @@ public class ExamplesTableFileLoader implements IExamplesTableLoader
     public void setBddResourceLoader(IBddResourceLoader bddResourceLoader)
     {
         this.bddResourceLoader = bddResourceLoader;
-    }
-
-    public void setVariableResolver(VariableResolver variableResolver)
-    {
-        this.variableResolver = variableResolver;
     }
 
     public void setCacheTables(boolean cacheTables)
