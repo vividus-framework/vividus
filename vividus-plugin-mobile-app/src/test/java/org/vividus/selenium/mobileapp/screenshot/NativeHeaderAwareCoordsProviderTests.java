@@ -17,6 +17,7 @@
 package org.vividus.selenium.mobileapp.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,12 +26,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
-import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.context.UiContext;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
 
@@ -39,7 +41,7 @@ class NativeHeaderAwareCoordsProviderTests
 {
     @Mock private MobileAppWebDriverManager driverManager;
     @Mock private WebElement webElement;
-    @Mock private IUiContext uiContext;
+    @Spy private UiContext uiContext;
 
     @InjectMocks private NativeHeaderAwareCoordsProvider coordsProvider;
 
@@ -49,6 +51,7 @@ class NativeHeaderAwareCoordsProviderTests
         when(driverManager.getStatusBarSize()).thenReturn(100);
         when(webElement.getLocation()).thenReturn(new Point(0, 234));
         when(webElement.getSize()).thenReturn(new Dimension(1, 1));
+        doReturn(null).when(uiContext).getSearchContext();
         Coords coords = coordsProvider.ofElement(null, webElement);
         Assertions.assertAll(() -> assertEquals(0, coords.getX()),
                              () -> assertEquals(134, coords.getY()),
@@ -64,7 +67,7 @@ class NativeHeaderAwareCoordsProviderTests
         when(contextElement.getSize()).thenReturn(new Dimension(100, 50));
         when(webElement.getLocation()).thenReturn(new Point(5, 15));
         when(webElement.getSize()).thenReturn(new Dimension(150, 30));
-        when(uiContext.getSearchContext()).thenReturn(contextElement);
+        doReturn(contextElement).when(uiContext).getSearchContext();
         Coords coords = coordsProvider.ofElement(null, webElement);
         Assertions.assertAll(() -> assertEquals(0, coords.getX()),
                              () -> assertEquals(5, coords.getY()),
@@ -78,7 +81,7 @@ class NativeHeaderAwareCoordsProviderTests
         WebElement contextElement = mock(WebElement.class);
         when(contextElement.getLocation()).thenReturn(new Point(10, 10));
         when(contextElement.getSize()).thenReturn(new Dimension(100, 50));
-        when(uiContext.getSearchContext()).thenReturn(contextElement);
+        doReturn(contextElement).when(uiContext).getSearchContext();
         Coords coords = coordsProvider.ofElement(null, contextElement);
         Assertions.assertAll(
                 () -> assertEquals(10, coords.getX()),

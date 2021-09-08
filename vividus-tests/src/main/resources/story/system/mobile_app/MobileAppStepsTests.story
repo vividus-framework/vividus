@@ -227,6 +227,13 @@ Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` 
 When I swipe RIGHT to element located `accessibilityId(<firstItemAccessibilityId>)` with duration PT1S
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
+When I change context to element located `xpath(<swipeableAreaXpath>)`
+When I swipe LEFT to element located `accessibilityId(<secondItemAccessibilityId>)` with duration PT1S
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I swipe RIGHT to element located `accessibilityId(<firstItemAccessibilityId>)` with duration PT1S
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
 
 Examples:
 |firstItemAccessibilityId|secondItemAccessibilityId|

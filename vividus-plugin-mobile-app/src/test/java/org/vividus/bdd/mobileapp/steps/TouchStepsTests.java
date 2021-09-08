@@ -17,6 +17,7 @@
 package org.vividus.bdd.mobileapp.steps;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -42,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.mobileapp.model.SwipeDirection;
 import org.vividus.bdd.steps.ComparisonRule;
@@ -52,10 +54,13 @@ import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.context.IUiContext;
 
 @ExtendWith(MockitoExtension.class)
 class TouchStepsTests
 {
+    private static final Dimension DIMENSION = new Dimension(0, 1184);
+
     private static final String ELEMENT_TO_TAP = "The element to tap";
 
     @Mock private IBaseValidations baseValidations;
@@ -64,6 +69,7 @@ class TouchStepsTests
     @Mock private Locator locator;
     @Mock private GenericWebDriverManager genericWebDriverManager;
     @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private IUiContext uiContext;
     @InjectMocks private TouchSteps touchSteps;
 
     @AfterEach
@@ -122,36 +128,74 @@ class TouchStepsTests
                                                  .thenReturn(List.of(element));
         doAnswer(a ->
         {
-            BooleanSupplier condition = a.getArgument(2, BooleanSupplier.class);
+            BooleanSupplier condition = a.getArgument(3, BooleanSupplier.class);
             condition.getAsBoolean();
             condition.getAsBoolean();
             return null;
-        }).when(touchActions).swipeUntil(eq(SwipeDirection.UP), eq(Duration.ZERO),
+        }).when(touchActions).swipeUntil(eq(SwipeDirection.UP), eq(Duration.ZERO), any(Rectangle.class),
                 any(BooleanSupplier.class));
 
         touchSteps.swipeToElement(SwipeDirection.UP, locator, Duration.ZERO);
 
         verifyNoMoreInteractions(parameters);
-        verify(touchActions).performVerticalSwipe(592, endY, Duration.ZERO);
+        verify(touchActions).performVerticalSwipe(eq(592), eq(endY), argThat(sa ->
+            DIMENSION.equals(sa.getDimension()) && sa.getPoint().equals(new Point(0, 0))), eq(Duration.ZERO));
+    }
+
+    @Test
+    void shouldSwipeToElementUsingContextElement()
+    {
+        WebElement element = mock(WebElement.class);
+        mockAssertElementsNumber(List.of(element), true);
+        when(element.getLocation()).thenReturn(new Point(-1, 138));
+        WebElement searchContext = mock(WebElement.class);
+        Point point = new Point(10, 10);
+        Dimension contextDimension = new Dimension(1920, 1080);
+        when(searchContext.getRect()).thenReturn(new Rectangle(point, contextDimension));
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
+
+        when(searchActions.findElements(locator)).thenReturn(new ArrayList<>())
+                                                 .thenReturn(List.of())
+                                                 .thenReturn(List.of(element));
+        doAnswer(a ->
+        {
+            BooleanSupplier condition = a.getArgument(3, BooleanSupplier.class);
+            condition.getAsBoolean();
+            condition.getAsBoolean();
+            return null;
+        }).when(touchActions).swipeUntil(eq(SwipeDirection.UP), eq(Duration.ZERO), argThat(sa ->
+            contextDimension.equals(sa.getDimension()) && sa.getPoint().equals(point)),
+                any(BooleanSupplier.class));
+        SearchParameters parameters = initSwipeMocks();
+
+        touchSteps.swipeToElement(SwipeDirection.UP, locator, Duration.ZERO);
+
+        verifyNoMoreInteractions(parameters);
+        verify(touchActions).performVerticalSwipe(eq(540), eq(564), argThat(sa ->
+            contextDimension.equals(sa.getDimension()) && sa.getPoint().equals(point)), eq(Duration.ZERO));
     }
 
     @Test
     void shouldSwipeToElementToTryToFindItButThatDoesntExist()
     {
+        mockScreenSize();
         mockAssertElementsNumber(List.of(), false);
         initSwipeMocks();
         when(searchActions.findElements(locator)).thenReturn(List.of());
         doAnswer(a ->
         {
-            BooleanSupplier condition = a.getArgument(2, BooleanSupplier.class);
+            BooleanSupplier condition = a.getArgument(3, BooleanSupplier.class);
             condition.getAsBoolean();
             return null;
-        }).when(touchActions).swipeUntil(eq(SwipeDirection.UP), eq(Duration.ZERO),
-                any(BooleanSupplier.class));
+        }).when(touchActions).swipeUntil(eq(SwipeDirection.UP), eq(Duration.ZERO), argThat(sa ->
+            DIMENSION.equals(sa.getDimension()) && sa.getPoint().equals(new Point(0, 0))), any(BooleanSupplier.class));
 
         touchSteps.swipeToElement(SwipeDirection.UP, locator, Duration.ZERO);
 
-        verifyNoInteractions(genericWebDriverManager);
+        verify(touchActions).swipeUntil(eq(SwipeDirection.UP), eq(Duration.ZERO),
+                argThat(sa -> DIMENSION.equals(sa.getDimension()) && sa.getPoint().equals(new Point(0, 0))),
+                any(BooleanSupplier.class));
+        verifyNoMoreInteractions(touchActions);
     }
 
     @ParameterizedTest
@@ -159,12 +203,11 @@ class TouchStepsTests
     void shouldNotSwipeToElementIfItAlreadyExists(SwipeDirection swipeDireciton)
     {
         mockScreenSize();
-        SearchParameters parameters = initSwipeMocks();
         WebElement element = mock(WebElement.class);
         when(element.getLocation()).thenReturn(new Point(-1, 500));
         mockAssertElementsNumber(List.of(element), true);
-
         when(searchActions.findElements(locator)).thenReturn(List.of(element));
+        SearchParameters parameters = initSwipeMocks();
 
         touchSteps.swipeToElement(swipeDireciton, locator, Duration.ZERO);
 
@@ -201,8 +244,6 @@ class TouchStepsTests
 
     private void mockScreenSize()
     {
-        Dimension dimension = mock(Dimension.class);
-        when(dimension.getHeight()).thenReturn(1184);
-        when(genericWebDriverManager.getSize()).thenReturn(dimension);
+        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
     }
 }

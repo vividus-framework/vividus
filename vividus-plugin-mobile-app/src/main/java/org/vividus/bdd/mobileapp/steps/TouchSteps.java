@@ -20,8 +20,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.mobileapp.model.SwipeDirection;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
@@ -31,6 +35,7 @@ import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.context.IUiContext;
 
 @TakeScreenshotOnFailure
 public class TouchSteps
@@ -42,14 +47,16 @@ public class TouchSteps
     private final IBaseValidations baseValidations;
     private final ISearchActions searchActions;
     private final GenericWebDriverManager genericWebDriverManager;
+    private final IUiContext uiContext;
 
     public TouchSteps(TouchActions touchActions, IBaseValidations baseValidations,
-            ISearchActions searchActions, GenericWebDriverManager genericWebDriverManager)
+            ISearchActions searchActions, GenericWebDriverManager genericWebDriverManager, IUiContext uiContext)
     {
         this.touchActions = touchActions;
         this.baseValidations = baseValidations;
         this.searchActions = searchActions;
         this.genericWebDriverManager = genericWebDriverManager;
+        this.uiContext = uiContext;
     }
 
     /**
@@ -89,6 +96,8 @@ public class TouchSteps
 
     /**
      * Swipes to element in <b>direction</b> direction with duration <b>duration</b>
+     * The step takes into account current context. If you need to perform swipe on the element,
+     * you need to switch the context to this element.
      * @param direction direction to swipe, either <b>UP</b> or <b>DOWN</b>
      * @param locator locator to find an element
      * @param swipeDuration swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
@@ -97,44 +106,54 @@ public class TouchSteps
     public void swipeToElement(SwipeDirection direction, Locator locator, Duration swipeDuration)
     {
         locator.getSearchParameters().setWaitForElement(false);
-
+        Supplier<Rectangle> swipeArea = createSwipeArea();
         List<WebElement> elements = new ArrayList<>(searchActions.findElements(locator));
         if (elements.isEmpty())
         {
-            touchActions.swipeUntil(direction, swipeDuration, () ->
+            touchActions.swipeUntil(direction, swipeDuration, swipeArea.get(), () ->
             {
                 elements.addAll(searchActions.findElements(locator));
                 return !elements.isEmpty();
             });
         }
-
         if (baseValidations.assertElementsNumber(String.format("The element by locator %s exists", locator), elements,
                 ComparisonRule.EQUAL_TO, 1) && (SwipeDirection.UP == direction || SwipeDirection.DOWN == direction))
         {
-            adjustVerticalPosition(elements.get(0), swipeDuration);
+            adjustVerticalPosition(elements.get(0), swipeArea.get(), swipeDuration);
         }
     }
 
-    private void adjustVerticalPosition(WebElement element, Duration swipeDuration)
+    private Supplier<Rectangle> createSwipeArea()
     {
-        int windowSizeHeight = genericWebDriverManager.getSize().getHeight();
-        int windowCenterY = windowSizeHeight / 2;
+        SearchContext searchContext = uiContext.getSearchContext();
+        if (searchContext instanceof WebElement)
+        {
+            WebElement contextElement = (WebElement) searchContext;
+            return contextElement::getRect;
+        }
+        return () -> new Rectangle(new Point(0, 0), genericWebDriverManager.getSize());
+    }
+
+    private void adjustVerticalPosition(WebElement element, Rectangle swipeArea, Duration swipeDuration)
+    {
+        int swipeAreaSizeHeight = swipeArea.getHeight();
+        int swipeAreaCenterY = swipeAreaSizeHeight / 2;
         int elementTopCoordinateY = element.getLocation().getY();
 
-        int bottomVisibilityIndent = (int) (VISIBILITY_BOTTOM_INDENT_COEFFICIENT * windowSizeHeight);
-        int visibilityY = windowSizeHeight - bottomVisibilityIndent;
+        int bottomVisibilityIndent = (int) (VISIBILITY_BOTTOM_INDENT_COEFFICIENT * swipeAreaSizeHeight);
+        int visibilityY = swipeAreaSizeHeight - bottomVisibilityIndent;
         if (elementTopCoordinateY > visibilityY)
         {
-            touchActions.performVerticalSwipe(windowCenterY, windowCenterY - (elementTopCoordinateY - visibilityY),
-                    swipeDuration);
+            touchActions.performVerticalSwipe(swipeAreaCenterY,
+                    swipeAreaCenterY - (elementTopCoordinateY - visibilityY), swipeArea, swipeDuration);
             return;
         }
 
-        int topVisibilityIndent = (int) (VISIBILITY_TOP_INDENT_COEFFICIENT * windowSizeHeight);
+        int topVisibilityIndent = (int) (VISIBILITY_TOP_INDENT_COEFFICIENT * swipeAreaSizeHeight);
         if (elementTopCoordinateY < topVisibilityIndent)
         {
-            touchActions.performVerticalSwipe(windowCenterY,
-                    windowCenterY + topVisibilityIndent - elementTopCoordinateY, swipeDuration);
+            touchActions.performVerticalSwipe(swipeAreaCenterY,
+                    swipeAreaCenterY + topVisibilityIndent - elementTopCoordinateY, swipeArea, swipeDuration);
         }
     }
 
