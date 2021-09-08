@@ -29,6 +29,7 @@ import java.util.function.BooleanSupplier;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration;
@@ -131,11 +132,13 @@ public class TouchActions
      * <li>the end of mobile scroll view is reached</li>
      * <li>the swipe limit is exceeded</li>
      * </ul>
-     * @param direction direction to swipe, either <b>UP</b> or <b>DOWN</b>
+     * @param direction     direction to swipe, either <b>UP</b> or <b>DOWN</b>
      * @param swipeDuration duration between a pointer moves from the start to the end of the swipe coordinates
+     * @param swipeArea     the area to execute the swipe
      * @param stopCondition condition to stop swiping
      */
-    public void swipeUntil(SwipeDirection direction, Duration swipeDuration, BooleanSupplier stopCondition)
+    public void swipeUntil(SwipeDirection direction, Duration swipeDuration, Rectangle swipeArea,
+            BooleanSupplier stopCondition)
     {
         /*
          * mobile:scroll
@@ -156,8 +159,7 @@ public class TouchActions
         Duration stabilizationDuration = mobileApplicationConfiguration.getSwipeStabilizationDuration();
         int swipeLimit = mobileApplicationConfiguration.getSwipeLimit();
         BufferedImage previousFrame = null;
-        SwipeCoordinates swipeCoordinates = direction.calculateCoordinates(genericWebDriverManager.getSize(),
-                mobileApplicationConfiguration);
+        SwipeCoordinates swipeCoordinates = direction.calculateCoordinates(swipeArea, mobileApplicationConfiguration);
         for (int count = 0; count <= swipeLimit; count++)
         {
             swipe(swipeCoordinates, swipeDuration);
@@ -185,14 +187,15 @@ public class TouchActions
     /**
      * Performs vertical swipe from <b>startY</b> to <b>endY</b> with <b>swipeDuration</b>
      *
-     * @param startY start Y coordinate
-     * @param endY end Y coordinate
+     * @param startY        start Y coordinate
+     * @param endY          end Y coordinate
+     * @param swipeArea     the area to execute the swipe
      * @param swipeDuration swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
      */
-    public void performVerticalSwipe(int startY, int endY, Duration swipeDuration)
+    public void performVerticalSwipe(int startY, int endY, Rectangle swipeArea, Duration swipeDuration)
     {
-        swipe(SwipeDirection.createCoordinates(startY, endY, genericWebDriverManager.getSize().getWidth(),
-                mobileApplicationConfiguration.getSwipeVerticalXPosition()), swipeDuration);
+        swipe(SwipeDirection.createCoordinates(startY, endY, swipeArea.getWidth(),
+                mobileApplicationConfiguration.getSwipeVerticalXPosition(), swipeArea.getPoint()), swipeDuration);
     }
 
     private BufferedImage takeScreenshot()

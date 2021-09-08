@@ -436,6 +436,9 @@ When I clear field located `accessibilityId(username)`
 
 Swipes to an element in either UP, DOWN, LEFT, or RIGHT direction with the specified swipe duration
 
+[INFO]
+The step takes into account current context. If you need to perform swipe on the element, you need to switch the context to this element.
+
 ==== *_Wording_*
 
 [source,gherkin]
@@ -465,6 +468,16 @@ Scenario: Swipe to element
 Then number of elements found by `accessibilityId(end-of-screen)` is equal to `0`
 When I swipe UP to element located `accessibilityId(end-of-screen)` with duration PT1S
 Then number of elements found by `accessibilityId(end-of-screen)` is equal to `1`
+----
+
+.Swipe context element.story
+[source,gherkin]
+----
+Scenario: Switch slides
+When I change context to element located `accessibilityId(carousel)`
+Then number of elements found by `accessibilityId(slide 2)` is equal to `0`
+When I swipe LEFT to element located `accessibilityId(slide 2)` with duration PT1S
+Then number of elements found by `accessibilityId(slide 2)` is equal to `1`
 ----
 
 === Upload a file to a device
