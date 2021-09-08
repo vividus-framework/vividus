@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.Resource;
@@ -36,37 +37,42 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.examples.IExamplesTableLoader;
 import org.vividus.bdd.resource.ResourceLoadException;
+import org.vividus.bdd.steps.VariableResolver;
 
 @ExtendWith(MockitoExtension.class)
 class StoryLoaderTests
 {
-    private static final String STORY_FILENAME = "unittest.story";
-    private static final String STORY_CONTENT = "unittest";
-
-    @Mock
-    private ResourcePatternResolver resourcePatternResolver;
-
-    @Mock
-    private IExamplesTableLoader examplesTableLoader;
-
-    @InjectMocks
-    private StoryLoader storyLoader;
+    @Mock private VariableResolver variableResolver;
+    @Mock private ResourcePatternResolver resourcePatternResolver;
+    @Mock private IExamplesTableLoader examplesTableLoader;
+    @InjectMocks private StoryLoader storyLoader;
 
     private final ResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
+
+    @BeforeEach
+    void beforeEach()
+    {
+        storyLoader.setResourcePatternResolver(resourcePatternResolver);
+        storyLoader.setExamplesTableLoader(examplesTableLoader);
+    }
 
     @Test
     void testLoadResourceAsText()
     {
-        Resource resource = resourceLoader.getResource(STORY_FILENAME);
-        when(resourcePatternResolver.getResource(STORY_FILENAME)).thenReturn(resource);
-        String actual = storyLoader.loadResourceAsText(STORY_FILENAME);
-        assertEquals(STORY_CONTENT, actual.trim());
+        var preProcessedStoryPath = "${unit}test.story";
+        var storyPath = "unittest.story";
+        when(variableResolver.resolve(preProcessedStoryPath)).thenReturn(storyPath);
+        Resource resource = resourceLoader.getResource(storyPath);
+        when(resourcePatternResolver.getResource(storyPath)).thenReturn(resource);
+        String actual = storyLoader.loadResourceAsText(preProcessedStoryPath);
+        assertEquals("unittest", actual.trim());
     }
 
     @Test
     void shouldThrowResourceLoadException() throws IOException
     {
-        String resourcePath = "resourcePath";
+        var resourcePath = "resourcePath";
+        when(variableResolver.resolve(resourcePath)).thenReturn(resourcePath);
         Resource resource = mock(Resource.class);
         when(resourcePatternResolver.getResource(resourcePath)).thenReturn(resource);
         ResourceLoadException ioException = new ResourceLoadException("Resource IOException");
@@ -77,9 +83,9 @@ class StoryLoaderTests
     @Test
     void testLoadStoryAsText()
     {
-        StoryLoader spy = Mockito.spy(storyLoader);
-        String storyPath = "storyPath";
-        String expected = "resource";
+        var storyPath = "storyPath";
+        var expected = "resource";
+        StoryLoader spy = spy(storyLoader);
         doReturn(expected).when(spy).loadResourceAsText(storyPath);
         String actual = spy.loadStoryAsText(storyPath);
         assertEquals(expected, actual);
@@ -88,8 +94,9 @@ class StoryLoaderTests
     @Test
     void testLoadExamplesTableAsText()
     {
-        String tablePath = "unittest.table";
-        String tableContent = "tableContent";
+        var tablePath = "unittest.table";
+        var tableContent = "tableContent";
+        when(variableResolver.resolve(tablePath)).thenReturn(tablePath);
         when(examplesTableLoader.loadExamplesTable(tablePath)).thenReturn(tableContent);
         String actual = storyLoader.loadResourceAsText(tablePath);
         assertEquals(tableContent, actual);

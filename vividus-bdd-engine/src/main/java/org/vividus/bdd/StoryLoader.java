@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,25 +24,29 @@ import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.io.LoadFromClasspath;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.examples.IExamplesTableLoader;
+import org.vividus.bdd.steps.VariableResolver;
 
 public class StoryLoader extends LoadFromClasspath
 {
+    private final VariableResolver variableResolver;
     private IExamplesTableLoader examplesTableLoader;
     private ResourcePatternResolver resourcePatternResolver;
 
-    public StoryLoader()
+    public StoryLoader(VariableResolver variableResolver)
     {
         super(StandardCharsets.UTF_8);
+        this.variableResolver = variableResolver;
     }
 
     @Override
     public String loadResourceAsText(String resourcePath)
     {
-        if ("table".equals(FilenameUtils.getExtension(resourcePath)))
+        String path = (String) variableResolver.resolve(resourcePath);
+        if ("table".equals(FilenameUtils.getExtension(path)))
         {
-            return examplesTableLoader.loadExamplesTable(resourcePath);
+            return examplesTableLoader.loadExamplesTable(path);
         }
-        return super.loadResourceAsText(resourcePath);
+        return super.loadResourceAsText(path);
     }
 
     @Override
