@@ -18,35 +18,25 @@ package org.vividus.bdd;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.io.LoadFromClasspath;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.examples.IExamplesTableLoader;
-import org.vividus.bdd.steps.VariableResolver;
 
 public class StoryLoader extends LoadFromClasspath
 {
-    private final VariableResolver variableResolver;
     private IExamplesTableLoader examplesTableLoader;
     private ResourcePatternResolver resourcePatternResolver;
-
-    public StoryLoader(VariableResolver variableResolver)
-    {
-        super(StandardCharsets.UTF_8);
-        this.variableResolver = variableResolver;
-    }
 
     @Override
     public String loadResourceAsText(String resourcePath)
     {
-        String path = (String) variableResolver.resolve(resourcePath);
-        if ("table".equals(FilenameUtils.getExtension(path)))
+        if ("table".equals(FilenameUtils.getExtension(resourcePath)))
         {
-            return examplesTableLoader.loadExamplesTable(path);
+            return examplesTableLoader.loadExamplesTable(resourcePath);
         }
-        return super.loadResourceAsText(path);
+        return super.loadResourceAsText(resourcePath);
     }
 
     @Override

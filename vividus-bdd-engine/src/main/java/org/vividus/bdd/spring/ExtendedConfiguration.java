@@ -33,6 +33,7 @@ import org.jbehave.core.io.StoryLoader;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
+import org.jbehave.core.model.VariableResolvingTableParsers;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.reporters.ViewGenerator;
@@ -67,6 +68,8 @@ public class ExtendedConfiguration extends Configuration
         useParameterControls(parameterControls);
         useParameterConverters(new ParameterConvertersDecorator(this, variableResolver, expressionAdaptor)
                 .addConverters(customConverters));
+        tableParsers = new VariableResolvingTableParsers(variableResolver, keywords(), parameterConverters(),
+                Optional.empty());
         useStoryParser(new RegexStoryParser(examplesTableFactory()));
         TableTransformers transformers = tableTransformers();
         customTableTransformers.forEach(transformers::useTransformer);
