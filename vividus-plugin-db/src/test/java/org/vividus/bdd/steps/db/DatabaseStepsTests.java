@@ -39,12 +39,10 @@ import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,19 +70,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.db.DataSourceManager;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
-import org.vividus.util.property.PropertyMappedCollection;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-@SuppressFBWarnings("OBL_UNSATISFIED_OBLIGATION")
 class DatabaseStepsTests
 {
     private static final Duration TWO_SECONDS = Duration.ofSeconds(2);
@@ -129,8 +127,6 @@ class DatabaseStepsTests
 
     private static final HashCode HASH3 = Hashing.murmur3_128().hashString(VAL3, StandardCharsets.UTF_8);
 
-    private static final String MISSING_DB_CONFIG_ERROR = "Database connection with key '%s' is not configured in "
-            + "properties";
     private static final String LOG_EXECUTING_SQL_QUERY = "Executing SQL query: {}";
 
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(DatabaseSteps.class);
@@ -143,10 +139,11 @@ class DatabaseStepsTests
 
     private final IAttachmentPublisher attachmentPublisher = mock(IAttachmentPublisher.class);
 
-    @Mock private PropertyMappedCollection<DriverManagerDataSource> dataSources;
+    private final DataSourceManager dataSourceManager = mock(DataSourceManager.class);
+
     @Mock private HashFunction hashFunction;
-    @InjectMocks private final DatabaseSteps databaseSteps = new DatabaseSteps(bddVariableContext, attachmentPublisher,
-            softAssert);
+    @InjectMocks private final DatabaseSteps databaseSteps = new DatabaseSteps(dataSourceManager, bddVariableContext,
+            attachmentPublisher, softAssert);
 
     @BeforeEach
     void beforeEach()
@@ -155,41 +152,41 @@ class DatabaseStepsTests
     }
 
     @Test
-    void testExecuteSql() throws SQLException
+    void testExecuteSql()
     {
-        mockDataSource(QUERY, DB_KEY, mockResultSet(COL1, VAL1));
+        mockQueryForList(QUERY, DB_KEY, List.of(Map.of(COL1, VAL1)));
         Set<VariableScope> variableScope = Set.of(VariableScope.SCENARIO);
-        List<Map<String, Object>> singletonList = Collections.singletonList(Collections.singletonMap(COL1, VAL1));
+        List<Map<String, Object>> singletonList = List.of(Map.of(COL1, VAL1));
         String variableName = "var";
         databaseSteps.executeSql(QUERY, DB_KEY, variableScope, variableName);
         verify(bddVariableContext).putVariable(variableScope, variableName, singletonList);
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(LOG_EXECUTING_SQL_QUERY, QUERY))));
     }
 
-    static Stream<Arguments> matchingResultSets() throws SQLException
+    static Stream<Arguments> matchingResultLists()
     {
         return Stream.of(
                 arguments(
                         DataSetComparisonRule.IS_EQUAL_TO,
-                        mockResultSet(COL1, VAL1, COL2, VAL2, COL3, VAL3),
-                        mockResultSet(COL1, VAL1, COL2, VAL2, COL3, VAL3)
+                        List.of(Map.of(COL1, VAL1, COL2, VAL2, COL3, VAL3)),
+                        List.of(Map.of(COL1, VAL1, COL2, VAL2, COL3, VAL3))
                 ),
                 arguments(
                         DataSetComparisonRule.CONTAINS,
-                        mockResultSet(COL1, VAL1, COL2, VAL2, COL3, VAL3),
-                        mockResultSet(COL2, VAL2)
+                        List.of(Map.of(COL1, VAL1, COL2, VAL2, COL3, VAL3)),
+                        List.of(Map.of(COL2, VAL2))
                 )
         );
     }
 
     @ParameterizedTest
-    @MethodSource("matchingResultSets")
-    void shouldCompareQueriesResponsesAndDontPostDiffInCaseOfEqualData(DataSetComparisonRule comparisonRule,
-            ResultSet leftResultSet, ResultSet rightResultSet)
-            throws InterruptedException, ExecutionException, TimeoutException, SQLException
+    @MethodSource("matchingResultLists")
+    void shouldCompareQueriesResponsesAndDoNotPostDiffInCaseOfEqualData(DataSetComparisonRule comparisonRule,
+            List<Map<String, Object>> leftResult, List<Map<String, Object>> rightResult)
+            throws InterruptedException, ExecutionException, TimeoutException
     {
-        mockDataSource(QUERY, DB_KEY, leftResultSet);
-        mockDataSource(QUERY, DB_KEY2, rightResultSet);
+        mockQueryForList(QUERY, DB_KEY, leftResult);
+        mockQueryForList(QUERY, DB_KEY2, rightResult);
         when(softAssert.assertTrue(comparisonRule.getAssertionDescription(), true)).thenReturn(true);
         configureTimeout();
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
@@ -201,10 +198,20 @@ class DatabaseStepsTests
 
     @Test
     void shouldCompareQueriesAndUseAllColumnValuesIfUserDoesntSpecifyKeys() throws InterruptedException,
-        ExecutionException, TimeoutException, SQLException
+        ExecutionException, TimeoutException
     {
-        mockDataSource(QUERY, DB_KEY, mockResultSet(COL1, VAL1, COL2, null, COL3, VAL3));
-        mockDataSource(QUERY, DB_KEY2, mockResultSet(COL1, VAL1, COL2, null, COL3, VAL3));
+        Map<String, Object> firstResult = new HashMap<>();
+        firstResult.put(COL1, VAL1);
+        firstResult.put(COL2, null);
+        firstResult.put(COL3, VAL3);
+
+        Map<String, Object> secondResult = new HashMap<>();
+        secondResult.put(COL1, VAL1);
+        secondResult.put(COL2, null);
+        secondResult.put(COL3, VAL3);
+
+        mockQueryForList(QUERY, DB_KEY, List.of(firstResult));
+        mockQueryForList(QUERY, DB_KEY2, List.of(secondResult));
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         ArgumentMatcher<CharSequence> matcher = s ->
         {
@@ -221,14 +228,11 @@ class DatabaseStepsTests
     }
 
     @Test
-    void shouldExecuteSqlQuery() throws SQLException
+    void shouldExecuteSqlQuery()
     {
-        Statement stmt = mock(Statement.class);
-        when(stmt.executeUpdate(QUERY)).thenReturn(1);
-        Connection con = mock(Connection.class);
-        when(con.createStatement()).thenReturn(stmt);
-        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
-        when(dataSource.getConnection()).thenReturn(con);
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        when(dataSourceManager.getJdbcTemplate(DB_KEY)).thenReturn(jdbcTemplate);
+        when(jdbcTemplate.update(QUERY)).thenReturn(1);
         databaseSteps.executeSql(QUERY, DB_KEY);
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(
                 info(LOG_EXECUTING_SQL_QUERY, QUERY),
@@ -267,16 +271,14 @@ class DatabaseStepsTests
     }
 
     @Test
-    void shouldThrowIllegalStateExceptionInCaseOfDataIntegrityViolationException() throws SQLException
+    void shouldThrowIllegalStateExceptionInCaseOfDataIntegrityViolationException()
     {
         DataIntegrityViolationException cause =
                 new DataIntegrityViolationException("A result was returned when none was expected.");
-        Statement stmt = mock(Statement.class);
-        when(stmt.executeUpdate(QUERY)).thenThrow(cause);
-        Connection con = mock(Connection.class);
-        when(con.createStatement()).thenReturn(stmt);
-        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
-        when(dataSource.getConnection()).thenReturn(con);
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        when(dataSourceManager.getJdbcTemplate(DB_KEY)).thenReturn(jdbcTemplate);
+        when(jdbcTemplate.update(QUERY)).thenThrow(cause);
+
         IllegalStateException actual = assertThrows(IllegalStateException.class,
             () -> databaseSteps.executeSql(QUERY, DB_KEY));
         assertEquals(cause, actual.getCause());
@@ -289,19 +291,11 @@ class DatabaseStepsTests
     @SuppressWarnings("unchecked")
     @Test
     void shouldCompareQueriesResponsesAndPostDiffTable() throws InterruptedException,
-        ExecutionException, TimeoutException, SQLException
+            ExecutionException, TimeoutException
     {
-        ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
-        when(rsmd.getColumnCount()).thenReturn(1);
-        when(rsmd.getColumnLabel(1)).thenReturn(COL1);
-        ResultSet rs = mock(ResultSet.class);
-        when(rs.next()).thenReturn(true).thenReturn(true).thenReturn(true).thenReturn(false);
-        when(rs.getMetaData()).thenReturn(rsmd);
-        when(rs.getObject(1)).thenReturn(VAL1).thenReturn(VAL1).thenReturn(VAL3);
-        DriverManagerDataSource dataSource1 = mockDataSource(QUERY, DB_KEY, rs);
-        when(dataSource1.getUrl()).thenReturn(DB_URL);
-        DriverManagerDataSource dataSource2 = mockDataSource(QUERY2, DB_KEY2, mockResultSet(COL1, VAL2));
-        when(dataSource2.getUrl()).thenReturn(DB_URL);
+        List<Map<String, Object>> result = List.of(Map.of(COL1, VAL1), Map.of(COL1, VAL1), Map.of(COL1, VAL3));
+        mockQueryForList(QUERY, DB_KEY, result);
+        mockQueryForList(QUERY2, DB_KEY2, List.of(Map.of(COL1, VAL2)));
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
         mockHashing();
         configureTimeout();
@@ -349,19 +343,13 @@ class DatabaseStepsTests
 
     @SuppressWarnings("unchecked")
     @Test
-    void shouldLimitDiffTable() throws InterruptedException, ExecutionException, TimeoutException, SQLException
+    void shouldLimitDiffTable() throws InterruptedException, ExecutionException, TimeoutException
     {
         databaseSteps.setDiffLimit(1);
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
-        ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
-        when(rsmd.getColumnCount()).thenReturn(1);
-        when(rsmd.getColumnLabel(1)).thenReturn(COL1);
-        ResultSet rs = mock(ResultSet.class);
-        when(rs.next()).thenReturn(true).thenReturn(true).thenReturn(false);
-        when(rs.getMetaData()).thenReturn(rsmd);
-        when(rs.getObject(1)).thenReturn(VAL1).thenReturn(VAL3);
-        mockDataSource(QUERY, DB_KEY, rs);
-        mockDataSource(QUERY, DB_KEY2, mockResultSet(COL1, VAL2));
+        List<Map<String, Object>> result = List.of(Map.of(COL1, VAL1), Map.of(COL1, VAL3));
+        mockQueryForList(QUERY, DB_KEY, result);
+        mockQueryForList(QUERY, DB_KEY2, List.of(Map.of(COL1, VAL2)));
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
         mockHashing();
         configureTimeout();
@@ -504,10 +492,10 @@ class DatabaseStepsTests
     }
 
     @Test
-    void testWaitUntilQueryReturnedDataEqualToTable() throws SQLException
+    void testWaitUntilQueryReturnedDataEqualToTable()
     {
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
-        mockDataSource(QUERY, DB_KEY, mockResultSet(COL1, VAL2));
+        mockQueryForList(QUERY, DB_KEY, List.of(Map.of(COL1, VAL2)));
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, TABLE);
         verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
@@ -516,18 +504,18 @@ class DatabaseStepsTests
     }
 
     @Test
-    void testWaitTwiceUntilQueryReturnedDataEqualToTable() throws SQLException
+    void testWaitTwiceUntilQueryReturnedDataEqualToTable()
     {
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
 
-        ResultSet rsFirst = mockResultSet(COL1, VAL1);
-        ResultSet rsSecond = mockResultSet(COL1, VAL2);
-        Statement stmt = mock(Statement.class);
-        when(stmt.executeQuery(QUERY)).thenReturn(rsFirst).thenReturn(rsSecond);
-        Connection con = mock(Connection.class);
-        when(con.createStatement()).thenReturn(stmt);
-        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
-        when(dataSource.getConnection()).thenReturn(con);
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        when(dataSourceManager.getJdbcTemplate(DB_KEY)).thenReturn(jdbcTemplate);
+        when(jdbcTemplate.queryForList(QUERY))
+                .thenReturn(List.of(Map.of(COL1, VAL1)))
+                .thenReturn(List.of(Map.of(COL1, VAL2)));
+        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
+        when(dataSource.getUrl()).thenReturn(DB_URL);
 
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, TABLE);
@@ -537,18 +525,18 @@ class DatabaseStepsTests
     }
 
     @Test
-    void testWaitUntilQueryReturnedDataEqualToTableFailed() throws SQLException
+    void testWaitUntilQueryReturnedDataEqualToTableFailed()
     {
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
 
-        ResultSet rsFirst = mockResultSet(COL1, VAL1);
-        ResultSet rsSecond = mockResultSet(COL1, VAL3);
-        Statement stmt = mock(Statement.class);
-        when(stmt.executeQuery(QUERY)).thenReturn(rsFirst).thenReturn(rsSecond);
-        Connection con = mock(Connection.class);
-        when(con.createStatement()).thenReturn(stmt);
-        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
-        when(dataSource.getConnection()).thenReturn(con);
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        when(dataSourceManager.getJdbcTemplate(DB_KEY)).thenReturn(jdbcTemplate);
+        when(jdbcTemplate.queryForList(QUERY))
+                .thenReturn(List.of(Map.of(COL1, VAL1)))
+                .thenReturn(List.of(Map.of(COL1, VAL3)));
+        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
+        when(dataSource.getUrl()).thenReturn(DB_URL);
 
         databaseSteps.waitForDataAppearance(Duration.ofSeconds(2), 2, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO,
                 TABLE);
@@ -620,49 +608,21 @@ class DatabaseStepsTests
     {
         DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
         String dbKey = DB_KEY;
-        when(dataSources.get(dbKey, MISSING_DB_CONFIG_ERROR, dbKey)).thenReturn(dataSource);
+        lenient().when(dataSourceManager.getDataSource(dbKey)).thenReturn(dataSource);
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        lenient().when(dataSourceManager.getJdbcTemplate(dbKey)).thenReturn(jdbcTemplate);
+        lenient().when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
         return dataSource;
     }
 
-    private DriverManagerDataSource mockDataSource(String query, String dbKey, ResultSet rs) throws SQLException
+    private void mockQueryForList(String query, String dbKey, List<Map<String, Object>> result)
     {
-        Statement stmt = mock(Statement.class);
-        when(stmt.executeQuery(query)).thenReturn(rs);
-        Connection con = mock(Connection.class);
-        when(con.createStatement()).thenReturn(stmt);
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        when(dataSourceManager.getJdbcTemplate(dbKey)).thenReturn(jdbcTemplate);
         DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
-        when(dataSource.getConnection()).thenReturn(con);
-        lenient().when(dataSources.get(dbKey, MISSING_DB_CONFIG_ERROR, dbKey)).thenReturn(dataSource);
-        return dataSource;
-    }
-
-    private static ResultSet mockResultSet(String columnName, String value) throws SQLException
-    {
-        ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
-        when(rsmd.getColumnCount()).thenReturn(1);
-        when(rsmd.getColumnLabel(1)).thenReturn(columnName);
-        ResultSet rs = mock(ResultSet.class);
-        when(rs.next()).thenReturn(true).thenReturn(false);
-        when(rs.getMetaData()).thenReturn(rsmd);
-        when(rs.getObject(1)).thenReturn(value);
-        return rs;
-    }
-
-    private static ResultSet mockResultSet(String columnName1, String value1, String columnName2, String value2,
-            String columnName3, String value3) throws SQLException
-    {
-        ResultSetMetaData rsmd = mock(ResultSetMetaData.class);
-        when(rsmd.getColumnCount()).thenReturn(3);
-        lenient().when(rsmd.getColumnLabel(1)).thenReturn(columnName1);
-        lenient().when(rsmd.getColumnLabel(2)).thenReturn(columnName2);
-        lenient().when(rsmd.getColumnLabel(3)).thenReturn(columnName3);
-        ResultSet rs = mock(ResultSet.class);
-        when(rs.next()).thenReturn(true).thenReturn(false);
-        when(rs.getMetaData()).thenReturn(rsmd);
-        lenient().when(rs.getObject(1)).thenReturn(value1);
-        lenient().when(rs.getObject(2)).thenReturn(value2);
-        lenient().when(rs.getObject(3)).thenReturn(value3);
-        return rs;
+        lenient().when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
+        lenient().when(dataSource.getUrl()).thenReturn(DB_URL);
+        when(jdbcTemplate.queryForList(query)).thenReturn(result);
     }
 
     private void configureTimeout()
