@@ -1,0 +1,63 @@
+= How to use in-memory database to manage test data
+
+Assuming there is a project containing VIVIDUS-based tests
+(e.g. https://github.com/vividus-framework/vividus-starter[VIVIDUS Starter])
+and the goal is to manage test data in the in-memory database (e.g.
+https://h2database.com/html/features.html#feature_list[H2 database]).
+The database is deployed on tests start, accessible from tests and shutdown on
+tests end. The test data can be created from SQL files located in the project.
+
+. Add the required dependencies (DB plugin, H2 database) to the project `build.gradle`
++
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{current-version}')
+implementation(group: 'com.h2database', name: 'h2', version: '1.4.200')
+----
+
+. Configure connection to the H2 database
++
+The details on executing SQL statements on connection
+https://h2database.com/html/features.html#execute_sql_on_connection[could be found in the official H2 guide].
++
+You could execute SQL on connection via the INIT property in two ways:
+
+ - using RUNSCRIPT commands with the path to SQL files.
+Here you can specify absolute path to file
+or use the 'classpath:/' prefix - files will be searched from 'src/main/resources' folder relatively.
++
+[source,properties]
+----
+db.connection.testh2db.driver-class-name=org.h2.Driver
+db.connection.testh2db.url=jdbc:h2:mem:test;\
+  INIT=create schema if not exists test\\;\
+  SET SCHEMA test\\;\
+  RUNSCRIPT FROM 'classpath:/path/to/sql/file1.sql'\\;\
+  RUNSCRIPT FROM 'classpath:/path/to/sql/file2.sql'
+db.connection.testh2db.username=
+db.connection.testh2db.password=
+----
+ - using SQL queries.
++
+[source,properties]
+----
+db.connection.testh2db.driver-class-name=org.h2.Driver
+db.connection.testh2db.url=jdbc:h2:mem:test;\
+  INIT=create schema if not exists test\\;\
+  SET SCHEMA test\\;\
+  DROP TABLE IF EXISTS students\\;\
+  CREATE TABLE students (firstname VARCHAR(50) NOT NULL, lastname VARCHAR(50) NOT NULL)\\;\
+  INSERT INTO students (firstname, lastname) VALUES ('Maria', 'Miller')\\;
+db.connection.testh2db.username=
+db.connection.testh2db.password=
+----
+
+. Use the configured connection to execute SQL
++
+.Execute SQL against H2 database
+[source,gherkin]
+----
+When I execute SQL query `
+SELECT * FROM students
+` against `testh2db` and save result to scenario variable `h2-records`
+----
