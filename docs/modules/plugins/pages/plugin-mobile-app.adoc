@@ -436,7 +436,7 @@ When I clear field located `accessibilityId(username)`
 
 Swipes to an element in either UP, DOWN, LEFT, or RIGHT direction with the specified swipe duration
 
-[INFO]
+[NOTE]
 The step takes into account current context. If you need to perform swipe on the element, you need to switch the context to this element.
 
 ==== *_Wording_*
