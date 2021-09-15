@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
@@ -175,6 +176,26 @@ class KeyboardActionsTests
 
         verify(element).clear();
         verify(hidesKeyboard).hideKeyboard();
+    }
+
+    @Test
+    void shouldTryHideKeyboardIfElementToTypeTextBecamesStale()
+    {
+        init(true);
+
+        WebDriver context = mock(WebDriver.class);
+        WebElement returnButton = mock(WebElement.class);
+
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        enableOnScreenKeyboard(true);
+        when(element.getTagName()).thenThrow(new StaleElementReferenceException("Stale"));
+        when(webDriverProvider.get()).thenReturn(context);
+        when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
+
+        keyboardActions.typeText(element, TEXT);
+
+        verify(touchActions).tap(returnButton);
+        verify(element).sendKeys(TEXT);
     }
 
     void init(boolean realDevice)
