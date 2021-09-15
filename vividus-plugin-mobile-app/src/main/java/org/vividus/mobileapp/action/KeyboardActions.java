@@ -21,6 +21,7 @@ import static org.apache.commons.lang3.Validate.isTrue;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +99,7 @@ public class KeyboardActions
         if (genericWebDriverManager.isIOSNativeApp() && webDriverProvider.getUnwrapped(HasOnScreenKeyboard.class)
                 .isKeyboardShown())
         {
-            String tagName = webElement.getTagName();
+            String tagName = getTagNameSafely(webElement);
             /*
              * Tap on 'Return' doesn't close the keyboard for XCUIElementTypeTextView element, the only way to
              * close the keyboard is to tap on any element outside the text view.
@@ -126,5 +127,18 @@ public class KeyboardActions
             }
         }
         webDriverProvider.getUnwrapped(HidesKeyboard.class).hideKeyboard();
+    }
+
+    private static String getTagNameSafely(WebElement webElement)
+    {
+        try
+        {
+            return webElement.getTagName();
+        }
+        catch (StaleElementReferenceException exception)
+        {
+            // Swallow exception quietly
+            return null;
+        }
     }
 }
