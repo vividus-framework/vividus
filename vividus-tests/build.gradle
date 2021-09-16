@@ -45,4 +45,5 @@ dependencies {
 
     implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.23')
     implementation(group: 'com.github.simoc', name: 'csvjdbc', version: 'd939a2f344')
+    implementation(group: 'com.h2database', name: 'h2', version: '1.4.200')
 }
