@@ -19,11 +19,15 @@ package org.vividus.azure.storage.blob;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.http.rest.PagedResponse;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -31,6 +35,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.ListBlobsOptions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -39,6 +44,7 @@ import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.azure.storage.blob.model.BlobFilter;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
@@ -229,6 +235,106 @@ public class BlobStorageSteps
                                                     .filter(nameMatcher::matches)
                                                     .collect(Collectors.toList());
         bddVariableContext.putVariable(scopes, variableName, blobNames);
+    }
+
+    /**
+     * Finds blobs with names filtered by the specified rules in the container.
+     *
+     * @param filter            Filter to apply to blob names.
+     *                          <div>Example:</div>
+     *                          <code>
+     *                          <br>When I filter blobs by:
+     *                          <br>|blobNamePrefix|blobNameFilterRule|blobNameFilterValue|resultsLimit|
+     *                          <br>|data/         |contains          |file-key.txt       |10          |
+     *                          <br>in container `global` of storage account `storage`
+     *                          <br> and save result to story variable `blobs`
+     *                          </code>
+     *                          <br>
+     *                          <br>where all filters are optional, but at least one rule is required.
+     *                          <ul>
+     *                           <li><code>blobNameFilterRule</code> The blob name comparison rule: "is equal to",
+     *                           "contains", "does not contain" or "matches".
+     *                           Should be specified along with <i>blobNameFilterValue</i>.</li>
+     *                           <li><code>blobNameFilterValue</code> The full or partial blob name to be matched.
+     *                           Should be specified along with <i>blobNameFilterRule</i>.</li>
+     *                           <li><code>blobNamePrefix</code> The prefix which blob names should start with.</li>
+     *                           <li><code>resultsLimit</code> Maximum number of blob names to return.</li>
+     *                          </ul>
+     * @param containerName     The name of the container to point to.
+     * @param storageAccountKey The key to Storage Account endpoint.
+     * @param scopes            The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
+     *                          scopes.<br>
+     *                          <i>Available scopes:</i>
+     *                          <ul>
+     *                          <li><b>STEP</b> - the variable will be available only within the step,
+     *                          <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                          <li><b>STORY</b> - the variable will be available within the whole story,
+     *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                          </ul>
+     * @param variableName      The variable name to store the list of found blob names.
+     */
+    @When("I filter blobs by:$filter in container `$containerName` of storage account `$storageAccountKey`"
+            + " and save result to $scopes variable `$variableName`")
+    public void findBlobsByFilter(BlobFilter filter, String containerName,
+                                      String storageAccountKey, Set<VariableScope> scopes, String variableName)
+    {
+        filter.validate();
+        BlobContainerClient blobContainerClient = createBlobContainerClient(containerName, storageAccountKey);
+        bddVariableContext.putVariable(scopes, variableName, getLimitedBlobNames(blobContainerClient, filter));
+    }
+
+    private static List<String> getLimitedBlobNames(BlobContainerClient blobContainerClient, BlobFilter filter)
+    {
+        return filter.getResultsLimit()
+                .map(limit -> {
+                    ListBlobsOptions options = new ListBlobsOptions();
+                    options.setMaxResultsPerPage(limit.intValue());
+                    return filter.getBlobNamePrefix()
+                            .map(options::setPrefix)
+                            .map(opts -> getLimitPerPage(filter, limit,
+                                    blobContainerClient.listBlobsByHierarchy("/", opts, null)))
+                            .orElseGet(
+                                () -> getLimitPerPage(filter, limit,
+                                        blobContainerClient.listBlobs(options, null)));
+                })
+                .orElseGet(
+                    () -> filter.getBlobNamePrefix()
+                        .map(blobContainerClient::listBlobsByHierarchy)
+                        .orElseGet(blobContainerClient::listBlobs)
+                        .stream()
+                        .map(BlobItem::getName)
+                        .filter(filterMatched(filter))
+                        .collect(Collectors.toList())
+                );
+    }
+
+    private static List<String> getLimitPerPage(BlobFilter filter, Long limit, PagedIterable<BlobItem> pages)
+    {
+        List<String> blobNames = new ArrayList<>();
+        for (PagedResponse<BlobItem> page : pages.iterableByPage())
+        {
+            if (blobNames.size() < limit)
+            {
+                LOGGER.info("Blob Items on page: {}", page.getContinuationToken());
+                page.getValue()
+                        .stream()
+                        .map(BlobItem::getName)
+                        .filter(filterMatched(filter))
+                        .forEach(blobNames::add);
+            }
+            else
+            {
+                break;
+            }
+        }
+        return blobNames.stream().limit(limit).collect(Collectors.toList());
+    }
+
+    private static Predicate<String> filterMatched(BlobFilter filter)
+    {
+        return name -> filter.getBlobNameFilterValue()
+                    .map(value -> filter.getBlobNameFilterRule().get().createMatcher(value).matches(name))
+                    .orElse(true);
     }
 
     private BlobContainerClient createBlobContainerClient(String containerName, String storageAccountKey)
