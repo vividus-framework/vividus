@@ -138,3 +138,17 @@ Given I initialize the scenario variable `personalInfo` using template `template
 |name     |race  |
 |Dagoth Ur|Dunmer|
 ----
+
+=== Assert the value matches regex
+
+Asserts that the given value matches the specified regular expression.
+The dotall mode is enabled by default: the expression `.` matches any character,
+including a line terminator.
+
+[source,gherkin]
+----
+Then `$value` matches `$regex`
+----
+
+* `$value` - The value to assert.
+* `$regex` - https://en.wikipedia.org/wiki/Regular_expression[The regular expression].

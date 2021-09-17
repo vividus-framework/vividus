@@ -176,14 +176,15 @@ public class BddVariableSteps
     }
 
     /**
-     * Matches given value against specified pattern
-     * @param value The value to be matched
-     * @param pattern pattern
+     * Asserts that the given value matches the specified regular expression
+     * @param value The value to assert
+     * @param regex The regular expression
      */
-    @Then("`$value` matches `$pattern`")
-    public void valueMatchesPattern(String value, Pattern pattern)
+    @Then("`$value` matches `$regex`")
+    public void assertMatchesRegex(String value, String regex)
     {
-        softAssert.assertThat(String.format("Value '%s' matches pattern '%s'", value, pattern.pattern()), value,
+        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+        softAssert.assertThat(String.format("Value '%s' matches pattern '%s'", value, regex), value,
                 matchesPattern(pattern));
     }
 

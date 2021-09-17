@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
@@ -294,13 +293,16 @@ class BddVariableStepsTests
         assertEquals("'variable' should be empty list or list of maps structure", exception.getMessage());
     }
 
-    @Test
-    void testValueMatchesPattern()
+    @ParameterizedTest
+    @CsvSource({
+            "value,   .*",
+            "'a\nb\nc', .*b.*"
+    })
+    void testValueMatchesRegex(String value, String regex)
     {
-        String pattern = ".*";
-        bddVariableSteps.valueMatchesPattern(VALUE_1, Pattern.compile(pattern));
-        verify(softAssert).assertThat(eq(String.format("Value '%s' matches pattern '%s'", VALUE_1, pattern)),
-                eq(VALUE_1), argThat(m -> "a string matching the pattern '.*'".equals(m.toString())));
+        bddVariableSteps.assertMatchesRegex(value, regex);
+        verify(softAssert).assertThat(eq(String.format("Value '%s' matches pattern '%s'", value, regex)), eq(value),
+                argThat(m -> ("a string matching the pattern '" + regex + "'").equals(m.toString())));
     }
 
     @Test

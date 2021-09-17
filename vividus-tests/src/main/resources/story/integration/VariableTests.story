@@ -155,3 +155,12 @@ Then `${java}` is equal to `${JAVA_HOME}`
 
 Scenario: Compare variable with int value
 Then `${property-with-int-value}` is equal to `4`
+
+Scenario: The multiline value can be matched using regex
+Meta:
+    @issueId 1967
+Then `
+A
+B
+C
+` matches `.*B.*`
