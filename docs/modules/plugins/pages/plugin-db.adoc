@@ -45,3 +45,33 @@ a|The strategy defining how records with duplicate keys should be handled:
 |The maximum time to wait for DB query completion
 
 |===
+
+
+== Table Transformers
+
+NOTE: The table transformers properties marked with *bold* are mandatory.
+
+=== FROM_DB
+
+`FROM_DB` transformer generates table from DB via SQL queries.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|[subs=+quotes]`*dbKey*`
+|Database key
+
+|`*sqlQuery*`
+|SQL select query to get data
+
+|`nullReplacement`
+|Value to replace NULLs in result data set
+|===
+
+.The transformer based on the default configuration
+[source,gherkin]
+----
+{transformer=FROM_DB, dbKey=testh2db, sqlQuery=SELECT * FROM students, nullReplacement=""}
+----
