@@ -19,7 +19,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
 
-    implementation(group: 'org.apache.parquet', name: 'parquet-avro', version: '1.12.0')
+    implementation(group: 'org.apache.parquet', name: 'parquet-avro', version: '1.12.1')
     implementation(group: 'org.apache.hadoop', name: 'hadoop-common', version: "${hadoopVersion}")
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
