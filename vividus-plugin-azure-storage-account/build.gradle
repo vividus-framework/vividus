@@ -4,7 +4,7 @@ dependencies {
     api project(':vividus-bdd-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
-    implementation(group: 'com.azure', name: 'azure-storage-blob', version: '12.13.0')
+    implementation(group: 'com.azure', name: 'azure-storage-blob', version: '12.14.0')
     implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-storage', version: '2.7.0')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
