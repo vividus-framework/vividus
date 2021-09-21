@@ -116,6 +116,17 @@ When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityI
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
+Scenario: Verify step: 'I type `$text` in field located `$locator` and keep keyboard opened'
+When I initialize the story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<menuInputXpath>)`
+When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityId>)` and keep keyboard opened
+When I save `<textFieldValueAttribute>` attribute value of element located `accessibilityId(<nameInputAccessibilityId>)`
+ to scenarion variable `typedText`
+Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `0`
+Then `${text}` is equal to `${typedText}`
+
+
 Scenario: Verify dynamic variable: 'clipboard-text'
 When I tap on element located `accessibilityId(CopyTextToClipboardButton)`
 Then `${clipboard-text}` is equal to `${text}`

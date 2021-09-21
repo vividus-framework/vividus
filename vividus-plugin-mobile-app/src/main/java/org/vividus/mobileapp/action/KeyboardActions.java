@@ -67,11 +67,19 @@ public class KeyboardActions
      * </ol>
      * @param element element to type text, must not be {@code null}
      * @param text text to type into the element, must not be {@code null}
+     * @param hideKeyboard flag showing whether to hide the keyboard after type
      */
-    public void typeText(WebElement element, String text)
+    public void typeText(WebElement element, String text, boolean hideKeyboard)
     {
         LOGGER.atInfo().addArgument(text).log("Typing text '{}' into the field");
-        performWithHideKeyboard(element, e -> e.sendKeys(text));
+        if (hideKeyboard)
+        {
+            performWithHideKeyboard(element, e -> e.sendKeys(text));
+        }
+        else
+        {
+            element.sendKeys(text);
+        }
     }
 
     /**

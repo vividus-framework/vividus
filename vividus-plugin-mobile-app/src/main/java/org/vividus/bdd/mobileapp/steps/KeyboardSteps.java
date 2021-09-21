@@ -72,6 +72,17 @@ public class KeyboardSteps
 
     /**
      * Type <b>text</b> into the <b>element</b>
+     * @param text text to type into the element
+     * @param locator locator to find an element
+     */
+    @When("I type `$text` in field located `$locator` and keep keyboard opened")
+    public void typeTextInFieldAndKeepKeyboard(String text, Locator locator)
+    {
+        typeText(text, locator, false);
+    }
+
+    /**
+     * Type <b>text</b> into the <b>element</b>
      * <br>
      * The atomic actions performed are:
      * <ol>
@@ -84,8 +95,7 @@ public class KeyboardSteps
     @When("I type `$text` in field located `$locator`")
     public void typeTextInField(String text, Locator locator)
     {
-        baseValidations.assertElementExists("The element to type text", locator)
-                .ifPresent(e -> keyboardActions.typeText(e, text));
+        typeText(text, locator, true);
     }
 
     /**
@@ -166,6 +176,12 @@ public class KeyboardSteps
                                   .map(mapper)
                                   .collect(Collectors.toList());
         pressKeys(toType);
+    }
+
+    private void typeText(String text, Locator locator, boolean hideKeyboard)
+    {
+        baseValidations.assertElementExists("The element to type text", locator)
+                .ifPresent(e -> keyboardActions.typeText(e, text, hideKeyboard));
     }
 
     private void pressKeys(List<String> keys)
