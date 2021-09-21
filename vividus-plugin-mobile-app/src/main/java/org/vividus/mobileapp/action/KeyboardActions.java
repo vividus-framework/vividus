@@ -67,7 +67,7 @@ public class KeyboardActions
      * </ol>
      * @param element element to type text, must not be {@code null}
      * @param text text to type into the element, must not be {@code null}
-     * @param hideKeyboard flag showing whether to hide the keyboard after type
+     * @param hideKeyboard flag showing whether to hide the keyboard after typing
      */
     public void typeText(WebElement element, String text, boolean hideKeyboard)
     {
