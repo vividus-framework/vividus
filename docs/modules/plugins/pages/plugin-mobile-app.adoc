@@ -397,6 +397,33 @@ Scenario: Type text
 When I type `Bob` in field located `accessibilityId(username)`
 ----
 
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I type `$text` in field located `$locator` and keep keyboard opened
+----
+
+==== *_Info_*
+
+The only type text into the element action is performed.
+
+Keyboard hiding is skipped.
+
+==== *_Parameters_*
+
+. `$text` - text to type into the element
+. `$locator` - <<_locator>>
+
+==== *_Usage_*
+
+.Keyboard.story
+[source,gherkin]
+----
+Scenario: Type text
+When I type `Bob` in field located `accessibilityId(username)` and keep keyboard opened
+----
+
 === Clear field
 
 ==== *_Info_*
