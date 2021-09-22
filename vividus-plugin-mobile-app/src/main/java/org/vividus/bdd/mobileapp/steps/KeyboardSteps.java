@@ -78,7 +78,8 @@ public class KeyboardSteps
     @When("I type `$text` in field located `$locator` and keep keyboard opened")
     public void typeTextInFieldAndKeepKeyboard(String text, Locator locator)
     {
-        typeText(text, locator, false);
+        baseValidations.assertElementExists("The element to type text", locator)
+                .ifPresent(e -> keyboardActions.typeTextAndHide(e, text));
     }
 
     /**
@@ -95,7 +96,8 @@ public class KeyboardSteps
     @When("I type `$text` in field located `$locator`")
     public void typeTextInField(String text, Locator locator)
     {
-        typeText(text, locator, true);
+        baseValidations.assertElementExists("The element to type text", locator)
+                .ifPresent(e -> keyboardActions.typeText(e, text));
     }
 
     /**
@@ -176,12 +178,6 @@ public class KeyboardSteps
                                   .map(mapper)
                                   .collect(Collectors.toList());
         pressKeys(toType);
-    }
-
-    private void typeText(String text, Locator locator, boolean hideKeyboard)
-    {
-        baseValidations.assertElementExists("The element to type text", locator)
-                .ifPresent(e -> keyboardActions.typeText(e, text, hideKeyboard));
     }
 
     private void pressKeys(List<String> keys)
