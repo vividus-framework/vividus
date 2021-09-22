@@ -88,7 +88,7 @@ class KeyboardActionsTests
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
         when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
 
-        keyboardActions.typeText(element, TEXT);
+        keyboardActions.typeTextAndHide(element, TEXT);
 
         verify(element).sendKeys(TEXT);
         verify(hidesKeyboard).hideKeyboard();
@@ -100,7 +100,7 @@ class KeyboardActionsTests
     {
         init(false);
 
-        keyboardActions.typeTextAndHide(element, TEXT);
+        keyboardActions.typeText(element, TEXT);
 
         verify(element).sendKeys(TEXT);
         verifyNoInteractions(hidesKeyboard);
@@ -135,7 +135,7 @@ class KeyboardActionsTests
         when(webDriverProvider.get()).thenReturn(context);
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
 
-        keyboardActions.typeText(element, TEXT);
+        keyboardActions.typeTextAndHide(element, TEXT);
 
         verify(touchActions).tap(returnButton);
         verify(element).sendKeys(TEXT);
@@ -154,7 +154,7 @@ class KeyboardActionsTests
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> keyboardActions.typeText(element, TEXT));
+            () -> keyboardActions.typeTextAndHide(element, TEXT));
         assertEquals("Unable to find a button to close the keyboard", exception.getMessage());
     }
 
@@ -203,7 +203,7 @@ class KeyboardActionsTests
         when(webDriverProvider.get()).thenReturn(context);
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
 
-        keyboardActions.typeText(element, TEXT);
+        keyboardActions.typeTextAndHide(element, TEXT);
 
         verify(touchActions).tap(returnButton);
         verify(element).sendKeys(TEXT);
