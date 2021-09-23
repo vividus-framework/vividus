@@ -121,8 +121,7 @@ When I initialize the story variable `text` with value `#{generate(regexify '[a-
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `xpath(<menuInputXpath>)`
 When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityId>)` and keep keyboard opened
-When I save `<textFieldValueAttribute>` attribute value of element located `accessibilityId(<nameInputAccessibilityId>)`
- to scenarion variable `typedText`
+When I save `<textFieldValueAttribute>` attribute value of element located `accessibilityId(<nameInputAccessibilityId>)` to scenario variable `typedText`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `0`
 Then `${text}` is equal to `${typedText}`
 
