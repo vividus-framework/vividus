@@ -116,6 +116,15 @@ When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityI
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
+Scenario: Verify step: 'When I clear field located `$locator`' and Appium XPath Locator
+When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
+Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
+
+!-- There should be no error when trying to clear an empty field
+When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
+Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
+
+
 Scenario: Verify step: 'When I type `$text` in field located `$locator` and keep keyboard opened'
 Meta:
     @requirementId 1927
@@ -131,15 +140,6 @@ Then `${text}` is equal to `${typedText}`
 Scenario: Verify dynamic variable: 'clipboard-text'
 When I tap on element located `accessibilityId(CopyTextToClipboardButton)`
 Then `${clipboard-text}` is equal to `${text}`
-
-
-Scenario: Verify step: 'When I clear field located `$locator`' and Appium XPath Locator
-When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
-Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
-
-!-- There should be no error when trying to clear an empty field
-When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
-Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
 
 
 Scenario: Verify step: 'When I wait until element located `$locator` disappears'
