@@ -117,6 +117,8 @@ Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
 Scenario: Verify step: 'When I type `$text` in field located `$locator` and keep keyboard opened'
+Meta:
+    @requirementId 1927
 When I initialize the story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `xpath(<menuInputXpath>)`
