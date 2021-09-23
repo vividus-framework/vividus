@@ -19,7 +19,6 @@ package org.vividus.mobileapp.action;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
@@ -68,10 +67,21 @@ public class KeyboardActions
      * @param element element to type text, must not be {@code null}
      * @param text text to type into the element, must not be {@code null}
      */
+    public void typeTextAndHide(WebElement element, String text)
+    {
+        typeText(element, text);
+        hideKeyboard(element);
+    }
+
+    /**
+     * Type <b>text</b> into the <b>element</b>
+     * @param element element to type text, must not be {@code null}
+     * @param text text to type into the element, must not be {@code null}
+     */
     public void typeText(WebElement element, String text)
     {
         LOGGER.atInfo().addArgument(text).log("Typing text '{}' into the field");
-        performWithHideKeyboard(element, e -> e.sendKeys(text));
+        element.sendKeys(text);
     }
 
     /**
@@ -86,13 +96,12 @@ public class KeyboardActions
      */
     public void clearText(WebElement element)
     {
-        performWithHideKeyboard(element, WebElement::clear);
+        element.clear();
+        hideKeyboard(element);
     }
 
-    private void performWithHideKeyboard(WebElement webElement, Consumer<WebElement> performOnElement)
+    private void hideKeyboard(WebElement webElement)
     {
-        performOnElement.accept(webElement);
-
         // 1. https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
         // 2. The keyboard is not shown in some cases: e.g. when trying to clear an empty field. So we need to check
         // whether the keyboard is shown at first

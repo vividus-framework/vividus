@@ -18,3 +18,4 @@
 |scrollViewXpath            |//XCUIElementTypeScrollView                            |
 |carouselViewXpath          |//XCUIElementTypeButton[@name='Carousel']              |
 |swipeableAreaXpath         |(//XCUIElementTypeScrollView)[2]                       |
+|textFieldValueAttribute    |value                                                  |

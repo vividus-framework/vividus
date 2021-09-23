@@ -53,6 +53,8 @@ public class KeyboardSteps
         entry("8", AndroidKey.DIGIT_8.toString()),
         entry("9", AndroidKey.DIGIT_9.toString()));
 
+    private static final String ELEMENT_TO_TYPE_TEXT = "The element to type text";
+
     private final KeyboardActions keyboardActions;
     private final IBaseValidations baseValidations;
     private final GenericWebDriverManager genericWebDriverManager;
@@ -72,6 +74,18 @@ public class KeyboardSteps
 
     /**
      * Type <b>text</b> into the <b>element</b>
+     * @param text text to type into the element
+     * @param locator locator to find an element
+     */
+    @When("I type `$text` in field located `$locator` and keep keyboard opened")
+    public void typeTextInFieldAndKeepKeyboard(String text, Locator locator)
+    {
+        baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)
+                .ifPresent(e -> keyboardActions.typeText(e, text));
+    }
+
+    /**
+     * Type <b>text</b> into the <b>element</b>
      * <br>
      * The atomic actions performed are:
      * <ol>
@@ -84,8 +98,8 @@ public class KeyboardSteps
     @When("I type `$text` in field located `$locator`")
     public void typeTextInField(String text, Locator locator)
     {
-        baseValidations.assertElementExists("The element to type text", locator)
-                .ifPresent(e -> keyboardActions.typeText(e, text));
+        baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)
+                .ifPresent(e -> keyboardActions.typeTextAndHide(e, text));
     }
 
     /**

@@ -79,6 +79,15 @@ class KeyboardStepsTests
         WebElement element = mock(WebElement.class);
         when(baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)).thenReturn(Optional.of(element));
         keyboardSteps.typeTextInField(TEXT, locator);
+        verify(keyboardActions).typeTextAndHide(element, TEXT);
+    }
+
+    @Test
+    void testTypeTextWithKeepingKeyboardInField()
+    {
+        WebElement element = mock(WebElement.class);
+        when(baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)).thenReturn(Optional.of(element));
+        keyboardSteps.typeTextInFieldAndKeepKeyboard(TEXT, locator);
         verify(keyboardActions).typeText(element, TEXT);
     }
 
