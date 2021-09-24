@@ -116,6 +116,11 @@ When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityI
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
+Scenario: Verify dynamic variable: 'clipboard-text'
+When I tap on element located `accessibilityId(CopyTextToClipboardButton)`
+Then `${clipboard-text}` is equal to `${text}`
+
+
 Scenario: Verify step: 'When I clear field located `$locator`' and Appium XPath Locator
 When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
 Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
@@ -128,18 +133,16 @@ Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
 Scenario: Verify step: 'When I type `$text` in field located `$locator` and keep keyboard opened'
 Meta:
     @requirementId 1927
+    @targetPlatform ios
+!-- Typing on android emulator doesn't shows a keyboard.
 When I initialize the story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
-When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
-When I tap on element located `xpath(<menuInputXpath>)`
 When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityId>)` and keep keyboard opened
 When I save `<textFieldValueAttribute>` attribute value of element located `accessibilityId(<nameInputAccessibilityId>)` to scenario variable `typedText`
-Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `0`
+Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
+Then number of elements found by `<keyboardLocator>` is equal to `1`
 Then `${text}` is equal to `${typedText}`
-
-
-Scenario: Verify dynamic variable: 'clipboard-text'
-When I tap on element located `accessibilityId(CopyTextToClipboardButton)`
-Then `${clipboard-text}` is equal to `${text}`
+When I tap on element located `accessibilityId(Return)`
+Then number of elements found by `<keyboardLocator>` is equal to `0`
 
 
 Scenario: Verify step: 'When I wait until element located `$locator` disappears'
