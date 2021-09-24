@@ -74,5 +74,5 @@ specified database using SQL query.
 .Generate ExampleTable using data from H2 database
 [source,gherkin]
 ----
-{transformer=FROM_DB, dbKey=testh2db, sqlQuery=SELECT * FROM students, nullReplacement=""}
+{transformer=FROM_DB, dbKey=testh2db, sqlQuery=SELECT * FROM students, nullReplacement= }
 ----
