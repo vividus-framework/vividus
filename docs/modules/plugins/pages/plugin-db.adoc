@@ -53,24 +53,25 @@ NOTE: The table transformers properties marked with *bold* are mandatory.
 
 === FROM_DB
 
-`FROM_DB` transformer generates table from DB via SQL queries.
+`FROM_DB` transformer generates table based on the data retirved from the
+specified database using SQL query.
 
 [cols="1,3", options="header"]
 |===
 |Parameter
 |Description
 
-|[subs=+quotes]`*dbKey*`
+|`*dbKey*`
 |Database key
 
 |`*sqlQuery*`
-|SQL select query to get data
+|SQL `SELECT` query to retrieve the data from DB
 
 |`nullReplacement`
-|Value to replace NULLs in result data set
+|The value to put in the generating table instead of `NULL`-s contained in the DB data set
 |===
 
-.The transformer based on the default configuration
+.Generate ExampleTable using data from H2 database
 [source,gherkin]
 ----
 {transformer=FROM_DB, dbKey=testh2db, sqlQuery=SELECT * FROM students, nullReplacement=""}
