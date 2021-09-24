@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -48,15 +47,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.db.DataSourceManager;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
-import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
 
@@ -66,17 +64,16 @@ public class DatabaseSteps
     private final IBddVariableContext bddVariableContext;
     private final IAttachmentPublisher attachmentPublisher;
     private final ISoftAssert softAssert;
+    private final DataSourceManager dataSourceManager;
     private HashFunction hashFunction;
-    private PropertyMappedCollection<DriverManagerDataSource> dataSources;
     private Duration dbQueryTimeout;
     private DuplicateKeysStrategy duplicateKeysStrategy;
     private int diffLimit;
 
-    private final Map<String, JdbcTemplate> jdbcTemplates = new ConcurrentHashMap<>();
-
-    public DatabaseSteps(IBddVariableContext bddVariableContext, IAttachmentPublisher attachmentPublisher,
-            ISoftAssert softAssert)
+    public DatabaseSteps(DataSourceManager dataSourceManager, IBddVariableContext bddVariableContext,
+                         IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
     {
+        this.dataSourceManager = dataSourceManager;
         this.bddVariableContext = bddVariableContext;
         this.attachmentPublisher = attachmentPublisher;
         this.softAssert = softAssert;
@@ -99,7 +96,7 @@ public class DatabaseSteps
             String sqlState)
     {
         String actualSqlState = "00000";
-        try (Connection connection = getDataSourceByKey(dbKey).getConnection(username, password))
+        try (Connection connection = dataSourceManager.getDataSource(dbKey).getConnection(username, password))
         {
             // empty statement
         }
@@ -134,7 +131,7 @@ public class DatabaseSteps
     public void executeSql(String sqlQuery, String dbKey, Set<VariableScope> scopes, String variableName)
     {
         logSqlQuery(sqlQuery);
-        List<Map<String, Object>> result = getJdbcTemplate(dbKey).queryForList(sqlQuery);
+        List<Map<String, Object>> result = dataSourceManager.getJdbcTemplate(dbKey).queryForList(sqlQuery);
         bddVariableContext.putVariable(scopes, variableName, result);
     }
 
@@ -190,7 +187,7 @@ public class DatabaseSteps
         logSqlQuery(sqlQuery);
         try
         {
-            int numberOfAffectedRows = getJdbcTemplate(dbKey).update(sqlQuery);
+            int numberOfAffectedRows = dataSourceManager.getJdbcTemplate(dbKey).update(sqlQuery);
             LOGGER.info("The number of affected rows: {}", numberOfAffectedRows);
         }
         catch (DataIntegrityViolationException e)
@@ -245,8 +242,8 @@ public class DatabaseSteps
             String rightSqlQuery, String rightDbKey, Set<String> keys)
             throws InterruptedException, ExecutionException, TimeoutException
     {
-        JdbcTemplate leftJdbcTemplate = getJdbcTemplate(leftDbKey);
-        JdbcTemplate rightJdbcTemplate = getJdbcTemplate(rightDbKey);
+        JdbcTemplate leftJdbcTemplate = dataSourceManager.getJdbcTemplate(leftDbKey);
+        JdbcTemplate rightJdbcTemplate = dataSourceManager.getJdbcTemplate(rightDbKey);
         DataSourceStatistics dataSourceStatistics = new DataSourceStatistics(leftJdbcTemplate, rightJdbcTemplate);
         QueryStatistic left = dataSourceStatistics.getLeft();
         left.setQuery(leftSqlQuery);
@@ -289,7 +286,7 @@ public class DatabaseSteps
     public void waitForDataAppearance(Duration duration, int retryTimes, String leftSqlQuery, String leftDbKey,
             DataSetComparisonRule comparisonRule, List<Map<String, String>> rightTable)
     {
-        JdbcTemplate leftJdbcTemplate = getJdbcTemplate(leftDbKey);
+        JdbcTemplate leftJdbcTemplate = dataSourceManager.getJdbcTemplate(leftDbKey);
         DataSourceStatistics statistic = new DataSourceStatistics(leftJdbcTemplate);
         statistic.getLeft().setQuery(leftSqlQuery);
         ListMultimap<Object, Map<String, Object>> rightData = hashMap(Set.of(), rightTable);
@@ -350,7 +347,7 @@ public class DatabaseSteps
     public void compareData(List<Map<String, Object>> leftData, Set<String> keys, String leftDbKey,
             DataSetComparisonRule comparisonRule, List<Map<String, String>> rightTable)
     {
-        JdbcTemplate leftJdbcTemplate = getJdbcTemplate(leftDbKey);
+        JdbcTemplate leftJdbcTemplate = dataSourceManager.getJdbcTemplate(leftDbKey);
         DataSourceStatistics statistics = new DataSourceStatistics(leftJdbcTemplate);
         statistics.getLeft().setRowsQuantity(leftData.size());
         ListMultimap<Object, Map<String, Object>> left = hashMap(keys,
@@ -443,21 +440,6 @@ public class DatabaseSteps
     private void logSqlQuery(String sqlQuery)
     {
         LOGGER.info("Executing SQL query: {}", sqlQuery);
-    }
-
-    private JdbcTemplate getJdbcTemplate(String dbKey)
-    {
-        return jdbcTemplates.computeIfAbsent(dbKey, key -> new JdbcTemplate(getDataSourceByKey(key)));
-    }
-
-    private DriverManagerDataSource getDataSourceByKey(String key)
-    {
-        return dataSources.get(key, "Database connection with key '%s' is not configured in properties", key);
-    }
-
-    public void setDataSources(PropertyMappedCollection<DriverManagerDataSource> dataSources)
-    {
-        this.dataSources = dataSources;
     }
 
     public void setDbQueryTimeout(Duration dbQueryTimeout)

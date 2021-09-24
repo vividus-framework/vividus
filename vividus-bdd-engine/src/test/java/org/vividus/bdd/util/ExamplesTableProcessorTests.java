@@ -19,6 +19,7 @@ package org.vividus.bdd.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -50,10 +51,15 @@ class ExamplesTableProcessorTests
 
     static Stream<Arguments> tableToBuildSource()
     {
+        List<String> row = new ArrayList<>();
+        row.add(null);
+        row.add(ZERO);
         return Stream.of(
             Arguments.of(TABLE, List.of(VALUES1, VALUES2)),
             Arguments.of("|key1|key2|\n!4!3!\n!1|!0!", List.of(VALUES1, List.of("1|", ZERO))),
-            Arguments.of("|key1|key2|\n#11|#12!#\n#13?#14$#", List.of(List.of("11|", "12!"), List.of("13?", "14$"))));
+            Arguments.of("|key1|key2|\n#11|#12!#\n#13?#14$#", List.of(List.of("11|", "12!"), List.of("13?", "14$"))),
+            Arguments.of("|key1|key2|\n|null|0|", List.of(row))
+        );
     }
 
     @Test

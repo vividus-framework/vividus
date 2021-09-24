@@ -9,3 +9,11 @@ SELECT * FROM csv-with-semicolon-and-duplicates
 ` executed against `csv-data` contains data from:
 |country|capital|data                                                             |
 |Belarus|Minsk  |{"sheet": [{"cols": 1, "name": "A", "rows": 2}], "name": "tests"}|
+
+Scenario: Verify FROM_DB transformer
+Meta:
+    @feature table-transformers
+Then `<name>` is equal to `lipstick`
+Then `<description>` is equal to `Color with the power to transform your lips`
+Examples:
+{transformer=FROM_DB, dbKey=testh2db, sqlQuery=SELECT name\,description FROM cosmetics}
