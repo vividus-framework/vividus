@@ -70,7 +70,13 @@ class VariableResolverTests
         assertEquals(expected, convert(valueToResolve));
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "${varWithObject}",
+            "\n${varWithObject}",
+            "${varWithObject}\r\n",
+            "\n\n\n${varWithObject}\r\n\r\n"
+    })
     void shouldResolveVariableAsObject()
     {
         Object object = new Object();

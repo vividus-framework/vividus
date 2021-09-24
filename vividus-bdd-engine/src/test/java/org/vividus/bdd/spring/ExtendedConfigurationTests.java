@@ -61,9 +61,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
-import org.vividus.bdd.steps.ExpressionAdaptor;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
-import org.vividus.bdd.steps.VariableResolver;
+import org.vividus.bdd.steps.PlaceholderResolver;
 
 @ExtendWith(MockitoExtension.class)
 class ExtendedConfigurationTests
@@ -71,8 +70,7 @@ class ExtendedConfigurationTests
     private static final String SEPARATOR = "|";
 
     @Mock private IPathFinder pathFinder;
-    @Mock private VariableResolver variableResolver;
-    @Mock private ExpressionAdaptor expressionAdaptor;
+    @Mock private PlaceholderResolver placeholderResolver;
 
     @InjectMocks
     @Spy
@@ -116,7 +114,7 @@ class ExtendedConfigurationTests
             MockedConstruction<ParameterConvertersDecorator> ignoredDecorator = mockConstruction(
                 ParameterConvertersDecorator.class, (mock, context) -> {
                     assertEquals(1, context.getCount());
-                    assertEquals(List.of(configuration, variableResolver, expressionAdaptor), context.arguments());
+                    assertEquals(List.of(configuration, placeholderResolver), context.arguments());
                     constructedMocks.put(ParameterConvertersDecorator.class, mock);
 
                     when(mock.addConverters(parameterConverterList)).thenReturn(mock);

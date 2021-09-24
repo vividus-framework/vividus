@@ -41,6 +41,8 @@ import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.io.StoryLoader;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.jbehave.core.steps.ParameterConverters.NumberConverter;
 import org.jbehave.core.steps.ParameterConverters.StringConverter;
@@ -51,6 +53,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.vividus.bdd.converter.ResolvingPlaceholdersExamplesTableConverter;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
@@ -72,7 +75,12 @@ class ParameterConvertersDecoratorTests
         when(configuration.stepMonitor()).thenReturn(stepMonitor);
         when(configuration.keywords()).thenReturn(new Keywords());
         when(configuration.storyLoader()).thenReturn(storyLoader);
-        parameterConverters = new ParameterConvertersDecorator(configuration, variableResolver, expressionAdaptor);
+        var placeholderResolver = new PlaceholderResolver(variableResolver, expressionAdaptor);
+        parameterConverters = new ParameterConvertersDecorator(configuration, placeholderResolver);
+        var examplesTableFactory = new ExamplesTableFactory(storyLoader, new TableTransformers());
+        var examplesTableConverter = new ResolvingPlaceholdersExamplesTableConverter(examplesTableFactory,
+                placeholderResolver);
+        parameterConverters.addConverters(examplesTableConverter);
     }
 
     @Test
