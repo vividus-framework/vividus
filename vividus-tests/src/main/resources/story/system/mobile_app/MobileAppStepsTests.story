@@ -116,6 +116,11 @@ When I type `${text}` in field located `accessibilityId(<nameInputAccessibilityI
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
+Scenario: Verify dynamic variable: 'clipboard-text'
+When I tap on element located `accessibilityId(CopyTextToClipboardButton)`
+Then `${clipboard-text}` is equal to `${text}`
+
+
 Scenario: Verify step: 'When I clear field located `$locator`' and Appium XPath Locator
 When I clear field located `accessibilityId(<nameInputAccessibilityId>)`
 Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
@@ -138,11 +143,6 @@ Then number of elements found by `<keyboardLocator>` is equal to `1`
 Then `${text}` is equal to `${typedText}`
 When I tap on element located `accessibilityId(Return)`
 Then number of elements found by `<keyboardLocator>` is equal to `0`
-
-
-Scenario: Verify dynamic variable: 'clipboard-text'
-When I tap on element located `accessibilityId(CopyTextToClipboardButton)`
-Then `${clipboard-text}` is equal to `${text}`
 
 
 Scenario: Verify step: 'When I wait until element located `$locator` disappears'
