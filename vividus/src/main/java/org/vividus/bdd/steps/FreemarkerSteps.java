@@ -16,18 +16,22 @@
 
 package org.vividus.bdd.steps;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toCollection;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jbehave.core.annotations.Given;
-import org.jbehave.core.model.ExamplesTable;
 import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.util.MapUtils;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.util.freemarker.FreemarkerProcessor;
 
@@ -95,14 +99,21 @@ public class FreemarkerSteps
     @Given("I initialize the $scopes variable `$variableName` using template `$templatePath` with parameters:"
             + "$templateParameters")
     public void initVariableUsingTemplate(Set<VariableScope> scopes, String variableName, String templatePath,
-            ExamplesTable templateParameters) throws IOException, TemplateException
+            List<Map<String, String>> templateParameters) throws IOException, TemplateException
     {
         Map<String, Object> dataModel = new HashMap<>();
         if (resolveBddVariables)
         {
             dataModel.putAll(bddVariableContext.getVariables());
         }
-        dataModel.putAll(MapUtils.convertExamplesTableToMap(templateParameters));
+        Map<String, List<String>> inputModel = templateParameters.stream()
+                .map(Map::entrySet)
+                .flatMap(Set::stream)
+                .collect(groupingBy(Entry::getKey, HashMap::new,
+                        mapping(Entry::getValue, toCollection(ArrayList::new)))
+                );
+
+        dataModel.putAll(inputModel);
 
         Map<String, Object> parameters = new HashMap<>();
         String parametersKey = "parameters";

@@ -16,10 +16,15 @@
 
 package org.vividus.bdd.transformer;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -28,8 +33,8 @@ import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.util.ExamplesTableProcessor;
-import org.vividus.bdd.util.MapUtils;
 
 public enum JoinMode
 {
@@ -38,11 +43,14 @@ public enum JoinMode
         @Override
         protected String join(ExamplesTable table, TableProperties properties)
         {
-            Map<String, List<String>> tableMap = MapUtils.convertExamplesTableToMap(table);
-            List<List<String>> tableData = tableMap.values().stream()
-                    .map(column -> String.join(DELIMITER, column))
-                    .map(List::of)
-                    .collect(Collectors.toList());
+            Map<String, String> tableMap = table.getRowsAsParameters(true).stream()
+                    .map(Parameters::values)
+                    .map(Map::entrySet)
+                    .flatMap(Set::stream)
+                    .collect(groupingBy(Entry::getKey, LinkedHashMap::new,
+                            mapping(Entry::getValue, Collectors.joining(DELIMITER)))
+                    );
+            List<List<String>> tableData = tableMap.values().stream().map(List::of).collect(Collectors.toList());
 
             return ExamplesTableProcessor.buildExamplesTableFromColumns(tableMap.keySet(), tableData, properties);
         }

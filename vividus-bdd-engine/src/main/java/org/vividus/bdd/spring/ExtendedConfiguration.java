@@ -42,15 +42,14 @@ import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
 import org.vividus.bdd.IPathFinder;
 import org.vividus.bdd.batch.BatchResourceConfiguration;
-import org.vividus.bdd.steps.ExpressionAdaptor;
+import org.vividus.bdd.converter.ResolvingPlaceholdersExamplesTableConverter;
 import org.vividus.bdd.steps.ParameterConvertersDecorator;
-import org.vividus.bdd.steps.VariableResolver;
+import org.vividus.bdd.steps.PlaceholderResolver;
 
 public class ExtendedConfiguration extends Configuration
 {
     private IPathFinder pathFinder;
-    private VariableResolver variableResolver;
-    private ExpressionAdaptor expressionAdaptor;
+    private PlaceholderResolver placeholderResolver;
     private List<ParameterConverter<?, ?>> customConverters;
     private List<StepMonitor> stepMonitors;
     private Map<String, TableTransformer> customTableTransformers;
@@ -65,8 +64,10 @@ public class ExtendedConfiguration extends Configuration
         initKeywords();
         initCompositePaths();
         useParameterControls(parameterControls);
-        useParameterConverters(new ParameterConvertersDecorator(this, variableResolver, expressionAdaptor)
+        useParameterConverters(new ParameterConvertersDecorator(this, placeholderResolver)
                 .addConverters(customConverters));
+        parameterConverters().addConverters(
+                new ResolvingPlaceholdersExamplesTableConverter(examplesTableFactory(), placeholderResolver));
         useStoryParser(new RegexStoryParser(examplesTableFactory()));
         TableTransformers transformers = tableTransformers();
         customTableTransformers.forEach(transformers::useTransformer);
@@ -129,9 +130,9 @@ public class ExtendedConfiguration extends Configuration
         this.compositePaths = compositePaths;
     }
 
-    public void setVariableResolver(VariableResolver variableResolver)
+    public void setPlaceholderResolver(PlaceholderResolver placeholderResolver)
     {
-        this.variableResolver = variableResolver;
+        this.placeholderResolver = placeholderResolver;
     }
 
     @Inject
@@ -144,11 +145,6 @@ public class ExtendedConfiguration extends Configuration
     public void setCustomTableTransformers(Map<String, TableTransformer> customTableTransformers)
     {
         this.customTableTransformers = customTableTransformers;
-    }
-
-    public void setExpressionAdaptor(ExpressionAdaptor expressionAdaptor)
-    {
-        this.expressionAdaptor = expressionAdaptor;
     }
 
     public void setStoryControls(StoryControls storyControls)

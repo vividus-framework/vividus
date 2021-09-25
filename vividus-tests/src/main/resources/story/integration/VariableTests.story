@@ -86,6 +86,25 @@ Given I initialize the scenario variable `template-result` using template `/data
 /data/table-with-scenario-level-variables.table
 Then `${template-result}` is equal to `passed: variable is resolved`
 
+Scenario: Verify that variable can be used as an input for the step generating data from Freemarker template
+When I initialize scenario variable `table` with values:
+|country     |capital   |
+|Belarus     |Minsk     |
+|Netherlands |Amsterdam |
+Given I initialize the scenario variable `countries-json` using template `/data/complex-template.ftl` with parameters:
+${table}
+Then JSON element from `${countries-json}` by JSON path `$` is equal to `
+[
+    {
+        "country": "Belarus",
+        "capital": "Minsk"
+    },
+    {
+        "country": "Netherlands",
+        "capital": "Amsterdam"
+    }
+]`
+
 Scenario: Verify that variables of different nesting step-levels are cleaned up only for the current level
 Meta:
     @issueId 763

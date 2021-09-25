@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,34 +51,34 @@ import freemarker.template.TemplateExceptionHandler;
 class FreemarkerStepsTests
 {
     private static final String VARIABLE_NAME = "name";
-    private static final String TEMPLATE_PATH = "org/vividus/bdd/steps/";
     private static final String TEMPLATE_FILE_NAME = "simple.ftl";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
-    private static final String CONTEX_KEY = "context-key";
-    private static final String CONTEX_VALUE = "context-value";
     private static final String TABLE_KEY = "table-key";
     private static final String TABLE_VALUE = "table-value";
     private static final String PARAMETERS = "parameters";
-    private static final ExamplesTable TABLE = new ExamplesTable(String.format("|%s|%n|%s|", TABLE_KEY, TABLE_VALUE));
+    private static final String PARAM = "param";
+    private static final String COMING = "coming";
+    private static final List<Map<String, String>> TEMPLATE_PARAMETERS = List.of(Map.of(TABLE_KEY, TABLE_VALUE));
 
     @Mock private IBddVariableContext bddVariableContext;
 
     static Stream<Arguments> dataProvider()
     {
         return Stream.of(
-            arguments(new ExamplesTable("|param|\n|coming|"), TEMPLATE_FILE_NAME),
-            arguments(new ExamplesTable("|param|parameters|\n|coming|1|"), "parameters.ftl")
+            arguments(List.of(Map.of(PARAM, COMING)), TEMPLATE_FILE_NAME),
+            arguments(List.of(Map.of(PARAM, COMING, PARAMETERS, "1")), "parameters.ftl")
         );
     }
 
     @ParameterizedTest
     @MethodSource("dataProvider")
-    void shouldInitVariableUsingTemplate(ExamplesTable table, String template) throws IOException, TemplateException
+    void shouldInitVariableUsingTemplate(List<Map<String, String>> templateParameters, String template)
+            throws IOException, TemplateException
     {
         ExpressionAdaptor adaptor = new ExpressionAdaptor();
         adaptor.setProcessors(List.of(new TestExpressionProcessor()));
         FreemarkerSteps steps = new FreemarkerSteps(true, createConfiguration(), bddVariableContext, adaptor);
-        steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, TEMPLATE_PATH + template, table);
+        steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, "org/vividus/bdd/steps/" + template, templateParameters);
         verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, "Winter is coming\n");
     }
 
@@ -88,18 +87,19 @@ class FreemarkerStepsTests
     {
         try (MockedConstruction<FreemarkerProcessor> mockedProcessor = mockConstruction(FreemarkerProcessor.class))
         {
-            when(bddVariableContext.getVariables()).thenReturn(Map.of(CONTEX_KEY, CONTEX_VALUE));
+            String contextKey = "context-key";
+            String contextValue = "context-value";
+            when(bddVariableContext.getVariables()).thenReturn(Map.of(contextKey, contextValue));
 
             FreemarkerSteps steps = new FreemarkerSteps(true, createConfiguration(), bddVariableContext,
                     new ExpressionAdaptor());
 
-            steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, TEMPLATE_FILE_NAME, TABLE);
+            steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, TEMPLATE_FILE_NAME, TEMPLATE_PARAMETERS);
 
             FreemarkerProcessor processor = mockedProcessor.constructed().get(0);
             Map<String, Object> parameters = Map.of(
-                TABLE_KEY, List.of(TABLE_VALUE),
-                CONTEX_KEY, CONTEX_VALUE,
-                PARAMETERS, Map.of(CONTEX_KEY, CONTEX_VALUE, TABLE_KEY, List.of(TABLE_VALUE))
+                TABLE_KEY, List.of(TABLE_VALUE), contextKey, contextValue,
+                PARAMETERS, Map.of(contextKey, contextValue, TABLE_KEY, List.of(TABLE_VALUE))
             );
             verify(processor).process(TEMPLATE_FILE_NAME, parameters, StandardCharsets.UTF_8);
         }
@@ -113,7 +113,7 @@ class FreemarkerStepsTests
             FreemarkerSteps steps = new FreemarkerSteps(false, createConfiguration(), bddVariableContext,
                     new ExpressionAdaptor());
 
-            steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, TEMPLATE_FILE_NAME, TABLE);
+            steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, TEMPLATE_FILE_NAME, TEMPLATE_PARAMETERS);
 
             FreemarkerProcessor processor = mockedProcessor.constructed().get(0);
             Map<String, Object> parameters = Map.of(

@@ -19,6 +19,7 @@ package org.vividus.bdd.steps;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import com.google.common.base.CaseFormat;
 
@@ -29,6 +30,7 @@ import org.vividus.bdd.variable.DynamicVariable;
 public class VariableResolver
 {
     private static final String VARIABLE_START_MARKER = "${";
+    private static final String LINE_BREAKS = "[\r\n]*";
 
     private final IBddVariableContext bddVariableContext;
     private final Map<String, DynamicVariable> dynamicVariables;
@@ -137,7 +139,7 @@ public class VariableResolver
             return target;
         }
         String variablePlaceholder = VARIABLE_START_MARKER + variableKey + "}";
-        if (variablePlaceholder.equals(target))
+        if (target.matches(LINE_BREAKS + Pattern.quote(variablePlaceholder) + LINE_BREAKS))
         {
             return variableValue;
         }
