@@ -71,6 +71,12 @@ Examples:
 /data/for-filtering-transformer.table
 
 
+Scenario: Verify FILTERING transformer with byColumnNames parameter loaded from variable
+Then `<column3>` is equal to `C`
+Examples:
+${filtered-examples-table}
+
+
 Scenario: Verify RESOLVING_EXPRESSIONS_EAGERLY transformer
 When I initialize story variable `table` with values:
 /data/with-replacing-transformer.table

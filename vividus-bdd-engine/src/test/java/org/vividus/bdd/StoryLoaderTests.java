@@ -37,12 +37,10 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.bdd.examples.IExamplesTableLoader;
 import org.vividus.bdd.resource.ResourceLoadException;
-import org.vividus.bdd.steps.VariableResolver;
 
 @ExtendWith(MockitoExtension.class)
 class StoryLoaderTests
 {
-    @Mock private VariableResolver variableResolver;
     @Mock private ResourcePatternResolver resourcePatternResolver;
     @Mock private IExamplesTableLoader examplesTableLoader;
     @InjectMocks private StoryLoader storyLoader;
@@ -59,12 +57,10 @@ class StoryLoaderTests
     @Test
     void testLoadResourceAsText()
     {
-        var preProcessedStoryPath = "${unit}test.story";
         var storyPath = "unittest.story";
-        when(variableResolver.resolve(preProcessedStoryPath)).thenReturn(storyPath);
         Resource resource = resourceLoader.getResource(storyPath);
         when(resourcePatternResolver.getResource(storyPath)).thenReturn(resource);
-        String actual = storyLoader.loadResourceAsText(preProcessedStoryPath);
+        String actual = storyLoader.loadResourceAsText(storyPath);
         assertEquals("unittest", actual.trim());
     }
 
@@ -72,7 +68,6 @@ class StoryLoaderTests
     void shouldThrowResourceLoadException() throws IOException
     {
         var resourcePath = "resourcePath";
-        when(variableResolver.resolve(resourcePath)).thenReturn(resourcePath);
         Resource resource = mock(Resource.class);
         when(resourcePatternResolver.getResource(resourcePath)).thenReturn(resource);
         ResourceLoadException ioException = new ResourceLoadException("Resource IOException");
@@ -96,7 +91,6 @@ class StoryLoaderTests
     {
         var tablePath = "unittest.table";
         var tableContent = "tableContent";
-        when(variableResolver.resolve(tablePath)).thenReturn(tablePath);
         when(examplesTableLoader.loadExamplesTable(tablePath)).thenReturn(tableContent);
         String actual = storyLoader.loadResourceAsText(tablePath);
         assertEquals(tableContent, actual);
