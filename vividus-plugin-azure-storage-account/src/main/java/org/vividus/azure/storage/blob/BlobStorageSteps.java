@@ -135,7 +135,7 @@ public class BlobStorageSteps
             Set<VariableScope> scopes, String variableName) throws IOException
     {
         String tempFilePath = ResourceUtils.createTempFile(baseFileName).toAbsolutePath().toString();
-        createBlobClient(blobName, containerName, storageAccountKey).downloadToFile(tempFilePath);
+        createBlobClient(blobName, containerName, storageAccountKey).downloadToFile(tempFilePath, true);
         bddVariableContext.putVariable(scopes, variableName, tempFilePath);
     }
 

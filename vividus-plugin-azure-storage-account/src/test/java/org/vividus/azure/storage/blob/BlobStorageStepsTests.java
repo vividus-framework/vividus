@@ -114,7 +114,7 @@ class BlobStorageStepsTests
             String baseFileName = "blobFile";
             BlobClient blobClient = mockBlobClient(client);
             steps.downloadBlobToFile(BLOB, CONTAINER, KEY, baseFileName, SCOPES, VARIABLE);
-            verify(blobClient).downloadToFile(argThat(filename -> filename.contains(baseFileName)));
+            verify(blobClient).downloadToFile(argThat(filename -> filename.contains(baseFileName)), eq(true));
             verify(bddVariableContext).putVariable(eq(SCOPES), eq(VARIABLE),
                     argThat(filename -> ((String) filename).contains(baseFileName)));
         });
