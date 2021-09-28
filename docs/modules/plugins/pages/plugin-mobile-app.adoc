@@ -679,6 +679,25 @@ When I press $key key
 When I press Home key
 ----
 
+=== Long press key
+
+Performs long press of the https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android key]
+
+WARNING: Only Android supported
+
+[source,gherkin]
+----
+When I long press $key key
+----
+
+. `$key` - The key to press
+
+.Go to home
+[source,gherkin]
+----
+When I long press Home key
+----
+
 === Press keys
 
 Presses a sequence of https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
