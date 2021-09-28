@@ -109,7 +109,7 @@ The file represents a collection of JSON elements describing known issues.
  {
     "VVD-1": { <1>
         "type": "Internal",<2>
-        "assertionPattern": "Expected: a value equal to 200, Actual: \\[404\\]" <3>
+        "assertionPattern": "Expected: a value equal to 200, Actual: \\[404\\]", <3>
         "storyPattern": "Validate the Math", <4>
         "scenarioPattern": "Validate equality", <5>
         "stepPattern": "Then `1` is = `2`.+", <6>
