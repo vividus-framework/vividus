@@ -54,6 +54,8 @@ import io.appium.java_client.android.nativekey.PressesKey;
 @ExtendWith(MockitoExtension.class)
 class KeyboardStepsTests
 {
+    private static final String KEYCODE = "keycode";
+    private static final String HOME = "Home";
     private static final String TEXT = "text";
     private static final String ELEMENT_TO_TYPE_TEXT = "The element to type text";
     private static final String NAME = "name";
@@ -140,7 +142,7 @@ class KeyboardStepsTests
 
     private void performPressdKeyTest()
     {
-        String key = "Home";
+        String key = HOME;
 
         keyboardSteps.pressKey(key);
 
@@ -186,7 +188,7 @@ class KeyboardStepsTests
 
         verify(pressesKey).pressKey(keyCaptor.capture());
 
-        assertEquals(Map.of("keycode", exptectedCode), keyCaptor.getValue().build());
+        assertEquals(Map.of(KEYCODE, exptectedCode), keyCaptor.getValue().build());
         verifyNoMoreInteractions(webDriverProvider, genericWebDriverManager);
     }
 
@@ -202,5 +204,28 @@ class KeyboardStepsTests
         assertEquals("Unsupported Android key: unsupported key", exception.getMessage());
         verifyNoMoreInteractions(webDriverProvider, genericWebDriverManager);
         verifyNoInteractions(pressesKey);
+    }
+
+    @Test
+    void shouldLongPressAndroidKey()
+    {
+        ArgumentCaptor<KeyEvent> keyCaptor = ArgumentCaptor.forClass(KeyEvent.class);
+        PressesKey pressesKey = mock(PressesKey.class);
+        when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
+        when(genericWebDriverManager.isAndroidNativeApp()).thenReturn(true);
+        keyboardSteps.longPressKey(HOME);
+
+        verify(pressesKey).longPressKey(keyCaptor.capture());
+
+        assertEquals(Map.of(KEYCODE, 3), keyCaptor.getValue().build());
+        verifyNoMoreInteractions(webDriverProvider, genericWebDriverManager);
+    }
+
+    @Test
+    void shouldFailForLongPressForNotAndroid()
+    {
+        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
+            () -> keyboardSteps.longPressKey(HOME));
+        assertEquals("Long press supported for Android only", iae.getMessage());
     }
 }

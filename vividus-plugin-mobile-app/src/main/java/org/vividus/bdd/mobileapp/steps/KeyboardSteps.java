@@ -20,6 +20,8 @@ import static java.util.Map.entry;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -141,6 +143,29 @@ public class KeyboardSteps
     }
 
     /**
+     * Performs long press of the key
+     * <br>
+     * See <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
+     * Android keys</a> for available values
+     * <br>
+     * Supported for <b>Android</b> only
+     * <br>
+     * Example:
+     * <br>
+     * <code>
+     * When I long press RETURN key
+     * </code>
+     *
+     * @param key the key to press
+     */
+    @When("I long press $key key")
+    public void longPressKey(String key)
+    {
+        Validate.isTrue(genericWebDriverManager.isAndroidNativeApp(), "Long press supported for Android only");
+        pressOnAndroid(p -> p::longPressKey, List.of(key));
+    }
+
+    /**
      * Presses the keys
      * <br>
      * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
@@ -190,16 +215,22 @@ public class KeyboardSteps
         }
         else
         {
-            PressesKey pressesKey = webDriverProvider.getUnwrapped(PressesKey.class);
-            keys.stream()
-                .map(key ->
-                {
-                    AndroidKey androidKey = EnumUtils.getEnumIgnoreCase(AndroidKey.class, key);
-                    Validate.isTrue(androidKey != null, "Unsupported Android key: %s", key);
-                    return androidKey;
-                })
-                .map(KeyEvent::new)
-                .forEach(pressesKey::pressKey);
+            pressOnAndroid(p -> p::pressKey, keys);
         }
+    }
+
+    private void pressOnAndroid(Function<PressesKey, Consumer<KeyEvent>> presser, List<String> keys)
+    {
+        PressesKey pressesKey = webDriverProvider.getUnwrapped(PressesKey.class);
+        Consumer<KeyEvent> keyPresser = presser.apply(pressesKey);
+        keys.stream()
+            .map(key ->
+            {
+                AndroidKey androidKey = EnumUtils.getEnumIgnoreCase(AndroidKey.class, key);
+                Validate.isTrue(androidKey != null, "Unsupported Android key: %s", key);
+                return androidKey;
+            })
+            .map(KeyEvent::new)
+            .forEach(keyPresser::accept);
     }
 }

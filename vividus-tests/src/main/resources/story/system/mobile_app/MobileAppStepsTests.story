@@ -255,5 +255,12 @@ Examples:
 |Item 1                  |Item 2                   |
 
 
+Scenario: Verify step: 'When I long press $key key'
+Meta:
+    @targetPlatform android
+When I long press POWER key
+When I reset context
+Then number of elements found by `xpath(//*[@text = 'Power off'])` is = `1`
+
 Scenario: Verify step: 'When I close mobile application'
 When I close mobile application
