@@ -31,8 +31,6 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,6 +44,7 @@ import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
@@ -58,6 +57,10 @@ import io.appium.java_client.remote.MobilePlatform;
 @ExtendWith(MockitoExtension.class)
 class MobileAppWebDriverManagerTests
 {
+    private static final String GET_SYSTEM_BARS = "getSystemBars";
+
+    private static final String STAT_BAR_HEIGHT = "statBarHeight";
+
     private static final byte[] IMAGE = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A,
             0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
             0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, (byte) 0xC4, (byte) 0x89, 0x00, 0x00, 0x00, 0x0B, 0x49,
@@ -76,8 +79,21 @@ class MobileAppWebDriverManagerTests
         when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(hasAndroidDeviceDetails);
         Response response = mock(Response.class);
         when(response.getValue()).thenReturn(Map.of("statusBar", Map.of("height", 100L)));
-        when(hasAndroidDeviceDetails.execute("getSystemBars", ImmutableMap.of())).thenReturn(response);
+        when(hasAndroidDeviceDetails.execute(GET_SYSTEM_BARS, Map.of())).thenReturn(response);
         assertEquals(100, driverManager.getStatusBarSize());
+    }
+
+    @Test
+    void shouldTryToGetStatBarHeightInCaseOfWebDriverException()
+    {
+        HasAndroidDeviceDetails hasAndroidDeviceDetails = mock(HasAndroidDeviceDetails.class,
+                withSettings().extraInterfaces(ExecutesMethod.class));
+        when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(hasAndroidDeviceDetails);
+        when(hasAndroidDeviceDetails.execute(GET_SYSTEM_BARS, Map.of())).thenThrow(new WebDriverException());
+        HasSessionDetails details = mock(HasSessionDetails.class);
+        when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
+        when(details.getSessionDetail(STAT_BAR_HEIGHT)).thenReturn(101L);
+        assertEquals(101, driverManager.getStatusBarSize());
     }
 
     @Test
@@ -91,7 +107,7 @@ class MobileAppWebDriverManagerTests
         when(capabilitiesMock.getCapability(CapabilityType.PLATFORM_NAME)).thenReturn(MobilePlatform.IOS);
         HasSessionDetails details = mock(HasSessionDetails.class);
         when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
-        when(details.getSessionDetail("statBarHeight")).thenReturn(102L);
+        when(details.getSessionDetail(STAT_BAR_HEIGHT)).thenReturn(102L);
         assertEquals(102, driverManager.getStatusBarSize());
     }
 
