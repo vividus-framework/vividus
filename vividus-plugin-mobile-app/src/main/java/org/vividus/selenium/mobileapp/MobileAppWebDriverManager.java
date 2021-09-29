@@ -31,6 +31,7 @@ import com.google.common.base.Suppliers;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriverException;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
@@ -52,21 +53,31 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
     public int getStatusBarSize()
     {
-        return  super.isIOSNativeApp() ? getIOsStatusBar() : getAndroidStatusBar();
+        return  super.isIOSNativeApp() ? getStatBarHeight() : getAndroidStatusBar();
     }
 
     private int getAndroidStatusBar()
     {
-        HasAndroidDeviceDetails details = getWebDriverProvider().getUnwrapped(HasAndroidDeviceDetails.class);
-        // https://github.com/appium/java-client/commit/9020174c578bed5e03c24b43c2c5ba590f663201
-        Map<String, Map<String, Object>>  systemBars = CommandExecutionHelper.execute(details,
-                AndroidMobileCommandHelper.getSystemBarsCommand());
-        return Optional.ofNullable(systemBars)
-                       .map(b -> b.get("statusBar"))
-                       .map(sb -> sb.get("height"))
-                       .map(Long.class::cast)
-                       .map(Long::intValue)
-                       .orElse(0);
+        try
+        {
+            HasAndroidDeviceDetails details = getWebDriverProvider().getUnwrapped(HasAndroidDeviceDetails.class);
+            // https://github.com/appium/java-client/commit/9020174c578bed5e03c24b43c2c5ba590f663201
+            Map<String, Map<String, Object>>  systemBars = CommandExecutionHelper.execute(details,
+                    AndroidMobileCommandHelper.getSystemBarsCommand());
+            return Optional.ofNullable(systemBars)
+                           .map(b -> b.get("statusBar"))
+                           .map(sb -> sb.get("height"))
+                           .map(Long.class::cast)
+                           .map(Long::intValue)
+                           .orElse(0);
+        }
+        catch (WebDriverException e)
+        {
+            // The workaround is for Android TV. It is not clear if any of the Android TVs could have a status bar
+            // at all, but the session capabilities contains `statBarHeight`, and to be on the safe side fall-back code
+            // was added to get the status bar height in case of exception.
+            return getStatBarHeight();
+        }
     }
 
     public double getDpr()
@@ -89,7 +100,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
         }
     }
 
-    private int getIOsStatusBar()
+    private int getStatBarHeight()
     {
         HasSessionDetails details = getWebDriverProvider().getUnwrapped(HasSessionDetails.class);
         return ((Long) details.getSessionDetail("statBarHeight")).intValue();
