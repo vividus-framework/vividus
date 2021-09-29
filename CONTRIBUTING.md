@@ -20,7 +20,7 @@ By participating in this project you agree to abide by its terms.
   * Keep commits discrete: avoid including multiple unrelated changes in a single commit
   * Keep commits self-contained: avoid spreading a single change across multiple commits. A single commit should make sense in isolation
 * Make sure you have added the necessary unit, intergration and/or system tests for your changes.
-* If your changes introduce new functionlity which wil be available for end users or affects already existing features, do not forget to add or update the corresponding sections in the documentation.
+* If your changes introduce new functionlity which will be available for end users or affects already existing features, do not forget to add or update the corresponding sections in the documentation.
 * Run all the checks and tests with `./gradlew clean build` to assure nothing else was accidentally broken.
 
 ## Submitting Changes
