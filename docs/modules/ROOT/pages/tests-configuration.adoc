@@ -117,7 +117,8 @@ The file represents a collection of JSON elements describing known issues.
             "var":  "value-.*"
         },
         "failScenarioFast": true, <8>
-        "failStoryFast": true <9>
+        "failStoryFast": true, <9>
+        "description": "Missing endpoint configuration on server side" <10>
     }
 }
 ----
@@ -130,6 +131,7 @@ The file represents a collection of JSON elements describing known issues.
 <7> Variable patterns. Patterns to match variables.
 <8> Skip the rest of scenario in case of failure identified as this known issue
 <9> Skip the rest of story in case of failure identified as this known issue
+<10> Known issue description, it's used to give the meaningful explanation of the issue if it's not tracked in bug tracking system or if the issue is too complicated and to improve overall transparency
 
 [IMPORTANT]
 Use *\\* for escaping of special characters in regular expressions
