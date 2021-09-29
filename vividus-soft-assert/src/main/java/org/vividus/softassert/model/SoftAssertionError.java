@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,8 @@
 
 package org.vividus.softassert.model;
 
-import java.io.Serializable;
-
-public class SoftAssertionError implements Serializable
+public class SoftAssertionError
 {
-    private static final long serialVersionUID = -4048370277342398507L;
-
     private final AssertionError error;
     private KnownIssue knownIssue;
 
