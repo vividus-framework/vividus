@@ -62,6 +62,7 @@
     "failScenarioFast": true
   },
   "VVD-10": {
+    "description": "Hide debug step failure",
     "type": "Internal",
     "assertionPattern": ".*",
     "scenarioPattern": "Verify wait for debug step",
@@ -69,6 +70,7 @@
     "stepPattern": "When I wait .* for debug"
   },
   "VVD-11": {
+    "description": "The WCAG2AAA standard violation",
     "type": "Internal",
     "assertionPattern": ".*accessibility violations of level Notice and above at .*2L.*",
     "scenarioPattern": "Validate against WCAG2AAA",

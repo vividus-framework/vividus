@@ -17,6 +17,7 @@
 package org.vividus.softassert.model;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.vividus.softassert.issue.KnownIssueIdentifier;
 import org.vividus.softassert.issue.KnownIssueType;
@@ -31,6 +32,7 @@ public class KnownIssue
     private final boolean potentiallyKnown;
     private final boolean failTestCaseFast;
     private final boolean failTestSuiteFast;
+    private final Optional<String> description;
     private String status;
     private String resolution;
 
@@ -41,6 +43,7 @@ public class KnownIssue
         this.failTestCaseFast = issueIdentifier.isFailTestCaseFast();
         this.failTestSuiteFast = issueIdentifier.isFailTestSuiteFast();
         this.potentiallyKnown = potentiallyKnown;
+        this.description = Optional.ofNullable(issueIdentifier.getDescription());
     }
 
     public String getIdentifier()
@@ -99,10 +102,16 @@ public class KnownIssue
         return failTestSuiteFast;
     }
 
+    public Optional<String> getDescription()
+    {
+        return description;
+    }
+
     @Override
     public int hashCode()
     {
-        return Objects.hash(identifier, type, potentiallyKnown, failTestCaseFast, failTestSuiteFast, status);
+        return Objects.hash(identifier, type, potentiallyKnown, failTestCaseFast, failTestSuiteFast, status,
+                description);
     }
 
     @Override
@@ -125,6 +134,7 @@ public class KnownIssue
                 && potentiallyKnown == other.potentiallyKnown
                 && failTestCaseFast == other.failTestCaseFast
                 && failTestSuiteFast == other.failTestSuiteFast
+                && Objects.equals(description, other.description)
                 && Objects.equals(status, other.status) && type == other.type;
     }
 }

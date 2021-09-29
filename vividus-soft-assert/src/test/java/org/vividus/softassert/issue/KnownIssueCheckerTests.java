@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,21 +61,13 @@ class KnownIssueCheckerTests
     private static final String NOT_MATCHING_ASSERTION = "not matching assertion";
     private static final String NOT_MATCHING_SUITE = "not matching suite";
     private static final String NOT_MATCHING_STEP = "not matching step";
+    private static final String DESCRIPTION = "description";
 
-    @Mock
-    private IKnownIssueProvider knownIssueProvider;
-
-    @Mock
-    private IIssueStateProvider issueStateProvider;
-
-    @Mock
-    private ITestInfoProvider testInfoProvider;
-
-    @Mock
-    private KnownIssueDataProvider knownIssueDataProvider;
-
-    @InjectMocks
-    private KnownIssueChecker knownIssueChecker;
+    @Mock private IKnownIssueProvider knownIssueProvider;
+    @Mock private IIssueStateProvider issueStateProvider;
+    @Mock private ITestInfoProvider testInfoProvider;
+    @Mock private KnownIssueDataProvider knownIssueDataProvider;
+    @InjectMocks private KnownIssueChecker knownIssueChecker;
 
     @BeforeEach
     void beforeEach()
@@ -295,6 +287,7 @@ class KnownIssueCheckerTests
         identifier.setAssertionPattern(assertionPattern);
         identifier.setType(KnownIssueType.AUTOMATION);
         identifier.setTestStepPattern(testStep);
+        identifier.setDescription(DESCRIPTION);
         return identifier;
     }
 
@@ -340,6 +333,7 @@ class KnownIssueCheckerTests
         assertEquals(KnownIssueType.AUTOMATION, actual.getType());
         assertEquals(status, actual.getStatus());
         assertEquals(resolution, actual.getResolution());
+        assertEquals(Optional.of(DESCRIPTION), actual.getDescription());
         assertFalse(actual.isFailTestCaseFast());
         assertFalse(actual.isFailTestSuiteFast());
     }

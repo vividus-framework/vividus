@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ public class KnownIssueIdentifier
     private Pattern assertionCompiledPattern;
     private boolean failTestCaseFast;
     private boolean failTestSuiteFast;
+    private String description;
     private Map<String, Pattern> additionalCompiledPatterns = Collections.emptyMap();
     private Map<String, Pattern> dynamicCompiledPatterns = Collections.emptyMap();
     private Map<String, Pattern> runtimeDataPatterns = Map.of();
@@ -82,6 +83,16 @@ public class KnownIssueIdentifier
     public void setFailTestSuiteFast(boolean failTestSuiteFast)
     {
         this.failTestSuiteFast = failTestSuiteFast;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
     }
 
     public Map<String, Pattern> getAdditionalCompiledPatterns()
