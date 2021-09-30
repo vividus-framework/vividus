@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,17 @@
 
 package org.vividus.softassert.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.vividus.softassert.issue.KnownIssueIdentifier;
 import org.vividus.softassert.issue.KnownIssueType;
 
-public class KnownIssue
+public class KnownIssue implements Serializable
 {
+    private static final long serialVersionUID = 5419047883822146063L;
+
     private static final String FIXED_ISSUE_STATUSES_STRING = "closed";
     private static final String FIXED_ISSUE_RESOLUTIONS_STRING = "fixed|done";
 
