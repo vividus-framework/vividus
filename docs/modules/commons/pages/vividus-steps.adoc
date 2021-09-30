@@ -152,3 +152,50 @@ Then `$value` matches `$regex`
 
 * `$value` - The value to assert.
 * `$regex` - https://en.wikipedia.org/wiki/Regular_expression[The regular expression].
+
+=== Create a file
+
+Saves the provided content to a file with the specified pathname.
+
+[source,gherkin]
+----
+When I create a file with the pathname `$pathname` and the content `$fileContent`
+----
+
+* `$pathname` - The fully qualified file name including parent folders and extension (e.g. `temp/some_file.txt`).
+* `$fileContent` - The content to be saved to the creating file.
+
+
+=== Create a temporary file
+
+Creates a temporary file with the provided content and puts its path to a variable with the specified name.
+The created file will be removed upon test run completion.
+
+[source,gherkin]
+----
+When I create temporary file with name '$name' and content '$content' and put path to '$scopes' variable with name '$pathVariable'
+----
+
+* `$name` - The logical name of the creating temporary file. For example, when `$name` is equal to `my-file.txt`, then `my-file` will be used as a prefix in the temporary file name and `.txt` - as a suffix.
+* `$content` - The content to be saved to the creating temporary file.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$pathVariable` - The name of the variable to store the full path of the created temporary file.
+
+If you want to use the created temporary file in further batches of the test suite as an input data, you should use https://datatracker.ietf.org/doc/html/rfc8089#appendix-A[URL with `file` protocol]
+
+.Batch 1 - Create a temporary local file
+[source,gherkin]
+----
+When I create temporary file with name '.table' and content '
+|column|
+|value |
+' and put path to 'NEXT_BATCHES' variable with name 'examples-table-temporary-file'
+----
+
+.Batch 2 - Use the temporary file as `ExamplesTable`
+[source,gherkin]
+----
+Then `<column>` is equal to `value`
+Examples:
+file:///${examples-table-temporary-file}
+----
