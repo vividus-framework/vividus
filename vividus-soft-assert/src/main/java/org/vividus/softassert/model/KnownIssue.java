@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class KnownIssue implements Serializable
     private final boolean potentiallyKnown;
     private final boolean failTestCaseFast;
     private final boolean failTestSuiteFast;
-    private final Optional<String> description;
+    private final transient Optional<String> description;
     private String status;
     private String resolution;
 
@@ -113,8 +113,7 @@ public class KnownIssue implements Serializable
     @Override
     public int hashCode()
     {
-        return Objects.hash(identifier, type, potentiallyKnown, failTestCaseFast, failTestSuiteFast, status,
-                description);
+        return Objects.hash(identifier, type, potentiallyKnown, failTestCaseFast, failTestSuiteFast, status);
     }
 
     @Override
@@ -137,7 +136,6 @@ public class KnownIssue implements Serializable
                 && potentiallyKnown == other.potentiallyKnown
                 && failTestCaseFast == other.failTestCaseFast
                 && failTestSuiteFast == other.failTestSuiteFast
-                && Objects.equals(description, other.description)
                 && Objects.equals(status, other.status) && type == other.type;
     }
 }
