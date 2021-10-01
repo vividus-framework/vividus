@@ -47,7 +47,7 @@ class LocatorConversionUtilsTests
 {
     private static final String VALUE = "value";
     private static final String INVALID_LOCATOR_MESSAGE = "Invalid locator format. "
-            + "Expected matches [(?:By\\.)?([a-zA-Z]+)\\((.+?)\\)(:(.*))?] Actual: [";
+            + "Expected matches [(?:By\\.)?([a-zA-Z]+)\\((.+)\\)(:(.*))?] Actual: [";
     private static final char CLOSING_BRACKET = ']';
     private static final String INVALID_LOCATOR = "To.xpath(.a)";
 
@@ -73,7 +73,10 @@ class LocatorConversionUtilsTests
                 TestLocatorType.FILTER, VALUE)
                 .addFilter(TestLocatorType.FILTER, VALUE)
                 .addFilter(TestLocatorType.FILTER, VALUE),
-                "By.search(value):i->filter.filter(value).filter(value).filter(value)")
+                "By.search(value):i->filter.filter(value).filter(value).filter(value)"),
+            Arguments.of(createAttributes(TestLocatorType.SEARCH, "value:not([attribute*='test'])",
+                Visibility.INVISIBLE, TestLocatorType.FILTER, VALUE),
+                "By.search(value:not([attribute*='test'])):i->filter.filter(value)")
         );
     }
 

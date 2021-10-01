@@ -40,7 +40,7 @@ public class LocatorConversionUtils
     private static final int ELEMENT_TYPE_GROUP = 3;
     private static final int VISIBILITY_GROUP = 4;
     private static final char CLOSING_BRACKET = ']';
-    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z]+)\\((.+?)\\)(:(.*))?";
+    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z]+)\\((.+)\\)(:(.*))?";
     private static final Pattern LOCATOR_PATTERN = Pattern.compile(LOCATOR_FORMAT);
     private static final Pattern FILTER_PATTERN = Pattern.compile("([a-zA-Z]+)(?:\\()([^()]*)(?:\\))");
 
