@@ -16,12 +16,16 @@
 
 package org.vividus.runner;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
@@ -32,15 +36,18 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
+import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
-import org.jbehave.core.parsers.StoryParser;
+import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction.Context;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.SystemStreamTests;
@@ -148,12 +155,20 @@ class BddStepsCounterTests extends SystemStreamTests
         assertTrue(output.contains(TWO_OCCURRENCES));
     }
 
+    @SuppressWarnings("try")
     private void testCounter(String[] args, String resourceLocation, List<String> steps,
             List<StepCandidate> stepCandidates) throws IOException, ParseException
     {
-        try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        String path = "";
+        Scenario scenario = new Scenario(steps);
+        Story story = new Story(path, List.of(scenario));
+
+        try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
+                var regexStoryParser = mockConstruction(RegexStoryParser.class, (mock, context) -> {
+                    assertRegexStoryParserConstruction(context);
+                    when(mock.parseStory(any(String.class))).thenReturn(story);
+                }))
         {
-            String path = "";
             StoryLoader storyLoader = mock(StoryLoader.class);
             when(storyLoader.loadResourceAsText(path)).thenReturn("");
             beanFactory.when(() -> BeanFactory.getBean(StoryLoader.class)).thenReturn(storyLoader);
@@ -163,15 +178,8 @@ class BddStepsCounterTests extends SystemStreamTests
                     List.of(path));
             beanFactory.when(() -> BeanFactory.getBean(IPathFinder.class)).thenReturn(pathFinder);
 
-            Scenario scenario = new Scenario(steps);
-            Story story = new Story(path, List.of(scenario));
-
-            StoryParser storyParser = mock(StoryParser.class);
-            when(storyParser.parseStory(any(String.class))).thenReturn(story);
-
             ExtendedConfiguration configuration = new ExtendedConfiguration();
             configuration.useKeywords(new Keywords());
-            configuration.useStoryParser(storyParser);
             beanFactory.when(() -> BeanFactory.getBean(Configuration.class)).thenReturn(configuration);
 
             InjectableStepsFactory stepFactory = mock(InjectableStepsFactory.class);
@@ -185,5 +193,17 @@ class BddStepsCounterTests extends SystemStreamTests
 
             beanFactory.verify(BeanFactory::open);
         }
+    }
+
+    private void assertRegexStoryParserConstruction(Context context)
+    {
+        assertEquals(1, context.getCount());
+        var constructorArguments = context.arguments();
+        assertEquals(1, constructorArguments.size());
+        var constructorArgument = constructorArguments.get(0);
+        assertInstanceOf(ExamplesTableFactory.class, constructorArgument);
+        var examplesTableFactory = (ExamplesTableFactory) constructorArgument;
+        assertSame(ExamplesTable.EMPTY, examplesTableFactory.createExamplesTable("t1.table"));
+        assertSame(ExamplesTable.EMPTY, examplesTableFactory.createExamplesTable("t2.table"));
     }
 }
