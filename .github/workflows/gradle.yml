@@ -101,6 +101,11 @@ jobs:
       with:
         fail_ci_if_error: true
 
+    - name: VIVIDUS tasks validation
+      run: |
+         ./gradlew validateKnownIssues printSteps countSteps -x testVividusInitialization -Pvividus.bdd.variables.global.iterationLimit=3 -Pvividus.bdd.variables.global.target-platform=ios -p vividus-tests
+
+
     - name: Integration tests
       if: matrix.platform == 'ubuntu-latest'
       run: |
