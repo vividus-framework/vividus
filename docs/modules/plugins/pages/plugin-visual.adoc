@@ -34,7 +34,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-visual', version: '{c
 |`string`
 |`./baseline`
 |The path to folder for saving baselines (root folder is `src/main/resources`).
-For example, `web.visual.baselines-folder=C:/Workspace/vividus-tests/src/main/resources/baselines`
+For example, `ui.visual.baselines-folder=C:/Workspace/vividus-tests/src/main/resources/baselines`
 
 |`ui.visual.indexer`
 |scenario
@@ -59,7 +59,7 @@ For example, `web.visual.baselines-folder=C:/Workspace/vividus-tests/src/main/re
 |`ui.screenshot.debug-directory`
 |`string`
 |`false`
-|The path to folder for saving debug screenshots. For example, `web.visual.baselines-folder=C:/temp/debug`
+|The path to folder for saving debug screenshots. For example, `ui.screenshot.debug-directory=C:/temp/debug`
 
 |===
 
