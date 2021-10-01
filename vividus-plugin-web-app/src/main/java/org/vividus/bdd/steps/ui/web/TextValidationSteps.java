@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.vividus.bdd.steps.ui.web;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
@@ -39,54 +37,55 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
-public class WebElementsSteps
+public class TextValidationSteps
 {
-    @Inject private IWebElementActions webElementActions;
-    @Inject private IBaseValidations baseValidations;
-    @Inject private IElementValidations elementValidations;
-    @Inject private IUiContext uiContext;
-    @Inject private ISearchActions searchActions;
-    @Inject private ISoftAssert softAssert;
+    private final IUiContext uiContext;
+    private final ISearchActions searchActions;
+    private final IWebElementActions webElementActions;
+    private final ISoftAssert softAssert;
+    private final IBaseValidations baseValidations;
+    private final IElementValidations elementValidations;
+
+    public TextValidationSteps(IUiContext uiContext, ISearchActions searchActions, IWebElementActions webElementActions,
+            ISoftAssert softAssert, IBaseValidations baseValidations, IElementValidations elementValidations)
+    {
+        this.uiContext = uiContext;
+        this.searchActions = searchActions;
+        this.webElementActions = webElementActions;
+        this.softAssert = softAssert;
+        this.baseValidations = baseValidations;
+        this.elementValidations = elementValidations;
+    }
 
     /**
      * Checks if the text in context matches <b>regex</b>
      * @param regex Expected regular expression
      */
     @Then("the text matches '$regex'")
-    public void ifTextMatchesRegex(String regex)
+    public void ifTextMatchesRegex(Pattern regex)
     {
         String actualText = "";
-        boolean assertCondition = false;
-        boolean isWebElement = contextualSearch();
-        if (isWebElement)
+        SearchContext searchContext = uiContext.getSearchContext(SearchContext.class);
+        if (searchContext instanceof WebElement)
         {
-            actualText = webElementActions.getElementText((WebElement) getSearchContext());
+            actualText = webElementActions.getElementText((WebElement) searchContext);
         }
-        if (getSearchContext() instanceof WebDriver)
+        else if (searchContext instanceof WebDriver)
         {
             actualText = webElementActions.getPageText();
         }
-        if (!actualText.isEmpty())
-        {
-            assertCondition = verifyText(regex, actualText, isWebElement);
-        }
+        boolean assertCondition = !actualText.isEmpty() && verifyText(regex, actualText, searchContext);
         softAssert.assertTrue("The text in search context matches regular expression " + regex,
                 assertCondition);
     }
 
-    private boolean verifyText(String regex, String actualText, boolean isWebElement)
+    private boolean verifyText(Pattern regex, String actualText, SearchContext searchContext)
     {
-        boolean assertCondition;
-        Pattern pattern = Pattern.compile(regex);
-        assertCondition = pattern.matcher(actualText).find();
-        if (!assertCondition && isWebElement)
+        boolean assertCondition = regex.matcher(actualText).find();
+        if (!assertCondition && searchContext instanceof WebElement)
         {
-            String pseudoElementContent = webElementActions
-                    .getPseudoElementContent((WebElement) getSearchContext());
-            if (!pseudoElementContent.isEmpty())
-            {
-                assertCondition = pattern.matcher(pseudoElementContent).find();
-            }
+            String pseudoElementContent = webElementActions.getPseudoElementContent((WebElement) searchContext);
+            return !pseudoElementContent.isEmpty() && regex.matcher(pseudoElementContent).find();
         }
         return assertCondition;
     }
@@ -98,49 +97,35 @@ public class WebElementsSteps
     @Then("the text '$text' exists")
     public void ifTextExists(String text)
     {
-        if (contextualSearch())
+        SearchContext searchContext = uiContext.getSearchContext();
+        if (searchContext instanceof WebElement)
         {
-            elementValidations.assertIfElementContainsText(uiContext.getSearchContext(WebElement.class), text, true);
+            elementValidations.assertIfElementContainsText((WebElement) searchContext, text, true);
         }
         else
         {
-            By locator = LocatorUtil.getXPathLocatorByInnerText(text);
-
-            List<WebElement> elements = findElements(locator);
+            List<WebElement> elements = findElements(LocatorUtil.getXPathLocatorByInnerText(text));
 
             boolean assertCondition = !elements.isEmpty();
 
             if (!assertCondition)
             {
                 Locator caseSensitiveLocator = new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text);
-                elements = searchActions.findElements(getSearchContext(), caseSensitiveLocator);
-                assertCondition = !elements.isEmpty();
+                assertCondition = !searchActions.findElements(getSearchContext(), caseSensitiveLocator).isEmpty();
             }
 
             if (!assertCondition)
             {
-                List<String> pseudoElementsContent = webElementActions.getAllPseudoElementsContent();
-                for (String content : pseudoElementsContent)
-                {
-                    if (content.contains(text))
-                    {
-                        assertCondition = true;
-                        break;
-                    }
-                }
+                assertCondition = webElementActions.getAllPseudoElementsContent().stream().anyMatch(
+                        content -> content.contains(text));
             }
 
             if (!assertCondition)
             {
-                String pageInnerText = webElementActions.getPageText();
-                if (pageInnerText.trim().contains(text))
-                {
-                    assertCondition = true;
-                }
+                assertCondition = webElementActions.getPageText().trim().contains(text);
             }
 
-            softAssert.assertTrue("There is an element with text=" + text + " in the context",
-                    assertCondition);
+            softAssert.assertTrue("There is an element with text=" + text + " in the context", assertCondition);
         }
     }
 
@@ -167,25 +152,17 @@ public class WebElementsSteps
     @Then("the text '$text' does not exist")
     public boolean textDoesNotExist(String text)
     {
-        if (contextualSearch())
+        SearchContext searchContext = getSearchContext();
+        if (searchContext instanceof WebElement)
         {
-            return elementValidations.assertIfElementContainsText(uiContext.getSearchContext(WebElement.class), text,
-                    false);
+            return elementValidations.assertIfElementContainsText((WebElement) searchContext, text, false);
         }
-        else
-        {
-            return baseValidations.assertIfElementDoesNotExist(String.format("An element with text '%s'", text),
-                    new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text));
-        }
-    }
-
-    private boolean contextualSearch()
-    {
-        return getSearchContext() instanceof WebElement;
+        return baseValidations.assertIfElementDoesNotExist(String.format("An element with text '%s'", text),
+                searchContext, new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text));
     }
 
     protected SearchContext getSearchContext()
     {
-        return uiContext.getSearchContext();
+        return uiContext.getSearchContext(SearchContext.class);
     }
 }

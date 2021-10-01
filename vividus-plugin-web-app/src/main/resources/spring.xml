@@ -226,7 +226,7 @@
     <bean id="setVariableSteps" class="org.vividus.bdd.steps.ui.web.SetVariableSteps" />
     <bean id="videoPlayerSteps" class="org.vividus.bdd.steps.ui.web.VideoPlayerSteps" />
     <bean id="waitSteps" class="org.vividus.bdd.steps.ui.web.WaitSteps" />
-    <bean id="webElementsSteps" class="org.vividus.bdd.steps.ui.web.WebElementsSteps" />
+    <bean id="textValidationSteps" class="org.vividus.bdd.steps.ui.web.TextValidationSteps" />
 
     <bean id="actionSteps" class="org.vividus.bdd.steps.ui.web.ActionSteps" />
 
@@ -322,7 +322,7 @@
         <idref bean="fieldSteps" />
         <idref bean="linkSteps" />
         <idref bean="pageSteps" />
-        <idref bean="webElementsSteps" />
+        <idref bean="textValidationSteps" />
         <idref bean="jsValidationSteps" />
         <idref bean="focusSteps" />
         <idref bean="keyboardSteps" />
