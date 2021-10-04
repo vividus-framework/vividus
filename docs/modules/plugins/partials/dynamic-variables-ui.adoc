@@ -3,10 +3,9 @@
 The set of dynamic variables provides ability to access context element
 coordinates, width and height.
 
-[IMPORTANT]
+IMPORTANT: The variables rely on the contextual approach: it is necessary to switch context to the target element.
 
-The variables rely on the contextual approach: it is necessary to switch context
-to the target element.
+WARNING: In case of missing search context the error will be logged and `-1` will be returned as a result
 
 
 ==== *Variable name*
