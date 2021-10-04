@@ -19,10 +19,12 @@ package org.vividus.bdd.steps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.jbehave.core.embedder.StoryControls;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,16 +39,18 @@ import org.vividus.bdd.variable.DynamicVariable;
 @ExtendWith(MockitoExtension.class)
 class VariableResolverTests
 {
+    private static final String KEY = "key";
     private static final String VAR1 = "var1";
     private static final String VALUE1 = "2";
     private static final String VAR2 = "var2";
     private static final String VALUE2 = "3";
 
     @Mock private IBddVariableContext bddVariableContext;
+    @Mock private StoryControls storyControls;
 
     private Object convert(String value)
     {
-        return new VariableResolver(bddVariableContext, Map.of()).resolve(value);
+        return new VariableResolver(bddVariableContext, Map.of(), storyControls).resolve(value);
     }
 
     @ParameterizedTest
@@ -143,10 +147,22 @@ class VariableResolverTests
         DynamicVariable dynamicVariable = mock(DynamicVariable.class);
         when(bddVariableContext.getVariable(key)).thenReturn(null);
         when(bddVariableContext.getVariable(alias)).thenReturn(null);
-        VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(key, dynamicVariable));
+        VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(key, dynamicVariable),
+                storyControls);
         when(dynamicVariable.getValue()).thenReturn(VALUE1);
         assertEquals(VALUE1, variableResolver.resolve(asRef(key)));
         assertEquals(VALUE1, variableResolver.resolve(asRef(alias)));
+    }
+
+    @Test
+    void shouldNotResolveDynamicVariablesIfTheExecutionIsDryRun()
+    {
+        DynamicVariable dynamicVariable = mock(DynamicVariable.class);
+        VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(KEY, dynamicVariable),
+                storyControls);
+        when(storyControls.dryRun()).thenReturn(true);
+        variableResolver.resolve(asRef(KEY));
+        verifyNoInteractions(dynamicVariable);
     }
 
     @Test
@@ -154,7 +170,8 @@ class VariableResolverTests
     {
         DynamicVariable dynamicVariable = mock(DynamicVariable.class);
         when(bddVariableContext.getVariable(VAR1)).thenReturn(null);
-        VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(VAR2, dynamicVariable));
+        VariableResolver variableResolver = new VariableResolver(bddVariableContext, Map.of(VAR2, dynamicVariable),
+                storyControls);
         String test1 = asRef(VAR1);
         Object actualValue = variableResolver.resolve(test1);
         assertEquals(test1, actualValue);

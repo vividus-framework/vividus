@@ -24,21 +24,26 @@ import java.util.regex.Pattern;
 import com.google.common.base.CaseFormat;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbehave.core.embedder.StoryControls;
+import org.vividus.bdd.DryRunAwareExecutor;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.DynamicVariable;
 
-public class VariableResolver
+public class VariableResolver implements DryRunAwareExecutor
 {
     private static final String VARIABLE_START_MARKER = "${";
     private static final String LINE_BREAKS = "[\r\n]*";
 
     private final IBddVariableContext bddVariableContext;
     private final Map<String, DynamicVariable> dynamicVariables;
+    private final StoryControls storyControls;
 
-    public VariableResolver(IBddVariableContext bddVariableContext, Map<String, DynamicVariable> dynamicVariables)
+    public VariableResolver(IBddVariableContext bddVariableContext, Map<String, DynamicVariable> dynamicVariables,
+            StoryControls storyControls)
     {
         this.bddVariableContext = bddVariableContext;
         this.dynamicVariables = new HashMap<>();
+        this.storyControls = storyControls;
         dynamicVariables.forEach((key, variable) ->
         {
             this.dynamicVariables.put(key, variable);
@@ -151,10 +156,16 @@ public class VariableResolver
         Object variable = bddVariableContext.getVariable(variableKey);
         if (variable == null)
         {
-            variable = Optional.ofNullable(dynamicVariables.get(variableKey))
+            variable = execute(() -> Optional.ofNullable(dynamicVariables.get(variableKey))
                                .map(DynamicVariable::getValue)
-                               .orElse(null);
+                               .orElse(null), null);
         }
         return variable;
+    }
+
+    @Override
+    public StoryControls getStoryControls()
+    {
+        return storyControls;
     }
 }
