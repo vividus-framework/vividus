@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ class BddResourceLoaderTests
     @InjectMocks
     private BddResourceLoader bddResourceLoader;
 
-    private Resource[] mockGetAllResources(String... urls) throws IOException
+    private Resource[] mockGetAllResources(String prefix, String... urls) throws IOException
     {
         Resource[] allResources = new Resource[urls.length];
         for (int i = 0; i < urls.length; i++)
@@ -76,7 +76,7 @@ class BddResourceLoaderTests
             when(resource.getURL()).thenReturn(new URL(urls[i]));
             allResources[i] = resource;
         }
-        when(resourcePatternResolver.getResources(startsWith(CLASSPATH_ALL_URL_PREFIX)))
+        when(resourcePatternResolver.getResources(startsWith(prefix)))
                 .thenReturn(allResources);
         return allResources;
     }
@@ -85,7 +85,8 @@ class BddResourceLoaderTests
     void testGetResources() throws IOException
     {
         when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources("file:/src/resources/story/sit/vividus/ca/en/sit.story",
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+                "file:/src/resources/story/sit/vividus/ca/en/sit.story",
                 "file:/src/resources/story/sit/vividus/ca/sit.story",
                 "file:/src/resources/story/sit/vividus/sit.story");
 
@@ -99,10 +100,31 @@ class BddResourceLoaderTests
     }
 
     @Test
+    void testGetFileResources() throws IOException
+    {
+        Resource[] allResources = mockGetAllResources("file://",
+                "file:///C:/Users/test/vividus/ca/temp.table", "file:///C:/Users/test/vividus/temp.table");
+
+        String resourceLocation = "file:///C:/Users/test/";
+        String resourcePattern = "temp.table";
+
+        when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(List.of(BRAND));
+        when(allResources[0].getFilename()).thenReturn(SUCCESS);
+        when(allResources[1].getFilename()).thenReturn(SUCCESS);
+
+        Resource[] actualResource = bddResourceLoader.getResources(resourceLocation, resourcePattern);
+        assertEquals(2, actualResource.length);
+        assertThat(actualResource[0].getFilename(), equalTo(SUCCESS));
+        assertThat(actualResource[1].getFilename(), equalTo(SUCCESS));
+    }
+
+    @Test
     void testGetResourcesWhenMoreThanOneFound() throws IOException
     {
-        Resource[] allResources = mockGetAllResources("file:/src/resources/story/uat/vividus/ca/en/sit.story",
-                "file:/src/resources/story/uat/vividus/super.story", "file:/src/resources/story/uat/vividus/sit.story");
+        Resource[] allResources = mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+                "file:/src/resources/story/uat/vividus/ca/en/sit.story",
+                "file:/src/resources/story/uat/vividus/super.story",
+                "file:/src/resources/story/uat/vividus/sit.story");
 
         String resourceLocation = "story/uat";
         String resourcePattern = "diamond.story";
@@ -125,8 +147,10 @@ class BddResourceLoaderTests
     void testGetResourcesWhenNonMatchingPathsFound() throws IOException
     {
         when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources("file:/src/resources/story/xx/test/ca/en/sit.story",
-                "file:/src/resources/story/xx/test/super.story", "file:/src/resources/story/xx/diamond/sit.story");
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+                "file:/src/resources/story/xx/test/ca/en/sit.story",
+                "file:/src/resources/story/xx/test/super.story",
+                "file:/src/resources/story/xx/diamond/sit.story");
 
         String resourceLocation = "story/xx";
         String resourcePattern = "extra.story";
@@ -142,8 +166,10 @@ class BddResourceLoaderTests
     void testGetResourcesWhenEmptyLoadConfig() throws IOException
     {
         when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources("file:/src/resources/story/xxx/vividus/ca/en/sit.story",
-                "file:/src/resources/story/xxx/vividus/super.story", "file:/src/resources/story/xxx/sit.story");
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+                "file:/src/resources/story/xxx/vividus/ca/en/sit.story",
+                "file:/src/resources/story/xxx/vividus/super.story",
+                "file:/src/resources/story/xxx/sit.story");
 
         String resourceLocation = "story/xxx";
         String resourcePattern = "*.story";
@@ -161,7 +187,8 @@ class BddResourceLoaderTests
     void testGetResource() throws IOException
     {
         when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources("file:/src/resources/story/bvt/vividus/ca/en/vividus.table",
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+                "file:/src/resources/story/bvt/vividus/ca/en/vividus.table",
                 "file:/src/resources/story/bvt/vividus/ca/vividus.table",
                 "file:/src/resources/story/bvt/vividus/vividus.table");
         String rawPath = "story/bvt/vividus.table";
@@ -179,7 +206,8 @@ class BddResourceLoaderTests
     void testGetResource2() throws IOException
     {
         when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources("file:/src/resources/story/sit/vividus/ca/de/super.table",
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+                "file:/src/resources/story/sit/vividus/ca/de/super.table",
                 "file:/src/resources/story/sit/vividus/super.table",
                 "file:/src/resources/story/sit/vividus/ca/super.table");
         String rawPath = "story/sit/super.table";
@@ -196,7 +224,7 @@ class BddResourceLoaderTests
     @Test
     void testGetResourceWhenMoreThanOneFound() throws IOException
     {
-        mockGetAllResources(DEFAULT_URLS);
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, DEFAULT_URLS);
         String rawPath = "story/sit/vividus.table";
         List<String> params = List.of(MARKET, BRAND, LOCALE);
 
@@ -207,7 +235,7 @@ class BddResourceLoaderTests
     @Test
     void testGetResourceWhenNotFound() throws IOException
     {
-        mockGetAllResources(DEFAULT_URLS);
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, DEFAULT_URLS);
         String rawPath = "story/sit/list.table";
         List<String> params = List.of(MARKET, BRAND, LOCALE);
 
@@ -251,7 +279,7 @@ class BddResourceLoaderTests
     void testGetResourcesSimilarProps() throws IOException
     {
         when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources("file:/src/resources/story/bvt/vividus/bvt.story");
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, "file:/src/resources/story/bvt/vividus/bvt.story");
 
         String resourceLocation = "story/bvt";
         String resourcePattern = "bvt.story";
@@ -266,7 +294,7 @@ class BddResourceLoaderTests
     void testGetResourcesIdenticalProps() throws IOException
     {
         when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources("file:/src/resources/story/ut/vividus/en/en/uat.story");
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, "file:/src/resources/story/ut/vividus/en/en/uat.story");
         mockResourceConfig(CLASSPATH_ALL_URL_PREFIX + "story/ut/vividus/en/en/uat.story", LOCALE, LOCALE,
                 BRAND);
         assertThat(bddResourceLoader.getResources("story/ut", "uat.story")[0]
