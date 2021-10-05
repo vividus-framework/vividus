@@ -32,7 +32,10 @@ public class KnownIssueIdentifier
     private boolean failTestSuiteFast;
     private String description;
     private Map<String, Pattern> additionalCompiledPatterns = Collections.emptyMap();
+
+    @Deprecated(since = "0.3.10", forRemoval = true)
     private Map<String, Pattern> dynamicCompiledPatterns = Collections.emptyMap();
+
     private Map<String, Pattern> runtimeDataPatterns = Map.of();
 
     public KnownIssueType getType()
@@ -106,6 +109,7 @@ public class KnownIssueIdentifier
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue(), Pattern.DOTALL)));
     }
 
+    @Deprecated(since = "0.3.10", forRemoval = true)
     public void setDynamicPatterns(Map<String, String> dynamicPatterns)
     {
         this.dynamicCompiledPatterns = dynamicPatterns.entrySet().stream()
@@ -118,6 +122,7 @@ public class KnownIssueIdentifier
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue(), Pattern.DOTALL)));
     }
 
+    @Deprecated(since = "0.3.10", forRemoval = true)
     public Map<String, Pattern> getDynamicCompiledPatterns()
     {
         return dynamicCompiledPatterns;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,19 @@
 
 package org.vividus.bdd.issue;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,14 +39,18 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.vividus.selenium.IWebDriverProvider;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class CurrentPageUrlKnownIssueDataProviderTests
 {
-    @Mock
-    private IWebDriverProvider webDriverProvider;
+    private static final String DEPRECATION_WARNING =
+            "'dynamicPatterns' field is deprecated in known issues and will be removed in VIVIDUS 0.4.0, use "
+                    + "'variablePatterns' instead. The dynamic pattern 'currentPageUrl' must be replaced with "
+                    + "variable pattern 'currentPageUrl'";
 
-    @InjectMocks
-    private CurrentPageUrlKnownIssueDataProvider currentPageUrlDataProvider;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @InjectMocks private CurrentPageUrlKnownIssueDataProvider currentPageUrlDataProvider;
+
+    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(CurrentPageUrlKnownIssueDataProvider.class);
 
     @Test
     void testGetData()
@@ -49,6 +61,8 @@ class CurrentPageUrlKnownIssueDataProviderTests
         when(driver.getCurrentUrl()).thenReturn(url);
 
         assertEquals(Optional.of(url), currentPageUrlDataProvider.getData());
+
+        assertThat(testLogger.getLoggingEvents(), equalTo(List.of(warn(DEPRECATION_WARNING))));
     }
 
     @Test
@@ -59,5 +73,7 @@ class CurrentPageUrlKnownIssueDataProviderTests
         when(driver.getCurrentUrl()).thenThrow(new WebDriverException());
 
         assertEquals(Optional.empty(), currentPageUrlDataProvider.getData());
+
+        assertThat(testLogger.getLoggingEvents(), equalTo(List.of(warn(DEPRECATION_WARNING))));
     }
 }
