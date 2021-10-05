@@ -25,11 +25,13 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.jbehave.core.embedder.StoryControls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.bdd.DryRunAwareExecutor;
 import org.vividus.bdd.expression.IExpressionProcessor;
 
-public class ExpressionAdaptor
+public class ExpressionAdaptor implements DryRunAwareExecutor
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionAdaptor.class);
 
@@ -40,7 +42,14 @@ public class ExpressionAdaptor
 
     private static final String REPLACEMENT_PATTERN = "\\#\\{%s\\}";
 
+    private final StoryControls storyControls;
+
     private List<IExpressionProcessor<?>> processors;
+
+    public ExpressionAdaptor(StoryControls storyControls)
+    {
+        this.storyControls = storyControls;
+    }
 
     /**
      * Processes the expression including nested ones.
@@ -65,8 +74,8 @@ public class ExpressionAdaptor
      */
     public Object processRawExpression(String expression)
     {
-        return processExpression(expression, () -> processExpression(expression,
-                List.of(RELUCTANT_EXPRESSION_PATTERN, GREEDY_EXPRESSION_PATTERN).iterator()));
+        return execute(() -> processExpression(expression, () -> processExpression(expression,
+                List.of(RELUCTANT_EXPRESSION_PATTERN, GREEDY_EXPRESSION_PATTERN).iterator())), expression);
     }
 
     /**
@@ -152,5 +161,11 @@ public class ExpressionAdaptor
     public void setProcessors(List<IExpressionProcessor<?>> processors)
     {
         this.processors = processors;
+    }
+
+    @Override
+    public StoryControls getStoryControls()
+    {
+        return storyControls;
     }
 }
