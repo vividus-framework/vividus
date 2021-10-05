@@ -16,15 +16,20 @@
 
 package org.vividus.bdd.variable.ui;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.bdd.variable.DynamicVariable;
 import org.vividus.ui.context.UiContext;
 
 public abstract class AbstractContextProvidingDynamicVariable implements DynamicVariable
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractContextProvidingDynamicVariable.class);
+
     private final UiContext uiContext;
 
     public AbstractContextProvidingDynamicVariable(UiContext uiContext)
@@ -34,7 +39,13 @@ public abstract class AbstractContextProvidingDynamicVariable implements Dynamic
 
     protected String getContextRectValue(Function<Rectangle, Integer> valueProvider)
     {
-        WebElement searchContext = uiContext.getSearchContext(WebElement.class);
-        return String.valueOf(valueProvider.apply(searchContext.getRect()));
+        return  Optional.ofNullable(uiContext.getSearchContext(WebElement.class))
+                        .map(WebElement::getRect)
+                        .map(valueProvider::apply)
+                        .map(String::valueOf)
+                        .orElseGet(() -> {
+                            LOGGER.atError().log("Unable to get coordinate, context is not set");
+                            return "-1";
+                        });
     }
 }
