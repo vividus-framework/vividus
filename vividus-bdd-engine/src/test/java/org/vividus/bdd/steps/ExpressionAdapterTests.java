@@ -24,9 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -37,6 +39,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbehave.core.embedder.StoryControls;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -68,6 +71,7 @@ class ExpressionAdapterTests
 
     @Mock private IExpressionProcessor<Object> mockedTargetProcessor;
     @Mock private IExpressionProcessor<Object> mockedAnotherProcessor;
+    @Mock private StoryControls storyControls;
     @InjectMocks private ExpressionAdaptor expressionAdaptor;
 
     @ParameterizedTest
@@ -212,6 +216,17 @@ class ExpressionAdapterTests
         assertEquals(exception, actualException);
         assertThat(logger.getLoggingEvents(),
                 is(List.of(error("Unable to process expression '{}'", input))));
+    }
+
+    @Test
+    void shouldNotProcessExpressionsDuringDryRun()
+    {
+        String input = "#{expr(ess)}";
+        var processor = mock(IExpressionProcessor.class);
+        when(storyControls.dryRun()).thenReturn(true);
+        expressionAdaptor.setProcessors(List.of(processor));
+        assertEquals(input, expressionAdaptor.processRawExpression(input));
+        verifyNoInteractions(processor);
     }
 
     @Test

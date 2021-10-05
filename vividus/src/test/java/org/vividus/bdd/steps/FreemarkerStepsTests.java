@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.jbehave.core.embedder.StoryControls;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +62,7 @@ class FreemarkerStepsTests
     private static final List<Map<String, String>> TEMPLATE_PARAMETERS = List.of(Map.of(TABLE_KEY, TABLE_VALUE));
 
     @Mock private IBddVariableContext bddVariableContext;
+    @Mock private StoryControls storyControls;
 
     static Stream<Arguments> dataProvider()
     {
@@ -75,7 +77,7 @@ class FreemarkerStepsTests
     void shouldInitVariableUsingTemplate(List<Map<String, String>> templateParameters, String template)
             throws IOException, TemplateException
     {
-        ExpressionAdaptor adaptor = new ExpressionAdaptor();
+        ExpressionAdaptor adaptor = new ExpressionAdaptor(storyControls);
         adaptor.setProcessors(List.of(new TestExpressionProcessor()));
         FreemarkerSteps steps = new FreemarkerSteps(true, createConfiguration(), bddVariableContext, adaptor);
         steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, "org/vividus/bdd/steps/" + template, templateParameters);
@@ -92,7 +94,7 @@ class FreemarkerStepsTests
             when(bddVariableContext.getVariables()).thenReturn(Map.of(contextKey, contextValue));
 
             FreemarkerSteps steps = new FreemarkerSteps(true, createConfiguration(), bddVariableContext,
-                    new ExpressionAdaptor());
+                    new ExpressionAdaptor(storyControls));
 
             steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, TEMPLATE_FILE_NAME, TEMPLATE_PARAMETERS);
 
@@ -111,7 +113,7 @@ class FreemarkerStepsTests
         try (MockedConstruction<FreemarkerProcessor> mockedProcessor = mockConstruction(FreemarkerProcessor.class))
         {
             FreemarkerSteps steps = new FreemarkerSteps(false, createConfiguration(), bddVariableContext,
-                    new ExpressionAdaptor());
+                    new ExpressionAdaptor(storyControls));
 
             steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, TEMPLATE_FILE_NAME, TEMPLATE_PARAMETERS);
 
