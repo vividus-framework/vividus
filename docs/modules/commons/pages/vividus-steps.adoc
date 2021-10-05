@@ -155,15 +155,15 @@ Then `$value` matches `$regex`
 
 === Create a file
 
-Saves the provided content to a file with the specified pathname.
+Saves the provided content to a file with the specified file path.
 
 [source,gherkin]
 ----
-When I create a file with the pathname `$pathname` and the content `$fileContent`
+When I create file with content `$fileContent` at path `$filePath`
 ----
 
-* `$pathname` - The fully qualified file name including parent folders and extension (e.g. `temp/some_file.txt`).
 * `$fileContent` - The content to be saved to the creating file.
+* `$filePath` - The fully qualified file name including parent folders and extension (e.g. `temp/some_file.txt`).
 
 
 === Create a temporary file
@@ -173,23 +173,23 @@ The created file will be removed upon test run completion.
 
 [source,gherkin]
 ----
-When I create temporary file with name '$name' and content '$content' and put path to '$scopes' variable with name '$pathVariable'
+When I create temporary file with name `$name` and content `$content` and put path to $scopes variable `$variableName`
 ----
 
 * `$name` - The logical name of the creating temporary file. For example, when `$name` is equal to `my-file.txt`, then `my-file` will be used as a prefix in the temporary file name and `.txt` - as a suffix.
 * `$content` - The content to be saved to the creating temporary file.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$pathVariable` - The name of the variable to store the full path of the created temporary file.
+* `$variableName` - The name of the variable to store the full path of the created temporary file.
 
 If you want to use the created temporary file in further batches of the test suite as an input data, you should use https://datatracker.ietf.org/doc/html/rfc8089#appendix-A[URL with `file` protocol]
 
 .Batch 1 - Create a temporary local file
 [source,gherkin]
 ----
-When I create temporary file with name '.table' and content '
+When I create temporary file with name `.table` and content `
 |column|
 |value |
-' and put path to 'NEXT_BATCHES' variable with name 'examples-table-temporary-file'
+` and put path to NEXT_BATCHES variable `examples-table-temporary-file`
 ----
 
 .Batch 2 - Use the temporary file as `ExamplesTable`
