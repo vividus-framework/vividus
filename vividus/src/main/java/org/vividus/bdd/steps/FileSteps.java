@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,28 +48,28 @@ public class FileSteps
      * <li><b>STORY</b> - the variable will be available within the whole story,
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
-     * @param pathVariable name of variable
+     * @param variableName name of variable
      * @throws IOException if an I/O exception of some sort has occurred
      */
-    @When("I create temporary file with name '$name' and content '$content' and put path to '$scopes' variable"
-            + " with name '$pathVariable'")
-    public void saveResponseBodyToFile(String name, String content, Set<VariableScope> scopes, String pathVariable)
+    @When("I create temporary file with name `$name` and content `$content` and put path to $scopes variable"
+            + " `$variableName`")
+    public void saveResponseBodyToFile(String name, String content, Set<VariableScope> scopes, String variableName)
             throws IOException
     {
         Path temporaryFile = ResourceUtils.createTempFile(FilenameUtils.getBaseName(name),
                 "." + FilenameUtils.getExtension(name), content);
-        bddVariableContext.putVariable(scopes, pathVariable, temporaryFile.toString());
+        bddVariableContext.putVariable(scopes, variableName, temporaryFile.toString());
     }
 
     /**
      * Saves content to file with specified pathname
-     * @param pathname Fully qualified file name with parent folders and extension (e.g. temp/some_file.txt)
      * @param fileContent Content to be saved to file
+     * @param filePath Fully qualified file name with parent folders and extension (e.g. temp/some_file.txt)
      * @throws IOException If an I/O error has occurred
      */
-    @When("I create a file with the pathname `$pathname` and the content `$fileContent`")
-    public void createFile(String pathname, String fileContent) throws IOException
+    @When("I create file with content `$fileContent` at path `$filePath`")
+    public void createFile(String fileContent, String filePath) throws IOException
     {
-        FileUtils.writeStringToFile(new File(pathname), fileContent, StandardCharsets.UTF_8);
+        FileUtils.writeStringToFile(new File(filePath), fileContent, StandardCharsets.UTF_8);
     }
 }

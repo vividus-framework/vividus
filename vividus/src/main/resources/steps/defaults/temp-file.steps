@@ -1,0 +1,7 @@
+Composite: When I create temporary file with name '$name' and content '$content' and put path to '$scopes' variable with name '$pathVariable'
+!-- WARNING: The step "When I create temporary file with name '$name' and content '$content' and put path to '$scopes' variable with name '$pathVariable'" is deprecated and will be removed in VIVIDUS 0.4.0
+When I create temporary file with name `<name>` and content `<content>` and put path to <scopes> variable `<pathVariable>`
+
+Composite: When I create a file with the pathname `$pathname` and the content `$fileContent`
+!-- WARNING: The step "When I create a file with the pathname `$pathname` and the content `$fileContent`" is deprecated and will be removed in VIVIDUS 0.4.0
+When I create file with content `<fileContent>` at path `<pathname>`
