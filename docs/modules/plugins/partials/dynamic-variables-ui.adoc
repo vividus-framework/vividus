@@ -39,3 +39,21 @@ Then `${context-width}` is > `0`
 Then `${context-x-coordinate}` is > `0`
 Then `${context-y-coordinate}` is > `0`
 ----
+
+
+=== Source code
+
+Variable provides source code of the UI of the application under test.
+
+==== *Variable name*
+
+[source,gherkin]
+---
+${source-code}
+---
+
+.Check if element exists on UI
+[source,gherkin]
+----
+Then `${source-code}` matches `.+Home.+`
+----

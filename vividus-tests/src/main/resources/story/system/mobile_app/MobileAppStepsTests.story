@@ -14,7 +14,8 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
-Scenario: Validate coordinate/size dynamic variables
+Scenario: Validate coordinate/size dynamic variables, page source dynamic variable
+Then `${source-code}` matches `.+Home.+`
 When I change context to element located `xpath(<textElementXpath>)->filter.text(Home)`
 Then `${context-height}`            is > `0`
 Then `${context-width}`             is > `0`

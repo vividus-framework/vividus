@@ -18,3 +18,7 @@ Then `${context-height}`            is > `0`
 Then `${context-width}`             is > `0`
 Then `${context-x-coordinate}`      is > `0`
 Then `${context-y-coordinate}`      is > `0`
+
+
+Scenario: Verify `source-code` dynamic variable
+Then `${source-code}` matches `.+Vividus Logo.+`

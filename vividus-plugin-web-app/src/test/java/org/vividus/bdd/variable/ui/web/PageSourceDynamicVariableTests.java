@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,34 +17,40 @@
 package org.vividus.bdd.variable.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+
+import com.github.valfirst.slf4jtest.LoggingEvent;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.WebDriver;
-import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.bdd.variable.ui.SourceCodeDynamicVariable;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class})
 class PageSourceDynamicVariableTests
 {
+    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(PageSourceDynamicVariable.class);
+
     @Mock
-    private IWebDriverProvider webDriverProvider;
+    private SourceCodeDynamicVariable appSourceVariable;
 
     @InjectMocks
     private PageSourceDynamicVariable pageSourceDynamicVariable;
 
     @Test
-    void shouldReturnPageSource()
+    void shouldLogDeprecation()
     {
-        String sources = "<html></html>";
-        WebDriver driver = mock(WebDriver.class);
-        when(webDriverProvider.get()).thenReturn(driver);
-        when(driver.getPageSource()).thenReturn(sources);
-
-        assertEquals(sources, pageSourceDynamicVariable.getValue());
+        String source = "</html>";
+        when(appSourceVariable.getValue()).thenReturn(source);
+        assertEquals(source, pageSourceDynamicVariable.getValue());
+        assertEquals(List.of(LoggingEvent.error("Dynamice variable `page-source` is deprecated and will be"
+                + " removed in VIVIDUS 0.4.0, please use `source-code` instead")), LOGGER.getLoggingEvents());
     }
 }
