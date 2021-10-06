@@ -201,6 +201,20 @@ selenium.grid.platform-name=Android
 selenium.grid.automation-name=UIAutomator2
 ----
 
+=== Local
+:local-profile: mobile_app/local
+
+The profile simplifies execution of tests against the local Appium server. It could be used in conjunction with: `{android-profile}`, `{ios-profile}`, `{tvos-profile}`
+The profile can be enabled by adding `{local-profile}` to `configuration.profiles` property
+
+Default profile configuration
+[source,properties]
+----
+selenium.grid.url=http://127.0.0.1:4723/wd/hub
+selenium.grid.platformName=${selenium.grid.platform-name}
+selenium.grid.automationName=${selenium.grid.automation-name}
+----
+
 include::partial$dynamic-variables-header.adoc[]
 
 === Get clipboard text
