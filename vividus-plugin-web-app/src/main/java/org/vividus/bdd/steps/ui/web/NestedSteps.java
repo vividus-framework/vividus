@@ -21,10 +21,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
@@ -32,8 +28,6 @@ import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.bdd.steps.SubSteps;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
-import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.context.SearchContextSetter;
@@ -44,11 +38,16 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 @TakeScreenshotOnFailure
 public class NestedSteps
 {
-    @Inject private IUiContext uiContext;
-    @Inject private IBaseValidations baseValidations;
-    @Inject private ISearchActions searchActions;
-    @Inject private ISoftAssert softAssert;
-    @Inject private ICssSelectorFactory cssSelectorFactory;
+    private final IUiContext uiContext;
+    private final IBaseValidations baseValidations;
+    private final ICssSelectorFactory cssSelectorFactory;
+
+    public NestedSteps(IUiContext uiContext, IBaseValidations baseValidations, ICssSelectorFactory cssSelectorFactory)
+    {
+        this.uiContext = uiContext;
+        this.baseValidations = baseValidations;
+        this.cssSelectorFactory = cssSelectorFactory;
+    }
 
     /**
      * Steps designed to perform steps against all elements found by locator
@@ -110,63 +109,6 @@ public class NestedSteps
         }
     }
 
-    /**
-     * Steps designed to perform steps while specified condition persists
-     * <b>if</b> condition changed cycle ends.
-     * Actions performed by step:
-     * <ul>
-     * <li>1. Searches for elements using locator</li>
-     * <li>2. Checks that elements quantity matches comparison rule and elements number</li>
-     * <li>3. Performs steps</li>
-     * <li>4. Restores previously set context</li>
-     * <li>Repeat 1-4 until iteration limit reached or elements quantity changed</li>
-     * </ul>
-     * To avoid infinite loops used iterationLimit. If iteration's limit reached step will fail.
-     * <br> Usage example:
-     * <code>
-     * <br>When I find = 1 elements By.xpath(.//*[contains(@class,'fancybox-wrap')]) and while elements
-     * number persists do up to 5 iteration of
-     * <br>|step|
-     * <br>|When I compare against baseline with name 'test_composit1_step'|
-     * <br>|When I click on all elements by xpath './/a[@title='Close']'|
-     * </code>
-     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
-     *                       <ul>
-     *                       <li>less than (&lt;)</li>
-     *                       <li>less than or equal to (&lt;=)</li>
-     *                       <li>greater than (&gt;)</li>
-     *                       <li>greater than or equal to (&gt;=)</li>
-     *                       <li>equal to (=)</li>
-     *                       <li>not equal to (!=)</li>
-     *                       </ul>
-     * @param number         Number of elements to find
-     * @param locator        Locator to locate element
-     * @param iterationLimit Max iterations to perform
-     * @param stepsToExecute Examples table with steps to execute for each found elements
-     */
-    @When(value = "I find $comparisonRule `$number` elements `$locator` and while they exist do up "
-            + "to $iterationLimit iteration of$stepsToExecute", priority = 5)
-    @Alias("I find $comparisonRule '$number' elements $locator and while they exist do up "
-            + "to $iterationLimit iteration of$stepsToExecute")
-    public void performAllStepsWhileElementsExist(ComparisonRule comparisonRule, int number, Locator locator,
-            int iterationLimit, SubSteps stepsToExecute)
-    {
-        int iterationsCounter = iterationLimit;
-        Matcher<Integer> elementNumberMatcher = comparisonRule.getComparisonRule(number);
-        MutableBoolean firstIteration = new MutableBoolean(true);
-        while (iterationsCounter > 0 && isExpectedElementsQuantity(locator, elementNumberMatcher, firstIteration))
-        {
-            runStepsWithContextReset(() -> stepsToExecute.execute(Optional.empty()));
-            iterationsCounter--;
-        }
-        if (iterationsCounter == 0)
-        {
-            softAssert.recordFailedAssertion(
-                    String.format("Elements number %s was not changed after %d iteration(s)",
-                            elementNumberMatcher.toString(), iterationLimit));
-        }
-    }
-
     private void runStepsWithContextReset(Runnable subStepExecutor)
     {
         SearchContextSetter contextSetter = uiContext.getSearchContextSetter();
@@ -178,21 +120,5 @@ public class NestedSteps
         {
             contextSetter.setSearchContext();
         }
-    }
-
-    private boolean isExpectedElementsQuantity(Locator locator, Matcher<Integer> elementsMatcher,
-            MutableBoolean firstIteration)
-    {
-        if (firstIteration.isTrue())
-        {
-            firstIteration.setValue(false);
-            return softAssert.assertThat("Elements number", getElementsNumber(locator), elementsMatcher);
-        }
-        return elementsMatcher.matches(getElementsNumber(locator));
-    }
-
-    private int getElementsNumber(Locator locator)
-    {
-        return searchActions.findElements(uiContext.getSearchContext(), locator).size();
     }
 }
