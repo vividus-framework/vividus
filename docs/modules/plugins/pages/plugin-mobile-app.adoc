@@ -177,6 +177,18 @@ selenium.grid.platform-name=iOS
 selenium.grid.automation-name=XCUITest
 ----
 
+=== tvOS
+:tvos-profile: mobile_app/tvos
+
+The profile can be enabled by adding `{tvos-profile}` to `configuration.profiles` property
+
+Default profile configuration
+[source,properties]
+----
+selenium.grid.platform-name=tvOS
+selenium.grid.automation-name=XCUITest
+----
+
 === Android
 :android-profile: mobile_app/android
 
