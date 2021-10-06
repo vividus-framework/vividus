@@ -129,6 +129,7 @@
     <bean id="genericWaitSteps" class="org.vividus.bdd.steps.ui.GenericWaitSteps" />
     <bean id="genericSetVariableSteps" class="org.vividus.bdd.steps.ui.GenericSetVariableSteps" />
     <bean id="genericSetContextSteps" class="org.vividus.bdd.steps.ui.GenericSetContextSteps" />
+    <bean id="genericNestedSteps" class="org.vividus.bdd.steps.ui.GenericNestedSteps" />
     <bean id="navigationSteps" class="org.vividus.bdd.steps.ui.NavigationSteps" />
     <bean id="screenshotTakingSteps" class="org.vividus.bdd.steps.ui.ScreenshotTakingSteps" />
 
@@ -154,6 +155,7 @@
         <idref bean="genericWaitSteps" />
         <idref bean="genericSetVariableSteps" />
         <idref bean="genericSetContextSteps" />
+        <idref bean="genericNestedSteps" />
         <idref bean="navigationSteps" />
         <idref bean="screenshotTakingSteps" />
     </util:list>
