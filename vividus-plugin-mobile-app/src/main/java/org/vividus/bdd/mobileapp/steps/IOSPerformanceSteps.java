@@ -16,76 +16,73 @@
 
 package org.vividus.bdd.mobileapp.steps;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
+import org.vividus.ui.action.JavascriptActions;
 
 public class IOSPerformanceSteps
 {
     private static final String PROFILE_NAME = "profileName";
 
-    private IWebDriverProvider webDriverProvider;
-    private IGenericWebDriverManager webDriverManager;
+    private final JavascriptActions javascriptActions;
+    private final IGenericWebDriverManager webDriverManager;
 
-    public IOSInstrumentsSteps(IWebDriverProvider webDriverProvider, IGenericWebDriverManager webDriverManager)
+    public IOSPerformanceSteps(JavascriptActions javascriptActions, IGenericWebDriverManager webDriverManager)
     {
-        this.webDriverProvider = webDriverProvider;
+        this.javascriptActions = javascriptActions;
         this.webDriverManager = webDriverManager;
     }
 
     /**
-     * Start recording metrics of specified IOS instrument.
+     * Start recording metrics of specified Xcode instrument.
+     * <br>
+     * List of some useful instruments: Time Profiler, Leaks, File Activity, etc.
+     * <br>
+     * See <a href="https://appiumpro.com/editions/12-capturing-performance-data-for-native-ios-apps">
+     * Capturing Performance Data for Native iOS Apps</a> and
+     * <a href="https://developer.apple.com/videos/play/wwdc2019/411/">Getting Started with Instruments</a>
+     * for more info
+     * <br>
      * @param instrument instrument to record data
      */
     @When("I start recording `$instrument` metrics")
     public void startRecordingOfInstrument(String instrument)
     {
         checkIOS();
-        Map<String, Object> args = new HashMap<>();
-        args.put("pid", "current");
-        args.put(PROFILE_NAME, instrument);
+        Map<String, Object> args = Map.of("pid", "current", PROFILE_NAME, instrument);
 
-        getWebDriver().executeScript("mobile: startPerfRecord", args);
+        javascriptActions.executeScript("mobile: startPerfRecord", args);
     }
 
     /**
      * Stop recording metrics of specified IOS instrument and save results to <b>path</b>
+     * <br>
+     * Result will be an archive with *.trace file whick could be opened by Xcode.
      * @param instrument instrument to record data
      * @param path Path to the location for saving the screenshot
      * @throws IOException If an input or output exception occurred
      */
-    @When("I stop recording `$instrument` metrics and save results to file `$filePath`")
-    public void stopRecordingInstrumentData(String instrument, Path filePath) throws IOException
+    @When("I stop recording `$instrument` metrics and save results to file `$path`")
+    public void stopRecordingInstrumentData(String instrument, Path path) throws IOException
     {
         checkIOS();
-        Map<String, Object> args = new HashMap<>();
-        args.put(PROFILE_NAME, instrument);
+        Map<String, Object> args = Map.of(PROFILE_NAME, instrument);
 
-        File traceZip = new File(path);
-        String b64Zip = (String) getWebDriver().executeScript("mobile: stopPerfRecord", args);
+        String b64Zip = (String) javascriptActions.executeScript("mobile: stopPerfRecord", args);
         byte[] bytesZip = Base64.getMimeDecoder().decode(b64Zip);
 
-        Files.write(filePath, bytesZip);
+        Files.write(path, bytesZip);
     }
 
     private void checkIOS()
     {
-        if (!webDriverManager.isIOS())
-        {
-            throw new IllegalStateException("Step is only supported on IOS devices");
-        }
-    }
-
-    private RemoteWebDriver getWebDriver()
-    {
-        return webDriverProvider.getUnwrapped(RemoteWebDriver.class);
+        Validate.isTrue(webDriverManager.isIOS());
     }
 }

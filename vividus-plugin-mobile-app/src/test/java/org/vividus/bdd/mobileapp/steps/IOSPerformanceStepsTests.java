@@ -36,41 +36,36 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
+import org.vividus.ui.action.JavascriptActions;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
-public class IOSInstrumentsStepsTests
+public class IOSPerformanceStepsTests
 {
     private static final String PROFILE_NAME = "profileName";
     private static final String PROFILE = "profile";
 
     @Mock
-    private IWebDriverProvider webDriverProvider;
+    private JavascriptActions javascriptActions;
 
     @Mock
     private IGenericWebDriverManager webDriverManager;
-
-    @Mock
-    private RemoteWebDriver webDriver;
 
     @Captor
     private ArgumentCaptor<Map<String, Object>> captor;
 
     @InjectMocks
-    private IOSInstrumentsSteps instrumentsSteps;
+    private IOSPerformanceSteps performanceSteps;
 
     @Test
     void shouldStartRecordingOfInstrument()
     {
         when(webDriverManager.isIOS()).thenReturn(true);
-        when(webDriverProvider.getUnwrapped(RemoteWebDriver.class)).thenReturn(webDriver);
 
-        instrumentsSteps.startRecordingOfInstrument(PROFILE);
+        performanceSteps.startRecordingOfInstrument(PROFILE);
 
-        verify(webDriver).executeScript(eq("mobile: startPerfRecord"), captor.capture());
+        verify(javascriptActions).executeScript(eq("mobile: startPerfRecord"), captor.capture());
         Map<String, Object> scriptParams = captor.getValue();
         assertEquals("current", scriptParams.get("pid"));
         assertEquals(PROFILE, scriptParams.get(PROFILE_NAME));
@@ -80,12 +75,11 @@ public class IOSInstrumentsStepsTests
     void shouldStopRecordingInstrumentData() throws IOException
     {
         when(webDriverManager.isIOS()).thenReturn(true);
-        when(webDriverProvider.getUnwrapped(RemoteWebDriver.class)).thenReturn(webDriver);
         String text = "text";
         Path tempFilepath = ResourceUtils.createTempFile("test", ".trace", null);
-        when(webDriver.executeScript(eq("mobile: stopPerfRecord"), captor.capture())).thenReturn(text);
+        when(javascriptActions.executeScript(eq("mobile: stopPerfRecord"), captor.capture())).thenReturn(text);
 
-        instrumentsSteps.stopRecordingInstrumentData(PROFILE, tempFilepath.toString());
+        performanceSteps.stopRecordingInstrumentData(PROFILE, tempFilepath);
 
         Map<String, Object> scriptParams = captor.getValue();
         assertEquals(PROFILE, scriptParams.get(PROFILE_NAME));
@@ -97,8 +91,6 @@ public class IOSInstrumentsStepsTests
     void shouldFailInNonIOSRun() throws IOException
     {
         when(webDriverManager.isIOS()).thenReturn(false);
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> instrumentsSteps.startRecordingOfInstrument(PROFILE));
-        assertEquals("Step is only supported on IOS devices", exception.getMessage());
+        assertThrows(IllegalArgumentException.class, () -> performanceSteps.startRecordingOfInstrument(PROFILE));
     }
 }

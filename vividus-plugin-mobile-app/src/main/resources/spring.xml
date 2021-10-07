@@ -51,7 +51,7 @@
         <constructor-arg index="0" value="${mobile-environment.device.folder-for-file-upload}" />
     </bean>
 
-    <bean id="iOSInstrumentsSteps" class="org.vividus.bdd.mobileapp.steps.IOSInstrumentsSteps" />
+    <bean id="iOSPerformanceSteps" class="org.vividus.bdd.mobileapp.steps.IOSPerformanceSteps" />
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
 
@@ -121,6 +121,6 @@
         <idref bean="deviceSteps" />
         <idref bean="elementSteps" />
         <idref bean="setContextSteps" />
-        <idref bean="iOSInstrumentsSteps" />
+        <idref bean="iOSPerformanceSteps" />
     </util:list>
 </beans>

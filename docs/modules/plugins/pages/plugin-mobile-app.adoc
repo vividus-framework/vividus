@@ -700,13 +700,15 @@ include::partial$generic-ui-steps.adoc[]
 === Recording iOS Performance metrics
 
 Records performance metrics of iOS application. It is based on the Instruments utility distributed by Xcode which provides a number of built-in analyses and measurements.
+See https://appiumpro.com/editions/12-capturing-performance-data-for-native-ios-apps[Capturing Performance Data for Native iOS Apps] and https://developer.apple.com/videos/play/wwdc2019/411/[Getting Started with Instruments] for more information.
 
-NOTE: Appium server should be started with the *--relaxed-security* flag. This is because Instruments can gather data from the system as a whole, not just the AUT. (It's thus a security risk to expose potentially sensitive system information to Appium sessions running from a remote client).
+[NOTE]
+Appium server should be started with the *--relaxed-security* flag. This is because Instruments can gather data from the system as a whole, not just the AUT. (It's thus a security risk to expose potentially sensitive system information to Appium sessions running from a remote client).
 
 [source,gherkin]
 ----
-When I start recording '$instrument' metrics
-When I stop recording '$instrument' metrics and save data to '$path'
+When I start recording `$instrument` metrics
+When I stop recording `$instrument` metrics and save results to file `$path`
 ----
 
 . `$instrument` - The instrument of Xcode Instruments utility
@@ -715,7 +717,7 @@ When I stop recording '$instrument' metrics and save data to '$path'
 .Perform profiling during application usage
 [source,gherkin]
 ----
-When I start recording 'Time Profiler' metrics
+When I start recording `Time Profiler` metrics
 !-- set of actions to measure performance
-When I stop recording 'Time Profiler' metrics and save data to '${outputDirectory}/time_profiler.zip'
+When I stop recording `Time Profiler` metrics and save results to file `${outputDirectory}/time_profiler.zip`
 ----
