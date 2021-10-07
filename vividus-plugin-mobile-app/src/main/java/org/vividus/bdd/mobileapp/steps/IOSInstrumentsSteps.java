@@ -28,7 +28,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 
-public class IOSInstrumentsSteps
+public class IOSPerformanceSteps
 {
     private static final String PROFILE_NAME = "profileName";
 
@@ -45,7 +45,7 @@ public class IOSInstrumentsSteps
      * Start recording metrics of specified IOS instrument.
      * @param instrument instrument to record data
      */
-    @When("I start recording '$instrument' metrics")
+    @When("I start recording `$instrument` metrics")
     public void startRecordingOfInstrument(String instrument)
     {
         checkIOS();
@@ -62,8 +62,8 @@ public class IOSInstrumentsSteps
      * @param path Path to the location for saving the screenshot
      * @throws IOException If an input or output exception occurred
      */
-    @When("I stop recording '$instrument' metrics and save data to '$path'")
-    public void stopRecordingInstrumentData(String instrument, String path) throws IOException
+    @When("I stop recording `$instrument` metrics and save results to file `$filePath`")
+    public void stopRecordingInstrumentData(String instrument, Path filePath) throws IOException
     {
         checkIOS();
         Map<String, Object> args = new HashMap<>();
@@ -73,10 +73,7 @@ public class IOSInstrumentsSteps
         String b64Zip = (String) getWebDriver().executeScript("mobile: stopPerfRecord", args);
         byte[] bytesZip = Base64.getMimeDecoder().decode(b64Zip);
 
-        try (FileOutputStream stream = new FileOutputStream(traceZip))
-        {
-            stream.write(bytesZip);
-        }
+        Files.write(filePath, bytesZip);
     }
 
     private void checkIOS()
