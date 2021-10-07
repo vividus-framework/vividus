@@ -88,8 +88,12 @@ include::partial$locator-header.adoc[]
 |checkboxName(allow)
 
 |`elementName`
-|Any attribute or text value
+|any attribute or text value
 |elementName(OK)
+
+|`shadowCssSelector`
+|chain of css selectors, separated by `;`, where first value - selector for upper shadow host, last value - target element selector
+|shadowCssSelector(.upperHost; #innerHost1; #innerHost2; .targetValue)
 
 |===
 

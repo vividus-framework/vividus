@@ -42,6 +42,12 @@ When I save `name` attribute value of element located `By.id(text)` to SCENARIO 
 Then `text` is equal to `${variableName}`
 
 
+Scenario: Verify step: "When I save `$attributeName` attribute value of element located `$locator` to $scopes variable `$variableName`" for element with shadowCssSelector
+Given I am on a page with the URL '${vividus-test-site-url}/shadowDom.html'
+When I save `class` attribute value of element located `shadowCssSelector(#shadow-upper-host; #shadow-inner-host; .target-element):in` to SCENARIO variable `variableName`
+Then `target-element` is equal to `${variableName}`
+
+
 Scenario: Verify save number of elements steps
 Given I am on a page with the URL '${vividus-test-site-url}/links.html'
 When I save number of elements located `tagName(a)` to SCENARIO variable `numberOfLinks`

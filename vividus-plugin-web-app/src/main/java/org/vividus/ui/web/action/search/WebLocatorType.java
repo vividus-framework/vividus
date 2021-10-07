@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package org.vividus.ui.web.action.search;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.vividus.ui.action.search.GenericTextFilter;
 import org.vividus.ui.action.search.IElementAction;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.LocatorType;
 
 public enum WebLocatorType implements LocatorType
@@ -52,7 +56,25 @@ public enum WebLocatorType implements LocatorType
     CLASS_NAME("Class name", BySeleniumLocatorSearch.class),
     XPATH("XPath", XpathSearch.class),
     ID("Id", BySeleniumLocatorSearch.class),
-    TAG_NAME("Tag name", BySeleniumLocatorSearch.class);
+    TAG_NAME("Tag name", BySeleniumLocatorSearch.class),
+    SHADOW_CSS_SELECTOR("Shadow CSS selector", ShadowCssSelectorSearch.class)
+    {
+        @Override
+        public Locator buildLocator(String searchValue)
+        {
+            List<String> searchValues = Stream.of(searchValue.split(";"))
+                    .map(String::strip)
+                    .collect(Collectors.toList());
+            String targetValue = searchValues.get(searchValues.size() - 1);
+            String upperShadowHost = searchValues.get(0);
+            String[] innerShadowHosts = searchValues.stream().skip(1)
+                    .limit(searchValues.size() - 2)
+                    .toArray(String[]::new);
+
+            return new Locator(this, new ShadowDomSearchParameters(targetValue, upperShadowHost,
+                    innerShadowHosts));
+        }
+    };
 
     private final String attributeName;
     private final Class<? extends IElementAction> actionClass;
