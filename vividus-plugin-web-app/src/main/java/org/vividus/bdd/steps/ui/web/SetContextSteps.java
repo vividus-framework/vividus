@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.web.action.FrameActions;
 import org.vividus.ui.web.action.IWindowsActions;
 
 @TakeScreenshotOnFailure
@@ -46,17 +47,19 @@ public class SetContextSteps
     private final IWebDriverProvider webDriverProvider;
     private final IDescriptiveSoftAssert descriptiveSoftAssert;
     private final IWindowsActions windowsActions;
+    private final FrameActions frameActions;
     private final IWaitActions waitActions;
     private final IBaseValidations baseValidations;
 
     public SetContextSteps(IUiContext uiContext, IWebDriverProvider webDriverProvider,
-            IDescriptiveSoftAssert descriptiveSoftAssert, IWindowsActions windowsActions, IWaitActions waitActions,
-            IBaseValidations baseValidations)
+            IDescriptiveSoftAssert descriptiveSoftAssert, IWindowsActions windowsActions, FrameActions frameActions,
+            IWaitActions waitActions, IBaseValidations baseValidations)
     {
         this.uiContext = uiContext;
         this.webDriverProvider = webDriverProvider;
         this.descriptiveSoftAssert = descriptiveSoftAssert;
         this.windowsActions = windowsActions;
+        this.frameActions = frameActions;
         this.waitActions = waitActions;
         this.baseValidations = baseValidations;
     }
@@ -73,7 +76,7 @@ public class SetContextSteps
     public void switchingToDefault()
     {
         resetContext();
-        getWebDriver().switchTo().defaultContent();
+        frameActions.switchToRoot();
     }
 
     /**
@@ -104,7 +107,10 @@ public class SetContextSteps
     {
         resetContext();
         WebElement element = baseValidations.assertIfElementExists("A frame", locator);
-        switchToFrame(element);
+        if (element != null)
+        {
+            frameActions.switchToFrame(element);
+        }
     }
 
     /**
@@ -215,14 +221,6 @@ public class SetContextSteps
         if (condition.getAsBoolean())
         {
             resetContext();
-        }
-    }
-
-    private void switchToFrame(WebElement frame)
-    {
-        if (frame != null)
-        {
-            getWebDriver().switchTo().frame(frame);
         }
     }
 
