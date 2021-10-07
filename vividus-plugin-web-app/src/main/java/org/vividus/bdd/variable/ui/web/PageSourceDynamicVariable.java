@@ -18,22 +18,29 @@ package org.vividus.bdd.variable.ui.web;
 
 import javax.inject.Named;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.bdd.variable.DynamicVariable;
-import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.bdd.variable.ui.SourceCodeDynamicVariable;
 
 @Named("page-source")
+@Deprecated(forRemoval = true, since = "0.3.10")
 public class PageSourceDynamicVariable implements DynamicVariable
 {
-    private final IWebDriverProvider webDriverProvider;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PageSourceDynamicVariable.class);
+    private final SourceCodeDynamicVariable appSourceVariable;
 
-    public PageSourceDynamicVariable(IWebDriverProvider webDriverProvider)
+    public PageSourceDynamicVariable(SourceCodeDynamicVariable appSourceVariable)
     {
-        this.webDriverProvider = webDriverProvider;
+        this.appSourceVariable = appSourceVariable;
     }
 
     @Override
     public String getValue()
     {
-        return webDriverProvider.get().getPageSource();
+        LOGGER.atError().log(
+            "Dynamice variable `page-source` is deprecated and will be removed in VIVIDUS 0.4.0, please use "
+            + "`source-code` instead");
+        return appSourceVariable.getValue();
     }
 }
