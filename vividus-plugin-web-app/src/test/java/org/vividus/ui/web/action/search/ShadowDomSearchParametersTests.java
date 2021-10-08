@@ -26,7 +26,7 @@ import org.vividus.ui.action.search.Visibility;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
-public class ShadowDomSearchParametersTests
+class ShadowDomSearchParametersTests
 {
     private static final String TARGET = "h1";
     private static final String UPPER_HOST = "div";
