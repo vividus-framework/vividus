@@ -19,6 +19,7 @@ dependencies {
     api(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.1')
     api(group: 'edu.uci.ics', name: 'crawler4j', version: '4.4.0')
 
+    implementation(group: 'com.codeborne', name: 'selenide', version: '5.24.3')
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: seleniumVersion)
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-edge-driver', version: seleniumVersion)
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-firefox-driver', version: seleniumVersion)
@@ -44,4 +45,5 @@ dependencies {
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.7.1')
 }
