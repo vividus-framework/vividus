@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,18 +37,13 @@ public class LinkTextSearch extends AbstractWebElementSearchAction implements IE
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
-        if (searchContext != null)
+        String text = parameters.getValue();
+        List<WebElement> links = findElements(searchContext, By.linkText(text), parameters);
+        if (links.isEmpty())
         {
-            String text = parameters.getValue();
-            By locator = By.linkText(text);
-            List<WebElement> links = findElements(searchContext, locator, parameters);
-            if (links.isEmpty())
-            {
-                locator = LocatorUtil.getXPathLocator(LINK_WITH_ANY_ATTRIBUTE_OR_TEXT, text);
-                return findElementsByText(searchContext, locator, parameters, "a");
-            }
-            return links;
+            By locator = LocatorUtil.getXPathLocator(LINK_WITH_ANY_ATTRIBUTE_OR_TEXT, text);
+            return findElementsByText(searchContext, locator, parameters, "a");
         }
-        return List.of();
+        return links;
     }
 }

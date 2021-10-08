@@ -145,38 +145,44 @@
     <bean class="org.vividus.ui.web.action.search.CheckboxNameSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.ClassAttributePartFilter" />
     <bean class="org.vividus.ui.web.action.search.ImageWithSourcePartFilter" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.PartialLinkTextSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.FieldTextFilter" />
     <bean class="org.vividus.ui.web.action.search.FieldTextPartFilter" />
-    <bean class="org.vividus.ui.web.action.search.FieldNameSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.DropDownStateFilter" parent="abstractStateFilter" />
     <bean class="org.vividus.ui.web.action.search.DropDownTextFilter" />
-    <bean class="org.vividus.ui.web.action.search.CaseInsensitiveTextSearch" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.ImageWithSourceSearch" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.XpathSearch" parent="abstractWebElementSearchAction" />
+
     <bean class="org.vividus.ui.web.action.search.LinkUrlSearch" parent="abstractWebElementSearchAction">
         <property name="caseSensitiveSearch" value="${web.search.link-url.case-sensitive}" />
     </bean>
 
-    <bean class="org.vividus.ui.web.action.search.BySeleniumLocatorSearch" parent="abstractWebElementSearchAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).ID}" />
-        <constructor-arg index="1" value="#{T(org.openqa.selenium.support.How).ID}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CASE_INSENSITIVE_TEXT}" />
     </bean>
-    <bean class="org.vividus.ui.web.action.search.BySeleniumLocatorSearch" parent="abstractWebElementSearchAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).TAG_NAME}" />
-        <constructor-arg index="1" value="#{T(org.openqa.selenium.support.How).TAG_NAME}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CLASS_NAME}" />
     </bean>
-    <bean class="org.vividus.ui.web.action.search.BySeleniumLocatorSearch" parent="abstractWebElementSearchAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CSS_SELECTOR}" />
-        <constructor-arg index="1" value="#{T(org.openqa.selenium.support.How).CSS}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CSS_SELECTOR}" />
     </bean>
-    <bean class="org.vividus.ui.web.action.search.BySeleniumLocatorSearch" parent="abstractWebElementSearchAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CLASS_NAME}" />
-        <constructor-arg index="1" value="#{T(org.openqa.selenium.support.How).CLASS_NAME}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).FIELD_NAME}" />
     </bean>
-    <bean class="org.vividus.ui.web.action.search.ShadowCssSelectorSearch" parent="abstractWebElementSearchAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).SHADOW_CSS_SELECTOR}" />
-        <constructor-arg index="1" value="#{T(org.openqa.selenium.support.How).CSS}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).ID}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).IMAGE_SRC}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).PARTIAL_LINK_TEXT}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).SHADOW_CSS_SELECTOR}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).TAG_NAME}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).XPATH}" />
     </bean>
 
     <bean class="org.vividus.ui.web.action.search.ElementNameSearch" parent="abstractWebElementSearchAction" >

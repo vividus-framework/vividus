@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.action.search;
+package org.vividus.ui.action.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -23,31 +23,23 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.action.search.Visibility;
+import org.vividus.testdouble.TestLocatorType;
 
-class ImageWithSourceSearchTests
+class ByLocatorSearchTests
 {
-    private final ImageWithSourceSearch search = new ImageWithSourceSearch();
-
     @Test
     void testSearch()
     {
+        TestLocatorType locatorType = TestLocatorType.ADDITIONAL_SEARCH;
         List<WebElement> webElements = List.of(mock(WebElement.class));
         SearchContext searchContext = mock(SearchContext.class);
         SearchParameters parameters = new SearchParameters("locator", Visibility.ALL, false);
+        ByLocatorSearch searchAction = new ByLocatorSearch(locatorType);
 
-        when(searchContext.findElements(By.xpath(".//img[normalize-space(@src)=\"locator\"]"))).thenReturn(webElements);
+        when(searchContext.findElements(locatorType.buildBy(parameters.getValue()))).thenReturn(webElements);
 
-        assertEquals(webElements, search.search(searchContext, parameters));
-    }
-
-    @Test
-    void testAttributeKey()
-    {
-        assertEquals(WebLocatorType.IMAGE_SRC, search.getType());
+        assertEquals(webElements, searchAction.search(searchContext, parameters));
     }
 }

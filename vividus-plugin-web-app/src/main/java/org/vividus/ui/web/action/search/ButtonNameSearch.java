@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,6 @@ public class ButtonNameSearch extends AbstractWebElementSearchAction implements 
     {
         String value = parameters.getValue();
         By locator = LocatorUtil.getXPathLocator(".//" + BUTTON_WITH_ANY_ATTRIBUTE_NAME_PATTERN, value);
-        List<WebElement> buttons = findElements(searchContext, locator, parameters);
-        if (buttons.isEmpty())
-        {
-            return findElementsByText(searchContext, locator, parameters, "button", "input");
-        }
-        return buttons;
+        return findElementsByText(searchContext, locator, parameters, "button", "input");
     }
 }

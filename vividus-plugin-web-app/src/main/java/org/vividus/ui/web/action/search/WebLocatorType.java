@@ -21,10 +21,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.codeborne.selenide.selector.ByShadow;
+
+import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.By;
+import org.vividus.ui.action.search.ByLocatorSearch;
 import org.vividus.ui.action.search.GenericTextFilter;
 import org.vividus.ui.action.search.IElementAction;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.LocatorType;
+import org.vividus.ui.web.util.LocatorUtil;
 
 public enum WebLocatorType implements LocatorType
 {
@@ -32,13 +37,58 @@ public enum WebLocatorType implements LocatorType
     LINK_URL("URL", LinkUrlSearch.class),
     LINK_URL_PART("URL part", LinkUrlPartSearch.class),
     CASE_SENSITIVE_TEXT("Case sensitive text", CaseSensitiveTextSearch.class),
-    CASE_INSENSITIVE_TEXT("Case insensitive text", CaseInsensitiveTextSearch.class),
-    TOOLTIP("Tooltip", TooltipFilter.class),
-    CSS_SELECTOR("CSS selector", BySeleniumLocatorSearch.class),
-    IMAGE_SRC("Image source", ImageWithSourceSearch.class),
-    IMAGE_SRC_PART("Image source part", ImageWithSourcePartFilter.class),
+    CASE_INSENSITIVE_TEXT("Case insensitive text", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return AbstractWebElementSearchAction.generateCaseInsensitiveLocator(value.toLowerCase(), "*");
+        }
+    },
+    TOOLTIP("Tooltip", TooltipFilter.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return LocatorUtil.getXPathLocator(".//*[@title=%s]", value);
+        }
+    },
+    CSS_SELECTOR("CSS selector", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return By.cssSelector(value);
+        }
+    },
+    IMAGE_SRC("Image source", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return LocatorUtil.getXPathLocator(".//img[@src='%s']", value);
+        }
+    },
+    IMAGE_SRC_PART("Image source part", ImageWithSourcePartFilter.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return LocatorUtil.getXPathLocator(".//img[contains(@src,'%s')]", value);
+        }
+    },
     BUTTON_NAME("Button name", ButtonNameSearch.class),
-    FIELD_NAME("Field name", FieldNameSearch.class),
+    FIELD_NAME("Field name", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            // due to firefox bug, we can't use name() and must use local-name()
+            // as workaround 'body' represents CKE editor
+            return LocatorUtil.getXPathLocator(".//*[(local-name() = 'input' or local-name() = 'textarea' or "
+                    + "local-name()='body') and ((@* | text())=%s)]", value);
+        }
+    },
     TEXT_PART("Text part", GenericTextFilter.class),
     PLACEHOLDER("Placeholder", PlaceholderFilter.class),
     STATE("State", StateFilter.class),
@@ -52,17 +102,52 @@ public enum WebLocatorType implements LocatorType
     DROP_DOWN_TEXT("Drop down text", DropDownTextFilter.class),
     ELEMENT_NAME("Element name", ElementNameSearch.class),
     NAME("Name", ElementNameSearch.class),
-    PARTIAL_LINK_TEXT("Partial link text", PartialLinkTextSearch.class),
-    CLASS_NAME("Class name", BySeleniumLocatorSearch.class),
-    XPATH("XPath", XpathSearch.class),
-    ID("Id", BySeleniumLocatorSearch.class),
-    TAG_NAME("Tag name", BySeleniumLocatorSearch.class),
-    SHADOW_CSS_SELECTOR("Shadow CSS selector", ShadowCssSelectorSearch.class)
+    PARTIAL_LINK_TEXT("Partial link text", ByLocatorSearch.class)
     {
         @Override
-        public Locator buildLocator(String searchValue)
+        public By buildBy(String value)
         {
-            List<String> searchValues = Stream.of(searchValue.split(";"))
+            return LocatorUtil.getXPathLocatorByInnerTextWithTagName("a", value);
+        }
+    },
+    CLASS_NAME("Class name", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return By.className(value);
+        }
+    },
+    XPATH("XPath", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return By.xpath(LocatorUtil.getXPath(value));
+        }
+    },
+    ID("Id", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return By.id(value);
+        }
+    },
+    TAG_NAME("Tag name", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return By.tagName(value);
+        }
+    },
+    SHADOW_CSS_SELECTOR("Shadow CSS selector", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String searchValue)
+        {
+            List<String> searchValues = Stream.of(StringUtils.split(searchValue, ';'))
                     .map(String::strip)
                     .collect(Collectors.toList());
             String targetValue = searchValues.get(searchValues.size() - 1);
@@ -71,8 +156,7 @@ public enum WebLocatorType implements LocatorType
                     .limit(searchValues.size() - 2)
                     .toArray(String[]::new);
 
-            return new Locator(this, new ShadowDomSearchParameters(targetValue, upperShadowHost,
-                    innerShadowHosts));
+            return ByShadow.cssSelector(targetValue, upperShadowHost, innerShadowHosts);
         }
     };
 
