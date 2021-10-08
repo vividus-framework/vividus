@@ -95,6 +95,7 @@
     <bean id="videoPlayerActions" class="org.vividus.ui.web.action.VideoPlayerActions" />
     <bean id="webElementActions" class="org.vividus.ui.web.action.WebElementActions" />
     <bean id="windowsActions" class="org.vividus.ui.web.action.WindowsActions" />
+    <bean class="org.vividus.ui.web.action.FrameActions" />
 
     <bean class="org.vividus.ui.web.action.WebWaitActions" parent="waitActions">
         <property name="pageStartsToLoadTimeout" value="${web.wait.page-starts-to-load-timeout}" />

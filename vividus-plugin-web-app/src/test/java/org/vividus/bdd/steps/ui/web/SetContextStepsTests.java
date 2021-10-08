@@ -23,7 +23,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -38,7 +37,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.StringComparisonRule;
@@ -48,6 +46,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.web.action.FrameActions;
 import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.IWindowsActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
@@ -70,36 +69,30 @@ class SetContextStepsTests
     private static final String OTHER_WINDOW_HANDLE = "{248427e8-e67d-47ba-923f-4051f349f813}";
     private static final String NEW_WINDOW_IS_FOUND = "New window is found";
     private static final String NEW_WINDOW = "New window '";
+    private static final String A_FRAME = "A frame";
 
-    @Mock
-    private IBaseValidations mockedBaseValidations;
+    @Mock private IBaseValidations mockedBaseValidations;
+    @Mock private IUiContext uiContext;
+    @Mock private WebElement mockedWebElement;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private WebDriver mockedWebDiver;
+    @Mock private IDescriptiveSoftAssert softAssert;
+    @Mock private FrameActions frameActions;
+    @Mock private IWindowsActions windowsActions;
+    @Mock private IWebWaitActions waitActions;
+    @InjectMocks private SetContextSteps setContextSteps;
 
-    @Mock
-    private IUiContext uiContext;
+    @Test
+    void shouldSwitchingToDefault()
+    {
+        InOrder ordered = inOrder(frameActions, uiContext);
 
-    @Mock
-    private WebElement mockedWebElement;
+        setContextSteps.switchingToDefault();
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private WebDriver mockedWebDiver;
-
-    @Mock
-    private TargetLocator mockedTargetLocator;
-
-    @Mock
-    private IDescriptiveSoftAssert softAssert;
-
-    @Mock
-    private IWindowsActions windowsActions;
-
-    @Mock
-    private IWebWaitActions waitActions;
-
-    @InjectMocks
-    private SetContextSteps setContextSteps;
+        ordered.verify(uiContext).reset();
+        ordered.verify(frameActions).switchToRoot();
+        ordered.verifyNoMoreInteractions();
+    }
 
     @Test
     void testSwitchingToWindow()
@@ -155,26 +148,23 @@ class SetContextStepsTests
     @Test
     void testSwitchingToFrameByXpathIfElementExist()
     {
-        when(webDriverProvider.get()).thenReturn(mockedWebDiver);
-        when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
         Locator locator = new Locator(WebLocatorType.XPATH,
                 LocatorUtil.getXPath(XPATH));
-        when(mockedBaseValidations.assertIfElementExists("A frame", locator)).thenReturn(mockedWebElement);
-        InOrder ordered = inOrder(mockedTargetLocator, uiContext);
+        when(mockedBaseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(mockedWebElement);
+        InOrder ordered = inOrder(frameActions, uiContext);
         setContextSteps.switchingToFrame(locator);
         ordered.verify(uiContext).reset();
-        ordered.verify(mockedTargetLocator).frame(mockedWebElement);
-        verify(mockedTargetLocator, never()).defaultContent();
+        ordered.verify(frameActions).switchToFrame(mockedWebElement);
+        ordered.verifyNoMoreInteractions();
     }
 
     @Test
     void testSwitchingToFrameByXpathIfElementNotExist()
     {
-        Locator locator = new Locator(WebLocatorType.XPATH,
-                LocatorUtil.getXPath(XPATH));
-        when(mockedWebDiver.switchTo()).thenReturn(mockedTargetLocator);
+        Locator locator = new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(XPATH));
+        when(mockedBaseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(null);
         setContextSteps.switchingToFrame(locator);
-        verify(mockedWebDiver.switchTo(), never()).frame(mockedWebElement);
+        verifyNoInteractions(frameActions);
     }
 
     @Test
