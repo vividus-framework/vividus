@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package org.vividus.ui.action.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,9 +29,12 @@ class GenericLocatorTypeTests
     @Test
     void testLocatorTypeAttributes()
     {
-        assertEquals("Index", GenericLocatorType.INDEX.getAttributeName());
-        assertEquals(IndexElementFilter.class, GenericLocatorType.INDEX.getActionClass());
-        assertThat(GenericLocatorType.INDEX.getCompetingTypes(), empty());
-        assertEquals("INDEX", GenericLocatorType.INDEX.getKey());
+        assertAll(
+            () -> assertEquals("Index", GenericLocatorType.INDEX.getAttributeName()),
+            () -> assertEquals(IndexElementFilter.class, GenericLocatorType.INDEX.getActionClass()),
+            () -> assertThat(GenericLocatorType.INDEX.getCompetingTypes(), empty()),
+            () -> assertEquals("INDEX", GenericLocatorType.INDEX.getKey()),
+            () -> assertThrows(UnsupportedOperationException.class, () -> GenericLocatorType.INDEX.buildBy("any"))
+        );
     }
 }

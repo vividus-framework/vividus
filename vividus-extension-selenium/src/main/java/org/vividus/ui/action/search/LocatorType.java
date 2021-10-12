@@ -18,6 +18,8 @@ package org.vividus.ui.action.search;
 
 import java.util.Set;
 
+import org.openqa.selenium.By;
+
 public interface LocatorType
 {
     Class<? extends IElementAction> getActionClass();
@@ -26,13 +28,13 @@ public interface LocatorType
 
     String getKey();
 
-    default Locator buildLocator(String searchValue)
-    {
-        return new Locator(this, searchValue);
-    }
-
     default Set<LocatorType> getCompetingTypes()
     {
         return Set.of();
+    }
+
+    default By buildBy(String value)
+    {
+        throw new UnsupportedOperationException();
     }
 }

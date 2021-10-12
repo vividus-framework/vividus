@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.util.LocatorUtil;
 
 public abstract class AbstractWebElementSearchAction extends AbstractElementAction
@@ -42,9 +41,8 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
             .format("[text()[%2$s=%1$s] or @*[%2$s=%1$s] or *[%2$s=%1$s]", "%1$s", TRANSLATE_TO_LOWER_CASE_FORMATTED);
 
     @Inject private IWebElementActions webElementActions;
-    @Inject private WebJavascriptActions javascriptActions;
 
-    public AbstractWebElementSearchAction(LocatorType elementActionType)
+    AbstractWebElementSearchAction(LocatorType elementActionType)
     {
         super(elementActionType);
     }
@@ -110,10 +108,5 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
     protected IWebElementActions getWebElementActions()
     {
         return this.webElementActions;
-    }
-
-    protected WebJavascriptActions getJavascriptActions()
-    {
-        return this.javascriptActions;
     }
 }

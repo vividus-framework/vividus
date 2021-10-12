@@ -57,7 +57,6 @@ import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.IWebWaitActions;
-import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class ElementSearchActionTests
@@ -80,7 +79,6 @@ class ElementSearchActionTests
 
     @Mock private WebElement webElement;
     @Mock private SearchContext searchContext;
-    @Mock private WebJavascriptActions javascriptActions;
     @Mock private IWebElementActions webElementActions;
     @Mock private ElementActions elementActions;
     @Mock private IWebWaitActions waitActions;

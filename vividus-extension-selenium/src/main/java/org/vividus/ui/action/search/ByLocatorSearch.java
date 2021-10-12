@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.action.search;
+package org.vividus.ui.action.search;
 
 import java.util.List;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.action.search.IElementSearchAction;
-import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.web.util.LocatorUtil;
 
-public class ImageWithSourceSearch extends AbstractWebElementSearchAction implements IElementSearchAction
+public class ByLocatorSearch extends AbstractElementAction implements IElementSearchAction
 {
-    public ImageWithSourceSearch()
+    public ByLocatorSearch(LocatorType type)
     {
-        super(WebLocatorType.IMAGE_SRC);
+        super(type);
     }
 
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
-        return findElements(searchContext, LocatorUtil.getXPathLocator(".//img[@src='%s']", parameters.getValue()),
-                parameters);
+        return findElements(searchContext, getType().buildBy(parameters.getValue()), parameters);
     }
 }

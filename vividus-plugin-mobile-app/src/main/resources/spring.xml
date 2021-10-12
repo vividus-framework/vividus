@@ -63,24 +63,17 @@
     <bean class="org.vividus.selenium.mobileapp.MobileAppDriverFactory"
         parent="parentWebDriverFactory"/>
 
-    <bean class="org.vividus.ui.mobile.action.search.ByAppiumLocatorSearch" parent="abstractElementAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).XPATH}" />
-        <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).XPATH}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg  value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).XPATH}" />
     </bean>
-
-    <bean class="org.vividus.ui.mobile.action.search.ByAppiumLocatorSearch" parent="abstractElementAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).ACCESSIBILITY_ID}" />
-        <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).ACCESSIBILITY_ID}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).ACCESSIBILITY_ID}" />
     </bean>
-
-    <bean class="org.vividus.ui.mobile.action.search.ByAppiumLocatorSearch" parent="abstractElementAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).IOS_CLASS_CHAIN}" />
-        <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).IOS_CLASS_CHAIN}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).IOS_CLASS_CHAIN}" />
     </bean>
-
-    <bean class="org.vividus.ui.mobile.action.search.ByAppiumLocatorSearch" parent="abstractElementAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).ID}" />
-        <constructor-arg index="1" value="#{T(org.vividus.ui.mobile.action.search.AppiumHow).ID}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).ID}" />
     </bean>
 
     <bean class="org.vividus.ui.action.search.GenericTextFilter" >

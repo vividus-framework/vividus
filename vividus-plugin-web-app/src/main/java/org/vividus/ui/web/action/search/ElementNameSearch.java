@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,8 @@ public class ElementNameSearch extends AbstractWebElementSearchAction implements
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
-        if (null != searchContext)
-        {
-            String elementName = parameters.getValue();
-            return findElementsByText(searchContext,
-                    LocatorUtil.getXPathLocator(".//*[@*=%1$s or text()=%1$s]", elementName), parameters, "*");
-        }
-        return List.of();
+        String elementName = parameters.getValue();
+        return findElementsByText(searchContext,
+                LocatorUtil.getXPathLocator(".//*[@*=%1$s or text()=%1$s]", elementName), parameters, "*");
     }
 }

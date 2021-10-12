@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,22 @@ package org.vividus.testdouble;
 
 import java.util.Set;
 
+import org.openqa.selenium.By;
+import org.vividus.ui.action.search.ByLocatorSearch;
 import org.vividus.ui.action.search.IElementAction;
 import org.vividus.ui.action.search.LocatorType;
 
 public enum TestLocatorType implements LocatorType
 {
     SEARCH("Search", TestElementSearch.class),
-    ADDITIONAL_SEARCH("Additional Search", TestElementSearch.class),
+    ADDITIONAL_SEARCH("Additional Search", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return By.xpath(value);
+        }
+    },
     COMPETING_SEARCH("Competing Search", TestElementSearch.class),
     FILTER("Filter", TestElementFilter.class),
     ADDITIONAL_FILTER("Additional Filter", TestElementFilter.class),

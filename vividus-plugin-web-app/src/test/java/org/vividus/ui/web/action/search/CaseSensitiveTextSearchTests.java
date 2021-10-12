@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -35,6 +37,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.web.action.IWebElementActions;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,24 +54,18 @@ class CaseSensitiveTextSearchTests
     private static final String EMPTY_STRING = "";
     private static final String UPPERCASE = "uppercase";
 
-    private final SearchParameters parameters = new SearchParameters(TEXT);
-
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private IWebElementActions webElementActions;
-
-    @InjectMocks
-    private CaseSensitiveTextSearch caseSensitiveTextSearch;
+    @Mock private WebElement webElement;
+    @Mock private IWebElementActions webElementActions;
+    @InjectMocks private CaseSensitiveTextSearch caseSensitiveTextSearch;
 
     @Test
     void testFindLinksByTextByFullLinkText()
     {
+        var parameters = new SearchParameters(TEXT, Visibility.ALL, false);
         SearchContext searchContext = mock(SearchContext.class);
         CaseSensitiveTextSearch spy = Mockito.spy(caseSensitiveTextSearch);
         List<WebElement> webElements = List.of(mock(WebElement.class));
-        doReturn(webElements).when(spy).findElementsByText(searchContext, FULL_INNER_TEXT_LOCATOR, parameters, ANY);
+        when(searchContext.findElements(FULL_INNER_TEXT_LOCATOR)).thenReturn(webElements);
         List<WebElement> foundElements = spy.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
     }
@@ -76,12 +73,13 @@ class CaseSensitiveTextSearchTests
     @Test
     void testFindLinksByTextByLinkText()
     {
+        var parameters = new SearchParameters(TEXT, Visibility.ALL, false);
         By innerTextLocator = By.xpath(String.format(".//*[contains(normalize-space(.), \"%1$s\") and "
                 + "not(.//*[contains(normalize-space(.), \"%1$s\")])]", TEXT));
         SearchContext searchContext = mock(SearchContext.class);
         CaseSensitiveTextSearch spy = Mockito.spy(caseSensitiveTextSearch);
         List<WebElement> webElements = List.of(mock(WebElement.class));
-        doReturn(List.of()).when(spy).findElementsByText(searchContext, FULL_INNER_TEXT_LOCATOR, parameters, ANY);
+        when(searchContext.findElements(FULL_INNER_TEXT_LOCATOR)).thenReturn(List.of());
         doReturn(webElements).when(spy).findElementsByText(searchContext, innerTextLocator, parameters, ANY);
         List<WebElement> foundElements = spy.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
@@ -90,7 +88,7 @@ class CaseSensitiveTextSearchTests
     @Test
     void testFindElementsByTextNullSearchContext()
     {
-        List<WebElement> foundElements = caseSensitiveTextSearch.search(null, parameters);
+        List<WebElement> foundElements = caseSensitiveTextSearch.search(null, new SearchParameters(TEXT));
         assertEquals(List.of(), foundElements);
     }
 
@@ -131,19 +129,9 @@ class CaseSensitiveTextSearchTests
         assertNotEquals(webElements, foundElements);
     }
 
-    @Test
-    void testTextFilterNull()
-    {
-        testTextFilterEmptyOrNull(null);
-    }
-
-    @Test
-    void testTextFilterEmpty()
-    {
-        testTextFilterEmptyOrNull(EMPTY_STRING);
-    }
-
-    private void testTextFilterEmptyOrNull(String text)
+    @ParameterizedTest
+    @NullAndEmptySource
+    void testTextFilterEmptyOrNull(String text)
     {
         List<WebElement> webElements = List.of(webElement);
         List<WebElement> filteredText = caseSensitiveTextSearch.filter(webElements, text);

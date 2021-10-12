@@ -93,7 +93,7 @@ public class LocatorConversionUtils
     private Locator convertToLocator(String searchType, String searchValue)
     {
         return createLocator(elementActionService.getSearchLocatorTypes(),
-            type -> type.buildLocator(searchValue), "locator", searchType);
+            type -> new Locator(type, searchValue), "locator", searchType);
     }
 
     private static Locator createLocator(Set<LocatorType> locatorTypes, Function<LocatorType, Locator> mapper,
