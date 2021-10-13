@@ -28,7 +28,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-email', version: '{cu
 Polling timeout that can be calculated by `email.imap.wait.duration / email.imap.wait.retry-times` must be not less than `5` seconds.
 
 For IMAP configuration details see https://javaee.github.io/javamail/docs/api/com/sun/mail/imap/package-summary.html#properties[IMAP Properties].
-To use IMAP properties the `email.imap.` prefix must be replaced with `email.server.<server-key>.` e.g. `email.imap.timeout` will become `email.server.<server-key>.timeout`.
+To use IMAP properties the `mail.imap.` prefix must be replaced with `email.server.<server-key>.properties.` e.g. `mail.imap.timeout` will become `email.server.<server-key>.properties.timeout`.
 The `<server-key>` is a logical name defining single server configuration and referred in steps.
 
 See <<_configuration_example>>
