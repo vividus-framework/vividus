@@ -239,6 +239,12 @@
     <bean id="waitSteps" class="org.vividus.bdd.steps.ui.web.WaitSteps" />
     <bean id="textValidationSteps" class="org.vividus.bdd.steps.ui.web.TextValidationSteps" />
 
+    <bean id="performanceSteps" class="org.vividus.bdd.steps.ui.web.PerformanceSteps" >
+        <constructor-arg index="0">
+            <bean class="org.vividus.ui.web.performance.PerformanceMetrics" />
+        </constructor-arg>
+    </bean>
+
     <bean id="actionSteps" class="org.vividus.bdd.steps.ui.web.ActionSteps" />
 
     <bean id="webUiVividusSetupSteps" class="org.vividus.bdd.steps.WebUiVividusSetupSteps">
@@ -290,6 +296,7 @@
                     <bean class="org.vividus.ui.web.listener.WebUiContextListener" lazy-init="false">
                         <property name="uiContext" ref="uiContext" />
                     </bean>
+                    <bean class="org.vividus.ui.web.listener.PerformanceMetricsListener" />
                 </list>
             </list>
         </property>
@@ -346,6 +353,7 @@
         <idref bean="proxySteps" />
         <idref bean="dragAndDropSteps" />
         <idref bean="scrollSteps" />
+        <idref bean="performanceSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">

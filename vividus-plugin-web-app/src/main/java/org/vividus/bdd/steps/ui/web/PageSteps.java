@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.bdd.steps.ui.web;
 
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 
 import java.io.IOException;
@@ -104,7 +103,7 @@ public class PageSteps
     public void iAmOnPage(String pageURL)
     {
         uiContext.reset();
-        navigateActions.loadPage(pageURL);
+        navigateActions.navigateTo(pageURL);
     }
 
     /**
@@ -179,25 +178,6 @@ public class PageSteps
         javascriptActions.openNewWindow();
         setContextSteps.switchingToWindow();
         iAmOnPage(pageUrl);
-    }
-
-    /**
-     * Checks that the <b>page</b> was loaded less than in 'pageLoadTimeThreshold' <b>milliseconds</b>
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Gets the <b>page's load time</b>
-     * <li>Compares it with a 'pageLoadTimeThreshold'
-     * </ul>
-     * <p>
-     * @param pageLoadTimeThreshold The time in <b>milliseconds</b> bigger than an expected <b>page's load time</b><br>
-     */
-    @Then("the page load time should be less than '$pageLoadTimeThreshold' milliseconds")
-    public void thenTheLoadTimeShouldBeLessThan(long pageLoadTimeThreshold)
-    {
-        descriptiveSoftAssert.assertThat("The page load time is less than load time threshold.",
-                String.format("The page load time is less than '%s'", pageLoadTimeThreshold),
-                navigateActions.getActualPageLoadTimeInMs(), lessThan(pageLoadTimeThreshold));
     }
 
     /**
@@ -279,7 +259,7 @@ public class PageSteps
         URI newURI = UriUtils.buildNewRelativeUrl(currentURI, relativeURL);
         // Workaround: window content is not loaded if basic authentification is used
         newURI = UriUtils.removeUserInfo(newURI);
-        navigateActions.loadPage(newURI.toString());
+        navigateActions.navigateTo(newURI.toString());
         waitForPageLoad(webDriverManager.isIOS());
     }
 
@@ -359,7 +339,7 @@ public class PageSteps
     public void loadApplicationPage(URI pageUrl)
     {
         URI finalUri = updateUrlWithUserInfoForRedirects(pageUrl);
-        navigateActions.loadPage(finalUri.toString());
+        navigateActions.navigateTo(finalUri.toString());
         waitForPageLoad(webDriverManager.isIOS());
         webApplicationListener.onLoad();
     }

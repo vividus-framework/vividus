@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptException;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
@@ -97,53 +96,23 @@ class PageStepsTests
     private static final String RELATIVE_URL = "/";
     private static final String URL = "http://qa.vividus.org/";
     private static final String HOST = "qa.vividus.org";
-    private static final long PAGE_LOAD_TIME_THRESHOLD = 1000L;
     private static final String PAGE_TITLE = "Page title";
 
-    @Mock(extraInterfaces = JavascriptExecutor.class)
-    private WebDriver driver;
-
-    @Mock
-    private IDescriptiveSoftAssert softAssert;
-
-    @Mock
-    private IBaseValidations mockedBaseValidations;
-
-    @Mock
-    private INavigateActions navigateActions;
-
-    @Mock
-    private WebJavascriptActions javascriptActions;
-
-    @Mock
-    private IUiContext uiContext;
-
-    @Mock
-    private IWebElementActions webElementActions;
-
-    @Mock
-    private WebApplicationConfiguration webApplicationConfiguration;
-
-    @Mock
-    private IWebApplicationListener webApplicationListener;
-
-    @Mock
-    private SetContextSteps setContextSteps;
-
-    @Mock
-    private IWebWaitActions waitActions;
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
-
-    @Mock
-    private IHttpClient httpClient;
-
-    @InjectMocks
-    private PageSteps pageSteps;
+    @Mock private WebDriver driver;
+    @Mock private IDescriptiveSoftAssert softAssert;
+    @Mock private IBaseValidations mockedBaseValidations;
+    @Mock private INavigateActions navigateActions;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private IUiContext uiContext;
+    @Mock private IWebElementActions webElementActions;
+    @Mock private WebApplicationConfiguration webApplicationConfiguration;
+    @Mock private IWebApplicationListener webApplicationListener;
+    @Mock private SetContextSteps setContextSteps;
+    @Mock private IWebWaitActions waitActions;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private IWebDriverManager webDriverManager;
+    @Mock private IHttpClient httpClient;
+    @InjectMocks private PageSteps pageSteps;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(PageSteps.class);
 
@@ -295,7 +264,7 @@ class PageStepsTests
         when(driver.getCurrentUrl()).thenReturn(baseUrl);
         pageSteps.iGoTo(toGo);
         verify(setContextSteps).switchingToDefault();
-        verify(navigateActions).loadPage(expected);
+        verify(navigateActions).navigateTo(expected);
     }
 
     @Test
@@ -323,7 +292,7 @@ class PageStepsTests
     {
         String pageURL = "pageURL";
         pageSteps.iAmOnPage(pageURL);
-        verify(navigateActions).loadPage(pageURL);
+        verify(navigateActions).navigateTo(pageURL);
     }
 
     @Test
@@ -342,7 +311,7 @@ class PageStepsTests
         ordered.verify(javascriptActions).openNewWindow();
         ordered.verify(setContextSteps).switchingToWindow();
         ordered.verify(uiContext).reset();
-        ordered.verify(navigateActions).loadPage(URL);
+        ordered.verify(navigateActions).navigateTo(URL);
         ordered.verifyNoMoreInteractions();
     }
 
@@ -353,7 +322,7 @@ class PageStepsTests
         URI mainPage = URI.create(URL);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
         pageSteps.iAmOnTheMainApplicationPage();
-        verify(navigateActions).loadPage(URL);
+        verify(navigateActions).navigateTo(URL);
         verify(webApplicationListener).onLoad();
     }
 
@@ -370,7 +339,7 @@ class PageStepsTests
     {
         mockPageRedirect(URL, HTTP_EXAMPLE_COM);
         pageSteps.iAmOnTheMainApplicationPage();
-        verify(navigateActions).loadPage(URL);
+        verify(navigateActions).navigateTo(URL);
         verify(webApplicationListener).onLoad();
     }
 
@@ -380,7 +349,7 @@ class PageStepsTests
         mockPageRedirect(HTTP_EXAMPLE_COM, "https://example.com");
         when(webApplicationConfiguration.getBasicAuthUser()).thenReturn("user:password");
         pageSteps.iAmOnTheMainApplicationPage();
-        verify(navigateActions).loadPage("https://user:password@example.com");
+        verify(navigateActions).navigateTo("https://user:password@example.com");
         verify(webApplicationListener).onLoad();
     }
 
@@ -406,7 +375,7 @@ class PageStepsTests
         URI mainPage = URI.create(HTTP_EXAMPLE_COM);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
         pageSteps.iAmOnTheMainApplicationPage();
-        verify(navigateActions).loadPage(HTTP_EXAMPLE_COM);
+        verify(navigateActions).navigateTo(HTTP_EXAMPLE_COM);
         verify(webApplicationListener).onLoad();
     }
 
@@ -423,15 +392,6 @@ class PageStepsTests
         pageSteps.iAmOnTheMainApplicationPage();
         assertThat(logger.getLoggingEvents(),
                 is(List.of(error("HTTP request for '{}' failed with the exception: {}", mainPage, exceptionMessage))));
-    }
-
-    @Test
-    void testThenTheLoadTimeShouldBeLessThan()
-    {
-        when(navigateActions.getActualPageLoadTimeInMs()).thenReturn(PAGE_LOAD_TIME_THRESHOLD);
-        pageSteps.thenTheLoadTimeShouldBeLessThan(PAGE_LOAD_TIME_THRESHOLD);
-        verify(softAssert).assertThat(eq("The page load time is less than load time threshold."),
-                eq("The page load time is less than '1000'"), eq(PAGE_LOAD_TIME_THRESHOLD), any());
     }
 
     @Test

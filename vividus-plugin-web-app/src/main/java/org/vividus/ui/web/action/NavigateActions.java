@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.ui.web.action;
 
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -36,7 +35,6 @@ public class NavigateActions implements INavigateActions
     @Inject private ISoftAssert softAssert;
     @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebWaitActions waitActions;
-    private final ThreadLocal<Long> actualPageLoadTimeInMs = ThreadLocal.withInitial(() -> 0L);
 
     @Override
     public void navigateTo(String url)
@@ -97,20 +95,6 @@ public class NavigateActions implements INavigateActions
         {
             navigateTo(previousPageUrl);
         }
-    }
-
-    @Override
-    public void loadPage(String pageURL)
-    {
-        long start = System.nanoTime();
-        navigateTo(pageURL);
-        actualPageLoadTimeInMs.set(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
-    }
-
-    @Override
-    public long getActualPageLoadTimeInMs()
-    {
-        return actualPageLoadTimeInMs.get();
     }
 
     @SuppressWarnings("checkstyle:IllegalCatchExtended")

@@ -293,6 +293,32 @@ When I scroll element located `$locator` into view
 When I scroll element located `id(way_down_button)` into view
 ----
 
+=== Performance metrics
+
+Checks web performance metrics.
+
+[source,gherkin]
+----
+Then metric $webPerformanceMetric is $comparisonRule `$duration`
+----
+
+:navigation-timing: https://www.w3.org/TR/navigation-timing/#dom-performancetiming-
+
+* `$webPerformanceMetric` - The web performance metric. Where:
+** [subs=+quotes]`*TIME_TO_FIRST_BYTE*` -  The time between {navigation-timing}navigationstart[the navigation start] and {navigation-timing}responsestart[the response start].
+** [subs=+quotes]`*DNS_LOOKUP_TIME*` -  The time between {navigation-timing}domainlookupstart[the domain lookup start] and {navigation-timing}domainlookupend[the domain lookup end].
+** [subs=+quotes]`*DOM_CONTENT_LOAD_TIME*` -  The time between {navigation-timing}domloading[the DOM loading] and the {navigation-timing}domcomplete[the DOM complete].
+** [subs=+quotes]`*PAGE_LOAD_TIME*` -  The time between {navigation-timing}navigationstart[the navgation start] and {navigation-timing}loadeventend[the load event end].
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The duration comparison rule].
+* `$duration` - The duration to compare against in {iso-date-format-link} format.
+
+.Check page load
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com'
+Then metric PAGE_LOAD_TIME is less than `PT5S`
+----
+
 === Execute sequence of actions
 
 Executes the sequence of web actions
@@ -633,7 +659,6 @@ to apply the cookie changes.
 ----
 When I remove all cookies from current domain without applying changes
 ----
-
 
 === Proxy Steps
 ==== Check the number of HTTP requests

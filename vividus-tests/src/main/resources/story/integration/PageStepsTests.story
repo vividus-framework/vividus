@@ -20,3 +20,12 @@ When I perform async javascript 'setTimeout(() => arguments[0]('wait for page to
 When I change context to element located `cssSelector(img)`
 Then `${context-height}` is < `100`
 Then `${context-width}`  is < `100`
+
+Scenario: Verify step: Then metric $webPerformanceMetric is $comparisonRule `$duration`
+Then metric <metric> is less than `PT5S`
+Examples:
+|metric               |
+|TIME_TO_FIRST_BYTE   |
+|DNS_LOOKUP_TIME      |
+|DOM_CONTENT_LOAD_TIME|
+|PAGE_LOAD_TIME       |
