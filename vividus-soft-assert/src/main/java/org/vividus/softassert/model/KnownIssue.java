@@ -36,8 +36,8 @@ public class KnownIssue implements Serializable
     private final boolean failTestCaseFast;
     private final boolean failTestSuiteFast;
     private final transient Optional<String> description;
-    private String status;
-    private String resolution;
+    private transient Optional<String> status;
+    private transient Optional<String> resolution;
 
     public KnownIssue(String identifier, KnownIssueIdentifier issueIdentifier, boolean potentiallyKnown)
     {
@@ -47,6 +47,8 @@ public class KnownIssue implements Serializable
         this.failTestSuiteFast = issueIdentifier.isFailTestSuiteFast();
         this.potentiallyKnown = potentiallyKnown;
         this.description = Optional.ofNullable(issueIdentifier.getDescription());
+        this.status = Optional.empty();
+        this.resolution = Optional.empty();
     }
 
     public String getIdentifier()
@@ -64,35 +66,39 @@ public class KnownIssue implements Serializable
         return potentiallyKnown;
     }
 
-    public String getStatus()
+    public Optional<String> getStatus()
     {
         return status;
     }
 
-    public void setStatus(String status)
+    public void setStatus(Optional<String> status)
     {
         this.status = status;
     }
 
-    public String getResolution()
+    public Optional<String> getResolution()
     {
         return resolution;
     }
 
-    public void setResolution(String resolution)
+    public void setResolution(Optional<String> resolution)
     {
         this.resolution = resolution;
     }
 
     public boolean isClosed()
     {
-        return status != null && status.length() > 0 && FIXED_ISSUE_STATUSES_STRING.contains(status.toLowerCase());
+        return contains(status, FIXED_ISSUE_STATUSES_STRING);
     }
 
     public boolean isFixed()
     {
-        return isClosed() && resolution != null && resolution.length() > 0
-                && FIXED_ISSUE_RESOLUTIONS_STRING.contains(resolution.toLowerCase());
+        return isClosed() && contains(resolution, FIXED_ISSUE_RESOLUTIONS_STRING);
+    }
+
+    private boolean contains(Optional<String> value, String values)
+    {
+        return value.filter(v -> v.length() > 0).filter(v -> values.contains(v.toLowerCase())).isPresent();
     }
 
     public boolean isFailTestCaseFast()
@@ -113,7 +119,7 @@ public class KnownIssue implements Serializable
     @Override
     public int hashCode()
     {
-        return Objects.hash(identifier, type, potentiallyKnown, failTestCaseFast, failTestSuiteFast, status);
+        return Objects.hash(identifier, type, potentiallyKnown, failTestCaseFast, failTestSuiteFast);
     }
 
     @Override
@@ -136,6 +142,6 @@ public class KnownIssue implements Serializable
                 && potentiallyKnown == other.potentiallyKnown
                 && failTestCaseFast == other.failTestCaseFast
                 && failTestSuiteFast == other.failTestSuiteFast
-                && Objects.equals(status, other.status) && type == other.type;
+                && type == other.type;
     }
 }

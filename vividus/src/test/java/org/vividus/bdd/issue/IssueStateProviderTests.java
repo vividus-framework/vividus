@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.vividus.bdd.issue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class IssueStateProviderTests
 {
     private static final String VALID_ISSUE_ID = "ISSUE-123";
-    private static final String UNKNOWN = "UNKNOWN";
+    private static final Optional<String> UNKNOWN = Optional.of("UNKNOWN");
 
     @InjectMocks
     private IssueStateProvider issueStateProvider;
@@ -35,14 +37,14 @@ class IssueStateProviderTests
     @Test
     void testGetStatusSuccess()
     {
-        String actualStatus = issueStateProvider.getIssueStatus(VALID_ISSUE_ID);
+        Optional<String> actualStatus = issueStateProvider.getIssueStatus(VALID_ISSUE_ID);
         assertEquals(UNKNOWN, actualStatus);
     }
 
     @Test
     void testGetResolutionSuccess()
     {
-        String actualStatus = issueStateProvider.getIssueResolution(VALID_ISSUE_ID);
+        Optional<String> actualStatus = issueStateProvider.getIssueResolution(VALID_ISSUE_ID);
         assertEquals(UNKNOWN, actualStatus);
     }
 }

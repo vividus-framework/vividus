@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,22 @@
 
 package org.vividus.bdd.issue;
 
+import java.util.Optional;
+
 import org.vividus.softassert.issue.IIssueStateProvider;
 
 public class IssueStateProvider implements IIssueStateProvider
 {
-    private static final String UNKNOWN = "UNKNOWN";
+    private static final Optional<String> UNKNOWN = Optional.of("UNKNOWN");
 
     @Override
-    public String getIssueStatus(String issue)
+    public Optional<String> getIssueStatus(String issue)
     {
         return UNKNOWN;
     }
 
     @Override
-    public String getIssueResolution(String issue)
+    public Optional<String> getIssueResolution(String issue)
     {
         return UNKNOWN;
     }
