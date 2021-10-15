@@ -45,16 +45,11 @@ public class AssertionFormatter implements IAssertionFormatter
                .append(issue.getType())
                .append(DOT_CHAR);
 
-        String status = issue.getStatus();
-        if (status != null)
-        {
-            message.append(" Status: ").append(status);
-        }
-        String resolution = issue.getResolution();
-        if (resolution != null)
-        {
-            message.append(DOT_CHAR).append(" Resolution: ").append(resolution);
-        }
+        issue.getStatus().ifPresent(status -> message.append(" Status: ").append(status));
+
+        issue.getResolution().ifPresent(resolution -> message.append(DOT_CHAR)
+                .append(" Resolution: ").append(resolution));
+
         message.append("). ").append(description);
         return message.toString();
     }

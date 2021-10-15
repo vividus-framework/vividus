@@ -54,7 +54,7 @@ class KnownIssueCheckerTests
     private static final String STEP = "step";
     private static final String SECOND_STEP = "step2";
     private static final String SUITE = "suite";
-    private static final String CLOSED = "closed";
+    private static final Optional<String> CLOSED = Optional.of("closed");
     private static final String FIRST_ISSUE = "UNIT-1";
     private static final String SECOND_ISSUE = "UNIT-2";
     private static final String THIRD_ISSUE = "UNIT-3";
@@ -106,10 +106,10 @@ class KnownIssueCheckerTests
     @Test
     void testGetKnownIssueIfIssueStatusIsNull()
     {
-        testGetKnownIssue(null);
+        testGetKnownIssue(Optional.empty());
     }
 
-    private void testGetKnownIssue(String status)
+    private void testGetKnownIssue(Optional<String> status)
     {
         mockKnownIssueIdentifiers();
         when(issueStateProvider.getIssueStatus(TEXT)).thenReturn(status);
@@ -140,7 +140,7 @@ class KnownIssueCheckerTests
     void testGetKnownIssueWithResolution()
     {
         mockKnownIssueIdentifiers();
-        String resolution = "resolution";
+        Optional<String> resolution = Optional.of("resolution");
         when(issueStateProvider.getIssueStatus(TEXT)).thenReturn(CLOSED);
         when(issueStateProvider.getIssueResolution(TEXT)).thenReturn(resolution);
         assertKnownIssue(false, TEXT, CLOSED, resolution);
@@ -317,15 +317,16 @@ class KnownIssueCheckerTests
 
     private void assertKnownIssue(boolean isPotentiallyKnown, String identifier)
     {
-        assertKnownIssue(isPotentiallyKnown, identifier, null);
+        assertKnownIssue(isPotentiallyKnown, identifier, Optional.empty());
     }
 
-    private void assertKnownIssue(boolean isPotentiallyKnown, String identifier, String status)
+    private void assertKnownIssue(boolean isPotentiallyKnown, String identifier, Optional<String> status)
     {
-        assertKnownIssue(isPotentiallyKnown, identifier, status, null);
+        assertKnownIssue(isPotentiallyKnown, identifier, status, Optional.empty());
     }
 
-    private void assertKnownIssue(boolean isPotentiallyKnown, String identifier, String status, String resolution)
+    private void assertKnownIssue(boolean isPotentiallyKnown, String identifier, Optional<String> status,
+            Optional<String> resolution)
     {
         KnownIssue actual = knownIssueChecker.getKnownIssue(PATTERN);
         assertEquals(isPotentiallyKnown, actual.isPotentiallyKnown());

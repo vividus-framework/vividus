@@ -1070,8 +1070,8 @@ class AllureStoryReporterTests
     {
         StepResult stepResult = mockCurrentStep(Status.PASSED);
         KnownIssue knownIssue = new KnownIssue(null, new KnownIssueIdentifier(), false);
-        knownIssue.setStatus("Closed");
-        knownIssue.setResolution("Fixed");
+        knownIssue.setStatus(Optional.of("Closed"));
+        knownIssue.setResolution(Optional.of("Fixed"));
         AssertionFailedEvent assertionFailedEvent = mockSoftAssertionError(knownIssue);
         allureStoryReporter.onAssertionFailure(assertionFailedEvent);
         verify(stepResult).setStatus(Status.FAILED);

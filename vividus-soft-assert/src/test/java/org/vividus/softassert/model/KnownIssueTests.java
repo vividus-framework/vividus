@@ -18,6 +18,8 @@ package org.vividus.softassert.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,7 +52,7 @@ class KnownIssueTests
     })
     void testIsClosedStatus(String status, boolean expectedToBeClosed)
     {
-        knownIssue.setStatus(status);
+        knownIssue.setStatus(Optional.ofNullable(status));
         assertEquals(expectedToBeClosed, knownIssue.isClosed());
     }
 
@@ -67,8 +69,8 @@ class KnownIssueTests
     })
     void testIsFixedResolution(String resolution, String status, boolean expectedToBeFixed)
     {
-        knownIssue.setResolution(resolution);
-        knownIssue.setStatus(status);
+        knownIssue.setResolution(Optional.ofNullable(resolution));
+        knownIssue.setStatus(Optional.ofNullable(status));
         assertEquals(expectedToBeFixed, knownIssue.isFixed());
     }
 

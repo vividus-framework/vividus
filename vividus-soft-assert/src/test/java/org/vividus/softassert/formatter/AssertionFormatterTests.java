@@ -43,8 +43,8 @@ import org.vividus.softassert.util.StackTraceFilter;
 class AssertionFormatterTests
 {
     private static final String IDENTIFIER = "identifier";
-    private static final String STATUS = "status";
-    private static final String RESOLUTION = "resolution";
+    private static final Optional<String> STATUS = Optional.of("status");
+    private static final Optional<String> RESOLUTION = Optional.of("resolution");
     private static final String ASSERT_DESCRIPTION = "assert-description";
     private static final int ASSERTION_COUNT = 1;
     private final List<SoftAssertionError> softAssertionErrors = new ArrayList<>();
@@ -89,8 +89,8 @@ class AssertionFormatterTests
     @Test
     void testGetMessageWithNullStatusAndResolution()
     {
-        when(knownIssue.getStatus()).thenReturn(null);
-        when(knownIssue.getResolution()).thenReturn(null);
+        when(knownIssue.getStatus()).thenReturn(Optional.empty());
+        when(knownIssue.getResolution()).thenReturn(Optional.empty());
         assertEquals("Known issue: null (Type: null.). assert-description",
                 assertionFormatter.getMessage(ASSERT_DESCRIPTION, knownIssue));
     }
