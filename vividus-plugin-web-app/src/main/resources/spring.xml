@@ -55,11 +55,6 @@
         <property name="highlighterType" value="${selenium.screenshot.highlighter}" />
     </bean>
 
-    <bean id="screenshotDebugger" class="org.vividus.selenium.screenshot.FilesystemScreenshotDebugger"
-        init-method="cleanUp">
-        <property name="debugScreenshotsLocation" value="${selenium.screenshot.debug-directory}" />
-    </bean>
-
     <bean class="org.vividus.selenium.screenshot.WebAshotFactory" parent="abstractAshotFactory">
         <property name="shootingStrategy" value="${web.screenshot.strategy}" />
         <property name="screenshotShootingStrategy" value="${selenium.screenshot.strategy}" />
