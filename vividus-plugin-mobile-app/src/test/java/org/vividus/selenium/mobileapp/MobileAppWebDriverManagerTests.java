@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -74,6 +75,7 @@ class MobileAppWebDriverManagerTests
     @Test
     void shouldProvideStatusBarHeightForAndorid()
     {
+        mockCapabilities(MobilePlatform.ANDROID);
         HasAndroidDeviceDetails hasAndroidDeviceDetails = mock(HasAndroidDeviceDetails.class,
                 withSettings().extraInterfaces(ExecutesMethod.class));
         when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(hasAndroidDeviceDetails);
@@ -88,6 +90,7 @@ class MobileAppWebDriverManagerTests
     {
         HasAndroidDeviceDetails hasAndroidDeviceDetails = mock(HasAndroidDeviceDetails.class,
                 withSettings().extraInterfaces(ExecutesMethod.class));
+        mockCapabilities(MobilePlatform.ANDROID);
         when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(hasAndroidDeviceDetails);
         when(hasAndroidDeviceDetails.execute(GET_SYSTEM_BARS, Map.of())).thenThrow(new WebDriverException());
         HasSessionDetails details = mock(HasSessionDetails.class);
@@ -99,16 +102,30 @@ class MobileAppWebDriverManagerTests
     @Test
     void shouldProviderStatusBarHeightForIos()
     {
+        mockCapabilities(MobilePlatform.IOS);
+        HasSessionDetails details = mock(HasSessionDetails.class);
+        when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
+        when(details.getSessionDetail(STAT_BAR_HEIGHT)).thenReturn(102L);
+        assertEquals(102, driverManager.getStatusBarSize());
+    }
+
+    @Test
+    void shouldProviderStatusBarHeightForTvOS()
+    {
+        mockCapabilities(MobilePlatform.TVOS);
+        assertEquals(0, driverManager.getStatusBarSize());
+        verify(webDriverProvider).get();
+        verifyNoMoreInteractions(webDriverProvider);
+    }
+
+    private void mockCapabilities(String platform)
+    {
         WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
         when(webDriverProvider.get()).thenReturn(webDriver);
         Capabilities capabilitiesMock = mock(Capabilities.class);
         when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilitiesMock);
         driverManager.setMobileApp(true);
-        when(capabilitiesMock.getCapability(CapabilityType.PLATFORM_NAME)).thenReturn(MobilePlatform.IOS);
-        HasSessionDetails details = mock(HasSessionDetails.class);
-        when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
-        when(details.getSessionDetail(STAT_BAR_HEIGHT)).thenReturn(102L);
-        assertEquals(102, driverManager.getStatusBarSize());
+        when(capabilitiesMock.getCapability(CapabilityType.PLATFORM_NAME)).thenReturn(platform);
     }
 
     @Test

@@ -53,6 +53,10 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
     public int getStatusBarSize()
     {
+        if (super.isTvOS())
+        {
+            return 0;
+        }
         return  super.isIOSNativeApp() ? getStatBarHeight() : getAndroidStatusBar();
     }
 
