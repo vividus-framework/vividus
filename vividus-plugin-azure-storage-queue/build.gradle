@@ -4,7 +4,7 @@ dependencies {
     api project(':vividus-bdd-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
-    implementation(group: 'com.azure', name: 'azure-storage-queue', version: '12.11.0')
+    implementation(group: 'com.azure', name: 'azure-storage-queue', version: '12.11.1')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
