@@ -57,7 +57,7 @@
 
     <bean id="screenshotDebugger" class="org.vividus.selenium.screenshot.FilesystemScreenshotDebugger"
         init-method="cleanUp">
-        <property name="debugScreenshotsLocation" value="${selenium.screenshot.debug-directory}" />
+        <property name="debugScreenshotsLocation" value="${ui.screenshot.debug-directory}" />
     </bean>
 
     <bean class="org.vividus.selenium.screenshot.WebAshotFactory" parent="abstractAshotFactory">
