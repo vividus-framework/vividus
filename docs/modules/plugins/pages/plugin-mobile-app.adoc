@@ -303,6 +303,27 @@ Given I start mobile application with capabilities:
 |appium:options.clearSystemFiles|false|
 ----
 
+=== Restart mobile application
+
+==== *_Info_*
+
+Closes a mobile application and launch it again with the same capabilities
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I restart mobile application
+----
+
+==== *_Usage_*
+
+.Restart mobile application
+[source,gherkin]
+----
+When I restart mobile application
+----
+
 === Close mobile application
 
 ==== *_Info_*
@@ -584,6 +605,33 @@ When I activate application with bundle identifier `$bundleId`
 ----
 Scenario: Open safari
 When I activate application with bundle identifier `com.apple.mobilesafari`
+----
+
+
+=== Terminate mobile application
+
+==== *_Info_*
+
+Terminates a running application on the device and navigates to the home device screen.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I terminate application with bundle identifier `$bundleId`
+----
+
+==== *_Parameters_*
+
+. `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
+
+==== *_Usage_*
+
+.ColseSafari.story
+[source,gherkin]
+----
+Scenario: Close safari
+When I terminate application with bundle identifier `com.apple.mobilesafari`
 ----
 
 include::partial$generic-ui-steps.adoc[]

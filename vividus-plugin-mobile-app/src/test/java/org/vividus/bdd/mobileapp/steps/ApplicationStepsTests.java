@@ -18,6 +18,7 @@ package org.vividus.bdd.mobileapp.steps;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -31,6 +32,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import io.appium.java_client.InteractsWithApps;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,6 +64,7 @@ class ApplicationStepsTests
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ApplicationSteps.class);
 
     @Mock private HasCapabilities hasCapabilities;
+    @Mock private InteractsWithApps interacts;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManagerContext webDriverManagerContext;
     @Mock private ApplicationActions applicationActions;
@@ -120,11 +123,33 @@ class ApplicationStepsTests
     }
 
     @Test
+    void shouldRestartMobileApplication()
+    {
+        when(webDriverProvider.getUnwrapped(InteractsWithApps.class)).thenReturn(interacts);
+
+        applicationSteps.restartMobileApplication();
+
+        verify(interacts).closeApp();
+        verify(interacts).launchApp();
+        verifyNoMoreInteractions(webDriverProvider);
+    }
+
+    @Test
     void shouldActivateApp()
     {
         String bundleId = "bundleId";
         applicationSteps.activateApp(bundleId);
         verify(applicationActions).activateApp(bundleId);
+    }
+
+    @Test
+    void shouldTerminateApp()
+    {
+        when(webDriverProvider.getUnwrapped(InteractsWithApps.class)).thenReturn(interacts);
+
+        String bundleId = "bundleId";
+        applicationSteps.terminateApp(bundleId);
+        verify(interacts).terminateApp(bundleId);
     }
 
     @Test

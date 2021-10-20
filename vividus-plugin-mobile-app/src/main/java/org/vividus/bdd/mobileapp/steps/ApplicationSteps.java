@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.appium.java_client.InteractsWithApps;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
@@ -96,6 +97,28 @@ public class ApplicationSteps
     public void closeMobileApplication()
     {
         webDriverProvider.end();
+    }
+
+    /**
+     * Restart mobile application
+     */
+    @When("I restart mobile application")
+    public void restartMobileApplication()
+    {
+        InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
+        interactor.closeApp();
+        interactor.launchApp();
+    }
+
+    /**
+     * Terminates the application if it's running
+     * @param bundleId bundle identifier of the application to terminate.
+     */
+    @When("I terminate application with bundle identifier `$bundleId`")
+    public void terminateApp(String bundleId)
+    {
+        InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
+        interactor.terminateApp(bundleId);
     }
 
     /**
