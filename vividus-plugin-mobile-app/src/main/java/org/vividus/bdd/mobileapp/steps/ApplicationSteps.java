@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.appium.java_client.InteractsWithApps;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
@@ -42,6 +41,8 @@ import org.vividus.util.property.PropertyParser;
 
 import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.internal.CapabilityHelpers;
+import io.appium.java_client.HasSessionDetails;
+import io.appium.java_client.InteractsWithApps;
 
 public class ApplicationSteps
 {

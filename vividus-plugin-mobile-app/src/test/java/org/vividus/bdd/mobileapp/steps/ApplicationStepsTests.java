@@ -18,7 +18,6 @@ package org.vividus.bdd.mobileapp.steps;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -32,7 +31,6 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import io.appium.java_client.InteractsWithApps;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,6 +46,8 @@ import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 import io.appium.java_client.ExecutesMethod;
+import io.appium.java_client.HasSessionDetails;
+import io.appium.java_client.InteractsWithApps;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ApplicationStepsTests
@@ -60,6 +60,7 @@ class ApplicationStepsTests
     private static final String APP_NAME = "vividus-mobile.app";
     private static final String SET_SETTINGS = "setSettings";
     private static final String SETTINGS = "settings";
+    private static final String BUNDLE_ID = "bundleId";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ApplicationSteps.class);
 
@@ -137,9 +138,8 @@ class ApplicationStepsTests
     @Test
     void shouldActivateApp()
     {
-        String bundleId = "bundleId";
-        applicationSteps.activateApp(bundleId);
-        verify(applicationActions).activateApp(bundleId);
+        applicationSteps.activateApp(BUNDLE_ID);
+        verify(applicationActions).activateApp(BUNDLE_ID);
     }
 
     @Test
@@ -147,9 +147,8 @@ class ApplicationStepsTests
     {
         when(webDriverProvider.getUnwrapped(InteractsWithApps.class)).thenReturn(interacts);
 
-        String bundleId = "bundleId";
-        applicationSteps.terminateApp(bundleId);
-        verify(interacts).terminateApp(bundleId);
+        applicationSteps.terminateApp(BUNDLE_ID);
+        verify(interacts).terminateApp(BUNDLE_ID);
     }
 
     @Test
