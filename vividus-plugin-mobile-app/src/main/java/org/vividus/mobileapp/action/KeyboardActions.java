@@ -18,6 +18,7 @@ package org.vividus.mobileapp.action;
 
 import static org.apache.commons.lang3.Validate.isTrue;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.openqa.selenium.StaleElementReferenceException;
@@ -26,7 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
-import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.IExpectedConditions;
+import org.vividus.ui.action.IWaitActions;
+import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
@@ -42,18 +45,20 @@ public class KeyboardActions
     private final TouchActions touchActions;
     private final IWebDriverProvider webDriverProvider;
     private final GenericWebDriverManager genericWebDriverManager;
-    private final ISearchActions searchActions;
+    private final IWaitActions waitActions;
+    private final IExpectedConditions<Locator> expectedSearchActionsConditions;
     private final boolean realDevice;
 
     public KeyboardActions(boolean realDevice, TouchActions touchActions,
-            IWebDriverProvider webDriverProvider, GenericWebDriverManager genericWebDriverManager,
-            ISearchActions searchActions)
+                           IWebDriverProvider webDriverProvider, GenericWebDriverManager genericWebDriverManager,
+                           IWaitActions waitActions, IExpectedConditions<Locator> expectedSearchActionsConditions)
     {
         this.realDevice = realDevice;
         this.touchActions = touchActions;
         this.webDriverProvider = webDriverProvider;
         this.genericWebDriverManager = genericWebDriverManager;
-        this.searchActions = searchActions;
+        this.waitActions = waitActions;
+        this.expectedSearchActionsConditions = expectedSearchActionsConditions;
     }
 
     /**
@@ -122,9 +127,11 @@ public class KeyboardActions
                 Locator dismissKeyboardButtonLocator = new Locator(AppiumLocatorType.XPATH,
                         new SearchParameters("(//XCUIElementTypeKeyboard//XCUIElementTypeButton)[last()]",
                                 Visibility.VISIBLE, false));
-                List<WebElement> buttons = searchActions.findElements(webDriverProvider.get(),
-                        dismissKeyboardButtonLocator);
-                isTrue(!buttons.isEmpty(), "Unable to find a button to close the keyboard");
+                WaitResult<List<WebElement>> waitResult = waitActions.wait(webDriverProvider.get(),
+                        Duration.ofSeconds(2),
+                        expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(dismissKeyboardButtonLocator));
+                isTrue(waitResult.isWaitPassed(), "Unable to find a button to close the keyboard");
+                List<WebElement> buttons = waitResult.getData();
                 touchActions.tap(buttons.get(0));
                 return;
             }

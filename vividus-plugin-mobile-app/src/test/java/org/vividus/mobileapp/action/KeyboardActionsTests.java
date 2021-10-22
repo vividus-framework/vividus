@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.List;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -45,7 +46,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
-import org.vividus.ui.action.ISearchActions;
+import org.vividus.ui.action.IExpectedConditions;
+import org.vividus.ui.action.IWaitActions;
+import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
@@ -66,7 +69,8 @@ class KeyboardActionsTests
     @Mock private TouchActions touchActions;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private GenericWebDriverManager genericWebDriverManager;
-    @Mock private ISearchActions searchActions;
+    @Mock private IWaitActions waitActions;
+    @Mock private IExpectedConditions<Locator> expectedSearchActionsConditions;
     @Mock private WebElement element;
     @Mock private HidesKeyboard hidesKeyboard;
 
@@ -77,7 +81,7 @@ class KeyboardActionsTests
     @AfterEach
     void afterEach()
     {
-        verifyNoMoreInteractions(hidesKeyboard, searchActions, genericWebDriverManager);
+        verifyNoMoreInteractions(hidesKeyboard, waitActions, genericWebDriverManager);
     }
 
     @Test
@@ -127,13 +131,18 @@ class KeyboardActionsTests
     {
         init(true);
 
-        WebDriver context = mock(WebDriver.class);
         WebElement returnButton = mock(WebElement.class);
+        WaitResult<List<WebElement>> successWaitResult = new WaitResult<>();
+        successWaitResult.setWaitPassed(true);
+        successWaitResult.setData(List.of(returnButton));
+        WebDriver context = mock(WebDriver.class);
 
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
         enableOnScreenKeyboard(true);
         when(webDriverProvider.get()).thenReturn(context);
-        when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
+        when(waitActions.wait(context, Duration.ofSeconds(2),
+                expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(KEYBOARD_RETURN_LOCATOR)))
+                .thenReturn(successWaitResult);
 
         keyboardActions.typeTextAndHide(element, TEXT);
 
@@ -146,12 +155,17 @@ class KeyboardActionsTests
     {
         init(true);
 
+        WaitResult<List<WebElement>> unsuccessfulWaitResult = new WaitResult<>();
+        unsuccessfulWaitResult.setWaitPassed(false);
+        unsuccessfulWaitResult.setData(List.of());
         WebDriver context = mock(WebDriver.class);
 
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
         enableOnScreenKeyboard(true);
         when(webDriverProvider.get()).thenReturn(context);
-        when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of());
+        when(waitActions.wait(context, Duration.ofSeconds(2),
+                expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(KEYBOARD_RETURN_LOCATOR)))
+                .thenReturn(unsuccessfulWaitResult);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> keyboardActions.typeTextAndHide(element, TEXT));
@@ -194,14 +208,19 @@ class KeyboardActionsTests
     {
         init(true);
 
-        WebDriver context = mock(WebDriver.class);
         WebElement returnButton = mock(WebElement.class);
+        WaitResult<List<WebElement>> successWaitResult = new WaitResult<>();
+        successWaitResult.setWaitPassed(true);
+        successWaitResult.setData(List.of(returnButton));
+        WebDriver context = mock(WebDriver.class);
 
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
         enableOnScreenKeyboard(true);
         when(element.getTagName()).thenThrow(new StaleElementReferenceException("Stale"));
         when(webDriverProvider.get()).thenReturn(context);
-        when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
+        when(waitActions.wait(context, Duration.ofSeconds(2),
+                expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(KEYBOARD_RETURN_LOCATOR)))
+                .thenReturn(successWaitResult);
 
         keyboardActions.typeTextAndHide(element, TEXT);
 
@@ -212,7 +231,7 @@ class KeyboardActionsTests
     void init(boolean realDevice)
     {
         keyboardActions = new KeyboardActions(realDevice, touchActions, webDriverProvider,
-                genericWebDriverManager, searchActions);
+                genericWebDriverManager, waitActions, expectedSearchActionsConditions);
     }
 
     private void enableOnScreenKeyboard(boolean keyboardShown)
