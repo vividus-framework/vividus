@@ -20,6 +20,7 @@ import org.apache.commons.lang3.Validate;
 import org.vividus.selenium.IWebDriverProvider;
 
 import io.appium.java_client.InteractsWithApps;
+import io.appium.java_client.appmanagement.ApplicationState;
 
 public class ApplicationActions
 {
@@ -41,5 +42,20 @@ public class ApplicationActions
         Validate.isTrue(interactor.isAppInstalled(bundleId),
                 "Application with the bundle identifier '%s' is not installed on the device", bundleId);
         interactor.activateApp(bundleId);
+    }
+
+    /**
+     * Terminate the application if it's running.
+     * @param bundleId bundle identifier of the application to terminate.
+     */
+    public void terminateApp(String bundleId)
+    {
+        InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
+        ApplicationState appState = interactor.queryAppState(bundleId);
+        Validate.isTrue(appState != ApplicationState.NOT_INSTALLED && appState != ApplicationState.NOT_RUNNING,
+                "Application with the bundle identifier '%s' is not installed or not running on the device",
+                bundleId);
+        Validate.isTrue(interactor.terminateApp(bundleId),
+                "Application with the bundle identifier '%s' hasn't been successfully stopped", bundleId);
     }
 }

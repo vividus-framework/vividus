@@ -612,7 +612,7 @@ When I activate application with bundle identifier `com.apple.mobilesafari`
 
 ==== *_Info_*
 
-Terminates a running application on the device and navigates to the home device screen.
+Terminates a running application on the device and navigates to the home device screen. The session will not be closed.
 
 ==== *_Wording_*
 

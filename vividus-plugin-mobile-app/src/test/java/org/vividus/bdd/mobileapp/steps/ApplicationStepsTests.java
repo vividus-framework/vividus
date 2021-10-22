@@ -145,10 +145,8 @@ class ApplicationStepsTests
     @Test
     void shouldTerminateApp()
     {
-        when(webDriverProvider.getUnwrapped(InteractsWithApps.class)).thenReturn(interacts);
-
         applicationSteps.terminateApp(BUNDLE_ID);
-        verify(interacts).terminateApp(BUNDLE_ID);
+        verify(applicationActions).terminateApp(BUNDLE_ID);
     }
 
     @Test

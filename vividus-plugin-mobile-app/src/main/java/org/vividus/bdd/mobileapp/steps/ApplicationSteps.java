@@ -92,7 +92,7 @@ public class ApplicationSteps
     }
 
     /**
-     * Closes mobile application
+     * Closes mobile application and quits the session
      */
     @When("I close mobile application")
     public void closeMobileApplication()
@@ -112,14 +112,13 @@ public class ApplicationSteps
     }
 
     /**
-     * Terminates the application if it's running
+     * Terminates the application if it's running. The session will not be closed.
      * @param bundleId bundle identifier of the application to terminate.
      */
     @When("I terminate application with bundle identifier `$bundleId`")
     public void terminateApp(String bundleId)
     {
-        InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
-        interactor.terminateApp(bundleId);
+        applicationActions.terminateApp(bundleId);
     }
 
     /**
