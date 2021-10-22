@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.org.lidalia.slf4jext.Level.ERROR;
 
@@ -46,14 +47,19 @@ import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.event.AssertionPassedEvent;
+import org.vividus.softassert.event.FailTestFastEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.formatter.IAssertionFormatter;
+import org.vividus.softassert.issue.IKnownIssueChecker;
 import org.vividus.softassert.model.AssertionCollection;
+import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
 import org.vividus.testcontext.TestContext;
 
@@ -74,23 +80,12 @@ class SoftAssertTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SoftAssert.class);
 
-    @Mock
-    private TestContext testContext;
-
-    @Mock
-    private IAssertionFormatter formatter;
-
-    @Mock
-    private EventBus eventBus;
-
-    @Mock
-    private AssertionCollection assertionCollection;
-
-    @Mock
-    private List<SoftAssertionError> assertionErrors;
-
-    @InjectMocks
-    private SoftAssert softAssert;
+    @Mock private TestContext testContext;
+    @Mock private IAssertionFormatter formatter;
+    @Mock private EventBus eventBus;
+    @Mock private AssertionCollection assertionCollection;
+    @Mock private List<SoftAssertionError> assertionErrors;
+    @InjectMocks private SoftAssert softAssert;
 
     @SuppressWarnings("unchecked")
     private void mockAssertionCollection()
@@ -242,9 +237,71 @@ class SoftAssertTests
     }
 
     @Test
+    void shouldRecordFailedAssertionAndFailTestCaseFast()
+    {
+        softAssert.setFailTestCaseFast(true);
+        testRecordFailedAssertion(softAssert::recordFailedAssertion);
+        verify(eventBus).post(argThat(event -> {
+            if (event instanceof FailTestFastEvent)
+            {
+                FailTestFastEvent failTestFastEvent = (FailTestFastEvent) event;
+                return failTestFastEvent.isFailTestCaseFast() && !failTestFastEvent.isFailTestSuiteFast();
+            }
+            return false;
+        }));
+        verifyNoMoreInteractions(eventBus);
+    }
+
+    @Test
     void testRecordAssertionWithFailedFlag()
     {
         testRecordFailedAssertion(description -> softAssert.recordAssertion(false, description));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "false",
+            "true"
+    })
+    void shouldRecordFailedAssertionAsKnownIssue(boolean globalFailTestCaseFast)
+    {
+        var knownIssue = mock(KnownIssue.class);
+        testRecordFailedAssertionAsKnownIssue(globalFailTestCaseFast, knownIssue);
+        verifyNoMoreInteractions(eventBus);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionAsKnownIssueAndFailTestCaseFast()
+    {
+        var knownIssue = mock(KnownIssue.class);
+        when(knownIssue.isFailTestCaseFast()).thenReturn(true);
+        testRecordFailedAssertionAsKnownIssue(false, knownIssue);
+        verify(eventBus).post(argThat(event -> {
+            if (event instanceof FailTestFastEvent)
+            {
+                FailTestFastEvent failTestFastEvent = (FailTestFastEvent) event;
+                return failTestFastEvent.isFailTestCaseFast() && !failTestFastEvent.isFailTestSuiteFast();
+            }
+            return false;
+        }));
+        verifyNoMoreInteractions(eventBus);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionAsKnownIssueAndFailTestSuiteFast()
+    {
+        var knownIssue = mock(KnownIssue.class);
+        when(knownIssue.isFailTestSuiteFast()).thenReturn(true);
+        testRecordFailedAssertionAsKnownIssue(false, knownIssue);
+        verify(eventBus).post(argThat(event -> {
+            if (event instanceof FailTestFastEvent)
+            {
+                FailTestFastEvent failTestFastEvent = (FailTestFastEvent) event;
+                return !failTestFastEvent.isFailTestCaseFast() && failTestFastEvent.isFailTestSuiteFast();
+            }
+            return false;
+        }));
+        verifyNoMoreInteractions(eventBus);
     }
 
     private void testRecordFailedAssertion(Predicate<String> testMethod)
@@ -252,16 +309,42 @@ class SoftAssertTests
         mockAssertionCollection();
         String description = "Failed";
         assertFalse(testMethod.test(description));
+        assertLoggingOfFailedAssertion(description);
+        verifyAssertionFailedEventPosted(false);
+    }
+
+    private void testRecordFailedAssertionAsKnownIssue(boolean globalFailTestCaseFast, KnownIssue knownIssue)
+    {
+        mockAssertionCollection();
+        var knownIssueChecker = mock(IKnownIssueChecker.class);
+        softAssert.setKnownIssueChecker(knownIssueChecker);
+        softAssert.setFailTestCaseFast(globalFailTestCaseFast);
+        var description = "failure";
+        when(knownIssue.isPotentiallyKnown()).thenReturn(false);
+        when(knownIssueChecker.getKnownIssue(description)).thenReturn(knownIssue);
+        var descriptionWithKnownIssue = "failure as known issue";
+        when(formatter.getMessage(description, knownIssue)).thenReturn(descriptionWithKnownIssue);
+        assertFalse(softAssert.recordFailedAssertion(description));
+        assertLoggingOfFailedAssertion(descriptionWithKnownIssue);
+        verifyAssertionFailedEventPosted(true);
+    }
+
+    private void verifyAssertionFailedEventPosted(boolean knownIssue)
+    {
         verify(eventBus).post(argThat(event -> {
             if (event instanceof AssertionFailedEvent)
             {
                 AssertionFailedEvent failedEvent = (AssertionFailedEvent) event;
                 SoftAssertionError softAssertionError = failedEvent.getSoftAssertionError();
-                return softAssertionError != null && !softAssertionError.isKnownIssue()
+                return softAssertionError != null && knownIssue == softAssertionError.isKnownIssue()
                         && softAssertionError.getError() != null;
             }
             return false;
         }));
+    }
+
+    private void assertLoggingOfFailedAssertion(String description)
+    {
         assertThat(logger.getLoggingEvents(), equalTo(List.of(error("Fail: {}", description))));
     }
 
