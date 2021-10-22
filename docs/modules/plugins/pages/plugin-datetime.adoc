@@ -80,8 +80,8 @@ Let's imagine the current date is `2020-11-23` and the time is `00:10:01`. Here 
 |20-11-24
 |Current date +1 day with the custom output format
 
-|`#{generateDate(P, yyyy-MM-dd'T'HH:mm:ssZ)}`
-|2020-11-23'T'00:10:01+0300
+|`#{generateDate(P, yyyy-MM-dd\'T\'HH:mm:ssZ)}`
+|2020-11-23T00:10:01+0300
 |Current date with the custom output format including time zone offset
 |===
 
@@ -105,43 +105,43 @@ Formats the input date to another format. Additionally, time zone can be changed
 |Expression
 |Result
 
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSS)}`
+|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
 |2017-01-13T09:00:42.862
 
-|`#{formatDate(2017-01-13T09:00:42.862-05:00, yyyy-MM-dd'T'HH:mm:ss.SSS)}`
+|`#{formatDate(2017-01-13T09:00:42.862-05:00, yyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
 |2017-01-13T09:00:42.862
 
-|`#{formatDate(2017-01-13T09:00:42.862-0500, yyyy-MM-dd'T'HH:mm:ss.SSS)}`
+|`#{formatDate(2017-01-13T09:00:42.862-0500, yyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
 |Throw exception
 
-|`#{formatDate(2017-01-13T09:00:42.862, yyyy-MM-dd'T'HH:mm:ss)}`
+|`#{formatDate(2017-01-13T09:00:42.862, yyyy-MM-dd\'T\'HH:mm:ss)}`
 |2017-01-13T09:00:42
 
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss)}`
+|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss)}`
 |2017-01-13T09:00:42+0000
 
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ssZ)}`
+|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ssZ)}`
 |2017-01-13T09:00:42-05:00
 
 |`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd)}`
 |2017-01-13
 
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSSZ, -05:00)}`
+|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSSZ, -05:00)}`
 |2017-01-13T04:00:42.862-0500
 
-|`#{formatDate(2017-01-13T04:00:42.862-05:00, yyyy-MM-dd'T'HH:mm:ss.SSSZ, GMT)}`
+|`#{formatDate(2017-01-13T04:00:42.862-05:00, yyyy-MM-dd\'T\'HH:mm:ss.SSSZ, GMT)}`
 |2017-01-13T09:00:42.862+0000
 
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSSZ, America/New_York)}`
+|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSSZ, America/New_York)}`
 |2017-01-13T04:00:42.862-0500
 
-|`#{formatDate(2017:01:13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSS)}`
+|`#{formatDate(2017:01:13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
 |Error: invalid input data
 
-|`#{formatDate(2017-01-13T09:00:42.862Z, BBByyyy-MM-dd'T'HH:mm:ss.SSS)}`
+|`#{formatDate(2017-01-13T09:00:42.862Z, BBByyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
 |Error: invalid output format
 
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd'T'HH:mm:ss.SSS, ABCD)}`
+|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSS, ABCD)}`
 |Error: invalid output timezone
 |===
 
