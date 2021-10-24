@@ -43,7 +43,7 @@ dependencies {
     implementation project(':vividus-plugin-websocket')
     implementation project(':vividus-plugin-xml')
 
-    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.24')
+    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.3.0')
     implementation(group: 'com.github.simoc', name: 'csvjdbc', version: 'd939a2f344')
     implementation(group: 'com.h2database', name: 'h2', version: '1.4.200')
 }
