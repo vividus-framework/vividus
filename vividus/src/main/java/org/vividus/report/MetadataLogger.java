@@ -143,7 +143,7 @@ public final class MetadataLogger
         table.setPaddingLeftRight(1);
         table.setPaddingBottom(1);
         table.setTextAlignment(TextAlignment.LEFT);
-        message.format(table.render());
+        message.format("%s", table.render());
     }
 
     private static String wrap(String words)

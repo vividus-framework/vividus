@@ -58,7 +58,8 @@ class MetadataLoggerTests
 {
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(MetadataLogger.class);
     private static final String FORMAT = "{}={}";
-    private static final String MESSAGE = "This is a very long message that should be wrapped to defined cell size";
+    private static final String MESSAGE = "This is a very long message that should be wrapped to defined cell size "
+            + "and with special char: %";
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -107,7 +108,7 @@ class MetadataLoggerTests
         + "\\│       \\│                                                    \\│           \\│                                                    \\│\\s+"
         + "├───────┼────────────────────────────────────────────────────┼───────────┼────────────────────────────────────────────────────┤\\s+"
         + "\\│ aaaaa \\│ This is a very long message that should be wrapped \\│ When I do \\│ This is a very long message that should be wrapped \\│\\s+"
-        + "\\│       \\│ to defined cell size                               \\│ \\|k\\|       \\│ to defined cell size                               \\│\\s+"
+        + "\\│       \\│ to defined cell size and with special char: %      \\│ \\|k\\|       \\│ to defined cell size and with special char: %      \\│\\s+"
         + "\\│       \\│                                                    \\│ \\|v\\|       \\│                                                    \\│\\s+"
         + "\\│       \\│                                                    \\│           \\│                                                    \\│\\s+"
         + "\\│ first \\│ verify                                             \\│ do        \\│ failure                                            \\│\\s+"
