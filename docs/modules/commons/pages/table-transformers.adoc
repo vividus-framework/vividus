@@ -133,6 +133,9 @@ the columns.
 |`byMaxRows`
 |the maximum number of rows to keep
 
+|`byRandomRows`
+|the number of random rows to keep
+
 |`byColumnNames`
 |the names of the columns to keep separated by semicolon
 
@@ -141,7 +144,7 @@ the columns.
 |===
 
 [IMPORTANT]
-`byMaxColumns` and `byColumnNames` are competing properties and only one can be specified at the same time. The same restriction is applied to the properties `byMaxRows` and `byRowIndexes`.
+`byMaxColumns` and `byColumnNames` are competing properties and only one can be specified at the same time. The same restriction is applied to the properties `byMaxRows`, `byRandomRows` and `byRowIndexes`.
 
 .Usage of FILTERING transformer with filtering by column names and by max number of rows
 [source,gherkin]
@@ -162,6 +165,15 @@ the columns.
 |value7|value8|value9|
 ----
 
+.Usage of FILTERING transformer with filtering by column names and the number of random rows to keep
+[source,gherkin]
+----
+{transformer=FILTERING, byColumnNames=key2;key3, byRandomRows=2}
+|key1  |key2  |key3  |
+|value1|value2|value3|
+|value4|value5|value6|
+|value7|value8|value9|
+----
 === MERGING
 
 `MERGING` transformer merges several tables into one.
