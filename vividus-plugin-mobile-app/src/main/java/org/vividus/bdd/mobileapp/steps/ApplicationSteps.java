@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.util.property.PropertyParser;
 
 import io.appium.java_client.ExecutesMethod;
-import io.appium.java_client.HasSessionDetails;
+import io.appium.java_client.internal.CapabilityHelpers;
 
 public class ApplicationSteps
 {
@@ -80,10 +81,12 @@ public class ApplicationSteps
     @Given("I start mobile application")
     public void startMobileApplication()
     {
-        HasSessionDetails details = webDriverProvider.getUnwrapped(HasSessionDetails.class);
+        HasCapabilities driverWithCapabilities = webDriverProvider.getUnwrapped(HasCapabilities.class);
         LOGGER.atInfo()
-              .addArgument(() -> details.getSessionDetail("app"))
-              .log("Started application located at {}");
+                .addArgument(
+                        () -> CapabilityHelpers.getCapability(driverWithCapabilities.getCapabilities(), "app",
+                                String.class))
+                .log("Started application located at {}");
     }
 
     /**

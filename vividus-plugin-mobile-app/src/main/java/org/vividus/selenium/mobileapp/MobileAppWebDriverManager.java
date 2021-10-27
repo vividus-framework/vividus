@@ -35,6 +35,7 @@ import org.openqa.selenium.WebDriverException;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
+import org.vividus.ui.action.JavascriptActions;
 
 import io.appium.java_client.CommandExecutionHelper;
 import io.appium.java_client.HasSessionDetails;
@@ -43,21 +44,44 @@ import io.appium.java_client.android.HasAndroidDeviceDetails;
 
 public class MobileAppWebDriverManager extends GenericWebDriverManager
 {
+    private static final String HEIGHT = "height";
+
+    private final JavascriptActions javascriptActions;
     private final Supplier<Float> dpr = Suppliers.memoize(this::calculateDpr);
 
     public MobileAppWebDriverManager(IWebDriverProvider webDriverProvider,
-            IWebDriverManagerContext webDriverManagerContext)
+            IWebDriverManagerContext webDriverManagerContext, JavascriptActions javascriptActions)
     {
         super(webDriverProvider, webDriverManagerContext);
+        this.javascriptActions = javascriptActions;
     }
 
+    @SuppressWarnings("unchecked")
     public int getStatusBarSize()
     {
-        if (super.isTvOS())
+        if (isTvOS())
         {
             return 0;
         }
-        return  super.isIOSNativeApp() ? getStatBarHeight() : getAndroidStatusBar();
+        if (isIOSNativeApp())
+        {
+            try
+            {
+                return getStatBarHeight();
+            }
+            catch (WebDriverException e)
+            {
+                // Handling SauceLabs error:
+                // org.openqa.selenium.WebDriverException:
+                // failed serving request GET https://production-sushiboat.default/wd/hub/session/XXXX
+
+                // Appium 1.21.0 or higher is required
+                Map<String, ?> deviceScreenInfo = javascriptActions.executeScript("mobile:deviceScreenInfo");
+                Map<String, ?> statusBarSize = (Map<String, ?>) deviceScreenInfo.get("statusBarSize");
+                return ((Number) statusBarSize.get(HEIGHT)).intValue();
+            }
+        }
+        return getAndroidStatusBar();
     }
 
     private int getAndroidStatusBar()
@@ -70,7 +94,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
                     AndroidMobileCommandHelper.getSystemBarsCommand());
             return Optional.ofNullable(systemBars)
                            .map(b -> b.get("statusBar"))
-                           .map(sb -> sb.get("height"))
+                           .map(sb -> sb.get(HEIGHT))
                            .map(Long.class::cast)
                            .map(Long::intValue)
                            .orElse(0);

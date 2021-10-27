@@ -36,6 +36,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.HasCapabilities;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.bdd.mobileapp.model.NamedEntry;
 import org.vividus.mobileapp.action.ApplicationActions;
@@ -44,7 +46,6 @@ import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 import io.appium.java_client.ExecutesMethod;
-import io.appium.java_client.HasSessionDetails;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ApplicationStepsTests
@@ -60,7 +61,7 @@ class ApplicationStepsTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ApplicationSteps.class);
 
-    @Mock private HasSessionDetails details;
+    @Mock private HasCapabilities hasCapabilities;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManagerContext webDriverManagerContext;
     @Mock private ApplicationActions applicationActions;
@@ -68,8 +69,8 @@ class ApplicationStepsTests
 
     private void mockCommons()
     {
-        when(details.getSessionDetail(APP)).thenReturn(APP_NAME);
-        when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
+        when(hasCapabilities.getCapabilities()).thenReturn(new MutableCapabilities(Map.of(APP, APP_NAME)));
+        when(webDriverProvider.getUnwrapped(HasCapabilities.class)).thenReturn(hasCapabilities);
     }
 
     private void verifyLogs()
@@ -94,7 +95,7 @@ class ApplicationStepsTests
 
         verify(webDriverManagerContext).putParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES,
                 new DesiredCapabilities(Map.of(KEY, VALUE, CAPABILITY_NAME, CAPABILITY_VALUE)));
-        verifyNoMoreInteractions(webDriverProvider, details, webDriverManagerContext);
+        verifyNoMoreInteractions(webDriverProvider, hasCapabilities, webDriverManagerContext);
         verifyLogs();
     }
 
@@ -105,7 +106,7 @@ class ApplicationStepsTests
 
         applicationSteps.startMobileApplication();
 
-        verifyNoMoreInteractions(webDriverProvider, details);
+        verifyNoMoreInteractions(webDriverProvider, hasCapabilities);
         verifyLogs();
     }
 

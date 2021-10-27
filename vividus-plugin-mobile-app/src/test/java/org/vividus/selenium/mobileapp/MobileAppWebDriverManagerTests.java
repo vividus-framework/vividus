@@ -49,6 +49,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.action.JavascriptActions;
 
 import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.HasSessionDetails;
@@ -61,6 +62,7 @@ class MobileAppWebDriverManagerTests
     private static final String GET_SYSTEM_BARS = "getSystemBars";
 
     private static final String STAT_BAR_HEIGHT = "statBarHeight";
+    private static final String HEIGHT = "height";
 
     private static final byte[] IMAGE = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A,
             0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
@@ -70,6 +72,7 @@ class MobileAppWebDriverManagerTests
             0x42, 0x60, (byte) 0x82 };
 
     @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private JavascriptActions javascriptActions;
     @InjectMocks private MobileAppWebDriverManager driverManager;
 
     @Test
@@ -80,7 +83,7 @@ class MobileAppWebDriverManagerTests
                 withSettings().extraInterfaces(ExecutesMethod.class));
         when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(hasAndroidDeviceDetails);
         Response response = mock(Response.class);
-        when(response.getValue()).thenReturn(Map.of("statusBar", Map.of("height", 100L)));
+        when(response.getValue()).thenReturn(Map.of("statusBar", Map.of(HEIGHT, 100L)));
         when(hasAndroidDeviceDetails.execute(GET_SYSTEM_BARS, Map.of())).thenReturn(response);
         assertEquals(100, driverManager.getStatusBarSize());
     }
@@ -110,6 +113,21 @@ class MobileAppWebDriverManagerTests
     }
 
     @Test
+    void shouldProviderStatusBarHeightForIosWhenSauceLabsThrowAnError()
+    {
+        mockCapabilities(MobilePlatform.IOS);
+        HasSessionDetails details = mock(HasSessionDetails.class);
+        when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
+        when(details.getSessionDetail(STAT_BAR_HEIGHT)).thenThrow(new WebDriverException(
+                "failed serving request GET https://production-sushiboat.default/wd/hub/session/XXXX"));
+        when(javascriptActions.executeScript("mobile:deviceScreenInfo")).thenReturn(Map.of(
+                "statusBarSize", Map.of("width", 375, HEIGHT, 44),
+                "scale", 3
+        ));
+        assertEquals(44, driverManager.getStatusBarSize());
+    }
+
+    @Test
     void shouldProviderStatusBarHeightForTvOS()
     {
         mockCapabilities(MobilePlatform.TVOS);
@@ -131,7 +149,9 @@ class MobileAppWebDriverManagerTests
     @Test
     void shouldProvideDpr()
     {
-        MobileAppWebDriverManager spyingDriverManager = new MobileAppWebDriverManager(webDriverProvider, null) {
+        MobileAppWebDriverManager spyingDriverManager = new MobileAppWebDriverManager(webDriverProvider, null,
+                javascriptActions)
+        {
             @Override
             public Dimension getSize()
             {
