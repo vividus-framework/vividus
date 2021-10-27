@@ -108,7 +108,7 @@ class ApplicationActionsTests
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> applicationActions.terminateApp(UNKNOWN_BUNDLE_ID));
         assertEquals(
-                String.format("Application with the bundle identifier '%s' hasn't been successfully stopped",
+                String.format("Application with the bundle identifier '%s' hasn't been successfully terminated",
                         UNKNOWN_BUNDLE_ID),
                 exception.getMessage());
     }
