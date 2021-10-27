@@ -61,7 +61,6 @@ import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.SauceLabsCapabilityType;
 
 import io.appium.java_client.MobileDriver;
 import io.appium.java_client.MobileElement;
@@ -283,21 +282,6 @@ class GenericWebDriverManagerTests
     {
         mockWebDriverHavingCapabilities(Map.of(CapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID));
         assertFalse(driverManager.isIOS());
-    }
-
-    @Test
-    void testIsIOSDeviceFromInnerCapabilities()
-    {
-        Map<String, String> map = Map.of(SauceLabsCapabilityType.DEVICE, BrowserType.IPHONE);
-        mockWebDriverHavingCapabilities(Map.of(SauceLabsCapabilityType.CAPABILITIES, map));
-        assertTrue(driverManager.isIOS());
-    }
-
-    @Test
-    void testIsIOSUsingDeviceType()
-    {
-        mockWebDriverHavingCapabilities(Map.of(SauceLabsCapabilityType.DEVICE, BrowserType.IPHONE));
-        assertTrue(driverManager.isIOS());
     }
 
     @Test

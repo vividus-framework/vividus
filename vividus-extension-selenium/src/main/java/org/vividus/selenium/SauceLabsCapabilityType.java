@@ -18,6 +18,5 @@ package org.vividus.selenium;
 
 public interface SauceLabsCapabilityType
 {
-    String DEVICE = "device";
     String CAPABILITIES = "capabilities";
 }

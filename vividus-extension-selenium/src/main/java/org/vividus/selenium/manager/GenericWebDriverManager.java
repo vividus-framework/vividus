@@ -35,7 +35,6 @@ import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.SauceLabsCapabilityType;
 import org.vividus.selenium.WebDriverUtil;
 
 import io.appium.java_client.MobileDriver;
@@ -146,8 +145,7 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     public static boolean isIOS(Capabilities capabilities)
     {
         return isPlatformName(capabilities, MobilePlatform.IOS)
-                || isBrowserAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD)
-                || isDeviceAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD);
+                || isBrowserAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD);
     }
 
     @Override
@@ -211,30 +209,6 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
             if (platformNameFromCaps instanceof Platform && !MobilePlatform.TVOS.equals(platformName))
             {
                 return platformNameFromCaps == Platform.fromString(platformName);
-            }
-            return false;
-        });
-    }
-
-    private static boolean isDeviceAnyOf(Capabilities capabilities, String... devices)
-    {
-        return checkCapabilities(capabilities, () ->
-        {
-            String deviceCapability = (String) capabilities.getCapability(SauceLabsCapabilityType.DEVICE);
-            if (deviceCapability == null)
-            {
-                Object innerCapabilities = capabilities.getCapability(SauceLabsCapabilityType.CAPABILITIES);
-                if (innerCapabilities instanceof Map<?, ?>)
-                {
-                    deviceCapability = (String) ((Map<?, ?>) innerCapabilities).get(SauceLabsCapabilityType.DEVICE);
-                }
-            }
-            for (String device : devices)
-            {
-                if (device.equalsIgnoreCase(deviceCapability))
-                {
-                    return true;
-                }
             }
             return false;
         });
