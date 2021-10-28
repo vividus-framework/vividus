@@ -141,9 +141,10 @@ class MergingTableTransformerTests
     {
         Properties properties = createProperties(COLUMNS, TWO_PATHS);
         when(configuration.examplesTableFactory()).thenReturn(factory);
-        mockCreateExamplesTable(PATH_1, "|var2|var1|\n|b|a|");
-        mockCreateExamplesTable(PATH_2, "|var2|var3|\n|c|d|");
-        verifyIllegalArgumentException(properties, "Please, specify tables with the unique sets of headers");
+        mockCreateExamplesTable(PATH_1, "|0409|var2|var1|\n|b|a|");
+        mockCreateExamplesTable(PATH_2, "|0409|var2|var3|\n|c|d|");
+        verifyIllegalArgumentException(properties,
+                "Please, specify tables with the unique sets of headers. Conflicting headers are: 0409, var2");
     }
 
     @Test
