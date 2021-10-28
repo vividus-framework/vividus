@@ -64,6 +64,19 @@ Examples:
 |D      |E      |F      |
 
 
+Scenario: Get random row with byRandomRows
+Then `<column1>` matches `(A|D|G|J|M)`
+Then `<column2>` matches `(B|E|H|K|N)`
+Examples:
+{transformer=FILTERING, byRandomRows=1, byMaxColumns=2}
+|column1|column2|column3|
+|A      |B      |C      |
+|D      |E      |F      |
+|G      |H      |I      |
+|J      |K      |L      |
+|M      |N      |O      |
+
+
 Scenario: Verify FILTERING transformer with byColumnNames parameter and external table
 Then `<column3>` is equal to `C`
 Examples:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.vividus.bdd.transformer;
 
-import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.ObjectUtils.allNull;
+import static org.apache.commons.lang3.ObjectUtils.anyNotNull;
+import static org.apache.commons.lang3.ObjectUtils.anyNull;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -43,6 +46,7 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
     private static final String BY_MAX_COLUMNS_PROPERTY = "byMaxColumns";
     private static final String BY_MAX_ROWS_PROPERTY = "byMaxRows";
     private static final String BY_ROW_INDEXES_PROPERTY = "byRowIndexes";
+    private static final String BY_RANDOM_ROWS_PROPERTY = "byRandomRows";
     private static final String COLUMN_PREFIX = "column.";
 
     private static final String REGEX_FILTER_DECLARATION = COLUMN_PREFIX + "<regex placeholder>";
@@ -58,48 +62,69 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
         String byMaxRows = properties.getProperty(BY_MAX_ROWS_PROPERTY);
         String byColumnNames = properties.getProperty(BY_COLUMNS_NAMES_PROPERTY);
         String byRowIndexes = properties.getProperty(BY_ROW_INDEXES_PROPERTY);
+        String byRandomRows = properties.getProperty(BY_RANDOM_ROWS_PROPERTY);
         Set<String> columnFilters = findColumnFilters(properties);
 
-        isTrue(byMaxColumns != null || byMaxRows != null || byColumnNames != null
-                        || !columnFilters.isEmpty() || byRowIndexes != null,
-                "At least one of the following properties should be specified: '%s', '%s', '%s', '%s', '%s'",
-                BY_MAX_COLUMNS_PROPERTY, BY_MAX_ROWS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY,
-                REGEX_FILTER_DECLARATION, BY_ROW_INDEXES_PROPERTY);
+        isTrue(anyNotNull(byMaxColumns, byMaxRows, byColumnNames, byRowIndexes, byRandomRows)
+                || !columnFilters.isEmpty(),
+                "At least one of the following properties should be specified: '%s', '%s', '%s', '%s', '%s', '%s'",
+                BY_MAX_COLUMNS_PROPERTY, BY_MAX_ROWS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY, REGEX_FILTER_DECLARATION,
+                BY_ROW_INDEXES_PROPERTY, BY_RANDOM_ROWS_PROPERTY);
 
         TableRows tableRows = tableParsers.parseRows(tableAsString, tableProperties);
         if (!columnFilters.isEmpty())
         {
-            isTrue(byMaxColumns == null && byColumnNames == null && byMaxRows == null && byRowIndexes == null,
+            isTrue(allNull(byMaxColumns, byColumnNames, byMaxRows, byRowIndexes, byRandomRows),
                     "Filtering by regex is not allowed to be used together with the following properties:"
-                    + " '%s', '%s', '%s', '%s'",
-                    BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY, BY_MAX_ROWS_PROPERTY, BY_ROW_INDEXES_PROPERTY);
+                            + " '%s', '%s', '%s', '%s', '%s'",
+                    BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY, BY_MAX_ROWS_PROPERTY, BY_ROW_INDEXES_PROPERTY,
+                    BY_RANDOM_ROWS_PROPERTY);
 
             return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(),
                     filterRows(columnFilters, tableRows.getRows(), properties), tableProperties);
         }
 
-        isTrue(byMaxColumns == null || byColumnNames == null, CONFLICTING_PROPERTIES_MESSAGE,
+        isTrue(anyNull(byMaxColumns, byColumnNames), CONFLICTING_PROPERTIES_MESSAGE,
                 BY_MAX_COLUMNS_PROPERTY, BY_COLUMNS_NAMES_PROPERTY);
 
-        isTrue(byMaxRows == null || byRowIndexes == null, CONFLICTING_PROPERTIES_MESSAGE,
+        isTrue(anyNull(byMaxRows, byRowIndexes), CONFLICTING_PROPERTIES_MESSAGE,
                 BY_MAX_ROWS_PROPERTY, BY_ROW_INDEXES_PROPERTY);
 
+        isTrue(anyNull(byRandomRows, byRowIndexes), CONFLICTING_PROPERTIES_MESSAGE,
+                BY_RANDOM_ROWS_PROPERTY, BY_ROW_INDEXES_PROPERTY);
+
+        isTrue(anyNull(byRandomRows, byMaxRows), CONFLICTING_PROPERTIES_MESSAGE,
+                BY_RANDOM_ROWS_PROPERTY, BY_MAX_ROWS_PROPERTY);
+
         List<String> filteredColumnNames = filterColumnNames(byMaxColumns, byColumnNames, tableRows.getHeaders());
-        List<Map<String, String>> filteredRows = filterRows(byMaxRows, byRowIndexes, tableRows.getRows());
+        List<Map<String, String>> filteredRows = filterRows(byMaxRows, byRowIndexes, byRandomRows, tableRows.getRows());
         filterRowsByColumnNames(filteredRows, filteredColumnNames);
 
         return ExamplesTableProcessor.buildExamplesTable(filteredColumnNames, filteredRows, tableProperties);
     }
 
-    private List<Map<String, String>> filterRows(String byMaxRows, String byRowIndexes, List<Map<String, String>> rows)
+    private List<Map<String, String>> filterRows(String byMaxRows, String byRowIndexes, String byRandomRows,
+            List<Map<String, String>> rows)
     {
-        if (byRowIndexes == null)
+        if (byRowIndexes == null && byRandomRows == null)
         {
             return Optional.ofNullable(byMaxRows)
                     .map(Integer::parseInt)
                     .filter(m -> m < rows.size())
                     .map(m -> rows.subList(0, m))
                     .orElse(rows);
+        }
+        else if (byRandomRows != null)
+        {
+            int randomRowsCount = Integer.parseInt(byRandomRows);
+            isTrue(randomRowsCount <= rows.size(),
+                    "'byRandomRows' must be less than or equal to the number of table rows");
+            return ThreadLocalRandom.current()
+                    .ints(0, rows.size())
+                    .distinct()
+                    .limit(randomRowsCount)
+                    .mapToObj(rows::get)
+                    .collect(Collectors.toList());
         }
         else
         {
@@ -136,9 +161,9 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
     private List<Map<String, String>> filterRows(Set<String> columnFilters, List<Map<String, String>> rows,
             Properties properties)
     {
-        return columnFilters.stream().collect(Collectors.collectingAndThen(
-                Collectors.toMap(k -> substringAfter(k, COLUMN_PREFIX), k -> createFilter(properties.getProperty(k))),
-            filters -> filterRows(rows, filters)));
+        return columnFilters.stream().collect(
+                Collectors.collectingAndThen(Collectors.toMap(k -> StringUtils.substringAfter(k, COLUMN_PREFIX),
+                        k -> createFilter(properties.getProperty(k))), filters -> filterRows(rows, filters)));
     }
 
     private static Predicate<String> createFilter(String regex)

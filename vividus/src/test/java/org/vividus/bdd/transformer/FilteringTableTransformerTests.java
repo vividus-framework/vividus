@@ -16,10 +16,17 @@
 
 package org.vividus.bdd.transformer;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.jbehave.core.configuration.Keywords;
@@ -75,14 +82,39 @@ class FilteringTableTransformerTests
         assertEquals("|key2|key3|key1|\n|2|3|1|", transformer.transform(table, tableParsers, tableProperties));
     }
 
+    @Test
+    void testTransformRandomRows()
+    {
+        var tableProperties = new TableProperties("byRandomRows=1", keywords, parameterConverters);
+        String table = "|key2|key3|key1|\n|1|2|3|\n|4|5|6|\n|7|8|9|\n|10|11|12|\n|13|14|15|\n|16|17|18|\n|19|20|21|"
+                + "\n|22|23|24|\n|25|26|27|\n|28|29|30|";
+        List<String> transformerRandomTables = new ArrayList<>();
+        Map<String, Integer> randomTablesCount = new HashMap<>();
+        for (int i = 0; i < 1000; i++)
+        {
+            transformerRandomTables.add(transformer.transform(table, tableParsers, tableProperties));
+        }
+        for (String tableStr : transformerRandomTables)
+        {
+            randomTablesCount.put(tableStr, Collections.frequency(transformerRandomTables, tableStr));
+        }
+        Integer minCountSameRows = Collections.min(randomTablesCount.values());
+        Integer maxCountSameRows = Collections.max(randomTablesCount.values());
+        int maxThreshold = 55;
+        assertThat(maxCountSameRows - minCountSameRows, lessThanOrEqualTo(maxThreshold));
+    }
+
     @ParameterizedTest
     // CHECKSTYLE:OFF
     // @formatter:off
     @CsvSource({
-            "'',                                   'At least one of the following properties should be specified: ''byMaxColumns'', ''byMaxRows'', ''byColumnNames'', ''column.<regex placeholder>'', ''byRowIndexes'''",
+            "'',                                   'At least one of the following properties should be specified: ''byMaxColumns'', ''byMaxRows'', ''byColumnNames'', ''column.<regex placeholder>'', ''byRowIndexes'', ''byRandomRows'''",
             "'byMaxColumns=1, byColumnNames=key2', Conflicting properties declaration found: 'byMaxColumns' and 'byColumnNames'",
             "'byMaxRows=1, byRowIndexes=1;2',      Conflicting properties declaration found: 'byMaxRows' and 'byRowIndexes'",
-            "'column.demo=.*, byMaxRows=2',        'Filtering by regex is not allowed to be used together with the following properties: ''byMaxColumns'', ''byColumnNames'', ''byMaxRows'', ''byRowIndexes'''"
+            "'byRandomRows=1, byMaxRows=1',        Conflicting properties declaration found: 'byRandomRows' and 'byMaxRows'",
+            "'byRandomRows=1, byRowIndexes=1;2',   Conflicting properties declaration found: 'byRandomRows' and 'byRowIndexes'",
+            "'column.demo=.*, byMaxRows=2',        'Filtering by regex is not allowed to be used together with the following properties: ''byMaxColumns'', ''byColumnNames'', ''byMaxRows'', ''byRowIndexes'', ''byRandomRows'''",
+            "'byRandomRows=4',                     'byRandomRows' must be less than or equal to the number of table rows"
     })
     // CHECKSTYLE:ON
     // @formatter:on
