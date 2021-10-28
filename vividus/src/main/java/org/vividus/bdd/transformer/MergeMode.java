@@ -88,8 +88,10 @@ public enum MergeMode
         {
             isTrue(!strict || current.getRows().size() == next.getRows().size(),
                     "Please, specify tables with the same number of rows");
-            isTrue(CollectionUtils.intersection(current.getHeaders(), next.getHeaders()).isEmpty(),
-                    "Please, specify tables with the unique sets of headers");
+            Collection<String> intersection = CollectionUtils.intersection(current.getHeaders(), next.getHeaders());
+            isTrue(intersection.isEmpty(),
+                "Please, specify tables with the unique sets of headers. Conflicting headers are: %s",
+                String.join(", ", intersection));
         }
 
         @Override
