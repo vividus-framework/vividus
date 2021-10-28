@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -38,7 +39,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.PropertyMapper;
 import org.vividus.util.property.PropertyParser;
 
@@ -78,7 +78,18 @@ class BatchStorageTests
         addBatchResourceConfiguration(batchResourceConfigurations, 8);
         addBatchResourceConfiguration(batchResourceConfigurations, 10);
 
-        PropertyParser propertyParser = mock(PropertyParser.class);
+        createBatchStorage(batchResourceConfigurations);
+    }
+
+    private void addBatchResourceConfiguration(Map<String, String> batchResourceConfigurations, int i)
+    {
+        batchResourceConfigurations.put(BATCH_LOADER_PROPERTY_PREFIX + BATCH_NUMBERS.get(i) + ".resource-location",
+                DEFAULT_RESOURCE_LOCATION);
+    }
+
+    private void createBatchStorage(Map<String, String> batchResourceConfigurations) throws IOException
+    {
+        var propertyParser = mock(PropertyParser.class);
         when(propertyParser.getPropertiesByPrefix(BATCH_LOADER_PROPERTY_PREFIX)).thenReturn(
                 batchResourceConfigurations);
         when(propertyParser.getPropertiesByPrefix("bdd.batch-")).thenReturn(Map.of(
@@ -90,15 +101,8 @@ class BatchStorageTests
             "bdd.batch-2.fail-fast", "true"
         ));
 
-        IPropertyMapper propertyMapper = new PropertyMapper(".", PropertyNamingStrategies.KEBAB_CASE, propertyParser,
-                Set.of());
+        var propertyMapper = new PropertyMapper(".", PropertyNamingStrategies.KEBAB_CASE, propertyParser, Set.of());
         batchStorage = new BatchStorage(propertyMapper, Long.toString(DEFAULT_TIMEOUT), DEFAULT_META_FILTERS, false);
-    }
-
-    private void addBatchResourceConfiguration(Map<String, String> batchResourceConfigurations, int i)
-    {
-        batchResourceConfigurations.put(BATCH_LOADER_PROPERTY_PREFIX + BATCH_NUMBERS.get(i) + ".resource-location",
-                DEFAULT_RESOURCE_LOCATION);
     }
 
     @Test
@@ -154,5 +158,14 @@ class BatchStorageTests
             () -> assertEquals(DEFAULT_META_FILTERS, config.getMetaFilters()),
             () -> assertFalse(config.isFailFast())
         );
+    }
+
+    @Test
+    void shouldThrowErrorIfBatchResourceConfigurationDoesNotContainResourceLocation()
+    {
+        var batchResourceConfigurations = Map.of("bdd.story-loader.batch-1.resource-include-patterns", "*.story");
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> createBatchStorage(batchResourceConfigurations));
+        assertEquals("'resource-location' is missing for batch-1", exception.getMessage());
     }
 }

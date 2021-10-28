@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.vividus.util.property.IPropertyMapper;
 
 public class BatchStorage
@@ -45,9 +46,12 @@ public class BatchStorage
 
         batchResourceConfigurations = readFromProperties(propertyMapper, "bdd.story-loader.batch-",
                 BatchResourceConfiguration.class);
+        batchResourceConfigurations.forEach((batchKey, resourceConfiguration) -> Validate.isTrue(
+                resourceConfiguration.getResourceLocation() != null, "'resource-location' is missing for %s",
+                batchKey));
+
         batchExecutionConfigurations = readFromProperties(propertyMapper, "bdd.batch-",
                 BatchExecutionConfiguration.class);
-
         batchExecutionConfigurations.forEach((key, config) -> {
             if (config.getName() == null)
             {
