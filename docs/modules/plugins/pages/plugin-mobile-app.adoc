@@ -324,6 +324,39 @@ When I restart mobile application
 When I restart mobile application
 ----
 
+One of the key benefit of usage the restart step instead of
+[source,gherkin]
+----
+When I close mobile application
+Given I start mobile application
+----
+
+steps pair is ability to avoid device re-allocation on SauceLabs or BrowserStack in case of application re-installation within story run (e.g. in case usage ExamplesTable)
+
+.Re-install mobile application in Sauce Labs
+[source,gherkin]
+----
+Given I start mobile application with capabilities:
+|name   |value|
+|noReset|false|
+!-- Some test steps
+
+When I restart mobile application
+!-- Some test steps after application re-installation
+----
+
+.Re-install mobile application in Browser Stack
+[source,gherkin]
+----
+Given I start mobile application with capabilities:
+|name     |value|
+|fullReset|true |
+!-- Some test steps
+
+When I restart mobile application
+!-- Some test steps after application re-installation
+----
+
 === Close mobile application
 
 ==== *_Info_*
