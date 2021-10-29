@@ -250,6 +250,7 @@ Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` 
 When I swipe RIGHT to element located `accessibilityId(<firstItemAccessibilityId>)` with duration PT1S
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
+When I reset context
 
 Examples:
 |firstItemAccessibilityId|secondItemAccessibilityId|
@@ -262,6 +263,17 @@ Meta:
 When I long press POWER key
 When I reset context
 Then number of elements found by `xpath(//*[@text = 'Power off'])` is = `1`
+
+
+Scenario: Verify step: 'When I long press $key key'
+Meta:
+    @targetPlatform ios
+When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears
+When I long press home key
+When I wait until element located `accessibilityId(<togglerAccessibilityId>)` disappears
+When I activate application with bundle identifier `${main-app}`
+When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears
+
 
 Scenario: Verify step: 'When I close mobile application'
 When I close mobile application

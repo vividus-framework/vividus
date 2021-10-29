@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,6 +55,7 @@ import io.appium.java_client.android.nativekey.PressesKey;
 @ExtendWith(MockitoExtension.class)
 class KeyboardStepsTests
 {
+    private static final String DURATION_SECONDS = "durationSeconds";
     private static final String KEYCODE = "keycode";
     private static final String HOME = "Home";
     private static final String TEXT = "text";
@@ -222,10 +224,20 @@ class KeyboardStepsTests
     }
 
     @Test
-    void shouldFailForLongPressForNotAndroid()
+    void shouldLongPressForIOS()
     {
-        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
-            () -> keyboardSteps.longPressKey(HOME));
-        assertEquals("Long press supported for Android only", iae.getMessage());
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
+        keyboardSteps.setLongPressDuration(Duration.ofDays(1));
+        keyboardSteps.longPressKey(HOME);
+        verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, HOME, DURATION_SECONDS, 86400L));
+    }
+
+    @Test
+    void shouldLongPressForTVOS()
+    {
+        when(genericWebDriverManager.isTvOS()).thenReturn(true);
+        keyboardSteps.setLongPressDuration(Duration.ofDays(1));
+        keyboardSteps.longPressKey(HOME);
+        verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, HOME, DURATION_SECONDS, 86400L));
     }
 }

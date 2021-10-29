@@ -18,8 +18,11 @@ package org.vividus.bdd.mobileapp.steps;
 
 import static java.util.Map.entry;
 
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -62,6 +65,8 @@ public class KeyboardSteps
     private final GenericWebDriverManager genericWebDriverManager;
     private final JavascriptActions javascriptActions;
     private final IWebDriverProvider webDriverProvider;
+
+    private Duration longPressDuration;
 
     public KeyboardSteps(KeyboardActions keyboardActions, IBaseValidations baseValidations,
             GenericWebDriverManager genericWebDriverManager,
@@ -145,10 +150,9 @@ public class KeyboardSteps
     /**
      * Performs long press of the key
      * <br>
-     * See <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
+     * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
+     * <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
      * Android keys</a> for available values
-     * <br>
-     * Supported for <b>Android</b> only
      * <br>
      * Example:
      * <br>
@@ -161,8 +165,14 @@ public class KeyboardSteps
     @When("I long press $key key")
     public void longPressKey(String key)
     {
-        Validate.isTrue(genericWebDriverManager.isAndroidNativeApp(), "Long press supported for Android only");
-        pressOnAndroid(p -> p::longPressKey, List.of(key));
+        if (genericWebDriverManager.isAndroidNativeApp())
+        {
+            pressOnAndroid(p -> p::longPressKey, List.of(key));
+        }
+        else if (genericWebDriverManager.isIOS() || genericWebDriverManager.isTvOS())
+        {
+            pressButton(key, Optional.of(longPressDuration));
+        }
     }
 
     /**
@@ -211,12 +221,20 @@ public class KeyboardSteps
     {
         if (genericWebDriverManager.isIOSNativeApp() || genericWebDriverManager.isTvOS())
         {
-            keys.forEach(key -> javascriptActions.executeScript("mobile: pressButton", Map.of("name", key)));
+            keys.forEach(key -> pressButton(key, Optional.empty()));
         }
         else
         {
             pressOnAndroid(p -> p::pressKey, keys);
         }
+    }
+
+    private Object pressButton(String key, Optional<Duration> pressDuration)
+    {
+        Map<String, Object> args = new HashMap<>(2);
+        args.put("name", key);
+        pressDuration.ifPresent(d -> args.put("durationSeconds", longPressDuration.toSeconds()));
+        return javascriptActions.executeScript("mobile: pressButton", args);
     }
 
     private void pressOnAndroid(Function<PressesKey, Consumer<KeyEvent>> presser, List<String> keys)
@@ -232,5 +250,10 @@ public class KeyboardSteps
             })
             .map(KeyEvent::new)
             .forEach(keyPresser::accept);
+    }
+
+    public void setLongPressDuration(Duration longPressDuration)
+    {
+        this.longPressDuration = longPressDuration;
     }
 }

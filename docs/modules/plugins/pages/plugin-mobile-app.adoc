@@ -688,9 +688,11 @@ When I switch to native context
 Then number of elements found by `xpath(html)` is equal to `0`
 ----
 
+:keys: https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
+
 === Press key
 
-Presses an https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS key] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android key]
+Presses {keys}
 
 [source,gherkin]
 ----
@@ -705,11 +707,12 @@ When I press $key key
 When I press Home key
 ----
 
+
 === Long press key
 
-Performs long press of the https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android key]
+Performs long press of {keys}
 
-WARNING: Only Android supported
+TIP: to modify long press duration for `iOS` and `tvOS` you could use `mobile-application.long-press-duration` property.
 
 [source,gherkin]
 ----
@@ -726,7 +729,7 @@ When I long press Home key
 
 === Press keys
 
-Presses a sequence of https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
+Presses a sequence of {keys}
 
 [source,gherkin]
 ----
