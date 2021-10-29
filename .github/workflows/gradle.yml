@@ -110,24 +110,15 @@ jobs:
 
 
     - name: Integration tests
-      if: matrix.platform == 'ubuntu-latest'
+      if: matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest'
       run: |
-        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=integration \
-                                              -Pvividus.allure.history-directory=output/history/integration-tests \
-                                              -Pvividus.allure.executor.name="Github Actions (Vividus)" \
-                                              -Pvividus.allure.executor.type=github \
-                                              -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
-                                              -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
-                                              -Pvividus.allure.executor.build-name="Integration Tests ${GITHUB_RUN_ID}" \
-                                              -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                              -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                              -Pvividus.allure.executor.report-name="Integration tests report"
+        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=integration -Pvividus.allure.history-directory=output/history/integration-tests -Pvividus.allure.executor.name="Github Actions (Vividus)" -Pvividus.allure.executor.type=github -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} -Pvividus.allure.executor.build-name="Integration Tests ${GITHUB_RUN_ID}" -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} -Pvividus.allure.executor.report-name="Integration tests report"
 
     - name: Publish integration tests report
-      if: matrix.platform == 'ubuntu-latest' && always()
+      if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest') && always()
       uses: actions/upload-artifact@v2
       with:
-        name: Integration Tests - Allure report
+        name: Integration Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
 
     - name: System tests
