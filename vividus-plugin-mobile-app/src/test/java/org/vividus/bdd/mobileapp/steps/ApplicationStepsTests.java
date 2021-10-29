@@ -46,7 +46,6 @@ import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 import io.appium.java_client.ExecutesMethod;
-import io.appium.java_client.HasSessionDetails;
 import io.appium.java_client.InteractsWithApps;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })

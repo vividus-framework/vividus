@@ -40,9 +40,8 @@ import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.util.property.PropertyParser;
 
 import io.appium.java_client.ExecutesMethod;
-import io.appium.java_client.internal.CapabilityHelpers;
-import io.appium.java_client.HasSessionDetails;
 import io.appium.java_client.InteractsWithApps;
+import io.appium.java_client.internal.CapabilityHelpers;
 
 public class ApplicationSteps
 {
