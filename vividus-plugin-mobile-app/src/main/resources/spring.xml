@@ -39,7 +39,9 @@
 
     <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
 
-    <bean id="keyboardSteps" class="org.vividus.bdd.mobileapp.steps.KeyboardSteps" />
+    <bean id="keyboardSteps" class="org.vividus.bdd.mobileapp.steps.KeyboardSteps">
+        <property name="longPressDuration" value="${mobile-application.long-press-duration}" />
+    </bean>
 
     <bean id="touchSteps" class="org.vividus.bdd.mobileapp.steps.TouchSteps" />
 
