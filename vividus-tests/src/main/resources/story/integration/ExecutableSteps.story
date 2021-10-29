@@ -68,7 +68,7 @@ When I execute steps:
 !step                                                                                   !
 !Then `${iterator}` is = `0`                                                            !
 !When I initialize the STORY variable `iterator` with value `#{eval(${iterator} + 1)}`  !
-!When I do                                                                              !
+!When I execute steps:                                                                  !
 !|step                                                                                 |!
 !|Then `${iterator}` is = `1`                                                          |!
 !|When I initialize the STORY variable `iterator` with value `#{eval(${iterator} + 1)}`|!
