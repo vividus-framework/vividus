@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,13 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
+import org.vividus.bdd.steps.ui.GenericSetVariableSteps;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
@@ -42,6 +44,8 @@ import org.vividus.util.UriUtils;
 @TakeScreenshotOnFailure
 public class SetVariableSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SetVariableSteps.class);
+
     private final IWebDriverProvider webDriverProvider;
     private final ISoftAssert softAssert;
     private final ISearchActions searchActions;
@@ -49,10 +53,11 @@ public class SetVariableSteps
     private final IBddVariableContext bddVariableContext;
     private final IUiContext uiContext;
     private final WebJavascriptActions javascriptActions;
+    private final GenericSetVariableSteps genericSetVariableSteps;
 
     public SetVariableSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert, ISearchActions searchActions,
             IBaseValidations baseValidations, IBddVariableContext bddVariableContext, IUiContext uiContext,
-            WebJavascriptActions javascriptActions)
+            WebJavascriptActions javascriptActions, GenericSetVariableSteps genericSetVariableSteps)
     {
         this.webDriverProvider = webDriverProvider;
         this.softAssert = softAssert;
@@ -61,6 +66,7 @@ public class SetVariableSteps
         this.bddVariableContext = bddVariableContext;
         this.uiContext = uiContext;
         this.javascriptActions = javascriptActions;
+        this.genericSetVariableSteps = genericSetVariableSteps;
     }
 
     /**
@@ -245,16 +251,21 @@ public class SetVariableSteps
      * <li><b>STEP</b> - the variable will be available within the step)
      * </ul>
      * @param variableName A name under which the value should be saved
+     * @deprecated Use step:
+     * When I save number of elements located `$locator` to $scopes variable `$variableName`
      */
     @When("I set the number of elements found by the attribute '$attributeType'='$attributeValue'"
             + " to the '$scopes' variable '$variableName'")
+    @Deprecated(since = "0.3.11", forRemoval = true)
     public void saveNumberOfElementsByAttributeValueToVariable(String attributeType, String attributeValue,
             Set<VariableScope> scopes, String variableName)
     {
+        LOGGER.warn(
+                "This step is deprecated and will be removed in VIVIDUS 0.4.0. The replacement is \"When I save "
+                        + "number of elements located `$locator` to $scopes variable `$variableName`\"");
         Locator locator = new Locator(WebLocatorType.XPATH,
                 LocatorUtil.getXPathByAttribute(attributeType, attributeValue));
-        List<WebElement> elements = searchActions.findElements(getSearchContext(), locator);
-        saveVariable(scopes, variableName, elements.size());
+        genericSetVariableSteps.saveNumberOfElementsToVariable(locator, scopes, variableName);
     }
 
     /**
@@ -366,10 +377,5 @@ public class SetVariableSteps
     private WebDriver getWebDriver()
     {
         return webDriverProvider.get();
-    }
-
-    private SearchContext getSearchContext()
-    {
-        return uiContext.getSearchContext();
     }
 }

@@ -16,6 +16,9 @@
 
 package org.vividus.bdd.steps.ui.web;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,6 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +46,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.steps.ui.GenericSetVariableSteps;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
@@ -50,7 +58,7 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SetVariableStepsTests
 {
     private static final String VALID_URL = "http://www.example.com/relative/path";
@@ -63,39 +71,24 @@ class SetVariableStepsTests
     private static final String VARIABLE = "variable";
     private static final String URL_VARIABLE = "urlVariable";
     private static final String VALUE = "value";
-    private static final String NUMBER_BY_XPATH = "numberByXpath";
     private static final Locator VIDEO_IFRAME_SEARCH = new Locator(WebLocatorType.XPATH,
             LocatorUtil.getXPath("div[contains(@class,'video')]/iframe"));
     private static final String VARIABLE_NAME = "variableName";
     private static final String SRC = "src";
     private static final String NUMBER_FOUND_VIDEO_MESSAGE = "The number of found video frames";
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private ISoftAssert softAssert;
+    @Mock private ISearchActions searchActions;
+    @Mock private IBaseValidations baseValidations;
+    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private IUiContext uiContext;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private WebDriver webDriver;
+    @Mock private GenericSetVariableSteps genericSetVariableSteps;
+    @InjectMocks private SetVariableSteps setVariableSteps;
 
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private ISearchActions searchActions;
-
-    @Mock
-    private IBaseValidations baseValidations;
-
-    @Mock
-    private IBddVariableContext bddVariableContext;
-
-    @Mock
-    private IUiContext uiContext;
-
-    @Mock
-    private WebJavascriptActions javascriptActions;
-
-    @Mock
-    private WebDriver webDriver;
-
-    @InjectMocks
-    private SetVariableSteps setVariableSteps;
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(SetVariableSteps.class);
 
     @Test
     void testGettingValueFromUrl()
@@ -227,14 +220,14 @@ class SetVariableStepsTests
     @Test
     void testGetNumberOfElementsByAttributeValueToStoryVariable()
     {
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        WebElement webElement = mock(WebElement.class);
+        setVariableSteps.saveNumberOfElementsByAttributeValueToVariable("attributeType", "attributeValue",
+                VARIABLE_SCOPE, VARIABLE);
         Locator locator = new Locator(WebLocatorType.XPATH,
                 ".//*[normalize-space(@attributeType)=\"attributeValue\"]");
-        when(searchActions.findElements(webDriver, locator)).thenReturn(Collections.singletonList(webElement));
-        setVariableSteps.saveNumberOfElementsByAttributeValueToVariable("attributeType", "attributeValue",
-                VARIABLE_SCOPE, NUMBER_BY_XPATH);
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, NUMBER_BY_XPATH, 1);
+        verify(genericSetVariableSteps).saveNumberOfElementsToVariable(locator, VARIABLE_SCOPE, VARIABLE);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                warn("This step is deprecated and will be removed in VIVIDUS 0.4.0. The replacement is \"When I save "
+                        + "number of elements located `$locator` to $scopes variable `$variableName`\""))));
     }
 
     @Test
