@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,19 +53,22 @@ class PathFinderTests
     void testFindPaths() throws IOException
     {
         BatchResourceConfiguration config = new BatchResourceConfiguration();
-        config.setResourceLocation("story/uat");
+        String resourceLocation = "story/uat";
+        config.setResourceLocation(resourceLocation);
         config.setResourceIncludePatterns(STORY_INCLUDE_PATTERN + PATTERN_SEPARATOR + OTHER_INCLUDE_PATTERN);
         config.setResourceExcludePatterns(STORY_EXCLUDE_PATTERN + PATTERN_SEPARATOR + OTHER_EXCLUDE_PATTERN);
-        String uri1 = "uri:resource1";
+        String uri1 = "uri:/resource1";
         Resource resource1 = mockResource(uri1);
-        String uri2 = "uri:resource2";
+        String nonNormalizedUri2 = "uri:/path//resource2";
+        Resource nonNormalizedResource2 = mockResource(nonNormalizedUri2);
+        String uri2 = "uri:/path/resource2";
         Resource resource2 = mockResource(uri2);
-        String uri3 = "uri:resource3";
+        String uri3 = "uri:/resource3";
         Resource resource3 = mockResource(uri3);
-        mockResources(config, STORY_INCLUDE_PATTERN, resource3);
-        mockResources(config, STORY_EXCLUDE_PATTERN);
-        mockResources(config, OTHER_INCLUDE_PATTERN, resource2, resource1);
-        mockResources(config, OTHER_EXCLUDE_PATTERN, resource2);
+        mockResources(resourceLocation, STORY_INCLUDE_PATTERN, resource3);
+        mockResources(resourceLocation, STORY_EXCLUDE_PATTERN);
+        mockResources(resourceLocation, OTHER_INCLUDE_PATTERN, nonNormalizedResource2, resource1);
+        mockResources(resourceLocation, OTHER_EXCLUDE_PATTERN, resource2);
         List<String> paths = pathFinder.findPaths(config);
         assertEquals(List.of(uri1, uri3), paths);
     }
@@ -75,8 +78,8 @@ class PathFinderTests
         return when(mock(Resource.class).getURI()).thenReturn(URI.create(uri)).getMock();
     }
 
-    private void mockResources(BatchResourceConfiguration config, String pattern, Resource... resources)
+    private void mockResources(String resourceLocation, String pattern, Resource... resources)
     {
-        doReturn(resources).when(bddResourceLoader).getResources(config.getResourceLocation(), pattern);
+        doReturn(resources).when(bddResourceLoader).getResources(resourceLocation, pattern);
     }
 }
