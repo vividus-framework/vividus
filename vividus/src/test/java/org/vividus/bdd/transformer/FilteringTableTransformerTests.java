@@ -100,7 +100,7 @@ class FilteringTableTransformerTests
         }
         Integer minCountSameRows = Collections.min(randomTablesCount.values());
         Integer maxCountSameRows = Collections.max(randomTablesCount.values());
-        int maxThreshold = 55;
+        int maxThreshold = 70;
         assertThat(maxCountSameRows - minCountSameRows, lessThanOrEqualTo(maxThreshold));
     }
 
