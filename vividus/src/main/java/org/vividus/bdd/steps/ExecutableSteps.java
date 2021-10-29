@@ -78,6 +78,24 @@ public class ExecutableSteps
         }
     }
 
+    /**
+     * Executes steps provided in ExamplesTable
+     * <br>
+     * Usage example:
+     * <code>
+     * <br>When I do
+     * <br>|step                                                           |
+     * <br>|When I compare against baseline with name 'test_composit1_step'|
+     * <br>|When I click on all elements by xpath './/a[@title='Close']'   |
+     * </code>
+     * @param stepsToExecute examples table with steps to unconditional execute
+     */
+    @When("I do$stepsToExecute")
+    public void performAllStepsUnconditionally(SubSteps stepsToExecute)
+    {
+        stepsToExecute.execute(Optional.empty());
+    }
+
     /** If the variable with name is not set into context executes steps.
      * <b>Example:</b>
      * <br> When variable 'token' is not set perform:

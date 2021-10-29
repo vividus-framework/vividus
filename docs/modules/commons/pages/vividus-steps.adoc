@@ -4,6 +4,28 @@
 
 Here one could find description of the steps that are delivered with Vividus itself without any plugins required.
 
+=== Execute examples table
+
+Executes the steps located in the table.
+
+[source,gherkin]
+----
+When I do$stepsToExecute
+----
+
+* `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute
+
+.Check and increment the value of a variable
+[source,gherkin]
+----
+When I initialize the STORY variable `var` with value `0`
+When I do
+|step                                                                         |
+|Then `${var}` is = `0`                                                       |
+|When I initialize the STORY variable `var` with value `#{eval(${var} + 1)}`  |
+Then `${var}` is = `1`
+----
+
 === Execute while-like loop
 
 Executes the steps while variable matches the comparison rule or until the maximum number of iterations is reached.

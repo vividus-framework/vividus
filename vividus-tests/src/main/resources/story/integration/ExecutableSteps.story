@@ -60,6 +60,21 @@ When variable `varName` is not set I do:
 Then `${iterator}` is = `2`
 
 
+Scenario: Verify step: I do:$stepsToExecute
+
+When I initialize the STORY variable `iterator` with value `0`
+When I do
+{headerSeparator=!, valueSeparator=!}
+!step                                                                                   !
+!Then `${iterator}` is = `0`                                                            !
+!When I initialize the STORY variable `iterator` with value `#{eval(${iterator} + 1)}`  !
+!When I do                                                                              !
+!|step                                                                                 |!
+!|Then `${iterator}` is = `1`                                                          |!
+!|When I initialize the STORY variable `iterator` with value `#{eval(${iterator} + 1)}`|!
+Then `${iterator}` is = `2`
+
+
 Scenario: Verify step: When I `$number` times do:$stepsToExecute
 
 When I initialize the STORY variable `iterator` with value `0`
