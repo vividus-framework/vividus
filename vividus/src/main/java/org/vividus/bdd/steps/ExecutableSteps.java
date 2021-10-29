@@ -83,14 +83,14 @@ public class ExecutableSteps
      * <br>
      * Usage example:
      * <code>
-     * <br>When I do
+     * <br>When I execute steps:
      * <br>|step                                                           |
      * <br>|When I compare against baseline with name 'test_composit1_step'|
      * <br>|When I click on all elements by xpath './/a[@title='Close']'   |
      * </code>
-     * @param stepsToExecute examples table with steps to unconditional execute
+     * @param stepsToExecute ExamplesTable with steps to execute
      */
-    @When("I do$stepsToExecute")
+    @When("I execute steps:$stepsToExecute")
     public void performAllStepsUnconditionally(SubSteps stepsToExecute)
     {
         stepsToExecute.execute(Optional.empty());

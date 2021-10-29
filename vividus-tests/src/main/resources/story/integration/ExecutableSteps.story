@@ -60,10 +60,10 @@ When variable `varName` is not set I do:
 Then `${iterator}` is = `2`
 
 
-Scenario: Verify step: I do:$stepsToExecute
+Scenario: Verify step: When I execute steps:$stepsToExecute
 
 When I initialize the STORY variable `iterator` with value `0`
-When I do
+When I execute steps:
 {headerSeparator=!, valueSeparator=!}
 !step                                                                                   !
 !Then `${iterator}` is = `0`                                                            !

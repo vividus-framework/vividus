@@ -94,8 +94,8 @@ public class BlobStorageSteps
      * @throws IOException      In case of error on blob downloading
      */
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    @When(value = "I download blob with name `$blobName` from container `$containerName` of storage account "
-            + "`$storageAccountKey` and save its content to $scopes variable `$variableName`", priority = 1)
+    @When("I download blob with name `$blobName` from container `$containerName` of storage account "
+            + "`$storageAccountKey` and save its content to $scopes variable `$variableName`")
     public void downloadBlob(String blobName, String containerName, String storageAccountKey, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
@@ -128,9 +128,9 @@ public class BlobStorageSteps
      * @throws IOException      In case of error on blob downloading or temporary file creation
      */
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    @When(value = "I download blob with name `$blobName` from container `$containerName` of storage account "
+    @When("I download blob with name `$blobName` from container `$containerName` of storage account "
             + "`$storageAccountKey` to temporary file with name `$baseFileName` and save path to $scopes "
-            + "variable `$variableName`", priority = 1)
+            + "variable `$variableName`")
     public void downloadBlobToFile(String blobName, String containerName, String storageAccountKey, String baseFileName,
             Set<VariableScope> scopes, String variableName) throws IOException
     {
