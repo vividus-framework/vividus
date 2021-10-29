@@ -65,6 +65,8 @@ Examples:
 
 
 Scenario: Get random row with byRandomRows
+Meta:
+    @requirementId 1895
 Then `<column1>` matches `(A|D|G|J|M)`
 Then `<column2>` matches `(B|E|H|K|N)`
 Examples:

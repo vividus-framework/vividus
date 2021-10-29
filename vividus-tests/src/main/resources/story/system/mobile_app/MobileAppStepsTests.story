@@ -268,6 +268,7 @@ Then number of elements found by `xpath(//*[@text = 'Power off'])` is = `1`
 Scenario: Verify step: 'When I long press $key key'
 Meta:
     @targetPlatform ios
+    @requirementId 2087
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears
 When I long press home key
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` disappears

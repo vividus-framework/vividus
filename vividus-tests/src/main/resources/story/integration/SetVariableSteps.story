@@ -43,6 +43,8 @@ Then `text` is equal to `${variableName}`
 
 
 Scenario: Verify step: "When I save `$attributeName` attribute value of element located `$locator` to $scopes variable `$variableName`" for element with shadowCssSelector
+Meta:
+    @requirementId 1494
 Given I am on a page with the URL '${vividus-test-site-url}/shadowDom.html'
 When I save `class` attribute value of element located `shadowCssSelector(#shadow-upper-host; #shadow-inner-host; .target-element):in` to SCENARIO variable `variableName`
 Then `target-element` is equal to `${variableName}`
