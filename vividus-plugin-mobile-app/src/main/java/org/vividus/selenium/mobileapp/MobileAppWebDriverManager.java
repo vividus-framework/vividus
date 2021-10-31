@@ -37,9 +37,7 @@ import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.ui.action.JavascriptActions;
 
-import io.appium.java_client.CommandExecutionHelper;
 import io.appium.java_client.HasSessionDetails;
-import io.appium.java_client.android.AndroidMobileCommandHelper;
 import io.appium.java_client.android.HasAndroidDeviceDetails;
 
 public class MobileAppWebDriverManager extends GenericWebDriverManager
@@ -89,10 +87,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
         try
         {
             HasAndroidDeviceDetails details = getWebDriverProvider().getUnwrapped(HasAndroidDeviceDetails.class);
-            // https://github.com/appium/java-client/commit/9020174c578bed5e03c24b43c2c5ba590f663201
-            Map<String, Map<String, Object>>  systemBars = CommandExecutionHelper.execute(details,
-                    AndroidMobileCommandHelper.getSystemBarsCommand());
-            return Optional.ofNullable(systemBars)
+            return Optional.ofNullable(details.getSystemBars())
                            .map(b -> b.get("statusBar"))
                            .map(sb -> sb.get(HEIGHT))
                            .map(Long.class::cast)
