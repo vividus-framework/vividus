@@ -1,0 +1,51 @@
+:azure-service-name: event-hub
+
+= Azure Event Hub Plugin
+
+The plugin provides functionality to interact with https://docs.microsoft.com/en-us/azure/event-hubs/[Event Hub].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-event-hub', version: '{current-version}')
+----
+
+== Event Hub management
+
+=== Configuration
+
+include::partial$azure-authentication.adoc[leveloffset=+1]
+
+include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
+
+=== Steps
+
+==== Manage data capturing
+
+Toggles https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-capture-overview[data capturing option]
+(enables or disables it) for the specified Azure Event Hub.
+
+[source,gherkin]
+----
+When I $toggle data capturing for event hub `$eventHubName` in namespace `$namespaceName` from resource group `$resourceGroupName`
+----
+
+* `$toggle` - The data capturing toggle: either `ENABLE` or `DISABLE`.
+* `$eventHubName` - The event hub name.
+* `$namespaceName` - The name of the namespace the event hub belongs to.
+* `$resourceGroupName` - The resource group name.
+
+[IMPORTANT]
+====
+The client should have permission to run action `Microsoft.EventHub/namespaces/eventhubs/write`
+over scope `/subscriptions/{subscription ID}/resourceGroups/{resource group name}/providers/Microsoft.EventHub/namespaces/{event hub namespace}/eventhubs/{event hub name}`.
+====
+
+.Restart data capturing
+[source,gherkin]
+----
+When I disable data capturing for event hub `sample_event_hub` in namespace `NS-EH` from resource group `RG-EH`
+When I enable data capturing for event hub `sample_event_hub` in namespace `NS-EH` from resource group `RG-EH`
+----
