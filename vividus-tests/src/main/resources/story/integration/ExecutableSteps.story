@@ -61,6 +61,8 @@ Then `${iterator}` is = `2`
 
 
 Scenario: Verify step: When I execute steps:$stepsToExecute
+Meta:
+    @requirementId 1800
 
 When I initialize the STORY variable `iterator` with value `0`
 When I execute steps:
@@ -76,8 +78,6 @@ Then `${iterator}` is = `2`
 
 
 Scenario: Verify step: When I `$number` times do:$stepsToExecute
-Meta:
-    @requirementId 1800
 
 When I initialize the STORY variable `iterator` with value `0`
 When I `1` times do:
