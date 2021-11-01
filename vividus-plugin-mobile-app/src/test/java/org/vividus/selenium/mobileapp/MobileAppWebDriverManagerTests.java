@@ -47,11 +47,9 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.JavascriptActions;
 
-import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.HasSessionDetails;
 import io.appium.java_client.android.HasAndroidDeviceDetails;
 import io.appium.java_client.remote.MobilePlatform;
@@ -59,8 +57,6 @@ import io.appium.java_client.remote.MobilePlatform;
 @ExtendWith(MockitoExtension.class)
 class MobileAppWebDriverManagerTests
 {
-    private static final String GET_SYSTEM_BARS = "getSystemBars";
-
     private static final String STAT_BAR_HEIGHT = "statBarHeight";
     private static final String HEIGHT = "height";
 
@@ -79,23 +75,19 @@ class MobileAppWebDriverManagerTests
     void shouldProvideStatusBarHeightForAndorid()
     {
         mockCapabilities(MobilePlatform.ANDROID);
-        HasAndroidDeviceDetails hasAndroidDeviceDetails = mock(HasAndroidDeviceDetails.class,
-                withSettings().extraInterfaces(ExecutesMethod.class));
-        when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(hasAndroidDeviceDetails);
-        Response response = mock(Response.class);
-        when(response.getValue()).thenReturn(Map.of("statusBar", Map.of(HEIGHT, 100L)));
-        when(hasAndroidDeviceDetails.execute(GET_SYSTEM_BARS, Map.of())).thenReturn(response);
+        var driverWithAndroidDeviceDetails = mock(HasAndroidDeviceDetails.class);
+        when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(driverWithAndroidDeviceDetails);
+        when(driverWithAndroidDeviceDetails.getSystemBars()).thenReturn(Map.of("statusBar", Map.of(HEIGHT, 100L)));
         assertEquals(100, driverManager.getStatusBarSize());
     }
 
     @Test
     void shouldTryToGetStatBarHeightInCaseOfWebDriverException()
     {
-        HasAndroidDeviceDetails hasAndroidDeviceDetails = mock(HasAndroidDeviceDetails.class,
-                withSettings().extraInterfaces(ExecutesMethod.class));
         mockCapabilities(MobilePlatform.ANDROID);
-        when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(hasAndroidDeviceDetails);
-        when(hasAndroidDeviceDetails.execute(GET_SYSTEM_BARS, Map.of())).thenThrow(new WebDriverException());
+        var driverWithAndroidDeviceDetails = mock(HasAndroidDeviceDetails.class);
+        when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(driverWithAndroidDeviceDetails);
+        when(driverWithAndroidDeviceDetails.getSystemBars()).thenThrow(new WebDriverException());
         HasSessionDetails details = mock(HasSessionDetails.class);
         when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
         when(details.getSessionDetail(STAT_BAR_HEIGHT)).thenReturn(101L);
