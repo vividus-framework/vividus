@@ -1,0 +1,13 @@
+project.description = 'Vividus plugin for Azure Event Hub'
+
+dependencies {
+    api project(':vividus-bdd-engine')
+    implementation project(':vividus-extension-azure')
+    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-eventhubs', version: '2.9.0')
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+}
