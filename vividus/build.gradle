@@ -60,7 +60,7 @@ dependencies {
     // Spring
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
-    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.4')
+    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.5.0')
     // jasypt
     implementation(group: 'org.jasypt', name: 'jasypt-spring4', version: '1.9.3')
 
