@@ -68,6 +68,13 @@ class ExecutableStepsTests
     }
 
     @Test
+    void shouldPerformAllStepsUnconditionally()
+    {
+        executableSteps.performAllStepsUnconditionally(subSteps);
+        verify(subSteps).execute(Optional.empty());
+    }
+
+    @Test
     void shouldRunStepsIfVariableIsNotSet()
     {
         executableSteps.ifVariableNotSetPerformSteps(KEY, subSteps);
