@@ -16,6 +16,7 @@
 
 package org.vividus.selenium;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -37,6 +38,11 @@ public class TimeoutConfigurer
     {
         setTimeout(timeouts, t -> t.pageLoadTimeout(pageLoadTimeout, pageLoadTimeoutTimeUnit));
         setTimeout(timeouts, t -> t.setScriptTimeout(asyncScriptTimeout, asyncScriptTimeoutTimeUnit));
+    }
+
+    public void configurePageLoadTimeout(Duration duration, Timeouts timeouts)
+    {
+        setTimeout(timeouts, t -> t.pageLoadTimeout(duration.getSeconds(), TimeUnit.SECONDS));
     }
 
     private static void setTimeout(Timeouts timeouts, Consumer<Timeouts> consumer)

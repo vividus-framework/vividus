@@ -67,3 +67,9 @@ Then number of elements found by `id(element-to-hide)` is equal to `0`
 Scenario: Verify step: 'Then element located `$locator` exists for `$duration` duration'
 Then element located `id(button-hide)` exists for `PT1S` duration
 Then number of elements found by `id(button-hide)` is equal to `1`
+
+Scenario: Verify step: 'When I set page load timeout to `$duration`'
+Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
+When I set page load timeout to `PT15S`
+When I open URL `${vividus-test-site-url}/delayedLoading?imageTimeout=10000` in new window
+When I set page load timeout to `PT10S`
