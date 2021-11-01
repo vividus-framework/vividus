@@ -84,17 +84,22 @@ Then `${response-code}` is equal to `200`
 Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/json"`
 Then JSON element by JSON path `$.headers.Language` is equal to `"en-ru"`
 
+
 Scenario: Verify step "Given multipart request:$requestParts"
+Meta:
+    @requirementId 2106
+When I initialize the scenario variable `temp-file-content` with value `Your first and last stop for No-Code Test Automation!`
+When I create temporary file with name `abc.txt` and content `${temp-file-content}` and put path to scenario variable `temp-file-path`
 Given multipart request:
-|type  |name      |value         |contentType|fileName       |
-|file  |file-key  |/data/file.txt|           |anotherName.txt|
-|file  |file-key2 |/data/file.txt|text/plain |               |
-|string|string-key|string1       |text/plain |               |
-|binary|binary-key|raw           |text/plain |raw.txt        |
+|type  |name      |value            |contentType|fileName       |
+|file  |file-key  |/data/file.txt   |           |anotherName.txt|
+|file  |file-key2 |${temp-file-path}|text/plain |               |
+|string|string-key|string1          |text/plain |               |
+|binary|binary-key|raw              |text/plain |raw.txt        |
 When I send HTTP POST to the relative URL '/post'
 Then `${responseCode}` is equal to `200`
 Then JSON element by JSON path `$.files.file-key` is equal to `"#{loadResource(/data/file.txt)}"`
-Then JSON element by JSON path `$.files.file-key2` is equal to `"#{loadResource(/data/file.txt)}"`
+Then JSON element by JSON path `$.files.file-key2` is equal to `"${temp-file-content}"`
 Then JSON element by JSON path `$.form.string-key` is equal to `"string1"`
 Then JSON element by JSON path `$.files.binary-key` is equal to `"raw"`
 Then JSON element by JSON path `$.headers.Content-Type` is equal to `"${json-unit.regex}multipart/form-data; boundary=[A-Za-z0-9-_]+"`

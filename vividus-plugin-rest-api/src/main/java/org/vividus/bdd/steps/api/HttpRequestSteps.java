@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class HttpRequestSteps
     }
 
     /**
-     * Sets multipart request entity that will be used while sending request
+     * Sets multipart request entity that will be used while executing request
      * <div>Example:</div>
      * <code>
      * <br>Given multipart request:
@@ -86,16 +86,21 @@ public class HttpRequestSteps
      * <ul>
      *   <li><code>type</code> is one of request part types: STRING, FILE, BINARY</li>
      *   <li><code>name</code> is request part name</li>
-     *   <li><code>value</code> is the resource path for FILE part type and the actual content for STRING and BINARY
-     *   part types</li>
+     *   <li><code>value</code>
+     *   <ul>
+     *       <li>for <code>FILE</code> part type - the resource name or the file path</li>
+     *       <li>for <code>STRING</code> or <code>STRING</code> part type - the actual content</li>
+     *   </ul>
+     *   </li>
      *   <li><code>contentType</code> is the content type</li>
      *   <li><code>fileName</code> is the name of the file contained in this request part. The parameter is not allowed
      *   for STRING part type, but it's required for BINARY one and optional for FILE part type</li>
      * </ul>
      * @param requestParts HTTP request parts
+     * @throws IOException if an I/O error occurs
      */
     @Given("multipart request:$requestParts")
-    public void putMultipartRequest(ExamplesTable requestParts)
+    public void putMultipartRequest(ExamplesTable requestParts) throws IOException
     {
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
         for (Parameters row : requestParts.getRowsAsParameters(true))

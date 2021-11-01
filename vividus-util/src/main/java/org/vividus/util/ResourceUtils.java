@@ -72,11 +72,37 @@ public final class ResourceUtils
      * Loads resource as byte array
      * @param clazz Class to search resource relatively
      * @param resourceName Resource name
-     * @return Resource as string
+     * @return Resource as byte array
      */
     public static byte[] loadResourceAsByteArray(Class<?> clazz, String resourceName)
     {
         return loadResource(clazz, resourceName, IOUtils::toByteArray);
+    }
+
+    /**
+     * Loads resource or file as byte array
+     *
+     * @param resourceNameOrFilePath Resource name or file path to load
+     * @return Resource or file content as byte array
+     * @throws IOException if an I/O error occurs
+     */
+    public static byte[] loadResourceOrFileAsByteArray(String resourceNameOrFilePath) throws IOException
+    {
+        String resourcePath = ensureRootPath(resourceNameOrFilePath);
+        URL resource = ResourceUtils.class.getResource(resourcePath);
+        if (resource != null)
+        {
+            return IOUtils.toByteArray(resource);
+        }
+        Path path = Paths.get(resourceNameOrFilePath);
+        File file = path.toFile();
+        if (file.exists() && file.isFile())
+        {
+            return Files.readAllBytes(path);
+        }
+        throw new IllegalArgumentException(
+                "Neither resource with name '" + resourcePath + "' nor file at path '" + resourceNameOrFilePath
+                        + "' is found");
     }
 
     /**
