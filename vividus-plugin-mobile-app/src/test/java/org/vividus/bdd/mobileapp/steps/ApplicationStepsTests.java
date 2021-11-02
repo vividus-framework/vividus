@@ -46,7 +46,6 @@ import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 import io.appium.java_client.ExecutesMethod;
-import io.appium.java_client.InteractsWithApps;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ApplicationStepsTests
@@ -64,7 +63,6 @@ class ApplicationStepsTests
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ApplicationSteps.class);
 
     @Mock private HasCapabilities hasCapabilities;
-    @Mock private InteractsWithApps interacts;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManagerContext webDriverManagerContext;
     @Mock private ApplicationActions applicationActions;
@@ -125,13 +123,10 @@ class ApplicationStepsTests
     @Test
     void shouldRestartMobileApplication()
     {
-        when(webDriverProvider.getUnwrapped(InteractsWithApps.class)).thenReturn(interacts);
+        applicationSteps.reinstallMobileApplication(BUNDLE_ID);
 
-        applicationSteps.restartMobileApplication();
-
-        verify(interacts).closeApp();
-        verify(interacts).launchApp();
-        verifyNoMoreInteractions(webDriverProvider);
+        verify(applicationActions).reinstallApplication(BUNDLE_ID);
+        verify(applicationActions).activateApp(BUNDLE_ID);
     }
 
     @Test

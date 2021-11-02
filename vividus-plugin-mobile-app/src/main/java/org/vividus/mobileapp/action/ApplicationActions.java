@@ -17,6 +17,7 @@
 package org.vividus.mobileapp.action;
 
 import org.apache.commons.lang3.Validate;
+import org.openqa.selenium.HasCapabilities;
 import org.vividus.selenium.IWebDriverProvider;
 
 import io.appium.java_client.InteractsWithApps;
@@ -57,5 +58,19 @@ public class ApplicationActions
                 bundleId);
         Validate.isTrue(interactor.terminateApp(bundleId),
                 "Application with the bundle identifier '%s' hasn't been successfully terminated", bundleId);
+    }
+
+    /**
+     * Reinstall the application.
+     * @param bundleId bundle identifier of the application to reinstall.
+     */
+    public void reinstallApplication(String bundleId)
+    {
+        InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
+        HasCapabilities hasCapabilities = webDriverProvider.getUnwrapped(HasCapabilities.class);
+        String appPath = hasCapabilities.getCapabilities().getCapability("app").toString();
+        Validate.isTrue(interactor.removeApp(bundleId),
+                "Application with the bundle identifier '%s' hasn't been successfully removed", bundleId);
+        interactor.installApp(appPath);
     }
 }

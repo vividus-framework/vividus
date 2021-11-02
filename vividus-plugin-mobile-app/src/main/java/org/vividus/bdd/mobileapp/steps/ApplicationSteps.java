@@ -40,7 +40,6 @@ import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.util.property.PropertyParser;
 
 import io.appium.java_client.ExecutesMethod;
-import io.appium.java_client.InteractsWithApps;
 import io.appium.java_client.internal.CapabilityHelpers;
 
 public class ApplicationSteps
@@ -101,13 +100,14 @@ public class ApplicationSteps
 
     /**
      * Restart mobile application
+     * @param bundleId bundle identifier of the mobile application to reinstall.
+     *  BundleId should indicate the application used in the current session.
      */
-    @When("I restart mobile application")
-    public void restartMobileApplication()
+    @When("I reinstall mobile application using bundle identifier `$bundleId`")
+    public void reinstallMobileApplication(String bundleId)
     {
-        InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
-        interactor.closeApp();
-        interactor.launchApp();
+        applicationActions.reinstallApplication(bundleId);
+        applicationActions.activateApp(bundleId);
     }
 
     /**

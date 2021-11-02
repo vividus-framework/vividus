@@ -303,59 +303,37 @@ Given I start mobile application with capabilities:
 |appium:options.clearSystemFiles|false|
 ----
 
-=== Restart mobile application
+=== Reinstall mobile application
 
 ==== *_Info_*
 
-Closes a mobile application and launch it again with the same capabilities
+Remove a mobile application from device and install it again
 
 ==== *_Wording_*
 
 [source,gherkin]
 ----
-When I restart mobile application
+When I reinstall mobile application using bundle identifier `$bundleId`
 ----
 
 ==== *_Usage_*
 
-.Restart mobile application
+.Reinstall mobile application
 [source,gherkin]
 ----
-When I restart mobile application
+When I reinstall mobile application using bundle identifier `vividus-mobile.app`
 ----
 
-One of the key benefit of usage the restart step instead of
+One of the key benefit of usage the reinstall step instead of
 [source,gherkin]
 ----
 When I close mobile application
-Given I start mobile application
-----
-
-steps pair is ability to avoid device re-allocation on SauceLabs or BrowserStack in case of application re-installation within story run (e.g. in case usage ExamplesTable)
-
-.Re-install mobile application in Sauce Labs
-[source,gherkin]
-----
-Given I start mobile application with capabilities:
-|name   |value|
-|noReset|false|
-!-- Some test steps
-
-When I restart mobile application
-!-- Some test steps after application re-installation
-----
-
-.Re-install mobile application in Browser Stack
-[source,gherkin]
-----
 Given I start mobile application with capabilities:
 |name     |value|
 |fullReset|true |
-!-- Some test steps
 
-When I restart mobile application
-!-- Some test steps after application re-installation
 ----
+steps pair is ability to avoid device re-allocation on SauceLabs or BrowserStack in case of application re-installation within story run (e.g. in case usage ExamplesTable)
 
 === Close mobile application
 

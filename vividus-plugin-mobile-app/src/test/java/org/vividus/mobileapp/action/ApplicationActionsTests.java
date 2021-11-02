@@ -20,13 +20,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.HasCapabilities;
+import org.openqa.selenium.MutableCapabilities;
 import org.vividus.selenium.IWebDriverProvider;
 
 import io.appium.java_client.InteractsWithApps;
@@ -37,6 +42,8 @@ class ApplicationActionsTests
 {
     private static final String BUNDLE_ID = "bundleId";
     private static final String UNKNOWN_BUNDLE_ID = "unknown bundle id";
+    private static final String APP = "app";
+    private static final String APP_NAME = "vividus-mobile.app";
     private static final String APPLICATION_IS_NOT_INSTALLED_OR_NOT_RUNNING = "Application with the bundle identifier"
             + " '%s' is not installed or not running on the device";
 
@@ -73,6 +80,35 @@ class ApplicationActionsTests
         when(driver.terminateApp(BUNDLE_ID)).thenReturn(true);
         applicationActions.terminateApp(BUNDLE_ID);
         verify(driver).terminateApp(BUNDLE_ID);
+    }
+
+    @Test
+    void shouldReinstallApp()
+    {
+        InteractsWithApps driver = mockInteractingWithAppsDriver();
+        HasCapabilities hasCapabilities = mockCapabilities();
+        when(driver.removeApp(BUNDLE_ID)).thenReturn(true);
+
+        applicationActions.reinstallApplication(BUNDLE_ID);
+        verify(driver).removeApp(BUNDLE_ID);
+        verify(driver).installApp(APP_NAME);
+        verify(hasCapabilities).getCapabilities();
+    }
+
+    @Test
+    void shouldThrowExceptionIfRemovingFailure()
+    {
+        InteractsWithApps driver = mockInteractingWithAppsDriver();
+        mockCapabilities();
+        when(driver.removeApp(BUNDLE_ID)).thenReturn(false);
+
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> applicationActions.reinstallApplication(BUNDLE_ID));
+        assertEquals(
+                String.format("Application with the bundle identifier '%s' hasn't been successfully removed",
+                        BUNDLE_ID),
+                exception.getMessage());
+        verifyNoMoreInteractions(driver);
     }
 
     @Test
@@ -118,5 +154,13 @@ class ApplicationActionsTests
         InteractsWithApps driver = mock(InteractsWithApps.class);
         when(webDriverProvider.getUnwrapped(InteractsWithApps.class)).thenReturn(driver);
         return driver;
+    }
+
+    private HasCapabilities mockCapabilities()
+    {
+        HasCapabilities hasCapabilities = mock(HasCapabilities.class);
+        when(hasCapabilities.getCapabilities()).thenReturn(new MutableCapabilities(Map.of(APP, APP_NAME)));
+        when(webDriverProvider.getUnwrapped(HasCapabilities.class)).thenReturn(hasCapabilities);
+        return hasCapabilities;
     }
 }
