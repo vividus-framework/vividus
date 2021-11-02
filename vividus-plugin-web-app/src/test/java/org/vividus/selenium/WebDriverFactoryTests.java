@@ -106,7 +106,7 @@ class WebDriverFactoryTests
     private IRemoteWebDriverFactory remoteWebDriverFactory;
 
     @Mock
-    private ITimeoutConfigurer timeoutConfigurer;
+    private TimeoutConfigurer timeoutConfigurer;
 
     @Mock
     private IPropertyParser propertyParser;
