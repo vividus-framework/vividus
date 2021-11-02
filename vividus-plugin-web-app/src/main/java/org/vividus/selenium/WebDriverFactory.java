@@ -35,14 +35,14 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
 {
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
 
-    private final ITimeoutConfigurer timeoutConfigurer;
+    private final TimeoutConfigurer timeoutConfigurer;
     private final IProxy proxy;
     private WebDriverType webDriverType;
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
     public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
-            JsonUtils jsonUtils, ITimeoutConfigurer timeoutConfigurer, IProxy proxy)
+            JsonUtils jsonUtils, TimeoutConfigurer timeoutConfigurer, IProxy proxy)
     {
         super(remoteWebDriverFactory, propertyParser, jsonUtils);
         this.timeoutConfigurer = timeoutConfigurer;
