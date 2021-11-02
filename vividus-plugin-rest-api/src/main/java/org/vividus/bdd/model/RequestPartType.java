@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.bdd.model;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.FilenameUtils;
@@ -57,16 +58,16 @@ public enum RequestPartType
         }
 
         @Override
-        public ContentBody createPart(String value, ContentType contentType)
+        public ContentBody createPart(String value, ContentType contentType) throws IOException
         {
             String fileName = FilenameUtils.getName(value);
             return createPart(value, contentType, fileName);
         }
 
         @Override
-        public ContentBody createPart(String value, ContentType contentType, String fileName)
+        public ContentBody createPart(String value, ContentType contentType, String fileName) throws IOException
         {
-            byte[] byteArray = ResourceUtils.loadResourceAsByteArray(getClass(), value);
+            byte[] byteArray = ResourceUtils.loadResourceOrFileAsByteArray(value);
             return new ByteArrayBody(byteArray, contentType, fileName);
         }
     },
@@ -95,7 +96,7 @@ public enum RequestPartType
 
     public abstract ContentType getDefaultContentType();
 
-    public abstract ContentBody createPart(String value, ContentType contentType);
+    public abstract ContentBody createPart(String value, ContentType contentType) throws IOException;
 
-    public abstract ContentBody createPart(String value, ContentType contentType, String fileName);
+    public abstract ContentBody createPart(String value, ContentType contentType, String fileName) throws IOException;
 }
