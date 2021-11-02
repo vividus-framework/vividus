@@ -38,6 +38,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.TimeoutConfigurer;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
@@ -64,6 +65,7 @@ public class WaitSteps
     @Inject private IExpectedConditions<Locator> expectedSearchActionsConditions;
     @Inject private IBaseValidations baseValidations;
     @Inject private WebJavascriptActions javascriptActions;
+    @Inject private TimeoutConfigurer timeoutConfigurer;
 
     /**
      * Waits <b>duration</b> with <b>pollingDuration</b> until <b>an element</b> by the specified <b>locator</b>
@@ -392,6 +394,25 @@ public class WaitSteps
     public void waitForScroll()
     {
         javascriptActions.waitUntilScrollFinished();
+    }
+
+    /**
+     * Sets a custom timeout for loading all following pages
+     * <br>
+     * Usage example:
+     * <code>
+     * <br>Given I am on a page with the URL 'https://example.com/'
+     * <br>When I set page load timeout to `PT15S`
+     * <br>When I open URL `https://example.com/super-heavy-page` in new window
+     * <br>When I set page load timeout to `PT10S`
+     * </code>
+     * <br>
+     * @param duration timeout for pages loading
+     */
+    @When("I set page load timeout to `$duration`")
+    public void configurePageLoadTimeout(Duration duration)
+    {
+        timeoutConfigurer.configurePageLoadTimeout(duration, getWebDriver().manage().timeouts());
     }
 
     private WebDriver getWebDriver()

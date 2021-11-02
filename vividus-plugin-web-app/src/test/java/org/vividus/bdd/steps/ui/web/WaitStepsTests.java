@@ -36,9 +36,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Options;
+import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.TimeoutConfigurer;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
@@ -77,6 +80,7 @@ class WaitStepsTests
     @Mock private IBaseValidations baseValidations;
     @Mock private ISearchActions searchActions;
     @Mock private WebJavascriptActions javascriptActions;
+    @Mock private TimeoutConfigurer timeoutConfigurer;
     @InjectMocks private WaitSteps waitSteps;
 
     @Test
@@ -281,5 +285,17 @@ class WaitStepsTests
     {
         waitSteps.waitForScroll();
         verify(javascriptActions).waitUntilScrollFinished();
+    }
+
+    @Test
+    void testConfigurePageLoadTimeout()
+    {
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        Options options = mock(Options.class);
+        when(webDriver.manage()).thenReturn(options);
+        Timeouts timeouts = mock(Timeouts.class);
+        when(options.timeouts()).thenReturn(timeouts);
+        waitSteps.configurePageLoadTimeout(TIMEOUT);
+        verify(timeoutConfigurer).configurePageLoadTimeout(TIMEOUT, timeouts);
     }
 }
