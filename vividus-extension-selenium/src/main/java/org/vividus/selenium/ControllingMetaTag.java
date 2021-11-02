@@ -27,22 +27,34 @@ import java.util.stream.Stream;
 import org.jbehave.core.model.Meta;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.bdd.model.MetaWrapper;
 
 import io.appium.java_client.remote.MobileCapabilityType;
 
 public enum ControllingMetaTag
 {
+    @Deprecated(since = "0.3.10", forRemoval = true)
     BROWSER_NAME(CapabilityType.BROWSER_NAME),
+    @Deprecated(since = "0.3.10", forRemoval = true)
     VERSION(CapabilityType.VERSION),
-    SCREEN_RESOLUTION(SauceLabsCapabilityType.SCREEN_RESOLUTION),
+    @Deprecated(since = "0.3.10", forRemoval = true)
+    SCREEN_RESOLUTION("screen-resolution"),
+    @Deprecated(since = "0.3.10", forRemoval = true)
     APPIUM_VERSION(MobileCapabilityType.APPIUM_VERSION),
+    @Deprecated(since = "0.3.10", forRemoval = true)
     DEVICE_NAME(MobileCapabilityType.DEVICE_NAME),
-    DEVICE_ORIENTATION(SauceLabsCapabilityType.DEVICE_ORIENTATION),
+    @Deprecated(since = "0.3.10", forRemoval = true)
+    DEVICE_ORIENTATION("device-orientation"),
+    @Deprecated(since = "0.3.10", forRemoval = true)
     PLATFORM_VERSION(MobileCapabilityType.PLATFORM_VERSION),
+    @Deprecated(since = "0.3.10", forRemoval = true)
     PLATFORM_NAME(CapabilityType.PLATFORM_NAME),
-    IEDRIVER_VERSION(SauceLabsCapabilityType.IEDRIVER_VERSION),
-    SELENIUM_VERSION(SauceLabsCapabilityType.SELENIUM_VERSION),
+    @Deprecated(since = "0.3.10", forRemoval = true)
+    IEDRIVER_VERSION("iedriver-version"),
+    @Deprecated(since = "0.3.10", forRemoval = true)
+    SELENIUM_VERSION("seleniumVersion"),
     PROXY(CapabilityType.PROXY)
     {
         @Override
@@ -69,6 +81,8 @@ public enum ControllingMetaTag
         }
     };
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControllingMetaTag.class);
+
     private final String metaTagName;
 
     ControllingMetaTag(String metaTagName)
@@ -94,6 +108,8 @@ public enum ControllingMetaTag
     protected void setCapability(DesiredCapabilities capabilities, Meta meta)
     {
         String capabilityName = getMetaTagName();
+        LOGGER.warn("Setting of capability via meta tag '{}' is deprecated and will be removed in VIVIDUS 0.4.0, "
+                        + "please, use 'capability.{}' meta tag instead", capabilityName, capabilityName);
         meta.getOptionalProperty(capabilityName).ifPresent(value -> capabilities.setCapability(capabilityName, value));
     }
 

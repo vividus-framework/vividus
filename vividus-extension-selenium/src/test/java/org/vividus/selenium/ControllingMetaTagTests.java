@@ -16,6 +16,9 @@
 
 package org.vividus.selenium;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,8 +28,13 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.jbehave.core.model.Meta;
 import org.junit.jupiter.api.Test;
@@ -35,7 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ControllingMetaTagTests
 {
     private static final String VERSION = "version";
@@ -46,6 +54,8 @@ class ControllingMetaTagTests
     @Mock private DesiredCapabilities desiredCapabilities;
     @Mock private Meta meta;
     @Mock private Meta metaSecond;
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(ControllingMetaTag.class);
 
     @Test
     void testGetMetaTagName()
@@ -60,6 +70,9 @@ class ControllingMetaTagTests
         ControllingMetaTag.VERSION.setCapability(desiredCapabilities, meta);
         verify(meta).getOptionalProperty(VERSION);
         verify(desiredCapabilities).setCapability(VERSION, VERSION_NUMBER);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                warn("Setting of capability via meta tag '{}' is deprecated and will be removed in VIVIDUS 0.4.0, "
+                        + "please, use 'capability.{}' meta tag instead", VERSION, VERSION))));
     }
 
     @Test
