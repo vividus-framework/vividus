@@ -96,7 +96,7 @@
             <bean class="org.vividus.bdd.proxy.ProxyAgentStoryReporter">
                 <property name="proxyEnabled" value="${proxy.enabled}" />
                 <property name="proxyRecordingEnabled" value="${proxy.recording.enabled}" />
-                <property name="next" ref="allureStoryReporter" />
+                <property name="next" ref="reportControlStoryReporter" />
             </bean>
         </property>
     </bean>

@@ -40,6 +40,7 @@ import com.google.common.eventbus.Subscribe;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jbehave.core.failures.BeforeOrAfterFailed;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
+import org.jbehave.core.model.Lifecycle;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
@@ -47,10 +48,11 @@ import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.Timing;
-import org.vividus.bdd.ChainedStoryReporter;
+import org.vividus.bdd.AbstractReportControlStoryReporter;
 import org.vividus.bdd.JBehaveFailureUnwrapper;
 import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.context.ReportControlContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.report.allure.adapter.IVerificationErrorAdapter;
@@ -80,17 +82,29 @@ import io.qameta.allure.model.WithStatus;
 import io.qameta.allure.util.ResultsUtils;
 
 @SuppressWarnings("checkstyle:MethodCount")
-public class AllureStoryReporter extends ChainedStoryReporter
+public class AllureStoryReporter extends AbstractReportControlStoryReporter
 {
     private static final String CURRENT_STEP_KEY = "allureCurrentLinkedStep";
 
-    private final AllureLifecycle lifecycle = Allure.getLifecycle();
-    private IAllureReportGenerator allureReportGenerator;
-    private IBddRunContext bddRunContext;
-    private BatchStorage batchStorage;
-    private TestContext testContext;
-    private IAllureRunContext allureRunContext;
-    private IVerificationErrorAdapter verificationErrorAdapter;
+    private final AllureLifecycle lifecycle;
+    private final IAllureReportGenerator allureReportGenerator;
+    private final BatchStorage batchStorage;
+    private final TestContext testContext;
+    private final IAllureRunContext allureRunContext;
+    private final IVerificationErrorAdapter verificationErrorAdapter;
+
+    public AllureStoryReporter(ReportControlContext reportControlContext, IBddRunContext bddRunContext,
+            IAllureReportGenerator allureReportGenerator, BatchStorage batchStorage, TestContext testContext,
+            IAllureRunContext allureRunContext, IVerificationErrorAdapter verificationErrorAdapter)
+    {
+        super(reportControlContext, bddRunContext);
+        this.lifecycle = Allure.getLifecycle();
+        this.allureReportGenerator = allureReportGenerator;
+        this.batchStorage = batchStorage;
+        this.testContext = testContext;
+        this.allureRunContext = allureRunContext;
+        this.verificationErrorAdapter = verificationErrorAdapter;
+    }
 
     @Override
     public void storyCancelled(Story story, StoryDuration storyDuration)
@@ -132,7 +146,7 @@ public class AllureStoryReporter extends ChainedStoryReporter
     @Override
     public void beforeStory(Story story, boolean givenStory)
     {
-        RunningStory runningStory = bddRunContext.getRunningStory();
+        RunningStory runningStory = getBddRunContext().getRunningStory();
         if (runningStory.isNotExcluded())
         {
             allureRunContext.initExecutionStages();
@@ -140,7 +154,7 @@ public class AllureStoryReporter extends ChainedStoryReporter
 
             List<Label> storyLabels = allureRunContext.createNewStoryLabels(givenStory);
             String title = givenStory ? "Given Story: " + storyName : storyName;
-            if (!bddRunContext.isDryRun() && getLinkedStep() != null)
+            if (!getBddRunContext().isDryRun() && getLinkedStep() != null)
             {
                 startStep(title, false);
             }
@@ -185,14 +199,14 @@ public class AllureStoryReporter extends ChainedStoryReporter
 
     private String getBatchName()
     {
-        String runningBatchKey = bddRunContext.getRunningBatchKey();
+        String runningBatchKey = getBddRunContext().getRunningBatchKey();
         return batchStorage.getBatchExecutionConfiguration(runningBatchKey).getName();
     }
 
     @Override
-    public void afterStorySteps(Stage stage)
+    public void afterStorySteps(Stage stage, Lifecycle.ExecutionType type)
     {
-        super.afterStorySteps(stage);
+        super.afterStorySteps(stage, type);
         if (stage == Stage.BEFORE
                 && allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS)
         {
@@ -203,7 +217,7 @@ public class AllureStoryReporter extends ChainedStoryReporter
     @Override
     public void beforeScenario(Scenario scenario)
     {
-        RunningStory runningStory = bddRunContext.getRunningStory();
+        RunningStory runningStory = getBddRunContext().getRunningStory();
         if ((scenario.getExamplesTable().getRowCount() == 0 || scenario.getGivenStories().requireParameters())
                 && runningStory.getStory().getLifecycle().getExamplesTable().getRowCount() == 0)
         {
@@ -215,7 +229,7 @@ public class AllureStoryReporter extends ChainedStoryReporter
     @Override
     public void example(Map<String, String> tableRow, int exampleIndex)
     {
-        RunningStory runningStory = bddRunContext.getRunningStory();
+        RunningStory runningStory = getBddRunContext().getRunningStory();
         RunningScenario runningScenario = runningStory.getRunningScenario();
 
         if (exampleIndex > 0)
@@ -247,7 +261,7 @@ public class AllureStoryReporter extends ChainedStoryReporter
     }
 
     @Override
-    public void beforeScenarioSteps(Stage stage)
+    public void beforeScenarioSteps(Stage stage, Lifecycle.ExecutionType type)
     {
         if (stage == Stage.BEFORE)
         {
@@ -257,20 +271,20 @@ public class AllureStoryReporter extends ChainedStoryReporter
         {
             allureRunContext.setScenarioExecutionStage(ScenarioExecutionStage.AFTER_STEPS);
         }
-        super.beforeScenarioSteps(stage);
+        super.beforeScenarioSteps(stage, type);
     }
 
     @Override
-    public void afterScenarioSteps(Stage stage)
+    public void afterScenarioSteps(Stage stage, Lifecycle.ExecutionType type)
     {
-        super.afterScenarioSteps(stage);
+        super.afterScenarioSteps(stage, type);
         allureRunContext.resetScenarioExecutionStage();
     }
 
     @Override
     public void beforeStep(Step step)
     {
-        startBddStep(step.getStepAsString());
+        perform(() -> startBddStep(step.getStepAsString()));
         super.beforeStep(step);
     }
 
@@ -278,8 +292,11 @@ public class AllureStoryReporter extends ChainedStoryReporter
     public void successful(String step)
     {
         super.successful(step);
-        modifyStepTitle(step);
-        stopBddStep(Status.PASSED);
+        perform(() ->
+        {
+            modifyStepTitle(step);
+            stopBddStep(Status.PASSED);
+        });
     }
 
     @Override
@@ -353,7 +370,7 @@ public class AllureStoryReporter extends ChainedStoryReporter
     public void afterStory(boolean givenStory)
     {
         super.afterStory(givenStory);
-        RunningStory runningStory = bddRunContext.getRunningStory();
+        RunningStory runningStory = getBddRunContext().getRunningStory();
         if (runningStory.isNotExcluded())
         {
             if (allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_AFTER_STORY_STEPS)
@@ -560,7 +577,7 @@ public class AllureStoryReporter extends ChainedStoryReporter
         allureRunContext.setStoryExecutionStage(storyExecutionStage);
         if (getLinkedStep() == null)
         {
-            RunningStory runningStory = bddRunContext.getRunningStory();
+            RunningStory runningStory = getBddRunContext().getRunningStory();
             Meta storyMeta = runningStory.getStory().getMeta();
             Scenario scenario = runningScenario.getScenario();
             Meta scenarioMeta = scenario.getMeta();
@@ -600,7 +617,7 @@ public class AllureStoryReporter extends ChainedStoryReporter
 
     private String getHistoryId(RunningStory runningStory, RunningScenario runningScenario)
     {
-        Deque<RunningStory> chain = bddRunContext.getStoriesChain();
+        Deque<RunningStory> chain = getBddRunContext().getStoriesChain();
         String chainedStories = StreamSupport.stream(
                 Spliterators.spliterator(chain.descendingIterator(), chain.size(), Spliterator.ORDERED), false)
                 .map(RunningStory::getStory)
@@ -690,36 +707,6 @@ public class AllureStoryReporter extends ChainedStoryReporter
     private void switchToParent()
     {
         putLinkedStep(getLinkedStep().getPreviousItem());
-    }
-
-    public void setAllureReportGenerator(IAllureReportGenerator allureReportGenerator)
-    {
-        this.allureReportGenerator = allureReportGenerator;
-    }
-
-    public void setBddRunContext(IBddRunContext bddRunContext)
-    {
-        this.bddRunContext = bddRunContext;
-    }
-
-    public void setBatchStorage(BatchStorage batchStorage)
-    {
-        this.batchStorage = batchStorage;
-    }
-
-    public void setTestContext(TestContext testContext)
-    {
-        this.testContext = testContext;
-    }
-
-    public void setAllureRunContext(IAllureRunContext allureRunContext)
-    {
-        this.allureRunContext = allureRunContext;
-    }
-
-    public void setVerificationErrorAdapter(IVerificationErrorAdapter verificationErrorAdapter)
-    {
-        this.verificationErrorAdapter = verificationErrorAdapter;
     }
 
     static class LinkedQueueItem<E>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.bdd.context;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -112,5 +113,13 @@ class BddRunContextTests
     {
         bddRunContext.setDryRun(true);
         assertTrue(bddRunContext.isDryRun());
+    }
+
+    @Test
+    void shouldCompleteRun()
+    {
+        assertFalse(bddRunContext.isRunCompleted());
+        bddRunContext.completeRun();
+        assertTrue(bddRunContext.isRunCompleted());
     }
 }

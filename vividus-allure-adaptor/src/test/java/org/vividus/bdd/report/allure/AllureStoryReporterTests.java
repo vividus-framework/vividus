@@ -32,6 +32,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -56,6 +57,7 @@ import org.jbehave.core.failures.BeforeOrAfterFailed;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.GivenStories;
+import org.jbehave.core.model.Lifecycle.ExecutionType;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
@@ -77,13 +79,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.batch.BatchExecutionConfiguration;
 import org.vividus.bdd.batch.BatchStorage;
 import org.vividus.bdd.context.BddRunContext;
-import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.context.ReportControlContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.report.allure.AllureStoryReporter.LinkedQueueItem;
@@ -147,18 +149,18 @@ class AllureStoryReporterTests
 
     @Captor private ArgumentCaptor<TestResult> testResultCaptor;
     @Mock private IAllureReportGenerator allureReportGenerator;
-    @Mock private IBddRunContext bddRunContext;
     @Mock private BatchStorage batchStorage;
-    @Mock private TestContext testContext;
+    @Spy private TestContext testContext = new SimpleTestContext();
     @Mock private IAllureRunContext allureRunContext;
     @Mock private IVerificationErrorAdapter verificationErrorAdapter;
     @Mock private StoryReporter next;
     @Mock private AllureLifecycle allureLifecycle;
+    @Mock private ReportControlContext reportControlContext;
 
     private LinkedQueueItem<String> linkedQueueItem;
     private String scenarioUid;
+    private BddRunContext bddRunContext;
 
-    @InjectMocks
     private AllureStoryReporter allureStoryReporter;
 
     @BeforeAll
@@ -181,6 +183,11 @@ class AllureStoryReporterTests
     @BeforeEach
     void beforeEach() throws IllegalAccessException
     {
+        BddRunContext context = new BddRunContext();
+        context.setTestContext(testContext);
+        bddRunContext = spy(context);
+        allureStoryReporter = new AllureStoryReporter(reportControlContext, bddRunContext, allureReportGenerator,
+                batchStorage, testContext, allureRunContext, verificationErrorAdapter);
         FieldUtils.writeField(allureStoryReporter, "lifecycle", allureLifecycle, true);
         linkedQueueItem = new LinkedQueueItem<>(SCENARIO_UID);
         allureStoryReporter.setNext(next);
@@ -189,7 +196,7 @@ class AllureStoryReporterTests
     @Test
     void testNonFirstExampleEventHandling()
     {
-        when(testContext.get(CURRENT_STEP_KEY))
+        lenient().when(testContext.get(CURRENT_STEP_KEY))
                 .thenReturn(null)
                 .thenReturn(linkedQueueItem)
                 .thenReturn(linkedQueueItem)
@@ -208,7 +215,7 @@ class AllureStoryReporterTests
     @Test
     void testFirstExampleEventHandling()
     {
-        when(testContext.get(CURRENT_STEP_KEY))
+        lenient().when(testContext.get(CURRENT_STEP_KEY))
                 .thenReturn(null)
                 .thenReturn(null)
                 .thenReturn(null)
@@ -229,28 +236,26 @@ class AllureStoryReporterTests
     })
     void shouldSetExecutionStageInBeforeScenarioSteps(Stage stage, ScenarioExecutionStage scenarioExecutionStage)
     {
-        allureStoryReporter.beforeScenarioSteps(stage);
+        allureStoryReporter.beforeScenarioSteps(stage, ExecutionType.SYSTEM);
         InOrder ordered = inOrder(allureRunContext, next);
         ordered.verify(allureRunContext).setScenarioExecutionStage(scenarioExecutionStage);
-        ordered.verify(next).beforeScenarioSteps(stage);
+        ordered.verify(next).beforeScenarioSteps(stage, ExecutionType.SYSTEM);
     }
 
     @Test
     void shouldDoNothingInBeforeScenarioStepsIfStageIsUnknown()
     {
-        Stage stage = any();
-        allureStoryReporter.beforeScenarioSteps(stage);
-        verify(next).beforeScenarioSteps(stage);
+        allureStoryReporter.beforeScenarioSteps(null, ExecutionType.USER);
+        verify(next).beforeScenarioSteps(null, ExecutionType.USER);
         verifyNoInteractions(allureRunContext);
     }
 
     @Test
     void shouldResetExecutionStageInAfterScenarioSteps()
     {
-        Stage stage = any();
-        allureStoryReporter.afterScenarioSteps(stage);
+        allureStoryReporter.afterScenarioSteps(Stage.AFTER, ExecutionType.SYSTEM);
         InOrder ordered = inOrder(allureRunContext, next);
-        ordered.verify(next).afterScenarioSteps(stage);
+        ordered.verify(next).afterScenarioSteps(Stage.AFTER, ExecutionType.SYSTEM);
         ordered.verify(allureRunContext).resetScenarioExecutionStage();
     }
 
@@ -389,7 +394,7 @@ class AllureStoryReporterTests
     private void mockRunningBatchName()
     {
         String batchKey = mockBatchExecutionConfiguration();
-        when(bddRunContext.getRunningBatchKey()).thenReturn(batchKey);
+        bddRunContext.putRunningBatch(batchKey);
     }
 
     private String mockBatchExecutionConfiguration()
@@ -413,7 +418,6 @@ class AllureStoryReporterTests
         boolean givenStory = false;
         mockStoryStart(givenStory);
         mockScenarioUid(true);
-        when(bddRunContext.getStoriesChain()).thenReturn(new LinkedList<>(List.of(runningStory)));
         allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.beforeScenario(scenario);
         verify(next).beforeScenario(scenario);
@@ -445,7 +449,6 @@ class AllureStoryReporterTests
         boolean givenStory = false;
         mockStoryStart(givenStory);
         mockScenarioUid(true);
-        when(bddRunContext.getStoriesChain()).thenReturn(new LinkedList<>(List.of(runningStory)));
         allureStoryReporter.beforeStory(story, givenStory);
         Scenario scenario = story.getScenarios().get(0);
         allureStoryReporter.beforeScenario(scenario);
@@ -462,10 +465,8 @@ class AllureStoryReporterTests
     {
         List<Label> story1Labels = new ArrayList<>();
         List<Label> story2Labels = new ArrayList<>();
-        List<RunningStory> runningStories = startStoriesWithSameName(story1Labels, story2Labels);
+        startStoriesWithSameName(story1Labels, story2Labels);
         when(allureRunContext.getCurrentStoryLabels()).thenReturn(story1Labels).thenReturn(story2Labels);
-        when(bddRunContext.getStoriesChain()).thenReturn(new LinkedList<>(List.of(runningStories.get(0))))
-                .thenReturn(new LinkedList<>(List.of(runningStories.get(1))));
         mockScenarioUid(true);
         allureStoryReporter.beforeScenario(new Scenario("Scenario 1", Meta.EMPTY));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
@@ -479,14 +480,12 @@ class AllureStoryReporterTests
         Properties scenarioMeta = getScenarioMeta(true);
         Properties storyMeta = getStoryMeta();
         RunningStory runningGivenStory = createRunningStory(storyMeta, scenarioMeta, List.of(), "given story");
-        lenient().when(bddRunContext.getRunningStory()).thenReturn(runningGivenStory);
+        bddRunContext.putRunningStory(runningGivenStory, true);
+        bddRunContext.putRunningStory(mockRunningStoryWithSeverity(true), false);
         Story givenStory = runningGivenStory.getStory();
         List<Label> givenStoryLabels = List.of(
                 new Label().setName(LabelName.PARENT_SUITE.value()).setValue(STORY_NAME));
         when(allureRunContext.getCurrentStoryLabels()).thenReturn(givenStoryLabels);
-        LinkedList<RunningStory> storiesChain = new LinkedList<>(
-                List.of(runningGivenStory, mockRunningStoryWithSeverity(true)));
-        when(bddRunContext.getStoriesChain()).thenReturn(storiesChain);
         mockScenarioUid(true);
         allureStoryReporter.beforeScenario(givenStory.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
@@ -499,18 +498,16 @@ class AllureStoryReporterTests
     @Test
     void afterBeforeStoryStepsShouldStopLifecycleBeforeStorySteps()
     {
-        setupContext();
-
         when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS);
         when(allureRunContext.isStepInProgress()).thenReturn(true);
         String currentStepId = "lifecycle-before-story-step";
         String currentScenarioId = LIFECYCLE_BEFORE_STORY;
         testContext.put(CURRENT_STEP_KEY, new LinkedQueueItem<>(currentScenarioId).attachItem(currentStepId));
 
-        allureStoryReporter.afterStorySteps(Stage.BEFORE);
+        allureStoryReporter.afterStorySteps(Stage.BEFORE, ExecutionType.USER);
 
         InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
-        ordered.verify(next).afterStorySteps(Stage.BEFORE);
+        ordered.verify(next).afterStorySteps(Stage.BEFORE, ExecutionType.USER);
         ordered.verify(allureLifecycle).updateStep(eq(currentStepId), anyStepResultConsumer());
         ordered.verify(allureLifecycle).stopStep(currentStepId);
         ordered.verify(allureLifecycle).updateTestCase(eq(currentScenarioId), anyTestResultConsumer());
@@ -524,9 +521,9 @@ class AllureStoryReporterTests
     void afterEmptyBeforeStorySteps()
     {
         when(allureRunContext.getStoryExecutionStage()).thenReturn(null);
-        allureStoryReporter.afterStorySteps(Stage.BEFORE);
+        allureStoryReporter.afterStorySteps(Stage.BEFORE, ExecutionType.USER);
         InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
-        ordered.verify(next).afterStorySteps(Stage.BEFORE);
+        ordered.verify(next).afterStorySteps(Stage.BEFORE, ExecutionType.USER);
         ordered.verify(allureRunContext).getStoryExecutionStage();
         ordered.verifyNoMoreInteractions();
     }
@@ -534,9 +531,9 @@ class AllureStoryReporterTests
     @Test
     void afterAfterStorySteps()
     {
-        allureStoryReporter.afterStorySteps(Stage.AFTER);
+        allureStoryReporter.afterStorySteps(Stage.AFTER, ExecutionType.USER);
         InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
-        ordered.verify(next).afterStorySteps(Stage.AFTER);
+        ordered.verify(next).afterStorySteps(Stage.AFTER, ExecutionType.USER);
         ordered.verifyNoMoreInteractions();
     }
 
@@ -565,7 +562,8 @@ class AllureStoryReporterTests
                 "/story/path2/" + storyName);
         Story story2 = runningStory2.getStory();
         story2.namedAs(storyName);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory1, runningStory2);
+        bddRunContext.putRunningStory(runningStory1, false);
+        bddRunContext.putRunningStory(runningStory2, false);
         when(allureRunContext.createNewStoryLabels(false)).thenReturn(story1Labels, story2Labels);
         mockRunningBatchName();
         allureStoryReporter.beforeStory(story1, false);
@@ -576,6 +574,7 @@ class AllureStoryReporterTests
     @Test
     void testBeforeStep()
     {
+        mockEnableReporting();
         mockScenarioUid(false);
         Step givenStep = createStep(GIVEN_STEP);
         allureStoryReporter.beforeStep(givenStep);
@@ -586,12 +585,14 @@ class AllureStoryReporterTests
     @Test
     void beforeStepShouldStartLifecycleBeforeStorySteps()
     {
+        mockEnableReporting();
         beforeStepShouldStartLifecycleStorySteps(null, "before-story-step", LIFECYCLE_BEFORE_STORY);
     }
 
     @Test
     void beforeStepShouldStartLifecycleAfterStorySteps()
     {
+        mockEnableReporting();
         beforeStepShouldStartLifecycleStorySteps(StoryExecutionStage.AFTER_SCENARIO, "after-story-step",
                 LIFECYCLE_AFTER_STORY);
     }
@@ -599,7 +600,6 @@ class AllureStoryReporterTests
     private void beforeStepShouldStartLifecycleStorySteps(StoryExecutionStage storyExecutionStage, String stepAsString,
             String testCaseName)
     {
-        BddRunContext bddRunContext = setupContext();
         mockBatchExecutionConfiguration();
 
         when(allureRunContext.getStoryExecutionStage()).thenReturn(storyExecutionStage);
@@ -637,6 +637,7 @@ class AllureStoryReporterTests
     @Test
     void testSuccessful()
     {
+        mockEnableReporting();
         mockStepUid();
         allureStoryReporter.successful(GIVEN_STEP);
         verify(next).successful(GIVEN_STEP);
@@ -683,8 +684,6 @@ class AllureStoryReporterTests
     @Test
     void afterStoryShouldStopLifecycleAfterStorySteps()
     {
-        BddRunContext bddRunContext = setupContext();
-
         when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.LIFECYCLE_AFTER_STORY_STEPS);
         when(allureRunContext.isStepInProgress()).thenReturn(true);
         String currentStepId = "lifecycle-after-story-step";
@@ -965,6 +964,8 @@ class AllureStoryReporterTests
     @Test
     void testAddTestCaseInfo()
     {
+        putEmptyRunningScenario(bddRunContext);
+
         mockScenarioUid(true);
         boolean givenStory = false;
         mockStoryStart(givenStory);
@@ -977,8 +978,7 @@ class AllureStoryReporterTests
         RunningScenario runningScenario = getRunningScenario(scenario1, 0);
         Story story = new Story(STORY_NAME, null, new Meta(new Properties()), null, List.of(scenario1, scenario2));
         RunningStory runningStory = getRunningStory(story, runningScenario);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
-        when(bddRunContext.getStoriesChain()).thenReturn(new LinkedList<>(List.of(runningStory)));
+        bddRunContext.putRunningStory(runningStory, false);
         allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
@@ -1007,7 +1007,6 @@ class AllureStoryReporterTests
                 putTestCaseMetaProperties(getScenarioMeta(false), EXPECTED_SCENARIO_TEST_CASE_ID,
                         EXPECTED_SCENARIO_REQUIREMENT_ID), List.of());
         Story story = runningStory.getStory();
-        when(bddRunContext.getStoriesChain()).thenReturn(new LinkedList<>(List.of(runningStory)));
         allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
         verify(allureLifecycle).scheduleTestCase(testResultCaptor.capture());
@@ -1115,7 +1114,7 @@ class AllureStoryReporterTests
     private RunningStory mockRunningStory(Properties storyMeta, Properties scenarioMeta, List<String> steps)
     {
         RunningStory runningStory = createRunningStory(storyMeta, scenarioMeta, steps, STORY_NAME);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        bddRunContext.putRunningStory(runningStory, false);
         return runningStory;
     }
 
@@ -1192,11 +1191,12 @@ class AllureStoryReporterTests
     {
         if (nullOnFirstAccess)
         {
-            when(testContext.get(CURRENT_STEP_KEY)).thenReturn(null).thenReturn(null).thenReturn(linkedQueueItem);
+            lenient().when(testContext.get(CURRENT_STEP_KEY)).thenReturn(null).thenReturn(null)
+                    .thenReturn(linkedQueueItem);
         }
         else
         {
-            when(testContext.get(CURRENT_STEP_KEY)).thenReturn(linkedQueueItem);
+            lenient().when(testContext.get(CURRENT_STEP_KEY)).thenReturn(linkedQueueItem);
         }
         lenient().when(allureRunContext.getStoryExecutionStage())
                  .thenReturn(StoryExecutionStage.BEFORE_SCENARIO);
@@ -1225,9 +1225,8 @@ class AllureStoryReporterTests
         tableRow.putAll(Maps.fromProperties(scenarioMeta));
         tableRow.putAll(Maps.fromProperties(storyMeta));
 
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
-        when(bddRunContext.getStoriesChain()).thenReturn(new LinkedList<>(List.of(runningStory)));
         boolean givenStory = false;
+        bddRunContext.putRunningStory(runningStory, givenStory);
         mockStoryStart(givenStory);
         allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.example(tableRow, scenarioRowIndex);
@@ -1247,16 +1246,6 @@ class AllureStoryReporterTests
         );
     }
 
-    private BddRunContext setupContext()
-    {
-        BddRunContext bddRunContext = new BddRunContext();
-        testContext = new SimpleTestContext();
-        bddRunContext.setTestContext(testContext);
-        allureStoryReporter.setBddRunContext(bddRunContext);
-        allureStoryReporter.setTestContext(testContext);
-        return bddRunContext;
-    }
-
     private static RunningScenario putEmptyRunningScenario(BddRunContext bddRunContext)
     {
         Scenario scenario = new Scenario();
@@ -1274,7 +1263,13 @@ class AllureStoryReporterTests
     {
         RunningStory runningStory = new RunningStory();
         runningStory.setNotExcluded(notExcluded);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        bddRunContext.putRunningStory(runningStory, false);
+    }
+
+    private void mockEnableReporting()
+    {
+        when(reportControlContext.isReportingEnabled()).thenReturn(true);
+        when(bddRunContext.isRunCompleted()).thenReturn(false);
     }
 
     private static Consumer<StepResult> anyStepResultConsumer()

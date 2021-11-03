@@ -90,7 +90,7 @@ public class TestExecutionFactory
 
     private static TestExecutionItemStatus calculateStatus(AbstractStepsContainer steps)
     {
-        return Stream.of(steps.getBeforeScenarioSteps(), steps.getSteps(), steps.getAfterScenarioSteps())
+        return Stream.of(steps.getBeforeUserScenarioSteps(), steps.getSteps(), steps.getAfterUserScenarioSteps())
                      .flatMap(List::stream)
                      .allMatch(step -> "successful".equals(step.getOutcome())) ? TestExecutionItemStatus.PASS
                              : TestExecutionItemStatus.FAIL;

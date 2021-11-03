@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableBiConsumer;
 import org.jbehave.core.i18n.LocalizedKeywords;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.Lifecycle.ExecutionType;
 import org.jbehave.core.reporters.JsonOutput;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
@@ -79,9 +80,9 @@ class StoryTests
             reporter.beforeStory(TEST_STORY, false);
             reporter.beforeScenarios();
             reporter.beforeScenario(TEST_SCENARIO);
-            reportStep(reporter, Stage.BEFORE);
-            reportStep(reporter, null);
-            reportStep(reporter, Stage.AFTER);
+            reportStep(reporter, Stage.BEFORE, ExecutionType.USER);
+            reportStep(reporter, null, null);
+            reportStep(reporter, Stage.AFTER, ExecutionType.USER);
             reporter.afterScenario(mockTiming());
             reporter.afterScenarios();
             reporter.afterStory(false);
@@ -94,9 +95,9 @@ class StoryTests
             assertEquals(SCENARIO_TITLE, scenario.getTitle());
             assertNull(scenario.getExamples());
             verifyMeta(ensureSingleElement(scenario.getMeta()), META_KEY, META_VALUE);
-            verifyStep(ensureSingleElement(scenario.getBeforeScenarioSteps()), COMMENT, STEP);
+            verifyStep(ensureSingleElement(scenario.getBeforeUserScenarioSteps()), COMMENT, STEP);
             verifyStep(ensureSingleElement(scenario.getSteps()), COMMENT, STEP);
-            verifyStep(ensureSingleElement(scenario.getAfterScenarioSteps()), COMMENT, STEP);
+            verifyStep(ensureSingleElement(scenario.getAfterUserScenarioSteps()), COMMENT, STEP);
         });
     }
 
@@ -114,9 +115,9 @@ class StoryTests
             reporter.beforeScenario(TEST_SCENARIO);
             reporter.beforeExamples(List.of(STEP), table);
             reporter.example(table.getRow(0), -1);
-            reportStep(reporter, Stage.BEFORE);
-            reportStep(reporter, null);
-            reportStep(reporter, Stage.AFTER);
+            reportStep(reporter, Stage.BEFORE, ExecutionType.USER);
+            reportStep(reporter, null, null);
+            reportStep(reporter, Stage.AFTER, ExecutionType.USER);
             reporter.afterExamples();
             reporter.afterScenario(mockTiming());
             reporter.afterScenarios();
@@ -129,17 +130,17 @@ class StoryTests
             Scenario scenario = ensureSingleElement(story.getScenarios());
             assertTimings(scenario);
             assertEquals(SCENARIO_TITLE, scenario.getTitle());
-            assertNull(scenario.getBeforeScenarioSteps());
+            assertNull(scenario.getBeforeUserScenarioSteps());
             assertNull(scenario.getSteps());
-            assertNull(scenario.getAfterScenarioSteps());
+            assertNull(scenario.getAfterUserScenarioSteps());
             verifyMeta(ensureSingleElement(scenario.getMeta()), META_KEY, META_VALUE);
             Examples examples = scenario.getExamples();
             verifyParameters(examples.getParameters());
             assertNotNull(examples);
             Example example = ensureSingleElement(examples.getExamples());
-            verifyStep(ensureSingleElement(example.getBeforeScenarioSteps()), COMMENT, STEP);
+            verifyStep(ensureSingleElement(example.getBeforeUserScenarioSteps()), COMMENT, STEP);
             verifyStep(ensureSingleElement(example.getSteps()), COMMENT, STEP);
-            verifyStep(ensureSingleElement(example.getAfterScenarioSteps()), COMMENT, STEP);
+            verifyStep(ensureSingleElement(example.getAfterUserScenarioSteps()), COMMENT, STEP);
         });
     }
 
@@ -218,12 +219,12 @@ class StoryTests
         ), params.getValues());
     }
 
-    private static void reportStep(StoryReporter reporter, Stage stage)
+    private static void reportStep(StoryReporter reporter, Stage stage, ExecutionType type)
     {
-        reporter.beforeScenarioSteps(stage);
+        reporter.beforeScenarioSteps(stage, type);
         reporter.beforeStep(new org.jbehave.core.model.Step(StepExecutionType.EXECUTABLE, STEP));
         reporter.comment(STEP);
-        reporter.afterScenarioSteps(stage);
+        reporter.afterScenarioSteps(stage, type);
     }
 
     private void verifyParameters(Parameters parameters)
