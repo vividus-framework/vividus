@@ -25,7 +25,7 @@ import org.jasypt.encryption.StringEncryptor;
 
 public final class PropertiesDecryptor
 {
-    private static final Pattern ENCRYPTED_PROPERTY_PATTERN = Pattern.compile("ENC\\((.*)\\)");
+    private static final Pattern ENCRYPTED_PROPERTY_PATTERN = Pattern.compile("ENC\\((.+?)\\)");
 
     private PropertiesDecryptor()
     {
@@ -38,11 +38,15 @@ public final class PropertiesDecryptor
             Object value = entry.getValue();
             if (value instanceof String)
             {
-                Matcher matcher = ENCRYPTED_PROPERTY_PATTERN.matcher((String) value);
-                if (matcher.matches())
+                String decryptedValue = (String) value;
+                Matcher matcher = ENCRYPTED_PROPERTY_PATTERN.matcher(decryptedValue);
+                while (matcher.find())
                 {
-                    entry.setValue(stringEncryptor.decrypt(matcher.group(1)));
+                    String encryptedPartOfValue = matcher.group(1);
+                    String decryptedPartOfValue = stringEncryptor.decrypt(encryptedPartOfValue);
+                    decryptedValue = decryptedValue.replace("ENC(" + encryptedPartOfValue + ")", decryptedPartOfValue);
                 }
+                entry.setValue(decryptedValue);
             }
         }
         return properties;
