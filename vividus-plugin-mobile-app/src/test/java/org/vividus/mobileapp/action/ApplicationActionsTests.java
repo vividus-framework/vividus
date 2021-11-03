@@ -105,7 +105,7 @@ class ApplicationActionsTests
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> applicationActions.reinstallApplication(BUNDLE_ID));
         assertEquals(
-                String.format("Application with the bundle identifier '%s' hasn't been successfully removed",
+                String.format("Unable to remove mobile application with the bundle identifier '%s'",
                         BUNDLE_ID),
                 exception.getMessage());
         verifyNoMoreInteractions(driver);

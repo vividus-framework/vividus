@@ -14,8 +14,10 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
-Scenario: Verify step: 'When I restart mobile application'
-When I restart mobile application
+Scenario: Verify step: 'When I reinstall mobile application with bundle identifier `$bundleId`'
+Meta:
+    @requirementId 2073
+When I reinstall mobile application with bundle identifier `${main-app}`
 
 
 Scenario: Validate coordinate/size dynamic variables, page source dynamic variable
@@ -213,6 +215,8 @@ When I wait until element located `accessibilityId(<togglerAccessibilityId>)` ap
 
 
 Scenario: Verify step: 'When I terminate application with bundle identifier `$bundleId`'
+Meta:
+    @requirementId 2073
 When I terminate application with bundle identifier `${main-app}`
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` disappears
 When I activate application with bundle identifier `${main-app}`

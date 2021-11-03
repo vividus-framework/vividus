@@ -309,11 +309,15 @@ Given I start mobile application with capabilities:
 
 Remove a mobile application from device and install it again
 
+==== *_Parameters_*
+
+. `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
+
 ==== *_Wording_*
 
 [source,gherkin]
 ----
-When I reinstall mobile application using bundle identifier `$bundleId`
+When I reinstall mobile application with bundle identifier `$bundleId`
 ----
 
 ==== *_Usage_*
@@ -321,7 +325,7 @@ When I reinstall mobile application using bundle identifier `$bundleId`
 .Reinstall mobile application
 [source,gherkin]
 ----
-When I reinstall mobile application using bundle identifier `vividus-mobile.app`
+When I reinstall mobile application with bundle identifier `vividus-mobile.app`
 ----
 
 One of the key benefit of usage the reinstall step instead of
@@ -333,7 +337,7 @@ Given I start mobile application with capabilities:
 |fullReset|true |
 
 ----
-steps pair is ability to avoid device re-allocation on SauceLabs or BrowserStack in case of application re-installation within story run (e.g. in case usage ExamplesTable)
+steps pair is ability to avoid device re-allocation on SauceLabs or BrowserStack in case of application re-installation within story run.
 
 === Close mobile application
 

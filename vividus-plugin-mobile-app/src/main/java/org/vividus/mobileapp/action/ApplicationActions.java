@@ -70,7 +70,7 @@ public class ApplicationActions
         HasCapabilities hasCapabilities = webDriverProvider.getUnwrapped(HasCapabilities.class);
         String appPath = hasCapabilities.getCapabilities().getCapability("app").toString();
         Validate.isTrue(interactor.removeApp(bundleId),
-                "Application with the bundle identifier '%s' hasn't been successfully removed", bundleId);
+                "Unable to remove mobile application with the bundle identifier '%s'", bundleId);
         interactor.installApp(appPath);
     }
 }

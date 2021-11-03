@@ -103,7 +103,7 @@ public class ApplicationSteps
      * @param bundleId bundle identifier of the mobile application to reinstall.
      *  BundleId should indicate the application used in the current session.
      */
-    @When("I reinstall mobile application using bundle identifier `$bundleId`")
+    @When("I reinstall mobile application with bundle identifier `$bundleId`")
     public void reinstallMobileApplication(String bundleId)
     {
         applicationActions.reinstallApplication(bundleId);
