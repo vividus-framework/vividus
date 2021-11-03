@@ -1,7 +1,7 @@
-|index
+|`index`
 |Get an element by the specified index from a collection of elements found by a locator. Indexes start from 1.
 |tagName(div)->filter.index(2)
 
-|textPart
+|`textPart`
 |Filter elements by their text parts.
 |tagName(h3)->filter.textPart(Welcome)

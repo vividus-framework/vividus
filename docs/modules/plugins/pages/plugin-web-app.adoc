@@ -141,10 +141,6 @@ include::partial$common-filters.adoc[]
 |src attribute should contain value
 |id(v1)->filter.imageSrcPart(part)
 
-|`textPart`
-|text of an element should contain value
-|id(v1)->filter.textPart(part)
-
 |`placeholder`
 |Placeholder attribute should be equal to a value
 |id(v1)->filter.placeholder(placeholder-value)
