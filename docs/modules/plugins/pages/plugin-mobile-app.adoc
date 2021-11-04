@@ -309,16 +309,16 @@ Given I start mobile application with capabilities:
 
 Remove a mobile application from device and install it again
 
-==== *_Parameters_*
-
-. `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
-
 ==== *_Wording_*
 
 [source,gherkin]
 ----
 When I reinstall mobile application with bundle identifier `$bundleId`
 ----
+
+==== *_Parameters_*
+
+. `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
 
 ==== *_Usage_*
 
