@@ -685,10 +685,9 @@ Then number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $com
 Then number of HTTP GET, POST requests with URL pattern `http://httpbin\.org/get` is equal to `1`
 ----
 
+==== Capture HTTP message
 
-==== Capture the request URL
-
-Save the URL from the request with given URL-pattern into the variable with specified name and the scopes.
+Save the HTTP message part from the HTTP request with given URL-pattern into the variable with specified name and the scopes.
 
 {proxy}
 
@@ -698,18 +697,30 @@ The actions preformed by the step:
 * filter out the HTTP messages with the response status code `302 Moved Temporarily`
 * find HTTP requests matching the provided HTTP methods and the URL regular expression
 * check that total number of the found HTTP messages is equal to `1`
-* save the HTTP request URL to the specified variable
+* save the HTTP message part to the specified variable
 
 {har-attached}
 
 [source,gherkin]
 ----
-When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
+When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`
 ----
 * `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
 * `$urlPattern` - The regular expression to match HTTP request URL.
+* `$httpMessagePart` - The HTTP message part to save. One of:
+** `URL` - The request URL.
+** `URL query` - The request URL query parameters.
+** `request data` - The request data includes the following keys:
+*** `query` - The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
+*** `requestBody.mimeType` - The MIME type of posted data, the variable will not be saved if MIME type is not present.
+*** `requestBody.text` - The posted data as plain text, the variable will not be saved if the request body is not present.
+*** `requestBodyParameters` - The form data parameters are stored as a collection of key and value pairs, where key is the name of the form parameter and value is the list of form parameter values. The form parameter values are accessible via zero-based index.
+*** `responseStatus` - The response status, the variable will not be saved if the response is not present.
+** `response data` - The response data includes the following keys:
+*** `responseBody.mimeType` - The MIME type of response data, the variable will not be saved if MIME type is not present.
+*** `responseBody.text` - The response data as plain text, the variable will not be saved if the response body is not present.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to save the URL.
+* `$variableName` - The variable name to save the HTTP message part.
 
 .Validate the URL of the matching HTTP request
 [source,gherkin]
@@ -718,32 +729,6 @@ Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
 When I capture HTTP GET or POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
 Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
 ----
-
-
-==== Capture the URL query
-
-Save the URL query parameters from the request with given URL-pattern into the variable with specified name and the scopes.
-
-{proxy}
-
-The actions preformed by the step:
-
-* extract HTTP messages from the recorded proxy archive
-* filter out the HTTP messages with the response status code `302 Moved Temporarily`
-* find HTTP requests matching the provided HTTP methods and the URL regular expression
-* check that total number of the found HTTP messages is equal to `1`
-* save the URL query parameters to the specified variable
-
-{har-attached}
-
-[source,gherkin]
-----
-When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`
-----
-* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
-* `$urlPattern` - The regular expression to match HTTP request URL.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to save the URL query. The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
 
 .Validate the URL query of the matching HTTP request
 [source,gherkin]
@@ -755,35 +740,7 @@ Then `${query.q}` is equal to `[vividus]`
 Then `${query}` is equal to `{q=[vividus]}`
 ----
 
-
-==== Capture the HTTP request
-
-{proxy}
-The actions preformed by the step:
-
-* extract HTTP messages from the recorded proxy archive
-* filter out the HTTP messages with response status code `302 Moved Temporarily`
-* find HTTP requests matching the provided HTTP methods and URL regular expression
-* check that total number of the found HTTP messages is equal to 1
-* save the HTTP message data to the specified variable
-
-{har-attached}
-
-[source,gherkin]
-----
-When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
-----
-* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
-* `$urlPattern` - The regular expression to match HTTP request URL.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store results. If the variable name is `my-var`, the following variables will be created:
-** `${my-var.query}` - The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
-** `${my-var.requestBody.mimeType}` - The MIME type of posted data, the variable will not be created if MIME type is not present.
-** `${my-var.requestBody.text}` - The posted data as plain text, the variable will not be created if the request body is not present.
-** `${my-var.requestBodyParameters}` - The form data parameters are stored as a collection of key and value pairs, where key is the name of the form parameter and value is the list of form parameter values. The form parameter values are accessible via zero-based index.
-** `${my-var.responseStatus}` - The response status, the variable will not be created if the response is not present.
-
-.Validate the data from the matching HTTP message
+.Validate the request data from the matching HTTP message
 [source,gherkin]
 ----
 Given I am on a page with the URL 'http://httpbin.org/forms/post'
@@ -793,6 +750,16 @@ Then `${data.query}` is equal to `{}`
 Then `${data.requestBodyParameters}` is equal to `{delivery=, custtel=, comments=, custemail=, custname=}`
 Then `${data.requestBody}` is not equal to `null`
 Then `${data.responseStatus}` is equal to `200`
+----
+
+.Validate the response data from the matching HTTP message
+[source,gherkin]
+----
+Given I am on a page with the URL 'http://httpbin.org/forms/post'
+When I click on element located `By.xpath(//button)`
+When I capture HTTP POST request with URL pattern `http://httpbin\.org/post` and save response data to scenario variable `data`
+Then `${data.responseBody.text}` is equal to `{"status": "ok"}`
+Then `${data.responseBody.mimeType}` is equal to `application/json`
 ----
 
 
