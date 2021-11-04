@@ -57,7 +57,7 @@ public class ApplicationActions
                 "Application with the bundle identifier '%s' is not installed or not running on the device",
                 bundleId);
         Validate.isTrue(interactor.terminateApp(bundleId),
-                "Application with the bundle identifier '%s' hasn't been successfully terminated", bundleId);
+                "Unable to terminate mobile application with the bundle identifier '%s'", bundleId);
     }
 
     /**
