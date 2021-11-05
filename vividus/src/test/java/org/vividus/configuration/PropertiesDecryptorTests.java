@@ -32,19 +32,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PropertiesDecryptorTests
 {
     private static final String PROPERTY_KEY = "key";
+    private static final String ENCRYPTED_VALUE = "encrypted";
+    private static final String DECRYPTED_VALUE = "decrypted";
 
     @Mock private StandardPBEStringEncryptor standardPBEStringEncryptor;
 
     @Test
     void shouldDecryptProperties()
     {
-        var encrypted = "encrypted";
-        var decrypted = "decrypted";
         Properties properties = new Properties();
-        properties.setProperty(PROPERTY_KEY, "ENC(" + encrypted + ")");
-        when(standardPBEStringEncryptor.decrypt(encrypted)).thenReturn(decrypted);
+        properties.setProperty(PROPERTY_KEY, "ENC(" + ENCRYPTED_VALUE + ")");
+        when(standardPBEStringEncryptor.decrypt(ENCRYPTED_VALUE)).thenReturn(DECRYPTED_VALUE);
         Properties propertiesDecrypted = PropertiesDecryptor.decryptProperties(standardPBEStringEncryptor, properties);
-        assertEquals(decrypted, propertiesDecrypted.getProperty(PROPERTY_KEY));
+        assertEquals(DECRYPTED_VALUE, propertiesDecrypted.getProperty(PROPERTY_KEY));
     }
 
     @Test
@@ -67,5 +67,17 @@ class PropertiesDecryptorTests
         Properties propertiesDecrypted = PropertiesDecryptor.decryptProperties(standardPBEStringEncryptor, properties);
         assertEquals(propertyValue, propertiesDecrypted.get(PROPERTY_KEY));
         verifyNoInteractions(standardPBEStringEncryptor);
+    }
+
+    @Test
+    void shouldDecryptPartsOfValue()
+    {
+        var decryptedFullValue = "username=open password=decrypted secret-key=decrypted";
+        var encryptedFullValue = "username=open password=ENC(encrypted) secret-key=ENC(encrypted)";
+        Properties properties = new Properties();
+        properties.setProperty(PROPERTY_KEY, encryptedFullValue);
+        when(standardPBEStringEncryptor.decrypt(ENCRYPTED_VALUE)).thenReturn(DECRYPTED_VALUE);
+        Properties propertiesDecrypted = PropertiesDecryptor.decryptProperties(standardPBEStringEncryptor, properties);
+        assertEquals(decryptedFullValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
     }
 }
