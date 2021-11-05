@@ -642,7 +642,7 @@ When I terminate application with bundle identifier `$bundleId`
 
 ==== *_Usage_*
 
-.ColseSafari.story
+.CloseSafari.story
 [source,gherkin]
 ----
 Scenario: Close safari
