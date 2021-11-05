@@ -275,22 +275,14 @@ public class SoftAssert implements ISoftAssert
             List<SoftAssertionError> assertionErrors = assertionCollection.getAssertionErrors();
             if (assertionErrors.isEmpty())
             {
-                if (LOGGER.isInfoEnabled())
-                {
-                    String verificationMessage = formatter.getPassedVerificationMessage(assertionCollection
-                            .getAssertionsCount());
-                    LOGGER.info(verificationMessage);
-                }
+                LOGGER.atInfo().log(() -> formatter.getPassedVerificationMessage(assertionCollection
+                        .getAssertionsCount()));
             }
             else
             {
                 String errorsMessage = formatter.getErrorsMessage(assertionErrors, true);
-                if (LOGGER.isErrorEnabled())
-                {
-                    String verificationMessage = formatter.getFailedVerificationMessage(assertionErrors,
-                            assertionCollection.getAssertionsCount());
-                    LOGGER.error("{}{}", verificationMessage, errorsMessage);
-                }
+                LOGGER.atError().addArgument(formatter.getFailedVerificationMessage(assertionErrors,
+                        assertionCollection.getAssertionsCount())).addArgument(errorsMessage).log("{}{}");
                 throw new VerificationError(errorsMessage, assertionErrors);
             }
         }
@@ -327,7 +319,7 @@ public class SoftAssert implements ISoftAssert
     {
         if (passed)
         {
-            LOGGER.info(PASS, description);
+            LOGGER.atInfo().addArgument(description).log(PASS);
             getAssertionCollection().addPassed();
             eventBus.post(new AssertionPassedEvent());
         }
@@ -335,7 +327,7 @@ public class SoftAssert implements ISoftAssert
         {
             KnownIssue issue = getKnownIssue(description);
             String message = getKnownIssueMessage(issue, description);
-            LOGGER.error(FAIL, message);
+            LOGGER.atError().addArgument(message).log(FAIL);
             recordAssertionError(issue, message, cause);
         }
         return passed;
