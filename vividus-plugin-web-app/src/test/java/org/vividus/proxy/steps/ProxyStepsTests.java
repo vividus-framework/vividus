@@ -96,7 +96,6 @@ class ProxyStepsTests
     private static final String VALUE2 = "value2";
     private static final String MIME_TYPE = "mimeType";
     private static final String TEXT = "text";
-    private static final String COMMENT = "comment";
     private static final String CONTENT_LENGTH_VALUE = "6";
     private static final DefaultHttpHeaders HEADERS = new DefaultHttpHeaders();
     private static final Pattern URL_PATTERN = Pattern.compile(URL);
@@ -192,7 +191,6 @@ class ProxyStepsTests
                     () -> assertEquals(List.of(VALUE1, VALUE2), urlQuery.get(KEY1)),
                     () -> assertEquals(List.of(VALUE2), urlQuery.get(KEY2)),
                     () -> assertEquals(MIME_TYPE, requestBody.get(MIME_TYPE)),
-                    () -> assertEquals(COMMENT, requestBody.get(COMMENT)),
                     () -> assertEquals(List.of(VALUE1, VALUE2), formData.get(KEY1)),
                     () -> assertEquals(List.of(VALUE2), formData.get(KEY2)),
                     () -> assertEquals(statusCode, responseStatus)
@@ -400,7 +398,6 @@ class ProxyStepsTests
         HarPostData postData = new HarPostData();
         postData.setMimeType(MIME_TYPE);
         postData.setText(TEXT);
-        postData.setComment(COMMENT);
         postData.setParams(List.of(
                 createHarPostDataParam(KEY1, VALUE1),
                 createHarPostDataParam(KEY1, VALUE2),

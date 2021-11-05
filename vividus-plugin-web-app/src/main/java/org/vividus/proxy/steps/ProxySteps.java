@@ -288,8 +288,7 @@ public class ProxySteps
     {
         return Map.of(
                 "mimeType", postData.getMimeType(),
-                "text", postData.getText(),
-                "comment", String.valueOf(postData.getComment())
+                "text", postData.getText()
         );
     }
 
