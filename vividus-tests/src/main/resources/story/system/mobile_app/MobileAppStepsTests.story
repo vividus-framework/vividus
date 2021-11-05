@@ -17,7 +17,10 @@ Given I start mobile application with capabilities:
 Scenario: Verify step: 'When I reinstall mobile application with bundle identifier `$bundleId`'
 Meta:
     @requirementId 2073
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<menuInputXpath>)`
 When I reinstall mobile application with bundle identifier `${main-app}`
+Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `1`
 
 
 Scenario: Validate coordinate/size dynamic variables, page source dynamic variable
