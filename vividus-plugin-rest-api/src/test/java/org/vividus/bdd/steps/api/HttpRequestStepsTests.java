@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.SubSteps;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
@@ -71,7 +72,7 @@ class HttpRequestStepsTests
     @Test
     void testRequest()
     {
-        httpRequestSteps.request(CONTENT);
+        httpRequestSteps.request(new DataWrapper(CONTENT));
         verifyPutRequestEntity(CONTENT);
     }
 
@@ -79,8 +80,20 @@ class HttpRequestStepsTests
     void testRequestUtf8Content()
     {
         String content = "{\"storeUserNewPassword\": \"зЛЖЛВеБЛги!\"}";
-        httpRequestSteps.request(content);
+        httpRequestSteps.request(new DataWrapper(content));
         verifyPutRequestEntity(content);
+    }
+
+    @Test
+    void testRequestBinaryContent() throws IOException
+    {
+        String content = "{there are some binary content}";
+        byte[] contentInBytes = content.getBytes(StandardCharsets.UTF_8);
+        httpRequestSteps.request(new DataWrapper(contentInBytes));
+        ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
+        verify(httpTestContext).putRequestEntity(captor.capture());
+        String result = IOUtils.toString(captor.getValue().getContent(), StandardCharsets.UTF_8);
+        assertThat(result, containsString(content));
     }
 
     @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })

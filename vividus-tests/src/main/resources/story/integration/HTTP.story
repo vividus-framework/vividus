@@ -104,3 +104,10 @@ Then JSON element by JSON path `$.form.string-key` is equal to `"string1"`
 Then JSON element by JSON path `$.files.binary-key` is equal to `"raw"`
 Then JSON element by JSON path `$.headers.Content-Type` is equal to `"${json-unit.regex}multipart/form-data; boundary=[A-Za-z0-9-_]+"`
 Then JSON element by JSON path `$.json` is equal to `null`
+
+Scenario: Verify steps "Given request body: $content" (binary content)
+Meta:
+    @requirementId 1739
+Given request body: #{loadBinaryResource(data/image.png)}
+When I send HTTP POST to the relative URL '/post'
+Then `${responseCode}` is equal to `200`
