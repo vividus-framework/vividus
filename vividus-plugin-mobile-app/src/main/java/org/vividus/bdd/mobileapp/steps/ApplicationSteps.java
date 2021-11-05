@@ -99,7 +99,7 @@ public class ApplicationSteps
     }
 
     /**
-     * Restart mobile application
+     * Removes a mobile application from device and installs it again
      * @param bundleId bundle identifier of the mobile application to reinstall.
      *  BundleId should indicate the application used in the current session.
      */
