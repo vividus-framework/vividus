@@ -53,7 +53,7 @@ class FileStepsTests
         String content = "content";
         String pathVariable = "path";
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        fileSteps.saveResponseBodyToFile("test.txt", content, scopes, pathVariable);
+        fileSteps.createTemporaryFile("test.txt", new DataWrapper(content), scopes, pathVariable);
         verify(bddVariableContext).putVariable(eq(scopes), eq(pathVariable), argThat(path ->
         {
             try

@@ -19,6 +19,7 @@ package org.vividus.bdd.steps;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
@@ -53,11 +54,12 @@ public class FileSteps
      */
     @When("I create temporary file with name `$name` and content `$content` and put path to $scopes variable"
             + " `$variableName`")
-    public void saveResponseBodyToFile(String name, String content, Set<VariableScope> scopes, String variableName)
+    public void createTemporaryFile(String name, DataWrapper content, Set<VariableScope> scopes, String variableName)
             throws IOException
     {
         Path temporaryFile = ResourceUtils.createTempFile(FilenameUtils.getBaseName(name),
-                "." + FilenameUtils.getExtension(name), content);
+                "." + FilenameUtils.getExtension(name));
+        Files.write(temporaryFile, content.getBytes());
         bddVariableContext.putVariable(scopes, variableName, temporaryFile.toString());
     }
 
