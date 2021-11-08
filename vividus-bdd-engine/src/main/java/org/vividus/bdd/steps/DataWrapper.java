@@ -39,4 +39,9 @@ public class DataWrapper
         }
         throw new IllegalArgumentException("Unsupported content type: " + data.getClass());
     }
+
+    public Object getData()
+    {
+        return data;
+    }
 }

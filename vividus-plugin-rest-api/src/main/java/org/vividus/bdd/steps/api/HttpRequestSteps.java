@@ -29,7 +29,9 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -40,6 +42,7 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.bdd.model.RequestPartType;
+import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.SubSteps;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
@@ -64,13 +67,19 @@ public class HttpRequestSteps
     }
 
     /**
-     * Set up request body that will be used while sending request
-     * @param content HTTP method request body
+     * Sets HTTP request body that will be used while executing request. In case of textual content the default HTTP
+     * request header with name 'Content-Type' and value 'text/plain; charset=UTF-8' is set. No HTTP request header
+     * is set in case of binary content.
+     *
+     * @param content HTTP request body
      */
     @Given("request body: $content")
-    public void request(String content)
+    public void request(DataWrapper content)
     {
-        httpTestContext.putRequestEntity(new StringEntity(content, StandardCharsets.UTF_8));
+        Object data = content.getData();
+        HttpEntity requestEntity = data instanceof String ? new StringEntity((String) data, StandardCharsets.UTF_8)
+                : new ByteArrayEntity((byte[]) data);
+        httpTestContext.putRequestEntity(requestEntity);
     }
 
     /**
