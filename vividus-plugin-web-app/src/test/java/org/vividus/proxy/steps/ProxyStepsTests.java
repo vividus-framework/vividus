@@ -69,6 +69,7 @@ import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.proxy.IProxy;
+import org.vividus.proxy.model.HttpMessagePart;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.action.IWebWaitActions;
@@ -139,8 +140,8 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         byte[] data = mockHar(httpMethodInHar, statusCode);
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
-        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, Set.of(VariableScope.SCENARIO),
-                VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL,
+                Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
         verifySizeAssertion(message, 0, ComparisonRule.EQUAL_TO, 1);
         verify(attachmentPublisher).publishAttachment(data, "har.har");
         verifyNoInteractions(bddVariableContext);
@@ -153,7 +154,8 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         mockHar(httpMethod, HttpStatus.SC_OK);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
-        proxySteps.captureRequestAndSaveURLQuery(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL_QUERY,
+                variableScopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value ->
             value.equals(Map.of(
                     KEY1, List.of(VALUE1, VALUE2),
@@ -168,7 +170,8 @@ class ProxyStepsTests
         HttpMethod httpMethod = HttpMethod.POST;
         mockHar(httpMethod, HttpStatus.SC_OK);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
-        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL, variableScopes,
+                VARIABLE_NAME);
         verify(bddVariableContext).putVariable(variableScopes, VARIABLE_NAME, URL);
     }
 
@@ -180,7 +183,8 @@ class ProxyStepsTests
         int statusCode = HttpStatus.SC_OK;
         mockHar(httpMethod, statusCode);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
-        proxySteps.captureRequestAndSaveRequestData(EnumSet.of(httpMethod), URL_PATTERN, variableScopes, VARIABLE_NAME);
+        proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.REQUEST_DATA,
+                variableScopes, VARIABLE_NAME);
         verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value -> {
             Map<String, Object> map = (Map<String, Object>) value;
             Map<String, List<String>> urlQuery = (Map<String, List<String>>) map.get("query");

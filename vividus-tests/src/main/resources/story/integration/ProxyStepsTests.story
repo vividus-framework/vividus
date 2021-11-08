@@ -14,7 +14,7 @@ Given I am on a page with the URL 'http:/httpbin.org/get'
 When I clear proxy log
 Then number of HTTP GET, POST requests with URL pattern `http://httpbin\.org/get` is EQUAL TO `0`
 
-Scenario: Verify steps "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`" and  "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`"
+Scenario: Verify URL and URL query HTTP message parts in step "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`"
 Meta:
     @issueId 1248; 1388
 Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
@@ -28,14 +28,19 @@ Then `${query}` is equal to table ignoring extra columns:
 |q      |
 |vividus|
 
-Scenario: Verify step When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
+Scenario: Verify request data and response data HTTP message parts in step "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`"
+Meta:
+    @requirementId 1772
 Given I am on a page with the URL 'http://httpbin.org/forms/post'
+When I check checkbox located by `By.xpath(//input[@value='cheese'])`
 When I click on element located `By.xpath(//button)`
 When I capture HTTP POST request with URL pattern `http://httpbin\.org/post` and save request data to SCENARIO variable `requestData`
 Then `${requestData.query}` is equal to `{}`
-Then `${requestData.requestBodyParameters}` is equal to `{delivery=[], custtel=[], comments=[], custemail=[], custname=[]}`
+Then `${requestData.requestBodyParameters}` is equal to `{delivery=[], custtel=[], comments=[], custemail=[], topping=[cheese], custname=[]}`
 Then `${requestData.requestBody}` is not equal to `null`
 Then `${requestData.responseStatus}` is equal to `200`
+When I capture HTTP POST request with URL pattern `http://httpbin\.org/post` and save response data to SCENARIO variable `responseData`
+Then `${responseData.responseBody}` matches `.*"topping": "cheese".*`
 
 Scenario: Verify step When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log
 Given I am on a page with the URL 'http://httpbin.org/get'
