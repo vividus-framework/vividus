@@ -87,13 +87,12 @@ class HttpRequestStepsTests
     @Test
     void testRequestBinaryContent() throws IOException
     {
-        String content = "{there are some binary content}";
-        byte[] contentInBytes = content.getBytes(StandardCharsets.UTF_8);
-        httpRequestSteps.request(new DataWrapper(contentInBytes));
-        ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
+        var content = "{there is some binary content}";
+        httpRequestSteps.request(new DataWrapper(content.getBytes(StandardCharsets.UTF_8)));
+        var captor = ArgumentCaptor.forClass(HttpEntity.class);
         verify(httpTestContext).putRequestEntity(captor.capture());
-        String result = IOUtils.toString(captor.getValue().getContent(), StandardCharsets.UTF_8);
-        assertThat(result, containsString(content));
+        var result = IOUtils.toString(captor.getValue().getContent(), StandardCharsets.UTF_8);
+        assertEquals(content, result);
     }
 
     @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
