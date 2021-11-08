@@ -164,6 +164,31 @@ https://www.ietf.org/rfc/rfc3986.txt[RFC 3986].
 
 == HTTP Steps
 
+=== Set HTTP request body
+
+Sets HTTP request body that will be used while executing request. In case of textual content the default HTTP
+request header with name `Content-Type` and value `text/plain; charset=UTF-8` is set. No HTTP request header is set in
+case of binary content.
+
+[source,gherkin]
+----
+Given request body: $content
+----
+
+* `$content` - HTTP request body.
+
+.Set textual HTTP request body
+[source,gherkin]
+----
+Given request body: Hello!
+----
+
+.Set binary HTTP request body
+[source,gherkin]
+----
+Given request body: #{loadBinaryResource(/data/image.png)}
+----
+
 === Prepare multipart HTTP request
 
 Sets https://tools.ietf.org/html/rfc7578[multipart] request entity that will be used while executing HTTP requests.

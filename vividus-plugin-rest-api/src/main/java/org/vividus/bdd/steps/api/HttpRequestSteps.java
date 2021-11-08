@@ -67,8 +67,11 @@ public class HttpRequestSteps
     }
 
     /**
-     * Set up request body that will be used while sending request
-     * @param content HTTP method request body
+     * Sets HTTP request body that will be used while executing request. In case of textual content the default HTTP
+     * request header with name 'Content-Type' and value 'text/plain; charset=UTF-8' is set. No HTTP request header
+     * is set in case of binary content.
+     *
+     * @param content HTTP request body
      */
     @Given("request body: $content")
     public void request(DataWrapper content)
