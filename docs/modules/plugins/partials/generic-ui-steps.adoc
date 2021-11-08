@@ -1,291 +1,209 @@
 === Verify elements number
 
-==== *_Info_*
-
-Verifies if the number of elements located by locator matches desired number
-
-==== *_Wording_*
+Verifies if the number of elements located by locator matches the desired number.
 
 [source,gherkin]
 ----
 Then number of elements found by `$locator` is $comparisonRule `$quantity`
 ----
 
-==== *_Parameters_*
+* `$locator` - <<_locator>>.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$quantity` - The expected number of the elements.
 
-. `$locator` - <<_locator>>
-. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
-. `$quantity` - expected number of elements
-
-==== *_Usage_*
-
-.VerifyNumber.story
+.Verify the number of elements
 [source,gherkin]
 ----
-Scenario: Step verification 'Then number of elements found by `$locator` is $comparisonRule `$quantity`'
 Then number of elements found by `tagName(img)` is equal to `5`
 ----
 
+
 === Verify elements state
 
-==== *_Info_*
-
-Verifies if the number of elements located by locator matches number condition and all of them are in desired state
+Verifies if the number of elements located by locator matches the number
+condition and all of them are in the desired state.
 
 [IMPORTANT]
-
 If you describe number condition as equal to 5 in case if there are 10 elements by this locator and only 5 of them in the desired state. You will get two failed assertions.
 The first one about number condition violation. The second one about state check failure.
 
 [WARNING]
 In case when locator's visibility and checked state are equal (For an example :i and NOT_VISIBLE) exception will be thrown. In such cases please use step: <<_verify_elements_number>>
 
-==== *_Wording_*
-
 [source,gherkin]
 ----
 Then number of $state elements found by `$locator` is $comparisonRule `$quantity`
 ----
 
-==== *_Parameters_*
+* `$state` - xref:parameters:state.adoc[State]
+* `$locator` - <<_locator>>.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$quantity` - The expected number of elements.
 
-. `$state` - xref:parameters:state.adoc[State]
-. `$locator` - <<_locator>>
-. `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison rule]
-. `$quantity` - expected number of elements
-
-==== *_Usage_*
-
-.VerifyState.story
+.Verify the number of elements in the state
 [source,gherkin]
 ----
-Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
-Given I am on a page with the URL '${vividus-test-site-url}'
 Then number of VISIBLE elements found by `tagName(img)` is = `1`
 ----
 
 
 === Wait for element appearance
 
-==== *_Info_*
-
-Waits for appearance of an element by the locator
-
-==== *_Wording_*
+Waits for appearance of an element by the locator.
 
 [source,gherkin]
 ----
 When I wait until element located `$locator` appears
 ----
 
-==== *_Parameters_*
+* `$locator` - <<_locator>>.
 
-. `$locator` - <<_locator>>
-
-==== *_Usage_*
-
-.Wait.story
+.Wait for element appearance
 [source,gherkin]
 ----
-Scenario: Wait for element appearance
 When I wait until element located `name(welcome-image)` appears
 ----
 
 
 === Wait for element disappearance
 
-==== *_Info_*
-
-Waits for disappearance of an element by the locator
-
-==== *_Wording_*
+Waits for disappearance of an element by the locator.
 
 [source,gherkin]
 ----
 When I wait until element located `$locator` disappears
 ----
 
-==== *_Parameters_*
+* `$locator` - <<_locator>>.
 
-. `$locator` - <<_locator>>
-
-==== *_Usage_*
-
-.Wait.story
+.Wait for element disappearance
 [source,gherkin]
 ----
-Scenario: Wait for element disappearance
 When I wait until element located `name(welcome-image)` disappears
 ----
 
-=== Save text of context element
 
-==== *_Info_*
+=== Save the text of the context
 
-Saves text of a context element into a variable
+Saves the text of the context element into a variable.
 
 [WARNING]
-Step will throw an error if the context element is not set
-
-==== *_Wording_*
+Step will throw an error if the context element is not set.
 
 [source,gherkin]
 ----
 When I save text of context element to $scopes variable `$variableName`
 ----
 
-==== *_Parameters_*
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the text.
 
-. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-. `$variableName` - name of a variable
-
-==== *_Usage_*
-
-.SaveText.story
+.Save the text of the context element
 [source,gherkin]
 ----
-Scenario: Save text of context element
 When I change context to element located `By.id(username)`
 When I save text of context element to SCENARIO variable `username`
 ----
 
-=== Save attribute value of context element
 
-==== *_Info_*
+=== Saves the attribute value of the context
 
-Saves attribute value of a context element into a variable
+Saves the attribute value of the context element into a variable.
 
 [WARNING]
-Step will throw an error if the context element is not set
-
-==== *_Wording_*
+Step will throw an error if the context element is not set.
 
 [source,gherkin]
 ----
 When I save `$attributeName` attribute value of context element to $scopes variable `$variableName`
 ----
 
-==== *_Parameters_*
+* `$attributeName` - The name of an element attribute.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the attribute value.
 
-. `$attributeName` - name of an element's attribute
-. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-. `$variableName` - name of a variable
-
-==== *_Usage_*
-
-.SaveAttributeValue.story
+.Save the attribute value of the context element
 [source,gherkin]
 ----
-Scenario: Save attribute value of context element
 When I change context to element located `By.id(username)`
 When I save `innerText` attribute value of context element to SCENARIO variable `username`
 ----
 
-=== Save attribute value of element
 
-==== *_Info_*
+=== Save the attribute value of the element
 
-Saves attribute value of an element located by locator into a variable
-
-==== *_Wording_*
+Saves the attribute value of the element located by locator into a variable.
 
 [source,gherkin]
 ----
 When I save `$attributeName` attribute value of element located `$locator` to $scopes variable `$variableName`
 ----
 
-==== *_Parameters_*
+* `$attributeName` - The name of an element attribute.
+* `$locator` - <<_locator>>.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the attribute value.
 
-. `$attributeName` - name of an element's attribute
-. `$locator` - <<_locator>>
-. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-. `$variableName` - name of a variable
-
-==== *_Usage_*
-
-.SaveAttributeValue.story
+Save the attribute value of the element
 [source,gherkin]
 ----
-Scenario: Save attribute value of element
 When I save `innerText` attribute value of element located `By.id(username)` to SCENARIO variable `username`
 ----
 
+
 === Save number of elements
 
-==== *_Info_*
-
-Saves number of elements located by locator into a variable
-
-==== *_Wording_*
+Saves number of elements located by locator into a variable.
 
 [source,gherkin]
 ----
 When I save number of elements located `$locator` to $scopes variable `$variableName`
 ----
 
-==== *_Parameters_*
+* `$locator` - <<_locator>>.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the number of elements.
 
-. `$locator` - <<_locator>>
-. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-. `$variableName` - name of a variable
-
-==== *_Usage_*
-
-.SaveNumberOfElements.story
+.Save number of elements
 [source,gherkin]
 ----
-Scenario: Save number of elements
 When I save number of elements located `tagName(a)` to scenario variable `numberOfLinks`
 Then `${numberOfLinks}` is equal to `1`
 ----
 
+
 === Change context
 
-==== *_Info_*
-
-Changes the context to an element located by locator for limiting area of subsequent UI interactions
-
-==== *_Wording_*
+Changes the context to an element located by locator for limiting area of subsequent UI interactions.
 
 [source,gherkin]
 ----
 When I change context to element located `$locator`
 ----
 
-==== *_Parameters_*
+* `$locator` - <<_locator>>.
 
-. `$locator` - <<_locator>>
-
-==== *_Usage_*
-
-.ChangeContext.story
+.Change context
 [source,gherkin]
 ----
-Scenario: Change context
 Then number of elements found by `By.xpath(html)` is equal to `1`
 When I change context to element located `By.xpath(//body)`
 Then number of elements found by `By.xpath(html)` is equal to `0`
 ----
+
 
 === Reset context
 
-==== *_Info_*
-
-Resets the context
-
-==== *_Wording_*
+Resets the context.
 
 [source,gherkin]
 ----
 When I reset context
 ----
 
-==== *_Usage_*
-
-.ResetContext.story
+.Reset context
 [source,gherkin]
 ----
-Scenario: Reset context
 Then number of elements found by `By.xpath(html)` is equal to `1`
 When I change context to element located `By.xpath(//body)`
 Then number of elements found by `By.xpath(html)` is equal to `0`
@@ -293,74 +211,57 @@ When I reset context
 Then number of elements found by `By.xpath(html)` is equal to `1`
 ----
 
+
 === Element exists for duration
 
-==== *_Info_*
-
-Verifies that an element located by locator exists for given duration
-
-==== *_Wording_*
+Verifies that an element located by locator exists for given duration.
 
 [source,gherkin]
 ----
 Then element located `$locator` exists for `$duration` duration
 ----
 
-==== *_Parameters_*
+* `$locator` - <<_locator>>.
+* `$duration` - The duration in {iso-date-format-link} format.
 
-. `$locator` - <<_locator>>
-. `$duration` - duration in {iso-date-format-link} format
-
-==== *_Usage_*
-
-.ElementExistence.story
+.Element should exists for 5 second
 [source,gherkin]
 ----
-Scenario: Element should exists for 5 second
 Then element located 'id(banner)' exists for 'PT5S' duration
 ----
 
+
 === Navigate back
 
-==== *_Info_*
-
-Navigates back to the previous view
-
-==== *_Wording_*
+Navigates back to the previous view.
 
 [source,gherkin]
 ----
 When I navigate back
 ----
 
-==== *_Usage_*
-
 .Navigate back
 [source,gherkin]
 ----
-Scenario: Navigate back
 Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `1`
 When I navigate back
 Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `0`
 ----
 
+
 === Verify elements order
 
-==== *_Info_*
-
-Gets a collection of elements by locator and checks that they are sorted by their text in the specified order. The collection should have more than 1 element with not empty text, otherwise the step fails.
-
-==== *_Wording_*
+Gets a collection of elements by locator and checks that they are sorted by
+their text in the specified order. The collection should have more than 1
+element with not empty text, otherwise the step fails.
 
 [source,gherkin]
 ----
 Then elements located `$locator` are sorted by text in $sortingOrder order
 ----
 
-==== *_Parameters_*
-
-. `$locator` - <<_locator>>
-. `$sortingOrder`
+* `$locator` - <<_locator>>.
+* `$sortingOrder`
 
 [cols="2,2,2", options="header"]
 |===
@@ -387,63 +288,50 @@ Then elements located `$locator` are sorted by text in $sortingOrder order
 
 |===
 
-==== *_Usage_*
-
-.OrderVerification.story
+.Check items are sorted
 [source,gherkin]
 ----
-Scenario: Check items are sorted
 Given I am on a page with the URL 'https://grocery.by'
 When I click on element located `By.id(a-z)`
 Then elements located `By.xpath(//span[@id='item-to-purchase'])` are sorted by text in ascending order
 ----
 
-=== Take a screenshot
 
-==== *_Info_*
+=== Take a screenshot
 
 Takes a screenshot and saves it to the default folder defined by the property `ui.screenshots.directory`.
 
 TIP: The full path to the screenshot is posted to the logs and the report.
-
-==== *_Wording_*
 
 [source,gherkin]
 ----
 When I take screenshot
 ----
 
+
 === Take a screenshot and save it to the folder
 
-==== *_Info_*
+Takes a screenshot and saves it to the default folder defined by user.
 
-Takes a screenshot and saves it to the default folder defined by user
-
-TIP: Full path to a screenshot will be posted to logs and allure
-
-==== *_Wording_*
+TIP: The full path to a screenshot will be posted to logs and allure
 
 [source,gherkin]
 ----
 When I take screenshot and save it to folder `$path`
 ----
 
-==== *_Parameters_*
-
-. `$path` - an absolute or relative path to the folder to save taken screenshot
-
-==== *_Usage_*
+* `$path` - The absolute or relative path to the folder to save taken screenshot.
 
 .Take a screenshot to a path
 [source,gherkin]
 ----
-Scenario: Take a screenshot to a path
 When I take screenshot to path `${screenshot-directory}/#{generate(Ancient.god)}.png`
 ----
 
+
 === Perform steps while elements exist
 
-Executes the steps while the found elements exist
+Executes the steps while the found elements exist.
 
 [IMPORTANT]
 To avoid infinite loops the iterationLimit parameter is used. If iteration's limit reached the step will fail.
@@ -459,11 +347,11 @@ Alias:
 When I find $comparisonRule '$number' elements $locator and while they exist do up to $iterationLimit iteration of$stepsToExecute
 ----
 
-. `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
-. `$number` - The number of elements to find
-. `$locator` - <<_locator>>
-. `$iterationLimit` - The maximum number of iterations to perform
-. `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$number` - The number of elements to find.
+* `$locator` - <<_locator>>.
+* `$iterationLimit` - The maximum number of iterations to perform.
+* `$stepsToExecute` - The `ExamplesTable` with a single column containing the steps to execute.
 
 .Disable menus
 [source,gherkin]
