@@ -14,6 +14,15 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
+Scenario: Verify step: 'When I reinstall mobile application with bundle identifier `$bundleId`'
+Meta:
+    @requirementId 2073
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<menuInputXpath>)`
+When I reinstall mobile application with bundle identifier `${main-app}`
+Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `1`
+
+
 Scenario: Validate coordinate/size dynamic variables, page source dynamic variable
 Then `${source-code}` matches `.+Home.+`
 When I change context to element located `xpath(<textElementXpath>)->filter.text(Home)`
@@ -203,6 +212,15 @@ Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x
 
 Scenario: Verify step: 'When I activate application with bundle identifier `$bundleId`'
 When I activate application with bundle identifier `${browser-app}`
+When I wait until element located `accessibilityId(<togglerAccessibilityId>)` disappears
+When I activate application with bundle identifier `${main-app}`
+When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears
+
+
+Scenario: Verify step: 'When I terminate application with bundle identifier `$bundleId`'
+Meta:
+    @requirementId 2073
+When I terminate application with bundle identifier `${main-app}`
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` disappears
 When I activate application with bundle identifier `${main-app}`
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears

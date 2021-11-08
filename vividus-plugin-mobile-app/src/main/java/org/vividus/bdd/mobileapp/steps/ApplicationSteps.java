@@ -90,12 +90,34 @@ public class ApplicationSteps
     }
 
     /**
-     * Closes mobile application
+     * Closes mobile application and quits the session
      */
     @When("I close mobile application")
     public void closeMobileApplication()
     {
         webDriverProvider.end();
+    }
+
+    /**
+     * Removes a mobile application from device and installs it again
+     * @param bundleId bundle identifier of the mobile application to reinstall.
+     *  BundleId should indicate the application used in the current session.
+     */
+    @When("I reinstall mobile application with bundle identifier `$bundleId`")
+    public void reinstallMobileApplication(String bundleId)
+    {
+        applicationActions.reinstallApplication(bundleId);
+        applicationActions.activateApp(bundleId);
+    }
+
+    /**
+     * Terminates the application if it's running. The session will not be closed.
+     * @param bundleId bundle identifier of the application to terminate.
+     */
+    @When("I terminate application with bundle identifier `$bundleId`")
+    public void terminateApp(String bundleId)
+    {
+        applicationActions.terminateApp(bundleId);
     }
 
     /**

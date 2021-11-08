@@ -303,6 +303,42 @@ Given I start mobile application with capabilities:
 |appium:options.clearSystemFiles|false|
 ----
 
+=== Reinstall mobile application
+
+==== *_Info_*
+
+Remove a mobile application from device and install it again
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I reinstall mobile application with bundle identifier `$bundleId`
+----
+
+==== *_Parameters_*
+
+. `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
+
+==== *_Usage_*
+
+.Reinstall mobile application
+[source,gherkin]
+----
+When I reinstall mobile application with bundle identifier `vividus-mobile.app`
+----
+
+One of the key benefit of usage the reinstall step instead of
+[source,gherkin]
+----
+When I close mobile application
+Given I start mobile application with capabilities:
+|name     |value|
+|fullReset|true |
+
+----
+steps pair is ability to avoid device re-allocation on SauceLabs or BrowserStack in case of application re-installation within story run.
+
 === Close mobile application
 
 ==== *_Info_*
@@ -584,6 +620,33 @@ When I activate application with bundle identifier `$bundleId`
 ----
 Scenario: Open safari
 When I activate application with bundle identifier `com.apple.mobilesafari`
+----
+
+
+=== Terminate mobile application
+
+==== *_Info_*
+
+Terminates a running application on the device and navigates to the home device screen. The session will not be closed.
+
+==== *_Wording_*
+
+[source,gherkin]
+----
+When I terminate application with bundle identifier `$bundleId`
+----
+
+==== *_Parameters_*
+
+. `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
+
+==== *_Usage_*
+
+.CloseSafari.story
+[source,gherkin]
+----
+Scenario: Close safari
+When I terminate application with bundle identifier `com.apple.mobilesafari`
 ----
 
 include::partial$generic-ui-steps.adoc[]

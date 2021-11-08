@@ -58,6 +58,7 @@ class ApplicationStepsTests
     private static final String APP_NAME = "vividus-mobile.app";
     private static final String SET_SETTINGS = "setSettings";
     private static final String SETTINGS = "settings";
+    private static final String BUNDLE_ID = "bundleId";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ApplicationSteps.class);
 
@@ -120,11 +121,26 @@ class ApplicationStepsTests
     }
 
     @Test
+    void shouldRestartMobileApplication()
+    {
+        applicationSteps.reinstallMobileApplication(BUNDLE_ID);
+
+        verify(applicationActions).reinstallApplication(BUNDLE_ID);
+        verify(applicationActions).activateApp(BUNDLE_ID);
+    }
+
+    @Test
     void shouldActivateApp()
     {
-        String bundleId = "bundleId";
-        applicationSteps.activateApp(bundleId);
-        verify(applicationActions).activateApp(bundleId);
+        applicationSteps.activateApp(BUNDLE_ID);
+        verify(applicationActions).activateApp(BUNDLE_ID);
+    }
+
+    @Test
+    void shouldTerminateApp()
+    {
+        applicationSteps.terminateApp(BUNDLE_ID);
+        verify(applicationActions).terminateApp(BUNDLE_ID);
     }
 
     @Test
