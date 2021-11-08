@@ -23,32 +23,40 @@ import java.util.regex.Pattern;
 
 import org.jasypt.encryption.StringEncryptor;
 
-public final class PropertiesDecryptor
+public class PropertiesDecryptor
 {
     private static final Pattern ENCRYPTED_PROPERTY_PATTERN = Pattern.compile("ENC\\((.+?)\\)");
 
-    private PropertiesDecryptor()
+    private final StringEncryptor stringEncryptor;
+
+    PropertiesDecryptor(StringEncryptor stringEncryptor)
     {
+        this.stringEncryptor = stringEncryptor;
     }
 
-    public static Properties decryptProperties(StringEncryptor stringEncryptor, Properties properties)
+    public Properties decryptProperties(Properties properties)
     {
         for (Map.Entry<Object, Object> entry : properties.entrySet())
         {
             Object value = entry.getValue();
             if (value instanceof String)
             {
-                String decryptedValue = (String) value;
-                Matcher matcher = ENCRYPTED_PROPERTY_PATTERN.matcher(decryptedValue);
-                while (matcher.find())
-                {
-                    String encryptedPartOfValue = matcher.group(1);
-                    String decryptedPartOfValue = stringEncryptor.decrypt(encryptedPartOfValue);
-                    decryptedValue = decryptedValue.replace("ENC(" + encryptedPartOfValue + ")", decryptedPartOfValue);
-                }
-                entry.setValue(decryptedValue);
+                entry.setValue(decrypt((String) value));
             }
         }
         return properties;
+    }
+
+    public String decrypt(String value)
+    {
+        String decryptedValue = value;
+        Matcher matcher = ENCRYPTED_PROPERTY_PATTERN.matcher(value);
+        while (matcher.find())
+        {
+            String encryptedPartOfValue = matcher.group(1);
+            String decryptedPartOfValue = stringEncryptor.decrypt(encryptedPartOfValue);
+            decryptedValue = decryptedValue.replace("ENC(" + encryptedPartOfValue + ")", decryptedPartOfValue);
+        }
+        return decryptedValue;
     }
 }

@@ -3,12 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="properties" class="org.vividus.configuration.PropertiesDecryptor" factory-method="decryptProperties">
-        <constructor-arg ref="stringEncryptor"/>
-        <constructor-arg>
-            <bean factory-bean="configurationResolver" factory-method="getProperties"/>
-        </constructor-arg>
-    </bean>
+    <bean id="properties" factory-bean="configurationResolver" factory-method="getProperties" />
 
     <bean id="propertyParser" class="org.vividus.util.property.PropertyParser" />
 
@@ -21,15 +16,6 @@
 
         <property name="nullValue" value="" />
         <property name="properties" ref="properties" />
-    </bean>
-
-    <bean id ="stringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
-        <property name="config">
-            <bean class="org.jasypt.encryption.pbe.config.SimplePBEConfig">
-                <property name="algorithm" value="PBEWithMD5AndDES"/>
-                <property name="password" value="#{systemProperties['vividus.encryptor.password']?:'82=thuMUH@'}"/>
-            </bean>
-        </property>
     </bean>
 
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">

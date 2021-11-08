@@ -42,9 +42,13 @@ class BeanFactoryIntegrationTests
     private static final String BASIC_PROFILE = "basicprofile";
     private static final String BASIC_SUITE = "integration";
     private static final String ADDITIONAL_SUITE = "additionalsuite,additionalsuite/props";
+    private static final String INTEGRATION_TEST = "integrationtest";
 
     private static final String PROPERTY_VALUE_FROM_SUITE = "value-from-suite";
     private static final char COMMA = ',';
+    private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
+    private static final String ENCRYPTED_PROPERTY = "encrypted-property";
+    private static final String HELLO = "hello";
 
     @BeforeEach
     void beforeEach()
@@ -75,7 +79,7 @@ class BeanFactoryIntegrationTests
     {
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
         System.setProperty(CONFIGURATION_PROFILES, profile);
-        System.setProperty(CONFIGURATION_ENVIRONMENTS, "integrationtest");
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, INTEGRATION_TEST);
         BeanFactory.open();
         for (String beanName : BeanFactory.getBeanDefinitionNames())
         {
@@ -195,6 +199,30 @@ class BeanFactoryIntegrationTests
         assertSuiteProperty("other-profile-property-value", "other-value");
         assertSuiteProperty("property-wtih-expression-containing-placeholder-for-another-property-with-expression",
                 "yes");
+    }
+
+    @Test
+    void testConfigurationResolverEncryptedPropertyUserPassword() throws IOException
+    {
+        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, INTEGRATION_TEST);
+        System.clearProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY);
+        BeanFactory.open();
+        Properties properties = ConfigurationResolver.getInstance().getProperties();
+        assertEquals(HELLO, properties.getProperty(ENCRYPTED_PROPERTY));
+    }
+
+    @Test
+    void testConfigurationResolverEncryptedPropertySystemPassword() throws IOException
+    {
+        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, INTEGRATION_TEST);
+        System.setProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY, "12345");
+        BeanFactory.open();
+        Properties properties = ConfigurationResolver.getInstance().getProperties();
+        assertEquals(HELLO, properties.getProperty(ENCRYPTED_PROPERTY));
     }
 
     private void assertIntegrationSuiteProperty() throws IOException
