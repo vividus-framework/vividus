@@ -188,6 +188,10 @@ Given request body: Hello!
 [source,gherkin]
 ----
 Given request body: #{loadBinaryResource(/data/image.png)}
+When I set request headers:
+|name        |value    |
+|Content-Type|image/png|
+When I send HTTP POST to the relative URL '/upload/png'
 ----
 
 === Prepare multipart HTTP request
