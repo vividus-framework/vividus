@@ -14,6 +14,7 @@
 ** xref:plugin-azure-functions.adoc[Functions]
 ** xref:plugin-azure-storage-account.adoc[Storage Account]
 ** xref:plugin-azure-storage-queue.adoc[Storage Queue]
+* xref:plugin-avro.adoc[Avro]
 * xref:plugin-csv.adoc[CSV]
 * xref:plugin-datetime.adoc[Date/Time]
 * xref:plugin-db.adoc[Relational Database]

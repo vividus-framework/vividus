@@ -79,6 +79,7 @@ dependencies {
     testImplementation(group: 'org.springframework', name: 'spring-test', version: versions.spring)
 
     integrationTestImplementation project(':vividus-plugin-azure-data-factory')
+    integrationTestImplementation project(':vividus-plugin-avro')
     integrationTestImplementation project(':vividus-plugin-csv')
     integrationTestImplementation project(':vividus-plugin-excel')
     integrationTestImplementation project(':vividus-plugin-kafka')
