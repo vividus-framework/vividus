@@ -43,6 +43,8 @@ NOTE: The properties marked with *bold* are mandatory.
 |`PT1S`
 |The retry interval between subsequent requests
 
+4+^.^|_Configuration of HTTP authentication_
+
 |`http.auth.username`
 |character sequence
 |`<empty>`
