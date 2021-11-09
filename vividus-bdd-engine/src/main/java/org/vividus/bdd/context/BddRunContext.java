@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ public class BddRunContext implements IBddRunContext
     // must be initialized for jbehave-junit-runner
     private Optional<String> runningBatchKey = Optional.of("batch-1");
     private boolean dryRun;
+    private boolean runCompleted;
 
     public void putRunningStory(RunningStory story, boolean givenStory)
     {
@@ -115,6 +116,18 @@ public class BddRunContext implements IBddRunContext
     public boolean isDryRun()
     {
         return dryRun;
+    }
+
+    @Override
+    public boolean isRunCompleted()
+    {
+        return runCompleted;
+    }
+
+    @Override
+    public void completeRun()
+    {
+        this.runCompleted = true;
     }
 
     public void setTestContext(TestContext testContext)

@@ -34,17 +34,16 @@ import java.util.stream.Stream;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
-import org.jbehave.core.reporters.NullStoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.context.ReportControlContext;
 import org.vividus.bdd.model.Failure;
 import org.vividus.bdd.model.Node;
 import org.vividus.bdd.model.NodeContext;
@@ -56,7 +55,8 @@ import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.testcontext.TestContext;
 import org.vividus.util.json.JsonUtils;
 
-public class StatisticsStoryReporter extends NullStoryReporter
+@SuppressWarnings({ "PMD.GodClass", "PMD.ExcessiveImports" })
+public class StatisticsStoryReporter extends AbstractReportControlStoryReporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsStoryReporter.class);
 
@@ -74,18 +74,17 @@ public class StatisticsStoryReporter extends NullStoryReporter
 
     private final TestContext testContext;
     private final JsonUtils jsonUtils;
-    private final IBddRunContext bddRunContext;
 
     private boolean collectFailures;
     private File statisticsFolder;
 
-    public StatisticsStoryReporter(EventBus eventBus, TestContext testContext, JsonUtils jsonUtils,
-            IBddRunContext bddRunContext)
+    public StatisticsStoryReporter(ReportControlContext reportControlContext, IBddRunContext bddRunContext,
+            EventBus eventBus, TestContext testContext, JsonUtils jsonUtils)
     {
+        super(reportControlContext, bddRunContext);
         eventBus.register(this);
         this.testContext = testContext;
         this.jsonUtils = jsonUtils;
-        this.bddRunContext = bddRunContext;
         Stream.of(NodeType.values()).forEach(t -> AGGREGATOR.put(t, new Statistic()));
     }
 
@@ -108,7 +107,7 @@ public class StatisticsStoryReporter extends NullStoryReporter
     {
         if (collectFailures)
         {
-            FAILURES.add(Failure.from(bddRunContext.getRunningStory(), message.get()));
+            FAILURES.add(Failure.from(getBddRunContext().getRunningStory(), message.get()));
         }
     }
 
@@ -181,22 +180,25 @@ public class StatisticsStoryReporter extends NullStoryReporter
     @Override
     public void beforeStep(Step step)
     {
-        if (step.getExecutionType() != StepExecutionType.COMMENT)
+        perform(() ->
         {
-            Node node = new Node(NodeType.STEP);
-            if (isRoot())
+            if (step.getExecutionType() != StepExecutionType.COMMENT)
             {
-                context().getRoot().addChild(node);
-                return;
+                Node node = new Node(NodeType.STEP);
+                if (isRoot())
+                {
+                    context().getRoot().addChild(node);
+                    return;
+                }
+                context().getTail().addChild(node);
             }
-            context().getTail().addChild(node);
-        }
+        });
     }
 
     @Override
     public void successful(String step)
     {
-        updateStepStatus(Status.PASSED);
+        perform(() -> updateStepStatus(Status.PASSED));
     }
 
     @Override
@@ -220,7 +222,7 @@ public class StatisticsStoryReporter extends NullStoryReporter
     @Override
     public void failed(String step, Throwable throwable)
     {
-        if (!StringUtils.contains(step, "verifyIfAssertionsPassed"))
+        perform(() ->
         {
             Status status = Status.from(StatusPriority.from(StatusProvider.getStatus(throwable)));
             if (status == Status.BROKEN)
@@ -228,7 +230,7 @@ public class StatisticsStoryReporter extends NullStoryReporter
                 addFailure(() -> throwable.getCause().toString());
             }
             updateStepStatus(status);
-        }
+        });
     }
 
     @Override

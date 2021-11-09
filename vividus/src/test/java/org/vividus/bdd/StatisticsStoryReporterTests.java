@@ -23,7 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -40,6 +42,8 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.google.common.eventbus.EventBus;
 
+import org.jbehave.core.failures.BeforeOrAfterFailed;
+import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
@@ -54,12 +58,14 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.bdd.context.ReportControlContext;
 import org.vividus.bdd.model.Failure;
 import org.vividus.bdd.model.NodeType;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
 import org.vividus.bdd.model.Statistic;
 import org.vividus.softassert.event.AssertionFailedEvent;
+import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
 import org.vividus.testcontext.ThreadedTestContext;
@@ -75,11 +81,9 @@ class StatisticsStoryReporterTests
 
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(StatisticsStoryReporter.class);
 
-    @Mock
-    private EventBus eventBus;
-
-    @Mock
-    private IBddRunContext bddRunContext;
+    @Mock private EventBus eventBus;
+    @Mock private IBddRunContext bddRunContext;
+    @Mock private ReportControlContext reportControlContext;
 
     private StatisticsStoryReporter reporter;
 
@@ -90,9 +94,12 @@ class StatisticsStoryReporterTests
     @BeforeEach
     void init()
     {
-        reporter = new StatisticsStoryReporter(eventBus, new ThreadedTestContext(), new JsonUtils(),
-                bddRunContext);
+        reporter = new StatisticsStoryReporter(reportControlContext, bddRunContext, eventBus, new ThreadedTestContext(),
+                new JsonUtils());
         reporter.init();
+
+        when(reportControlContext.isReportingEnabled()).thenReturn(true);
+        when(bddRunContext.isRunCompleted()).thenReturn(false);
     }
 
     @Test
@@ -141,7 +148,8 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, output);
-        verifyNoInteractions(bddRunContext);
+        verify(bddRunContext, times(36)).isRunCompleted();
+        verifyNoMoreInteractions(bddRunContext);
     }
 
     @Test
@@ -156,7 +164,8 @@ class StatisticsStoryReporterTests
             () -> assertEquals(10, output.get(NodeType.SCENARIO).getTotal()),
             () -> assertEquals(18, output.get(NodeType.STEP).getTotal()),
             () -> assertEquals(5, output.get(NodeType.GIVEN_STORY).getTotal()));
-        verifyNoInteractions(bddRunContext);
+        verify(bddRunContext, times(36)).isRunCompleted();
+        verifyNoMoreInteractions(bddRunContext);
     }
 
     @Test
@@ -173,7 +182,8 @@ class StatisticsStoryReporterTests
             assertEquals(String.format("Unable to write statistics.json into folder: %s", tempDir),
                     event.getFormattedMessage());
             assertThat(event.getThrowable().get(), instanceOf(IOException.class));
-            verifyNoInteractions(bddRunContext);
+            verify(bddRunContext, times(36)).isRunCompleted();
+            verifyNoMoreInteractions(bddRunContext);
         }
     }
 
@@ -371,7 +381,8 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, statistic);
-        verifyNoInteractions(bddRunContext);
+        verify(bddRunContext, times(12)).isRunCompleted();
+        verifyNoMoreInteractions(bddRunContext);
     }
 
     @Test
@@ -433,7 +444,8 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, statistic);
-        verifyNoInteractions(bddRunContext);
+        verify(bddRunContext, times(8)).isRunCompleted();
+        verifyNoMoreInteractions(bddRunContext);
     }
 
     @Test
@@ -496,7 +508,8 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, statistic);
-        verifyNoInteractions(bddRunContext);
+        verify(bddRunContext, times(8)).isRunCompleted();
+        verifyNoMoreInteractions(bddRunContext);
     }
 
     @Test
@@ -528,21 +541,31 @@ class StatisticsStoryReporterTests
         reporter.onAssertionFailure(event);
         IllegalArgumentException exception = new IllegalArgumentException(causeMessage);
         reporter.failed("step", new IllegalArgumentException(exception));
-        reporter.failed("verifyIfAssertionsPassed", null);
+        UUIDExceptionWrapper exceptionWrapper = new UUIDExceptionWrapper(
+                new BeforeOrAfterFailed(new VerificationError("message", List.of())));
+        reporter.failed("verifyIfAssertionsPassed", exceptionWrapper);
         reporter.failed("some other step", error);
 
         List<Failure> failures = StatisticsStoryReporter.getFailures();
-        assertThat(failures, hasSize(2));
+        assertThat(failures, hasSize(3));
         Failure fail = failures.get(0);
         Failure broken = failures.get(1);
+        Failure assertionFail = failures.get(2);
+
+        assertFailure(fail, storyName, scenarioTitle, step, causeMessage);
+        assertFailure(broken, storyName, scenarioTitle, step, "java.lang.IllegalArgumentException: You're illegal");
+        assertFailure(assertionFail, storyName, scenarioTitle, step,
+                "org.jbehave.core.failures.BeforeOrAfterFailed: org.vividus.softassert.exception.VerificationError: "
+                + "message");
+    }
+
+    private static void assertFailure(Failure failure, String story, String scenario, String step, String cause)
+    {
         Assertions.assertAll(
-                () -> assertEquals(storyName, fail.getStory()),
-                () -> assertEquals(scenarioTitle, fail.getScenario()),
-                () -> assertEquals(step, fail.getStep()),
-                () -> assertEquals(causeMessage, fail.getMessage()),
-                () -> assertEquals(storyName, broken.getStory()),
-                () -> assertEquals(scenarioTitle, broken.getScenario()),
-                () -> assertEquals(step, broken.getStep()),
-                () -> assertEquals("java.lang.IllegalArgumentException: You're illegal", broken.getMessage()));
+            () -> assertEquals(story, failure.getStory()),
+            () -> assertEquals(scenario, failure.getScenario()),
+            () -> assertEquals(step, failure.getStep()),
+            () -> assertEquals(cause, failure.getMessage())
+        );
     }
 }

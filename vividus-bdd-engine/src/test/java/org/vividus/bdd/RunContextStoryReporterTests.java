@@ -23,7 +23,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -35,6 +37,7 @@ import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,18 +58,12 @@ class RunContextStoryReporterTests
 {
     private static final String SCENARIO_TITLE = "scenario title";
     private static final String TITLE_PATTERN = "%s [%d]";
+    private static final String STEP = "step";
 
-    @Mock
-    private BddRunContext bddRunContext;
-
-    @Mock
-    private Scenario scenario;
-
-    @Mock
-    private StoryReporter next;
-
-    @InjectMocks
-    private RunContextStoryReporter runContextStoryReporter;
+    @Mock private BddRunContext bddRunContext;
+    @Mock private Scenario scenario;
+    @Mock private StoryReporter next;
+    @InjectMocks private RunContextStoryReporter runContextStoryReporter;
 
     @BeforeEach
     void beforeEach()
@@ -101,11 +98,22 @@ class RunContextStoryReporterTests
     @Test
     void testBeforeStep()
     {
-        String stepAsString = "step";
         RunningStory runningStory = mockGetRunningStory();
-        Step step = createStep(stepAsString);
+        Step step = createStep(STEP);
         runContextStoryReporter.beforeStep(step);
-        assertEquals(stepAsString, runningStory.removeRunningStep());
+        assertEquals(STEP, runningStory.removeRunningStep());
+        verify(next).beforeStep(step);
+    }
+
+    @Test
+    void shouldNotPutRunningStepIfRunIsCompleted()
+    {
+        when(bddRunContext.isRunCompleted()).thenReturn(true);
+        Step step = mock(Step.class);
+
+        runContextStoryReporter.beforeStep(step);
+
+        verifyNoMoreInteractions(bddRunContext);
         verify(next).beforeStep(step);
     }
 
@@ -121,6 +129,17 @@ class RunContextStoryReporterTests
     }
 
     @Test
+    void shouldNotRemoteRunningStepOnSuccessIfRunIsCompleted()
+    {
+        when(bddRunContext.isRunCompleted()).thenReturn(true);
+
+        runContextStoryReporter.successful(STEP);
+
+        verifyNoMoreInteractions(bddRunContext);
+        verify(next).successful(STEP);
+    }
+
+    @Test
     void testFailed()
     {
         String step = "failed";
@@ -130,6 +149,18 @@ class RunContextStoryReporterTests
         runContextStoryReporter.failed(step, cause);
         assertEquals(List.of(), runningStory.getRunningSteps());
         verify(next).failed(step, cause);
+    }
+
+    @Test
+    void shouldNotRemoteRunningStepOnFailIfRunIsCompleted()
+    {
+        when(bddRunContext.isRunCompleted()).thenReturn(true);
+        Throwable cause = mock(Throwable.class);
+
+        runContextStoryReporter.failed(STEP, cause);
+
+        verifyNoMoreInteractions(bddRunContext);
+        verify(next).failed(STEP, cause);
     }
 
     private static Step createStep(String stepAsString)
@@ -203,6 +234,18 @@ class RunContextStoryReporterTests
     {
         runContextStoryReporter.dryRun();
         verify(bddRunContext).setDryRun(true);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "AFTER,  1",
+        "BEFORE, 0"
+    })
+    void shouldManageRunCompleteOnBeforeStoriesSteps(Stage stage, int times)
+    {
+        runContextStoryReporter.beforeStoriesSteps(stage);
+
+        verify(bddRunContext, times(times)).completeRun();
     }
 
     private RunningStory mockGetRunningStory()

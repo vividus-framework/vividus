@@ -40,10 +40,14 @@
     </bean>
 
     <bean id="runContextStoryReporter" class="org.vividus.bdd.RunContextStoryReporter">
+        <property name="next" ref="reportControlStoryReporter" />
+    </bean>
+
+    <bean id="reportControlStoryReporter" class="org.vividus.bdd.ReportControlStoryReporter" lazy-init="false">
         <property name="next" ref="allureStoryReporter" />
     </bean>
 
-    <bean id="allureStoryReporter" parent="abstractAllureStoryReporter" lazy-init="false">
+    <bean id="allureStoryReporter" class="org.vividus.bdd.report.allure.AllureStoryReporter" lazy-init="false">
         <property name="next">
             <bean class="org.vividus.bdd.variable.VariableStoryReporter">
                 <property name="next" ref="statusStoryReporter" />

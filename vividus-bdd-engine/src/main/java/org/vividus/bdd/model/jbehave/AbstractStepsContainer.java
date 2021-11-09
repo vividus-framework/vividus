@@ -20,18 +20,18 @@ import java.util.List;
 
 public abstract class AbstractStepsContainer
 {
-    private List<Step> beforeScenarioSteps;
+    private List<Step> beforeUserScenarioSteps;
     private List<Step> steps;
-    private List<Step> afterScenarioSteps;
+    private List<Step> afterUserScenarioSteps;
 
-    public List<Step> getBeforeScenarioSteps()
+    public List<Step> getBeforeUserScenarioSteps()
     {
-        return beforeScenarioSteps;
+        return beforeUserScenarioSteps;
     }
 
-    public void setBeforeScenarioSteps(List<Step> beforeScenarioSteps)
+    public void setBeforeUserScenarioSteps(List<Step> beforeScenarioSteps)
     {
-        this.beforeScenarioSteps = beforeScenarioSteps;
+        this.beforeUserScenarioSteps = beforeScenarioSteps;
     }
 
     public List<Step> getSteps()
@@ -44,13 +44,13 @@ public abstract class AbstractStepsContainer
         this.steps = steps;
     }
 
-    public List<Step> getAfterScenarioSteps()
+    public List<Step> getAfterUserScenarioSteps()
     {
-        return afterScenarioSteps;
+        return afterUserScenarioSteps;
     }
 
-    public void setAfterScenarioSteps(List<Step> afterScenarioSteps)
+    public void setAfterUserScenarioSteps(List<Step> afterScenarioSteps)
     {
-        this.afterScenarioSteps = afterScenarioSteps;
+        this.afterUserScenarioSteps = afterScenarioSteps;
     }
 }

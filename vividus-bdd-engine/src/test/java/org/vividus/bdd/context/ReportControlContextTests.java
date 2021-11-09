@@ -16,25 +16,22 @@
 
 package org.vividus.bdd.context;
 
-import java.util.Deque;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.vividus.bdd.model.RunningStory;
+import org.junit.jupiter.api.Test;
+import org.vividus.testcontext.SimpleTestContext;
 
-public interface IBddRunContext
+class ReportControlContextTests
 {
-    RunningStory getRunningStory();
-
-    RunningStory getRootRunningStory();
-
-    Deque<RunningStory> getStoriesChain();
-
-    String getRunningBatchKey();
-
-    void setDryRun(boolean dryRun);
-
-    boolean isDryRun();
-
-    boolean isRunCompleted();
-
-    void completeRun();
+    @Test
+    void shouldEnableAndDisableReporting()
+    {
+        ReportControlContext context = new ReportControlContext(new SimpleTestContext());
+        assertFalse(context.isReportingEnabled());
+        context.enableReporting();
+        assertTrue(context.isReportingEnabled());
+        context.disableReporting();
+        assertFalse(context.isReportingEnabled());
+    }
 }
