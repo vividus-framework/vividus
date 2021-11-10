@@ -45,7 +45,7 @@ public class QRCodeSteps
      * <b>variableName</b>
      * Actions performed at this step:
      * <ul>
-     * <li>Takes a screenshot and saves it to the default location</i>
+     * <li>Takes a screenshot and saves it to the default location
      * <li>Scan a QR code and save its value to the <i>variable name</i>
      * </ul>
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
