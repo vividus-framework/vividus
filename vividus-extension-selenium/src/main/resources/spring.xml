@@ -42,6 +42,8 @@
     <bean class="org.vividus.ui.action.SearchActions" />
     <bean class="org.vividus.ui.action.JavascriptActions" />
 
+    <bean class="org.vividus.ui.action.QRCodeActions" />
+
     <bean id="abstractElementAction" class="org.vividus.ui.action.search.AbstractElementAction"
           abstract="true">
         <property name="waitForElementTimeout" value="${ui.search.wait-for-element-timeout}" />
@@ -132,6 +134,7 @@
     <bean id="genericNestedSteps" class="org.vividus.bdd.steps.ui.GenericNestedSteps" />
     <bean id="navigationSteps" class="org.vividus.bdd.steps.ui.NavigationSteps" />
     <bean id="screenshotTakingSteps" class="org.vividus.bdd.steps.ui.ScreenshotTakingSteps" />
+    <bean id="qrCodeSteps" class="org.vividus.bdd.steps.ui.QRCodeSteps" />
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />
 
@@ -158,6 +161,7 @@
         <idref bean="genericNestedSteps" />
         <idref bean="navigationSteps" />
         <idref bean="screenshotTakingSteps" />
+        <idref bean="qrCodeSteps" />
     </util:list>
 
     <util:map id="propertyEditors-UI" key-type="java.lang.Class">
