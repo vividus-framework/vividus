@@ -6,6 +6,7 @@
 |menuInputXpath             |//android.widget.TextView[@text='Input']             |
 |nameInputAccessibilityId   |name-input-accessibilityLabel                        |
 |nameDisplayXpath           |//android.widget.TextView[@text='${text}']           |
+|menuQRCodeXpath            |//android.widget.TextView[@text='QR Code']           |
 |menuWaitXpath              |//android.widget.TextView[@text='Wait']              |
 |pictureAccessibilityId     |picture-accessibilityLabel                           |
 |hidePictureAccessibilityId |hide-picture-accessibilityLabel                      |
