@@ -227,7 +227,7 @@ Then element located `$locator` exists for `$duration` duration
 .Element should exists for 5 second
 [source,gherkin]
 ----
-Then element located 'id(banner)' exists for 'PT5S' duration
+Then element located `id(banner)` exists for `PT5S` duration
 ----
 
 
