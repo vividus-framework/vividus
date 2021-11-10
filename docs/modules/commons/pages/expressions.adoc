@@ -294,6 +294,28 @@ Compress the input string to GZip and encode compressed bytes to Base64 format
 |`H4sIAAAAAAAAACvLLMtMKS0GANIHCdkHAAAA`
 |===
 
+== Hash calculations
+
+=== `calculateHash`
+
+Calculates the hash using the specified hashing algorithm
+
+[source, subs="+quotes"]
+----
+#{calculateHash($algorithm, $input)}
+----
+
+* *`$algorithm`* - hash algorithm (can use https://datatracker.ietf.org/doc/rfc1319[MD2], https://datatracker.ietf.org/doc/rfc1321[MD5], https://datatracker.ietf.org/doc/rfc3174[SHA-1], https://datatracker.ietf.org/doc/rfc6234[SHA-256], https://datatracker.ietf.org/doc/rfc6234[SHA-384], https://datatracker.ietf.org/doc/rfc6234[SHA-512])
+* *`$input`* - any string to calculate hash
+
+.Example of hash calculating for string using MD5
+|===
+|Expression |Result
+
+|`#{calculateHash(MD5, vividus)}`
+|`0a05ba6064ae7e5d6ee9818f85b666ad`
+|===
+
 == Resources
 :resource-name-parameter: pass:quotes[*`$resourceName`* - the name of the xref:ROOT:glossary.adoc#_resource[resource] to load]
 

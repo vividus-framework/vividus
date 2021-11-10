@@ -104,3 +104,14 @@ Examples:
 |uncapitalize(ABc)            |aBc       |
 |uncapitalizeFirstWord(ABc)   |aBc       |
 |uncapitalizeWords(ABc DEf)   |aBc dEf   |
+
+Scenario: Verify hash expressions
+Then `#{<expression>}` is = `<expected>`
+Examples:
+|expression                                  |expected                                                                                                                         |
+|calculateHash(SHA-1, some_mail@gmail.com)   |83a7c7215b3d0052b6b9b9154ff0608a6890fd45                                                                                         |
+|calculateHash(Sha-256, some_mail@gmail.com) |81f98afdd1738a76e06649c1d9c27d15eaa7cd57e408b0f32e831728c80bd124                                                                 |
+|calculateHash(MD2, some_mail@gmail.com)     |556c1d6a0abd28ed40d364fe114518c4                                                                                                 |
+|calculateHash(Md5, some_mail@gmail.com)     |ade052992d2105f5aae8f2a0893318ea                                                                                                 |
+|calculateHash(Sha384, some_mail@gmail.com)  |df0e51dd5bbb2aee58ace845c655006c74803179261971403c3b7430abeed55cb3097a6519dbf2138c09a7b893d9c08b                                 |
+|calculateHash(sha-512, some_mail@gmail.com) |46c9fc926b32077b0f54ac872f8118ecd50824a1c2fa8f538d1a25eb341e3cc90dbe98a9e6b5c293becfcd965ed41bd950b5d06d0a30d774cec77a0a49aa2141 |
