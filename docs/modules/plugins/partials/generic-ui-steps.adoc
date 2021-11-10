@@ -328,6 +328,29 @@ When I take screenshot and save it to folder `$path`
 When I take screenshot to path `${screenshot-directory}/#{generate(Ancient.god)}.png`
 ----
 
+=== Scan QR code
+
+Scan a QR code and save its value to the variable with the specified variable
+
+Actions performed at this step:
+
+* Takes a screenshot and saves it to the default location
+* Scan a QR code and save its value to the variable
+
+[source,gherkin]
+----
+When I scan a QR Code from screen and save result to $scopes variable `$variableName`
+----
+
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the number of elements.
+
+.Scan a QR Code
+[source,gherkin]
+----
+When I scan a QR Code from screen and save result to scenario variable `qrCodeLink`
+Then `${qrCodeLink}` is equal to `https://www.example.com`
+----
 
 === Perform steps while elements exist
 
