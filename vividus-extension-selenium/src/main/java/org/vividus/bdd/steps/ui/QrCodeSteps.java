@@ -16,23 +16,23 @@
 
 package org.vividus.bdd.steps.ui;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Set;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
-import org.vividus.ui.action.QRCodeActions;
+import org.vividus.ui.action.QrCodeActions;
 
-public class QRCodeSteps
+public class QrCodeSteps
 {
     private final ScreenshotTaker screenshotTaker;
-    private final QRCodeActions qrCodeActions;
+    private final QrCodeActions qrCodeActions;
     private final IBddVariableContext bddVariableContext;
 
-    public QRCodeSteps(ScreenshotTaker screenshotTaker, QRCodeActions qrCodeActions,
+    public QrCodeSteps(ScreenshotTaker screenshotTaker, QrCodeActions qrCodeActions,
                        IBddVariableContext bddVariableContext)
     {
         this.screenshotTaker = screenshotTaker;
@@ -59,10 +59,10 @@ public class QRCodeSteps
      * @param variableName A name under which the value should be saved
      */
     @When("I scan a QR Code from screen and save result to $scopes variable `$variableName`")
-    public void whenIScanningAQRCode(Set<VariableScope> scopes, String variableName) throws IOException
+    public void whenIScanningAQrCode(Set<VariableScope> scopes, String variableName) throws IOException
     {
-        Path screenshotPath = screenshotTaker.takeScreenshotAsFile("QR_Code_Screenshot");
-        String result = qrCodeActions.scanQRCode(screenshotPath);
+        BufferedImage screenshotPath = screenshotTaker.takeViewportScreenshot();
+        String result = qrCodeActions.scanQrCode(screenshotPath);
         bddVariableContext.putVariable(scopes, variableName, result);
     }
 }

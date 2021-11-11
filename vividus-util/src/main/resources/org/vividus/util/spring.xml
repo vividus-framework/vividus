@@ -28,8 +28,6 @@
         <constructor-arg value="${location.zone-id:#{T(java.time.ZoneId).systemDefault().toString()}}" />
     </bean>
 
-    <bean id="qrCodeReader" class="org.vividus.util.qrCode.QRCodeReader" />
-
     <bean id="abstractFreemarkerConfig" class="freemarker.template.Configuration" abstract="true" >
         <constructor-arg index="0" value="2.3.31" />
         <property name="defaultEncoding" value="utf-8" />

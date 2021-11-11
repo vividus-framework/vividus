@@ -298,8 +298,8 @@ Scenario: Verify steps: "When I scan a QR Code from screen and save result to $s
 Meta:
     @requirementId 2112
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
-When I tap on element located `xpath(<menuQRCodeXpath>)`
-When I wait until element located `xpath(<menuQRCodeXpath>)` disappears
+When I tap on element located `xpath(<menuQrCodeXpath>)`
+When I wait until element located `xpath(<menuQrCodeXpath>)` disappears
 When I scan a QR Code from screen and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 

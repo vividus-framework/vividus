@@ -16,12 +16,14 @@
 
 package org.vividus.bdd.steps.ui;
 
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -32,34 +34,47 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
-import org.vividus.ui.action.QRCodeActions;
+import org.vividus.ui.action.QrCodeActions;
 
 @ExtendWith(MockitoExtension.class)
-public class QRCodeStepsTests
+public class QrCodeStepsTests
 {
-    private static final Path PATH = Paths.get("path");
-    private static final String QR_CODE_SCREENSHOT = "QR_Code_Screenshot";
+    private static final BufferedImage QR_CODE_IMAGE = new BufferedImage(10, 10, TYPE_INT_RGB);
     private static final String QR_CODE_VALUE = "QR Code Value";
     private static final String VARIABLE_NAME = "variableName";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
 
     @Mock private ScreenshotTaker screenshotTaker;
-    @Mock private QRCodeActions qrCodeActions;
+    @Mock private QrCodeActions qrCodeActions;
     @Mock private IBddVariableContext bddVariableContext;
 
     @InjectMocks
-    private QRCodeSteps qrCodeSteps;
+    private QrCodeSteps qrCodeSteps;
 
     @Test
-    void whenIScanAQRCode() throws IOException
+    void whenIScanAQrCode() throws IOException
     {
-        when(screenshotTaker.takeScreenshotAsFile(QR_CODE_SCREENSHOT)).thenReturn(PATH);
-        when(qrCodeActions.scanQRCode(PATH)).thenReturn(QR_CODE_VALUE);
+        when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
+        when(qrCodeActions.scanQrCode(QR_CODE_IMAGE)).thenReturn(QR_CODE_VALUE);
 
-        qrCodeSteps.whenIScanningAQRCode(VARIABLE_SCOPE, VARIABLE_NAME);
+        qrCodeSteps.whenIScanningAQrCode(VARIABLE_SCOPE, VARIABLE_NAME);
 
-        verify(screenshotTaker).takeScreenshotAsFile(QR_CODE_SCREENSHOT);
-        verify(qrCodeActions).scanQRCode(PATH);
+        verify(screenshotTaker).takeViewportScreenshot();
+        verify(qrCodeActions).scanQrCode(QR_CODE_IMAGE);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, QR_CODE_VALUE);
+    }
+
+    @Test
+    void whenIScanAQrCodeAndQrCodeIsAbsent() throws IOException
+    {
+        when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
+        when(qrCodeActions.scanQrCode(QR_CODE_IMAGE)).thenThrow(IllegalArgumentException.class);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                qrCodeSteps.whenIScanningAQrCode(VARIABLE_SCOPE, VARIABLE_NAME));
+
+        verify(screenshotTaker).takeViewportScreenshot();
+        verify(qrCodeActions).scanQrCode(QR_CODE_IMAGE);
+        verifyNoInteractions(bddVariableContext);
     }
 }

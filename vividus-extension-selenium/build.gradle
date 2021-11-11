@@ -3,8 +3,8 @@ project.description = 'Vividus extension for selenium'
  ext {
      seleniumVersion = '3.141.59'
      browserupProxyVersion = '2.1.2'
+     zxingVersion = '3.4.1'
 }
-
 
  dependencies {
      implementation project(':vividus-bdd-engine')
@@ -20,6 +20,9 @@ project.description = 'Vividus extension for selenium'
      api(group: 'io.appium', name: 'java-client', version: '7.3.0')
 
      api(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: versions.ashot)
+
+     implementation(group: 'com.google.zxing', name: 'core', version: zxingVersion)
+     implementation(group: 'com.google.zxing', name: 'javase', version: zxingVersion)
 
      api(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
      implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
