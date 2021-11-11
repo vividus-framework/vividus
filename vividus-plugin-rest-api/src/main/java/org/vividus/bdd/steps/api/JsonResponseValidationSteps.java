@@ -393,9 +393,9 @@ public class JsonResponseValidationSteps
      * </ul>
      * <br> Usage example:
      * <code>
-     * <br>When I find equal to '1' JSON elements by '$.[?(@.parent_target_id=="")]' and for each element do
-     * <br>|step|
-     * <br>|Then the number of JSON elements by the JSON path '$..name' is = 3|
+     * <br>When I find equal to `1` JSON elements by `$.[?(@.parent_target_id=="")]` and for each element do
+     * <br>|step                                                      |
+     * <br>|Then number of JSON elements by JSON path `$..name` is = 3|
      * </code>
      * @param comparisonRule The rule to match the quantity of elements. The supported rules:
      *                       <ul>
@@ -436,8 +436,8 @@ public class JsonResponseValidationSteps
     * <code>
     * <br>When I find equal to `1` JSON elements from `{"parent_id":"","elements":[{"name": "1"},{"name": "2"}]}`
     *       by `$.[?(@.parent_id=="")]` and for each element do
-    * <br>|step|
-    * <br>|Then the number of JSON elements by the JSON path '$..name' is = 2|
+    * <br>|step                                                      |
+    * <br>|Then number of JSON elements by JSON path `$..name` is = 2|
     * </code>
     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
     *                       <ul>
