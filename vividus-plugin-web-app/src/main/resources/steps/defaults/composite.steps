@@ -29,7 +29,7 @@ Composite: Then invisible element by xpath '$xpath' exists
 Then number of invisible elements `By.xpath(<xpath>)` is = `1`
 
 Composite: When I set the number of elements found by xpath '$xpath' to the '$scopes' variable '$variableName'
-When I set the number of elements found `By.xpath(<xpath>)` to <scopes> variable `<variableName>`
+When I save number of elements located `By.xpath(<xpath>)` to <scopes> variable `<variableName>`
 
 Composite: Then the number of elements found by the xpath '$xpath' is $comparisonRule '$quantity'
 Then number of elements found by `By.xpath(<xpath>)` is <comparisonRule> `<quantity>`
