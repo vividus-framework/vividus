@@ -64,7 +64,6 @@ class WaitStepsTests
     private static final String ELEMENT_TAG = "elementTag";
     private static final String NAME = "name";
     private static final String TEXT = "text";
-    private static final String XPATH = "xpath";
     private static final Duration TIMEOUT = Duration.ofSeconds(1L);
     private static final String ELEMENT_WITH_TAG = ".//elementTag[normalize-space(@attributeType)=\"attributeValue\"]";
     private static final String ALERT_TO_BE_PRESENT = "alert to be present";
@@ -200,7 +199,7 @@ class WaitStepsTests
         when(uiContext.getSearchContext()).thenReturn(webElement);
         WaitResult<Boolean> waitResult = new WaitResult<>();
         waitResult.setWaitPassed(true);
-        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
+        Locator locator = new Locator(WebLocatorType.XPATH, "xpath");
         IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
         when(waitActions.wait(webElement, TIMEOUT, TIMEOUT, condition)).thenReturn(waitResult);
         when(expectedSearchActionsConditions.invisibilityOfElement(locator)).thenReturn(condition);
@@ -238,23 +237,6 @@ class WaitStepsTests
         waitSteps.waitTillPageHasTitle(TEXT);
         verify(waitActions).wait(eq(webDriver),
                 argThat(e -> "title to be \"text\". Current title: \"\"".equals(e.toString())));
-    }
-
-    @Test
-    void testDoesElementExistsForTimePeriod()
-    {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
-        By xpath =  By.xpath(XPATH);
-        IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchContextConditions.presenceOfAllElementsLocatedBy(xpath)).thenReturn(condition);
-        IExpectedSearchContextCondition<Boolean> notCondition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchContextConditions.not(condition)).thenReturn(notCondition);
-        WaitResult<Boolean> waitResult = new WaitResult<>();
-        waitResult.setWaitPassed(true);
-        when(waitActions.wait(webElement, TIMEOUT, notCondition, false)).thenReturn(waitResult);
-        waitSteps.doesElementExistsForTimePeriod(XPATH, TIMEOUT.getSeconds());
-        verify(softAssert).assertFalse(String.format("Element with xpath '%s' has existed during '%d' seconds",
-                XPATH, TIMEOUT.getSeconds()), true);
     }
 
     @Test

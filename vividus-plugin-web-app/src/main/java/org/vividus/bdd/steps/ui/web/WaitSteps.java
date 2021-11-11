@@ -331,24 +331,6 @@ public class WaitSteps
     }
 
     /**
-     * Checks that element exists during the timeout
-     * @deprecated Use <code>Then element located `$locator` exists for `$duration` duration</code>
-     * @param seconds timeout in seconds
-     * @param xpath XPath value of the element
-     */
-    @Deprecated(forRemoval = true, since = "0.2.9")
-    @Then("the element with the xpath '$xpath' exists for '$seconds' seconds")
-    public void doesElementExistsForTimePeriod(String xpath, long seconds)
-    {
-        By elementXpath = LocatorUtil.getXPathLocator(xpath);
-        WaitResult<Boolean> result = waitActions.wait(getSearchContext(), Duration.ofSeconds(seconds),
-                expectedSearchContextConditions.not(
-                        expectedSearchContextConditions.presenceOfAllElementsLocatedBy(elementXpath)), false);
-        softAssert.assertFalse(String.format("Element with xpath '%s' has existed during '%d' seconds",
-                    xpath, seconds), result.isWaitPassed());
-    }
-
-    /**
      * Checks that no alert displayed during the <b><i>timeout</i></b>.
      * Makes {@value #DIVISOR} attempts to confirm alert displaying at regular intervals
      * <br>Example:<br>
