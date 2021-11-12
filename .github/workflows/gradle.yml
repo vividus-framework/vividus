@@ -198,7 +198,7 @@ jobs:
       shell: bash
       run: |
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge safari )
+          declare -a profiles=( iexplore chrome firefox edge edge/chromium safari )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
                                                   -Pvividus.configuration.suites=grid \
