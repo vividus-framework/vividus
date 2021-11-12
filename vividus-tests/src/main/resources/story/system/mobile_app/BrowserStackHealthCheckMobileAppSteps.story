@@ -15,4 +15,4 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 When I close mobile application
 When I save BrowserStack network logs to JSON context
-Then the number of JSON elements by the JSON path '$.log' is equal to 1
+Then number of JSON elements by JSON path `$.log` is equal to 1

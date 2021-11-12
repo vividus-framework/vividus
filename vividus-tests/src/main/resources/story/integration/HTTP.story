@@ -25,18 +25,18 @@ Then JSON element by JSON path `$.url` is equal to `${http-endpoint}anything/pat
 Scenario: Verify handling of ampersand and space characters in URI query parameter
 When I send HTTP GET to the relative URL '/get?key=#{encodeUriQueryParameter(a & b)}'
 Then the response code is equal to '200'
-Then a JSON element by the JSON path '$.url' is equal to '${http-endpoint}get?key=a %26 b'
-Then a JSON element by the JSON path '$.args.length()' is equal to '1'
-Then a JSON element by the JSON path '$.args.key' is equal to 'a & b'
+Then JSON element by JSON path `$.url` is equal to `${http-endpoint}get?key=a %26 b`
+Then JSON element by JSON path `$.args.length()` is equal to `1`
+Then JSON element by JSON path `$.args.key` is equal to `a & b`
 
 Scenario: Set HTTP cookies
 When I send HTTP GET to the relative URL '/cookies/set?vividus-cookie=vividus'
 When I send HTTP GET to the relative URL '/cookies'
-Then a JSON element by the JSON path '$.cookies' is equal to '{"vividus-cookie": "vividus"}'
+Then JSON element by JSON path `$.cookies` is equal to `{"vividus-cookie": "vividus"}`
 
 Scenario: Verify HTTP cookies are cleared
 When I send HTTP GET to the relative URL '/cookies'
-Then a JSON element by the JSON path '$.cookies' is equal to '{}'
+Then JSON element by JSON path `$.cookies` is equal to `{}`
 
 Scenario: I wait for response code $responseCode for $duration duration retrying $retryTimes times $stepsToExecute
 !-- Warm up Vividus test site
@@ -66,7 +66,7 @@ Examples:
 Scenario: Validate HTTP methods with missing optional request body
 When I send HTTP <http-method> to the relative URL '/<http-method>'
 Then `${responseCode}` is equal to `200`
-Then a JSON element by the JSON path '$.json' is equal to 'null'
+Then JSON element by JSON path `$.json` is equal to `null`
 Examples:
 |http-method|
 |put        |

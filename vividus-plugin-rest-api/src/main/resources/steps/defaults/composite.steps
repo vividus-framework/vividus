@@ -4,29 +4,10 @@ Given request body: <content>
 When I send HTTP <httpMethod> to the relative URL '<relativeURL>'
 
 Composite: Then a JSON element by the JSON path '$jsonPath' exists
-Then the number of JSON elements by the JSON path '<jsonPath>' is > 0
+Then number of JSON elements by JSON path `<jsonPath>` is > 0
 
 Composite: When I save a JSON element from response by JSON path '$jsonPath' to $scopes variable '$variableName'
-When I save a JSON element from '${response}' by JSON path '<jsonPath>' to <scopes> variable '<variableName>'
+When I save JSON element from `${response}` by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
 
 Composite: When I save JSON element from response by JSON path `$jsonPath` to $scopes variable `$variableName`
 When I save JSON element from `${response}` by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
-
-Composite: When I save a JSON element from '$json' by JSON path '$jsonPath' to $scopes variable '$variableName'
-When I save JSON element from `<json>` by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
-
-Composite: Then a JSON element by the JSON path '$jsonPath' is equal to '$expectedData'$options
-Then JSON element by JSON path `<jsonPath>` is equal to `<expectedData>`<options>
-
-Composite: Then a JSON element from '$json' by the JSON path '$jsonPath' is equal to '$expectedData'$options
-Then JSON element from `<json>` by JSON path `<jsonPath>` is equal to `<expectedData>`<options>
-
-Composite: Then the number of JSON elements by the JSON path '$jsonPath' is $comparisonRule $elementsNumber
-Then number of JSON elements by JSON path `<jsonPath>` is <comparisonRule> <elementsNumber>
-
-Composite: When I set the number of elements found by the JSON path '$jsonPath' to the $scopes variable '$variableName'
-When I set number of elements found by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
-
-Composite: When I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element do$stepsToExecute
-Priority: 6
-When I find <comparisonRule> `<elementsNumber>` JSON elements by `<jsonPath>` and for each element do<stepsToExecute>
