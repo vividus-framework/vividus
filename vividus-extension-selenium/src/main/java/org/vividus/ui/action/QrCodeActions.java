@@ -26,29 +26,13 @@ import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 
-import com.google.zxing.multi.qrcode.QRCodeMultiReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class QrCodeActions
 {
-    private static final String NO_QR_CODE_IN_THE_IMAGE_MESSAGE = "There is no QR code in the image";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(QrCodeActions.class);
-
-    public String scanQrCode(BufferedImage qrCode)
+    public String scanQrCode(BufferedImage qrCode) throws NotFoundException
     {
-        try
-        {
-            LuminanceSource source = new BufferedImageLuminanceSource(qrCode);
-            BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-            Result result = new MultiFormatReader().decode(bitmap);
-            return result.getText();
-        }
-        catch (NotFoundException e)
-        {
-            LOGGER.error(NO_QR_CODE_IN_THE_IMAGE_MESSAGE);
-            throw new IllegalArgumentException(NO_QR_CODE_IN_THE_IMAGE_MESSAGE, e);
-        }
+        LuminanceSource source = new BufferedImageLuminanceSource(qrCode);
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+        Result result = new MultiFormatReader().decode(bitmap);
+        return result.getText();
     }
 }

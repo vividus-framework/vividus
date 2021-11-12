@@ -17,7 +17,7 @@
 package org.vividus.bdd.steps.ui;
 
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -25,6 +25,8 @@ import static org.mockito.Mockito.when;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
+
+import com.google.zxing.NotFoundException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.QrCodeActions;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,12 +50,13 @@ public class QrCodeStepsTests
     @Mock private ScreenshotTaker screenshotTaker;
     @Mock private QrCodeActions qrCodeActions;
     @Mock private IBddVariableContext bddVariableContext;
+    @Mock private ISoftAssert softAssert;
 
     @InjectMocks
     private QrCodeSteps qrCodeSteps;
 
     @Test
-    void whenIScanAQrCode() throws IOException
+    void whenIScanAQrCode() throws IOException, NotFoundException
     {
         when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
         when(qrCodeActions.scanQrCode(QR_CODE_IMAGE)).thenReturn(QR_CODE_VALUE);
@@ -65,16 +69,17 @@ public class QrCodeStepsTests
     }
 
     @Test
-    void whenIScanAQrCodeAndQrCodeIsAbsent() throws IOException
+    void whenIScanAQrCodeAndQrCodeIsAbsent() throws IOException, NotFoundException
     {
         when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
-        when(qrCodeActions.scanQrCode(QR_CODE_IMAGE)).thenThrow(IllegalArgumentException.class);
+        when(qrCodeActions.scanQrCode(QR_CODE_IMAGE)).thenThrow(NotFoundException.class);
 
-        assertThrows(IllegalArgumentException.class, () ->
+        assertDoesNotThrow(() ->
                 qrCodeSteps.whenIScanningAQrCode(VARIABLE_SCOPE, VARIABLE_NAME));
 
         verify(screenshotTaker).takeViewportScreenshot();
         verify(qrCodeActions).scanQrCode(QR_CODE_IMAGE);
+        verify(softAssert).recordFailedAssertion("There is no QR code in the image");
         verifyNoInteractions(bddVariableContext);
     }
 }

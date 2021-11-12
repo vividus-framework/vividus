@@ -20,10 +20,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
 
+import com.google.zxing.NotFoundException;
+
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.QrCodeActions;
 
 public class QrCodeSteps
@@ -31,13 +34,15 @@ public class QrCodeSteps
     private final ScreenshotTaker screenshotTaker;
     private final QrCodeActions qrCodeActions;
     private final IBddVariableContext bddVariableContext;
+    private final ISoftAssert softAssert;
 
     public QrCodeSteps(ScreenshotTaker screenshotTaker, QrCodeActions qrCodeActions,
-                       IBddVariableContext bddVariableContext)
+                       IBddVariableContext bddVariableContext, ISoftAssert softAssert)
     {
         this.screenshotTaker = screenshotTaker;
         this.qrCodeActions = qrCodeActions;
         this.bddVariableContext = bddVariableContext;
+        this.softAssert = softAssert;
     }
 
     /**
@@ -45,7 +50,7 @@ public class QrCodeSteps
      * <b>variableName</b>
      * Actions performed at this step:
      * <ul>
-     * <li>Takes a screenshot and saves it to the default location
+     * <li>Takes a viewport screenshot
      * <li>Scan a QR code and save its value to the <i>variable name</i>
      * </ul>
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
@@ -62,7 +67,14 @@ public class QrCodeSteps
     public void whenIScanningAQrCode(Set<VariableScope> scopes, String variableName) throws IOException
     {
         BufferedImage screenshotPath = screenshotTaker.takeViewportScreenshot();
-        String result = qrCodeActions.scanQrCode(screenshotPath);
-        bddVariableContext.putVariable(scopes, variableName, result);
+        try
+        {
+            String result = qrCodeActions.scanQrCode(screenshotPath);
+            bddVariableContext.putVariable(scopes, variableName, result);
+        }
+        catch (NotFoundException e)
+        {
+            softAssert.recordFailedAssertion("There is no QR code in the image");
+        }
     }
 }

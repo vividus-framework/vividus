@@ -24,6 +24,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.google.zxing.NotFoundException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +41,7 @@ public class QrCodeActionsTests
     private QrCodeActions qrCodeActions;
 
     @Test
-    void shouldReadQrCode() throws IOException
+    void shouldReadQrCode() throws IOException, NotFoundException
     {
         final BufferedImage qrCodeBufferedImage = loadResource("qrCode.png");
 
@@ -53,11 +55,8 @@ public class QrCodeActionsTests
     {
         final BufferedImage squareBufferedImage = loadResource("blackSquare168x168.png");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(NotFoundException.class, () ->
                 qrCodeActions.scanQrCode(squareBufferedImage));
-        assertEquals(
-                "There is no QR code in the image",
-                exception.getMessage());
     }
 
     private BufferedImage loadResource(String filePath) throws IOException

@@ -334,7 +334,7 @@ Scan a QR code and save its value to the variable with the specified variable
 
 Actions performed at this step:
 
-* Takes a screenshot and saves it to the default location
+* Takes a viewport screenshot
 * Scan a QR code and save its value to the variable
 
 [source,gherkin]
