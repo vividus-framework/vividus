@@ -16,28 +16,36 @@
 
 package org.vividus.bdd.expression;
 
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
 public enum HashAlgorithmType
 {
-    MD2(DigestUtils::md2Hex),
-    MD5(DigestUtils::md5Hex),
-    SHA1(DigestUtils::sha1Hex),
-    SHA256(DigestUtils::sha256Hex),
-    SHA384(DigestUtils::sha384Hex),
-    SHA512(DigestUtils::sha512Hex);
+    MD2(DigestUtils::md2Hex, DigestUtils::md2Hex),
+    MD5(DigestUtils::md5Hex, DigestUtils::md5Hex),
+    SHA1(DigestUtils::sha1Hex, DigestUtils::sha1Hex),
+    SHA256(DigestUtils::sha256Hex, DigestUtils::sha256Hex),
+    SHA384(DigestUtils::sha384Hex, DigestUtils::sha384Hex),
+    SHA512(DigestUtils::sha512Hex, DigestUtils::sha512Hex);
 
     private final UnaryOperator<String> hashFactory;
+    private final Function<byte[], String> fileHashFactory;
 
-    HashAlgorithmType(UnaryOperator<String> hashFactory)
+    HashAlgorithmType(UnaryOperator<String> hashFactory, Function<byte[], String> fileHashFactory)
     {
         this.hashFactory = hashFactory;
+        this.fileHashFactory = fileHashFactory;
     }
 
-    public String getHash(String originalString)
+    public String getHash(String data)
     {
-        return hashFactory.apply(originalString);
+        return hashFactory.apply(data);
+    }
+
+    public String getHash(byte[] data)
+    {
+        return fileHashFactory.apply(data);
     }
 }

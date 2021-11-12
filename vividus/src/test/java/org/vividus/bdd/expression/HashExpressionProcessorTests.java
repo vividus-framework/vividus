@@ -17,12 +17,19 @@
 package org.vividus.bdd.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mockStatic;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.MockedStatic;
 import org.vividus.bdd.converter.FluentTrimmedEnumConverter;
+import org.vividus.util.ResourceUtils;
 
 public class HashExpressionProcessorTests
 {
@@ -42,5 +49,36 @@ public class HashExpressionProcessorTests
     void checkHash(String expression, String expected)
     {
         assertEquals(processor.execute(expression), Optional.of(expected));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            // CHECKSTYLE:OFF
+            "'calculateFileHash(SHA-1, org/vividus/bdd/expressions/resource.txt)', 1ae4969aa6712c516be2e62c652760e8abfaee07",
+            "'calculateFileHash(Sha-256, org/vividus/bdd/expressions/resource.txt)', 8a0a675375c2f15e3789b63a40ffd1963bb11cd0349d8f08f081dcb0bbe489fe",
+            "'calculateFileHash(md2, org/vividus/bdd/expressions/resource.txt)', 63090590b6d8e241bca791640a96e9fb",
+            "'calculateFileHash(MD5, org/vividus/bdd/expressions/resource.txt)', 44d6c918d7a7157f7c0905df17b25496",
+            "'calculateFileHash(SHA-384, org/vividus/bdd/expressions/resource.txt)', ed19ca22a3f70e8deb3c3ecd8e814b3663b042e3f9b70f0eea2bf1baa3b2c3ffecc4ab295cc51266173bab23eb6decc4",
+            "'calculateFileHash(Sha512, org/vividus/bdd/expressions/resource.txt)', 73e68881ac4f06fe5f62fdf3cf0acc90e830c02f8ffe2d9728ceef40bc4eb62dd235ab13aa5214931141d9d721e16e7bba3e69ac4d8a5f9c12261d9941bb65e1"
+            // CHECKSTYLE:ON
+    })
+    void checkFileHash(String expression, String expected)
+    {
+        assertEquals(processor.execute(expression), Optional.of(expected));
+    }
+
+    @Test
+    void shouldThrowUncheckedIOException()
+    {
+        var resourceOrFilePath = "resourceOrFilePath";
+        try (MockedStatic<ResourceUtils> resourceUtilsMockedStatic = mockStatic(ResourceUtils.class))
+        {
+            var ioException = new IOException();
+            resourceUtilsMockedStatic.when(() -> ResourceUtils.loadResourceOrFileAsByteArray(resourceOrFilePath))
+                    .thenThrow(ioException);
+            var uncheckedIOException = assertThrows(UncheckedIOException.class,
+                    () -> processor.execute(String.format("calculateFileHash(SHA-1, %s)", resourceOrFilePath)));
+            assertEquals(ioException, uncheckedIOException.getCause());
+        }
     }
 }

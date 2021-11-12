@@ -16,18 +16,26 @@
 
 package org.vividus.bdd.expression;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
 import org.vividus.bdd.converter.FluentTrimmedEnumConverter;
+import org.vividus.util.ResourceUtils;
 
 @Named
 public class HashExpressionProcessor extends AbstractExpressionProcessor<String>
 {
-    private static final Pattern HASH_PATTERN = Pattern.compile("^calculateHash\\((.*), (.*)\\)$",
+    private static final Pattern HASH_PATTERN = Pattern.compile("^(calculate(?:File)?Hash)\\((.+), (.+)\\)$",
             Pattern.CASE_INSENSITIVE);
+
+    private static final int INPUT_CALCULATE_TYPE_GROUP = 1;
+    private static final int INPUT_ALGORITHM_GROUP = 2;
+    private static final int INPUT_DATA_GROUP = 3;
+
     private final FluentTrimmedEnumConverter fluentTrimmedEnumConverter;
 
     protected HashExpressionProcessor(FluentTrimmedEnumConverter fluentTrimmedEnumConverter)
@@ -40,7 +48,22 @@ public class HashExpressionProcessor extends AbstractExpressionProcessor<String>
     protected String evaluateExpression(Matcher expressionMatcher)
     {
         HashAlgorithmType hashAlgorithmType = (HashAlgorithmType) fluentTrimmedEnumConverter
-                .convertValue(expressionMatcher.group(1).replace("-", ""), HashAlgorithmType.class);
-        return hashAlgorithmType.getHash(expressionMatcher.group(2));
+                .convertValue(expressionMatcher.group(INPUT_ALGORITHM_GROUP).replace("-", ""), HashAlgorithmType.class);
+        String data = expressionMatcher.group(INPUT_DATA_GROUP);
+        if ("calculateHash".equalsIgnoreCase(expressionMatcher.group(INPUT_CALCULATE_TYPE_GROUP)))
+        {
+            return hashAlgorithmType.getHash(data);
+        }
+        else
+        {
+            try
+            {
+                return hashAlgorithmType.getHash(ResourceUtils.loadResourceOrFileAsByteArray(data));
+            }
+            catch (IOException e)
+            {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 }
