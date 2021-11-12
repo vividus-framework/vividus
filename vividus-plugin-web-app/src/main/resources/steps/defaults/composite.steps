@@ -1,9 +1,8 @@
 Composite: Then a link with the URL '$URL' exists
-Then a link by By.linkUrl(<URL>) exists
+Then number of elements found by `By.linkUrl(<URL>)` is equal to `1`
 
 Composite: Then a link with the URL containing '$URLpart' exists
-Then a link by By.linkUrlPart(<URLpart>) exists
-
+Then number of elements found by `By.linkUrlPart(<URLpart>)` is equal to `1`
 
 Composite: When I change context to an element by the xpath '$xpath'
 Priority: 1
