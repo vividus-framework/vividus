@@ -14,7 +14,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-avro', version: '{cur
 
 === Convert Avro to JSON
 
-Converts the provided the xref:ROOT:glossary.adoc#_resource[resource] or file
+Converts the provided xref:ROOT:glossary.adoc#_resource[resource] or file
 in Avro format to JSON and saves it as a text to a variable
 
 [source,gherkin]
