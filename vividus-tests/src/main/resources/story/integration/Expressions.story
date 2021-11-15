@@ -102,3 +102,29 @@ Examples:
 |capitalizeWordsFully(aBc dEf)|Abc Def   |
 |uncapitalizeFirstWord(ABc)   |aBc       |
 |uncapitalizeWords(ABc DEf)   |aBc dEf   |
+
+Scenario: Verify hash expressions
+Meta:
+    @requirementId 1647
+Then `#{<expression>}` is = `<expected>`
+Examples:
+|expression                                  |expected                                                                                                                         |
+|calculateHash(SHA-1, some_mail@gmail.com)   |83a7c7215b3d0052b6b9b9154ff0608a6890fd45                                                                                         |
+|calculateHash(Sha-256, some_mail@gmail.com) |81f98afdd1738a76e06649c1d9c27d15eaa7cd57e408b0f32e831728c80bd124                                                                 |
+|calculateHash(MD2, some_mail@gmail.com)     |556c1d6a0abd28ed40d364fe114518c4                                                                                                 |
+|calculateHash(Md5, some_mail@gmail.com)     |ade052992d2105f5aae8f2a0893318ea                                                                                                 |
+|calculateHash(Sha384, some_mail@gmail.com)  |df0e51dd5bbb2aee58ace845c655006c74803179261971403c3b7430abeed55cb3097a6519dbf2138c09a7b893d9c08b                                 |
+|calculateHash(sha-512, some_mail@gmail.com) |46c9fc926b32077b0f54ac872f8118ecd50824a1c2fa8f538d1a25eb341e3cc90dbe98a9e6b5c293becfcd965ed41bd950b5d06d0a30d774cec77a0a49aa2141 |
+
+Scenario: Verify file hash expressions
+Meta:
+    @requirementId 1647
+Then `#{<expression>}` is = `<expected>`
+Examples:
+|expression                                |expected                                                                                                                         |
+|calculateFileHash(SHA-1, data/file.txt)   |625558f5355e182fd4684f02e459f64ac9341f19                                                                                         |
+|calculateFileHash(Sha-256, data/file.txt) |6fb11c13c1a5a71d3f2b0075562e4873c6823a8508d44a2fd0113fd6d307cd7f                                                                 |
+|calculateFileHash(MD2, data/file.txt)     |fa097512218e0f44febc5f9fadbe2bd6                                                                                                 |
+|calculateFileHash(Md5, data/file.txt)     |969015df4bea10782823bedbf48055e0                                                                                                 |
+|calculateFileHash(Sha384, data/file.txt)  |8fa517c0df035d579fae2ac4fd2e87de50a761b6249875607dbd01c64469b51bcc276ed9a3313031bba649d8577f5058                                 |
+|calculateFileHash(sha-512, data/file.txt) |ade64012f60b0620f285852f32a18e2e729c7a2a9810709d1786b344156525fef0a046d4f79104e193e98c6c80f6c744b97cb8410e55a5a8ef7f60623c583757 |
