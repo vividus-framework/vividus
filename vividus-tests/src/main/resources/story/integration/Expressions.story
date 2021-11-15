@@ -97,10 +97,8 @@ Scenario: Verify capitlizing/uncapitalizing expressions
 Then `#{<expression>}` is = `<expected>`
 Examples:
 |expression                   |expected  |
-|capitalize(aBc)              |ABc       |
 |capitalizeFirstWord(aBc)     |ABc       |
 |capitalizeWords(aBc dEf)     |ABc DEf   |
 |capitalizeWordsFully(aBc dEf)|Abc Def   |
-|uncapitalize(ABc)            |aBc       |
 |uncapitalizeFirstWord(ABc)   |aBc       |
 |uncapitalizeWords(ABc DEf)   |aBc dEf   |
