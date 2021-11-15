@@ -332,6 +332,38 @@ When I take screenshot to path `${screenshot-directory}/#{generate(Ancient.god)}
 
 Scan a QR code and save its value to the variable with the specified variable
 
+Supported Code Formats
+
+[cols="2,2,2", options="header"]
+|===
+
+|1D product
+|1D industrial
+|2D
+
+a|
+* UPC-A
+* UPC-E
+* EAN-8
+* EAN-13
+* UPC/EAN Extension 2/5
+* RSS-14
+* RSS-Expanded
+a|
+* Code 39
+* Code 93
+* Code 128
+* Codabar
+* ITF
+a|
+* QR Code
+* Data Matrix
+* Aztec
+* PDF 417
+* MaxiCode
+
+|===
+
 Actions performed at this step:
 
 * Takes a viewport screenshot
