@@ -14,13 +14,13 @@ Then `${consumed-messages[0]}` is equal to `${message}`
 
 
 Scenario: Wait until expected message appears in the Kafka topic
-When I start consuming messages from Kafka topics `${topic}`
-When I send data `{"key" : "failed"}` to Kafka topic `${topic}`
-When I send data `{"key" : "passed"}` to Kafka topic `${topic}`
+When I start consuming messages from `vividus` Kafka topics `${topic}`
+When I send data `{"key" : "failed"}` to `vividus` Kafka topic `${topic}`
+When I send data `{"key" : "passed"}` to `vividus` Kafka topic `${topic}`
 When I execute steps with delay `PT1S` at most 30 times while variable `messageCount` is = `0`:
 |step                                                                                                                               |
-|When I peek consumed Kafka messages to scenario variable `messages`                                                                |
+|When I peek consumed `vividus` Kafka messages to scenario variable `messages`                                                                |
 |When I save number of elements from `${messages}` found by JSON path `$..[?(@.key == "failed")]` to scenario variable `messageCount`|
-When I drain consumed Kafka messages to scenario variable `consumed-messages`
+When I drain consumed `vividus` Kafka messages to scenario variable `consumed-messages`
 Then `${consumed-messages}` is equal to `[{"key" : "failed"}, {"key" : "passed"}]`
-When I stop consuming messages from Kafka
+When I stop consuming messages from `vividus` Kafka
