@@ -35,7 +35,6 @@ class BeanFactoryIntegrationTests
 {
     private static final String CONFIGURATION_PROFILES = "configuration.profiles";
     private static final String CONFIGURATION_ENVIRONMENTS = "configuration.environments";
-    private static final String CONFIGURATION_SUITE = "configuration.suite";
     private static final String CONFIGURATION_SUITES = "configuration.suites";
 
     private static final String BASIC_ENV = "basicenv";
@@ -124,7 +123,7 @@ class BeanFactoryIntegrationTests
     {
         System.setProperty(CONFIGURATION_PROFILES, profile);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, environments);
-        System.setProperty(CONFIGURATION_SUITE, suite);
+        System.setProperty(CONFIGURATION_SUITES, suite);
         BeanFactory.open();
         assertProperties(null, null);
         assertIntegrationSuiteProperty();
@@ -151,20 +150,7 @@ class BeanFactoryIntegrationTests
         System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("Either 'configuration.suite' or 'configuration.suites' test configuration property must be set",
-                exception.getMessage());
-    }
-
-    @Test
-    void testConfigurationResolverBothSuiteAndSuitesPropertiesAreSet()
-    {
-        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
-        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
-        System.setProperty(CONFIGURATION_SUITE, BASIC_SUITE);
-        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
-        Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("Exactly one test configuration property: 'configuration.suite' or 'configuration.suites' must"
-                + " be set", exception.getMessage());
+        assertEquals("The 'configuration.suites' property is not set", exception.getMessage());
     }
 
     @Test
@@ -235,8 +221,8 @@ class BeanFactoryIntegrationTests
 
     private void resetBeanFactory()
     {
-        Stream.of(CONFIGURATION_PROFILES, CONFIGURATION_ENVIRONMENTS, CONFIGURATION_SUITE, CONFIGURATION_SUITES)
-                .forEach(System::clearProperty);
+        Stream.of(CONFIGURATION_PROFILES, CONFIGURATION_ENVIRONMENTS, CONFIGURATION_SUITES).forEach(
+                System::clearProperty);
         BeanFactory.reset();
         ConfigurationResolver.reset();
     }

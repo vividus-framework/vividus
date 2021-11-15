@@ -34,7 +34,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -54,7 +53,6 @@ public final class ConfigurationResolver
     private static final String ROOT = "";
     private static final String PROFILES = "profiles";
     private static final String ENVIRONMENTS = "environments";
-    private static final String SUITE = "suite";
     private static final String SUITES = "suites";
 
     private static final String PLACEHOLDER_PREFIX = "${";
@@ -79,8 +77,8 @@ public final class ConfigurationResolver
 
         PropertiesLoader propertiesLoader = new PropertiesLoader(BeanFactory.getResourcePatternResolver());
 
-        Properties configurationProperties = propertiesLoader.loadFromSingleResource("configuration.properties");
-        Properties overridingProperties = propertiesLoader.loadFromOptionalResource("overriding.properties");
+        Properties configurationProperties = propertiesLoader.loadConfigurationProperties();
+        Properties overridingProperties = propertiesLoader.loadOverridingProperties();
 
         Properties properties = new Properties();
         properties.putAll(configurationProperties);
@@ -141,8 +139,7 @@ public final class ConfigurationResolver
         String profiles = getConfigurationPropertyValue(configurationProperties, overridingProperties, PROFILES);
         String environments = getConfigurationPropertyValue(configurationProperties, overridingProperties,
                 ENVIRONMENTS);
-        String suites = getCompetingConfigurationPropertyValue(configurationProperties, overridingProperties,
-                Pair.of(SUITE, SUITES));
+        String suites = getConfigurationPropertyValue(configurationProperties, overridingProperties, SUITES);
 
         Properties mergedProperties = new Properties();
         mergedProperties.putAll(configurationProperties);
@@ -156,30 +153,8 @@ public final class ConfigurationResolver
         Multimap<String, String> configuration = LinkedHashMultimap.create();
         configuration.putAll("profile", asPaths(profiles));
         configuration.putAll("environment", asPaths(environments));
-        configuration.putAll(SUITE, asPaths(suites));
+        configuration.putAll("suite", asPaths(suites));
         return configuration;
-    }
-
-    private static String getCompetingConfigurationPropertyValue(Properties configurationProperties,
-            Properties overridingProperties, Pair<String, String> competingKeys)
-    {
-        return Stream.of(competingKeys.getLeft(), competingKeys.getRight())
-                .map(k -> Map.entry(k,
-                        getConfigurationPropertyValue(configurationProperties, overridingProperties, k, false)))
-                .filter(e -> e.getValue().isPresent())
-                .collect(Collectors.collectingAndThen(Collectors.toList(), props ->
-                {
-                    int size = props.size();
-                    if (size == 1)
-                    {
-                        return props.get(0).getValue().get();
-                    }
-                    String errorMessage = size == 0
-                            ? "Either '%1$s%2$s' or '%1$s%3$s' test configuration property must be set"
-                            : "Exactly one test configuration property: '%1$s%2$s' or '%1$s%3$s' must be set";
-                    throw new IllegalStateException(String.format(errorMessage, CONFIGURATION_PROPERTY_FAMILY,
-                            competingKeys.getLeft(), competingKeys.getRight()));
-                }));
     }
 
     private static List<String> asPaths(String value)
@@ -202,12 +177,6 @@ public final class ConfigurationResolver
     private static String getConfigurationPropertyValue(Properties configurationProperties,
             Properties overridingProperties, String key)
     {
-        return getConfigurationPropertyValue(configurationProperties, overridingProperties, key, true).get();
-    }
-
-    private static Optional<String> getConfigurationPropertyValue(Properties configurationProperties,
-            Properties overridingProperties, String key, boolean failOnAbsence)
-    {
         String propertyName = CONFIGURATION_PROPERTY_FAMILY + key;
         String value = System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + propertyName,
                 System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + key,
@@ -220,12 +189,8 @@ public final class ConfigurationResolver
                 value = configurationProperties.getProperty(propertyName);
                 if (value == null)
                 {
-                    if (failOnAbsence)
-                    {
-                        throw new IllegalStateException(
-                                String.format("The '%s%s' property is not set", CONFIGURATION_PROPERTY_FAMILY, key));
-                    }
-                    return Optional.empty();
+                    throw new IllegalStateException(
+                            String.format("The '%s%s' property is not set", CONFIGURATION_PROPERTY_FAMILY, key));
                 }
             }
         }
@@ -233,7 +198,7 @@ public final class ConfigurationResolver
         {
             overridingProperties.put(propertyName, value);
         }
-        return Optional.of(value);
+        return value;
     }
 
     private static void resolveSpelExpressions(Properties properties, boolean ignoreValuesWithPropertyPlaceholders)
@@ -315,9 +280,9 @@ public final class ConfigurationResolver
             this.resourcePatternResolver = resourcePatternResolver;
         }
 
-        Properties loadFromSingleResource(String resourceName) throws IOException
+        Properties loadConfigurationProperties() throws IOException
         {
-            String location = ROOT_LOCATION + resourceName;
+            String location = ROOT_LOCATION + "configuration.properties";
             Resource[] resources = resourcePatternResolver.getResources(location);
             int resourcesLength = resources.length;
             if (resourcesLength == 0)
@@ -332,9 +297,9 @@ public final class ConfigurationResolver
             return loadProperties(resources[0]);
         }
 
-        Properties loadFromOptionalResource(String resourceName) throws IOException
+        Properties loadOverridingProperties() throws IOException
         {
-            Resource resource = resourcePatternResolver.getResource("classpath:/" + resourceName);
+            Resource resource = resourcePatternResolver.getResource("classpath:/overriding.properties");
             return resource.exists() ? loadProperties(resource) : new Properties();
         }
 
