@@ -78,28 +78,6 @@ Converts an input string to upper case.
 |`ABC`
 |===
 
-=== `capitalize`
-
-[WARNING]
-Deprecated, will be removed in VIVIDUS 0.4.0 use <<_capitalizefirstword>> instead
-
-Capitalizes an input string, changing the first character to title case. No other characters are changed.
-
-[source, subs="+quotes"]
-----
-#{capitalize(*$input*)}
-----
-
-* *`$input`* - any string to be capitalized
-
-.Examples of the expressions capitalizing strings
-|===
-|Expression |Result
-
-|`#{capitalize(aBc)}`
-|`ABc`
-|===
-
 === `capitalizeFirstWord`
 
 Capitalizes an input string, changing the first character to title case. No other characters are changed.
@@ -155,28 +133,6 @@ Converts all the whitespace separated words in a String into capitalized words, 
 
 |`#{capitalizeWordsFully(aBc dEf)}`
 |`Abc Def`
-|===
-
-=== `uncapitalize`
-
-[WARNING]
-Deprecated, will be removed in VIVIDUS 0.4.0 use <<_uncapitalizefirstword>> instead
-
-Uncapitalizes an input string, changing the first character to lower case. No other characters are changed.
-
-[source, subs="+quotes"]
-----
-#{uncapitalize(*$input*)}
-----
-
-* *`$input`* - any string to be uncapitalized
-
-.Examples of the expressions uncapitalizing strings
-|===
-|Expression |Result
-
-|`#{uncapitalize(ABc)}`
-|`aBc`
 |===
 
 === `uncapitalizeFirstWord`
