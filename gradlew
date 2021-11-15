@@ -21,14 +21,9 @@ else
     die "$file not found."
 fi
 
-#If VIVIDUS_BUILD_SYSTEM_HOME is not set -> try BUILD_SYSTEM_ROOT -> try embedded
-if [ -n "$VIVIDUS_BUILD_SYSTEM_HOME" ] ; then
-    :
-elif [ -n "$BUILD_SYSTEM_ROOT" ] ; then
-    echo "WARNING: BUILD_SYSTEM_ROOT environment variable is deprecated, use VIVIDUS_BUILD_SYSTEM_HOME instead"
-    export VIVIDUS_BUILD_SYSTEM_HOME="$BUILD_SYSTEM_ROOT"
-else
-   export VIVIDUS_BUILD_SYSTEM_HOME=$(getValue 'buildSystemRoot')
+#If VIVIDUS_BUILD_SYSTEM_HOME is not set -> try embedded
+if [ -z "$VIVIDUS_BUILD_SYSTEM_HOME" ] ; then
+    export VIVIDUS_BUILD_SYSTEM_HOME=$(getValue 'buildSystemRootDir')
 fi
 
 GRADLEW_PATH=$VIVIDUS_BUILD_SYSTEM_HOME/$buildSystemVersion/gradlew
