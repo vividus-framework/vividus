@@ -134,7 +134,7 @@
     <bean id="genericNestedSteps" class="org.vividus.bdd.steps.ui.GenericNestedSteps" />
     <bean id="navigationSteps" class="org.vividus.bdd.steps.ui.NavigationSteps" />
     <bean id="screenshotTakingSteps" class="org.vividus.bdd.steps.ui.ScreenshotTakingSteps" />
-    <bean id="qrCodeSteps" class="org.vividus.bdd.steps.ui.BarcodeSteps" />
+    <bean id="barcodeSteps" class="org.vividus.bdd.steps.ui.BarcodeSteps" />
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />
 
@@ -161,7 +161,7 @@
         <idref bean="genericNestedSteps" />
         <idref bean="navigationSteps" />
         <idref bean="screenshotTakingSteps" />
-        <idref bean="qrCodeSteps" />
+        <idref bean="barcodeSteps" />
     </util:list>
 
     <util:map id="propertyEditors-UI" key-type="java.lang.Class">
