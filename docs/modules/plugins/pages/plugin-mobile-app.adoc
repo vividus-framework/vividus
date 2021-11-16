@@ -404,10 +404,11 @@ When I upload file `images/avatar.png` to device
 Then the avatar icon is displayed with the uploaded image
 ----
 
+:web-view-info: See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
 
-=== Switch to Web view
+=== Switch to Web view by index
 
-Switches context to a web view by the index, it starts from 1. See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+Switches context to a web view by the index, it starts from 1. {web-view-info}
 
 [source,gherkin]
 ----
@@ -416,11 +417,32 @@ When I switch to web view with index `$index`
 
 * `$index` - The index of the web view.
 
-.Switch to web view
+.Switch to web view by index
 [source,gherkin]
 ----
 Then number of elements found by `xpath(html)` is equal to `0`
 When I switch to web view with index `1`
+Then number of elements found by `xpath(html)` is equal to `1`
+----
+
+
+=== Switch to Web view by name
+
+Switches context to a web view with name that matches the rule. {web-view-info}
+
+[source,gherkin]
+----
+When I switch to web view with name that $comparisonRule `$value`
+----
+
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[The web view name comparison rule].
+* `$value` - The value to find the target web view.
+
+.Switch to web view by name
+[source,gherkin]
+----
+Then number of elements found by `xpath(html)` is equal to `0`
+When I switch to web view with name that contains `vividustestapp`
 Then number of elements found by `xpath(html)` is equal to `1`
 ----
 

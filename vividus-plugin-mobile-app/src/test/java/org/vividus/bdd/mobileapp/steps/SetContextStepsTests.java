@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.ContextAware;
+import org.vividus.bdd.steps.StringComparisonRule;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
@@ -71,13 +72,13 @@ class SetContextStepsTests
     }
 
     @Test
-    void shouldSwitchToWebView()
+    void shouldSwitchToWebViewByIndex()
     {
         when(webDriverProvider.getUnwrapped(ContextAware.class)).thenReturn(contextAware);
         when(contextAware.getContextHandles())
                 .thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT, WEB_VIEW_MAIN));
 
-        setContextSteps.switchToWebView(1);
+        setContextSteps.switchToWebViewByIndex(1);
 
         verify(contextAware).context(WEB_VIEW_MAIN);
         verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
@@ -87,12 +88,12 @@ class SetContextStepsTests
     }
 
     @Test
-    void shouldNotSwitchToWebViewIfWebViewCollectionIsEmpty()
+    void shouldNotSwitchToWebViewByIndexIfWebViewCollectionIsEmpty()
     {
         when(webDriverProvider.getUnwrapped(ContextAware.class)).thenReturn(contextAware);
         when(contextAware.getContextHandles()).thenReturn(Set.of());
 
-        setContextSteps.switchToWebView(1);
+        setContextSteps.switchToWebViewByIndex(1);
 
         verify(softAssert).recordFailedAssertion("No web views found");
         verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
@@ -101,16 +102,48 @@ class SetContextStepsTests
 
     @ValueSource(ints = { 2, -2 })
     @ParameterizedTest
-    void shouldNotSwitchToWebViewIfWebViewWithIndexDoesNotExist(int webViewIndex)
+    void shouldNotSwitchToWebViewByIndexIfWebViewWithIndexDoesNotExist(int webViewIndex)
     {
         when(webDriverProvider.getUnwrapped(ContextAware.class)).thenReturn(contextAware);
         when(contextAware.getContextHandles())
                 .thenReturn(Set.of(WEB_VIEW_MAIN, IGenericWebDriverManager.NATIVE_APP_CONTEXT));
 
-        setContextSteps.switchToWebView(webViewIndex);
+        setContextSteps.switchToWebViewByIndex(webViewIndex);
 
         verify(softAssert).recordFailedAssertion(String.format("Web view with index %s does not exist", webViewIndex));
         verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
         assertThat(logger.getLoggingEvents(), is(List.of(info(WEB_VIEWS_FOUND, Set.of(WEB_VIEW_MAIN).toString()))));
+    }
+
+    @Test
+    void shouldSwitchToWebViewByName()
+    {
+        when(webDriverProvider.getUnwrapped(ContextAware.class)).thenReturn(contextAware);
+        when(contextAware.getContextHandles())
+                .thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT, WEB_VIEW_MAIN));
+
+        setContextSteps.switchToWebViewByName(StringComparisonRule.IS_EQUAL_TO, WEB_VIEW_MAIN);
+
+        verify(contextAware).context(WEB_VIEW_MAIN);
+        verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info(WEB_VIEWS_FOUND, Set.of(WEB_VIEW_MAIN).toString()),
+                info("Switching to web view with the name '{}'", WEB_VIEW_MAIN))));
+    }
+
+    @Test
+    void shouldFailSwitchingToWebViewIfNoWebViewMatchesTheRule()
+    {
+        when(webDriverProvider.getUnwrapped(ContextAware.class)).thenReturn(contextAware);
+        when(contextAware.getContextHandles())
+                .thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT, WEB_VIEW_MAIN));
+
+        setContextSteps.switchToWebViewByName(StringComparisonRule.DOES_NOT_CONTAIN, WEB_VIEW_MAIN);
+
+        verify(softAssert).recordFailedAssertion("The number of web views with name that does not contain"
+                + " 'WEBVIEW_MAIN' is expected to be 1, but got 0");
+        verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info(WEB_VIEWS_FOUND, Set.of(WEB_VIEW_MAIN).toString()))));
     }
 }
