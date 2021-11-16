@@ -24,7 +24,6 @@ import java.util.Set;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.core.util.serializer.SerializerEncoding;
 import com.azure.resourcemanager.storage.StorageManager;
 import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
 
@@ -75,7 +74,6 @@ public class StorageAccountManagementSteps
                 .stream()
                 .collect(toList());
 
-        bddVariableContext.putVariable(scopes, variableName,
-                innersJacksonAdapter.serialize(storageAccounts, SerializerEncoding.JSON));
+        bddVariableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(storageAccounts));
     }
 }

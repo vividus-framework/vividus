@@ -24,7 +24,6 @@ import java.util.Set;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.core.util.serializer.SerializerEncoding;
 import com.azure.resourcemanager.eventgrid.EventGridManager;
 import com.azure.resourcemanager.eventgrid.fluent.models.SystemTopicInner;
 
@@ -75,7 +74,6 @@ public class EventGridManagementSteps
                 .stream()
                 .collect(toList());
 
-        bddVariableContext.putVariable(scopes, variableName,
-                innersJacksonAdapter.serialize(systemTopics, SerializerEncoding.JSON));
+        bddVariableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(systemTopics));
     }
 }

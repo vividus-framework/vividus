@@ -40,7 +40,7 @@ class InnersJacksonAdapterTests
         var jacksonAdapter = new InnersJacksonAdapter();
         var inner = (TestInner) jacksonAdapter.deserialize(inputJson, TestInner.class, SerializerEncoding.JSON);
         inner.withPrimaryLocation("westus");
-        String outputJson = jacksonAdapter.serialize(inner, SerializerEncoding.JSON);
+        String outputJson = jacksonAdapter.serializeToJson(inner);
         assertEquals("{\"name\":\"azure-resource\",\"tags\":{},\"properties\":{\"primaryLocation\":\"westus\"}}",
                 outputJson);
     }
