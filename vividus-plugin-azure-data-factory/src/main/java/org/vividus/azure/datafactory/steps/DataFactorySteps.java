@@ -16,16 +16,30 @@
 
 package org.vividus.azure.datafactory.steps;
 
+import java.io.IOException;
 import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.datafactory.DataFactoryManager;
+import com.azure.resourcemanager.datafactory.fluent.models.PipelineRunInner;
 import com.azure.resourcemanager.datafactory.models.PipelineRun;
+import com.azure.resourcemanager.datafactory.models.RunFilterParameters;
+import com.azure.resourcemanager.datafactory.models.RunQueryFilter;
+import com.azure.resourcemanager.datafactory.models.RunQueryFilterOperand;
+import com.azure.resourcemanager.datafactory.models.RunQueryFilterOperator;
 
+import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.azure.util.InnersJacksonAdapter;
+import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
@@ -36,12 +50,17 @@ public class DataFactorySteps
     private static final int RETRY_TIMES = 10;
 
     private final DataFactoryManager dataFactoryManager;
+    private final InnersJacksonAdapter innersJacksonAdapter;
+    private final IBddVariableContext bddVariableContext;
     private final ISoftAssert softAssert;
 
-    public DataFactorySteps(AzureProfile azureProfile, TokenCredential tokenCredential, ISoftAssert softAssert)
+    public DataFactorySteps(AzureProfile azureProfile, TokenCredential tokenCredential,
+            InnersJacksonAdapter innersJacksonAdapter, IBddVariableContext bddVariableContext, ISoftAssert softAssert)
     {
         this.dataFactoryManager = DataFactoryManager.authenticate(tokenCredential, azureProfile);
         this.softAssert = softAssert;
+        this.innersJacksonAdapter = innersJacksonAdapter;
+        this.bddVariableContext = bddVariableContext;
     }
 
     /**
@@ -96,10 +115,118 @@ public class DataFactorySteps
         }
     }
 
+    /**
+     * Collects pipeline runs in Data factory based on input filter conditions.
+     *
+     * @param pipelineName      The name of the pipeline to find runs.
+     * @param filters           The ExamplesTable with filters to be applied to the pipeline runs to limit the
+     *                          resulting set. The supported filter types are:
+     *                          <ul>
+     *                          <li><code>LAST_UPDATED_AFTER</code> - the time at or after which the run event was
+     *                          updated in ISO-8601 format.</li>
+     *                          <li><code>LAST_UPDATED_BEFORE</code> - the time at or before which the run event was
+     *                          updated in ISO-8601 format.</li>
+     *                          </ul>
+     *                          The filters can be combined in any order and in any composition, e.g.<br>
+     *                          <code>
+     *                          |filterType         |filterValue              |<br>
+     *                          |last updated after |2021-11-15T00:00:00+03:00|<br>
+     *                          |last updated before|2021-11-15T00:00:00+03:00|<br>
+     *                          </code>
+     * @param factoryName       The name of the factory.
+     * @param resourceGroupName The name of the resource group of the factory.
+     * @param scopes            The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
+     *                          scopes.<br>
+     *                          <i>Available scopes:</i>
+     *                          <ul>
+     *                          <li><b>STEP</b> - the variable will be available only within the step,
+     *                          <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                          <li><b>STORY</b> - the variable will be available within the whole story,
+     *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                          </ul>
+     * @param variableName      The variable name to store the pipeline runs in JSON format.
+     * @throws IOException if an I/O error occurs
+     */
+    @When("I collect runs of pipeline `$pipelineName` filtered by:$filters in Data Factory `$factoryName` from "
+            + "resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`")
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    public void collectPipelineRuns(String pipelineName, List<RunFilter> filters, String factoryName,
+            String resourceGroupName, Set<VariableScope> scopes, String variableName) throws IOException
+    {
+        RunFilterParameters filterParameters = new RunFilterParameters()
+                .withFilters(
+                        List.of(
+                                new RunQueryFilter()
+                                        .withOperand(RunQueryFilterOperand.PIPELINE_NAME)
+                                        .withOperator(RunQueryFilterOperator.EQUALS)
+                                        .withValues(List.of(pipelineName))
+                        )
+                );
+        filters.forEach(filter -> filter.getFilterType().addFilter(filterParameters, filter.getFilterValue()));
+        LOGGER.atInfo().addArgument(() -> {
+            try
+            {
+                return innersJacksonAdapter.serializeToJson(filterParameters);
+            }
+            catch (IOException e)
+            {
+                return "<unable to log filters: " + e.getMessage() + ">";
+            }
+        }).log("Collecting pipeline runs filtered by: {}");
+        List<PipelineRunInner> runs = dataFactoryManager.pipelineRuns().queryByFactory(resourceGroupName, factoryName,
+                filterParameters).innerModel().value();
+        bddVariableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(runs));
+    }
+
     private PipelineRun getPipelineRun(String resourceGroupName, String factoryName, String runId)
     {
         PipelineRun pipelineRun = dataFactoryManager.pipelineRuns().get(resourceGroupName, factoryName, runId);
         LOGGER.atInfo().addArgument(pipelineRun::status).log("The current pipeline run status is \"{}\"");
         return pipelineRun;
+    }
+
+    @AsParameters
+    public static class RunFilter
+    {
+        private RunFilterType filterType;
+        private OffsetDateTime filterValue;
+
+        public RunFilterType getFilterType()
+        {
+            return filterType;
+        }
+
+        public void setFilterType(RunFilterType filterType)
+        {
+            this.filterType = filterType;
+        }
+
+        public OffsetDateTime getFilterValue()
+        {
+            return filterValue;
+        }
+
+        public void setFilterValue(OffsetDateTime filterValue)
+        {
+            this.filterValue = filterValue;
+        }
+    }
+
+    public enum RunFilterType
+    {
+        LAST_UPDATED_AFTER(RunFilterParameters::withLastUpdatedAfter),
+        LAST_UPDATED_BEFORE(RunFilterParameters::withLastUpdatedBefore);
+
+        private final BiConsumer<RunFilterParameters, OffsetDateTime> filterSetter;
+
+        RunFilterType(BiConsumer<RunFilterParameters, OffsetDateTime> filterSetter)
+        {
+            this.filterSetter = filterSetter;
+        }
+
+        public void addFilter(RunFilterParameters filterParameters, OffsetDateTime filterValue)
+        {
+            filterSetter.accept(filterParameters, filterValue);
+        }
     }
 }

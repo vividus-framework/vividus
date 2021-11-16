@@ -21,33 +21,54 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.datafactory.DataFactoryManager;
+import com.azure.resourcemanager.datafactory.fluent.models.PipelineRunInner;
+import com.azure.resourcemanager.datafactory.fluent.models.PipelineRunsQueryResponseInner;
 import com.azure.resourcemanager.datafactory.models.CreateRunResponse;
 import com.azure.resourcemanager.datafactory.models.PipelineRun;
 import com.azure.resourcemanager.datafactory.models.PipelineRuns;
+import com.azure.resourcemanager.datafactory.models.PipelineRunsQueryResponse;
 import com.azure.resourcemanager.datafactory.models.Pipelines;
+import com.azure.resourcemanager.datafactory.models.RunFilterParameters;
+import com.azure.resourcemanager.datafactory.models.RunQueryFilterOperand;
+import com.azure.resourcemanager.datafactory.models.RunQueryFilterOperator;
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.commons.lang3.function.FailableBiConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.azure.datafactory.steps.DataFactorySteps.RunFilter;
+import org.vividus.azure.datafactory.steps.DataFactorySteps.RunFilterType;
+import org.vividus.azure.util.InnersJacksonAdapter;
+import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.bdd.variable.VariableScope;
 import org.vividus.softassert.ISoftAssert;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -66,16 +87,19 @@ class DataFactoryStepsTests
                     + "pipeline `$pipelineName` in Data Factory `$factoryName` from resource group "
                     + "`$resourceGroupName` with wait timeout `$waitTimeout` and expect run status to be equal to"
                     + " `$expectedPipelineRunStatus`\"";
+    private static final String FILTER_LOG_MESSAGE = "Collecting pipeline runs filtered by: {}";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DataFactorySteps.class);
 
     @Mock private AzureProfile azureProfile;
     @Mock private TokenCredential tokenCredential;
+    @Spy private InnersJacksonAdapter innersJacksonAdapter = new InnersJacksonAdapter();
+    @Mock private IBddVariableContext bddVariableContext;
     @Mock private ISoftAssert softAssert;
 
     @Test
     @SuppressWarnings("removal")
-    void shouldRunSuccessfulPipeline()
+    void shouldRunSuccessfulPipeline() throws IOException
     {
         shouldRunPipeline(mock(PipelineRun.class), SUCCEEDED, SUCCEEDED, (steps, loggingEvents) -> {
             loggingEvents.add(0, warn(DEPRECATION_NOTICE));
@@ -85,7 +109,7 @@ class DataFactoryStepsTests
 
     @Test
     @SuppressWarnings("removal")
-    void shouldRunFailingPipeline()
+    void shouldRunFailingPipeline() throws IOException
     {
         var errorMessage = "error message";
         PipelineRun finalPipelineRunState = mock(PipelineRun.class);
@@ -99,15 +123,36 @@ class DataFactoryStepsTests
     }
 
     @Test
-    void shouldRunFailingPipelineAsExpected()
+    void shouldRunFailingPipelineAsExpected() throws IOException
     {
         shouldRunPipeline(mock(PipelineRun.class), FAILED, FAILED, (steps, loggingEvents) -> {
             steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT, FAILED);
         });
     }
 
+    @Test
+    void shouldCollectPipelineRunsSuccessfully() throws IOException
+    {
+        shouldCollectPipelineRuns();
+        assertThat(logger.getLoggingEvents(), is(List.of(info(FILTER_LOG_MESSAGE,
+                "{\"lastUpdatedAfter\":\"2021-11-14T21:00:00Z\",\"lastUpdatedBefore\":\"2021-11-15T21:00:00Z\","
+                        + "\"filters\":[{\"operand\":\"PipelineName\",\"operator\":\"Equals\","
+                        + "\"values\":[\"pipelineName\"]}]}")))
+        );
+    }
+
+    @Test
+    void shouldCollectPipelineRunsWithErrorOnFiltersLogging() throws IOException
+    {
+        var ioException = new IOException("IO error");
+        when(innersJacksonAdapter.serializeToJson(any())).thenThrow(ioException).thenCallRealMethod();
+        shouldCollectPipelineRuns();
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info(FILTER_LOG_MESSAGE, "<unable to log filters: IO error>"))));
+    }
+
     private void shouldRunPipeline(PipelineRun finalPipelineRunState, String finalRunStatus, String expectedRunStatus,
-            BiConsumer<DataFactorySteps, List<LoggingEvent>> pipelineRunner)
+            BiConsumer<DataFactorySteps, List<LoggingEvent>> pipelineRunner) throws IOException
     {
         String runId = "run-id";
 
@@ -149,14 +194,60 @@ class DataFactoryStepsTests
         });
     }
 
-    private void executeSteps(BiConsumer<DataFactoryManager, DataFactorySteps> consumer)
+    private void shouldCollectPipelineRuns() throws IOException
+    {
+        executeSteps((dataFactoryManager, steps) -> {
+            var pipelineRunInner = new PipelineRunInner().withAdditionalProperties(Map.of("key", "PipelineRunInner"));
+
+            var innerQueryResponse = mock(PipelineRunsQueryResponseInner.class);
+            when(innerQueryResponse.value()).thenReturn(List.of(pipelineRunInner));
+
+            var queryResponse = mock(PipelineRunsQueryResponse.class);
+            when(queryResponse.innerModel()).thenReturn(innerQueryResponse);
+
+            var pipelineRuns = mock(PipelineRuns.class);
+            var runFilterParametersCaptor = ArgumentCaptor.forClass(RunFilterParameters.class);
+            when(pipelineRuns.queryByFactory(eq(RESOURCE_GROUP_NAME), eq(FACTORY_NAME),
+                    runFilterParametersCaptor.capture())).thenReturn(queryResponse);
+
+            when(dataFactoryManager.pipelineRuns()).thenReturn(pipelineRuns);
+
+            var filter1 = new RunFilter();
+            filter1.setFilterType(RunFilterType.LAST_UPDATED_AFTER);
+            filter1.setFilterValue(OffsetDateTime.parse("2021-11-15T00:00:00+03:00"));
+            var filter2 = new RunFilter();
+            filter2.setFilterType(RunFilterType.LAST_UPDATED_BEFORE);
+            filter2.setFilterValue(OffsetDateTime.parse("2021-11-16T00:00:00+03:00"));
+
+            var scopes = Set.of(VariableScope.SCENARIO);
+            var variableName = "varName";
+            steps.collectPipelineRuns(PIPELINE_NAME, List.of(filter1, filter2), FACTORY_NAME, RESOURCE_GROUP_NAME,
+                    scopes, variableName);
+
+            verify(bddVariableContext).putVariable(scopes, variableName, "[{\"key\":\"PipelineRunInner\"}]");
+
+            var runFilterParameters = runFilterParametersCaptor.getValue();
+            assertEquals(filter1.getFilterValue(), runFilterParameters.lastUpdatedAfter());
+            assertEquals(filter2.getFilterValue(), runFilterParameters.lastUpdatedBefore());
+            var runQueryFilters = runFilterParameters.filters();
+            assertEquals(1, runQueryFilters.size());
+            var runQueryFilter = runQueryFilters.get(0);
+            assertEquals(RunQueryFilterOperand.PIPELINE_NAME, runQueryFilter.operand());
+            assertEquals(RunQueryFilterOperator.EQUALS, runQueryFilter.operator());
+            assertEquals(List.of(PIPELINE_NAME), runQueryFilter.values());
+        });
+    }
+
+    private void executeSteps(FailableBiConsumer<DataFactoryManager, DataFactorySteps, IOException> consumer)
+            throws IOException
     {
         try (MockedStatic<DataFactoryManager> dataFactoryManagerStaticMock = mockStatic(DataFactoryManager.class))
         {
             var dataFactoryManager = mock(DataFactoryManager.class);
             dataFactoryManagerStaticMock.when(() -> DataFactoryManager.authenticate(tokenCredential, azureProfile))
                     .thenReturn(dataFactoryManager);
-            var steps = new DataFactorySteps(azureProfile, tokenCredential, softAssert);
+            var steps = new DataFactorySteps(azureProfile, tokenCredential, innersJacksonAdapter, bddVariableContext,
+                    softAssert);
             consumer.accept(dataFactoryManager, steps);
         }
     }

@@ -16,7 +16,10 @@
 
 package org.vividus.azure.util;
 
+import java.io.IOException;
+
 import com.azure.core.util.serializer.JacksonAdapter;
+import com.azure.core.util.serializer.SerializerEncoding;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -38,5 +41,10 @@ public class InnersJacksonAdapter extends JacksonAdapter
             outer.setAnnotationIntrospector(annotationIntrospector);
             inner.setAnnotationIntrospector(annotationIntrospector);
         });
+    }
+
+    public String serializeToJson(Object object) throws IOException
+    {
+        return super.serialize(object, SerializerEncoding.JSON);
     }
 }
