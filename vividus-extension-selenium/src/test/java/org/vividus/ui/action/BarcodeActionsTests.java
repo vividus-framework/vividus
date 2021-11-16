@@ -33,19 +33,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
-public class QrCodeActionsTests
+public class BarcodeActionsTests
 {
     private static final String EXPECTED_VALUE = "https://github.com/vividus-framework/vividus";
 
     @InjectMocks
-    private QrCodeActions qrCodeActions;
+    private BarcodeActions barcodeActions;
 
     @Test
     void shouldReadQrCode() throws IOException, NotFoundException
     {
         final BufferedImage qrCodeBufferedImage = loadResource("qrCode.png");
 
-        String actualQrCodeValue = qrCodeActions.scanQrCode(qrCodeBufferedImage);
+        String actualQrCodeValue = barcodeActions.scanBarcode(qrCodeBufferedImage);
 
         assertEquals(EXPECTED_VALUE, actualQrCodeValue);
     }
@@ -56,11 +56,11 @@ public class QrCodeActionsTests
         final BufferedImage squareBufferedImage = loadResource("blackSquare168x168.png");
 
         assertThrows(NotFoundException.class, () ->
-                qrCodeActions.scanQrCode(squareBufferedImage));
+                barcodeActions.scanBarcode(squareBufferedImage));
     }
 
     private BufferedImage loadResource(String filePath) throws IOException
     {
-        return ImageIO.read(ResourceUtils.loadFile(QrCodeActions.class, filePath));
+        return ImageIO.read(ResourceUtils.loadFile(BarcodeActions.class, filePath));
     }
 }

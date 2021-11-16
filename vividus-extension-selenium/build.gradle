@@ -3,7 +3,6 @@ project.description = 'Vividus extension for selenium'
  ext {
      seleniumVersion = '3.141.59'
      browserupProxyVersion = '2.1.2'
-     zxingVersion = '3.4.1'
 }
 
  dependencies {
@@ -21,11 +20,12 @@ project.description = 'Vividus extension for selenium'
 
      api(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: versions.ashot)
 
-     implementation(group: 'com.google.zxing', name: 'core', version: zxingVersion)
-     implementation(group: 'com.google.zxing', name: 'javase', version: zxingVersion)
-
      api(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
      implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
+
+     implementation platform(group: 'com.google.zxing', name: 'zxing-parent', version: '3.4.1')
+     implementation(group: 'com.google.zxing', name: 'core')
+     implementation(group: 'com.google.zxing', name: 'javase')
 
      implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)

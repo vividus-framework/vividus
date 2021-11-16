@@ -42,7 +42,7 @@
     <bean class="org.vividus.ui.action.SearchActions" />
     <bean class="org.vividus.ui.action.JavascriptActions" />
 
-    <bean class="org.vividus.ui.action.QrCodeActions" />
+    <bean class="org.vividus.ui.action.BarcodeActions" />
 
     <bean id="abstractElementAction" class="org.vividus.ui.action.search.AbstractElementAction"
           abstract="true">
@@ -134,7 +134,7 @@
     <bean id="genericNestedSteps" class="org.vividus.bdd.steps.ui.GenericNestedSteps" />
     <bean id="navigationSteps" class="org.vividus.bdd.steps.ui.NavigationSteps" />
     <bean id="screenshotTakingSteps" class="org.vividus.bdd.steps.ui.ScreenshotTakingSteps" />
-    <bean id="qrCodeSteps" class="org.vividus.bdd.steps.ui.QrCodeSteps" />
+    <bean id="qrCodeSteps" class="org.vividus.bdd.steps.ui.BarcodeSteps" />
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />
 

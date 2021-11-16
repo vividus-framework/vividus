@@ -26,11 +26,11 @@ import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 
-public class QrCodeActions
+public class BarcodeActions
 {
-    public String scanQrCode(BufferedImage qrCode) throws NotFoundException
+    public String scanBarcode(BufferedImage barcode) throws NotFoundException
     {
-        LuminanceSource source = new BufferedImageLuminanceSource(qrCode);
+        LuminanceSource source = new BufferedImageLuminanceSource(barcode);
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
         Result result = new MultiFormatReader().decode(bitmap);
         return result.getText();

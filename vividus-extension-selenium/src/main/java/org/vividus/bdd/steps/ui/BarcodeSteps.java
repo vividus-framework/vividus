@@ -27,31 +27,31 @@ import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.action.QrCodeActions;
+import org.vividus.ui.action.BarcodeActions;
 
-public class QrCodeSteps
+public class BarcodeSteps
 {
     private final ScreenshotTaker screenshotTaker;
-    private final QrCodeActions qrCodeActions;
+    private final BarcodeActions barcodeActions;
     private final IBddVariableContext bddVariableContext;
     private final ISoftAssert softAssert;
 
-    public QrCodeSteps(ScreenshotTaker screenshotTaker, QrCodeActions qrCodeActions,
-                       IBddVariableContext bddVariableContext, ISoftAssert softAssert)
+    public BarcodeSteps(ScreenshotTaker screenshotTaker, BarcodeActions barcodeActions,
+                        IBddVariableContext bddVariableContext, ISoftAssert softAssert)
     {
         this.screenshotTaker = screenshotTaker;
-        this.qrCodeActions = qrCodeActions;
+        this.barcodeActions = barcodeActions;
         this.bddVariableContext = bddVariableContext;
         this.softAssert = softAssert;
     }
 
     /**
-     * Scan a QR code and save its value to the <b>variable</b> with the specified
+     * Scan a barcode and save its value to the <b>variable</b> with the specified
      * <b>variableName</b>
      * Actions performed at this step:
      * <ul>
      * <li>Takes a viewport screenshot
-     * <li>Scans a QR code from the screenshot and save its value to the <i>variable name</i>
+     * <li>Scans a barcode from the screenshot and save its value to the <i>variable name</i>
      * </ul>
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      * <i>Available scopes:</i>
@@ -62,19 +62,20 @@ public class QrCodeSteps
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
      * @param variableName A name under which the value should be saved
+     * @throws IOException If an input or output exception occurred
      */
-    @When("I scan a QR Code from screen and save result to $scopes variable `$variableName`")
-    public void whenIScanningAQrCode(Set<VariableScope> scopes, String variableName) throws IOException
+    @When("I scan a barcode from screen and save result to $scopes variable `$variableName`")
+    public void scanBarcode(Set<VariableScope> scopes, String variableName) throws IOException
     {
         BufferedImage screenshotPath = screenshotTaker.takeViewportScreenshot();
         try
         {
-            String result = qrCodeActions.scanQrCode(screenshotPath);
+            String result = barcodeActions.scanBarcode(screenshotPath);
             bddVariableContext.putVariable(scopes, variableName, result);
         }
         catch (NotFoundException e)
         {
-            softAssert.recordFailedAssertion("There is no QR code on the screen", e);
+            softAssert.recordFailedAssertion("There is no barcode on the screen", e);
         }
     }
 }
