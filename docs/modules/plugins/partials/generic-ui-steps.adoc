@@ -328,6 +328,61 @@ When I take screenshot and save it to folder `$path`
 When I take screenshot to path `${screenshot-directory}/#{generate(Ancient.god)}.png`
 ----
 
+=== Scan barcode
+
+Scan a barcode and save its value to the variable with the specified name. Only the first founded barcode will be scanned.
+
+Supported Code Formats
+
+[cols="2,2,2", options="header"]
+|===
+
+|1D product
+|1D industrial
+|2D
+
+a|
+* UPC-A
+* UPC-E
+* EAN-8
+* EAN-13
+* UPC/EAN Extension 2/5
+* RSS-14
+* RSS-Expanded
+a|
+* Code 39
+* Code 93
+* Code 128
+* Codabar
+* ITF
+a|
+* QR Code
+* Data Matrix
+* Aztec
+* PDF 417
+* MaxiCode
+
+|===
+
+Actions performed at this step:
+
+* Takes a viewport screenshot
+* Scans a barcode from the screenshot and save its value to the variable
+
+[source,gherkin]
+----
+When I scan barcode from screen and save result to $scopes variable `$variableName`
+----
+
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the value of the barcode.
+
+.Scan a barcode
+[source,gherkin]
+----
+When I scan barcode from screen and save result to scenario variable `qrCodeLink`
+Then `${qrCodeLink}` is equal to `https://www.example.com`
+----
 
 === Perform steps while elements exist
 

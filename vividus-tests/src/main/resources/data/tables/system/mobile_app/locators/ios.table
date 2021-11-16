@@ -6,6 +6,7 @@
 |menuInputXpath             |//XCUIElementTypeButton[@name="Input"]                 |
 |nameInputAccessibilityId   |name-input-testID                                      |
 |nameDisplayXpath           |//XCUIElementTypeTextField[@value='${text}']           |
+|menuQrCodeXpath            |//XCUIElementTypeButton[@name="QR Code"]               |
 |menuWaitXpath              |//XCUIElementTypeButton[@name="Wait"]                  |
 |pictureAccessibilityId     |picture-testID                                         |
 |hidePictureAccessibilityId |hide-picture-testID                                    |
