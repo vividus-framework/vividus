@@ -239,13 +239,13 @@ When I reset context
 Then number of elements found by `accessibilityId(dateInput)->filter.textPart(1/10/2012)` is equal to `1`
 
 
-Scenario: [Android] Verify steps: 'When I switch to native context', 'When I switch to web view with index `$index`'
+Scenario: [Android] Verify steps: 'When I switch to native context', 'When I switch to web view with name that $comparisonRule `$value`'
 Meta:
     @targetPlatform android
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `xpath(//android.widget.TextView[@text='Web View'])`
 When I wait until element located `xpath(//android.webkit.WebView[@focusable='true'])` appears
-When I switch to web view with index `1`
+When I switch to web view with name that contains `vividustestapp`
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `1`
 When I switch to native context
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `0`
