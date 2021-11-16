@@ -51,7 +51,7 @@ public class QrCodeSteps
      * Actions performed at this step:
      * <ul>
      * <li>Takes a viewport screenshot
-     * <li>Scan a QR code and save its value to the <i>variable name</i>
+     * <li>Scans a QR code from the screenshot and save its value to the <i>variable name</i>
      * </ul>
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      * <i>Available scopes:</i>
@@ -74,7 +74,7 @@ public class QrCodeSteps
         }
         catch (NotFoundException e)
         {
-            softAssert.recordFailedAssertion("There is no QR code in the image");
+            softAssert.recordFailedAssertion("There is no QR code on the screen", e);
         }
     }
 }

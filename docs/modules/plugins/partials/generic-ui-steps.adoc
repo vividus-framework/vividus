@@ -367,20 +367,20 @@ a|
 Actions performed at this step:
 
 * Takes a viewport screenshot
-* Scan a QR code and save its value to the variable
+* Scans a QR code from the screenshot and save its value to the variable
 
 [source,gherkin]
 ----
-When I scan a QR Code from screen and save result to $scopes variable `$variableName`
+When I scan QR Code from screen and save result to $scopes variable `$variableName`
 ----
 
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The name of the variable to save the number of elements.
+* `$variableName` - The name of the variable to save the value of the QR code.
 
 .Scan a QR Code
 [source,gherkin]
 ----
-When I scan a QR Code from screen and save result to scenario variable `qrCodeLink`
+When I scan QR Code from screen and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is equal to `https://www.example.com`
 ----
 
