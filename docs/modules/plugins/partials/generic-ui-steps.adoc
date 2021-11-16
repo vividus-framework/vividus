@@ -330,7 +330,7 @@ When I take screenshot to path `${screenshot-directory}/#{generate(Ancient.god)}
 
 === Scan barcode
 
-Scan a barcode and save its value to the variable with the specified variable. Only the first founded barcode will be scanned.
+Scan a barcode and save its value to the variable with the specified name. Only the first founded barcode will be scanned.
 
 Supported Code Formats
 
