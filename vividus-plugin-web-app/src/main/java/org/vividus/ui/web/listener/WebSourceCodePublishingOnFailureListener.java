@@ -51,7 +51,7 @@ public class WebSourceCodePublishingOnFailureListener extends AbstractSourceCode
         {
             sourceCode = getElementSource(searchContext);
         }
-        else
+        else if (searchContext instanceof WebDriver)
         {
             sourceCode = ((WebDriver) searchContext).getPageSource();
         }
