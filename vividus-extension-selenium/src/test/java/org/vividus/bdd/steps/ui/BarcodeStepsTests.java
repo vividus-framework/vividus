@@ -42,7 +42,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.BarcodeActions;
 
 @ExtendWith(MockitoExtension.class)
-public class BarcodeStepsTests
+class BarcodeStepsTests
 {
     private static final BufferedImage QR_CODE_IMAGE = new BufferedImage(10, 10, TYPE_INT_RGB);
     private static final String QR_CODE_VALUE = "QR Code Value";
@@ -58,7 +58,7 @@ public class BarcodeStepsTests
     private BarcodeSteps barCodeSteps;
 
     @Test
-    void whenIScanABarcode() throws IOException, NotFoundException
+    void whenIScanBarcode() throws IOException, NotFoundException
     {
         when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
         when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenReturn(QR_CODE_VALUE);
@@ -71,7 +71,7 @@ public class BarcodeStepsTests
     }
 
     @Test
-    void whenIScanABarcodeAndBarcodeIsAbsent() throws IOException, NotFoundException
+    void whenIScanBarcodeAndBarcodeIsAbsent() throws IOException, NotFoundException
     {
         when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
         when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenThrow(NotFoundException.class);

@@ -64,7 +64,7 @@ public class BarcodeSteps
      * @param variableName A name under which the value should be saved
      * @throws IOException If an input or output exception occurred
      */
-    @When("I scan a barcode from screen and save result to $scopes variable `$variableName`")
+    @When("I scan barcode from screen and save result to $scopes variable `$variableName`")
     public void scanBarcode(Set<VariableScope> scopes, String variableName) throws IOException
     {
         BufferedImage screenshotPath = screenshotTaker.takeViewportScreenshot();

@@ -33,7 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
-public class BarcodeActionsTests
+class BarcodeActionsTests
 {
     private static final String EXPECTED_VALUE = "https://github.com/vividus-framework/vividus";
 
