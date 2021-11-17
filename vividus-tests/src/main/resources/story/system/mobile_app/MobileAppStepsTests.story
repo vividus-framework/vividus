@@ -275,6 +275,15 @@ Examples:
 |Item 1                  |Item 2                   |
 
 
+Scenario: Verify steps: "When I scan barcode from screen and save result to $scopes variable `$variableName`"
+Meta:
+    @requirementId 2112
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<menuQrCodeXpath>)`
+When I scan barcode from screen and save result to scenario variable `qrCodeLink`
+Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
+
+
 Scenario: Verify step: 'When I long press $key key'
 Meta:
     @targetPlatform android
@@ -292,16 +301,6 @@ When I long press home key
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` disappears
 When I activate application with bundle identifier `${main-app}`
 When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears
-
-
-Scenario: Verify steps: "When I scan barcode from screen and save result to $scopes variable `$variableName`"
-Meta:
-    @requirementId 2112
-When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
-When I tap on element located `xpath(<menuQrCodeXpath>)`
-When I wait until element located `xpath(<menuQrCodeXpath>)` disappears
-When I scan barcode from screen and save result to scenario variable `qrCodeLink`
-Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 
 
 Scenario: Verify step: 'When I close mobile application'
