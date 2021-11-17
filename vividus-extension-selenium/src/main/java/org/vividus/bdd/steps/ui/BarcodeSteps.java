@@ -20,14 +20,19 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
 
+import com.google.common.eventbus.EventBus;
 import com.google.zxing.NotFoundException;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.reporter.event.AttachmentPublishEvent;
+import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.BarcodeActions;
+
+import ru.yandex.qatools.ashot.util.ImageTool;
 
 public class BarcodeSteps
 {
@@ -35,14 +40,16 @@ public class BarcodeSteps
     private final BarcodeActions barcodeActions;
     private final IBddVariableContext bddVariableContext;
     private final ISoftAssert softAssert;
+    private final EventBus eventBus;
 
     public BarcodeSteps(ScreenshotTaker screenshotTaker, BarcodeActions barcodeActions,
-                        IBddVariableContext bddVariableContext, ISoftAssert softAssert)
+            IBddVariableContext bddVariableContext, ISoftAssert softAssert, EventBus eventBus)
     {
         this.screenshotTaker = screenshotTaker;
         this.barcodeActions = barcodeActions;
         this.bddVariableContext = bddVariableContext;
         this.softAssert = softAssert;
+        this.eventBus = eventBus;
     }
 
     /**
@@ -67,15 +74,18 @@ public class BarcodeSteps
     @When("I scan barcode from screen and save result to $scopes variable `$variableName`")
     public void scanBarcode(Set<VariableScope> scopes, String variableName) throws IOException
     {
-        BufferedImage screenshotPath = screenshotTaker.takeViewportScreenshot();
+        BufferedImage viewportScreenshot = screenshotTaker.takeViewportScreenshot();
         try
         {
-            String result = barcodeActions.scanBarcode(screenshotPath);
+            String result = barcodeActions.scanBarcode(viewportScreenshot);
             bddVariableContext.putVariable(scopes, variableName, result);
         }
         catch (NotFoundException e)
         {
             softAssert.recordFailedAssertion("There is no barcode on the screen", e);
+            Attachment attachment = new Attachment(ImageTool.toByteArray(viewportScreenshot), "Viewport Screenshot",
+                    "image/png");
+            eventBus.post(new AttachmentPublishEvent(attachment));
         }
     }
 }
