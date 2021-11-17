@@ -20,7 +20,7 @@ Meta:
 When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
 When I tap on element located `xpath(<menuInputXpath>)`
 When I reinstall mobile application with bundle identifier `${main-app}`
-Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `1`
+When I wait until element located `xpath(<textElementXpath>)->filter.text(Home)` appears
 
 
 Scenario: Validate coordinate/size dynamic variables, page source dynamic variable
