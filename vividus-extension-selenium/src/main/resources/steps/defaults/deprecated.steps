@@ -1,7 +1,0 @@
-Composite: When I take a screenshot
-!-- WARNING: The step "When I take a screenshot" is deprecated and will be removed in VIVIDUS 0.4.0
-When I take screenshot
-
-Composite: When I take a screenshot to '$path'
-!-- WARNING: The step "When I take a screenshot to '$path'" is deprecated and will be removed in VIVIDUS 0.4.0
-When I take screenshot and save it to folder `<path>`
