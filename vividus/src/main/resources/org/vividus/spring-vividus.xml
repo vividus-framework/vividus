@@ -23,10 +23,9 @@
         <property name="propertyParser" ref="propertyParser" />
     </bean>
 
-    <bean class="org.vividus.bdd.issue.DelegatingKnownIssueDataProvider" />
+    <bean class="org.vividus.bdd.issue.KnownIssueVariableDataProvider" />
 
     <bean class="org.vividus.spring.SubscriberRegisteringBeanPostProcessor" />
-    <bean class="org.vividus.bdd.issue.KnownIssueCheckerBeanPostProcessor" />
 
     <util:map id="knownIssues" />
 

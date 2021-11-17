@@ -311,12 +311,6 @@
         </property>
     </bean>
 
-    <util:map id="knownIssueChecker-WebUiKnownIssueDataProviders">
-        <entry key="currentPageUrl">
-            <bean class="org.vividus.bdd.issue.CurrentPageUrlKnownIssueDataProvider" />
-        </entry>
-    </util:map>
-
     <bean id="browserLogCleanningListener" class="org.vividus.bdd.steps.ui.web.listener.BrowserLogCleanningListener" />
 
     <util:list id="stepBeanNames-WebUi" value-type="java.lang.String">
