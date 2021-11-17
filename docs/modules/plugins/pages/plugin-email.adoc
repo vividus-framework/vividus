@@ -31,103 +31,7 @@ For IMAP configuration details see https://javaee.github.io/javamail/docs/api/co
 To use IMAP properties the `mail.imap.` prefix must be replaced with `email.server.<server-key>.properties.` e.g. `mail.imap.timeout` will become `email.server.<server-key>.properties.timeout`.
 The `<server-key>` is a logical name defining single server configuration and referred in steps.
 
-See <<_configuration_example>>
-
-== Steps
-
-=== Fetch message from an email server
-
-==== *_Info_*
-
-Fetches an email message from a server filtered by user-defined filters. If the message is found its text content parts are saved into indexed variables prefixed `variableName` parameter and part index, e.g. if the message contains two text parts, the first part will be saved under `variableName[0]` and the second under `variableName[1]`
-
-==== *_Wording_*
-
-[source, gherkin]
-----
-When I fetch email message from `$serverKey` server filtered by $filters and save message content to $scopes variable `$variableName`
-----
-
-==== *_Parameters_*
-
-. `$serverKey` - server `configuration` to identify a server to fetch a message from
-. `$filters` - <<_message_filters>>
-. `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-. `$variableName` - name to prefix text content references
-
-==== *_Usage_*
-
-.Sample.story
-[source, gherkin]
-----
-Scenario: Fetch email message
-When I fetch email message from `gmail` server filtered by
-|parameter     |rule            |value                                       |
-|SUBJECT       |EQUAL_TO        |Registration code                           |
-|SENT_DATE     |GREATER_THAN    |1970-01-01T00:00:00.000Z                    |
-|RECEIVED_DATE |LESS_THAN       |2020-06-14T11:47:11.521Z                    |
-|FROM          |IS_EQUAL_TO     |service <regservice@company.com>            |
-|CC_RECIPIENTS |CONTAINS        |admin                                       |
-|BCC_RECIPIENTS|DOES_NOT_CONTAIN|gmail.com                                   |
-|TO_RECIPIENTS |EQUAL_TO        |me <me@company.com>, boss <boss@company.com>|
-|REPLY_TO      |MATCHES         |(?i)[0-9]@.*                                |
- and save message content to SCENARIO variable `textContent`
-Then `${textContent[1]}` matches `.*Registration code.*`
-----
-
-== Appendix
-
-=== Message filters
-
-==== *_parameter_*
-
-[cols="1,3", options="header"]
-|===
-|Name
-|Description
-
-|SUBJECT
-|Subject text
-
-|SENT_DATE
-|Date in <<_iso_8061>> format
-
-|RECEIVED_DATE
-|Date in <<_iso_8061>> format
-
-|FROM
-|<<_address>>
-
-|CC_RECIPIENTS
-|<<_address>>
-
-|BCC_RECIPIENTS
-|<<_address>>
-
-|TO_RECIPIENTS
-|<<_address>>
-
-|REPLY_TO
-|<<_address>>
-
-|===
-
-==== *_rule_*
-
-* xref:parameters:comparison-rule.adoc[Comparison Rules] are allowed to be used with any kind of <<_parameter>>
-* xref:parameters:string-comparison-rule.adoc[String Comparison Rules] are allowed to be used with any kind of <<_parameter>> besides `SENT_DATE` and `RECEIVED_DATE`
-
-=== ISO 8061
-
-Date argument must be presented in {iso-date-format-link} format e.g. `1970-01-01T00:00:00.000Z`
-
-=== Address
-
-Address argument is a comma-separated text that holds one or more email addresses e.g. `Billie Jean <bjean@gmail.com>, Big Boss <boss@company.com>`
-
-=== Configuration example
-
-.email.properties
+.Configuration example: `email.properties`
 [source, properties]
 ----
 # email server
@@ -142,4 +46,80 @@ email.server.gmail.properties.usesocketchannels=true
 email.imap.wait.duration=PT15S
 email.imap.wait.retry-times=3
 email.imap.folder=Inbox
+----
+
+== Steps
+
+=== Fetch message from an email server
+
+Fetches an email message from a server filtered by user-defined filters. If the
+message is found its text content parts are saved into indexed variables
+prefixed `variableName` parameter and part index, e.g. if the message contains
+two text parts, the first part will be saved under `variableName[0]` and the
+second under `variableName[1]`.
+
+[source, gherkin]
+----
+When I fetch email message from `$serverKey` server filtered by $filters and save message content to $scopes variable `$variableName`
+----
+
+* `$serverKey` - The server `configuration` to identify a server to fetch a message from.
+* `$filters` - The `ExamplesTable` with filters to be applied to emails to limit the resulting set. The `ExamplesTable` columns are:
+** `parameter`
++
+:date-parameter: pass:quotes[Date in {iso-date-format-link} format e.g. `1970-01-01T00:00:00.000Z`]
+:address-parameter: pass:quotes[Address - one or several comma-separated email addresses e.g. `Billie Jean <bjean@gmail.com>, Big Boss <boss@company.com>`]
+
+[cols="1,3", options="header", subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
+|===
+|Name
+|Description
+
+|`SUBJECT`
+|Subject text
+
+|`SENT_DATE`
+|{date-parameter}
+
+|`RECEIVED_DATE`
+|{date-parameter}
+
+|`FROM`
+|{address-parameter}
+
+|`CC_RECIPIENTS`
+|{address-parameter}
+
+|`BCC_RECIPIENTS`
+|{address-parameter}
+
+|`TO_RECIPIENTS`
+|{address-parameter}
+
+|REPLY_TO
+|{address-parameter}
+
+|===
+** `rule`
+*** The xref:parameters:comparison-rule.adoc[comparison rules] can be used with any parameter.
+*** The xref:parameters:string-comparison-rule.adoc[string comparison rules] can be used with any parameter besides `SENT_DATE` and `RECEIVED_DATE`.
+
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name to prefix text content references.
+
+.Fetch email message and validate its content
+[source, gherkin]
+----
+When I fetch email message from `gmail` server filtered by
+|parameter     |rule            |value                                       |
+|SUBJECT       |EQUAL_TO        |Registration code                           |
+|SENT_DATE     |GREATER_THAN    |1970-01-01T00:00:00.000Z                    |
+|RECEIVED_DATE |LESS_THAN       |2020-06-14T11:47:11.521Z                    |
+|FROM          |IS_EQUAL_TO     |service <regservice@company.com>            |
+|CC_RECIPIENTS |CONTAINS        |admin                                       |
+|BCC_RECIPIENTS|DOES_NOT_CONTAIN|gmail.com                                   |
+|TO_RECIPIENTS |EQUAL_TO        |me <me@company.com>, boss <boss@company.com>|
+|REPLY_TO      |MATCHES         |(?i)[0-9]@.*                                |
+ and save message content to SCENARIO variable `textContent`
+Then `${textContent[1]}` matches `.*Registration code.*`
 ----
