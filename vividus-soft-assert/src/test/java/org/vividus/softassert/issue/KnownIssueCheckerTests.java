@@ -147,39 +147,6 @@ class KnownIssueCheckerTests
     }
 
     @Test
-    void testGetKnownIssueWithDynamicDataProvider()
-    {
-        KnownIssueIdentifier identifier = createIdentifier();
-        identifier.setDynamicPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
-        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
-        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.of(URL));
-
-        assertKnownIssue(false, TEXT);
-    }
-
-    @Test
-    void testGetKnownIssueWithDynamicDataProviderMismatchedData()
-    {
-        KnownIssueIdentifier identifier = createIdentifier();
-        identifier.setDynamicPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
-        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
-        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.of(ANOTHER_URL));
-
-        assertNull(knownIssueChecker.getKnownIssue(PATTERN));
-    }
-
-    @Test
-    void testGetKnownIssueWithDynamicDataProviderReturnEmpty()
-    {
-        KnownIssueIdentifier identifier = createIdentifier();
-        identifier.setDynamicPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
-        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
-        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.empty());
-
-        assertNull(knownIssueChecker.getKnownIssue(PATTERN));
-    }
-
-    @Test
     void testGetKnownIssueWithRuntimeDataProvider()
     {
         KnownIssueIdentifier identifier = createIdentifier();

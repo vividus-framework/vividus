@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-package org.vividus.softassert.issue;
+package org.vividus.bdd.issue;
 
 import java.util.Optional;
 
-@Deprecated(since = "0.3.10", forRemoval = true)
-public interface IKnownIssueDataProvider
+import org.vividus.bdd.context.IBddVariableContext;
+import org.vividus.softassert.issue.KnownIssueDataProvider;
+
+public class KnownIssueVariableDataProvider implements KnownIssueDataProvider
 {
-    Optional<String> getData();
+    private final IBddVariableContext bddVariableContext;
+
+    public KnownIssueVariableDataProvider(IBddVariableContext bddVariableContext)
+    {
+        this.bddVariableContext = bddVariableContext;
+    }
+
+    @Override
+    public Optional<String> getData(String key)
+    {
+        return Optional.ofNullable(bddVariableContext.getVariable(key));
+    }
 }
