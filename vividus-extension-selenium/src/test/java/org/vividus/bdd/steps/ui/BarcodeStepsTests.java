@@ -17,9 +17,10 @@
 package org.vividus.bdd.steps.ui;
 
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -28,18 +29,24 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
 
+import com.google.common.eventbus.EventBus;
 import com.google.zxing.NotFoundException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.variable.VariableScope;
+import org.vividus.reporter.event.AttachmentPublishEvent;
+import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.BarcodeActions;
+
+import ru.yandex.qatools.ashot.util.ImageTool;
 
 @ExtendWith(MockitoExtension.class)
 class BarcodeStepsTests
@@ -53,20 +60,17 @@ class BarcodeStepsTests
     @Mock private BarcodeActions barcodeActions;
     @Mock private IBddVariableContext bddVariableContext;
     @Mock private ISoftAssert softAssert;
-
-    @InjectMocks
-    private BarcodeSteps barCodeSteps;
+    @Mock private EventBus eventBus;
+    @InjectMocks private BarcodeSteps barCodeSteps;
 
     @Test
-    void whenIScanBarcode() throws IOException, NotFoundException
+    void shouldScanBarcodeSuccessfully() throws IOException, NotFoundException
     {
         when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
         when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenReturn(QR_CODE_VALUE);
 
         barCodeSteps.scanBarcode(VARIABLE_SCOPE, VARIABLE_NAME);
 
-        verify(screenshotTaker).takeViewportScreenshot();
-        verify(barcodeActions).scanBarcode(QR_CODE_IMAGE);
         verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, QR_CODE_VALUE);
     }
 
@@ -74,15 +78,20 @@ class BarcodeStepsTests
     void whenIScanBarcodeAndBarcodeIsAbsent() throws IOException, NotFoundException
     {
         when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
-        when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenThrow(NotFoundException.class);
+        var exception = NotFoundException.getNotFoundInstance();
+        when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenThrow(exception);
 
-        assertDoesNotThrow(() ->
-                barCodeSteps.scanBarcode(VARIABLE_SCOPE, VARIABLE_NAME));
+        barCodeSteps.scanBarcode(VARIABLE_SCOPE, VARIABLE_NAME);
 
-        verify(screenshotTaker).takeViewportScreenshot();
-        verify(barcodeActions).scanBarcode(QR_CODE_IMAGE);
-        verify(softAssert).recordFailedAssertion(eq("There is no barcode on the screen"), argThat(
-                arg -> arg instanceof NotFoundException));
+        verify(softAssert).recordFailedAssertion("There is no barcode on the screen", exception);
+        var eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventBus).post(eventCaptor.capture());
+        Object event = eventCaptor.getValue();
+        assertThat(event, instanceOf(AttachmentPublishEvent.class));
+        Attachment attachment = ((AttachmentPublishEvent) event).getAttachment();
+        assertEquals("Viewport Screenshot", attachment.getTitle());
+        assertEquals("image/png", attachment.getContentType());
+        assertArrayEquals(ImageTool.toByteArray(QR_CODE_IMAGE), attachment.getContent());
         verifyNoInteractions(bddVariableContext);
     }
 }
