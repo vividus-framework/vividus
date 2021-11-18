@@ -252,13 +252,13 @@ public class BlobStorageSteps
      *                          <br>
      *                          <br>where all filters are optional, but at least one rule is required.
      *                          <ul>
-     *                           <li><code>blobNameFilterRule</code> The blob name comparison rule: "is equal to",
+     *                          <li><code>blobNameFilterRule</code> The blob name comparison rule: "is equal to",
      *                           "contains", "does not contain" or "matches".
      *                           Should be specified along with <i>blobNameFilterValue</i>.</li>
-     *                           <li><code>blobNameFilterValue</code> The full or partial blob name to be matched.
+     *                          <li><code>blobNameFilterValue</code> The full or partial blob name to be matched.
      *                           Should be specified along with <i>blobNameFilterRule</i>.</li>
-     *                           <li><code>blobNamePrefix</code> The prefix which blob names should start with.</li>
-     *                           <li><code>resultsLimit</code> Maximum number of blob names to return.</li>
+     *                          <li><code>blobNamePrefix</code> The prefix which blob names should start with.</li>
+     *                          <li><code>resultsLimit</code> Maximum number of blob names to return.</li>
      *                          </ul>
      * @param containerName     The name of the container to point to.
      * @param storageAccountKey The key to Storage Account endpoint.
