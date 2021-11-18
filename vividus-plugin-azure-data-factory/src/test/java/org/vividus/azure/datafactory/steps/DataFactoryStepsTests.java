@@ -18,7 +18,6 @@ package org.vividus.azure.datafactory.steps;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
@@ -59,6 +57,8 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.apache.commons.lang3.function.FailableBiConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -82,52 +82,32 @@ class DataFactoryStepsTests
     private static final String SUCCEEDED = "Succeeded";
     private static final String FAILED = "Failed";
 
-    private static final String DEPRECATION_NOTICE =
-            "This step is deprecated and will be removed in VIVIDUS 0.4.0. The replacement is \"When I run "
-                    + "pipeline `$pipelineName` in Data Factory `$factoryName` from resource group "
-                    + "`$resourceGroupName` with wait timeout `$waitTimeout` and expect run status to be equal to"
-                    + " `$expectedPipelineRunStatus`\"";
     private static final String FILTER_LOG_MESSAGE = "Collecting pipeline runs filtered by: {}";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DataFactorySteps.class);
 
     @Mock private AzureProfile azureProfile;
     @Mock private TokenCredential tokenCredential;
-    @Spy private InnersJacksonAdapter innersJacksonAdapter = new InnersJacksonAdapter();
+    @Spy private final InnersJacksonAdapter innersJacksonAdapter = new InnersJacksonAdapter();
     @Mock private IBddVariableContext bddVariableContext;
     @Mock private ISoftAssert softAssert;
 
-    @Test
-    @SuppressWarnings("removal")
-    void shouldRunSuccessfulPipeline() throws IOException
+    @ParameterizedTest
+    @ValueSource(strings = { SUCCEEDED, FAILED })
+    void shouldRunSuccessfulPipeline(String runStatus) throws IOException
     {
-        shouldRunPipeline(mock(PipelineRun.class), SUCCEEDED, SUCCEEDED, (steps, loggingEvents) -> {
-            loggingEvents.add(0, warn(DEPRECATION_NOTICE));
-            steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT);
-        });
+        shouldRunPipeline(mock(PipelineRun.class), runStatus, runStatus, List.of());
     }
 
     @Test
-    @SuppressWarnings("removal")
     void shouldRunFailingPipeline() throws IOException
     {
         var errorMessage = "error message";
         PipelineRun finalPipelineRunState = mock(PipelineRun.class);
         when(finalPipelineRunState.message()).thenReturn(errorMessage);
 
-        shouldRunPipeline(finalPipelineRunState, FAILED, SUCCEEDED, (steps, loggingEvents) -> {
-            loggingEvents.add(0, warn(DEPRECATION_NOTICE));
-            loggingEvents.add(error("The pipeline run message: {}", errorMessage));
-            steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT);
-        });
-    }
-
-    @Test
-    void shouldRunFailingPipelineAsExpected() throws IOException
-    {
-        shouldRunPipeline(mock(PipelineRun.class), FAILED, FAILED, (steps, loggingEvents) -> {
-            steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT, FAILED);
-        });
+        shouldRunPipeline(finalPipelineRunState, FAILED, SUCCEEDED,
+                List.of(error("The pipeline run message: {}", errorMessage)));
     }
 
     @Test
@@ -152,7 +132,7 @@ class DataFactoryStepsTests
     }
 
     private void shouldRunPipeline(PipelineRun finalPipelineRunState, String finalRunStatus, String expectedRunStatus,
-            BiConsumer<DataFactorySteps, List<LoggingEvent>> pipelineRunner) throws IOException
+            List<LoggingEvent> extraLoggingEvents) throws IOException
     {
         String runId = "run-id";
 
@@ -187,8 +167,9 @@ class DataFactoryStepsTests
             var currentStatusLogMessageFormat = "The current pipeline run status is \"{}\"";
             loggingEvents.add(info(currentStatusLogMessageFormat, firstRunStatus));
             loggingEvents.add(info(currentStatusLogMessageFormat, finalRunStatus));
+            loggingEvents.addAll(extraLoggingEvents);
 
-            pipelineRunner.accept(steps, loggingEvents);
+            steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT, expectedRunStatus);
 
             assertThat(logger.getLoggingEvents(), is(loggingEvents));
         });
