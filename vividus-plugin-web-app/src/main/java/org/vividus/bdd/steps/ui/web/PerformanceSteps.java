@@ -16,54 +16,23 @@
 
 package org.vividus.bdd.steps.ui.web;
 
-import static org.hamcrest.Matchers.lessThan;
-
 import java.time.Duration;
 
 import org.jbehave.core.annotations.Then;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.model.WebPerformanceMetric;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.performance.PerformanceMetrics;
 
 public class PerformanceSteps
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PerformanceSteps.class);
-
     private final PerformanceMetrics performanceMetrics;
-    private final IDescriptiveSoftAssert softAssert;
+    private final ISoftAssert softAssert;
 
-    public PerformanceSteps(PerformanceMetrics performanceMetrics, IDescriptiveSoftAssert softAssert)
+    public PerformanceSteps(PerformanceMetrics performanceMetrics, ISoftAssert softAssert)
     {
         this.performanceMetrics = performanceMetrics;
         this.softAssert = softAssert;
-    }
-
-    /**
-     * Checks that the <b>page</b> was loaded less than in 'pageLoadTimeThreshold' <b>milliseconds</b>
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Gets the <b>page's load time</b>
-     * <li>Compares it with a 'pageLoadTimeThreshold'
-     * </ul>
-     * <p>
-     * @deprecated Use the following step with the PAGE_LOAD_TIME metric name:
-     * Then $webPerformanceMetric is $comparisonRule `$duration`
-     * @param pageLoadTimeThreshold The time in <b>milliseconds</b> bigger than an expected <b>page's load time</b><br>
-     */
-    @Deprecated(since = "0.3.9", forRemoval = true)
-    @Then("the page load time should be less than '$pageLoadTimeThreshold' milliseconds")
-    public void thenTheLoadTimeShouldBeLessThan(long pageLoadTimeThreshold)
-    {
-        LOGGER.warn("This step is deprecated and will be removed in VIVIDUS 0.4.0. The replacement is"
-                + " \"Then $webPerformanceMetric is $comparisonRule `$duration`\" with the PAGE_LOAD_TIME metric name");
-        softAssert.assertThat("The page load time is less than load time threshold.",
-                String.format("The page load time is less than '%s'", pageLoadTimeThreshold),
-                performanceMetrics.getMetrics().get(WebPerformanceMetric.PAGE_LOAD_TIME),
-                lessThan(pageLoadTimeThreshold));
     }
 
     /**

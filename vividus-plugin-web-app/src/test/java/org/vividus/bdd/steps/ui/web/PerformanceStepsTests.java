@@ -16,7 +16,6 @@
 
 package org.vividus.bdd.steps.ui.web;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -31,8 +30,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.bdd.steps.ui.web.model.WebPerformanceMetric;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.performance.PerformanceMetrics;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,18 +40,8 @@ class PerformanceStepsTests
     private static final long PAGE_LOAD_TIME_THRESHOLD = 1000L;
 
     @Mock private PerformanceMetrics performanceMetrics;
-    @Mock private IDescriptiveSoftAssert softAssert;
+    @Mock private ISoftAssert softAssert;
     @InjectMocks private PerformanceSteps performanceSteps;
-
-    @Test
-    void shouldVerifyThatTheLoadTimeShouldBeLessThanThresholdValue()
-    {
-        when(performanceMetrics.getMetrics())
-                .thenReturn(Map.of(WebPerformanceMetric.PAGE_LOAD_TIME, PAGE_LOAD_TIME_THRESHOLD));
-        performanceSteps.thenTheLoadTimeShouldBeLessThan(PAGE_LOAD_TIME_THRESHOLD);
-        verify(softAssert).assertThat(eq("The page load time is less than load time threshold."),
-                eq("The page load time is less than '1000'"), eq(PAGE_LOAD_TIME_THRESHOLD), any());
-    }
 
     @Test
     void shouldCheckWebPerformanceMetric()
