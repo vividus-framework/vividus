@@ -17,6 +17,7 @@
 package org.vividus.bdd.mobileapp.steps;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
+import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -50,6 +52,9 @@ class SetContextStepsTests
 {
     private static final String WEB_VIEW_MAIN = "WEBVIEW_MAIN";
     private static final String WEB_VIEWS_FOUND = "Web views found: {}";
+    private static final LoggingEvent DEPRECATION_NOTICE = warn(
+            "This step is deprecated and will be removed in VIVIDUS 0.5.0. The replacement is "
+            + "\"When I switch to web view with name that $comparisonRule `$value`\"");
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ISoftAssert softAssert;
@@ -71,6 +76,7 @@ class SetContextStepsTests
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
+    @SuppressWarnings("removal")
     @Test
     void shouldSwitchToWebViewByIndex()
     {
@@ -83,10 +89,12 @@ class SetContextStepsTests
         verify(contextAware).context(WEB_VIEW_MAIN);
         verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
         assertThat(logger.getLoggingEvents(), is(List.of(
+                DEPRECATION_NOTICE,
                 info(WEB_VIEWS_FOUND, Set.of(WEB_VIEW_MAIN).toString()),
                 info("Switching to '{}' web view found by the index {}", WEB_VIEW_MAIN, 1))));
     }
 
+    @SuppressWarnings("removal")
     @Test
     void shouldNotSwitchToWebViewByIndexIfWebViewCollectionIsEmpty()
     {
@@ -97,9 +105,10 @@ class SetContextStepsTests
 
         verify(softAssert).recordFailedAssertion("No web views found");
         verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
-        assertThat(logger.getLoggingEvents(), is(empty()));
+        assertThat(logger.getLoggingEvents(), is(List.of(DEPRECATION_NOTICE)));
     }
 
+    @SuppressWarnings("removal")
     @ValueSource(ints = { 2, -2 })
     @ParameterizedTest
     void shouldNotSwitchToWebViewByIndexIfWebViewWithIndexDoesNotExist(int webViewIndex)
@@ -112,7 +121,9 @@ class SetContextStepsTests
 
         verify(softAssert).recordFailedAssertion(String.format("Web view with index %s does not exist", webViewIndex));
         verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
-        assertThat(logger.getLoggingEvents(), is(List.of(info(WEB_VIEWS_FOUND, Set.of(WEB_VIEW_MAIN).toString()))));
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                DEPRECATION_NOTICE,
+                info(WEB_VIEWS_FOUND, Set.of(WEB_VIEW_MAIN).toString()))));
     }
 
     @Test

@@ -59,10 +59,15 @@ public class SetContextSteps
     /**
      * Switches context to a web view by the index, it starts from 1
      * @param index index of web view
+     * @deprecated Use step:
+     * When I switch to web view with name that $comparisonRule `$value`
      */
+    @Deprecated(since = "0.5.0", forRemoval = true)
     @When("I switch to web view with index `$index`")
     public void switchToWebViewByIndex(int index)
     {
+        LOGGER.warn("This step is deprecated and will be removed in VIVIDUS 0.5.0. The replacement is "
+                + "\"When I switch to web view with name that $comparisonRule `$value`\"");
         performOnWebViews(webViews ->
         {
             int webViewIndex = index - 1;

@@ -408,6 +408,9 @@ Then the avatar icon is displayed with the uploaded image
 
 === Switch to Web view by index
 
+[WARNING]
+This step is deprecated and will be removed in VIVIDUS 0.5.0. The replacement is <<_switch_to_web_view_by_name>>.
+
 Switches context to a web view by the index, it starts from 1. {web-view-info}
 
 [source,gherkin]
