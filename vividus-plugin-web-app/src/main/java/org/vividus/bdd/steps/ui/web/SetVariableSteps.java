@@ -24,11 +24,8 @@ import java.util.function.Supplier;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ui.GenericSetVariableSteps;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
@@ -44,8 +41,6 @@ import org.vividus.util.UriUtils;
 @TakeScreenshotOnFailure
 public class SetVariableSteps
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SetVariableSteps.class);
-
     private final IWebDriverProvider webDriverProvider;
     private final ISoftAssert softAssert;
     private final ISearchActions searchActions;
@@ -53,11 +48,10 @@ public class SetVariableSteps
     private final IBddVariableContext bddVariableContext;
     private final IUiContext uiContext;
     private final WebJavascriptActions javascriptActions;
-    private final GenericSetVariableSteps genericSetVariableSteps;
 
     public SetVariableSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert, ISearchActions searchActions,
             IBaseValidations baseValidations, IBddVariableContext bddVariableContext, IUiContext uiContext,
-            WebJavascriptActions javascriptActions, GenericSetVariableSteps genericSetVariableSteps)
+            WebJavascriptActions javascriptActions)
     {
         this.webDriverProvider = webDriverProvider;
         this.softAssert = softAssert;
@@ -66,7 +60,6 @@ public class SetVariableSteps
         this.bddVariableContext = bddVariableContext;
         this.uiContext = uiContext;
         this.javascriptActions = javascriptActions;
-        this.genericSetVariableSteps = genericSetVariableSteps;
     }
 
     /**
@@ -234,41 +227,6 @@ public class SetVariableSteps
     }
 
     /**
-     * Extracts the <b>number</b> of elements found by the specified <b>attribute value</b> in the context
-     * and saves it into the <b>variable</b> with the specified <b>name</b>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Finds the elements by the <b>attribute value</b>
-     * <li>Saves the number of found elements into the <i>variable</i>
-     * </ul>
-     * @param attributeType A type of the element's attribute
-     * @param attributeValue A value of the element's attribute
-     * @param scopes The type of the variable
-     * (<i>Possible values:</i>
-     * <ul>
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>STEP</b> - the variable will be available within the step)
-     * </ul>
-     * @param variableName A name under which the value should be saved
-     * @deprecated Use step:
-     * When I save number of elements located `$locator` to $scopes variable `$variableName`
-     */
-    @When("I set the number of elements found by the attribute '$attributeType'='$attributeValue'"
-            + " to the '$scopes' variable '$variableName'")
-    @Deprecated(since = "0.3.11", forRemoval = true)
-    public void saveNumberOfElementsByAttributeValueToVariable(String attributeType, String attributeValue,
-            Set<VariableScope> scopes, String variableName)
-    {
-        LOGGER.warn(
-                "This step is deprecated and will be removed in VIVIDUS 0.4.0. The replacement is \"When I save "
-                        + "number of elements located `$locator` to $scopes variable `$variableName`\"");
-        Locator locator = new Locator(WebLocatorType.XPATH,
-                LocatorUtil.getXPathByAttribute(attributeType, attributeValue));
-        genericSetVariableSteps.saveNumberOfElementsToVariable(locator, scopes, variableName);
-    }
-
-    /**
      * Performs passed javascript code on the opened page
      * and saves returned value into the <b>variable</b>
      * <p>
@@ -358,15 +316,10 @@ public class SetVariableSteps
 
     private void saveSrcAttributeValueToVariable(WebElement element, Set<VariableScope> scopes, String variableName)
     {
-        String value = getAssertedAttributeValue(element, "src");
-        saveVariable(scopes, variableName, value);
-    }
-
-    private String getAssertedAttributeValue(WebElement element, String attributeName)
-    {
+        String attributeName = "src";
         String value = element.getAttribute(attributeName);
         softAssert.assertNotNull("The '" + attributeName + "' attribute value was found", value);
-        return value;
+        saveVariable(scopes, variableName, value);
     }
 
     private void saveVariable(Set<VariableScope> scopes, String variableName, Object value)
