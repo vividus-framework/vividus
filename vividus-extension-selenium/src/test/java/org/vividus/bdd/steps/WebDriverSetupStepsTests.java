@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Properties;
+import java.util.List;
 
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.remote.CapabilityType;
 import org.vividus.bdd.context.IBddRunContext;
 import org.vividus.bdd.model.RunningScenario;
 import org.vividus.bdd.model.RunningStory;
@@ -138,9 +137,7 @@ class WebDriverSetupStepsTests
 
     private Meta createMetaWithControllingTag()
     {
-        Properties properties = new Properties();
-        properties.put(CapabilityType.BROWSER_NAME, "chrome");
-        return new Meta(properties);
+        return new Meta(List.of("capability.browserName chrome"));
     }
 
     private void prepareRunningStory(Meta meta)

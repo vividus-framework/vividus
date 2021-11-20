@@ -27,40 +27,15 @@ import java.util.stream.Stream;
 import org.jbehave.core.model.Meta;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vividus.bdd.model.MetaWrapper;
-
-import io.appium.java_client.remote.MobileCapabilityType;
 
 public enum ControllingMetaTag
 {
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    BROWSER_NAME(CapabilityType.BROWSER_NAME),
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    VERSION(CapabilityType.VERSION),
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    SCREEN_RESOLUTION("screen-resolution"),
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    APPIUM_VERSION(MobileCapabilityType.APPIUM_VERSION),
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    DEVICE_NAME(MobileCapabilityType.DEVICE_NAME),
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    DEVICE_ORIENTATION("device-orientation"),
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    PLATFORM_VERSION(MobileCapabilityType.PLATFORM_VERSION),
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    PLATFORM_NAME(CapabilityType.PLATFORM_NAME),
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    IEDRIVER_VERSION("iedriver-version"),
-    @Deprecated(since = "0.3.10", forRemoval = true)
-    SELENIUM_VERSION("seleniumVersion"),
-    PROXY(CapabilityType.PROXY)
+    PROXY
     {
         @Override
-        protected boolean isContainedInImpl(Meta meta)
+        public boolean isContainedIn(Meta meta)
         {
-            return meta.hasProperty(getMetaTagName());
+            return meta.hasProperty(CapabilityType.PROXY);
         }
 
         @Override
@@ -69,49 +44,32 @@ public enum ControllingMetaTag
             // Nothing to do
         }
     },
-    CAPABILITY("capability.")
+    CAPABILITY
     {
+        private static final String META_PROPERTY_PREFIX = "capability.";
+
+        @Override
+        public boolean isContainedIn(Meta meta)
+        {
+            return meta.getPropertyNames().stream().anyMatch(s -> s.startsWith(META_PROPERTY_PREFIX));
+        }
+
         @Override
         protected void setCapability(DesiredCapabilities capabilities, Meta meta)
         {
             Map<String, Object> capabilitiesContainer = new HashMap<>(capabilities.asMap());
-            new MetaWrapper(meta).getPropertiesByKey(k -> k.startsWith(getMetaTagName())).forEach(
-                    (k, v) -> putByPath(capabilitiesContainer, substringAfter(k, getMetaTagName()), adjustType(v)));
+            meta.getPropertyNames()
+                    .stream()
+                    .filter(name -> name.startsWith(META_PROPERTY_PREFIX))
+                    .forEach(k -> putByPath(capabilitiesContainer, substringAfter(k, META_PROPERTY_PREFIX),
+                            adjustType(meta.getProperty(k))));
             capabilitiesContainer.forEach(capabilities::setCapability);
         }
     };
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ControllingMetaTag.class);
+    public abstract boolean isContainedIn(Meta meta);
 
-    private final String metaTagName;
-
-    ControllingMetaTag(String metaTagName)
-    {
-        this.metaTagName = metaTagName;
-    }
-
-    public String getMetaTagName()
-    {
-        return metaTagName;
-    }
-
-    protected boolean isContainedInImpl(Meta meta)
-    {
-        return meta.getOptionalProperty(getMetaTagName()).isPresent();
-    }
-
-    public boolean isContainedIn(Meta... metas)
-    {
-        return Stream.of(metas).anyMatch(this::isContainedInImpl);
-    }
-
-    protected void setCapability(DesiredCapabilities capabilities, Meta meta)
-    {
-        String capabilityName = getMetaTagName();
-        LOGGER.warn("Setting of capability via meta tag '{}' is deprecated and will be removed in VIVIDUS 0.4.0, "
-                        + "please, use 'capability.{}' meta tag instead", capabilityName, capabilityName);
-        meta.getOptionalProperty(capabilityName).ifPresent(value -> capabilities.setCapability(capabilityName, value));
-    }
+    protected abstract void setCapability(DesiredCapabilities capabilities, Meta meta);
 
     public static boolean isAnyContainedIn(Meta meta)
     {
@@ -120,9 +78,6 @@ public enum ControllingMetaTag
 
     public static void setDesiredCapabilitiesFromMeta(DesiredCapabilities capabilities, Meta meta)
     {
-        for (ControllingMetaTag controllingMetaTag : values())
-        {
-            controllingMetaTag.setCapability(capabilities, meta);
-        }
+        Stream.of(values()).forEach(controllingMetaTag -> controllingMetaTag.setCapability(capabilities, meta));
     }
 }
