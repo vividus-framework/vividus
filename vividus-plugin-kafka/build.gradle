@@ -6,7 +6,7 @@ dependencies {
     api project(':vividus-bdd-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
-
+    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'org.springframework.kafka', name: 'spring-kafka', version: "${springKafkaVersion}")
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
