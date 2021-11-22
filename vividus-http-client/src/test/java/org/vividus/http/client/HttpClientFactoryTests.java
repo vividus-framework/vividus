@@ -99,7 +99,7 @@ class HttpClientFactoryTests
     @Test
     void testBuildHttpClientWithHeaders() throws GeneralSecurityException
     {
-        config.setHeadersMap(HEADERS);
+        config.setHeaders(HEADERS);
 
         testBuildHttpClientUsingConfig();
         verifyDefaultHeaderSetting(HEADERS.entrySet().iterator().next());
@@ -275,7 +275,7 @@ class HttpClientFactoryTests
     {
         String baseUrl = "http://somewh.ere/";
         config.setBaseUrl(baseUrl);
-        config.setHeadersMap(HEADERS);
+        config.setHeaders(HEADERS);
         config.setUsername(USERNAME);
         config.setPassword(PASSWORD);
         config.setAuthScope(AUTH_SCOPE);

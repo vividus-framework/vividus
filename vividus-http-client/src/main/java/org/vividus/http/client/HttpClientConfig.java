@@ -40,7 +40,7 @@ public class HttpClientConfig
     private String username;
     private String password;
     private AuthScope authScope;
-    private Map<String, String> headersMap;
+    private Map<String, String> headers;
     private boolean sslCertificateCheckEnabled = true;
     private boolean sslHostnameVerificationEnabled = true;
     private HttpClientConnectionManager connectionManager;
@@ -84,13 +84,13 @@ public class HttpClientConfig
 
     public List<Header> createHeaders()
     {
-        return headersMap != null ? headersMap.entrySet().stream().map(e -> new BasicHeader(e.getKey(), e.getValue()))
+        return headers != null ? headers.entrySet().stream().map(e -> new BasicHeader(e.getKey(), e.getValue()))
                 .collect(Collectors.toList()) : List.of();
     }
 
-    public void setHeadersMap(Map<String, String> headersMap)
+    public void setHeaders(Map<String, String> headers)
     {
-        this.headersMap = headersMap;
+        this.headers = headers;
     }
 
     public AuthScope getAuthScope()

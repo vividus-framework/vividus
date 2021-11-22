@@ -14,7 +14,7 @@
                   factory-method="buildHttpClient">
                 <constructor-arg>
                     <bean parent="httpClientConfig">
-                        <property name="headersMap">
+                        <property name="headers">
                             <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
                                 <constructor-arg value="jira.http.header." />
                             </bean>

@@ -143,13 +143,13 @@ class HttpClientConfigTests
         String header2 = "header2";
         String value1 = "value1";
         String value2 = "value2";
-        Map<String, String> headersMap = new HashMap<>();
-        headersMap.put(header1, value1);
-        headersMap.put(header2, value2);
-        config.setHeadersMap(headersMap);
+        Map<String, String> customHeaders = new HashMap<>();
+        customHeaders.put(header1, value1);
+        customHeaders.put(header2, value2);
+        config.setHeaders(customHeaders);
 
         List<Header> headers = config.createHeaders();
-        assertEquals(headersMap.size(), headers.size());
+        assertEquals(customHeaders.size(), headers.size());
         assertThat(headers.get(0).getName(), anyOf(equalTo(header1), equalTo(header2)));
         assertThat(headers.get(0).getValue(), anyOf(equalTo(value1), equalTo(value2)));
         assertThat(headers.get(1).getName(), anyOf(equalTo(header1), equalTo(header2)));
@@ -166,7 +166,7 @@ class HttpClientConfigTests
     @Test
     void testCreateHeadersEmptyMap()
     {
-        config.setHeadersMap(new HashMap<>());
+        config.setHeaders(new HashMap<>());
         List<Header> headers = config.createHeaders();
         assertEquals(0, headers.size());
     }
