@@ -21,7 +21,6 @@ import java.util.Optional;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.bdd.steps.ComparisonRule;
 import org.vividus.ui.IState;
@@ -30,10 +29,6 @@ import org.vividus.ui.action.search.Locator;
 public interface IBaseValidations
 {
     boolean assertElementState(String businessDescription, IState state, WebElement element);
-
-    boolean assertElementState(String businessDescription, IState state, WrapsElement element);
-
-    WebElement assertIfElementExists(String businessDescription, List<WebElement> elements);
 
     /**
      * Assert that the number of elements in <b>elements</b> collection is <b>comparisonRule</b> <b>number</b>
@@ -72,8 +67,6 @@ public interface IBaseValidations
 
     List<WebElement> assertIfElementsExist(String businessDescription, Locator locator);
 
-    List<WebElement> assertIfElementsExist(String businessDescription, SearchContext searchContext, Locator locator);
-
     /**
      * Assert that the number of elements found by <b>locator</b> is <b>comparisonRule</b> <b>number</b>
      * @param businessDescription business description of the elements being found, must not be {@code null}
@@ -88,9 +81,6 @@ public interface IBaseValidations
     @Deprecated(since = "0.2.9", forRemoval = true)
     List<WebElement> assertIfNumberOfElementsFound(String businessDescription, Locator locator, int number,
             ComparisonRule comparisonRule);
-
-    List<WebElement> assertIfNumberOfElementsFound(String businessDescription, SearchContext searchContext,
-            Locator locator, int number, ComparisonRule comparisonRule);
 
     /**
      * Assert that the number of elements found by <b>locator</b> is <b>comparisonRule</b> <b>number</b>
@@ -121,17 +111,7 @@ public interface IBaseValidations
     WebElement assertIfAtLeastOneElementExists(String businessDescription, SearchContext searchContext,
             Locator locator);
 
-    Optional<WebElement> assertIfZeroOrOneElementFound(String businessDescription, Locator locator);
-
-    Optional<WebElement> assertIfZeroOrOneElementFound(String businessDescription, SearchContext searchContext,
-            Locator locator);
-
     boolean assertIfElementDoesNotExist(String businessDescription, Locator locator);
 
     boolean assertIfElementDoesNotExist(String businessDescription, SearchContext searchContext, Locator locator);
-
-    boolean assertIfElementDoesNotExist(String businessDescription, Locator locator, boolean recordAssertionIfFail);
-
-    boolean assertIfElementDoesNotExist(String businessDescription, SearchContext searchContext, Locator locator,
-            boolean recordAssertionIfFail);
 }
