@@ -169,6 +169,59 @@ When I find all blobs with name which $comparisonRule `$blobNameToMatch` in cont
 When I find all blobs with name which contains `json` in container `vividus` of storage account `testaccount` and save result to scenario variable `blobsCollection`
 ----
 
+==== Find blobs by filter
+
+Finds blobs with names filtered by the specified rules in the container.
+
+NOTE: At least one rule is required.
+
+[source,gherkin]
+----
+When I filter blobs by:$filter in container `$containerName` of storage account `$storageAccountKey` and save result to $scopes variable `$variableName`
+----
+
+* `$filter` - `ExamplesTable` with filter rules to apply on blob names.
++
+.The supported filter rules
+[cols="1,2,1", options="header"]
+|===
+|Filter
+|Description
+|Example value
+
+|`blobNamePrefix`
+|The prefix which blob names should start with.
+|`path/to/data/` (equal to `/path/to/data`)
+
+|`resultsLimit`
+|The maximum number of blob names to return.
+|`10`
+
+|`blobNameFilterRule`
+|xref:parameters:string-comparison-rule.adoc[The blob name comparison rule].
+It should be specified along with `blobNameFilterValue`.
+|`MATCHES`
+
+|`blobNameFilterValue`
+|The full or partial blob name to be matched.
+It should be specified along with `blobNameFilterRule`.
+|`.*`
+|===
+
+* `$containerName` - The name of the container to point to.
+* `$storageAccountKey` - The key of storage account from the configuration.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the list of found blob names.
+
+.Find blobs by filter
+[source,gherkin]
+----
+When I filter blobs by:
+|blobNameFilterRule|blobNameFilterValue|blobNamePrefix                       |resultsLimit |
+|matches           |.*_test            |images_for_testing_05.10.2021/images/|10           |
+in container `vividus` of storage account `testaccount` and save result to story variable `imagePathList`
+----
+
 == Storage account management
 
 === Configuration
