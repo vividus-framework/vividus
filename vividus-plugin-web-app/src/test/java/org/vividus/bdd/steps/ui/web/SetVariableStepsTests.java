@@ -16,9 +16,6 @@
 
 package org.vividus.bdd.steps.ui.web;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,10 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +39,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
 import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.steps.ui.GenericSetVariableSteps;
 import org.vividus.bdd.steps.ui.validation.IBaseValidations;
 import org.vividus.bdd.variable.VariableScope;
 import org.vividus.selenium.IWebDriverProvider;
@@ -58,11 +50,9 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.LocatorUtil;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ExtendWith(MockitoExtension.class)
 class SetVariableStepsTests
 {
-    private static final String VALID_URL = "http://www.example.com/relative/path";
-    private static final String PATH = "/relative/path";
     private static final String JS_RESULT_ASSERTION_MESSAGE = "Returned result is not null";
     private static final String JS_CODE = "return 'value'";
     private static final String THE_SRC_VALUE_WAS_FOUND = "The 'src' attribute value was found";
@@ -85,10 +75,7 @@ class SetVariableStepsTests
     @Mock private IUiContext uiContext;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private WebDriver webDriver;
-    @Mock private GenericSetVariableSteps genericSetVariableSteps;
     @InjectMocks private SetVariableSteps setVariableSteps;
-
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(SetVariableSteps.class);
 
     @Test
     void testGettingValueFromUrl()
@@ -218,19 +205,6 @@ class SetVariableStepsTests
     }
 
     @Test
-    void testGetNumberOfElementsByAttributeValueToStoryVariable()
-    {
-        setVariableSteps.saveNumberOfElementsByAttributeValueToVariable("attributeType", "attributeValue",
-                VARIABLE_SCOPE, VARIABLE);
-        Locator locator = new Locator(WebLocatorType.XPATH,
-                ".//*[normalize-space(@attributeType)=\"attributeValue\"]");
-        verify(genericSetVariableSteps).saveNumberOfElementsToVariable(locator, VARIABLE_SCOPE, VARIABLE);
-        assertThat(logger.getLoggingEvents(), is(List.of(
-                warn("This step is deprecated and will be removed in VIVIDUS 0.4.0. The replacement is \"When I save "
-                        + "number of elements located `$locator` to $scopes variable `$variableName`\""))));
-    }
-
-    @Test
     void testGettingValueFromJS()
     {
         when(javascriptActions.executeScript(JS_CODE)).thenReturn(VALUE);
@@ -268,11 +242,11 @@ class SetVariableStepsTests
     void testSavePathFromUrl()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriver.getCurrentUrl()).thenReturn(VALID_URL);
+        when(webDriver.getCurrentUrl()).thenReturn("http://www.example.com/relative/path");
 
         setVariableSteps.savePathFromUrl(VARIABLE_SCOPE, VARIABLE_NAME);
 
-        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, PATH);
+        verify(bddVariableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, "/relative/path");
     }
 
     @Test
