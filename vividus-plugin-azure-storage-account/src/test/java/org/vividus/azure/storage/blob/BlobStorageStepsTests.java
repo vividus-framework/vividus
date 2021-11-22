@@ -17,13 +17,11 @@
 package org.vividus.azure.storage.blob;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
-import static java.util.Optional.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.argThat;
@@ -32,6 +30,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -58,6 +57,8 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.lang3.function.FailableBiConsumer;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -69,7 +70,6 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.azure.storage.blob.model.BlobFilter;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
@@ -205,20 +205,17 @@ class BlobStorageStepsTests
     static Stream<Arguments> matchingParametersToBlobs()
     {
         return Stream.of(
-                arguments(Optional.of(StringComparisonRule.MATCHES), Optional.of(".*d"), List.of(SECOND, THIRD)),
-                arguments(empty(), empty(), List.of(FIRST, SECOND, THIRD))
+                arguments(Matchers.matchesRegex(".*d"), List.of(SECOND, THIRD)),
+                arguments(null, List.of(FIRST, SECOND, THIRD))
         );
     }
 
     @ParameterizedTest
     @MethodSource("matchingParametersToBlobs")
-    void shouldListFilteredBlobs(Optional<StringComparisonRule> rule, Optional<String> name, List<String> expectedBlobs)
+    void shouldListFilteredBlobs(Matcher<String> blobNameMatcher, List<String> expectedBlobs)
     {
-        var filter = new BlobFilter();
-        filter.setBlobNameFilterRule(rule);
-        filter.setBlobNameFilterValue(name);
         var prefix = "datasets/";
-        filter.setBlobNamePrefix(Optional.of(prefix));
+        var filter = new BlobFilter(Optional.of(prefix), Optional.ofNullable(blobNameMatcher), Optional.empty());
 
         runWithClient((steps, client) ->
         {
@@ -236,11 +233,8 @@ class BlobStorageStepsTests
     @Test
     void shouldListFilteredBlobsWithLimitAndWithoutPrefix()
     {
-        var filter = new BlobFilter();
-        filter.setBlobNameFilterRule(Optional.of(StringComparisonRule.MATCHES));
-        filter.setBlobNameFilterValue(Optional.of(".*"));
         int limit = 2;
-        filter.setResultsLimit(Optional.of(limit));
+        var filter = new BlobFilter(Optional.empty(), Optional.of(Matchers.matchesRegex(".*")), Optional.of(limit));
 
         runWithClient((steps, client) ->
         {
@@ -252,6 +246,7 @@ class BlobStorageStepsTests
             ListBlobsOptions options = testBlobsSearch(steps, client, blobItems, filter, List.of(FIRST, SECOND));
             assertEquals(limit, options.getMaxResultsPerPage());
             assertNull(options.getPrefix());
+            verifyNoInteractions(blobItem3);
         });
     }
 
@@ -272,31 +267,6 @@ class BlobStorageStepsTests
         verify(bddVariableContext).putVariable(SCOPES, VARIABLE, expectedBlobs);
 
         return optionsCaptor.getValue();
-    }
-
-    static Stream<Arguments> parametersToFailValidation()
-    {
-        var relatedFilterMessage = "Should be specified together: 'blobNameFilterRle' and 'blobNameFilterValue'";
-        return Stream.of(
-                arguments(empty(), empty(), "At least one filter must be present"),
-                arguments(Optional.of(StringComparisonRule.CONTAINS), empty(), relatedFilterMessage),
-                arguments(empty(), Optional.of(FIRST), relatedFilterMessage)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("parametersToFailValidation")
-    @SuppressWarnings("unchecked")
-    void shouldFailWithoutRelatedFilter(Optional<StringComparisonRule> rule, Optional<String> name, String message)
-    {
-        BlobFilter filter = new BlobFilter();
-        filter.setBlobNameFilterRule(rule);
-        filter.setBlobNameFilterValue(name);
-        BlobStorageSteps steps = new BlobStorageSteps(storageAccountEndpoints, tokenCredential, bddVariableContext,
-                jsonUtils);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> steps.findBlobs(filter, CONTAINER, KEY, SCOPES, VARIABLE));
-        assertEquals(message, exception.getMessage());
     }
 
     private BlobItem blobItem(String name)

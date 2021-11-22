@@ -44,7 +44,6 @@ import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.azure.storage.blob.model.BlobFilter;
 import org.vividus.bdd.context.IBddVariableContext;
 import org.vividus.bdd.steps.DataWrapper;
 import org.vividus.bdd.steps.StringComparisonRule;
@@ -279,7 +278,6 @@ public class BlobStorageSteps
     public void findBlobs(BlobFilter filter, String containerName, String storageAccountKey, Set<VariableScope> scopes,
             String variableName)
     {
-        filter.validate();
         BlobContainerClient blobContainerClient = createBlobContainerClient(containerName, storageAccountKey);
 
         ListBlobsOptions options = new ListBlobsOptions();
@@ -295,10 +293,8 @@ public class BlobStorageSteps
                 .map(PagedResponse::getValue)
                 .flatMap(List::stream)
                 .map(BlobItem::getName);
-        Stream<String> filteredBlobNames = filter.getBlobNameFilterValue()
-                .map(value -> blobNames.filter(
-                        name -> filter.getBlobNameFilterRule().get().createMatcher(value).matches(name)
-                ))
+        Stream<String> filteredBlobNames = filter.getBlobNameMatcher()
+                .map(matcher -> blobNames.filter(matcher::matches))
                 .orElse(blobNames);
 
         List<String> result = filter.getResultsLimit()
