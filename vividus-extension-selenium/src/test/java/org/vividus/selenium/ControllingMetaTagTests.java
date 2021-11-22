@@ -16,190 +16,88 @@
 
 package org.vividus.selenium;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.jbehave.core.model.Meta;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ControllingMetaTagTests
 {
-    private static final String VERSION = "version";
-    private static final String VERSION_NUMBER = "10";
     private static final String PROXY = "proxy";
-    private static final String APPIUM_VERSION = "appiumVersion";
-
-    @Mock private DesiredCapabilities desiredCapabilities;
-    @Mock private Meta meta;
-    @Mock private Meta metaSecond;
-
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(ControllingMetaTag.class);
 
     @Test
-    void testGetMetaTagName()
+    void shouldNotSetCapabilityForProxy()
     {
-        assertEquals(VERSION, ControllingMetaTag.VERSION.getMetaTagName());
-    }
-
-    @Test
-    void testSetCapabilityIf()
-    {
-        when(meta.getOptionalProperty(VERSION)).thenReturn(Optional.of(VERSION_NUMBER));
-        ControllingMetaTag.VERSION.setCapability(desiredCapabilities, meta);
-        verify(meta).getOptionalProperty(VERSION);
-        verify(desiredCapabilities).setCapability(VERSION, VERSION_NUMBER);
-        assertThat(logger.getLoggingEvents(), is(List.of(
-                warn("Setting of capability via meta tag '{}' is deprecated and will be removed in VIVIDUS 0.4.0, "
-                        + "please, use 'capability.{}' meta tag instead", VERSION, VERSION))));
-    }
-
-    @Test
-    void testSetCapabilityIfPropertyNotPresented()
-    {
-        when(meta.getOptionalProperty(VERSION)).thenReturn(Optional.empty());
-        ControllingMetaTag.VERSION.setCapability(desiredCapabilities, meta);
-        verify(meta).getOptionalProperty(VERSION);
-        verifyNoInteractions(desiredCapabilities);
-    }
-
-    @Test
-    void testProxySetCapability()
-    {
+        var meta = mock(Meta.class);
+        var desiredCapabilities = mock(DesiredCapabilities.class);
         ControllingMetaTag.PROXY.setCapability(desiredCapabilities, meta);
         verifyNoInteractions(desiredCapabilities, meta);
     }
 
     @Test
-    void testIsContainedInImpl()
+    void shouldContainProxyMetaTag()
     {
-        when(meta.getOptionalProperty(VERSION)).thenReturn(Optional.of(VERSION_NUMBER));
-        assertTrue(ControllingMetaTag.VERSION.isContainedInImpl(meta));
+        var meta = new Meta(List.of(PROXY));
+        assertTrue(ControllingMetaTag.PROXY.isContainedIn(meta));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "capability.version 96, true",
+            "version 96, false"
+    })
+    void testIsAnyContainedIn(String metaProperty, boolean expectedResult)
+    {
+        var meta = new Meta(List.of(metaProperty));
+        assertEquals(expectedResult, ControllingMetaTag.isAnyContainedIn(meta));
     }
 
     @Test
-    void testIsContainedInImplPropertyNotPresented()
+    void shouldNotSetDesiredCapabilitiesFromMetaForUnknownTags()
     {
-        when(meta.getOptionalProperty(anyString())).thenReturn(Optional.empty());
-        assertFalse(ControllingMetaTag.VERSION.isContainedInImpl(meta));
-    }
-
-    @Test
-    void testProxyIsContainedInImpl()
-    {
-        when(meta.hasProperty(PROXY)).thenReturn(true);
-        assertTrue(ControllingMetaTag.PROXY.isContainedInImpl(meta));
-    }
-
-    @Test
-    void testProxyIsContainedInImplPropertyNotPresented()
-    {
-        when(meta.hasProperty(PROXY)).thenReturn(false);
-        assertFalse(ControllingMetaTag.PROXY.isContainedInImpl(meta));
-    }
-
-    @Test
-    void testIsContainedIn()
-    {
-        when(meta.getOptionalProperty(VERSION)).thenReturn(Optional.of(VERSION_NUMBER));
-        assertTrue(ControllingMetaTag.VERSION.isContainedIn(meta, metaSecond));
-    }
-
-    @Test
-    void testIsContainedInPropertyNotPresented()
-    {
-        when(meta.getOptionalProperty(VERSION)).thenReturn(Optional.empty());
-        when(metaSecond.getOptionalProperty(VERSION)).thenReturn(Optional.empty());
-        assertFalse(ControllingMetaTag.VERSION.isContainedIn(meta, metaSecond));
-    }
-
-    @Test
-    void testIsAnyContainedIn()
-    {
-        when(meta.getOptionalProperty(anyString())).thenReturn(Optional.empty());
-        when(meta.getOptionalProperty(VERSION)).thenReturn(Optional.empty());
-        when(meta.getOptionalProperty(APPIUM_VERSION)).thenReturn(Optional.of("1.8.1"));
-        assertTrue(ControllingMetaTag.isAnyContainedIn(meta));
-    }
-
-    @Test
-    void testIsAnyContainedInPropertyNotPresented()
-    {
-        when(meta.getOptionalProperty(anyString())).thenReturn(Optional.empty());
-        when(meta.getOptionalProperty(VERSION)).thenReturn(Optional.empty());
-        when(meta.getOptionalProperty(APPIUM_VERSION)).thenReturn(Optional.empty());
-        assertFalse(ControllingMetaTag.isAnyContainedIn(meta));
-    }
-
-    @Test
-    void testSetDesiredCapabilitiesFromMeta()
-    {
-        when(meta.getOptionalProperty(anyString())).thenReturn(Optional.empty());
-        when(meta.getOptionalProperty(VERSION)).thenReturn(Optional.of(VERSION_NUMBER));
+        var meta = new Meta(List.of(PROXY, "browserName Chrome"));
+        var desiredCapabilities = mock(DesiredCapabilities.class);
         ControllingMetaTag.setDesiredCapabilitiesFromMeta(desiredCapabilities, meta);
-        verify(meta).getOptionalProperty(VERSION);
-        verify(desiredCapabilities).setCapability(VERSION, VERSION_NUMBER);
-    }
-
-    @Test
-    void testSetDesiredCapabilitiesFromMetaPropertyNotPresented()
-    {
-        when(meta.getOptionalProperty(anyString())).thenReturn(Optional.empty());
-        ControllingMetaTag.setDesiredCapabilitiesFromMeta(desiredCapabilities, meta);
-        verify(meta).getOptionalProperty(VERSION);
         verify(desiredCapabilities).asMap();
         verifyNoMoreInteractions(desiredCapabilities);
     }
 
     @Test
-    void testSetDesiredCapabilitiesFromCapabilityMeta()
+    void shouldSetDesiredCapabilitiesFromCapabilityMeta()
     {
-        String prefix = ControllingMetaTag.CAPABILITY.getMetaTagName();
-        String groupPrefix = "group.";
-        String acceptInsecureCerts = "acceptInsecureCerts";
-        Map<String, String> metaValues = Map.of(
-                prefix + APPIUM_VERSION, VERSION_NUMBER,
-                prefix + VERSION, VERSION_NUMBER,
-                prefix + acceptInsecureCerts, Boolean.TRUE.toString(),
-                prefix + groupPrefix + APPIUM_VERSION, VERSION_NUMBER,
-                prefix + groupPrefix + VERSION, VERSION_NUMBER,
-                prefix + groupPrefix + acceptInsecureCerts, Boolean.TRUE.toString()
-        );
-        when(meta.getPropertyNames()).thenReturn(metaValues.keySet());
-        metaValues.forEach((name, value) -> when(meta.getProperty(name)).thenReturn(value));
+        var meta = new Meta(List.of(
+                "capability.appiumVersion 1.20.1",
+                "capability.version 95",
+                "capability.acceptInsecureCerts true",
+                "capability.group.appiumVersion 1.22.0",
+                "capability.group.version 96",
+                "capability.group.acceptInsecureCerts false"
+        ));
         DesiredCapabilities capabilities = new DesiredCapabilities();
         ControllingMetaTag.CAPABILITY.setCapability(capabilities, meta);
+        var acceptInsecureCerts = "acceptInsecureCerts";
+        var version = "version";
+        var appiumVersion = "appiumVersion";
         assertEquals(Map.of(
             acceptInsecureCerts, true,
-            APPIUM_VERSION, VERSION_NUMBER,
-            VERSION, VERSION_NUMBER,
+            appiumVersion, "1.20.1",
+            version, "95",
             "group", Map.of(
-                        acceptInsecureCerts, true,
-                        APPIUM_VERSION, VERSION_NUMBER,
-                        VERSION, VERSION_NUMBER
+                        acceptInsecureCerts, false,
+                        appiumVersion, "1.22.0",
+                        version, "96"
                     )
         ), capabilities.asMap());
-        verifyNoMoreInteractions(meta);
     }
 }
