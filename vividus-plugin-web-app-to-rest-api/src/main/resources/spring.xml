@@ -21,10 +21,6 @@
                 <constructor-arg>
                     <bean parent="httpClientConfig">
                         <property name="circularRedirectsAllowed" value="${http.redirects-provider.circular-redirects-allowed}" />
-                        <property name="username"
-                            value="#{'${http.redirects-provider.credentials}'.length() == 0 ? null : T(org.apache.commons.lang3.StringUtils).split('${http.redirects-provider.credentials}', ':', 2)[0]}" />
-                        <property name="password"
-                            value="#{'${http.redirects-provider.credentials}'.length() == 0 ? null : T(org.apache.commons.lang3.StringUtils).split('${http.redirects-provider.credentials}', ':', 2)[1]}" />
                     </bean>
                 </constructor-arg>
             </bean>
