@@ -29,7 +29,7 @@ public class BlobFilter
     private Optional<String> blobNamePrefix = Optional.empty();
     private Optional<StringComparisonRule> blobNameFilterRule = Optional.empty();
     private Optional<String> blobNameFilterValue = Optional.empty();
-    private Optional<Long> resultsLimit = Optional.empty();
+    private Optional<Integer> resultsLimit = Optional.empty();
 
     public Optional<String> getBlobNamePrefix()
     {
@@ -61,22 +61,21 @@ public class BlobFilter
         this.blobNameFilterValue = blobNameFilterValue;
     }
 
-    public Optional<Long> getResultsLimit()
+    public Optional<Integer> getResultsLimit()
     {
         return resultsLimit;
     }
 
-    public void setResultsLimit(Optional<Long> resultsLimit)
+    public void setResultsLimit(Optional<Integer> resultsLimit)
     {
         this.resultsLimit = resultsLimit;
     }
 
     public void validate()
     {
-        isTrue(getResultsLimit().isPresent() || getBlobNameFilterValue().isPresent()
-                        || getBlobNameFilterRule().isPresent() || getBlobNamePrefix().isPresent(),
-                "At least one filter must be present");
         isTrue(getBlobNameFilterValue().isPresent() == getBlobNameFilterRule().isPresent(),
                 "Should be specified together: 'blobNameFilterRle' and 'blobNameFilterValue'");
+        isTrue(getResultsLimit().isPresent() || getBlobNameFilterRule().isPresent() || getBlobNamePrefix().isPresent(),
+                "At least one filter must be present");
     }
 }

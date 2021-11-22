@@ -19,11 +19,11 @@ package org.vividus.azure.storage.blob;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.rest.PagedIterable;
@@ -56,6 +56,7 @@ import org.vividus.util.property.PropertyMappedCollection;
 public class BlobStorageSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlobStorageSteps.class);
+    private static final int DEFAULT_MAX_RESULTS_PER_PAGE = 1000;
 
     private final PropertyMappedCollection<String> storageAccountEndpoints;
     private final TokenCredential credential;
@@ -275,66 +276,37 @@ public class BlobStorageSteps
      */
     @When("I filter blobs by:$filter in container `$containerName` of storage account `$storageAccountKey`"
             + " and save result to $scopes variable `$variableName`")
-    public void findBlobsByFilter(BlobFilter filter, String containerName,
-                                      String storageAccountKey, Set<VariableScope> scopes, String variableName)
+    public void findBlobs(BlobFilter filter, String containerName, String storageAccountKey, Set<VariableScope> scopes,
+            String variableName)
     {
         filter.validate();
         BlobContainerClient blobContainerClient = createBlobContainerClient(containerName, storageAccountKey);
-        bddVariableContext.putVariable(scopes, variableName, getLimitedBlobNames(blobContainerClient, filter));
-    }
 
-    private static List<String> getLimitedBlobNames(BlobContainerClient blobContainerClient, BlobFilter filter)
-    {
-        return filter.getResultsLimit()
-                .map(limit -> {
-                    ListBlobsOptions options = new ListBlobsOptions();
-                    options.setMaxResultsPerPage(limit.intValue());
-                    return filter.getBlobNamePrefix()
-                            .map(options::setPrefix)
-                            .map(opts -> getLimitPerPage(filter, limit,
-                                    blobContainerClient.listBlobsByHierarchy("/", opts, null)))
-                            .orElseGet(
-                                () -> getLimitPerPage(filter, limit,
-                                        blobContainerClient.listBlobs(options, null)));
-                })
-                .orElseGet(
-                    () -> filter.getBlobNamePrefix()
-                        .map(blobContainerClient::listBlobsByHierarchy)
-                        .orElseGet(blobContainerClient::listBlobs)
-                        .stream()
-                        .map(BlobItem::getName)
-                        .filter(filterMatched(filter))
-                        .collect(Collectors.toList())
-                );
-    }
+        ListBlobsOptions options = new ListBlobsOptions();
+        filter.getBlobNamePrefix().ifPresent(options::setPrefix);
+        options.setMaxResultsPerPage(
+                filter.getResultsLimit()
+                        .map(limit -> Math.min(limit, DEFAULT_MAX_RESULTS_PER_PAGE))
+                        .orElse(DEFAULT_MAX_RESULTS_PER_PAGE)
+        );
 
-    private static List<String> getLimitPerPage(BlobFilter filter, Long limit, PagedIterable<BlobItem> pages)
-    {
-        List<String> blobNames = new ArrayList<>();
-        for (PagedResponse<BlobItem> page : pages.iterableByPage())
-        {
-            if (blobNames.size() < limit)
-            {
-                LOGGER.info("Blob Items on page: {}", page.getContinuationToken());
-                page.getValue()
-                        .stream()
-                        .map(BlobItem::getName)
-                        .filter(filterMatched(filter))
-                        .forEach(blobNames::add);
-            }
-            else
-            {
-                break;
-            }
-        }
-        return blobNames.stream().limit(limit).collect(Collectors.toList());
-    }
+        PagedIterable<BlobItem> blobItems = blobContainerClient.listBlobs(options, null);
+        Stream<String> blobNames = StreamSupport.stream(blobItems.iterableByPage().spliterator(), false)
+                .map(PagedResponse::getValue)
+                .flatMap(List::stream)
+                .map(BlobItem::getName);
+        Stream<String> filteredBlobNames = filter.getBlobNameFilterValue()
+                .map(value -> blobNames.filter(
+                        name -> filter.getBlobNameFilterRule().get().createMatcher(value).matches(name)
+                ))
+                .orElse(blobNames);
 
-    private static Predicate<String> filterMatched(BlobFilter filter)
-    {
-        return name -> filter.getBlobNameFilterValue()
-                    .map(value -> filter.getBlobNameFilterRule().get().createMatcher(value).matches(name))
-                    .orElse(true);
+        List<String> result = filter.getResultsLimit()
+                .map(filteredBlobNames::limit)
+                .orElse(filteredBlobNames)
+                .collect(Collectors.toList());
+
+        bddVariableContext.putVariable(scopes, variableName, result);
     }
 
     private BlobContainerClient createBlobContainerClient(String containerName, String storageAccountKey)

@@ -171,18 +171,19 @@ When I find all blobs with name which contains `json` in container `vividus` of 
 
 ==== Find blobs by filter
 
-Find blobs with names filtered by the specified rules in the container.
-At least one rule is required.
+Finds blobs with names filtered by the specified rules in the container.
+
+NOTE: At least one rule is required.
 
 [source,gherkin]
 ----
 When I filter blobs by:$filter in container `$containerName` of storage account `$storageAccountKey` and save result to $scopes variable `$variableName`
 ----
 
-* `$filter` - Table with filter rules to apply on blob names.
+* `$filter` - `ExamplesTable` with filter rules to apply on blob names.
 +
 .The supported filter rules
-[cols="1,1,2", options="header"]
+[cols="1,2,1", options="header"]
 |===
 |Filter
 |Description
@@ -193,17 +194,17 @@ When I filter blobs by:$filter in container `$containerName` of storage account 
 |`path/to/data/` (equal to `/path/to/data`)
 
 |`resultsLimit`
-|Maximum number of blob names to return.
+|The maximum number of blob names to return.
 |`10`
 
 |`blobNameFilterRule`
 |xref:parameters:string-comparison-rule.adoc[The blob name comparison rule].
-Should be specified along with ```blobNameFilterValue```.
+It should be specified along with `blobNameFilterValue`.
 |`MATCHES`
 
 |`blobNameFilterValue`
 |The full or partial blob name to be matched.
-Should be specified along with ```blobNameFilterRule```.
+It should be specified along with `blobNameFilterRule`.
 |`.*`
 |===
 
