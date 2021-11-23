@@ -32,10 +32,10 @@ class ViewportPastingScreenshotShootingStrategyTests
     private final ViewportPastingScreenshotShootingStrategy strategy = new ViewportPastingScreenshotShootingStrategy();
 
     @Test
-    void shouldCreageAdjustingViewportPastingDecorator() throws IllegalAccessException, InvocationTargetException,
+    void shouldCreateAdjustingViewportPastingDecorator() throws IllegalAccessException, InvocationTargetException,
         NoSuchMethodException
     {
-        ShootingStrategy shootingStrategy = strategy.getDecoratedShootingStrategy(null, false, null);
+        ShootingStrategy shootingStrategy = strategy.getDecoratedShootingStrategy(null);
         assertThat(shootingStrategy,
                 instanceOf(AdjustingViewportPastingDecorator.class));
         assertEquals("0", BeanUtils.getProperty(shootingStrategy, "headerAdjustment"));

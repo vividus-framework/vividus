@@ -31,6 +31,6 @@ class SimpleScreenshotShootingStrategyTests
     void shouldReturnTheSameStrategy()
     {
         ShootingStrategy simple = ShootingStrategies.simple();
-        assertSame(simple, strategy.getDecoratedShootingStrategy(simple, false, null));
+        assertSame(simple, strategy.getDecoratedShootingStrategy(simple));
     }
 }

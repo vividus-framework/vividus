@@ -23,9 +23,8 @@ import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 public class ViewportPastingScreenshotShootingStrategy implements ScreenshotShootingStrategy
 {
     @Override
-    public ShootingStrategy getDecoratedShootingStrategy(ShootingStrategy shootingStrategy,
-        boolean landscape, String deviceName)
+    public ShootingStrategy getDecoratedShootingStrategy(ShootingStrategy shootingStrategy)
     {
-        return new AdjustingViewportPastingDecorator(shootingStrategy, 0).withScrollTimeout(SCROLL_TIMEOUT);
+        return new AdjustingViewportPastingDecorator(shootingStrategy, 0, 0).withScrollTimeout(SCROLL_TIMEOUT);
     }
 }
