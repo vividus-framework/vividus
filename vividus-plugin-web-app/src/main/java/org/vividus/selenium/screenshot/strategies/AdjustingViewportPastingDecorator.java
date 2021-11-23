@@ -44,11 +44,6 @@ public class AdjustingViewportPastingDecorator extends DebuggingViewportPastingD
         this.footerAdjustment = footerAdjustment;
     }
 
-    public AdjustingViewportPastingDecorator(ShootingStrategy strategy, int headerAdjustment)
-    {
-        this(strategy, headerAdjustment, 0);
-    }
-
     @Override
     public int getWindowHeight(WebDriver driver)
     {

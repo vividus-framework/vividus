@@ -33,7 +33,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.selenium.WebDriverProvider;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.selenium.mobileapp.screenshot.strategies.SimpleScreenshotShootingStrategy;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
@@ -53,7 +52,6 @@ class MobileAppAshotFactoryTests
     private static final String SIMPLE = "SIMPLE";
     private static final String DEFAULT = "DEFAULT";
 
-    @Mock private WebDriverProvider webDriverProvider;
     @Mock private MobileAppWebDriverManager mobileAppWebDriverManager;
     @Mock private CoordsProvider coordsProvider;
     @InjectMocks private MobileAppAshotFactory ashotFactory;
@@ -98,7 +96,7 @@ class MobileAppAshotFactoryTests
         PropertyMappedCollection<ScreenshotConfiguration> ashotConfigurations = mock(PropertyMappedCollection.class);
         ashotFactory.setAshotConfigurations(ashotConfigurations);
         ashotFactory.setShootingStrategy(DEFAULT);
-        ashotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy(), DIMPLE, (s, l, d) -> {
+        ashotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy(), DIMPLE, s -> {
             throw new IllegalStateException();
         }));
         when(ashotConfigurations.getNullable(DEFAULT)).thenReturn(createConfigurationWith(5,

@@ -52,7 +52,7 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfig
             return c;
         }).get();
         ShootingStrategy strategy = getStrategyBy(ashotConfig.getShootingStrategy().get())
-            .getDecoratedShootingStrategy(getBaseShootingStrategy(), false, null);
+            .getDecoratedShootingStrategy(getBaseShootingStrategy());
         strategy = configureNativePartialsToCut(mobileAppWebDriverManager.getStatusBarSize(), ashotConfig, strategy);
         return new AShot().shootingStrategy(strategy).coordsProvider(coordsProvider);
     }

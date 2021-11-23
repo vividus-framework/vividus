@@ -68,9 +68,6 @@
 
     <bean id="SIMPLE" class="org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy" />
     <bean id="VIEWPORT_PASTING" class="org.vividus.selenium.screenshot.strategies.ViewportPastingScreenshotShootingStrategy" />
-    <bean id="DEVICE_DEPENDENT" class="org.vividus.selenium.screenshot.strategies.DeviceDependentScreenshotShootingStrategy" />
-    <bean id="PHONE_ANDROID_PORTRAIT" class="org.vividus.selenium.screenshot.strategies.PhoneAndroidScreenshotShootingStrategy" />
-    <bean id="PHONE_ANDROID_LANDSCAPE" class="org.vividus.selenium.screenshot.strategies.PhoneAndroidScreenshotShootingStrategy" />
 
     <bean id="scrollbarHandler" class="org.vividus.selenium.screenshot.ScrollbarHandler">
         <property name="webDriverManager" ref="webDriverManager" />

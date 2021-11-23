@@ -20,9 +20,6 @@ import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.cutting;
 
 import java.util.Optional;
 
-import org.openqa.selenium.ScreenOrientation;
-import org.vividus.selenium.IWebDriverFactory;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
 import org.vividus.selenium.screenshot.strategies.AdjustingViewportPastingDecorator;
 import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
@@ -30,27 +27,21 @@ import org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrate
 import org.vividus.selenium.screenshot.strategies.StickyHeaderCutStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
-import io.appium.java_client.remote.MobileCapabilityType;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
 public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotConfiguration>
 {
-    private final IWebDriverFactory webDriverFactory;
-    private final IWebDriverManager webDriverManager;
     private final ScreenshotDebugger screenshotDebugger;
     private final IScrollbarHandler scrollbarHandler;
     private final WebJavascriptActions javascriptActions;
     private String screenshotShootingStrategy;
 
-    protected WebAshotFactory(WebJavascriptActions javascriptActions, IWebDriverFactory webDriverFactory,
-            IWebDriverManager webDriverManager, ScreenshotDebugger screenshotDebugger,
+    protected WebAshotFactory(WebJavascriptActions javascriptActions, ScreenshotDebugger screenshotDebugger,
             IScrollbarHandler scrollbarHandler)
     {
         this.javascriptActions = javascriptActions;
-        this.webDriverFactory = webDriverFactory;
-        this.webDriverManager = webDriverManager;
         this.screenshotDebugger = screenshotDebugger;
         this.scrollbarHandler = scrollbarHandler;
     }
@@ -103,11 +94,8 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotConfigura
     private AShot createAShot(String screenshotShootingStrategyName)
     {
         ScreenshotShootingStrategy configured = getStrategyBy(screenshotShootingStrategyName);
-        String deviceName = webDriverFactory.getCapability(MobileCapabilityType.DEVICE_NAME, false);
-        boolean landscapeOrientation = webDriverManager.isOrientation(ScreenOrientation.LANDSCAPE);
         ShootingStrategy baseShootingStrategy = getBaseShootingStrategy();
-        ShootingStrategy shootingStrategy = configured.getDecoratedShootingStrategy(
-                baseShootingStrategy, landscapeOrientation, deviceName);
+        ShootingStrategy shootingStrategy = configured.getDecoratedShootingStrategy(baseShootingStrategy);
         return new ScrollbarHidingAshot(Optional.empty(), scrollbarHandler).shootingStrategy(shootingStrategy)
                 .coordsProvider(configured instanceof SimpleScreenshotShootingStrategy
                         ? CeilingJsCoordsProvider.getSimple(javascriptActions)
