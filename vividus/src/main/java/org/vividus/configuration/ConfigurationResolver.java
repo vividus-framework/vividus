@@ -82,17 +82,17 @@ public final class ConfigurationResolver
 
         Properties properties = new Properties();
         properties.putAll(configurationProperties);
-        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively("defaults"));
-        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(ROOT));
+        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, "defaults"));
+        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, ROOT));
 
         Multimap<String, String> configuration = assembleConfiguration(configurationProperties, overridingProperties);
         for (Entry<String, String> configurationEntry : configuration.entries())
         {
-            properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(configurationEntry.getKey(),
+            properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, configurationEntry.getKey(),
                     configurationEntry.getValue()));
         }
 
-        Properties deprecatedProperties = propertiesLoader.loadFromResourceTreeRecursively("deprecated");
+        Properties deprecatedProperties = propertiesLoader.loadFromResourceTreeRecursively(false, "deprecated");
         DeprecatedPropertiesHandler deprecatedPropertiesHandler = new DeprecatedPropertiesHandler(
                 deprecatedProperties, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
         deprecatedPropertiesHandler.replaceDeprecated(properties);
@@ -303,10 +303,12 @@ public final class ConfigurationResolver
             return resource.exists() ? loadProperties(resource) : new Properties();
         }
 
-        Properties loadFromResourceTreeRecursively(String... resourcePathParts) throws IOException
+        Properties loadFromResourceTreeRecursively(boolean failOnMissingResource, String... resourcePathParts)
+                throws IOException
         {
             String resourcePath = String.join(DELIMITER, resourcePathParts);
-            List<Resource> propertyResources = collectResourcesRecursively(resourcePatternResolver, resourcePath);
+            List<Resource> propertyResources = collectResourcesRecursively(resourcePatternResolver, resourcePath,
+                    failOnMissingResource);
             LOGGER.info("Loading properties from /{}", resourcePath);
             Properties loadedProperties = loadProperties(propertyResources.toArray(new Resource[0]));
             loadedProperties.forEach((key, value) -> LOGGER.debug("{}=={}", key, value));
@@ -314,7 +316,7 @@ public final class ConfigurationResolver
         }
 
         private static List<Resource> collectResourcesRecursively(ResourcePatternResolver resourcePatternResolver,
-                String resourcePath) throws IOException
+                String resourcePath, boolean failOnMissingResource) throws IOException
         {
             List<Resource> propertyResources = new LinkedList<>();
             StringBuilder path = new StringBuilder(ROOT_LOCATION);
@@ -329,9 +331,9 @@ public final class ConfigurationResolver
                 {
                     path.append(DELIMITER);
                 }
-                String resourceLocation = path.toString() + "*.properties";
+                String resourceLocation = path + "*.properties";
                 Resource[] resources = resourcePatternResolver.getResources(resourceLocation);
-                if (deepestLevel && resources.length == 0)
+                if (deepestLevel && resources.length == 0 && failOnMissingResource)
                 {
                     throw new IllegalStateException(
                             "No files with properties were found at location with pattern: " + resourceLocation);
