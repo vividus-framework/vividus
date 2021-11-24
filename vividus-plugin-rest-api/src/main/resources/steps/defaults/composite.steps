@@ -1,13 +1,17 @@
 Composite: When I send HTTP $httpMethod to the relative URL '$relativeURL' with content: '$content'
 Priority: 1
+!-- WARNING: The step "When I send HTTP $httpMethod to the relative URL '$relativeURL' with content: '$content'" is deprecated and will be removed in VIVIDUS 0.5.0
 Given request body: <content>
 When I send HTTP <httpMethod> to the relative URL '<relativeURL>'
 
 Composite: Then a JSON element by the JSON path '$jsonPath' exists
+!-- WARNING: The step "Then a JSON element by the JSON path '$jsonPath' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of JSON elements by JSON path `<jsonPath>` is > 0
 
 Composite: When I save a JSON element from response by JSON path '$jsonPath' to $scopes variable '$variableName'
+!-- WARNING: The step "When I save a JSON element from response by JSON path '$jsonPath' to $scopes variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I save JSON element from `${response}` by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
 
 Composite: When I save JSON element from response by JSON path `$jsonPath` to $scopes variable `$variableName`
+!-- WARNING: The step "When I save a JSON element from response by JSON path '$jsonPath' to $scopes variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I save JSON element from `${response}` by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
