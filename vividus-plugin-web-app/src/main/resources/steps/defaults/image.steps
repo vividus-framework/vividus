@@ -1,44 +1,58 @@
 Composite: When I hover a mouse over an image with the src '$src'
+!-- WARNING: The step "When I hover a mouse over an image with the src '$src'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I hover a mouse over an element with the xpath './/img[@src='<src>']'
 
 Composite: When I hover a mouse over an image with the tooltip '$tooltipImage'
+!-- WARNING: The step "When I hover a mouse over an image with the tooltip '$tooltipImage'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I hover a mouse over an element with the xpath './/img[@alt='<tooltipImage>' or @title='<tooltipImage>']'
 
 Composite: When I click on an image with the src '$src'
+!-- WARNING: The step "When I click on an image with the src '$src'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I click on an element by the xpath './/img[@src='<src>']'
 
 Composite: When I click on an image with the name '$imageName'
+!-- WARNING: The step "When I click on an image with the name '$imageName'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I click on an element by the xpath './/img[@*='<imageName>' or text()='<imageName>']'
 
 Composite: Then an image with the src '$src' exists
+!-- WARNING: The step "Then an image with the src '$src' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[@src='<src>'])` is equal to `1`
 
 Composite: Then a [$state] image with the src '$src' exists
+!-- WARNING: The step "Then a [$state] image with the src '$src' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[@src='<src>'])->filter.state(<state>)` is equal to `1`
 
 Composite: Then an image with the src '$src' does not exist
+!-- WARNING: The step "Then an image with the src '$src' does not exist" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[@src='<src>'])` is equal to `0`
 
 Composite: Then an image with the src containing '$srcpart' exists
+!-- WARNING: The step "Then an image with the src containing '$srcpart' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[contains(@src,'<srcpart>')])` is equal to `1`
 
 Composite: Then an image with the tooltip '$tooltip' and src containing '$srcpart' exists
 Priority: 1
+!-- WARNING: The step "Then an image with the tooltip '$tooltip' and src containing '$srcpart' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[contains(@src,'<srcpart>') and (@alt='<tooltip>' or @title='<tooltip>')])` is equal to `1`
 
 Composite: Then an image with the src '$imageSrc' and tooltip '$tooltip' exists
 Priority: 1
+!-- WARNING: The step "Then an image with the src '$imageSrc' and tooltip '$tooltip' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[@src='<imageSrc>' and (@alt='<tooltip>' or @title='<tooltip>')])` is equal to `1`
 
 Composite: Then a [$state] image with the src '$imageSrc' and tooltip '$tooltip' exists
 Priority: 1
+!-- WARNING: The step "Then a [$state] image with the src '$imageSrc' and tooltip '$tooltip' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[@src='<imageSrc>' and (@alt='<tooltip>' or @title='<tooltip>')])->filter.state(<state>)` is equal to `1`
 
 Composite: Then a [$state] image with the src containing '$srcpart' exists
+!-- WARNING: The step "Then a [$state] image with the src containing '$srcpart' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[contains(@src,'<srcpart>')])->filter.state(<state>)` is equal to `1`
 
 Composite: Then a [$state] image with the tooltip '$tooltipImage' exists
+!-- WARNING: The step "Then a [$state] image with the tooltip '$tooltipImage' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[@alt='<tooltipImage>' or @title='<tooltipImage>'])->filter.state(<state>)` is equal to `1`
 
 Composite: Then an image with the tooltip '$tooltipImage' exists
+!-- WARNING: The step "Then an image with the tooltip '$tooltipImage' exists" is deprecated and will be removed in VIVIDUS 0.5.0
 Then number of elements found by `By.xpath(.//img[@alt='<tooltipImage>' or @title='<tooltipImage>'])` is equal to `1`
