@@ -6,14 +6,17 @@ Then number of elements found by `By.linkUrlPart(<URLpart>)` is equal to `1`
 
 Composite: When I change context to an element by the xpath '$xpath'
 Priority: 1
+!-- WARNING: The step "When I change context to an element by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I change context to element located `By.xpath(<xpath>)`
 
 Composite: When I change context to an element by the CSS selector '$cssSelector'
 Priority: 1
+!-- WARNING: The step "When I change context to an element by the CSS selector '$cssSelector'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I change context to element located `By.cssSelector(<cssSelector>)`
 
 Composite: When I change context to an element with the name '$name'
 Priority: 1
+!-- WARNING: The step "When I change context to an element with the name '$name'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I change context to element located `By.name(<name>)`
 
 Composite: Then the page title is '$pageTitle'
