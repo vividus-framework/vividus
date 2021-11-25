@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -57,7 +58,7 @@ import org.vividus.zephyr.model.TestCaseStatus;
 import uk.org.lidalia.slf4jext.Level;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
-public class TestCaseParserTests
+class TestCaseParserTests
 {
     private static final String JSON_FILES_STRING = "Json files: {}";
     private static final String TEST_CASES_STRING = "Test cases: {}";
@@ -66,17 +67,13 @@ public class TestCaseParserTests
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(TestCaseParser.class);
 
-    @Mock
-    private ZephyrExporterProperties zephyrExporterProperties;
-
-    @InjectMocks
-    private TestCaseParser testCaseParser;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Mock private ZephyrExporterProperties zephyrExporterProperties;
+    @InjectMocks private TestCaseParser testCaseParser;
 
     @Test
     void testConfigurationWithEmptyResultsToExport(@TempDir Path tempDir) throws IOException
     {
+        var objectMapper = new ObjectMapper();
         Path emptyDirectoryPath = tempDir.resolve("empty");
         Files.createDirectory(emptyDirectoryPath);
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(emptyDirectoryPath);
@@ -90,7 +87,7 @@ public class TestCaseParserTests
     @Test
     void testTestCaseWithEmptyKey() throws URISyntaxException
     {
-        configureObjectMapper();
+        var objectMapper = configureObjectMapper();
         Path sourceDirectory = Paths.get(getClass().getResource("/emptyKey/test-cases").toURI());
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -103,6 +100,7 @@ public class TestCaseParserTests
     @Test
     void testResultsProblemWithReading() throws URISyntaxException
     {
+        var objectMapper = new ObjectMapper();
         Path sourceDirectory = Paths.get(getClass().getResource("/exception/test-cases").toURI());
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -115,7 +113,7 @@ public class TestCaseParserTests
     @Test
     void testCreateTestCases() throws URISyntaxException, IOException
     {
-        configureObjectMapper();
+        var objectMapper = configureObjectMapper();
         Path sourceDirectory = Paths.get(getClass().getResource(RESOURCE_PATH).toURI());
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
         when(zephyrExporterProperties.getStatusesOfTestCasesToAddToExecution())
@@ -135,7 +133,7 @@ public class TestCaseParserTests
     @Test
     void testCreateTestCasesWithStatusFilter() throws URISyntaxException, IOException
     {
-        configureObjectMapper();
+        var objectMapper = configureObjectMapper();
         Path sourceDirectory = Paths.get(getClass().getResource(RESOURCE_PATH).toURI());
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
         when(zephyrExporterProperties.getStatusesOfTestCasesToAddToExecution())
@@ -151,10 +149,12 @@ public class TestCaseParserTests
         assertThat(events.size(), equalTo(3));
     }
 
-    private void configureObjectMapper()
+    private ObjectMapper configureObjectMapper()
     {
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
-        objectMapper.registerModule(new SimpleModule().addDeserializer(TestCase.class, new TestCaseDeserializer()));
+        return JsonMapper.builder()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+                .build()
+                .registerModule(new SimpleModule().addDeserializer(TestCase.class, new TestCaseDeserializer()));
     }
 }
