@@ -11,4 +11,5 @@ When I save `<attributeName>` attribute value of element located `<locator>` to 
 
 
 Composite: When I change context to the page
+!-- WARNING: The step "When I change context to the page" is deprecated and will be removed in VIVIDUS 0.5.0
 When I reset context
