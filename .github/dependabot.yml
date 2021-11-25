@@ -11,11 +11,6 @@ updates:
   - valfirst
   - ikalinin1
   - uarlouski
-  ignore:
-  - dependency-name: io.appium:java-client
-    versions:
-    - 7.5.0
-    - 7.5.1
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
