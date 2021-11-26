@@ -7,7 +7,7 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="csvSteps" class="org.vividus.bdd.steps.csv.CsvSteps" />
+    <bean id="csvSteps" class="org.vividus.steps.csv.CsvSteps" />
 
     <bean id="csvFormatFactory" class="org.vividus.csv.CsvFormatFactory">
         <constructor-arg type="char" value="${csv.delimiter-char:,}" />

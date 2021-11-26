@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN" packages="org.vividus.bdd.log">
+<Configuration status="WARN" packages="org.vividus.log">
     <Appenders>
         <Console name="console">
             <PatternLayout pattern="%highlight{%d [%t] %-5p %c - %m%n}" />
@@ -26,7 +26,7 @@
             <AppenderRef ref="file" />
             <AppenderRef ref="AllureLogAppender" />
         </Logger>
-        <Logger name="org.vividus.bdd.log" level="INFO" additivity="false">
+        <Logger name="org.vividus.log" level="INFO" additivity="false">
             <AppenderRef ref="console" />
             <AppenderRef ref="file" />
         </Logger>

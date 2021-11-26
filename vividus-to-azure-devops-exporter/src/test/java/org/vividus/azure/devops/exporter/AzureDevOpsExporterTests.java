@@ -45,9 +45,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.azure.devops.configuration.AzureDevOpsExporterOptions;
 import org.vividus.azure.devops.facade.AzureDevOpsFacade;
-import org.vividus.bdd.model.jbehave.Scenario;
-import org.vividus.bdd.model.jbehave.Step;
-import org.vividus.bdd.output.SyntaxException;
+import org.vividus.model.jbehave.Scenario;
+import org.vividus.model.jbehave.Step;
+import org.vividus.output.SyntaxException;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })

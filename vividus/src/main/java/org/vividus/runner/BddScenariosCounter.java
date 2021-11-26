@@ -52,7 +52,7 @@ public final class BddScenariosCounter
         CommandLine commandLine = parser.parse(options, args);
         if (commandLine.hasOption(helpOption.getOpt()))
         {
-            new HelpFormatter().printHelp("BddScenariosCounter", options);
+            new HelpFormatter().printHelp("ScenariosCounter", options);
             return;
         }
 
@@ -63,9 +63,9 @@ public final class BddScenariosCounter
         System.out.println("Story parsing may take up to 5 minutes. Please be patient.");
         JUnit4StoryRunner runner = new JUnit4StoryRunner(StoriesRunner.class);
 
-        print(getNumberOfChildren(runner.getDescription(), BDDLevel.STORY.getLevel()), "Stories");
-        print(getNumberOfChildren(runner.getDescription(), BDDLevel.SCENARIO.getLevel()), "Scenarios");
-        print(getNumberOfChildren(runner.getDescription(), BDDLevel.EXAMPLE.getLevel()), "Scenarios with Examples");
+        print(getNumberOfChildren(runner.getDescription(), Level.STORY.getLevel()), "Stories");
+        print(getNumberOfChildren(runner.getDescription(), Level.SCENARIO.getLevel()), "Scenarios");
+        print(getNumberOfChildren(runner.getDescription(), Level.EXAMPLE.getLevel()), "Scenarios with Examples");
     }
 
     private static int getNumberOfChildren(Description description, int level)
@@ -99,13 +99,13 @@ public final class BddScenariosCounter
         properties.put("bdd.story-loader.batch1.resource-exclude-patterns", "");
     }
 
-    private enum BDDLevel
+    private enum Level
     {
         STORY(1), SCENARIO(2), EXAMPLE(3);
 
         private final int level;
 
-        BDDLevel(int level)
+        Level(int level)
         {
             this.level = level;
         }

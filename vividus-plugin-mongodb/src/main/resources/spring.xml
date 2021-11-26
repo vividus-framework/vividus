@@ -6,7 +6,7 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        default-lazy-init="true">
 
-    <bean id="mongoDbSteps" class="org.vividus.bdd.steps.mongodb.MongoDbSteps">
+    <bean id="mongoDbSteps" class="org.vividus.steps.mongodb.MongoDbSteps">
         <constructor-arg index="0">
             <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
                 <constructor-arg value="mongodb.connection." />

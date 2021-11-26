@@ -70,12 +70,12 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.steps.DataWrapper;
-import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.steps.DataWrapper;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class BlobStorageStepsTests
@@ -94,7 +94,7 @@ class BlobStorageStepsTests
     private final TestLogger logger = TestLoggerFactory.getTestLogger(BlobStorageSteps.class);
 
     @Mock private PropertyMappedCollection<String> storageAccountEndpoints;
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
     @Mock private JsonUtils jsonUtils;
     @Mock private TokenCredential tokenCredential;
 
@@ -117,7 +117,7 @@ class BlobStorageStepsTests
                 return true;
             }));
             steps.downloadBlob(BLOB, CONTAINER, KEY, SCOPES, VARIABLE);
-            verify(bddVariableContext).putVariable(SCOPES, VARIABLE, DATA);
+            verify(variableContext).putVariable(SCOPES, VARIABLE, DATA);
         });
     }
 
@@ -130,7 +130,7 @@ class BlobStorageStepsTests
             BlobClient blobClient = mockBlobClient(client);
             steps.downloadBlobToFile(BLOB, CONTAINER, KEY, baseFileName, SCOPES, VARIABLE);
             verify(blobClient).downloadToFile(argThat(filename -> filename.contains(baseFileName)), eq(true));
-            verify(bddVariableContext).putVariable(eq(SCOPES), eq(VARIABLE),
+            verify(variableContext).putVariable(eq(SCOPES), eq(VARIABLE),
                     argThat(filename -> ((String) filename).contains(baseFileName)));
         });
     }
@@ -146,7 +146,7 @@ class BlobStorageStepsTests
             String blobPropertiesAsJson = "{\"blob\":\"properties\"}";
             when(jsonUtils.toJson(blobProperties)).thenReturn(blobPropertiesAsJson);
             steps.retrieveBlobProperties(BLOB, CONTAINER, KEY, SCOPES, VARIABLE);
-            verify(bddVariableContext).putVariable(SCOPES, VARIABLE, blobPropertiesAsJson);
+            verify(variableContext).putVariable(SCOPES, VARIABLE, blobPropertiesAsJson);
         });
     }
 
@@ -198,7 +198,7 @@ class BlobStorageStepsTests
             BlobItem third = blobItem(THIRD);
             when(iterable.stream()).thenReturn(Stream.of(first, second, third));
             steps.findBlobs(StringComparisonRule.CONTAINS, "s", CONTAINER, KEY, SCOPES, VARIABLE);
-            verify(bddVariableContext).putVariable(SCOPES, VARIABLE, List.of(FIRST, SECOND));
+            verify(variableContext).putVariable(SCOPES, VARIABLE, List.of(FIRST, SECOND));
         });
     }
 
@@ -264,7 +264,7 @@ class BlobStorageStepsTests
         when(client.listBlobs(optionsCaptor.capture(), isNull())).thenReturn(pagedIterable);
 
         steps.findBlobs(filter, CONTAINER, KEY, SCOPES, VARIABLE);
-        verify(bddVariableContext).putVariable(SCOPES, VARIABLE, expectedBlobs);
+        verify(variableContext).putVariable(SCOPES, VARIABLE, expectedBlobs);
 
         return optionsCaptor.getValue();
     }
@@ -292,7 +292,7 @@ class BlobStorageStepsTests
             BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
             when(blobServiceClient.getBlobContainerClient(CONTAINER)).thenReturn(blobContainerClient);
             BlobStorageSteps steps = new BlobStorageSteps(storageAccountEndpoints, tokenCredential,
-                    bddVariableContext, jsonUtils);
+                    variableContext, jsonUtils);
             testToRun.accept(steps, blobContainerClient);
             assertThat(serviceClientBuilder.constructed(), hasSize(1));
             BlobServiceClientBuilder builder = serviceClientBuilder.constructed().get(0);

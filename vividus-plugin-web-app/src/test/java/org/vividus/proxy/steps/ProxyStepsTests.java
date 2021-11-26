@@ -63,16 +63,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.DataWrapper;
-import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.proxy.IProxy;
 import org.vividus.proxy.model.HttpMessagePart;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.ComparisonRule;
+import org.vividus.steps.DataWrapper;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.variable.VariableScope;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -102,7 +102,7 @@ class ProxyStepsTests
     private static final Pattern URL_PATTERN = Pattern.compile(URL);
 
     @Mock private ISoftAssert nonFailingAssert;
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
     @Mock private IProxy proxy;
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private IWebWaitActions waitActions;
@@ -144,7 +144,7 @@ class ProxyStepsTests
                 Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
         verifySizeAssertion(message, 0, ComparisonRule.EQUAL_TO, 1);
         verify(attachmentPublisher).publishAttachment(data, "har.har");
-        verifyNoInteractions(bddVariableContext);
+        verifyNoInteractions(variableContext);
     }
 
     @SuppressWarnings("unchecked")
@@ -156,7 +156,7 @@ class ProxyStepsTests
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL_QUERY,
                 variableScopes, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value ->
+        verify(variableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value ->
             value.equals(Map.of(
                     KEY1, List.of(VALUE1, VALUE2),
                     KEY2, List.of(VALUE2)
@@ -172,7 +172,7 @@ class ProxyStepsTests
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL, variableScopes,
                 VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(variableScopes, VARIABLE_NAME, URL);
+        verify(variableContext).putVariable(variableScopes, VARIABLE_NAME, URL);
     }
 
     @SuppressWarnings("unchecked")
@@ -185,7 +185,7 @@ class ProxyStepsTests
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.REQUEST_DATA,
                 variableScopes, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value -> {
+        verify(variableContext).putVariable(eq(variableScopes), eq(VARIABLE_NAME), argThat(value -> {
             Map<String, Object> map = (Map<String, Object>) value;
             Map<String, List<String>> urlQuery = (Map<String, List<String>>) map.get("query");
             Map<String, String> requestBody = (Map<String, String>) map.get("requestBody");
@@ -210,7 +210,7 @@ class ProxyStepsTests
         ProxySteps spy = spy(proxySteps);
         Mockito.lenient().doReturn(List.of(mock(HarEntry.class), mock(HarEntry.class))).when(spy).checkNumberOfRequests(
                 EnumSet.of(httpMethod), URL_PATTERN, ComparisonRule.EQUAL_TO, 1);
-        verifyNoInteractions(bddVariableContext);
+        verifyNoInteractions(variableContext);
     }
 
     @ParameterizedTest

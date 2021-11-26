@@ -26,18 +26,18 @@ import org.apache.avro.io.DatumReader;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.util.ResourceUtils;
+import org.vividus.variable.VariableScope;
 
 public class AvroSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AvroSteps.class);
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
 
-    public AvroSteps(IBddVariableContext bddVariableContext)
+    public AvroSteps(VariableContext variableContext)
     {
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
     }
 
     /**
@@ -79,7 +79,7 @@ public class AvroSteps
                 json.append(dataRecord);
             }
             json.append(']');
-            bddVariableContext.putVariable(scopes, variableName, json.toString());
+            variableContext.putVariable(scopes, variableName, json.toString());
         }
     }
 }

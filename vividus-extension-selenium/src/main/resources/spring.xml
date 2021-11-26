@@ -9,10 +9,10 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" profile="web,mobile_app">
 
-    <context:component-scan base-package="org.vividus.bdd.converter.ui" >
-         <context:exclude-filter type="regex" expression="org\.vividus\.bdd\.converter\.ui\..*\..*"/>
+    <context:component-scan base-package="org.vividus.converter.ui" >
+         <context:exclude-filter type="regex" expression="org\.vividus\.converter\.ui\..*\..*"/>
     </context:component-scan>
-    <context:component-scan base-package="org.vividus.bdd.variable.ui"/>
+    <context:component-scan base-package="org.vividus.variable.ui"/>
 
     <bean id="parentWebDriverFactory" class="org.vividus.selenium.AbstractWebDriverFactory" abstract="true">
         <property name="remoteDriverUrl" value="${selenium.grid.url}" />
@@ -51,7 +51,7 @@
         <property name="waitActions" ref="waitActions" />
     </bean>
 
-    <bean id="abstractScreenshotOnFailureMonitor" class="org.vividus.bdd.monitor.AbstractScreenshotOnFailureMonitor"
+    <bean id="abstractScreenshotOnFailureMonitor" class="org.vividus.monitor.AbstractScreenshotOnFailureMonitor"
           abstract="true">
         <property name="debugModes" value="${screenshot.on-failure.debug-modes}" />
     </bean>
@@ -93,9 +93,9 @@
         <property name="captureTypes" value="${proxy.capture-types}"/>
     </bean>
 
-    <bean id="runContextStoryReporter" class="org.vividus.bdd.RunContextStoryReporter">
+    <bean id="runContextStoryReporter" class="org.vividus.RunContextStoryReporter">
         <property name="next">
-            <bean class="org.vividus.bdd.proxy.ProxyAgentStoryReporter">
+            <bean class="org.vividus.proxy.ProxyAgentStoryReporter">
                 <property name="proxyEnabled" value="${proxy.enabled}" />
                 <property name="proxyRecordingEnabled" value="${proxy.recording.enabled}" />
                 <property name="next" ref="reportControlStoryReporter" />
@@ -110,9 +110,9 @@
         <property name="testContext" ref="testContext" />
     </bean>
 
-    <bean class="org.vividus.bdd.steps.ui.validation.DescriptiveSoftAssert" parent="softAssert" />
+    <bean class="org.vividus.steps.ui.validation.DescriptiveSoftAssert" parent="softAssert" />
 
-    <bean class="org.vividus.bdd.steps.ui.validation.BaseValidations" />
+    <bean class="org.vividus.steps.ui.validation.BaseValidations" />
 
     <bean class="org.vividus.ui.action.search.ElementActionService" init-method="init"/>
 
@@ -127,14 +127,14 @@
 
     <bean class="org.vividus.selenium.screenshot.ScreenshotFileNameGenerator" />
 
-    <bean id="genericElementSteps" class="org.vividus.bdd.steps.ui.GenericElementSteps" />
-    <bean id="genericWaitSteps" class="org.vividus.bdd.steps.ui.GenericWaitSteps" />
-    <bean id="genericSetVariableSteps" class="org.vividus.bdd.steps.ui.GenericSetVariableSteps" />
-    <bean id="genericSetContextSteps" class="org.vividus.bdd.steps.ui.GenericSetContextSteps" />
-    <bean id="genericNestedSteps" class="org.vividus.bdd.steps.ui.GenericNestedSteps" />
-    <bean id="navigationSteps" class="org.vividus.bdd.steps.ui.NavigationSteps" />
-    <bean id="screenshotTakingSteps" class="org.vividus.bdd.steps.ui.ScreenshotTakingSteps" />
-    <bean id="barcodeSteps" class="org.vividus.bdd.steps.ui.BarcodeSteps" />
+    <bean id="genericElementSteps" class="org.vividus.steps.ui.GenericElementSteps" />
+    <bean id="genericWaitSteps" class="org.vividus.steps.ui.GenericWaitSteps" />
+    <bean id="genericSetVariableSteps" class="org.vividus.steps.ui.GenericSetVariableSteps" />
+    <bean id="genericSetContextSteps" class="org.vividus.steps.ui.GenericSetContextSteps" />
+    <bean id="genericNestedSteps" class="org.vividus.steps.ui.GenericNestedSteps" />
+    <bean id="navigationSteps" class="org.vividus.steps.ui.NavigationSteps" />
+    <bean id="screenshotTakingSteps" class="org.vividus.steps.ui.ScreenshotTakingSteps" />
+    <bean id="barcodeSteps" class="org.vividus.steps.ui.BarcodeSteps" />
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />
 
@@ -165,9 +165,9 @@
     </util:list>
 
     <util:map id="propertyEditors-UI" key-type="java.lang.Class">
-        <entry key="org.vividus.bdd.steps.WebDriverSessionScope">
+        <entry key="org.vividus.steps.WebDriverSessionScope">
             <bean class="org.vividus.beans.RelaxedEnumPropertyEditor">
-                <constructor-arg value="org.vividus.bdd.steps.WebDriverSessionScope" />
+                <constructor-arg value="org.vividus.steps.WebDriverSessionScope" />
             </bean>
         </entry>
         <entry key="org.vividus.model.IntegerRange">

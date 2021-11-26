@@ -20,7 +20,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.vividus.bdd.steps.ui.web.model.WebPerformanceMetric;
+import org.vividus.steps.ui.web.model.WebPerformanceMetric;
 import org.vividus.testcontext.TestContext;
 import org.vividus.ui.web.action.WebJavascriptActions;
 

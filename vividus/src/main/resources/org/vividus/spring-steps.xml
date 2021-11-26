@@ -7,19 +7,19 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean class="org.vividus.bdd.steps.SpringStepFactoryBeanPostProcessor" />
+    <bean class="org.vividus.steps.SpringStepFactoryBeanPostProcessor" />
 
-    <bean id="assertSteps" class="org.vividus.bdd.steps.AssertSteps" />
+    <bean id="assertSteps" class="org.vividus.steps.AssertSteps" />
 
-    <bean id="bddVariableSteps" class="org.vividus.bdd.steps.BddVariableSteps" />
+    <bean id="variablesSteps" class="org.vividus.steps.VariablesSteps" />
 
-    <bean id="freemarkerSteps" class="org.vividus.bdd.steps.FreemarkerSteps">
+    <bean id="freemarkerSteps" class="org.vividus.steps.FreemarkerSteps">
         <constructor-arg index="0" value="${template-processor.resolve-bdd-variables}" />
         <constructor-arg index="1">
             <bean parent="abstractFreemarkerConfig">
                 <property name="templateLoader">
                     <bean class="freemarker.cache.ClassTemplateLoader">
-                        <constructor-arg index="0" value="org.vividus.bdd.steps.FreemarkerSteps" />
+                        <constructor-arg index="0" value="org.vividus.steps.FreemarkerSteps" />
                         <constructor-arg index="1" value="/" />
                     </bean>
                 </property>
@@ -27,14 +27,14 @@
         </constructor-arg>
     </bean>
 
-    <bean id="debugSteps" class="org.vividus.bdd.steps.DebugSteps" />
-    <bean id="executableSteps" class="org.vividus.bdd.steps.ExecutableSteps" />
-    <bean id="fileSteps" class="org.vividus.bdd.steps.FileSteps" />
-    <bean id="setupSteps" class="org.vividus.bdd.steps.SetupSteps" />
+    <bean id="debugSteps" class="org.vividus.steps.DebugSteps" />
+    <bean id="executableSteps" class="org.vividus.steps.ExecutableSteps" />
+    <bean id="fileSteps" class="org.vividus.steps.FileSteps" />
+    <bean id="setupSteps" class="org.vividus.steps.SetupSteps" />
 
     <util:list id="stepBeanNames-Vividus">
         <idref bean="assertSteps" />
-        <idref bean="bddVariableSteps" />
+        <idref bean="variablesSteps" />
         <idref bean="fileSteps" />
         <idref bean="executableSteps" />
         <idref bean="setupSteps" />

@@ -50,15 +50,15 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class DynamoDbStepsTests
 {
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(DynamoDbSteps.class);
 
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
 
     @SuppressWarnings({ "try", "PMD.CloseResource" })
     @Test
@@ -98,7 +98,7 @@ class DynamoDbStepsTests
             String variableName = "var";
             steps.executeQuery(partiqlQuery, scopes, variableName);
             String expectedValue = "[{\"key1\":\"value1\"},{\"key2\":\"value2\"}]";
-            verify(bddVariableContext).putVariable(scopes, variableName, expectedValue);
+            verify(variableContext).putVariable(scopes, variableName, expectedValue);
         });
     }
 
@@ -116,7 +116,7 @@ class DynamoDbStepsTests
             ArgumentCaptor<ExecuteStatementRequest> captor = ArgumentCaptor.forClass(ExecuteStatementRequest.class);
             when(amazonDynamoDB.executeStatement(captor.capture())).thenReturn(result);
 
-            DynamoDbSteps steps = new DynamoDbSteps(roleArn, bddVariableContext);
+            DynamoDbSteps steps = new DynamoDbSteps(roleArn, variableContext);
             test.accept(steps);
 
             ExecuteStatementRequest request = captor.getValue();

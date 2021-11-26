@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.context.RunContext;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractTunnellingCapabilitiesConfigurerTests
@@ -50,7 +50,7 @@ class AbstractTunnellingCapabilitiesConfigurerTests
     @Captor private ArgumentCaptor<TunnelOptions> optionsCaptor;
     @Mock private DesiredCapabilities capabilities;
     @Mock private Consumer<String> tunnelIdConsumer;
-    @Mock private IBddRunContext bddRunContext;
+    @Mock private RunContext runContext;
     @Mock private TunnelManager<TunnelOptions> tunnelManager;
     @InjectMocks private TestTunnellingCapabilitiesConfigurer tunnellingConfigurer;
 
@@ -129,10 +129,10 @@ class AbstractTunnellingCapabilitiesConfigurerTests
     private static class TestTunnellingCapabilitiesConfigurer
             extends AbstractTunnellingCapabilitiesConfigurer<TunnelOptions>
     {
-        TestTunnellingCapabilitiesConfigurer(IBddRunContext bddRunContext,
+        TestTunnellingCapabilitiesConfigurer(RunContext runContext,
                 TunnelManager<TunnelOptions> tunnelManager)
         {
-            super(bddRunContext, tunnelManager);
+            super(runContext, tunnelManager);
         }
 
         @Override

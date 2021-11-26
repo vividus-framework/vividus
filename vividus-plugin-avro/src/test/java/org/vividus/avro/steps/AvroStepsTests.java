@@ -34,13 +34,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AvroStepsTests
 {
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
     @InjectMocks private AvroSteps avroSteps;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AvroSteps.class);
@@ -51,7 +51,7 @@ class AvroStepsTests
         var scopes = Set.of(VariableScope.STORY);
         var variableName = "varName";
         avroSteps.convertAvroDataToJson("/event-message.avro", scopes, variableName);
-        verify(bddVariableContext).putVariable(scopes, variableName, "[{\"SequenceNumber\": 0, \"Offset\": \"0\", "
+        verify(variableContext).putVariable(scopes, variableName, "[{\"SequenceNumber\": 0, \"Offset\": \"0\", "
                 + "\"EnqueuedTimeUtc\": \"11/5/2021 1:25:22 PM\", \"SystemProperties\": {\"x-opt-enqueued-time\": "
                 + "1636118722484}, \"Properties\": {}, \"Body\": \"my-data\"}]");
         assertThat(logger.getLoggingEvents(), is(List.of(info("Avro schema: {}", "{\"type\":\"record\","

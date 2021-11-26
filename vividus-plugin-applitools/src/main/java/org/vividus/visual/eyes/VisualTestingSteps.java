@@ -26,11 +26,11 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.visual.bdd.AbstractVisualSteps;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.service.VisualTestingService;
 import org.vividus.visual.model.VisualActionType;
+import org.vividus.visual.steps.AbstractVisualSteps;
 
 public class VisualTestingSteps extends AbstractVisualSteps
 {

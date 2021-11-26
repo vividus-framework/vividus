@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.vividus.selenium.browserstack;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.context.RunContext;
 import org.vividus.selenium.tunnel.AbstractTunnellingCapabilitiesConfigurer;
 import org.vividus.selenium.tunnel.TunnelOptions;
 
@@ -26,10 +26,10 @@ public class BrowserStackCapabilitiesConfigurer
 {
     private static final String BSTACK_OPTIONS = "bstack:options";
 
-    public BrowserStackCapabilitiesConfigurer(IBddRunContext bddRunContext,
+    public BrowserStackCapabilitiesConfigurer(RunContext runContext,
             BrowserStackLocalManager browserStackLocalManager)
     {
-        super(bddRunContext, browserStackLocalManager);
+        super(runContext, browserStackLocalManager);
     }
 
     @Override

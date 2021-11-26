@@ -29,10 +29,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.azure.cosmos.model.CosmosDbContainer;
-import org.vividus.bdd.context.BddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.softassert.SoftAssert;
 import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
 class CosmosDbStepsTests
@@ -50,7 +50,7 @@ class CosmosDbStepsTests
     private static final String CONTAINER = "container";
     private final CosmosDbContainer container = new CosmosDbContainer();
 
-    @Mock private BddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
     @Mock private PropertyMappedCollection<CosmosDbContainer> containers;
     @Mock private CosmosDbService cosmosDbService;
     @Mock private SoftAssert softAssert;
@@ -69,7 +69,7 @@ class CosmosDbStepsTests
     {
         when(cosmosDbService.executeQuery(container, QUERY)).thenReturn(RESULT);
         dbSteps.query(QUERY, CONTAINER, SCOPES, RESULT_SET);
-        verify(bddVariableContext).putVariable(SCOPES, RESULT_SET, RESULT);
+        verify(variableContext).putVariable(SCOPES, RESULT_SET, RESULT);
         verifyNoInteractions(softAssert);
     }
 
@@ -102,7 +102,7 @@ class CosmosDbStepsTests
     {
         when(cosmosDbService.readById(container, ID, PARTITION)).thenReturn(RESULT);
         dbSteps.read(ID, PARTITION, CONTAINER, SCOPES, RESULT_SET);
-        verify(bddVariableContext).putVariable(SCOPES, RESULT_SET, RESULT);
+        verify(variableContext).putVariable(SCOPES, RESULT_SET, RESULT);
         verifyNoInteractions(softAssert);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningStory;
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningStory;
 import org.vividus.selenium.tunnel.TunnelException;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +53,7 @@ class SauceLabsCapabilitiesConfigurerTests
 
     private static final String STORY_PATH = STORY_NAME + ".story";
 
-    @Mock private IBddRunContext bddRunContext;
+    @Mock private RunContext runContext;
     @Mock private SauceConnectManager sauceConnectManager;
     @InjectMocks private SauceLabsCapabilitiesConfigurer configurer;
 
@@ -121,7 +121,7 @@ class SauceLabsCapabilitiesConfigurerTests
         Story story = new Story(STORY_PATH, List.of());
         RunningStory runningStory = new RunningStory();
         runningStory.setStory(story);
-        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
+        when(runContext.getRootRunningStory()).thenReturn(runningStory);
     }
 
     private DesiredCapabilities mockDesiredCapabilities(Proxy proxy, Map<String, Object> sauceOptions)

@@ -29,20 +29,20 @@ import com.azure.resourcemanager.eventgrid.fluent.models.SystemTopicInner;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.azure.util.InnersJacksonAdapter;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.variable.VariableScope;
 
 public class EventGridManagementSteps
 {
     private final EventGridManager eventGridManager;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
     private final InnersJacksonAdapter innersJacksonAdapter;
 
     public EventGridManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            InnersJacksonAdapter innersJacksonAdapter, IBddVariableContext bddVariableContext)
+            InnersJacksonAdapter innersJacksonAdapter, VariableContext variableContext)
     {
         this.eventGridManager = EventGridManager.authenticate(tokenCredential, azureProfile);
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
         this.innersJacksonAdapter = innersJacksonAdapter;
     }
 
@@ -74,6 +74,6 @@ public class EventGridManagementSteps
                 .stream()
                 .collect(toList());
 
-        bddVariableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(systemTopics));
+        variableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(systemTopics));
     }
 }

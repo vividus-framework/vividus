@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.vividus.bdd.email.model.EmailServerConfiguration;
+import org.vividus.email.model.EmailServerConfiguration;
 
 @Named
 public class EmailServerConfigurationDeserializer extends JsonDeserializer<EmailServerConfiguration>

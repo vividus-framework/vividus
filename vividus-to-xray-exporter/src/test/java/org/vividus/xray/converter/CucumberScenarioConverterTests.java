@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.vividus.bdd.model.jbehave.Example;
-import org.vividus.bdd.model.jbehave.Examples;
-import org.vividus.bdd.model.jbehave.Parameters;
-import org.vividus.bdd.model.jbehave.Scenario;
-import org.vividus.bdd.model.jbehave.Step;
+import org.vividus.model.jbehave.Example;
+import org.vividus.model.jbehave.Examples;
+import org.vividus.model.jbehave.Parameters;
+import org.vividus.model.jbehave.Scenario;
+import org.vividus.model.jbehave.Step;
 import org.vividus.xray.converter.CucumberScenarioConverter.CucumberScenario;
 
 class CucumberScenarioConverterTests

@@ -11,9 +11,9 @@
 
     <context:component-scan base-package="org.vividus.ssh" />
 
-    <bean class="org.vividus.bdd.context.SshTestContext" />
+    <bean class="org.vividus.context.SshTestContext" />
 
-    <bean id="sshSteps" class="org.vividus.bdd.steps.ssh.SshSteps">
+    <bean id="sshSteps" class="org.vividus.steps.ssh.SshSteps">
         <property name="serverConfigurations">
             <bean factory-bean="propertyMapper" factory-method="readValues">
                 <constructor-arg value="ssh.server." />

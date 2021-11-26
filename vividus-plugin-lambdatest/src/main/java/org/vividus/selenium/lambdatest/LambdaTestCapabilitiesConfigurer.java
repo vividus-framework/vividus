@@ -17,14 +17,14 @@
 package org.vividus.selenium.lambdatest;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.context.RunContext;
 import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
 
 public class LambdaTestCapabilitiesConfigurer extends AbstractDesiredCapabilitiesConfigurer
 {
-    protected LambdaTestCapabilitiesConfigurer(IBddRunContext bddRunContext)
+    protected LambdaTestCapabilitiesConfigurer(RunContext runContext)
     {
-        super(bddRunContext);
+        super(runContext);
     }
 
     @Override

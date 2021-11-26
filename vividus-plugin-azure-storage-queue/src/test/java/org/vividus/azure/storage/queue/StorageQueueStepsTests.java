@@ -43,10 +43,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
 class StorageQueueStepsTests
@@ -58,7 +58,7 @@ class StorageQueueStepsTests
     private static final String VARIABLE_NAME = "variableName";
 
     @Mock private PropertyMappedCollection<String> storageQueueEndpoints;
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
     @Mock private JsonUtils jsonUtils;
     @Mock private TokenCredential tokenCredential;
 
@@ -75,7 +75,7 @@ class StorageQueueStepsTests
             when(client.peekMessages(1, RECEIVE_TIMEOUT, Context.NONE)).thenReturn(result);
             when(result.stream()).thenReturn(messages.stream());
             steps.peekMessages(1, KEY, SCOPES, VARIABLE_NAME);
-            verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(MESSAGE));
+            verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(MESSAGE));
         });
     }
 
@@ -89,7 +89,7 @@ class StorageQueueStepsTests
             var resultAsJson = "result";
             when(jsonUtils.toJson(result)).thenReturn(resultAsJson);
             steps.sendMessage(MESSAGE, KEY, SCOPES, VARIABLE_NAME);
-            verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, resultAsJson);
+            verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, resultAsJson);
         });
     }
 
@@ -117,7 +117,7 @@ class StorageQueueStepsTests
                 }))
         {
             StorageQueueSteps steps = new StorageQueueSteps(storageQueueEndpoints, RECEIVE_TIMEOUT, tokenCredential,
-                    bddVariableContext, jsonUtils);
+                    variableContext, jsonUtils);
             testToRun.accept(steps, queueClient);
             assertThat(queueClientBuilder.constructed(), hasSize(1));
             QueueClientBuilder builder = queueClientBuilder.constructed().get(0);

@@ -7,9 +7,9 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" profile="web">
 
-    <bean id="httpRequestSteps" class="org.vividus.bdd.steps.integration.HttpRequestSteps" />
+    <bean id="httpRequestSteps" class="org.vividus.steps.integration.HttpRequestSteps" />
 
-    <bean id="resourceCheckSteps" class="org.vividus.bdd.steps.integration.ResourceCheckSteps" init-method="init">
+    <bean id="resourceCheckSteps" class="org.vividus.steps.integration.ResourceCheckSteps" init-method="init">
         <property name="uriToIgnoreRegex" value="${resource-checker.uri-to-ignore-regex}" />
     </bean>
 

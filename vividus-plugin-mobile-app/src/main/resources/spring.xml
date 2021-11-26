@@ -9,16 +9,16 @@
      http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
      default-lazy-init="true" profile="mobile_app">
 
-     <context:component-scan base-package="org.vividus.bdd.mobileapp.variable"/>
+     <context:component-scan base-package="org.vividus.mobileapp.variable"/>
      <context:component-scan base-package="org.vividus.selenium.mobileapp.screenshot.strategies"/>
-     <context:component-scan base-package="org.vividus.bdd.mobileapp.converter"/>
+     <context:component-scan base-package="org.vividus.mobileapp.converter"/>
 
-     <bean class="org.vividus.bdd.mobileapp.configuration.MobileEnvironment">
+     <bean class="org.vividus.mobileapp.configuration.MobileEnvironment">
          <constructor-arg index="0" value="${mobile-environment.real-device}" />
          <constructor-arg index="1" value="${mobile-environment.wda-bundle-id}" />
      </bean>
 
-    <bean id="webDriverSetupSteps" class="org.vividus.bdd.steps.WebDriverSetupSteps">
+    <bean id="webDriverSetupSteps" class="org.vividus.steps.WebDriverSetupSteps">
         <constructor-arg index="0" value="${mobile-application.session-scope}" />
     </bean>
 
@@ -33,29 +33,29 @@
 
     <bean class="org.vividus.mobileapp.listener.MobileSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
 
-    <bean class="org.vividus.bdd.monitor.GenericScreenshotOnFailureMonitor" />
+    <bean class="org.vividus.monitor.GenericScreenshotOnFailureMonitor" />
 
     <bean class="org.vividus.selenium.mobileapp.MobileAppScreenshotTaker" parent="abstractScreenshotTaker"/>
 
-    <bean id="applicationSteps" class="org.vividus.bdd.mobileapp.steps.ApplicationSteps" />
+    <bean id="applicationSteps" class="org.vividus.mobileapp.steps.ApplicationSteps" />
 
-    <bean id="keyboardSteps" class="org.vividus.bdd.mobileapp.steps.KeyboardSteps">
+    <bean id="keyboardSteps" class="org.vividus.mobileapp.steps.KeyboardSteps">
         <property name="longPressDuration" value="${mobile-application.long-press-duration}" />
     </bean>
 
-    <bean id="touchSteps" class="org.vividus.bdd.mobileapp.steps.TouchSteps" />
+    <bean id="touchSteps" class="org.vividus.mobileapp.steps.TouchSteps" />
 
-    <bean id="setContextSteps" class="org.vividus.bdd.mobileapp.steps.SetContextSteps" />
+    <bean id="setContextSteps" class="org.vividus.mobileapp.steps.SetContextSteps" />
 
-    <bean id="elementSteps" class="org.vividus.bdd.mobileapp.steps.ElementSteps" />
+    <bean id="elementSteps" class="org.vividus.mobileapp.steps.ElementSteps" />
 
-    <bean id="deviceSteps" class="org.vividus.bdd.mobileapp.steps.DeviceSteps" >
+    <bean id="deviceSteps" class="org.vividus.mobileapp.steps.DeviceSteps" >
         <constructor-arg index="0" value="${mobile-environment.device.folder-for-file-upload}" />
     </bean>
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
 
-    <bean class="org.vividus.bdd.mobileapp.configuration.MobileApplicationConfiguration" >
+    <bean class="org.vividus.mobileapp.configuration.MobileApplicationConfiguration" >
         <constructor-arg index="0" value="${mobile-application.swipe.stabilization-duration}" />
         <constructor-arg index="1" value="${mobile-application.swipe.limit}" />
         <constructor-arg index="2" value="${mobile-application.swipe.vertical.x-position}" />
@@ -80,12 +80,12 @@
 
     <bean class="org.vividus.ui.action.search.GenericTextFilter" >
         <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).TEXT_PART}" />
-        <constructor-arg index="1" value="#{T(org.vividus.bdd.steps.StringComparisonRule).CONTAINS}" />
+        <constructor-arg index="1" value="#{T(org.vividus.steps.StringComparisonRule).CONTAINS}" />
     </bean>
 
     <bean class="org.vividus.ui.action.search.GenericTextFilter" >
         <constructor-arg index="0" value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).TEXT}" />
-        <constructor-arg index="1" value="#{T(org.vividus.bdd.steps.StringComparisonRule).IS_EQUAL_TO}" />
+        <constructor-arg index="1" value="#{T(org.vividus.steps.StringComparisonRule).IS_EQUAL_TO}" />
     </bean>
 
     <bean class="org.vividus.ui.mobile.action.search.ElementAttributeFilter" />

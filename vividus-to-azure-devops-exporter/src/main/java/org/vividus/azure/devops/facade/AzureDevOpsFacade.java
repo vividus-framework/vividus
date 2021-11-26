@@ -20,9 +20,9 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static org.vividus.bdd.output.ManualStepConverter.convert;
-import static org.vividus.bdd.output.ManualStepConverter.cutManualIdentifier;
-import static org.vividus.bdd.output.ManualStepConverter.startsWithManualKeyword;
+import static org.vividus.output.ManualStepConverter.convert;
+import static org.vividus.output.ManualStepConverter.cutManualIdentifier;
+import static org.vividus.output.ManualStepConverter.startsWithManualKeyword;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,10 +44,10 @@ import org.vividus.azure.devops.client.model.AddOperation;
 import org.vividus.azure.devops.configuration.AzureDevOpsExporterOptions;
 import org.vividus.azure.devops.facade.model.ScenarioPart;
 import org.vividus.azure.devops.facade.model.Steps;
-import org.vividus.bdd.model.jbehave.Scenario;
-import org.vividus.bdd.model.jbehave.Step;
-import org.vividus.bdd.output.ManualTestStep;
-import org.vividus.bdd.output.SyntaxException;
+import org.vividus.model.jbehave.Scenario;
+import org.vividus.model.jbehave.Step;
+import org.vividus.output.ManualTestStep;
+import org.vividus.output.SyntaxException;
 import org.vividus.util.json.JsonPathUtils;
 
 @Component

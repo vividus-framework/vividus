@@ -6,7 +6,7 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        default-lazy-init="true">
 
-    <bean id="webSocketSteps" class="org.vividus.bdd.steps.websocket.WebSocketSteps"
+    <bean id="webSocketSteps" class="org.vividus.steps.websocket.WebSocketSteps"
         init-method="init" destroy-method="destroy" >
         <constructor-arg index="0">
             <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">

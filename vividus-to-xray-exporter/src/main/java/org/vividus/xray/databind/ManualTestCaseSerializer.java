@@ -22,7 +22,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 import org.springframework.stereotype.Component;
-import org.vividus.bdd.output.ManualTestStep;
+import org.vividus.output.ManualTestStep;
 import org.vividus.xray.model.ManualTestCase;
 
 @Component

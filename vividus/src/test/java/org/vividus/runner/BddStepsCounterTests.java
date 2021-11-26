@@ -50,13 +50,13 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction.Context;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.IPathFinder;
+import org.vividus.PathFinder;
+import org.vividus.StoryLoader;
 import org.vividus.SystemStreamTests;
-import org.vividus.bdd.IPathFinder;
-import org.vividus.bdd.PathFinder;
-import org.vividus.bdd.StoryLoader;
-import org.vividus.bdd.spring.ExtendedConfiguration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
+import org.vividus.spring.ExtendedConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class BddStepsCounterTests extends SystemStreamTests
@@ -71,7 +71,7 @@ class BddStepsCounterTests extends SystemStreamTests
     private static final String THEN_STEP = String.format(STEP_PATTERN, THEN, VALUE);
     private static final String AND_STEP = String.format(STEP_PATTERN, AND, VALUE);
     private static final String CANDIDATE_STRING = String.format(STEP_PATTERN, "", VARIABLE).trim();
-    private static final String TOP_STEPS = "Top of the most used bdd steps:";
+    private static final String TOP_STEPS = "Top of the most used steps:";
     private static final String OCCURRENCES = "occurrence(s)";
     private static final String NO_MATCHED_STEPS = "Matched steps haven't been found";
     private static final String NO_STEP_CANDIDATES = "\nUnable to find StepCandidate(s) for following step(s):";

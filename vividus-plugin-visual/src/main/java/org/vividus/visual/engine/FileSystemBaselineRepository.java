@@ -29,7 +29,7 @@ import com.google.common.base.Suppliers;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.resource.ResourceLoadException;
+import org.vividus.resource.ResourceLoadException;
 import org.vividus.ui.util.ImageUtils;
 import org.vividus.util.ResourceUtils;
 

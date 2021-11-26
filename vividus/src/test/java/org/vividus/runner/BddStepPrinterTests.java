@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,8 @@ class BddStepPrinterTests extends SystemStreamTests
     void testPrintHelp() throws IOException, ParseException
     {
         BddStepPrinter.main(new String[] {"-h"});
-        assertOutput(List.of("usage: BddStepPrinter",
-                                   " -f,--file <arg>   Name of file to save BDD steps",
+        assertOutput(List.of("usage: StepPrinter",
+                                   " -f,--file <arg>   Name of file to save steps",
                                    " -h,--help         Print this message"));
     }
 
@@ -75,7 +75,7 @@ class BddStepPrinterTests extends SystemStreamTests
             String filePath = "mocked" + File.separator + "file";
             BddStepPrinter.main(new String[] {"-f", filePath});
             Path file = Paths.get(filePath);
-            assertOutput(List.of("File with BDD steps: " + file.toAbsolutePath()));
+            assertOutput(List.of("File with steps: " + file.toAbsolutePath()));
             vividus.verify(Vividus::init);
             fileUtils.verify(() -> FileUtils.writeLines(argThat(f -> filePath.equals(f.toString())),
                     argThat(steps -> steps.stream().map(Object::toString).collect(Collectors.toList())

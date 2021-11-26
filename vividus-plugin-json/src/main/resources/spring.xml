@@ -7,7 +7,7 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="jsonPatchSteps" class="org.vividus.bdd.steps.json.JsonPatchSteps" />
+    <bean id="jsonPatchSteps" class="org.vividus.steps.json.JsonPatchSteps" />
 
     <util:list id="stepBeanNames-Json">
         <idref bean="jsonPatchSteps" />

@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.vividus.bdd.output.ManualTestStep;
+import org.vividus.output.ManualTestStep;
 import org.vividus.xray.facade.AbstractTestCaseParameters;
 import org.vividus.xray.facade.CucumberTestCaseParameters;
 import org.vividus.xray.facade.ManualTestCaseParameters;
