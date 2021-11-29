@@ -14,50 +14,46 @@
  * limitations under the License.
  */
 
-package org.vividus.converter.ui.web;
+package org.vividus.converter.ui;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.function.Supplier;
 
-import javax.inject.Named;
-
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
-import org.vividus.converter.PointConverter;
-import org.vividus.converter.ui.StringToLocatorConverter;
-import org.vividus.steps.ui.web.model.SequenceAction;
-import org.vividus.steps.ui.web.model.SequenceActionType;
+import org.vividus.steps.ui.model.SequenceAction;
+import org.vividus.steps.ui.model.SequenceActionType;
 
-@Named
-public class ParametersToSequenceActionConverter extends AbstractParameterConverter<Parameters, SequenceAction>
+public class AbstractParametersToSequenceActionConverter<T extends SequenceActionType<?>>
+        extends AbstractParameterConverter<Parameters, SequenceAction<T>>
 {
     private final StringToLocatorConverter stringToLocatorConverter;
-    private final PointConverter pointConverter;
 
-    public ParametersToSequenceActionConverter(StringToLocatorConverter stringToLocatorConverter,
-                                               PointConverter pointConverter)
+    public AbstractParametersToSequenceActionConverter(StringToLocatorConverter stringToLocatorConverter,
+            Type type)
     {
+        super(Parameters.class, type);
         this.stringToLocatorConverter = stringToLocatorConverter;
-        this.pointConverter = pointConverter;
     }
 
     @Override
-    public SequenceAction convertValue(Parameters parameters, Type type)
+    public SequenceAction<T> convertValue(Parameters parameters, Type type)
     {
-        SequenceActionType actionType = parameters.valueAs("type", SequenceActionType.class);
+        T actionType = parameters.valueAs("type", ((ParameterizedType) getClass().getGenericSuperclass())
+                .getActualTypeArguments()[0]);
         String argumentAsString = argumentAs(parameters, String.class);
         if (argumentAsString.isEmpty() && actionType.isNullable())
         {
-            return new SequenceAction(actionType, null);
+            return new SequenceAction<T>(actionType, null);
         }
         Type argumentType = actionType.getArgumentType();
-        return new SequenceAction(actionType, convertArgument(argumentAsString,
+        return new SequenceAction<T>(actionType, convertArgument(argumentAsString,
                 argumentType, () -> argumentAs(parameters, argumentType)));
     }
 
-    private <T> T argumentAs(Parameters parameters, Type type)
+    private <P> P argumentAs(Parameters parameters, Type type)
     {
         return parameters.valueAs("argument", type);
     }
@@ -67,10 +63,6 @@ public class ParametersToSequenceActionConverter extends AbstractParameterConver
         if (argumentType.equals(WebElement.class))
         {
             return stringToLocatorConverter.convertValue(argumentValue, null);
-        }
-        else if (argumentType.equals(Point.class))
-        {
-            return pointConverter.convertValue(argumentValue, null);
         }
         return defaultConverter.get();
     }

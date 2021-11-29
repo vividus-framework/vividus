@@ -275,6 +275,32 @@ Examples:
 |Item 1                  |Item 2                   |
 
 
+Scenario: Verify step: 'When I execute sequence of actions'
+When I tap on element located `accessibilityId(<togglerAccessibilityId>)`
+When I tap on element located `xpath(<carouselViewXpath>)`
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+When I execute sequence of actions:
+|type          |argument                                      |
+|PRESS         |By.accessibilityId(<firstItemAccessibilityId>)|
+|WAIT          |PT1S                                          |
+|MOVE_BY_OFFSET|(-150, 0)                                     |
+|RELEASE       |                                              |
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I execute sequence of actions:
+|type          |argument                                       |
+|PRESS         |By.accessibilityId(<secondItemAccessibilityId>)|
+|WAIT          |PT1S                                           |
+|MOVE_BY_OFFSET|(150, 0)                                       |
+|RELEASE       |                                               |
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
+
+Examples:
+|firstItemAccessibilityId|secondItemAccessibilityId|
+|Item 1                  |Item 2                   |
+
+
 Scenario: Verify steps: "When I scan barcode from screen and save result to $scopes variable `$variableName`"
 Meta:
     @requirementId 2112

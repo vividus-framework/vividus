@@ -30,8 +30,9 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.selenium.KeysUtils;
+import org.vividus.steps.ui.model.SequenceActionType;
 
-public enum SequenceActionType
+public enum WebSequenceActionType implements SequenceActionType<Actions>
 {
     DOUBLE_CLICK(true)
     {
@@ -182,19 +183,16 @@ public enum SequenceActionType
 
     private final boolean nullable;
 
-    SequenceActionType(boolean nullable)
+    WebSequenceActionType(boolean nullable)
     {
         this.nullable = nullable;
     }
 
+    @Override
     public boolean isNullable()
     {
         return nullable;
     }
-
-    public abstract void addAction(Actions actions, Object argument);
-
-    public abstract Type getArgumentType();
 
     <T, U extends WebElement> void performOnWebElement(T argument, Consumer<U> argumentConsumer, Runnable emptyRunner)
     {

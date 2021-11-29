@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.ui.web.model;
+package org.vividus.mobileapp.action;
 
-public class SequenceAction
+import org.openqa.selenium.Point;
+
+import io.appium.java_client.touch.offset.PointOption;
+
+public class RetrievablePointOption extends PointOption<RetrievablePointOption>
 {
-    private final SequenceActionType type;
-    private final Object argument;
-
-    public SequenceAction(SequenceActionType type, Object argument)
+    public Point getCoordinates()
     {
-        this.type = type;
-        this.argument = argument;
-    }
-
-    public SequenceActionType getType()
-    {
-        return type;
-    }
-
-    public Object getArgument()
-    {
-        return argument;
+        return coordinates;
     }
 }

@@ -719,6 +719,63 @@ Then number of elements found by `accessibilityId(slide 2)` is equal to `1`
 ----
 
 
+=== Execute sequence of actions
+
+Executes the sequence of actions
+
+[source,gherkin]
+----
+When I execute sequence of actions: $actions
+----
+* `$actions` - table of actions to execute
+
+==== Possible actions
+
+[cols="1,5,3", options="header"]
+|===
+
+|Type
+|Argument
+|Example
+
+|PRESS
+|Locator
+|By.id(Name)
+
+|PRESS_BY_COORDS
+|Coordinates
+|(10, 15) where `x` is 10 and `y` is 15
+
+|MOVE_TO
+|Locator
+|By.id(Name)
+
+|MOVE_BY_OFFSET
+|Point
+|(20, 30) where `x` is 20 and `y` is 30
+
+|RELEASE
+|empty value
+|
+
+|WAIT
+|Duration
+|PT1S - wait 1 second
+
+|===
+
+.TouchActionSteps.story
+[source,gherkin]
+----
+When I execute sequence of touch actions:
+|type          |argument          |
+|PRESS         |By.id(Hello World)|
+|WAIT          |PT1S              |
+|MOVE_BY_OFFSET|(0,200)           |
+|RELEASE       |                  |
+----
+
+
 === Select date in date picker
 
 Selects a next or previous picker wheel value in date picker

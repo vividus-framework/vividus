@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.converter;
+package org.vividus.converter.ui;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

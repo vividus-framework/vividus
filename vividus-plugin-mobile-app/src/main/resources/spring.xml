@@ -53,6 +53,8 @@
         <constructor-arg index="0" value="${mobile-environment.device.folder-for-file-upload}" />
     </bean>
 
+    <bean id="actionSteps" class="org.vividus.mobileapp.steps.ActionSteps" />
+
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
 
     <bean class="org.vividus.mobileapp.configuration.MobileApplicationConfiguration" >
@@ -107,6 +109,7 @@
     <bean id="coordsProvider" class="org.vividus.selenium.mobileapp.screenshot.NativeHeaderAwareCoordsProvider" />
 
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
+        <idref bean="actionSteps" />
         <idref bean="applicationSteps" />
         <idref bean="webDriverSetupSteps" />
         <idref bean="touchSteps" />

@@ -25,8 +25,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.steps.ui.model.SequenceAction;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.steps.ui.web.model.SequenceAction;
+import org.vividus.steps.ui.web.model.WebSequenceActionType;
 import org.vividus.ui.action.search.Locator;
 
 @TakeScreenshotOnFailure
@@ -137,7 +138,7 @@ public class ActionSteps
      * @param actions table of actions to execute
      */
     @When("I execute sequence of actions: $actions")
-    public void executeSequenceOfActions(List<SequenceAction> actions)
+    public void executeSequenceOfActions(List<SequenceAction<WebSequenceActionType>> actions)
     {
         performActions(actions, (builder, action) ->
         {

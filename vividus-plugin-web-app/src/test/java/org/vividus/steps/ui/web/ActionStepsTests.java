@@ -41,9 +41,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.steps.ui.model.SequenceAction;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.steps.ui.web.model.SequenceAction;
-import org.vividus.steps.ui.web.model.SequenceActionType;
+import org.vividus.steps.ui.web.model.WebSequenceActionType;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
@@ -95,18 +95,18 @@ class ActionStepsTests
         when(point.getX()).thenReturn(offset);
         when(point.getY()).thenReturn(offset);
 
-        List<SequenceAction> actions = List.of(
-                new SequenceAction(SequenceActionType.DOUBLE_CLICK, locator),
-                new SequenceAction(SequenceActionType.CLICK_AND_HOLD, locator),
-                new SequenceAction(SequenceActionType.MOVE_BY_OFFSET, point),
-                new SequenceAction(SequenceActionType.RELEASE, locator),
-                new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT),
-                new SequenceAction(SequenceActionType.CLICK, locator),
-                new SequenceAction(SequenceActionType.MOVE_TO, locator),
-                new SequenceAction(SequenceActionType.DOUBLE_CLICK, null),
-                new SequenceAction(SequenceActionType.CLICK_AND_HOLD, null),
-                new SequenceAction(SequenceActionType.RELEASE, null),
-                new SequenceAction(SequenceActionType.CLICK, null)
+        List<SequenceAction<WebSequenceActionType>> actions = List.of(
+                new SequenceAction<>(WebSequenceActionType.DOUBLE_CLICK, locator),
+                new SequenceAction<>(WebSequenceActionType.CLICK_AND_HOLD, locator),
+                new SequenceAction<>(WebSequenceActionType.MOVE_BY_OFFSET, point),
+                new SequenceAction<>(WebSequenceActionType.RELEASE, locator),
+                new SequenceAction<>(WebSequenceActionType.ENTER_TEXT, TEXT),
+                new SequenceAction<>(WebSequenceActionType.CLICK, locator),
+                new SequenceAction<>(WebSequenceActionType.MOVE_TO, locator),
+                new SequenceAction<>(WebSequenceActionType.DOUBLE_CLICK, null),
+                new SequenceAction<>(WebSequenceActionType.CLICK_AND_HOLD, null),
+                new SequenceAction<>(WebSequenceActionType.RELEASE, null),
+                new SequenceAction<>(WebSequenceActionType.CLICK, null)
                 );
         actionSteps.executeSequenceOfActions(actions);
         verify((Interactive) webDriver).perform(argThat(arg -> {
@@ -148,9 +148,9 @@ class ActionStepsTests
 
         when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(null);
 
-        List<SequenceAction> actions = List.of(
-                new SequenceAction(SequenceActionType.DOUBLE_CLICK, locator),
-                new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT)
+        List<SequenceAction<WebSequenceActionType>> actions = List.of(
+                new SequenceAction<>(WebSequenceActionType.DOUBLE_CLICK, locator),
+                new SequenceAction<>(WebSequenceActionType.ENTER_TEXT, TEXT)
                 );
         actionSteps.executeSequenceOfActions(actions);
         verify((Interactive) webDriver, never()).perform(any());

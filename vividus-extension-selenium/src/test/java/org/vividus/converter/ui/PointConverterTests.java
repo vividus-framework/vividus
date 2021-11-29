@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.converter;
+package org.vividus.converter.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
