@@ -16,6 +16,8 @@
 
 package org.vividus.transformer;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +32,17 @@ public abstract class AbstractFilteringTableTransformer implements ExtendedTable
 
     protected List<String> filterColumnNames(List<String> allColumnNames, String byColumnNames)
     {
-        List<String> filtered = new ArrayList<>(allColumnNames);
-        filtered.retainAll(Stream.of(StringUtils.split(byColumnNames, ';'))
+        List<String> selectedColumnNames = Stream.of(StringUtils.split(byColumnNames, ';'))
                 .map(String::trim)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+
+        String undefinedColumns = selectedColumnNames
+                .stream().filter(element -> !allColumnNames.contains(element)).collect(Collectors.joining("; "));
+        isTrue(undefinedColumns.isEmpty(),
+                "'byColumnNames' refers columns missing in ExamplesTable: %s", undefinedColumns);
+
+        List<String> filtered = new ArrayList<>(allColumnNames);
+        filtered.retainAll(selectedColumnNames);
         return filtered;
     }
 

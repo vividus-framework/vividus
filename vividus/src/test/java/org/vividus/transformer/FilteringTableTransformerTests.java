@@ -114,7 +114,8 @@ class FilteringTableTransformerTests
             "'byRandomRows=1, byMaxRows=1',        Conflicting properties declaration found: 'byRandomRows' and 'byMaxRows'",
             "'byRandomRows=1, byRowIndexes=1;2',   Conflicting properties declaration found: 'byRandomRows' and 'byRowIndexes'",
             "'column.demo=.*, byMaxRows=2',        'Filtering by regex is not allowed to be used together with the following properties: ''byMaxColumns'', ''byColumnNames'', ''byMaxRows'', ''byRowIndexes'', ''byRandomRows'''",
-            "'byRandomRows=4',                     'byRandomRows' must be less than or equal to the number of table rows"
+            "'byRandomRows=4',                     'byRandomRows' must be less than or equal to the number of table rows",
+            "'byColumnNames=key11;key2;key13',     'byColumnNames' refers columns missing in ExamplesTable: key11; key13"
     })
     // CHECKSTYLE:ON
     // @formatter:on
