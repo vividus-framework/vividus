@@ -1,7 +1,7 @@
 Description: Integration tests for various Vividus ExamplesTable transformers
 
 Meta:
-    @epic vividus-bdd-engine
+    @epic vividus-engine
     @feature table-transformers
 
 Scenario: Verify JOINING transformer in default columns mode

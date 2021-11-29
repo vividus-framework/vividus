@@ -6,7 +6,7 @@ project.description = 'Vividus extension for selenium'
 }
 
  dependencies {
-     implementation project(':vividus-bdd-engine')
+     implementation project(':vividus-engine')
      implementation project(':vividus-reporter')
      implementation project(':vividus-http-client')
      implementation project(':vividus-test-context')

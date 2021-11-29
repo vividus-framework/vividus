@@ -14,7 +14,7 @@ if (isFamily(FAMILY_WINDOWS)) {
 ext.hadoopVersion = '3.3.1'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
 

@@ -1,5 +1,5 @@
 Meta:
-    @epic vividus-bdd-engine
+    @epic vividus-engine
     @feature variables
 
 Scenario: Create temporary local file for next batch

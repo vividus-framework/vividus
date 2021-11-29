@@ -1,7 +1,7 @@
 project.description = 'Vividus plugin for WebSockets'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 

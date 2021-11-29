@@ -1,5 +1,5 @@
 Meta:
-    @epic vividus-bdd-engine
+    @epic vividus-engine
 
 GivenStories: /story/integration/KnownIssues.story
 

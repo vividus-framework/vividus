@@ -1,7 +1,7 @@
 Description: Integration tests for various Vividus expressions
 
 Meta:
-    @epic vividus-bdd-engine
+    @epic vividus-engine
     @feature expressions
 
 Scenario: [Deprecated] Verify date generation and format

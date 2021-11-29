@@ -23,7 +23,7 @@ configurations.all {
 
 dependencies {
     implementation project(':vividus-util')
-    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-engine')
     implementation project(':vividus-facade-jira')
 
     // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257

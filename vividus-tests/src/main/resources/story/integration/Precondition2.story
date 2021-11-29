@@ -1,5 +1,5 @@
 Meta:
-    @epic vividus-bdd-engine
+    @epic vividus-engine
 
 Scenario: Precondition
 Meta:

@@ -1,5 +1,5 @@
 Meta:
-    @epic vividus-bdd-engine
+    @epic vividus-engine
     @feature variables
 
 Scenario: Should use Examples Table from temporary local file

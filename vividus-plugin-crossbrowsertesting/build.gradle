@@ -1,7 +1,7 @@
 project.description = 'Vividus plugin for CrossBrowserTesting'
 
 dependencies {
-    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-engine')
     implementation project(':vividus-extension-selenium')
 
     // https://github.com/uarlouski/cbthelper-java/tree/master

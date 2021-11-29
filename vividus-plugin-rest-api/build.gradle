@@ -3,7 +3,7 @@ project.description = 'Vividus plugin for REST API testing'
 ext.jsonPathVersion = '2.6.0'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     implementation project(':vividus-http-client')
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')

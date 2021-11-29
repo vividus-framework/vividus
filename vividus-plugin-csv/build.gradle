@@ -1,7 +1,7 @@
 project.description = 'Vividus plugin for CSV'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     api(group: 'org.apache.commons', name: 'commons-csv', version: '1.9.0')
     implementation project(':vividus-util')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
