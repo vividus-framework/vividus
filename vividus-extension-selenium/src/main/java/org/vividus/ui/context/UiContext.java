@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.ui.context;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import javax.inject.Inject;
@@ -39,32 +40,26 @@ public class UiContext implements IUiContext
     @Override
     public SearchContext getSearchContext()
     {
-        SearchContextData searchContext = testContext.get(KEY, SearchContextData.class);
-        if (searchContext != null)
-        {
-            return searchContext.getSearchContext();
-        }
-        return null;
+        return getSearchContext(SearchContext.class).orElse(null);
     }
 
     @Override
-    public <T extends SearchContext> T getSearchContext(Class<T> clazz)
+    public <T extends SearchContext> Optional<T> getSearchContext(Class<T> clazz)
     {
-        SearchContext searchContext = getSearchContext();
+        SearchContextData searchContextData = testContext.get(KEY, SearchContextData.class);
+        SearchContext searchContext = searchContextData != null ? searchContextData.getSearchContext() : null;
         if (clazz.isInstance(searchContext))
         {
-            return clazz.cast(searchContext);
+            return Optional.of(clazz.cast(searchContext));
         }
-        StringBuilder exceptionMessage = new StringBuilder("Expected search context of ").append(clazz)
-                .append(", but was ");
         if (searchContext != null)
         {
-            exceptionMessage.append(searchContext.getClass()).append(" search context");
-            throw new IllegalSearchContextException(exceptionMessage.toString());
+            String exceptionMessage =
+                    "Expected search context of " + clazz + ", but was " + searchContext.getClass() + " search context";
+            throw new IllegalSearchContextException(exceptionMessage);
         }
-        exceptionMessage.append("null search context");
-        softAssert.recordFailedAssertion(exceptionMessage.toString());
-        return null;
+        softAssert.recordFailedAssertion("Search context is not set");
+        return Optional.empty();
     }
 
     @Override

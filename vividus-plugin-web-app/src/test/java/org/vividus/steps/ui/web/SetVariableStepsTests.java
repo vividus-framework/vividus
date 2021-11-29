@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -266,7 +267,7 @@ class SetVariableStepsTests
     void shouldCallJSScriptAndSaveValueToContext()
     {
         WebElement table = mock(WebElement.class);
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(table);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(table));
         List<Map<String, String>> listOfTables = List.of(Map.of("key", VALUE));
         when(javascriptActions.executeScriptFromResource(SetVariableSteps.class, "parse-table.js", table))
                 .thenReturn(listOfTables);

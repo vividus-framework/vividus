@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,8 @@ public class WebElementActions implements IWebElementActions
     @Override
     public String getCssValue(WebElement element, String propertyName)
     {
-        if (element != null)
-        {
-            String cssValue = StringUtils.remove(element.getCssValue(propertyName), QUOTE);
-            return StringUtils.remove(cssValue, APOSTROPHE);
-        }
-        return null;
+        String cssValue = StringUtils.remove(element.getCssValue(propertyName), QUOTE);
+        return StringUtils.remove(cssValue, APOSTROPHE);
     }
 
     @Override

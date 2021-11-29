@@ -301,9 +301,11 @@ public class SetVariableSteps
     @When("I save table to $scopes variable '$variableName'")
     public void saveTableToContext(Set<VariableScope> scopes, String variableName)
     {
-        List<Map<String, Object>> table = javascriptActions.executeScriptFromResource(SetVariableSteps.class,
-                "parse-table.js", uiContext.getSearchContext(WebElement.class));
-        variableContext.putVariable(scopes, variableName, table);
+        uiContext.getSearchContext(WebElement.class).ifPresent(tableElement -> {
+            List<Map<String, Object>> table = javascriptActions.executeScriptFromResource(SetVariableSteps.class,
+                    "parse-table.js", tableElement);
+            variableContext.putVariable(scopes, variableName, table);
+        });
     }
 
     private List<WebElement> getVideoIFrames(int leastNumber)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.ui.context;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.openqa.selenium.SearchContext;
@@ -26,7 +27,7 @@ public interface IUiContext
 {
     SearchContext getSearchContext();
 
-    <T extends SearchContext> T getSearchContext(Class<T> clazz);
+    <T extends SearchContext> Optional<T> getSearchContext(Class<T> clazz);
 
     SearchContextSetter getSearchContextSetter();
 

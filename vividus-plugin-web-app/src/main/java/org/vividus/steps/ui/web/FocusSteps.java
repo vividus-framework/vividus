@@ -16,6 +16,8 @@
 
 package org.vividus.steps.ui.web;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.jbehave.core.annotations.Then;
@@ -45,11 +47,9 @@ public class FocusSteps
     @When("I set focus to the context element")
     public void setFocus()
     {
-        WebElement elementToCheck = getWebElementFromContext();
-        if (null != elementToCheck)
-        {
-            javascriptActions.executeScript("arguments[0].focus()", elementToCheck);
-        }
+        getWebElementFromContext().ifPresent(
+                elementToSetFocus -> javascriptActions.executeScript("arguments[0].focus()", elementToSetFocus)
+        );
     }
 
     /**
@@ -67,10 +67,12 @@ public class FocusSteps
     @Then("the context element is $focusState")
     public void isElementInFocusState(FocusState focusState)
     {
-        focusValidations.isElementInFocusState(getWebElementFromContext(), focusState);
+        getWebElementFromContext().ifPresent(
+                elementToCheck -> focusValidations.isElementInFocusState(elementToCheck, focusState)
+        );
     }
 
-    private WebElement getWebElementFromContext()
+    private Optional<WebElement> getWebElementFromContext()
     {
         return uiContext.getSearchContext(WebElement.class);
     }

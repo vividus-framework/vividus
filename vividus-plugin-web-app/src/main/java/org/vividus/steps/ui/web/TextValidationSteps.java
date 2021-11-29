@@ -65,7 +65,7 @@ public class TextValidationSteps
     public void ifTextMatchesRegex(Pattern regex)
     {
         String actualText = "";
-        SearchContext searchContext = uiContext.getSearchContext(SearchContext.class);
+        SearchContext searchContext = uiContext.getSearchContext();
         if (searchContext instanceof WebElement)
         {
             actualText = webElementActions.getElementText((WebElement) searchContext);
@@ -111,7 +111,7 @@ public class TextValidationSteps
             if (!assertCondition)
             {
                 Locator caseSensitiveLocator = new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text);
-                assertCondition = !searchActions.findElements(getSearchContext(), caseSensitiveLocator).isEmpty();
+                assertCondition = !searchActions.findElements(caseSensitiveLocator).isEmpty();
             }
 
             if (!assertCondition)
@@ -134,12 +134,12 @@ public class TextValidationSteps
         List<WebElement> elements;
         try
         {
-            elements = getSearchContext().findElements(locator);
+            elements = uiContext.getSearchContext().findElements(locator);
         }
         // Workaround for WebDriverException: Permission denied to access property '_wrapped'
         catch (WebDriverException ex)
         {
-            elements = getSearchContext().findElements(locator);
+            elements = uiContext.getSearchContext().findElements(locator);
         }
         return elements;
     }
@@ -152,17 +152,12 @@ public class TextValidationSteps
     @Then("the text '$text' does not exist")
     public boolean textDoesNotExist(String text)
     {
-        SearchContext searchContext = getSearchContext();
+        SearchContext searchContext = uiContext.getSearchContext();
         if (searchContext instanceof WebElement)
         {
             return elementValidations.assertIfElementContainsText((WebElement) searchContext, text, false);
         }
         return baseValidations.assertIfElementDoesNotExist(String.format("An element with text '%s'", text),
                 searchContext, new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text));
-    }
-
-    protected SearchContext getSearchContext()
-    {
-        return uiContext.getSearchContext(SearchContext.class);
     }
 }

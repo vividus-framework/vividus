@@ -18,22 +18,25 @@ package org.vividus.steps.ui.web;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.By;
+import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.KeysUtils;
 import org.vividus.steps.ui.web.validation.FocusValidations;
 import org.vividus.ui.context.IUiContext;
 
 public class KeyboardSteps
 {
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IUiContext uiContext;
-    @Inject private FocusValidations focusValidations;
+    private final IUiContext uiContext;
+    private final FocusValidations focusValidations;
+
+    public KeyboardSteps(IUiContext uiContext, FocusValidations focusValidations)
+    {
+        this.uiContext = uiContext;
+        this.focusValidations = focusValidations;
+    }
 
     /**
      * Step for interaction with page via keyboard. Interacts with the context element in focus.
@@ -44,9 +47,10 @@ public class KeyboardSteps
     @When("I press $keys on keyboard")
     public void pressKeys(List<String> keys)
     {
-        WebElement element = uiContext.getSearchContext() instanceof WebDriver
-                ? webDriverProvider.get().findElement(By.xpath("//body"))
-                : uiContext.getSearchContext(WebElement.class);
+        SearchContext searchContext = uiContext.getSearchContext();
+        WebElement element = searchContext instanceof WebDriver
+                ? searchContext.findElement(By.xpath("//body"))
+                : (WebElement) searchContext;
         if (focusValidations.isElementInFocusState(element, FocusState.IN_FOCUS))
         {
             element.sendKeys(KeysUtils.keysToCharSequenceArray(keys));

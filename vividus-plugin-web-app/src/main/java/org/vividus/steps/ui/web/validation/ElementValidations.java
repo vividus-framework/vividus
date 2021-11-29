@@ -93,7 +93,7 @@ public class ElementValidations implements IElementValidations
     @Override
     public boolean assertIfElementHasWidthInPerc(WebElement parent, WebElement element, int widthInPerc)
     {
-        if (parent != null && element != null)
+        if (parent != null)
         {
             return uiContext.withAssertingWebElements(List.of(parent, element),
                 () -> softAssert.assertEquals("Element has correct width", widthInPerc,

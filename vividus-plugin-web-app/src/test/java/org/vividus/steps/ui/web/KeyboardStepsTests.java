@@ -17,6 +17,7 @@
 package org.vividus.steps.ui.web;
 
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -25,13 +26,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.web.validation.FocusValidations;
 import org.vividus.ui.context.IUiContext;
 
@@ -41,49 +40,36 @@ class KeyboardStepsTests
     private static final String A = "a";
     private static final List<String> KEYS = List.of("CONTROL", A);
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private WebDriver webDriver;
-
-    @Mock
-    private IUiContext uiContext;
-
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private FocusValidations focusValidations;
-
-    @InjectMocks
-    private KeyboardSteps keyboardSteps;
+    @Mock private WebDriver webDriver;
+    @Mock private WebElement webElement;
+    @Mock private IUiContext uiContext;
+    @Mock private FocusValidations focusValidations;
+    @InjectMocks private KeyboardSteps keyboardSteps;
 
     @Test
     void testPressKeysContextFocused()
     {
-        Mockito.lenient().when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext()).thenReturn(webElement);
         when(focusValidations.isElementInFocusState(webElement, FocusState.IN_FOCUS)).thenReturn(true);
         keyboardSteps.pressKeys(KEYS);
-        Mockito.verify(webElement).sendKeys(Keys.CONTROL, A);
+        verify(webElement).sendKeys(Keys.CONTROL, A);
     }
 
     @Test
     void testPressKeysContextNotFocused()
     {
-        Mockito.lenient().when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext()).thenReturn(webElement);
         keyboardSteps.pressKeys(KEYS);
-        Mockito.verify(webElement, never()).sendKeys(Keys.CONTROL, A);
+        verify(webElement, never()).sendKeys(Keys.CONTROL, A);
     }
 
     @Test
     void testPressKeysContextBody()
     {
-        when(webDriverProvider.get()).thenReturn(webDriver);
         when(uiContext.getSearchContext()).thenReturn(webDriver);
         when(focusValidations.isElementInFocusState(webElement, FocusState.IN_FOCUS)).thenReturn(true);
         when(webDriver.findElement(By.xpath("//body"))).thenReturn(webElement);
         keyboardSteps.pressKeys(KEYS);
-        Mockito.verify(webElement).sendKeys(Keys.CONTROL, A);
+        verify(webElement).sendKeys(Keys.CONTROL, A);
     }
 }

@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,17 +34,14 @@ import org.vividus.ui.context.UiContext;
 @ExtendWith(MockitoExtension.class)
 class SearchContextHeightDynamicVariableTests
 {
-    @Mock
-    private UiContext uiContext;
-
-    @InjectMocks
-    private SearchContextHeightDynamicVariable heightDynamicVariable;
+    @Mock private UiContext uiContext;
+    @InjectMocks private SearchContextHeightDynamicVariable heightDynamicVariable;
 
     @Test
     void shouldReturnElementHeight()
     {
         WebElement webElement = mock(WebElement.class);
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
         Rectangle rectangle = mock(Rectangle.class);
         when(webElement.getRect()).thenReturn(rectangle);
         when(rectangle.getHeight()).thenReturn(711);

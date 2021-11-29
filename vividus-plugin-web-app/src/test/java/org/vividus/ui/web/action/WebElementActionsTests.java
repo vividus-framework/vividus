@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.ui.web.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -115,12 +114,6 @@ class WebElementActionsTests
     {
         when(webElement.getCssValue(PROPERTY_NAME)).thenReturn("some 'value' with \"quotes\"");
         assertEquals("some value with quotes", webElementActions.getCssValue(webElement, PROPERTY_NAME));
-    }
-
-    @Test
-    void testGetCssValueOfNullElement()
-    {
-        assertNull(webElementActions.getCssValue(null, PROPERTY_NAME));
     }
 
     @Test

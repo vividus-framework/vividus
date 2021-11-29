@@ -150,11 +150,10 @@ class WaitStepsTests
     @Test
     void testWaitTillElementWithTagAndAttributeDisappears()
     {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
         when(webDriverProvider.get()).thenReturn(webDriver);
         List<WebElement> elements = List.of(webElement);
         Locator locator = new Locator(WebLocatorType.XPATH, ELEMENT_WITH_TAG);
-        when(searchActions.findElements(webElement, locator)).thenReturn(elements);
+        when(searchActions.findElements(locator)).thenReturn(elements);
         waitSteps.waitTillElementDisappears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verify(waitActions).wait(eq(webDriver),
                 argThat(condition -> condition.toString().equals("invisibility of " + webElement)));
@@ -210,7 +209,7 @@ class WaitStepsTests
     @Test
     void testWaitTillFrameAppears()
     {
-        when(uiContext.getSearchContext(WebDriver.class)).thenReturn(webDriver);
+        when(uiContext.getSearchContext()).thenReturn(webDriver);
         WaitResult<List<WebElement>> waitResult = mock(WaitResult.class);
         IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
         By locator = LocatorUtil

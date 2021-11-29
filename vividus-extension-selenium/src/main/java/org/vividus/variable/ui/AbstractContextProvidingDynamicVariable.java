@@ -16,7 +16,6 @@
 
 package org.vividus.variable.ui;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.openqa.selenium.Rectangle;
@@ -32,16 +31,16 @@ public abstract class AbstractContextProvidingDynamicVariable implements Dynamic
 
     private final UiContext uiContext;
 
-    public AbstractContextProvidingDynamicVariable(UiContext uiContext)
+    AbstractContextProvidingDynamicVariable(UiContext uiContext)
     {
         this.uiContext = uiContext;
     }
 
     protected String getContextRectValue(Function<Rectangle, Integer> valueProvider)
     {
-        return  Optional.ofNullable(uiContext.getSearchContext(WebElement.class))
+        return  uiContext.getSearchContext(WebElement.class)
                         .map(WebElement::getRect)
-                        .map(valueProvider::apply)
+                        .map(valueProvider)
                         .map(String::valueOf)
                         .orElseGet(() -> {
                             LOGGER.atError().log("Unable to get coordinate, context is not set");

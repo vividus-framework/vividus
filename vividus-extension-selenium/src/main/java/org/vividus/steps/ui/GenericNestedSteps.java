@@ -124,6 +124,6 @@ public class GenericNestedSteps
 
     private int getElementsNumber(Locator locator)
     {
-        return searchActions.findElements(uiContext.getSearchContext(), locator).size();
+        return searchActions.findElements(locator).size();
     }
 }

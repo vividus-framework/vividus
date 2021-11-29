@@ -21,14 +21,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.WebElement;
 import org.vividus.ui.context.UiContext;
 
 class ContextProvidingDynamicVariableTests
@@ -37,9 +40,11 @@ class ContextProvidingDynamicVariableTests
             .getTestLogger(AbstractContextProvidingDynamicVariable.class);
 
     @Test
-    void shouldReturnMinuseOneInCaseOfMissingContext()
+    void shouldReturnMinusOneInCaseOfMissingContext()
     {
-        var dynamicVariable = new AbstractContextProvidingDynamicVariable(mock(UiContext.class))
+        var uiContext = mock(UiContext.class);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.empty());
+        var dynamicVariable = new AbstractContextProvidingDynamicVariable(uiContext)
         {
             @Override
             public String getValue()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -164,8 +165,8 @@ class UiContextTests
         when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(true);
         stepContext.reset();
         Class<WebDriver> searchContextClass = WebDriver.class;
-        WebDriver actualSearchContext = stepContext.getSearchContext(searchContextClass);
-        assertEquals(mockedWebDriver, actualSearchContext);
+        Optional<WebDriver> actualSearchContext = stepContext.getSearchContext(searchContextClass);
+        assertEquals(Optional.of(mockedWebDriver), actualSearchContext);
     }
 
     @Test
@@ -186,9 +187,8 @@ class UiContextTests
     {
         stepContext.setTestContext(context);
         stepContext.putSearchContext(null, searchContextSetter);
-        assertNull(stepContext.getSearchContext(WebDriver.class));
-        verify(softAssert).recordFailedAssertion(
-                EXPECTED_SEARCH_CONTEXT_OF_INTERFACE + "org.openqa.selenium.WebDriver, but was null search context");
+        assertEquals(Optional.empty(), stepContext.getSearchContext(WebDriver.class));
+        verify(softAssert).recordFailedAssertion("Search context is not set");
     }
 
     @Test

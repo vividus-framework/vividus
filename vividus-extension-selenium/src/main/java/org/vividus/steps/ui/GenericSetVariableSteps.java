@@ -74,7 +74,7 @@ public class GenericSetVariableSteps
     @When("I save text of context element to $scopes variable `$variableName`")
     public void saveContextElementTextToVariable(Set<VariableScope> scopes, String variableName)
     {
-        Optional.ofNullable(uiContext.getSearchContext(WebElement.class))
+        uiContext.getSearchContext(WebElement.class)
                 .map(elementActions::getElementText)
                 .ifPresent(text -> variableContext.putVariable(scopes, variableName, text));
     }
@@ -101,7 +101,7 @@ public class GenericSetVariableSteps
     public void saveContextElementAttributeValueToVariable(String attributeName, Set<VariableScope> scopes,
             String variableName)
     {
-        Optional<WebElement> webElement = Optional.ofNullable(uiContext.getSearchContext(WebElement.class));
+        Optional<WebElement> webElement = uiContext.getSearchContext(WebElement.class);
         saveAttributeValueOfElement(webElement, attributeName, scopes, variableName);
     }
 

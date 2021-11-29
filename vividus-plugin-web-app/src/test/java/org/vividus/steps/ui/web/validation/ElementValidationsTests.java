@@ -48,23 +48,12 @@ class ElementValidationsTests
     private static final int DIMENSION_VALUE = 100;
     private static final int CORRECT_WIDTH_VALUE = 80;
 
-    @Mock
-    private WebElementActions webElementActions;
-
-    @Mock
-    private WebElement mockedWebElement;
-
-    @Mock
-    private org.openqa.selenium.Dimension seleniumDimension;
-
-    @Mock
-    private ISoftAssert descriptiveSoftAssert;
-
-    @Mock
-    private IUiContext uiContext;
-
-    @InjectMocks
-    private ElementValidations elementValidations;
+    @Mock private WebElementActions webElementActions;
+    @Mock private WebElement mockedWebElement;
+    @Mock private org.openqa.selenium.Dimension seleniumDimension;
+    @Mock private ISoftAssert descriptiveSoftAssert;
+    @Mock private IUiContext uiContext;
+    @InjectMocks private ElementValidations elementValidations;
 
     @Test
     void testAssertIfElementContainsTextOverload()
@@ -155,14 +144,6 @@ class ElementValidationsTests
         WebElement mockedChildElement = mock(WebElement.class);
         assertFalse(
                 elementValidations.assertIfElementHasWidthInPerc(null, mockedChildElement, CORRECT_WIDTH_VALUE));
-    }
-
-    @Test
-    void testAssertIfElementHasWidthInPercNullChildElement()
-    {
-        WebElement mockedParentElement = mock(WebElement.class);
-        assertFalse(
-                elementValidations.assertIfElementHasWidthInPerc(mockedParentElement, null, CORRECT_WIDTH_VALUE));
     }
 
     @Test

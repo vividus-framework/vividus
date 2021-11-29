@@ -94,7 +94,7 @@ public class WaitSteps
     public boolean waitDurationWithPollingDurationTillElementState(Duration duration, Duration pollingDuration,
             Locator locator, State state)
     {
-        return waitActions.wait(getSearchContext(), duration, pollingDuration,
+        return waitActions.wait(uiContext.getSearchContext(), duration, pollingDuration,
                 state.getExpectedCondition(expectedSearchActionsConditions, locator)).isWaitPassed();
     }
 
@@ -121,7 +121,7 @@ public class WaitSteps
     {
         String elementXpath = LocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue);
         Locator locator = new Locator(WebLocatorType.XPATH, elementXpath);
-        List<WebElement> elements = searchActions.findElements(getSearchContext(), locator);
+        List<WebElement> elements = searchActions.findElements(locator);
         if (!elements.isEmpty())
         {
             waitActions.wait(getWebDriver(), State.NOT_VISIBLE.getExpectedCondition(elements.get(0)));
@@ -152,7 +152,7 @@ public class WaitSteps
             + " '$attributeType'='$attributeValue' appears")
     public void waitTillElementAppears(String elementTag, String attributeType, String attributeValue)
     {
-        waitForElementAppearance(getSearchContext(),
+        waitForElementAppearance(uiContext.getSearchContext(),
                 By.xpath(LocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue)));
     }
 
@@ -199,7 +199,8 @@ public class WaitSteps
     @When("I wait until state of element located `$locator` is $state")
     public void waitTillElementIsSelected(Locator locator, State state)
     {
-        waitActions.wait(getSearchContext(), state.getExpectedCondition(expectedSearchActionsConditions, locator));
+        waitActions.wait(
+                uiContext.getSearchContext(), state.getExpectedCondition(expectedSearchActionsConditions, locator));
     }
 
     /**
@@ -265,7 +266,7 @@ public class WaitSteps
     @When("I wait until element located `$locator` contains text '$text'")
     public void waitTillElementContainsText(Locator locator, String text)
     {
-        waitActions.wait(getSearchContext(),
+        waitActions.wait(uiContext.getSearchContext(),
               expectedSearchActionsConditions.textToBePresentInElementLocated(locator, text));
     }
 
@@ -312,8 +313,7 @@ public class WaitSteps
     @When("I wait until a frame with the name '$frameName' appears")
     public void waitTillFrameAppears(String frameName)
     {
-        WebDriver searchContext = uiContext.getSearchContext(WebDriver.class);
-        waitForElementAppearance(searchContext, LocatorUtil
+        waitForElementAppearance(uiContext.getSearchContext(), LocatorUtil
                 .getXPathLocator("*[(local-name()='frame' or local-name()='iframe') and @*='%s']", frameName));
     }
 
@@ -326,7 +326,7 @@ public class WaitSteps
     public void elementByIdDisappears(String id)
     {
         By locator = By.xpath(LocatorUtil.getXPathByAttribute("id", id));
-        waitActions.wait(getSearchContext(),
+        waitActions.wait(uiContext.getSearchContext(),
                 State.NOT_VISIBLE.getExpectedCondition(expectedSearchContextConditions, locator));
     }
 
@@ -358,7 +358,7 @@ public class WaitSteps
     @Then("element located '$locator' disappears in '$timeout'")
     public boolean waitForElementDisappearance(Locator locator, Duration timeout)
     {
-        return waitActions.wait(getSearchContext(), timeout,
+        return waitActions.wait(uiContext.getSearchContext(), timeout,
                 expectedSearchActionsConditions.invisibilityOfElement(locator)).isWaitPassed();
     }
 
@@ -400,10 +400,5 @@ public class WaitSteps
     private WebDriver getWebDriver()
     {
         return webDriverProvider.get();
-    }
-
-    private SearchContext getSearchContext()
-    {
-        return uiContext.getSearchContext();
     }
 }

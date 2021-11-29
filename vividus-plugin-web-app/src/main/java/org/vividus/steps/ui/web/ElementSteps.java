@@ -193,10 +193,10 @@ public class ElementSteps implements ResourceLoaderAware
     @Then("the context element has the CSS property '$cssName'='$cssValue'")
     public void doesElementHaveRightCss(String cssName, String cssValue)
     {
-        WebElement element = uiContext.getSearchContext(WebElement.class);
-        String actualCssValue = webElementActions.getCssValue(element, cssName);
-        descriptiveSoftAssert.assertEquals("Element has correct css property value", cssValue,
-                actualCssValue);
+        uiContext.getSearchContext(WebElement.class)
+                .map(element -> webElementActions.getCssValue(element, cssName))
+                .ifPresent(actualCssValue -> descriptiveSoftAssert.assertEquals(
+                        "Element has correct css property value", cssValue, actualCssValue));
     }
 
     /**
@@ -207,11 +207,11 @@ public class ElementSteps implements ResourceLoaderAware
     @Then("the context element has the CSS property '$cssName' containing '$cssValue'")
     public void doesElementHaveRightPartOfCssValue(String cssName, String cssValue)
     {
-        WebElement element = uiContext.getSearchContext(WebElement.class);
-        String actualCssValue = webElementActions.getCssValue(element, cssName);
-        descriptiveSoftAssert.assertThat("Css property value part is correct",
-                String.format("Element has CSS property '%1$s' containing value '%2$s'", cssName, cssValue),
-                actualCssValue, containsString(cssValue));
+        uiContext.getSearchContext(WebElement.class)
+                .map(element -> webElementActions.getCssValue(element, cssName))
+                .ifPresent(actualCssValue -> descriptiveSoftAssert.assertThat("Css property value part is correct",
+                        String.format("Element has CSS property '%1$s' containing value '%2$s'", cssName, cssValue),
+                        actualCssValue, containsString(cssValue)));
     }
 
     /**
@@ -254,11 +254,13 @@ public class ElementSteps implements ResourceLoaderAware
     @Then("the context has a width of '$widthInPerc'%")
     public void isElementHasRightWidth(int widthInPerc)
     {
-        WebElement webElement = uiContext.getSearchContext(WebElement.class);
-        WebElement bodyElement = baseValidations.assertIfElementExists("'Body' element", webDriverProvider.get(),
-                new Locator(WebLocatorType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPath("//body"), Visibility.ALL)));
-        elementValidations.assertIfElementHasWidthInPerc(bodyElement, webElement, widthInPerc);
+        uiContext.getSearchContext(WebElement.class).ifPresent(webElement -> {
+            Locator bodyLocator = new Locator(WebLocatorType.XPATH,
+                    new SearchParameters(LocatorUtil.getXPath("//body"), Visibility.ALL));
+            WebElement bodyElement = baseValidations.assertIfElementExists("'Body' element", webDriverProvider.get(),
+                    bodyLocator);
+            elementValidations.assertIfElementHasWidthInPerc(bodyElement, webElement, widthInPerc);
+        });
     }
 
     /**
@@ -268,10 +270,11 @@ public class ElementSteps implements ResourceLoaderAware
     @Then("the context element has a width of '$widthInPerc'% relative to the parent element")
     public void isElementHasWidthRelativeToTheParentElement(int width)
     {
-        WebElement elementChild = uiContext.getSearchContext(WebElement.class);
-        WebElement elementParent = baseValidations.assertIfElementExists("Parent element",
-                new Locator(WebLocatorType.XPATH, "./.."));
-        elementValidations.assertIfElementHasWidthInPerc(elementParent, elementChild, width);
+        uiContext.getSearchContext(WebElement.class).ifPresent(elementChild -> {
+            Locator parentLocator = new Locator(WebLocatorType.XPATH, "./..");
+            WebElement elementParent = baseValidations.assertIfElementExists("Parent element", parentLocator);
+            elementValidations.assertIfElementHasWidthInPerc(elementParent, elementChild, width);
+        });
     }
 
     /**

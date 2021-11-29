@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
@@ -151,7 +152,7 @@ class ElementStepsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         int widthInPerc = 50;
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
         when(baseValidations.assertIfElementExists("'Body' element", webDriverProvider.get(),
                 new Locator(WebLocatorType.XPATH, new SearchParameters("//body", Visibility.ALL))))
                 .thenReturn(bodyElement);
@@ -163,7 +164,7 @@ class ElementStepsTests
     void testIsElementHasWidthRelativeToTheParentElement()
     {
         int width = 50;
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
         when(baseValidations.assertIfElementExists("Parent element", new Locator(WebLocatorType.XPATH,
                 "./.."))).thenReturn(webElement);
         elementSteps.isElementHasWidthRelativeToTheParentElement(width);
@@ -181,10 +182,9 @@ class ElementStepsTests
     @Test
     void testIsNullElementHasRightCss()
     {
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(null);
-        when(webElementActions.getCssValue(null, CSS_NAME)).thenReturn(null);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.empty());
         elementSteps.doesElementHaveRightCss(CSS_NAME, CSS_VALUE);
-        verify(softAssert).assertEquals(ELEMENT_HAS_CORRECT_CSS_PROPERTY_VALUE, CSS_VALUE, null);
+        verifyNoInteractions(webElementActions, softAssert);
     }
 
     @Test
@@ -372,7 +372,7 @@ class ElementStepsTests
 
     private void mockWebElementCssValue()
     {
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
         when(webElementActions.getCssValue(webElement, CSS_NAME)).thenReturn(CSS_VALUE);
     }
 

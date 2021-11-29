@@ -34,7 +34,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
@@ -58,10 +57,9 @@ class GenericNestedStepsTests
     @Test
     void shouldExecuteStepsAndExitWhenQuantityChangedAndIterationLimitNotReached()
     {
-        SearchContext searchContext = mockUiContext();
         Locator locator = mock(Locator.class);
         List<WebElement> elements = List.of(mock(WebElement.class));
-        when(searchActions.findElements(searchContext, locator)).thenReturn(elements).thenReturn(elements)
+        when(searchActions.findElements(locator)).thenReturn(elements).thenReturn(elements)
             .thenReturn(List.of());
         when(softAssert.assertThat(eq(ELEMENTS_NUMBER), eq(1), argThat(m ->
             ComparisonRule.EQUAL_TO.getComparisonRule(1).toString().equals(m.toString())))).thenReturn(true);
@@ -71,7 +69,7 @@ class GenericNestedStepsTests
 
         verify(subSteps, times(2)).execute(Optional.empty());
         verify(searchContextSetter, times(2)).setSearchContext();
-        verify(searchActions, times(3)).findElements(searchContext, locator);
+        verify(searchActions, times(3)).findElements(locator);
         verify(softAssert).assertThat(eq(ELEMENTS_NUMBER), eq(1),
                 argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(1).toString().equals(m.toString())));
     }
@@ -79,10 +77,9 @@ class GenericNestedStepsTests
     @Test
     void shouldExecuteStepsAndExitAndRecordFailedAssertionWhenIterationLimitReached()
     {
-        SearchContext searchContext = mockUiContext();
         Locator locator = mock(Locator.class);
         List<WebElement> elements = List.of(mock(WebElement.class));
-        when(searchActions.findElements(searchContext, locator)).thenReturn(elements);
+        when(searchActions.findElements(locator)).thenReturn(elements);
         when(softAssert.assertThat(eq(ELEMENTS_NUMBER), eq(1), argThat(m ->
             ComparisonRule.EQUAL_TO.getComparisonRule(1).toString().equals(m.toString())))).thenReturn(true);
         SearchContextSetter searchContextSetter = mockSearchContextSetter();
@@ -91,7 +88,7 @@ class GenericNestedStepsTests
 
         verify(subSteps, times(2)).execute(Optional.empty());
         verify(searchContextSetter, times(2)).setSearchContext();
-        verify(searchActions, times(2)).findElements(searchContext, locator);
+        verify(searchActions, times(2)).findElements(locator);
         verify(softAssert).recordFailedAssertion("Elements number a value equal to <1>"
                 + " was not changed after 2 iteration(s)");
     }
@@ -109,25 +106,17 @@ class GenericNestedStepsTests
     @Test
     void shouldNotExecuteStepsIfInitialElementsNumberIsNotValid()
     {
-        SearchContext searchContext = mockUiContext();
         Locator locator = mock(Locator.class);
-        when(searchActions.findElements(searchContext, locator)).thenReturn(List.of(mock(WebElement.class)));
+        when(searchActions.findElements(locator)).thenReturn(List.of(mock(WebElement.class)));
 
         nestedSteps.performAllStepsWhileElementsExist(ComparisonRule.EQUAL_TO, 2, locator, 5, subSteps);
 
         verifyNoInteractions(subSteps);
-        verify(searchActions, times(1)).findElements(searchContext, locator);
+        verify(searchActions, times(1)).findElements(locator);
         verify(softAssert).assertThat(eq(ELEMENTS_NUMBER), eq(1), argThat(m ->
             ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));
         verify(softAssert, never()).recordFailedAssertion(anyString());
         verify(uiContext, never()).getSearchContextSetter();
-    }
-
-    private SearchContext mockUiContext()
-    {
-        SearchContext searchContext = mock(SearchContext.class);
-        when(uiContext.getSearchContext()).thenReturn(searchContext);
-        return searchContext;
     }
 
     private SearchContextSetter mockSearchContextSetter()
