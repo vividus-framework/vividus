@@ -67,9 +67,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.azure.datafactory.steps.DataFactorySteps.RunFilter;
 import org.vividus.azure.datafactory.steps.DataFactorySteps.RunFilterType;
 import org.vividus.azure.util.InnersJacksonAdapter;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class DataFactoryStepsTests
@@ -89,7 +89,7 @@ class DataFactoryStepsTests
     @Mock private AzureProfile azureProfile;
     @Mock private TokenCredential tokenCredential;
     @Spy private final InnersJacksonAdapter innersJacksonAdapter = new InnersJacksonAdapter();
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
     @Mock private ISoftAssert softAssert;
 
     @ParameterizedTest
@@ -205,7 +205,7 @@ class DataFactoryStepsTests
             steps.collectPipelineRuns(PIPELINE_NAME, List.of(filter1, filter2), FACTORY_NAME, RESOURCE_GROUP_NAME,
                     scopes, variableName);
 
-            verify(bddVariableContext).putVariable(scopes, variableName, "[{\"key\":\"PipelineRunInner\"}]");
+            verify(variableContext).putVariable(scopes, variableName, "[{\"key\":\"PipelineRunInner\"}]");
 
             var runFilterParameters = runFilterParametersCaptor.getValue();
             assertEquals(filter1.getFilterValue(), runFilterParameters.lastUpdatedAfter());
@@ -227,7 +227,7 @@ class DataFactoryStepsTests
             var dataFactoryManager = mock(DataFactoryManager.class);
             dataFactoryManagerStaticMock.when(() -> DataFactoryManager.authenticate(tokenCredential, azureProfile))
                     .thenReturn(dataFactoryManager);
-            var steps = new DataFactorySteps(azureProfile, tokenCredential, innersJacksonAdapter, bddVariableContext,
+            var steps = new DataFactorySteps(azureProfile, tokenCredential, innersJacksonAdapter, variableContext,
                     softAssert);
             consumer.accept(dataFactoryManager, steps);
         }

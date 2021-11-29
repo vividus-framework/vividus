@@ -39,17 +39,17 @@ import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.monitor.TakeScreenshotOnFailure;
-import org.vividus.bdd.steps.ComparisonRule;
-import org.vividus.bdd.steps.DataWrapper;
-import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.proxy.IProxy;
 import org.vividus.proxy.model.HttpMessagePart;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.ComparisonRule;
+import org.vividus.steps.DataWrapper;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.variable.VariableScope;
 
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -70,7 +70,7 @@ public class ProxySteps
     @Inject private IProxy proxy;
     @Inject private ISoftAssert softAssert;
     @Inject private IAttachmentPublisher attachmentPublisher;
-    @Inject private IBddVariableContext bddVariableContext;
+    @Inject private VariableContext variableContext;
     @Inject private IWebWaitActions waitActions;
 
     /**
@@ -169,7 +169,7 @@ public class ProxySteps
         if (harEntries.size() == 1)
         {
             HarEntry harEntry = harEntries.get(0);
-            bddVariableContext.putVariable(scopes, variableName, httpMessagePart.get(harEntry));
+            variableContext.putVariable(scopes, variableName, httpMessagePart.get(harEntry));
         }
     }
 

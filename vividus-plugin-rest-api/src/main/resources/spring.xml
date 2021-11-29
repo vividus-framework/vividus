@@ -26,25 +26,25 @@
 
     <bean id="httpTestContext" class="org.vividus.http.HttpTestContext" />
 
-    <bean name="FROM_JSON" class="org.vividus.bdd.transformer.JsonRestApiTableTransformer">
+    <bean name="FROM_JSON" class="org.vividus.transformer.JsonRestApiTableTransformer">
         <property name="httpClient" ref="httpClient-RestApi"/>
     </bean>
 
-    <bean id="jsonSoftAssert" class="org.vividus.bdd.validator.JsonSoftAssert" parent="softAssert" />
+    <bean id="jsonSoftAssert" class="org.vividus.validator.JsonSoftAssert" parent="softAssert" />
 
-    <bean id="apiSteps" class="org.vividus.bdd.steps.api.HttpRequestSteps">
+    <bean id="apiSteps" class="org.vividus.steps.api.HttpRequestSteps">
         <property name="apiEndpoint" value="${rest-api.http.endpoint}"/>
     </bean>
 
-    <bean id="httpResponseValidationSteps" class="org.vividus.bdd.steps.api.HttpResponseValidationSteps" />
+    <bean id="httpResponseValidationSteps" class="org.vividus.steps.api.HttpResponseValidationSteps" />
 
-    <bean id="httpResourceValidationSteps" class="org.vividus.bdd.steps.http.HttpResourceValidationSteps" />
+    <bean id="httpResourceValidationSteps" class="org.vividus.steps.http.HttpResourceValidationSteps" />
 
-    <bean id="jsonResponseValidationSteps" class="org.vividus.bdd.steps.api.JsonResponseValidationSteps">
+    <bean id="jsonResponseValidationSteps" class="org.vividus.steps.api.JsonResponseValidationSteps">
         <property name="softAssert" ref="jsonSoftAssert" />
     </bean>
 
-    <bean id="sslSteps" class="org.vividus.bdd.steps.ssl.SslSteps" />
+    <bean id="sslSteps" class="org.vividus.steps.ssl.SslSteps" />
 
     <bean id="httpClient-RestApi" class="org.vividus.http.client.HttpClient"
         factory-bean="httpClientFactory"
@@ -88,7 +88,7 @@
 
     <bean id="httpClientInterceptor" class="org.vividus.http.HttpClientInterceptor" />
 
-    <bean id="httpCookieSteps" class="org.vividus.bdd.steps.api.HttpCookieSteps"/>
+    <bean id="httpCookieSteps" class="org.vividus.steps.api.HttpCookieSteps"/>
 
     <util:list id="stepBeanNames-Api" value-type="java.lang.String">
         <idref bean="apiSteps" />

@@ -56,7 +56,7 @@ public final class BddStepPrinter
     {
         CommandLineParser parser = new DefaultParser();
         Option helpOption = new Option("h", "help", false, "Print this message");
-        Option fileOption = new Option("f", "file", true, "Name of file to save BDD steps");
+        Option fileOption = new Option("f", "file", true, "Name of file to save steps");
         Options options = new Options();
         options.addOption(helpOption);
         options.addOption(fileOption);
@@ -64,7 +64,7 @@ public final class BddStepPrinter
 
         if (commandLine.hasOption(helpOption.getOpt()))
         {
-            new HelpFormatter().printHelp("BddStepPrinter", options);
+            new HelpFormatter().printHelp("StepPrinter", options);
             return;
         }
 
@@ -87,7 +87,7 @@ public final class BddStepPrinter
         {
             Path path = Paths.get(file);
             FileUtils.writeLines(path.toFile(), stepsLines);
-            System.out.println("File with BDD steps: " + path.toAbsolutePath());
+            System.out.println("File with steps: " + path.toAbsolutePath());
         }
     }
 

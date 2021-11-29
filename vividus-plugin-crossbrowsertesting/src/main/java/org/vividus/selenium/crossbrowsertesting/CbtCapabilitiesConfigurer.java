@@ -17,14 +17,14 @@
 package org.vividus.selenium.crossbrowsertesting;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.context.RunContext;
 import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
 
 public class CbtCapabilitiesConfigurer extends AbstractDesiredCapabilitiesConfigurer
 {
-    protected CbtCapabilitiesConfigurer(IBddRunContext bddRunContext)
+    protected CbtCapabilitiesConfigurer(RunContext runContext)
     {
-        super(bddRunContext);
+        super(runContext);
     }
 
     @Override

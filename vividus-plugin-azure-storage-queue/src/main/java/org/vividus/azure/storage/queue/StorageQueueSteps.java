@@ -33,15 +33,15 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.variable.VariableScope;
 
 public class StorageQueueSteps
 {
     private final PropertyMappedCollection<String> storageQueueEndpoints;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
     private final JsonUtils jsonUtils;
     private final Duration receiveTimeout;
 
@@ -61,11 +61,11 @@ public class StorageQueueSteps
             });
 
     public StorageQueueSteps(PropertyMappedCollection<String> storageQueueEndpoints, Duration receiveTimeout,
-            TokenCredential tokenCredential, IBddVariableContext bddVariableContext, JsonUtils jsonUtils)
+            TokenCredential tokenCredential, VariableContext variableContext, JsonUtils jsonUtils)
     {
         this.storageQueueEndpoints = storageQueueEndpoints;
         this.receiveTimeout = receiveTimeout;
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
         this.jsonUtils = jsonUtils;
         this.tokenCredential = tokenCredential;
     }
@@ -100,7 +100,7 @@ public class StorageQueueSteps
                 .map(PeekedMessageItem::getBody)
                 .map(BinaryData::toString)
                 .collect(Collectors.toList());
-        bddVariableContext.putVariable(scopes, variableName, messages);
+        variableContext.putVariable(scopes, variableName, messages);
     }
 
     /**
@@ -123,7 +123,7 @@ public class StorageQueueSteps
     public void sendMessage(String message, String storageQueueKey, Set<VariableScope> scopes, String variableName)
     {
         SendMessageResult sendMessageResult = getQueueClient(storageQueueKey).sendMessage(message);
-        bddVariableContext.putVariable(scopes, variableName, jsonUtils.toJson(sendMessageResult));
+        variableContext.putVariable(scopes, variableName, jsonUtils.toJson(sendMessageResult));
     }
 
     /**

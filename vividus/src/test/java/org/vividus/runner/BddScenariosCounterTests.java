@@ -127,7 +127,7 @@ class BddScenariosCounterTests extends SystemStreamTests
         {
             BddScenariosCounter.main(new String[] { "--help" });
             vividus.verify(Vividus::init);
-            assertThat(getOutStreamContent(), containsString("usage: BddScenariosCounter"));
+            assertThat(getOutStreamContent(), containsString("usage: ScenariosCounter"));
         }
     }
 

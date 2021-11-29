@@ -40,15 +40,15 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.azure.util.InnersJacksonAdapter;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
 class StorageAccountManagementStepsTests
 {
     @Mock private AzureProfile azureProfile;
     @Mock private TokenCredential tokenCredential;
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
 
     @Test
     @SuppressWarnings("unchecked")
@@ -71,11 +71,11 @@ class StorageAccountManagementStepsTests
             storageAccount.withTags(Map.of());
             when(storageAccounts.stream()).thenReturn(Stream.of(storageAccount));
             var steps = new StorageAccountManagementSteps(azureProfile, tokenCredential, new InnersJacksonAdapter(),
-                    bddVariableContext);
+                    variableContext);
             var scopes = Set.of(VariableScope.STORY);
             var varName = "varName";
             steps.listStorageAccounts(resourceGroupName, scopes, varName);
-            verify(bddVariableContext).putVariable(scopes, varName,
+            verify(variableContext).putVariable(scopes, varName,
                     "[{\"tags\":{},\"properties\":{\"allowBlobPublicAccess\":true}}]");
         }
     }

@@ -25,9 +25,9 @@ import org.jbehave.core.model.Meta;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningScenario;
-import org.vividus.bdd.model.RunningStory;
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningScenario;
+import org.vividus.model.RunningStory;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
@@ -36,17 +36,17 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
 {
     private final boolean remoteExecution;
     private final IWebDriverManagerContext webDriverManagerContext;
-    private final IBddRunContext bddRunContext;
+    private final RunContext runContext;
     private final IProxy proxy;
     private final Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers;
 
     public AbstractVividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
-            IBddRunContext bddRunContext, IProxy proxy,
+            RunContext runContext, IProxy proxy,
             Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
     {
         this.remoteExecution = remoteExecution;
         this.webDriverManagerContext = webDriverManagerContext;
-        this.bddRunContext = bddRunContext;
+        this.runContext = runContext;
         this.proxy = proxy;
         this.desiredCapabilitiesConfigurers = desiredCapabilitiesConfigurers;
     }
@@ -77,7 +77,7 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
                 webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES));
 
         webDriverManagerContext.reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
-        RunningStory runningStory = bddRunContext.getRunningStory();
+        RunningStory runningStory = runContext.getRunningStory();
         if (runningStory != null)
         {
             Meta storyMeta = runningStory.getStory().getMeta();

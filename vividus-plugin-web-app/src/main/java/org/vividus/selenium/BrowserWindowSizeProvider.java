@@ -22,19 +22,19 @@ import java.awt.Toolkit;
 import javax.inject.Inject;
 
 import org.jbehave.core.model.Meta;
-import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningScenario;
-import org.vividus.bdd.model.RunningStory;
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningScenario;
+import org.vividus.model.RunningStory;
 
 public class BrowserWindowSizeProvider implements IBrowserWindowSizeProvider
 {
-    @Inject private IBddRunContext bddRunContext;
+    @Inject private RunContext runContext;
     private String remoteScreenResolution;
 
     @Override
     public BrowserWindowSize getBrowserWindowSize(boolean remoteExecution)
     {
-        RunningStory runningStory = bddRunContext.getRunningStory();
+        RunningStory runningStory = runContext.getRunningStory();
         if (runningStory != null)
         {
             RunningScenario runningScenario = runningStory.getRunningScenario();

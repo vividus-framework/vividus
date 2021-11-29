@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.testcontext.TestContext;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class })
 class KinesisStepsTests
@@ -68,7 +68,7 @@ class KinesisStepsTests
     private static final Object KEY = GetShardIteratorResult.class;
 
     @Mock private TestContext testContext;
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
 
     @Test
     void shouldPutRecord()
@@ -134,7 +134,7 @@ class KinesisStepsTests
 
             List<String> nextShardIterators = List.of(nextShardIterator);
             verify(testContext).put(KEY, nextShardIterators);
-            verify(bddVariableContext).putVariable(scopes, variableName, List.of(DATA));
+            verify(variableContext).putVariable(scopes, variableName, List.of(DATA));
             assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(
                     info("Getting records using shard iterator '{}'", SHARD_ITERATOR),
                     info("Next shard iterators are: {}", nextShardIterators)
@@ -149,7 +149,7 @@ class KinesisStepsTests
             AmazonKinesis kinesis = mock(AmazonKinesis.class);
             builder.when(AmazonKinesisClientBuilder::defaultClient).thenReturn(kinesis);
 
-            KinesisSteps steps = new KinesisSteps(testContext, bddVariableContext);
+            KinesisSteps steps = new KinesisSteps(testContext, variableContext);
 
             kinesisConsumer.accept(kinesis, steps);
         }

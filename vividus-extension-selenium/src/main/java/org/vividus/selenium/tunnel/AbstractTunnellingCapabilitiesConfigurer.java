@@ -23,7 +23,7 @@ import com.google.common.eventbus.Subscribe;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.context.RunContext;
 import org.vividus.selenium.AbstractDesiredCapabilitiesConfigurer;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 
@@ -34,9 +34,9 @@ public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelO
 
     private boolean tunnellingEnabled;
 
-    protected AbstractTunnellingCapabilitiesConfigurer(IBddRunContext bddRunContext, TunnelManager<T> tunnelManager)
+    protected AbstractTunnellingCapabilitiesConfigurer(RunContext runContext, TunnelManager<T> tunnelManager)
     {
-        super(bddRunContext);
+        super(runContext);
         this.tunnelManager = tunnelManager;
     }
 

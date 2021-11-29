@@ -44,13 +44,13 @@ import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.steps.DataWrapper;
-import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.steps.DataWrapper;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.variable.VariableScope;
 
 public class BlobStorageSteps
 {
@@ -59,7 +59,7 @@ public class BlobStorageSteps
 
     private final PropertyMappedCollection<String> storageAccountEndpoints;
     private final TokenCredential credential;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
     private final JsonUtils jsonUtils;
 
     private final LoadingCache<String, BlobServiceClient> blobStorageClients = CacheBuilder.newBuilder()
@@ -73,11 +73,11 @@ public class BlobStorageSteps
             });
 
     public BlobStorageSteps(PropertyMappedCollection<String> storageAccountEndpoints, TokenCredential credential,
-            IBddVariableContext bddVariableContext, JsonUtils jsonUtils)
+            VariableContext variableContext, JsonUtils jsonUtils)
     {
         this.storageAccountEndpoints = storageAccountEndpoints;
         this.credential = credential;
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
         this.jsonUtils = jsonUtils;
     }
 
@@ -108,7 +108,7 @@ public class BlobStorageSteps
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
             createBlobClient(blobName, containerName, storageAccountKey).download(outputStream);
-            bddVariableContext.putVariable(scopes, variableName, outputStream.toString(StandardCharsets.UTF_8));
+            variableContext.putVariable(scopes, variableName, outputStream.toString(StandardCharsets.UTF_8));
         }
     }
 
@@ -142,7 +142,7 @@ public class BlobStorageSteps
     {
         String tempFilePath = ResourceUtils.createTempFile(baseFileName).toAbsolutePath().toString();
         createBlobClient(blobName, containerName, storageAccountKey).downloadToFile(tempFilePath, true);
-        bddVariableContext.putVariable(scopes, variableName, tempFilePath);
+        variableContext.putVariable(scopes, variableName, tempFilePath);
     }
 
     /**
@@ -170,7 +170,7 @@ public class BlobStorageSteps
             Set<VariableScope> scopes, String variableName)
     {
         BlobProperties blobProperties = createBlobClient(blobName, containerName, storageAccountKey).getProperties();
-        bddVariableContext.putVariable(scopes, variableName, jsonUtils.toJson(blobProperties));
+        variableContext.putVariable(scopes, variableName, jsonUtils.toJson(blobProperties));
     }
 
     /**
@@ -234,7 +234,7 @@ public class BlobStorageSteps
                                                     .map(BlobItem::getName)
                                                     .filter(nameMatcher::matches)
                                                     .collect(Collectors.toList());
-        bddVariableContext.putVariable(scopes, variableName, blobNames);
+        variableContext.putVariable(scopes, variableName, blobNames);
     }
 
     /**
@@ -302,7 +302,7 @@ public class BlobStorageSteps
                 .orElse(filteredBlobNames)
                 .collect(Collectors.toList());
 
-        bddVariableContext.putVariable(scopes, variableName, result);
+        variableContext.putVariable(scopes, variableName, result);
     }
 
     private BlobContainerClient createBlobContainerClient(String containerName, String storageAccountKey)

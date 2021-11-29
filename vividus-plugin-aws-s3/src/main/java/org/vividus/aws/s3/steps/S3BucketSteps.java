@@ -49,25 +49,25 @@ import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.csv.CsvReader;
 import org.vividus.util.DateUtils;
 import org.vividus.util.ResourceUtils;
+import org.vividus.variable.VariableScope;
 
 public class S3BucketSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(S3BucketSteps.class);
 
     private final AmazonS3 amazonS3Client;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
     private final DateUtils dateUtils;
 
-    public S3BucketSteps(IBddVariableContext bddVariableContext, DateUtils dateUtils)
+    public S3BucketSteps(VariableContext variableContext, DateUtils dateUtils)
     {
         this.dateUtils = dateUtils;
         this.amazonS3Client = AmazonS3ClientBuilder.defaultClient();
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
     }
 
     /**
@@ -160,7 +160,7 @@ public class S3BucketSteps
     {
         String csvString = fetchObject(bucketName, StringUtils.appendIfMissing(objectKey, ".csv"));
         List<Map<String, String>> csv = new CsvReader().readCsvString(csvString);
-        bddVariableContext.putVariable(scopes, variableName, csv);
+        variableContext.putVariable(scopes, variableName, csv);
     }
 
     /**
@@ -188,7 +188,7 @@ public class S3BucketSteps
             throws IOException
     {
         String content = fetchObject(bucketName, objectKey);
-        bddVariableContext.putVariable(scopes, variableName, content);
+        variableContext.putVariable(scopes, variableName, content);
     }
 
     private String fetchObject(String bucketName, String key) throws IOException
@@ -290,7 +290,7 @@ public class S3BucketSteps
         Predicate<S3ObjectSummary> filter = buildFilter(filterParameters);
 
         List<String> keys = collectS3ObjectsKeys(request, filter);
-        bddVariableContext.putVariable(scopes, variableName, keys);
+        variableContext.putVariable(scopes, variableName, keys);
     }
 
     private Predicate<S3ObjectSummary> buildFilter(Map<S3ObjectFilterType, String> filterParameters)

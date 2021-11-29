@@ -7,8 +7,8 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="excelResponseValidationSteps" class="org.vividus.bdd.steps.ExcelResponseValidationSteps" />
-    <bean id="excelFileSteps" class="org.vividus.bdd.steps.ExcelFileSteps" />
+    <bean id="excelResponseValidationSteps" class="org.vividus.steps.ExcelResponseValidationSteps" />
+    <bean id="excelFileSteps" class="org.vividus.steps.ExcelFileSteps" />
 
     <util:list id="stepBeanNames-Excel" value-type="java.lang.String">
         <idref bean="excelResponseValidationSteps" />

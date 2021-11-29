@@ -45,12 +45,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedStatic;
-import org.vividus.bdd.StatisticsStoryReporter;
-import org.vividus.bdd.model.Failure;
-import org.vividus.bdd.model.NodeType;
-import org.vividus.bdd.model.RunningScenario;
-import org.vividus.bdd.model.RunningStory;
-import org.vividus.bdd.model.Statistic;
+import org.vividus.StatisticsStoryReporter;
+import org.vividus.model.Failure;
+import org.vividus.model.NodeType;
+import org.vividus.model.RunningScenario;
+import org.vividus.model.RunningStory;
+import org.vividus.model.Statistic;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(TestLoggerFactoryExtension.class)

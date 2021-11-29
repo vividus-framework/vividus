@@ -27,14 +27,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningStory;
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningStory;
 
 @ExtendWith(MockitoExtension.class)
 class CbtCapabilitiesConfigurerTests
 {
     @Mock private RunningStory runningStory;
-    @Mock private IBddRunContext bddRunContext;
+    @Mock private RunContext runContext;
     @InjectMocks private CbtCapabilitiesConfigurer configurer;
 
     @Test
@@ -42,7 +42,7 @@ class CbtCapabilitiesConfigurerTests
     {
         String storyName = "story-name";
 
-        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
+        when(runContext.getRootRunningStory()).thenReturn(runningStory);
         when(runningStory.getName()).thenReturn(storyName);
 
         DesiredCapabilities capabilities = new DesiredCapabilities();

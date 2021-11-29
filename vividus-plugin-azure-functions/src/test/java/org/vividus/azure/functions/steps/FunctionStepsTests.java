@@ -30,9 +30,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.azure.functions.service.FunctionService;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.util.json.JsonUtils;
+import org.vividus.variable.VariableScope;
 
 import reactor.core.publisher.Mono;
 
@@ -50,7 +50,7 @@ class FunctionStepsTests
 
     @Mock private JsonUtils jsonUtils;
     @Mock private FunctionService functionService;
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
 
     @InjectMocks private FunctionSteps functionSteps;
 
@@ -62,7 +62,7 @@ class FunctionStepsTests
         mockTrigger(payloadMap);
         functionSteps.triggerFunction(FUNCTION_NAME, APP_NAME, RESOURCE_GROUP, PAYLOAD,
                 SCOPES, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, Map.of(BODY, DATA));
+        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, Map.of(BODY, DATA));
     }
 
     private void mockTrigger(Map<String, String> payloadMap)
@@ -78,7 +78,7 @@ class FunctionStepsTests
         Map<String, String> payloadMap = Map.of();
         mockTrigger(payloadMap);
         functionSteps.triggerFunction(FUNCTION_NAME, APP_NAME, RESOURCE_GROUP, "", SCOPES, VARIABLE_NAME);
-        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, Map.of(BODY, DATA));
+        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, Map.of(BODY, DATA));
         verifyNoInteractions(jsonUtils);
     }
 }

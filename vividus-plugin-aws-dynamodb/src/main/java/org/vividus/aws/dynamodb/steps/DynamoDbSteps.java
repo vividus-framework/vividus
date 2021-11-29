@@ -31,17 +31,17 @@ import com.amazonaws.services.dynamodbv2.model.ExecuteStatementResult;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.variable.VariableScope;
 
 public class DynamoDbSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDbSteps.class);
 
     private final AmazonDynamoDB amazonDynamoDB;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
 
-    public DynamoDbSteps(String roleArn, IBddVariableContext bddVariableContext)
+    public DynamoDbSteps(String roleArn, VariableContext variableContext)
     {
         AmazonDynamoDBClientBuilder amazonDynamoDBClientBuilder = AmazonDynamoDBClientBuilder.standard();
         if (roleArn != null)
@@ -51,7 +51,7 @@ public class DynamoDbSteps
         }
 
         this.amazonDynamoDB = amazonDynamoDBClientBuilder.build();
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
     }
 
     /**
@@ -104,6 +104,6 @@ public class DynamoDbSteps
                 .map(ItemUtils::toItem)
                 .map(Item::toJSON)
                 .collect(Collectors.joining(",", "[", "]"));
-        bddVariableContext.putVariable(scopes, variableName, jsonResult);
+        variableContext.putVariable(scopes, variableName, jsonResult);
     }
 }

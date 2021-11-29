@@ -25,7 +25,7 @@ import org.hamcrest.Matcher;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
-import org.vividus.bdd.steps.StringComparisonRule;
+import org.vividus.steps.StringComparisonRule;
 
 public class ExamplesTableToBlobFilterConverter extends AbstractParameterConverter<ExamplesTable, BlobFilter>
 {

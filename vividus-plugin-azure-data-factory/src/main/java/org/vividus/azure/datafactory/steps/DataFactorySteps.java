@@ -38,11 +38,11 @@ import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.azure.util.InnersJacksonAdapter;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
+import org.vividus.variable.VariableScope;
 
 public class DataFactorySteps
 {
@@ -51,16 +51,16 @@ public class DataFactorySteps
 
     private final DataFactoryManager dataFactoryManager;
     private final InnersJacksonAdapter innersJacksonAdapter;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
     private final ISoftAssert softAssert;
 
     public DataFactorySteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            InnersJacksonAdapter innersJacksonAdapter, IBddVariableContext bddVariableContext, ISoftAssert softAssert)
+            InnersJacksonAdapter innersJacksonAdapter, VariableContext variableContext, ISoftAssert softAssert)
     {
         this.dataFactoryManager = DataFactoryManager.authenticate(tokenCredential, azureProfile);
         this.softAssert = softAssert;
         this.innersJacksonAdapter = innersJacksonAdapter;
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
     }
 
     /**
@@ -151,7 +151,7 @@ public class DataFactorySteps
         }).log("Collecting pipeline runs filtered by: {}");
         List<PipelineRunInner> runs = dataFactoryManager.pipelineRuns().queryByFactory(resourceGroupName, factoryName,
                 filterParameters).innerModel().value();
-        bddVariableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(runs));
+        variableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(runs));
     }
 
     private PipelineRun getPipelineRun(String resourceGroupName, String factoryName, String runId)

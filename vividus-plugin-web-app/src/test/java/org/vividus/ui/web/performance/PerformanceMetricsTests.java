@@ -30,7 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.steps.ui.web.model.WebPerformanceMetric;
+import org.vividus.steps.ui.web.model.WebPerformanceMetric;
 import org.vividus.testcontext.TestContext;
 import org.vividus.ui.web.action.WebJavascriptActions;
 

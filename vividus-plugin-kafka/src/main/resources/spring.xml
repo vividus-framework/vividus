@@ -6,7 +6,7 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        default-lazy-init="true">
 
-    <bean id="kafkaSteps" class="org.vividus.bdd.steps.kafka.KafkaSteps" />
+    <bean id="kafkaSteps" class="org.vividus.steps.kafka.KafkaSteps" />
 
     <util:list id="stepBeanNames-Kafka">
         <idref bean="kafkaSteps" />

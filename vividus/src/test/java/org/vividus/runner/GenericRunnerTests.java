@@ -25,7 +25,7 @@ import java.util.Properties;
 import org.jbehave.core.embedder.Embedder;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.vividus.bdd.IBatchedPathFinder;
+import org.vividus.IBatchedPathFinder;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.report.MetadataLogger;

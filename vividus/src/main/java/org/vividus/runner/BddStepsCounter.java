@@ -44,9 +44,9 @@ import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
-import org.vividus.bdd.IPathFinder;
-import org.vividus.bdd.StoryLoader;
-import org.vividus.bdd.batch.BatchResourceConfiguration;
+import org.vividus.IPathFinder;
+import org.vividus.StoryLoader;
+import org.vividus.batch.BatchResourceConfiguration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
@@ -181,7 +181,7 @@ public final class BddStepsCounter
     {
         if (!stepsWithStats.isEmpty())
         {
-            printStream.println(center("Top of the most used bdd steps:", maxStepLength) + SPACE + OCCURRENCES);
+            printStream.println(center("Top of the most used steps:", maxStepLength) + SPACE + OCCURRENCES);
             long limit = stepsWithStats.size();
             if (commandLine.hasOption(topOption.getOpt()))
             {
