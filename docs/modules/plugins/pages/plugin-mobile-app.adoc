@@ -739,7 +739,7 @@ When I execute sequence of actions: $actions
 |Example
 
 |PRESS
-|Locator
+|<<_locator>>
 |By.id(Name)
 
 |PRESS_BY_COORDS
@@ -747,7 +747,7 @@ When I execute sequence of actions: $actions
 |(10, 15) where `x` is 10 and `y` is 15
 
 |MOVE_TO
-|Locator
+|<<_locator>>
 |By.id(Name)
 
 |MOVE_BY_OFFSET

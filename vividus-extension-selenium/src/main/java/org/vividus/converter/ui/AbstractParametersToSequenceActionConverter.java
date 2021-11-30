@@ -26,7 +26,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.steps.ui.model.SequenceAction;
 import org.vividus.steps.ui.model.SequenceActionType;
 
-public class AbstractParametersToSequenceActionConverter<T extends SequenceActionType<?>>
+public abstract class AbstractParametersToSequenceActionConverter<T extends SequenceActionType<?>>
         extends AbstractParameterConverter<Parameters, SequenceAction<T>>
 {
     private final StringToLocatorConverter stringToLocatorConverter;

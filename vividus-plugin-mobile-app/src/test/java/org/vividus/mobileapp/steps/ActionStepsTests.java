@@ -18,6 +18,7 @@ package org.vividus.mobileapp.steps;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -84,5 +85,17 @@ class ActionStepsTests
                 );
         actionSteps.executeSequenceOfActions(actions);
         verify(performsTouchActions).performTouchAction(any(PositionCachingTouchAction.class));
+    }
+
+    @Test
+    void testExecuteSequenceOfActionsStoppedSinceElementByLocatorNotFound()
+    {
+        when(baseValidations.assertElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(Optional.empty());
+
+        List<SequenceAction<MobileSequenceActionType>> actions = List.of(
+                new SequenceAction<>(MobileSequenceActionType.PRESS, locator)
+                );
+        actionSteps.executeSequenceOfActions(actions);
+        verifyNoInteractions(performsTouchActions);
     }
 }
