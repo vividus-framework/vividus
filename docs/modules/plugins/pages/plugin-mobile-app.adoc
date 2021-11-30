@@ -1,5 +1,6 @@
 :grid-default-hostname: empty
 :keys: https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
+:given-step: Given I start mobile application
 
 = Mobile Application Plugin
 
@@ -161,8 +162,12 @@ a|Defines a destination folder on a device for a file being uploaded
 !`/sdcard/Pictures`
 
 !===
-
+include::partial$proxy-properties.adoc[]
 |===
+
+include::partial$proxy-meta-tags.adoc[]
+
+IMPORTANT: For device configuration, we need to perform the following steps: install CA certificate(download https://github.com/browserup/browserup-proxy/blob/master/browserup-proxy-core/src/main/resources/sslSupport/ca-certificate-rsa.cer[CA certificate] from a browserup repository), configure device proxy, and configure the test app to allow proxy in cases of necessity.
 
 == Profiles
 
@@ -745,57 +750,4 @@ When I select next value with `0.1` offset in picker wheel located `xpath(//XCUI
 
 include::partial$generic-ui-steps.adoc[]
 
-=== Change network condition
-
-Turn ON/OFF network condition.
-
-[source,gherkin]
-----
-When I turn $toggle `$mode` network connection
-----
-* `$toggle` - modes of the toggle - ON or OFF
-* `$mode` - The name of the action to be performed
-
-[cols="2,2,2", options="header"]
-|===
-
-|Mode
-|Platform
-|Description
-
-|`WIFI`
-|Android, iOS
-|Turn ON/OFF Wi-Fi connection state only.
-
-|`MOBILE_DATA`
-|Android, iOS
-|Turn ON/OFF Mobile Data connection state only.
-
-|`AIRPLANE`
-|Android
-|Turn ON/OFF Airplane Mode only.
-
-|`WIFI_AND_MOBILE_DATA`
-|Android
-|Turn ON/OFF Mobile Data and Wi-Fi state.
-
-|===
-
-TIP: For IOS devices: to return to the application you must use the step:
-[source,gherkin]
-----
-When I activate application with bundle identifier `$bundleId`.
-----
-
-.Turn OFF Wi-Fi for Android
-[source,gherkin]
-----
-When I turn OFF `WIFI` network connection
-----
-
-.Turn OFF Wi-Fi for iOS
-[source,gherkin]
-----
-When I turn OFF `WIFI` network connection
-When I activate application with bundle identifier `$bundleId`
-----
+include::partial$proxy-steps.adoc[]

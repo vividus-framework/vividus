@@ -71,7 +71,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
-import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.action.IWaitActions;
 import org.vividus.variable.VariableScope;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -105,7 +105,7 @@ class ProxyStepsTests
     @Mock private VariableContext variableContext;
     @Mock private IProxy proxy;
     @Mock private IAttachmentPublisher attachmentPublisher;
-    @Mock private IWebWaitActions waitActions;
+    @Mock private IWaitActions waitActions;
     @InjectMocks private ProxySteps proxySteps;
 
     @Test

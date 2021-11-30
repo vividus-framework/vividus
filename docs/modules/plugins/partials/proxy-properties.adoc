@@ -1,0 +1,23 @@
+|proxy
+|empty
+|Provides possibility to attach screenshot for failed proxy steps
+
+|proxy.enabled
+|true/false
+|false
+|Enabled proxy for the run
+
+|proxy.host
+|any host name resolving on the machine
+|empty
+|Overrides the host which will be used by proxy
+
+|proxy.ports
+|ports range(e.g., 10000-10005)
+|empty
+|Defines ports range which could be used for proxy
+
+|proxy.connectable-host
+|host.docker.internal
+|empty
+|Overrides the proxy host which will be passed to browser

@@ -53,8 +53,6 @@
         <constructor-arg index="0" value="${mobile-environment.device.folder-for-file-upload}" />
     </bean>
 
-    <bean id="networkConditionsSteps" class="org.vividus.mobileapp.steps.NetworkConditionsSteps" />
-
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
 
     <bean class="org.vividus.mobileapp.configuration.MobileApplicationConfiguration" >
@@ -94,8 +92,6 @@
 
     <bean class="org.vividus.ui.mobile.action.MobileAppElementActions" />
 
-    <bean class="org.vividus.mobileapp.action.NetworkActions" />
-
     <bean class="org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory" parent="abstractAshotFactory">
         <property name="ashotConfigurations">
             <bean factory-bean="propertyMapper" factory-method="readValues">
@@ -118,6 +114,5 @@
         <idref bean="deviceSteps" />
         <idref bean="elementSteps" />
         <idref bean="setContextSteps" />
-        <idref bean="networkConditionsSteps" />
     </util:list>
 </beans>

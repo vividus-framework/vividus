@@ -243,8 +243,6 @@
         <property name="windowsStrategy" value="${selenium.windows-strategy}" />
     </bean>
 
-    <bean id="proxySteps" class="org.vividus.proxy.steps.ProxySteps" />
-
     <bean class="org.vividus.monitor.WebScreenshotOnFailureMonitor" parent="abstractScreenshotOnFailureMonitor"/>
 
     <bean class="org.vividus.ui.web.listener.WebSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
@@ -336,7 +334,6 @@
         <idref bean="actionSteps" />
         <idref bean="webUiVividusSetupSteps" />
         <idref bean="localStorageSteps" />
-        <idref bean="proxySteps" />
         <idref bean="dragAndDropSteps" />
         <idref bean="scrollSteps" />
         <idref bean="performanceSteps" />

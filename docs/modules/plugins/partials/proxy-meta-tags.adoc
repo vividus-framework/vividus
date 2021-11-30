@@ -1,0 +1,3 @@
+=== Meta Tags
+
+`@proxy` - some steps require proxy to be turned on: it can be done by setting the corresponding properties or by switching on this meta tag at story level.
