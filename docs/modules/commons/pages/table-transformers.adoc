@@ -145,6 +145,8 @@ the columns.
 
 [IMPORTANT]
 `byMaxColumns` and `byColumnNames` are competing properties and only one can be specified at the same time. The same restriction is applied to the properties `byMaxRows`, `byRandomRows` and `byRowIndexes`.
+[IMPORTANT]
+In case if `byColumnNames` contains nonexistent table columns the exception with list of the invalid columns will be thrown.
 
 .Usage of FILTERING transformer with filtering by column names and by max number of rows
 [source,gherkin]
