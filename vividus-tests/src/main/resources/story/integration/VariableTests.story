@@ -1,7 +1,7 @@
 Description: Integration tests for variables
 
 Meta:
-    @epic vividus-bdd-engine
+    @epic vividus-engine
     @feature variables
 
 Scenario: Verify default variables

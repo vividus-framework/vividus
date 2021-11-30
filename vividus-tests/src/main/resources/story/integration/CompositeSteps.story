@@ -1,7 +1,7 @@
 Description: Integration tests for composite steps.
 
 Meta:
-    @epic vividus-bdd-engine
+    @epic vividus-engine
     @feature composite-steps
 
 Scenario: Verify composite step with comment

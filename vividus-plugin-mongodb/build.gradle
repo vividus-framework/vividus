@@ -1,7 +1,7 @@
 project.description = 'Vividus plugin for Mongo DB testing'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     implementation project(':vividus-util')
     implementation(group: 'org.mongodb', name: 'mongodb-driver-sync', version: '4.4.0')
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)

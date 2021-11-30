@@ -6,7 +6,7 @@ test {
 }
 
 dependencies {
-    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
 

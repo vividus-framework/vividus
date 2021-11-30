@@ -32,7 +32,7 @@ configurations.testImplementation {
 }
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     api project(':vividus-http-client')
     api project(':vividus-reporter')
 

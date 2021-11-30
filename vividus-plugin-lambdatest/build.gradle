@@ -1,7 +1,7 @@
 project.description = 'Vividus plugin for LambdaTest'
 
 dependencies {
-    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-engine')
     implementation project(':vividus-extension-selenium')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)

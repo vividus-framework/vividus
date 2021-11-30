@@ -2,7 +2,7 @@ project.description = 'Vividus plugin for testing mobile applications'
 
  dependencies {
      implementation project(':vividus-extension-selenium')
-     implementation project(':vividus-bdd-engine')
+     implementation project(':vividus-engine')
      implementation project(':vividus-util')
      implementation project(':vividus-reporter')
      implementation project(':vividus-soft-assert')

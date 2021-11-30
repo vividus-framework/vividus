@@ -1,7 +1,7 @@
 project.description = 'Vividus Allure report adaptor'
 
 dependencies {
-    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-reporter')
     implementation project(':vividus-util')

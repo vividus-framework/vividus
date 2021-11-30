@@ -24,7 +24,7 @@ configurations.all {
 dependencies {
     implementation project(':vividus-http-client')
     implementation project(':vividus-util')
-    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-engine')
 
     // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
     implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: "${springBootVersion}")
