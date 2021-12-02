@@ -132,7 +132,8 @@ public class VariablesSteps
         Map<Object, Object> actualMap = expandListValuesWithSingleElement((Map<Object, Object>) variable);
 
         List<Parameters> rows = table.getRowsAsParameters(true);
-        isTrue(rows.size() == 1, "ExamplesTable should contain single row with values");
+        int rowCount = rows.size();
+        isTrue(rowCount == 1, "Input ExamplesTable should contain 1 row, but was %d", rowCount);
 
         Map<String, String> expectedMap =  rows.get(0).values();
         List<EntryComparisonResult> results = ComparisonUtils.checkMapContainsSubMap(actualMap, expectedMap);
