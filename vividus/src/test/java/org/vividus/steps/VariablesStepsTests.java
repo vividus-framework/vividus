@@ -253,7 +253,8 @@ class VariablesStepsTests
         Map<Object, Object> variable = Map.of();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> variablesSteps.tablesAreEqualIgnoringExtraColumns(variable, examplesTable));
-        assertEquals("ExamplesTable should contain single row with values", exception.getMessage());
+        assertEquals("Input ExamplesTable should contain 1 row, but was " + examplesTable.getRowCount(),
+                exception.getMessage());
     }
 
     @Test
