@@ -249,6 +249,26 @@ When I open URL `https://delayed.vividus.dev` in new window
 When I stop page loading
 ----
 
+=== Configure page load timeout
+
+Sets a custom page load timeout for a part of the story
+
+[source,gherkin]
+----
+When I set page load timeout to `$duration`
+----
+
+* `$duration` - total duration to wait for page load completion in {iso-date-format-link} format
+
+.Before loading a heavy page set an increased timeout
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I set page load timeout to `PT20S`
+When I open URL `https://example.com/super-heavy-page` in new window
+When I set page load timeout to `PT10S`
+----
+
 === Scroll context
 
 Scrolls the context to an edge
