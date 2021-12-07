@@ -179,7 +179,7 @@ jobs:
       shell: bash
       run: |
         if [[ -n $LAMBDATEST_USER && -n $LAMBDATEST_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge safari )
+          declare -a profiles=( iexplore chrome firefox edge/chromium safari )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/lambdatest \
                                                   -Pvividus.configuration.suites=lambdatest \
@@ -200,7 +200,7 @@ jobs:
       shell: bash
       run: |
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge edge/chromium safari )
+          declare -a profiles=( iexplore chrome firefox edge/chromium safari )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
                                                   -Pvividus.configuration.suites=grid \
@@ -344,7 +344,7 @@ jobs:
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge safari )
+          declare -a profiles=( iexplore chrome firefox edge/chromium safari )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=grid \
                                                   -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \

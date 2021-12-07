@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,24 +132,6 @@ public enum WebDriverType
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
             return new SafariDriver(SafariOptions.fromCapabilities(desiredCapabilities));
-        }
-    },
-    EDGE(false, false, false, Set.of(), BrowserType.EDGE)
-    {
-        @Override
-        public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
-        {
-            EdgeOptions edgeOptions = new EdgeOptions();
-            edgeOptions.merge(desiredCapabilities);
-            edgeOptions.setCapability("ms:inPrivate", true);
-            return new EdgeDriver(edgeOptions);
-        }
-
-        @Override
-        void setDriverExecutablePath(Optional<String> driverExecutablePath)
-        {
-            setDriverExecutablePathImpl(driverExecutablePath, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
-                    WebDriverManager::edgedriver);
         }
     },
     OPERA(true, true, false, Set.of(OperaOptions.CAPABILITY), BrowserType.OPERA_BLINK)
