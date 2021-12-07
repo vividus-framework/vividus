@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.function.FailableBiFunction;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,7 @@ public class XrayExporter
     @Autowired private TestCaseFactory testCaseFactory;
     @Autowired private TestExecutionFactory testExecutionFactory;
 
-    private final List<ErrorExportEntry> errors = new ArrayList<>();
+    private final List<String> errors = new ArrayList<>();
 
     private final Map<TestCaseType, Function<AbstractTestCaseParameters, AbstractTestCase>> testCaseFactories = Map.of(
         TestCaseType.MANUAL, p -> testCaseFactory.createManualTestCase((ManualTestCaseParameters) p),
@@ -95,7 +96,7 @@ public class XrayExporter
         publishErrors();
     }
 
-    private void addTestCasesToTestSet(List<Entry<String, Scenario>> testCases) throws IOException
+    private void addTestCasesToTestSet(List<Entry<String, Scenario>> testCases)
     {
         String testSetKey = xrayExporterOptions.getTestSetKey();
         if (testSetKey != null)
@@ -104,17 +105,31 @@ public class XrayExporter
                                                 .map(Entry::getKey)
                                                 .collect(Collectors.toList());
 
-            xrayFacade.updateTestSet(testSetKey, testCaseIds);
+            updateSafely(() -> xrayFacade.updateTestSet(testSetKey, testCaseIds), "test set", testSetKey);
         }
     }
 
-    private void addTestCasesToTestExecution(List<Entry<String, Scenario>> testCases) throws IOException
+    private void addTestCasesToTestExecution(List<Entry<String, Scenario>> testCases)
     {
         String testExecutionKey = xrayExporterOptions.getTestExecutionKey();
         if (testExecutionKey != null)
         {
             TestExecution testExecution = testExecutionFactory.create(testCases);
-            xrayFacade.updateTestExecution(testExecution);
+            updateSafely(() -> xrayFacade.updateTestExecution(testExecution), "test execution", testExecutionKey);
+        }
+    }
+
+    private void updateSafely(FailableRunnable<IOException> runnable, String type, String key)
+    {
+        try
+        {
+            runnable.run();
+        }
+        catch (IOException thrown)
+        {
+            String errorMessage = String.format("Failed updating %s with the key %s: %s", type, key,
+                    thrown.getMessage());
+            errors.add(errorMessage);
         }
     }
 
@@ -150,7 +165,9 @@ public class XrayExporter
         }
         catch (IOException | SyntaxException | NonEditableIssueStatusException | NotUniqueMetaValueException e)
         {
-            errors.add(new ErrorExportEntry(storyTitle, scenarioTitle, e.getMessage()));
+            String errorMessage = "Story: " + storyTitle + lineSeparator() + "Scenario: " + scenarioTitle
+                    + lineSeparator() + "Error: " + e.getMessage();
+            errors.add(errorMessage);
             LOGGER.atError().setCause(e).log("Got an error while exporting");
         }
         return Optional.empty();
@@ -193,11 +210,9 @@ public class XrayExporter
                 StringBuilder errorBuilder = new StringBuilder();
                 IntStream.range(0, errors.size()).forEach(index ->
                 {
-                    ErrorExportEntry errorEntry = errors.get(index);
+                    String errorMessage = errors.get(index);
                     errorBuilder.append("Error #").append(index + 1).append(lineSeparator())
-                                .append("Story: ").append(errorEntry.getStory()).append(lineSeparator())
-                                .append("Scenario: ").append(errorEntry.getScenario()).append(lineSeparator())
-                                .append("Error: ").append(errorEntry.getError()).append(lineSeparator());
+                                .append(errorMessage).append(lineSeparator());
                 });
                 return errorBuilder.toString();
             }).log("Export failed:{}{}");
@@ -212,35 +227,6 @@ public class XrayExporter
         if (requirementId.isPresent())
         {
             xrayFacade.createTestsLink(testCaseId, requirementId.get());
-        }
-    }
-
-    private static final class ErrorExportEntry
-    {
-        private final String story;
-        private final String scenario;
-        private final String error;
-
-        private ErrorExportEntry(String story, String scenario, String error)
-        {
-            this.story = story;
-            this.scenario = scenario;
-            this.error = error;
-        }
-
-        public String getStory()
-        {
-            return story;
-        }
-
-        public String getScenario()
-        {
-            return scenario;
-        }
-
-        public String getError()
-        {
-            return error;
         }
     }
 
