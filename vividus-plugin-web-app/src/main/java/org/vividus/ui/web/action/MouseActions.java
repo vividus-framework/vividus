@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,9 +195,9 @@ public class MouseActions implements IMouseActions
     {
         if (element != null)
         {
-            // Safari, Firefox and Edge Drivers don't scroll to element before moveTo action
+            // Safari and Firefox Drivers don't scroll to element before moveTo action
             if (webDriverManager.isMobile()
-                    || webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.FIREFOX, WebDriverType.EDGE))
+                    || webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.FIREFOX))
             {
                 javascriptActions.scrollIntoView(element, true);
             }

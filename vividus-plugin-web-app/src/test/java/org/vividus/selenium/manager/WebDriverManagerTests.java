@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,8 +156,6 @@ class WebDriverManagerTests
             Arguments.of(BrowserType.FIREFOX_CHROME,  WebDriverType.FIREFOX,      false  ),
             Arguments.of(BrowserType.CHROME,          WebDriverType.CHROME,       true   ),
             Arguments.of(BrowserType.FIREFOX_CHROME,  WebDriverType.CHROME,       false  ),
-            Arguments.of(BrowserType.EDGE,            WebDriverType.EDGE,         true   ),
-            Arguments.of(BrowserType.IE,              WebDriverType.EDGE,         false  ),
             Arguments.of(BrowserType.IEXPLORE,        WebDriverType.IEXPLORE,     true   ),
             Arguments.of(BrowserType.IE_HTA,          WebDriverType.IEXPLORE,     false  ),
             Arguments.of(BrowserType.SAFARI,          WebDriverType.SAFARI,       true   ),
@@ -173,7 +171,6 @@ class WebDriverManagerTests
             Arguments.of(BrowserType.FIREFOX_CHROME,  null                    ),
             Arguments.of(BrowserType.CHROME,          WebDriverType.CHROME    ),
             Arguments.of(BrowserType.FIREFOX_CHROME,  null                    ),
-            Arguments.of(BrowserType.EDGE,            WebDriverType.EDGE      ),
             Arguments.of(BrowserType.IE,              WebDriverType.IEXPLORE  ),
             Arguments.of(BrowserType.IEXPLORE,        WebDriverType.IEXPLORE  ),
             Arguments.of(BrowserType.IE_HTA,          null                    ),

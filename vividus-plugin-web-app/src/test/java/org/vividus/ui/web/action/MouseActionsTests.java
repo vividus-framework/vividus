@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -495,8 +495,7 @@ class MouseActionsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(((HasInputDevices) webDriver).getMouse()).thenReturn(mouse);
         when(webDriverManager.isMobile()).thenReturn(false);
-        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.FIREFOX, WebDriverType.EDGE))
-            .thenReturn(true);
+        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.FIREFOX)).thenReturn(true);
         mouseActions.moveToElement(locatableWebElement);
         verify(javascriptActions).scrollIntoView(locatableWebElement, true);
     }
