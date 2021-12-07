@@ -89,6 +89,8 @@ class XrayExporterTests
     private static final String GIVEN_STEP = "Given I setup test environment";
     private static final String WHEN_STEP = "When I perform action on test environment";
     private static final String THEN_STEP = "Then I verify changes on test environment";
+    private static final String TEST_SET_KEY = "TEST-SET";
+    private static final String TEST_EXECUTION_KEY = "TEST-EXEC";
 
     @Captor private ArgumentCaptor<ManualTestCaseParameters> manualTestCaseParametersCaptor;
     @Captor private ArgumentCaptor<CucumberTestCaseParameters> cucumberTestCaseParametersCaptor;
@@ -154,11 +156,9 @@ class XrayExporterTests
             throws URISyntaxException, IOException, NonEditableIssueStatusException
     {
         URI jsonResultsUri = getJsonResultsUri("componentslabelsupdatabletci");
-        String testSetKey = "TEST-SET";
-        String testExecutionKey = "TEST-EXEC";
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
-        xrayExporterOptions.setTestSetKey(testSetKey);
-        xrayExporterOptions.setTestExecutionKey(testExecutionKey);
+        xrayExporterOptions.setTestSetKey(TEST_SET_KEY);
+        xrayExporterOptions.setTestExecutionKey(TEST_EXECUTION_KEY);
         ManualTestCase testCase = mock(ManualTestCase.class);
 
         when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
@@ -177,12 +177,12 @@ class XrayExporterTests
         assertThat(scenarios, hasSize(1));
         assertEquals(ISSUE_ID, scenarios.get(0).getKey());
 
-        verify(xrayFacade).updateTestSet(testSetKey, List.of(ISSUE_ID));
+        verify(xrayFacade).updateTestSet(TEST_SET_KEY, List.of(ISSUE_ID));
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }
 
     @Test
-    void shouldExportTestCaseIfPreviousTestCaseExportAttemptThrownIOException()
+    void shouldCompleteExportIfExportAttemptThrownIOException()
             throws URISyntaxException, IOException, NonEditableIssueStatusException
     {
         URI jsonResultsUri = getJsonResultsUri("continueiferror");
@@ -193,15 +193,28 @@ class XrayExporterTests
         String errorMessage = "error message";
         when(exception.getMessage()).thenReturn(errorMessage);
         doThrow(exception).when(xrayFacade).updateTestCase(eq(errorIssueId), any(ManualTestCase.class));
+        String errorLogMessage = getDefaultErrorMessage(errorMessage);
         ManualTestCase testCase = mock(ManualTestCase.class);
         when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
+
+        xrayExporterOptions.setTestSetKey(TEST_SET_KEY);
+        doThrow(exception).when(xrayFacade).updateTestSet(TEST_SET_KEY, List.of(ISSUE_ID));
+        errorLogMessage += "Error #2" + lineSeparator()
+                + "Failed updating test set with the key TEST-SET: error message" + lineSeparator();
+
+        xrayExporterOptions.setTestExecutionKey(TEST_EXECUTION_KEY);
+        doThrow(exception).when(xrayFacade).updateTestExecution(any());
+        errorLogMessage += "Error #3" + lineSeparator()
+                + "Failed updating test execution with the key TEST-EXEC: error message" + lineSeparator();
 
         xrayExporter.exportResults();
 
         verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
+        verify(xrayFacade).updateTestSet(TEST_SET_KEY, List.of(ISSUE_ID));
+        verify(xrayFacade).updateTestExecution(any());
         verifyManualTestCaseParameters(Set.of(), Set.of());
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), error(exception, ERROR_MESSAGE),
-                getExportingScenarioEvent(), getReportErrorEvent(errorMessage));
+                getExportingScenarioEvent(), getExportFailedErrorEvent(errorLogMessage));
     }
 
     @Test
@@ -308,8 +321,18 @@ class XrayExporterTests
 
     private static LoggingEvent getReportErrorEvent(String error)
     {
+        return getExportFailedErrorEvent(getDefaultErrorMessage(error));
+    }
+
+    private static String getDefaultErrorMessage(String error)
+    {
         String errorFormat = "Error #1%1$sStory: storyPath%1$sScenario: Dummy scenario%1$sError: %2$s%1$s";
-        return error("Export failed:{}{}", lineSeparator(), String.format(errorFormat, lineSeparator(), error));
+        return String.format(errorFormat, lineSeparator(), error);
+    }
+
+    private static LoggingEvent getExportFailedErrorEvent(String message)
+    {
+        return error("Export failed:{}{}", lineSeparator(), message);
     }
 
     private static LoggingEvent getExportSuccessfulEvent()
