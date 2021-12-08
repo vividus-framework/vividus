@@ -8,9 +8,9 @@
     default-lazy-init="true">
 
     <bean id="propertyMapper" class="org.vividus.util.property.PropertyMapper" >
-        <constructor-arg index="0" value="${property-mapper.prefix-separator:.}" />
+        <constructor-arg index="0" value="${property-mapper.prefix-separator}" />
         <constructor-arg index="1" >
-            <bean class="#{T(com.fasterxml.jackson.databind.PropertyNamingStrategies).${property-mapper.naming-strategy:KEBAB_CASE}.getClass().getName()}" />
+            <bean class="#{T(com.fasterxml.jackson.databind.PropertyNamingStrategies).${property-mapper.naming-strategy}.getClass().getName()}" />
         </constructor-arg>
     </bean>
 
@@ -21,11 +21,11 @@
     </bean>
 
     <bean id="locationProvider" class="org.vividus.util.LocationProvider">
-        <property name="locale" value="${location.locale:#{T(java.util.Locale).getDefault()}}" />
+        <property name="locale" value="${location.locale}" />
     </bean>
 
     <bean id="dateUtils" class="org.vividus.util.DateUtils">
-        <constructor-arg value="${location.zone-id:#{T(java.time.ZoneId).systemDefault().toString()}}" />
+        <constructor-arg value="${location.zone-id}" />
     </bean>
 
     <bean id="abstractFreemarkerConfig" class="freemarker.template.Configuration" abstract="true" >

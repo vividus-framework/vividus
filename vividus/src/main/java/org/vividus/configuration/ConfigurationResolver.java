@@ -16,6 +16,8 @@
 
 package org.vividus.configuration;
 
+import static org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
@@ -59,6 +61,11 @@ public final class ConfigurationResolver
     private static final String PLACEHOLDER_SUFFIX = "}";
     private static final String PLACEHOLDER_VALUE_SEPARATOR = "=";
 
+    private static final String[] DEFAULTS_PATHS = {
+        "org/vividus/http/client",
+        "org/vividus/util"
+    };
+
     private static ConfigurationResolver instance;
 
     private final Properties properties;
@@ -82,6 +89,12 @@ public final class ConfigurationResolver
 
         Properties properties = new Properties();
         properties.putAll(configurationProperties);
+
+        for (String defaultPath : DEFAULTS_PATHS)
+        {
+            properties.putAll(propertiesLoader.loadResourceFromClasspath(true, defaultPath, "defaults.properties"));
+        }
+
         properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, "defaults"));
         properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, ROOT));
 
@@ -270,7 +283,7 @@ public final class ConfigurationResolver
 
     private static final class PropertiesLoader
     {
-        private static final String ROOT_LOCATION = "classpath*:/properties/";
+        private static final String ROOT_LOCATION = CLASSPATH_ALL_URL_PREFIX + "/properties/";
         private static final String DELIMITER = "/";
 
         private final ResourcePatternResolver resourcePatternResolver;
@@ -307,21 +320,39 @@ public final class ConfigurationResolver
                 throws IOException
         {
             String resourcePath = String.join(DELIMITER, resourcePathParts);
-            List<Resource> propertyResources = collectResourcesRecursively(resourcePatternResolver, resourcePath,
-                    failOnMissingResource);
+            List<Resource> propertyResources = collectResourcesRecursively(resourcePath, failOnMissingResource);
+            return loadPropertiesFromResources(resourcePath, propertyResources);
+        }
+
+        Properties loadResourceFromClasspath(boolean failOnMissingResource, String resourcePath, String resourcePattern)
+                throws IOException
+        {
+            return loadPropertiesFromResources(resourcePath,
+                    collectResources(failOnMissingResource, CLASSPATH_ALL_URL_PREFIX, resourcePattern, resourcePath));
+        }
+
+        private Properties loadPropertiesFromResources(String resourcePath, List<Resource> propertyResources)
+                throws IOException
+        {
             LOGGER.info("Loading properties from /{}", resourcePath);
             Properties loadedProperties = loadProperties(propertyResources.toArray(new Resource[0]));
             loadedProperties.forEach((key, value) -> LOGGER.debug("{}=={}", key, value));
             return loadedProperties;
         }
 
-        private static List<Resource> collectResourcesRecursively(ResourcePatternResolver resourcePatternResolver,
-                String resourcePath, boolean failOnMissingResource) throws IOException
+        private List<Resource> collectResourcesRecursively(String resourcePath, boolean failOnMissingResource)
+                throws IOException
         {
-            List<Resource> propertyResources = new LinkedList<>();
-            StringBuilder path = new StringBuilder(ROOT_LOCATION);
             String[] locationParts = resourcePath.isEmpty() ? new String[] { resourcePath }
                     : StringUtils.split(resourcePath, DELIMITER);
+            return collectResources(failOnMissingResource, ROOT_LOCATION, "*.properties", locationParts);
+        }
+
+        private List<Resource> collectResources(boolean failOnMissingResource, String root, String resourcePattern,
+                String... locationParts) throws IOException
+        {
+            List<Resource> propertyResources = new LinkedList<>();
+            StringBuilder path = new StringBuilder(root);
             for (int i = 0; i < locationParts.length; i++)
             {
                 boolean deepestLevel = i + 1 == locationParts.length;
@@ -331,7 +362,7 @@ public final class ConfigurationResolver
                 {
                     path.append(DELIMITER);
                 }
-                String resourceLocation = path + "*.properties";
+                String resourceLocation = path + resourcePattern;
                 Resource[] resources = resourcePatternResolver.getResources(resourceLocation);
                 if (deepestLevel && resources.length == 0 && failOnMissingResource)
                 {

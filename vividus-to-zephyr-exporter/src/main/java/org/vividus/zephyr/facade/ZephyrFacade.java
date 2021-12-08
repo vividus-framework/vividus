@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,20 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.jira.JiraClient;
+import org.vividus.jira.JiraClientProvider;
+import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.Project;
 import org.vividus.jira.model.Version;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
+import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 public class ZephyrFacade implements IZephyrFacade
@@ -41,33 +45,36 @@ public class ZephyrFacade implements IZephyrFacade
     private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";
 
     private final JiraFacade jiraFacade;
-    private final JiraClient client;
+    private final JiraClientProvider jiraClientProvider;
     private final ZephyrExporterConfiguration zephyrExporterConfiguration;
+    private final ZephyrExporterProperties zephyrExporterProperties;
 
-    public ZephyrFacade(JiraFacade jiraFacade, JiraClient jiraClient,
-            ZephyrExporterConfiguration zephyrExporterConfiguration)
+    public ZephyrFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
+            ZephyrExporterConfiguration zephyrExporterConfiguration, ZephyrExporterProperties zephyrExporterProperties)
     {
         this.jiraFacade = jiraFacade;
-        this.client = jiraClient;
+        this.jiraClientProvider = jiraClientProvider;
         this.zephyrExporterConfiguration = zephyrExporterConfiguration;
+        this.zephyrExporterProperties = zephyrExporterProperties;
     }
 
     @Override
-    public Integer createExecution(String execution) throws IOException
+    public Integer createExecution(String execution) throws IOException, JiraConfigurationException
     {
-        String responseBody = client.executePost(ZAPI_ENDPOINT + "execution/", execution);
+        String responseBody = getJiraClient().executePost(ZAPI_ENDPOINT + "execution/", execution);
         List<Integer> executionId = JsonPathUtils.getData(responseBody, "$..id");
         return executionId.get(0);
     }
 
     @Override
-    public void updateExecutionStatus(int executionId, String executionBody) throws IOException
+    public void updateExecutionStatus(int executionId, String executionBody)
+            throws IOException, JiraConfigurationException
     {
-        client.executePut(String.format(ZAPI_ENDPOINT + "execution/%s/execute", executionId), executionBody);
+        getJiraClient().executePut(String.format(ZAPI_ENDPOINT + "execution/%s/execute", executionId), executionBody);
     }
 
     @Override
-    public ZephyrConfiguration prepareConfiguration() throws IOException
+    public ZephyrConfiguration prepareConfiguration() throws IOException, JiraConfigurationException
     {
         ZephyrConfiguration zephyrConfiguration = new ZephyrConfiguration();
 
@@ -106,9 +113,9 @@ public class ZephyrFacade implements IZephyrFacade
                         "Version with name '%s' does not exist", zephyrExporterConfiguration.getVersionName())));
     }
 
-    private String findCycleId(String projectAndVersionUrlQuery) throws IOException
+    private String findCycleId(String projectAndVersionUrlQuery) throws IOException, JiraConfigurationException
     {
-        String json = client.executeGet(ZAPI_ENDPOINT + "cycle?" + projectAndVersionUrlQuery);
+        String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "cycle?" + projectAndVersionUrlQuery);
         Map<String, Map<String, String>> cycles = JsonPathUtils.getData(json, "$");
         cycles.remove("recordsCount");
         Iterator<Map.Entry<String, Map<String, String>>> itr = cycles.entrySet().iterator();
@@ -126,18 +133,20 @@ public class ZephyrFacade implements IZephyrFacade
         return cycleId;
     }
 
-    private String findFolderId(String cycleId, String projectAndVersionUrlQuery) throws IOException
+    private String findFolderId(String cycleId, String projectAndVersionUrlQuery)
+            throws IOException, JiraConfigurationException
     {
-        String json = client.executeGet(ZAPI_ENDPOINT + "cycle/" + cycleId + "/folders?" + projectAndVersionUrlQuery);
+        String json = getJiraClient()
+                .executeGet(ZAPI_ENDPOINT + "cycle/" + cycleId + "/folders?" + projectAndVersionUrlQuery);
         List<Integer> folderId = JsonPathUtils.getData(json, String.format("$.[?(@.folderName=='%s')].folderId",
                 zephyrExporterConfiguration.getFolderName()));
         notEmpty(folderId, "Folder with name '%s' does not exist", zephyrExporterConfiguration.getFolderName());
         return folderId.get(0).toString();
     }
 
-    private Map<TestCaseStatus, Integer> getExecutionStatuses() throws IOException
+    private Map<TestCaseStatus, Integer> getExecutionStatuses() throws IOException, JiraConfigurationException
     {
-        String json = client.executeGet(ZAPI_ENDPOINT + "util/testExecutionStatus");
+        String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "util/testExecutionStatus");
         Map<TestCaseStatus, Integer> testStatusPerZephyrIdMapping = new EnumMap<>(TestCaseStatus.class);
         zephyrExporterConfiguration.getStatuses().entrySet().forEach(s ->
         {
@@ -149,9 +158,9 @@ public class ZephyrFacade implements IZephyrFacade
     }
 
     @Override
-    public OptionalInt findExecutionId(String issueId) throws IOException
+    public OptionalInt findExecutionId(String issueId) throws IOException, JiraConfigurationException
     {
-        String json = client.executeGet(ZAPI_ENDPOINT + "execution?issueId=" + issueId);
+        String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "execution?issueId=" + issueId);
         String jsonpath;
         if (StringUtils.isNotBlank(zephyrExporterConfiguration.getFolderName()))
         {
@@ -166,5 +175,11 @@ public class ZephyrFacade implements IZephyrFacade
         }
         List<Integer> executionId = JsonPathUtils.getData(json, jsonpath);
         return executionId.size() != 0 ? OptionalInt.of(executionId.get(0)) : OptionalInt.empty();
+    }
+
+    private JiraClient getJiraClient() throws JiraConfigurationException
+    {
+        return jiraClientProvider
+                .getByJiraConfigurationKey(Optional.ofNullable(zephyrExporterProperties.getJiraInstanceKey()));
     }
 }

@@ -30,11 +30,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.function.FailableBiFunction;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.vividus.jira.JiraConfigurationException;
 import org.vividus.model.jbehave.NotUniqueMetaValueException;
 import org.vividus.model.jbehave.Scenario;
 import org.vividus.model.jbehave.Story;
@@ -119,13 +119,13 @@ public class XrayExporter
         }
     }
 
-    private void updateSafely(FailableRunnable<IOException> runnable, String type, String key)
+    private void updateSafely(FailableRunnable runnable, String type, String key)
     {
         try
         {
             runnable.run();
         }
-        catch (IOException thrown)
+        catch (IOException | JiraConfigurationException thrown)
         {
             String errorMessage = String.format("Failed updating %s with the key %s: %s", type, key,
                     thrown.getMessage());
@@ -163,7 +163,8 @@ public class XrayExporter
             createTestsLink(testCaseId, scenario);
             return Optional.of(entry(testCaseId, scenario));
         }
-        catch (IOException | SyntaxException | NonEditableIssueStatusException | NotUniqueMetaValueException e)
+        catch (IOException | SyntaxException | NonEditableIssueStatusException | NotUniqueMetaValueException
+                | JiraConfigurationException e)
         {
             String errorMessage = "Story: " + storyTitle + lineSeparator() + "Scenario: " + scenarioTitle
                     + lineSeparator() + "Error: " + e.getMessage();
@@ -221,7 +222,8 @@ public class XrayExporter
         LOGGER.atInfo().log("Export successful");
     }
 
-    private void createTestsLink(String testCaseId, Scenario scenario) throws IOException, NotUniqueMetaValueException
+    private void createTestsLink(String testCaseId, Scenario scenario)
+            throws IOException, NotUniqueMetaValueException, JiraConfigurationException
     {
         Optional<String> requirementId = scenario.getUniqueMetaValue("requirementId");
         if (requirementId.isPresent())
@@ -234,5 +236,11 @@ public class XrayExporter
     private interface CreateParametersFunction
             extends FailableBiFunction<String, Scenario, AbstractTestCaseParameters, SyntaxException>
     {
+    }
+
+    @FunctionalInterface
+    private interface FailableRunnable
+    {
+        void run() throws IOException, JiraConfigurationException;
     }
 }

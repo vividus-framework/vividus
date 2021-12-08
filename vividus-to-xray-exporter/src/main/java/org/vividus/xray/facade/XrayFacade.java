@@ -18,6 +18,7 @@ package org.vividus.xray.facade;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -27,7 +28,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.jira.JiraClient;
+import org.vividus.jira.JiraClientProvider;
+import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.xray.databind.CucumberTestCaseSerializer;
@@ -43,17 +45,19 @@ public class XrayFacade
     private static final Logger LOGGER = LoggerFactory.getLogger(XrayFacade.class);
 
     private final List<String> editableStatuses;
+    private final Optional<String> jiraInstanceKey;
     private final JiraFacade jiraFacade;
-    private final JiraClient jiraClient;
+    private final JiraClientProvider jiraClientProvider;
     private final ObjectMapper objectMapper;
 
-    public XrayFacade(List<String> editableStatuses, JiraFacade jiraFacade,
-            JiraClient jiraClient, ManualTestCaseSerializer manualTestSerializer,
+    public XrayFacade(Optional<String> jiraInstanceKey, List<String> editableStatuses, JiraFacade jiraFacade,
+            JiraClientProvider jiraClientProvider, ManualTestCaseSerializer manualTestSerializer,
             CucumberTestCaseSerializer cucumberTestSerializer)
     {
+        this.jiraInstanceKey = jiraInstanceKey;
         this.editableStatuses = editableStatuses;
         this.jiraFacade = jiraFacade;
-        this.jiraClient = jiraClient;
+        this.jiraClientProvider = jiraClientProvider;
         this.objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .setSerializationInclusion(Include.NON_NULL)
@@ -61,11 +65,11 @@ public class XrayFacade
                                                   .addSerializer(CucumberTestCase.class, cucumberTestSerializer));
     }
 
-    public <T extends AbstractTestCase> String createTestCase(T testCase) throws IOException
+    public <T extends AbstractTestCase> String createTestCase(T testCase) throws IOException, JiraConfigurationException
     {
         String createTestRequest = objectMapper.writeValueAsString(testCase);
         LOGGER.atInfo().addArgument(testCase::getType).addArgument(createTestRequest).log("Creating {} Test Case: {}");
-        String response = jiraFacade.createIssue(createTestRequest);
+        String response = jiraFacade.createIssue(createTestRequest, jiraInstanceKey);
         String issueKey = JsonPathUtils.getData(response, "$.key");
         LOGGER.atInfo().addArgument(testCase::getType)
                        .addArgument(issueKey)
@@ -74,7 +78,7 @@ public class XrayFacade
     }
 
     public <T extends AbstractTestCase> void updateTestCase(String testCaseKey, T testCase)
-            throws IOException, NonEditableIssueStatusException
+            throws IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         checkIfIssueEditable(testCaseKey);
         String updateTestRequest = objectMapper.writeValueAsString(testCase);
@@ -88,7 +92,7 @@ public class XrayFacade
                        .log("{} Test with key {} has been updated");
     }
 
-    public void updateTestExecution(TestExecution testExecution) throws IOException
+    public void updateTestExecution(TestExecution testExecution) throws IOException, JiraConfigurationException
     {
         String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
         String testExecutionKey = testExecution.getTestExecutionKey();
@@ -96,11 +100,13 @@ public class XrayFacade
               .addArgument(testExecutionKey)
               .addArgument(testExecutionRequest)
               .log("Updating Test Execution with ID {}: {}");
-        jiraClient.executePost("/rest/raven/1.0/import/execution", testExecutionRequest);
+        jiraClientProvider.getByIssueKey(testExecutionKey).executePost("/rest/raven/1.0/import/execution",
+                testExecutionRequest);
         LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been updated");
     }
 
-    public void updateTestSet(String testSetKey, List<String> testCaseKeys) throws IOException
+    public void updateTestSet(String testSetKey, List<String> testCaseKeys)
+            throws IOException, JiraConfigurationException
     {
         AddOperationRequest request = new AddOperationRequest(testCaseKeys);
         String requestBody = objectMapper.writeValueAsString(request);
@@ -108,10 +114,12 @@ public class XrayFacade
               .addArgument(() -> StringUtils.join(testCaseKeys, ", "))
               .addArgument(testSetKey)
               .log("Add {} test cases to Test Set with ID {}");
-        jiraClient.executePost("/rest/raven/1.0/api/testset/" + testSetKey + "/test", requestBody);
+        jiraClientProvider.getByIssueKey(testSetKey).executePost("/rest/raven/1.0/api/testset/" + testSetKey + "/test",
+                requestBody);
     }
 
-    private void checkIfIssueEditable(String issueKey) throws IOException, NonEditableIssueStatusException
+    private void checkIfIssueEditable(String issueKey)
+            throws IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         String status = jiraFacade.getIssueStatus(issueKey);
 
@@ -121,7 +129,7 @@ public class XrayFacade
         }
     }
 
-    public void createTestsLink(String testCaseId, String requirementId) throws IOException
+    public void createTestsLink(String testCaseId, String requirementId) throws IOException, JiraConfigurationException
     {
         String linkType = "Tests";
         LOGGER.atInfo().addArgument(linkType)

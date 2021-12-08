@@ -84,29 +84,15 @@ class HttpClientConfigTests
     }
 
     @Test
-    void testGetAndSetUsername()
+    void testGetAndSetAuthConfig()
     {
-        config.setUsername(USERNAME);
-        assertEquals(USERNAME, config.getUsername());
-    }
-
-    @Test
-    void testGetAndSetPassword()
-    {
-        config.setPassword(PASSWORD);
-        assertEquals(PASSWORD, config.getPassword());
-    }
-
-    @Test
-    void testDefaultUsername()
-    {
-        assertNull(config.getUsername());
-    }
-
-    @Test
-    void testDefaultPassword()
-    {
-        assertNull(config.getPassword());
+        AuthConfig authConfig = new AuthConfig();
+        authConfig.setPassword(PASSWORD);
+        authConfig.setUsername(USERNAME);
+        config.setAuthConfig(authConfig);
+        assertEquals(authConfig, config.getAuthConfig());
+        assertEquals(PASSWORD, config.getAuthConfig().getPassword());
+        assertEquals(USERNAME, config.getAuthConfig().getUsername());
     }
 
     @Test
@@ -230,6 +216,7 @@ class HttpClientConfigTests
     @Test
     void testDefaultConnectionRequestTimeout()
     {
+        config.setConnectionRequestTimeout(-1);
         assertEquals(-1, config.getConnectionRequestTimeout());
     }
 
@@ -244,6 +231,7 @@ class HttpClientConfigTests
     @Test
     void testDefaultConnectTimeout()
     {
+        config.setConnectTimeout(-1);
         assertEquals(-1, config.getConnectTimeout());
     }
 
@@ -258,6 +246,7 @@ class HttpClientConfigTests
     @Test
     void testDefaultSocketTimeout()
     {
+        config.setSocketTimeout(0);
         assertEquals(0, config.getSocketTimeout());
     }
 
@@ -293,6 +282,7 @@ class HttpClientConfigTests
     @Test
     void testSkipResponseEntity()
     {
+        config.setSkipResponseEntity(false);
         assertFalse(config.isSkipResponseEntity());
     }
 

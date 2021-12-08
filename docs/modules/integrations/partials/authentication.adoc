@@ -1,36 +1,16 @@
 == Authentication
 
-* if the authentication through basic schema is available on your JIRA instance use `jira.username` and `jira.password` properties, both properties must be set
-* in case of two-factor authentication or any other complex authentication process it's possible to set session cookies into request headers like the following example shows (`jira.username` and `jira.password` properties must be empty in this case)
+* If the authentication through basic schema is available on your JIRA instance use `jira.<jira instance key placeholder>.http.auth.username` and `jira.<jira instance key placeholder>.http.auth.password` properties, both properties must be set.
 +
 [source,properties]
 ----
-jira.http.header.Cookie=SESSIONID=298zf09hf012fh2
+jira.<jira instance key placeholder>.http.auth.username=admin
+jira.<jira instance key placeholder>.http.auth.password=5401a7d27b291c5d
 ----
 
-== Jira properties
-
-[cols="1,1,1,3", options="header"]
-|===
-
-|Property
-|Required
-|Acceptable values
-|Description
-
-|jira.username
-|false
-|`string`
-|JIRA username used to export test cases
-
-|jira.password
-|false
-|`string`
-|JIRA password used to export test cases
-
-|jira.endpoint
-|true
-|https://en.wikipedia.org/wiki/URL[URL]
-|JIRA URL e.g. `https://jira.example.com/`
-
-|===
+* In case of two-factor authentication or any other complex authentication process it's possible to set session cookies into request headers like the following example shows (`jira.<jira instance key placeholder>.http.auth.username` and `jira.<jira instance key placeholder>.http.auth.password` properties must be empty in this case).
++
+[source,properties]
+----
+jira.<jira instance key placeholder>.http.headers.Cookie=SESSIONID=298zf09hf012fh2
+----

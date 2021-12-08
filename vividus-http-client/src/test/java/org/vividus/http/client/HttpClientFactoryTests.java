@@ -66,6 +66,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -94,12 +95,28 @@ class HttpClientFactoryTests
     @Mock private HttpClientBuilder mockedHttpClientBuilder;
     @Mock private CloseableHttpClient mockedApacheHttpClient;
 
-    private final HttpClientConfig config = new HttpClientConfig();
+    private HttpClientConfig config;
+
+    @BeforeEach
+    void init()
+    {
+        config = new HttpClientConfig();
+        config.setCircularRedirectsAllowed(false);
+        SslConfig sslConfig = new SslConfig();
+        sslConfig.setSslCertificateCheckEnabled(true);
+        sslConfig.setSslHostnameVerificationEnabled(true);
+        config.setSslConfig(sslConfig);
+        config.setSkipResponseEntity(false);
+        config.setConnectionRequestTimeout(0);
+        config.setConnectTimeout(0);
+        config.setSocketTimeout(0);
+    }
 
     @Test
     void testBuildHttpClientWithHeaders() throws GeneralSecurityException
     {
         config.setHeaders(HEADERS);
+        config.setAuthConfig(authConfig(null, null, false));
 
         testBuildHttpClientUsingConfig();
         verifyDefaultHeaderSetting(HEADERS.entrySet().iterator().next());
@@ -108,8 +125,7 @@ class HttpClientFactoryTests
     @Test
     void testBuildHttpClientWithFullAuthenticationNoPreemptive() throws GeneralSecurityException
     {
-        config.setUsername(USERNAME);
-        config.setPassword(PASSWORD);
+        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
         config.setAuthScope(AUTH_SCOPE);
 
         try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
@@ -127,9 +143,7 @@ class HttpClientFactoryTests
     @Test
     void testBuildHttpClientWithFullAuthenticationPreemptive() throws GeneralSecurityException
     {
-        config.setUsername(USERNAME);
-        config.setPassword(PASSWORD);
-        config.setPreemptiveAuthEnabled(true);
+        config.setAuthConfig(authConfig(USERNAME, PASSWORD, true));
 
         Header header = mock(Header.class);
         try (MockedConstruction<BasicScheme> basicSchemeConstruction = mockConstruction(BasicScheme.class,
@@ -156,8 +170,7 @@ class HttpClientFactoryTests
     @Test
     void testBuildHttpClientWithAuthentication() throws GeneralSecurityException
     {
-        config.setUsername(USERNAME);
-        config.setPassword(PASSWORD);
+        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
 
         try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
                 BasicCredentialsProvider.class))
@@ -181,8 +194,7 @@ class HttpClientFactoryTests
     void testBuildHttpClientWithAuthenticationInvalidUsernameAndPasswordParams(String username, String password,
             String message)
     {
-        config.setUsername(username);
-        config.setPassword(password);
+        config.setAuthConfig(authConfig(username, password, false));
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
             () -> httpClientFactory.buildHttpClient(config));
@@ -192,7 +204,7 @@ class HttpClientFactoryTests
     @Test
     void testBuildHttpClientWithAuthenticationInvalidPreemptiveAuthParams()
     {
-        config.setPreemptiveAuthEnabled(true);
+        config.setAuthConfig(authConfig(null, null, true));
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
             () -> httpClientFactory.buildHttpClient(config));
@@ -202,6 +214,8 @@ class HttpClientFactoryTests
     @Test
     void testBuildHttpClientAuthenticationWithoutPass() throws GeneralSecurityException
     {
+        config.setAuthConfig(authConfig(null, null, false));
+
         try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
                 BasicCredentialsProvider.class))
         {
@@ -216,9 +230,9 @@ class HttpClientFactoryTests
     @Test
     void testBuildTrustedHttpClient() throws GeneralSecurityException
     {
-        config.setUsername(USERNAME);
-        config.setPassword(PASSWORD);
-        config.setSslCertificateCheckEnabled(false);
+        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
+        config.getSslConfig().setSslHostnameVerificationEnabled(false);
+        config.getSslConfig().setSslCertificateCheckEnabled(false);
 
         SSLContext sslContext = mock(SSLContext.class);
         when(sslContextFactory.getTrustingAllSslContext(SSLConnectionSocketFactory.SSL)).thenReturn(sslContext);
@@ -229,9 +243,8 @@ class HttpClientFactoryTests
     @Test
     void testBuildHostnameVerifierHttpClient() throws GeneralSecurityException
     {
-        config.setUsername(USERNAME);
-        config.setPassword(PASSWORD);
-        config.setSslHostnameVerificationEnabled(false);
+        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
+        config.getSslConfig().setSslHostnameVerificationEnabled(false);
         testBuildHttpClientUsingConfig();
         verify(mockedHttpClientBuilder).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
     }
@@ -241,6 +254,7 @@ class HttpClientFactoryTests
     {
         DnsResolver resolver = mock(DnsResolver.class);
         config.setDnsResolver(resolver);
+        config.setAuthConfig(authConfig(null, null, false));
         testBuildHttpClientUsingConfig();
         verify(mockedHttpClientBuilder).setDnsResolver(resolver);
     }
@@ -248,9 +262,10 @@ class HttpClientFactoryTests
     @Test
     void testBuildCircularRedirects() throws GeneralSecurityException
     {
-        config.setUsername(USERNAME);
-        config.setPassword(PASSWORD);
+        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
         config.setCircularRedirectsAllowed(true);
+        config.setMaxTotalConnections(-1);
+        config.setMaxConnectionsPerRoute(-1);
 
         try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
                 BasicCredentialsProvider.class);
@@ -276,14 +291,15 @@ class HttpClientFactoryTests
         String baseUrl = "http://somewh.ere/";
         config.setBaseUrl(baseUrl);
         config.setHeaders(HEADERS);
-        config.setUsername(USERNAME);
-        config.setPassword(PASSWORD);
+        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
         config.setAuthScope(AUTH_SCOPE);
-        config.setSslCertificateCheckEnabled(true);
         config.setSkipResponseEntity(true);
         CookieStore cookieStore = new BasicCookieStore();
         config.setCookieStore(cookieStore);
-        config.setSslHostnameVerificationEnabled(false);
+        SslConfig sslConfig = new SslConfig();
+        sslConfig.setSslCertificateCheckEnabled(true);
+        sslConfig.setSslHostnameVerificationEnabled(false);
+        config.setSslConfig(sslConfig);
         DnsResolver resolver = mock(DnsResolver.class);
         config.setDnsResolver(resolver);
         HttpResponseHandler handler = mock(HttpResponseHandler.class);
@@ -402,5 +418,14 @@ class HttpClientFactoryTests
             }
             return false;
         }));
+    }
+
+    private static AuthConfig authConfig(String username, String password, boolean preemptiveAuthEnabled)
+    {
+        AuthConfig authConfig = new AuthConfig();
+        authConfig.setUsername(username);
+        authConfig.setPassword(password);
+        authConfig.setPreemptiveAuthEnabled(preemptiveAuthEnabled);
+        return authConfig;
     }
 }

@@ -25,6 +25,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.vividus.jira.JiraConfigurationException;
 import org.vividus.util.property.PropertyParser;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
@@ -36,7 +37,7 @@ import org.vividus.zephyr.exporter.ZephyrExporter;
 @EnableConfigurationProperties({ ZephyrExporterConfiguration.class, ZephyrExporterProperties.class })
 public class VividusToZephyrExporterApplication
 {
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws IOException, JiraConfigurationException
     {
         ApplicationContext ctx = SpringApplication.run(VividusToZephyrExporterApplication.class, args);
         ZephyrExporter exporter = ctx.getBean(ZephyrExporter.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.vividus.jira;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import org.apache.commons.lang3.function.FailableSupplier;
 import org.vividus.jira.databind.IssueLinkSerializer;
 import org.vividus.jira.model.IssueLink;
 import org.vividus.jira.model.JiraEntity;
@@ -38,49 +40,60 @@ public class JiraFacade
     private static final String ISSUE = "issue/";
     private static final String ISSUE_ENDPOINT = REST_API_ENDPOINT + ISSUE;
 
-    private final JiraClient jiraClient;
+    private final JiraClientProvider jiraClientProvider;
 
-    public JiraFacade(JiraClient jiraClient)
+    public JiraFacade(JiraClientProvider jiraClientProvider)
     {
-        this.jiraClient = jiraClient;
+        this.jiraClientProvider = jiraClientProvider;
     }
 
-    public String createIssue(String issueBody) throws IOException
+    public String createIssue(String issueBody, Optional<String> jiraInstanceKey)
+            throws IOException, JiraConfigurationException
     {
-        return jiraClient.executePost(ISSUE_ENDPOINT, issueBody);
+        return jiraClientProvider.getByJiraConfigurationKey(jiraInstanceKey).executePost(ISSUE_ENDPOINT, issueBody);
     }
 
-    public String updateIssue(String issueKey, String issueBody) throws IOException
+    public String updateIssue(String issueKey, String issueBody) throws IOException, JiraConfigurationException
     {
-        return jiraClient.executePut(ISSUE_ENDPOINT + issueKey, issueBody);
+        return jiraClientProvider.getByIssueKey(issueKey).executePut(ISSUE_ENDPOINT + issueKey, issueBody);
     }
 
-    public void createIssueLink(String inwardIssueKey, String outwardIssueKey, String type) throws IOException
+    public void createIssueLink(String inwardIssueKey, String outwardIssueKey, String type)
+            throws IOException, JiraConfigurationException
     {
         IssueLink issueLink = new IssueLink(type, inwardIssueKey, outwardIssueKey);
         String createLinkRequest = OBJECT_MAPPER.writeValueAsString(issueLink);
-        jiraClient.executePost("/rest/api/latest/issueLink", createLinkRequest);
+        jiraClientProvider.getByIssueKey(inwardIssueKey).executePost("/rest/api/latest/issueLink", createLinkRequest);
     }
 
-    public String getIssueStatus(String issueKey) throws IOException
+    public String getIssueStatus(String issueKey) throws IOException, JiraConfigurationException
     {
-        String issue = jiraClient.executeGet(ISSUE_ENDPOINT + issueKey);
+        String issue = jiraClientProvider.getByIssueKey(issueKey).executeGet(ISSUE_ENDPOINT + issueKey);
         return JsonPathUtils.getData(issue, "$.fields.status.name");
     }
 
-    public Project getProject(String projectKey) throws IOException
+    public Project getProject(String projectKey) throws IOException, JiraConfigurationException
     {
-        return getJiraEntity("project/", projectKey, Project.class);
+        return getJiraEntity("project/", projectKey, () -> jiraClientProvider.getByProjectKey(projectKey),
+                Project.class);
     }
 
-    public JiraEntity getIssue(String issueKey) throws IOException
+    public JiraEntity getIssue(String issueKey) throws IOException, JiraConfigurationException
     {
         return getJiraEntity(ISSUE, issueKey, JiraEntity.class);
     }
 
-    private <T> T getJiraEntity(String relativeUrl, String entityKey, Class<T> entityType) throws IOException
+    private <T> T getJiraEntity(String relativeUrl, String entityKey, Class<T> entityType)
+            throws IOException, JiraConfigurationException
     {
-        String responseBody = jiraClient.executeGet(REST_API_ENDPOINT + relativeUrl + entityKey);
+        return getJiraEntity(relativeUrl, entityKey, () -> jiraClientProvider.getByIssueKey(entityKey), entityType);
+    }
+
+    private <T> T getJiraEntity(String relativeUrl, String entityKey,
+            FailableSupplier<JiraClient, JiraConfigurationException> jiraClientSupplier, Class<T> entityType)
+            throws IOException, JiraConfigurationException
+    {
+        String responseBody = jiraClientSupplier.get().executeGet(REST_API_ENDPOINT + relativeUrl + entityKey);
         return OBJECT_MAPPER.readValue(responseBody, entityType);
     }
 }

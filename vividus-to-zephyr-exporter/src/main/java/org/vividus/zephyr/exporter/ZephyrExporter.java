@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
@@ -64,7 +65,7 @@ public class ZephyrExporter
                 .registerModule(new SimpleModule().addDeserializer(TestCase.class, new TestCaseDeserializer()));
     }
 
-    public void exportResults() throws IOException
+    public void exportResults() throws IOException, JiraConfigurationException
     {
         List<TestCase> testCasesForImporting = testCaseParser.createTestCases(objectMapper);
         ZephyrConfiguration configuration = zephyrFacade.prepareConfiguration();
@@ -74,7 +75,8 @@ public class ZephyrExporter
         }
     }
 
-    private void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration) throws IOException
+    private void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
+            throws IOException, JiraConfigurationException
     {
         JiraEntity issue = jiraFacade.getIssue(testCase.getKey());
         ZephyrExecution execution = new ZephyrExecution(configuration, issue.getId(), testCase.getStatus());
