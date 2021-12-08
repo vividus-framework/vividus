@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.IntFunction;
@@ -70,23 +71,39 @@ public class PropertyMapper implements IPropertyMapper
     }
 
     @Override
+    public <T> PropertyMappedCollection<T> readValues(String propertyPrefix, String basePropertyPrefix,
+            Class<T> valueType) throws IOException
+    {
+        return readValues(propertyPrefix, basePropertyPrefix, UnaryOperator.identity(), valueType);
+    }
+
+    @Override
     public <T> PropertyMappedCollection<T> readValues(String propertyPrefix, UnaryOperator<String> keyMapper,
             Class<T> valueType) throws IOException
     {
-        return readValues(propertyPrefix, keyMapper, valueType,  HashMap::new);
+        return readValues(propertyPrefix, null, keyMapper, valueType);
+    }
+
+    private <T> PropertyMappedCollection<T> readValues(String propertyPrefix, String basePropertyPrefix,
+            UnaryOperator<String> keyMapper, Class<T> valueType) throws IOException
+    {
+        return readValues(propertyPrefix, basePropertyPrefix, keyMapper, valueType, HashMap::new);
     }
 
     @Override
     public <T> PropertyMappedCollection<T> readValues(String propertyPrefix, UnaryOperator<String> keyMapper,
             Comparator<String> keyComparator, Class<T> valueType) throws IOException
     {
-        return readValues(propertyPrefix, keyMapper, valueType, keysSize -> new TreeMap<>(keyComparator));
+        return readValues(propertyPrefix, null, keyMapper, valueType, keysSize -> new TreeMap<>(keyComparator));
     }
 
-    private <T> PropertyMappedCollection<T> readValues(String propertyPrefix, UnaryOperator<String> keyMapper,
-            Class<T> valueType, IntFunction<Map<String, T>> mapProducer) throws IOException
+    private <T> PropertyMappedCollection<T> readValues(String propertyPrefix, String basePropertyPrefix,
+            UnaryOperator<String> keyMapper, Class<T> valueType, IntFunction<Map<String, T>> mapProducer)
+            throws IOException
     {
         Map<String, String> properties = propertyParser.getPropertiesByPrefix(propertyPrefix);
+        Map<String, String> baseProperties = Optional.ofNullable(basePropertyPrefix)
+                .map(propertyParser::getPropertiesByPrefix).orElse(Map.of());
         Set<String> keys = getKeys(properties.keySet(), propertyPrefix);
         Map<String, T> result = mapProducer.apply(keys.size());
         for (String key : keys)
@@ -95,6 +112,7 @@ public class PropertyMapper implements IPropertyMapper
             Map<String, String> objectProps = properties.entrySet().stream()
                     .filter(e -> e.getKey().startsWith(propertyFamily))
                     .collect(toMap(e -> StringUtils.removeStart(e.getKey(), propertyFamily), Entry::getValue));
+            baseProperties.forEach(objectProps::putIfAbsent);
             T value = javaPropsMapper.readMapAs(objectProps, valueType);
             result.put(keyMapper.apply(key), value);
         }

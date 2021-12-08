@@ -26,6 +26,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
 import org.vividus.azure.devops.configuration.AzureDevOpsExporterOptions;
 import org.vividus.azure.devops.exporter.AzureDevOpsExporter;
 import org.vividus.util.property.PropertyParser;
@@ -33,6 +34,10 @@ import org.vividus.util.property.PropertyParser;
 @SpringBootApplication
 @EnableConfigurationProperties(AzureDevOpsExporterOptions.class)
 @ImportResource(locations = { "org/vividus/azure/devops/spring.xml", "org/vividus/http/client/spring.xml" })
+@PropertySource({
+    "org/vividus/http/client/defaults.properties",
+    "org/vividus/util/defaults.properties"
+})
 public class VividusToAzureDevOpsApplication
 {
     public static void main(String [] args) throws BeansException, IOException

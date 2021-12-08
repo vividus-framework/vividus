@@ -27,6 +27,7 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
     testCompileOnly(group: 'junit', name: 'junit', version: versions.junit4)
+    testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)

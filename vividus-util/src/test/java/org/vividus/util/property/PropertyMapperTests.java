@@ -43,6 +43,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @ExtendWith(MockitoExtension.class)
 class PropertyMapperTests
 {
@@ -77,6 +79,32 @@ class PropertyMapperTests
         when(propertyParser.getPropertyValuesByPrefix(PROPERTY_PREFIX)).thenReturn(properties);
         User result = propertyMapper.readValue(PROPERTY_PREFIX, User.class);
         assertUser(result);
+    }
+
+    @Test
+    void shouldMapMergedPropertiesToCollectionOfObjects() throws IOException
+    {
+        String addressPrefix = "address.";
+        String streetNameKey = "street-name";
+        String streetName = "Stakanalievo";
+
+        Map<String, String> properties = new HashMap<>(createObjectProperties(PROPERTY_PREFIX + ADMIN + '.'));
+        properties.put(PROPERTY_PREFIX + ADMIN + '.' + addressPrefix + streetNameKey, streetName);
+        when(propertyParser.getPropertiesByPrefix(PROPERTY_PREFIX)).thenReturn(properties);
+
+        Map<String, String> baseProperties = Map.of(
+            addressPrefix + streetNameKey, "Broadway",
+            addressPrefix + "house-number", "228"
+        );
+        when(propertyParser.getPropertiesByPrefix(addressPrefix)).thenReturn(baseProperties);
+
+        PropertyMappedCollection<User> result = propertyMapper.readValues(PROPERTY_PREFIX, addressPrefix,
+                User.class);
+        assertCollection(result, ADMIN);
+        Address address = result.getData().get(ADMIN).getAddress();
+        assertNotNull(address);
+        assertEquals(streetName, address.getStreetName());
+        assertEquals(228, address.getHouseNumber());
     }
 
     @Test
@@ -160,6 +188,7 @@ class PropertyMapperTests
         private String lastName;
         private Pattern pattern;
         private Supplier<String> dob;
+        private Address address;
 
         public String getFirstName()
         {
@@ -184,6 +213,28 @@ class PropertyMapperTests
         public Supplier<String> getDob()
         {
             return dob;
+        }
+
+        public Address getAddress()
+        {
+            return address;
+        }
+    }
+
+    private static final class Address
+    {
+        @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
+        private String streetName;
+        private int houseNumber;
+
+        public String getStreetName()
+        {
+            return streetName;
+        }
+
+        public int getHouseNumber()
+        {
+            return houseNumber;
         }
     }
 

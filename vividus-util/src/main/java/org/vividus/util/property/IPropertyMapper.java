@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,28 @@ public interface IPropertyMapper
      * @throws IOException if any error is occurred during mapping of properties to objects
      */
     <T> PropertyMappedCollection<T> readValues(String propertyPrefix, Class<T> valueType) throws IOException;
+
+    /**
+     * Maps properties with specified prefix to the collection with values representing objects created
+     * using property names and their values.
+     * <br>
+     * Steps performed at this function:
+     * <ol>
+     * <li>find properties by the <b>propertyPrefix</b></li>
+     * <li>find properties by the <b>basePropertyPrefix</b></li>
+     * <li>each property found by the <b>basePropertyPrefix</b> is added to the properties found by the
+     * <b>propertyPrefix</b> if it's missing</li>
+     * <li>map resulting properties to the collection of objects</li>
+     * </ol>
+     * @param <T> type of resulting objects
+     * @param propertyPrefix Prefix of properties
+     * @param basePropertyPrefix Prefix of base properties
+     * @param valueType Collection value type
+     * @return collection with values representing objects created using property names and their values
+     * @throws IOException if any error is occurred during mapping of properties to objects
+     */
+    <T> PropertyMappedCollection<T> readValues(String propertyPrefix, String basePropertyPrefix, Class<T> valueType)
+            throws IOException;
 
     /**
      * Maps properties with specified prefix to the collection with values representing objects created

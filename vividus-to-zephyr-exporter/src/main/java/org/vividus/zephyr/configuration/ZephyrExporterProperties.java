@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,24 @@ import org.vividus.zephyr.model.TestCaseStatus;
 @ConfigurationProperties("zephyr.exporter")
 public class ZephyrExporterProperties
 {
+    private String jiraInstanceKey;
+
     @NotBlank(message = "Property 'zephyr.exporter.source-directory' must not be blank")
     private Path sourceDirectory;
 
     private boolean updateExecutionStatusesOnly;
 
     private List<TestCaseStatus> statusesOfTestCasesToAddToExecution;
+
+    public String getJiraInstanceKey()
+    {
+        return jiraInstanceKey;
+    }
+
+    public void setJiraInstanceKey(String jiraInstanceKey)
+    {
+        this.jiraInstanceKey = jiraInstanceKey;
+    }
 
     public Path getSourceDirectory()
     {

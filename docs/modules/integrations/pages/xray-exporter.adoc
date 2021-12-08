@@ -9,6 +9,8 @@ Features:
 * Set Jira components for test cases
 * Link test cases to stories they belong to
 
+include::partial$jira-configuration.adoc[]
+
 == Xray Export Properties
 
 [cols="2,1,3", options="header"]
@@ -17,6 +19,10 @@ Features:
 |Property
 |Required
 |Description
+
+|`xray-exporter.jira-instance-key`
+|false
+|The key of the configured JIRA instance, in case of missing value it will be evaluated automatically based on issue keys being exported
 
 |`xray-exporter.json-results-directory`
 |true
