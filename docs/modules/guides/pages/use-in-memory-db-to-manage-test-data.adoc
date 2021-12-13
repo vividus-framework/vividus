@@ -15,17 +15,34 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{curre
 implementation(group: 'com.h2database', name: 'h2', version: '2.0.202')
 ----
 
-. Configure connection to the H2 database
+. Configure connection to the H2 database and initialization
 +
+DDL/DQL scripts could be run using either `INIT` property of the connection string or the step executing SQL queries.
++
+Whichever method of database initialization is chosen, `RUNSCRIPT` statement with the path to SQL files could be used. Here you can specify absolute path to file or use the 'classpath:/' prefix - files will be searched from 'src/main/resources' folder relatively.
+[NOTE]
 The details on executing SQL statements on connection
 https://h2database.com/html/features.html#execute_sql_on_connection[could be found in the official H2 guide].
 +
-You could execute SQL on connection via the INIT property in two ways:
-
- - using RUNSCRIPT commands with the path to SQL files.
-Here you can specify absolute path to file
-or use the 'classpath:/' prefix - files will be searched from 'src/main/resources' folder relatively.
+2.1 Configure using `INIT` property
 +
+ - using `INIT` property data loaded into the database once and can no longer be change.
++
+.Configure connection and initialization of the database
+[source,properties]
+----
+db.connection.testh2db.driver-class-name=org.h2.Driver
+db.connection.testh2db.url=jdbc:h2:mem:test;\
+  INIT=create schema if not exists test\\;\
+  SET SCHEMA test\\;\
+  DROP TABLE IF EXISTS test.students\\;\
+  CREATE TABLE test.students (firstname VARCHAR(50) NOT NULL, lastname VARCHAR(50) NOT NULL)\\;\
+  INSERT INTO students (firstname, lastname) VALUES ('Maria', 'Miller')\\;
+db.connection.testh2db.username=
+db.connection.testh2db.password=
+----
++
+.Configure connection and initialization of the database with `RUNSCRIPT`
 [source,properties]
 ----
 db.connection.testh2db.driver-class-name=org.h2.Driver
@@ -37,27 +54,64 @@ db.connection.testh2db.url=jdbc:h2:mem:test;\
 db.connection.testh2db.username=
 db.connection.testh2db.password=
 ----
- - using SQL queries.
+2.2 Configure using test step
 +
+ - if you use database initialization in the step, you only need to specify the connection parameters in the properties file and execute DDL script in the test.
++
+.Configure connection to database
 [source,properties]
 ----
 db.connection.testh2db.driver-class-name=org.h2.Driver
 db.connection.testh2db.url=jdbc:h2:mem:test;\
-  INIT=create schema if not exists test\\;\
-  SET SCHEMA test\\;\
-  DROP TABLE IF EXISTS students\\;\
-  CREATE TABLE students (firstname VARCHAR(50) NOT NULL, lastname VARCHAR(50) NOT NULL)\\;\
-  INSERT INTO students (firstname, lastname) VALUES ('Maria', 'Miller')\\;
+  DB_CLOSE_DELAY=-1;
 db.connection.testh2db.username=
 db.connection.testh2db.password=
 ----
-
-. Use the configured connection to execute SQL
+WARNING: If you are using database initialization in the step, do not forget to set the property http://www.h2database.com/html/features.html#in_memory_databases[`DB_CLOSE_DELAY`].
 +
-.Execute SQL against H2 database
+.Initialization of the database
+[source,gherkin]
+----
+When I execute SQL query `
+  CREATE SCHEMA IF NOT EXISTS test;
+  SET SCHEMA test;
+  CREATE TABLE test.students (firstname VARCHAR(50) NOT NULL, lastname VARCHAR(50) NOT NULL);
+  INSERT INTO students (firstname, lastname) VALUES ('Maria', 'Miller');
+` against `testh2db`
+----
++
+.Initialization of the database with `RUNSCRIPT`
+[source,gherkin]
+----
+When I execute SQL query `
+  CREATE SCHEMA IF NOT EXISTS test;
+  SET SCHEMA test;
+  RUNSCRIPT FROM 'classpath:/path/to/sql/file1.sql';
+  RUNSCRIPT FROM 'classpath:/path/to/sql/file2.sql'
+` against `testh2db`
+----
+
+. Use the configured connection and the initialized database to execute SQL
++
+.Execute SQL script against H2 database
 [source,gherkin]
 ----
 When I execute SQL query `
 SELECT * FROM students
 ` against `testh2db` and save result to scenario variable `h2-records`
+----
++
+.Execute DML script against H2 database initialized in the step with the schema `test` and check result
+[source,gherkin]
+----
+When I execute SQL query `
+INSERT INTO test.students (firstname, lastname) VALUES ('Alex', 'Magnus');
+` against `testh2db`
+When I execute SQL query `
+UPDATE test.students SET firstname='Mary' WHERE lastname='Miller';
+` against `testh2db`
+When I execute SQL query `
+SELECT * FROM test.students
+` against `testh2db` and save result to scenario variable `h2-records`
+Then `${h2-records}` is equal to `[{firstname=Mary, lastname=Miller}, {firstname=Alex, lastname=Magnus}]`
 ----
