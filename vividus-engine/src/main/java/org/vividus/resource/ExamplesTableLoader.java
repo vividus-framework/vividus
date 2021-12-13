@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.examples;
+package org.vividus.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,23 +22,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.Resource;
-import org.vividus.resource.ITestResourceLoader;
-import org.vividus.resource.ResourceLoadException;
 
-public class ExamplesTableFileLoader implements IExamplesTableLoader
+public class ExamplesTableLoader
 {
     private static final Map<String, String> TABLES_CACHE = new ConcurrentHashMap<>();
     private final ITestResourceLoader testResourceLoader;
     private boolean cacheTables;
 
-    public ExamplesTableFileLoader(ITestResourceLoader testResourceLoader)
+    public ExamplesTableLoader(ITestResourceLoader testResourceLoader)
     {
         this.testResourceLoader = testResourceLoader;
     }
 
-    @Override
     public String loadExamplesTable(String tablePath)
     {
         return cacheTables ? TABLES_CACHE.computeIfAbsent(tablePath, this::loadTable) : loadTable(tablePath);
@@ -46,8 +44,18 @@ public class ExamplesTableFileLoader implements IExamplesTableLoader
 
     private String loadTable(String exampleTablePath)
     {
-        Resource resource = testResourceLoader.getResource(exampleTablePath);
-        try (InputStream inputStream = resource.getInputStream())
+        String parentDir = FilenameUtils.getFullPathNoEndSeparator(exampleTablePath);
+        String fileName = FilenameUtils.getName(exampleTablePath);
+        Resource[] resources = testResourceLoader.getResources(parentDir, fileName);
+        if (resources.length > 1)
+        {
+            throw new ResourceLoadException("More than 1 ExamplesTable resource is found for " + exampleTablePath);
+        }
+        if (resources.length == 0)
+        {
+            throw new ResourceLoadException("No ExamplesTable resource is found for " + exampleTablePath);
+        }
+        try (InputStream inputStream = resources[0].getInputStream())
         {
             return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
         }

@@ -29,26 +29,15 @@
 
     <bean id="batchedPathFinder" class="org.vividus.BatchedPathFinder" />
 
-    <bean id="storyLoader" class="org.vividus.StoryLoader">
-        <property name="examplesTableLoader" ref="examplesTableLoader" />
-        <property name="resourcePatternResolver" ref="pathMatchingResourcePatternResolver" />
-    </bean>
+    <bean id="storyLoader" class="org.vividus.resource.StoryLoader" />
 
-    <bean id="resourceLoadConfiguration" class="org.vividus.resource.ResourceLoadConfiguration"
-        init-method="init">
-        <property name="propertyParser" ref="propertyParser" />
-    </bean>
-
-    <bean id="examplesTableLoader" class="org.vividus.examples.ExamplesTableFileLoader">
+    <bean class="org.vividus.resource.ExamplesTableLoader">
         <property name="cacheTables" value="${bdd.cache-examples-table}" />
     </bean>
 
     <bean class="org.vividus.parser.StepExamplesTableParser" />
 
-    <bean id="testResourceLoader" class="org.vividus.resource.TestResourceLoader">
-        <property name="resourceLoadConfiguration" ref="resourceLoadConfiguration" />
-        <property name="resourcePatternResolver" ref="pathMatchingResourcePatternResolver" />
-    </bean>
+    <bean id="testResourceLoader" class="org.vividus.resource.TestResourceLoader" />
 
     <bean id="storyReporterBuilder" class="org.vividus.ExtendedStoryReporterBuilder">
         <property name="reportFailureTrace" value="true" />

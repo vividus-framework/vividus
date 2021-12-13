@@ -52,10 +52,10 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.IPathFinder;
 import org.vividus.PathFinder;
-import org.vividus.StoryLoader;
 import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
+import org.vividus.resource.StoryLoader;
 import org.vividus.spring.ExtendedConfiguration;
 
 @ExtendWith(MockitoExtension.class)

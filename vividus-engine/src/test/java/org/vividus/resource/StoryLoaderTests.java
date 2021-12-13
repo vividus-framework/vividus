@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus;
+package org.vividus.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,8 +34,6 @@ import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.vividus.examples.IExamplesTableLoader;
-import org.vividus.resource.ResourceLoadException;
 import org.vividus.steps.VariableResolver;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,17 +41,10 @@ class StoryLoaderTests
 {
     @Mock private VariableResolver variableResolver;
     @Mock private ResourcePatternResolver resourcePatternResolver;
-    @Mock private IExamplesTableLoader examplesTableLoader;
+    @Mock private ExamplesTableLoader examplesTableLoader;
     @InjectMocks private StoryLoader storyLoader;
 
     private final ResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
-
-    @BeforeEach
-    void beforeEach()
-    {
-        storyLoader.setResourcePatternResolver(resourcePatternResolver);
-        storyLoader.setExamplesTableLoader(examplesTableLoader);
-    }
 
     @Test
     void testLoadResourceAsText()

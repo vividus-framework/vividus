@@ -16,9 +16,7 @@
 
 package org.vividus.resource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayWithSize;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.startsWith;
@@ -28,15 +26,16 @@ import static org.springframework.core.io.support.ResourcePatternResolver.CLASSP
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.vividus.util.property.IPropertyParser;
 
 @ExtendWith(MockitoExtension.class)
 class TestResourceLoaderTests
@@ -44,28 +43,27 @@ class TestResourceLoaderTests
     private static final String STORY_LOCATION = "story/any/dir";
     private static final String ANY_STORY = "any.story";
 
-    private static final String BRAND = "vividus";
-    private static final String MARKET = "ca";
-    private static final String LOCALE = "en";
+    private static final String BRAND_KEY = "brand";
+    private static final String BRAND_VALUE = "vividus";
 
-    private static final String SUCCESS = "success";
+    private static final String MARKET_KEY = "market";
+    private static final String MARKET_VALUE = "ca";
 
-    private static final String[] DEFAULT_URLS = {
-            "file:/src/resources/story/sit/vividus/ca/de/table/vividus.table",
-            "file:/src/resources/story/sit/vividus/table/vividus.table",
-            "file:/src/resources/story/sit/vividus/ca/table/vividus.table" };
+    private static final String LOCALE_KEY = "locale";
+    private static final String LOCALE_VALUE = "en";
 
-    @Mock
-    private ResourcePatternResolver resourcePatternResolver;
+    private static final String BRANDED_FULL_PATH = "file:/src/resources/story/bvt/vividus/bvt.story";
 
-    @Mock
-    private IResourceLoadConfiguration resourceLoadConfiguration;
+    @Mock private ResourcePatternResolver resourcePatternResolver;
 
-    @Mock
-    private Resource trueResource;
-
-    @InjectMocks
     private TestResourceLoader testResourceLoader;
+
+    private void initLoader(Map<String, String> props)
+    {
+        var propertyParser = mock(IPropertyParser.class);
+        when(propertyParser.getPropertyValuesByPrefix("bdd.resource-loader.")).thenReturn(props);
+        testResourceLoader = new TestResourceLoader(propertyParser, resourcePatternResolver);
+    }
 
     private Resource[] mockGetAllResources(String prefix, String... urls) throws IOException
     {
@@ -76,234 +74,145 @@ class TestResourceLoaderTests
             when(resource.getURL()).thenReturn(new URL(urls[i]));
             allResources[i] = resource;
         }
-        when(resourcePatternResolver.getResources(startsWith(prefix)))
-                .thenReturn(allResources);
+        when(resourcePatternResolver.getResources(startsWith(prefix))).thenReturn(allResources);
         return allResources;
-    }
-
-    @Test
-    void testGetResources() throws IOException
-    {
-        when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
-                "file:/src/resources/story/sit/vividus/ca/en/sit.story",
-                "file:/src/resources/story/sit/vividus/ca/sit.story",
-                "file:/src/resources/story/sit/vividus/sit.story");
-
-        String resourceLocation = "story/sit";
-        String resourcePattern = "sit.story";
-        String truePath = CLASSPATH_ALL_URL_PREFIX + "story/sit/vividus/ca/sit.story";
-        mockResourceConfig(truePath, BRAND, MARKET);
-
-        Resource[] actualResource = testResourceLoader.getResources(resourceLocation, resourcePattern);
-        assertThat(actualResource[0].getFilename(), equalTo(SUCCESS));
     }
 
     @Test
     void testGetFileResources() throws IOException
     {
-        Resource[] allResources = mockGetAllResources("file://",
+        initLoader(Map.of(BRAND_KEY, BRAND_VALUE));
+        var allResources = mockGetAllResources("file://",
                 "file:///C:/Users/test/vividus/ca/temp.table", "file:///C:/Users/test/vividus/temp.table");
 
-        String resourceLocation = "file:///C:/Users/test/";
-        String resourcePattern = "temp.table";
-
-        when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(List.of(BRAND));
-        when(allResources[0].getFilename()).thenReturn(SUCCESS);
-        when(allResources[1].getFilename()).thenReturn(SUCCESS);
-
-        Resource[] actualResource = testResourceLoader.getResources(resourceLocation, resourcePattern);
-        assertEquals(2, actualResource.length);
-        assertThat(actualResource[0].getFilename(), equalTo(SUCCESS));
-        assertThat(actualResource[1].getFilename(), equalTo(SUCCESS));
+        var actualResources = testResourceLoader.getResources("file:///C:/Users/test/", "temp.table");
+        assertArrayEquals(allResources, actualResources);
     }
 
     @Test
     void testGetResourcesWhenMoreThanOneFound() throws IOException
     {
-        Resource[] allResources = mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+        initLoader(Map.of(BRAND_KEY, BRAND_VALUE));
+        var allResources = mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
                 "file:/src/resources/story/uat/vividus/ca/en/sit.story",
                 "file:/src/resources/story/uat/vividus/super.story",
                 "file:/src/resources/story/uat/vividus/sit.story");
 
-        String resourceLocation = "story/uat";
-        String resourcePattern = "diamond.story";
-        String truePath = CLASSPATH_ALL_URL_PREFIX + "story/uat/vividus/diamond.story";
-        List<String> params = List.of(BRAND);
+        Resource[] expectedResources = { allResources[1], allResources[2] };
+        when(resourcePatternResolver.getResources(
+                CLASSPATH_ALL_URL_PREFIX + "story/uat/vividus/diamond.story")).thenReturn(expectedResources);
 
-        when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(params);
-        when(resourcePatternResolver.getResources(truePath))
-                .thenReturn(new Resource[] { allResources[1], allResources[2] });
-        when(allResources[1].getFilename()).thenReturn(SUCCESS);
-        when(allResources[2].getFilename()).thenReturn(SUCCESS);
-
-        Resource[] actualResource = testResourceLoader.getResources(resourceLocation, resourcePattern);
-        assertEquals(2, actualResource.length);
-        assertThat(actualResource[0].getFilename(), equalTo(SUCCESS));
-        assertThat(actualResource[1].getFilename(), equalTo(SUCCESS));
-    }
-
-    @Test
-    void testGetResourcesWhenNonMatchingPathsFound() throws IOException
-    {
-        when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
-                "file:/src/resources/story/xx/test/ca/en/sit.story",
-                "file:/src/resources/story/xx/test/super.story",
-                "file:/src/resources/story/xx/diamond/sit.story");
-
-        String resourceLocation = "story/xx";
-        String resourcePattern = "extra.story";
-        String truePath = CLASSPATH_ALL_URL_PREFIX + "story/xx/extra.story";
-        mockResourceConfig(truePath, BRAND, LOCALE);
-
-        Resource[] actualResource = testResourceLoader.getResources(resourceLocation, resourcePattern);
-        assertEquals(1, actualResource.length);
-        assertThat(actualResource[0].getFilename(), equalTo(SUCCESS));
-    }
-
-    @Test
-    void testGetResourcesWhenEmptyLoadConfig() throws IOException
-    {
-        when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
-                "file:/src/resources/story/xxx/vividus/ca/en/sit.story",
-                "file:/src/resources/story/xxx/vividus/super.story",
-                "file:/src/resources/story/xxx/sit.story");
-
-        String resourceLocation = "story/xxx";
-        String resourcePattern = "*.story";
-        String truePath = CLASSPATH_ALL_URL_PREFIX + "story/xxx/*.story";
-
-        when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(List.of());
-        when(resourcePatternResolver.getResources(truePath)).thenReturn(new Resource[] { trueResource });
-
-        Resource[] actualResource = testResourceLoader.getResources(resourceLocation, resourcePattern);
-        assertEquals(1, actualResource.length);
-        assertThat(actualResource[0].getFilename(), equalTo(SUCCESS));
-    }
-
-    @Test
-    void testGetResource() throws IOException
-    {
-        when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
-                "file:/src/resources/story/bvt/vividus/ca/en/vividus.table",
-                "file:/src/resources/story/bvt/vividus/ca/vividus.table",
-                "file:/src/resources/story/bvt/vividus/vividus.table");
-        String rawPath = "story/bvt/vividus.table";
-        String truePath = CLASSPATH_ALL_URL_PREFIX + "story/bvt/vividus/ca/en/vividus.table";
-        List<String> params = List.of(LOCALE, MARKET, BRAND);
-
-        when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(params);
-        when(resourcePatternResolver.getResources(truePath)).thenReturn(new Resource[] { trueResource });
-
-        Resource actualResource = testResourceLoader.getResource(rawPath);
-        assertThat(actualResource.getFilename(), equalTo(SUCCESS));
-    }
-
-    @Test
-    void testGetResource2() throws IOException
-    {
-        when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
-                "file:/src/resources/story/sit/vividus/ca/de/super.table",
-                "file:/src/resources/story/sit/vividus/super.table",
-                "file:/src/resources/story/sit/vividus/ca/super.table");
-        String rawPath = "story/sit/super.table";
-        String truePath = CLASSPATH_ALL_URL_PREFIX + "story/sit/vividus/ca/super.table";
-        List<String> params = List.of(MARKET, BRAND, LOCALE);
-
-        when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(params);
-        when(resourcePatternResolver.getResources(truePath)).thenReturn(new Resource[] { trueResource });
-
-        Resource actualResource = testResourceLoader.getResource(rawPath);
-        assertThat(actualResource.getFilename(), equalTo(SUCCESS));
-    }
-
-    @Test
-    void testGetResourceWhenMoreThanOneFound() throws IOException
-    {
-        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, DEFAULT_URLS);
-        String rawPath = "story/sit/vividus.table";
-        List<String> params = List.of(MARKET, BRAND, LOCALE);
-
-        when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(params);
-        assertThrows(ResourceLoadException.class, () -> testResourceLoader.getResource(rawPath));
-    }
-
-    @Test
-    void testGetResourceWhenNotFound() throws IOException
-    {
-        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, DEFAULT_URLS);
-        String rawPath = "story/sit/list.table";
-        List<String> params = List.of(MARKET, BRAND, LOCALE);
-
-        when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(params);
-        assertThrows(ResourceLoadException.class, () -> testResourceLoader.getResource(rawPath));
+        var actualResources = testResourceLoader.getResources("story/uat", "diamond.story");
+        assertArrayEquals(expectedResources, actualResources);
     }
 
     @Test
     void testGetNoResourceFound() throws IOException
     {
-        when(resourcePatternResolver.getResources(startsWith(CLASSPATH_ALL_URL_PREFIX)))
-                .thenReturn(new Resource[] {});
-        String resourceLocation = "story";
-        String resourcePattern = "some story.story";
-
-        Resource[] resources = testResourceLoader.getResources(resourceLocation, resourcePattern);
-        assertThat(resources, arrayWithSize(0));
+        initLoader(Map.of());
+        when(resourcePatternResolver.getResources(startsWith(CLASSPATH_ALL_URL_PREFIX))).thenReturn(new Resource[] {});
+        var actualResource = testResourceLoader.getResources("story", "unknown.story");
+        assertEquals(0, actualResource.length);
     }
 
     @Test
     void testGetResourceIOException() throws IOException
     {
-        when(resourcePatternResolver.getResources(startsWith(CLASSPATH_ALL_URL_PREFIX)))
-                .thenThrow(new IOException());
-        assertThrows(ResourceLoadException.class, () -> testResourceLoader.getResource("story/sit/unknown.table"));
+        initLoader(Map.of());
+        var cause = new IOException();
+        when(resourcePatternResolver.getResources(startsWith(CLASSPATH_ALL_URL_PREFIX))).thenThrow(cause);
+        var exception = assertThrows(ResourceLoadException.class,
+                () -> testResourceLoader.getResources("story/sit", "any.table"));
+        assertEquals(cause, exception.getCause());
     }
 
     @Test
     void testGetResourcesThrowsExceptionAtGettingUri() throws IOException
     {
+        initLoader(Map.of());
         IOException ioException = new IOException();
         Resource resource = when(mock(Resource.class).getURL()).thenThrow(ioException).getMock();
-        when(resourcePatternResolver.getResources(startsWith(CLASSPATH_ALL_URL_PREFIX)))
-                .thenReturn(new Resource[] { resource });
-        ResourceLoadException exception = assertThrows(ResourceLoadException.class,
+        when(resourcePatternResolver.getResources(startsWith(CLASSPATH_ALL_URL_PREFIX))).thenReturn(
+                new Resource[] { resource });
+        var exception = assertThrows(ResourceLoadException.class,
             () ->  testResourceLoader.getResources(STORY_LOCATION, ANY_STORY));
         assertEquals(ioException, exception.getCause());
     }
 
     @Test
+    void testGetResources() throws IOException
+    {
+        initLoader(Map.of(
+                LOCALE_KEY, "",
+                MARKET_KEY, MARKET_VALUE,
+                BRAND_KEY, BRAND_VALUE
+        ));
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+                "file:/src/resources/story/bvt/vividus/ca/en/bvt.story",
+                "file:/src/resources/story/bvt/vividus/ca/bvt.story", BRANDED_FULL_PATH);
+        testSingleResourceRetrieval("/vividus/ca");
+    }
+
+    @Test
     void testGetResourcesSimilarProps() throws IOException
     {
-        when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, "file:/src/resources/story/bvt/vividus/bvt.story");
-
-        String resourceLocation = "story/bvt";
-        String resourcePattern = "bvt.story";
-        String truePath = CLASSPATH_ALL_URL_PREFIX + "story/bvt/vividus/bvt.story";
-        mockResourceConfig(truePath, "cn", BRAND);
-
-        Resource[] actualResource = testResourceLoader.getResources(resourceLocation, resourcePattern);
-        assertThat(actualResource[0].getFilename(), equalTo(SUCCESS));
+        Map<String, String> props = new HashMap<>();
+        props.put(LOCALE_KEY, "cn");
+        props.put(MARKET_KEY, null);
+        props.put(BRAND_KEY, BRAND_VALUE);
+        initLoader(props);
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, BRANDED_FULL_PATH);
+        testSingleResourceRetrieval("/vividus");
     }
 
     @Test
     void testGetResourcesIdenticalProps() throws IOException
     {
-        when(trueResource.getFilename()).thenReturn(SUCCESS);
-        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, "file:/src/resources/story/ut/vividus/en/en/uat.story");
-        mockResourceConfig(CLASSPATH_ALL_URL_PREFIX + "story/ut/vividus/en/en/uat.story", LOCALE, LOCALE,
-                BRAND);
-        assertThat(testResourceLoader.getResources("story/ut", "uat.story")[0]
-                .getFilename(), equalTo(SUCCESS));
+        initLoader(Map.of(
+                LOCALE_KEY, LOCALE_VALUE,
+                MARKET_KEY, LOCALE_VALUE,
+                BRAND_KEY, BRAND_VALUE
+        ));
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX, "file:/src/resources/story/bvt/vividus/en/en/bvt.story");
+        testSingleResourceRetrieval("/vividus/en/en");
     }
 
-    private void mockResourceConfig(String truePath, String... props) throws IOException
+    @Test
+    void testGetResourcesWhenNonMatchingPathsFound() throws IOException
     {
-        when(resourceLoadConfiguration.getResourceLoadParametersValues()).thenReturn(List.of(props));
-        when(resourcePatternResolver.getResources(truePath)).thenReturn(new Resource[] { trueResource });
+        initLoader(Map.of(
+                BRAND_KEY, BRAND_VALUE,
+                LOCALE_KEY, LOCALE_VALUE
+        ));
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+                "file:/src/resources/story/bvt/test/ca/en/sit.story",
+                "file:/src/resources/story/bvt/test/super.story",
+                "file:/src/resources/story/bvt/diamond/sit.story");
+        testSingleResourceRetrieval("");
+    }
+
+    @Test
+    void testGetResourcesWhenEmptyLoadConfig() throws IOException
+    {
+        initLoader(Map.of());
+        mockGetAllResources(CLASSPATH_ALL_URL_PREFIX,
+                "file:/src/resources/story/bvt/vividus/ca/en/sit.story",
+                "file:/src/resources/story/bvt/vividus/super.story",
+                "file:/src/resources/story/bvt/sit.story");
+        testSingleResourceRetrieval("");
+    }
+
+    private void testSingleResourceRetrieval(String dynamicPathPart) throws IOException
+    {
+        var resourceLocation = "story/bvt";
+        var resourceName = "bvt.story";
+        Resource[] expectedResources = { mock(Resource.class) };
+        when(resourcePatternResolver.getResources(
+                CLASSPATH_ALL_URL_PREFIX + resourceLocation + dynamicPathPart + "/" + resourceName)).thenReturn(
+                expectedResources);
+
+        var actualResources = testResourceLoader.getResources(resourceLocation, resourceName);
+
+        assertArrayEquals(expectedResources, actualResources);
     }
 }

@@ -20,7 +20,5 @@ import org.springframework.core.io.Resource;
 
 public interface ITestResourceLoader
 {
-    Resource getResource(String rawResourcePath);
-
     Resource[] getResources(String locationPath, String resourcePattern);
 }
