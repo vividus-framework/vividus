@@ -45,10 +45,10 @@ import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
 import org.vividus.IPathFinder;
-import org.vividus.StoryLoader;
 import org.vividus.batch.BatchResourceConfiguration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
+import org.vividus.resource.StoryLoader;
 
 public final class BddStepsCounter
 {

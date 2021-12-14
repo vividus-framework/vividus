@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus;
+package org.vividus.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,19 +23,21 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.io.LoadFromClasspath;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.vividus.examples.IExamplesTableLoader;
 import org.vividus.steps.VariableResolver;
 
 public class StoryLoader extends LoadFromClasspath
 {
     private final VariableResolver variableResolver;
-    private IExamplesTableLoader examplesTableLoader;
-    private ResourcePatternResolver resourcePatternResolver;
+    private final ExamplesTableLoader examplesTableLoader;
+    private final ResourcePatternResolver resourcePatternResolver;
 
-    public StoryLoader(VariableResolver variableResolver)
+    public StoryLoader(VariableResolver variableResolver, ExamplesTableLoader examplesTableLoader,
+            ResourcePatternResolver resourcePatternResolver)
     {
         super(StandardCharsets.UTF_8);
         this.variableResolver = variableResolver;
+        this.examplesTableLoader = examplesTableLoader;
+        this.resourcePatternResolver = resourcePatternResolver;
     }
 
     @Override
@@ -60,15 +62,5 @@ public class StoryLoader extends LoadFromClasspath
         {
             throw new IllegalArgumentException(e);
         }
-    }
-
-    public void setExamplesTableLoader(IExamplesTableLoader examplesTableLoader)
-    {
-        this.examplesTableLoader = examplesTableLoader;
-    }
-
-    public void setResourcePatternResolver(ResourcePatternResolver resourcePatternResolver)
-    {
-        this.resourcePatternResolver = resourcePatternResolver;
     }
 }

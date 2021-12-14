@@ -24,73 +24,53 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.vividus.util.property.IPropertyParser;
 
 public class TestResourceLoader implements ITestResourceLoader
 {
+    private static final String VARIABLES_PROPERTY_PREFIX = "bdd.resource-loader.";
     private static final String SEPARATOR = "/";
     private static final String FILE_URL_PREFIX = "file://";
 
-    private ResourcePatternResolver resourcePatternResolver;
+    private final List<String> resourceLoadParameters;
+    private final ResourcePatternResolver resourcePatternResolver;
 
-    private IResourceLoadConfiguration resourceLoadConfiguration;
-
-    @Override
-    public Resource getResource(String rawResourcePath)
+    public TestResourceLoader(IPropertyParser propertyParser, ResourcePatternResolver resourcePatternResolver)
     {
-        String parentDir = FilenameUtils.getFullPathNoEndSeparator(rawResourcePath);
-        String fileName = FilenameUtils.getName(rawResourcePath);
-        Resource[] resources = getResources(parentDir, fileName);
-        if (resources.length > 1)
-        {
-            throw new ResourceLoadException("More than 1 resource is found for " + rawResourcePath);
-        }
-        if (resources.length == 0)
-        {
-            throw new ResourceLoadException("No resource is found for " + rawResourcePath);
-        }
-        return resources[0];
+        resourceLoadParameters = propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX).values().stream()
+                .filter(p -> p != null && !p.isEmpty())
+                .collect(Collectors.toList());
+        this.resourcePatternResolver = resourcePatternResolver;
     }
 
     @Override
     public Resource[] getResources(String resourceLocation, String resourcePattern)
     {
-        String normalizedResourceLocation = StringUtils.appendIfMissing(resourceLocation, SEPARATOR);
-        String locationPattern = resourceLocation.startsWith(FILE_URL_PREFIX)
-                ? normalizedResourceLocation : CLASSPATH_ALL_URL_PREFIX + normalizedResourceLocation;
-        Resource[] allResources = getResources(locationPattern + "**/" + resourcePattern);
-        List<URL> resourceUrls = new ArrayList<>(allResources.length);
-        for (Resource resource : allResources)
+        try
         {
-            try
+            String normalizedResourceLocation = StringUtils.appendIfMissing(resourceLocation, SEPARATOR);
+            String locationPattern = resourceLocation.startsWith(FILE_URL_PREFIX)
+                    ? normalizedResourceLocation : CLASSPATH_ALL_URL_PREFIX + normalizedResourceLocation;
+            Resource[] allResources = resourcePatternResolver.getResources(locationPattern + "**/" + resourcePattern);
+            List<URL> resourceUrls = new ArrayList<>(allResources.length);
+            for (Resource resource : allResources)
             {
                 resourceUrls.add(resource.getURL());
             }
-            catch (IOException e)
-            {
-                throw new ResourceLoadException(e);
-            }
-        }
-        Optional<String> deepestResourcePath = resourceUrls.stream()
-                .map(URL::toString)
-                .map(resourceUrl -> StringUtils.substringAfter(resourceUrl, normalizedResourceLocation))
-                .map(this::generatePathByLoadConfig)
-                .max(Comparator.comparing(String::length));
-        StringBuilder resourcePatternBuilder = new StringBuilder(locationPattern);
-        deepestResourcePath.ifPresent(resourcePatternBuilder::append);
-        String baseResourcePattern = resourcePatternBuilder.toString();
-        return getResources(baseResourcePattern + resourcePattern);
-    }
-
-    private Resource[] getResources(String locationPattern)
-    {
-        try
-        {
-            return resourcePatternResolver.getResources(locationPattern);
+            Optional<String> deepestResourcePath = resourceUrls.stream()
+                    .map(URL::toString)
+                    .map(resourceUrl -> StringUtils.substringAfter(resourceUrl, normalizedResourceLocation))
+                    .map(this::generatePathByLoadConfig)
+                    .max(Comparator.comparing(String::length));
+            StringBuilder resourcePatternBuilder = new StringBuilder(locationPattern);
+            deepestResourcePath.ifPresent(resourcePatternBuilder::append);
+            String baseResourcePattern = resourcePatternBuilder.toString();
+            return resourcePatternResolver.getResources(baseResourcePattern + resourcePattern);
         }
         catch (IOException e)
         {
@@ -100,8 +80,7 @@ public class TestResourceLoader implements ITestResourceLoader
 
     private String generatePathByLoadConfig(String relativeResourcePath)
     {
-        return generatePathByLoadConfig(relativeResourcePath, new StringBuilder(),
-                resourceLoadConfiguration.getResourceLoadParametersValues());
+        return generatePathByLoadConfig(relativeResourcePath, new StringBuilder(), resourceLoadParameters);
     }
 
     private String generatePathByLoadConfig(String initialPath, StringBuilder pathBuilder, List<String> initialProps)
@@ -119,15 +98,5 @@ public class TestResourceLoader implements ITestResourceLoader
             }
         }
         return pathBuilder.toString();
-    }
-
-    public void setResourcePatternResolver(ResourcePatternResolver resourcePatternResolver)
-    {
-        this.resourcePatternResolver = resourcePatternResolver;
-    }
-
-    public void setResourceLoadConfiguration(IResourceLoadConfiguration resourceLoadConfiguration)
-    {
-        this.resourceLoadConfiguration = resourceLoadConfiguration;
     }
 }
