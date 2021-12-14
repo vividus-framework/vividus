@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
     implementation(group: 'com.azure', name: 'azure-messaging-eventgrid', version: '4.7.1')
-    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-eventgrid', version: '1.1.0-beta.2')
+    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-eventgrid', version: '1.1.0-beta.5')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
