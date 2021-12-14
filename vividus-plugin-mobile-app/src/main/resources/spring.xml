@@ -55,6 +55,12 @@
 
     <bean id="iOSPerformanceSteps" class="org.vividus.bdd.mobileapp.steps.IOSPerformanceSteps" />
 
+    <bean id="networkConditionsSteps" class="org.vividus.mobileapp.steps.NetworkConditionsSteps">
+        <constructor-arg>
+            <bean name="actions" class="org.vividus.mobileapp.action.NetworkActions"/>
+        </constructor-arg>
+    </bean>
+
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
 
     <bean class="org.vividus.mobileapp.configuration.MobileApplicationConfiguration" >
@@ -120,5 +126,6 @@
         <idref bean="elementSteps" />
         <idref bean="setContextSteps" />
         <idref bean="iOSPerformanceSteps" />
+        <idref bean="networkConditionsSteps" />
     </util:list>
 </beans>

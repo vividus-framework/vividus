@@ -780,3 +780,60 @@ When I stop recording `Time Profiler` metrics and save results to file `${output
 include::partial$generic-ui-steps.adoc[]
 
 include::partial$proxy-steps.adoc[]
+
+=== Change network condition
+
+Turn ON/OFF network condition.
+
+[source,gherkin]
+----
+When I turn $toggle `$mode` network connection
+----
+* `$toggle` - The modes of the toggle: `ON` or `OFF`.
+* `$mode` - The name of the network connect to toggle.
+
+[cols="2,2,2", options="header"]
+|===
+
+|Mode
+|Platform
+|Description
+
+|`WIFI`
+|Android, iOS and emulators
+|Turn ON/OFF Wi-Fi connection state only.
+
+|`MOBILE_DATA`
+|Android, iOS and emulators
+|Turn ON/OFF Mobile Data connection state only.
+
+|`AIRPLANE`
+|Android and emulators
+|Turn ON/OFF Airplane Mode only.
+
+|`WIFI_AND_MOBILE_DATA`
+|Android and emulators
+|Turn ON/OFF Mobile Data and Wi-Fi state.
+
+|===
+
+TIP: For IOS devices: to return to the application you must use the step:
+[source,gherkin]
+----
+When I activate application with bundle identifier `$bundleId`.
+----
+
+WARNING: To be able to use this step in the cloud testing platform, review the documentation related to simulating the mobile network conditions of the selected platform.
+
+.Turn OFF Wi-Fi for Android
+[source,gherkin]
+----
+When I turn OFF `WIFI` network connection
+----
+
+.Turn OFF Wi-Fi for iOS
+[source,gherkin]
+----
+When I turn OFF `WIFI` network connection
+When I activate application with bundle identifier `$bundleId`
+----
