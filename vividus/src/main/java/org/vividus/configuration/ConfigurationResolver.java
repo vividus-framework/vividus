@@ -20,7 +20,6 @@ import static org.springframework.core.io.support.ResourcePatternResolver.CLASSP
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +35,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jasypt.encryption.StringEncryptor;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -47,9 +48,12 @@ import org.springframework.util.PropertyPlaceholderHelper;
 
 public final class ConfigurationResolver
 {
+    private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
+    private static final String DEFAULT_ENCRYPTOR_ALGORITHM = "PBEWithMD5AndDES";
+    private static final String DEFAULT_ENCRYPTOR_PASSWORD = "82=thuMUH@";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationResolver.class);
 
-    private static final String SYSTEM_PROPERTIES_PREFIX = "system.";
     private static final String VIVIDUS_SYSTEM_PROPERTY_FAMILY = "vividus.";
     private static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
     private static final String ROOT = "";
@@ -134,10 +138,29 @@ public final class ConfigurationResolver
         }
         deprecatedPropertiesHandler.removeDeprecated(properties);
         resolveSpelExpressions(properties, false);
-        processSystemProperties(properties);
+
+        StringEncryptor stringEncryptor = createStringEncryptor(properties);
+        BeanFactory.registerBean("stringEncryptor", StringEncryptor.class, () -> stringEncryptor);
+        PropertiesDecryptor decryptor = new PropertiesDecryptor(stringEncryptor);
+        SystemPropertiesProcessor systemPropertiesProcessor = new SystemPropertiesProcessor(decryptor);
+        systemPropertiesProcessor.process(properties);
+        properties = decryptor.decryptProperties(properties);
 
         instance = new ConfigurationResolver(properties);
         return instance;
+    }
+
+    private static StringEncryptor createStringEncryptor(Properties properties)
+    {
+        String password = System.getProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY);
+        if (password == null)
+        {
+            password = properties.getProperty("system." + VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY);
+        }
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setAlgorithm(DEFAULT_ENCRYPTOR_ALGORITHM);
+        encryptor.setPassword(password != null ? password : DEFAULT_ENCRYPTOR_PASSWORD);
+        return encryptor;
     }
 
     private static PropertyPlaceholderHelper createPropertyPlaceholderHelper(boolean ignoreUnresolvablePlaceholders)
@@ -243,21 +266,6 @@ public final class ConfigurationResolver
                                         .getKey() + "'", e);
                     }
                 }
-            }
-        }
-    }
-
-    private static void processSystemProperties(Properties properties)
-    {
-        Iterator<Entry<Object, Object>> iterator = properties.entrySet().iterator();
-        while (iterator.hasNext())
-        {
-            Entry<Object, Object> entry = iterator.next();
-            String key = (String) entry.getKey();
-            if (key.startsWith(SYSTEM_PROPERTIES_PREFIX))
-            {
-                System.setProperty(StringUtils.removeStart(key, SYSTEM_PROPERTIES_PREFIX), (String) entry.getValue());
-                iterator.remove();
             }
         }
     }
