@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -44,7 +43,6 @@ import javax.imageio.ImageIO;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-import com.google.common.eventbus.EventBus;
 
 import org.jsoup.UncheckedIOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,16 +77,12 @@ class WebScreenshotTakerTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private IWebElementHighlighter webElementHighlighter;
-    @Mock private EventBus eventBus;
     @Mock private AshotFactory<WebScreenshotConfiguration> ashotFactory;
     @Mock private ScreenshotDebugger screenshotDebugger;
     @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
 
     @InjectMocks private WebScreenshotTaker screenshotTaker;
-
-    @Mock
-    private WebScreenshotConfiguration screenshotConfiguration;
 
     @BeforeEach
     void beforeEach()
@@ -200,7 +194,7 @@ class WebScreenshotTakerTests
     }
 
     @Test
-    void testTakeViewportScreenshotByPathNotViewport(@TempDir Path tempDir) throws Exception
+    void testTakeViewportScreenshotByPathNotViewport(@TempDir Path tempDir) throws IOException
     {
         mockTakeScreenshotWithHighlights();
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
@@ -209,7 +203,6 @@ class WebScreenshotTakerTests
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
         Path filePath = tempDir.resolve(SCREENSHOT_NAME_GENERATED);
         screenshotTaker.takeScreenshot(filePath);
-        verify(eventBus).post(argThat(e -> filePath.equals(((ScreenshotTakeEvent) e).getScreenshotFilePath())));
         assertTrue(Files.exists(filePath));
         assertThat(testLogger.getLoggingEvents(), equalTo(List.of(
                 info(SCREENSHOT_WAS_TAKEN, filePath.toAbsolutePath()))));
@@ -229,7 +222,6 @@ class WebScreenshotTakerTests
         when(screenshotFileNameGenerator.generateScreenshotFileName(fileName))
             .thenReturn(fileName);
         screenshotTaker.takeScreenshotAsFile(fileName);
-        verify(eventBus).post(argThat(e -> absolutePath.equals(((ScreenshotTakeEvent) e).getScreenshotFilePath())));
         assertTrue(Files.exists(absolutePath));
         assertThat(testLogger.getLoggingEvents(), equalTo(List.of(
                 info(SCREENSHOT_WAS_TAKEN, absolutePath.toAbsolutePath()))));
