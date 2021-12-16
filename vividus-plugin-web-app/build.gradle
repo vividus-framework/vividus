@@ -38,8 +38,6 @@ dependencies {
     implementation(group: 'io.netty', name: 'netty-all', version: "${nettyVersion}")
     implementation(group: 'io.netty', name: 'netty-codec', version: "${nettyVersion}")
 
-    compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
-
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
