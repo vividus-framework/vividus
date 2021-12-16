@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,19 @@
 
 package org.vividus.selenium;
 
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Window;
@@ -39,43 +41,45 @@ class BrowserWindowSizeListenerTests
     @Mock private IWebDriverManager webDriverManager;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IBrowserWindowSizeProvider browserWindowSizeProvider;
+    @Mock private WebDriver webDriver;
+
+    @InjectMocks private BrowserWindowSizeManager browserWindowSizeManager;
     @InjectMocks private BrowserWindowSizeListener browserWindowSizeListener;
 
+    @BeforeEach
+    void beforeEach()
+    {
+        browserWindowSizeListener.setBrowserWindowSizeManager(browserWindowSizeManager);
+    }
+
+    @SuppressWarnings("removal")
     @Test
     void shouldResizeWindowWithDesiredBrowserSizeOnCreate()
     {
         when(webDriverManager.isElectronApp()).thenReturn(false);
         when(webDriverManager.isMobile()).thenReturn(false);
-        WebDriver webDriver = mock(WebDriver.class);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        BrowserWindowSize browserWindowSize = mock(BrowserWindowSize.class);
-        Options options = mock(Options.class);
-        when(webDriver.manage()).thenReturn(options);
-        Window window = mock(Window.class);
-        when(options.window()).thenReturn(window);
-        Dimension dimension = mock(Dimension.class);
-        when(browserWindowSize.toDimension()).thenReturn(dimension);
+        int width = 1440;
+        int height = 900;
         boolean remoteExecution = true;
         when(webDriverProvider.isRemoteExecution()).thenReturn(remoteExecution);
-        when(browserWindowSizeProvider.getBrowserWindowSize(remoteExecution)).thenReturn(browserWindowSize);
+        when(browserWindowSizeProvider.getBrowserWindowSizeFromMeta(remoteExecution))
+                .thenReturn(new BrowserWindowSize(width, height));
+        Window window = mockWindow();
         browserWindowSizeListener.onWebDriverCreate(new WebDriverCreateEvent(mock(WebDriver.class)));
-        verify(window).setSize(dimension);
+        verify(window).setSize(argThat(dimension -> width == dimension.getWidth() && height == dimension.getHeight()));
+        verify(window, never()).maximize();
     }
 
+    @SuppressWarnings("removal")
     @Test
     void shouldMaximizeWindowWithDesiredBrowserSizeOnCreate()
     {
         when(webDriverManager.isElectronApp()).thenReturn(false);
         when(webDriverManager.isMobile()).thenReturn(false);
-        WebDriver webDriver = mock(WebDriver.class);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        Options options = mock(Options.class);
-        when(webDriver.manage()).thenReturn(options);
-        Window window = mock(Window.class);
-        when(options.window()).thenReturn(window);
         boolean remoteExecution = true;
         when(webDriverProvider.isRemoteExecution()).thenReturn(remoteExecution);
-        when(browserWindowSizeProvider.getBrowserWindowSize(remoteExecution)).thenReturn(null);
+        when(browserWindowSizeProvider.getBrowserWindowSizeFromMeta(remoteExecution)).thenReturn(null);
+        Window window = mockWindow();
         browserWindowSizeListener.onWebDriverCreate(new WebDriverCreateEvent(mock(WebDriver.class)));
         verify(window).maximize();
     }
@@ -95,5 +99,15 @@ class BrowserWindowSizeListenerTests
         when(webDriverManager.isMobile()).thenReturn(true);
         browserWindowSizeListener.onWebDriverCreate(new WebDriverCreateEvent(mock(WebDriver.class)));
         verifyNoInteractions(webDriverProvider);
+    }
+
+    private Window mockWindow()
+    {
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        Options mockedOptions = mock(Options.class);
+        when(webDriver.manage()).thenReturn(mockedOptions);
+        Window mockedWindow = mock(Window.class);
+        when(mockedOptions.window()).thenReturn(mockedWindow);
+        return mockedWindow;
     }
 }

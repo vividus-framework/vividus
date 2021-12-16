@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,24 @@
 
 package org.vividus.selenium;
 
+import java.util.Optional;
+
 public interface IBrowserWindowSizeProvider
 {
-    BrowserWindowSize getBrowserWindowSize(boolean remoteExecution);
+    /**
+     * Returns the desired browser window size configured in Meta used for initial resizing.
+     * @param remoteExecution - True if remote execution, False for local run.
+     * @return The desired browser window size
+     * @deprecated Use step:
+     * When I change window size to `$targetSize`
+     */
+    @Deprecated(since = "0.5.0", forRemoval = true)
+    BrowserWindowSize getBrowserWindowSizeFromMeta(boolean remoteExecution);
+
+    /**
+     * Returns the possible maximum of browser window size based on screen size if exists.
+     * @param remoteExecution - True if remote execution, False for local run.
+     * @return Optional containing maximum browser window size
+     */
+    Optional<BrowserWindowSize> getMaximumBrowserWindowSize(boolean remoteExecution);
 }

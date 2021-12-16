@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium;
+package org.vividus.converter.ui.web;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -23,8 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Dimension;
+import org.vividus.selenium.BrowserWindowSize;
 
-class BrowserWindowSizeTests
+class StringToBrowserWindowSizeParameterConverterTests
 {
     private static final String SIZE_800_X_600 = "800x600";
     private static final String WRONG_WIDTH_WAS_RETURNED = "Wrong width was returned";
@@ -32,24 +33,36 @@ class BrowserWindowSizeTests
 
     private BrowserWindowSize browserWindowSize;
 
+    private final StringToBrowserWindowSizeParameterConverter browserWindowSizeConverter =
+            new StringToBrowserWindowSizeParameterConverter();
+
     @Test
-    void testGetWidthHeightWrong()
+    void shouldConvertStringToBrowserWindowSizeParameter()
     {
-        assertThrows(IllegalStateException.class, () -> new BrowserWindowSize("800"));
+        String sizeAsString = "2048x1080";
+        BrowserWindowSize browserWindowSize = browserWindowSizeConverter.convertValue(sizeAsString, null);
+        assertEquals(2048, browserWindowSize.getWidth());
+        assertEquals(1080, browserWindowSize.getHeight());
     }
 
     @Test
-    void testGetWidthHeight()
+    void testConversionError()
     {
-        browserWindowSize = new BrowserWindowSize(SIZE_800_X_600);
+        assertThrows(IllegalStateException.class, () -> browserWindowSizeConverter.convert("800"));
+    }
+
+    @Test
+    void testSuccessfulConversion()
+    {
+        browserWindowSize = browserWindowSizeConverter.convert(SIZE_800_X_600).get();
         assertEquals(800, browserWindowSize.getWidth(), WRONG_WIDTH_WAS_RETURNED);
         assertEquals(600, browserWindowSize.getHeight(), WRONG_HEIGHT_WAS_RETURNED);
     }
 
     @Test
-    void testToDimension()
+    void testSuccessfulConversionToDimension()
     {
-        browserWindowSize = new BrowserWindowSize(SIZE_800_X_600);
+        browserWindowSize = browserWindowSizeConverter.convert(SIZE_800_X_600).get();
         Dimension dimension = browserWindowSize.toDimension();
         assertThat("Dimension was not returned", dimension, instanceOf(Dimension.class));
         assertEquals(800, dimension.getWidth(), WRONG_WIDTH_WAS_RETURNED);

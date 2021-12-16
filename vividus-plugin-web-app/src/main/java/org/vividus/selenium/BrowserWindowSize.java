@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,17 @@
 
 package org.vividus.selenium;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.openqa.selenium.Dimension;
 
 public class BrowserWindowSize
 {
     private final int width;
     private final int height;
-    private final String sizeAsString;
 
-    public BrowserWindowSize(String sizeAsString)
+    public BrowserWindowSize(int width, int height)
     {
-        Matcher matcher = Pattern.compile("(\\d+)x(\\d+)").matcher(sizeAsString);
-        if (matcher.matches())
-        {
-            width = Integer.parseInt(matcher.group(1));
-            height = Integer.parseInt(matcher.group(2));
-        }
-        else
-        {
-            throw new IllegalStateException("Provided size = " + sizeAsString
-                    + " has wrong format. Example of correct format: 800x600");
-        }
-        this.sizeAsString = sizeAsString;
+        this.width = width;
+        this.height = height;
     }
 
     public int getWidth()
@@ -61,6 +47,6 @@ public class BrowserWindowSize
     @Override
     public String toString()
     {
-        return sizeAsString;
+        return getWidth() + "x" + getHeight();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,18 @@
 package org.vividus.selenium;
 
 import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Suppliers;
+
 import org.jbehave.core.model.Meta;
 import org.vividus.context.RunContext;
+import org.vividus.converter.ui.web.StringToBrowserWindowSizeParameterConverter;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 
@@ -30,9 +36,12 @@ public class BrowserWindowSizeProvider implements IBrowserWindowSizeProvider
 {
     @Inject private RunContext runContext;
     private String remoteScreenResolution;
+    private final Supplier<Optional<BrowserWindowSize>> remoteBrowserWindowSizeSupplier = Suppliers.memoize(() ->
+            StringToBrowserWindowSizeParameterConverter.convert(remoteScreenResolution));
 
+    @SuppressWarnings("removal")
     @Override
-    public BrowserWindowSize getBrowserWindowSize(boolean remoteExecution)
+    public BrowserWindowSize getBrowserWindowSizeFromMeta(boolean remoteExecution)
     {
         RunningStory runningStory = runContext.getRunningStory();
         if (runningStory != null)
@@ -53,7 +62,7 @@ public class BrowserWindowSizeProvider implements IBrowserWindowSizeProvider
 
     private void checkDesiredBrowserWindowSize(BrowserWindowSize desiredBrowserWindowSize, boolean remoteExecution)
     {
-        BrowserWindowSize screenSize = getScreenSize(remoteExecution);
+        BrowserWindowSize screenSize = getMaximumBrowserWindowSize(remoteExecution).get();
         if (desiredBrowserWindowSize.getWidth() > screenSize.getWidth()
                 || desiredBrowserWindowSize.getHeight() > screenSize.getHeight())
         {
@@ -62,24 +71,27 @@ public class BrowserWindowSizeProvider implements IBrowserWindowSizeProvider
         }
     }
 
-    private BrowserWindowSize getScreenSize(boolean remoteExecution)
+    @Override
+    public Optional<BrowserWindowSize> getMaximumBrowserWindowSize(boolean remoteExecution)
     {
-        if (!remoteExecution)
+        if (!remoteExecution && !GraphicsEnvironment.isHeadless())
         {
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            return new BrowserWindowSize((int) screenSize.getWidth() + "x" + (int) screenSize.getHeight());
+            return Optional.of(new BrowserWindowSize((int) screenSize.getWidth(), (int) screenSize.getHeight()));
         }
-        return new BrowserWindowSize(remoteScreenResolution);
+        return remoteBrowserWindowSizeSupplier.get();
     }
 
-    private BrowserWindowSize getBrowserSizeFromMeta(Meta meta, boolean sauceLabsEnabled)
+    private BrowserWindowSize getBrowserSizeFromMeta(Meta meta, boolean remoteExecution)
     {
-        return meta.getOptionalProperty("browserWindowSize").map(windowSize ->
-        {
-            BrowserWindowSize browserWindowSize = new BrowserWindowSize(windowSize);
-            checkDesiredBrowserWindowSize(browserWindowSize, sauceLabsEnabled);
-            return browserWindowSize;
-        }).orElse(null);
+        return meta.getOptionalProperty("browserWindowSize")
+                .map(StringToBrowserWindowSizeParameterConverter::convert)
+                .map(Optional::get)
+                .map(browserWindowSize ->
+                {
+                    checkDesiredBrowserWindowSize(browserWindowSize, remoteExecution);
+                    return browserWindowSize;
+                }).orElse(null);
     }
 
     public void setRemoteScreenResolution(String remoteScreenResolution)

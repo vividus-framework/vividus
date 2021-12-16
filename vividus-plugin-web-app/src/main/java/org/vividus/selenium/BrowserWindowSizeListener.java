@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.vividus.selenium;
 
-import java.util.Optional;
-
 import com.google.common.eventbus.Subscribe;
 
 import org.openqa.selenium.WebDriver.Window;
@@ -29,18 +27,17 @@ public class BrowserWindowSizeListener
     private IWebDriverManager webDriverManager;
     private IWebDriverProvider webDriverProvider;
     private IBrowserWindowSizeProvider browserWindowSizeProvider;
+    private IBrowserWindowSizeManager browserWindowSizeManager;
 
+    @SuppressWarnings("removal")
     @Subscribe
     public void onWebDriverCreate(WebDriverCreateEvent event)
     {
         if (!webDriverManager.isElectronApp() && !webDriverManager.isMobile())
         {
-            Window window = webDriverProvider.get().manage().window();
-            Optional.ofNullable(browserWindowSizeProvider.getBrowserWindowSize(webDriverProvider.isRemoteExecution()))
-                .ifPresentOrElse(
-                    browserWindowSize -> window.setSize(browserWindowSize.toDimension()),
-                    window::maximize
-                );
+            browserWindowSizeManager.resizeBrowserWindow(
+                    browserWindowSizeProvider.getBrowserWindowSizeFromMeta(webDriverProvider.isRemoteExecution()),
+                    Window::maximize);
         }
     }
 
@@ -57,5 +54,10 @@ public class BrowserWindowSizeListener
     public void setBrowserWindowSizeProvider(IBrowserWindowSizeProvider browserWindowSizeProvider)
     {
         this.browserWindowSizeProvider = browserWindowSizeProvider;
+    }
+
+    public void setBrowserWindowSizeManager(IBrowserWindowSizeManager browserWindowSizeManager)
+    {
+        this.browserWindowSizeManager = browserWindowSizeManager;
     }
 }

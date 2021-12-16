@@ -663,3 +663,26 @@ When I remove all cookies from current domain without applying changes
 ----
 
 include::partial$proxy-steps.adoc[]
+
+=== Window Steps
+==== Resize the current browser window
+
+Step changes the current browser window size to the specified one.
+
+[IMPORTANT]
+Specified browser window size should be smaller than the current screen resolution.
+
+[source,gherkin]
+----
+When I change window size to `$targetSize`
+----
+
+* `$targetSize` - Any browser window size in pixels, e.g. 800x600,
+where first measure is window WIDTH, last measure is its HEIGHT.
+
+.Resize browser window
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I change window size to `640x320`
+----

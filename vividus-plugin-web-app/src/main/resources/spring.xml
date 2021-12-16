@@ -234,6 +234,8 @@
         </constructor-arg>
     </bean>
 
+    <bean id="windowSteps" class="org.vividus.steps.ui.web.WindowSteps" />
+
     <bean id="actionSteps" class="org.vividus.steps.ui.web.ActionSteps" />
 
     <bean id="webUiVividusSetupSteps" class="org.vividus.steps.WebUiVividusSetupSteps">
@@ -254,6 +256,8 @@
         <property name="webDriverProvider" ref="webDriverProvider" />
         <property name="browserWindowSizeProvider" ref="browserWindowSizeProvider" />
     </bean>
+
+    <bean id="browserWindowSizeManager" class="org.vividus.selenium.BrowserWindowSizeManager" />
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.VividusWebDriverFactory">
         <constructor-arg index="0" value="${selenium.grid.enabled}"/>
@@ -334,6 +338,7 @@
         <idref bean="dragAndDropSteps" />
         <idref bean="scrollSteps" />
         <idref bean="performanceSteps" />
+        <idref bean="windowSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">
