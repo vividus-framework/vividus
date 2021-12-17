@@ -8,5 +8,9 @@
 
     <bean class="org.vividus.reportportal.listener.AttachmentListener"/>
 
+    <bean class="org.vividus.reportportal.jbehave.AdaptedReportPortalFormat">
+        <property name="testEntity" value="#{systemProperties['rp.test-entity']}"/>
+    </bean>
+
     <context:component-scan base-package="org.vividus.reportportal.config" />
 </beans>

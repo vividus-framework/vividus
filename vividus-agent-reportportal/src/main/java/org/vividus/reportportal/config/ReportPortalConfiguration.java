@@ -16,45 +16,27 @@
 
 package org.vividus.reportportal.config;
 
-import java.util.List;
-
-import com.epam.reportportal.jbehave.ReportPortalViewGenerator;
-
-import org.jbehave.core.reporters.StoryReporter;
-import org.jbehave.core.reporters.ViewGenerator;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.vividus.ExtendedStoryReporterBuilder;
 import org.vividus.reportportal.config.condition.ReportPortalEnableCondition;
-import org.vividus.reportportal.jbehave.AdaptedReportPortalStoryReporter;
-import org.vividus.reportportal.listener.AssertionFailureListener;
+import org.vividus.reportportal.jbehave.AdaptedReportPortalFormat;
 
 @Conditional(ReportPortalEnableCondition.class)
 @Configuration
 public class ReportPortalConfiguration implements InitializingBean
 {
     @Autowired
-    @Qualifier("storyReporters")
-    private List<StoryReporter> storyReporters;
+    private AdaptedReportPortalFormat adaptedReportPortalFormat;
+
+    @Autowired
+    private ExtendedStoryReporterBuilder storyReporterBuilder;
 
     @Override
     public void afterPropertiesSet()
     {
-        storyReporters.add(new AdaptedReportPortalStoryReporter());
-    }
-
-    @Bean
-    public AssertionFailureListener assertionFailureListener()
-    {
-        return new AssertionFailureListener();
-    }
-
-    @Bean
-    public ViewGenerator reportPortalViewGenerator()
-    {
-        return new ReportPortalViewGenerator();
+        storyReporterBuilder.withFormats(adaptedReportPortalFormat);
     }
 }

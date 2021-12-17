@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,46 +16,28 @@
 
 package org.vividus.reportportal.config;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 
-import java.util.List;
-
-import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
-
-import org.jbehave.core.reporters.StoryReporter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.ExtendedStoryReporterBuilder;
+import org.vividus.reportportal.jbehave.AdaptedReportPortalFormat;
 
 @ExtendWith(MockitoExtension.class)
 class ReportPortalConfigurationTests
 {
-    @Mock
-    private List<StoryReporter> storyReporters;
+    @Mock private ExtendedStoryReporterBuilder storyBuilder;
+    @Mock private AdaptedReportPortalFormat adaptedReportPortalFormat;
 
-    @InjectMocks
-    private ReportPortalConfiguration configuration;
+    @InjectMocks private ReportPortalConfiguration configuration;
 
     @Test
-    void shouldAddReportPortalStoryReporterAfterPropertiesSet()
+    void shouldRegisterReportPortalFormat()
     {
         configuration.afterPropertiesSet();
-        verify(storyReporters).add(isA(ReportPortalStoryReporter.class));
-    }
-
-    @Test
-    void assertionFailureListener()
-    {
-        assertNotNull(configuration.assertionFailureListener());
-    }
-
-    @Test
-    void reportPortalViewGenerator()
-    {
-        assertNotNull(configuration.reportPortalViewGenerator());
+        verify(storyBuilder).withFormats(adaptedReportPortalFormat);
     }
 }
