@@ -28,8 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import com.google.common.eventbus.EventBus;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +52,6 @@ class MobileAppScreenshotTakerTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private TakesScreenshot takesScreenshot;
-    @Mock private EventBus eventBus;
     @Mock private MobileAppAshotFactory ashotFactory;
     @InjectMocks private MobileAppScreenshotTaker screenshotTaker;
 

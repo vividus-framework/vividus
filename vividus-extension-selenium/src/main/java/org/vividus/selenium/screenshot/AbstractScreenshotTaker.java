@@ -27,8 +27,6 @@ import java.util.Optional;
 
 import javax.imageio.ImageIO;
 
-import com.google.common.eventbus.EventBus;
-
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.SearchContext;
@@ -47,19 +45,17 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScreenshotTaker.class);
 
     private final IWebDriverProvider webDriverProvider;
-    private final EventBus eventBus;
     private final IScreenshotFileNameGenerator screenshotFileNameGenerator;
     private final AshotFactory<T> ashotFactory;
     private final ScreenshotDebugger screenshotDebugger;
 
     private File screenshotDirectory;
 
-    protected AbstractScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
+    protected AbstractScreenshotTaker(IWebDriverProvider webDriverProvider,
             IScreenshotFileNameGenerator screenshotFileNameGenerator, AshotFactory<T> ashotFactory,
             ScreenshotDebugger screenshotDebugger)
     {
         this.webDriverProvider = webDriverProvider;
-        this.eventBus = eventBus;
         this.screenshotFileNameGenerator = screenshotFileNameGenerator;
         this.ashotFactory = ashotFactory;
         this.screenshotDebugger = screenshotDebugger;
@@ -96,7 +92,6 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
 
             LOGGER.atInfo().addArgument(screenshotFilePath::toAbsolutePath).log("Screenshot was taken: {}");
 
-            eventBus.post(new ScreenshotTakeEvent(screenshotFilePath));
             return screenshotFilePath;
         }
         return null;
