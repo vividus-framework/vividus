@@ -32,7 +32,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -110,17 +109,6 @@ class AbstractScreenshotTakerTests
     }
 
     @Test
-    void shouldGeneratePathStartingWithScreenshotDirectoryToAScreenshotWithFileName(@TempDir File tempDir)
-            throws IOException
-    {
-        mockScreenshotTaking();
-        String screenshotName = "image";
-        testScreenshotTaker.setScreenshotDirectory(tempDir);
-        when(screenshotFileNameGenerator.generateScreenshotFileName(screenshotName)).thenReturn(IMAGE_PNG);
-        assertEquals(tempDir.toPath().resolve(IMAGE_PNG), testScreenshotTaker.takeScreenshotAsFile(screenshotName));
-    }
-
-    @Test
     void shouldNotPublishEmptyScreenshotData(@TempDir Path path) throws IOException
     {
         testScreenshotTaker.screenshot = new byte[0];
@@ -131,7 +119,6 @@ class AbstractScreenshotTakerTests
     @Test
     void shouldPublishScreenshot(@TempDir Path path) throws IOException
     {
-        testScreenshotTaker.setScreenshotDirectory(path.toFile());
         testScreenshotTaker.screenshot = new byte[1];
         Path screenshotPath = testScreenshotTaker.takeScreenshot(path.resolve(IMAGE_PNG));
         assertTrue(Files.exists(screenshotPath));

@@ -209,25 +209,6 @@ class WebScreenshotTakerTests
     }
 
     @Test
-    void shouldTakeScreenshotAsFile(@TempDir Path tempDir) throws IOException
-    {
-        mockTakeScreenshotWithHighlights();
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(ashotFactory.create(Optional.empty())).thenReturn(ASHOT);
-        when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
-        String fileName = "screenshotName.png";
-        screenshotTaker.setScreenshotDirectory(tempDir.toFile());
-        Path absolutePath = tempDir.resolve(fileName).toAbsolutePath();
-        when(screenshotFileNameGenerator.generateScreenshotFileName(fileName))
-            .thenReturn(fileName);
-        screenshotTaker.takeScreenshotAsFile(fileName);
-        assertTrue(Files.exists(absolutePath));
-        assertThat(testLogger.getLoggingEvents(), equalTo(List.of(
-                info(SCREENSHOT_WAS_TAKEN, absolutePath.toAbsolutePath()))));
-    }
-
-    @Test
     void shouldTakeAShotScreenshotWithCustomConfiguration() throws IOException
     {
         WebScreenshotConfiguration configurationMock = mock(WebScreenshotConfiguration.class);

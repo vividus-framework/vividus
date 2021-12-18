@@ -16,17 +16,27 @@
 
 package org.vividus.steps.ui;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
+
+import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.reporter.event.AttachmentPublishEvent;
+import org.vividus.reporter.model.Attachment;
+import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,24 +44,33 @@ class ScreenshotTakingStepsTests
 {
     private static final String PATH = "path";
 
-    @Mock
-    private ScreenshotTaker screenshotTaker;
-
-    @InjectMocks
-    private ScreenshotTakingSteps screenshotTakingSteps;
+    @Mock private ScreenshotTaker screenshotTaker;
+    @Mock private EventBus eventBus;
+    @InjectMocks private ScreenshotTakingSteps screenshotTakingSteps;
 
     @Test
-    void testWhenITakeScreenshot() throws IOException
+    void testTakeScreenshot()
     {
-        screenshotTakingSteps.whenITakeScreenshot();
-        verify(screenshotTaker).takeScreenshotAsFile("Step_Screenshot");
+        String screenshotName = "Step_Screenshot";
+        byte[] screenshotData = new byte[1];
+        when(screenshotTaker.takeScreenshot(screenshotName))
+                .thenReturn(Optional.of(new Screenshot(screenshotName, screenshotData)));
+        var eventCaptor = ArgumentCaptor.forClass(AttachmentPublishEvent.class);
+        screenshotTakingSteps.takeScreenshot();
+        verify(screenshotTaker).takeScreenshot(screenshotName);
+        verify(eventBus).post(eventCaptor.capture());
+        AttachmentPublishEvent attachmentPublishEvent = eventCaptor.getValue();
+        Attachment attachment = attachmentPublishEvent.getAttachment();
+        assertEquals(screenshotName, attachment.getTitle());
+        assertArrayEquals(screenshotData, attachment.getContent());
+        assertEquals("image/png", attachment.getContentType());
     }
 
     @Test
-    void testWhenITakeScreenshotToPath() throws IOException
+    void testTakeScreenshotToPath() throws IOException
     {
         Path screenshotFilePath = Paths.get(PATH);
-        screenshotTakingSteps.whenITakeScreenshotToPath(screenshotFilePath);
+        screenshotTakingSteps.takeScreenshotToPath(screenshotFilePath);
         verify(screenshotTaker).takeScreenshot(screenshotFilePath);
     }
 }

@@ -18,7 +18,6 @@ package org.vividus.selenium.screenshot;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -49,8 +48,6 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
     private final AshotFactory<T> ashotFactory;
     private final ScreenshotDebugger screenshotDebugger;
 
-    private File screenshotDirectory;
-
     protected AbstractScreenshotTaker(IWebDriverProvider webDriverProvider,
             IScreenshotFileNameGenerator screenshotFileNameGenerator, AshotFactory<T> ashotFactory,
             ScreenshotDebugger screenshotDebugger)
@@ -68,13 +65,6 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
         {
             return ImageIO.read(inputStream);
         }
-    }
-
-    @Override
-    public Path takeScreenshotAsFile(String screenshotName) throws IOException
-    {
-        Path screenshotFilePath = new File(screenshotDirectory, generateScreenshotFileName(screenshotName)).toPath();
-        return takeScreenshot(screenshotFilePath);
     }
 
     @Override
@@ -132,10 +122,5 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
     protected IWebDriverProvider getWebDriverProvider()
     {
         return webDriverProvider;
-    }
-
-    public void setScreenshotDirectory(File screenshotDirectory)
-    {
-        this.screenshotDirectory = screenshotDirectory;
     }
 }

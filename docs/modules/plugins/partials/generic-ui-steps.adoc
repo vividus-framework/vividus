@@ -299,9 +299,7 @@ Then elements located `By.xpath(//span[@id='item-to-purchase'])` are sorted by t
 
 === Take a screenshot
 
-Takes a screenshot and saves it to the default folder defined by the property `ui.screenshots.directory`.
-
-TIP: The full path to the screenshot is posted to the logs and the report.
+Takes a screenshot and publish it to the report.
 
 [source,gherkin]
 ----
@@ -325,7 +323,7 @@ When I take screenshot and save it to folder `$path`
 .Take a screenshot to a path
 [source,gherkin]
 ----
-When I take screenshot to path `${screenshot-directory}/#{generate(Ancient.god)}.png`
+When I take screenshot and save it to folder `${screenshot-directory}/#{generate(Ancient.god)}.png`
 ----
 
 === Scan barcode
