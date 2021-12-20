@@ -19,23 +19,35 @@ package org.vividus.steps.ui;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import javax.inject.Inject;
+import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.annotations.When;
+import org.vividus.reporter.event.AttachmentPublishEvent;
+import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 
 public class ScreenshotTakingSteps
 {
-    @Inject private ScreenshotTaker screenshotTaker;
+    private final ScreenshotTaker screenshotTaker;
+    private final EventBus eventBus;
+
+    public ScreenshotTakingSteps(ScreenshotTaker screenshotTaker, EventBus eventBus)
+    {
+        this.screenshotTaker = screenshotTaker;
+        this.eventBus = eventBus;
+    }
 
     /**
-     * Takes a screenshot and saves it to the default location
-     * @throws IOException If an input or output exception occurred
+     * Takes a screenshot and publish it to the report
      */
     @When("I take screenshot")
-    public void whenITakeScreenshot() throws IOException
+    public void takeScreenshot()
     {
-        screenshotTaker.takeScreenshotAsFile("Step_Screenshot");
+        screenshotTaker.takeScreenshot("Step_Screenshot").ifPresent(screenshot ->
+        {
+            Attachment attachment = new Attachment(screenshot.getData(), screenshot.getFileName(), "image/png");
+            eventBus.post(new AttachmentPublishEvent(attachment));
+        });
     }
 
     /**
@@ -52,7 +64,7 @@ public class ScreenshotTakingSteps
      * @throws IOException If an input or output exception occurred
      */
     @When("I take screenshot and save it to folder `$path`")
-    public void whenITakeScreenshotToPath(Path path) throws IOException
+    public void takeScreenshotToPath(Path path) throws IOException
     {
         screenshotTaker.takeScreenshot(path);
     }

@@ -138,13 +138,7 @@
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />
 
-    <bean class="org.vividus.selenium.screenshot.AbstractScreenshotTaker" id="abstractScreenshotTaker" abstract="true">
-        <property name="screenshotDirectory">
-            <bean class="java.io.File">
-                <constructor-arg value="${ui.screenshot.directory}" />
-            </bean>
-        </property>
-    </bean>
+    <bean class="org.vividus.selenium.screenshot.AbstractScreenshotTaker" id="abstractScreenshotTaker" abstract="true" />
 
     <bean id="abstractAshotFactory" class="org.vividus.selenium.screenshot.AbstractAshotFactory" abstract="true" />
 

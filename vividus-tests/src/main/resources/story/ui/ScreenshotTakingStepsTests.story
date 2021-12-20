@@ -14,6 +14,5 @@ When I execute steps:
 Then `1` is = `#{evalGroovy(return java.nio.file.Path.of('${screenshot-directory}').toFile().listFiles().length - ${numberOfScreenshots})}`
 
 Examples:
-|stepUnderTest                                                                                              |
-|When I take screenshot                                                                                     |
+|stepUnderTest                                                                                              |                                                                                  |
 |When I take screenshot and save it to folder `${screenshot-directory}/#{generate(Number.randomNumber)}.png`|

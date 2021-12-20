@@ -27,7 +27,5 @@ public interface ScreenshotTaker
 
     BufferedImage takeViewportScreenshot() throws IOException;
 
-    Path takeScreenshotAsFile(String screenshotName) throws IOException;
-
     Path takeScreenshot(Path screenshotFilePath) throws IOException;
 }
