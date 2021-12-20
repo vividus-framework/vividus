@@ -16,12 +16,9 @@
 
 package org.vividus.selenium.manager;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.ContextAware;
@@ -31,20 +28,15 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.Rotatable;
 import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverUtil;
 
-import io.appium.java_client.MobileDriver;
-import io.appium.java_client.MobileElement;
 import io.appium.java_client.remote.MobilePlatform;
+import io.appium.java_client.remote.SupportsContextSwitching;
 
 public class GenericWebDriverManager implements IGenericWebDriverManager
 {
-    private static final String DESIRED_CAPABILITIES_KEY = "desired";
-
     private final IWebDriverProvider webDriverProvider;
     private final IWebDriverManagerContext webDriverManagerContext;
 
@@ -60,19 +52,21 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     @Override
     public Dimension getSize()
     {
-        if (isMobile())
+        if (!isMobile())
         {
-            Dimension dimension =
-                    webDriverManagerContext.getParameter(WebDriverManagerParameter.SCREEN_SIZE);
-            if (dimension == null)
-            {
-                dimension = runInNativeContext(this::getSize);
-                webDriverManagerContext.putParameter(WebDriverManagerParameter.SCREEN_SIZE, dimension);
-            }
-            return isOrientation(ScreenOrientation.LANDSCAPE) ? new Dimension(dimension.height, dimension.width)
-                    : dimension;
+            return getSize(webDriverProvider.get());
         }
-        return getSize(getWebDriver());
+        Dimension screenSize = webDriverManagerContext.getParameter(WebDriverManagerParameter.SCREEN_SIZE);
+        if (screenSize == null)
+        {
+            screenSize = runInNativeContext(this::getSize);
+            if (getUnwrappedDriver(Rotatable.class).getOrientation() == ScreenOrientation.LANDSCAPE)
+            {
+                screenSize = new Dimension(screenSize.height, screenSize.width);
+            }
+            webDriverManagerContext.putParameter(WebDriverManagerParameter.SCREEN_SIZE, screenSize);
+        }
+        return screenSize;
     }
 
     @Override
@@ -93,24 +87,23 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     {
         if (isMobile())
         {
-            @SuppressWarnings("unchecked")
-            MobileDriver<MobileElement> mobileDriver = webDriverProvider.getUnwrapped(MobileDriver.class);
-            String originalContext = mobileDriver.getContext();
+            SupportsContextSwitching contextSwitchingDriver = getUnwrappedDriver(SupportsContextSwitching.class);
+            String originalContext = contextSwitchingDriver.getContext();
             if (!NATIVE_APP_CONTEXT.equals(originalContext))
             {
-                switchToContext(mobileDriver, NATIVE_APP_CONTEXT);
+                switchToContext(contextSwitchingDriver, NATIVE_APP_CONTEXT);
                 try
                 {
-                    return function.apply(mobileDriver);
+                    return function.apply(contextSwitchingDriver);
                 }
                 finally
                 {
-                    switchToContext(mobileDriver, originalContext);
+                    switchToContext(contextSwitchingDriver, originalContext);
                 }
             }
-            return function.apply(mobileDriver);
+            return function.apply(contextSwitchingDriver);
         }
-        return function.apply(getWebDriver());
+        return function.apply(webDriverProvider.get());
     }
 
     private void switchToContext(ContextAware contextAwareDriver, String contextName)
@@ -128,11 +121,7 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     @Override
     public boolean isMobile()
     {
-        return isMobile(getCapabilities());
-    }
-
-    protected static boolean isMobile(Capabilities capabilities)
-    {
+        Capabilities capabilities = getCapabilities();
         return isIOS(capabilities) || isAndroid(capabilities);
     }
 
@@ -144,8 +133,7 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
 
     public static boolean isIOS(Capabilities capabilities)
     {
-        return isPlatformName(capabilities, MobilePlatform.IOS)
-                || isBrowserAnyOf(capabilities, BrowserType.IPHONE, BrowserType.IPAD);
+        return isPlatformName(capabilities, MobilePlatform.IOS);
     }
 
     @Override
@@ -165,35 +153,9 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         return isAndroid(getCapabilities());
     }
 
-    @SuppressWarnings("unchecked")
     public static boolean isAndroid(Capabilities capabilities)
     {
-        return checkCapabilities(capabilities, () ->
-        {
-            Capabilities capabilitiesToCheck = capabilities;
-            Object desiredCapabilities = capabilitiesToCheck.getCapability(DESIRED_CAPABILITIES_KEY);
-            if (desiredCapabilities instanceof Map<?, ?>)
-            {
-                capabilitiesToCheck = new DesiredCapabilities((Map<String, ?>) desiredCapabilities);
-            }
-            return isPlatformName(capabilities, MobilePlatform.ANDROID)
-                    || isBrowserAnyOf(capabilitiesToCheck, BrowserType.ANDROID);
-        });
-    }
-
-    @Override
-    public boolean isBrowserAnyOf(String... browserTypes)
-    {
-        return isBrowserAnyOf(getCapabilities(), browserTypes);
-    }
-
-    protected static boolean isBrowserAnyOf(Capabilities capabilities, String... browserNames)
-    {
-        return checkCapabilities(capabilities, () ->
-        {
-            String capabilitiesBrowserName = capabilities.getBrowserName();
-            return Stream.of(browserNames).anyMatch(name -> name.equalsIgnoreCase(capabilitiesBrowserName));
-        });
+        return isPlatformName(capabilities, MobilePlatform.ANDROID);
     }
 
     private static boolean isPlatformName(Capabilities capabilities, String platformName)
@@ -229,7 +191,7 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     @Override
     public Capabilities getCapabilities()
     {
-        return getCapabilities(getWebDriver());
+        return getCapabilities(webDriverProvider.get());
     }
 
     protected static Capabilities getCapabilities(WebDriver webDriver)
@@ -237,42 +199,14 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         return WebDriverUtil.unwrap(webDriver, HasCapabilities.class).getCapabilities();
     }
 
-    @Override
-    public Set<String> getWindowHandles()
-    {
-        return getWebDriver().getWindowHandles();
-    }
-
-    @Override
-    public boolean isOrientation(ScreenOrientation orientation)
-    {
-        if (isMobile())
-        {
-            ScreenOrientation screenOrientation =
-                    webDriverManagerContext.getParameter(WebDriverManagerParameter.ORIENTATION);
-            if (screenOrientation == null)
-            {
-                screenOrientation = webDriverProvider.getUnwrapped(Rotatable.class).getOrientation();
-                webDriverManagerContext.putParameter(WebDriverManagerParameter.ORIENTATION, screenOrientation);
-            }
-            return orientation == screenOrientation;
-        }
-        return false;
-    }
-
-    private static boolean checkCapabilities(Capabilities capabilities, BooleanSupplier supplier)
+    protected static boolean checkCapabilities(Capabilities capabilities, BooleanSupplier supplier)
     {
         return capabilities != null && supplier.getAsBoolean();
     }
 
-    protected WebDriver getWebDriver()
+    protected <T> T getUnwrappedDriver(Class<T> clazz)
     {
-        return webDriverProvider.get();
-    }
-
-    protected IWebDriverProvider getWebDriverProvider()
-    {
-        return webDriverProvider;
+        return webDriverProvider.getUnwrapped(clazz);
     }
 
     public void setMobileApp(boolean mobileApp)

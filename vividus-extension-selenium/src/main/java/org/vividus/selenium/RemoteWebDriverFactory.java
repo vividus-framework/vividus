@@ -32,11 +32,11 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
     {
         if (GenericWebDriverManager.isIOS(capabilities) || GenericWebDriverManager.isTvOS(capabilities))
         {
-            return new IOSDriver<>(url, capabilities);
+            return new IOSDriver(url, capabilities);
         }
         else if (GenericWebDriverManager.isAndroid(capabilities))
         {
-            return new AndroidDriver<>(url, capabilities);
+            return new AndroidDriver(url, capabilities);
         }
         return new RemoteWebDriver(url, capabilities);
     }

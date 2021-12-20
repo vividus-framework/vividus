@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.util.ResourceUtils;
 
@@ -315,6 +315,6 @@ class WebJavascriptActionsTests
 
     private void mockIsFirefox(boolean firefox)
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.FIREFOX)).thenReturn(firefox);
+        when(webDriverManager.isBrowserAnyOf(Browser.FIREFOX)).thenReturn(firefox);
     }
 }

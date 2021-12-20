@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.vividus.ui.web.action.storage;
 import javax.inject.Inject;
 
 import org.openqa.selenium.html5.LocalStorage;
+import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteExecuteMethod;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.html5.RemoteLocalStorage;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
@@ -38,7 +38,7 @@ class LocalStorageProvider implements ILocalStorageProvider
     public LocalStorage getLocalStorage()
     {
         RemoteWebDriver driver = webDriverProvider.getUnwrapped(RemoteWebDriver.class);
-        if (!webDriverManager.isTypeAnyOf(WebDriverType.SAFARI) && isWebStorageEnabled(driver))
+        if (!webDriverManager.isBrowserAnyOf(Browser.SAFARI) && isWebStorageEnabled(driver))
         {
             return new RemoteLocalStorage(new RemoteExecuteMethod(driver));
         }

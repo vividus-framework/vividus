@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,11 @@
 
 package org.vividus.selenium.manager;
 
-import org.openqa.selenium.WebDriver;
-import org.vividus.selenium.BrowserWindowSize;
-import org.vividus.selenium.WebDriverType;
+import org.openqa.selenium.remote.Browser;
 
 public interface IWebDriverManager extends IGenericWebDriverManager
 {
-    void resize(BrowserWindowSize browserWindowSize);
-
-    void resize(WebDriver webDriver, BrowserWindowSize browserWindowSize);
-
     boolean isElectronApp();
 
-    boolean isTypeAnyOf(WebDriverType... webDriverTypes);
-
-    WebDriverType detectType();
+    boolean isBrowserAnyOf(Browser... browsers);
 }

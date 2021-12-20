@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,9 @@ package org.vividus.selenium.manager;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.Window;
-import org.vividus.selenium.BrowserWindowSize;
+import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
-import org.vividus.selenium.WebDriverUtil;
 
 public class WebDriverManager extends GenericWebDriverManager implements IWebDriverManager
 {
@@ -37,56 +33,25 @@ public class WebDriverManager extends GenericWebDriverManager implements IWebDri
     }
 
     @Override
-    public void resize(BrowserWindowSize browserWindowSize)
+    public boolean isBrowserAnyOf(Browser... browsers)
     {
-        if (isElectronApp())
-        {
-            return;
-        }
-        WebDriver webDriver = getWebDriver();
-        resize(webDriver, browserWindowSize);
+        return isBrowserAnyOf(getCapabilities(), browsers);
     }
 
-    @Override
-    public void resize(WebDriver webDriver, BrowserWindowSize browserWindowSize)
+    public static boolean isBrowserAnyOf(WebDriver webDriver, Browser... browsers)
     {
-        if (isElectronApp() || isMobile(WebDriverUtil.unwrap(webDriver, HasCapabilities.class).getCapabilities()))
-        {
-            return;
-        }
-        Window window = webDriver.manage().window();
-        if (browserWindowSize == null)
-        {
-            window.maximize();
-        }
-        else
-        {
-            window.setSize(browserWindowSize.toDimension());
-        }
+        return isBrowserAnyOf(getCapabilities(webDriver), browsers);
     }
 
-    @Override
-    public boolean isTypeAnyOf(WebDriverType... webDriverTypes)
+    private static boolean isBrowserAnyOf(Capabilities capabilities, Browser... browsers)
     {
-        return isTypeAnyOf(getWebDriver(), webDriverTypes);
+        return checkCapabilities(capabilities,
+                () -> Stream.of(browsers).anyMatch(browser -> isBrowser(capabilities, browser)));
     }
 
-    public static boolean isTypeAnyOf(WebDriver webDriver, WebDriverType... webDriverTypes)
+    public static boolean isBrowser(Capabilities capabilities, Browser browser)
     {
-        Capabilities capabilities = getCapabilities(webDriver);
-        return Stream.of(webDriverTypes).anyMatch(type -> isBrowserAnyOf(capabilities, type.getBrowserNames()));
-    }
-
-    @Override
-    public WebDriverType detectType()
-    {
-        return detectType(getCapabilities());
-    }
-
-    public static WebDriverType detectType(Capabilities capabilities)
-    {
-        return Stream.of(WebDriverType.values()).filter(type -> isBrowserAnyOf(capabilities, type.getBrowserNames()))
-                .findFirst().orElse(null);
+        return browser.browserName().equalsIgnoreCase(capabilities.getBrowserName());
     }
 
     @Override

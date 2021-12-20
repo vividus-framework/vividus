@@ -34,10 +34,10 @@ class AppiumLocatorTypeTests
 
     @ParameterizedTest
     @CsvSource({
-            "By.xpath:          , XPATH           ",
-            "By.AccessibilityId:, ACCESSIBILITY_ID",
-            "By.IosClassChain:  , IOS_CLASS_CHAIN ",
-            "By.id:             , ID              "
+            "By.xpath:,                 XPATH",
+            "AppiumBy.accessibilityId:, ACCESSIBILITY_ID",
+            "AppiumBy.iOSClassChain:,   IOS_CLASS_CHAIN",
+            "By.id:,                    ID"
     })
     void shouldBuildBy(String prefix, AppiumLocatorType locatorType)
     {

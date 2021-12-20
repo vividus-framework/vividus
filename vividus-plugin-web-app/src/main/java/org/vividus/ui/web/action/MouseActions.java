@@ -31,9 +31,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
+import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
@@ -93,7 +93,7 @@ public class MouseActions implements IMouseActions
         {
             try
             {
-                if (webDriverManager.isTypeAnyOf(WebDriverType.CHROME)
+                if (webDriverManager.isBrowserAnyOf(Browser.CHROME)
                         && message.contains(". Other element would receive the click"))
                 {
                     javascriptActions.click(element);
@@ -196,8 +196,7 @@ public class MouseActions implements IMouseActions
         if (element != null)
         {
             // Safari and Firefox Drivers don't scroll to element before moveTo action
-            if (webDriverManager.isMobile()
-                    || webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.FIREFOX))
+            if (webDriverManager.isMobile() || webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.FIREFOX))
             {
                 javascriptActions.scrollIntoView(element, true);
             }

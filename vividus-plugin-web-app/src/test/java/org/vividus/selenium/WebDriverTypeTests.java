@@ -80,7 +80,7 @@ class WebDriverTypeTests
     {
         String argument = "headless";
         WebDriverConfiguration configuration = new WebDriverConfiguration();
-        configuration.setCommandLineArguments(new String[] { argument });
+        configuration.setCommandLineArguments(argument);
         FirefoxOptions expected = new FirefoxOptions();
         expected.addArguments(argument);
         testGetFirefoxWebDriver(configuration, expected);

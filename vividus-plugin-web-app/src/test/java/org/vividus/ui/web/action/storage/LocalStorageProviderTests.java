@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,24 +27,19 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.html5.LocalStorage;
+import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.html5.RemoteLocalStorage;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 
 @ExtendWith(MockitoExtension.class)
 class LocalStorageProviderTests
 {
-    @Mock
-    private IWebDriverManager webDriverManager;
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @InjectMocks
-    private LocalStorageProvider localStorageProvider;
+    @Mock private IWebDriverManager webDriverManager;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @InjectMocks private LocalStorageProvider localStorageProvider;
 
     @Test
     void testGetLocalStorageLocalStorageEnabledIfSafariDriver()
@@ -87,7 +82,7 @@ class LocalStorageProviderTests
     {
         RemoteWebDriver driver = mock(RemoteWebDriver.class);
         Mockito.lenient().when(webDriverProvider.getUnwrapped(RemoteWebDriver.class)).thenReturn(driver);
-        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(safariDriver);
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(safariDriver);
         Capabilities capabilities = mock(Capabilities.class);
         Mockito.lenient().when(driver.getCapabilities()).thenReturn(capabilities);
         Mockito.lenient().when(capabilities.getCapability(CapabilityType.SUPPORTS_WEB_STORAGE))

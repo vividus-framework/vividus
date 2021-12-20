@@ -22,7 +22,7 @@ import org.vividus.ui.action.search.GenericTextFilter;
 import org.vividus.ui.action.search.IElementAction;
 import org.vividus.ui.action.search.LocatorType;
 
-import io.appium.java_client.MobileBy;
+import io.appium.java_client.AppiumBy;
 
 public enum AppiumLocatorType implements LocatorType
 {
@@ -39,7 +39,7 @@ public enum AppiumLocatorType implements LocatorType
         @Override
         public By buildBy(String value)
         {
-            return MobileBy.AccessibilityId(value);
+            return AppiumBy.accessibilityId(value);
         }
     },
     IOS_CLASS_CHAIN("iOS Class Chain", ByLocatorSearch.class)
@@ -47,7 +47,7 @@ public enum AppiumLocatorType implements LocatorType
         @Override
         public By buildBy(String value)
         {
-            return MobileBy.iOSClassChain(value);
+            return AppiumBy.iOSClassChain(value);
         }
     },
     ID("Id", ByLocatorSearch.class)

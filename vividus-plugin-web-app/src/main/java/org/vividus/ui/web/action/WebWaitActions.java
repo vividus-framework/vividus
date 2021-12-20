@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import javax.inject.Inject;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.action.WaitActions;
 
@@ -49,12 +49,12 @@ public class WebWaitActions extends WaitActions implements IWebWaitActions
     {
         if (!alertActions.isAlertPresent(webDriver) && !webDriverManager.isElectronApp())
         {
-            boolean iexplore = webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE);
+            boolean internetExplorer = webDriverManager.isBrowserAnyOf(Browser.IE);
             /*
              * Workaround for ChromeDriver. Waits for the specified timeout for the page to start reloading.
              */
-            if ((webDriverManager.isTypeAnyOf(WebDriverType.CHROME) || webDriverManager.isIOS())
-                    && checkDocumentReadyState(webDriver, iexplore))
+            if ((webDriverManager.isBrowserAnyOf(Browser.CHROME) || webDriverManager.isIOS())
+                    && checkDocumentReadyState(webDriver, internetExplorer))
             {
                 sleepForTimeout(pageStartsToLoadTimeout);
             }
@@ -63,7 +63,7 @@ public class WebWaitActions extends WaitActions implements IWebWaitActions
                 @Override
                 public Boolean apply(WebDriver webDriver)
                 {
-                    return checkDocumentReadyState(webDriver, iexplore);
+                    return checkDocumentReadyState(webDriver, internetExplorer);
                 }
 
                 @Override

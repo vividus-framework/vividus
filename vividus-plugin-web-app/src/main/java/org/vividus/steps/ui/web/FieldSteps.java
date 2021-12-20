@@ -24,6 +24,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.Browser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.monitor.TakeScreenshotOnFailure;
@@ -143,8 +144,7 @@ public class FieldSteps
             String normalizedText = FormatUtil.normalizeLineEndings(text);
             element.clear();
             LOGGER.info("Entering text \"{}\" in element", normalizedText);
-            if (webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)
-                    && webElementActions.isElementContenteditable(element))
+            if (webDriverManager.isBrowserAnyOf(Browser.SAFARI) && webElementActions.isElementContenteditable(element))
             {
                 javascriptActions.executeScript("var element = arguments[0];element.innerHTML = arguments[1];", element,
                         normalizedText);
@@ -174,7 +174,7 @@ public class FieldSteps
     private void applyWorkaroundIfIE(WebElement element, String normalizedText)
     {
         // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
-        if (webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE) && Boolean.TRUE.equals(
+        if (webDriverManager.isBrowserAnyOf(Browser.IE) && Boolean.TRUE.equals(
                 ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(WebDriverType.IE_OPTIONS))
                         .get("requireWindowFocus")))
         {

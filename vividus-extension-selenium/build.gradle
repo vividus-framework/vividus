@@ -1,7 +1,7 @@
 project.description = 'Vividus extension for selenium'
 
  ext {
-     seleniumVersion = '3.141.59'
+     seleniumVersion = '4.1.1'
      browserupProxyVersion = '2.1.2'
 }
 
@@ -16,7 +16,7 @@ project.description = 'Vividus extension for selenium'
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: seleniumVersion)
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: seleniumVersion)
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: seleniumVersion)
-     api(group: 'io.appium', name: 'java-client', version: '7.6.0')
+     api(group: 'com.github.appium', name: 'java-client', version: 'a43064d49e')
 
      api(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: versions.ashot)
 
