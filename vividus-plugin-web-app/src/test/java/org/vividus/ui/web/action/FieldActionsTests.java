@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ class FieldActionsTests
     void testSelectItemInDDLSelectPresentOptionDoesntExist()
     {
         when(webElement.getTagName()).thenReturn(SELECT);
-        when(webElement.getAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
+        when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
         Select select = new Select(webElement);
         addOptionsToSelect(select, "anotherOne");
         fieldActions.selectItemInDropDownList(select, TEXT, false);
@@ -151,7 +151,7 @@ class FieldActionsTests
     void testSelectItemInDDLSingleSelectAdditable()
     {
         when(webElement.getTagName()).thenReturn(SELECT);
-        when(webElement.getAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
+        when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
         Select select = new Select(webElement);
         fieldActions.selectItemInDropDownList(select, TEXT, true);
         verifyNoMoreInteractions(waitActions);
@@ -176,7 +176,7 @@ class FieldActionsTests
     {
         when(webElement.getTagName()).thenReturn(SELECT);
         when(webElement.getAttribute(INDEX)).thenReturn("0");
-        when(webElement.getAttribute(MULTIPLE)).thenReturn(Boolean.toString(isMultiple));
+        when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(isMultiple));
         return new Select(webElement);
     }
 

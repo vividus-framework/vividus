@@ -17,18 +17,13 @@
 package org.vividus.selenium.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.lenient;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -37,163 +32,65 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.Options;
-import org.openqa.selenium.WebDriver.Window;
-import org.openqa.selenium.remote.BrowserType;
-import org.vividus.selenium.BrowserWindowSize;
+import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
 
 @ExtendWith(MockitoExtension.class)
 class WebDriverManagerTests
 {
-    private static final String BROWSER_TYPE = "browser type";
+    @Mock private IWebDriverProvider webDriverProvider;
+    @InjectMocks private WebDriverManager webDriverManager;
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @InjectMocks
-    private WebDriverManager webDriverManager;
-
-    private WebDriver mockWebDriverHavingCapabilities()
+    static Stream<Arguments> browserChecks()
     {
-        WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
+        return Stream.of(
+                arguments(Browser.FIREFOX,  Browser.FIREFOX, true),
+                arguments(Browser.CHROME,   Browser.CHROME,  true),
+                arguments(Browser.EDGE,     Browser.EDGE,    true),
+                arguments(Browser.IE,       Browser.EDGE,    false),
+                arguments(Browser.HTMLUNIT, Browser.SAFARI,  false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("browserChecks")
+    void testIsBrowserAnyOf(Browser browserInCapabilities, Browser browserToCheck, boolean expected)
+    {
+        WebDriver webDriver = mockDriverWithBrowserCapability(browserInCapabilities);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        return webDriver;
-    }
-
-    private WebDriver mockWebDriverHavingCapabilities(Map<String, Object> capabilities)
-    {
-        Capabilities capabilitiesMock = mock(Capabilities.class);
-        capabilities.forEach((capabilityType, capabilityValue) ->
-                setCapabilities(capabilitiesMock, capabilityType, capabilityValue));
-
-        WebDriver webDriver = mockWebDriverHavingCapabilities();
-        when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilitiesMock);
-        return webDriver;
-    }
-
-    private void setCapabilities(Capabilities capabilitiesMock, String capabilityType, Object capabilityValue)
-    {
-        if (BROWSER_TYPE.equals(capabilityType))
-        {
-            when(capabilitiesMock.getBrowserName()).thenReturn((String) capabilityValue);
-        }
-        else
-        {
-            lenient().when(capabilitiesMock.getCapability(capabilityType)).thenReturn(capabilityValue);
-        }
-    }
-
-    private Options mockOptions(WebDriver webDriver)
-    {
-        Options options = mock(Options.class);
-        when(webDriver.manage()).thenReturn(options);
-        return options;
-    }
-
-    @Test
-    void testResizeWebDriverWithDesiredBrowserSize()
-    {
-        WebDriver webDriver = mockWebDriverHavingCapabilities(Map.of());
-        BrowserWindowSize browserWindowSize = mock(BrowserWindowSize.class);
-        Window window = mock(Window.class);
-        when(mockOptions(webDriver).window()).thenReturn(window);
-        Dimension dimension = mock(Dimension.class);
-        when(browserWindowSize.toDimension()).thenReturn(dimension);
-        webDriverManager.resize(browserWindowSize);
-        verify(window).setSize(dimension);
-    }
-
-    @Test
-    void testResizeWebDriverWithNullBrowserSize()
-    {
-        WebDriver webDriver = mockWebDriverHavingCapabilities();
-        Window window = mock(Window.class);
-        when(mockOptions(webDriver).window()).thenReturn(window);
-        webDriverManager.resize(null);
-        verify(window).maximize();
-    }
-
-    @Test
-    void testResizeWebDriverDesiredBrowserSizeMobile()
-    {
-        WebDriver webDriver = mockWebDriverHavingCapabilities(Map.of(BROWSER_TYPE, BrowserType.ANDROID));
-        BrowserWindowSize browserWindowSize = mock(BrowserWindowSize.class);
-        webDriverManager.resize(browserWindowSize);
-        verify(webDriver, never()).manage();
-    }
-
-    @Test
-    void shouldNotResizeElectronApps()
-    {
-        webDriverManager.setElectronApp(true);
-        WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
-        BrowserWindowSize browserWindowSize = mock(BrowserWindowSize.class);
-        webDriverManager.resize(browserWindowSize);
-        verify(webDriver, never()).manage();
-        verifyNoInteractions(webDriverProvider);
-    }
-
-    @Test
-    void shouldNotResizeWindowSizeForElectronApps()
-    {
-        webDriverManager.setElectronApp(true);
-        WebDriver webDriver = mock(WebDriver.class);
-        BrowserWindowSize browserWindowSize = mock(BrowserWindowSize.class);
-        webDriverManager.resize(webDriver, browserWindowSize);
-        verify(webDriver, never()).manage();
-    }
-
-    // CHECKSTYLE:OFF
-    static Stream<Arguments> webDriverTypeChecks()
-    {
-        return Stream.of(
-            Arguments.of(BrowserType.FIREFOX,         WebDriverType.FIREFOX,      true   ),
-            Arguments.of(BrowserType.FIREFOX_CHROME,  WebDriverType.FIREFOX,      false  ),
-            Arguments.of(BrowserType.CHROME,          WebDriverType.CHROME,       true   ),
-            Arguments.of(BrowserType.FIREFOX_CHROME,  WebDriverType.CHROME,       false  ),
-            Arguments.of(BrowserType.IEXPLORE,        WebDriverType.IEXPLORE,     true   ),
-            Arguments.of(BrowserType.IE_HTA,          WebDriverType.IEXPLORE,     false  ),
-            Arguments.of(BrowserType.SAFARI,          WebDriverType.SAFARI,       true   ),
-            Arguments.of(BrowserType.SAFARI_PROXY,    WebDriverType.SAFARI,       true   ),
-            Arguments.of(BrowserType.IPHONE,          WebDriverType.SAFARI,       false  )
-        );
-    }
-
-    static Stream<Arguments> webDriverTypeDetections()
-    {
-        return Stream.of(
-            Arguments.of(BrowserType.FIREFOX,         WebDriverType.FIREFOX   ),
-            Arguments.of(BrowserType.FIREFOX_CHROME,  null                    ),
-            Arguments.of(BrowserType.CHROME,          WebDriverType.CHROME    ),
-            Arguments.of(BrowserType.FIREFOX_CHROME,  null                    ),
-            Arguments.of(BrowserType.IE,              WebDriverType.IEXPLORE  ),
-            Arguments.of(BrowserType.IEXPLORE,        WebDriverType.IEXPLORE  ),
-            Arguments.of(BrowserType.IE_HTA,          null                    ),
-            Arguments.of(BrowserType.SAFARI,          WebDriverType.SAFARI    ),
-            Arguments.of(BrowserType.SAFARI_PROXY,    WebDriverType.SAFARI    ),
-            Arguments.of(BrowserType.IPHONE,          null                    )
-        );
-    }
-    // CHECKSTYLE:ON
-
-    @ParameterizedTest
-    @MethodSource("webDriverTypeChecks")
-    void testIsTypeAnyOf(String browserName, WebDriverType webDriverType, boolean result)
-    {
-        mockWebDriverHavingCapabilities(Map.of(BROWSER_TYPE, browserName));
-        assertEquals(result, webDriverManager.isTypeAnyOf(webDriverType));
+        assertEquals(expected, webDriverManager.isBrowserAnyOf(browserToCheck));
     }
 
     @ParameterizedTest
-    @MethodSource("webDriverTypeDetections")
-    void testDetectType(String browserName, WebDriverType webDriverType)
+    @MethodSource("browserChecks")
+    void testIsWebDriverBrowserAnyOf(Browser browserInCapabilities, Browser browserToCheck, boolean expected)
     {
-        mockWebDriverHavingCapabilities(Map.of(BROWSER_TYPE, browserName));
-        assertEquals(webDriverType, webDriverManager.detectType());
+        WebDriver webDriver = mockDriverWithBrowserCapability(browserInCapabilities);
+        assertEquals(expected, WebDriverManager.isBrowserAnyOf(webDriver, browserToCheck));
+    }
+
+    @ParameterizedTest
+    @MethodSource("browserChecks")
+    void testIsBrowser(Browser browserInCapabilities, Browser browserToCheck, boolean expected)
+    {
+        Capabilities capabilities = mockCapabilitiesWithBrowser(browserInCapabilities);
+        assertEquals(expected, WebDriverManager.isBrowser(capabilities, browserToCheck));
+    }
+
+    private Capabilities mockCapabilitiesWithBrowser(Browser browserInCapabilities)
+    {
+        var capabilities = mock(Capabilities.class);
+        when(capabilities.getBrowserName()).thenReturn(browserInCapabilities.browserName());
+        return capabilities;
+    }
+
+    private WebDriver mockDriverWithBrowserCapability(Browser browserInCapabilities)
+    {
+        Capabilities capabilities = mockCapabilitiesWithBrowser(browserInCapabilities);
+        var webDriver = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
+        when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilities);
+        return webDriver;
     }
 }

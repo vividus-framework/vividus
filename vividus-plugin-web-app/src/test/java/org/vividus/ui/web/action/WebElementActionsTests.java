@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.WebDriverType;
+import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.util.FormatUtil;
 
@@ -208,7 +208,7 @@ class WebElementActionsTests
     @Test
     void testAddTextSafariOrIExploreContenteditableRichText()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.IEXPLORE)).thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)).thenReturn(true);
         when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(TRUE);
         when(webElement.findElements(RICH_TEXT_EDITOR_LOCATOR)).thenReturn(List.of(webElement));
         webElementActions.addText(webElement, TEXT);
@@ -218,7 +218,7 @@ class WebElementActionsTests
     @Test
     void testAddTextSafariOrIExploreNotContextEditableNotRichText()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.IEXPLORE)).thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)).thenReturn(true);
         webElementActions.addText(webElement, TEXT);
         InOrder inOrder = verifyWebElementInOrderInvocation();
         inOrder.verify(webElement).sendKeys(TEXT);
@@ -228,7 +228,7 @@ class WebElementActionsTests
     @Test
     void testAddTextSafariOrIExploreRichTextNotEditable()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.IEXPLORE)).thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)).thenReturn(true);
         when(webElement.findElements(RICH_TEXT_EDITOR_LOCATOR)).thenReturn(List.of(webElement));
         webElementActions.addText(webElement, TEXT);
         InOrder inOrder = verifyWebElementInOrderInvocation();
@@ -239,7 +239,7 @@ class WebElementActionsTests
     @Test
     void testAddTextNotSafari()
     {
-        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI)).thenReturn(false);
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
         webElementActions.addText(webElement, TEXT);
         verifyNoInteractions(javascriptActions);
         verify(webElement).sendKeys(TEXT);

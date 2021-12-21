@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.GenericWebDriverManager;
+
+import io.appium.java_client.PushesFiles;
 
 @ExtendWith(MockitoExtension.class)
 class DeviceActionsTests
@@ -38,38 +38,18 @@ class DeviceActionsTests
     private static final byte[] RESOURCE_BODY = { 79, 105, 107, 75 };
 
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private GenericWebDriverManager genericWebDriverManager;
     @InjectMocks private DeviceActions deviceActions;
 
-    @AfterEach
-    void afterEach()
-    {
-        verifyNoMoreInteractions(webDriverProvider, genericWebDriverManager);
-    }
-
     @Test
-    void shouldPushFileOntoAndroidDevice()
+    void shouldPushFile()
     {
-        io.appium.java_client.android.PushesFiles pushFiles = mock(io.appium.java_client.android.PushesFiles.class);
+        var pushingFilesDriver = mock(PushesFiles.class);
 
-        when(genericWebDriverManager.isAndroidNativeApp()).thenReturn(true);
-        when(webDriverProvider.getUnwrapped(io.appium.java_client.android.PushesFiles.class)).thenReturn(pushFiles);
+        when(webDriverProvider.getUnwrapped(PushesFiles.class)).thenReturn(pushingFilesDriver);
 
         deviceActions.pushFile(DEVICE_FILE_PATH, RESOURCE_PATH);
 
-        verify(pushFiles).pushFile(DEVICE_FILE_PATH, RESOURCE_BODY);
-    }
-
-    @Test
-    void shouldPushFileOntoIOSDevice()
-    {
-        io.appium.java_client.ios.PushesFiles pushFiles = mock(io.appium.java_client.ios.PushesFiles.class);
-
-        when(genericWebDriverManager.isAndroidNativeApp()).thenReturn(false);
-        when(webDriverProvider.getUnwrapped(io.appium.java_client.ios.PushesFiles.class)).thenReturn(pushFiles);
-
-        deviceActions.pushFile(DEVICE_FILE_PATH, RESOURCE_PATH);
-
-        verify(pushFiles).pushFile(DEVICE_FILE_PATH, RESOURCE_BODY);
+        verify(pushingFilesDriver).pushFile(DEVICE_FILE_PATH, RESOURCE_BODY);
+        verifyNoMoreInteractions(webDriverProvider);
     }
 }

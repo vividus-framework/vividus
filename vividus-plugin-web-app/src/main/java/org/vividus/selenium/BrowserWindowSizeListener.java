@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.vividus.selenium;
 
+import java.util.Optional;
+
 import com.google.common.eventbus.Subscribe;
 
+import org.openqa.selenium.WebDriver.Window;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.manager.IWebDriverManager;
 
@@ -30,7 +33,15 @@ public class BrowserWindowSizeListener
     @Subscribe
     public void onWebDriverCreate(WebDriverCreateEvent event)
     {
-        webDriverManager.resize(browserWindowSizeProvider.getBrowserWindowSize(webDriverProvider.isRemoteExecution()));
+        if (!webDriverManager.isElectronApp() && !webDriverManager.isMobile())
+        {
+            Window window = webDriverProvider.get().manage().window();
+            Optional.ofNullable(browserWindowSizeProvider.getBrowserWindowSize(webDriverProvider.isRemoteExecution()))
+                .ifPresentOrElse(
+                    browserWindowSize -> window.setSize(browserWindowSize.toDimension()),
+                    window::maximize
+                );
+        }
     }
 
     public void setWebDriverManager(IWebDriverManager webDriverManager)

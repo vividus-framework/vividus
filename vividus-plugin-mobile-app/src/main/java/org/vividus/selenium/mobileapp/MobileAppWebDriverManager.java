@@ -32,12 +32,13 @@ import com.google.common.base.Suppliers;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.ui.action.JavascriptActions;
 
-import io.appium.java_client.HasSessionDetails;
+import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.android.HasAndroidDeviceDetails;
 
 public class MobileAppWebDriverManager extends GenericWebDriverManager
@@ -52,6 +53,14 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     {
         super(webDriverProvider, webDriverManagerContext);
         this.javascriptActions = javascriptActions;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getSessionDetail(String detail)
+    {
+        Response response = getUnwrappedDriver(ExecutesMethod.class).execute("getSession");
+        Map<String, Object> sessionDetails = (Map<String, Object>) response.getValue();
+        return (T) sessionDetails.get(detail);
     }
 
     @SuppressWarnings("unchecked")
@@ -86,7 +95,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     {
         try
         {
-            HasAndroidDeviceDetails details = getWebDriverProvider().getUnwrapped(HasAndroidDeviceDetails.class);
+            HasAndroidDeviceDetails details = getUnwrappedDriver(HasAndroidDeviceDetails.class);
             return Optional.ofNullable(details.getSystemBars())
                            .map(b -> b.get("statusBar"))
                            .map(sb -> sb.get(HEIGHT))
@@ -110,8 +119,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
     private float calculateDpr()
     {
-        byte[] imageBytes = getWebDriverProvider().getUnwrapped(TakesScreenshot.class)
-                .getScreenshotAs(OutputType.BYTES);
+        byte[] imageBytes = getUnwrappedDriver(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
         try (InputStream is = new ByteArrayInputStream(imageBytes))
         {
             BufferedImage image = ImageIO.read(is);
@@ -125,7 +133,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
     private int getStatBarHeight()
     {
-        HasSessionDetails details = getWebDriverProvider().getUnwrapped(HasSessionDetails.class);
-        return ((Long) details.getSessionDetail("statBarHeight")).intValue();
+        Long statBarHeight = getSessionDetail("statBarHeight");
+        return statBarHeight.intValue();
     }
 }

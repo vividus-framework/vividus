@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,17 @@ package org.vividus.mobileapp.action;
 import java.util.Base64;
 
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.util.ResourceUtils;
+
+import io.appium.java_client.PushesFiles;
 
 public class DeviceActions
 {
     private final IWebDriverProvider webDriverProvider;
-    private final GenericWebDriverManager genericWebDriverManager;
 
-    public DeviceActions(IWebDriverProvider webDriverProvider, GenericWebDriverManager genericWebDriverManager)
+    public DeviceActions(IWebDriverProvider webDriverProvider)
     {
         this.webDriverProvider = webDriverProvider;
-        this.genericWebDriverManager = genericWebDriverManager;
     }
 
     /**
@@ -43,15 +42,6 @@ public class DeviceActions
         byte[] fileBytes = ResourceUtils.loadResourceAsByteArray(getClass(), resource);
         byte[] base64Bytes = Base64.getEncoder().encode(fileBytes);
 
-        if (genericWebDriverManager.isAndroidNativeApp())
-        {
-            webDriverProvider.getUnwrapped(io.appium.java_client.android.PushesFiles.class).pushFile(deviceFilePath,
-                    base64Bytes);
-        }
-        else
-        {
-            webDriverProvider.getUnwrapped(io.appium.java_client.ios.PushesFiles.class).pushFile(deviceFilePath,
-                    base64Bytes);
-        }
+        webDriverProvider.getUnwrapped(PushesFiles.class).pushFile(deviceFilePath, base64Bytes);
     }
 }

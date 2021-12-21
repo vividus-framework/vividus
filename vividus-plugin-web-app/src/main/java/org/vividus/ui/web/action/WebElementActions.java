@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.Browser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.web.util.FormatUtil;
 
@@ -75,7 +75,7 @@ public class WebElementActions implements IWebElementActions
             // workaround for Safari and IE 11
             // Safari issue: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4467
             // IE 11 issue: https://github.com/SeleniumHQ/selenium/issues/3353
-            boolean workaroundNeeded = webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.IEXPLORE)
+            boolean workaroundNeeded = webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)
                     && !element.findElements(By.xpath("//preceding-sibling::head"
                     + "[descendant::title[contains(text(),'Rich Text')]]")).isEmpty()
                     && isElementContenteditable(element);

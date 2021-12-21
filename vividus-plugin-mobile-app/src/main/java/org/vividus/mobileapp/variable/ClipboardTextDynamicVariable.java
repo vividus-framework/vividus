@@ -26,11 +26,10 @@ import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.mobileapp.configuration.MobileEnvironment;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
-import org.vividus.selenium.manager.IGenericWebDriverManager;
+import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.testcontext.TestContext;
 import org.vividus.variable.DynamicVariable;
 
-import io.appium.java_client.HasSessionDetails;
 import io.appium.java_client.clipboard.HasClipboard;
 
 @Named("clipboard-text")
@@ -39,17 +38,17 @@ public class ClipboardTextDynamicVariable implements DynamicVariable
     private static final Object KEY = BundleIdKey.class;
 
     private final IWebDriverProvider webDriverProvider;
-    private final IGenericWebDriverManager genericWebDriverManager;
+    private final MobileAppWebDriverManager mobileAppWebDriverManager;
     private final TestContext testContext;
     private final ApplicationActions applicationActions;
     private final MobileEnvironment mobileEnvironment;
 
     public ClipboardTextDynamicVariable(IWebDriverProvider webDriverProvider,
-            IGenericWebDriverManager genericWebDriverManager, TestContext testContext,
+            MobileAppWebDriverManager mobileAppWebDriverManager, TestContext testContext,
             ApplicationActions applicationActions, MobileEnvironment mobileEnvironment)
     {
         this.webDriverProvider = webDriverProvider;
-        this.genericWebDriverManager = genericWebDriverManager;
+        this.mobileAppWebDriverManager = mobileAppWebDriverManager;
         this.testContext = testContext;
         this.applicationActions = applicationActions;
         this.mobileEnvironment = mobileEnvironment;
@@ -58,12 +57,11 @@ public class ClipboardTextDynamicVariable implements DynamicVariable
     @Override
     public String getValue()
     {
-        if (mobileEnvironment.isRealDevice() && genericWebDriverManager.isIOSNativeApp())
+        if (mobileEnvironment.isRealDevice() && mobileAppWebDriverManager.isIOSNativeApp())
         {
             String webDriverAgentBundleId = mobileEnvironment.getWebDriverAgentBundleId();
             isTrue(webDriverAgentBundleId != null, "WebDriverAgent bundle ID is not specified");
-            String appBundleId = testContext.get(KEY, () -> (String) webDriverProvider
-                    .getUnwrapped(HasSessionDetails.class).getSessionDetail("bundleID"));
+            String appBundleId = testContext.get(KEY, () -> mobileAppWebDriverManager.getSessionDetail("bundleID"));
             try
             {
                 applicationActions.activateApp(webDriverAgentBundleId);

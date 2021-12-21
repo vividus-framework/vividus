@@ -32,10 +32,9 @@ import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.mobileapp.configuration.MobileEnvironment;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
-import org.vividus.selenium.manager.IGenericWebDriverManager;
+import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.testcontext.ThreadedTestContext;
 
-import io.appium.java_client.HasSessionDetails;
 import io.appium.java_client.clipboard.HasClipboard;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,15 +43,25 @@ class ClipboardTextDynamicVariableTests
     private static final String VALUE = "value";
 
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IGenericWebDriverManager genericWebDriverManager;
+    @Mock private MobileAppWebDriverManager mobileAppWebDriverManager;
     @Spy private ThreadedTestContext testContext;
     @Mock private ApplicationActions applicationActions;
     private ClipboardTextDynamicVariable dynamicVariable;
 
     @Test
-    void shouldReturnClipboardText()
+    void shouldReturnClipboardTextForSimulator()
     {
         init(false, null);
+        mockGetClipboardText();
+
+        assertEquals(VALUE, dynamicVariable.getValue());
+    }
+
+    @Test
+    void shouldReturnClipboardTextForNonIos()
+    {
+        init(true, null);
+        when(mobileAppWebDriverManager.isIOSNativeApp()).thenReturn(false);
         mockGetClipboardText();
 
         assertEquals(VALUE, dynamicVariable.getValue());
@@ -63,14 +72,12 @@ class ClipboardTextDynamicVariableTests
     {
         String wdaBundleId = "wda-bundle-id";
         init(true, wdaBundleId);
+        when(mobileAppWebDriverManager.isIOSNativeApp()).thenReturn(true);
+
         mockGetClipboardText();
 
         String appBundleId = "app-bundle-id";
-        HasSessionDetails hasSessionDetails = mock(HasSessionDetails.class);
-
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
-        when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(hasSessionDetails);
-        when(hasSessionDetails.getSessionDetail("bundleID")).thenReturn(appBundleId);
+        when(mobileAppWebDriverManager.getSessionDetail("bundleID")).thenReturn(appBundleId);
 
         assertEquals(VALUE, dynamicVariable.getValue());
 
@@ -83,7 +90,7 @@ class ClipboardTextDynamicVariableTests
     {
         init(true, null);
 
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(mobileAppWebDriverManager.isIOSNativeApp()).thenReturn(true);
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, dynamicVariable::getValue);
 
@@ -109,7 +116,7 @@ class ClipboardTextDynamicVariableTests
 
     private void init(boolean realDevice, String wdaBundle)
     {
-        dynamicVariable = new ClipboardTextDynamicVariable(webDriverProvider, genericWebDriverManager, testContext,
+        dynamicVariable = new ClipboardTextDynamicVariable(webDriverProvider, mobileAppWebDriverManager, testContext,
                 applicationActions, new MobileEnvironment(realDevice, wdaBundle));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,8 @@ import org.openqa.selenium.interactions.Locatable;
 @ExtendWith(MockitoExtension.class)
 class DelegatingWebElementTests
 {
-    @Mock
-    private WebElement webElement;
-
-    @InjectMocks
-    private DelegatingWebElement delegatingWebElement;
+    @Mock private WebElement webElement;
+    @InjectMocks private DelegatingWebElement delegatingWebElement;
 
     @Test
     void testClick()
@@ -85,6 +82,15 @@ class DelegatingWebElementTests
         String tagName = "tagName";
         when(webElement.getTagName()).thenReturn(tagName);
         assertEquals(tagName, delegatingWebElement.getTagName());
+    }
+
+    @Test
+    void testGetDomeAttribute()
+    {
+        String domAttribute = "domAttribute";
+        String domAttributeValue = "domAttributeValue";
+        when(webElement.getDomAttribute(domAttribute)).thenReturn(domAttributeValue);
+        assertEquals(domAttributeValue, delegatingWebElement.getDomAttribute(domAttribute));
     }
 
     @Test

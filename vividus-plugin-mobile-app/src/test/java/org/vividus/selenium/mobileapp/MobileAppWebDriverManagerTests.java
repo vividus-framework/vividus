@@ -47,16 +47,18 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.JavascriptActions;
 
-import io.appium.java_client.HasSessionDetails;
+import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.android.HasAndroidDeviceDetails;
 import io.appium.java_client.remote.MobilePlatform;
 
 @ExtendWith(MockitoExtension.class)
 class MobileAppWebDriverManagerTests
 {
+    private static final String GET_SESSION_COMMAND = "getSession";
     private static final String STAT_BAR_HEIGHT = "statBarHeight";
     private static final String HEIGHT = "height";
 
@@ -71,8 +73,19 @@ class MobileAppWebDriverManagerTests
     @Mock private JavascriptActions javascriptActions;
     @InjectMocks private MobileAppWebDriverManager driverManager;
 
+    private int mockStatusBarHeightRetrieval()
+    {
+        ExecutesMethod executingMethodDriver = mock(ExecutesMethod.class);
+        when(webDriverProvider.getUnwrapped(ExecutesMethod.class)).thenReturn(executingMethodDriver);
+        Response response = new Response();
+        long height = 101L;
+        response.setValue(Map.of(STAT_BAR_HEIGHT, height));
+        when(executingMethodDriver.execute(GET_SESSION_COMMAND)).thenReturn(response);
+        return (int) height;
+    }
+
     @Test
-    void shouldProvideStatusBarHeightForAndorid()
+    void shouldProvideStatusBarHeightForAndroid()
     {
         mockCapabilities(MobilePlatform.ANDROID);
         var driverWithAndroidDeviceDetails = mock(HasAndroidDeviceDetails.class);
@@ -88,29 +101,25 @@ class MobileAppWebDriverManagerTests
         var driverWithAndroidDeviceDetails = mock(HasAndroidDeviceDetails.class);
         when(webDriverProvider.getUnwrapped(HasAndroidDeviceDetails.class)).thenReturn(driverWithAndroidDeviceDetails);
         when(driverWithAndroidDeviceDetails.getSystemBars()).thenThrow(new WebDriverException());
-        HasSessionDetails details = mock(HasSessionDetails.class);
-        when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
-        when(details.getSessionDetail(STAT_BAR_HEIGHT)).thenReturn(101L);
-        assertEquals(101, driverManager.getStatusBarSize());
+        int statusBarHeight = mockStatusBarHeightRetrieval();
+        assertEquals(statusBarHeight, driverManager.getStatusBarSize());
     }
 
     @Test
     void shouldProviderStatusBarHeightForIos()
     {
         mockCapabilities(MobilePlatform.IOS);
-        HasSessionDetails details = mock(HasSessionDetails.class);
-        when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
-        when(details.getSessionDetail(STAT_BAR_HEIGHT)).thenReturn(102L);
-        assertEquals(102, driverManager.getStatusBarSize());
+        int statusBarHeight = mockStatusBarHeightRetrieval();
+        assertEquals(statusBarHeight, driverManager.getStatusBarSize());
     }
 
     @Test
     void shouldProviderStatusBarHeightForIosWhenSauceLabsThrowAnError()
     {
         mockCapabilities(MobilePlatform.IOS);
-        HasSessionDetails details = mock(HasSessionDetails.class);
-        when(webDriverProvider.getUnwrapped(HasSessionDetails.class)).thenReturn(details);
-        when(details.getSessionDetail(STAT_BAR_HEIGHT)).thenThrow(new WebDriverException(
+        ExecutesMethod executingMethodDriver = mock(ExecutesMethod.class);
+        when(webDriverProvider.getUnwrapped(ExecutesMethod.class)).thenReturn(executingMethodDriver);
+        when(executingMethodDriver.execute(GET_SESSION_COMMAND)).thenThrow(new WebDriverException(
                 "failed serving request GET https://production-sushiboat.default/wd/hub/session/XXXX"));
         when(javascriptActions.executeScript("mobile:deviceScreenInfo")).thenReturn(Map.of(
                 "statusBarSize", Map.of("width", 375, HEIGHT, 44),

@@ -123,7 +123,7 @@ class DropdownStepsTests
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
         when(webElement.getTagName()).thenReturn(SELECT);
-        when(webElement.getAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
+        when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
         WebElement element = webElement;
         dropdownSteps.addOptionInDropdown(TEXT, LOCATOR);
         verify(fieldActions).selectItemInDropDownList(
@@ -136,7 +136,7 @@ class DropdownStepsTests
         ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
         when(webElement.getTagName()).thenReturn(SELECT);
-        when(webElement.getAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
+        when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
         WebElement element = webElement;
         addOptionsToSelect(element, TEXT);
         when(softAssert.assertEquals(DROPDOWN_SIZE_ASSERTION_MESSAGE,
@@ -166,7 +166,7 @@ class DropdownStepsTests
         ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
         when(webElement.getTagName()).thenReturn(SELECT);
-        when(webElement.getAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
+        when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
         WebElement element = webElement;
         addOptionsToSelect(element, "itemValue");
         when(softAssert.assertEquals(DROPDOWN_SIZE_ASSERTION_MESSAGE,
