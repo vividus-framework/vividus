@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -120,6 +121,7 @@ class ImapFetchServiceSystemTests
         scheduleSendEmail(testMessageDelay, GreenMailUtil.random());
         scheduleSendEmail(deliveryDelay, subject);
         List<EmailMessage> receivedMessages = new ArrayList<>();
+        assertTrue(mailServer.waitForIncomingEmail(deliveryDelay * 2, 2));
         assertTimeout(Duration.ofSeconds(testTimeout),
             () -> receivedMessages.addAll(service.fetch(predicates, getConfig())));
 
