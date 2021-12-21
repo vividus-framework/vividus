@@ -46,6 +46,7 @@ class TableLoadingTransformerTests
 {
     private static final String PATH = "path";
     private static final String INPUT_TABLE = "|input_table_col|";
+    private static final String DEFAULT_SEPARATOR = "|";
 
     @Mock private Configuration configuration;
     @Mock private TableProperties tableProperties;
@@ -58,13 +59,37 @@ class TableLoadingTransformerTests
     }
 
     @Test
-    void shouldLoadTablesWithFirbiddenEmptyOnes() throws IllegalAccessException
+    void shouldLoadTablesWithForbiddenEmptyOnes() throws IllegalAccessException
     {
         String table = "|col1|col2|\n|val11|val12|";
 
         when(tableProperties.getProperties()).thenReturn(createProperties(PATH));
         when(factory.createExamplesTable(PATH)).thenReturn(new ExamplesTable(table));
         when(factory.createExamplesTable(INPUT_TABLE)).thenReturn(new ExamplesTable(table));
+        mockSeparators();
+
+        TestTableLoadingTransformer transformer = createTransformer(true);
+
+        List<ExamplesTable> tables = transformer.loadTables(INPUT_TABLE, tableProperties);
+        assertThat(tables, hasSize(2));
+        String tableAsString = new ExamplesTable(table).asString();
+        assertEquals(tableAsString, tables.get(0).asString());
+        assertEquals(tableAsString, tables.get(1).asString());
+    }
+
+    @Test
+    void shouldLoadTablesWithForbiddenEmptyOnesNotDefaultSeparators() throws IllegalAccessException
+    {
+        String table = "~col1~col2~\n~val11~val12~";
+        String separator = "~";
+
+        when(tableProperties.getProperties()).thenReturn(createProperties(PATH));
+        when(factory.createExamplesTable(PATH)).thenReturn(new ExamplesTable(table));
+        when(factory.createExamplesTable("{valueSeparator=~, headerSeparator=~, ignorableSeparator=~--}\n"
+                + INPUT_TABLE)).thenReturn(new ExamplesTable(table));
+        when(tableProperties.getHeaderSeparator()).thenReturn(separator);
+        when(tableProperties.getValueSeparator()).thenReturn(separator);
+        when(tableProperties.getIgnorableSeparator()).thenReturn("~--");
 
         TestTableLoadingTransformer transformer = createTransformer(true);
 
@@ -87,6 +112,7 @@ class TableLoadingTransformerTests
         when(factory.createExamplesTable(tablePath2)).thenReturn(new ExamplesTable("|col1|\n|row1|"));
         when(factory.createExamplesTable(tablePath3)).thenReturn(ExamplesTable.EMPTY);
         when(factory.createExamplesTable(INPUT_TABLE)).thenReturn(new ExamplesTable(INPUT_TABLE));
+        mockSeparators();
 
         TestTableLoadingTransformer transformer = createTransformer(true);
 
@@ -102,6 +128,7 @@ class TableLoadingTransformerTests
         when(tableProperties.getProperties()).thenReturn(createProperties(PATH));
         when(factory.createExamplesTable(PATH)).thenReturn(ExamplesTable.EMPTY);
         when(factory.createExamplesTable(INPUT_TABLE)).thenReturn(new ExamplesTable(INPUT_TABLE));
+        mockSeparators();
 
         TestTableLoadingTransformer transformer = createTransformer(false);
 
@@ -117,6 +144,13 @@ class TableLoadingTransformerTests
         ReflectionUtils.makeAccessible(configurationField);
         configurationField.set(transformer, configuration);
         return transformer;
+    }
+
+    private void mockSeparators()
+    {
+        when(tableProperties.getHeaderSeparator()).thenReturn(DEFAULT_SEPARATOR);
+        when(tableProperties.getValueSeparator()).thenReturn(DEFAULT_SEPARATOR);
+        when(tableProperties.getIgnorableSeparator()).thenReturn("|--");
     }
 
     private static Properties createProperties(String tables)

@@ -65,7 +65,9 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
         else
         {
             isTrue(!tables.isEmpty(), "Please, specify at least one table path");
-            descriptiveTables.add(new DescriptiveTable("input table", factory.createExamplesTable(tableAsString)));
+
+            descriptiveTables.add(new DescriptiveTable("input table",
+                    factory.createExamplesTable(getSeparatorsAsString(tableProperties) + tableAsString)));
         }
 
         List<DescriptiveTable> pathTables = IntStream.range(0, tables.size())
@@ -83,6 +85,21 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
         return descriptiveTables.stream()
                                 .map(DescriptiveTable::getTable)
                                 .collect(Collectors.toList());
+    }
+
+    private String getSeparatorsAsString(TableProperties tableProperties)
+    {
+        String headerSeparator = tableProperties.getHeaderSeparator();
+        String valueSeparator = tableProperties.getValueSeparator();
+        String ignorableSeparator = tableProperties.getIgnorableSeparator();
+        String propertiesAsString = "";
+        if (!headerSeparator.equals(valueSeparator) || !"|".equals(headerSeparator)
+                || !"|--".equals(ignorableSeparator))
+        {
+            propertiesAsString = "{valueSeparator=" + valueSeparator + ", headerSeparator=" + headerSeparator
+                    + ", ignorableSeparator=" + ignorableSeparator + "}\n";
+        }
+        return propertiesAsString;
     }
 
     private void checkEmptyTables(List<DescriptiveTable> tables)
