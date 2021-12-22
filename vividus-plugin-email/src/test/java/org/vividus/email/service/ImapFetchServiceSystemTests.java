@@ -66,9 +66,6 @@ class ImapFetchServiceSystemTests
     private static GreenMail mailServer;
     private static GreenMailUser mailUser;
 
-    private final EmailFetchService service = new ImapFetchService(Duration.ofSeconds(30), 6, "INBOX",
-            new EmailMessageFactory());
-
     @BeforeAll
     static void initServer()
     {
@@ -102,6 +99,7 @@ class ImapFetchServiceSystemTests
     })
     void testFetch(long deliveryDelay, long testTimeout) throws MessagingException
     {
+        ImapFetchService service = serviceWith(90, 15);
         String subject = GreenMailUtil.random();
         FailablePredicate<Message, MessagingException> subjectPredicate = EmailParameterFilterFactory.SUBJECT
                 .createFilter(ComparisonRule.EQUAL_TO.name(), subject);
@@ -136,6 +134,7 @@ class ImapFetchServiceSystemTests
                 .createFilter(ComparisonRule.EQUAL_TO.name(), subject);
 
         List<EmailMessage> receivedMessages = new ArrayList<>();
+        ImapFetchService service = serviceWith(5, 1);
         assertTimeout(Duration.ofMinutes(1),
             () -> receivedMessages.addAll(service.fetch(List.of(subjectPredicate), getConfig())));
 
@@ -149,6 +148,11 @@ class ImapFetchServiceSystemTests
                 "port", String.valueOf(mailServer.getImaps().getPort()),
                 "ssl.trust", "127.0.0.1"
                 ));
+    }
+
+    private ImapFetchService serviceWith(int waitTimeout, int retries)
+    {
+        return new ImapFetchService(Duration.ofSeconds(waitTimeout), retries, "INBOX", new EmailMessageFactory());
     }
 
     private static void scheduleSendEmail(long deliveryDelay, String subject)
