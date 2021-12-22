@@ -25,8 +25,6 @@ import org.openqa.selenium.ContextAware;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.Platform;
-import org.openqa.selenium.Rotatable;
-import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.vividus.selenium.IWebDriverProvider;
@@ -60,10 +58,6 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         if (screenSize == null)
         {
             screenSize = runInNativeContext(this::getSize);
-            if (getUnwrappedDriver(Rotatable.class).getOrientation() == ScreenOrientation.LANDSCAPE)
-            {
-                screenSize = new Dimension(screenSize.height, screenSize.width);
-            }
             webDriverManagerContext.putParameter(WebDriverManagerParameter.SCREEN_SIZE, screenSize);
         }
         return screenSize;

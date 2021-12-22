@@ -47,8 +47,6 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.Platform;
-import org.openqa.selenium.Rotatable;
-import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Window;
@@ -225,28 +223,17 @@ class GenericWebDriverManagerTests
         assertEquals(screenSize, driverManager.getSize());
     }
 
-    static Stream<Arguments> nativeApplicationViewportProvider()
+    @Test
+    void shouldGetScreenSizeForMobileApp()
     {
-        return Stream.of(
-            arguments(ScreenOrientation.LANDSCAPE, new Dimension(375, 667), new Dimension(667, 375)),
-            arguments(ScreenOrientation.PORTRAIT,  new Dimension(375, 667), new Dimension(375, 667))
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("nativeApplicationViewportProvider")
-    void testGetScreenSizeForPortraitOrientation(ScreenOrientation orientation, Dimension dimension,
-            Dimension viewport)
-    {
+        var dimension = new Dimension(375, 667);
         var iOSDriver = mock(IOSDriver.class);
         lenient().when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(iOSDriver);
-        lenient().when(webDriverProvider.getUnwrapped(Rotatable.class)).thenReturn(iOSDriver);
-        when(iOSDriver.getOrientation()).thenReturn(orientation);
         when(iOSDriver.getContext()).thenReturn(NATIVE_APP_CONTEXT);
         mockWebDriver(MobilePlatform.IOS);
         mockSizeRetrieval(iOSDriver, dimension);
-        assertEquals(viewport, driverManager.getSize());
-        verify(webDriverManagerContext).putParameter(WebDriverManagerParameter.SCREEN_SIZE, viewport);
+        assertEquals(dimension, driverManager.getSize());
+        verify(webDriverManagerContext).putParameter(WebDriverManagerParameter.SCREEN_SIZE, dimension);
     }
 
     private void mockSizeRetrieval(WebDriver webDriver, Dimension screenSize)
