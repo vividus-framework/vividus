@@ -535,28 +535,31 @@ class StatisticsStoryReporterTests
         SoftAssertionError assertion = mock(SoftAssertionError.class);
         when(event.getSoftAssertionError()).thenReturn(assertion);
         AssertionError error = mock(AssertionError.class);
-        String causeMessage = "You're illegal";
+        String argumentExceptionCauseMessage = "You're illegal";
         when(assertion.getError()).thenReturn(error);
-        when(error.getMessage()).thenReturn(causeMessage);
+        when(error.getMessage()).thenReturn(argumentExceptionCauseMessage);
         reporter.onAssertionFailure(event);
-        IllegalArgumentException exception = new IllegalArgumentException(causeMessage);
+        IllegalArgumentException exception = new IllegalArgumentException(argumentExceptionCauseMessage);
         reporter.failed("step", new IllegalArgumentException(exception));
-        UUIDExceptionWrapper exceptionWrapper = new UUIDExceptionWrapper(
+        UUIDExceptionWrapper verificationErrorWrapped = new UUIDExceptionWrapper(
                 new BeforeOrAfterFailed(new VerificationError("message", List.of())));
-        reporter.failed("verifyIfAssertionsPassed", exceptionWrapper);
+        UUIDExceptionWrapper illegalArgumentExceptionWrapped = new UUIDExceptionWrapper(
+                new BeforeOrAfterFailed(new IllegalArgumentException(argumentExceptionCauseMessage)));
+        reporter.failed("verifyIfAssertionsPassed", verificationErrorWrapped);
         reporter.failed("some other step", error);
+        reporter.failed("Step with incorrect argument", illegalArgumentExceptionWrapped);
 
         List<Failure> failures = StatisticsStoryReporter.getFailures();
+        failures.forEach(s -> System.out.println(s.getMessage()));
         assertThat(failures, hasSize(3));
         Failure fail = failures.get(0);
         Failure broken = failures.get(1);
-        Failure assertionFail = failures.get(2);
+        Failure assertionFail = failures.get(1);
 
-        assertFailure(fail, storyName, scenarioTitle, step, causeMessage);
+        assertFailure(fail, storyName, scenarioTitle, step, argumentExceptionCauseMessage);
         assertFailure(broken, storyName, scenarioTitle, step, "java.lang.IllegalArgumentException: You're illegal");
         assertFailure(assertionFail, storyName, scenarioTitle, step,
-                "org.jbehave.core.failures.BeforeOrAfterFailed: org.vividus.softassert.exception.VerificationError: "
-                + "message");
+                "java.lang.IllegalArgumentException: " + argumentExceptionCauseMessage);
     }
 
     private static void assertFailure(Failure failure, String story, String scenario, String step, String cause)

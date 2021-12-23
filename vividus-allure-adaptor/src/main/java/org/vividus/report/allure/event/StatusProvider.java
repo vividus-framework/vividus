@@ -16,6 +16,7 @@
 
 package org.vividus.report.allure.event;
 
+import org.vividus.JBehaveFailureUnwrapper;
 import org.vividus.softassert.exception.VerificationError;
 
 import io.qameta.allure.model.Status;
@@ -28,7 +29,9 @@ public final class StatusProvider
 
     public static Status getStatus(Throwable throwable)
     {
-        return throwable instanceof AssertionError ? getStatus((AssertionError) throwable) : Status.BROKEN;
+        Throwable unwrappedThrowable = JBehaveFailureUnwrapper.unwrapCause(throwable);
+        return unwrappedThrowable instanceof AssertionError ? getStatus((AssertionError) unwrappedThrowable)
+                : Status.BROKEN;
     }
 
     private static Status getStatus(AssertionError assertionError)
