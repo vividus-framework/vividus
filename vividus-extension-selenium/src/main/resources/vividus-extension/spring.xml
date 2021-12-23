@@ -57,6 +57,13 @@
         <property name="debugModes" value="${screenshot.on-failure.debug-modes}" />
     </bean>
 
+    <bean id="publishingHarOnFailureMonitor" class="org.vividus.monitor.PublishingHarOnFailureMonitor">
+        <property name="publishHarOnFailure" value="${proxy.publish-har-on-failure}" />
+        <constructor-arg>
+            <bean class="org.vividus.proxy.har.HarOnFailureManager"/>
+        </constructor-arg>
+    </bean>
+
     <bean class="org.vividus.proxy.ThreadedProxy" >
         <constructor-arg index="0" value="${proxy.host}" />
         <constructor-arg index="1" value="${proxy.ports}" />

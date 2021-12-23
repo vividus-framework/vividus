@@ -18,3 +18,8 @@ a|`true`
 |`host.docker.internal`
 |`<empty>`
 |Overrides the proxy host which will be passed to browser
+
+|proxy.publish-har-on-failure
+|true/false
+|false
+|Adds a har file for each failed step. If necessary use `@noHarOnFailure` meta tag to disable HAR publishing at the story level.

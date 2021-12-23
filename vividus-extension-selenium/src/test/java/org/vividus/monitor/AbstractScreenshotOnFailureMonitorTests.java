@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,11 @@
 
 package org.vividus.monitor;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -32,6 +29,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -83,7 +81,8 @@ class AbstractScreenshotOnFailureMonitorTests
     @Mock private EventBus eventBus;
     @InjectMocks private TestScreenshotOnFailureMonitor monitor;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractScreenshotOnFailureMonitor.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(
+            AbstractPublishingAttachmentOnFailureMonitor.class);
 
     @AfterEach
     void afterEach()
@@ -127,7 +126,8 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldNotTakeScreenshotIfMethodAnnotatedButStoryHasNoScreenshotOnFailure() throws NoSuchMethodException
+    void shouldNotTakeScreenshotIfMethodAnnotatedButStoryHasNoScreenshotOnFailure()
+            throws NoSuchMethodException, IOException
     {
         RunningStory runningStory = mock(RunningStory.class);
         mockStoryMeta(runningStory, new Meta(List.of(NO_SCREENSHOT_ON_FAILURE)));
@@ -137,7 +137,8 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldNotTakeScreenshotIfMethodAnnotatedButScenarioHasNoScreenshotOnFailure() throws NoSuchMethodException
+    void shouldNotTakeScreenshotIfMethodAnnotatedButScenarioHasNoScreenshotOnFailure()
+            throws NoSuchMethodException, IOException
     {
         RunningStory runningStory = mock(RunningStory.class);
         mockStoryMeta(runningStory, EMPTY_META);
@@ -148,7 +149,7 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldEnableScreenshotsIfNoRunningSceanario() throws NoSuchMethodException
+    void shouldEnableScreenshotsIfNoRunningSceanario() throws NoSuchMethodException, IOException
     {
         RunningStory runningStory = mock(RunningStory.class);
         mockStoryMeta(runningStory, EMPTY_META);
@@ -158,14 +159,14 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldNotTakeScreenshotIfItIsNotEnabled()
+    void shouldNotTakeScreenshotIfItIsNotEnabled() throws IOException
     {
         monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
         assertThat(logger.getLoggingEvents(), empty());
     }
 
     @Test
-    void shouldNotTakeScreenshotIfWebDriverIsNotEnabled() throws NoSuchMethodException
+    void shouldNotTakeScreenshotIfWebDriverIsNotEnabled() throws NoSuchMethodException, IOException
     {
         enableScreenshotPublishing(false);
         monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
@@ -173,7 +174,7 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldTakeScreenshotOfSearchContext() throws NoSuchMethodException
+    void shouldTakeScreenshotOfSearchContext() throws NoSuchMethodException, IOException
     {
         enableScreenshotPublishing(true);
         String title = "2019-03-07_19-11-38_898-Assertion_Failure-chrome-1440x836";
@@ -189,7 +190,7 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldTakeScreenshotOfAssertedElementsISearchContextIsPage() throws NoSuchMethodException
+    void shouldTakeScreenshotOfAssertedElementsISearchContextIsPage() throws NoSuchMethodException, IOException
     {
         enableScreenshotPublishing(true);
         TestScreenshotOnFailureMonitor spy = spy(monitor);
@@ -199,7 +200,7 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldTakeScreenshotOfAssertedElementsWithDebugMode() throws NoSuchMethodException
+    void shouldTakeScreenshotOfAssertedElementsWithDebugMode() throws NoSuchMethodException, IOException
     {
         mockScenarioAndStoryMeta(EMPTY_META);
         monitor.setDebugModes(Arrays.asList("mode", "ui"));
@@ -218,7 +219,8 @@ class AbstractScreenshotOnFailureMonitorTests
 
     @ParameterizedTest
     @MethodSource("debugMode")
-    void shouldNotTakeScreenshotOfAssertedElementsWithDebugModeMethod(List<String> mode) throws NoSuchMethodException
+    void shouldNotTakeScreenshotOfAssertedElementsWithDebugModeMethod(List<String> mode)
+            throws NoSuchMethodException, IOException
     {
         monitor.setDebugModes(mode);
         monitor.beforePerforming(I_DO_ACTION, false, getClass().getDeclaredMethod("whenDebugStep"));
@@ -227,7 +229,7 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldTakeScreenshotOfAssertedElementsWithoutDebugModeInAnnotation() throws NoSuchMethodException
+    void shouldTakeScreenshotOfAssertedElementsWithoutDebugModeInAnnotation() throws NoSuchMethodException, IOException
     {
         monitor.setDebugModes(Arrays.asList("anymode"));
         enableScreenshotPublishing(true);
@@ -235,17 +237,6 @@ class AbstractScreenshotOnFailureMonitorTests
         doReturn(Optional.empty()).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
         spy.onAssertionFailure(mock(AssertionFailedEvent.class));
         assertThat(logger.getLoggingEvents(), empty());
-    }
-
-    @Test
-    void shouldLogErrorIfScreenshotTakingIsFailed() throws NoSuchMethodException
-    {
-        enableScreenshotPublishing(true);
-        IllegalStateException exception = new IllegalStateException();
-        TestScreenshotOnFailureMonitor spy = spy(monitor);
-        doThrow(exception).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
-        spy.onAssertionFailure(mock(AssertionFailedEvent.class));
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception, "Unable to take a screenshot"))));
     }
 
     private void enableScreenshotPublishing(boolean webDriverInitialized) throws NoSuchMethodException

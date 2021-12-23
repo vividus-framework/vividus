@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,12 +138,11 @@ class ProxyStepsTests
             throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        byte[] data = mockHar(httpMethodInHar, statusCode);
+        mockHar(httpMethodInHar, statusCode);
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL,
                 Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
         verifySizeAssertion(message, 0, ComparisonRule.EQUAL_TO, 1);
-        verify(attachmentPublisher).publishAttachment(data, "har.har");
         verifyNoInteractions(variableContext);
     }
 

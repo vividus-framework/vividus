@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.util.json;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -56,6 +57,13 @@ class JsonUtilsTests
     {
         String actualJson = jsonUtils.toJson(TEST_OBJECT);
         assertEquals(JSON_STRING, actualJson);
+    }
+
+    @Test
+    void testToBytesSuccessDefault()
+    {
+        byte[] actualJson = jsonUtils.toJsonAsBytes(TEST_OBJECT);
+        assertArrayEquals(JSON_STRING.getBytes(StandardCharsets.UTF_8), actualJson);
     }
 
     @Test

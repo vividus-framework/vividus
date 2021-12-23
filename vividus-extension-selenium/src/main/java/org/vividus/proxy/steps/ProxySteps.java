@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.proxy.steps;
 
 import static java.util.stream.Collectors.toList;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,17 +32,16 @@ import javax.inject.Inject;
 import com.browserup.bup.util.HttpMessageInfo;
 import com.browserup.harreader.model.HarEntry;
 import com.browserup.harreader.model.HttpMethod;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
+import org.vividus.monitor.PublishHarOnFailure;
 import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.proxy.IProxy;
 import org.vividus.proxy.model.HttpMessagePart;
-import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.DataWrapper;
@@ -65,11 +63,8 @@ import io.netty.handler.codec.http.HttpVersion;
 @TakeScreenshotOnFailure(onlyInDebugMode = "proxy")
 public class ProxySteps
 {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     @Inject private IProxy proxy;
     @Inject private ISoftAssert softAssert;
-    @Inject private IAttachmentPublisher attachmentPublisher;
     @Inject private VariableContext variableContext;
     @Inject private IWaitActions waitActions;
 
@@ -104,21 +99,17 @@ public class ProxySteps
      *                       <li>not equal to (!=)</li>
      *                       </ul>
      * @param number         The number to compare with
-     * @throws IOException If any error happens during operation
      * @return Filtered HAR entries
      */
+    @PublishHarOnFailure
     @Then("number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $comparisonRule `$number`")
     public List<HarEntry> checkNumberOfRequests(Set<HttpMethod> httpMethods, Pattern urlPattern,
-            ComparisonRule comparisonRule, int number) throws IOException
+            ComparisonRule comparisonRule, int number)
     {
         List<HarEntry> harEntries = getLogEntries(httpMethods, urlPattern);
         String description = String.format("Number of HTTP %s requests matching URL pattern '%s'",
                 methodsToString(httpMethods, ", "), urlPattern);
-        if (!softAssert.assertThat(description, harEntries.size(), comparisonRule.getComparisonRule(number)))
-        {
-            byte[] harBytes = OBJECT_MAPPER.writeValueAsBytes(proxy.getRecordedData());
-            attachmentPublisher.publishAttachment(harBytes, "har.har");
-        }
+        softAssert.assertThat(description, harEntries.size(), comparisonRule.getComparisonRule(number));
         return harEntries;
     }
 
@@ -158,12 +149,11 @@ public class ProxySteps
      *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                       </ul>
      * @param variableName The variable name to save the URL.
-     * @throws IOException If any error happens during operation
      */
     @When("I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes "
             + "variable `$variableName`")
     public void captureRequestAndSaveURL(Set<HttpMethod> httpMethods, Pattern urlPattern,
-            HttpMessagePart httpMessagePart, Set<VariableScope> scopes, String variableName) throws IOException
+            HttpMessagePart httpMessagePart, Set<VariableScope> scopes, String variableName)
     {
         List<HarEntry> harEntries = checkNumberOfRequests(httpMethods, urlPattern, ComparisonRule.EQUAL_TO, 1);
         if (harEntries.size() == 1)
