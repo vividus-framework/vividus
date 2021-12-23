@@ -369,7 +369,7 @@ jobs:
     - name: SauceLabs - Android Proxy- Mobile App - Run system tests
       if: matrix.platform == 'ubuntu-latest'
       env:
-        AUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
+        SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
         SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
       shell: bash
       run: |
