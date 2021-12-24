@@ -402,7 +402,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: SauceLabs - System Tests With Proxy- Allure report - Android
-        path: vividus-tests/output/reports/sl-andorid-proxy-allure
+        path: vividus-tests/output/reports/sl-android-proxy-allure
 
     - name: BrowserStack - Desktop - Web - System tests
       if: matrix.platform == 'macos-latest'
