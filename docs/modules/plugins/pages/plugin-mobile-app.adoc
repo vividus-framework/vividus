@@ -1,5 +1,6 @@
 :grid-default-hostname: empty
 :keys: https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
+:given-step: Given I start mobile application
 
 = Mobile Application Plugin
 
@@ -161,8 +162,12 @@ a|Defines a destination folder on a device for a file being uploaded
 !`/sdcard/Pictures`
 
 !===
-
+include::partial$proxy-properties.adoc[]
 |===
+
+include::partial$proxy-meta-tags.adoc[]
+
+IMPORTANT: For device configuration, we need to perform the following steps: install CA certificate(download https://github.com/browserup/browserup-proxy/blob/master/browserup-proxy-core/src/main/resources/sslSupport/ca-certificate-rsa.cer[CA certificate] from a browserup repository), configure device proxy, and configure the test app to allow proxy in cases of necessity.
 
 == Profiles
 
@@ -744,3 +749,5 @@ When I select next value with `0.1` offset in picker wheel located `xpath(//XCUI
 
 
 include::partial$generic-ui-steps.adoc[]
+
+include::partial$proxy-steps.adoc[]

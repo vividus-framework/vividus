@@ -48,7 +48,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
-import org.vividus.ui.web.action.IWebWaitActions;
+import org.vividus.ui.action.IWaitActions;
 import org.vividus.variable.VariableScope;
 
 import io.netty.buffer.Unpooled;
@@ -71,7 +71,7 @@ public class ProxySteps
     @Inject private ISoftAssert softAssert;
     @Inject private IAttachmentPublisher attachmentPublisher;
     @Inject private VariableContext variableContext;
-    @Inject private IWebWaitActions waitActions;
+    @Inject private IWaitActions waitActions;
 
     /**
      * Clears the proxy log
