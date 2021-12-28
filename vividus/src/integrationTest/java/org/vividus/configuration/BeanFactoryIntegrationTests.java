@@ -245,6 +245,7 @@ class BeanFactoryIntegrationTests
         assertEquals(additionalValueFirst, properties.getProperty("additionalenv-props-property"));
         assertEquals(additionalValueSecond, properties.getProperty("additionalenv-property"));
         assertEquals("override-property-value", properties.getProperty("override-property"));
+        assertEquals("#{anyOf(1,2,3)}", properties.getProperty("expression-property"));
     }
 
     private void resetBeanFactory()

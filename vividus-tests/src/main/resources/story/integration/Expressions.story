@@ -128,3 +128,8 @@ Examples:
 |calculateFileHash(Md5, data/file.txt)     |969015df4bea10782823bedbf48055e0                                                                                                 |
 |calculateFileHash(Sha384, data/file.txt)  |8fa517c0df035d579fae2ac4fd2e87de50a761b6249875607dbd01c64469b51bcc276ed9a3313031bba649d8577f5058                                 |
 |calculateFileHash(sha-512, data/file.txt) |ade64012f60b0620f285852f32a18e2e729c7a2a9810709d1786b344156525fef0a046d4f79104e193e98c6c80f6c744b97cb8410e55a5a8ef7f60623c583757 |
+
+Scenario: Verify expressions from the properties
+Meta:
+    @requirementId 2322
+Then `1` is = `${vividus-expression}`
