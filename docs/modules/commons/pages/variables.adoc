@@ -58,6 +58,29 @@ When I issue a HTTP POST request for a resource with the URL '${login-endpoint}'
 Then the response code is equal to '200'
 ----
 
+WARNING: It is possible to reuse VIVIDUS expressions using `global` variables. Please mind that expression will be executed lazily at the runtime and randomizing/generating expressions may produce different results per usage.
+
+.Declaring global variable with expression `random-user`
+[source,properties]
+----
+bdd.variables.global.random-user=#{anyOf(superadmin,admin)}
+----
+
+.Using global variable `random-user`
+[source,gherkin]
+----
+Given request body:
+{
+    "username":"${random-user}",
+    "password":"pass"
+}
+When I set request headers:
+\|name        \|value           \|
+\|Content-Type\|application/json\|
+When I issue a HTTP POST request for a resource with the URL '/authenticate'
+Then the response code is equal to '200'
+----
+
 |===
 
 If variable with the specified name is not found in any of VIVIDUS scopes,

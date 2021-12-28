@@ -42,9 +42,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.expression.ParserContext;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.PropertyPlaceholderHelper;
+import org.vividus.spring.SpelExpressionResolver;
 
 public final class ConfigurationResolver
 {
@@ -245,7 +244,7 @@ public final class ConfigurationResolver
                         .collect(Collectors.toSet()))
                 : Optional.empty();
 
-        SpelExpressionParser spelExpressionParser = new SpelExpressionParser();
+        SpelExpressionResolver spelResolver = new SpelExpressionResolver();
         for (Entry<Object, Object> entry : properties.entrySet())
         {
             Object value = entry.getValue();
@@ -254,17 +253,7 @@ public final class ConfigurationResolver
                 String strValue = (String) value;
                 if (propertyPlaceholders.stream().flatMap(Set::stream).noneMatch(strValue::contains))
                 {
-                    try
-                    {
-                        entry.setValue(spelExpressionParser.parseExpression(strValue, ParserContext.TEMPLATE_EXPRESSION)
-                                .getValue());
-                    }
-                    catch (Exception e)
-                    {
-                        throw new IllegalStateException(
-                                "Exception during evaluation of expression " + strValue + " for property '" + entry
-                                        .getKey() + "'", e);
-                    }
+                    entry.setValue(spelResolver.resolve(strValue));
                 }
             }
         }
