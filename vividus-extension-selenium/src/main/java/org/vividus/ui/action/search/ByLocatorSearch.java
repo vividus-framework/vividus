@@ -17,6 +17,7 @@
 package org.vividus.ui.action.search;
 
 import java.util.List;
+import java.util.Map;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -29,8 +30,9 @@ public class ByLocatorSearch extends AbstractElementAction implements IElementSe
     }
 
     @Override
-    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters,
+            Map<LocatorType, List<String>> filters)
     {
-        return findElements(searchContext, getType().buildBy(parameters.getValue()), parameters);
+        return findElements(searchContext, getType().buildBy(parameters.getValue()), parameters, filters);
     }
 }

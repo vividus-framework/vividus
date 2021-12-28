@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 import org.vividus.util.UriUtils;
@@ -54,12 +56,13 @@ public class LinkUrlSearch extends AbstractWebElementSearchAction
     }
 
     @Override
-    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters,
+            Map<LocatorType, List<String>> filters)
     {
         String searchValue = parameters.getValue();
         By xpathLocator = caseSensitiveSearch ? LocatorUtil.getXPathLocator(LINK_PATTERN, searchValue)
                 : LocatorUtil.getXPathLocator(LINK_WITH_CASE_INSENSITIVE_URL, searchValue.toLowerCase());
-        return findElements(searchContext, xpathLocator, parameters);
+        return findElements(searchContext, xpathLocator, parameters, filters);
     }
 
     @Override

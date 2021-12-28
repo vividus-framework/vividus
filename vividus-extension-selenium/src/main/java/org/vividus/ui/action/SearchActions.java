@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.ui.action;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -28,10 +27,8 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.ui.action.search.ElementActionService;
-import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.context.IUiContext;
 
@@ -47,29 +44,8 @@ public class SearchActions implements ISearchActions
     {
         SearchParameters searchParameters = locator.getSearchParameters();
         IElementSearchAction searchAction = elementActionService.find(locator.getLocatorType());
-        List<WebElement> foundElements = searchAction.search(searchContext, searchParameters);
-        for (Entry<LocatorType, List<String>> entry : locator.getFilterAttributes().entrySet())
-        {
-            IElementFilterAction filterAction = elementActionService.find(entry.getKey());
-            for (String filterValue : entry.getValue())
-            {
-                int size = foundElements.size();
-                if (size == 0)
-                {
-                    break;
-                }
-
-                List<WebElement> filteredElements = filterAction.filter(foundElements, filterValue);
-
-                LOGGER.atInfo().addArgument(() -> size - filteredElements.size())
-                               .addArgument(size)
-                               .addArgument(entry::getKey)
-                               .addArgument(filterValue)
-                               .log("{} of {} elements were filtered out by {} filter with '{}' value");
-
-                foundElements = filteredElements;
-            }
-        }
+        List<WebElement> foundElements = searchAction.search(searchContext, searchParameters,
+                locator.getFilterAttributes());
         List<Locator> childLocators = locator.getChildLocators();
         for (Locator attributes : childLocators)
         {

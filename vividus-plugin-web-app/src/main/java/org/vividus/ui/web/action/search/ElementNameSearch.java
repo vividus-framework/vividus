@@ -17,6 +17,7 @@
 package org.vividus.ui.web.action.search;
 
 import java.util.List;
+import java.util.Map;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -33,7 +34,8 @@ public class ElementNameSearch extends AbstractWebElementSearchAction implements
     }
 
     @Override
-    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters,
+            Map<LocatorType, List<String>> filters)
     {
         String elementName = parameters.getValue();
         return findElementsByText(searchContext,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.testdouble;
 
 import java.util.List;
+import java.util.Map;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -27,7 +28,8 @@ import org.vividus.ui.action.search.SearchParameters;
 public class TestElementSearch implements IElementSearchAction
 {
     @Override
-    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters,
+            Map<LocatorType, List<String>> filters)
     {
         return List.of();
     }

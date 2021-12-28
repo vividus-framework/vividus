@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package org.vividus.ui.web.action.search;
 import static org.vividus.ui.web.util.LocatorUtil.getXPathLocator;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.element.Checkbox;
 import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 
@@ -43,19 +45,21 @@ public class CheckboxNameSearch extends AbstractWebElementSearchAction implement
     }
 
     @Override
-    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters,
+            Map<LocatorType, List<String>> filters)
     {
         String checkBoxName = parameters.getValue();
         SearchParameters nonDisplayedParameters = new SearchParameters(parameters.getValue(), Visibility.ALL,
                 parameters.isWaitForElement());
 
         List<WebElement> checkboxLabels = findElements(searchContext,
-                getXPathLocator(String.format(CHECKBOX_LABEL_FORMAT, checkBoxName)), parameters);
+                getXPathLocator(String.format(CHECKBOX_LABEL_FORMAT, checkBoxName)), parameters, filters);
         List<WebElement> matchedCheckboxLabels = searchCheckboxByLabels(searchContext, nonDisplayedParameters,
                 checkboxLabels);
         if (matchedCheckboxLabels.isEmpty())
         {
-            checkboxLabels = findElements(searchContext, getXPathLocator(CHECKBOX_LABEL_DEEP), parameters).stream()
+            checkboxLabels = findElements(searchContext, getXPathLocator(CHECKBOX_LABEL_DEEP), parameters, filters)
+                    .stream()
                     .filter(e -> getWebElementActions().getElementText(e).contains(checkBoxName))
                     .collect(Collectors.toList());
             return searchCheckboxByLabels(searchContext, nonDisplayedParameters, checkboxLabels);
@@ -73,7 +77,7 @@ public class CheckboxNameSearch extends AbstractWebElementSearchAction implement
             if (checkBoxId != null)
             {
                 checkboxes = findElements(searchContext,
-                        getXPathLocator(".//input[@type='checkbox' and @id=%s]", checkBoxId), parameters);
+                        getXPathLocator(".//input[@type='checkbox' and @id=%s]", checkBoxId), parameters, Map.of());
             }
             else
             {

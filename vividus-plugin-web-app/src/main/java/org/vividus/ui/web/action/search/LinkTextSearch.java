@@ -17,11 +17,13 @@
 package org.vividus.ui.web.action.search;
 
 import java.util.List;
+import java.util.Map;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -35,10 +37,11 @@ public class LinkTextSearch extends AbstractWebElementSearchAction implements IE
     }
 
     @Override
-    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters,
+            Map<LocatorType, List<String>> filters)
     {
         String text = parameters.getValue();
-        List<WebElement> links = findElements(searchContext, By.linkText(text), parameters);
+        List<WebElement> links = findElements(searchContext, By.linkText(text), parameters, filters);
         if (links.isEmpty())
         {
             By locator = LocatorUtil.getXPathLocator(LINK_WITH_ANY_ATTRIBUTE_OR_TEXT, text);

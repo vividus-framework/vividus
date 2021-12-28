@@ -17,6 +17,7 @@
 package org.vividus.ui.web.action.search;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
@@ -24,6 +25,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -36,11 +38,12 @@ public class CaseSensitiveTextSearch extends AbstractWebElementSearchAction
     }
 
     @Override
-    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters,
+            Map<LocatorType, List<String>> filters)
     {
         String value = parameters.getValue();
         List<WebElement> elements = findElements(searchContext, LocatorUtil.getXPathLocatorByFullInnerText(value),
-                parameters);
+                parameters, filters);
         if (elements.isEmpty())
         {
             By locator = LocatorUtil.getXPathLocatorByInnerText(value);
