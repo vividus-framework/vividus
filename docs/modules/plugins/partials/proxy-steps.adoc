@@ -1,6 +1,7 @@
 === Proxy Steps
 ==== Check the number of HTTP requests
 :proxy: This step requires proxy to be turned on. It can be done in properties or by switching on @proxy meta tag at the story level.
+:har-attached: In case of failure the full HTTP archive (HAR) is attached to the report.
 
 {proxy}
 
@@ -70,7 +71,7 @@ When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save
 ----
 {given-step}
 When I capture HTTP GET or POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
-Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
+Then `$\{URL}` is equal to `https://www.google.com/search?q=vividus`
 ----
 
 .Validate the URL query of the matching HTTP request
@@ -80,7 +81,7 @@ Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
 When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL query to scenario variable `query`
 Then `${query.q[0]}` is equal to `vividus`
 Then `${query.q}` is equal to `[vividus]`
-Then `${query}` is equal to `{q=[vividus]}`
+Then `$\{query}` is equal to `{q=[vividus]}`
 ----
 
 .Validate the request data from the matching HTTP message
@@ -147,7 +148,7 @@ When I add headers to proxied requests with URL pattern which is equal to `https
 |testName1|testValue1|
 |testName2|testValue2|
 {given-step}
-Then a JSON element from '${response}' by the JSON path '$.headers' is equal to '
+Then a JSON element from '$\{response}' by the JSON path '$.headers' is equal to '
 {
     "Testname1": "testValue1",
     "Testname2": "testValue2"

@@ -1,5 +1,4 @@
 = Web Application Plugin
-:har-attached: In case of failure the full HTTP archive (HAR) is attached to the report.
 :grid-default-hostname: empty
 :given-step: Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
 
