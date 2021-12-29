@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.vividus.util.ResourceUtils;
@@ -38,7 +39,7 @@ public class KeyStoreFactory implements IKeyStoreFactory
             try
             {
                 String keyStorePath = keyStoreOptions.getPath();
-                if (keyStorePath != null)
+                if (StringUtils.isNotBlank(keyStorePath))
                 {
                     String keyStorePassword = keyStoreOptions.getPassword();
                     if (keyStorePassword == null)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ import java.security.cert.X509Certificate;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class KeyStoreFactoryTests
 {
@@ -69,10 +72,12 @@ class KeyStoreFactoryTests
                 exception.getMessage());
     }
 
-    @Test
-    void testGetKeyStoreEmptyPath()
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = "  ")
+    void testGetKeyStoreBlankPath(String path)
     {
-        KeyStoreFactory keyStoreFactory = createKeyStoreFactory(null, null);
+        KeyStoreFactory keyStoreFactory = createKeyStoreFactory(path, null);
         Optional<KeyStore> optionalkeyStore = keyStoreFactory.getKeyStore();
         assertFalse(optionalkeyStore.isPresent());
     }
