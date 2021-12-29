@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.json;
+package org.vividus.json.steps;
 
 import static org.mockito.Mockito.verify;
 

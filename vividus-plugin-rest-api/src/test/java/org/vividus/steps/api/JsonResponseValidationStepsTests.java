@@ -16,6 +16,7 @@
 
 package org.vividus.steps.api;
 
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,6 +38,7 @@ import java.util.stream.Stream;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import org.hamcrest.TypeSafeMatcher;
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,11 +47,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.json.steps.JsonSteps;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
@@ -66,25 +68,36 @@ import net.javacrumbs.jsonunit.core.internal.Options;
 @ExtendWith(MockitoExtension.class)
 class JsonResponseValidationStepsTests
 {
-    private static final String SOME_PATH = "$.some";
-    private static final String RESPONSE_PATH = "$.response";
     private static final String RESPONSE_NULL = "{\"response\": null}";
     private static final String NON_EXISTING_PATH = "$['non-existing-element']";
-    private static final String NON_EXISTING_SOME_PATH = "$['some']";
-    private static final String BOOL_ELEMENT_JSON_PATH = "$..bool";
-    private static final String TRUE = "true";
 
     private static final String OBJECT_PATH = "$.test";
-    private static final String OBJECT_PATH_RESULT = "{\"name\":\"value\",\"number\":42,\"bool\":true,\"array\":[1,2]}";
+    private static final String OBJECT_PATH_RESULT = "{\"name\":\"value\",\"number\":42,\"bool\":true,\"array\":[1,2]"
+            + ",\"null\":null}";
 
     private static final String STRING_PATH = "$.test.name";
-    private static final String STRING_PATH_RESULT = "\"value\"";
+    private static final String STRING_PATH_ELEMENT_RESULT = "\"value\"";
+
+    private static final String NULL_PATH = "$.test.null";
+    private static final String NULL_PATH_RESULT = "null";
+
+    private static final String NUMBER_PATH = "$.test.number";
+    private static final String NUMBER_PATH_RESULT = "42";
+
+    private static final String BOOLEAN_PATH = "$.test.bool";
+    private static final String BOOLEAN_PATH_RESULT = "true";
 
     private static final String ARRAY_PATH = "$.test.array";
     private static final String ARRAY_PATH_RESULT = "[1,2]";
 
-    private static final String VARIABLE_NAME = "name";
+    private static final String NUMBER_INDEFINITE_PATH = "$..number";
+    private static final String NUMBER_INDEFINITE_PATH_RESULT = "[42]";
+
+    private static final String BOOLEAN_INDEFINITE_PATH = "$..bool";
+    private static final String BOOLEAN_INDEFINITE_PATH_RESULT = "[true]";
+
     private static final String JSON = "{\"test\":" + OBJECT_PATH_RESULT + "}";
+
     private static final int ELEMENTS_NUMBER = 1;
 
     private static final String JSON_PATH = "$..value";
@@ -92,6 +105,9 @@ class JsonResponseValidationStepsTests
             "The number of JSON elements by JSON path: ";
     private static final String HTML =
             "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\"/>";
+
+    private static final String VARIABLE_NAME = "name";
+    private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
 
     @Mock private VariableContext variableContext;
     @Mock private ISoftAssert softAssert;
@@ -104,39 +120,38 @@ class JsonResponseValidationStepsTests
     void beforeEach()
     {
         JsonPathUtils.setJacksonConfiguration();
+        var jsonSteps = new JsonSteps(new FluentEnumConverter(), httpTestContext, variableContext);
+        jsonSteps.setSoftAssert(softAssert);
         jsonResponseValidationSteps = new JsonResponseValidationSteps(httpTestContext, variableContext,
-                attachmentPublisher, new JsonUtils());
+                attachmentPublisher, new JsonUtils(), jsonSteps);
         jsonResponseValidationSteps.setSoftAssert(softAssert);
     }
 
-    static Stream<Arguments> defaultDataProvider()
+    static Stream<Arguments> jsonValuesAndElements()
     {
-        // @formatter:off
         return Stream.of(
-                Arguments.of(STRING_PATH,               STRING_PATH_RESULT),
-                Arguments.of(OBJECT_PATH,               OBJECT_PATH_RESULT),
-                Arguments.of("$.test.number",           "42"),
-                Arguments.of("$.test.bool",             TRUE),
-                Arguments.of(ARRAY_PATH,                ARRAY_PATH_RESULT),
-                Arguments.of("$..number",               "[42]"),
-                Arguments.of(BOOL_ELEMENT_JSON_PATH,    "[true]")
+                arguments(STRING_PATH,             STRING_PATH_ELEMENT_RESULT),
+                arguments(NULL_PATH,               NULL_PATH_RESULT),
+                arguments(NUMBER_PATH,             NUMBER_PATH_RESULT),
+                arguments(BOOLEAN_PATH,            BOOLEAN_PATH_RESULT),
+                arguments(OBJECT_PATH,             OBJECT_PATH_RESULT),
+                arguments(ARRAY_PATH,              ARRAY_PATH_RESULT),
+                arguments(NUMBER_INDEFINITE_PATH,  NUMBER_INDEFINITE_PATH_RESULT),
+                arguments(BOOLEAN_INDEFINITE_PATH, BOOLEAN_INDEFINITE_PATH_RESULT)
         );
-        // @formatter:on
     }
 
     static Stream<Arguments> checkJsonElementsNumberDataProvider()
     {
-        // @formatter:off
         return Stream.of(
-                Arguments.of(STRING_PATH, ELEMENTS_NUMBER),
-                Arguments.of(ARRAY_PATH,          2),
-                Arguments.of(NON_EXISTING_PATH,   0)
+                arguments(STRING_PATH, ELEMENTS_NUMBER),
+                arguments(ARRAY_PATH,          2),
+                arguments(NON_EXISTING_PATH,   0)
         );
-        // @formatter:on
     }
 
     @ParameterizedTest
-    @MethodSource("defaultDataProvider")
+    @MethodSource("jsonValuesAndElements")
     void testIsDataByJsonPathEqual(String jsonPath, String expectedData)
     {
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
@@ -144,7 +159,7 @@ class JsonResponseValidationStepsTests
     }
 
     @ParameterizedTest
-    @MethodSource("defaultDataProvider")
+    @MethodSource("jsonValuesAndElements")
     void testIsDataByJsonPathFromJsonEqual(String jsonPath, String expectedData)
     {
         jsonResponseValidationSteps.isDataByJsonPathFromJsonEqual(JSON, jsonPath, expectedData, Options.empty());
@@ -201,7 +216,7 @@ class JsonResponseValidationStepsTests
     {
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
         String nonExistingPath = NON_EXISTING_PATH;
-        jsonResponseValidationSteps.isDataByJsonPathEqual(nonExistingPath, STRING_PATH_RESULT,
+        jsonResponseValidationSteps.isDataByJsonPathEqual(nonExistingPath, STRING_PATH_ELEMENT_RESULT,
                 Options.empty());
         verifyPathNotFoundExceptionRecording(nonExistingPath);
     }
@@ -246,34 +261,30 @@ class JsonResponseValidationStepsTests
     }
 
     @Test
-    void testSaveJsonFromContextElementToVariable()
+    void shouldSaveJsonElementFromContextElementToVariable()
     {
         when(httpTestContext.getJsonContext()).thenReturn(JSON);
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        String variableName = VARIABLE_NAME;
-        JsonResponseValidationSteps spy = Mockito.spy(jsonResponseValidationSteps);
-        spy.saveJsonElementFromContextToVariable(STRING_PATH, scopes, variableName);
-        verify(spy).saveJsonElementToVariable(JSON, STRING_PATH, scopes, variableName);
+        jsonResponseValidationSteps.saveJsonElementFromContextToVariable(STRING_PATH, SCOPES, VARIABLE_NAME);
+        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, STRING_PATH_ELEMENT_RESULT);
+        verifyNoInteractions(softAssert);
     }
 
     @ParameterizedTest
-    @MethodSource("defaultDataProvider")
-    void testSaveJsonElementFromGivenJsonToVariable(String jsonPath, String expectedData)
+    @MethodSource("jsonValuesAndElements")
+    void shouldSaveJsonElementFromGivenJson(String jsonPath, String expectedData)
     {
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        String variableName = VARIABLE_NAME;
-        jsonResponseValidationSteps.saveJsonElementToVariable(JSON, jsonPath, scopes, variableName);
-        verify(variableContext).putVariable(scopes, variableName, expectedData);
+        jsonResponseValidationSteps.saveJsonElementToVariable(JSON, jsonPath, SCOPES, VARIABLE_NAME);
+        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, expectedData);
+        verifyNoInteractions(softAssert);
     }
 
     @Test
-    void testSaveJsonElementFromGivenJsonToVariableWithPathNotFoundException()
+    void shouldFailToSaveNonExistingJsonElementFromGivenJson()
     {
-        String nonExistingPath = NON_EXISTING_PATH;
-        jsonResponseValidationSteps
-                .saveJsonElementToVariable(JSON, nonExistingPath, Set.of(VariableScope.STORY), VARIABLE_NAME);
-        verifyPathNotFoundExceptionRecording(nonExistingPath);
-        verifyNoMoreInteractions(variableContext);
+        jsonResponseValidationSteps.saveJsonElementToVariable(JSON, NON_EXISTING_PATH, Set.of(VariableScope.STORY),
+                VARIABLE_NAME);
+        verifyPathNotFoundExceptionRecording(NON_EXISTING_PATH);
+        verifyNoInteractions(variableContext);
     }
 
     @ParameterizedTest
@@ -383,22 +394,6 @@ class JsonResponseValidationStepsTests
         jsonResponseValidationSteps.doesJsonPathElementsMatchRule(jsonPath, ComparisonRule.EQUAL_TO, number);
         verify(softAssert).assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(number),
                 verifyMatcher(number));
-    }
-
-    @Test
-    void testSaveJsonElementToVariableNullData()
-    {
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        jsonResponseValidationSteps.saveJsonElementToVariable(RESPONSE_NULL, RESPONSE_PATH, scopes, VARIABLE_NAME);
-        verify(variableContext).putVariable(scopes, VARIABLE_NAME, "null");
-    }
-
-    @Test
-    void testSaveJsonElementToVariableNoData()
-    {
-        jsonResponseValidationSteps.saveJsonElementToVariable(RESPONSE_NULL, SOME_PATH, Set.of(VariableScope.STORY),
-                VARIABLE_NAME);
-        verifyPathNotFoundExceptionRecording(NON_EXISTING_SOME_PATH);
     }
 
     @Test

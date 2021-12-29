@@ -30,8 +30,6 @@
         <property name="httpClient" ref="httpClient-RestApi"/>
     </bean>
 
-    <bean id="jsonSoftAssert" class="org.vividus.validator.JsonSoftAssert" parent="softAssert" />
-
     <bean id="apiSteps" class="org.vividus.steps.api.HttpRequestSteps">
         <property name="apiEndpoint" value="${rest-api.http.endpoint}"/>
     </bean>

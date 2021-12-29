@@ -7,9 +7,16 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="jsonPatchSteps" class="org.vividus.steps.json.JsonPatchSteps" />
+    <bean id="jsonSoftAssert" class="org.vividus.json.softassert.JsonSoftAssert" parent="softAssert" />
+
+    <bean id="jsonSteps" class="org.vividus.json.steps.JsonSteps">
+        <property name="softAssert" ref="jsonSoftAssert" />
+    </bean>
+
+    <bean id="jsonPatchSteps" class="org.vividus.json.steps.JsonPatchSteps" />
 
     <util:list id="stepBeanNames-Json">
+        <idref bean="jsonSteps" />
         <idref bean="jsonPatchSteps" />
     </util:list>
 </beans>
