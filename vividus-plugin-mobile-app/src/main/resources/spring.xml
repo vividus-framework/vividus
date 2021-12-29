@@ -100,11 +100,14 @@
             </bean>
         </property>
         <property name="shootingStrategy" value="${mobile.screenshot.strategy}" />
+        <property name="downscale" value="${mobile.screenshot.downscale}" />
     </bean>
 
     <bean id="mobileAppWebDriverManager" class="org.vividus.selenium.mobileapp.MobileAppWebDriverManager" parent="genericWebDriverManager"/>
 
-    <bean id="coordsProvider" class="org.vividus.selenium.mobileapp.screenshot.NativeHeaderAwareCoordsProvider" />
+    <bean id="coordsProvider" class="org.vividus.selenium.mobileapp.screenshot.MobileAppCoordsProvider">
+        <constructor-arg index="0" value="${mobile.screenshot.downscale}" />
+    </bean>
 
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
         <idref bean="applicationSteps" />
