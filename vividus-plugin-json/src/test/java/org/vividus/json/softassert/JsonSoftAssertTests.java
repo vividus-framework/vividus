@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.validator;
+package org.vividus.json.softassert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

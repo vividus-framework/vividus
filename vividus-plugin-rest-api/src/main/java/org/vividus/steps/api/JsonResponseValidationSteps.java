@@ -31,7 +31,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jayway.jsonpath.InvalidJsonException;
-import com.jayway.jsonpath.PathNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -41,11 +40,11 @@ import org.vividus.context.VariableContext;
 import org.vividus.diff.JsonDiffMatcher;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.json.steps.JsonSteps;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.SubSteps;
-import org.vividus.util.json.JsonPathUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.RetryTimesBasedWaiter;
@@ -71,45 +70,48 @@ public class JsonResponseValidationSteps
     private final VariableContext variableContext;
     private final IAttachmentPublisher attachmentPublisher;
     private final JsonUtils jsonUtils;
-
+    private final JsonSteps jsonSteps;
     private ISoftAssert softAssert;
 
     public JsonResponseValidationSteps(HttpTestContext httpTestContext, VariableContext variableContext,
-            IAttachmentPublisher attachmentPublisher, JsonUtils jsonUtils)
+            IAttachmentPublisher attachmentPublisher, JsonUtils jsonUtils, JsonSteps jsonSteps)
     {
         this.httpTestContext = httpTestContext;
         this.variableContext = variableContext;
         this.attachmentPublisher = attachmentPublisher;
         this.jsonUtils = jsonUtils;
+        this.jsonSteps = jsonSteps;
     }
 
     /**
-     * Checks if JSON contains the expected data by given JSON path
-     * @param jsonPath JSON path
-     * @param expectedData expected value of element by JSON path
-     * @param options JSON comparison options. Available options: TREATING_NULL_AS_ABSENT, IGNORING_ARRAY_ORDER,
-     * IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS, IGNORING_VALUES
-     * @return true JSON contains the expected data by given JSON path, otherwise - false
+     * Checks if the given JSON contains the expected JSON element by the specified JSON path
+     *
+     * @param jsonPath     The JSON path used to find the actual JSON element.
+     * @param expectedJson The expected JSON element to compare against.
+     * @param options      JSON comparison options. Available options: TREATING_NULL_AS_ABSENT, IGNORING_ARRAY_ORDER,
+     *                     IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS, IGNORING_VALUES.
+     * @return true if JSON contains the expected JSON element by the specified JSON path, otherwise - false.
      */
-    @Then("JSON element by JSON path `$jsonPath` is equal to `$expectedData`$options")
-    public boolean isDataByJsonPathEqual(String jsonPath, String expectedData, Options options)
+    @Then("JSON element by JSON path `$jsonPath` is equal to `$expectedJson`$options")
+    public boolean isDataByJsonPathEqual(String jsonPath, String expectedJson, Options options)
     {
-        return isDataByJsonPathFromJsonEqual(getActualJson(), jsonPath, expectedData, options);
+        return isDataByJsonPathFromJsonEqual(getActualJson(), jsonPath, expectedJson, options);
     }
 
     /**
-     * Checks if supplied JSON contains the expected data by given JSON path
-     * @param json JSON data
-     * @param jsonPath JSON path
-     * @param expectedData expected value of element by JSON path
-     * @param options JSON comparison options. Available options: TREATING_NULL_AS_ABSENT, IGNORING_ARRAY_ORDER,
-     * IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS, IGNORING_VALUES
-     * @return true JSON contains the expected data by given JSON path, otherwise - false
+     * Checks if the given JSON contains the expected JSON element by the specified JSON path
+     *
+     * @param json         The JSON used to find the actual JSON element.
+     * @param jsonPath     The JSON path used to find the actual JSON element.
+     * @param expectedJson The expected JSON element to compare against.
+     * @param options      JSON comparison options. Available options: TREATING_NULL_AS_ABSENT, IGNORING_ARRAY_ORDER,
+     *                     IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS, IGNORING_VALUES.
+     * @return true if JSON contains the expected JSON element by the specified JSON path, otherwise - false.
      */
-    @Then("JSON element from `$json` by JSON path `$jsonPath` is equal to `$expectedData`$options")
-    public boolean isDataByJsonPathFromJsonEqual(String json, String jsonPath, String expectedData, Options options)
+    @Then("JSON element from `$json` by JSON path `$jsonPath` is equal to `$expectedJson`$options")
+    public boolean isDataByJsonPathFromJsonEqual(String json, String jsonPath, String expectedJson, Options options)
     {
-        return getDataByJsonPath(json, jsonPath, expectedData).map(match(jsonPath, expectedData, options))
+        return getJsonElementByJsonPath(json, jsonPath, expectedJson).map(match(jsonPath, expectedJson, options))
                 .orElse(Boolean.FALSE).booleanValue();
     }
 
@@ -124,8 +126,9 @@ public class JsonResponseValidationSteps
 
             if (differences == null)
             {
-                return softAssert.assertThat(format("Data by JSON path: %s is equal to '%s'", jsonPath, expectedData),
-                        actualData, jsonMatcher);
+                return softAssert.assertThat(
+                        format("Data by JSON path: %s is equal to '%s'", jsonPath, expectedData), actualData,
+                        jsonMatcher);
             }
 
             StringBuilder matched = new StringBuilder("JSON documents are different:").append(LF);
@@ -192,24 +195,25 @@ public class JsonResponseValidationSteps
     }
 
     /**
-     * Saves value extracted from JSON context or HTTP response with given scope into the variable with specified name
+     * Saves JSON element found in JSON context or HTTP response into the variable with specified name and scope
      * <p>
-     * <b>Actions performed at this step:</b>
+     * <b>The actions performed in this step:</b>
      * </p>
      * <ul>
-     * <li>Extracts value by jsonPath from JSON context or HTTP response</li>
-     * <li>Saves value extracted into the variable with specified name</li>
+     * <li>Finds a JSON element by the JSON path in JSON context or HTTP response</li>
+     * <li>Saves the found JSON element into the variable with specified name and scope</li>
      * </ul>
-     * @param jsonPath json path
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName variable name
+     *
+     * @param jsonPath     The JSON path used to find JSON element
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The name of the variable to save the found JSON element
      */
     @When("I save JSON element from context by JSON path `$jsonPath` to $scopes variable `$variableName`")
     public void saveJsonElementFromContextToVariable(String jsonPath, Set<VariableScope> scopes, String variableName)
@@ -218,31 +222,31 @@ public class JsonResponseValidationSteps
     }
 
     /**
-     * Saves value extracted by the JSON path from the given json with the given scope into the variable with specified
-     * name
+     * Saves JSON element found in the given JSON into the variable with specified name and scope
      * <p>
-     * <b>Actions performed at this step:</b>
+     * <b>The actions performed in this step:</b>
      * </p>
      * <ul>
-     * <li>Extracts value by jsonPath from the given json</li>
-     * <li>Saves value extracted from HTTP response with given scope into the variable with specified name</li>
+     * <li>Finds a JSON element by the JSON path in the given JSON</li>
+     * <li>Saves the found JSON element into the variable with specified name and scope</li>
      * </ul>
-     * @param json A json string to extract value from
-     * @param jsonPath A JSON path
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A variable name
+     *
+     * @param json         The JSON used to find JSON element
+     * @param jsonPath     The JSON path used to find JSON element
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The name of the variable to save the found JSON element
      */
     @When("I save JSON element from `$json` by JSON path `$jsonPath` to $scopes variable `$variableName`")
     public void saveJsonElementToVariable(String json, String jsonPath, Set<VariableScope> scopes, String variableName)
     {
-        getDataByJsonPath(json, jsonPath, null)
+        getJsonElementByJsonPath(json, jsonPath, null)
                 .ifPresent(actualData -> variableContext.putVariable(scopes, variableName, actualData));
     }
 
@@ -472,32 +476,13 @@ public class JsonResponseValidationSteps
         }
     }
 
-    private Optional<String> getDataByJsonPath(String json, String jsonPath, String expectedData)
+    private Optional<String> getJsonElementByJsonPath(String json, String jsonPath, String expectedData)
     {
-        return getDataByJsonPathSafely(json, jsonPath).map(
-            jsonByPath -> unwrapCollection(jsonByPath, expectedData)
-            .orElseGet(() -> jsonUtils.toJson(jsonByPath.orElse(null))));
-    }
-
-    private <T> Optional<Optional<T>> getDataByJsonPathSafely(String json, String jsonPath)
-    {
-        return getDataByJsonPathSafely(json, jsonPath, true);
-    }
-
-    private <T> Optional<Optional<T>> getDataByJsonPathSafely(String json, String jsonPath, boolean recordFail)
-    {
-        try
-        {
-            return Optional.of(Optional.ofNullable(JsonPathUtils.getData(json, jsonPath)));
-        }
-        catch (PathNotFoundException e)
-        {
-            if (recordFail)
-            {
-                softAssert.recordFailedAssertion(e);
-            }
-            return Optional.empty();
-        }
+        return jsonSteps.getDataByJsonPathSafely(json, jsonPath, true).map(
+            jsonByPath -> unwrapCollection(jsonByPath, expectedData).orElseGet(
+                    () -> jsonUtils.toJson(jsonByPath.orElse(null))
+            )
+        );
     }
 
     private Optional<String> unwrapCollection(Optional<Object> jsonByPath, String expectedData)
@@ -528,7 +513,7 @@ public class JsonResponseValidationSteps
 
     private Optional<List<?>> getElements(String json, String jsonPath)
     {
-        Optional<Optional<Object>> jsonObject = getDataByJsonPathSafely(json, jsonPath, false);
+        Optional<Optional<Object>> jsonObject = jsonSteps.getDataByJsonPathSafely(json, jsonPath, false);
         return jsonObject.map(e -> e.map(value -> value instanceof List ? (List<?>) value : List.of(value))
                 .orElseGet(() -> Collections.singletonList(null)));
     }

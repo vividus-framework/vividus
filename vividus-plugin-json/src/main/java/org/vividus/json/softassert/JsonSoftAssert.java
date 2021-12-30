@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.validator;
+package org.vividus.json.softassert;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;

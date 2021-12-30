@@ -4,6 +4,7 @@ ext.jsonPathVersion = '2.6.0'
 
 dependencies {
     api project(':vividus-engine')
+    api project(':vividus-plugin-json')
     implementation project(':vividus-http-client')
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
