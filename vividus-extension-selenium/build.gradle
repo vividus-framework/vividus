@@ -2,8 +2,7 @@ project.description = 'Vividus extension for selenium'
 
  ext {
      seleniumVersion = '4.1.1'
-     browserupProxyVersion = '2.1.2'
-     nettyVersion = '4.1.72.Final'
+     browserupProxyVersion = '2.1.3'
 }
 
  dependencies {
@@ -21,8 +20,8 @@ project.description = 'Vividus extension for selenium'
 
      api(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: versions.ashot)
 
-     api(group: 'com.browserup', name: 'browserup-proxy-core', version: browserupProxyVersion)
-     implementation(group: 'com.browserup', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
+     api(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-core', version: browserupProxyVersion)
+     implementation(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
 
      implementation platform(group: 'com.google.zxing', name: 'zxing-parent', version: '3.4.1')
      implementation(group: 'com.google.zxing', name: 'core')
@@ -32,11 +31,6 @@ project.description = 'Vividus extension for selenium'
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
      implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
      implementation(group: 'org.springframework', name: 'spring-core', version: versions.spring)
-
-     // browserup-proxy depends on both netty-all and netty-core, so we need to align versions of all netty dependencies
-     // https://github.com/browserup/browserup-proxy/blob/26714e26fae728733a13a0f332bd0c6dcaa78de5/browserup-proxy-core/build.gradle#L60-L76
-     implementation(group: 'io.netty', name: 'netty-all', version: nettyVersion)
-     implementation(group: 'io.netty', name: 'netty-codec', version: nettyVersion)
 
      compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
