@@ -17,9 +17,9 @@ Given I start mobile application with capabilities:
 
 Scenario: Verify step: 'When I activate application with bundle identifier `$bundleId`'
 When I activate application with bundle identifier `${browser-app}`
-When I wait until element located `accessibilityId(<togglerAccessibilityId>)` disappears
+When I wait until element located `accessibilityId(menuToggler)` disappears
 When I activate application with bundle identifier `${main-app}`
-When I wait until element located `accessibilityId(<togglerAccessibilityId>)` appears
+When I wait until element located `accessibilityId(menuToggler)` appears
 Then number of HTTP GET requests with URL pattern `.*` is not equal to `0`
 
 Scenario: Verify step: 'When I close mobile application'
