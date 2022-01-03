@@ -1,59 +1,13 @@
-buildscript {
-    ext.springBootVersion = '2.6.1'
-
-    repositories {
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath(group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: "${springBootVersion}")
-    }
-}
-apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
-
 project.description = 'Vividus to Azure DevOps exporter'
 
-configurations.testImplementation {
-    exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j18-impl'
-    exclude group: 'ch.qos.logback', module: 'logback-classic'
-}
-
-configurations.all {
-    exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-}
+apply from: "$rootDir/vividus-exporter-commons/dependencies.gradle"
 
 dependencies {
     implementation project(':vividus-http-client')
     implementation project(':vividus-util')
     implementation project(':vividus-engine')
-
-    // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
-    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: "${springBootVersion}")
-
-    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
-    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
-
-    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.17.1')
-    implementation(group: 'org.apache.logging.log4j', name: 'log4j-api')
-    implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
-    implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl')
+    implementation project(':vividus-exporter-commons')
 
     implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.13.1')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml')
-
-    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
-}
-
-// https://stackoverflow.com/a/62645933/2067574
-configurations {
-    [apiElements, runtimeElements].each {
-        it.outgoing.artifacts.removeIf {
-            it.buildDependencies.getDependencies(null).contains(jar)
-        }
-        it.outgoing.artifact(bootJar)
-    }
 }

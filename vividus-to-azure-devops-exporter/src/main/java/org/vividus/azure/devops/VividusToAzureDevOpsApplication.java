@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,38 +17,28 @@
 package org.vividus.azure.devops;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.PropertySource;
 import org.vividus.azure.devops.configuration.AzureDevOpsExporterOptions;
 import org.vividus.azure.devops.exporter.AzureDevOpsExporter;
-import org.vividus.util.property.PropertyParser;
+import org.vividus.exporter.config.VividusExporterCommonConfiguration;
 
 @SpringBootApplication
+@Import(VividusExporterCommonConfiguration.class)
 @EnableConfigurationProperties(AzureDevOpsExporterOptions.class)
-@ImportResource(locations = { "org/vividus/azure/devops/spring.xml", "org/vividus/http/client/spring.xml" })
-@PropertySource({
-    "org/vividus/http/client/defaults.properties",
-    "org/vividus/util/defaults.properties"
-})
+@ImportResource(locations = "org/vividus/azure/devops/spring.xml")
+@SuppressWarnings("checkstyle:hideutilityclassconstructor")
 public class VividusToAzureDevOpsApplication
 {
     public static void main(String [] args) throws BeansException, IOException
     {
         ApplicationContext context = SpringApplication.run(VividusToAzureDevOpsApplication.class, args);
         context.getBean(AzureDevOpsExporter.class).exportResults();
-    }
-
-    @Bean("propertyParser")
-    public PropertyParser propertyParser(Properties properties)
-    {
-        return new PropertyParser(properties);
     }
 }
