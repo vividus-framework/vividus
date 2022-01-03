@@ -1,19 +1,11 @@
 {transformer=FROM_LANDSCAPE}
 |textElementXpath           |//XCUIElementTypeStaticText                            |
-|togglerAccessibilityId     |menu-toggler-testID                                    |
 |menuButtonXpath            |//XCUIElementTypeButton[@name="Button"]                |
-|incrementAccessibilityId   |increment-testID                                       |
 |menuInputXpath             |//XCUIElementTypeButton[@name="Input"]                 |
-|nameInputAccessibilityId   |name-input-testID                                      |
 |nameDisplayXpath           |//XCUIElementTypeTextField[@value='${text}']           |
 |menuQrCodeXpath            |//XCUIElementTypeButton[@name="QR Code"]               |
 |menuWaitXpath              |//XCUIElementTypeButton[@name="Wait"]                  |
-|pictureAccessibilityId     |picture-testID                                         |
-|hidePictureAccessibilityId |hide-picture-testID                                    |
-|showPictureAccessibilityId |show-picture-testID                                    |
 |menuScrollViewXpath        |//XCUIElementTypeButton[@name="Scroll View"]           |
-|startElementAccessibilityId|history-start-testID                                   |
-|endElementAccessibilityId  |history-end-testID                                     |
 |nameInputXpath             |//XCUIElementTypeTextField[@value='Enter your name...']|
 |action                     |COMPARE_AGAINST                                        |
 |scrollViewXpath            |//XCUIElementTypeScrollView                            |
