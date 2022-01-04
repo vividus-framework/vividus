@@ -155,7 +155,7 @@ class MobileAppWebDriverManagerTests
         response.setValue(Collections.EMPTY_MAP);
 
         when(executingMethodDriver.execute(GET_SESSION_COMMAND)).thenReturn(response);
-        Exception exception = assertThrows(IllegalArgumentException.class, driverManager::getStatusBarSize);
+        var exception = assertThrows(IllegalStateException.class, driverManager::getStatusBarSize);
         assertEquals("Unable to receive status bar height. Received value is null.", exception.getMessage());
     }
 
