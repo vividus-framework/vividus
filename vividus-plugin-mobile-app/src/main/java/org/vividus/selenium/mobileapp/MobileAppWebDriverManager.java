@@ -141,7 +141,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
         Long statBarHeight = getStatBarHeightUnsafely();
         if (statBarHeight == null)
         {
-            throw new IllegalArgumentException("Unable to receive status bar height. Received value is null.");
+            throw new IllegalStateException("Unable to receive status bar height. Received value is null.");
         }
         return statBarHeight.intValue();
     }
