@@ -1,5 +1,3 @@
-Description: Integration tests for known issues functionality
-
 Meta:
     @epic vividus-core
     @feature known-issues

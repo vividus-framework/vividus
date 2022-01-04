@@ -8,20 +8,20 @@
   "VVD-2": {
     "type": "Internal",
     "assertionPattern": ".*\\[Expected: a value equal to <5> Actual: <4> was less than <5>\\]",
-    "storyPattern": "KnownIssues",
+    "storyPattern": "Known issues",
     "variablePatterns": { "var":  "value-.*" }
   },
   "VVD-3": {
     "type": "Internal",
     "assertionPattern": ".*Different value found (when comparing expected array element|in node).*",
     "scenarioPattern": "Known issues should be detected and matched for separate JSON assertions",
-    "storyPattern": "KnownIssues"
+    "storyPattern": "Known issues"
   },
   "VVD-4": {
     "type": "Internal",
     "assertionPattern": ".*Different keys found in node.*",
     "scenarioPattern": "Known issues should be detected and matched for separate JSON assertions",
-    "storyPattern": "KnownIssues"
+    "storyPattern": "Known issues"
   },
   "VVD-5": {
     "type": "Internal",
@@ -33,14 +33,14 @@
     "type": "Internal",
     "assertionPattern": ".*",
     "scenarioPattern": "Known issue should be detected and matched by step pattern with composite step",
-    "storyPattern": "KnownIssues",
+    "storyPattern": "Known issues",
     "stepPattern": "When I use composite step in known-issues"
   },
   "VVD-7": {
     "type": "Internal",
     "assertionPattern": ".*",
     "scenarioPattern": "Known issue should should stop scenario if it's marked as fail test case fast",
-    "storyPattern": "KnownIssues",
+    "storyPattern": "Known issues",
     "stepPattern": "Then `vividus` matches.*",
     "failScenarioFast": true
   },
@@ -48,7 +48,7 @@
     "type": "Internal",
     "assertionPattern": ".*",
     "scenarioPattern": "Known issue should should stop scenario and the rest of the story if it's marked as fail test case and test suite fast",
-    "storyPattern": "KnownIssues",
+    "storyPattern": "Known issues",
     "stepPattern": "Then `vividus` matches.*",
     "failScenarioFast": true,
     "failStoryFast": true
@@ -57,7 +57,7 @@
     "type": "Internal",
     "assertionPattern": ".*",
     "scenarioPattern": "Known issue should be detected in sub-steps",
-    "storyPattern": "KnownIssues",
+    "storyPattern": "Known issues",
     "stepPattern": "When I use composite step in known-issues",
     "failScenarioFast": true
   },
@@ -83,5 +83,12 @@
     "scenarioPattern": "Validate against Section 508",
     "storyPattern": "Accessibility",
     "stepPattern": "Then I test accessibility.*"
+  },
+  "VVD-13": {
+    "type": "Internal",
+    "assertionPattern": ".*",
+    "scenarioPattern": "Known issue should should not stop the rest of the story if it's not marked as fail test suite fast",
+    "storyPattern": "Next known issues",
+    "stepPattern": "Then `vividus` matches.*"
   }
 }
