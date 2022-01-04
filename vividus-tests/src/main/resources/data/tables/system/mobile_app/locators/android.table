@@ -12,3 +12,4 @@
 |carouselViewXpath          |//android.widget.TextView[@text='Carousel']          |
 |swipeableAreaXpath         |//android.widget.HorizontalScrollView                |
 |textFieldValueAttribute    |text                                                 |
+|scrollableMenuXpath        |//android.widget.ScrollView                          |

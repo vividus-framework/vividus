@@ -13,3 +13,4 @@
 |swipeableAreaXpath         |(//XCUIElementTypeScrollView)[2]                       |
 |textFieldValueAttribute    |value                                                  |
 |keyboardLocator            |xpath(//XCUIElementTypeKeyboard)                       |
+|scrollableMenuXpath        |//XCUIElementTypeScrollView                            |

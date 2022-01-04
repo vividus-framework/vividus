@@ -280,6 +280,7 @@ Meta:
     @requirementId 2112
 When I tap on element located `accessibilityId(menuToggler)`
 When I tap on element located `xpath(<menuQrCodeXpath>)`
+When I wait until element located `xpath(<scrollableMenuXpath>)` disappears
 When I scan barcode from screen and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 
