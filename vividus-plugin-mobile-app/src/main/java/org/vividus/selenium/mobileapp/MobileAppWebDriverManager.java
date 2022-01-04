@@ -29,6 +29,7 @@ import javax.imageio.ImageIO;
 
 import com.google.common.base.Suppliers;
 
+import org.apache.commons.lang3.Validate;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriverException;
@@ -139,10 +140,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     private int getStatBarHeightSafely()
     {
         Long statBarHeight = getStatBarHeightUnsafely();
-        if (statBarHeight == null)
-        {
-            throw new IllegalStateException("Unable to receive status bar height. Received value is null.");
-        }
+        Validate.validState(statBarHeight != null, "Unable to receive status bar height. Received value is null");
         return statBarHeight.intValue();
     }
 
