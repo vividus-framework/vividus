@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.imageio.ImageIO;
 
 import com.google.common.base.Suppliers;
 
+import org.apache.commons.lang3.Validate;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriverException;
@@ -72,21 +73,26 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
         }
         if (isIOSNativeApp())
         {
+            Number statBarHeight;
             try
             {
-                return getStatBarHeight();
+                statBarHeight = getStatBarHeightUnsafely();
             }
             catch (WebDriverException e)
             {
                 // Handling SauceLabs error:
                 // org.openqa.selenium.WebDriverException:
                 // failed serving request GET https://production-sushiboat.default/wd/hub/session/XXXX
-
+                statBarHeight = null;
+            }
+            if (null == statBarHeight)
+            {
                 // Appium 1.21.0 or higher is required
                 Map<String, ?> deviceScreenInfo = javascriptActions.executeScript("mobile:deviceScreenInfo");
                 Map<String, ?> statusBarSize = (Map<String, ?>) deviceScreenInfo.get("statusBarSize");
-                return ((Number) statusBarSize.get(HEIGHT)).intValue();
+                statBarHeight = (Number) statusBarSize.get(HEIGHT);
             }
+            return statBarHeight.intValue();
         }
         return getAndroidStatusBar();
     }
@@ -108,7 +114,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
             // The workaround is for Android TV. It is not clear if any of the Android TVs could have a status bar
             // at all, but the session capabilities contains `statBarHeight`, and to be on the safe side fall-back code
             // was added to get the status bar height in case of exception.
-            return getStatBarHeight();
+            return getStatBarHeightSafely();
         }
     }
 
@@ -131,9 +137,15 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
         }
     }
 
-    private int getStatBarHeight()
+    private int getStatBarHeightSafely()
     {
-        Long statBarHeight = getSessionDetail("statBarHeight");
+        Long statBarHeight = getStatBarHeightUnsafely();
+        Validate.validState(statBarHeight != null, "Unable to receive status bar height. Received value is null");
         return statBarHeight.intValue();
+    }
+
+    private Long getStatBarHeightUnsafely()
+    {
+        return getSessionDetail("statBarHeight");
     }
 }
