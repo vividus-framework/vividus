@@ -24,7 +24,7 @@ jobs:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
       fail-fast: false
-    
+
     env:
       TEST_APP_VERSION: 0.2.0
 
@@ -110,6 +110,7 @@ jobs:
         fail_ci_if_error: true
 
     - name: VIVIDUS tasks validation
+      shell: bash
       run: |
          ./gradlew validateKnownIssues printSteps countSteps -x testVividusInitialization  -p vividus-tests --project-prop 'vividus.bdd.variables.global.iterationLimit=3' --project-prop 'vividus.bdd.variables.global.target-platform=ios'
 
