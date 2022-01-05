@@ -27,7 +27,7 @@ exit /b 1
 
 :call
 @CALL "%GRADLEW_PATH%" %*
-exit /b 0
+exit /b %ERRORLEVEL%
 
 :setpropertyvalue
 For /F "tokens=1* delims==" %%A IN (%GRADLE_PROPERTIES%) DO (
