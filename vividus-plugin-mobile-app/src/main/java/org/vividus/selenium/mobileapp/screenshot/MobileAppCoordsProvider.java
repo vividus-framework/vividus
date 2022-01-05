@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,28 +19,33 @@ package org.vividus.selenium.mobileapp.screenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
+import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtil;
 import org.vividus.selenium.screenshot.AbstractAdjustingCoordsProvider;
 import org.vividus.ui.context.IUiContext;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
 
-public class NativeHeaderAwareCoordsProvider extends AbstractAdjustingCoordsProvider
+public class MobileAppCoordsProvider extends AbstractAdjustingCoordsProvider
 {
     private static final long serialVersionUID = 2966521618709606533L;
 
     private final transient MobileAppWebDriverManager mobileAppWebDriverManager;
+    private final boolean downscale;
 
-    public NativeHeaderAwareCoordsProvider(MobileAppWebDriverManager mobileAppWebDriverManager, IUiContext uiContext)
+    public MobileAppCoordsProvider(boolean downscale, MobileAppWebDriverManager mobileAppWebDriverManager,
+        IUiContext uiContext)
     {
         super(uiContext);
         this.mobileAppWebDriverManager = mobileAppWebDriverManager;
+        this.downscale = downscale;
     }
 
     @Override
     public Coords ofElement(WebDriver driver, WebElement element)
     {
         Coords coords = getCoords(element);
-        return getUiContext().getSearchContext() == element ? coords : adjustToSearchContext(coords);
+        coords = getUiContext().getSearchContext() == element ? coords : adjustToSearchContext(coords);
+        return downscale ? coords : adjustToDpr(coords);
     }
 
     protected Coords getCoords(WebElement element)
@@ -48,5 +53,11 @@ public class NativeHeaderAwareCoordsProvider extends AbstractAdjustingCoordsProv
         Coords coords = super.ofElement(null, element);
         return new Coords(coords.x, coords.y - mobileAppWebDriverManager.getStatusBarSize(), coords.width,
                 coords.height);
+    }
+
+    private Coords adjustToDpr(Coords coords)
+    {
+        double dpr = mobileAppWebDriverManager.getDpr();
+        return CoordsUtil.scale(coords, dpr);
     }
 }

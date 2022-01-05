@@ -261,7 +261,7 @@ jobs:
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
         fi
 
-    - name: SauceLabs - iOS - Mobile App - Run system tests
+    - name: SauceLabs - iOS - Mobile App - Run system tests (Downscaled)
       if: matrix.platform == 'ubuntu-latest'
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
@@ -274,8 +274,8 @@ jobs:
                                                   -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                  -Pvividus.allure.history-directory=output/history/sl-ios-system-tests \
-                                                  -Pvividus.allure.report-directory=output/reports/sl-ios-allure \
+                                                  -Pvividus.allure.history-directory=output/history/sl-ios-system-tests-downscaled \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-ios-allure-downscaled \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
                                                   -Pvividus.allure.executor.type=github \
                                                   -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
@@ -283,7 +283,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-name="SauceLabs iOS System Tests ${GITHUB_RUN_ID}" \
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                                  -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report" \
+                                                  -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report (Downscaled)" \
                                                   -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
@@ -293,8 +293,46 @@ jobs:
       if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v2
       with:
-        name: SauceLabs - System Tests - Allure report - iOS
-        path: vividus-tests/output/reports/sl-ios-allure
+        name: SauceLabs - System Tests - Allure report - iOS (Downscaled)
+        path: vividus-tests/output/reports/sl-ios-allure-downscaled
+
+    - name: SauceLabs - iOS - Mobile App - Run system tests (Original)
+      if: matrix.platform == 'ubuntu-latest'
+      env:
+        SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
+        SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/mobile_app/ios \
+                                                  -Pvividus.configuration.suites=system/mobile_app/ios,ui \
+                                                  -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
+                                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                  -Pvividus.allure.history-directory=output/history/sl-ios-system-tests-original \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-ios-allure-original \
+                                                  -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                                  -Pvividus.allure.executor.type=github \
+                                                  -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                                  -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.build-name="SauceLabs iOS System Tests ${GITHUB_RUN_ID}" \
+                                                  -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report (Original)" \
+                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip \
+                                                  -Pvividus.statistics.print-failures=true \
+                                                  -Pvividus.mobile.screenshot.downscale=false \
+                                                  -Pvividus.ui.visual.baselines-folder=./baselines/original
+        else
+            echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
+        fi
+
+    - name: SauceLabs - iOS - Mobile App - Publish system tests report
+      if: matrix.platform == 'ubuntu-latest' && always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: SauceLabs - System Tests - Allure report - iOS (Original)
+        path: vividus-tests/output/reports/sl-ios-allure-original
 
     - name: SauceLabs - iOS Proxy- Mobile App - Run system tests
       if: matrix.platform == 'ubuntu-latest'
@@ -334,7 +372,7 @@ jobs:
         name: SauceLabs - System Tests With Proxy- Allure report - iOS
         path: vividus-tests/output/reports/sl-ios-proxy-allure
 
-    - name: SauceLabs - Android - Mobile App - Run system tests
+    - name: SauceLabs - Android - Mobile App - Run system tests (Downscaled)
       if: matrix.platform == 'ubuntu-latest'
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
@@ -347,8 +385,8 @@ jobs:
                                                   -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                  -Pvividus.allure.history-directory=output/history/sl-android-system-tests \
-                                                  -Pvividus.allure.report-directory=output/reports/sl-android-allure \
+                                                  -Pvividus.allure.history-directory=output/history/sl-android-system-tests-downscaled \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-android-allure-downscaled \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
                                                   -Pvividus.allure.executor.type=github \
                                                   -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
@@ -356,7 +394,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-name="SauceLabs Android System Tests ${GITHUB_RUN_ID}" \
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                                  -Pvividus.allure.executor.report-name="SauceLabs Android System tests report" \
+                                                  -Pvividus.allure.executor.report-name="SauceLabs Android System tests report (Downscaled)" \
                                                   -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
@@ -366,8 +404,47 @@ jobs:
       if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v2
       with:
-        name: SauceLabs - System Tests - Allure report - Android
-        path: vividus-tests/output/reports/sl-android-allure
+        name: SauceLabs - System Tests - Allure report - Android (Downscaled)
+        path: vividus-tests/output/reports/sl-android-allure-downscaled
+
+    - name: SauceLabs - Android - Mobile App - Run system tests (Original)
+      if: matrix.platform == 'ubuntu-latest'
+      env:
+        SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
+        SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/mobile_app/android \
+                                                  -Pvividus.configuration.suites=system/mobile_app/android \
+                                                  -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
+                                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                  -Pvividus.allure.history-directory=output/history/sl-android-system-tests-original \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-android-allure-original \
+                                                  -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                                  -Pvividus.allure.executor.type=github \
+                                                  -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                                  -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.build-name="SauceLabs Android System Tests ${GITHUB_RUN_ID}" \
+                                                  -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-name="SauceLabs Android System tests report (Original)" \
+                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip \
+                                                  -Pvividus.statistics.print-failures=true \
+                                                  -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=VisualTesting.story \
+                                                  -Pvividus.mobile.screenshot.downscale=false \
+                                                  -Pvividus.ui.visual.baselines-folder=./baselines/original
+        else
+            echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
+        fi
+
+    - name: SauceLabs - Android - Mobile App - Publish system tests report
+      if: matrix.platform == 'ubuntu-latest' && always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: SauceLabs - System Tests - Allure report - Android (Original)
+        path: vividus-tests/output/reports/sl-android-allure-original
 
     - name: SauceLabs - Android Proxy- Mobile App - Run system tests
       if: matrix.platform == 'ubuntu-latest'
