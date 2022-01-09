@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,14 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.http.rest.Response;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.datafactory.DataFactoryManager;
 import com.azure.resourcemanager.datafactory.fluent.models.PipelineRunInner;
@@ -69,6 +72,7 @@ import org.vividus.azure.datafactory.steps.DataFactorySteps.RunFilterType;
 import org.vividus.azure.util.InnersJacksonAdapter;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -94,19 +98,34 @@ class DataFactoryStepsTests
 
     @ParameterizedTest
     @ValueSource(strings = { SUCCEEDED, FAILED })
-    void shouldRunSuccessfulPipeline(String runStatus) throws IOException
+    void shouldRunSuccessfulPipelineWithoutParameters(String runStatus) throws IOException
     {
-        shouldRunPipeline(mock(PipelineRun.class), runStatus, runStatus, List.of());
+        shouldRunPipelineWithoutParameters(mock(PipelineRun.class), runStatus, runStatus, List.of());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { SUCCEEDED, FAILED })
+    void shouldRunSuccessfulPipelineWithParameters(String runStatus) throws IOException
+    {
+        var parametersJson = "{\"string\": \"str\",\"number\": 1,\"bool\": true,\"null\": null}";
+        Map<String, Object> expectedParameters = new HashMap<>();
+        expectedParameters.put("string", "str");
+        expectedParameters.put("number", 1);
+        expectedParameters.put("bool", true);
+        expectedParameters.put("null", null);
+        shouldRunPipeline(expectedParameters, mock(PipelineRun.class), runStatus, runStatus, List.of(),
+                steps -> steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT,
+                        parametersJson, runStatus));
     }
 
     @Test
-    void shouldRunFailingPipeline() throws IOException
+    void shouldRunFailingPipelineWithoutParameters() throws IOException
     {
         var errorMessage = "error message";
         PipelineRun finalPipelineRunState = mock(PipelineRun.class);
         when(finalPipelineRunState.message()).thenReturn(errorMessage);
 
-        shouldRunPipeline(finalPipelineRunState, FAILED, SUCCEEDED,
+        shouldRunPipelineWithoutParameters(finalPipelineRunState, FAILED, SUCCEEDED,
                 List.of(error("The pipeline run message: {}", errorMessage)));
     }
 
@@ -131,8 +150,18 @@ class DataFactoryStepsTests
                 is(List.of(info(FILTER_LOG_MESSAGE, "<unable to log filters: IO error>"))));
     }
 
-    private void shouldRunPipeline(PipelineRun finalPipelineRunState, String finalRunStatus, String expectedRunStatus,
-            List<LoggingEvent> extraLoggingEvents) throws IOException
+    private void shouldRunPipelineWithoutParameters(PipelineRun finalPipelineRunState,
+            String finalRunStatus, String expectedRunStatus, List<LoggingEvent> extraLoggingEvents) throws IOException
+    {
+        shouldRunPipeline(null, finalPipelineRunState, finalRunStatus, expectedRunStatus, extraLoggingEvents,
+                steps -> steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT,
+                        expectedRunStatus));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void shouldRunPipeline(Map<String, Object> expectedParameters, PipelineRun finalPipelineRunState,
+            String finalRunStatus, String expectedRunStatus, List<LoggingEvent> extraLoggingEvents,
+            Consumer<DataFactorySteps> test) throws IOException
     {
         String runId = "run-id";
 
@@ -140,8 +169,12 @@ class DataFactoryStepsTests
             var createRunResponse = mock(CreateRunResponse.class);
             when(createRunResponse.runId()).thenReturn(runId);
 
+            var response = mock(Response.class);
+            when(response.getValue()).thenReturn(createRunResponse);
+
             var pipelines = mock(Pipelines.class);
-            when(pipelines.createRun(RESOURCE_GROUP_NAME, FACTORY_NAME, PIPELINE_NAME)).thenReturn(createRunResponse);
+            when(pipelines.createRunWithResponse(RESOURCE_GROUP_NAME, FACTORY_NAME, PIPELINE_NAME, null, null, null,
+                    null, expectedParameters, null)).thenReturn(response);
 
             when(dataFactoryManager.pipelines()).thenReturn(pipelines);
 
@@ -169,7 +202,7 @@ class DataFactoryStepsTests
             loggingEvents.add(info(currentStatusLogMessageFormat, finalRunStatus));
             loggingEvents.addAll(extraLoggingEvents);
 
-            steps.runPipeline(PIPELINE_NAME, FACTORY_NAME, RESOURCE_GROUP_NAME, WAIT_TIMEOUT, expectedRunStatus);
+            test.accept(steps);
 
             assertThat(logger.getLoggingEvents(), is(loggingEvents));
         });
@@ -227,8 +260,8 @@ class DataFactoryStepsTests
             var dataFactoryManager = mock(DataFactoryManager.class);
             dataFactoryManagerStaticMock.when(() -> DataFactoryManager.authenticate(tokenCredential, azureProfile))
                     .thenReturn(dataFactoryManager);
-            var steps = new DataFactorySteps(azureProfile, tokenCredential, innersJacksonAdapter, variableContext,
-                    softAssert);
+            var steps = new DataFactorySteps(azureProfile, tokenCredential, innersJacksonAdapter, new JsonUtils(),
+                    variableContext, softAssert);
             consumer.accept(dataFactoryManager, steps);
         }
     }

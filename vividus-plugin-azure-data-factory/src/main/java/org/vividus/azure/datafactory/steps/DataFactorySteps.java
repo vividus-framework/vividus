@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -33,6 +34,7 @@ import com.azure.resourcemanager.datafactory.models.RunQueryFilter;
 import com.azure.resourcemanager.datafactory.models.RunQueryFilterOperand;
 import com.azure.resourcemanager.datafactory.models.RunQueryFilterOperator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
@@ -40,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.vividus.azure.util.InnersJacksonAdapter;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
 import org.vividus.variable.VariableScope;
@@ -51,21 +54,24 @@ public class DataFactorySteps
 
     private final DataFactoryManager dataFactoryManager;
     private final InnersJacksonAdapter innersJacksonAdapter;
+    private final JsonUtils jsonUtils;
     private final VariableContext variableContext;
     private final ISoftAssert softAssert;
 
     public DataFactorySteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            InnersJacksonAdapter innersJacksonAdapter, VariableContext variableContext, ISoftAssert softAssert)
+            InnersJacksonAdapter innersJacksonAdapter, JsonUtils jsonUtils, VariableContext variableContext,
+            ISoftAssert softAssert)
     {
         this.dataFactoryManager = DataFactoryManager.authenticate(tokenCredential, azureProfile);
         this.softAssert = softAssert;
         this.innersJacksonAdapter = innersJacksonAdapter;
+        this.jsonUtils = jsonUtils;
         this.variableContext = variableContext;
     }
 
     /**
-     * Creates a run of a pipeline in Data Factory, waits for its completion or until the timeout is reached and
-     * validates the run status is equal to the expected one.
+     * Runs a pipeline in Data Factory, waits for its completion or until the timeout is reached and validates the run
+     * status is equal to the expected one.
      *
      * @param pipelineName              The name of the pipeline to run.
      * @param factoryName               The name of the factory.
@@ -74,13 +80,36 @@ public class DataFactorySteps
      * @param expectedPipelineRunStatus The expected pipeline run status, e.g. Succeeded
      */
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    @When(value = "I run pipeline `$pipelineName` in Data Factory `$factoryName` from resource group "
-            + "`$resourceGroupName` with wait timeout `$waitTimeout` and expect run status to be equal to "
-            + "`$expectedPipelineRunStatus`", priority = 1)
+    @When("I run pipeline `$pipelineName` in Data Factory `$factoryName` from resource group `$resourceGroupName` with "
+            + "wait timeout `$waitTimeout` and expect run status to be equal to `$expectedPipelineRunStatus`")
     public void runPipeline(String pipelineName, String factoryName, String resourceGroupName, Duration waitTimeout,
             String expectedPipelineRunStatus)
     {
-        String runId = dataFactoryManager.pipelines().createRun(resourceGroupName, factoryName, pipelineName).runId();
+        runPipeline(pipelineName, factoryName, resourceGroupName, waitTimeout, null, expectedPipelineRunStatus);
+    }
+
+    /**
+     * Runs a pipeline with the provided input parameters in Data Factory, waits for its completion or until the
+     * timeout is reached and validates the run status is equal to the expected one.
+     *
+     * @param pipelineName              The name of the pipeline to run.
+     * @param factoryName               The name of the factory.
+     * @param resourceGroupName         The name of the resource group of the factory.
+     * @param waitTimeout               The maximum duration of time to wait for the pipeline completion.
+     * @param inputParametersJson       The input parameters of the pipeline run in JSON format.
+     * @param expectedPipelineRunStatus The expected pipeline run status, e.g. Succeeded
+     */
+    @SuppressWarnings({ "PMD.UseObjectForClearerAPI", "unchecked" })
+    @When(value = "I run pipeline `$pipelineName` in Data Factory `$factoryName` from resource group "
+            + "`$resourceGroupName` with wait timeout `$waitTimeout` and with input parameters `$inputParametersJson` "
+            + "and expect run status to be equal to `$expectedPipelineRunStatus`", priority = 1)
+    public void runPipeline(String pipelineName, String factoryName, String resourceGroupName, Duration waitTimeout,
+            String inputParametersJson, String expectedPipelineRunStatus)
+    {
+        Map<String, Object> parameters = StringUtils.isNotBlank(inputParametersJson) ? jsonUtils.toObject(
+                inputParametersJson, Map.class) : null;
+        String runId = dataFactoryManager.pipelines().createRunWithResponse(resourceGroupName, factoryName,
+                pipelineName, null, null, null, null, parameters, null).getValue().runId();
         LOGGER.info("The ID of the created pipeline run is {}", runId);
         PipelineRun pipelineRun = new DurationBasedWaiter(new WaitMode(waitTimeout, RETRY_TIMES)).wait(
                 () -> getPipelineRun(resourceGroupName, factoryName, runId),
