@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.inject.Named;
 
-import com.github.javafaker.Faker;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -40,6 +39,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.vividus.util.ILocationProvider;
 import org.vividus.util.ResourceUtils;
+
+import net.datafaker.Faker;
 
 @Named
 public class StringsExpressionProcessor extends DelegatingExpressionProcessor<String>
