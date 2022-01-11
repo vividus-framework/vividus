@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.apache.http.Header;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
@@ -33,16 +36,15 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.vividus.http.handler.HttpResponseHandler;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @SuppressWarnings("MethodCount")
 public class HttpClientConfig
 {
     private String baseUrl;
-    private String username;
-    private String password;
+    private AuthConfig authConfig;
     private AuthScope authScope;
-    private Map<String, String> headersMap;
-    private boolean sslCertificateCheckEnabled = true;
-    private boolean sslHostnameVerificationEnabled = true;
+    private Map<String, String> headers;
+    private SslConfig sslConfig;
     private HttpClientConnectionManager connectionManager;
     private int maxTotalConnections;
     private int maxConnectionsPerRoute;
@@ -59,7 +61,6 @@ public class HttpClientConfig
     private String cookieSpec;
     private HttpRequestRetryHandler httpRequestRetryHandler;
     private ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy;
-    private boolean preemptiveAuthEnabled;
     private List<HttpResponseHandler> httpResponseHandlers;
 
     public boolean hasBaseUrl()
@@ -84,13 +85,13 @@ public class HttpClientConfig
 
     public List<Header> createHeaders()
     {
-        return headersMap != null ? headersMap.entrySet().stream().map(e -> new BasicHeader(e.getKey(), e.getValue()))
+        return headers != null ? headers.entrySet().stream().map(e -> new BasicHeader(e.getKey(), e.getValue()))
                 .collect(Collectors.toList()) : List.of();
     }
 
-    public void setHeadersMap(Map<String, String> headersMap)
+    public void setHeaders(Map<String, String> headers)
     {
-        this.headersMap = headersMap;
+        this.headers = headers;
     }
 
     public AuthScope getAuthScope()
@@ -103,44 +104,26 @@ public class HttpClientConfig
         this.authScope = authScope;
     }
 
-    public boolean isSslCertificateCheckEnabled()
+    public SslConfig getSslConfig()
     {
-        return sslCertificateCheckEnabled;
+        return sslConfig;
     }
 
-    public void setSslCertificateCheckEnabled(boolean sslCertificateCheckEnabled)
+    @JsonProperty("ssl")
+    public void setSslConfig(SslConfig sslConfig)
     {
-        this.sslCertificateCheckEnabled = sslCertificateCheckEnabled;
+        this.sslConfig = sslConfig;
     }
 
-    public boolean isSslHostnameVerificationEnabled()
+    public AuthConfig getAuthConfig()
     {
-        return sslHostnameVerificationEnabled;
+        return authConfig;
     }
 
-    public void setSslHostnameVerificationEnabled(boolean sslHostnameVerificationEnabled)
+    @JsonProperty("auth")
+    public void setAuthConfig(AuthConfig authConfig)
     {
-        this.sslHostnameVerificationEnabled = sslHostnameVerificationEnabled;
-    }
-
-    public String getUsername()
-    {
-        return username;
-    }
-
-    public void setUsername(String username)
-    {
-        this.username = username;
-    }
-
-    public String getPassword()
-    {
-        return password;
-    }
-
-    public void setPassword(String password)
-    {
-        this.password = password;
+        this.authConfig = authConfig;
     }
 
     public HttpClientConnectionManager getConnectionManager()
@@ -306,16 +289,6 @@ public class HttpClientConfig
     public void setServiceUnavailableRetryStrategy(ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy)
     {
         this.serviceUnavailableRetryStrategy = serviceUnavailableRetryStrategy;
-    }
-
-    public boolean isPreemptiveAuthEnabled()
-    {
-        return preemptiveAuthEnabled;
-    }
-
-    public void setPreemptiveAuthEnabled(boolean preemptiveAuthEnabled)
-    {
-        this.preemptiveAuthEnabled = preemptiveAuthEnabled;
     }
 
     public List<HttpResponseHandler> getHttpResponseHandlers()

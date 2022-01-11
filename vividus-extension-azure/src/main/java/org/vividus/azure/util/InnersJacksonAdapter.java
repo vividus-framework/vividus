@@ -16,21 +16,19 @@
 
 package org.vividus.azure.util;
 
+import java.io.IOException;
+
 import com.azure.core.util.serializer.JacksonAdapter;
+import com.azure.core.util.serializer.SerializerEncoding;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 
 public class InnersJacksonAdapter extends JacksonAdapter
 {
-    private ObjectMapper objectMapper;
-
-    @Override
-    protected ObjectMapper simpleMapper()
+    public InnersJacksonAdapter()
     {
-        if (this.objectMapper == null)
-        {
+        super((outer, inner) -> {
             JacksonAnnotationIntrospector annotationIntrospector = new JacksonAnnotationIntrospector()
             {
                 @Override
@@ -40,8 +38,13 @@ public class InnersJacksonAdapter extends JacksonAdapter
                     return access == Access.WRITE_ONLY ? Access.AUTO : access;
                 }
             };
-            this.objectMapper = super.simpleMapper().setAnnotationIntrospector(annotationIntrospector);
-        }
-        return objectMapper;
+            outer.setAnnotationIntrospector(annotationIntrospector);
+            inner.setAnnotationIntrospector(annotationIntrospector);
+        });
+    }
+
+    public String serializeToJson(Object object) throws IOException
+    {
+        return super.serialize(object, SerializerEncoding.JSON);
     }
 }

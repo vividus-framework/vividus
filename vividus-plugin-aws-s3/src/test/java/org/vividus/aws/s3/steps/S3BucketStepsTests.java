@@ -59,10 +59,10 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.aws.s3.steps.S3BucketSteps.S3ObjectFilter;
 import org.vividus.aws.s3.steps.S3BucketSteps.S3ObjectFilterType;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.util.DateUtils;
 import org.vividus.util.ResourceUtils;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class S3BucketStepsTests
@@ -77,7 +77,7 @@ class S3BucketStepsTests
     private final TestLogger logger = TestLoggerFactory.getTestLogger(S3BucketSteps.class);
 
     @Mock private AmazonS3Client amazonS3Client;
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
 
     @Test
     void shouldUploadData() throws IOException
@@ -129,7 +129,7 @@ class S3BucketStepsTests
         mockGetObject(S3_OBJECT_KEY + ".csv", csv);
 
         testSteps(steps -> steps.fetchCsvObject(S3_OBJECT_KEY, S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
-        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(Map.of("id", "1")));
+        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(Map.of("id", "1")));
     }
 
     @Test
@@ -142,7 +142,7 @@ class S3BucketStepsTests
 
         testSteps(steps -> steps.fetchObject(objectKey, S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
         verify(amazonS3Client).getObject(S3_BUCKET_NAME, objectKey);
-        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, data);
+        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, data);
     }
 
     private void mockGetObject(String objectKey, byte[] data)
@@ -182,7 +182,7 @@ class S3BucketStepsTests
                 rq -> S3_BUCKET_NAME.equals(rq.getBucketName()) && rq.getPrefix() == null))).thenReturn(result);
         testSteps(steps -> steps.collectObjectKeys(List.of(), S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
 
-        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(key));
+        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(key));
 
         assertKeysCollectorLogs(1, 1);
     }
@@ -226,7 +226,7 @@ class S3BucketStepsTests
 
         testSteps(steps -> steps.collectObjectKeys(filters, S3_BUCKET_NAME, SCOPES, VARIABLE_NAME));
 
-        verify(bddVariableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(key));
+        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, List.of(key));
 
         assertKeysCollectorLogs(3, 1);
     }
@@ -261,7 +261,7 @@ class S3BucketStepsTests
         try (MockedStatic<AmazonS3ClientBuilder> clientBuilder = mockStatic(AmazonS3ClientBuilder.class))
         {
             clientBuilder.when(AmazonS3ClientBuilder::defaultClient).thenReturn(amazonS3Client);
-            S3BucketSteps steps = new S3BucketSteps(bddVariableContext, new DateUtils(ZoneId.of("Z")));
+            S3BucketSteps steps = new S3BucketSteps(variableContext, new DateUtils(ZoneId.of("Z")));
             test.accept(steps);
         }
     }

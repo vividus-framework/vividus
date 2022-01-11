@@ -18,7 +18,7 @@ package org.vividus.xray.facade;
 
 import java.util.List;
 
-import org.vividus.bdd.output.ManualTestStep;
+import org.vividus.output.ManualTestStep;
 
 public class ManualTestCaseParameters extends AbstractTestCaseParameters
 {

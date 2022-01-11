@@ -9,9 +9,9 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" profile="web">
 
-    <context:component-scan base-package="org.vividus.bdd.variable.ui.web"/>
+    <context:component-scan base-package="org.vividus.variable.ui.web"/>
     <context:component-scan base-package="org.vividus.jackson.databind.ui.web"/>
-    <context:component-scan base-package="org.vividus.bdd.converter.ui.web" />
+    <context:component-scan base-package="org.vividus.converter.ui.web" />
 
     <bean id="siteMapParser" class="org.vividus.sitemap.SiteMapParser">
         <property name="httpClient">
@@ -20,7 +20,7 @@
                   factory-method="buildHttpClient">
                 <constructor-arg>
                     <bean parent="httpClientConfig">
-                        <property name="headersMap">
+                        <property name="headers">
                             <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
                                 <constructor-arg value="sitemap.parser.http.header." />
                             </bean>
@@ -55,11 +55,6 @@
         <property name="highlighterType" value="${selenium.screenshot.highlighter}" />
     </bean>
 
-    <bean id="screenshotDebugger" class="org.vividus.selenium.screenshot.FilesystemScreenshotDebugger"
-        init-method="cleanUp">
-        <property name="debugScreenshotsLocation" value="${selenium.screenshot.debug-directory}" />
-    </bean>
-
     <bean class="org.vividus.selenium.screenshot.WebAshotFactory" parent="abstractAshotFactory">
         <property name="shootingStrategy" value="${web.screenshot.strategy}" />
         <property name="screenshotShootingStrategy" value="${selenium.screenshot.strategy}" />
@@ -73,9 +68,6 @@
 
     <bean id="SIMPLE" class="org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy" />
     <bean id="VIEWPORT_PASTING" class="org.vividus.selenium.screenshot.strategies.ViewportPastingScreenshotShootingStrategy" />
-    <bean id="DEVICE_DEPENDENT" class="org.vividus.selenium.screenshot.strategies.DeviceDependentScreenshotShootingStrategy" />
-    <bean id="PHONE_ANDROID_PORTRAIT" class="org.vividus.selenium.screenshot.strategies.PhoneAndroidScreenshotShootingStrategy" />
-    <bean id="PHONE_ANDROID_LANDSCAPE" class="org.vividus.selenium.screenshot.strategies.PhoneAndroidScreenshotShootingStrategy" />
 
     <bean id="scrollbarHandler" class="org.vividus.selenium.screenshot.ScrollbarHandler">
         <property name="webDriverManager" ref="webDriverManager" />
@@ -95,6 +87,7 @@
     <bean id="videoPlayerActions" class="org.vividus.ui.web.action.VideoPlayerActions" />
     <bean id="webElementActions" class="org.vividus.ui.web.action.WebElementActions" />
     <bean id="windowsActions" class="org.vividus.ui.web.action.WindowsActions" />
+    <bean class="org.vividus.ui.web.action.FrameActions" />
 
     <bean class="org.vividus.ui.web.action.WebWaitActions" parent="waitActions">
         <property name="pageStartsToLoadTimeout" value="${web.wait.page-starts-to-load-timeout}" />
@@ -136,7 +129,7 @@
     <bean class="org.vividus.ui.web.action.search.RelativeToParentWidthFilter"/>
     <bean class="org.vividus.ui.action.search.GenericTextFilter" >
         <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).TEXT_PART}" />
-        <constructor-arg index="1" value="#{T(org.vividus.bdd.steps.StringComparisonRule).CONTAINS}" />
+        <constructor-arg index="1" value="#{T(org.vividus.steps.StringComparisonRule).CONTAINS}" />
     </bean>
     <bean class="org.vividus.ui.web.action.search.ValidationIconSourceFilter" />
     <bean class="org.vividus.ui.web.action.search.PlaceholderFilter" />
@@ -144,34 +137,44 @@
     <bean class="org.vividus.ui.web.action.search.CheckboxNameSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.ClassAttributePartFilter" />
     <bean class="org.vividus.ui.web.action.search.ImageWithSourcePartFilter" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.PartialLinkTextSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.FieldTextFilter" />
     <bean class="org.vividus.ui.web.action.search.FieldTextPartFilter" />
-    <bean class="org.vividus.ui.web.action.search.FieldNameSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.DropDownStateFilter" parent="abstractStateFilter" />
     <bean class="org.vividus.ui.web.action.search.DropDownTextFilter" />
-    <bean class="org.vividus.ui.web.action.search.CaseInsensitiveTextSearch" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.ImageWithSourceSearch" parent="abstractWebElementSearchAction" />
-    <bean class="org.vividus.ui.web.action.search.XpathSearch" parent="abstractWebElementSearchAction" />
+
     <bean class="org.vividus.ui.web.action.search.LinkUrlSearch" parent="abstractWebElementSearchAction">
         <property name="caseSensitiveSearch" value="${web.search.link-url.case-sensitive}" />
     </bean>
 
-    <bean class="org.vividus.ui.web.action.search.BySeleniumLocatorSearch" parent="abstractWebElementSearchAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).ID}" />
-        <constructor-arg index="1" value="#{T(org.openqa.selenium.support.How).ID}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CASE_INSENSITIVE_TEXT}" />
     </bean>
-    <bean class="org.vividus.ui.web.action.search.BySeleniumLocatorSearch" parent="abstractWebElementSearchAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).TAG_NAME}" />
-        <constructor-arg index="1" value="#{T(org.openqa.selenium.support.How).TAG_NAME}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CLASS_NAME}" />
     </bean>
-    <bean class="org.vividus.ui.web.action.search.BySeleniumLocatorSearch" parent="abstractWebElementSearchAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CSS_SELECTOR}" />
-        <constructor-arg index="1" value="#{T(org.openqa.selenium.support.How).CSS}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CSS_SELECTOR}" />
     </bean>
-    <bean class="org.vividus.ui.web.action.search.BySeleniumLocatorSearch" parent="abstractWebElementSearchAction" >
-        <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).CLASS_NAME}" />
-        <constructor-arg index="1" value="#{T(org.openqa.selenium.support.How).CLASS_NAME}" />
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).FIELD_NAME}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).ID}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).IMAGE_SRC}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).PARTIAL_LINK_TEXT}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).SHADOW_CSS_SELECTOR}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).TAG_NAME}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).XPATH}" />
     </bean>
 
     <bean class="org.vividus.ui.web.action.search.ElementNameSearch" parent="abstractWebElementSearchAction" >
@@ -187,56 +190,60 @@
         <property name="webApplicationListeners" ref="delegatingWebApplicationListener-WebApplicationListeners" />
     </bean>
 
-    <bean id="elementValidations" class="org.vividus.bdd.steps.ui.web.validation.ElementValidations" />
-    <bean id="focusValidations" class="org.vividus.bdd.steps.ui.web.validation.FocusValidations" />
+    <bean id="elementValidations" class="org.vividus.steps.ui.web.validation.ElementValidations" />
+    <bean id="focusValidations" class="org.vividus.steps.ui.web.validation.FocusValidations" />
 
-    <bean id="webDriverSetupSteps" class="org.vividus.bdd.steps.WebDriverSetupSteps">
+    <bean id="webDriverSetupSteps" class="org.vividus.steps.WebDriverSetupSteps">
         <constructor-arg index="0" value="${web-application.session-scope}" />
     </bean>
 
-    <bean id="alertSteps" class="org.vividus.bdd.steps.ui.web.AlertSteps" />
-    <bean id="buttonSteps" class="org.vividus.bdd.steps.ui.web.RadioButtonSteps" />
-    <bean id="codeSteps" class="org.vividus.bdd.steps.ui.web.CodeSteps" />
-    <bean id="cookieSteps" class="org.vividus.bdd.steps.ui.web.CookieSteps" />
-    <bean id="checkboxSteps" class="org.vividus.bdd.steps.ui.web.CheckboxSteps" />
-    <bean id="dropdownSteps" class="org.vividus.bdd.steps.ui.web.DropdownSteps" />
-    <bean id="elementSteps" class="org.vividus.bdd.steps.ui.web.ElementSteps" />
-    <bean id="fieldSteps" class="org.vividus.bdd.steps.ui.web.FieldSteps" />
-    <bean id="focusSteps" class="org.vividus.bdd.steps.ui.web.FocusSteps" />
-    <bean id="dragAndDropSteps" class="org.vividus.bdd.steps.ui.web.DragAndDropSteps" />
+    <bean id="alertSteps" class="org.vividus.steps.ui.web.AlertSteps" />
+    <bean id="buttonSteps" class="org.vividus.steps.ui.web.RadioButtonSteps" />
+    <bean id="codeSteps" class="org.vividus.steps.ui.web.CodeSteps" />
+    <bean id="cookieSteps" class="org.vividus.steps.ui.web.CookieSteps" />
+    <bean id="checkboxSteps" class="org.vividus.steps.ui.web.CheckboxSteps" />
+    <bean id="dropdownSteps" class="org.vividus.steps.ui.web.DropdownSteps" />
+    <bean id="elementSteps" class="org.vividus.steps.ui.web.ElementSteps" />
+    <bean id="fieldSteps" class="org.vividus.steps.ui.web.FieldSteps" />
+    <bean id="focusSteps" class="org.vividus.steps.ui.web.FocusSteps" />
+    <bean id="dragAndDropSteps" class="org.vividus.steps.ui.web.DragAndDropSteps" />
 
-    <bean id="jsValidationSteps" class="org.vividus.bdd.steps.ui.web.JsValidationSteps">
+    <bean id="jsValidationSteps" class="org.vividus.steps.ui.web.JsValidationSteps">
         <property name="includeBrowserExtensionLogEntries" value="${web.steps.js.include-browser-extension-log-entries}" />
     </bean>
 
-    <bean id="keyboardSteps" class="org.vividus.bdd.steps.ui.web.KeyboardSteps" />
-    <bean id="linkSteps" class="org.vividus.bdd.steps.ui.web.LinkSteps" />
-    <bean id="localStorageSteps" class="org.vividus.bdd.steps.ui.web.LocalStorageSteps" />
-    <bean id="nestedSteps" class="org.vividus.bdd.steps.ui.web.NestedSteps" />
+    <bean id="keyboardSteps" class="org.vividus.steps.ui.web.KeyboardSteps" />
+    <bean id="linkSteps" class="org.vividus.steps.ui.web.LinkSteps" />
+    <bean id="localStorageSteps" class="org.vividus.steps.ui.web.LocalStorageSteps" />
+    <bean id="nestedSteps" class="org.vividus.steps.ui.web.NestedSteps" />
 
-    <bean id="pageSteps" class="org.vividus.bdd.steps.ui.web.PageSteps">
+    <bean id="pageSteps" class="org.vividus.steps.ui.web.PageSteps">
         <property name="httpClient" ref="httpClient" />
         <property name="keepUserInfoForProtocolRedirects" value="${web.steps.page.keep-user-info-for-protocol-redirects}" />
     </bean>
 
-    <bean id="setContextSteps" class="org.vividus.bdd.steps.ui.web.SetContextSteps" />
-    <bean id="sliderSteps" class="org.vividus.bdd.steps.ui.web.SliderSteps" />
-    <bean id="scriptSteps" class="org.vividus.bdd.steps.ui.web.ScriptSteps" />
-    <bean id="scrollSteps" class="org.vividus.bdd.steps.ui.web.ScrollSteps" />
-    <bean id="setVariableSteps" class="org.vividus.bdd.steps.ui.web.SetVariableSteps" />
-    <bean id="videoPlayerSteps" class="org.vividus.bdd.steps.ui.web.VideoPlayerSteps" />
-    <bean id="waitSteps" class="org.vividus.bdd.steps.ui.web.WaitSteps" />
-    <bean id="webElementsSteps" class="org.vividus.bdd.steps.ui.web.WebElementsSteps" />
+    <bean id="setContextSteps" class="org.vividus.steps.ui.web.SetContextSteps" />
+    <bean id="sliderSteps" class="org.vividus.steps.ui.web.SliderSteps" />
+    <bean id="scriptSteps" class="org.vividus.steps.ui.web.ScriptSteps" />
+    <bean id="scrollSteps" class="org.vividus.steps.ui.web.ScrollSteps" />
+    <bean id="setVariableSteps" class="org.vividus.steps.ui.web.SetVariableSteps" />
+    <bean id="videoPlayerSteps" class="org.vividus.steps.ui.web.VideoPlayerSteps" />
+    <bean id="waitSteps" class="org.vividus.steps.ui.web.WaitSteps" />
+    <bean id="textValidationSteps" class="org.vividus.steps.ui.web.TextValidationSteps" />
 
-    <bean id="actionSteps" class="org.vividus.bdd.steps.ui.web.ActionSteps" />
+    <bean id="performanceSteps" class="org.vividus.steps.ui.web.PerformanceSteps" >
+        <constructor-arg index="0">
+            <bean class="org.vividus.ui.web.performance.PerformanceMetrics" />
+        </constructor-arg>
+    </bean>
 
-    <bean id="webUiVividusSetupSteps" class="org.vividus.bdd.steps.WebUiVividusSetupSteps">
+    <bean id="actionSteps" class="org.vividus.steps.ui.web.ActionSteps" />
+
+    <bean id="webUiVividusSetupSteps" class="org.vividus.steps.WebUiVividusSetupSteps">
         <property name="windowsStrategy" value="${selenium.windows-strategy}" />
     </bean>
 
-    <bean id="proxySteps" class="org.vividus.proxy.steps.ProxySteps" />
-
-    <bean class="org.vividus.bdd.monitor.WebScreenshotOnFailureMonitor" parent="abstractScreenshotOnFailureMonitor"/>
+    <bean class="org.vividus.monitor.WebScreenshotOnFailureMonitor" parent="abstractScreenshotOnFailureMonitor"/>
 
     <bean class="org.vividus.ui.web.listener.WebSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
 
@@ -279,6 +286,7 @@
                     <bean class="org.vividus.ui.web.listener.WebUiContextListener" lazy-init="false">
                         <property name="uiContext" ref="uiContext" />
                     </bean>
+                    <bean class="org.vividus.ui.web.listener.PerformanceMetricsListener" />
                 </list>
             </list>
         </property>
@@ -298,13 +306,7 @@
         </property>
     </bean>
 
-    <util:map id="knownIssueChecker-WebUiKnownIssueDataProviders">
-        <entry key="currentPageUrl">
-            <bean class="org.vividus.bdd.issue.CurrentPageUrlKnownIssueDataProvider" />
-        </entry>
-    </util:map>
-
-    <bean id="browserLogCleanningListener" class="org.vividus.bdd.steps.ui.web.listener.BrowserLogCleanningListener" />
+    <bean id="browserLogCleanningListener" class="org.vividus.steps.ui.web.listener.BrowserLogCleanningListener" />
 
     <util:list id="stepBeanNames-WebUi" value-type="java.lang.String">
         <idref bean="webDriverSetupSteps" />
@@ -322,7 +324,7 @@
         <idref bean="fieldSteps" />
         <idref bean="linkSteps" />
         <idref bean="pageSteps" />
-        <idref bean="webElementsSteps" />
+        <idref bean="textValidationSteps" />
         <idref bean="jsValidationSteps" />
         <idref bean="focusSteps" />
         <idref bean="keyboardSteps" />
@@ -332,9 +334,9 @@
         <idref bean="actionSteps" />
         <idref bean="webUiVividusSetupSteps" />
         <idref bean="localStorageSteps" />
-        <idref bean="proxySteps" />
         <idref bean="dragAndDropSteps" />
         <idref bean="scrollSteps" />
+        <idref bean="performanceSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">

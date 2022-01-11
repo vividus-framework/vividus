@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,9 @@ import org.openqa.selenium.interactions.HasInputDevices;
 import org.openqa.selenium.interactions.Locatable;
 import org.openqa.selenium.interactions.Mouse;
 import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
+import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
@@ -217,7 +217,7 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableStaleReferenceExceptionNotChrome()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(false);
+        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(false);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
@@ -270,7 +270,7 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableExceptionNoExceptionNotChrome()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(false);
+        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(false);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
@@ -283,7 +283,7 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableExceptionStaleExceptionChrome()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
@@ -299,7 +299,7 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableExceptionNoExceptionChrome()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
@@ -310,7 +310,7 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableExceptionWithJsChrome()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
@@ -328,7 +328,7 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableExceptionWithoutJsNotChrome()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(false);
+        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(false);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
@@ -339,7 +339,7 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableExceptionAndWebDriverExceptionInChromeWorkaround()
     {
-        when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
@@ -495,8 +495,7 @@ class MouseActionsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(((HasInputDevices) webDriver).getMouse()).thenReturn(mouse);
         when(webDriverManager.isMobile()).thenReturn(false);
-        when(webDriverManager.isTypeAnyOf(WebDriverType.SAFARI, WebDriverType.FIREFOX, WebDriverType.EDGE))
-            .thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.FIREFOX)).thenReturn(true);
         mouseActions.moveToElement(locatableWebElement);
         verify(javascriptActions).scrollIntoView(locatableWebElement, true);
     }

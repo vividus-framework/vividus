@@ -1,12 +1,12 @@
 project.description = 'Vividus plugin for WebSockets'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
     implementation(group: 'org.springframework', name: 'spring-websocket', version: versions.spring)
-    implementation(group: 'org.eclipse.jetty.websocket', name: 'websocket-client', version: '9.4.43.v20210629')
+    implementation(group: 'org.eclipse.jetty.websocket', name: 'websocket-client', version: '9.4.44.v20210927')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')

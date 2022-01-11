@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class WebDriverTypeTests
     {
         String argument = "headless";
         WebDriverConfiguration configuration = new WebDriverConfiguration();
-        configuration.setCommandLineArguments(new String[] { argument });
+        configuration.setCommandLineArguments(argument);
         FirefoxOptions expected = new FirefoxOptions();
         expected.addArguments(argument);
         testGetFirefoxWebDriver(configuration, expected);
@@ -190,23 +190,6 @@ class WebDriverTypeTests
     }
 
     @Test
-    void testGetEdgeWebDriver()
-    {
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        EdgeOptions edgeOptions = new EdgeOptions();
-        edgeOptions.merge(desiredCapabilities);
-        edgeOptions.setCapability("ms:inPrivate", true);
-        try (MockedConstruction<EdgeDriver> edgeDriverMock = mockConstruction(EdgeDriver.class, (mock, context) -> {
-            assertEquals(1, context.getCount());
-            assertEquals(List.of(edgeOptions), context.arguments());
-        }))
-        {
-            WebDriver actual = WebDriverType.EDGE.getWebDriver(desiredCapabilities, new WebDriverConfiguration());
-            assertEquals(edgeDriverMock.constructed().get(0), actual);
-        }
-    }
-
-    @Test
     void testGetEdgeChromiumWebDriver()
     {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
@@ -263,7 +246,6 @@ class WebDriverTypeTests
         "IEXPLORE,      false",
         "CHROME,        true",
         "SAFARI,        false",
-        "EDGE,          false",
         "EDGE_CHROMIUM, false",
         "OPERA,         true"
     })
@@ -278,7 +260,6 @@ class WebDriverTypeTests
         "IEXPLORE,      true",
         "CHROME,        true",
         "SAFARI,        false",
-        "EDGE,          false",
         "EDGE_CHROMIUM, false",
         "OPERA,         true"
     })
@@ -293,7 +274,6 @@ class WebDriverTypeTests
         "IEXPLORE,      true",
         "CHROME,        false",
         "SAFARI,        false",
-        "EDGE,          false",
         "EDGE_CHROMIUM, false",
         "OPERA,         false"
     })
@@ -308,7 +288,6 @@ class WebDriverTypeTests
         "IEXPLORE,      false",
         "CHROME,        false",
         "SAFARI,        false",
-        "EDGE,          true",
         "EDGE_CHROMIUM, true",
         "OPERA,         false"
     })
@@ -322,7 +301,6 @@ class WebDriverTypeTests
         "FIREFOX,       webdriver.gecko.driver",
         "IEXPLORE,      webdriver.ie.driver",
         "CHROME,        webdriver.chrome.driver",
-        "EDGE,          webdriver.edge.driver",
         "EDGE_CHROMIUM, webdriver.edge.driver",
         "OPERA,         webdriver.opera.driver"
     })
@@ -367,12 +345,6 @@ class WebDriverTypeTests
     void testSetOperaDriverExecutablePathViaAutomaticManager()
     {
         testSetDriverExecutablePathViaAutomaticManager(WebDriverType.OPERA, WebDriverManager::operadriver);
-    }
-
-    @Test
-    void testSetEdgeDriverExecutablePathViaAutomaticManager()
-    {
-        testSetDriverExecutablePathViaAutomaticManager(WebDriverType.EDGE, WebDriverManager::edgedriver);
     }
 
     private static void testSetDriverExecutablePathViaAutomaticManager(WebDriverType type,

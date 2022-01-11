@@ -3,10 +3,9 @@
 The set of dynamic variables provides ability to access context element
 coordinates, width and height.
 
-[IMPORTANT]
+IMPORTANT: The variables rely on the contextual approach: it is necessary to switch context to the target element.
 
-The variables rely on the contextual approach: it is necessary to switch context
-to the target element.
+WARNING: In case of missing search context the error will be logged and `-1` will be returned as a result
 
 
 ==== *Variable name*
@@ -39,4 +38,22 @@ Then `${context-height}` is > `0`
 Then `${context-width}` is > `0`
 Then `${context-x-coordinate}` is > `0`
 Then `${context-y-coordinate}` is > `0`
+----
+
+
+=== Source code
+
+Variable provides source code of the UI of the application under test.
+
+==== *Variable name*
+
+[source,gherkin]
+---
+${source-code}
+---
+
+.Check if element exists on UI
+[source,gherkin]
+----
+Then `${source-code}` matches `.+Home.+`
 ----

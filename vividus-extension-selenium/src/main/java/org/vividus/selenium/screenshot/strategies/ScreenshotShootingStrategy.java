@@ -21,6 +21,5 @@ import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 @FunctionalInterface
 public interface ScreenshotShootingStrategy
 {
-    ShootingStrategy getDecoratedShootingStrategy(ShootingStrategy shootingStrategy, boolean landscape,
-            String deviceName);
+    ShootingStrategy getDecoratedShootingStrategy(ShootingStrategy shootingStrategy);
 }

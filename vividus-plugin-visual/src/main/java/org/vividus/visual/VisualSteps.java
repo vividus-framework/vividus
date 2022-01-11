@@ -31,18 +31,18 @@ import com.google.gson.reflect.TypeToken;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
-import org.vividus.bdd.resource.ResourceLoadException;
 import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.resource.ResourceLoadException;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.visual.bdd.AbstractVisualSteps;
 import org.vividus.visual.engine.IVisualTestingEngine;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 import org.vividus.visual.screenshot.IgnoreStrategy;
+import org.vividus.visual.steps.AbstractVisualSteps;
 
 public class VisualSteps extends AbstractVisualSteps
 {

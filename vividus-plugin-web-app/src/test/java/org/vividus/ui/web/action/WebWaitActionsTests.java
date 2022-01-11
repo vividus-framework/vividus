@@ -42,9 +42,9 @@ import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.DescriptiveWait;
@@ -61,32 +61,17 @@ class WebWaitActionsTests
 
     private WebWaitActions spy;
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private IWaitFactory waitFactory;
-
-    @Mock
-    private WebJavascriptActions javascriptActions;
-
-    @Mock
-    private IAlertActions alertActions;
-
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
-
     @Mock(extraInterfaces = HasCapabilities.class)
     private WebDriver webDriver;
 
-    @Mock
-    private TargetLocator targetLocator;
-
-    @InjectMocks
-    private WebWaitActions waitActions;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private IWaitFactory waitFactory;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private IAlertActions alertActions;
+    @Mock private ISoftAssert softAssert;
+    @Mock private IWebDriverManager webDriverManager;
+    @Mock private TargetLocator targetLocator;
+    @InjectMocks private WebWaitActions waitActions;
 
     @Test
     void testWaitForPageLoadWithAlert()
@@ -133,7 +118,7 @@ class WebWaitActionsTests
     void testWaitForPageLoad()
     {
         mockDescriptiveWait(ChronoUnit.DAYS);
-        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(false);
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(false);
         waitActions.waitForPageLoad();
         verify(softAssert).assertNotNull("The input value to pass to the wait condition", null);
     }
@@ -146,7 +131,7 @@ class WebWaitActionsTests
         mockDescriptiveWait(ChronoUnit.DAYS);
         when(javascriptActions.executeScript(SCRIPT_READY_STATE)).thenThrow(new WebDriverException())
                 .thenReturn(COMPLETE);
-        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(false);
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(false);
         waitActions.waitForPageLoad();
         verify(targetLocator).defaultContent();
     }
@@ -156,7 +141,7 @@ class WebWaitActionsTests
     {
         configureWaitActions();
         spy = spy(waitActions);
-        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(true);
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
         testWaitForPageLoadSleepForTimeout();
     }
 
@@ -184,7 +169,7 @@ class WebWaitActionsTests
         spy = spy(waitActions);
         mockDescriptiveWait(ChronoUnit.DAYS);
         when(alertActions.isAlertPresent(webDriver)).thenReturn(false);
-        when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
         when(javascriptActions.executeScript(SCRIPT_READY_STATE)).thenReturn(INTERACTIVE);
         spy.waitForPageLoad(webDriver);
         verify(spy).wait(eq(webDriver), any());
@@ -196,7 +181,7 @@ class WebWaitActionsTests
         spy = spy(waitActions);
         mockDescriptiveWait(ChronoUnit.MILLIS);
         when(alertActions.isAlertPresent(webDriver)).thenReturn(false);
-        when(webDriverManager.isTypeAnyOf(WebDriverType.IEXPLORE)).thenReturn(true);
+        when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
         when(javascriptActions.executeScript(SCRIPT_READY_STATE)).thenReturn("");
         spy.waitForPageLoad(webDriver);
         verify(spy).wait(eq(webDriver), any());
@@ -208,7 +193,7 @@ class WebWaitActionsTests
         spy = spy(waitActions);
         mockDescriptiveWait(ChronoUnit.DAYS);
         when(javascriptActions.executeScript(SCRIPT_READY_STATE)).thenReturn("").thenReturn(COMPLETE);
-        Mockito.lenient().when(webDriverManager.isTypeAnyOf(WebDriverType.CHROME)).thenReturn(Boolean.TRUE);
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(Boolean.TRUE);
         spy.waitForPageLoad();
         verify(spy, never()).sleepForTimeout(Duration.ofDays(TIMEOUT_VALUE));
     }

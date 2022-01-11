@@ -6,19 +6,22 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        default-lazy-init="true">
 
-    <bean id="databaseSteps" class="org.vividus.bdd.steps.db.DatabaseSteps">
-        <property name="dataSources">
-            <bean factory-bean="propertyMapper" factory-method="readValues">
-                <constructor-arg value="db.connection." />
-                <constructor-arg value="org.springframework.jdbc.datasource.DriverManagerDataSource" />
-            </bean>
-        </property>
+    <bean id="databaseSteps" class="org.vividus.steps.db.DatabaseSteps">
         <property name="dbQueryTimeout" value="${db.query-timeout}" />
         <property name="hashFunction">
             <bean class="com.google.common.hash.Hashing" factory-method="murmur3_128"/>
         </property>
         <property name="duplicateKeysStrategy" value="${db.duplicate-keys-strategy}" />
         <property name="diffLimit" value="${db.diff-limit}" />
+    </bean>
+
+    <bean name="dataSourceManager" class="org.vividus.db.DataSourceManager">
+        <constructor-arg>
+                <bean factory-bean="propertyMapper" factory-method="readValues">
+                    <constructor-arg value="db.connection." />
+                    <constructor-arg value="org.springframework.jdbc.datasource.DriverManagerDataSource" />
+                </bean>
+        </constructor-arg>
     </bean>
 
     <util:list id="stepBeanNames-DB">

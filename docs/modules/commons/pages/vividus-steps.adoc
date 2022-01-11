@@ -4,6 +4,28 @@
 
 Here one could find description of the steps that are delivered with Vividus itself without any plugins required.
 
+=== Execute steps
+
+Executes the steps located in the table.
+
+[source,gherkin]
+----
+When I execute steps:$stepsToExecute
+----
+
+* `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute.
+
+.Check and increment the value of a variable
+[source,gherkin]
+----
+When I initialize the STORY variable `var` with value `0`
+When I execute steps:
+|step                                                                         |
+|Then `${var}` is = `0`                                                       |
+|When I initialize the STORY variable `var` with value `#{eval(${var} + 1)}`  |
+Then `${var}` is = `1`
+----
+
 === Execute while-like loop
 
 Executes the steps while variable matches the comparison rule or until the maximum number of iterations is reached.
@@ -137,4 +159,65 @@ When I initialize the scenario variable `age` with value `4510`
 Given I initialize the scenario variable `personalInfo` using template `templates/person.ftl` with parameters:
 |name     |race  |
 |Dagoth Ur|Dunmer|
+----
+
+=== Assert the value matches regex
+
+Asserts that the given value matches the specified regular expression.
+The dotall mode is enabled by default: the expression `.` matches any character,
+including a line terminator.
+
+[source,gherkin]
+----
+Then `$value` matches `$regex`
+----
+
+* `$value` - The value to assert.
+* `$regex` - https://en.wikipedia.org/wiki/Regular_expression[The regular expression].
+
+=== Create a file
+
+Saves the provided content to a file with the specified file path.
+
+[source,gherkin]
+----
+When I create file with content `$fileContent` at path `$filePath`
+----
+
+* `$fileContent` - The content to be saved to the creating file.
+* `$filePath` - The fully qualified file name including parent folders and extension (e.g. `temp/some_file.txt`).
+
+
+=== Create a temporary file
+
+Creates a temporary file with the provided content and puts its path to a variable with the specified name.
+The created file will be removed upon test run completion.
+
+[source,gherkin]
+----
+When I create temporary file with name `$name` and content `$content` and put path to $scopes variable `$variableName`
+----
+
+* `$name` - The logical name of the creating temporary file. For example, when `$name` is equal to `my-file.txt`, then `my-file` will be used as a prefix in the temporary file name and `.txt` - as a suffix.
+* `$content` - The content to be saved to the creating temporary file.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to store the full path of the created temporary file.
+
+If you want to use the created temporary file in further batches of the test suite as an input data, you should use https://datatracker.ietf.org/doc/html/rfc8089#appendix-A[URL with `file` protocol]
+
+.Batch 1 - Create a temporary local file
+[source,gherkin]
+----
+When I create temporary file with name `.table` and content `
+|column|
+|value |
+` and put path to NEXT_BATCHES variable `examples-table-temporary-file`
+----
+
+.Batch 2 - Use the temporary file as `ExamplesTable`
+[source,gherkin]
+----
+Then `<column>` is equal to `value`
+Examples:
+file:///${examples-table-temporary-file}
 ----

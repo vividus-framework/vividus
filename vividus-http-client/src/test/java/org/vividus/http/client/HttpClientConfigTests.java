@@ -84,29 +84,15 @@ class HttpClientConfigTests
     }
 
     @Test
-    void testGetAndSetUsername()
+    void testGetAndSetAuthConfig()
     {
-        config.setUsername(USERNAME);
-        assertEquals(USERNAME, config.getUsername());
-    }
-
-    @Test
-    void testGetAndSetPassword()
-    {
-        config.setPassword(PASSWORD);
-        assertEquals(PASSWORD, config.getPassword());
-    }
-
-    @Test
-    void testDefaultUsername()
-    {
-        assertNull(config.getUsername());
-    }
-
-    @Test
-    void testDefaultPassword()
-    {
-        assertNull(config.getPassword());
+        AuthConfig authConfig = new AuthConfig();
+        authConfig.setPassword(PASSWORD);
+        authConfig.setUsername(USERNAME);
+        config.setAuthConfig(authConfig);
+        assertEquals(authConfig, config.getAuthConfig());
+        assertEquals(PASSWORD, config.getAuthConfig().getPassword());
+        assertEquals(USERNAME, config.getAuthConfig().getUsername());
     }
 
     @Test
@@ -143,13 +129,13 @@ class HttpClientConfigTests
         String header2 = "header2";
         String value1 = "value1";
         String value2 = "value2";
-        Map<String, String> headersMap = new HashMap<>();
-        headersMap.put(header1, value1);
-        headersMap.put(header2, value2);
-        config.setHeadersMap(headersMap);
+        Map<String, String> customHeaders = new HashMap<>();
+        customHeaders.put(header1, value1);
+        customHeaders.put(header2, value2);
+        config.setHeaders(customHeaders);
 
         List<Header> headers = config.createHeaders();
-        assertEquals(headersMap.size(), headers.size());
+        assertEquals(customHeaders.size(), headers.size());
         assertThat(headers.get(0).getName(), anyOf(equalTo(header1), equalTo(header2)));
         assertThat(headers.get(0).getValue(), anyOf(equalTo(value1), equalTo(value2)));
         assertThat(headers.get(1).getName(), anyOf(equalTo(header1), equalTo(header2)));
@@ -166,7 +152,7 @@ class HttpClientConfigTests
     @Test
     void testCreateHeadersEmptyMap()
     {
-        config.setHeadersMap(new HashMap<>());
+        config.setHeaders(new HashMap<>());
         List<Header> headers = config.createHeaders();
         assertEquals(0, headers.size());
     }
@@ -230,6 +216,7 @@ class HttpClientConfigTests
     @Test
     void testDefaultConnectionRequestTimeout()
     {
+        config.setConnectionRequestTimeout(-1);
         assertEquals(-1, config.getConnectionRequestTimeout());
     }
 
@@ -244,6 +231,7 @@ class HttpClientConfigTests
     @Test
     void testDefaultConnectTimeout()
     {
+        config.setConnectTimeout(-1);
         assertEquals(-1, config.getConnectTimeout());
     }
 
@@ -258,6 +246,7 @@ class HttpClientConfigTests
     @Test
     void testDefaultSocketTimeout()
     {
+        config.setSocketTimeout(0);
         assertEquals(0, config.getSocketTimeout());
     }
 
@@ -293,6 +282,7 @@ class HttpClientConfigTests
     @Test
     void testSkipResponseEntity()
     {
+        config.setSkipResponseEntity(false);
         assertFalse(config.isSkipResponseEntity());
     }
 

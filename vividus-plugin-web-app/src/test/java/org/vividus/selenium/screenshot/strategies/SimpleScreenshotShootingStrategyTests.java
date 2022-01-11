@@ -29,7 +29,7 @@ class SimpleScreenshotShootingStrategyTests
     @Test
     void shouldProvideViewportShootingStrategy()
     {
-        assertThat(simpleScreenshotShootingStrategy.getDecoratedShootingStrategy(null, false, null),
+        assertThat(simpleScreenshotShootingStrategy.getDecoratedShootingStrategy(null),
                 instanceOf(ViewportShootingStrategy.class));
     }
 }

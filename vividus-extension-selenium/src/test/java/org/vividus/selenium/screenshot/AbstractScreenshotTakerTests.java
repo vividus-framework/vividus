@@ -25,16 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,7 +41,6 @@ import java.util.Optional;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -74,7 +70,6 @@ class AbstractScreenshotTakerTests
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private TakesScreenshot takesScreenshot;
-    @Mock private EventBus eventBus;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private ScreenshotDebugger screenshotDebugger;
     @Mock private AshotFactory<ScreenshotConfiguration> ashotFactory;
@@ -114,32 +109,18 @@ class AbstractScreenshotTakerTests
     }
 
     @Test
-    void shouldGeneratePathStartingWithScreenshotDirectoryToAScreenshotWithFileName(@TempDir File tempDir)
-            throws IOException
-    {
-        mockScreenshotTaking();
-        String screenshotName = "image";
-        testScreenshotTaker.setScreenshotDirectory(tempDir);
-        when(screenshotFileNameGenerator.generateScreenshotFileName(screenshotName)).thenReturn(IMAGE_PNG);
-        assertEquals(tempDir.toPath().resolve(IMAGE_PNG), testScreenshotTaker.takeScreenshotAsFile(screenshotName));
-    }
-
-    @Test
     void shouldNotPublishEmptyScreenshotData(@TempDir Path path) throws IOException
     {
         testScreenshotTaker.screenshot = new byte[0];
         assertNull(testScreenshotTaker.takeScreenshot(path.resolve(IMAGE_PNG)));
-        verifyNoInteractions(eventBus);
         assertThat(testLogger.getLoggingEvents(), empty());
     }
 
     @Test
     void shouldPublishScreenshot(@TempDir Path path) throws IOException
     {
-        testScreenshotTaker.setScreenshotDirectory(path.toFile());
         testScreenshotTaker.screenshot = new byte[1];
         Path screenshotPath = testScreenshotTaker.takeScreenshot(path.resolve(IMAGE_PNG));
-        verify(eventBus).post(argThat(s -> screenshotPath.equals(((ScreenshotTakeEvent) s).getScreenshotFilePath())));
         assertTrue(Files.exists(screenshotPath));
         assertArrayEquals(testScreenshotTaker.screenshot, Files.readAllBytes(screenshotPath));
         assertThat(testLogger.getLoggingEvents(), equalTo(List.of(
@@ -184,11 +165,11 @@ class AbstractScreenshotTakerTests
     {
         private byte[] screenshot;
 
-        TestScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
+        TestScreenshotTaker(IWebDriverProvider webDriverProvider,
                 IScreenshotFileNameGenerator screenshotFileNameGenerator,
                 AshotFactory<ScreenshotConfiguration> ashotFactory, ScreenshotDebugger screenshotDebugger)
         {
-            super(webDriverProvider, eventBus, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
+            super(webDriverProvider, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
         }
 
         @Override

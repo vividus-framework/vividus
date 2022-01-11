@@ -1,5 +1,4 @@
 project.description = 'Vividus plugin for Parquet'
-ext.sonarProjectName = 'Vividus Plugin - Parquet'
 
 import static org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
 import static org.apache.tools.ant.taskdefs.condition.Os.isFamily
@@ -15,11 +14,11 @@ if (isFamily(FAMILY_WINDOWS)) {
 ext.hadoopVersion = '3.3.1'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
 
-    implementation(group: 'org.apache.parquet', name: 'parquet-avro', version: '1.12.0')
+    implementation(group: 'org.apache.parquet', name: 'parquet-avro', version: '1.12.2')
     implementation(group: 'org.apache.hadoop', name: 'hadoop-common', version: "${hadoopVersion}")
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)

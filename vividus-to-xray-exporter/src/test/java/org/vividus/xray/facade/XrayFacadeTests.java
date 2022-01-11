@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -45,9 +46,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.output.ManualTestStep;
 import org.vividus.jira.JiraClient;
+import org.vividus.jira.JiraClientProvider;
+import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
+import org.vividus.output.ManualTestStep;
 import org.vividus.xray.databind.AbstractTestCaseSerializer;
 import org.vividus.xray.databind.CucumberTestCaseSerializer;
 import org.vividus.xray.databind.ManualTestCaseSerializer;
@@ -75,6 +78,7 @@ class XrayFacadeTests
     @Mock private CucumberTestCaseSerializer cucumberTestSerializer;
     @Mock private JiraFacade jiraFacade;
     @Mock private JiraClient jiraClient;
+    @Mock private JiraClientProvider jiraClientProvider;
     private XrayFacade xrayFacade;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(XrayFacade.class);
@@ -86,7 +90,7 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldCreateTestsLink() throws IOException
+    void shouldCreateTestsLink() throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of());
         String requirementId = "requirement id";
@@ -100,7 +104,7 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldUpdateManualTestCase() throws IOException, NonEditableIssueStatusException
+    void shouldUpdateManualTestCase() throws IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         initializeFacade(List.of(OPEN_STATUS));
         ManualTestCase testCase = createManualTestCase();
@@ -115,7 +119,7 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldUpdateCucumberTestCase() throws IOException, NonEditableIssueStatusException
+    void shouldUpdateCucumberTestCase() throws IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         initializeFacade(List.of(OPEN_STATUS));
         CucumberTestCase testCase = createCucumberTestCase();
@@ -137,7 +141,7 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldUpdateTestCaseNotEditableStatus() throws IOException
+    void shouldUpdateTestCaseNotEditableStatus() throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of(OPEN_STATUS));
         String closedStatus = "Closed";
@@ -150,12 +154,12 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldCreateManualTestCase() throws IOException
+    void shouldCreateManualTestCase() throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of());
         ManualTestCase testCase = createManualTestCase();
         mockSerialization(manualTestSerializer, testCase);
-        when(jiraFacade.createIssue(BODY)).thenReturn(CREATE_RESPONSE);
+        when(jiraFacade.createIssue(BODY, Optional.empty())).thenReturn(CREATE_RESPONSE);
 
         xrayFacade.createTestCase(testCase);
 
@@ -163,7 +167,7 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldAddTestCasesToTestExecution() throws IOException
+    void shouldAddTestCasesToTestExecution() throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of());
         TestExecution testExecution = new TestExecution();
@@ -173,6 +177,7 @@ class XrayFacadeTests
             createTestExecutionItem("test-2", TestExecutionItemStatus.FAIL, List.of(TestExecutionItemStatus.PASS,
                     TestExecutionItemStatus.FAIL))
         ));
+        when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
         xrayFacade.updateTestExecution(testExecution);
         String body = "{\"testExecutionKey\":\"TEST-0\",\"tests\":[{\"testKey\":\"test-1\",\"status\":\"PASS\"},"
                 + "{\"testKey\":\"test-2\",\"status\":\"FAIL\",\"examples\":[\"PASS\",\"FAIL\"]}]}";
@@ -193,9 +198,10 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldAddTestCasesToTestSet() throws IOException
+    void shouldAddTestCasesToTestSet() throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of());
+        when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
         xrayFacade.updateTestSet(ISSUE_KEY, List.of(ISSUE_ID, ISSUE_ID));
         verify(jiraClient).executePost("/rest/raven/1.0/api/testset/" + ISSUE_KEY + "/test",
             "{\"add\":[\"issue id\",\"issue id\"]}");
@@ -205,12 +211,12 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldCreateCucumberTestCase() throws IOException
+    void shouldCreateCucumberTestCase() throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of());
         CucumberTestCase testCase = createCucumberTestCase();
         mockSerialization(cucumberTestSerializer, testCase);
-        when(jiraFacade.createIssue(BODY)).thenReturn(CREATE_RESPONSE);
+        when(jiraFacade.createIssue(BODY, Optional.empty())).thenReturn(CREATE_RESPONSE);
 
         xrayFacade.createTestCase(testCase);
 
@@ -254,8 +260,8 @@ class XrayFacadeTests
 
     private void initializeFacade(List<String> editableStatuses)
     {
-        xrayFacade = new XrayFacade(editableStatuses, jiraFacade, jiraClient, manualTestSerializer,
-                cucumberTestSerializer);
+        xrayFacade = new XrayFacade(Optional.empty(), editableStatuses, jiraFacade, jiraClientProvider,
+                manualTestSerializer, cucumberTestSerializer);
     }
 
     private <T extends AbstractTestCase> void mockSerialization(AbstractTestCaseSerializer<T> serializer,

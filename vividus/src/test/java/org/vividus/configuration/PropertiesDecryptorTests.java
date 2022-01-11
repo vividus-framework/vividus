@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -32,19 +33,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PropertiesDecryptorTests
 {
     private static final String PROPERTY_KEY = "key";
+    private static final String ENCRYPTED_VALUE = "encrypted";
+    private static final String DECRYPTED_VALUE = "decrypted";
 
     @Mock private StandardPBEStringEncryptor standardPBEStringEncryptor;
+
+    @InjectMocks
+    private PropertiesDecryptor propertiesDecryptor;
 
     @Test
     void shouldDecryptProperties()
     {
-        var encrypted = "encrypted";
-        var decrypted = "decrypted";
         Properties properties = new Properties();
-        properties.setProperty(PROPERTY_KEY, "ENC(" + encrypted + ")");
-        when(standardPBEStringEncryptor.decrypt(encrypted)).thenReturn(decrypted);
-        Properties propertiesDecrypted = PropertiesDecryptor.decryptProperties(standardPBEStringEncryptor, properties);
-        assertEquals(decrypted, propertiesDecrypted.getProperty(PROPERTY_KEY));
+        properties.setProperty(PROPERTY_KEY, "ENC(" + ENCRYPTED_VALUE + ")");
+        when(standardPBEStringEncryptor.decrypt(ENCRYPTED_VALUE)).thenReturn(DECRYPTED_VALUE);
+        Properties propertiesDecrypted = propertiesDecryptor.decryptProperties(properties);
+        assertEquals(DECRYPTED_VALUE, propertiesDecrypted.getProperty(PROPERTY_KEY));
     }
 
     @Test
@@ -53,7 +57,7 @@ class PropertiesDecryptorTests
         var propertyValue = "any";
         Properties properties = new Properties();
         properties.setProperty(PROPERTY_KEY, propertyValue);
-        Properties propertiesDecrypted = PropertiesDecryptor.decryptProperties(standardPBEStringEncryptor, properties);
+        Properties propertiesDecrypted = propertiesDecryptor.decryptProperties(properties);
         assertEquals(propertyValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
         verifyNoInteractions(standardPBEStringEncryptor);
     }
@@ -64,8 +68,20 @@ class PropertiesDecryptorTests
         var propertyValue = new Object();
         Properties properties = new Properties();
         properties.put(PROPERTY_KEY, propertyValue);
-        Properties propertiesDecrypted = PropertiesDecryptor.decryptProperties(standardPBEStringEncryptor, properties);
+        Properties propertiesDecrypted = propertiesDecryptor.decryptProperties(properties);
         assertEquals(propertyValue, propertiesDecrypted.get(PROPERTY_KEY));
         verifyNoInteractions(standardPBEStringEncryptor);
+    }
+
+    @Test
+    void shouldDecryptPartsOfValue()
+    {
+        var decryptedFullValue = "username=open password=decrypted secret-key=decrypted";
+        var encryptedFullValue = "username=open password=ENC(encrypted) secret-key=ENC(encrypted)";
+        Properties properties = new Properties();
+        properties.setProperty(PROPERTY_KEY, encryptedFullValue);
+        when(standardPBEStringEncryptor.decrypt(ENCRYPTED_VALUE)).thenReturn(DECRYPTED_VALUE);
+        Properties propertiesDecrypted = propertiesDecryptor.decryptProperties(properties);
+        assertEquals(decryptedFullValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
     }
 }

@@ -9,9 +9,9 @@
     <bean id="keyStoreFactory" class="org.vividus.http.keystore.KeyStoreFactory" >
         <constructor-arg>
             <bean class="org.vividus.http.keystore.KeyStoreOptions">
-                <constructor-arg index="0" value="${http.key-store.path:#{null}}" />
-                <constructor-arg index="1" value="${http.key-store.password:#{null}}" />
-                <constructor-arg index="2" value="${http.key-store.type:JKS}" />
+                <constructor-arg index="0" value="${http.key-store.path}" />
+                <constructor-arg index="1" value="${http.key-store.password}" />
+                <constructor-arg index="2" value="${http.key-store.type}" />
             </bean>
         </constructor-arg>
     </bean>
@@ -19,7 +19,7 @@
     <bean id="sslContextFactory" class="org.vividus.http.client.SslContextFactory" />
 
     <bean id="httpClientFactory" class="org.vividus.http.client.HttpClientFactory">
-        <property name="privateKeyPassword" value="${http.ssl.private-key-password:#{null}}" />
+        <property name="privateKeyPassword" value="${http.ssl.private-key-password}" />
     </bean>
 
     <bean id="httpClient" class="org.vividus.http.client.HttpClient"
@@ -28,8 +28,12 @@
     </bean>
 
     <bean id="httpClientConfig" class="org.vividus.http.client.HttpClientConfig">
-        <property name="sslCertificateCheckEnabled" value="${http.ssl.check-certificate}" />
-        <property name="sslHostnameVerificationEnabled" value="${http.ssl.verify-hostname}" />
+        <property name="sslConfig">
+            <bean class="org.vividus.http.client.SslConfig">
+                <property name="sslCertificateCheckEnabled" value="${http.ssl.check-certificate}" />
+                <property name="sslHostnameVerificationEnabled" value="${http.ssl.verify-hostname}" />
+            </bean>
+        </property>
         <property name="circularRedirectsAllowed" value="${http.circular-redirects-allowed}" />
         <property name="connectionRequestTimeout" value="${http.connection-request-timeout}" />
         <property name="connectTimeout" value="${http.connect-timeout}" />
@@ -48,14 +52,19 @@
         </property>
         <property name="serviceUnavailableRetryStrategy">
             <bean class="org.vividus.http.client.ConfigurableServiceUnavailableRetryStrategy">
-                <constructor-arg index="0" value="${http.service-unavailable-retry.max-retries:1}" />
-                <constructor-arg index="1" value="${http.service-unavailable-retry.retry-interval:PT1S}" />
-                <constructor-arg index="2" value="${http.service-unavailable-retry.status-codes:#{null}}" />
+                <constructor-arg index="0" value="${http.service-unavailable-retry.max-retries}" />
+                <constructor-arg index="1" value="${http.service-unavailable-retry.retry-interval}" />
+                <constructor-arg index="2" value="${http.service-unavailable-retry.status-codes}" />
             </bean>
         </property>
-        <property name="username" value="${http.auth.username:#{null}}" />
-        <property name="password" value="${http.auth.password:#{null}}" />
-        <property name="preemptiveAuthEnabled" value="${http.auth.preemptive-auth-enabled:false}" />
+        <property name="authConfig">
+            <bean class="org.vividus.http.client.AuthConfig">
+                <property name="username" value="${http.auth.username}" />
+                <property name="password" value="${http.auth.password}" />
+                <property name="preemptiveAuthEnabled" value="${http.auth.preemptive-auth-enabled}" />
+            </bean>
+        </property>
+        <property name="skipResponseEntity" value="false" />
     </bean>
 
     <bean id="localDnsStorage" factory-bean="propertyParser"

@@ -16,12 +16,13 @@ Then an element by the xpath './/div[@class='textfade']' exists
 Scenario: Step verification When I click on an image with the src '$src'
 Given I am on a page with the URL '${vividus-test-site-url}/index.html'
 When I click on an image with the src 'img/vividus.png'
-Then a link by By.xpath(//a[@href='#ElementId']) exists
+Then number of elements found by `xpath(//a[@href='#ElementId'])` is = `1`
+
 
 Scenario: Step verification When I click on an image with the name '$imageName'
 Given I am on a page with the URL '${vividus-test-site-url}/index.html'
 When I click on an image with the name 'vividus-logo'
-Then a link by By.xpath(//a[@href='#ElementId']) exists
+Then number of elements found by `xpath(//a[@href='#ElementId'])` is = `1`
 
 Scenario: Step verification Then an image with the src '$src' exists
 Given I am on a page with the URL 'https://www.w3schools.com/howto/howto_css_image_overlay.asp'

@@ -24,11 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.vividus.azure.devops.configuration.AzureDevOpsExporterOptions;
 import org.vividus.azure.devops.facade.AzureDevOpsFacade;
-import org.vividus.bdd.model.jbehave.NotUniqueMetaValueException;
-import org.vividus.bdd.model.jbehave.Scenario;
-import org.vividus.bdd.model.jbehave.Story;
-import org.vividus.bdd.output.OutputReader;
-import org.vividus.bdd.output.SyntaxException;
+import org.vividus.model.jbehave.NotUniqueMetaValueException;
+import org.vividus.model.jbehave.Scenario;
+import org.vividus.model.jbehave.Story;
+import org.vividus.output.OutputReader;
+import org.vividus.output.SyntaxException;
 
 @Component
 public class AzureDevOpsExporter

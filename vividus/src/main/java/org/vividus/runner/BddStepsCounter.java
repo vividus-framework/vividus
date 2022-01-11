@@ -38,24 +38,23 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
-import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Story;
-import org.jbehave.core.parsers.StoryParser;
+import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
-import org.vividus.bdd.IPathFinder;
-import org.vividus.bdd.StoryLoader;
-import org.vividus.bdd.batch.BatchResourceConfiguration;
+import org.vividus.IPathFinder;
+import org.vividus.batch.BatchResourceConfiguration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
+import org.vividus.resource.StoryLoader;
 
 public final class BddStepsCounter
 {
     private static final String DEFAULT_STORY_LOCATION = "story";
     private static final String SPACE = " ";
     private static final String OCCURRENCES = "occurrence(s)";
-    private final List<String> stepList = new ArrayList<>();
     private final Set<StepCandidate> stepCandidates = new HashSet<>();
     private final Map<String, Integer> stepsWithStats = new HashMap<>();
     private final List<String> missedSteps = new ArrayList<>();
@@ -89,28 +88,33 @@ public final class BddStepsCounter
                 ? commandLine.getOptionValue(directoryOption.getOpt()) : DEFAULT_STORY_LOCATION;
         Configuration configuration = BeanFactory.getBean(Configuration.class);
 
-        fillStepList(configuration, storyLoader, pathFinder, storyLocation);
+        List<String> steps = collectSteps(configuration, storyLoader, pathFinder, storyLocation);
         fillStepCandidates();
-        fillStepsWithStats(configuration);
+        fillStepsWithStats(configuration, steps);
         printResults(commandLine, topOption, System.out);
     }
 
-    private void fillStepList(Configuration configuration, StoryLoader storyLoader, IPathFinder pathFinder,
+    private List<String> collectSteps(Configuration configuration, StoryLoader storyLoader, IPathFinder pathFinder,
             String storyLocation) throws IOException
     {
-        StoryParser storyParser = configuration.storyParser();
         Keywords keywords = configuration.keywords();
-        BatchResourceConfiguration batchResourceConfiguration = createResourceBatch(storyLocation);
-        for (String path : pathFinder.findPaths(batchResourceConfiguration))
+        RegexStoryParser storyParser = new RegexStoryParser(new ExamplesTableFactory(keywords, null, null)
         {
-            String storyString = storyLoader.loadResourceAsText(path);
-            Story story = storyParser.parseStory(storyString);
-            for (Scenario scenario : story.getScenarios())
+            @Override
+            public ExamplesTable createExamplesTable(String input)
             {
-                stepList.addAll(scenario.getSteps().stream().filter(step -> !step.startsWith(keywords.ignorable()))
-                        .collect(Collectors.toList()));
+                return ExamplesTable.EMPTY;
             }
-        }
+        });
+        BatchResourceConfiguration batchResourceConfiguration = createResourceBatch(storyLocation);
+        return pathFinder.findPaths(batchResourceConfiguration)
+                .stream()
+                .map(storyLoader::loadResourceAsText)
+                .map(storyParser::parseStory)
+                .flatMap(story -> story.getScenarios().stream())
+                .flatMap(scenario -> scenario.getSteps().stream())
+                .filter(step -> !step.startsWith(keywords.ignorable()))
+                .collect(Collectors.toList());
     }
 
     private BatchResourceConfiguration createResourceBatch(String storyLocation)
@@ -131,11 +135,11 @@ public final class BddStepsCounter
         }
     }
 
-    private void fillStepsWithStats(Configuration configuration)
+    private void fillStepsWithStats(Configuration configuration, List<String> steps)
     {
         Keywords keywords = configuration.keywords();
         String previousNonAndStep = null;
-        for (String stepValue : stepList)
+        for (String stepValue : steps)
         {
             String currentNonAndStep = null;
             if (stepValue.startsWith(keywords.and()))
@@ -177,7 +181,7 @@ public final class BddStepsCounter
     {
         if (!stepsWithStats.isEmpty())
         {
-            printStream.println(center("Top of the most used bdd steps:", maxStepLength) + SPACE + OCCURRENCES);
+            printStream.println(center("Top of the most used steps:", maxStepLength) + SPACE + OCCURRENCES);
             long limit = stepsWithStats.size();
             if (commandLine.hasOption(topOption.getOpt()))
             {

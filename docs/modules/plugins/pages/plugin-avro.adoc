@@ -1,0 +1,33 @@
+= Avro Plugin
+
+The plugin provides the ability to work with https://avro.apache.org/docs/current/index.html[Avro] files.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-avro', version: '{current-version}')
+----
+
+== Steps
+
+=== Convert Avro to JSON
+
+Converts the provided xref:ROOT:glossary.adoc#_resource[resource] or file
+in Avro format to JSON and saves it as a text to a variable
+
+[source,gherkin]
+----
+When I convert Avro data from `$resourceNameOrFilePath` to JSON and save result to $scopes variable `$variableName`
+----
+
+* `$resourceNameOrFilePath` - The xref:ROOT:glossary.adoc#_resource[resource name] or the file path.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to save resulting JSON.
+
+.Convert the resource in Avro format to JSON
+[source,gherkin]
+----
+When I convert Avro data from `/data/event-message.avro` to JSON and save result to scenario variable `avro-data`
+----

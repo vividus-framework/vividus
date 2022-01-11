@@ -16,9 +16,10 @@
 
 package org.vividus.configuration;
 
+import static org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -34,32 +35,39 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.jasypt.encryption.StringEncryptor;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.expression.ParserContext;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.PropertyPlaceholderHelper;
+import org.vividus.spring.SpelExpressionResolver;
 
 public final class ConfigurationResolver
 {
+    private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
+    private static final String DEFAULT_ENCRYPTOR_ALGORITHM = "PBEWithMD5AndDES";
+    private static final String DEFAULT_ENCRYPTOR_PASSWORD = "82=thuMUH@";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationResolver.class);
 
-    private static final String SYSTEM_PROPERTIES_PREFIX = "system.";
     private static final String VIVIDUS_SYSTEM_PROPERTY_FAMILY = "vividus.";
     private static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
     private static final String ROOT = "";
     private static final String PROFILES = "profiles";
     private static final String ENVIRONMENTS = "environments";
-    private static final String SUITE = "suite";
     private static final String SUITES = "suites";
 
     private static final String PLACEHOLDER_PREFIX = "${";
     private static final String PLACEHOLDER_SUFFIX = "}";
     private static final String PLACEHOLDER_VALUE_SEPARATOR = "=";
+
+    private static final String[] DEFAULTS_PATHS = {
+        "org/vividus/http/client",
+        "org/vividus/util"
+    };
 
     private static ConfigurationResolver instance;
 
@@ -79,22 +87,28 @@ public final class ConfigurationResolver
 
         PropertiesLoader propertiesLoader = new PropertiesLoader(BeanFactory.getResourcePatternResolver());
 
-        Properties configurationProperties = propertiesLoader.loadFromSingleResource("configuration.properties");
-        Properties overridingProperties = propertiesLoader.loadFromOptionalResource("overriding.properties");
+        Properties configurationProperties = propertiesLoader.loadConfigurationProperties();
+        Properties overridingProperties = propertiesLoader.loadOverridingProperties();
 
         Properties properties = new Properties();
         properties.putAll(configurationProperties);
-        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively("defaults"));
-        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(ROOT));
+
+        for (String defaultPath : DEFAULTS_PATHS)
+        {
+            properties.putAll(propertiesLoader.loadResourceFromClasspath(true, defaultPath, "defaults.properties"));
+        }
+
+        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, "defaults"));
+        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, ROOT));
 
         Multimap<String, String> configuration = assembleConfiguration(configurationProperties, overridingProperties);
         for (Entry<String, String> configurationEntry : configuration.entries())
         {
-            properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(configurationEntry.getKey(),
+            properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, configurationEntry.getKey(),
                     configurationEntry.getValue()));
         }
 
-        Properties deprecatedProperties = propertiesLoader.loadFromResourceTreeRecursively("deprecated");
+        Properties deprecatedProperties = propertiesLoader.loadFromResourceTreeRecursively(false, "deprecated");
         DeprecatedPropertiesHandler deprecatedPropertiesHandler = new DeprecatedPropertiesHandler(
                 deprecatedProperties, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
         deprecatedPropertiesHandler.replaceDeprecated(properties);
@@ -123,10 +137,29 @@ public final class ConfigurationResolver
         }
         deprecatedPropertiesHandler.removeDeprecated(properties);
         resolveSpelExpressions(properties, false);
-        processSystemProperties(properties);
+
+        StringEncryptor stringEncryptor = createStringEncryptor(properties);
+        BeanFactory.registerBean("stringEncryptor", StringEncryptor.class, () -> stringEncryptor);
+        PropertiesDecryptor decryptor = new PropertiesDecryptor(stringEncryptor);
+        SystemPropertiesProcessor systemPropertiesProcessor = new SystemPropertiesProcessor(decryptor);
+        systemPropertiesProcessor.process(properties);
+        properties = decryptor.decryptProperties(properties);
 
         instance = new ConfigurationResolver(properties);
         return instance;
+    }
+
+    private static StringEncryptor createStringEncryptor(Properties properties)
+    {
+        String password = System.getProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY);
+        if (password == null)
+        {
+            password = properties.getProperty("system." + VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY);
+        }
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setAlgorithm(DEFAULT_ENCRYPTOR_ALGORITHM);
+        encryptor.setPassword(password != null ? password : DEFAULT_ENCRYPTOR_PASSWORD);
+        return encryptor;
     }
 
     private static PropertyPlaceholderHelper createPropertyPlaceholderHelper(boolean ignoreUnresolvablePlaceholders)
@@ -141,8 +174,7 @@ public final class ConfigurationResolver
         String profiles = getConfigurationPropertyValue(configurationProperties, overridingProperties, PROFILES);
         String environments = getConfigurationPropertyValue(configurationProperties, overridingProperties,
                 ENVIRONMENTS);
-        String suites = getCompetingConfigurationPropertyValue(configurationProperties, overridingProperties,
-                Pair.of(SUITE, SUITES));
+        String suites = getConfigurationPropertyValue(configurationProperties, overridingProperties, SUITES);
 
         Properties mergedProperties = new Properties();
         mergedProperties.putAll(configurationProperties);
@@ -156,30 +188,8 @@ public final class ConfigurationResolver
         Multimap<String, String> configuration = LinkedHashMultimap.create();
         configuration.putAll("profile", asPaths(profiles));
         configuration.putAll("environment", asPaths(environments));
-        configuration.putAll(SUITE, asPaths(suites));
+        configuration.putAll("suite", asPaths(suites));
         return configuration;
-    }
-
-    private static String getCompetingConfigurationPropertyValue(Properties configurationProperties,
-            Properties overridingProperties, Pair<String, String> competingKeys)
-    {
-        return Stream.of(competingKeys.getLeft(), competingKeys.getRight())
-                .map(k -> Map.entry(k,
-                        getConfigurationPropertyValue(configurationProperties, overridingProperties, k, false)))
-                .filter(e -> e.getValue().isPresent())
-                .collect(Collectors.collectingAndThen(Collectors.toList(), props ->
-                {
-                    int size = props.size();
-                    if (size == 1)
-                    {
-                        return props.get(0).getValue().get();
-                    }
-                    String errorMessage = size == 0
-                            ? "Either '%1$s%2$s' or '%1$s%3$s' test configuration property must be set"
-                            : "Exactly one test configuration property: '%1$s%2$s' or '%1$s%3$s' must be set";
-                    throw new IllegalStateException(String.format(errorMessage, CONFIGURATION_PROPERTY_FAMILY,
-                            competingKeys.getLeft(), competingKeys.getRight()));
-                }));
     }
 
     private static List<String> asPaths(String value)
@@ -202,12 +212,6 @@ public final class ConfigurationResolver
     private static String getConfigurationPropertyValue(Properties configurationProperties,
             Properties overridingProperties, String key)
     {
-        return getConfigurationPropertyValue(configurationProperties, overridingProperties, key, true).get();
-    }
-
-    private static Optional<String> getConfigurationPropertyValue(Properties configurationProperties,
-            Properties overridingProperties, String key, boolean failOnAbsence)
-    {
         String propertyName = CONFIGURATION_PROPERTY_FAMILY + key;
         String value = System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + propertyName,
                 System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + key,
@@ -220,12 +224,8 @@ public final class ConfigurationResolver
                 value = configurationProperties.getProperty(propertyName);
                 if (value == null)
                 {
-                    if (failOnAbsence)
-                    {
-                        throw new IllegalStateException(
-                                String.format("The '%s%s' property is not set", CONFIGURATION_PROPERTY_FAMILY, key));
-                    }
-                    return Optional.empty();
+                    throw new IllegalStateException(
+                            String.format("The '%s%s' property is not set", CONFIGURATION_PROPERTY_FAMILY, key));
                 }
             }
         }
@@ -233,7 +233,7 @@ public final class ConfigurationResolver
         {
             overridingProperties.put(propertyName, value);
         }
-        return Optional.of(value);
+        return value;
     }
 
     private static void resolveSpelExpressions(Properties properties, boolean ignoreValuesWithPropertyPlaceholders)
@@ -244,7 +244,7 @@ public final class ConfigurationResolver
                         .collect(Collectors.toSet()))
                 : Optional.empty();
 
-        SpelExpressionParser spelExpressionParser = new SpelExpressionParser();
+        SpelExpressionResolver spelResolver = new SpelExpressionResolver();
         for (Entry<Object, Object> entry : properties.entrySet())
         {
             Object value = entry.getValue();
@@ -253,33 +253,8 @@ public final class ConfigurationResolver
                 String strValue = (String) value;
                 if (propertyPlaceholders.stream().flatMap(Set::stream).noneMatch(strValue::contains))
                 {
-                    try
-                    {
-                        entry.setValue(spelExpressionParser.parseExpression(strValue, ParserContext.TEMPLATE_EXPRESSION)
-                                .getValue());
-                    }
-                    catch (Exception e)
-                    {
-                        throw new IllegalStateException(
-                                "Exception during evaluation of expression " + strValue + " for property '" + entry
-                                        .getKey() + "'", e);
-                    }
+                    entry.setValue(spelResolver.resolve(strValue));
                 }
-            }
-        }
-    }
-
-    private static void processSystemProperties(Properties properties)
-    {
-        Iterator<Entry<Object, Object>> iterator = properties.entrySet().iterator();
-        while (iterator.hasNext())
-        {
-            Entry<Object, Object> entry = iterator.next();
-            String key = (String) entry.getKey();
-            if (key.startsWith(SYSTEM_PROPERTIES_PREFIX))
-            {
-                System.setProperty(StringUtils.removeStart(key, SYSTEM_PROPERTIES_PREFIX), (String) entry.getValue());
-                iterator.remove();
             }
         }
     }
@@ -305,7 +280,7 @@ public final class ConfigurationResolver
 
     private static final class PropertiesLoader
     {
-        private static final String ROOT_LOCATION = "classpath*:/properties/";
+        private static final String ROOT_LOCATION = CLASSPATH_ALL_URL_PREFIX + "/properties/";
         private static final String DELIMITER = "/";
 
         private final ResourcePatternResolver resourcePatternResolver;
@@ -315,9 +290,9 @@ public final class ConfigurationResolver
             this.resourcePatternResolver = resourcePatternResolver;
         }
 
-        Properties loadFromSingleResource(String resourceName) throws IOException
+        Properties loadConfigurationProperties() throws IOException
         {
-            String location = ROOT_LOCATION + resourceName;
+            String location = ROOT_LOCATION + "configuration.properties";
             Resource[] resources = resourcePatternResolver.getResources(location);
             int resourcesLength = resources.length;
             if (resourcesLength == 0)
@@ -332,29 +307,49 @@ public final class ConfigurationResolver
             return loadProperties(resources[0]);
         }
 
-        Properties loadFromOptionalResource(String resourceName) throws IOException
+        Properties loadOverridingProperties() throws IOException
         {
-            Resource resource = resourcePatternResolver.getResource("classpath:/" + resourceName);
+            Resource resource = resourcePatternResolver.getResource("classpath:/overriding.properties");
             return resource.exists() ? loadProperties(resource) : new Properties();
         }
 
-        Properties loadFromResourceTreeRecursively(String... resourcePathParts) throws IOException
+        Properties loadFromResourceTreeRecursively(boolean failOnMissingResource, String... resourcePathParts)
+                throws IOException
         {
             String resourcePath = String.join(DELIMITER, resourcePathParts);
-            List<Resource> propertyResources = collectResourcesRecursively(resourcePatternResolver, resourcePath);
+            List<Resource> propertyResources = collectResourcesRecursively(resourcePath, failOnMissingResource);
+            return loadPropertiesFromResources(resourcePath, propertyResources);
+        }
+
+        Properties loadResourceFromClasspath(boolean failOnMissingResource, String resourcePath, String resourcePattern)
+                throws IOException
+        {
+            return loadPropertiesFromResources(resourcePath,
+                    collectResources(failOnMissingResource, CLASSPATH_ALL_URL_PREFIX, resourcePattern, resourcePath));
+        }
+
+        private Properties loadPropertiesFromResources(String resourcePath, List<Resource> propertyResources)
+                throws IOException
+        {
             LOGGER.info("Loading properties from /{}", resourcePath);
             Properties loadedProperties = loadProperties(propertyResources.toArray(new Resource[0]));
             loadedProperties.forEach((key, value) -> LOGGER.debug("{}=={}", key, value));
             return loadedProperties;
         }
 
-        private static List<Resource> collectResourcesRecursively(ResourcePatternResolver resourcePatternResolver,
-                String resourcePath) throws IOException
+        private List<Resource> collectResourcesRecursively(String resourcePath, boolean failOnMissingResource)
+                throws IOException
         {
-            List<Resource> propertyResources = new LinkedList<>();
-            StringBuilder path = new StringBuilder(ROOT_LOCATION);
             String[] locationParts = resourcePath.isEmpty() ? new String[] { resourcePath }
                     : StringUtils.split(resourcePath, DELIMITER);
+            return collectResources(failOnMissingResource, ROOT_LOCATION, "*.properties", locationParts);
+        }
+
+        private List<Resource> collectResources(boolean failOnMissingResource, String root, String resourcePattern,
+                String... locationParts) throws IOException
+        {
+            List<Resource> propertyResources = new LinkedList<>();
+            StringBuilder path = new StringBuilder(root);
             for (int i = 0; i < locationParts.length; i++)
             {
                 boolean deepestLevel = i + 1 == locationParts.length;
@@ -364,9 +359,9 @@ public final class ConfigurationResolver
                 {
                     path.append(DELIMITER);
                 }
-                String resourceLocation = path.toString() + "*.properties";
+                String resourceLocation = path + resourcePattern;
                 Resource[] resources = resourcePatternResolver.getResources(resourceLocation);
-                if (deepestLevel && resources.length == 0)
+                if (deepestLevel && resources.length == 0 && failOnMissingResource)
                 {
                     throw new IllegalStateException(
                             "No files with properties were found at location with pattern: " + resourceLocation);

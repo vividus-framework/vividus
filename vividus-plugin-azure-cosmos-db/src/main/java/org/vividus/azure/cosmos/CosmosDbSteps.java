@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import java.util.function.Function;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.azure.cosmos.model.CosmosDbContainer;
-import org.vividus.bdd.context.BddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.softassert.SoftAssert;
 import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.variable.VariableScope;
 
 public class CosmosDbSteps
 {
@@ -32,15 +32,15 @@ public class CosmosDbSteps
     private static final int NO_CONTENT = 204;
     private static final int OK = 200;
 
-    private final BddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
     private final PropertyMappedCollection<CosmosDbContainer> containers;
     private final CosmosDbService cosmosDbService;
     private final SoftAssert softAssert;
 
-    public CosmosDbSteps(BddVariableContext bddVariableContext, PropertyMappedCollection<CosmosDbContainer> containers,
+    public CosmosDbSteps(VariableContext variableContext, PropertyMappedCollection<CosmosDbContainer> containers,
             CosmosDbService cosmosDbService, SoftAssert softAssert)
     {
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
         this.containers = containers;
         this.cosmosDbService = cosmosDbService;
         this.softAssert = softAssert;
@@ -66,7 +66,7 @@ public class CosmosDbSteps
     public void read(String id, String partition, String containerKey, Set<VariableScope> scopes, String variableName)
     {
         String result = executeWithin(containerKey, c -> cosmosDbService.readById(c, id, partition));
-        bddVariableContext.putVariable(scopes, variableName, result);
+        variableContext.putVariable(scopes, variableName, result);
     }
 
     /**
@@ -88,7 +88,7 @@ public class CosmosDbSteps
     public void query(String query, String containerKey, Set<VariableScope> scopes, String variableName)
     {
         String result = executeWithin(containerKey, c -> cosmosDbService.executeQuery(c, query));
-        bddVariableContext.putVariable(scopes, variableName, result);
+        variableContext.putVariable(scopes, variableName, result);
     }
 
     /**

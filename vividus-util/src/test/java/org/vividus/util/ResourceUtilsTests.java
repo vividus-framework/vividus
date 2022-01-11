@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -65,6 +66,42 @@ public class ResourceUtilsTests
     {
         assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
                 normalizeBytes(ResourceUtils.loadResourceAsByteArray(RESOURCE_NAME)));
+    }
+
+    @Test
+    public void shouldLoadResourceFromRootAsByteArray() throws IOException
+    {
+        assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
+                normalizeBytes(ResourceUtils.loadResourceOrFileAsByteArray(RESOURCE_NAME)));
+    }
+
+    @Test
+    public void shouldLoadFileAsByteArray() throws IOException
+    {
+        var file = folder.newFile(RESOURCE_NAME);
+        Files.writeString(file.toPath(), ROOT_RESOURCE_CONTENT);
+        assertArrayEquals(ROOT_RESOURCE_CONTENT.getBytes(StandardCharsets.UTF_8),
+                normalizeBytes(ResourceUtils.loadResourceOrFileAsByteArray(file.getAbsolutePath())));
+    }
+
+    @Test
+    public void shouldFailIfTryingToLoadFolderAsByteArray() throws IOException
+    {
+        var resourceNameOrFilePath = folder.getRoot().getAbsolutePath();
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> ResourceUtils.loadResourceOrFileAsByteArray(resourceNameOrFilePath));
+        assertEquals("Neither resource with name '" + StringUtils.prependIfMissing(resourceNameOrFilePath, "/")
+                + "' nor file at path '" + resourceNameOrFilePath + "' is found", exception.getMessage());
+    }
+
+    @Test
+    public void shouldFailIfNeitherResourceNorFileIsFoundToBeLoadedAsByteArray()
+    {
+        var resourceNameOrFilePath = "/non-existent.txt";
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> ResourceUtils.loadResourceOrFileAsByteArray(resourceNameOrFilePath));
+        assertEquals("Neither resource with name '/non-existent.txt' nor file at path '/non-existent.txt' is found",
+                exception.getMessage());
     }
 
     @Test

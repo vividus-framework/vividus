@@ -1,0 +1,28 @@
+= Glossary
+
+This glossary contains the descriptions for terms and abbreviations that are used in the documentation.
+
+== Resource
+*Synoyms*: project resource, test resource.
+
+A resource is data (text, images, audio, and so on) that tests need to access
+in a way that is independent of the location of the test source code (either
+it's a local tests execution from IDE, or via Gradle, or from test artifact
+in CI/CD).
+
+All resources are located in `src/main/resources` folder of the test project by
+default. A resource name is a path relative to this folder, e.g. the resource
+located at:
+
+----
+└─ src
+    └─ main
+        └─ resources
+            └─ data
+                └─ request.json
+----
+
+can be referenced in the tests as `/data/request.json`.
+
+The name of a resource is independent of the used operating system;
+in particular, the path separator is always a slash `/`.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,17 @@ package org.vividus.softassert.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.vividus.softassert.issue.KnownIssueIdentifier;
 import org.vividus.softassert.issue.KnownIssueType;
+
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 
 class KnownIssueTests
 {
@@ -46,7 +52,7 @@ class KnownIssueTests
     })
     void testIsClosedStatus(String status, boolean expectedToBeClosed)
     {
-        knownIssue.setStatus(status);
+        knownIssue.setStatus(Optional.ofNullable(status));
         assertEquals(expectedToBeClosed, knownIssue.isClosed());
     }
 
@@ -63,8 +69,14 @@ class KnownIssueTests
     })
     void testIsFixedResolution(String resolution, String status, boolean expectedToBeFixed)
     {
-        knownIssue.setResolution(resolution);
-        knownIssue.setStatus(status);
+        knownIssue.setResolution(Optional.ofNullable(resolution));
+        knownIssue.setStatus(Optional.ofNullable(status));
         assertEquals(expectedToBeFixed, knownIssue.isFixed());
+    }
+
+    @Test
+    void verifyHashCodeAndEquals()
+    {
+        EqualsVerifier.simple().suppress(Warning.ALL_FIELDS_SHOULD_BE_USED).forClass(KnownIssue.class).verify();
     }
 }

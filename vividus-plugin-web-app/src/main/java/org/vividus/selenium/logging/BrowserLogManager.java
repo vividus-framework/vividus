@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
-import org.vividus.selenium.WebDriverType;
+import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.manager.WebDriverManager;
 
 public final class BrowserLogManager
@@ -59,7 +59,7 @@ public final class BrowserLogManager
     private static Optional<LogEntries> getLog(WebDriver driver, boolean ignoreUnsupportedDrivers)
     {
         // The Selenium log API isn't supported: https://github.com/w3c/webdriver/issues/406
-        if (WebDriverManager.isTypeAnyOf(driver, WebDriverType.FIREFOX, WebDriverType.IEXPLORE))
+        if (WebDriverManager.isBrowserAnyOf(driver, Browser.FIREFOX, Browser.IE))
         {
             if (ignoreUnsupportedDrivers)
             {

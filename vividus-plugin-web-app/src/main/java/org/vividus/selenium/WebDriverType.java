@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,10 @@
 
 package org.vividus.selenium;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
@@ -38,7 +36,7 @@ import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.opera.OperaDriverService;
 import org.openqa.selenium.opera.OperaOptions;
-import org.openqa.selenium.remote.BrowserType;
+import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
@@ -47,7 +45,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 public enum WebDriverType
 {
-    FIREFOX(true, true, true, Set.of(FirefoxOptions.FIREFOX_OPTIONS), BrowserType.FIREFOX, BrowserType.FIREFOX_PROXY)
+    FIREFOX(true, true, true, Set.of(FirefoxOptions.FIREFOX_OPTIONS), Browser.FIREFOX)
     {
         @Override
         public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
@@ -63,7 +61,11 @@ public enum WebDriverType
             prepareCapabilities(desiredCapabilities);
             FirefoxOptions options = new FirefoxOptions(desiredCapabilities);
             configuration.getBinaryPath().ifPresent(options::setBinary);
-            options.addArguments(configuration.getCommandLineArguments());
+            String[] commandLineArguments = configuration.getCommandLineArguments();
+            if (commandLineArguments.length > 0)
+            {
+                options.addArguments(commandLineArguments);
+            }
             return new FirefoxDriver(options);
         }
 
@@ -74,7 +76,7 @@ public enum WebDriverType
                     WebDriverManager::firefoxdriver);
         }
     },
-    IEXPLORE(false, true, true, Set.of(WebDriverType.IE_OPTIONS), BrowserType.IEXPLORE, BrowserType.IE)
+    IEXPLORE(false, true, true, Set.of(WebDriverType.IE_OPTIONS), Browser.IE)
     {
         @Override
         public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
@@ -105,16 +107,15 @@ public enum WebDriverType
                     WebDriverManager::iedriver);
         }
     },
-    CHROME(true, true, false, Set.of(ChromeOptions.CAPABILITY), BrowserType.CHROME, BrowserType.GOOGLECHROME)
+    CHROME(true, true, false, Set.of(ChromeOptions.CAPABILITY), Browser.CHROME)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            ChromeOptions options = new ChromeOptions();
+            ChromeOptions options = new ChromeOptions().merge(desiredCapabilities);
             configuration.getBinaryPath().ifPresent(options::setBinary);
             options.addArguments(configuration.getCommandLineArguments());
             configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
-            options.merge(desiredCapabilities);
             return new ChromeDriver(options);
         }
 
@@ -126,7 +127,7 @@ public enum WebDriverType
         }
     },
     SAFARI(false, false, false, Set.of("safari:automaticInspection", "safari:automaticProfiling"),
-        BrowserType.SAFARI, BrowserType.SAFARI_PROXY)
+        Browser.SAFARI)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -134,34 +135,15 @@ public enum WebDriverType
             return new SafariDriver(SafariOptions.fromCapabilities(desiredCapabilities));
         }
     },
-    EDGE(false, false, false, Set.of(), BrowserType.EDGE)
+    OPERA(true, true, false, Set.of(OperaOptions.CAPABILITY), Browser.OPERA)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            EdgeOptions edgeOptions = new EdgeOptions();
-            edgeOptions.merge(desiredCapabilities);
-            edgeOptions.setCapability("ms:inPrivate", true);
-            return new EdgeDriver(edgeOptions);
-        }
-
-        @Override
-        void setDriverExecutablePath(Optional<String> driverExecutablePath)
-        {
-            setDriverExecutablePathImpl(driverExecutablePath, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
-                    WebDriverManager::edgedriver);
-        }
-    },
-    OPERA(true, true, false, Set.of(OperaOptions.CAPABILITY), BrowserType.OPERA_BLINK)
-    {
-        @Override
-        public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
-        {
-            OperaOptions options = new OperaOptions();
+            OperaOptions options = new OperaOptions().merge(desiredCapabilities);
             configuration.getBinaryPath().ifPresent(options::setBinary);
             options.addArguments(configuration.getCommandLineArguments());
             configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
-            options.merge(desiredCapabilities);
             return new OperaDriver(options);
         }
 
@@ -172,14 +154,13 @@ public enum WebDriverType
                     WebDriverManager::operadriver);
         }
     },
-    EDGE_CHROMIUM(false, false, false, Set.of(), BrowserType.EDGE)
+    EDGE_CHROMIUM(false, false, false, Set.of(), Browser.EDGE)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            EdgeOptions edgeOptions = new EdgeOptions();
-            edgeOptions.merge(desiredCapabilities);
-            return new EdgeDriver(edgeOptions);
+            EdgeOptions options = new EdgeOptions().merge(desiredCapabilities);
+            return new EdgeDriver(options);
         }
 
         @Override
@@ -196,16 +177,16 @@ public enum WebDriverType
     private final boolean commandLineArgumentsSupported;
     private final boolean useW3C;
     private final Set<String> driverSpecificCapabilities;
-    private final String[] browserNames;
+    private final Browser browser;
 
     WebDriverType(boolean binaryPathSupported, boolean commandLineArgumentsSupported, boolean useW3C,
-            Set<String> driverSpecificCapabilities, String... browserNames)
+            Set<String> driverSpecificCapabilities, Browser browser)
     {
         this.binaryPathSupported = binaryPathSupported;
         this.commandLineArgumentsSupported = commandLineArgumentsSupported;
         this.useW3C = useW3C;
         this.driverSpecificCapabilities = driverSpecificCapabilities;
-        this.browserNames = Arrays.copyOf(browserNames, browserNames.length);
+        this.browser = browser;
     }
 
     public void prepareCapabilities(@SuppressWarnings("unused") DesiredCapabilities desiredCapabilities)
@@ -244,9 +225,9 @@ public enum WebDriverType
         return driverSpecificCapabilities;
     }
 
-    public String[] getBrowserNames()
+    public Browser getBrowser()
     {
-        return ArrayUtils.clone(browserNames);
+        return browser;
     }
 
     private static void setDriverExecutablePathImpl(Optional<String> driverExecutablePath, String driverExePropertyName,

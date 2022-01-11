@@ -16,16 +16,48 @@
 
 package org.vividus.ui.mobile.action.search;
 
+import org.openqa.selenium.By;
+import org.vividus.ui.action.search.ByLocatorSearch;
 import org.vividus.ui.action.search.GenericTextFilter;
 import org.vividus.ui.action.search.IElementAction;
 import org.vividus.ui.action.search.LocatorType;
 
+import io.appium.java_client.AppiumBy;
+
 public enum AppiumLocatorType implements LocatorType
 {
-    XPATH("Appium XPath", ByAppiumLocatorSearch.class),
-    ACCESSIBILITY_ID("Accessibility Id", ByAppiumLocatorSearch.class),
-    IOS_CLASS_CHAIN("iOS Class Chain", ByAppiumLocatorSearch.class),
-    ID("Id", ByAppiumLocatorSearch.class),
+    XPATH("Appium XPath", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return By.xpath(value);
+        }
+    },
+    ACCESSIBILITY_ID("Accessibility Id", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return AppiumBy.accessibilityId(value);
+        }
+    },
+    IOS_CLASS_CHAIN("iOS Class Chain", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return AppiumBy.iOSClassChain(value);
+        }
+    },
+    ID("Id", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return By.id(value);
+        }
+    },
     TEXT_PART("Text part", GenericTextFilter.class),
     TEXT("Text", GenericTextFilter.class),
     ATTRIBUTE("Attribute", ElementAttributeFilter.class);

@@ -10,6 +10,7 @@ dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-accessibility')
     implementation project(':vividus-plugin-applitools')
+    implementation project(':vividus-plugin-avro')
     implementation project(':vividus-plugin-aws-dynamodb')
     implementation project(':vividus-plugin-aws-kinesis')
     implementation project(':vividus-plugin-aws-lambda')
@@ -43,6 +44,7 @@ dependencies {
     implementation project(':vividus-plugin-websocket')
     implementation project(':vividus-plugin-xml')
 
-    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.2.23')
-    implementation(group: 'com.github.simoc', name: 'csvjdbc', version: 'd939a2f344')
+    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.3.1')
+    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.38')
+    implementation(group: 'com.h2database', name: 'h2', version: '2.0.206')
 }

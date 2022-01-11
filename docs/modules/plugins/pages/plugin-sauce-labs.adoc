@@ -59,7 +59,7 @@ a|`true`
 a|`true`
 `false`
 |`true`
-|If `false`, then use embedded Sauce Connect (https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy+Version+4.6.2[4.6.2]), otherwise check and download newer version if available.
+|If `false`, then use embedded Sauce Connect (https://changelog.saucelabs.com/en?category=sauce%20connect[4.7.1]), otherwise check and download newer version if available.
 
 |`saucelabs.sauce-connect.command-line-arguments`
 |String line with CLI flags

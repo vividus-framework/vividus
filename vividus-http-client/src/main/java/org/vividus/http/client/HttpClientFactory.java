@@ -68,9 +68,10 @@ public class HttpClientFactory implements IHttpClientFactory
 
         configureAuth(config, builder);
 
-        createSslContext(config.isSslCertificateCheckEnabled()).ifPresent(builder::setSSLContext);
+        SslConfig sslConfig = config.getSslConfig();
+        createSslContext(sslConfig.isSslCertificateCheckEnabled()).ifPresent(builder::setSSLContext);
 
-        if (!config.isSslHostnameVerificationEnabled())
+        if (!sslConfig.isSslHostnameVerificationEnabled())
         {
             builder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
         }
@@ -123,12 +124,13 @@ public class HttpClientFactory implements IHttpClientFactory
 
     private void configureAuth(HttpClientConfig config, HttpClientBuilder builder)
     {
-        String username = config.getUsername();
-        String password = config.getPassword();
+        AuthConfig authConfig = config.getAuthConfig();
+        String username = authConfig.getUsername();
+        String password = authConfig.getPassword();
 
         if (username == null && password == null)
         {
-            isTrue(!config.isPreemptiveAuthEnabled(),
+            isTrue(!authConfig.isPreemptiveAuthEnabled(),
                     "Preemptive authentication requires username and password to be set");
             return;
         }
@@ -136,7 +138,7 @@ public class HttpClientFactory implements IHttpClientFactory
         isTrue(username != null && password != null, "The %s is missing", username == null ? "username" : "password");
 
         Credentials credentials = new UsernamePasswordCredentials(username, password);
-        if (config.isPreemptiveAuthEnabled())
+        if (authConfig.isPreemptiveAuthEnabled())
         {
             builder.addInterceptorFirst((HttpRequestInterceptor) (req, ctx) ->
             {

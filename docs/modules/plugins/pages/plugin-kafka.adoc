@@ -10,27 +10,6 @@ The plugin provides integration with an open-source distributed event streaming 
 implementation(group: 'org.vividus', name: 'vividus-plugin-kafka', version: '{current-version}')
 ----
 
-== Deprecations
-
-=== Steps
-
-The following list of steps is deprecated and will be removed in the future releases:
-
-[source,gherkin]
-----
-When I send data `$data` to Kafka topic `$topic`
-When I start consuming messages from Kafka topics `$topics`
-When I wait with `$timeout` timeout until count of consumed Kafka messages is $comparisonRule `$expectedCount`
-When I stop consuming messages from Kafka
-When I $queueOperation consumed Kafka messages to $scopes variable `$variableName`
-----
-
-=== Properties
-
-The generic (without producer and consumer keys) properties with `kafka.producer.` and `kafka.consumer.` prefixes are deprecated and will be removed in the future releases.
-
-The documentation for the deprecated steps and properties can be found in xref:0.3.4@vividus:plugins:plugin-kafka.adoc[Plugin Kafka 0.3.4]
-
 == Producer
 === Properties
 

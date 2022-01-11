@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,12 @@ import java.util.OptionalInt;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
@@ -50,18 +52,20 @@ public class ZephyrExporter
     private final ObjectMapper objectMapper;
 
     public ZephyrExporter(JiraFacade jiraFacade, ZephyrFacade zephyrFacade, TestCaseParser testCaseParser,
-            ZephyrExporterProperties zephyrExporterProperties) throws IOException
+            ZephyrExporterProperties zephyrExporterProperties)
     {
         this.jiraFacade = jiraFacade;
         this.zephyrFacade = zephyrFacade;
         this.testCaseParser = testCaseParser;
         this.zephyrExporterProperties = zephyrExporterProperties;
-        this.objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
-            .registerModule(new SimpleModule().addDeserializer(TestCase.class, new TestCaseDeserializer()));
+        this.objectMapper = JsonMapper.builder()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+                .build()
+                .registerModule(new SimpleModule().addDeserializer(TestCase.class, new TestCaseDeserializer()));
     }
 
-    public void exportResults() throws IOException
+    public void exportResults() throws IOException, JiraConfigurationException
     {
         List<TestCase> testCasesForImporting = testCaseParser.createTestCases(objectMapper);
         ZephyrConfiguration configuration = zephyrFacade.prepareConfiguration();
@@ -71,7 +75,8 @@ public class ZephyrExporter
         }
     }
 
-    private void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration) throws IOException
+    private void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
+            throws IOException, JiraConfigurationException
     {
         JiraEntity issue = jiraFacade.getIssue(testCase.getKey());
         ZephyrExecution execution = new ZephyrExecution(configuration, issue.getId(), testCase.getStatus());

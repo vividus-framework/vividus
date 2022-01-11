@@ -18,8 +18,6 @@ package org.vividus.selenium.mobileapp;
 
 import java.util.Optional;
 
-import com.google.common.eventbus.EventBus;
-
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.AbstractScreenshotTaker;
 import org.vividus.selenium.screenshot.AshotFactory;
@@ -30,11 +28,11 @@ import org.vividus.selenium.screenshot.ScreenshotDebugger;
 
 public class MobileAppScreenshotTaker extends AbstractScreenshotTaker<ScreenshotConfiguration>
 {
-    public MobileAppScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
+    public MobileAppScreenshotTaker(IWebDriverProvider webDriverProvider,
             IScreenshotFileNameGenerator screenshotFileNameGenerator,
             AshotFactory<ScreenshotConfiguration> ashotFactory, ScreenshotDebugger screenshotDebugger)
     {
-        super(webDriverProvider, eventBus, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
+        super(webDriverProvider, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
     }
 
     @Override

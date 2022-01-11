@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
@@ -87,11 +88,22 @@ class KeyboardActionsTests
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
         when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
 
-        keyboardActions.typeText(element, TEXT);
+        keyboardActions.typeTextAndHide(element, TEXT);
 
         verify(element).sendKeys(TEXT);
         verify(hidesKeyboard).hideKeyboard();
         assertThat(logger.getLoggingEvents(), is(List.of(info("Typing text '{}' into the field", TEXT))));
+    }
+
+    @Test
+    void shouldTypeTextWithoutKeyboardHidingForNotRealDevice()
+    {
+        init(false);
+
+        keyboardActions.typeText(element, TEXT);
+
+        verify(element).sendKeys(TEXT);
+        verifyNoInteractions(hidesKeyboard);
     }
 
     @Test
@@ -123,7 +135,7 @@ class KeyboardActionsTests
         when(webDriverProvider.get()).thenReturn(context);
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
 
-        keyboardActions.typeText(element, TEXT);
+        keyboardActions.typeTextAndHide(element, TEXT);
 
         verify(touchActions).tap(returnButton);
         verify(element).sendKeys(TEXT);
@@ -142,7 +154,7 @@ class KeyboardActionsTests
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> keyboardActions.typeText(element, TEXT));
+            () -> keyboardActions.typeTextAndHide(element, TEXT));
         assertEquals("Unable to find a button to close the keyboard", exception.getMessage());
     }
 
@@ -175,6 +187,26 @@ class KeyboardActionsTests
 
         verify(element).clear();
         verify(hidesKeyboard).hideKeyboard();
+    }
+
+    @Test
+    void shouldTryHideKeyboardIfElementToTypeTextBecamesStale()
+    {
+        init(true);
+
+        WebDriver context = mock(WebDriver.class);
+        WebElement returnButton = mock(WebElement.class);
+
+        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        enableOnScreenKeyboard(true);
+        when(element.getTagName()).thenThrow(new StaleElementReferenceException("Stale"));
+        when(webDriverProvider.get()).thenReturn(context);
+        when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
+
+        keyboardActions.typeTextAndHide(element, TEXT);
+
+        verify(touchActions).tap(returnButton);
+        verify(element).sendKeys(TEXT);
     }
 
     void init(boolean realDevice)

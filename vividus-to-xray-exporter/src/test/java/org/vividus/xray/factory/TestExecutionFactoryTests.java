@@ -33,10 +33,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.model.jbehave.Example;
-import org.vividus.bdd.model.jbehave.Examples;
-import org.vividus.bdd.model.jbehave.Scenario;
-import org.vividus.bdd.model.jbehave.Step;
+import org.vividus.model.jbehave.Example;
+import org.vividus.model.jbehave.Examples;
+import org.vividus.model.jbehave.Scenario;
+import org.vividus.model.jbehave.Step;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.model.TestExecution;
 import org.vividus.xray.model.TestExecutionItem;
@@ -108,9 +108,9 @@ class TestExecutionFactoryTests
             List<Step> afterScenarioSteps)
     {
         Scenario scenario = createScenario();
-        scenario.setBeforeScenarioSteps(beforeScenarioSteps);
+        scenario.setBeforeUserScenarioSteps(beforeScenarioSteps);
         scenario.setSteps(List.of(createStep(SUCCESS), createStep(outcome)));
-        scenario.setAfterScenarioSteps(afterScenarioSteps);
+        scenario.setAfterUserScenarioSteps(afterScenarioSteps);
         return scenario;
     }
 
@@ -129,14 +129,14 @@ class TestExecutionFactoryTests
         scenario.setExamples(examples);
 
         Example example1 = new Example();
-        example1.setBeforeScenarioSteps(beforeScenarioSteps);
+        example1.setBeforeUserScenarioSteps(beforeScenarioSteps);
         example1.setSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
-        example1.setAfterScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
+        example1.setAfterUserScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
 
         Example example2 = new Example();
-        example2.setBeforeScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
+        example2.setBeforeUserScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
         example2.setSteps(List.of(createStep(SUCCESS), createStep(outcome)));
-        example2.setAfterScenarioSteps(afterScenarioSteps);
+        example2.setAfterUserScenarioSteps(afterScenarioSteps);
 
         examples.setExamples(List.of(example1, example2));
         return scenario;

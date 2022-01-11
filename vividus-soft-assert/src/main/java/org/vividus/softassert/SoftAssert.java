@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.event.AssertionPassedEvent;
+import org.vividus.softassert.event.FailTestFastEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.formatter.IAssertionFormatter;
 import org.vividus.softassert.issue.IKnownIssueChecker;
@@ -60,6 +61,8 @@ public class SoftAssert implements ISoftAssert
     private IAssertionFormatter formatter;
     private IKnownIssueChecker knownIssueChecker;
     private EventBus eventBus;
+
+    private boolean failTestCaseFast;
 
     @Override
     public boolean assertTrue(final String description, final boolean condition)
@@ -272,22 +275,14 @@ public class SoftAssert implements ISoftAssert
             List<SoftAssertionError> assertionErrors = assertionCollection.getAssertionErrors();
             if (assertionErrors.isEmpty())
             {
-                if (LOGGER.isInfoEnabled())
-                {
-                    String verificationMessage = formatter.getPassedVerificationMessage(assertionCollection
-                            .getAssertionsCount());
-                    LOGGER.info(verificationMessage);
-                }
+                LOGGER.atInfo().log(() -> formatter.getPassedVerificationMessage(assertionCollection
+                        .getAssertionsCount()));
             }
             else
             {
                 String errorsMessage = formatter.getErrorsMessage(assertionErrors, true);
-                if (LOGGER.isErrorEnabled())
-                {
-                    String verificationMessage = formatter.getFailedVerificationMessage(assertionErrors,
-                            assertionCollection.getAssertionsCount());
-                    LOGGER.error("{}{}", verificationMessage, errorsMessage);
-                }
+                LOGGER.atError().addArgument(formatter.getFailedVerificationMessage(assertionErrors,
+                        assertionCollection.getAssertionsCount())).addArgument(errorsMessage).log("{}{}");
                 throw new VerificationError(errorsMessage, assertionErrors);
             }
         }
@@ -324,7 +319,7 @@ public class SoftAssert implements ISoftAssert
     {
         if (passed)
         {
-            LOGGER.info(PASS, description);
+            LOGGER.atInfo().addArgument(description).log(PASS);
             getAssertionCollection().addPassed();
             eventBus.post(new AssertionPassedEvent());
         }
@@ -332,7 +327,7 @@ public class SoftAssert implements ISoftAssert
         {
             KnownIssue issue = getKnownIssue(description);
             String message = getKnownIssueMessage(issue, description);
-            LOGGER.error(FAIL, message);
+            LOGGER.atError().addArgument(message).log(FAIL);
             recordAssertionError(issue, message, cause);
         }
         return passed;
@@ -354,16 +349,19 @@ public class SoftAssert implements ISoftAssert
 
     protected void recordAssertionError(KnownIssue issue, String message, Throwable cause)
     {
-        SoftAssertionError assertionError = new SoftAssertionError(createAssertionError(message, cause));
+        SoftAssertionError assertionError = new SoftAssertionError(new AssertionError(message, cause));
         assertionError.setKnownIssue(issue);
         getAssertionCollection().addFailed(assertionError);
 
         eventBus.post(new AssertionFailedEvent(assertionError));
-    }
 
-    private AssertionError createAssertionError(String message, Throwable cause)
-    {
-        return new AssertionError(message, cause);
+        boolean failTestCase =
+                failTestCaseFast && !assertionError.isKnownIssue() || assertionError.isFailTestCaseFast();
+        boolean failTestSuite = assertionError.isFailTestSuiteFast();
+        if (failTestCase || failTestSuite)
+        {
+            eventBus.post(new FailTestFastEvent(failTestCase, failTestSuite));
+        }
     }
 
     /**
@@ -430,5 +428,10 @@ public class SoftAssert implements ISoftAssert
     public void setEventBus(EventBus eventBus)
     {
         this.eventBus = eventBus;
+    }
+
+    public void setFailTestCaseFast(boolean failTestCaseFast)
+    {
+        this.failTestCaseFast = failTestCaseFast;
     }
 }

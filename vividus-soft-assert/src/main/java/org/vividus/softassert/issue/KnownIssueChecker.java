@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,8 +102,7 @@ public class KnownIssueChecker implements IKnownIssueChecker
         boolean isProperCandidate(String candidateId, KnownIssueIdentifier candidate)
         {
             resetCurrentPatternsMatched();
-            if (!doAllDataPatternsMatch(candidate.getDynamicCompiledPatterns()) || !doAllDataPatternsMatch(
-                    candidate.getRuntimeDataPatterns()))
+            if (!doAllDataPatternsMatch(candidate.getRuntimeDataPatterns()))
             {
                 return false;
             }

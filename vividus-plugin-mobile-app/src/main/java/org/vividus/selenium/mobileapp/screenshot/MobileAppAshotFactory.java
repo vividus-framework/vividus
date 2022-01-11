@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,20 @@ package org.vividus.selenium.mobileapp.screenshot;
 import java.util.Optional;
 
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
+import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtil;
 import org.vividus.selenium.screenshot.AbstractAshotFactory;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
+import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
 public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfiguration>
 {
     private final MobileAppWebDriverManager mobileAppWebDriverManager;
     private final CoordsProvider coordsProvider;
+    private boolean downscale;
 
     public MobileAppAshotFactory(MobileAppWebDriverManager genericWebDriverManager, CoordsProvider coordsProvider)
     {
@@ -52,14 +55,30 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfig
             return c;
         }).get();
         ShootingStrategy strategy = getStrategyBy(ashotConfig.getShootingStrategy().get())
-            .getDecoratedShootingStrategy(getBaseShootingStrategy(), false, null);
-        strategy = configureNativePartialsToCut(mobileAppWebDriverManager.getStatusBarSize(), ashotConfig, strategy);
+            .getDecoratedShootingStrategy(getBaseShootingStrategy());
+        int statusBarSize = mobileAppWebDriverManager.getStatusBarSize();
+        if (!downscale)
+        {
+            statusBarSize = CoordsUtil.scale(statusBarSize, getDpr());
+        }
+        strategy = configureNativePartialsToCut(statusBarSize, ashotConfig, strategy);
         return new AShot().shootingStrategy(strategy).coordsProvider(coordsProvider);
+    }
+
+    @Override
+    protected ShootingStrategy getBaseShootingStrategy()
+    {
+        return downscale ? super.getBaseShootingStrategy() : ShootingStrategies.simple();
     }
 
     @Override
     protected double getDpr()
     {
         return mobileAppWebDriverManager.getDpr();
+    }
+
+    public void setDownscale(boolean downscale)
+    {
+        this.downscale = downscale;
     }
 }

@@ -14,10 +14,7 @@ The plugin provides the following abilities:
 implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '{current-version}')
 ----
 
-
 == Properties
-
-NOTE: The properties marked with *bold* are mandatory.
 
 [cols="3,1,1,3", options="header"]
 |===
@@ -26,39 +23,21 @@ NOTE: The properties marked with *bold* are mandatory.
 |Default
 |Description
 
-4+^.^|_Configuration of HTTP retries on service unavailability_
+4+^.^|_Configuration of REST API client_
 
-|`http.service-unavailable-retry.max-retries`
-|integer
-|`1`
-|The maximum number of allowed retries if the server responds with a HTTP code from the retry code set defined below
-
-|`http.service-unavailable-retry.status-codes`
-|set of integers
+|`rest-api.http.endpoint`
+|`URL`
 |`<empty>`
-|The set of HTTP status codes to be retried. If it's empty, no retries will be performed
+|The base request endpoint
 
-|`http.service-unavailable-retry.retry-interval`
-|{iso-date-format-link} duration
-|`PT1S`
-|The retry interval between subsequent requests
-
-|`http.auth.username`
-|character sequence
+|`rest-api.http.header.`
+|`key-value mapping`
 |`<empty>`
-|The username, presence of this property requires the `http.auth.password` to be also set
-
-|`http.auth.password`
-|character sequence
-|`<empty>`
-|The password, presence of this property requires the `http.auth.username` to be also set
-
-|`http.auth.preemptive-auth-enabled`
-|`boolean`
-|`false`
-|If enabled the HTTP client will send the basic authentication data even before the service gives an unauthorized response (401), useful when the service doesn't support unauthorized response (401) or to reduce the overhead of making the connection
+|The property family to set HTTP headers for all outgoing requests, e.g. rest-api.http.header.my-sample-header=my-sample-value
 
 |===
+
+See xref:ROOT:tests-configuration.adoc#_http_configuration[HTTP configuration] for more fine-grained control over the HTTP interactions.
 
 == Expressions
 
@@ -164,7 +143,37 @@ https://www.ietf.org/rfc/rfc3986.txt[RFC 3986].
 
 == HTTP Steps
 
-=== *Init multipart HTTP request*
+=== Set HTTP request body
+
+Sets HTTP request body that will be used while executing the request. In the case of textual content the default HTTP
+request header with name `Content-Type` and value `text/plain; charset=UTF-8` is set. 
+
+WARNING: No HTTP request header is set in the case of binary content.
+
+[source,gherkin]
+----
+Given request body: $content
+----
+
+* `$content` - HTTP request body.
+
+.Set textual HTTP request body
+[source,gherkin]
+----
+Given request body: Hello!
+----
+
+.Set binary HTTP request body
+[source,gherkin]
+----
+Given request body: #{loadBinaryResource(/data/image.png)}
+When I set request headers:
+|name        |value    |
+|Content-Type|image/png|
+When I send HTTP POST to the relative URL '/upload/png'
+----
+
+=== Prepare multipart HTTP request
 
 Sets https://tools.ietf.org/html/rfc7578[multipart] request entity that will be used while executing HTTP requests.
 
@@ -173,26 +182,31 @@ Sets https://tools.ietf.org/html/rfc7578[multipart] request entity that will be 
 Given multipart request:$requestParts
 ----
 
-where `requestParts` - `ExamplesTable` representing the list of the request parts with the following columns:
+where `requestParts` is `ExamplesTable` representing the list of the request parts with the following columns:
 
-* `type` - one of request part types: `STRING`, `FILE`, `BINARY`
-* `name` - the request part name
-* `value` - the path to the resource with the content for `FILE` part type and the actual content for `STRING` and `BINARY` part types
-* `contentType` - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type[the content type]
-* `fileName` - the name of the file contained in this request part. The parameter is not allowed for `STRING` part type, but it's required for `BINARY` one and optional for `FILE` part type
+* `type` - One of request part types: `STRING`, `FILE`, `BINARY`.
+* `name` - The request part name.
+* `value` -
+** For `FILE` part type - the xref:ROOT:glossary.adoc#_resource[resource name] or the file path.
+** For `STRING` or `BINARY` part type - the actual content.
+* `contentType` - The https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type[content type].
+* `fileName` - The name of the file contained in this request part. The
+parameter is not allowed for `STRING` part type, but it's required for `BINARY` one and optional for `FILE` part type.
 
 .Init HTTP request consisting of 4 different parts
 [source,gherkin]
 ----
+When I initialize the scenario variable `temp-file-content` with value `Your first and last stop for No-Code Test Automation!`
+When I create temporary file with name `abc.txt` and content `${temp-file-content}` and put path to scenario variable `temp-file-path`
 Given multipart request:
-|type  |name      |value         |contentType|fileName       |
-|file  |file-key  |/data/file.txt|           |anotherName.txt|
-|file  |file-key2 |/data/file.txt|text/plain |               |
-|string|string-key|string1       |text/plain |               |
-|binary|binary-key|raw           |text/plain |raw.txt        |
+|type  |name      |value            |contentType|fileName       |
+|file  |file-key  |/data/file.txt   |           |anotherName.txt|
+|file  |file-key2 |${temp-file-path}|text/plain |               |
+|string|string-key|string1          |text/plain |               |
+|binary|binary-key|raw              |text/plain |raw.txt        |
 ----
 
-=== *Add HTTP headers to the request*
+=== Add HTTP headers to the request
 
 Adds https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[HTTP headers] to the HTTP request.
 
@@ -213,7 +227,7 @@ When I send HTTP GET to the relative URL '/get?name=Content'
 Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
 ----
 
-=== *Wait for JSON element in the HTTP response*
+=== Wait for JSON element in the HTTP response
 
 Executes the provided sub-steps until the HTTP response body contains an element by the specified JSON path or the maximum number of retries is reached. The maximum duration of the step execution is not limited. The actions of the step:
 
@@ -243,7 +257,7 @@ When I wait for presence of element by `$.data.testData` with `PT5S` polling int
 |When I issue a HTTP GET request for a resource with the URL '${requestUrl}'|
 ----
 
-=== *Validate secure protocols supported by server*
+=== Validate secure protocols supported by server
 
 Checks that a server defined by the `hostname` supports secure protocols listed in the `protocols` parameter.
 
@@ -268,7 +282,7 @@ Then server `vividus-test-site.herokuapp.com` supports secure protocols that con
 :json-unit-options: https://github.com/lukas-krecan/JsonUnit/blob/master/README.md#options[options]
 
 
-=== *Verify context contains data*
+=== Verify context contains data
 
 Checks if the JSON context contains an expected data by a JSON path
 
@@ -293,7 +307,7 @@ Then JSON element by JSON path `$.accountList[0]` is equal to `
 `ignoring extra fields
 ----
 
-=== *Verify JSON contains data*
+=== Verify JSON contains data
 
 Checks if a JSON contains an expected data by a JSON path
 
@@ -318,7 +332,7 @@ Then JSON element from `
 ` by JSON path `$.status` is equal to `Active`
 ----
 
-=== *Verify number of elements in context*
+=== Verify number of elements in context
 
 Verifies that the number of elements found in the JSON context by a JSON path matches an expected number according to specified comparison rule
 
@@ -337,7 +351,7 @@ Then number of JSON elements by JSON path `$jsonPath` is $comparisonRule $elemen
 Then number of JSON elements by JSON path `$.accountList` is equal to 2
 ----
 
-=== *Verify number of elements in JSON*
+=== Verify number of elements in JSON
 
 Verifies that the number of elements found in JSON data by a JSON path matches an expected number according to specified comparison rule
 
@@ -366,7 +380,7 @@ Then number of JSON elements from `
 ` by JSON path `$..accountId` is equal to 2
 ----
 
-=== *Save element from context*
+=== Save element from context
 
 Saves value extracted from the JSON context into a variable with specified name
 
@@ -385,7 +399,7 @@ When I save JSON element from context by JSON path `$jsonPath` to $scopes variab
 When I save JSON element from context by JSON path `$.accountId` to SCENARIO variable `account-id`
 ----
 
-=== *Save element from JSON*
+=== Save element from JSON
 
 Saves value extracted from a JSON data into a variable with specified name
 
@@ -410,7 +424,7 @@ When I save JSON element from `
 ` by JSON path `$.accountId` to SCENARIO variable `account-id`
 ----
 
-=== *Save number of elements in context*
+=== Save number of elements in context
 
 Saves number of elements found in the JSON context by JSON path into a variable
 
@@ -429,7 +443,7 @@ When I set number of elements found by JSON path `$jsonPath` to $scopes variable
 When I set number of elements found by JSON path `$..id` to scenario variable `idsCount`
 ----
 
-=== *Save number of elements from JSON*
+=== Save number of elements from JSON
 
 Saves number of elements found in the JSON by JSON path into a variable
 
@@ -449,7 +463,7 @@ When I save number of elements from `$json` found by JSON path `$jsonPath` to $s
 When I save number of elements from `[{"key" : "passed"}, {"key" : "failed"}]` found by JSON path `$..[?(@.key == "failed")]` to scenario variable `messageCount`
 ----
 
-=== *Perform steps on elements in JSON*
+=== Perform steps on elements in JSON
 
 Performs steps against all elements found by JSON path in JSON data
 
@@ -497,7 +511,7 @@ When I find > `0` JSON elements from `
 |Then number of JSON elements by JSON path `$[?(@.accountId =~ /\d+/i)]` is equal to 1|
 ----
 
-=== *Validate HTTP resources*
+=== Validate HTTP resources
 
 Validates the defined HTTP resources
 

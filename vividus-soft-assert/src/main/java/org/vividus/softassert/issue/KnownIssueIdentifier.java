@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.softassert.issue;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,8 +29,8 @@ public class KnownIssueIdentifier
     private Pattern assertionCompiledPattern;
     private boolean failTestCaseFast;
     private boolean failTestSuiteFast;
-    private Map<String, Pattern> additionalCompiledPatterns = Collections.emptyMap();
-    private Map<String, Pattern> dynamicCompiledPatterns = Collections.emptyMap();
+    private String description;
+    private Map<String, Pattern> additionalCompiledPatterns = Map.of();
     private Map<String, Pattern> runtimeDataPatterns = Map.of();
 
     public KnownIssueType getType()
@@ -84,6 +83,16 @@ public class KnownIssueIdentifier
         this.failTestSuiteFast = failTestSuiteFast;
     }
 
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
     public Map<String, Pattern> getAdditionalCompiledPatterns()
     {
         return additionalCompiledPatterns;
@@ -95,21 +104,10 @@ public class KnownIssueIdentifier
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue(), Pattern.DOTALL)));
     }
 
-    public void setDynamicPatterns(Map<String, String> dynamicPatterns)
-    {
-        this.dynamicCompiledPatterns = dynamicPatterns.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue(), Pattern.DOTALL)));
-    }
-
     public void setRuntimeDataPatterns(Map<String, String> runtimeDataPatterns)
     {
         this.runtimeDataPatterns = runtimeDataPatterns.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue(), Pattern.DOTALL)));
-    }
-
-    public Map<String, Pattern> getDynamicCompiledPatterns()
-    {
-        return dynamicCompiledPatterns;
     }
 
     public Map<String, Pattern> getRuntimeDataPatterns()

@@ -9,12 +9,14 @@ on:
     paths:
       - '**/**'
       - '!docs/**'
+      - '!*.md'
   pull_request:
     branches:
     - master
     paths:
       - '**/**'
       - '!docs/**'
+      - '!*.md'
 
 jobs:
   build:
@@ -22,8 +24,14 @@ jobs:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
       fail-fast: false
+    
+    env:
+      TEST_APP_VERSION: 0.2.0
 
     runs-on: ${{ matrix.platform }}
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - name: Checkout (including submodules and tags)
@@ -60,7 +68,7 @@ jobs:
     - name: Set up JDK 16
       uses: actions/setup-java@v2
       with:
-        distribution: 'adopt'
+        distribution: 'temurin'
         java-version: 16
 
     - name: Build
@@ -83,7 +91,9 @@ jobs:
                             -Ptest.testLogging.exceptionFormat=full
           fi
         else
-          ./gradlew build -Ptest.testLogging.exceptionFormat=full --no-daemon
+          ./gradlew build -x spotbugsMain -x spotbugsTest -x spotbugsIntegrationTest \
+                          -x pmdMain -x pmdTest -x pmdIntegrationTest \
+                          -Ptest.testLogging.exceptionFormat=full --no-daemon
         fi
 
     - name: Publish unit and integration tests reports
@@ -95,29 +105,25 @@ jobs:
 
     - name: Upload coverage to Codecov
       if: matrix.platform == 'ubuntu-latest'
-      uses: codecov/codecov-action@v2.0.3
+      uses: codecov/codecov-action@v2.1.0
       with:
         fail_ci_if_error: true
 
-    - name: Integration tests
-      if: matrix.platform == 'ubuntu-latest'
+    - name: VIVIDUS tasks validation
       run: |
-        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=integration \
-                                              -Pvividus.allure.history-directory=output/history/integration-tests \
-                                              -Pvividus.allure.executor.name="Github Actions (Vividus)" \
-                                              -Pvividus.allure.executor.type=github \
-                                              -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
-                                              -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
-                                              -Pvividus.allure.executor.build-name="Integration Tests ${GITHUB_RUN_ID}" \
-                                              -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                              -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                              -Pvividus.allure.executor.report-name="Integration tests report"
+         ./gradlew validateKnownIssues printSteps countSteps -x testVividusInitialization  -p vividus-tests --project-prop 'vividus.bdd.variables.global.iterationLimit=3' --project-prop 'vividus.bdd.variables.global.target-platform=ios'
+
+
+    - name: Integration tests
+      if: matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest'
+      run: |
+        ./gradlew :vividus-tests:debugStories --project-prop 'vividus.configuration.environments=integration' --project-prop 'vividus.allure.history-directory=output/history/integration-tests' --project-prop 'vividus.allure.executor.name="Github Actions (Vividus)"' --project-prop 'vividus.allure.executor.type=github' --project-prop 'vividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions' --project-prop 'vividus.allure.executor.build-order=${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.build-name="Integration Tests ${GITHUB_RUN_ID}"' --project-prop 'vividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-name="Integration tests report"' --no-daemon
 
     - name: Publish integration tests report
-      if: matrix.platform == 'ubuntu-latest' && always()
+      if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest') && always()
       uses: actions/upload-artifact@v2
       with:
-        name: Integration Tests - Allure report
+        name: Integration Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
 
     - name: System tests
@@ -155,8 +161,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="System tests report" \
-                                                  -Pvividus.azure.cosmos-db.account.vividus.key=${AZURE_COSMOS_DB_KEY} \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.azure.cosmos-db.account.vividus.key=${AZURE_COSMOS_DB_KEY}
         else
             echo No passwords/access keys are available, skipping system tests
         fi
@@ -176,14 +181,13 @@ jobs:
       shell: bash
       run: |
         if [[ -n $LAMBDATEST_USER && -n $LAMBDATEST_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge safari )
+          declare -a profiles=( iexplore chrome firefox edge/chromium safari )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/lambdatest \
                                                   -Pvividus.configuration.suites=lambdatest \
                                                   -Pvividus.configuration.profiles=lambdatest/web,web/desktop/${profile} \
                                                   -Pvividus.selenium.grid.username=${LAMBDATEST_USER} \
-                                                  -Pvividus.selenium.grid.password=${LAMBDATEST_KEY} \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.selenium.grid.password=${LAMBDATEST_KEY}
           done
         else
             echo No LAMBDATEST_USER and/or LAMBDATEST_KEY, LambdaTest integration tests will be skipped
@@ -197,14 +201,13 @@ jobs:
       shell: bash
       run: |
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge safari )
+          declare -a profiles=( iexplore chrome firefox edge/chromium safari )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
                                                   -Pvividus.configuration.suites=grid \
                                                   -Pvividus.configuration.profiles=saucelabs/web,web/desktop/${profile} \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
-                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
           done
           ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
                                                 -Pvividus.configuration.suites= \
@@ -213,8 +216,7 @@ jobs:
                                                 -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyStepsTests.story \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
-                                                -Pvividus.statistics.print-failures=true
+                                                -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com"
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs integration tests will be skipped
         fi
@@ -233,8 +235,7 @@ jobs:
                                                   -Pvividus.configuration.suites=grid \
                                                   -Pvividus.configuration.profiles=saucelabs/web,web/tablet/${profile} \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
-                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
           done
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
@@ -254,14 +255,13 @@ jobs:
                                                   -Pvividus.configuration.suites=grid \
                                                   -Pvividus.configuration.profiles=saucelabs/web,web/phone/${profile} \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
-                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
           done
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
         fi
 
-    - name: SauceLabs - iOS - Mobile App - Run system tests
+    - name: SauceLabs - iOS - Mobile App - Run system tests (Downscaled)
       if: matrix.platform == 'ubuntu-latest'
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
@@ -274,8 +274,8 @@ jobs:
                                                   -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                  -Pvividus.allure.history-directory=output/history/sl-ios-system-tests \
-                                                  -Pvividus.allure.report-directory=output/reports/sl-ios-allure \
+                                                  -Pvividus.allure.history-directory=output/history/sl-ios-system-tests-downscaled \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-ios-allure-downscaled \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
                                                   -Pvividus.allure.executor.type=github \
                                                   -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
@@ -283,9 +283,8 @@ jobs:
                                                   -Pvividus.allure.executor.build-name="SauceLabs iOS System Tests ${GITHUB_RUN_ID}" \
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                                  -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report" \
-                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios.zip \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report (Downscaled)" \
+                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
         fi
@@ -294,10 +293,86 @@ jobs:
       if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v2
       with:
-        name: SauceLabs - System Tests - Allure report - iOS
-        path: vividus-tests/output/reports/sl-ios-allure
+        name: SauceLabs - System Tests - Allure report - iOS (Downscaled)
+        path: vividus-tests/output/reports/sl-ios-allure-downscaled
 
-    - name: SauceLabs - Android - Mobile App - Run system tests
+    - name: SauceLabs - iOS - Mobile App - Run system tests (Original)
+      if: matrix.platform == 'ubuntu-latest'
+      env:
+        SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
+        SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/mobile_app/ios \
+                                                  -Pvividus.configuration.suites=system/mobile_app/ios,ui \
+                                                  -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
+                                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                  -Pvividus.allure.history-directory=output/history/sl-ios-system-tests-original \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-ios-allure-original \
+                                                  -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                                  -Pvividus.allure.executor.type=github \
+                                                  -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                                  -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.build-name="SauceLabs iOS System Tests ${GITHUB_RUN_ID}" \
+                                                  -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report (Original)" \
+                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip \
+                                                  -Pvividus.statistics.print-failures=true \
+                                                  -Pvividus.mobile.screenshot.downscale=false \
+                                                  -Pvividus.ui.visual.baselines-folder=./baselines/original
+        else
+            echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
+        fi
+
+    - name: SauceLabs - iOS - Mobile App - Publish system tests report
+      if: matrix.platform == 'ubuntu-latest' && always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: SauceLabs - System Tests - Allure report - iOS (Original)
+        path: vividus-tests/output/reports/sl-ios-allure-original
+
+    - name: SauceLabs - iOS Proxy- Mobile App - Run system tests
+      if: matrix.platform == 'ubuntu-latest'
+      env:
+        SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
+        SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/mobile_app/ios \
+                                                  -Pvividus.configuration.suites= \
+                                                  -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
+                                                  -Pvividus.bdd.story-loader.batch-1.resource-location=story/system/mobile_app \
+                                                  -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyMobileStepsTests.story \
+                                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                  -Pvividus.allure.history-directory=output/history/sl-ios-proxy-system-tests \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-ios-proxy-allure \
+                                                  -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                                  -Pvividus.allure.executor.type=github \
+                                                  -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                                  -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.build-name="SauceLabs iOS Proxy Tests ${GITHUB_RUN_ID}" \
+                                                  -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-name="SauceLabs iOS Proxy tests report" \
+                                                  -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
+                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip
+        else
+            echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
+        fi
+
+    - name: SauceLabs - iOS Proxy - Mobile App - Publish system tests report
+      if: matrix.platform == 'ubuntu-latest' && always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: SauceLabs - System Tests With Proxy- Allure report - iOS
+        path: vividus-tests/output/reports/sl-ios-proxy-allure
+
+    - name: SauceLabs - Android - Mobile App - Run system tests (Downscaled)
       if: matrix.platform == 'ubuntu-latest'
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
@@ -310,8 +385,8 @@ jobs:
                                                   -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                  -Pvividus.allure.history-directory=output/history/sl-android-system-tests \
-                                                  -Pvividus.allure.report-directory=output/reports/sl-android-allure \
+                                                  -Pvividus.allure.history-directory=output/history/sl-android-system-tests-downscaled \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-android-allure-downscaled \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
                                                   -Pvividus.allure.executor.type=github \
                                                   -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
@@ -319,9 +394,8 @@ jobs:
                                                   -Pvividus.allure.executor.build-name="SauceLabs Android System Tests ${GITHUB_RUN_ID}" \
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
-                                                  -Pvividus.allure.executor.report-name="SauceLabs Android System tests report" \
-                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android.zip \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.allure.executor.report-name="SauceLabs Android System tests report (Downscaled)" \
+                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
         fi
@@ -330,8 +404,85 @@ jobs:
       if: matrix.platform == 'ubuntu-latest' && always()
       uses: actions/upload-artifact@v2
       with:
-        name: SauceLabs - System Tests - Allure report - Android
-        path: vividus-tests/output/reports/sl-android-allure
+        name: SauceLabs - System Tests - Allure report - Android (Downscaled)
+        path: vividus-tests/output/reports/sl-android-allure-downscaled
+
+    - name: SauceLabs - Android - Mobile App - Run system tests (Original)
+      if: matrix.platform == 'ubuntu-latest'
+      env:
+        SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
+        SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/mobile_app/android \
+                                                  -Pvividus.configuration.suites=system/mobile_app/android \
+                                                  -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
+                                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                  -Pvividus.allure.history-directory=output/history/sl-android-system-tests-original \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-android-allure-original \
+                                                  -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                                  -Pvividus.allure.executor.type=github \
+                                                  -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                                  -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.build-name="SauceLabs Android System Tests ${GITHUB_RUN_ID}" \
+                                                  -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-name="SauceLabs Android System tests report (Original)" \
+                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip \
+                                                  -Pvividus.statistics.print-failures=true \
+                                                  -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=VisualTesting.story \
+                                                  -Pvividus.mobile.screenshot.downscale=false \
+                                                  -Pvividus.ui.visual.baselines-folder=./baselines/original
+        else
+            echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
+        fi
+
+    - name: SauceLabs - Android - Mobile App - Publish system tests report
+      if: matrix.platform == 'ubuntu-latest' && always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: SauceLabs - System Tests - Allure report - Android (Original)
+        path: vividus-tests/output/reports/sl-android-allure-original
+
+    - name: SauceLabs - Android Proxy- Mobile App - Run system tests
+      if: matrix.platform == 'ubuntu-latest'
+      env:
+        SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
+        SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/mobile_app/android \
+                                                  -Pvividus.configuration.suites= \
+                                                  -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
+                                                  -Pvividus.bdd.story-loader.batch-1.resource-location=story/system/mobile_app \
+                                                  -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyMobileStepsTests.story \
+                                                  -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
+                                                  -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                  -Pvividus.allure.history-directory=output/history/sl-android-proxy-system-tests \
+                                                  -Pvividus.allure.report-directory=output/reports/sl-android-proxy-allure \
+                                                  -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                                  -Pvividus.allure.executor.type=github \
+                                                  -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                                  -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.build-name="SauceLabs Android Proxy Tests ${GITHUB_RUN_ID}" \
+                                                  -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.allure.executor.report-name="SauceLabs Android Proxy tests report" \
+                                                  -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
+                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip
+        else
+            echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
+        fi
+
+    - name: SauceLabs - Android Proxy - Mobile App - Publish system tests report
+      if: matrix.platform == 'ubuntu-latest' && always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: SauceLabs - System Tests With Proxy- Allure report - Android
+        path: vividus-tests/output/reports/sl-android-proxy-allure
 
     - name: BrowserStack - Desktop - Web - System tests
       if: matrix.platform == 'macos-latest'
@@ -341,15 +492,14 @@ jobs:
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
-          declare -a profiles=( iexplore chrome firefox edge safari )
+          declare -a profiles=( iexplore chrome firefox edge/chromium safari )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=grid \
                                                   -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                   -Pvividus.selenium.grid.capabilities.bstack\:options.projectName=Vividus \
-                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="Vividus BrowserStack Integration Tests" \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="Vividus BrowserStack Integration Tests"
           done
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY, Browserstack integration tests will be skipped
@@ -378,8 +528,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="BrowserStack iOS System tests report" \
-                                                  -Pvividus.bdd.variables.global.app-url=bs://444bd0308813ae0dc236f8cd461c02d3afa7901d \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.bdd.variables.global.app-url=bs://444bd0308813ae0dc236f8cd461c02d3afa7901d
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY variables, System tests will be skipped
         fi
@@ -414,8 +563,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="BrowserStack Android System tests report" \
-                                                  -Pvividus.bdd.variables.global.app-url=bs://c700ce60cf13ae8ed97705a55b8e022f13c5827c \
-                                                  -Pvividus.statistics.print-failures=true
+                                                  -Pvividus.bdd.variables.global.app-url=bs://c700ce60cf13ae8ed97705a55b8e022f13c5827c
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY variables, System tests will be skipped
         fi
@@ -448,10 +596,10 @@ jobs:
         ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_SNAPSHOTS_PUBLISHER_PASSWORD }}
       run: |
         ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=https://vividuscentral.jfrog.io/artifactory/ \
-                                        -Dartifactory.publish.repoKey=snapshots-local \
-                                        -Dartifactory.publish.username=$ARTIFACTORY_USERNAME \
-                                        -Dartifactory.publish.password=$ARTIFACTORY_PASSWORD \
-                                        -Dartifactory.publish.buildInfo=false
+                                     -Dartifactory.publish.repoKey=snapshots-local \
+                                     -Dartifactory.publish.username=$ARTIFACTORY_USERNAME \
+                                     -Dartifactory.publish.password=$ARTIFACTORY_PASSWORD \
+                                     -Dartifactory.publish.buildInfo=false
 
     - name: Publish release artifacts
       if: startsWith(github.ref, 'refs/tags/release-') && matrix.platform == 'ubuntu-latest'
@@ -460,10 +608,10 @@ jobs:
         ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_RELEASES_PUBLISHER_PASSWORD }}
       run: |
         ./gradlew artifactoryPublish -Dartifactory.publish.contextUrl=https://vividuscentral.jfrog.io/artifactory/ \
-                                        -Dartifactory.publish.repoKey=releases-local \
-                                        -Dartifactory.publish.username=$ARTIFACTORY_USERNAME \
-                                        -Dartifactory.publish.password=$ARTIFACTORY_PASSWORD \
-                                        -Dartifactory.publish.buildInfo=false
+                                     -Dartifactory.publish.repoKey=releases-local \
+                                     -Dartifactory.publish.username=$ARTIFACTORY_USERNAME \
+                                     -Dartifactory.publish.password=$ARTIFACTORY_PASSWORD \
+                                     -Dartifactory.publish.buildInfo=false
 
     - name: Login to Docker Hub
       if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/release-')) && matrix.platform == 'ubuntu-latest'

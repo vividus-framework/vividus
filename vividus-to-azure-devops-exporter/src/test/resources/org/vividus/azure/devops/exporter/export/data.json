@@ -15,7 +15,7 @@
           "value": ""
         }
       ],
-      "beforeScenarioSteps": [],
+      "beforeUserScenarioSteps": [],
       "steps": [
         {
           "outcome": "successful",
@@ -30,7 +30,7 @@
           "value": "Then I verify changes on test environment"
         }
       ],
-      "afterScenarioSteps": [],
+      "afterUserScenarioSteps": [],
       "start": 1627988025612,
       "end": 1627988026370
     },
@@ -45,7 +45,7 @@
           "value": "STUB-0"
         }
       ],
-      "beforeScenarioSteps": [],
+      "beforeUserScenarioSteps": [],
       "steps": [
         {
           "outcome": "successful",
@@ -60,7 +60,7 @@
           "value": "Then I verify changes on test environment"
         }
       ],
-      "afterScenarioSteps": [],
+      "afterUserScenarioSteps": [],
       "start": 1627988025612,
       "end": 1627988026370
     },
@@ -75,9 +75,9 @@
           "value": ""
         }
       ],
-      "beforeScenarioSteps": [],
+      "beforeUserScenarioSteps": [],
       "steps": [],
-      "afterScenarioSteps": [],
+      "afterUserScenarioSteps": [],
       "start": 1627988025612,
       "end": 1627988026370
     }

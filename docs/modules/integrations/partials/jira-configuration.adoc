@@ -1,0 +1,28 @@
+:test-config: xref:ROOT:tests-configuration.adoc
+:allowed-http-properties: {test-config}#_general[general], {test-config}#_authentication[authentication] or {test-config}#_ssl_handshake[SSL handshake] properties
+
+== JIRA Configuration
+
+IMPORTANT: The exporter requires configuration of JIRA instance to work with.
+
+To configure connector to JIRA instance use `jira.` prefix followed by arbitrary sequence of alphanumerical 
+characters that determine unique JIRA instance key and followed by `project-key-regex`, `endpoint` and optional 
+list of HTTP properties from {allowed-http-properties}.
+
+.jira.properties
+[source,json,subs=attributes+, source-highlighter+]
+----
+jira.vividus.project-key-regex=(VIVIDUS|VSCODE|REACTAPP) <1>
+jira.vividus.endpoint=https://vividusframework.atlassian.net/ <2>
+jira.vividus.http.auth.username=admin <3>
+jira.vividus.http.auth.password=5401a7d27b291c5d <3>
+jira.vividus.http.socket-timeout=10000 <3>
+----
+
+NOTE: The properties pointed by descriptions marked with *bold* are mandatory.
+
+<1> *The regular expression to match JIRA project keys.*
+<2> *The JIRA Endpoint.*
+<3> The {allowed-http-properties}.
+
+In the example above the `vividus` is a key that can be used to refer this JIRA instance.

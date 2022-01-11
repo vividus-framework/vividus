@@ -1,11 +1,11 @@
 project.description = 'Vividus plugin for Azure Data Factory'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
-    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-datafactory', version: '1.0.0-beta.6')
+    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-datafactory', version: '1.0.0-beta.9')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)

@@ -1,5 +1,5 @@
 plugins {
-    id 'com.bmuschko.docker-remote-api' version '7.1.0'
+    id 'com.bmuschko.docker-remote-api' version '7.2.0'
 }
 
 project.description = 'Vividus Docker bundler'
@@ -14,6 +14,7 @@ dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-accessibility')
     implementation project(':vividus-plugin-applitools')
+    implementation project(':vividus-plugin-avro')
     implementation project(':vividus-plugin-aws-dynamodb')
     implementation project(':vividus-plugin-aws-kinesis')
     implementation project(':vividus-plugin-aws-lambda')
@@ -21,6 +22,7 @@ dependencies {
     implementation project(':vividus-plugin-azure-cosmos-db')
     implementation project(':vividus-plugin-azure-data-factory')
     implementation project(':vividus-plugin-azure-event-grid')
+    implementation project(':vividus-plugin-azure-event-hub')
     implementation project(':vividus-plugin-azure-functions')
     implementation project(':vividus-plugin-azure-storage-account')
     implementation project(':vividus-plugin-azure-storage-queue')

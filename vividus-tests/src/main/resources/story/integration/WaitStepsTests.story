@@ -43,13 +43,6 @@ Examples:
 |By.id(button-hide)|By.id(element-to-hide)|NOT_VISIBLE|1     |0    |
 |By.id(button-show)|By.id(element-to-show)|VISIBLE    |0     |1    |
 
-Scenario: Verify step: When I wait until elements with the name '$elementName' appear
-Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
-Then number of elements found by `id(element-to-show)` is equal to `0`
-When I click on element located `id(button-show)`
-When I wait until elements with the name 'element-to-show' appear
-Then number of elements found by `id(element-to-show)` is equal to `1`
-
 Scenario: Verify step: 'When I wait until element located `$locator` appears'
 Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
 Then number of elements found by `id(element-to-show)` is equal to `0`
@@ -67,3 +60,11 @@ Then number of elements found by `id(element-to-hide)` is equal to `0`
 Scenario: Verify step: 'Then element located `$locator` exists for `$duration` duration'
 Then element located `id(button-hide)` exists for `PT1S` duration
 Then number of elements found by `id(button-hide)` is equal to `1`
+
+Scenario: Verify step: 'When I set page load timeout to `$duration`'
+Meta:
+    @requirementId 2122
+Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
+When I set page load timeout to `PT15S`
+When I open URL `${vividus-test-site-url}/delayedLoading?imageTimeout=10000` in new window
+When I set page load timeout to `PT10S`

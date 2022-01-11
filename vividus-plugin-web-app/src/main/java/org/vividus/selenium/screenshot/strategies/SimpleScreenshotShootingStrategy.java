@@ -21,8 +21,7 @@ import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 public class SimpleScreenshotShootingStrategy implements ScreenshotShootingStrategy
 {
     @Override
-    public ShootingStrategy getDecoratedShootingStrategy(ShootingStrategy shootingStrategy,
-            boolean landscape, String deviceName)
+    public ShootingStrategy getDecoratedShootingStrategy(ShootingStrategy shootingStrategy)
     {
         return new ViewportShootingStrategy(shootingStrategy);
     }

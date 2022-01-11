@@ -1,6 +1,6 @@
 project.description = 'Vividus plugin for Electron-based applications'
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     implementation project(':vividus-plugin-web-app')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)

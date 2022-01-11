@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.When;
 import org.vividus.azure.functions.service.FunctionService;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
 import org.vividus.util.json.JsonUtils;
+import org.vividus.variable.VariableScope;
 
 import reactor.core.publisher.Mono;
 
@@ -32,13 +32,13 @@ public class FunctionSteps
 {
     private final JsonUtils jsonUtils;
     private final FunctionService functionsService;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
 
-    public FunctionSteps(JsonUtils jsonUtils, FunctionService functionsService, IBddVariableContext bddVariableContext)
+    public FunctionSteps(JsonUtils jsonUtils, FunctionService functionsService, VariableContext variableContext)
     {
         this.jsonUtils = jsonUtils;
         this.functionsService = functionsService;
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
     }
 
     /**
@@ -79,7 +79,7 @@ public class FunctionSteps
         Map<String, Object> responses = functionsService.triggerFunction(resourceGroup, functionApp, functionName,
                 convertPayload(payload));
         responses.compute("body", (k, v) -> ((Mono<String>) v).block());
-        bddVariableContext.putVariable(scopes, variableName, responses);
+        variableContext.putVariable(scopes, variableName, responses);
     }
 
     @SuppressWarnings("unchecked")

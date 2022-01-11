@@ -46,9 +46,9 @@ import org.vividus.azure.devops.client.model.AddOperation;
 import org.vividus.azure.devops.configuration.AzureDevOpsExporterOptions;
 import org.vividus.azure.devops.configuration.SectionMapping;
 import org.vividus.azure.devops.facade.model.ScenarioPart;
-import org.vividus.bdd.model.jbehave.Scenario;
-import org.vividus.bdd.model.jbehave.Step;
-import org.vividus.bdd.output.SyntaxException;
+import org.vividus.model.jbehave.Scenario;
+import org.vividus.model.jbehave.Step;
+import org.vividus.output.SyntaxException;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AzureDevOpsFacadeTests

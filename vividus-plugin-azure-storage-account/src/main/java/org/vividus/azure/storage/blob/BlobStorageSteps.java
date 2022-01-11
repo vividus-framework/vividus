@@ -22,8 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.http.rest.PagedResponse;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -31,6 +35,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.ListBlobsOptions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -39,21 +44,22 @@ import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.steps.DataWrapper;
-import org.vividus.bdd.steps.StringComparisonRule;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.steps.DataWrapper;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
+import org.vividus.variable.VariableScope;
 
 public class BlobStorageSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlobStorageSteps.class);
+    private static final int DEFAULT_MAX_RESULTS_PER_PAGE = 1000;
 
     private final PropertyMappedCollection<String> storageAccountEndpoints;
     private final TokenCredential credential;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
     private final JsonUtils jsonUtils;
 
     private final LoadingCache<String, BlobServiceClient> blobStorageClients = CacheBuilder.newBuilder()
@@ -67,11 +73,11 @@ public class BlobStorageSteps
             });
 
     public BlobStorageSteps(PropertyMappedCollection<String> storageAccountEndpoints, TokenCredential credential,
-            IBddVariableContext bddVariableContext, JsonUtils jsonUtils)
+            VariableContext variableContext, JsonUtils jsonUtils)
     {
         this.storageAccountEndpoints = storageAccountEndpoints;
         this.credential = credential;
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
         this.jsonUtils = jsonUtils;
     }
 
@@ -102,7 +108,7 @@ public class BlobStorageSteps
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
             createBlobClient(blobName, containerName, storageAccountKey).download(outputStream);
-            bddVariableContext.putVariable(scopes, variableName, outputStream.toString(StandardCharsets.UTF_8));
+            variableContext.putVariable(scopes, variableName, outputStream.toString(StandardCharsets.UTF_8));
         }
     }
 
@@ -135,8 +141,8 @@ public class BlobStorageSteps
             Set<VariableScope> scopes, String variableName) throws IOException
     {
         String tempFilePath = ResourceUtils.createTempFile(baseFileName).toAbsolutePath().toString();
-        createBlobClient(blobName, containerName, storageAccountKey).downloadToFile(tempFilePath);
-        bddVariableContext.putVariable(scopes, variableName, tempFilePath);
+        createBlobClient(blobName, containerName, storageAccountKey).downloadToFile(tempFilePath, true);
+        variableContext.putVariable(scopes, variableName, tempFilePath);
     }
 
     /**
@@ -164,7 +170,7 @@ public class BlobStorageSteps
             Set<VariableScope> scopes, String variableName)
     {
         BlobProperties blobProperties = createBlobClient(blobName, containerName, storageAccountKey).getProperties();
-        bddVariableContext.putVariable(scopes, variableName, jsonUtils.toJson(blobProperties));
+        variableContext.putVariable(scopes, variableName, jsonUtils.toJson(blobProperties));
     }
 
     /**
@@ -228,7 +234,75 @@ public class BlobStorageSteps
                                                     .map(BlobItem::getName)
                                                     .filter(nameMatcher::matches)
                                                     .collect(Collectors.toList());
-        bddVariableContext.putVariable(scopes, variableName, blobNames);
+        variableContext.putVariable(scopes, variableName, blobNames);
+    }
+
+    /**
+     * Finds blobs with names filtered by the specified rules in the container.
+     *
+     * @param filter            Filter to apply to blob names.
+     *                          <div>Example:</div>
+     *                          <code>
+     *                          <br>When I filter blobs by:
+     *                          <br>|blobNamePrefix|blobNameFilterRule|blobNameFilterValue|resultsLimit|
+     *                          <br>|data/         |contains          |file-key.txt       |10          |
+     *                          <br>in container `global` of storage account `storage`
+     *                          <br> and save result to story variable `blobs`
+     *                          </code>
+     *                          <br>
+     *                          <br>where all filters are optional, but at least one rule is required.
+     *                          <ul>
+     *                          <li><code>blobNameFilterRule</code> The blob name comparison rule: "is equal to",
+     *                           "contains", "does not contain" or "matches".
+     *                           Should be specified along with <i>blobNameFilterValue</i>.</li>
+     *                          <li><code>blobNameFilterValue</code> The full or partial blob name to be matched.
+     *                           Should be specified along with <i>blobNameFilterRule</i>.</li>
+     *                          <li><code>blobNamePrefix</code> The prefix which blob names should start with.</li>
+     *                          <li><code>resultsLimit</code> Maximum number of blob names to return.</li>
+     *                          </ul>
+     * @param containerName     The name of the container to point to.
+     * @param storageAccountKey The key to Storage Account endpoint.
+     * @param scopes            The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
+     *                          scopes.<br>
+     *                          <i>Available scopes:</i>
+     *                          <ul>
+     *                          <li><b>STEP</b> - the variable will be available only within the step,
+     *                          <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                          <li><b>STORY</b> - the variable will be available within the whole story,
+     *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                          </ul>
+     * @param variableName      The variable name to store the list of found blob names.
+     */
+    @When("I filter blobs by:$filter in container `$containerName` of storage account `$storageAccountKey`"
+            + " and save result to $scopes variable `$variableName`")
+    public void findBlobs(BlobFilter filter, String containerName, String storageAccountKey, Set<VariableScope> scopes,
+            String variableName)
+    {
+        BlobContainerClient blobContainerClient = createBlobContainerClient(containerName, storageAccountKey);
+
+        ListBlobsOptions options = new ListBlobsOptions();
+        filter.getBlobNamePrefix().ifPresent(options::setPrefix);
+        options.setMaxResultsPerPage(
+                filter.getResultsLimit()
+                        .map(limit -> Math.min(limit, DEFAULT_MAX_RESULTS_PER_PAGE))
+                        .orElse(DEFAULT_MAX_RESULTS_PER_PAGE)
+        );
+
+        PagedIterable<BlobItem> blobItems = blobContainerClient.listBlobs(options, null);
+        Stream<String> blobNames = StreamSupport.stream(blobItems.iterableByPage().spliterator(), false)
+                .map(PagedResponse::getValue)
+                .flatMap(List::stream)
+                .map(BlobItem::getName);
+        Stream<String> filteredBlobNames = filter.getBlobNameMatcher()
+                .map(matcher -> blobNames.filter(matcher::matches))
+                .orElse(blobNames);
+
+        List<String> result = filter.getResultsLimit()
+                .map(filteredBlobNames::limit)
+                .orElse(filteredBlobNames)
+                .collect(Collectors.toList());
+
+        variableContext.putVariable(scopes, variableName, result);
     }
 
     private BlobContainerClient createBlobContainerClient(String containerName, String storageAccountKey)

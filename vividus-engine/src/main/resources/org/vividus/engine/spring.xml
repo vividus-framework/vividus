@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-lazy-init="true">
+
+    <bean id="runContext" class="org.vividus.context.RunTestContext">
+        <property name="testContext" ref="testContext" />
+    </bean>
+
+    <bean class="org.vividus.context.ReportControlContext" />
+
+    <bean id="batchStorage" class="org.vividus.batch.BatchStorage">
+        <constructor-arg ref="propertyMapper" />
+        <constructor-arg value="${bdd.story-execution-timeout}" />
+        <constructor-arg value="${bdd.all-meta-filters}" />
+        <constructor-arg value="${bdd.batch.fail-fast}" />
+    </bean>
+
+    <bean id="variableContext" class="org.vividus.context.VariableTestContext" />
+
+    <bean id="variablesFactory" class="org.vividus.variable.VariablesFactory"
+        init-method="init" />
+
+    <bean id="pathMatchingResourcePatternResolver"
+        class="org.springframework.core.io.support.PathMatchingResourcePatternResolver" />
+
+    <bean id="pathFinder" class="org.vividus.PathFinder" />
+
+    <bean id="batchedPathFinder" class="org.vividus.BatchedPathFinder" />
+
+    <bean id="storyLoader" class="org.vividus.resource.StoryLoader" />
+
+    <bean class="org.vividus.resource.ExamplesTableLoader">
+        <property name="cacheTables" value="${bdd.cache-examples-table}" />
+    </bean>
+
+    <bean class="org.vividus.parser.StepExamplesTableParser" />
+
+    <bean id="testResourceLoader" class="org.vividus.resource.TestResourceLoader" />
+
+    <bean id="storyReporterBuilder" class="org.vividus.ExtendedStoryReporterBuilder">
+        <property name="reportFailureTrace" value="true" />
+        <property name="storyReporter" ref="storyReporter" />
+        <property name="codeLocation" value="${bdd.report-directory}" />
+        <property name="formats" value="${bdd.configuration.formats}" />
+        <property name="pathResolver">
+            <bean class="org.jbehave.core.reporters.FilePrintStreamFactory.ResolveToSimpleName" />
+        </property>
+    </bean>
+
+    <bean id="configuration" class="org.vividus.spring.ExtendedConfiguration"
+        init-method="init">
+        <property name="pathFinder" ref="pathFinder" />
+        <property name="storyLoader" ref="storyLoader" />
+        <property name="storyReporterBuilder" ref="storyReporterBuilder" />
+        <property name="placeholderResolver" ref="placeholderResolver" />
+        <property name="compositePaths" value="${bdd.configuration.all-composite-paths}"/>
+        <property name="storyControls" ref="springStoryControls" />
+        <property name="parallelStoryExamplesEnabled" value="${bdd.configuration.parallel-story-examples-enabled}"/>
+        <property name="examplesTableHeaderSeparator" value="${bdd.configuration.examples-table-header-separator}"/>
+        <property name="examplesTableValueSeparator" value="${bdd.configuration.examples-table-value-separator}"/>
+        <property name="parameterControls" ref="parameterControls" />
+    </bean>
+
+    <bean id="springStoryControls" class="org.jbehave.core.configuration.spring.SpringStoryControls">
+         <property name="dryRun" value="${bdd.configuration.dry-run}" />
+         <property name="resetStateBeforeScenario" value="#{!T(java.lang.Boolean).parseBoolean('${bdd.story.fail-fast}')}" />
+         <property name="skipStoryIfGivenStoryFailed" value="${bdd.configuration.skip-story-if-given-story-failed}" />
+    </bean>
+
+    <bean class="org.vividus.log.LoggingStepMonitor" />
+
+    <bean id="stepFactory" class="org.vividus.steps.SpringStepFactory">
+        <constructor-arg index="0" ref="configuration" />
+    </bean>
+
+    <bean id="batchedEmbedder" class="org.vividus.BatchedEmbedder">
+        <property name="configuration" ref="configuration" />
+        <property name="stepFactory" ref="stepFactory" />
+        <property name="embedderMonitor">
+            <bean class="org.vividus.log.LoggingEmbedderMonitor" />
+        </property>
+        <property name="performableTree">
+            <bean class="org.vividus.BatchedPerformableTree" />
+        </property>
+        <property name="generateViewAfterBatches" value="${bdd.generate-view-after-batches}" />
+    </bean>
+
+    <bean class="org.vividus.steps.VariableResolver" />
+    <bean class="org.vividus.steps.ExpressionAdaptor" />
+    <bean id="placeholderResolver" class="org.vividus.steps.PlaceholderResolver" />
+    <bean id="parameterControls" class="org.jbehave.core.steps.ParameterControls" />
+
+</beans>

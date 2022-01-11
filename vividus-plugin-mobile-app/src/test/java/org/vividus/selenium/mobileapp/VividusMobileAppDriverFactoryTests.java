@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.context.RunContext;
 import org.vividus.selenium.IGenericWebDriverFactory;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 
 @ExtendWith(MockitoExtension.class)
 class VividusMobileAppDriverFactoryTests
 {
-    @Mock private IBddRunContext bddRunContext;
+    @Mock private RunContext runContext;
     @Mock private IWebDriverManagerContext webDriverManagerContext;
     @Mock private IGenericWebDriverFactory driverFactory;
     @InjectMocks private VividusMobileAppDriverFactory factory;

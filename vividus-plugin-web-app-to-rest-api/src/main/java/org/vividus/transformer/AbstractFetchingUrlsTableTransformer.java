@@ -28,10 +28,9 @@ import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.transformer.ExtendedTableTransformer;
-import org.vividus.bdd.util.ExamplesTableProcessor;
 import org.vividus.http.HttpRedirectsProvider;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
+import org.vividus.util.ExamplesTableProcessor;
 
 public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTableTransformer
 {

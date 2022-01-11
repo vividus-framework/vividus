@@ -29,10 +29,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.bdd.StatisticsStoryReporter;
-import org.vividus.bdd.model.Failure;
-import org.vividus.bdd.model.NodeType;
-import org.vividus.bdd.model.Statistic;
+import org.vividus.StatisticsStoryReporter;
+import org.vividus.model.Failure;
+import org.vividus.model.NodeType;
+import org.vividus.model.Statistic;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.util.ResourceUtils;
 
@@ -143,7 +143,7 @@ public final class MetadataLogger
         table.setPaddingLeftRight(1);
         table.setPaddingBottom(1);
         table.setTextAlignment(TextAlignment.LEFT);
-        message.format(table.render());
+        message.format("%s", table.render());
     }
 
     private static String wrap(String words)

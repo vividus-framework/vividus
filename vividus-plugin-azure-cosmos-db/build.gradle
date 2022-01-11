@@ -1,14 +1,14 @@
 project.description = 'Vividus plugin for Azure Cosmos DB'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-soft-assert')
-    implementation(group: 'com.azure', name: 'azure-cosmos', version: '4.19.0')
+    implementation(group: 'com.azure', name: 'azure-cosmos', version: '4.24.0')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.7.1')
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.8.2')
 }

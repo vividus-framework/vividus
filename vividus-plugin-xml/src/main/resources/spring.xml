@@ -7,7 +7,7 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="xmlSteps" class="org.vividus.bdd.steps.xml.XmlSteps" />
+    <bean id="xmlSteps" class="org.vividus.steps.xml.XmlSteps" />
 
     <util:list id="stepBeanNames-Xml" value-type="java.lang.String">
         <idref bean="xmlSteps" />

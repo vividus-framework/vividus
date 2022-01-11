@@ -11,7 +11,7 @@ subsets of the data.
 ----
 implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{current-version}')
 implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{current-version}')
-implementation(group: 'com.github.simoc', name: 'csvjdbc', version: 'd939a2f344')
+implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.38')
 ----
 
 . Configure connection to the CSV resources

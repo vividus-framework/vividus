@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.softassert.issue.KnownIssueType;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
 import org.vividus.softassert.util.StackTraceFilter;
@@ -40,24 +42,18 @@ import org.vividus.softassert.util.StackTraceFilter;
 @ExtendWith(MockitoExtension.class)
 class AssertionFormatterTests
 {
-    private static final String TEXT = "text";
+    private static final String IDENTIFIER = "identifier";
+    private static final Optional<String> STATUS = Optional.of("status");
+    private static final Optional<String> RESOLUTION = Optional.of("resolution");
+    private static final String ASSERT_DESCRIPTION = "assert-description";
     private static final int ASSERTION_COUNT = 1;
     private final List<SoftAssertionError> softAssertionErrors = new ArrayList<>();
 
-    @Mock
-    private KnownIssue knownIssue;
-
-    @Mock
-    private SoftAssertionError softAssertionError;
-
-    @Mock
-    private AssertionError assertionError;
-
-    @Mock
-    private PrintWriter printWriter;
-
-    @InjectMocks
-    private AssertionFormatter assertionFormatter;
+    @Mock private KnownIssue knownIssue;
+    @Mock private SoftAssertionError softAssertionError;
+    @Mock private AssertionError assertionError;
+    @Mock private PrintWriter printWriter;
+    @InjectMocks private AssertionFormatter assertionFormatter;
 
     @BeforeEach
     void beforeEach()
@@ -65,21 +61,38 @@ class AssertionFormatterTests
         softAssertionErrors.add(softAssertionError);
     }
 
+    @SuppressWarnings("LineLength")
+    @Test
+    void testGetFullMessageForKnownIssue()
+    {
+        when(knownIssue.isPotentiallyKnown()).thenReturn(false);
+        when(knownIssue.getIdentifier()).thenReturn(IDENTIFIER);
+        when(knownIssue.getDescription()).thenReturn(Optional.of("known-issue-description"));
+        when(knownIssue.getType()).thenReturn(KnownIssueType.INTERNAL);
+        when(knownIssue.getStatus()).thenReturn(STATUS);
+        when(knownIssue.getResolution()).thenReturn(RESOLUTION);
+
+        String message = assertionFormatter.getMessage(ASSERT_DESCRIPTION, knownIssue);
+        assertEquals("Known issue: identifier - known-issue-description (Type: INTERNAL. Status: status. Resolution: resolution). assert-description",
+            message);
+    }
+
     @Test
     void testGetMessage()
     {
-        when(knownIssue.getStatus()).thenReturn(TEXT);
-        when(knownIssue.getResolution()).thenReturn(TEXT);
-        assertEquals("Known issue: null (Type: null. Status: text. Resolution: text). text",
-                assertionFormatter.getMessage(TEXT, knownIssue));
+        when(knownIssue.getStatus()).thenReturn(STATUS);
+        when(knownIssue.getResolution()).thenReturn(RESOLUTION);
+        assertEquals("Known issue: null (Type: null. Status: status. Resolution: resolution). assert-description",
+                assertionFormatter.getMessage(ASSERT_DESCRIPTION, knownIssue));
     }
 
     @Test
     void testGetMessageWithNullStatusAndResolution()
     {
-        when(knownIssue.getStatus()).thenReturn(null);
-        when(knownIssue.getResolution()).thenReturn(null);
-        assertEquals("Known issue: null (Type: null.). text", assertionFormatter.getMessage(TEXT, knownIssue));
+        when(knownIssue.getStatus()).thenReturn(Optional.empty());
+        when(knownIssue.getResolution()).thenReturn(Optional.empty());
+        assertEquals("Known issue: null (Type: null.). assert-description",
+                assertionFormatter.getMessage(ASSERT_DESCRIPTION, knownIssue));
     }
 
     @Test
@@ -123,8 +136,8 @@ class AssertionFormatterTests
     {
         when(softAssertionError.getKnownIssue()).thenReturn(knownIssue);
         when(knownIssue.isPotentiallyKnown()).thenReturn(Boolean.FALSE);
-        when(knownIssue.getIdentifier()).thenReturn(TEXT);
-        assertEquals("Failed verification: 1 of 1 assertions failed. Known issues: [text].",
+        when(knownIssue.getIdentifier()).thenReturn(IDENTIFIER);
+        assertEquals("Failed verification: 1 of 1 assertions failed. Known issues: [identifier].",
                 assertionFormatter.getFailedVerificationMessage(softAssertionErrors, ASSERTION_COUNT));
     }
 
@@ -133,9 +146,9 @@ class AssertionFormatterTests
     {
         when(softAssertionError.getKnownIssue()).thenReturn(knownIssue);
         when(knownIssue.isPotentiallyKnown()).thenReturn(Boolean.TRUE);
-        when(knownIssue.getIdentifier()).thenReturn(TEXT);
+        when(knownIssue.getIdentifier()).thenReturn(IDENTIFIER);
         assertEquals("Failed verification: 1 of 1 assertions failed. Known issues are not found. Potentially "
-                        + "known issues: [text].",
+                        + "known issues: [identifier].",
                 assertionFormatter.getFailedVerificationMessage(softAssertionErrors, ASSERTION_COUNT));
     }
 

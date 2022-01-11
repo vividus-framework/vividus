@@ -27,8 +27,8 @@ import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.vividus.bdd.model.jbehave.AbstractStepsContainer;
-import org.vividus.bdd.model.jbehave.Scenario;
+import org.vividus.model.jbehave.AbstractStepsContainer;
+import org.vividus.model.jbehave.Scenario;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.model.TestExecution;
 import org.vividus.xray.model.TestExecutionItem;
@@ -90,7 +90,7 @@ public class TestExecutionFactory
 
     private static TestExecutionItemStatus calculateStatus(AbstractStepsContainer steps)
     {
-        return Stream.of(steps.getBeforeScenarioSteps(), steps.getSteps(), steps.getAfterScenarioSteps())
+        return Stream.of(steps.getBeforeUserScenarioSteps(), steps.getSteps(), steps.getAfterUserScenarioSteps())
                      .flatMap(List::stream)
                      .allMatch(step -> "successful".equals(step.getOutcome())) ? TestExecutionItemStatus.PASS
                              : TestExecutionItemStatus.FAIL;

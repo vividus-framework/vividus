@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,18 +29,18 @@ import com.amazonaws.services.lambda.model.InvokeResult;
 import com.amazonaws.services.lambda.model.LogType;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.variable.VariableScope;
 
 public class LambdaSteps
 {
     private final AWSLambda awsLambdaClient;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
 
-    public LambdaSteps(IBddVariableContext bddVariableContext)
+    public LambdaSteps(VariableContext variableContext)
     {
         this.awsLambdaClient = AWSLambdaClientBuilder.defaultClient();
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
     }
 
     /**
@@ -102,6 +102,6 @@ public class LambdaSteps
         {
             result.put("function-error", functionError);
         }
-        bddVariableContext.putVariable(scopes, variableName, result);
+        variableContext.putVariable(scopes, variableName, result);
     }
 }

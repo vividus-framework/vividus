@@ -1,7 +1,7 @@
 project.description = 'Vividus Analytics'
 
 dependencies {
-    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-engine')
     implementation project(':vividus-http-client')
     implementation project(':vividus-reporter')
     implementation project(':vividus-util')

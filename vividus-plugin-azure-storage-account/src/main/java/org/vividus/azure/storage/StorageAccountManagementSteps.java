@@ -24,26 +24,25 @@ import java.util.Set;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.core.util.serializer.SerializerEncoding;
 import com.azure.resourcemanager.storage.StorageManager;
 import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.azure.util.InnersJacksonAdapter;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.variable.VariableScope;
 
 public class StorageAccountManagementSteps
 {
     private final StorageManager storageManager;
-    private final IBddVariableContext bddVariableContext;
+    private final VariableContext variableContext;
     private final InnersJacksonAdapter innersJacksonAdapter;
 
     public StorageAccountManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            InnersJacksonAdapter innersJacksonAdapter, IBddVariableContext bddVariableContext)
+            InnersJacksonAdapter innersJacksonAdapter, VariableContext variableContext)
     {
         this.storageManager = StorageManager.authenticate(tokenCredential, azureProfile);
-        this.bddVariableContext = bddVariableContext;
+        this.variableContext = variableContext;
         this.innersJacksonAdapter = innersJacksonAdapter;
     }
 
@@ -75,7 +74,6 @@ public class StorageAccountManagementSteps
                 .stream()
                 .collect(toList());
 
-        bddVariableContext.putVariable(scopes, variableName,
-                innersJacksonAdapter.serialize(storageAccounts, SerializerEncoding.JSON));
+        variableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(storageAccounts));
     }
 }

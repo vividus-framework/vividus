@@ -40,9 +40,9 @@ import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.WebDriverEventListener;
-import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningScenario;
-import org.vividus.bdd.model.RunningStory;
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningScenario;
+import org.vividus.model.RunningStory;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
@@ -54,7 +54,7 @@ class VividusWebDriverFactoryTests
     private static final String TEST = "Test";
     private static final String STORY_FILE = TEST + ".story";
 
-    @Mock private IBddRunContext bddRunContext;
+    @Mock private RunContext runContext;
     @Mock private IWebDriverManagerContext webDriverManagerContext;
     @Mock private IWebDriverFactory webDriverFactory;
     @Mock private WebDriverEventListener webDriverEventListener;
@@ -67,7 +67,7 @@ class VividusWebDriverFactoryTests
     @BeforeEach
     public void beforeEach()
     {
-        vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverManagerContext, bddRunContext,
+        vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverManagerContext, runContext,
                 Optional.empty(), webDriverFactory, proxy);
     }
 
@@ -83,7 +83,7 @@ class VividusWebDriverFactoryTests
 
         when(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES))
                 .thenReturn(new DesiredCapabilities());
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         VividusWebDriver vividusWebDriver = vividusWebDriverFactory.create();
         WebDriver eventFiringDriver = vividusWebDriver.getWrappedDriver();
         assertEquals(driver, ((WrapsDriver) eventFiringDriver).getWrappedDriver());

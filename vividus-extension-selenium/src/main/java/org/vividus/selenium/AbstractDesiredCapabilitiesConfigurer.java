@@ -22,16 +22,16 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningStory;
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningStory;
 
 public abstract class AbstractDesiredCapabilitiesConfigurer implements DesiredCapabilitiesConfigurer
 {
-    private final IBddRunContext bddRunContext;
+    private final RunContext runContext;
 
-    protected AbstractDesiredCapabilitiesConfigurer(IBddRunContext bddRunContext)
+    protected AbstractDesiredCapabilitiesConfigurer(RunContext runContext)
     {
-        this.bddRunContext = bddRunContext;
+        this.runContext = runContext;
     }
 
     @SuppressWarnings("unchecked")
@@ -58,7 +58,7 @@ public abstract class AbstractDesiredCapabilitiesConfigurer implements DesiredCa
 
     private void consumeTestName(Consumer<String> testNameConsumer)
     {
-        Optional.ofNullable(bddRunContext.getRootRunningStory())
+        Optional.ofNullable(runContext.getRootRunningStory())
                 .map(RunningStory::getName)
                 .ifPresent(testNameConsumer);
     }

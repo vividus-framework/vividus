@@ -1,0 +1,64 @@
+= Report Portal
+
+https://reportportal.io/[ReportPortal] is a test automation analytics platform and real-time reporting, powered by Machine Learning.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'agent-reportportal', version: '{current-version}')
+----
+
+== Properties
+
+NOTE: The properties marked with bold are mandatory.
+
+[cols="4,3,2,6", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|*system.rp.enable*
+|`true`/`false`
+|`false`
+|Enables reporting to the ReportPortal
+
+|*system.rp.endpoint*
+|URL
+|none
+|URL to the ReportPortal instance
+
+|*system.rp.uuid*
+|Access token from ReportPortal profile
+|none
+|Will be used to authenticate user
+
+|*system.rp.project*
+|Any string
+|none
+|Name of the project that will be used for launch reporting
+
+|*system.rp.launch*
+|Any string
+|none
+|The name of the launch, e.g. `SMOKE`
+
+|system.rp.description
+|Any string
+|none
+|Launch description
+
+|system.rp.test-entity
+|`SCENARIO`/`STEP`
+|`SCENARIO`
+|Defines what will be reported as a test case `SCENARIO` or `STEP`
+
+|system.rp.attributes
+|Semi-colon seprated values, e.g. `key:value; value;`
+|none
+|Attributes could be used for additional tagging of the launches
+
+|===

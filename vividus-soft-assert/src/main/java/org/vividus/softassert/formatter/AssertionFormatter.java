@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,20 +37,19 @@ public class AssertionFormatter implements IAssertionFormatter
     {
         StringBuilder message = new StringBuilder(issue.isPotentiallyKnown() ? "Potentially known" : "Known")
                 .append(" issue: ")
-                .append(issue.getIdentifier())
-                .append(" (Type: ")
-                .append(issue.getType())
-                .append(DOT_CHAR);
-        String status = issue.getStatus();
-        if (status != null)
-        {
-            message.append(" Status: ").append(status);
-        }
-        String resolution = issue.getResolution();
-        if (resolution != null)
-        {
-            message.append(DOT_CHAR).append(" Resolution: ").append(resolution);
-        }
+                .append(issue.getIdentifier());
+
+        issue.getDescription().ifPresent(desc -> message.append(" - ").append(desc));
+
+        message.append(" (Type: ")
+               .append(issue.getType())
+               .append(DOT_CHAR);
+
+        issue.getStatus().ifPresent(status -> message.append(" Status: ").append(status));
+
+        issue.getResolution().ifPresent(resolution -> message.append(DOT_CHAR)
+                .append(" Resolution: ").append(resolution));
+
         message.append("). ").append(description);
         return message.toString();
     }

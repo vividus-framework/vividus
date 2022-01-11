@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,28 +54,20 @@ class KnownIssueCheckerTests
     private static final String STEP = "step";
     private static final String SECOND_STEP = "step2";
     private static final String SUITE = "suite";
-    private static final String CLOSED = "closed";
+    private static final Optional<String> CLOSED = Optional.of("closed");
     private static final String FIRST_ISSUE = "UNIT-1";
     private static final String SECOND_ISSUE = "UNIT-2";
     private static final String THIRD_ISSUE = "UNIT-3";
     private static final String NOT_MATCHING_ASSERTION = "not matching assertion";
     private static final String NOT_MATCHING_SUITE = "not matching suite";
     private static final String NOT_MATCHING_STEP = "not matching step";
+    private static final String DESCRIPTION = "description";
 
-    @Mock
-    private IKnownIssueProvider knownIssueProvider;
-
-    @Mock
-    private IIssueStateProvider issueStateProvider;
-
-    @Mock
-    private ITestInfoProvider testInfoProvider;
-
-    @Mock
-    private KnownIssueDataProvider knownIssueDataProvider;
-
-    @InjectMocks
-    private KnownIssueChecker knownIssueChecker;
+    @Mock private IKnownIssueProvider knownIssueProvider;
+    @Mock private IIssueStateProvider issueStateProvider;
+    @Mock private ITestInfoProvider testInfoProvider;
+    @Mock private KnownIssueDataProvider knownIssueDataProvider;
+    @InjectMocks private KnownIssueChecker knownIssueChecker;
 
     @BeforeEach
     void beforeEach()
@@ -114,10 +106,10 @@ class KnownIssueCheckerTests
     @Test
     void testGetKnownIssueIfIssueStatusIsNull()
     {
-        testGetKnownIssue(null);
+        testGetKnownIssue(Optional.empty());
     }
 
-    private void testGetKnownIssue(String status)
+    private void testGetKnownIssue(Optional<String> status)
     {
         mockKnownIssueIdentifiers();
         when(issueStateProvider.getIssueStatus(TEXT)).thenReturn(status);
@@ -148,43 +140,10 @@ class KnownIssueCheckerTests
     void testGetKnownIssueWithResolution()
     {
         mockKnownIssueIdentifiers();
-        String resolution = "resolution";
+        Optional<String> resolution = Optional.of("resolution");
         when(issueStateProvider.getIssueStatus(TEXT)).thenReturn(CLOSED);
         when(issueStateProvider.getIssueResolution(TEXT)).thenReturn(resolution);
         assertKnownIssue(false, TEXT, CLOSED, resolution);
-    }
-
-    @Test
-    void testGetKnownIssueWithDynamicDataProvider()
-    {
-        KnownIssueIdentifier identifier = createIdentifier();
-        identifier.setDynamicPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
-        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
-        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.of(URL));
-
-        assertKnownIssue(false, TEXT);
-    }
-
-    @Test
-    void testGetKnownIssueWithDynamicDataProviderMismatchedData()
-    {
-        KnownIssueIdentifier identifier = createIdentifier();
-        identifier.setDynamicPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
-        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
-        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.of(ANOTHER_URL));
-
-        assertNull(knownIssueChecker.getKnownIssue(PATTERN));
-    }
-
-    @Test
-    void testGetKnownIssueWithDynamicDataProviderReturnEmpty()
-    {
-        KnownIssueIdentifier identifier = createIdentifier();
-        identifier.setDynamicPatterns(Map.of(CURRENT_PAGE_URL, EXAMPLE_COM));
-        doReturn(Map.of(TEXT, identifier)).when(knownIssueProvider).getKnownIssueIdentifiers();
-        when(knownIssueDataProvider.getData(CURRENT_PAGE_URL)).thenReturn(Optional.empty());
-
-        assertNull(knownIssueChecker.getKnownIssue(PATTERN));
     }
 
     @Test
@@ -295,6 +254,7 @@ class KnownIssueCheckerTests
         identifier.setAssertionPattern(assertionPattern);
         identifier.setType(KnownIssueType.AUTOMATION);
         identifier.setTestStepPattern(testStep);
+        identifier.setDescription(DESCRIPTION);
         return identifier;
     }
 
@@ -324,15 +284,16 @@ class KnownIssueCheckerTests
 
     private void assertKnownIssue(boolean isPotentiallyKnown, String identifier)
     {
-        assertKnownIssue(isPotentiallyKnown, identifier, null);
+        assertKnownIssue(isPotentiallyKnown, identifier, Optional.empty());
     }
 
-    private void assertKnownIssue(boolean isPotentiallyKnown, String identifier, String status)
+    private void assertKnownIssue(boolean isPotentiallyKnown, String identifier, Optional<String> status)
     {
-        assertKnownIssue(isPotentiallyKnown, identifier, status, null);
+        assertKnownIssue(isPotentiallyKnown, identifier, status, Optional.empty());
     }
 
-    private void assertKnownIssue(boolean isPotentiallyKnown, String identifier, String status, String resolution)
+    private void assertKnownIssue(boolean isPotentiallyKnown, String identifier, Optional<String> status,
+            Optional<String> resolution)
     {
         KnownIssue actual = knownIssueChecker.getKnownIssue(PATTERN);
         assertEquals(isPotentiallyKnown, actual.isPotentiallyKnown());
@@ -340,6 +301,7 @@ class KnownIssueCheckerTests
         assertEquals(KnownIssueType.AUTOMATION, actual.getType());
         assertEquals(status, actual.getStatus());
         assertEquals(resolution, actual.getResolution());
+        assertEquals(Optional.of(DESCRIPTION), actual.getDescription());
         assertFalse(actual.isFailTestCaseFast());
         assertFalse(actual.isFailTestSuiteFast());
     }

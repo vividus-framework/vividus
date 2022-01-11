@@ -1,7 +1,7 @@
 Description: Integration tests for RoundExpressionProcessor class
 
 Meta:
-    @epic vividus-bdd-engine
+    @epic vividus-engine
     @feature expressions
 
 Scenario: Verify rounding works correctly

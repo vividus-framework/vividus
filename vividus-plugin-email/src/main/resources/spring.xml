@@ -10,18 +10,18 @@
         default-lazy-init="true" >
 
     <context:component-scan base-package="org.vividus.jackson.databind.email"/>
-    <context:component-scan base-package="org.vividus.bdd.email"/>
+    <context:component-scan base-package="org.vividus.email"/>
 
-    <bean id="emailSteps" class="org.vividus.bdd.email.steps.EmailSteps">
+    <bean id="emailSteps" class="org.vividus.email.steps.EmailSteps">
         <constructor-arg index="0">
             <bean factory-bean="propertyMapper" factory-method="readValues">
                 <constructor-arg value="email.server." />
-                <constructor-arg value="org.vividus.bdd.email.model.EmailServerConfiguration" />
+                <constructor-arg value="org.vividus.email.model.EmailServerConfiguration" />
             </bean>
         </constructor-arg>
     </bean>
 
-    <bean class="org.vividus.bdd.email.service.ImapFetchService">
+    <bean class="org.vividus.email.service.ImapFetchService">
         <constructor-arg index="0" value="${email.imap.wait.duration}"/>
         <constructor-arg index="1" value="${email.imap.wait.retry-times}"/>
         <constructor-arg index="2" value="${email.imap.folder}"/>

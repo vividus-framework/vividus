@@ -3,7 +3,8 @@ project.description = 'Vividus plugin for REST API testing'
 ext.jsonPathVersion = '2.6.0'
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
+    api project(':vividus-plugin-json')
     implementation project(':vividus-http-client')
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
@@ -17,7 +18,7 @@ dependencies {
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '2.28.0')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-    implementation(group: 'org.apache.tika', name: 'tika-core', version: '2.1.0')
+    implementation(group: 'org.apache.tika', name: 'tika-core', version: '2.2.1')
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     implementation(group: 'io.qameta.allure', name: 'allure-jsonunit', version: versions.allure) {
         exclude (group: 'io.qameta.allure')

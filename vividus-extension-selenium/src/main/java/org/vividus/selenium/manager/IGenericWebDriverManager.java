@@ -16,12 +16,10 @@
 
 package org.vividus.selenium.manager;
 
-import java.util.Set;
 import java.util.function.Consumer;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebDriver;
 
 public interface IGenericWebDriverManager
@@ -40,15 +38,9 @@ public interface IGenericWebDriverManager
 
     boolean isAndroid();
 
-    boolean isBrowserAnyOf(String... browserTypes);
-
     boolean isIOSNativeApp();
 
     boolean isAndroidNativeApp();
 
-    boolean isOrientation(ScreenOrientation orientation);
-
     Capabilities getCapabilities();
-
-    Set<String> getWindowHandles();
 }

@@ -1,7 +1,6 @@
 = Web Application Plugin
-:proxy: This step requires proxy to be turned on. It can be done in properties or by switching on @proxy meta tag at the story level.
-:har-attached: In case of failure the full HTTP archive (HAR) is attached to the report.
 :grid-default-hostname: empty
+:given-step: Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
 
 The plugin provides functionality to interact with Web applications.
 
@@ -88,8 +87,12 @@ include::partial$locator-header.adoc[]
 |checkboxName(allow)
 
 |`elementName`
-|Any attribute or text value
+|any attribute or text value
 |elementName(OK)
+
+|`shadowCssSelector`
+|chain of css selectors, separated by `;`, where first value - selector for upper shadow host, last value - target element selector
+|shadowCssSelector(.upperHost; #innerHost1; #innerHost2; .targetValue)
 
 |===
 
@@ -137,10 +140,6 @@ include::partial$common-filters.adoc[]
 |src attribute should contain value
 |id(v1)->filter.imageSrcPart(part)
 
-|`textPart`
-|text of an element should contain value
-|id(v1)->filter.textPart(part)
-
 |`placeholder`
 |Placeholder attribute should be equal to a value
 |id(v1)->filter.placeholder(placeholder-value)
@@ -178,35 +177,10 @@ include::partial$common-filters.adoc[]
 include::partial$selenium-properties.adoc[]
 include::partial$selenium-grid-properties.adoc[]
 |screenshot.on-failure.debug-modes
-|proxy
-|empty
-|Provides possibility to attach screenshot for failed proxy steps
-
-|proxy.enabled
-|true/false
-|false
-|Enabled proxy for the run
-
-|proxy.host
-|any host name resolving on the machine
-|empty
-|Overrides the host which will be used by proxy
-
-|proxy.ports
-|10000-10005
-|empty
-|Defines ports range which could be used for proxy
-
-|proxy.connectable-host
-|host.docker.internal
-|empty
-|Overrides the proxy host which will be passed to browser
+include::partial$proxy-properties.adoc[]
 |===
 
-=== Meta Tags
-
-`@proxy` - some steps require proxy to be turned on: it can be done by setting the corresponding properties or by switching on this meta tag at story level.
-
+include::partial$proxy-meta-tags.adoc[]
 
 include::partial$dynamic-variables-header.adoc[]
 
@@ -249,6 +223,26 @@ When I open URL `https://delayed.vividus.dev` in new window
 When I stop page loading
 ----
 
+=== Configure page load timeout
+
+Sets a custom page load timeout for a part of the story
+
+[source,gherkin]
+----
+When I set page load timeout to `$duration`
+----
+
+* `$duration` - total duration to wait for page load completion in {iso-date-format-link} format
+
+.Before loading a heavy page set an increased timeout
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I set page load timeout to `PT20S`
+When I open URL `https://example.com/super-heavy-page` in new window
+When I set page load timeout to `PT10S`
+----
+
 === Scroll context
 
 Scrolls the context to an edge
@@ -287,6 +281,32 @@ When I scroll element located `$locator` into view
 [source,gherkin]
 ----
 When I scroll element located `id(way_down_button)` into view
+----
+
+=== Performance metrics
+
+Checks web performance metrics.
+
+[source,gherkin]
+----
+Then metric $webPerformanceMetric is $comparisonRule `$duration`
+----
+
+:navigation-timing: https://www.w3.org/TR/navigation-timing/#dom-performancetiming-
+
+* `$webPerformanceMetric` - The web performance metric. Where:
+** [subs=+quotes]`*TIME_TO_FIRST_BYTE*` -  The time between {navigation-timing}navigationstart[the navigation start] and {navigation-timing}responsestart[the response start].
+** [subs=+quotes]`*DNS_LOOKUP_TIME*` -  The time between {navigation-timing}domainlookupstart[the domain lookup start] and {navigation-timing}domainlookupend[the domain lookup end].
+** [subs=+quotes]`*DOM_CONTENT_LOAD_TIME*` -  The time between {navigation-timing}domloading[the DOM loading] and the {navigation-timing}domcomplete[the DOM complete].
+** [subs=+quotes]`*PAGE_LOAD_TIME*` -  The time between {navigation-timing}navigationstart[the navgation start] and {navigation-timing}loadeventend[the load event end].
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The duration comparison rule].
+* `$duration` - The duration to compare against in {iso-date-format-link} format.
+
+.Check page load
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com'
+Then metric PAGE_LOAD_TIME is less than `PT5S`
 ----
 
 === Execute sequence of actions
@@ -630,320 +650,4 @@ to apply the cookie changes.
 When I remove all cookies from current domain without applying changes
 ----
 
-
-=== Proxy Steps
-==== Check the number of HTTP requests
-
-{proxy}
-
-The actions preformed by the step:
-
-* extract HTTP messages from the recorded proxy archive
-* filter out the HTTP messages with the response status code `302 Moved Temporarily`
-* find HTTP requests matching the provided HTTP methods and the URL regular expression
-* check that the total number of the found HTTP messages satisfies the desired condition
-
-{har-attached}
-
-[source,gherkin]
-----
-Then number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $comparisonRule `$number`
-----
-* `$httpMethods` - The comma-separated HTTP methods to filter by
-* `$urlPattern` - The regular expression to match HTTP request URL
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
-* `$number` - The number to compare with
-
-.Check the number of HTTP GET and POST requests matching URL regurlar expression is equal to 1
-[source,gherkin]
-----
-Then number of HTTP GET, POST requests with URL pattern `http://httpbin\.org/get` is equal to `1`
-----
-
-
-==== Capture the request URL
-
-Save the URL from the request with given URL-pattern into the variable with specified name and the scopes.
-
-{proxy}
-
-The actions preformed by the step:
-
-* extract HTTP messages from the recorded proxy archive
-* filter out the HTTP messages with the response status code `302 Moved Temporarily`
-* find HTTP requests matching the provided HTTP methods and the URL regular expression
-* check that total number of the found HTTP messages is equal to `1`
-* save the HTTP request URL to the specified variable
-
-{har-attached}
-
-[source,gherkin]
-----
-When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL to $scopes variable `$variableName`
-----
-* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
-* `$urlPattern` - The regular expression to match HTTP request URL.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to save the URL.
-
-.Validate the URL of the matching HTTP request
-[source,gherkin]
-----
-Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
-When I capture HTTP GET or POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
-Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
-----
-
-
-==== Capture the URL query
-
-Save the URL query parameters from the request with given URL-pattern into the variable with specified name and the scopes.
-
-{proxy}
-
-The actions preformed by the step:
-
-* extract HTTP messages from the recorded proxy archive
-* filter out the HTTP messages with the response status code `302 Moved Temporarily`
-* find HTTP requests matching the provided HTTP methods and the URL regular expression
-* check that total number of the found HTTP messages is equal to `1`
-* save the URL query parameters to the specified variable
-
-{har-attached}
-
-[source,gherkin]
-----
-When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save URL query to $scopes variable `$variableName`
-----
-* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
-* `$urlPattern` - The regular expression to match HTTP request URL.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to save the URL query. The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
-
-.Validate the URL query of the matching HTTP request
-[source,gherkin]
-----
-Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
-When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL query to scenario variable `query`
-Then `${query.q[0]}` is equal to `vividus`
-Then `${query.q}` is equal to `[vividus]`
-Then `${query}` is equal to `{q=[vividus]}`
-----
-
-
-==== Capture the HTTP request
-
-{proxy}
-The actions preformed by the step:
-
-* extract HTTP messages from the recorded proxy archive
-* filter out the HTTP messages with response status code `302 Moved Temporarily`
-* find HTTP requests matching the provided HTTP methods and URL regular expression
-* check that total number of the found HTTP messages is equal to 1
-* save the HTTP message data to the specified variable
-
-{har-attached}
-
-[source,gherkin]
-----
-When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save request data to $scopes variable `$variableName`
-----
-* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
-* `$urlPattern` - The regular expression to match HTTP request URL.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store results. If the variable name is `my-var`, the following variables will be created:
-** `${my-var.query}` - The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
-** `${my-var.requestBody.mimeType}` - The MIME type of posted data, the variable will not be created if MIME type is not present.
-** `${my-var.requestBody.text}` - The posted data as plain text, the variable will not be created if the request body is not present.
-** `${my-var.requestBodyParameters}` - The form data parameters are stored as a collection of key and value pairs, where key is the name of the form parameter and value is the list of form parameter values. The form parameter values are accessible via zero-based index.
-** `${my-var.responseStatus}` - The response status, the variable will not be created if the response is not present.
-
-.Validate the data from the matching HTTP message
-[source,gherkin]
-----
-Given I am on a page with the URL 'http://httpbin.org/forms/post'
-When I click on element located `By.xpath(//button)`
-When I capture GET or HTTP POST request with URL pattern `http://httpbin\.org/post` and save request data to scenario variable `data`
-Then `${data.query}` is equal to `{}`
-Then `${data.requestBodyParameters}` is equal to `{delivery=, custtel=, comments=, custemail=, custname=}`
-Then `${data.requestBody}` is not equal to `null`
-Then `${data.responseStatus}` is equal to `200`
-----
-
-
-==== Wait for the HTTP request
-
-{proxy}
-Waits for the HTTP requests matching the provided HTTP methods and URL regular expression.
-If no HTTP request is sent and wait timeout is reached, then the step will fail.
-
-[source,gherkin]
-----
-When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log
-----
-* `$httpMethods` - the "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
-* `$urlPattern` - the regular expression to match HTTP request URL
-
-.Wait for the HTTP request
-[source,gherkin]
-----
-Given I am on a page with the URL 'http://httpbin.org/get'
-When I wait until HTTP GET or POST request with URL pattern `http://httpbin\.org/get` exists in proxy log
-Then number of HTTP GET or POST requests with URL pattern `http://httpbin\.org/get` is equal to `1`
-----
-
-
-==== Add headers to the HTTP request
-
-{proxy}
-Add headers to the proxied HTTP request satisfying the desired condition
-
-[source,gherkin]
-----
-When I add headers to proxied requests with URL pattern which $comparisonRule `$url`:$headers
-----
-* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
-* `$url` - The input value of URL to filter by
-* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
-
-.Add headers to the proxied HTTP request
-[source,gherkin]
-----
-When I add headers to proxied requests with URL pattern which is equal to `http://httpbin.org/headers`:
-|name     |value     |
-|testName1|testValue1|
-|testName2|testValue2|
-Given I am on a page with the URL 'http://httpbin.org/headers'
-When I change context to element located `xpath(//pre)`
-When I set the text found in search context to the 'SCENARIO' variable 'response'
-Then a JSON element from '${response}' by the JSON path '$.headers' is equal to '
-{
-    "Testname1": "testValue1",
-    "Testname2": "testValue2"
-}
-'ignoring extra fields
-----
-
-
-==== Clear the recordings
-
-{proxy}
-The step clears the HTTP requests and responses recorded by the proxy
-
-[source,gherkin]
-----
-When I clear proxy log
-----
-
-.Clear the data recorded by the proxy
-[source,gherkin]
-----
-Given I am on a page with the URL 'http:/httpbin.org/get'
-When I clear proxy log
-Then number of HTTP GET requests with URL pattern `http://httpbin\.org/get` is equal to `0`
-----
-
-
-==== Clear the mocks
-
-{proxy}
-The step clears previously created mocks
-
-[source,gherkin]
-----
-When I clear proxy mocks
-----
-
-.Clear the proxy mocks
-[source,gherkin]
-----
-When I mock HTTP responses with request URL which CONTAINS `frames.html` using response code `200`, content `#{loadResource(page.html)}` and headers:
-|name        |value    |
-|Content-Type|text/html|
-When I clear proxy mocks
-Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
-Then number of elements found by `id(sw)` is = `0`
-----
-
-
-==== Mock the HTTP response by methods with content
-
-{proxy}
-Mocks HTTP response by methods with a provided content
-
-[IMPORTANT]
-No actual request will be executed. Short-circuited response will be returned.
-
-[source,gherkin]
-----
-When I mock HTTP $httpMethods responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers
-----
-* `$httpMethods` - The "or"-separated set of HTTP methods to filter by, e.g. `GET or POST or PUT`.
-* `$rule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
-* `$url` - The input value of URL to filter by
-* `$code` - The response status code
-* `$content` - The content to send within a response
-* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
-
-.Hijack a page
-[source,gherkin]
-----
-When I mock HTTP POST responses with request URL which CONTAINS `example` using response code `202`, content `#{loadResource(mocked-example.json)}` and headers:
-|name        |value           |
-|Content-Type|application/json|
-----
-
-
-==== Mock the HTTP response with content
-
-{proxy}
-Mocks HTTP response with a provided content
-
-[IMPORTANT]
-No actual request will be executed. Short-circuited response will be returned.
-
-[source,gherkin]
-----
-When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers
-----
-
-* `$rule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
-* `$url` - The input value of URL to filter by
-* `$code` - The response status code
-* `$content` - The content to send within a response
-* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
-
-.Hijack a page
-[source,gherkin]
-----
-When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `200`, content `#{loadResourceAsByteArray(page.html)}` and headers:
-|name        |value    |
-|Content-Type|text/html|
-----
-
-
-==== Mock the HTTP response without content
-
-{proxy}
-Mocks HTTP response
-
-[IMPORTANT]
-No actual request will be executed. Short-circuited response will be returned.
-
-[source,gherkin]
-----
-When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode` and headers:$headers
-----
-
-* `$rule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
-* `$url` - The input value of URL to filter by
-* `$code` - The response status code
-* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
-
-.404 page
-[source,gherkin]
-----
-When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `404` and headers:
-|name          |value|
-|Content-Length|0    |
-----
+include::partial$proxy-steps.adoc[]

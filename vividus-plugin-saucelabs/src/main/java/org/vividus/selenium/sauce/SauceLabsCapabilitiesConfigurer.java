@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.vividus.selenium.sauce;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
+import org.vividus.context.RunContext;
 import org.vividus.selenium.tunnel.AbstractTunnellingCapabilitiesConfigurer;
 
 public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilitiesConfigurer<SauceConnectOptions>
@@ -27,9 +27,9 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
     private String sauceConnectArguments;
     private String restUrl;
 
-    public SauceLabsCapabilitiesConfigurer(IBddRunContext bddRunContext, SauceConnectManager sauceConnectManager)
+    public SauceLabsCapabilitiesConfigurer(RunContext runContext, SauceConnectManager sauceConnectManager)
     {
-        super(bddRunContext, sauceConnectManager);
+        super(runContext, sauceConnectManager);
     }
 
     @Override

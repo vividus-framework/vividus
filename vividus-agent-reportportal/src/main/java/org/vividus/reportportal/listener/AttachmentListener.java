@@ -16,6 +16,8 @@
 
 package org.vividus.reportportal.listener;
 
+import java.util.Base64;
+
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 
@@ -23,8 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
-
-import rp.com.google.common.io.BaseEncoding;
 
 public class AttachmentListener
 {
@@ -35,7 +35,7 @@ public class AttachmentListener
     public void onAttachmentPublish(AttachmentPublishEvent event)
     {
         Attachment attachment = event.getAttachment();
-        LOGGER.atInfo().addArgument(() -> BaseEncoding.base64().encode(attachment.getContent()))
+        LOGGER.atInfo().addArgument(() -> Base64.getEncoder().encodeToString(attachment.getContent()))
                        .addArgument(attachment::getTitle)
                        .log("RP_MESSAGE#BASE64#{}#{}");
     }

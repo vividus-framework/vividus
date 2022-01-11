@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ class WebDriverManagerContextTests
     @Test
     void testPutParameter()
     {
-        WebDriverManagerParameter param = WebDriverManagerParameter.ORIENTATION;
+        WebDriverManagerParameter param = WebDriverManagerParameter.SCREEN_SIZE;
         String value = "value";
         webDriverManagerContext.putParameter(param, value);
         verify(testContext).put(param.getContextKey(), value);
@@ -78,7 +78,7 @@ class WebDriverManagerContextTests
     @Test
     void testResetParameter()
     {
-        WebDriverManagerParameter param = WebDriverManagerParameter.ORIENTATION;
+        WebDriverManagerParameter param = WebDriverManagerParameter.SCREEN_SIZE;
         webDriverManagerContext.reset(param);
         verify(testContext).remove(param.getContextKey());
     }

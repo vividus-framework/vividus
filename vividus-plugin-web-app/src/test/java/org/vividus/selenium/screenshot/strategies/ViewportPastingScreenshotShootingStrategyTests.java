@@ -20,24 +20,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.apache.commons.beanutils.BeanUtils;
 import org.junit.jupiter.api.Test;
-
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
 class ViewportPastingScreenshotShootingStrategyTests
 {
-    private final ViewportPastingScreenshotShootingStrategy strategy = new ViewportPastingScreenshotShootingStrategy();
-
     @Test
-    void shouldCreageAdjustingViewportPastingDecorator() throws IllegalAccessException, InvocationTargetException,
-        NoSuchMethodException
+    void shouldCreateAdjustingViewportPastingDecorator()
     {
-        ShootingStrategy shootingStrategy = strategy.getDecoratedShootingStrategy(null, false, null);
-        assertThat(shootingStrategy,
-                instanceOf(AdjustingViewportPastingDecorator.class));
-        assertEquals("0", BeanUtils.getProperty(shootingStrategy, "headerAdjustment"));
+        var strategy = new ViewportPastingScreenshotShootingStrategy();
+        var shootingStrategy = strategy.getDecoratedShootingStrategy(null);
+        assertThat(shootingStrategy, instanceOf(AdjustingViewportPastingDecorator.class));
+        var adjustingViewportPastingDecorator = (AdjustingViewportPastingDecorator) shootingStrategy;
+        assertEquals(0, adjustingViewportPastingDecorator.getHeaderAdjustment());
+        assertEquals(0, adjustingViewportPastingDecorator.getFooterAdjustment());
     }
 }

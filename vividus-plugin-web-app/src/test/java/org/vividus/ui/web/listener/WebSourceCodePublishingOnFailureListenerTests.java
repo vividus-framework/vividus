@@ -42,11 +42,11 @@ import org.vividus.ui.context.IUiContext;
 class WebSourceCodePublishingOnFailureListenerTests
 {
     private static final String INNER_HTML = "innerHTML";
-    private static final TestLogger LOGGER =
-        TestLoggerFactory.getTestLogger(WebSourceCodePublishingOnFailureListener.class);
-    @Mock private IUiContext uiContext;
 
+    @Mock private IUiContext uiContext;
     @InjectMocks private WebSourceCodePublishingOnFailureListener listener;
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(WebSourceCodePublishingOnFailureListener.class);
 
     @Test
     void shouldReturnWholePageForDriverContext()
@@ -75,6 +75,13 @@ class WebSourceCodePublishingOnFailureListenerTests
         when(uiContext.getSearchContext()).thenReturn(webElement);
         when(webElement.getAttribute(INNER_HTML)).thenThrow(StaleElementReferenceException.class);
         assertEquals(Optional.empty(), listener.getSourceCode());
-        assertEquals(LOGGER.getLoggingEvents(), List.of(debug("Unable to get sources of the stale element")));
+        assertEquals(logger.getLoggingEvents(), List.of(debug("Unable to get sources of the stale element")));
+    }
+
+    @Test
+    void shouldReturnEmptyValueForNullSearchContext()
+    {
+        when(uiContext.getSearchContext()).thenReturn(null);
+        assertEquals(Optional.empty(), listener.getSourceCode());
     }
 }

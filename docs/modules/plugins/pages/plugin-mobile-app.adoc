@@ -1,8 +1,10 @@
 :grid-default-hostname: empty
+:keys: https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
+:given-step: Given I start mobile application
 
 = Mobile Application Plugin
 
-The plugin provides functionality to test mobile application on real devices, Android Emulators and iOS Simulators
+The plugin provides functionality to test mobile application on real devices, Android Emulators and iOS Simulators.
 
 == Installation
 
@@ -160,8 +162,12 @@ a|Defines a destination folder on a device for a file being uploaded
 !`/sdcard/Pictures`
 
 !===
-
+include::partial$proxy-properties.adoc[]
 |===
+
+include::partial$proxy-meta-tags.adoc[]
+
+IMPORTANT: For device configuration, we need to perform the following steps: install CA certificate(download https://github.com/browserup/browserup-proxy/blob/master/browserup-proxy-core/src/main/resources/sslSupport/ca-certificate-rsa.cer[CA certificate] from a browserup repository), configure device proxy, and configure the test app to allow proxy in cases of necessity.
 
 == Profiles
 
@@ -177,6 +183,18 @@ selenium.grid.platform-name=iOS
 selenium.grid.automation-name=XCUITest
 ----
 
+=== tvOS
+:tvos-profile: mobile_app/tvos
+
+The profile can be enabled by adding `{tvos-profile}` to `configuration.profiles` property
+
+Default profile configuration
+[source,properties]
+----
+selenium.grid.platform-name=tvOS
+selenium.grid.automation-name=XCUITest
+----
+
 === Android
 :android-profile: mobile_app/android
 
@@ -187,6 +205,20 @@ Default profile configuration
 ----
 selenium.grid.platform-name=Android
 selenium.grid.automation-name=UIAutomator2
+----
+
+=== Local
+:local-profile: mobile_app/local
+
+The profile simplifies execution of tests against the local Appium server. It could be used in conjunction with: `{android-profile}`, `{ios-profile}`, `{tvos-profile}`
+The profile can be enabled by adding `{local-profile}` to `configuration.profiles` property
+
+Default profile configuration
+[source,properties]
+----
+selenium.grid.url=http://127.0.0.1:4723/wd/hub
+selenium.grid.platformName=${selenium.grid.platform-name}
+selenium.grid.automationName=${selenium.grid.automation-name}
 ----
 
 include::partial$dynamic-variables-header.adoc[]
@@ -218,7 +250,7 @@ ${clipboard-text}
 
 .Verify clipboard content
 [source,gherkin]
----- 
+----
 Then `${clipboard-text}` is equal to `uarlouski@gmail.com`
 ----
 
@@ -228,387 +260,172 @@ include::partial$dynamic-variables-ui.adoc[]
 
 === Start mobile application
 
-==== *_Info_*
-
-Starts mobile application with capabilities from user's `*.properties` files and profiles set by a user
-
-==== *_Wording_*
+Starts mobile application with capabilities from user's `*.properties` files and profiles set by a user.
 
 [source,gherkin]
 ----
-Given I start mobile application
-----
-
-==== *_Usage_*
-
-.Sample.story
-[source,gherkin]
-----
-Scenario: Start mobile application
 Given I start mobile application
 ----
 
 === Start mobile application with capabilities
 
-==== *_Info_*
-
-Starts mobile application with capabilities from user's `*.properties` files and profiles set by a user, additionally step takes list of capabilities as an argument that override previously defined capabilities
-
-==== *_Wording_*
+Starts mobile application with capabilities from user's `*.properties` files and profiles set by a user.
+Additionally the step takes a list of capabilities as an argument that overrides gloablly-defined capabilities.
 
 [source,gherkin]
 ----
 Given I start mobile application with capabilities:$capabilities
 ----
 
-==== *_Parameters_*
+* `$capabilities` - The capabilities to start application with, these capabilies
+have higher priority than capabilities defined in `*.properties` files and profiles.
 
-. `$capabilities` - capabilities to start application with, these capabilies have higher priority than capabilities defined in `*.properties` files and in profiles
-
-==== *_Usage_*
-
-.Sample.story
+.Start mobile application with 2 custom capabilities
 [source,gherkin]
 ----
-Scenario: Start mobile application with capabilities
 Given I start mobile application with capabilities:
 |name                           |value|
 |bstack:options.networkLogs     |true |
 |appium:options.clearSystemFiles|false|
 ----
 
-=== Close mobile application
-
-==== *_Info_*
-
-Closes a mobile application and quits the session
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I close mobile application
-----
-
-==== *_Usage_*
-
-.Close mobile application
-[source,gherkin]
-----
-When I close mobile application
-----
-
-=== Tap on element with duration
-
-==== *_Info_*
-
-Taps on the element located by the locator with the specified duration.
-
-The atomic actions performed are:
-* press on the element
-* wait for the duration
-* release
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I tap on element located `$locator` with duration `$duration`
-----
-
-==== *_Parameters_*
-
-. `$locator` - <<_locator>>
-. `$duration` - duration between an element is pressed and released in {iso-date-format-link} format
-
-==== *_Usage_*
-
-.Sample.story
-[source,gherkin]
-----
-Scenario: Tap on element with duration
-When I tap on element located `accessibilityId(menu-toggler)` with duration `PT0.5S`
-----
-
-=== Tap on element
-
-==== *_Info_*
-
-Taps on the element located by the locator.
-
-The atomic actions performed are:
-* press on the element
-* release
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I tap on element located `$locator`
-----
-
-==== *_Parameters_*
-
-. `$locator` - <<_locator>>
-
-==== *_Usage_*
-
-.Sample.story
-[source,gherkin]
-----
-Scenario: Tap on element
-When I tap on element located `accessibilityId(menu-toggler)`
-----
-
-=== Type text
-
-==== *_Info_*
-
-Types the text into the element located by the locator.
-
-[WARNING]
-Existing text is re-written by the text passed into the step
-
-The atomic actions performed are:
-* type text into the element
-* hide keyboard
-
-[WARNING]
-For `iOS` real devices the hide keyboard action works only for `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView` elements, in case of `XCUIElementTypeTextView` element tap outside the text view to close the keyboard.
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I type `$text` in field located `$locator`
-----
-
-==== *_Parameters_*
-
-. `$text` - text to type into the element
-. `$locator` - <<_locator>>
-
-==== *_Usage_*
-
-.Keyboard.story
-[source,gherkin]
-----
-Scenario: Type text
-When I type `Bob` in field located `accessibilityId(username)`
-----
-
-=== Clear field
-
-==== *_Info_*
-
-Clears a field located by the locator.
-
-The atomic actions performed are:
-* clear the field
-* hide keyboard
-
-[WARNING]
-For `iOS` real devices the hide keyboard action works only for `XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView` elements, in case of `XCUIElementTypeTextView` element tap outside the text view to close the keyboard.
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I clear field located `$locator`
-----
-
-==== *_Parameters_*
-
-. `$locator` - <<_locator>>
-
-==== *_Usage_*
-
-.Keyboard.story
-[source,gherkin]
-----
-Scenario: Type text
-When I clear field located `accessibilityId(username)`
-----
-
-=== Swipe to an element
-
-==== *_Info_*
-
-Swipes to an element in either UP, DOWN, LEFT, or RIGHT direction with the specified swipe duration
-
-[NOTE]
-The step takes into account current context. If you need to perform swipe on the element, you need to switch the context to this element.
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I swipe $direction to element located `$locator` with duration $swipeDuration
-----
-
-==== Properties
-
-* `mobile-application.swipe.limit` - defines max numbers of swipes to perform (if it's reached the swipe process is stopped and the error is thrown)
-* `mobile-application.swipe.stabilization-duration` - defines a duration to wait after swipe until view becomes stable
-* `mobile-application.swipe.vertical.x-position` - defines a vertical swipe `x` axis position in percentage from `0` to `100`, where `0` corresponds to `x=1` and `100` corresponds to `x = mobile screen width - 1`, default value is `0`
-* `mobile-application.swipe.horizontal.y-position` - defines a horizontal swipe `y` axis position in percentage from `0` to `100`, where `0` corresponds to `y=1` and `100` corresponds to `y = mobile screen height - 1`, default value is `50`
-
-==== *_Parameters_*
-
-. `$direction` - direction to swipe - UP, DOWN, LEFT, or RIGHT
-. `$locator` - <<_locator>>
-. `$swipeDuration` - swipe duration in {iso-date-format-link} format
-
-==== *_Usage_*
-
-.Swipe.story
-[source,gherkin]
-----
-Scenario: Swipe to element
-Then number of elements found by `accessibilityId(end-of-screen)` is equal to `0`
-When I swipe UP to element located `accessibilityId(end-of-screen)` with duration PT1S
-Then number of elements found by `accessibilityId(end-of-screen)` is equal to `1`
-----
-
-.Swipe context element.story
-[source,gherkin]
-----
-Scenario: Switch slides
-When I change context to element located `accessibilityId(carousel)`
-Then number of elements found by `accessibilityId(slide 2)` is equal to `0`
-When I swipe LEFT to element located `accessibilityId(slide 2)` with duration PT1S
-Then number of elements found by `accessibilityId(slide 2)` is equal to `1`
-----
-
-=== Upload a file to a device
-
-==== *_Info_*
-
-Uploads a file to a device
-
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I upload file `$filePath` to device
-----
-
-==== *_Parameters_*
-
-. `$filePath` - path of the file to upload to a device
-
-==== *_Usage_*
-
-.Upload.story
-[source,gherkin]
-----
-Scenario: Upload file
-When I upload file `images/avatar.png` to device
-Then the avatar icon is displayed with the uploaded image
-----
 
 === Activate mobile application
 
-==== *_Info_*
-
-Activates an existing application on the device and moves it to the foreground. The application should be already running in order to activate it.
-
-==== *_Wording_*
+Activates the existing application on the device/emulator/simulator and moves
+it to the foreground. The application should be already running in order to
+activate it.
 
 [source,gherkin]
 ----
 When I activate application with bundle identifier `$bundleId`
 ----
 
-==== *_Parameters_*
+* `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
 
-. `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
-
-==== *_Usage_*
-
-.GoToSafari.story
+.Switch to Safari browser application
 [source,gherkin]
 ----
-Scenario: Open safari
 When I activate application with bundle identifier `com.apple.mobilesafari`
 ----
 
-include::partial$generic-ui-steps.adoc[]
+
+=== Reinstall mobile application
+
+Removes the mobile application from device/emulator/simulator and installs it again.
+
+[source,gherkin]
+----
+When I reinstall mobile application with bundle identifier `$bundleId`
+----
+
+* `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS.
+
+The key benefit is that instead of the full remote session recreation (which
+includes device re-allocation in testing clouds, like SauceLabs, BrowserStack,
+etc.) achivable via the following example:
+
+[source,gherkin]
+----
+When I close mobile application
+Given I start mobile application with capabilities:
+|name     |value|
+|fullReset|true |
+----
+
+the step re-uses the current session which significantly improves performance.
+
+.Reinstall mobile application
+[source,gherkin]
+----
+When I reinstall mobile application with bundle identifier `vividus-mobile.app`
+----
+
+
+=== Terminate mobile application
+
+Terminates the running application on the device/emulator/simulator and
+navigates to the home device screen. The remote session will not be closed.
+
+[source,gherkin]
+----
+When I terminate application with bundle identifier `$bundleId`
+----
+
+* `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
+
+.Terminates Safari browser application
+[source,gherkin]
+----
+When I terminate application with bundle identifier `com.apple.mobilesafari`
+----
+
+
+=== Close mobile application
+
+Closes the mobile application and quits the remote session.
+
+[source,gherkin]
+----
+When I close mobile application
+----
 
 
 === Change session settings
 
-==== *_Info_*
-
-Changes the behavior of the Appium session
-
-==== *_Wording_*
+Changes the behavior of the Appium session.
 
 [source,gherkin]
 ----
 When I change Appium session settings:$settings
 ----
 
-==== *_Parameters_*
+* `$settings` - https://appium.io/docs/en/advanced-concepts/settings/#settings[The settings] to set.
 
-. `$settings` - https://appium.io/docs/en/advanced-concepts/settings/#settings[Settings]
-
-==== *_Usage_*
-
-.Settings.story
+.Configure to show invisible elements
 [source,gherkin]
 ----
-Scenario: Show invisible elements
 When I change Appium session settings:
 |name                  |value|
 |allowInvisibleElements|true |
 ----
 
-=== Select date in date picker
 
-==== *_Info_*
+=== Upload a file to the device
 
-Selects a next or previous picker wheel value in date picker
+Uploads a file to the device/emulator/simulator.
+
+[source,gherkin]
+----
+When I upload file `$filePath` to device
+----
+
+* `$filePath` - The path of the file to upload to the device.
+
+.Upload file
+[source,gherkin]
+----
+When I upload file `images/avatar.png` to device
+Then the avatar icon is displayed with the uploaded image
+----
+
+:web-view-info: See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+
+=== Switch to Web view by index
 
 [WARNING]
-* Only `iOS` platform is supported
-* Target element must be of type `XCUIElementTypePickerWheel`
+This step is deprecated and will be removed in VIVIDUS 0.5.0. The replacement is <<_switch_to_web_view_by_name>>.
 
-==== *_Wording_*
-
-[source,gherkin]
-----
-When I select $direction value with `$offset` offset in picker wheel located `$locator`
-----
-
-==== *_Parameters_*
-
-. `$direction` - next value to select, either `NEXT` or `PREVIOUS`
-. `$offset` - offset for pick from a middle of a wheel, see https://appium.io/docs/en/writing-running-appium/ios/ios-xctest-mobile-gestures/index.html#mobile-selectpickerwheelvalue[Select Picker Wheel Value]
-. `$locator` - locator to locate `XCUIElementTypePickerWheel` element
-
-==== *_Usage_*
-
-.Select next item in the picker wheel
-[source,gherkin]
-----
-When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(3)`
-----
-
-=== Switch to web view
-
-Switches context to a web view by the index, it starts from 1.
-
-See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+Switches context to a web view by the index, it starts from 1. {web-view-info}
 
 [source,gherkin]
 ----
 When I switch to web view with index `$index`
 ----
 
-. `$index` - index of a web view
+* `$index` - The index of the web view.
 
-.Switch to web view
+.Switch to web view by index
 [source,gherkin]
 ----
 Then number of elements found by `xpath(html)` is equal to `0`
@@ -616,11 +433,31 @@ When I switch to web view with index `1`
 Then number of elements found by `xpath(html)` is equal to `1`
 ----
 
+
+=== Switch to Web view by name
+
+Switches context to a web view with name that matches the rule. {web-view-info}
+
+[source,gherkin]
+----
+When I switch to web view with name that $comparisonRule `$value`
+----
+
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[The web view name comparison rule].
+* `$value` - The value to find the target web view.
+
+.Switch to web view by name
+[source,gherkin]
+----
+Then number of elements found by `xpath(html)` is equal to `0`
+When I switch to web view with name that contains `vividustestapp`
+Then number of elements found by `xpath(html)` is equal to `1`
+----
+
+
 === Switch to native context
 
-Switches context to a mobile native context.
-
-See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+Switches context to a mobile native context. See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
 
 [source,gherkin]
 ----
@@ -635,33 +472,101 @@ When I switch to native context
 Then number of elements found by `xpath(html)` is equal to `0`
 ----
 
+
+=== Tap on element
+
+Taps on the element located by the locator.
+
+The atomic actions performed are:
+* press on the element;
+* release.
+
+[source,gherkin]
+----
+When I tap on element located `$locator`
+----
+
+* `$locator` - <<_locator>>.
+
+.Tap on element
+[source,gherkin]
+----
+When I tap on element located `accessibilityId(menu-toggler)`
+----
+
+
+=== Tap on element with duration
+
+Taps on the element located by the locator with the specified duration.
+
+The atomic actions performed are:
+* press on the element;
+* wait for the duration;
+* release.
+
+[source,gherkin]
+----
+When I tap on element located `$locator` with duration `$duration`
+----
+
+* `$locator` - <<_locator>>.
+* `$duration` - The duration between an element is pressed and released in {iso-date-format-link} format.
+
+.Tap on element with duration
+[source,gherkin]
+----
+When I tap on element located `accessibilityId(menu-toggler)` with duration `PT0.5S`
+----
+
+
 === Press key
 
-Presses an https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS key] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android key]
+Presses {keys}.
 
 [source,gherkin]
 ----
 When I press $key key
 ----
 
-. `$key` - The key to press
+* `$key` - The key to press.
 
-.Go to home
+.Go to Home screen
 [source,gherkin]
 ----
 When I press Home key
 ----
 
+
+=== Long press key
+
+Performs long press of {keys}.
+
+TIP: to modify long press duration for `iOS` and `tvOS` you could use `mobile-application.long-press-duration` property.
+
+[source,gherkin]
+----
+When I long press $key key
+----
+
+* `$key` - The key to perform long press action.
+
+.Go to Home screen
+[source,gherkin]
+----
+When I long press Home key
+----
+
+
 === Press keys
 
-Presses a sequence of https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
+Presses a sequence of {keys}.
 
 [source,gherkin]
 ----
 When I press keys:$keys
 ----
 
-. `$keys` - The keys to press
+* `$keys` - The keys to press.
 
 .Enter password
 [source,gherkin]
@@ -675,19 +580,20 @@ When I press keys:
 |$  |
 ----
 
+
 === Type text sequentially
 
 Types the provided text
 
 [WARNING]
-All the characters will be treated as is and passed sequentially. To send special key like `HOME` please use <<_press_keys>>
+All the characters will be treated as is and passed sequentially. To send special key like `HOME` please use <<_press_keys>>.
 
 [source,gherkin]
 ----
 When I type text `$text`
 ----
 
-. `$text` - The text to type
+* `$text` - The text to type.
 
 .Enter password
 [source,gherkin]
@@ -695,7 +601,152 @@ When I type text `$text`
 When I type text `pas1$`
 ----
 
-include::partial$generic-ui-steps.adoc[]
+
+=== Type text in a field
+
+Types the text into the element located by the locator.
+
+WARNING: The existing text is re-written by the text passed into the step.
+
+The atomic actions performed are:
+* type text into the element;
+* hide keyboard.
+
+[WARNING]
+For `iOS` real devices the hide keyboard action works only for
+`XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView`
+elements, in case of `XCUIElementTypeTextView` element tap outside the text view
+is performed to close the keyboard.
+
+[source,gherkin]
+----
+When I type `$text` in field located `$locator`
+----
+
+* `$text` - The text to type into the element.
+* `$locator` - <<_locator>>.
+
+.Type text
+[source,gherkin]
+----
+When I type `Bob` in field located `accessibilityId(username)`
+----
+
+
+=== Type text and keep keyboard opened
+
+Only types text into the element. The keyboard hiding is skipped.
+
+[source,gherkin]
+----
+When I type `$text` in field located `$locator` and keep keyboard opened
+----
+
+* `$text` - The text to type into the element.
+* `$locator` - <<_locator>>.
+
+.Type text and keep keyboard opened
+[source,gherkin]
+----
+When I type `Bob` in field located `accessibilityId(username)` and keep keyboard opened
+----
+
+
+=== Clear field
+
+Clears the field located by the locator.
+
+The atomic actions performed are:
+* clear the field;
+* hide keyboard.
+
+[WARNING]
+For `iOS` real devices the hide keyboard action works only for
+`XCUIElementTypeTextField` elements and skipped for `XCUIElementTypeTextView`
+elements, in case of `XCUIElementTypeTextView` element tap outside the text view
+is performed to close the keyboard.
+
+[source,gherkin]
+----
+When I clear field located `$locator`
+----
+
+* `$locator` - <<_locator>>.
+
+.Clear the field
+[source,gherkin]
+----
+When I clear field located `accessibilityId(username)`
+----
+
+
+=== Swipe to an element
+
+Swipes to an element in either `UP`, `DOWN`, `LEFT` or `RIGHT` direction with
+the specified swipe duration.
+
+[NOTE]
+The step takes into account the current context. If you need to perform swipe on
+the element, you need to switch the context to this element.
+
+==== Properties
+
+* `mobile-application.swipe.limit` - defines max numbers of swipes to perform (if it's reached the swipe process is stopped and the error is thrown)
+* `mobile-application.swipe.stabilization-duration` - defines a duration to wait after swipe until view becomes stable
+* `mobile-application.swipe.vertical.x-position` - defines a vertical swipe `x` axis position in percentage from `0` to `100`, where `0` corresponds to `x=1` and `100` corresponds to `x = mobile screen width - 1`, default value is `0`
+* `mobile-application.swipe.horizontal.y-position` - defines a horizontal swipe `y` axis position in percentage from `0` to `100`, where `0` corresponds to `y=1` and `100` corresponds to `y = mobile screen height - 1`, default value is `50`
+
+[source,gherkin]
+----
+When I swipe $direction to element located `$locator` with duration $swipeDuration
+----
+
+* `$direction` - The direction to swipe: `UP`, `DOWN`, `LEFT` or `RIGHT`.
+* `$locator` - <<_locator>>.
+* `$swipeDuration` - The swipe duration in {iso-date-format-link} format.
+
+.Swipe to an element
+[source,gherkin]
+----
+Then number of elements found by `accessibilityId(end-of-screen)` is equal to `0`
+When I swipe UP to element located `accessibilityId(end-of-screen)` with duration PT1S
+Then number of elements found by `accessibilityId(end-of-screen)` is equal to `1`
+----
+
+.Swipe the context element
+[source,gherkin]
+----
+Scenario: Switch slides
+When I change context to element located `accessibilityId(carousel)`
+Then number of elements found by `accessibilityId(slide 2)` is equal to `0`
+When I swipe LEFT to element located `accessibilityId(slide 2)` with duration PT1S
+Then number of elements found by `accessibilityId(slide 2)` is equal to `1`
+----
+
+
+=== Select date in date picker
+
+Selects a next or previous picker wheel value in date picker
+
+[WARNING]
+* Only `iOS` platform is supported.
+* The target element must be of type `XCUIElementTypePickerWheel`.
+
+[source,gherkin]
+----
+When I select $direction value with `$offset` offset in picker wheel located `$locator`
+----
+
+* `$direction` - The direction to search the value: `NEXT` or `PREVIOUS`.
+* `$offset` - The ofset to pick from a middle of the wheel, see https://appium.io/docs/en/writing-running-appium/ios/ios-xctest-mobile-gestures/index.html#mobile-selectpickerwheelvalue[Select Picker Wheel Value guide].
+* `$locator` - The locator to find `XCUIElementTypePickerWheel` element.
+
+.Select next item in the picker wheel
+[source,gherkin]
+----
+When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(3)`
+----
+
 
 === Recording iOS Performance metrics
 
@@ -724,3 +775,8 @@ When I start recording `Time Profiler` metrics
 !-- set of actions to measure performance
 When I stop recording `Time Profiler` metrics and save results to file `${outputDirectory}/time_profiler.zip`
 ----
+
+
+include::partial$generic-ui-steps.adoc[]
+
+include::partial$proxy-steps.adoc[]

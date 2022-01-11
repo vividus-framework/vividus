@@ -27,28 +27,15 @@ import java.util.stream.Stream;
 import org.jbehave.core.model.Meta;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.model.MetaWrapper;
-
-import io.appium.java_client.remote.MobileCapabilityType;
 
 public enum ControllingMetaTag
 {
-    BROWSER_NAME(CapabilityType.BROWSER_NAME),
-    VERSION(CapabilityType.VERSION),
-    SCREEN_RESOLUTION(SauceLabsCapabilityType.SCREEN_RESOLUTION),
-    APPIUM_VERSION(MobileCapabilityType.APPIUM_VERSION),
-    DEVICE_NAME(MobileCapabilityType.DEVICE_NAME),
-    DEVICE_ORIENTATION(SauceLabsCapabilityType.DEVICE_ORIENTATION),
-    PLATFORM_VERSION(MobileCapabilityType.PLATFORM_VERSION),
-    PLATFORM_NAME(CapabilityType.PLATFORM_NAME),
-    IEDRIVER_VERSION(SauceLabsCapabilityType.IEDRIVER_VERSION),
-    SELENIUM_VERSION(SauceLabsCapabilityType.SELENIUM_VERSION),
-    PROXY(CapabilityType.PROXY)
+    PROXY
     {
         @Override
-        protected boolean isContainedInImpl(Meta meta)
+        public boolean isContainedIn(Meta meta)
         {
-            return meta.hasProperty(getMetaTagName());
+            return meta.hasProperty(CapabilityType.PROXY);
         }
 
         @Override
@@ -57,45 +44,32 @@ public enum ControllingMetaTag
             // Nothing to do
         }
     },
-    CAPABILITY("capability.")
+    CAPABILITY
     {
+        private static final String META_PROPERTY_PREFIX = "capability.";
+
+        @Override
+        public boolean isContainedIn(Meta meta)
+        {
+            return meta.getPropertyNames().stream().anyMatch(s -> s.startsWith(META_PROPERTY_PREFIX));
+        }
+
         @Override
         protected void setCapability(DesiredCapabilities capabilities, Meta meta)
         {
             Map<String, Object> capabilitiesContainer = new HashMap<>(capabilities.asMap());
-            new MetaWrapper(meta).getPropertiesByKey(k -> k.startsWith(getMetaTagName())).forEach(
-                    (k, v) -> putByPath(capabilitiesContainer, substringAfter(k, getMetaTagName()), adjustType(v)));
+            meta.getPropertyNames()
+                    .stream()
+                    .filter(name -> name.startsWith(META_PROPERTY_PREFIX))
+                    .forEach(k -> putByPath(capabilitiesContainer, substringAfter(k, META_PROPERTY_PREFIX),
+                            adjustType(meta.getProperty(k))));
             capabilitiesContainer.forEach(capabilities::setCapability);
         }
     };
 
-    private final String metaTagName;
+    public abstract boolean isContainedIn(Meta meta);
 
-    ControllingMetaTag(String metaTagName)
-    {
-        this.metaTagName = metaTagName;
-    }
-
-    public String getMetaTagName()
-    {
-        return metaTagName;
-    }
-
-    protected boolean isContainedInImpl(Meta meta)
-    {
-        return meta.getOptionalProperty(getMetaTagName()).isPresent();
-    }
-
-    public boolean isContainedIn(Meta... metas)
-    {
-        return Stream.of(metas).anyMatch(this::isContainedInImpl);
-    }
-
-    protected void setCapability(DesiredCapabilities capabilities, Meta meta)
-    {
-        String capabilityName = getMetaTagName();
-        meta.getOptionalProperty(capabilityName).ifPresent(value -> capabilities.setCapability(capabilityName, value));
-    }
+    protected abstract void setCapability(DesiredCapabilities capabilities, Meta meta);
 
     public static boolean isAnyContainedIn(Meta meta)
     {
@@ -104,9 +78,6 @@ public enum ControllingMetaTag
 
     public static void setDesiredCapabilitiesFromMeta(DesiredCapabilities capabilities, Meta meta)
     {
-        for (ControllingMetaTag controllingMetaTag : values())
-        {
-            controllingMetaTag.setCapability(capabilities, meta);
-        }
+        Stream.of(values()).forEach(controllingMetaTag -> controllingMetaTag.setCapability(capabilities, meta));
     }
 }

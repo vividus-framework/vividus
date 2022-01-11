@@ -78,28 +78,6 @@ Converts an input string to upper case.
 |`ABC`
 |===
 
-=== `capitalize`
-
-[WARNING]
-Deprecated, will be removed in VIVIDUS 0.4.0 use <<_capitalizefirstword>> instead
-
-Capitalizes an input string, changing the first character to title case. No other characters are changed.
-
-[source, subs="+quotes"]
-----
-#{capitalize(*$input*)}
-----
-
-* *`$input`* - any string to be capitalized
-
-.Examples of the expressions capitalizing strings
-|===
-|Expression |Result
-
-|`#{capitalize(aBc)}`
-|`ABc`
-|===
-
 === `capitalizeFirstWord`
 
 Capitalizes an input string, changing the first character to title case. No other characters are changed.
@@ -155,28 +133,6 @@ Converts all the whitespace separated words in a String into capitalized words, 
 
 |`#{capitalizeWordsFully(aBc dEf)}`
 |`Abc Def`
-|===
-
-=== `uncapitalize`
-
-[WARNING]
-Deprecated, will be removed in VIVIDUS 0.4.0 use <<_uncapitalizefirstword>> instead
-
-Uncapitalizes an input string, changing the first character to lower case. No other characters are changed.
-
-[source, subs="+quotes"]
-----
-#{uncapitalize(*$input*)}
-----
-
-* *`$input`* - any string to be uncapitalized
-
-.Examples of the expressions uncapitalizing strings
-|===
-|Expression |Result
-
-|`#{uncapitalize(ABc)}`
-|`aBc`
 |===
 
 === `uncapitalizeFirstWord`
@@ -294,19 +250,65 @@ Compress the input string to GZip and encode compressed bytes to Base64 format
 |`H4sIAAAAAAAAACvLLMtMKS0GANIHCdkHAAAA`
 |===
 
-== Resources
-:path-parameter: pass:quotes[*`$pathToResource`* - the path to the resource to load. It must be relative to the project, meaning `src/main/resources` is left out of it. Therefore, if the file is located at `my-tests/src/main/resources/data/body.txt`, then it's required to put only relative resource part: `/data/body.txt`]
+== Hash calculations
 
-=== `loadResource`
+:algorithm-summary: hash algorithm (can use https://datatracker.ietf.org/doc/rfc1319[MD2], https://datatracker.ietf.org/doc/rfc1321[MD5], https://datatracker.ietf.org/doc/rfc3174[SHA-1], https://datatracker.ietf.org/doc/rfc6234[SHA-256], https://datatracker.ietf.org/doc/rfc6234[SHA-384], https://datatracker.ietf.org/doc/rfc6234[SHA-512])
 
-Loads the resource found at the provided path and replaces the expression with the content of the resource.
+=== `calculateHash`
+
+Calculates the hash using the specified hashing algorithm
 
 [source, subs="+quotes"]
 ----
-#{loadResource(*$pathToResource*)}
+#{calculateHash($algorithm, $input)}
 ----
 
-* {path-parameter}
+* *`$algorithm`* - {algorithm-summary}
+* *`$input`* - any string to calculate hash
+
+.Example of hash calculating for string using MD5
+|===
+|Expression |Result
+
+|`#{calculateHash(MD5, vividus)}`
+|`0a05ba6064ae7e5d6ee9818f85b666ad`
+|===
+
+=== `calculateFileHash`
+
+:resource-info: xref:ROOT:glossary.adoc#_resource
+
+Calculates the {resource-info}[resource] or file hash using the specified hashing algorithm
+
+[source, subs="+quotes"]
+----
+#{calculateFileHash($algorithm, $resourceNameOrFilePath)}
+----
+
+* *`$algorithm`* - {algorithm-summary}
+* *`$resourceNameOrFilePath`* - the {resource-info}[resource name] or the file path
+
+.Example of hash calculating for file using SHA-1
+|===
+|Expression |Result
+
+|`#{calculateFileHash(SHA-1, data/file.txt)}`
+|`0a05ba6064ae7e5d6ee9818f85b666ad`
+|===
+
+== Resources
+:resource-name-parameter: pass:quotes[*`$resourceName`* - the name of the xref:ROOT:glossary.adoc#_resource[resource] to load]
+
+=== `loadResource`
+
+Loads the resource by its name and replaces the expression with the content of the resource.
+
+[source, subs="+quotes"]
+----
+#{loadResource(*$resourceName*)}
+----
+
+* {resource-name-parameter}
 
 .Load data from the project resource
 [source,gherkin]
@@ -316,14 +318,14 @@ When I initialize the scenario variable `my-data` with value `#{loadResource(/da
 
 === `loadBinaryResource`
 
-Loads the resource found at the provided path as bytes. Could be useful for the steps that accepting raw binary data.
+Loads the resource by its name as bytes. It could be useful for the steps that accepting raw binary data.
 
 [source, subs="+quotes"]
 ----
-#{loadBinaryResource(*$pathToResource*)}
+#{loadBinaryResource(*$resourceName*)}
 ----
 
-* {path-parameter}
+* {resource-name-parameter}
 
 .Load data from the project resource as bytes
 [source,gherkin]
@@ -335,15 +337,15 @@ When I mock HTTP responses with request URL which CONTAINS `frames.html` using r
 
 === `resourceToBase64`
 
-Finds the resource at the provided path and replaces the expression with the content of the resource in Base64 format.
+Finds the resource by its name and replaces the expression with the content of the resource in Base64 format.
 
 [source, subs="+quotes"]
 ----
-#{resourceToBase64(*$pathToResource*)}
+#{resourceToBase64(*$resourceName*)}
 ----
 
 [subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
-* {path-parameter}
+* {resource-name-parameter}
 
 .Load data as Base64 from the project resource
 [source,gherkin]

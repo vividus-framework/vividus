@@ -33,10 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.IWebDriverFactory;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
 import org.vividus.selenium.screenshot.strategies.AdjustingViewportPastingDecorator;
 import org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy;
@@ -46,7 +43,6 @@ import org.vividus.selenium.screenshot.strategies.ViewportShootingStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.util.property.PropertyMappedCollection;
 
-import io.appium.java_client.remote.MobileCapabilityType;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
 import ru.yandex.qatools.ashot.shooting.ScalingDecorator;
@@ -63,9 +59,6 @@ class WebAshotFactoryTests
     private static final int TEN = 10;
     private static final String SIMPLE = "SIMPLE";
 
-    @Mock private ShootingStrategy baseShootingStrategy;
-    @Mock private IWebDriverFactory webDriverFactory;
-    @Mock private IWebDriverManager webDriverManager;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private ScreenshotDebugger screenshotDebugger;
     @Mock private PropertyMappedCollection<WebScreenshotConfiguration> ashotConfigurations;
@@ -84,19 +77,11 @@ class WebAshotFactoryTests
         webAshotFactory.setShootingStrategy(SHOOTING_STRATEGY);
         webAshotFactory.setStrategies(Map.of(VIEWPORT_PASTING, new ViewportPastingScreenshotShootingStrategy()));
         when(ashotConfigurations.getNullable(SHOOTING_STRATEGY)).thenReturn(Optional.empty());
-        mockDeviceAndOrientation();
         webAshotFactory.setScreenshotShootingStrategy(VIEWPORT_PASTING);
         AShot aShot = webAshotFactory.create(Optional.empty());
         assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
         assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true),
                 instanceOf(AdjustingViewportPastingDecorator.class));
-    }
-
-    private void mockDeviceAndOrientation()
-    {
-        String deviceName = "Google pixel 3";
-        when(webDriverFactory.getCapability(MobileCapabilityType.DEVICE_NAME, false)).thenReturn(deviceName);
-        when(webDriverManager.isOrientation(ScreenOrientation.LANDSCAPE)).thenReturn(true);
     }
 
     @Test
@@ -108,7 +93,6 @@ class WebAshotFactoryTests
         WebScreenshotConfiguration screenshotConfiguration = new WebScreenshotConfiguration();
         screenshotConfiguration.setShootingStrategy(Optional.of(VIEWPORT_PASTING));
         when(ashotConfigurations.getNullable(SHOOTING_STRATEGY)).thenReturn(Optional.empty());
-        mockDeviceAndOrientation();
         AShot aShot = webAshotFactory.create(Optional.of(screenshotConfiguration));
         assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
         assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true),

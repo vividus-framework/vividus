@@ -3,12 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="properties" class="org.vividus.configuration.PropertiesDecryptor" factory-method="decryptProperties">
-        <constructor-arg ref="stringEncryptor"/>
-        <constructor-arg>
-            <bean factory-bean="configurationResolver" factory-method="getProperties"/>
-        </constructor-arg>
-    </bean>
+    <bean id="properties" factory-bean="configurationResolver" factory-method="getProperties" />
 
     <bean id="propertyParser" class="org.vividus.util.property.PropertyParser" />
 
@@ -23,15 +18,6 @@
         <property name="properties" ref="properties" />
     </bean>
 
-    <bean id ="stringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
-        <property name="config">
-            <bean class="org.jasypt.encryption.pbe.config.SimplePBEConfig">
-                <property name="algorithm" value="PBEWithMD5AndDES"/>
-                <property name="password" value="#{systemProperties['vividus.encryptor.password']?:'82=thuMUH@'}"/>
-            </bean>
-        </property>
-    </bean>
-
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="converters">
             <set>
@@ -42,8 +28,15 @@
     </bean>
 
     <bean class="org.vividus.spring.VividusEditorConfigurer" />
+    <bean class="org.vividus.softassert.FailFastManager" />
 
-    <bean id="assertionManager" class="org.vividus.softassert.AssertionManager">
-        <property name="failScenarioFast" value="${bdd.scenario.fail-fast}" />
+    <bean id="softAssert" class="org.vividus.softassert.SoftAssert"
+          init-method="init">
+        <property name="testContext" ref="testContext" />
+        <property name="formatter" ref="assertionFormatter" />
+        <property name="knownIssueChecker" ref="knownIssueChecker" />
+        <property name="eventBus" ref="eventBus" />
+        <property name="failTestCaseFast" value="${bdd.scenario.fail-fast}" />
     </bean>
+
 </beans>

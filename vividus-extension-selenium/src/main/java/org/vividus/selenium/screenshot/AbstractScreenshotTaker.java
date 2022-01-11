@@ -18,7 +18,6 @@ package org.vividus.selenium.screenshot;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -26,8 +25,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import javax.imageio.ImageIO;
-
-import com.google.common.eventbus.EventBus;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
@@ -47,19 +44,15 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScreenshotTaker.class);
 
     private final IWebDriverProvider webDriverProvider;
-    private final EventBus eventBus;
     private final IScreenshotFileNameGenerator screenshotFileNameGenerator;
     private final AshotFactory<T> ashotFactory;
     private final ScreenshotDebugger screenshotDebugger;
 
-    private File screenshotDirectory;
-
-    protected AbstractScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
+    protected AbstractScreenshotTaker(IWebDriverProvider webDriverProvider,
             IScreenshotFileNameGenerator screenshotFileNameGenerator, AshotFactory<T> ashotFactory,
             ScreenshotDebugger screenshotDebugger)
     {
         this.webDriverProvider = webDriverProvider;
-        this.eventBus = eventBus;
         this.screenshotFileNameGenerator = screenshotFileNameGenerator;
         this.ashotFactory = ashotFactory;
         this.screenshotDebugger = screenshotDebugger;
@@ -72,13 +65,6 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
         {
             return ImageIO.read(inputStream);
         }
-    }
-
-    @Override
-    public Path takeScreenshotAsFile(String screenshotName) throws IOException
-    {
-        Path screenshotFilePath = new File(screenshotDirectory, generateScreenshotFileName(screenshotName)).toPath();
-        return takeScreenshot(screenshotFilePath);
     }
 
     @Override
@@ -96,7 +82,6 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
 
             LOGGER.atInfo().addArgument(screenshotFilePath::toAbsolutePath).log("Screenshot was taken: {}");
 
-            eventBus.post(new ScreenshotTakeEvent(screenshotFilePath));
             return screenshotFilePath;
         }
         return null;
@@ -137,10 +122,5 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotConfiguration>
     protected IWebDriverProvider getWebDriverProvider()
     {
         return webDriverProvider;
-    }
-
-    public void setScreenshotDirectory(File screenshotDirectory)
-    {
-        this.screenshotDirectory = screenshotDirectory;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.selenium;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -24,7 +25,7 @@ import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TimeoutConfigurer implements ITimeoutConfigurer
+public class TimeoutConfigurer
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeoutConfigurer.class);
 
@@ -33,11 +34,15 @@ public class TimeoutConfigurer implements ITimeoutConfigurer
     private int asyncScriptTimeout;
     private TimeUnit asyncScriptTimeoutTimeUnit;
 
-    @Override
     public void configure(Timeouts timeouts)
     {
         setTimeout(timeouts, t -> t.pageLoadTimeout(pageLoadTimeout, pageLoadTimeoutTimeUnit));
         setTimeout(timeouts, t -> t.setScriptTimeout(asyncScriptTimeout, asyncScriptTimeoutTimeUnit));
+    }
+
+    public void configurePageLoadTimeout(Duration duration, Timeouts timeouts)
+    {
+        setTimeout(timeouts, t -> t.pageLoadTimeout(duration.getSeconds(), TimeUnit.SECONDS));
     }
 
     private static void setTimeout(Timeouts timeouts, Consumer<Timeouts> consumer)

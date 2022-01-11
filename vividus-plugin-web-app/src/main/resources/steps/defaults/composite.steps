@@ -1,20 +1,22 @@
 Composite: Then a link with the URL '$URL' exists
-Then a link by By.linkUrl(<URL>) exists
+Then number of elements found by `By.linkUrl(<URL>)` is equal to `1`
 
 Composite: Then a link with the URL containing '$URLpart' exists
-Then a link by By.linkUrlPart(<URLpart>) exists
-
+Then number of elements found by `By.linkUrlPart(<URLpart>)` is equal to `1`
 
 Composite: When I change context to an element by the xpath '$xpath'
 Priority: 1
+!-- WARNING: The step "When I change context to an element by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I change context to element located `By.xpath(<xpath>)`
 
 Composite: When I change context to an element by the CSS selector '$cssSelector'
 Priority: 1
+!-- WARNING: The step "When I change context to an element by the CSS selector '$cssSelector'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I change context to element located `By.cssSelector(<cssSelector>)`
 
 Composite: When I change context to an element with the name '$name'
 Priority: 1
+!-- WARNING: The step "When I change context to an element with the name '$name'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I change context to element located `By.name(<name>)`
 
 Composite: Then the page title is '$pageTitle'
@@ -29,7 +31,7 @@ Composite: Then invisible element by xpath '$xpath' exists
 Then number of invisible elements `By.xpath(<xpath>)` is = `1`
 
 Composite: When I set the number of elements found by xpath '$xpath' to the '$scopes' variable '$variableName'
-When I set the number of elements found `By.xpath(<xpath>)` to <scopes> variable `<variableName>`
+When I save number of elements located `By.xpath(<xpath>)` to <scopes> variable `<variableName>`
 
 Composite: Then the number of elements found by the xpath '$xpath' is $comparisonRule '$quantity'
 Then number of elements found by `By.xpath(<xpath>)` is <comparisonRule> `<quantity>`
@@ -233,6 +235,3 @@ When I wait until element located `By.elementName(<elementName>)` contains text 
 
 Composite: Then an element with the name '$elementName' disappears in '$timeout' seconds
 Then element located `By.elementName(<elementName>)` disappears in '$timeout'
-
-Composite: When I wait until elements with the name '$elementName' appear
-When I wait until element located `By.elementName(<elementName>)` appears

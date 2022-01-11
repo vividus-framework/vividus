@@ -1,2 +1,3 @@
 * xref:index.adoc[What is VIVIDUS]
+* xref:glossary.adoc[Glossary]
 * xref:tests-configuration.adoc[Configuration]

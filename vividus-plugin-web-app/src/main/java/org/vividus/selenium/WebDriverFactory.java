@@ -19,6 +19,7 @@ package org.vividus.selenium;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Capabilities;
@@ -35,14 +36,14 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
 {
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
 
-    private final ITimeoutConfigurer timeoutConfigurer;
+    private final TimeoutConfigurer timeoutConfigurer;
     private final IProxy proxy;
     private WebDriverType webDriverType;
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
     public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
-            JsonUtils jsonUtils, ITimeoutConfigurer timeoutConfigurer, IProxy proxy)
+            JsonUtils jsonUtils, TimeoutConfigurer timeoutConfigurer, IProxy proxy)
     {
         super(remoteWebDriverFactory, propertyParser, jsonUtils);
         this.timeoutConfigurer = timeoutConfigurer;
@@ -68,22 +69,24 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
     @Override
     protected DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities)
     {
-        WebDriverType webDriverType = WebDriverManager.detectType(desiredCapabilities);
-
-        Capabilities capabilities = desiredCapabilities;
-        if (webDriverType != null)
-        {
-            webDriverType.prepareCapabilities(desiredCapabilities);
-            configureProxy(webDriverType, desiredCapabilities);
-            if (webDriverType == WebDriverType.CHROME)
-            {
-                WebDriverConfiguration configuration = getWebDriverConfiguration(webDriverType, false);
-                ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.addArguments(configuration.getCommandLineArguments());
-                configuration.getExperimentalOptions().forEach(chromeOptions::setExperimentalOption);
-                capabilities = chromeOptions.merge(desiredCapabilities);
-            }
-        }
+        Capabilities capabilities = Stream.of(WebDriverType.values())
+                .filter(type -> WebDriverManager.isBrowser(desiredCapabilities, type.getBrowser()))
+                .findFirst()
+                .map(type ->
+                {
+                    type.prepareCapabilities(desiredCapabilities);
+                    configureProxy(type, desiredCapabilities);
+                    if (type == WebDriverType.CHROME)
+                    {
+                        WebDriverConfiguration configuration = getWebDriverConfiguration(type, false);
+                        ChromeOptions chromeOptions = new ChromeOptions();
+                        chromeOptions.addArguments(configuration.getCommandLineArguments());
+                        configuration.getExperimentalOptions().forEach(chromeOptions::setExperimentalOption);
+                        return chromeOptions.merge(desiredCapabilities);
+                    }
+                    return desiredCapabilities;
+                })
+                .orElse(desiredCapabilities);
         return new DesiredCapabilities(capabilities);
     }
 

@@ -1,14 +1,15 @@
 project.description = 'Vividus agent for Report Portal'
 
 dependencies {
+    implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-reporter')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
 
     // ReportPortal
-    implementation(group: 'com.epam.reportportal', name: 'logger-java-log4j', version: '4.0.2')
-    implementation(group: 'com.github.reportportal', name: 'agent-java-jbehave', version: '4.2.1') {
+    implementation(group: 'com.epam.reportportal', name: 'logger-java-log4j', version: '5.1.4')
+    implementation(group: 'com.epam.reportportal', name: 'agent-java-jbehave', version: '5.1.1') {
         exclude module: 'jbehave-core'
     }
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)

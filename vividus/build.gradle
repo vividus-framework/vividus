@@ -32,7 +32,7 @@ configurations.testImplementation {
 }
 
 dependencies {
-    api project(':vividus-bdd-engine')
+    api project(':vividus-engine')
     api project(':vividus-http-client')
     api project(':vividus-reporter')
 
@@ -44,7 +44,7 @@ dependencies {
 
     // Logging SLF4J + Log4j2
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.14.1')
+    implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.17.1')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-api')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-core')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-slf4j18-impl')
@@ -55,12 +55,12 @@ dependencies {
     implementation(group: 'org.slf4j', name: 'jul-to-slf4j', version: versions.slf4j)
 
     // Meta filters based on Groovy
-    implementation(group: 'org.codehaus.groovy', name: 'groovy', version: '3.0.9', classifier: 'indy')
+    implementation(group: 'org.codehaus.groovy', name: 'groovy', version: '3.0.9')
 
     // Spring
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
-    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.4')
+    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.5.0')
     // jasypt
     implementation(group: 'org.jasypt', name: 'jasypt-spring4', version: '1.9.3')
 
@@ -68,9 +68,9 @@ dependencies {
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-    implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.116')
+    implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.137')
     implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.2.1')
-    implementation(group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2')
+    implementation(group: 'net.datafaker', name: 'datafaker', version: '1.0.0')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
@@ -79,6 +79,7 @@ dependencies {
     testImplementation(group: 'org.springframework', name: 'spring-test', version: versions.spring)
 
     integrationTestImplementation project(':vividus-plugin-azure-data-factory')
+    integrationTestImplementation project(':vividus-plugin-avro')
     integrationTestImplementation project(':vividus-plugin-csv')
     integrationTestImplementation project(':vividus-plugin-excel')
     integrationTestImplementation project(':vividus-plugin-kafka')

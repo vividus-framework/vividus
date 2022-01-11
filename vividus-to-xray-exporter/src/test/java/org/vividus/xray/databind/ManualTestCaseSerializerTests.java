@@ -26,7 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.output.ManualTestStep;
+import org.vividus.output.ManualTestStep;
 import org.vividus.xray.configuration.JiraFieldsMapping;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.TestCaseType;

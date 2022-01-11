@@ -35,7 +35,6 @@ class BeanFactoryIntegrationTests
 {
     private static final String CONFIGURATION_PROFILES = "configuration.profiles";
     private static final String CONFIGURATION_ENVIRONMENTS = "configuration.environments";
-    private static final String CONFIGURATION_SUITE = "configuration.suite";
     private static final String CONFIGURATION_SUITES = "configuration.suites";
 
     private static final String BASIC_ENV = "basicenv";
@@ -43,9 +42,13 @@ class BeanFactoryIntegrationTests
     private static final String BASIC_PROFILE = "basicprofile";
     private static final String BASIC_SUITE = "integration";
     private static final String ADDITIONAL_SUITE = "additionalsuite,additionalsuite/props";
+    private static final String INTEGRATION_TEST = "integrationtest";
 
     private static final String PROPERTY_VALUE_FROM_SUITE = "value-from-suite";
     private static final char COMMA = ',';
+    private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
+    private static final String ENCRYPTED_PROPERTY = "encrypted-property";
+    private static final String HELLO = "hello";
 
     @BeforeEach
     void beforeEach()
@@ -76,7 +79,7 @@ class BeanFactoryIntegrationTests
     {
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
         System.setProperty(CONFIGURATION_PROFILES, profile);
-        System.setProperty(CONFIGURATION_ENVIRONMENTS, "integrationtest");
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, INTEGRATION_TEST);
         BeanFactory.open();
         for (String beanName : BeanFactory.getBeanDefinitionNames())
         {
@@ -124,7 +127,7 @@ class BeanFactoryIntegrationTests
     {
         System.setProperty(CONFIGURATION_PROFILES, profile);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, environments);
-        System.setProperty(CONFIGURATION_SUITE, suite);
+        System.setProperty(CONFIGURATION_SUITES, suite);
         BeanFactory.open();
         assertProperties(null, null);
         assertIntegrationSuiteProperty();
@@ -151,20 +154,7 @@ class BeanFactoryIntegrationTests
         System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("Either 'configuration.suite' or 'configuration.suites' test configuration property must be set",
-                exception.getMessage());
-    }
-
-    @Test
-    void testConfigurationResolverBothSuiteAndSuitesPropertiesAreSet()
-    {
-        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
-        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
-        System.setProperty(CONFIGURATION_SUITE, BASIC_SUITE);
-        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
-        Exception exception = assertThrows(IllegalStateException.class, BeanFactory::open);
-        assertEquals("Exactly one test configuration property: 'configuration.suite' or 'configuration.suites' must"
-                + " be set", exception.getMessage());
+        assertEquals("The 'configuration.suites' property is not set", exception.getMessage());
     }
 
     @Test
@@ -211,6 +201,30 @@ class BeanFactoryIntegrationTests
                 "yes");
     }
 
+    @Test
+    void testConfigurationResolverEncryptedPropertyUserPassword() throws IOException
+    {
+        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, INTEGRATION_TEST);
+        System.clearProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY);
+        BeanFactory.open();
+        Properties properties = ConfigurationResolver.getInstance().getProperties();
+        assertEquals(HELLO, properties.getProperty(ENCRYPTED_PROPERTY));
+    }
+
+    @Test
+    void testConfigurationResolverEncryptedPropertySystemPassword() throws IOException
+    {
+        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, INTEGRATION_TEST);
+        System.setProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY, "12345");
+        BeanFactory.open();
+        Properties properties = ConfigurationResolver.getInstance().getProperties();
+        assertEquals(HELLO, properties.getProperty(ENCRYPTED_PROPERTY));
+    }
+
     private void assertIntegrationSuiteProperty() throws IOException
     {
         assertSuiteProperty("deeper-suite-level-overridable-property", "value-from-deeper-level");
@@ -231,12 +245,13 @@ class BeanFactoryIntegrationTests
         assertEquals(additionalValueFirst, properties.getProperty("additionalenv-props-property"));
         assertEquals(additionalValueSecond, properties.getProperty("additionalenv-property"));
         assertEquals("override-property-value", properties.getProperty("override-property"));
+        assertEquals("#{anyOf(1,2,3)}", properties.getProperty("expression-property"));
     }
 
     private void resetBeanFactory()
     {
-        Stream.of(CONFIGURATION_PROFILES, CONFIGURATION_ENVIRONMENTS, CONFIGURATION_SUITE, CONFIGURATION_SUITES)
-                .forEach(System::clearProperty);
+        Stream.of(CONFIGURATION_PROFILES, CONFIGURATION_ENVIRONMENTS, CONFIGURATION_SUITES).forEach(
+                System::clearProperty);
         BeanFactory.reset();
         ConfigurationResolver.reset();
     }

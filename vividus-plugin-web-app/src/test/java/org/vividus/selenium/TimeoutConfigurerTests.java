@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,8 @@ class TimeoutConfigurerTests
 
     private static final int ASYNC_SCRIPT_TIMEOUT = 30;
     private static final TimeUnit ASYNC_SCRIPT_TIMEOUT_TIMEUNIT = TimeUnit.SECONDS;
+
+    private static final Duration DURATION_PAGE_LOAD_TIMEOUT = Duration.ofSeconds(30L);
 
     private TimeoutConfigurer timeoutConfigurer;
 
@@ -54,6 +57,14 @@ class TimeoutConfigurerTests
         timeoutConfigurer.configure(timeouts);
         verify(timeouts).pageLoadTimeout(PAGE_LOAD_TIMEOUT, PAGE_LOAD_TIMEOUT_TIMEUNIT);
         verify(timeouts).setScriptTimeout(ASYNC_SCRIPT_TIMEOUT, ASYNC_SCRIPT_TIMEOUT_TIMEUNIT);
+    }
+
+    @Test
+    void testSetPageLoadTimeout()
+    {
+        Timeouts timeouts = mock(Timeouts.class);
+        timeoutConfigurer.configurePageLoadTimeout(DURATION_PAGE_LOAD_TIMEOUT, timeouts);
+        verify(timeouts).pageLoadTimeout(DURATION_PAGE_LOAD_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
     }
 
     @Test

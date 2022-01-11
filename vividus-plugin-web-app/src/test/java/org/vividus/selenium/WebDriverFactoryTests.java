@@ -64,7 +64,7 @@ import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.remote.BrowserType;
+import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -106,7 +106,7 @@ class WebDriverFactoryTests
     private IRemoteWebDriverFactory remoteWebDriverFactory;
 
     @Mock
-    private ITimeoutConfigurer timeoutConfigurer;
+    private TimeoutConfigurer timeoutConfigurer;
 
     @Mock
     private IPropertyParser propertyParser;
@@ -283,7 +283,7 @@ class WebDriverFactoryTests
     }
 
     @ParameterizedTest
-    @CsvSource({"CHROME, true", "IEXPLORE,", "SAFARI,"})
+    @CsvSource({"chrome, true", "internet explorer,", "SAFARI,"})
     void shouldSetAcceptInsecureCertsForSupportingBrowsers(String type, Boolean acceptsInsecureCerts)
             throws MalformedURLException
     {
@@ -324,8 +324,8 @@ class WebDriverFactoryTests
         verify(timeoutConfigurer).configure(timeouts);
         assertLogger("{%n  \"acceptInsecureCerts\" : true,%n"
                         + "  \"browserName\" : \"firefox\",%n"
+                        + "  \"moz:debuggerAddress\" : true,%n"
                         + "  \"moz:firefoxOptions\" : {%n"
-                        + "    \"args\" : [ ],%n"
                         + "    \"prefs\" : {%n"
                         + "      \"startup.homepage_welcome_url.additional\" : \"about:blank\"%n"
                         + "    }%n  }%n}");
@@ -348,12 +348,12 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetRemoteWebDriverIEDriver() throws Exception
+    void testGetRemoteWebDriverIEDriver() throws MalformedURLException
     {
         mockCapabilities(remoteWebDriver);
         setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        desiredCapabilities.setBrowserName(BrowserType.IEXPLORE);
+        desiredCapabilities.setBrowserName(Browser.IE.browserName());
         when(remoteWebDriverFactory.getRemoteWebDriver(any(URL.class), any(DesiredCapabilities.class)))
                 .thenReturn(remoteWebDriver);
         Timeouts timeouts = mockTimeouts(remoteWebDriver);
@@ -384,12 +384,12 @@ class WebDriverFactoryTests
         testGetRemoteWebDriverIsChrome(new ChromeOptions());
     }
 
-    private void testGetRemoteWebDriverIsChrome(ChromeOptions chromeOptions) throws Exception
+    private void testGetRemoteWebDriverIsChrome(ChromeOptions chromeOptions) throws MalformedURLException
     {
         mockCapabilities(remoteWebDriver);
         setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        desiredCapabilities.setBrowserName(BrowserType.CHROME);
+        desiredCapabilities.setBrowserName(Browser.CHROME.browserName());
         desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
         when(remoteWebDriverFactory.getRemoteWebDriver(URL.toURL(), desiredCapabilities)).thenReturn(remoteWebDriver);
         Timeouts timeouts = mockTimeouts(remoteWebDriver);

@@ -1,6 +1,6 @@
 = JSON Plugin
 
-The plugin provides different actions to interact with JSON.
+The plugin provides a set of actions for transformation and validation of JSON data.
 
 == Installation
 
@@ -12,7 +12,118 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-json', version: '{cur
 
 == Steps
 
+:json-path: https://github.com/json-path/JsonPath#path-examples[JSON Path]
+
+The steps syntax uses two internal (VIVIDUS-only) terms:
+
+ * "JSON element" - any part of JSON document including both compex data
+   structures like `array`, `object` and primitive values like `string` in
+   double quotes, `number`, `boolean` (`true` or `false`) and `null`.
+ * "JSON element value" or "value of JSON element" - primitive values like
+   `string` _not wrapped_ into double quotes, `number`, `boolean`
+   (`true` or `false`) and `null`.
+
+NOTE: JSON context is pointed to the latest HTTP response by default.
+
+=== Save JSON element value from context
+
+Saves a value of JSON element found in JSON context into the variable with
+specified name and scope.
+
+[source,gherkin]
+----
+When I save JSON element value from context by JSON path `$jsonPath` to $scopes variable `$variableName`
+----
+
+* `$jsonPath` - The {json-path} used to find JSON element value.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the found JSON element value.
+
+.Validate the author of the first book
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I save JSON element value from context by JSON path `$.store.book[0].author` to scenario variable `author-of-first-book`
+Then `${author-of-first-book}` is equal to `Nigel Rees`
+----
+
+=== Save JSON element value from input
+
+Saves a value of JSON element found in the given JSON into the variable with
+specified name and scope.
+
+[source,gherkin]
+----
+When I save JSON element value from `$json` by JSON path `$jsonPath` to $scopes variable `$variableName`
+----
+
+* `$json` - The JSON used to find JSON element value.
+* `$jsonPath` - The {json-path} used to find JSON element value.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the found JSON element value.
+
+.Validate the title of the second book
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I save JSON element value from `${response}` by JSON path `$.store.book[1].title` to scenario variable `title-of-second-book`
+Then `${title-of-second-book}` is equal to `Sword of Honour`
+----
+
+=== Validate JSON element value from context
+
+Validates if the JSON contex contains the expected JSON element value matching
+the comparison rule by the specified JSON path.
+
+[source,gherkin]
+----
+Then JSON element value from context by JSON path `$jsonPath` $comparisonRule `$expectedValue`
+----
+
+* `$jsonPath` - The {json-path} used to find JSON element value.
+* `$comparisonRule` - The comparison rule to match JSON element value depending on the https://www.json.org/json-en.html[element type]:
+  ** for `string` - xref:parameters:string-comparison-rule.adoc[string comparison rules] are applicable,
+  ** for `number` - xref:parameters:comparison-rule.adoc[regular comparison rules] are applicable,
+  ** for `boolean` and `null`-s - only single rule `IS_EQUAL_TO` (readable form: `is equal to`) is allowed
+  ** `array` and `object` are complex types and must be validated using another steps dedicated for JSON elements.
+* `$expectedValue` - The expected value of JSON element to match according to the comparison rule.
+
+.Validate the price of the third book is less than 9
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+Then JSON element value from context by JSON path `$.store.book[2].price` is less than `9`
+----
+
+=== Validate JSON element value from input
+
+Validates if the given JSON contains the expected JSON element value matching
+the comparison rule by the specified JSON path.
+
+[source,gherkin]
+----
+Then JSON element value from `$json` by JSON path `$jsonPath` $comparisonRule `$expectedValue`
+----
+
+* `$json` - The JSON used to find JSON element value.
+* `$jsonPath` - The {json-path} used to find JSON element value.
+* `$comparisonRule` - The comparison rule to match JSON element value depending on the https://www.json.org/json-en.html[element type]:
+  ** for `string` - xref:parameters:string-comparison-rule.adoc[string comparison rules] are applicable,
+  ** for `number` - xref:parameters:comparison-rule.adoc[regular comparison rules] are applicable,
+  ** for `boolean` and `null`-s - only single rule `IS_EQUAL_TO` (readable form: `is equal to`) is allowed
+  ** `array` and `object` are complex types and must be validated using another steps dedicated for JSON elements.
+* `$expectedValue` - The expected value of JSON element to match according to the comparison rule.
+
+.Validate the price of the fouth book is greater than 22.50
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+Then JSON element value from `${response}` by JSON path `$.store.book[3].price` is greater than `22.50`
+----
+
 === Patch JSON
+
+Modified an input JSON using a sequence of operations defined in JSON patch.
 
 [source,gherkin]
 ----
@@ -22,12 +133,11 @@ When I patch JSON `$sourceJson` using `$jsonPatch` and save result to $scopes va
 * `$sourceJson` - JSON data to be patched.
 * `$jsonPatch` - JSON data with required patch actions according to https://datatracker.ietf.org/doc/html/rfc6902#section-4[RFC-6902]
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name
-
-=== Examples
+* `$variableName` - The name of the variable to save the patched JSON.
 
 .Patch JSON data
 [source,gherkin]
 ----
-When I patch JSON `{"a":"c"}` using `[{ "op": "replace", "path": "/a", "value": "c" }]` and save result to SCENARIO variable `patchedJSON`
+When I patch JSON `{"a":"b"}` using `[{ "op": "replace", "path": "/a", "value": "c" }]` and save result to SCENARIO variable `patchedJson`
+Then `{"a":"c"}` is equal to `${patchedJson}`
 ----

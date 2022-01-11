@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.vividus.ui.action.search;
 
 import java.util.Set;
 
+import org.openqa.selenium.By;
+
 public interface LocatorType
 {
     Class<? extends IElementAction> getActionClass();
@@ -29,5 +31,10 @@ public interface LocatorType
     default Set<LocatorType> getCompetingTypes()
     {
         return Set.of();
+    }
+
+    default By buildBy(String value)
+    {
+        throw new UnsupportedOperationException();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningStory;
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningStory;
 import org.vividus.selenium.tunnel.TunnelException;
 import org.vividus.selenium.tunnel.TunnelOptions;
 
@@ -44,7 +44,7 @@ class BrowserStackCapabilitiesConfigurerTests
     private static final String BSTACK_OPTIONS = "bstack:options";
 
     @Captor private ArgumentCaptor<TunnelOptions> optionsCaptor;
-    @Mock private IBddRunContext bddRunContext;
+    @Mock private RunContext runContext;
     @Mock private BrowserStackLocalManager browserStackLocalManager;
     @InjectMocks private BrowserStackCapabilitiesConfigurer configurer;
 
@@ -55,13 +55,13 @@ class BrowserStackCapabilitiesConfigurerTests
         RunningStory runningStory = mock(RunningStory.class);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
 
-        when(bddRunContext.getRootRunningStory()).thenReturn(runningStory);
+        when(runContext.getRootRunningStory()).thenReturn(runningStory);
         when(runningStory.getName()).thenReturn(name);
 
         configurer.configure(desiredCapabilities);
 
         assertEquals(Map.of(BSTACK_OPTIONS, Map.of("sessionName", name)), desiredCapabilities.asMap());
-        verifyNoMoreInteractions(bddRunContext, runningStory);
+        verifyNoMoreInteractions(runContext, runningStory);
     }
 
     @Test

@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.common.eventbus.EventBus;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
@@ -42,12 +40,12 @@ public class WebScreenshotTaker extends AbstractScreenshotTaker<WebScreenshotCon
     private int indent;
     private HighlighterType highlighterType;
 
-    public WebScreenshotTaker(IWebDriverProvider webDriverProvider, EventBus eventBus,
+    public WebScreenshotTaker(IWebDriverProvider webDriverProvider,
             IScreenshotFileNameGenerator screenshotFileNameGenerator,
             AshotFactory<WebScreenshotConfiguration> ashotFactory, ScreenshotDebugger screenshotDebugger,
             IWebElementHighlighter webElementHighlighter)
     {
-        super(webDriverProvider, eventBus, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
+        super(webDriverProvider, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
         this.webElementHighlighter = webElementHighlighter;
     }
 

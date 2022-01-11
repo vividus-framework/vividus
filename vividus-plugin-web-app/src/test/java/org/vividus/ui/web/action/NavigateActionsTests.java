@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,10 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -53,7 +51,6 @@ class NavigateActionsTests
     private static final String SCRIPT_WINDOW_STOP = "window.stop()";
     private static final String URL_STR = "http://somewhere.com/page";
     private static final URI URL = URI.create(URL_STR);
-    private static final long WAIT_MILLS = 5;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(NavigateActions.class);
 
@@ -184,20 +181,5 @@ class NavigateActionsTests
         when(webDriver.getCurrentUrl()).thenReturn(URL_STR);
         navigateActions.back(URL_STR);
         verify(navigation, never()).to(URL_STR);
-    }
-
-    @Test
-    void testLoadPage()
-    {
-        when(webDriver.navigate()).thenReturn(navigation);
-        String url = "http://somewhere.com";
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        Mockito.doAnswer(invocation ->
-        {
-            Thread.sleep(WAIT_MILLS);
-            return null;
-        }).when(navigation).to(url);
-        navigateActions.loadPage(url);
-        assertThat(navigateActions.getActualPageLoadTimeInMs(), Matchers.greaterThanOrEqualTo(WAIT_MILLS));
     }
 }

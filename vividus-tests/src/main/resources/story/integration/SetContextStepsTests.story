@@ -63,18 +63,11 @@ When I reset context
 Then number of elements found by `By.xpath(html)` is equal to `1`
 
 
-Scenario: Verify step: "When I change context to a [$state] element with the name '$name'"
-Given I am on a page with the URL '${vividus-test-site-url}'
-When I change context to a [VISIBLE] element with the name 'vividus-logo'
-Then number of elements found by `By.xpath(html)` is equal to `0`
-When I reset context
-
-
-Scenario: Verify step: "When I change context to an element with the attribute '$attributeType'='$attributeValue'"
-When I change context to an element with the attribute 'name'='vividus-logo'
-Then number of elements found by `By.xpath(html)` is equal to `0`
-
-
-Scenario: Verify step: "When I change context to a [$state] element with the attribute '$attributeType'='$attributeValue'"
-When I change context to a [VISIBLE] element with the attribute 'name'='vividus-logo'
-Then number of elements found by `By.xpath(html)` is equal to `0`
+Scenario: Should switch to first visible parent frame or main document if the current frame is closed
+Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+When I click on element located `id(modalButton)`
+When I wait until element located `id(modalWindow)` appears
+When I switch to frame located `id(firstFrame)`
+When I switch to frame located `id(secondFrame)`
+When I click on element located `id(close)`
+Then number of elements found by `id(modalButton)` is equal to `1`

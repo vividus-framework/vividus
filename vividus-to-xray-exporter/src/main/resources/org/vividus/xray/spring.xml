@@ -6,7 +6,8 @@
        default-lazy-init="true">
 
     <bean class="org.vividus.xray.facade.XrayFacade">
-        <constructor-arg index="0" value="${xray-exporter.editable-statuses}" />
+        <constructor-arg index="0" value="${xray-exporter.jira-instance-key}" />
+        <constructor-arg index="1" value="${xray-exporter.editable-statuses}" />
     </bean>
 
     <bean class="org.vividus.xray.factory.TestCaseFactory">

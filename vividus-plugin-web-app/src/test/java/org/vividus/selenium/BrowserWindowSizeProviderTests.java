@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.IBddRunContext;
-import org.vividus.bdd.model.RunningScenario;
-import org.vividus.bdd.model.RunningStory;
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningScenario;
+import org.vividus.model.RunningStory;
 
 @ExtendWith(MockitoExtension.class)
 class BrowserWindowSizeProviderTests
@@ -46,7 +46,7 @@ class BrowserWindowSizeProviderTests
     private static final String SUCCESSFUL_DESIRED_RESOLUTION = "1024x768";
 
     @Mock
-    private IBddRunContext bddRunContext;
+    private RunContext runContext;
 
     @InjectMocks
     private BrowserWindowSizeProvider browserWindowSizeProvider;
@@ -61,7 +61,7 @@ class BrowserWindowSizeProviderTests
     void testGetBrowserWindowSizeWhenNoMetaSet()
     {
         RunningStory runningStory = mockRunningStory(null, null);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         BrowserWindowSize browserWindowSize = browserWindowSizeProvider.getBrowserWindowSize(true);
         assertNull(browserWindowSize);
     }
@@ -69,7 +69,7 @@ class BrowserWindowSizeProviderTests
     @Test
     void testGetBrowserWindowSizeWhenNoRunningStory()
     {
-        when(bddRunContext.getRunningStory()).thenReturn(null);
+        when(runContext.getRunningStory()).thenReturn(null);
         BrowserWindowSize browserWindowSize = browserWindowSizeProvider.getBrowserWindowSize(true);
         assertNull(browserWindowSize);
     }
@@ -81,7 +81,7 @@ class BrowserWindowSizeProviderTests
         Story story = mock(Story.class);
         runningStory.setStory(story);
         when(story.getMeta()).thenReturn(new Meta(new Properties()));
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         BrowserWindowSize browserWindowSize = browserWindowSizeProvider.getBrowserWindowSize(true);
         assertNull(browserWindowSize);
     }
@@ -91,7 +91,7 @@ class BrowserWindowSizeProviderTests
     {
         String storyBrowserWindowSize = SUCCESSFUL_DESIRED_RESOLUTION;
         RunningStory runningStory = mockRunningStory(storyBrowserWindowSize, null);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         BrowserWindowSize browserWindowSize = browserWindowSizeProvider.getBrowserWindowSize(true);
         assertEquals(new BrowserWindowSize(storyBrowserWindowSize).toDimension(), browserWindowSize.toDimension());
     }
@@ -106,7 +106,7 @@ class BrowserWindowSizeProviderTests
         Scenario scenario = mock(Scenario.class);
         when(runningScenario.getScenario()).thenReturn(scenario);
         when(scenario.getMeta()).thenReturn(newMeta(scenarioBrowserWindowSize));
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         BrowserWindowSize browserWindowSize = browserWindowSizeProvider.getBrowserWindowSize(true);
         assertEquals(new BrowserWindowSize(scenarioBrowserWindowSize).toDimension(), browserWindowSize.toDimension());
     }
@@ -116,7 +116,7 @@ class BrowserWindowSizeProviderTests
     {
         String storyBrowserWindowSize = "1920x1080";
         RunningStory runningStory = mockRunningStory(storyBrowserWindowSize, null);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> browserWindowSizeProvider.getBrowserWindowSize(true));
         assertEquals(getExceptionMessage(storyBrowserWindowSize), exception.getMessage());
@@ -127,7 +127,7 @@ class BrowserWindowSizeProviderTests
     {
         String storyBrowserWindowSize = "1280x1025";
         RunningStory runningStory = mockRunningStory(storyBrowserWindowSize, null);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> browserWindowSizeProvider.getBrowserWindowSize(true));
         assertEquals(getExceptionMessage(storyBrowserWindowSize), exception.getMessage());
@@ -139,7 +139,7 @@ class BrowserWindowSizeProviderTests
         assumeFalse(GraphicsEnvironment.isHeadless());
         String storyBrowserWindowSize = "320x240";
         RunningStory runningStory = mockRunningStory(storyBrowserWindowSize, null);
-        when(bddRunContext.getRunningStory()).thenReturn(runningStory);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         BrowserWindowSize browserWindowSize = browserWindowSizeProvider.getBrowserWindowSize(false);
         assertEquals(new BrowserWindowSize(storyBrowserWindowSize).toDimension(), browserWindowSize.toDimension());
     }

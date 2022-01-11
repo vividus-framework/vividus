@@ -20,12 +20,37 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.vividus.ui.action.search.ByLocatorSearch;
 
 class AppiumLocatorTypeTests
 {
+    private static final String VALUE = "value";
+
+    @ParameterizedTest
+    @CsvSource({
+            "By.xpath:,                 XPATH",
+            "AppiumBy.accessibilityId:, ACCESSIBILITY_ID",
+            "AppiumBy.iOSClassChain:,   IOS_CLASS_CHAIN",
+            "By.id:,                    ID"
+    })
+    void shouldBuildBy(String prefix, AppiumLocatorType locatorType)
+    {
+        assertEquals(prefix + StringUtils.SPACE +  VALUE, locatorType.buildBy(VALUE).toString());
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = { "TEXT_PART", "TEXT", "ATTRIBUTE" })
+    void shouldNotBuildBy(AppiumLocatorType locatorType)
+    {
+        assertThrows(UnsupportedOperationException.class, () -> locatorType.buildBy(VALUE));
+    }
+
     @ParameterizedTest
     @CsvSource({
         "Appium XPath    , XPATH           ",
@@ -36,7 +61,7 @@ class AppiumLocatorTypeTests
     void testAppiumLocatorType(String attributeName, AppiumLocatorType locatorType)
     {
         assertEquals(attributeName, locatorType.getAttributeName());
-        assertEquals(ByAppiumLocatorSearch.class, locatorType.getActionClass());
+        assertEquals(ByLocatorSearch.class, locatorType.getActionClass());
         assertEquals(locatorType.name(), locatorType.getKey());
         assertThat(locatorType.getCompetingTypes(), is(empty()));
     }

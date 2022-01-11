@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.bdd.context.IBddVariableContext;
-import org.vividus.bdd.variable.VariableScope;
+import org.vividus.context.VariableContext;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
 class LambdaStepsTests
 {
-    @Mock private IBddVariableContext bddVariableContext;
+    @Mock private VariableContext variableContext;
 
     @Test
     void shouldInvokeAwsLambda()
@@ -89,7 +89,7 @@ class LambdaStepsTests
             when(awsLambda.invoke(invokeRequest)).thenReturn(invokeResult);
             Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
             String variableName = "var";
-            LambdaSteps steps = new LambdaSteps(bddVariableContext);
+            LambdaSteps steps = new LambdaSteps(variableContext);
             steps.invokeLambda(functionName, payload, scopes, variableName);
             Map<String, String> variableValue = new HashMap<>();
             variableValue.put("payload", result);
@@ -97,7 +97,7 @@ class LambdaStepsTests
             variableValue.put("log-result", logResult);
             variableValue.put("executed-version", executedVersion);
             variableValue.putAll(extraExpectedEntries);
-            verify(bddVariableContext).putVariable(scopes, variableName, variableValue);
+            verify(variableContext).putVariable(scopes, variableName, variableValue);
         }
     }
 }

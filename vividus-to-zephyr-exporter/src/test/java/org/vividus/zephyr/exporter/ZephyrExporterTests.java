@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
@@ -60,23 +61,14 @@ class ZephyrExporterTests
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(ZephyrExporter.class);
 
-    @Mock
-    private JiraFacade jiraFacade;
-
-    @Mock
-    private ZephyrFacade zephyrFacade;
-
-    @Mock
-    private TestCaseParser testCaseParser;
-
-    @Mock
-    private ZephyrExporterProperties zephyrExporterProperties;
-
-    @InjectMocks
-    private ZephyrExporter zephyrExporter;
+    @Mock private JiraFacade jiraFacade;
+    @Mock private ZephyrFacade zephyrFacade;
+    @Mock private TestCaseParser testCaseParser;
+    @Mock private ZephyrExporterProperties zephyrExporterProperties;
+    @InjectMocks private ZephyrExporter zephyrExporter;
 
     @Test
-    void testExportResults() throws IOException, URISyntaxException
+    void testExportResults() throws IOException, URISyntaxException, JiraConfigurationException
     {
         when(testCaseParser.createTestCases(any())).thenReturn(List.of(
                 new TestCase(TEST_CASE_KEY1, TestCaseStatus.SKIPPED),
@@ -94,7 +86,7 @@ class ZephyrExporterTests
     }
 
     @Test
-    void testExportResultsWithOnlyStatusUpdate() throws IOException, URISyntaxException
+    void testExportResultsWithOnlyStatusUpdate() throws IOException, URISyntaxException, JiraConfigurationException
     {
         when(zephyrExporterProperties.getUpdateExecutionStatusesOnly()).thenReturn(true);
         when(testCaseParser.createTestCases(any())).thenReturn(List.of(
@@ -126,7 +118,7 @@ class ZephyrExporterTests
         return configuration;
     }
 
-    private void mockJiraIssueRetrieve(String issueKey, String issueId) throws IOException
+    private void mockJiraIssueRetrieve(String issueKey, String issueId) throws IOException, JiraConfigurationException
     {
         JiraEntity issue = new JiraEntity();
         issue.setId(issueId);

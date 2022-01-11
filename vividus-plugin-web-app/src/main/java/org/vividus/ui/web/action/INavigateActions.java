@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,4 @@ public interface INavigateActions
      * @param previousPageUrl The string which defines the previous page URL
      */
     void back(String previousPageUrl);
-
-    /**
-     * Navigates to page url and writes page load timeout
-     * @param pageURL to navigate
-     */
-    void loadPage(String pageURL);
-
-    long getActualPageLoadTimeInMs();
 }

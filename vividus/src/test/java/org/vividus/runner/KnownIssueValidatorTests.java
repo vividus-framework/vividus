@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.SystemStreamTests;
-import org.vividus.bdd.issue.BddKnownIssueIdentifier;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
+import org.vividus.issue.VividusKnownIssueIdentifier;
 import org.vividus.softassert.issue.IKnownIssueProvider;
 import org.vividus.softassert.issue.KnownIssueChecker;
 import org.vividus.softassert.model.KnownIssue;
@@ -75,7 +75,7 @@ class KnownIssueValidatorTests extends SystemStreamTests
     @Test
     void testNoInputFileAndNonEmptyKnownIssues() throws IOException, ParseException
     {
-        Map<String, BddKnownIssueIdentifier> knownIssues = new HashMap<>();
+        Map<String, VividusKnownIssueIdentifier> knownIssues = new HashMap<>();
         knownIssues.put(KEY, null);
         doReturn(knownIssues).when(knownIssueProvider).getKnownIssueIdentifiers();
         testValidator();

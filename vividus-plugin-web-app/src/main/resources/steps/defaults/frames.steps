@@ -1,5 +1,0 @@
-Composite: Then a frame with the attribute '$attributeType'='$attributeValue' exists
-Then number of elements found by `xpath(.//iframe[@<attributeType>='<attributeValue>'])` is = `1`
-
-Composite: Then a [$state] frame with the attribute '$attributeType'='$attributeValue' exists
-Then number of elements found by `xpath(.//iframe[@<attributeType>='<attributeValue>'])->filter.state(<state>)` is = `1`

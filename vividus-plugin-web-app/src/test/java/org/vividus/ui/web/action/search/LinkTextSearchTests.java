@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,62 +38,43 @@ class LinkTextSearchTests
 {
     private static final String LINK_TEXT = "linkText";
     private static final By DEFAULT_LOCATOR = By.linkText(LINK_TEXT);
+    private static final SearchParameters SEARCH_PARAMETERS = new SearchParameters(LINK_TEXT, Visibility.ALL, false);
     private static final String LINK_TAG = "a";
     private static final By LINK_TEXT_LOCATOR = By.xpath(".//a[text()[normalize-space()=\"" + LINK_TEXT
             + "\"] or @*[normalize-space()=\"" + LINK_TEXT + "\"] or *[normalize-space()=\"" + LINK_TEXT + "\"]]");
 
-    private List<WebElement> webElements;
-
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private SearchContext searchContext;
-
-    @InjectMocks
-    private LinkTextSearch search;
+    @Mock private WebElement webElement;
+    @Mock private SearchContext searchContext;
+    private final LinkTextSearch search = new LinkTextSearch();
 
     @Test
     void testFindLinksByTextByLinkTextNull()
     {
-        search = new LinkTextSearch();
-        LinkTextSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(LINK_TEXT, Visibility.ALL, false);
+        var spy = Mockito.spy(search);
         when(searchContext.findElements(DEFAULT_LOCATOR)).thenReturn(List.of());
-        doReturn(List.of()).when(spy).findElementsByText(searchContext, LINK_TEXT_LOCATOR, parameters, LINK_TAG);
-        List<WebElement> foundElements = spy.search(searchContext, parameters);
+        doReturn(List.of()).when(spy).findElementsByText(searchContext, LINK_TEXT_LOCATOR, SEARCH_PARAMETERS, LINK_TAG);
+        var foundElements = spy.search(searchContext, SEARCH_PARAMETERS);
         assertEquals(List.of(), foundElements);
     }
 
     @Test
     void testFindLinksByTextByLinkText()
     {
-        search = new LinkTextSearch();
-        webElements = List.of(webElement);
-        SearchParameters parameters = new SearchParameters(LINK_TEXT, Visibility.ALL, false);
+        var webElements = List.of(webElement);
         when(searchContext.findElements(DEFAULT_LOCATOR)).thenReturn(webElements);
-        List<WebElement> foundElements = search.search(searchContext, parameters);
+        var foundElements = search.search(searchContext, SEARCH_PARAMETERS);
         assertEquals(webElements, foundElements);
     }
 
     @Test
     void testFindLinksByTextByLinkTextOrAttributeLocator()
     {
-        search = new LinkTextSearch();
-        LinkTextSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(LINK_TEXT, Visibility.ALL, false);
+        var webElements = List.of(webElement);
+        var spy = Mockito.spy(search);
         when(searchContext.findElements(DEFAULT_LOCATOR)).thenReturn(List.of());
-        doReturn(webElements).when(spy).findElementsByText(searchContext, LINK_TEXT_LOCATOR, parameters, LINK_TAG);
-        List<WebElement> foundElements = spy.search(searchContext, parameters);
+        doReturn(webElements).when(spy).findElementsByText(searchContext, LINK_TEXT_LOCATOR, SEARCH_PARAMETERS,
+                LINK_TAG);
+        var foundElements = spy.search(searchContext, SEARCH_PARAMETERS);
         assertEquals(webElements, foundElements);
-    }
-
-    @Test
-    void testFindLinksByTextNullSearchContext()
-    {
-        search = new LinkTextSearch();
-        SearchParameters parameters = new SearchParameters(LINK_TEXT);
-        List<WebElement> foundElements = search.search(null, parameters);
-        assertEquals(List.of(), foundElements);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -34,30 +33,20 @@ class ElementNameSearchTests
 {
     private static final String ELEMENT_NAME = "Element name";
 
-    private final SearchParameters searchParameters = new SearchParameters(ELEMENT_NAME);
-
     private final ElementNameSearch elementNameSearch = new ElementNameSearch(WebLocatorType.ELEMENT_NAME);
 
     @Test
-    void searchTest()
+    void shouldReturnFoundResults()
     {
-        SearchContext searchContext = mock(SearchContext.class);
-        ElementNameSearch spy = Mockito.spy(elementNameSearch);
-        List<WebElement> webElements = new ArrayList<>();
-        webElements.add(mock(WebElement.class));
+        var searchParameters = new SearchParameters(ELEMENT_NAME);
+        var searchContext = mock(SearchContext.class);
+        var spy = Mockito.spy(elementNameSearch);
+        var webElements = List.of(mock(WebElement.class));
         doReturn(webElements).when(spy).findElementsByText(searchContext,
                 By.xpath(".//*[@*[normalize-space()=\"Element name\"] or text()[normalize-space()=\"Element name\"]]"),
                 searchParameters, "*");
-        List<WebElement> foundElements = spy.search(searchContext, searchParameters);
+        var foundElements = spy.search(searchContext, searchParameters);
         assertEquals(webElements, foundElements);
-    }
-
-    @Test
-    void searchTestContextNull()
-    {
-        ElementNameSearch spy = Mockito.spy(elementNameSearch);
-        List<WebElement> foundElements = spy.search(null, searchParameters);
-        assertEquals(List.of(), foundElements);
     }
 
     @Test

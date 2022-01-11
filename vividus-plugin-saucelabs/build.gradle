@@ -6,12 +6,12 @@ test {
 }
 
 dependencies {
-    implementation project(':vividus-bdd-engine')
+    implementation project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-selenium')
 
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.153') {
+    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.154') {
         exclude group: 'com.google.collections', module: 'google-collections'
     }
 
