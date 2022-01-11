@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,22 +41,15 @@ import org.vividus.ui.action.JavascriptActions;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
-public class IOSPerformanceStepsTests
+class IOSPerformanceStepsTests
 {
     private static final String PROFILE_NAME = "profileName";
     private static final String PROFILE = "profile";
 
-    @Mock
-    private JavascriptActions javascriptActions;
-
-    @Mock
-    private IGenericWebDriverManager webDriverManager;
-
-    @Captor
-    private ArgumentCaptor<Map<String, Object>> captor;
-
-    @InjectMocks
-    private IOSPerformanceSteps performanceSteps;
+    @Mock private JavascriptActions javascriptActions;
+    @Mock private IGenericWebDriverManager webDriverManager;
+    @Captor private ArgumentCaptor<Map<String, Object>> captor;
+    @InjectMocks private IOSPerformanceSteps performanceSteps;
 
     @Test
     void shouldStartRecordingOfInstrument()
@@ -91,6 +84,7 @@ public class IOSPerformanceStepsTests
     void shouldFailInNonIOSRun() throws IOException
     {
         when(webDriverManager.isIOS()).thenReturn(false);
-        assertThrows(IllegalArgumentException.class, () -> performanceSteps.startRecordingOfInstrument(PROFILE));
+        assertThrows(IllegalArgumentException.class, () -> performanceSteps.startRecordingOfInstrument(PROFILE),
+                "The functionality is not supported for non-IOS applications");
     }
 }

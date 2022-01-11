@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,9 +64,11 @@ public class IOSPerformanceSteps
     /**
      * Stop recording metrics of specified IOS instrument and save results to <b>path</b>
      * <br>
-     * Result will be an archive with *.trace file whick could be opened by Xcode.
+     * List of some useful instruments: Time Profiler, Leaks, File Activity, etc.
+     * <br>
+     * Result will be an archive with *.trace file which could be opened by Xcode.
      * @param instrument instrument to record data
-     * @param path Path to the location for saving the screenshot
+     * @param path path to the file to save an archive with collected data
      * @throws IOException If an input or output exception occurred
      */
     @When("I stop recording `$instrument` metrics and save results to file `$path`")
@@ -83,6 +85,6 @@ public class IOSPerformanceSteps
 
     private void checkIOS()
     {
-        Validate.isTrue(webDriverManager.isIOS());
+        Validate.isTrue(webDriverManager.isIOS(), "The functionality is not supported for non-IOS applications");
     }
 }

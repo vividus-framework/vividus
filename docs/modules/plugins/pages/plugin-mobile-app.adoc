@@ -705,14 +705,17 @@ See https://appiumpro.com/editions/12-capturing-performance-data-for-native-ios-
 [NOTE]
 Appium server should be started with the *--relaxed-security* flag. This is because Instruments can gather data from the system as a whole, not just the AUT. (It's thus a security risk to expose potentially sensitive system information to Appium sessions running from a remote client).
 
+[NOTE]
+Archive with results contains *.trace file which could be opened by XCode. There is possibility to parse this file using XCode's utility https://keith.github.io/xcode-man-pages/xctrace.1.html[xctrace] and use generated data in tests
+
 [source,gherkin]
 ----
 When I start recording `$instrument` metrics
 When I stop recording `$instrument` metrics and save results to file `$path`
 ----
 
-. `$instrument` - The instrument of Xcode Instruments utility
-. `$path` - Path to save archive with collected data
+. `$instrument` - The instrument of Xcode Instruments utility. Some useful instruments: Time Profiler, Leaks, File Activity, etc.
+. `$path` - The path to the file to save an archive with collected data.
 
 .Perform profiling during application usage
 [source,gherkin]
