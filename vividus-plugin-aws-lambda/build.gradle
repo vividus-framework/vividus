@@ -2,7 +2,7 @@ project.description = 'Vividus plugin for AWS Lambda'
 
 dependencies {
     api project(':vividus-engine')
-    implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.12.125')
+    implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.12.138')
     implementation(group: 'com.amazonaws', name: 'aws-java-sdk-lambda')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
