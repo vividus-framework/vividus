@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.WebDriver;
 import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.mobileapp.configuration.MobileEnvironment;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.testcontext.ThreadedTestContext;
+import org.vividus.variable.DynamicVariableCalculationResult;
 
 import io.appium.java_client.clipboard.HasClipboard;
 
@@ -52,34 +55,37 @@ class ClipboardTextDynamicVariableTests
     void shouldReturnClipboardTextForSimulator()
     {
         init(false, null);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         mockGetClipboardText();
 
-        assertEquals(VALUE, dynamicVariable.getValue());
+        assertEquals(DynamicVariableCalculationResult.withValue(VALUE), dynamicVariable.calculateValue());
     }
 
     @Test
     void shouldReturnClipboardTextForNonIos()
     {
         init(true, null);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(mobileAppWebDriverManager.isIOSNativeApp()).thenReturn(false);
         mockGetClipboardText();
 
-        assertEquals(VALUE, dynamicVariable.getValue());
+        assertEquals(DynamicVariableCalculationResult.withValue(VALUE), dynamicVariable.calculateValue());
     }
 
     @Test
     void shouldReturnClipboardTextForIOSRealDevice()
     {
-        String wdaBundleId = "wda-bundle-id";
+        var wdaBundleId = "wda-bundle-id";
         init(true, wdaBundleId);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(mobileAppWebDriverManager.isIOSNativeApp()).thenReturn(true);
 
         mockGetClipboardText();
 
-        String appBundleId = "app-bundle-id";
+        var appBundleId = "app-bundle-id";
         when(mobileAppWebDriverManager.getSessionDetail("bundleID")).thenReturn(appBundleId);
 
-        assertEquals(VALUE, dynamicVariable.getValue());
+        assertEquals(DynamicVariableCalculationResult.withValue(VALUE), dynamicVariable.calculateValue());
 
         verify(applicationActions).activateApp(wdaBundleId);
         verify(applicationActions).activateApp(appBundleId);
@@ -89,10 +95,10 @@ class ClipboardTextDynamicVariableTests
     void shouldFailOnIOSReadDeviceIfWDABundleIsNotSet()
     {
         init(true, null);
-
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(mobileAppWebDriverManager.isIOSNativeApp()).thenReturn(true);
 
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, dynamicVariable::getValue);
+        var thrown = assertThrows(IllegalArgumentException.class, dynamicVariable::calculateValue);
 
         assertEquals("WebDriverAgent bundle ID is not specified", thrown.getMessage());
     }
@@ -107,11 +113,20 @@ class ClipboardTextDynamicVariableTests
         verify(testContext).remove(any(Class.class));
     }
 
+    @Test
+    void shouldReturnErrorInCaseOfNotStartedSession()
+    {
+        init(false, null);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(false);
+        assertEquals(DynamicVariableCalculationResult.withError("application is not started"),
+                dynamicVariable.calculateValue());
+    }
+
     private void mockGetClipboardText()
     {
-        HasClipboard clipboard = mock(HasClipboard.class);
-        when(webDriverProvider.getUnwrapped(HasClipboard.class)).thenReturn(clipboard);
-        when(clipboard.getClipboardText()).thenReturn(VALUE);
+        var webDriverWithClipboard = mock(WebDriver.class, withSettings().extraInterfaces(HasClipboard.class));
+        when(webDriverProvider.get()).thenReturn(webDriverWithClipboard);
+        when(((HasClipboard) webDriverWithClipboard).getClipboardText()).thenReturn(VALUE);
     }
 
     private void init(boolean realDevice, String wdaBundle)

@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.variable;
+package org.vividus.ui.variable;
 
-public interface DynamicVariable
+import org.openqa.selenium.Rectangle;
+import org.vividus.ui.context.UiContext;
+
+public class SearchContextHeightDynamicVariable extends AbstractSearchContextRectangleDynamicVariable
 {
-    DynamicVariableCalculationResult calculateValue();
+    public SearchContextHeightDynamicVariable(UiContext uiContext)
+    {
+        super(uiContext, Rectangle::getHeight);
+    }
 }

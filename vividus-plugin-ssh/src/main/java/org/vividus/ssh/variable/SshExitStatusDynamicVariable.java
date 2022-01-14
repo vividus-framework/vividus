@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package org.vividus.variable;
+package org.vividus.ssh.variable;
 
-public interface DynamicVariable
+import org.vividus.context.SshTestContext;
+
+public class SshExitStatusDynamicVariable extends AbstractSshDynamicVariable
 {
-    DynamicVariableCalculationResult calculateValue();
+    public SshExitStatusDynamicVariable(SshTestContext sshTestContext)
+    {
+        super(sshTestContext, sshOutput -> Integer.toString(sshOutput.getExitStatus()));
+    }
 }

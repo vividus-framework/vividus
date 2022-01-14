@@ -9,7 +9,6 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" profile="web">
 
-    <context:component-scan base-package="org.vividus.variable.ui.web"/>
     <context:component-scan base-package="org.vividus.jackson.databind.ui.web"/>
     <context:component-scan base-package="org.vividus.converter.ui.web" />
 
@@ -346,4 +345,7 @@
             </bean>
         </entry>
     </util:map>
+
+    <bean id="current-page-url" class="org.vividus.ui.web.variable.CurrentPageUrlDynamicVariable"/>
+
  </beans>

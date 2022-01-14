@@ -182,7 +182,7 @@ include::partial$proxy-properties.adoc[]
 
 include::partial$proxy-meta-tags.adoc[]
 
-include::partial$dynamic-variables-header.adoc[]
+== xref:commons:variables.adoc[Dynamic variables]
 
 include::partial$dynamic-variables-ui.adoc[]
 

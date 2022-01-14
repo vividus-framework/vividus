@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package org.vividus.variable;
+package org.vividus.ui.web.variable;
 
-public interface DynamicVariable
+import org.openqa.selenium.WebDriver;
+import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.variable.AbstractWebDriverDynamicVariable;
+
+public class CurrentPageUrlDynamicVariable extends AbstractWebDriverDynamicVariable
 {
-    DynamicVariableCalculationResult calculateValue();
+    public CurrentPageUrlDynamicVariable(IWebDriverProvider webDriverProvider)
+    {
+        super(webDriverProvider, WebDriver::getCurrentUrl, "browser is not started");
+    }
 }

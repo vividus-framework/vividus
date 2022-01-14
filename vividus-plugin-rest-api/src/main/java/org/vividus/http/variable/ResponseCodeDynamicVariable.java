@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package org.vividus.variable;
+package org.vividus.http.variable;
 
-public interface DynamicVariable
+import org.vividus.http.HttpTestContext;
+
+public class ResponseCodeDynamicVariable extends AbstractHttpResponseDynamicVariable
 {
-    DynamicVariableCalculationResult calculateValue();
+    public ResponseCodeDynamicVariable(HttpTestContext httpTestContext)
+    {
+        super(httpTestContext, response -> Integer.toString(response.getStatusCode()));
+    }
 }

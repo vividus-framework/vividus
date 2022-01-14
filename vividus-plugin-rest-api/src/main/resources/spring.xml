@@ -105,4 +105,7 @@
             </bean>
         </entry>
     </util:map>
+
+    <bean id="response-code" class="org.vividus.http.variable.ResponseCodeDynamicVariable"/>
+    <bean id="response" class="org.vividus.http.variable.ResponseDynamicVariable"/>
 </beans>

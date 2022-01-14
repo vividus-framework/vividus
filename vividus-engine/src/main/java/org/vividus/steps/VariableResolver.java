@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,16 @@ import com.google.common.base.CaseFormat;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.embedder.StoryControls;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.DryRunAwareExecutor;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.DynamicVariable;
 
 public class VariableResolver implements DryRunAwareExecutor
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VariableResolver.class);
+
     private static final String VARIABLE_START_MARKER = "${";
     private static final String LINE_BREAKS = "[\r\n]*";
 
@@ -156,11 +160,19 @@ public class VariableResolver implements DryRunAwareExecutor
         Object variable = variableContext.getVariable(variableKey);
         if (variable == null)
         {
-            variable = execute(() -> Optional.ofNullable(dynamicVariables.get(variableKey))
-                               .map(DynamicVariable::getValue)
-                               .orElse(null), null);
+            variable = execute(() -> calculateDynamicVariableValue(variableKey), null);
         }
         return variable;
+    }
+
+    private String calculateDynamicVariableValue(String variableKey)
+    {
+        return Optional.ofNullable(dynamicVariables.get(variableKey))
+                .map(DynamicVariable::calculateValue)
+                .flatMap(r -> r.getValueOrHandleError(
+                        error -> LOGGER.error("Unable to resolve dynamic variable ${{}}: {}", variableKey, error)
+                ))
+                .orElse(null);
     }
 
     @Override
