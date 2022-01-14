@@ -81,4 +81,8 @@
 
     <util:list id="storyReporters" />
 
+
+    <bean id="running-scenario" class="org.vividus.variable.RunningScenarioNameDynamicVariable"/>
+    <bean id="running-story" class="org.vividus.variable.RunningStoryNameDynamicVariable"/>
+
 </beans>

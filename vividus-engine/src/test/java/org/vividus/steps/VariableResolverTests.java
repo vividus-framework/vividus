@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,21 @@
 
 package org.vividus.steps;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.error;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.jbehave.core.embedder.StoryControls;
 import org.junit.jupiter.api.Test;
@@ -35,8 +43,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.DynamicVariable;
+import org.vividus.variable.DynamicVariableCalculationResult;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class VariableResolverTests
 {
     private static final String KEY = "key";
@@ -44,6 +53,8 @@ class VariableResolverTests
     private static final String VALUE1 = "2";
     private static final String VAR2 = "var2";
     private static final String VALUE2 = "3";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(VariableResolver.class);
 
     @Mock private VariableContext variableContext;
     @Mock private StoryControls storyControls;
@@ -83,7 +94,7 @@ class VariableResolverTests
     })
     void shouldResolveVariableAsObject()
     {
-        Object object = new Object();
+        var object = new Object();
         when(variableContext.getVariable("varWithObject")).thenReturn(object);
         assertEquals(object, convert("${varWithObject}"));
     }
@@ -144,12 +155,11 @@ class VariableResolverTests
     })
     void testVariablesDynamicValue(String key, String alias)
     {
-        DynamicVariable dynamicVariable = mock(DynamicVariable.class);
+        var dynamicVariable = mock(DynamicVariable.class);
+        when(dynamicVariable.calculateValue()).thenReturn(DynamicVariableCalculationResult.withValue(VALUE1));
         when(variableContext.getVariable(key)).thenReturn(null);
         when(variableContext.getVariable(alias)).thenReturn(null);
-        VariableResolver variableResolver = new VariableResolver(variableContext, Map.of(key, dynamicVariable),
-                storyControls);
-        when(dynamicVariable.getValue()).thenReturn(VALUE1);
+        var variableResolver = new VariableResolver(variableContext, Map.of(key, dynamicVariable), storyControls);
         assertEquals(VALUE1, variableResolver.resolve(asRef(key)));
         assertEquals(VALUE1, variableResolver.resolve(asRef(alias)));
     }
@@ -157,24 +167,36 @@ class VariableResolverTests
     @Test
     void shouldNotResolveDynamicVariablesIfTheExecutionIsDryRun()
     {
-        DynamicVariable dynamicVariable = mock(DynamicVariable.class);
-        VariableResolver variableResolver = new VariableResolver(variableContext, Map.of(KEY, dynamicVariable),
-                storyControls);
+        var dynamicVariable = mock(DynamicVariable.class);
+        var variableResolver = new VariableResolver(variableContext, Map.of(KEY, dynamicVariable), storyControls);
         when(storyControls.dryRun()).thenReturn(true);
         variableResolver.resolve(asRef(KEY));
         verifyNoInteractions(dynamicVariable);
     }
 
     @Test
+    void shouldNotResolveDynamicVariablesIfTheErrorIsReturned()
+    {
+        var dynamicVariable = mock(DynamicVariable.class);
+        var error = "error";
+        when(dynamicVariable.calculateValue()).thenReturn(DynamicVariableCalculationResult.withError(error));
+        when(variableContext.getVariable(KEY)).thenReturn(null);
+        var variableResolver = new VariableResolver(variableContext, Map.of(KEY, dynamicVariable), storyControls);
+        var variableReference = asRef(KEY);
+        assertEquals(variableReference, variableResolver.resolve(variableReference));
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(error("Unable to resolve dynamic variable ${{}}: {}", KEY, error))));
+    }
+
+    @Test
     void testVariablesDynamicValueNoProvider()
     {
-        DynamicVariable dynamicVariable = mock(DynamicVariable.class);
+        var dynamicVariable = mock(DynamicVariable.class);
         when(variableContext.getVariable(VAR1)).thenReturn(null);
-        VariableResolver variableResolver = new VariableResolver(variableContext, Map.of(VAR2, dynamicVariable),
-                storyControls);
-        String test1 = asRef(VAR1);
-        Object actualValue = variableResolver.resolve(test1);
-        assertEquals(test1, actualValue);
+        var variableResolver = new VariableResolver(variableContext, Map.of(VAR2, dynamicVariable), storyControls);
+        String varReference = asRef(VAR1);
+        Object actualValue = variableResolver.resolve(varReference);
+        assertEquals(varReference, actualValue);
     }
 
     private static String asRef(String name)

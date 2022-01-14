@@ -12,7 +12,6 @@
     <context:component-scan base-package="org.vividus.converter.ui" >
          <context:exclude-filter type="regex" expression="org\.vividus\.converter\.ui\..*\..*"/>
     </context:component-scan>
-    <context:component-scan base-package="org.vividus.variable.ui"/>
 
     <bean id="parentWebDriverFactory" class="org.vividus.selenium.AbstractWebDriverFactory" abstract="true">
         <property name="remoteDriverUrl" value="${selenium.grid.url}" />
@@ -183,4 +182,11 @@
             </set>
         </property>
     </bean>
+
+    <bean id="context-height" class="org.vividus.ui.variable.SearchContextHeightDynamicVariable"/>
+    <bean id="context-width" class="org.vividus.ui.variable.SearchContextWidthDynamicVariable"/>
+    <bean id="context-x-coordinate" class="org.vividus.ui.variable.SearchContextXCoordinateDynamicVariable"/>
+    <bean id="context-y-coordinate" class="org.vividus.ui.variable.SearchContextYCoordinateDynamicVariable"/>
+    <bean id="source-code" class="org.vividus.ui.variable.SourceCodeDynamicVariable"/>
+
  </beans>

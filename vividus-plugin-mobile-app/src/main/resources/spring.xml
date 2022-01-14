@@ -9,7 +9,6 @@
      http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
      default-lazy-init="true" profile="mobile_app">
 
-     <context:component-scan base-package="org.vividus.mobileapp.variable"/>
      <context:component-scan base-package="org.vividus.selenium.mobileapp.screenshot.strategies"/>
      <context:component-scan base-package="org.vividus.mobileapp.converter"/>
 
@@ -121,4 +120,7 @@
         <idref bean="setContextSteps" />
         <idref bean="iOSPerformanceSteps" />
     </util:list>
+
+    <bean id="clipboard-text" class="org.vividus.mobileapp.variable.ClipboardTextDynamicVariable" />
+
 </beans>

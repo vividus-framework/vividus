@@ -17,4 +17,5 @@ nav:
 - modules/plugins/nav.adoc
 - modules/parameters/nav.adoc
 - modules/integrations/nav.adoc
-- modules/guides/nav.adoc
+- modules/user-guides/nav.adoc
+- modules/developer-guides/nav.adoc

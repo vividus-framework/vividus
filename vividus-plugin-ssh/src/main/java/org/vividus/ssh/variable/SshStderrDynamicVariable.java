@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.variable;
+package org.vividus.ssh.variable;
 
-public interface DynamicVariable
+import org.vividus.context.SshTestContext;
+import org.vividus.ssh.exec.SshOutput;
+
+public class SshStderrDynamicVariable extends AbstractSshDynamicVariable
 {
-    DynamicVariableCalculationResult calculateValue();
+    public SshStderrDynamicVariable(SshTestContext sshTestContext)
+    {
+        super(sshTestContext, SshOutput::getErrorStream);
+    }
 }

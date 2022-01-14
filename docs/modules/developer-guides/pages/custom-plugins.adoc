@@ -1,0 +1,77 @@
+= Cutsom Plugins
+
+VIVIDUS functionality can be extended with custom business logic. It could be
+done either in separate modules included then as dependencies, or in Gradle
+sub-projects belonging to the root test project, or in the test project directly.
+VIVIDUS defines API-s and conventions that must be followed while implementing
+custom extensions.
+
+== Dynamic variables
+
+In order to create and register own dynamic variable the following steps should
+be done.
+
+. Create a new class that implements
+https://github.com/vividus-framework/vividus/blob/master/vividus-engine/src/main/java/org/vividus/variable/DynamicVariable.java[`org.vividus.variable.DynamicVariable`]:
++
+./src/main/java/com/mycompany/variable/MyDynamicVariable.java
+[source,java]
+----
+package com.mycompany.variable;
+
+import org.vividus.variable.DynamicVariable;
+import org.vividus.variable.DynamicVariableCalculationResult;
+
+public class MyDynamicVariable implements DynamicVariable
+{
+    @Override
+    public DynamicVariableCalculationResult calculateValue()
+    {
+        try
+        {
+            String value = ...; // Variable value calcualtion
+            return DynamicVariableCalculationResult.withValue(value);
+        }
+        catch (MyException e)
+        {
+            return DynamicVariableCalculationResult.withError(e.getMessage());
+        }
+    }
+}
+----
+
+. Register Spring bean where `id` is the name of the dynamic variable which will
+be used to refer it in tests:
++
+./src/main/resources/spring.xml
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="my-dynamic-varibale" class="com.mycompany.variable.MyDynamicVariable"/>
+
+</beans>
+----
+
+. Use new variable in tests:
++
+./src/main/resources/story/MyStory.story
+[source,gherkin]
+----
+Scenario: Validate with help of the custom dynamic variable
+Then `${my-dynamic-varibale}` is equal to `my app specific value`
+----
++
+Keep in mind the alias for the dynamic variable with name in lower camel
+case will be available out of the box:
++
+./src/main/resources/story/MyStory.story
+[source,gherkin]
+----
+Scenario: Validate with help of the custom dynamic variable
+Then `${myDynamicVaribale}` is equal to `my app specific value`
+----

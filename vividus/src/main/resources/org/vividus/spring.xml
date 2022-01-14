@@ -8,9 +8,6 @@
         https://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:annotation-config />
-    <context:component-scan base-package="org.vividus.variable">
-        <context:exclude-filter type="regex" expression="org\.vividus\.variable\..*\..*"/>
-    </context:component-scan>
     <context:component-scan base-package="org.vividus.transformer" />
     <context:component-scan base-package="org.vividus.converter" >
         <context:exclude-filter type="regex" expression="org\.vividus\.converter\..*\..*"/>

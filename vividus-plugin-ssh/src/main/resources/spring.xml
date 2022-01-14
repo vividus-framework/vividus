@@ -26,4 +26,8 @@
         <idref bean="sshSteps" />
     </util:list>
 
+    <bean id="ssh-stdout" class="org.vividus.ssh.variable.SshStdoutDynamicVariable"/>
+    <bean id="ssh-stderr" class="org.vividus.ssh.variable.SshStderrDynamicVariable"/>
+    <bean id="ssh-exit-status" class="org.vividus.ssh.variable.SshExitStatusDynamicVariable"/>
+
 </beans>

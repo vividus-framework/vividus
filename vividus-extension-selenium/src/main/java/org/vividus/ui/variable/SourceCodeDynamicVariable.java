@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.variable;
+package org.vividus.ui.variable;
 
-public interface DynamicVariable
+import org.openqa.selenium.WebDriver;
+import org.vividus.selenium.IWebDriverProvider;
+
+public class SourceCodeDynamicVariable extends AbstractWebDriverDynamicVariable
 {
-    DynamicVariableCalculationResult calculateValue();
+    public SourceCodeDynamicVariable(IWebDriverProvider webDriverProvider)
+    {
+        super(webDriverProvider, WebDriver::getPageSource);
+    }
 }

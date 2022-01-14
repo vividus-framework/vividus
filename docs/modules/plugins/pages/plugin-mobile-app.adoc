@@ -221,7 +221,7 @@ selenium.grid.platformName=${selenium.grid.platform-name}
 selenium.grid.automationName=${selenium.grid.automation-name}
 ----
 
-include::partial$dynamic-variables-header.adoc[]
+== xref:commons:variables.adoc[Dynamic variables]
 
 === Get clipboard text
 

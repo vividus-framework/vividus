@@ -1,8 +1,8 @@
 = Variables
 
-Variables are names used to hold one or more values. Instead of repeating these
-values in multiple places in tests, the variable holds the results of
-a calculation, step execution, expression evaluation, or other value.
+Variables are names used to store one or more values. Instead of repeating these
+values in multiple places in tests, the variable will keep the results of
+a calculation, step execution, expression evaluation, or any other user-defined data.
 
 VIVIDUS provides the following syntax to access variable value:
 [source,gherkin]
@@ -10,11 +10,39 @@ VIVIDUS provides the following syntax to access variable value:
 ${variableName}
 ----
 
+There are 2 types of variables:
+
+* regaular - such variables are initialized and controlled by users;
+* dynamic - these variables are available out of the box and provided by VIVIDUS
+core and plugins, the values of such variables are calculated at the runtime
+(i.e. the same variables in different parts of tests may result in different values).
++
+[TIP]
+Dynamic variables support both lower camel case (e.g. `$\{dynamicVariableName\}`)
+and lower hyphen case (e.g. `$\{dynamic-variable-name\}`) name formats.
+
+== Resolution
+
+Whenever the variable placeholder is found in tests, VIVIDUS attempts to resolve
+it using the chain having the following order:
+
+* regular variables,
+* default value if it's specified in the variable placeholder,
+* system properties,
+* OS environment variables,
+* dynamic variables (keep in mind, if dynamic variable is available, but couldn't
+be resolved due to errors or conditions mismatch, the error message will be
+logged and variable will be kept unresolved).
+
+If the end of chain is reached and the variable is not resolved, the variable
+placeholder will be kept as is: `$\{variableName\}`.
+
+
 == Scopes
 
-Variables can have one of the following scopes.
+Regular variables can have one of the following scopes.
 
-NOTE: The scopes names are case-insensitive
+NOTE: The scopes names are case-insensitive.
 
 [cols="1,6", options="header"]
 |===
@@ -82,8 +110,3 @@ Then the response code is equal to '200'
 ----
 
 |===
-
-If variable with the specified name is not found in any of VIVIDUS scopes,
-search for OS environment variable will be performed. If no OS environment
-variable is available, the variable placeholder will be kept as is:
-`$\{variableName\}`

@@ -16,7 +16,26 @@
 
 package org.vividus.variable;
 
-public interface DynamicVariable
+import java.util.Optional;
+
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningStory;
+
+public class RunningStoryNameDynamicVariable implements DynamicVariable
 {
-    DynamicVariableCalculationResult calculateValue();
+    private final RunContext runContext;
+
+    public RunningStoryNameDynamicVariable(RunContext runContext)
+    {
+        this.runContext = runContext;
+    }
+
+    @Override
+    public DynamicVariableCalculationResult calculateValue()
+    {
+        return DynamicVariableCalculationResult.withValueOrError(
+                Optional.ofNullable(runContext.getRunningStory()).map(RunningStory::getName),
+                () -> "no story is running"
+        );
+    }
 }
