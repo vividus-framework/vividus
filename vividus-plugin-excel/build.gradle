@@ -8,7 +8,7 @@ dependencies {
 
     implementation project(':vividus-plugin-rest-api')
 
-    api(group: 'org.apache.poi', name: 'poi-ooxml', version: '5.1.0')
+    api(group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.0')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
