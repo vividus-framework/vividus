@@ -1,44 +1,12 @@
-buildscript {
-    ext.springBootVersion = '2.6.1'
-
-    repositories {
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath(group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version: "${springBootVersion}")
-    }
-}
-apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
-
 project.description = 'Vividus to Zephyr exporter'
+
+apply from: "$rootDir/vividus-exporter-commons/dependencies.gradle"
 
 dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-facade-jira')
+    implementation project(':vividus-exporter-commons')
 
-    // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
-    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: "${springBootVersion}")
-
-    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter')
-    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-validation')
-
-    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
-
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
-}
-
-// https://stackoverflow.com/a/62645933/2067574
-configurations {
-    [apiElements, runtimeElements].each {
-        it.outgoing.artifacts.removeIf {
-            it.buildDependencies.getDependencies(null).contains(jar)
-        }
-        it.outgoing.artifact(bootJar)
-    }
 }
