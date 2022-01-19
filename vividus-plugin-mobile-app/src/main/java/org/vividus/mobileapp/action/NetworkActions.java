@@ -28,6 +28,7 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.mobile.action.search.AppiumLocatorType;
 
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.connection.ConnectionState;
 import io.appium.java_client.android.connection.ConnectionStateBuilder;
 
 public class NetworkActions
@@ -50,14 +51,12 @@ public class NetworkActions
         this.baseValidations = baseValidations;
     }
 
-    public void changeNetworkConnectionState(NetworkToggle networkToggle, Mode mode)
+    public void changeNetworkConnectionState(NetworkToggle networkToggle, NetworkMode mode)
     {
         if (genericWebDriverManager.isAndroid())
         {
-            ConnectionStateBuilder connectionStateBuilder = NetworkToggle.ON == networkToggle
-                    ? mode.getEnablingConnectionStateBuilder()
-                    : mode.getDisablingConnectionStateBuilder();
-            webDriverProvider.getUnwrapped(AndroidDriver.class).setConnection(connectionStateBuilder.build());
+            webDriverProvider.getUnwrapped(AndroidDriver.class).setConnection(
+                    networkToggle.createConnectionState(mode));
         }
         if (genericWebDriverManager.isIOS())
         {
@@ -65,7 +64,7 @@ public class NetworkActions
         }
     }
 
-    private void changeNetworkConnectionStateForIOS(NetworkToggle networkToggle, Mode mode)
+    private void changeNetworkConnectionStateForIOS(NetworkToggle networkToggle, NetworkMode mode)
     {
         applicationActions.activateApp(IOS_PREFERENCES_BUNDLE_ID);
         findMenuItemInSettings(new Locator(AppiumLocatorType.ACCESSIBILITY_ID, mode.getIOSNetworkConnectionAlias()))
@@ -94,7 +93,7 @@ public class NetworkActions
         return baseValidations.assertElementExists("Menu item in iOS Preferences", locator);
     }
 
-    public enum Mode
+    public enum NetworkMode
     {
         WIFI("Wi-Fi")
         {
@@ -155,7 +154,7 @@ public class NetworkActions
 
         private final String iOSNetworkConnectionAlias;
 
-        Mode(String iOSNetworkConnectionAlias)
+        NetworkMode(String iOSNetworkConnectionAlias)
         {
             this.iOSNetworkConnectionAlias = iOSNetworkConnectionAlias;
         }
@@ -172,7 +171,22 @@ public class NetworkActions
 
     public enum NetworkToggle
     {
-        ON("0"), OFF("1");
+        ON("0")
+        {
+            @Override
+            public ConnectionState createConnectionState(NetworkMode networkMode)
+            {
+                return networkMode.getEnablingConnectionStateBuilder().build();
+            }
+        },
+        OFF("1")
+        {
+            @Override
+            public ConnectionState createConnectionState(NetworkMode networkMode)
+            {
+                return networkMode.getDisablingConnectionStateBuilder().build();
+            }
+        };
 
         private final String value;
 
@@ -185,5 +199,7 @@ public class NetworkActions
         {
             return this.value.equals(state);
         }
+
+        public abstract ConnectionState createConnectionState(NetworkMode networkMode);
     }
 }

@@ -16,21 +16,25 @@
 
 package org.vividus.mobileapp.steps;
 
-import org.apache.commons.lang3.Validate;
+import static org.apache.commons.lang3.Validate.isTrue;
+
 import org.jbehave.core.annotations.When;
 import org.vividus.mobileapp.action.NetworkActions;
-import org.vividus.mobileapp.action.NetworkActions.Mode;
+import org.vividus.mobileapp.action.NetworkActions.NetworkMode;
 import org.vividus.mobileapp.action.NetworkActions.NetworkToggle;
+import org.vividus.mobileapp.configuration.MobileEnvironment;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 
-public final class NetworkConditionsSteps
+public class NetworkSteps
 {
-    private final NetworkActions networkActions;
+    private final MobileEnvironment mobileEnvironment;
     private final GenericWebDriverManager genericWebDriverManager;
+    private final NetworkActions networkActions;
 
-    private NetworkConditionsSteps(GenericWebDriverManager genericWebDriverManager,
+    public NetworkSteps(MobileEnvironment mobileEnvironment, GenericWebDriverManager genericWebDriverManager,
             NetworkActions networkActions)
     {
+        this.mobileEnvironment = mobileEnvironment;
         this.genericWebDriverManager = genericWebDriverManager;
         this.networkActions = networkActions;
     }
@@ -45,18 +49,22 @@ public final class NetworkConditionsSteps
      * </ul>
      * <p>The actions performed by the step for Android:</p>
      * <ul>
-     * <li>changes the selected network connect to disabled/enabled state if necessary using system commands</li>
+     * <li>changes the selected network connection to disabled/enabled state if necessary using system commands.</li>
      * </ul>
-     * @param toggle switch ON or OFF mode
-     * @param mode is network condition to be executed
+     * @param toggle ON or OFF toggle
+     * @param connectionName The name of the connection to be changed
      */
-    @When("I turn $toggle `$mode` network connection")
-    public void changeNetworkConnection(NetworkToggle toggle, Mode mode)
+    @When("I turn $toggle `$connectionName` network connection")
+    public void changeNetworkConnection(NetworkToggle toggle, NetworkMode connectionName)
     {
-        Validate.isTrue(
-                genericWebDriverManager.isAndroid()
-                        || genericWebDriverManager.isIOS() && (Mode.MOBILE_DATA.equals(mode) || Mode.WIFI.equals(mode)),
-                "%s is not supported for iOS", mode);
-        networkActions.changeNetworkConnectionState(toggle, mode);
+        if (!genericWebDriverManager.isAndroid())
+        {
+            boolean iosPlatform = genericWebDriverManager.isIOS();
+            isTrue(iosPlatform && mobileEnvironment.isRealDevice(),
+                    "Network connection can be changed only for Android emulators, Android and iOS real devices");
+            isTrue(NetworkMode.MOBILE_DATA == connectionName || NetworkMode.WIFI == connectionName,
+                    "%s is not supported for iOS", connectionName);
+        }
+        networkActions.changeNetworkConnectionState(toggle, connectionName);
     }
 }

@@ -43,7 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebElement;
-import org.vividus.mobileapp.action.NetworkActions.Mode;
+import org.vividus.mobileapp.action.NetworkActions.NetworkMode;
 import org.vividus.mobileapp.action.NetworkActions.NetworkToggle;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
@@ -59,7 +59,6 @@ class NetworkConditionsActionsTests
 {
     private static final String VALUE = "value";
     private static final String ELEMENT_TO_CLICK = "Menu item in iOS Preferences";
-    private static final String XCUIELEMENT_TYPE_SWITCH = "**/XCUIElementTypeSwitch[`label == '%s'`]";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(NetworkActions.class);
 
@@ -72,20 +71,19 @@ class NetworkConditionsActionsTests
     private static Stream<Arguments> dataProviderForAndroid()
     {
         return Stream.of(
-                Arguments.of(NetworkToggle.OFF, Mode.WIFI),
-                Arguments.of(NetworkToggle.ON, Mode.WIFI),
-                Arguments.of(NetworkToggle.OFF, Mode.MOBILE_DATA),
-                Arguments.of(NetworkToggle.ON, Mode.MOBILE_DATA),
-                Arguments.of(NetworkToggle.OFF, Mode.AIRPLANE_MODE),
-                Arguments.of(NetworkToggle.ON, Mode.AIRPLANE_MODE),
-                Arguments.of(NetworkToggle.OFF, Mode.WIFI_AND_MOBILE_DATA),
-                Arguments.of(NetworkToggle.ON, Mode.WIFI_AND_MOBILE_DATA));
+                Arguments.of(NetworkToggle.OFF, NetworkMode.WIFI),
+                Arguments.of(NetworkToggle.ON, NetworkMode.WIFI),
+                Arguments.of(NetworkToggle.OFF, NetworkMode.MOBILE_DATA),
+                Arguments.of(NetworkToggle.ON, NetworkMode.MOBILE_DATA),
+                Arguments.of(NetworkToggle.OFF, NetworkMode.AIRPLANE_MODE),
+                Arguments.of(NetworkToggle.ON, NetworkMode.AIRPLANE_MODE),
+                Arguments.of(NetworkToggle.OFF, NetworkMode.WIFI_AND_MOBILE_DATA),
+                Arguments.of(NetworkToggle.ON, NetworkMode.WIFI_AND_MOBILE_DATA));
     }
 
     @ParameterizedTest
     @MethodSource("dataProviderForAndroid")
-    void testChangeConnectionStateBuilderForAndroid(
-            NetworkToggle toggle, Mode mode)
+    void testChangeConnectionStateBuilderForAndroid(NetworkToggle toggle, NetworkMode mode)
     {
         AndroidDriver driver = mock(AndroidDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
         when(webDriverProvider.getUnwrapped(AndroidDriver.class)).thenReturn(driver);
@@ -95,22 +93,32 @@ class NetworkConditionsActionsTests
     }
 
     @ParameterizedTest
-    @CsvSource({ "ON, MOBILE_DATA,'1'", "OFF, MOBILE_DATA,'0'", "ON, WIFI,'1'", "OFF, WIFI,'0'" })
-    void testChangeConnectionStateBuilderForIOS(NetworkToggle toggle, Mode mode, String toggleState)
+    @CsvSource({
+            "ON, MOBILE_DATA,'1'",
+            "OFF, MOBILE_DATA,'0'",
+            "ON, WIFI,'1'",
+            "OFF, WIFI,'0'"
+    })
+    void testChangeConnectionStateBuilderForIOS(NetworkToggle toggle, NetworkMode mode, String toggleState)
     {
         WebElement switchBtn = changeNetworkConnection(toggle, mode, toggleState);
         verify(switchBtn).click();
     }
 
     @ParameterizedTest
-    @CsvSource({ "OFF, MOBILE_DATA, '1'", "ON, MOBILE_DATA, '0'", "OFF, WIFI, '1'", "ON, WIFI, '0'" })
-    void testAlreadyModifiedWiFiToggleForIOS(NetworkToggle toggle, Mode mode, String toggleState)
+    @CsvSource({
+            "OFF, MOBILE_DATA, '1'",
+            "ON, MOBILE_DATA, '0'",
+            "OFF, WIFI, '1'",
+            "ON, WIFI, '0'"
+    })
+    void testAlreadyModifiedWiFiToggleForIOS(NetworkToggle toggle, NetworkMode mode, String toggleState)
     {
         changeNetworkConnection(toggle, mode, toggleState);
         assertThat(logger.getLoggingEvents(), is(List.of(info("{} is already {}.", mode, toggle))));
     }
 
-    private WebElement changeNetworkConnection(NetworkToggle toggle, Mode mode, String toggleState)
+    private WebElement changeNetworkConnection(NetworkToggle toggle, NetworkMode mode, String toggleState)
     {
         WebElement wiFiElement = mock(WebElement.class);
         WebElement switchBtn = mock(WebElement.class);
@@ -119,10 +127,11 @@ class NetworkConditionsActionsTests
                 new Locator(AppiumLocatorType.ACCESSIBILITY_ID, mode.getIOSNetworkConnectionAlias()))).thenReturn(
                 Optional.of(wiFiElement));
         when(baseValidations.assertElementExists(ELEMENT_TO_CLICK, new Locator(AppiumLocatorType.IOS_CLASS_CHAIN,
-                String.format(XCUIELEMENT_TYPE_SWITCH,
+                String.format("**/XCUIElementTypeSwitch[`label == '%s'`]",
                         mode.getIOSNetworkConnectionAlias())))).thenReturn(Optional.of(switchBtn));
         when(switchBtn.getAttribute(VALUE)).thenReturn(toggleState);
         networkActions.changeNetworkConnectionState(toggle, mode);
+        verify(applicationActions).activateApp("com.apple.Preferences");
         return switchBtn;
     }
 }
