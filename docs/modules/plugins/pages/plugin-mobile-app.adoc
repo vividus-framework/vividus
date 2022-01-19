@@ -781,9 +781,9 @@ include::partial$generic-ui-steps.adoc[]
 
 include::partial$proxy-steps.adoc[]
 
-=== Change network condition
+=== Change network connection
 
-Turn ON/OFF network condition.
+Turn ON/OFF network connection.
 
 [source,gherkin]
 ----
@@ -801,19 +801,19 @@ When I turn $toggle `$mode` network connection
 
 |`WIFI`
 |Android, iOS and emulators
-|Turn ON/OFF Wi-Fi connection state only.
+|Turn ON/OFF Wi-Fi connection.
 
 |`MOBILE_DATA`
 |Android, iOS and emulators
-|Turn ON/OFF Mobile Data connection state only.
+|Turn ON/OFF Mobile Data connection.
 
 |`AIRPLANE`
 |Android and emulators
-|Turn ON/OFF Airplane Mode only.
+|Turn ON/OFF Airplane Mode.
 
 |`WIFI_AND_MOBILE_DATA`
 |Android and emulators
-|Turn ON/OFF Mobile Data and Wi-Fi state.
+|Turn ON/OFF Mobile Data and Wi-Fi connections.
 
 |===
 
