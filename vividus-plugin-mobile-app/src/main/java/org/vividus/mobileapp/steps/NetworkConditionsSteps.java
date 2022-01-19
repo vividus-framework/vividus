@@ -36,16 +36,16 @@ public final class NetworkConditionsSteps
     }
 
     /**
-     * Turn <b>toggle</b> <b>mode</b> network connection
+     * Turn <b>ON/OFF</b> the network connection.
      * <p>The actions performed by the step for iOS:</p>
      * <ul>
-     * <li>activate Preferences app</li>
-     * <li>open the selected mode</li>
-     * <li>switch toggle if necessary</li>
+     * <li>activate <code>Preferences</code> app,</li>
+     * <li>open the selected mode,</li>
+     * <li>switch on/off toggle if necessary.</li>
      * </ul>
      * <p>The actions performed by the step for Android:</p>
      * <ul>
-     * <li>Initializes connection state builder and sets selected mode to disabled/enabled state if necessary</li>
+     * <li>changes the selected network connect to disabled/enabled state if necessary using system commands</li>
      * </ul>
      * @param toggle switch ON or OFF mode
      * @param mode is network condition to be executed
