@@ -69,25 +69,24 @@ public class NetworkActions
     {
         applicationActions.activateApp(IOS_PREFERENCES_BUNDLE_ID);
         findMenuItemInSettings(new Locator(AppiumLocatorType.ACCESSIBILITY_ID, mode.getIOSNetworkConnectionAlias()))
-                .ifPresentOrElse(item ->
+                .ifPresent(item ->
                 {
                     item.click();
                     findMenuItemInSettings(new Locator(AppiumLocatorType.IOS_CLASS_CHAIN, String
                             .format("**/XCUIElementTypeSwitch[`label == '%s'`]", mode.getIOSNetworkConnectionAlias())))
-                            .ifPresent(switchButton ->
-                            {
-                                if (!networkToggle.active(switchButton.getAttribute("value")))
-                                {
-                                    switchButton.click();
-                                }
-                                else
-                                {
-                                    LOGGER.atInfo().addArgument(mode).addArgument(networkToggle)
-                                            .log("{} is already {}.");
-                                }
-                            });
-                }, () -> LOGGER.atWarn().addArgument(mode.getIOSNetworkConnectionAlias())
-                        .log("{} is not presented in iOS Preferences."));
+                                    .ifPresent(switchButton ->
+                                    {
+                                        if (!networkToggle.isActive(switchButton.getAttribute("value")))
+                                        {
+                                            switchButton.click();
+                                        }
+                                        else
+                                        {
+                                            LOGGER.atInfo().addArgument(mode).addArgument(networkToggle)
+                                                    .log("{} is already {}.");
+                                        }
+                                    });
+                });
     }
 
     private Optional<WebElement> findMenuItemInSettings(Locator locator)
@@ -182,7 +181,7 @@ public class NetworkActions
             this.value = value;
         }
 
-        public boolean active(String state)
+        public boolean isActive(String state)
         {
             return this.value.equals(state);
         }

@@ -17,7 +17,6 @@
 package org.vividus.mobileapp.action;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -109,19 +108,6 @@ class NetworkConditionsActionsTests
     {
         changeNetworkConnection(toggle, mode, toggleState);
         assertThat(logger.getLoggingEvents(), is(List.of(info("{} is already {}.", mode, toggle))));
-    }
-
-    @ParameterizedTest
-    @CsvSource({ "ON, MOBILE_DATA,'1'", "OFF, MOBILE_DATA,'0'", "ON, WIFI,'1'", "OFF, WIFI,'0'" })
-    void testModeIsNotPresentInPreferences(NetworkToggle toggle, Mode mode, String toggleState)
-    {
-        when(genericWebDriverManager.isIOS()).thenReturn(true);
-        when(baseValidations.assertElementExists(ELEMENT_TO_CLICK,
-                new Locator(AppiumLocatorType.ACCESSIBILITY_ID, mode.getIOSNetworkConnectionAlias()))).thenReturn(
-                Optional.empty());
-        networkActions.changeNetworkConnectionState(toggle, mode);
-        assertThat(logger.getLoggingEvents(),
-                is(List.of(warn("{} is not presented in iOS Preferences.", mode.getIOSNetworkConnectionAlias()))));
     }
 
     private WebElement changeNetworkConnection(NetworkToggle toggle, Mode mode, String toggleState)
