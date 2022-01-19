@@ -6,6 +6,7 @@
 |menuQrCodeXpath            |//android.widget.TextView[@text='QR Code']           |
 |menuWaitXpath              |//android.widget.TextView[@text='Wait']              |
 |menuScrollViewXpath        |//android.widget.TextView[@text='Scroll View']       |
+|menuSliderXpath            |//android.widget.TextView[@text='Slider']            |
 |nameInputXpath             |//android.widget.EditText[@text='Enter your name...']|
 |action                     |COMPARE_AGAINST                                      |
 |scrollViewXpath            |//android.widget.ScrollView                          |

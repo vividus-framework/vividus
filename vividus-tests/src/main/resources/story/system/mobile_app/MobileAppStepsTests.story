@@ -285,6 +285,46 @@ When I scan barcode from screen and save result to scenario variable `qrCodeLink
 Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 
 
+Scenario: Go to slider screen
+When I tap on element located `accessibilityId(menuToggler)`
+When I tap on element located `xpath(<menuSliderXpath>)`
+When I wait until element located `accessibilityId(zeroToHundredSlider)` appears
+
+
+Scenario: Verify steps: "When I set value of Android slider located `$locator` to `$number`"
+Meta:
+    @targetPlatform android
+When I set value of Android slider located `accessibilityId(<slider>)` to `<targetValue>`
+When I save `text` attribute value of element located `accessibilityId(<slider>Position)` to scenario variable `sliderState`
+Then `${sliderState}` is equal to `<actualValue>`
+Examples:
+|slider                    |targetValue|actualValue|
+|zeroToHundredSlider       |77.0       |77.0       |
+|zeroToHundredSlider       |13.0       |13.0       |
+|negativeFiftyToFiftySlider|25.0       |-25.0      |
+|negativeFiftyToFiftySlider|70.0       |20.0       |
+|eighteenToSixtyFiveSlider |47.0       |65.0       |
+|eighteenToSixtyFiveSlider |20.0       |38.0       |
+|eighteenToSixtyFiveSlider |2.0        |20.0       |
+
+
+Scenario: Verify steps: "When I set value of iOS slider located `$locator` to `$number`"
+Meta:
+    @targetPlatform ios
+When I set value of iOS slider located `accessibilityId(<slider>)` to `<targetValue>` percents
+When I save `value` attribute value of element located `accessibilityId(<slider>Position)` to scenario variable `sliderState`
+Then `${sliderState}` is greater than or equal to `<leftLimitValue>`
+Then `${sliderState}` is less than or equal to `<rightLimitValue>`
+Examples:
+|slider                    |targetValue|leftLimitValue|rightLimitValue|
+|zeroToHundredSlider       |77         |74            |80             |
+|zeroToHundredSlider       |13         |10            |16             |
+|negativeFiftyToFiftySlider|25         |-28           |-22            |
+|negativeFiftyToFiftySlider|70         |17            |23             |
+|eighteenToSixtyFiveSlider |12         |20            |26             |
+|eighteenToSixtyFiveSlider |80         |52            |58             |
+
+
 Scenario: Verify step: 'When I long press $key key'
 Meta:
     @targetPlatform android
