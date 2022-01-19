@@ -796,34 +796,34 @@ When I turn $toggle `$mode` network connection
 |===
 
 |Mode
-|Supported platform
+|Supported platforms
 |Description
 
 |`WIFI`
-|Android, iOS and Android Virtual Device
-|Turn ON/OFF Wi-Fi connection.
+|Android real devices, Android emulators, iOS real devices
+|Turn ON/OFF Wi-Fi connection
 
 |`MOBILE_DATA`
-|Android, iOS and Android Virtual Device
+|Android real devices, Android emulators, iOS real devices
 |Turn ON/OFF Mobile Data connection.
 
 |`AIRPLANE`
-|Android and Android Virtual Device
+|Android real devices, Android emulators
 |Turn ON/OFF Airplane Mode.
 
 |`WIFI_AND_MOBILE_DATA`
-|Android and Android Virtual Device
+|Android real devices, Android emulators
 |Turn ON/OFF Mobile Data and Wi-Fi connections.
 
 |===
 
-TIP: For IOS devices: to return to the application you must use the step:
+TIP: For iOS real devices: to return to the application you must use the step:
 [source,gherkin]
 ----
 When I activate application with bundle identifier `$bundleId`.
 ----
 
-WARNING: To be able to use this step in the cloud testing platform, review the documentation related to simulating the mobile network conditions of the selected platform.
+WARNING: To be able to use this step in the cloud testing platform, review the documentation related to simulating the mobile network conditions on the selected platform.
 
 .Turn OFF Wi-Fi for Android
 [source,gherkin]
