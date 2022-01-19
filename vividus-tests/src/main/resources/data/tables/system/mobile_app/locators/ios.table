@@ -6,6 +6,7 @@
 |menuQrCodeXpath            |//XCUIElementTypeButton[@name="QR Code"]               |
 |menuWaitXpath              |//XCUIElementTypeButton[@name="Wait"]                  |
 |menuScrollViewXpath        |//XCUIElementTypeButton[@name="Scroll View"]           |
+|menuSliderXpath            |//XCUIElementTypeButton[@name="Slider"]                |
 |nameInputXpath             |//XCUIElementTypeTextField[@value='Enter your name...']|
 |action                     |COMPARE_AGAINST                                        |
 |scrollViewXpath            |//XCUIElementTypeScrollView                            |

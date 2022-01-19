@@ -777,6 +777,79 @@ When I stop recording `Time Profiler` metrics and save results to file `${output
 ----
 
 
+=== Set slider value
+
+==== iOS
+
+Sets the slider value in percents.
+
+[WARNING]
+* The accuracy of setting the slider value is not guaranteed and may vary depending on the device screen resolution.
+* The target element must be of type `XCUIElementTypeSlider`.
+* The percent number must be between 0 and 100 inclusively.
+
+[source,gherkin]
+----
+When I set value of iOS slider located `$locator` to `$percent` percents
+----
+
+* `$locator` - The locator to find `XCUIElementTypeSlider` element.
+* `$percent` - The target value of the slider in percents.
+
+.Set value of iOS slider (with range 0:50) to 45
+[source,gherkin]
+----
+When I set value of iOS slider located `xpath(//XCUIElementTypeSlider)` to `90` percents
+----
+
+.Set value of iOS slider (with range -50:50) to 20
+[source,gherkin]
+----
+When I set value of iOS slider located `xpath(//XCUIElementTypeSlider)` to `70` percents
+----
+
+.Set value of iOS slider (with range 18:65) to 55
+[source,gherkin]
+----
+When I set value of iOS slider located `xpath(//XCUIElementTypeSlider)` to `80` percents
+----
+
+==== Android
+
+Sets the slider value to the number relatively to the slider leftmost side of its range.
+
+[WARNING]
+* The step is expected to set accurate value without deviations.
+* The target element must be of type `android.widget.SeekBar`.
+* The number must be greater than or equal to 0.
+* Make sure the passed number does not exceed the right limit of the slider, this may lead to unexpected failure.
+
+[source,gherkin]
+----
+When I set value of Android slider located `$locator` to `$number`
+----
+
+* `$locator` - The locator to find `android.widget.SeekBar` element.
+* `$number` - The number to set on the slider
+
+.Set value of Android slider (with range 0:50) to 13
+[source,gherkin]
+----
+When I set value of Android slider located `xpath(//android.widget.SeekBar)` to `13`
+----
+
+.Set value of Android slider (with range -50:50) to -25
+[source,gherkin]
+----
+When I set value of Android slider located `xpath(//android.widget.SeekBar)` to `25`
+----
+
+.Set value of Android slider (with range 18:65) to 20
+[source,gherkin]
+----
+When I set value of Android slider located `xpath(//android.widget.SeekBar)` to `2`
+----
+
 include::partial$generic-ui-steps.adoc[]
 
 include::partial$proxy-steps.adoc[]
