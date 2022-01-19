@@ -54,9 +54,10 @@ public class NetworkActions
     {
         if (genericWebDriverManager.isAndroid())
         {
-            webDriverProvider.getUnwrapped(AndroidDriver.class)
-                    .setConnection(NetworkToggle.ON == networkToggle ? mode.getEnablingConnectionStateBuilder().build()
-                            : mode.getDisablingConnectionStateBuilder().build());
+            ConnectionStateBuilder connectionStateBuilder = NetworkToggle.ON == networkToggle
+                    ? mode.getEnablingConnectionStateBuilder()
+                    : mode.getDisablingConnectionStateBuilder();
+            webDriverProvider.getUnwrapped(AndroidDriver.class).setConnection(connectionStateBuilder.build());
         }
         if (genericWebDriverManager.isIOS())
         {
@@ -68,25 +69,30 @@ public class NetworkActions
     {
         applicationActions.activateApp(IOS_PREFERENCES_BUNDLE_ID);
         findMenuItemInSettings(new Locator(AppiumLocatorType.ACCESSIBILITY_ID, mode.getIOSNetworkConnectionAlias()))
-                .ifPresent(WebElement::click);
-        findMenuItemInSettings(new Locator(AppiumLocatorType.IOS_CLASS_CHAIN,
-                String.format("**/XCUIElementTypeSwitch[`label == '%s'`]", mode.getIOSNetworkConnectionAlias())))
-                        .ifPresent(switchButton ->
-                        {
-                            if (!networkToggle.active(switchButton.getAttribute("value")))
+                .ifPresentOrElse(item ->
+                {
+                    item.click();
+                    findMenuItemInSettings(new Locator(AppiumLocatorType.IOS_CLASS_CHAIN, String
+                            .format("**/XCUIElementTypeSwitch[`label == '%s'`]", mode.getIOSNetworkConnectionAlias())))
+                            .ifPresent(switchButton ->
                             {
-                                switchButton.click();
-                            }
-                            else
-                            {
-                                LOGGER.atInfo().addArgument(mode).addArgument(networkToggle).log("{} is already {}.");
-                            }
-                        });
+                                if (!networkToggle.active(switchButton.getAttribute("value")))
+                                {
+                                    switchButton.click();
+                                }
+                                else
+                                {
+                                    LOGGER.atInfo().addArgument(mode).addArgument(networkToggle)
+                                            .log("{} is already {}.");
+                                }
+                            });
+                }, () -> LOGGER.atWarn().addArgument(mode.getIOSNetworkConnectionAlias())
+                        .log("{} is not presented in iOS Preferences."));
     }
 
     private Optional<WebElement> findMenuItemInSettings(Locator locator)
     {
-        return baseValidations.assertElementExists("Click an item from the menu in the device settings", locator);
+        return baseValidations.assertElementExists("Menu item in iOS Preferences", locator);
     }
 
     public enum Mode

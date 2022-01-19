@@ -796,23 +796,23 @@ When I turn $toggle `$mode` network connection
 |===
 
 |Mode
-|Platform
+|Supported platform
 |Description
 
 |`WIFI`
-|Android, iOS and emulators
+|Android, iOS and Android Virtual Device
 |Turn ON/OFF Wi-Fi connection.
 
 |`MOBILE_DATA`
-|Android, iOS and emulators
+|Android, iOS and Android Virtual Device
 |Turn ON/OFF Mobile Data connection.
 
 |`AIRPLANE`
-|Android and emulators
+|Android and Android Virtual Device
 |Turn ON/OFF Airplane Mode.
 
 |`WIFI_AND_MOBILE_DATA`
-|Android and emulators
+|Android and Android Virtual Device
 |Turn ON/OFF Mobile Data and Wi-Fi connections.
 
 |===
