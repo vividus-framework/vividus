@@ -57,7 +57,7 @@
 
     <bean id="networkConditionsSteps" class="org.vividus.mobileapp.steps.NetworkConditionsSteps">
         <constructor-arg>
-            <bean name="actions" class="org.vividus.mobileapp.action.NetworkActions"/>
+            <bean class="org.vividus.mobileapp.action.NetworkActions"/>
         </constructor-arg>
     </bean>
 
