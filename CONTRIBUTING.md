@@ -33,6 +33,16 @@ By participating in this project you agree to abide by its terms.
 
 * Business logic that is related to unit tests must not be placed within methods annotated with `@BeforeEach` and `@AfterEach` annotations, such methods can only be used for common logic such as initializing mock service for testing, clean up filesystem resources etc.
 
+### Dependency Injection
+
+* Use [Constructor-based Dependency Injection]https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-constructor-injection for beans (actions, factories, etc.).
+* Use [Constructor-based Dependency Injection]https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-constructor-injection or [Setter-based Dependency Injection]https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-setter-injection to inject properties.
+* Use XML-based configuration to configure beans, the configuration file should be named `spring.xml` and placed within `org.vividus` package or at the package root.
+* The declaration order of properties and beans in constructor should be as follows:
+  1. properties
+  1. beans like actions, factories, managers etc.
+  1. validation beans
+
 ## Bug reports
 
 We use the issue tracker on Github. Please report new bugs at <https://github.com/vividus-framework/vividus/issues/new/choose>.
