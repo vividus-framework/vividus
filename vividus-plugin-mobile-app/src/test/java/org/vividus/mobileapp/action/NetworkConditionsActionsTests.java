@@ -57,7 +57,6 @@ import io.appium.java_client.android.connection.ConnectionState;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class NetworkConditionsActionsTests
 {
-    private static final String VALUE = "value";
     private static final String ELEMENT_TO_CLICK = "Menu item in iOS Preferences";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(NetworkActions.class);
@@ -129,7 +128,7 @@ class NetworkConditionsActionsTests
         when(baseValidations.assertElementExists(ELEMENT_TO_CLICK, new Locator(AppiumLocatorType.IOS_CLASS_CHAIN,
                 String.format("**/XCUIElementTypeSwitch[`label == '%s'`]",
                         mode.getIOSNetworkConnectionAlias())))).thenReturn(Optional.of(switchBtn));
-        when(switchBtn.getAttribute(VALUE)).thenReturn(toggleState);
+        when(switchBtn.getAttribute("value")).thenReturn(toggleState);
         networkActions.changeNetworkConnectionState(toggle, mode);
         verify(applicationActions).activateApp("com.apple.Preferences");
         return switchBtn;

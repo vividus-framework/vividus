@@ -17,6 +17,8 @@
 package org.vividus.mobileapp.action;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
@@ -95,73 +97,34 @@ public class NetworkActions
 
     public enum NetworkMode
     {
-        WIFI("Wi-Fi")
-        {
-            @Override
-            public ConnectionStateBuilder getEnablingConnectionStateBuilder()
-            {
-                return new ConnectionStateBuilder().withWiFiEnabled();
-            }
-
-            @Override
-            public ConnectionStateBuilder getDisablingConnectionStateBuilder()
-            {
-                return new ConnectionStateBuilder().withWiFiDisabled();
-            }
-        },
-        MOBILE_DATA("Mobile Data")
-        {
-            @Override
-            public ConnectionStateBuilder getEnablingConnectionStateBuilder()
-            {
-                return new ConnectionStateBuilder().withDataEnabled();
-            }
-
-            @Override
-            public ConnectionStateBuilder getDisablingConnectionStateBuilder()
-            {
-                return new ConnectionStateBuilder().withDataDisabled();
-            }
-        },
-        AIRPLANE_MODE(null)
-        {
-            @Override
-            public ConnectionStateBuilder getEnablingConnectionStateBuilder()
-            {
-                return new ConnectionStateBuilder().withAirplaneModeEnabled();
-            }
-
-            @Override
-            public ConnectionStateBuilder getDisablingConnectionStateBuilder()
-            {
-                return new ConnectionStateBuilder().withAirplaneModeDisabled();
-            }
-        },
-        WIFI_AND_MOBILE_DATA(null)
-        {
-            @Override
-            public ConnectionStateBuilder getEnablingConnectionStateBuilder()
-            {
-                return new ConnectionStateBuilder().withWiFiEnabled().withDataEnabled();
-            }
-
-            @Override
-            public ConnectionStateBuilder getDisablingConnectionStateBuilder()
-            {
-                return new ConnectionStateBuilder().withWiFiDisabled().withDataDisabled();
-            }
-        };
+        WIFI("Wi-Fi", ConnectionStateBuilder::withWiFiEnabled, ConnectionStateBuilder::withWiFiDisabled),
+        MOBILE_DATA("Mobile Data", ConnectionStateBuilder::withDataEnabled, ConnectionStateBuilder::withDataDisabled),
+        AIRPLANE_MODE(null, ConnectionStateBuilder::withAirplaneModeEnabled,
+                ConnectionStateBuilder::withAirplaneModeDisabled),
+        WIFI_AND_MOBILE_DATA(null, WIFI.enabler.andThen(MOBILE_DATA.enabler),
+                WIFI.disabler.andThen(MOBILE_DATA.disabler));
 
         private final String iOSNetworkConnectionAlias;
+        private final Consumer<ConnectionStateBuilder> enabler;
+        private final Consumer<ConnectionStateBuilder> disabler;
 
-        NetworkMode(String iOSNetworkConnectionAlias)
+        NetworkMode(String iOSNetworkConnectionAlias, Consumer<ConnectionStateBuilder> enabler,
+                Consumer<ConnectionStateBuilder> disabler)
         {
             this.iOSNetworkConnectionAlias = iOSNetworkConnectionAlias;
+            this.enabler = enabler;
+            this.disabler = disabler;
         }
 
-        public abstract ConnectionStateBuilder getEnablingConnectionStateBuilder();
+        public void enableConnectionState(ConnectionStateBuilder builder)
+        {
+            enabler.accept(builder);
+        }
 
-        public abstract ConnectionStateBuilder getDisablingConnectionStateBuilder();
+        public void disableConnectionState(ConnectionStateBuilder builder)
+        {
+            disabler.accept(builder);
+        }
 
         public String getIOSNetworkConnectionAlias()
         {
@@ -171,28 +134,16 @@ public class NetworkActions
 
     public enum NetworkToggle
     {
-        ON("0")
-        {
-            @Override
-            public ConnectionState createConnectionState(NetworkMode networkMode)
-            {
-                return networkMode.getEnablingConnectionStateBuilder().build();
-            }
-        },
-        OFF("1")
-        {
-            @Override
-            public ConnectionState createConnectionState(NetworkMode networkMode)
-            {
-                return networkMode.getDisablingConnectionStateBuilder().build();
-            }
-        };
+        ON("0", NetworkMode::enableConnectionState),
+        OFF("1", NetworkMode::disableConnectionState);
 
         private final String value;
+        private final BiConsumer<NetworkMode, ConnectionStateBuilder> stateToggle;
 
-        NetworkToggle(String value)
+        NetworkToggle(String value, BiConsumer<NetworkMode, ConnectionStateBuilder> stateToggle)
         {
             this.value = value;
+            this.stateToggle = stateToggle;
         }
 
         public boolean isActive(String state)
@@ -200,6 +151,11 @@ public class NetworkActions
             return this.value.equals(state);
         }
 
-        public abstract ConnectionState createConnectionState(NetworkMode networkMode);
+        public ConnectionState createConnectionState(NetworkMode networkMode)
+        {
+            ConnectionStateBuilder builder = new ConnectionStateBuilder();
+            stateToggle.accept(networkMode, builder);
+            return builder.build();
+        }
     }
 }
