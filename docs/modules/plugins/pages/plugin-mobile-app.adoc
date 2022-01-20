@@ -853,3 +853,63 @@ When I set value of Android slider located `xpath(//android.widget.SeekBar)` to 
 include::partial$generic-ui-steps.adoc[]
 
 include::partial$proxy-steps.adoc[]
+
+=== Change network connection
+
+Turns ON/OFF network connection.
+
+WARNING: To be able to use this step in the cloud testing platform, review the documentation related to simulating the mobile network conditions on the selected platform.
+
+[source,gherkin]
+----
+When I turn $toggle `$connectionName` network connection
+----
+* `$toggle` - The modes of the toggle: `ON` or `OFF`.
+* `$connectionName` - The name of the network connect to toggle.
+
+[cols="2,3,2", options="header"]
+|===
+
+|Connection name
+|Supported platforms
+|Description
+
+|`WIFI`
+|Android emulators, Android and iOS real devices
+|Wi-Fi connection
+
+|`MOBILE_DATA`
+|Android emulators, Android and iOS real devices
+|Mobile Data connection
+
+|`AIRPLANE`
+|Android real devices, Android emulators
+|Airplane Mode
+
+|`WIFI_AND_MOBILE_DATA`
+|Android real devices, Android emulators
+|Mobile Data and Wi-Fi connections
+
+|===
+
+[TIP]
+====
+For iOS real devices: to return to the application you must use the step:
+[source,gherkin]
+----
+When I activate application with bundle identifier `$bundleId`.
+----
+====
+
+.Turn OFF Wi-Fi for Android
+[source,gherkin]
+----
+When I turn OFF `WIFI` network connection
+----
+
+.Turn OFF Wi-Fi for iOS
+[source,gherkin]
+----
+When I turn OFF `WIFI` network connection
+When I activate application with bundle identifier `my-aplication-bundle-id`
+----
