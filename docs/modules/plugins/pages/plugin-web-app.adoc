@@ -178,6 +178,12 @@ include::partial$selenium-properties.adoc[]
 include::partial$selenium-grid-properties.adoc[]
 |screenshot.on-failure.debug-modes
 include::partial$proxy-properties.adoc[]
+
+|web.driver.CHROME.command-line-arguments
+|https://peter.sh/experiments/chromium-command-line-switches/[Chromium Command Line Switches]
+|empty
+|Space separated list of Chromium Command Line Switches
+
 |===
 
 include::partial$proxy-meta-tags.adoc[]
