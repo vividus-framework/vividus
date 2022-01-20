@@ -6,23 +6,38 @@
 IMPORTANT: The exporter requires configuration of JIRA instance to work with.
 
 To configure connector to JIRA instance use `jira.` prefix followed by arbitrary sequence of alphanumerical 
-characters that determine unique JIRA instance key and followed by `project-key-regex`, `endpoint` and optional 
-list of HTTP properties from {allowed-http-properties}.
+characters that determine unique JIRA instance key and followed by the properties listed in the following table:
+
+NOTE: The properties marked with bold are mandatory.
+
+[cols="1,3", options="header"]
+|===
+|Property Name
+|Description
+
+|*project-key-regex*
+|The regular expression to match JIRA project keys.
+
+|*endpoint*
+|The JIRA Endpoint.
+
+|any of {allowed-http-properties}
+|The HTTP properties.
+
+|fields-mapping
+|The mapping between human-readable fields used by VIVIDUS and fields used by JIRA.
+
+|===
 
 .jira.properties
 [source,json,subs=attributes+, source-highlighter+]
 ----
-jira.vividus.project-key-regex=(VIVIDUS|VSCODE|REACTAPP) <1>
-jira.vividus.endpoint=https://vividusframework.atlassian.net/ <2>
-jira.vividus.http.auth.username=admin <3>
-jira.vividus.http.auth.password=5401a7d27b291c5d <3>
-jira.vividus.http.socket-timeout=10000 <3>
+jira.vividus.project-key-regex=(VIVIDUS|VSCODE|REACTAPP)
+jira.vividus.endpoint=https://vividusframework.atlassian.net/
+jira.vividus.http.auth.username=admin
+jira.vividus.http.auth.password=5401a7d27b291c5d
+jira.vividus.http.socket-timeout=10000
+jira.vividus.fields-mapping.test-case-type=customfield_10002
 ----
-
-NOTE: The properties pointed by descriptions marked with *bold* are mandatory.
-
-<1> *The regular expression to match JIRA project keys.*
-<2> *The JIRA Endpoint.*
-<3> The {allowed-http-properties}.
 
 In the example above the `vividus` is a key that can be used to refer this JIRA instance.

@@ -70,11 +70,11 @@ image::manual.png[Manual test case view]
 |Description
 
 |<<#_manual_test_case_view, 1>>
-|`jira.fields-mapping.test-case-type`
+|`jira.<jira-instance-key>.fields-mapping.test-case-type`
 |Key of a field containing test case type
 
 |<<#_manual_test_case_view, 2>>
-|`jira.fields-mapping.manual-steps`
+|`jira.<jira-instance-key>.fields-mapping.manual-steps`
 |Key of a field containing collection of manual steps
 
 |===
@@ -91,15 +91,15 @@ image::cucumber.png[Cucumber test case view]
 |Description
 
 |<<#_cucumber_test_case_view, 1>>
-|`jira.fields-mapping.test-case-type`
+|`jira.<jira-instance-key>.fields-mapping.test-case-type`
 |Key of a field containing test case type
 
 |<<#_cucumber_test_case_view, 2>>
-|`jira.fields-mapping.cucumber-scenario-type`
+|`jira.<jira-instance-key>.fields-mapping.cucumber-scenario-type`
 |Key of a field containing type of cucumer scenario
 
 |<<#_cucumber_test_case_view, 3>>
-|`jira.fields-mapping.cucumber-scenario`
+|`jira.<jira-instance-key>.fields-mapping.cucumber-scenario`
 |Key of a field containing body of cucumber scenario
 
 |===

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.jira.model;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,6 +29,7 @@ public class JiraConfiguration
     private String endpoint;
     @JsonProperty("http")
     private HttpClientConfig httpClientConfig;
+    private Map<String, String> fieldsMapping;
 
     public Pattern getProjectKeyRegex()
     {
@@ -57,5 +59,15 @@ public class JiraConfiguration
     public void setHttpClientConfig(HttpClientConfig httpClientConfig)
     {
         this.httpClientConfig = httpClientConfig;
+    }
+
+    public Map<String, String> getFieldsMapping()
+    {
+        return fieldsMapping;
+    }
+
+    public void setFieldsMapping(Map<String, String> fieldsMapping)
+    {
+        this.fieldsMapping = fieldsMapping;
     }
 }
