@@ -179,10 +179,12 @@ include::partial$selenium-grid-properties.adoc[]
 |screenshot.on-failure.debug-modes
 include::partial$proxy-properties.adoc[]
 
-|web.driver.CHROME.command-line-arguments
+|web.driver.<browser-name>.command-line-arguments
 |https://peter.sh/experiments/chromium-command-line-switches/[Chromium Command Line Switches]
+https://www-archive.mozilla.org/docs/command-line-args/[Mozilla Command Line Options]
+https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)?redirectedfrom=MSDN/[IE Command Line Options]
 |empty
-|Space separated list of Chromium Command Line Switches
+|Command line options used to specify various startup options for CHROME, FIREFOX and IE browsers 
 
 |===
 
