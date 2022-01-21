@@ -78,7 +78,7 @@ class TableLoadingTransformerTests
     void shouldLoadTablesWithForbiddenEmptyOnesNotDefaultSeparators(String headerSeparator, String valueSeparator,
             String ignorableSeparator) throws IllegalAccessException
     {
-        var tableBody = String.format("%1$scol1%1$scol2%1$s%n%2$sval11%2$sval12%3$scomment%2$s", headerSeparator,
+        var tableBody = String.format("%1$scol1%1$scol2%1$s%n%2$sval11%2$sval12%2$s%3$scomment", headerSeparator,
                 valueSeparator, ignorableSeparator);
         var separators = String.format("headerSeparator=%s, valueSeparator=%s, ignorableSeparator=%s", headerSeparator,
                 valueSeparator, ignorableSeparator);
