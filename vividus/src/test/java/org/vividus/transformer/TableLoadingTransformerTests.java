@@ -82,7 +82,7 @@ class TableLoadingTransformerTests
                 valueSeparator, ignorableSeparator);
         var separators = String.format("headerSeparator=%s, valueSeparator=%s, ignorableSeparator=%s", headerSeparator,
                 valueSeparator, ignorableSeparator);
-        var table = "{" + separators + "}\n" + tableBody;
+        var table = String.format("{%s}%n%s", separators, tableBody);
 
         var tableProperties = new TableProperties(TABLES_KEY + PATH + ", " + separators, keywords, null);
         when(factory.createExamplesTable(PATH)).thenReturn(new ExamplesTable(table));
