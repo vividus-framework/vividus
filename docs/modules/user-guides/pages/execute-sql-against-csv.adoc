@@ -1,16 +1,24 @@
-= How to execute SQL against CSV resources
+= How to execute SQL against CSV
 
 Assuming there is a project containing VIVIDUS-based tests
 (e.g. https://github.com/vividus-framework/vividus-starter[VIVIDUS Starter])
 and the goal is to execute SQL queries against CSV resources to get the various
 subsets of the data.
 
-. Add the required dependencies (CSV and DB plugins, CSV driver) to the project `build.gradle`
+As a prerequisite add the required DB plugin dependency to the project `build.gradle`
+
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{current-version}')
+----
+
+== Execute SQL against CSV resource
+
+. Add the CSV and CSV driver dependencies to the project `build.gradle`
 +
 [source,gradle,subs="attributes+"]
 ----
 implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{current-version}')
-implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{current-version}')
 implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.38')
 ----
 
@@ -50,3 +58,45 @@ where `capitals` is the name of CSV resource (the full resource path is
 +
 The complete guide on SQL syntax and supported functions can be found in
 https://github.com/simoc/csvjdbc/blob/master/docs/doc.md#features[CSV Driver documentation].
+
+== Execute SQL against in-memory CSV
+
+. Configure connection to in-memory database as described xref:use-in-memory-db-to-manage-test-data.adoc[here]
+
+. Populate database with CSV dataset
++
+.Create table with data from CSV
+[source,gherkin]
+----
+!-- For demonstration purposes we hardcode the CSV file content, you can use variables and expressions as a sources of CSV instead.
+When I create temporary file with name `egg-miners` and content `
+id,name,race
+1,Miner Gor,Redguard
+2,Daynila Valas,Dark Elf
+3,Miner Juillen,Breton
+` and put path to SCENARIO variable `egg-miners-csv-path`
+
+!-- Create table from the CSV contained in previously created temporary file
+When I execute SQL query `
+CREATE TABLE egg_miners AS SELECT * FROM CSVREAD('${egg-miners-csv-path}');
+` against `in-memory-db-key`
+----
+
++
+[NOTE]
+====
+* See http://www.h2database.com/html/functions.html#csvread[CSVREAD] function description for more details.
+* All columns read from CSV are of type VARCHAR.
+* Use the http://www.h2database.com/html/grammar.html#cast_specification[CAST] function to adjust the column types (if applicable).
+====
+
+. Use the created table to execute SQL against
++
+.Execute SQL against table created from CSV
+[source,gherkin]
+----
+When I execute SQL query `
+SELECT * FROM egg_miners WHERE race = 'Dark Elf';
+` against `in-memory-db-key` and save result to scenario variable `egg-miners-records`
+Then `${egg-miners-records}` is equal to `[{id=1, name=Daynila Valas, race=Dark Elf}]`
+----
