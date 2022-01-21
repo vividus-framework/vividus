@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
@@ -89,17 +90,18 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
 
     private String getSeparatorsAsString(TableProperties tableProperties)
     {
+        Keywords keywords = configuration.keywords();
         String headerSeparator = tableProperties.getHeaderSeparator();
         String valueSeparator = tableProperties.getValueSeparator();
         String ignorableSeparator = tableProperties.getIgnorableSeparator();
-        String propertiesAsString = "";
-        if (!headerSeparator.equals(valueSeparator) || !"|".equals(headerSeparator)
-                || !"|--".equals(ignorableSeparator))
+        if (keywords.examplesTableHeaderSeparator().equals(headerSeparator)
+                && keywords.examplesTableValueSeparator().equals(valueSeparator)
+                && keywords.examplesTableIgnorableSeparator().equals(ignorableSeparator))
         {
-            propertiesAsString = "{valueSeparator=" + valueSeparator + ", headerSeparator=" + headerSeparator
-                    + ", ignorableSeparator=" + ignorableSeparator + "}\n";
+            return "";
         }
-        return propertiesAsString;
+        return String.format("{headerSeparator=%s, valueSeparator=%s, ignorableSeparator=%s}%n", headerSeparator,
+                valueSeparator, ignorableSeparator);
     }
 
     private void checkEmptyTables(List<DescriptiveTable> tables)
