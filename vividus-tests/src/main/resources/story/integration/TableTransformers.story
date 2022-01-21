@@ -239,3 +239,17 @@ Then `${cartesianProductTable}` is equal to table:
 |3 |AWS    |Neptune |row11|row12|row13|
 |3 |AWS    |Neptune |row21|row22|row23|
 |3 |AWS    |Neptune |row31|row32|row33|
+
+
+Scenario: Verify sequence of transformers
+Meta:
+    @issueId 1812
+When I initialize scenario variable `resultSequenceOfTransformers` with values:
+{transformer=FILTERING, byColumnNames=column2}
+{transformer=CARTESIAN_PRODUCT, tables=/data/multirow.table}
+/data/for-filtering-transformer.table
+Then `${resultSequenceOfTransformers}` is equal to table:
+|id|name   |planet  |column2|
+|1 |Junit  |Jupiter |B      |
+|2 |Freddie|Mercury |B      |
+|3 |AWS    |Neptune |B      |

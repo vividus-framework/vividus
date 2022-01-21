@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
@@ -65,7 +66,9 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
         else
         {
             isTrue(!tables.isEmpty(), "Please, specify at least one table path");
-            descriptiveTables.add(new DescriptiveTable("input table", factory.createExamplesTable(tableAsString)));
+
+            descriptiveTables.add(new DescriptiveTable("input table",
+                    factory.createExamplesTable(getSeparatorsAsString(tableProperties) + tableAsString)));
         }
 
         List<DescriptiveTable> pathTables = IntStream.range(0, tables.size())
@@ -83,6 +86,22 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
         return descriptiveTables.stream()
                                 .map(DescriptiveTable::getTable)
                                 .collect(Collectors.toList());
+    }
+
+    private String getSeparatorsAsString(TableProperties tableProperties)
+    {
+        Keywords keywords = configuration.keywords();
+        String headerSeparator = tableProperties.getHeaderSeparator();
+        String valueSeparator = tableProperties.getValueSeparator();
+        String ignorableSeparator = tableProperties.getIgnorableSeparator();
+        if (keywords.examplesTableHeaderSeparator().equals(headerSeparator)
+                && keywords.examplesTableValueSeparator().equals(valueSeparator)
+                && keywords.examplesTableIgnorableSeparator().equals(ignorableSeparator))
+        {
+            return "";
+        }
+        return String.format("{headerSeparator=%s, valueSeparator=%s, ignorableSeparator=%s}%n", headerSeparator,
+                valueSeparator, ignorableSeparator);
     }
 
     private void checkEmptyTables(List<DescriptiveTable> tables)
