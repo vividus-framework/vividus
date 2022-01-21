@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,22 @@
 
 package org.vividus.xray.databind;
 
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Spy;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.jira.JiraConfigurationException;
+import org.vividus.jira.JiraConfigurationProvider;
 import org.vividus.output.ManualTestStep;
-import org.vividus.xray.configuration.JiraFieldsMapping;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.TestCaseType;
 
@@ -36,14 +40,18 @@ import test.util.JsonVerificationUtils;
 @ExtendWith(MockitoExtension.class)
 class ManualTestCaseSerializerTests
 {
-    @Spy private JiraFieldsMapping fields;
+    private static final String PROJECT_KEY = "project key";
+
+    @Mock private JiraConfigurationProvider jiraConfigurationProvider;
     @InjectMocks private ManualTestCaseSerializer serializer;
 
     @BeforeEach
-    void init()
+    void init() throws JiraConfigurationException
     {
-        fields.setManualSteps("manual-steps-field");
-        fields.setTestCaseType("test-case-type-field");
+        when(jiraConfigurationProvider.getFieldsMappingByProjectKey(PROJECT_KEY)).thenReturn(Map.of(
+            "manual-steps", "manual-steps-field",
+            "test-case-type", "test-case-type-field"
+        ));
     }
 
     @Test
@@ -66,7 +74,7 @@ class ManualTestCaseSerializerTests
     {
         ManualTestCase test = new ManualTestCase();
         test.setType(TestCaseType.MANUAL.getValue());
-        test.setProjectKey("project key");
+        test.setProjectKey(PROJECT_KEY);
         test.setSummary("summary");
         test.setManualTestSteps(List.of(
             createStep("action 1", "data 1", "result 1"),

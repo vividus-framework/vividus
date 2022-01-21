@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.xray.databind;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
@@ -26,11 +27,15 @@ import org.vividus.xray.model.CucumberTestCase;
 @Component
 public class CucumberTestCaseSerializer extends AbstractTestCaseSerializer<CucumberTestCase>
 {
+    private static final String CUCUMBER_SCENARIO_TYPE_FIELD_KEY = "cucumber-scenario-type";
+    private static final String CUCUMBER_SCENARIO_FIELD_KEY = "cucumber-scenario";
+
     @Override
-    protected void serializeCustomFields(CucumberTestCase testCase, JsonGenerator generator) throws IOException
+    protected void serializeCustomFields(CucumberTestCase testCase, Map<String, String> mapping,
+            JsonGenerator generator) throws IOException
     {
-        writeObjectWithValueField(generator, getJiraFieldsMapping().getCucumberScenarioType(),
+        writeObjectWithValueField(generator, getSafely(CUCUMBER_SCENARIO_TYPE_FIELD_KEY, mapping),
                 testCase.getScenarioType());
-        generator.writeStringField(getJiraFieldsMapping().getCucumberScenario(), testCase.getScenario());
+        generator.writeStringField(getSafely(CUCUMBER_SCENARIO_FIELD_KEY, mapping), testCase.getScenario());
     }
 }

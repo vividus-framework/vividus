@@ -7,7 +7,7 @@
 
     <bean class="org.vividus.jira.JiraFacade" />
 
-    <bean class="org.vividus.jira.JiraClientProvider" >
+    <bean class="org.vividus.jira.JiraConfigurationProvider">
         <constructor-arg index="0">
             <bean factory-bean="propertyMapper" factory-method="readValues">
                 <constructor-arg value="jira." />
@@ -16,4 +16,6 @@
             </bean>
         </constructor-arg>
     </bean>
+
+    <bean class="org.vividus.jira.JiraClientProvider" />
 </beans>

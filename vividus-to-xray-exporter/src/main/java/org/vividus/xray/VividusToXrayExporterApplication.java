@@ -25,7 +25,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.vividus.exporter.config.VividusExporterCommonConfiguration;
-import org.vividus.xray.configuration.JiraFieldsMapping;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.exporter.XrayExporter;
 
@@ -33,7 +32,7 @@ import org.vividus.xray.exporter.XrayExporter;
 @Import(VividusExporterCommonConfiguration.class)
 @ImportResource(locations = { "org/vividus/jira/spring.xml", "org/vividus/xray/spring.xml" })
 @SuppressWarnings("checkstyle:hideutilityclassconstructor")
-@EnableConfigurationProperties({ XrayExporterOptions.class, JiraFieldsMapping.class })
+@EnableConfigurationProperties(XrayExporterOptions.class)
 public class VividusToXrayExporterApplication
 {
     public static void main(String[] args) throws IOException
