@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTable.TableRows;
@@ -91,7 +92,9 @@ public class ResolvingSelfReferencesEagerlyTransformer implements ExtendedTableT
             {
                 resolveCell(nestedName, resolutionChain, resolvedRow, unresolvedRow);
             }
-            result = parameterControls.replaceAllDelimitedNames(result, nestedName, resolvedRow.get(nestedName));
+            result = StringUtils.replace(result,
+                    parameterControls.nameDelimiterLeft() + nestedName + parameterControls.nameDelimiterRight(),
+                    resolvedRow.get(nestedName));
         }
         resolvedRow.put(name, result);
         return result;
