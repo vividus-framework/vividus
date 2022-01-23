@@ -58,6 +58,10 @@ public class ParameterConvertersDecorator extends ParameterConverters
 
     private Object convertAdaptedValue(Object adaptedValue, Type type)
     {
+        if (adaptedValue == null)
+        {
+            return null;
+        }
         if (type == DataWrapper.class)
         {
             return new DataWrapper(adaptedValue);

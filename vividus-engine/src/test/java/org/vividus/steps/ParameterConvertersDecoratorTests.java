@@ -322,6 +322,14 @@ class ParameterConvertersDecoratorTests
     {
         String nullExpression = "#{null}";
         assertNull(parameterConverters.convert(nullExpression, String.class));
+        verifyNoInteractions(expressionAdaptor, variableResolver);
+    }
+
+    @Test
+    void shouldReturnNullIfOriginalValueIsNull()
+    {
+        when(variableResolver.resolve(null)).thenReturn(null);
+        assertNull(parameterConverters.convert(null, Object.class));
         verifyNoMoreInteractions(expressionAdaptor, variableResolver);
     }
 }

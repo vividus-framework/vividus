@@ -96,6 +96,7 @@ Then JSON element value from `${json}` by JSON path `<jsonPath>` <rule> `<expect
 Examples:
 |jsonPath                  |rule           |expected       |
 |$.store.book[0].category  |contains       |feren          |
+|$.store.book[0].isbn      |is equal to    |#{null}        |
 |$.store.book[1].price     |is greater than|12.50          |
 |$.store.book[1].hardcover |is equal to    |false          |
 |$.store.book[2].attributes|is equal to    |{"used": false}|
@@ -111,13 +112,9 @@ When I find = `1` JSON elements from `${json}` by `$.store` and for each element
 Examples:
 |jsonPath            |rule           |expected       |
 |$.book[0].category  |contains       |feren          |
+!-- |$.book[0].isbn      |is equal to    |#{null}        | <- TODO: think of ability to pass #{null} to sub-steps
 |$.book[1].price     |is greater than|12.50          |
 |$.book[1].hardcover |is equal to    |false          |
 |$.book[2].price     |is equal to    |9              |
 |$.book[2].attributes|is equal to    |{"used": false}|
 |$.book[3].hardcover |is equal to    |true           |
-
-Scenario: Step verification 'Then JSON element value from `${json}` by JSON path `$.store.book[0].isbn` is equal to `#{null}`'
-Meta:
-    @requirementId 2114
-Then JSON element value from `${json}` by JSON path `$.store.book[0].isbn` is equal to `#{null}`
