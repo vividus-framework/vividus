@@ -178,6 +178,18 @@ include::partial$selenium-properties.adoc[]
 include::partial$selenium-grid-properties.adoc[]
 |screenshot.on-failure.debug-modes
 include::partial$proxy-properties.adoc[]
+
+|web.driver.<browser-name>.command-line-arguments
+|string with arguments
+|empty
+a|The command line arguments to use when starting browser.
+
+`<browser-name>` is one supported browsers:
+
+* https://peter.sh/experiments/chromium-command-line-switches/[`CHROME`]
+* https://www-archive.mozilla.org/docs/command-line-args/[`FIREFOX`],
+* https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)?redirectedfrom=MSDN/[`IEXPLORE`].
+
 |===
 
 include::partial$proxy-meta-tags.adoc[]
