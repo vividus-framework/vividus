@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -86,14 +87,7 @@ public class GenericRunner extends JUnitStories
     @Override
     public List<String> storyPaths()
     {
-        try
-        {
-            return batchedPathFinder.findPaths().values().stream().flatMap(List::stream).collect(Collectors.toList());
-        }
-        catch (IOException e)
-        {
-            throw new IllegalStateException(e);
-        }
+        return getPaths().values().stream().flatMap(List::stream).collect(Collectors.toList());
     }
 
     @Override
@@ -102,18 +96,23 @@ public class GenericRunner extends JUnitStories
         Embedder embedder = configuredEmbedder();
         if (embedder instanceof BatchedEmbedder)
         {
-            try
-            {
-                ((BatchedEmbedder) embedder).runStoriesAsPaths(batchedPathFinder.findPaths());
-            }
-            catch (IOException e)
-            {
-                throw new UncheckedIOException(e);
-            }
+            ((BatchedEmbedder) embedder).runStoriesAsPaths(getPaths());
         }
         else
         {
             super.run();
+        }
+    }
+
+    private Map<String, List<String>> getPaths()
+    {
+        try
+        {
+            return batchedPathFinder.getPaths();
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
         }
     }
 

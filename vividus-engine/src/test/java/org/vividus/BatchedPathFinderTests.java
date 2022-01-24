@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.vividus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -34,17 +36,12 @@ import org.vividus.batch.BatchStorage;
 @ExtendWith(MockitoExtension.class)
 class BatchedPathFinderTests
 {
-    @Mock
-    private PathFinder pathFinder;
-
-    @Mock
-    private BatchStorage batchStorage;
-
-    @InjectMocks
-    private BatchedPathFinder batchedPathFinder;
+    @Mock private PathFinder pathFinder;
+    @Mock private BatchStorage batchStorage;
+    @InjectMocks private BatchedPathFinder batchedPathFinder;
 
     @Test
-    void testFindPaths() throws IOException
+    void shouldGetPathsWithCaching() throws IOException
     {
         BatchResourceConfiguration batchResourceConfiguration = new BatchResourceConfiguration();
         batchResourceConfiguration.setResourceLocation("testLocation");
@@ -54,8 +51,11 @@ class BatchedPathFinderTests
         when(batchStorage.getBatchResourceConfigurations()).thenReturn(Map.of(batchKey, batchResourceConfiguration));
         List<String> testPaths = List.of("testPath");
         when(pathFinder.findPaths(batchResourceConfiguration)).thenReturn(testPaths);
-        Map<String, List<String>> actual = batchedPathFinder.findPaths();
         Map<String, List<String>> expected = Map.of(batchKey, testPaths);
-        assertEquals(expected, actual);
+        assertEquals(expected, batchedPathFinder.getPaths());
+        assertEquals(expected, batchedPathFinder.getPaths());
+        verify(pathFinder).findPaths(batchResourceConfiguration);
+        verify(batchStorage).getBatchResourceConfigurations();
+        verifyNoMoreInteractions(batchStorage, pathFinder);
     }
 }

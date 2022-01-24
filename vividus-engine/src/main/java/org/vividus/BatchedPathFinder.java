@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,16 @@ import java.util.Map.Entry;
 import org.vividus.batch.BatchResourceConfiguration;
 import org.vividus.batch.BatchStorage;
 
+/**
+ * The API provided by this class is <b><u>not</u></b> thread-safe and expected to be invoked from the main thread
+ * by the test runner.
+ */
 public class BatchedPathFinder implements IBatchedPathFinder
 {
     private final IPathFinder pathFinder;
     private final BatchStorage batchStorage;
+
+    private Map<String, List<String>> batchKeyToStoryPaths;
 
     public BatchedPathFinder(IPathFinder pathFinder, BatchStorage batchStorage)
     {
@@ -37,13 +43,17 @@ public class BatchedPathFinder implements IBatchedPathFinder
     }
 
     @Override
-    public Map<String, List<String>> findPaths() throws IOException
+    public Map<String, List<String>> getPaths() throws IOException
     {
-        Map<String, List<String>> batchedPaths = new LinkedHashMap<>();
-        for (Entry<String, BatchResourceConfiguration> batch : batchStorage.getBatchResourceConfigurations().entrySet())
+        if (batchKeyToStoryPaths == null)
         {
-            batchedPaths.put(batch.getKey(), pathFinder.findPaths(batch.getValue()));
+            batchKeyToStoryPaths = new LinkedHashMap<>();
+            for (Entry<String, BatchResourceConfiguration> batch : batchStorage.getBatchResourceConfigurations()
+                    .entrySet())
+            {
+                batchKeyToStoryPaths.put(batch.getKey(), pathFinder.findPaths(batch.getValue()));
+            }
         }
-        return batchedPaths;
+        return batchKeyToStoryPaths;
     }
 }
