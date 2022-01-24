@@ -419,3 +419,29 @@ When I initialize Scenario variable `listOfMaps` with values:
 |3  |
 Then `1-2-3` is = `#{evalGroovy(return listOfMaps.collect{it['key']}.sort().join('-'))}`
 ----
+
+== Null value
+
+=== `null`
+
+Represents `null` (a.k.a. `NULL`). In most case `null` means no value (see https://www.w3schools.com/sql/sql_null_values.asp[`NULL` in SQL] and https://www.json.org/json-en.html[`null` in JSON]).
+
+[source, subs="+quotes"]
+----
+#{null}
+----
+
+NOTE: Null expression can only be evaluated separately. Strings or other expressions with the nested null expression will be completely ignored and not executed.
+
+.Validation of JSON element with `null` value
+[source,gherkin]
+----
+When I initialize the scenario variable `json` with value `
+{
+    "persons": {
+        "nemo": null
+    }
+}
+`
+Then JSON element value from `${json}` by JSON path `$.persons.nemo` is equal to `#{null}`
+----

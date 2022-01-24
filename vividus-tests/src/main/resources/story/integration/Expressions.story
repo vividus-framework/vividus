@@ -133,3 +133,15 @@ Scenario: Verify expressions from the properties
 Meta:
     @requirementId 2322
 Then `1` is = `${vividus-expression}`
+
+Scenario: Verify expression generating null
+Meta:
+    @requirementId 2345
+When I initialize the scenario variable `json` with value `
+{
+    "persons": {
+        "nemo": null
+    }
+}
+`
+Then JSON element value from `${json}` by JSON path `$.persons.nemo` is equal to `#{null}`
