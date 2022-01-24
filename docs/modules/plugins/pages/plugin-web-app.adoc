@@ -180,11 +180,15 @@ include::partial$selenium-grid-properties.adoc[]
 include::partial$proxy-properties.adoc[]
 
 |web.driver.<browser-name>.command-line-arguments
-|https://peter.sh/experiments/chromium-command-line-switches/[Chromium Command Line Switches]
-https://www-archive.mozilla.org/docs/command-line-args/[Mozilla Command Line Options]
-https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)?redirectedfrom=MSDN/[IE Command Line Options]
+|string with arguments
 |empty
-|Command line options used to specify various startup options for CHROME, FIREFOX and IE browsers 
+a|The command line arguments to use when starting browser.
+
+`<browser-name>` is one supported browsers:
+
+* https://peter.sh/experiments/chromium-command-line-switches/[`CHROME`]
+* https://www-archive.mozilla.org/docs/command-line-args/[`FIREFOX`],
+* https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)?redirectedfrom=MSDN/[`IEXPLORE`].
 
 |===
 
