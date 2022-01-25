@@ -277,11 +277,7 @@ When I <action> baseline with `scrollable-element-context` using screenshot conf
 
 === Run simple visual test
 
-==== *_Info_*
-
-Step establishes baseline or compares against existing one
-
-==== *_Wording_*
+Establishes baseline or compares against existing one.
 
 [source,gherkin]
 ----
@@ -291,8 +287,6 @@ When I $actionType baseline with `$name`
 * `actionType` - {actions}
 * `name` - name of baseline
 
-==== *_Usage_*
-
 .Perform simple visual check on compare
 [source,gherkin]
 ----
@@ -301,11 +295,7 @@ When I COMPARE_AGAINST baseline with `test`
 
 === Run visual test with specified configuration
 
-==== *_Info_*
-
-Step establishes baseline or compares against existing one with using specified configuration
-
-==== *_Wording_*
+Establishes baseline or compares against existing one using the specified configuration.
 
 [source,gherkin]
 ----
@@ -315,8 +305,6 @@ When I $actionType baseline with `$name` using screenshot configuration:$screens
 * `actionType` - {actions}
 * `name` - name of baseline
 * `screenshotConfiguration` - configuration to make screenshot
-
-==== *_Usage_*
 
 .Perform visual check on establish with specified configuration
 [source,gherkin]
@@ -328,11 +316,7 @@ When I ESTABLISH baseline with `test` using screenshot configuration:
 
 === Run visual test with ignoring option
 
-==== *_Info_*
-
-Step establishes baseline or compares against existing one with using ignoring option
-
-==== *_Wording_*
+Establishes baseline or compares against existing one using the ignoring option.
 
 [source,gherkin]
 ----
@@ -342,8 +326,6 @@ When I $actionType baseline with `$name` ignoring:$ignoredElements
 * `actionType` - {actions}
 * `name` - name of baseline
 * `checkSettings` - examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCANTAGE`
-
-==== *_Usage_*
 
 .Perform visual check on compare with ignoring options
 [source,gherkin]
@@ -355,11 +337,7 @@ When I COMPARE_AGAINST baseline with `test` ignoring:
 
 === Run visual test with ignoring option and specified configuration
 
-==== *_Info_*
-
-Step establishes baseline or compares against existing one with using ignoring option and specified configuration
-
-==== *_Wording_*
+Establishes baseline or compares against existing one using the ignoring option and the specified configuration.
 
 [source,gherkin]
 ----
@@ -370,8 +348,6 @@ When I $actionType baseline with `$name` ignoring:$ignoredElements using screens
 * `name` - name of baseline
 * `checkSettings` - examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCANTAGE`
 * `screenshotConfiguration` - configuration to make screenshot
-
-==== *_Usage_*
 
 .Perform visual check on establish with ignoring options and specified configuration
 [source,gherkin]
