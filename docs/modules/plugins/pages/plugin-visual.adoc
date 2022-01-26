@@ -159,7 +159,7 @@ where:
 |Locator of element for performing scroll action during visual check
 
 |`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.shooting-strategy`
-|`SIMPLE` `VIEWPORT_PASTING` `DEVICE_DEPENDENT` `PHONE_ANDROID_PORTRAIT` `PHONE_ANDROID_LANDSCAPE`
+|`SIMPLE` `VIEWPORT_PASTING`
 |Screenshot shooting strategy name (`VIEWPORT_PASTING` by default)
 
 |`web.screenshot.strategy=YOUR_STRATEGY_NAME`
