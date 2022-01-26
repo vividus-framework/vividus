@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,18 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jbehave.core.model.Scenario;
+import org.vividus.context.ReportControlContext;
+import org.vividus.context.RunContext;
 import org.vividus.softassert.exception.VerificationError;
 
-public class StatusStoryReporter extends ChainedStoryReporter implements IRunStatusProvider
+public class StatusStoryReporter extends AbstractReportControlStoryReporter implements IRunStatusProvider
 {
     private final AtomicReference<Optional<Status>> status = new AtomicReference<>(Optional.empty());
+
+    public StatusStoryReporter(ReportControlContext reportControlContext, RunContext runContext)
+    {
+        super(reportControlContext, runContext);
+    }
 
     @Override
     public Optional<Status> getRunStatus()
@@ -42,7 +49,7 @@ public class StatusStoryReporter extends ChainedStoryReporter implements IRunSta
     @Override
     public void successful(String step)
     {
-        changeStatus(Status.PASSED);
+        perform(() -> changeStatus(Status.PASSED));
         super.successful(step);
     }
 
@@ -70,8 +77,11 @@ public class StatusStoryReporter extends ChainedStoryReporter implements IRunSta
     @Override
     public void failed(String step, Throwable throwable)
     {
-        Throwable cause = JBehaveFailureUnwrapper.unwrapCause(throwable);
-        changeStatus(getStatus(cause));
+        perform(() ->
+        {
+            Throwable cause = JBehaveFailureUnwrapper.unwrapCause(throwable);
+            changeStatus(getStatus(cause));
+        });
         super.failed(step, throwable);
     }
 
