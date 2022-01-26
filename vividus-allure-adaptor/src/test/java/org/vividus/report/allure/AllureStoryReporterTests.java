@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -959,6 +959,25 @@ class AllureStoryReporterTests
         verify(allureLifecycle).stopStep(STEP_UID);
         verify(allureLifecycle, times(2)).updateTestCase(eq(SCENARIO_UID),
                 anyTestResultConsumer());
+    }
+
+    @Test
+    void testFailedVerificationErrorKnownIssueFailFast()
+    {
+        VerificationError verificationError = mock(VerificationError.class);
+        SoftAssertionError softAssertionError = mock(SoftAssertionError.class);
+        KnownIssue knownIssue = mock(KnownIssue.class);
+        when(verificationErrorAdapter.adapt(verificationError)).thenReturn(verificationError);
+        when(verificationError.getKnownIssues()).thenReturn(Collections.singleton(knownIssue));
+        when(verificationError.getErrors()).thenReturn(List.of(softAssertionError));
+        when(softAssertionError.isFailTestSuiteFast()).thenReturn(true);
+        StepResult stepResult = mockCurrentStep(null);
+        testFailed(verificationError);
+        verify(stepResult, never()).setStatus(Status.FAILED);
+        verify(verificationErrorAdapter).adapt(verificationError);
+        verify(allureLifecycle, times(3)).updateStep(eq(STEP_UID), anyStepResultConsumer());
+        verify(allureLifecycle).stopStep(STEP_UID);
+        verify(allureLifecycle, times(2)).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
     }
 
     @Test

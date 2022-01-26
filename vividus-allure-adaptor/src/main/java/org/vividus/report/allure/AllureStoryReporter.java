@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ import org.vividus.reporter.model.Attachment;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.model.KnownIssue;
+import org.vividus.softassert.model.SoftAssertionError;
 import org.vividus.testcontext.TestContext;
 
 import io.qameta.allure.Allure;
@@ -114,7 +115,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
                 .setMessage("Story timed out after " + storyDuration.getDurationInSecs() + "s");
         if (!getLinkedStep().isRootItem())
         {
-            stopStep(Status.BROKEN, statusDetails);
+            stopStep(Status.BROKEN, statusDetails, false);
         }
         else
         {
@@ -303,7 +304,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     public void ignorable(String step)
     {
         super.ignorable(step);
-        stopStep(Status.SKIPPED, new StatusDetails().setMessage("Step is commented"));
+        stopStep(Status.SKIPPED, new StatusDetails().setMessage("Step is commented"), false);
     }
 
     @Override
@@ -318,14 +319,14 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     public void pending(String step)
     {
         super.pending(step);
-        stopStep(Status.SKIPPED, new StatusDetails().setMessage("Step is not implemented"));
+        stopStep(Status.SKIPPED, new StatusDetails().setMessage("Step is not implemented"), false);
     }
 
     @Override
     public void notPerformed(String step)
     {
         super.notPerformed(step);
-        stopStep(Status.SKIPPED, new StatusDetails().setMessage("Step is not performed"));
+        stopStep(Status.SKIPPED, new StatusDetails().setMessage("Step is not performed"), false);
     }
 
     @Override
@@ -354,8 +355,19 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
                 }
             }
             lifecycle.updateTestCase(getRootStepId(), result -> result.getLinks().addAll(links));
+
+            List<SoftAssertionError> errors = ((VerificationError) cause).getErrors();
+            if (errors.size() != 0)
+            {
+                SoftAssertionError lastError = errors.get(errors.size() - 1);
+                if (lastError.isFailTestCaseFast() || lastError.isFailTestSuiteFast())
+                {
+                    stopStep(StatusProvider.getStatus(cause), getStatusDetailsFromThrowable(cause), true);
+                    return;
+                }
+            }
         }
-        stopStep(StatusProvider.getStatus(cause), getStatusDetailsFromThrowable(cause));
+        stopStep(StatusProvider.getStatus(cause), getStatusDetailsFromThrowable(cause), false);
     }
 
     @Override
@@ -443,16 +455,17 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
         LinkedQueueItem<String> step = getLinkedStep();
         while (!step.isRootItem())
         {
-            updateStepStatus(step.getValue(), status);
+            updateStepStatus(step.getValue(), status, false);
             step = step.getPreviousItem();
         }
     }
 
-    private void updateStepStatus(String stepId, Status status)
+    private void updateStepStatus(String stepId, Status status, boolean knownIssueFail)
     {
         lifecycle.updateStep(stepId, stepResult ->
         {
-            if (isStatusUpdateNeeded(stepResult, status))
+            if (isStatusUpdateNeeded(stepResult, status)
+                    && !(StatusPriority.from(stepResult.getStatus()).getPriority() == 2 && knownIssueFail))
             {
                 stepResult.setStatus(status);
             }
@@ -527,15 +540,15 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
 
     private void stopStep(Status status)
     {
-        stopStep(status, new StatusDetails());
+        stopStep(status, new StatusDetails(), false);
     }
 
-    private void stopStep(Status status, StatusDetails statusDetails)
+    private void stopStep(Status status, StatusDetails statusDetails, boolean knownIssueFail)
     {
         LinkedQueueItem<String> step = getLinkedStep();
         while (step != null && !step.isRootItem())
         {
-            updateStepStatus(step.getValue(), status);
+            updateStepStatus(step.getValue(), status, knownIssueFail);
             step = step.getPreviousItem();
         }
         stopStep();
