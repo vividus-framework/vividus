@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,63 @@
 
 package org.vividus.runner;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.junit.JUnit4StoryRunner;
 import org.junit.runner.RunWith;
+import org.vividus.BatchedEmbedder;
+import org.vividus.IBatchedPathFinder;
+import org.vividus.configuration.BeanFactory;
 
 @RunWith(JUnit4StoryRunner.class)
-public class StoriesRunner extends GenericRunner
+public class StoriesRunner extends AbstractTestRunner
 {
     static
     {
-        setEmbedderBeanName("batchedEmbedder");
+        setRunnerClass(StoriesRunner.class);
+    }
+
+    private final BatchedEmbedder batchedEmbedder;
+    private final IBatchedPathFinder batchedPathFinder;
+
+    public StoriesRunner()
+    {
+        batchedPathFinder = BeanFactory.getBean(IBatchedPathFinder.class);
+        batchedEmbedder = BeanFactory.getBean(BatchedEmbedder.class);
+    }
+
+    @Override
+    public void run()
+    {
+        batchedEmbedder.runStoriesAsPaths(getPaths());
+    }
+
+    @Override
+    public List<String> storyPaths()
+    {
+        return getPaths().values().stream().flatMap(List::stream).collect(Collectors.toList());
+    }
+
+    private Map<String, List<String>> getPaths()
+    {
+        try
+        {
+            return batchedPathFinder.getPaths();
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public Embedder configuredEmbedder()
+    {
+        return batchedEmbedder;
     }
 }
