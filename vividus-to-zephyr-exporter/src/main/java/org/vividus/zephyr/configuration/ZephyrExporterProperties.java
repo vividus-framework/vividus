@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.vividus.zephyr.model.TestCaseLevel;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 @ConfigurationProperties("zephyr.exporter")
@@ -29,12 +30,20 @@ public class ZephyrExporterProperties
 {
     private String jiraInstanceKey;
 
+    private boolean exportResults;
+
     @NotBlank(message = "Property 'zephyr.exporter.source-directory' must not be blank")
     private Path sourceDirectory;
 
     private boolean updateExecutionStatusesOnly;
 
     private List<TestCaseStatus> statusesOfTestCasesToAddToExecution;
+
+    private TestCaseLevel level;
+
+    private boolean updateCasesOnExport;
+
+    private String statusForUpdatedTestCases = "Backlog";
 
     public String getJiraInstanceKey()
     {
@@ -44,6 +53,16 @@ public class ZephyrExporterProperties
     public void setJiraInstanceKey(String jiraInstanceKey)
     {
         this.jiraInstanceKey = jiraInstanceKey;
+    }
+
+    public boolean getExportResults()
+    {
+        return exportResults;
+    }
+
+    public void setExportResults(boolean exportResults)
+    {
+        this.exportResults = exportResults;
     }
 
     public Path getSourceDirectory()
@@ -74,5 +93,35 @@ public class ZephyrExporterProperties
     public void setStatusesOfTestCasesToAddToExecution(List<TestCaseStatus> statusesOfTestCasesToAddToExecution)
     {
         this.statusesOfTestCasesToAddToExecution = statusesOfTestCasesToAddToExecution;
+    }
+
+    public TestCaseLevel getLevel()
+    {
+        return level;
+    }
+
+    public void setLevel(TestCaseLevel level)
+    {
+        this.level = level;
+    }
+
+    public boolean isUpdateCasesOnExport()
+    {
+        return updateCasesOnExport;
+    }
+
+    public void setUpdateCasesOnExport(boolean updateCasesOnExport)
+    {
+        this.updateCasesOnExport = updateCasesOnExport;
+    }
+
+    public String getStatusForUpdatedTestCases()
+    {
+        return statusForUpdatedTestCases;
+    }
+
+    public void setStatusForUpdatedTestCases(String statusForUpdatedTestCases)
+    {
+        this.statusForUpdatedTestCases = statusForUpdatedTestCases;
     }
 }

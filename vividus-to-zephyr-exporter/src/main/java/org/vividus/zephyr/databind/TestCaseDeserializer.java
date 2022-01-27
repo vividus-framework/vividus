@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,23 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import org.vividus.util.json.JsonPathUtils;
-import org.vividus.zephyr.model.TestCase;
+import org.vividus.zephyr.model.TestCaseExecution;
 
-public class TestCaseDeserializer extends StdDeserializer<TestCase>
+public class TestCaseDeserializer extends StdDeserializer<TestCaseExecution>
 {
     private static final long serialVersionUID = 7820826665413256040L;
 
     public TestCaseDeserializer()
     {
-        super(TestCase.class);
+        super(TestCaseExecution.class);
     }
 
     @Override
-    public TestCase deserialize(JsonParser parser, DeserializationContext deserializer) throws IOException
+    public TestCaseExecution deserialize(JsonParser parser, DeserializationContext deserializer) throws IOException
     {
         String node = parser.getCodec().readTree(parser).toString();
         String status = JsonPathUtils.getData(node, "$.status");
         List<String> testCaseIds = JsonPathUtils.getData(node, "$..[?(@.name=='testCaseId')].value");
-        return new TestCase(testCaseIds, status);
+        return new TestCaseExecution(testCaseIds, status);
     }
 }

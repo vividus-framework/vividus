@@ -1,9 +1,11 @@
 project.description = 'Vividus to Zephyr exporter'
 
 apply from: "$rootDir/vividus-exporter-commons/dependencies.gradle"
+apply from: "$rootDir/vividus-exporter-commons/logging.gradle"
 
 dependencies {
     implementation project(':vividus-util')
+    implementation project(':vividus-engine')
     implementation project(':vividus-facade-jira')
     implementation project(':vividus-exporter-commons')
 

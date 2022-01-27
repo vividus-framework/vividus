@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.configuration.ZephyrFileVisitor;
-import org.vividus.zephyr.model.TestCase;
+import org.vividus.zephyr.model.TestCaseExecution;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 public class TestCaseParser
@@ -47,27 +47,27 @@ public class TestCaseParser
         this.zephyrExporterProperties = zephyrExporterProperties;
     }
 
-    public List<TestCase> createTestCases(ObjectMapper objectMapper) throws IOException
+    public List<TestCaseExecution> createTestCases(ObjectMapper objectMapper) throws IOException
     {
-        List<TestCase> testCases = parseJsonResultsFile(getJsonResultsFiles(), objectMapper);
-        notEmpty(testCases, "There are not any test cases for exporting",
+        List<TestCaseExecution> testCaseExecutions = parseJsonResultsFile(getJsonResultsFiles(), objectMapper);
+        notEmpty(testCaseExecutions, "There are not any test cases for exporting",
                 zephyrExporterProperties.getSourceDirectory());
-        LOGGER.info("Test cases: {}", testCases);
-        Map<String, TreeSet<TestCaseStatus>> testCasesMap = testCases.stream()
-                .collect(Collectors.groupingBy(TestCase::getKey,
-                        Collectors.mapping(TestCase::getStatus, Collectors.toCollection(TreeSet::new))));
+        LOGGER.info("Test cases: {}", testCaseExecutions);
+        Map<String, TreeSet<TestCaseStatus>> testCasesMap = testCaseExecutions.stream()
+                .collect(Collectors.groupingBy(TestCaseExecution::getKey,
+                        Collectors.mapping(TestCaseExecution::getStatus, Collectors.toCollection(TreeSet::new))));
 
-        List<TestCase> testCasesForExporting = new ArrayList<>();
+        List<TestCaseExecution> testCasesForExportingExecution = new ArrayList<>();
         for (Map.Entry<String, TreeSet<TestCaseStatus>> entry : testCasesMap.entrySet())
         {
             TestCaseStatus testCaseStatus = entry.getValue().first();
             if (zephyrExporterProperties.getStatusesOfTestCasesToAddToExecution().contains(testCaseStatus))
             {
-                testCasesForExporting.add(new TestCase(entry.getKey(), testCaseStatus));
+                testCasesForExportingExecution.add(new TestCaseExecution(entry.getKey(), testCaseStatus));
             }
         }
-        LOGGER.info("Test cases for exporting to JIRA: {}", testCasesForExporting);
-        return testCasesForExporting;
+        LOGGER.info("Test cases for exporting to JIRA: {}", testCasesForExportingExecution);
+        return testCasesForExportingExecution;
     }
 
     private List<File> getJsonResultsFiles() throws IOException
@@ -81,15 +81,15 @@ public class TestCaseParser
         return jsonFiles;
     }
 
-    private List<TestCase> parseJsonResultsFile(List<File> jsonFiles, ObjectMapper objectMapper)
+    private List<TestCaseExecution> parseJsonResultsFile(List<File> jsonFiles, ObjectMapper objectMapper)
     {
-        List<TestCase> testCases = new ArrayList<>();
+        List<TestCaseExecution> testCaseExecutions = new ArrayList<>();
         for (File jsonFile : jsonFiles)
         {
             try
             {
-                TestCase testCase = objectMapper.readValue(jsonFile, TestCase.class);
-                List<String> testCaseKeys = testCase.getKeys();
+                TestCaseExecution testCaseExecution = objectMapper.readValue(jsonFile, TestCaseExecution.class);
+                List<String> testCaseKeys = testCaseExecution.getKeys();
                 if (testCaseKeys.isEmpty())
                 {
                     continue;
@@ -98,13 +98,14 @@ public class TestCaseParser
                 {
                     for (String key : testCaseKeys)
                     {
-                        TestCase additionalTestCase = new TestCase(key, testCase.getStatus());
-                        testCases.add(additionalTestCase);
+                        TestCaseExecution additionalTestCaseExecution = new TestCaseExecution(key,
+                                testCaseExecution.getStatus());
+                        testCaseExecutions.add(additionalTestCaseExecution);
                     }
                 }
                 else
                 {
-                    testCases.add(testCase);
+                    testCaseExecutions.add(testCaseExecution);
                 }
             }
             catch (IOException e)
@@ -112,6 +113,6 @@ public class TestCaseParser
                 throw new IllegalArgumentException("Problem with reading values from json file " + jsonFile, e);
             }
         }
-        return testCases;
+        return testCaseExecutions;
     }
 }

@@ -1,6 +1,7 @@
 project.description = 'Vividus to Azure DevOps exporter'
 
 apply from: "$rootDir/vividus-exporter-commons/dependencies.gradle"
+apply from: "$rootDir/vividus-exporter-commons/logging.gradle"
 
 dependencies {
     implementation project(':vividus-http-client')

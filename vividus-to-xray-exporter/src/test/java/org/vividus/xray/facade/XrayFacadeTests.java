@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,20 +87,6 @@ class XrayFacadeTests
     void afterEach()
     {
         verifyNoMoreInteractions(jiraFacade, jiraClient);
-    }
-
-    @Test
-    void shouldCreateTestsLink() throws IOException, JiraConfigurationException
-    {
-        initializeFacade(List.of());
-        String requirementId = "requirement id";
-        String linkType = "Tests";
-
-        xrayFacade.createTestsLink(ISSUE_ID, requirementId);
-
-        verify(jiraFacade).createIssueLink(ISSUE_ID, requirementId, linkType);
-        assertThat(logger.getLoggingEvents(),
-                is(List.of(info("Create '{}' link from {} to {}", linkType, ISSUE_ID, requirementId))));
     }
 
     @Test

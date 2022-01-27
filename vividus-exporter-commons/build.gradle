@@ -1,11 +1,15 @@
 project.description = 'Common module for all VIVIDUS exporters'
 
+apply from: "logging.gradle"
+
 ext {
     springBootVersion = '2.6.6'
 }
 
 dependencies {
+    implementation project(':vividus-facade-jira')
     implementation project(':vividus-util')
+    implementation project(':vividus-engine')
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter', version: "${springBootVersion}")
 
     testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}")

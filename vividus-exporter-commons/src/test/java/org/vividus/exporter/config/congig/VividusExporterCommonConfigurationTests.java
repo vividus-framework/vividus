@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.exporter.config;
+package org.vividus.exporter.config.congig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.env.MockEnvironment;
+import org.vividus.exporter.config.VividusExporterCommonConfiguration;
 import org.vividus.util.property.PropertyParser;
 
 @ExtendWith(MockitoExtension.class)

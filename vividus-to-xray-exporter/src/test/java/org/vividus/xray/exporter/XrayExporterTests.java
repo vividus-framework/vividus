@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,6 +134,7 @@ class XrayExporterTests
             + "|parameter-value-3|" + lineSeparator();
         verifyCucumberTestCaseParameters("Scenario Outline", scenario);
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
+        verify(xrayFacade).createTestsLink(any(), any());
     }
 
     @Test
@@ -152,6 +153,7 @@ class XrayExporterTests
         String scenario = GIVEN_STEP + lineSeparator() + WHEN_STEP + lineSeparator() + THEN_STEP;
         verifyCucumberTestCaseParameters("Scenario", scenario);
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
+        verify(xrayFacade).createTestsLink(any(), any());
     }
 
     @Test
@@ -182,6 +184,7 @@ class XrayExporterTests
 
         verify(xrayFacade).updateTestSet(TEST_SET_KEY, List.of(ISSUE_ID));
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
+        verify(xrayFacade).createTestsLink(any(), any());
     }
 
     @Test
@@ -215,13 +218,14 @@ class XrayExporterTests
         verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
         verify(xrayFacade).updateTestSet(TEST_SET_KEY, List.of(ISSUE_ID));
         verify(xrayFacade).updateTestExecution(any());
+        verify(xrayFacade).createTestsLink(any(), any());
         verifyManualTestCaseParameters(Set.of(), Set.of());
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), error(exception, ERROR_MESSAGE),
                 getExportingScenarioEvent(), getExportFailedErrorEvent(errorLogMessage));
     }
 
     @Test
-    void shouldNotExportSkippedTest() throws URISyntaxException, IOException, JiraConfigurationException
+    void shouldNotExportSkippedTest() throws URISyntaxException, IOException
     {
         URI jsonResultsUri = getJsonResultsUri("skipped");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
@@ -252,10 +256,9 @@ class XrayExporterTests
 
         when(xrayFacade.createTestCase(testCase)).thenReturn(ISSUE_ID);
         when(testCaseFactory.createManualTestCase(manualTestCaseParametersCaptor.capture())).thenReturn(testCase);
-
         xrayExporter.exportResults();
 
-        verify(xrayFacade).createTestsLink(ISSUE_ID, "STUB-REQ-0");
+        verify(xrayFacade).createTestsLink(ISSUE_ID, Optional.of("STUB-REQ-0"));
 
         verifyManualTestCaseParameters(Set.of(), Set.of());
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());

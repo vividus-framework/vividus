@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.zephyr.model.TestCase;
+import org.vividus.zephyr.model.TestCaseExecution;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,10 +60,10 @@ public class TestCaseDeserializerTests
         JsonNode root = MAPPER.readTree("{\"status\" : \"failed\", \"labels\" : [{\"name\" : \"testCaseId\","
                 + "\"value\" : \"TEST-001\"}, {\"name\" : \"framework\", \"value\" : \"Vividus\"}]}");
         when(objectCodec.readTree(parser)).thenReturn(root);
-        TestCase testCase = deserializer.deserialize(parser, null);
+        TestCaseExecution testCaseExecution = deserializer.deserialize(parser, null);
 
-        assertEquals(List.of("TEST-001"), testCase.getKeys());
-        assertEquals(TestCaseStatus.FAILED, testCase.getStatus());
+        assertEquals(List.of("TEST-001"), testCaseExecution.getKeys());
+        assertEquals(TestCaseStatus.FAILED, testCaseExecution.getStatus());
     }
 
     @Test
@@ -72,10 +72,10 @@ public class TestCaseDeserializerTests
         JsonNode root = MAPPER.readTree("{\"status\" : \"passed\","
                 + "\"labels\" : [{\"name\" : \"framework\", \"value\" : \"Vividus\"}]}");
         when(objectCodec.readTree(parser)).thenReturn(root);
-        TestCase testCase = deserializer.deserialize(parser, null);
+        TestCaseExecution testCaseExecution = deserializer.deserialize(parser, null);
 
-        assertEquals(List.of(), testCase.getKeys());
-        assertEquals(TestCaseStatus.PASSED, testCase.getStatus());
+        assertEquals(List.of(), testCaseExecution.getKeys());
+        assertEquals(TestCaseStatus.PASSED, testCaseExecution.getStatus());
     }
 
     @Test
@@ -85,9 +85,9 @@ public class TestCaseDeserializerTests
                 + "\"value\" : \"TEST-002\"}, {\"name\" : \"testCaseId\",\"value\" : \"TEST-003\"},"
                 + "{\"name\" : \"framework\", \"value\" : \"Vividus\"}]}");
         when(objectCodec.readTree(parser)).thenReturn(root);
-        TestCase testCase = deserializer.deserialize(parser, null);
+        TestCaseExecution testCaseExecution = deserializer.deserialize(parser, null);
 
-        assertEquals(List.of("TEST-002", "TEST-003"), testCase.getKeys());
-        assertEquals(TestCaseStatus.BROKEN, testCase.getStatus());
+        assertEquals(List.of("TEST-002", "TEST-003"), testCaseExecution.getKeys());
+        assertEquals(TestCaseStatus.BROKEN, testCaseExecution.getStatus());
     }
 }

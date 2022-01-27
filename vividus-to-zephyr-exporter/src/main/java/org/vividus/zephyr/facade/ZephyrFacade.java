@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,38 +24,63 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vividus.exporter.converter.CucumberExamplesConverter;
 import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.Project;
 import org.vividus.jira.model.Version;
+import org.vividus.model.jbehave.Examples;
+import org.vividus.model.jbehave.Scenario;
+import org.vividus.model.jbehave.Step;
+import org.vividus.model.jbehave.Story;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
+import org.vividus.zephyr.databind.TestCaseSerializer;
 import org.vividus.zephyr.model.TestCaseStatus;
+import org.vividus.zephyr.model.TestStep;
+import org.vividus.zephyr.model.ZephyrTestCase;
 
 public class ZephyrFacade implements IZephyrFacade
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZephyrFacade.class);
     private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";
+    private static final String TEST_STEP_CREATED = "{} test step has been created";
+    private static final String TESTSTEP = "teststep/%s";
 
     private final JiraFacade jiraFacade;
     private final JiraClientProvider jiraClientProvider;
     private final ZephyrExporterConfiguration zephyrExporterConfiguration;
     private final ZephyrExporterProperties zephyrExporterProperties;
+    private final ObjectMapper objectMapper;
 
     public ZephyrFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
-            ZephyrExporterConfiguration zephyrExporterConfiguration, ZephyrExporterProperties zephyrExporterProperties)
+                        ZephyrExporterConfiguration zephyrExporterConfiguration,
+                        ZephyrExporterProperties zephyrExporterProperties, TestCaseSerializer testCaseSerializer)
     {
         this.jiraFacade = jiraFacade;
         this.jiraClientProvider = jiraClientProvider;
         this.zephyrExporterConfiguration = zephyrExporterConfiguration;
         this.zephyrExporterProperties = zephyrExporterProperties;
+        this.objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .registerModule(new SimpleModule().addSerializer(ZephyrTestCase.class, testCaseSerializer));
     }
 
     @Override
@@ -64,6 +89,67 @@ public class ZephyrFacade implements IZephyrFacade
         String responseBody = getJiraClient().executePost(ZAPI_ENDPOINT + "execution/", execution);
         List<Integer> executionId = JsonPathUtils.getData(responseBody, "$..id");
         return executionId.get(0);
+    }
+
+    @Override
+    public void updateTestCase(String testCaseId, ZephyrTestCase zephyrTest)
+            throws IOException, JiraConfigurationException
+    {
+        String updateTestRequest = objectMapper.writeValueAsString(zephyrTest);
+        LOGGER.atInfo().addArgument(testCaseId)
+                .addArgument(updateTestRequest)
+                .log("Updating Test Case with ID {}: {}");
+        jiraFacade.updateIssue(testCaseId, updateTestRequest);
+        jiraFacade.setIssueStatus(testCaseId, zephyrExporterProperties.getStatusForUpdatedTestCases());
+        LOGGER.atInfo().addArgument(testCaseId)
+                .log("Test with key {} has been updated");
+    }
+
+    @Override
+    public String createTestCase(ZephyrTestCase zephyrTest) throws IOException, JiraConfigurationException
+    {
+        zephyrTest.setProjectKey(zephyrExporterConfiguration.getProjectKey());
+        String createTestRequest = objectMapper.writeValueAsString(zephyrTest);
+        LOGGER.atInfo().addArgument(createTestRequest).log("Creating Test Case: {}");
+        String response = jiraFacade
+                .createIssue(createTestRequest, Optional.ofNullable(zephyrExporterProperties.getJiraInstanceKey()));
+        String issueKey = JsonPathUtils.getData(response, "$.key");
+        LOGGER.atInfo().addArgument(issueKey).log("Test with key {} has been created");
+        return issueKey;
+    }
+
+    @Override
+    public void createTestSteps(Scenario scenario, String issueId) throws IOException, JiraConfigurationException
+    {
+        List<Step> steps = scenario.collectSteps();
+        for (int i = 0; i < steps.size(); i++)
+        {
+            LOGGER.atInfo().addArgument(i + 1).log(TEST_STEP_CREATED);
+            String executionBody = objectMapper.writeValueAsString(new TestStep(steps.get(i).getValue(), null));
+            getJiraClient().executePost(String.format(ZAPI_ENDPOINT + TESTSTEP, issueId), executionBody);
+        }
+        Examples examples = scenario.getExamples();
+
+        if (Objects.nonNull(examples))
+        {
+            String examplesStr = CucumberExamplesConverter
+                    .buildScenarioExamplesTableWithoutName(examples.getParameters());
+            String executionBody = objectMapper.writeValueAsString(new TestStep("Examples:", examplesStr));
+            getJiraClient().executePost(String.format(ZAPI_ENDPOINT + TESTSTEP, issueId), executionBody);
+        }
+    }
+
+    @Override
+    public void createTestSteps(Story story, String issueId) throws IOException, JiraConfigurationException
+    {
+        List<Scenario> scenarios = story.getScenarios();
+        for (int i = 0; i < scenarios.size(); i++)
+        {
+            LOGGER.atInfo().addArgument(i + 1).log(TEST_STEP_CREATED);
+            String executionBody = objectMapper
+                    .writeValueAsString(new TestStep(scenarios.get(i).getTitle(), null));
+            getJiraClient().executePost(String.format(ZAPI_ENDPOINT + TESTSTEP, issueId), executionBody);
+        }
     }
 
     @Override
@@ -144,19 +230,6 @@ public class ZephyrFacade implements IZephyrFacade
         return folderId.get(0).toString();
     }
 
-    private Map<TestCaseStatus, Integer> getExecutionStatuses() throws IOException, JiraConfigurationException
-    {
-        String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "util/testExecutionStatus");
-        Map<TestCaseStatus, Integer> testStatusPerZephyrIdMapping = new EnumMap<>(TestCaseStatus.class);
-        zephyrExporterConfiguration.getStatuses().entrySet().forEach(s ->
-        {
-            List<Integer> statusId = JsonPathUtils.getData(json, String.format("$.[?(@.name=='%s')].id", s.getValue()));
-            notEmpty(statusId, "Status '%s' does not exist", s.getValue());
-            testStatusPerZephyrIdMapping.put(s.getKey(), statusId.get(0));
-        });
-        return testStatusPerZephyrIdMapping;
-    }
-
     @Override
     public OptionalInt findExecutionId(String issueId) throws IOException, JiraConfigurationException
     {
@@ -165,8 +238,8 @@ public class ZephyrFacade implements IZephyrFacade
         if (StringUtils.isNotBlank(zephyrExporterConfiguration.getFolderName()))
         {
             jsonpath = String.format("$..[?(@.versionName=='%s' && @.cycleName=='%s' && @.folderName=='%s')].id",
-                zephyrExporterConfiguration.getVersionName(), zephyrExporterConfiguration.getCycleName(),
-                zephyrExporterConfiguration.getFolderName());
+                    zephyrExporterConfiguration.getVersionName(), zephyrExporterConfiguration.getCycleName(),
+                    zephyrExporterConfiguration.getFolderName());
         }
         else
         {
@@ -175,6 +248,18 @@ public class ZephyrFacade implements IZephyrFacade
         }
         List<Integer> executionId = JsonPathUtils.getData(json, jsonpath);
         return executionId.size() != 0 ? OptionalInt.of(executionId.get(0)) : OptionalInt.empty();
+    }
+
+    private Map<TestCaseStatus, Integer> getExecutionStatuses() throws IOException, JiraConfigurationException
+    {
+        String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "util/testExecutionStatus");
+        Map<TestCaseStatus, Integer> testStatusPerZephyrIdMapping = new EnumMap<>(TestCaseStatus.class);
+        zephyrExporterConfiguration.getStatuses().forEach((key, value) -> {
+            List<Integer> statusId = JsonPathUtils.getData(json, String.format("$.[?(@.name=='%s')].id", value));
+            notEmpty(statusId, "Status '%s' does not exist", value);
+            testStatusPerZephyrIdMapping.put(key, statusId.get(0));
+        });
+        return testStatusPerZephyrIdMapping;
     }
 
     private JiraClient getJiraClient() throws JiraConfigurationException

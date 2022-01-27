@@ -17,9 +17,10 @@
 package org.vividus.xray.databind;
 
 import static org.apache.commons.lang3.Validate.isTrue;
+import static org.vividus.exporter.databind.SerializeJsonHelper.writeJsonArray;
+import static org.vividus.exporter.databind.SerializeJsonHelper.writeObjectWithField;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -87,37 +88,6 @@ public abstract class AbstractTestCaseSerializer<T extends AbstractTestCase> ext
 
     protected abstract void serializeCustomFields(T testCase, Map<String, String> mapping, JsonGenerator generator)
             throws IOException;
-
-    private static void writeJsonArray(JsonGenerator generator, String startField, Collection<String> values,
-            boolean wrapValuesAsObjects) throws IOException
-    {
-        if (values != null)
-        {
-            generator.writeArrayFieldStart(startField);
-            for (String value : values)
-            {
-                if (wrapValuesAsObjects)
-                {
-                    generator.writeStartObject();
-                    generator.writeStringField(NAME, value);
-                    generator.writeEndObject();
-                }
-                else
-                {
-                    generator.writeString(value);
-                }
-            }
-            generator.writeEndArray();
-        }
-    }
-
-    private static void writeObjectWithField(JsonGenerator generator, String objectKey, String fieldName,
-            String fieldValue) throws IOException
-    {
-        generator.writeObjectFieldStart(objectKey);
-        generator.writeStringField(fieldName, fieldValue);
-        generator.writeEndObject();
-    }
 
     protected String getSafely(String key, Map<String, String> mapping)
     {

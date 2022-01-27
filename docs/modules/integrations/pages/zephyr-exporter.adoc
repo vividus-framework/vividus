@@ -4,6 +4,8 @@ Zephyr Exporter is a tool used for exporting test execution results into Jira Ze
 
 Features:
 
+* Create test cases
+* Update test cases
 * Create test executions
 * Set test execution statuses
 
@@ -18,17 +20,33 @@ include::partial$jira-configuration.adoc[]
 |Required
 |Description
 
+|`zephyr.exporter.export-results`
+|true
+|Property to export tests
+
+|`zephyr.exporter.level`
+|false
+|Property to export stories on STORY or SCENARIO level
+
 |`zephyr.exporter.jira-instance-key`
 |false
 |The key of the configured JIRA instance, in case of missing value it will be evaluated automatically based on issue keys being exported
 
 |`zephyr.exporter.source-directory`
 |true
-|Path to directory with test execution JSON results.
+|Path to directory with test JSON results.
 
 |`zephyr.exporter.update-execution-statuses-only`
 |false
 |Property for update existing executions statuses only.
+
+|`zephyr.exporter.update-cases-on-export`
+|false
+|Property to update existing test cases. User with update status permissions required in order to work.
+
+|`zephyr.exporter.status-for-updated-test-cases`
+|false
+|Property defines status which will be set for all updated tests ("Backlog" by default).
 
 |`zephyr.exporter.statuses-of-test-cases-to-add-to-execution`
 |false
@@ -51,6 +69,26 @@ include::partial$jira-configuration.adoc[]
 |Folder name where new test executions should be created
 
 |===
+
+== Jira Fields Mapping
+
+The Zephyr is a Jira plugin that uses custom Jira fields for it's data, one of the ways to find out custom field names for particular field used by Zephyr on Jira UI (if access to Jira configuration is prohibited) is to request description of some issue.
+
+=== Test Case Properties
+
+image::zephyr.png[]
+[cols="1,2", options="header"]
+|===
+
+|Property
+|Description
+
+|`jira.<jira-instance-key>.fields-mapping.story-type`
+|Key of a field containing story type
+
+|===
+
+include::partial$authentication.adoc[]
 
 == Zephyr Execution Status Mapping
 
