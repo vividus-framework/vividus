@@ -15,3 +15,8 @@ An empty property value will lead to the error: "Application session scope is no
 |true/false
 |true
 |Defines if Vividus publishes the application source code on failure
+
+|ui.context.self-healing
+|true/false
+|false
+|If set to `true` will try to reset context when it became stale
