@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.report;
+package org.vividus.log;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -54,9 +54,9 @@ import org.vividus.model.Statistic;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
-class MetadataLoggerTests
+class TestInfoLoggerTests
 {
-    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(MetadataLogger.class);
+    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(TestInfoLogger.class);
     private static final String FORMAT = "{}={}";
     private static final String MESSAGE = "This is a very long message that should be wrapped to defined cell size "
             + "and with special char: %";
@@ -74,7 +74,7 @@ class MetadataLoggerTests
     {
         Properties properties = new Properties();
         properties.put(key, "value");
-        MetadataLogger.logPropertiesSecurely(properties);
+        TestInfoLogger.logPropertiesSecurely(properties);
         assertThat(LOGGER.getLoggingEvents(), is(List.of(info(FORMAT, key, "****"))));
     }
 
@@ -88,7 +88,7 @@ class MetadataLoggerTests
         Properties properties = new Properties();
         properties.put(keyString, valueString);
         properties.put(keyInt, valueInt);
-        MetadataLogger.logPropertiesSecurely(properties);
+        TestInfoLogger.logPropertiesSecurely(properties);
         assertThat(LOGGER.getLoggingEvents(), is(List.of(
                 info(FORMAT, keyString, valueString),
                 info(FORMAT, keyInt, valueInt)
@@ -135,7 +135,7 @@ class MetadataLoggerTests
                            NodeType.SCENARIO, statistic,
                            NodeType.STEP, statistic));
             reporter.when(StatisticsStoryReporter::getFailures).thenReturn(failures);
-            MetadataLogger.logEnvironmentMetadata();
+            TestInfoLogger.logEnvironmentMetadata();
             ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
             assertThat(loggingEvents, hasSize(1));
             assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
@@ -180,7 +180,7 @@ class MetadataLoggerTests
     @Test
     void shouldPrintBanner()
     {
-        MetadataLogger.drawBanner();
+        TestInfoLogger.drawBanner();
         assertThat(LOGGER.getLoggingEvents(), is(List.of(info("\n{}", ResourceUtils.loadResource("banner.vividus")))));
     }
 }

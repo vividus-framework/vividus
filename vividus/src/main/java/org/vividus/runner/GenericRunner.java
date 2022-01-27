@@ -39,7 +39,7 @@ import org.vividus.IRunStatusProvider;
 import org.vividus.Status;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
-import org.vividus.report.MetadataLogger;
+import org.vividus.log.TestInfoLogger;
 
 public class GenericRunner extends JUnitStories
 {
@@ -57,8 +57,8 @@ public class GenericRunner extends JUnitStories
         Vividus.init();
         batchedPathFinder = BeanFactory.getBean(IBatchedPathFinder.class);
         embedder = BeanFactory.getBean(embedderBeanName, Embedder.class);
-        MetadataLogger.logPropertiesSecurely(System.getProperties());
-        MetadataLogger.logPropertiesSecurely(BeanFactory.getBean("properties", Properties.class));
+        TestInfoLogger.logPropertiesSecurely(System.getProperties());
+        TestInfoLogger.logPropertiesSecurely(BeanFactory.getBean("properties", Properties.class));
     }
 
     protected static void setEmbedderBeanName(String embedderBeanName)

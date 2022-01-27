@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,17 @@ import static org.mockito.Mockito.mockStatic;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.vividus.report.MetadataLogger;
+import org.vividus.log.TestInfoLogger;
 
 class SetupStepsTests
 {
     @Test
     void shouldLogEnvironmentMetadataAfterStories()
     {
-        try (MockedStatic<MetadataLogger> metadataLogger = mockStatic(MetadataLogger.class))
+        try (MockedStatic<TestInfoLogger> metadataLogger = mockStatic(TestInfoLogger.class))
         {
             new SetupSteps().afterStories();
-            metadataLogger.verify(MetadataLogger::logEnvironmentMetadata);
+            metadataLogger.verify(TestInfoLogger::logEnvironmentMetadata);
         }
     }
 }
