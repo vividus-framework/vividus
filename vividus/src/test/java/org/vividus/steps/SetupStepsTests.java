@@ -27,10 +27,10 @@ class SetupStepsTests
     @Test
     void shouldLogEnvironmentMetadataAfterStories()
     {
-        try (MockedStatic<TestInfoLogger> metadataLogger = mockStatic(TestInfoLogger.class))
+        try (MockedStatic<TestInfoLogger> testInfoLogger = mockStatic(TestInfoLogger.class))
         {
             new SetupSteps().afterStories();
-            metadataLogger.verify(TestInfoLogger::logEnvironmentMetadata);
+            testInfoLogger.verify(TestInfoLogger::logEnvironmentMetadata);
         }
     }
 }
