@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.mockito.MockedStatic;
 import org.vividus.IBatchedPathFinder;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
-import org.vividus.report.MetadataLogger;
+import org.vividus.log.TestInfoLogger;
 
 class GenericRunnerTests
 {
@@ -39,7 +39,7 @@ class GenericRunnerTests
         GenericRunner.setEmbedderBeanName(embedderBeanName);
         try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
                 MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                MockedStatic<MetadataLogger> metadataLogger = mockStatic(MetadataLogger.class))
+                MockedStatic<TestInfoLogger> metadataLogger = mockStatic(TestInfoLogger.class))
         {
             IBatchedPathFinder batchedPathFinder = mock(IBatchedPathFinder.class);
             beanFactory.when(() -> BeanFactory.getBean(IBatchedPathFinder.class)).thenReturn(batchedPathFinder);
@@ -51,8 +51,8 @@ class GenericRunnerTests
             GenericRunner genericRunner = new GenericRunner();
             assertEquals(embedder, genericRunner.configuredEmbedder());
             vividus.verify(Vividus::init);
-            metadataLogger.verify(() -> MetadataLogger.logPropertiesSecurely(systemProperties));
-            metadataLogger.verify(() -> MetadataLogger.logPropertiesSecurely(springProperties));
+            metadataLogger.verify(() -> TestInfoLogger.logPropertiesSecurely(systemProperties));
+            metadataLogger.verify(() -> TestInfoLogger.logPropertiesSecurely(springProperties));
         }
     }
 }

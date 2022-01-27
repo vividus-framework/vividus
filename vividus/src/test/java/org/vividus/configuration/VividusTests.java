@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.vividus.report.MetadataLogger;
+import org.vividus.log.TestInfoLogger;
 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ResourceList;
@@ -41,7 +41,7 @@ class VividusTests
     void shouldDrawBannerAfterLoggerConfigurations()
     {
         try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                MockedStatic<MetadataLogger> metadataLogger = mockStatic(MetadataLogger.class);
+                MockedStatic<TestInfoLogger> metadataLogger = mockStatic(TestInfoLogger.class);
                 MockedConstruction<ClassGraph> classGraph = mockConstruction(ClassGraph.class, (mock, context) -> {
                     when(mock.acceptPackagesNonRecursive("")).thenReturn(mock);
                     ScanResult scanResult = Mockito.mock(ScanResult.class);
@@ -53,7 +53,7 @@ class VividusTests
             List<ClassGraph> constructedScanners = classGraph.constructed();
             assertThat(constructedScanners, hasSize(1));
             verify(classGraph.constructed().get(0)).scan();
-            metadataLogger.verify(MetadataLogger::drawBanner);
+            metadataLogger.verify(TestInfoLogger::drawBanner);
             beanFactory.verify(BeanFactory::open);
         }
     }

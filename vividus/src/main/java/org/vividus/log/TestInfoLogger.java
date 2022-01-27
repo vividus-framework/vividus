@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.report;
+package org.vividus.log;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,7 +42,7 @@ import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_LongestLine;
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 
-public final class MetadataLogger
+public final class TestInfoLogger
 {
     private static final int MAX_CELL_WIDTH = 50;
     private static final int MARGIN = 3;
@@ -50,12 +50,12 @@ public final class MetadataLogger
     private static final int HEADER_SIZE = 40;
     private static final String CATEGORY_FORMAT = "%s%n %s:%n";
     private static final String NEW_LINE = "%n";
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataLogger.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestInfoLogger.class);
     private static final Pattern SECURE_KEY_PATTERN = Pattern
             .compile(".*(password|((access|api|private)-)?(key|secret|token)).*", Pattern.CASE_INSENSITIVE);
     private static final int HORIZONTAL_RULE_LENGTH = 60;
 
-    private MetadataLogger()
+    private TestInfoLogger()
     {
     }
 
@@ -157,7 +157,7 @@ public final class MetadataLogger
                 .stream()
                 .map(e -> Map.entry((String) e.getKey(), e.getValue()))
                 .sorted(Entry.comparingByKey())
-                .forEach(MetadataLogger::logPropertySecurely);
+                .forEach(TestInfoLogger::logPropertySecurely);
     }
 
     private static void logPropertySecurely(Entry<String, Object> entry)
