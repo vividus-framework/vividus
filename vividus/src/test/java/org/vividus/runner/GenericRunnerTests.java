@@ -39,7 +39,7 @@ class GenericRunnerTests
         GenericRunner.setEmbedderBeanName(embedderBeanName);
         try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
                 MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                MockedStatic<TestInfoLogger> metadataLogger = mockStatic(TestInfoLogger.class))
+                MockedStatic<TestInfoLogger> testInfoLogger = mockStatic(TestInfoLogger.class))
         {
             IBatchedPathFinder batchedPathFinder = mock(IBatchedPathFinder.class);
             beanFactory.when(() -> BeanFactory.getBean(IBatchedPathFinder.class)).thenReturn(batchedPathFinder);
@@ -51,8 +51,8 @@ class GenericRunnerTests
             GenericRunner genericRunner = new GenericRunner();
             assertEquals(embedder, genericRunner.configuredEmbedder());
             vividus.verify(Vividus::init);
-            metadataLogger.verify(() -> TestInfoLogger.logPropertiesSecurely(systemProperties));
-            metadataLogger.verify(() -> TestInfoLogger.logPropertiesSecurely(springProperties));
+            testInfoLogger.verify(() -> TestInfoLogger.logPropertiesSecurely(systemProperties));
+            testInfoLogger.verify(() -> TestInfoLogger.logPropertiesSecurely(springProperties));
         }
     }
 }

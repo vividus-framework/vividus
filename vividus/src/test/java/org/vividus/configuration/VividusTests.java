@@ -41,7 +41,7 @@ class VividusTests
     void shouldDrawBannerAfterLoggerConfigurations()
     {
         try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                MockedStatic<TestInfoLogger> metadataLogger = mockStatic(TestInfoLogger.class);
+                MockedStatic<TestInfoLogger> testInfoLogger = mockStatic(TestInfoLogger.class);
                 MockedConstruction<ClassGraph> classGraph = mockConstruction(ClassGraph.class, (mock, context) -> {
                     when(mock.acceptPackagesNonRecursive("")).thenReturn(mock);
                     ScanResult scanResult = Mockito.mock(ScanResult.class);
@@ -53,7 +53,7 @@ class VividusTests
             List<ClassGraph> constructedScanners = classGraph.constructed();
             assertThat(constructedScanners, hasSize(1));
             verify(classGraph.constructed().get(0)).scan();
-            metadataLogger.verify(TestInfoLogger::drawBanner);
+            testInfoLogger.verify(TestInfoLogger::drawBanner);
             beanFactory.verify(BeanFactory::open);
         }
     }
