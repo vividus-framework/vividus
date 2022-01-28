@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.mobileapp.steps;
+package org.vividus.mobileapp.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

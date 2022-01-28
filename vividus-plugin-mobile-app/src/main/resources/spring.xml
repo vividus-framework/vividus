@@ -52,7 +52,7 @@
         <constructor-arg index="0" value="${mobile-environment.device.folder-for-file-upload}" />
     </bean>
 
-    <bean id="iOSPerformanceSteps" class="org.vividus.bdd.mobileapp.steps.IOSPerformanceSteps" />
+    <bean id="iOSPerformanceSteps" class="org.vividus.mobileapp.steps.IOSPerformanceSteps" />
 
     <bean id="networkSteps" class="org.vividus.mobileapp.steps.NetworkSteps">
         <constructor-arg>
