@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,14 @@ class AdaptedDelegatingReportPortalStoryReporterTests
         String step = "When I play Starfield";
         adaptedReporter.beforeStep(new Step(StepExecutionType.EXECUTABLE, step));
         verify(reporter).beforeStep(step);
+    }
+
+    @Test
+    void shouldNotCallBeforeStepForTheComments()
+    {
+        String step = "!-- 'It just works' T.H.";
+        adaptedReporter.beforeStep(new Step(StepExecutionType.COMMENT, step));
+        verifyNoInteractions(reporter);
     }
 
     @Test
