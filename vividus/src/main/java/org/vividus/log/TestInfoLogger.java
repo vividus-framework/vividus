@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.WordUtils;
@@ -54,6 +55,7 @@ public final class TestInfoLogger
     private static final Pattern SECURE_KEY_PATTERN = Pattern
             .compile(".*(password|((access|api|private)-)?(key|secret|token)).*", Pattern.CASE_INSENSITIVE);
     private static final int HORIZONTAL_RULE_LENGTH = 60;
+    private static final String HORIZONTAL_RULE = HYPHEN.repeat(HORIZONTAL_RULE_LENGTH);
 
     private TestInfoLogger()
     {
@@ -66,9 +68,8 @@ public final class TestInfoLogger
 
     public static void logEnvironmentMetadata()
     {
-        if (LOGGER.isInfoEnabled())
+        logInfoMessage(() ->
         {
-            String horizontalRule = HYPHEN.repeat(HORIZONTAL_RULE_LENGTH);
             int maxKeyLength = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION
                     .values()
                     .stream()
@@ -81,13 +82,49 @@ public final class TestInfoLogger
             {
                 message.format(NEW_LINE);
                 EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.forEach((category, properties) -> {
-                    message.format(CATEGORY_FORMAT, horizontalRule, category.getCategoryName());
+                    message.format(CATEGORY_FORMAT, HORIZONTAL_RULE, category.getCategoryName());
                     properties.forEach((name, value) -> message.format(propertyFormat, name, value));
                 });
                 logExecutionStatistics(message);
-                LOGGER.atInfo().log(message::toString);
+                return message.toString();
             }
-        }
+        });
+    }
+
+    public static void logExecutionPlan(Map<String, List<String>> executionPlan)
+    {
+        logInfoMessage(() ->
+        {
+            String storyFormat = "%n     %s";
+            String separatorFormat = "%n%s";
+
+            try (Formatter message = new Formatter())
+            {
+                message.format(separatorFormat, HORIZONTAL_RULE);
+                message.format("%n Execution plan:");
+
+                executionPlan.forEach((batchKey, stories) ->
+                {
+                    message.format("%n   %s:", batchKey);
+
+                    if (!stories.isEmpty())
+                    {
+                        stories.forEach(story -> message.format(storyFormat, story));
+                        return;
+                    }
+                    message.format(storyFormat, "[no stories found]");
+                });
+
+                message.format(separatorFormat, HORIZONTAL_RULE);
+
+                return message.toString();
+            }
+        });
+    }
+
+    private static void logInfoMessage(Supplier<String> messageSupplier)
+    {
+        LOGGER.atInfo().log(messageSupplier);
     }
 
     private static void logExecutionStatistics(Formatter message)

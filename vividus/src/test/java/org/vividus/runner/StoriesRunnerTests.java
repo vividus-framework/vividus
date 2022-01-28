@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.lang3.function.FailableRunnable;
+import org.apache.commons.lang3.function.FailableConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -51,20 +51,21 @@ class StoriesRunnerTests
     @Test
     void shouldRun() throws IOException
     {
-        performTest(() ->
+        performTest(testInfoLogger ->
         {
             StoriesRunner runner = new StoriesRunner();
 
             runner.run();
 
             verify(batchedEmbedder).runStoriesAsPaths(BATCH_TO_PATHS);
+            testInfoLogger.verify(() -> TestInfoLogger.logExecutionPlan(BATCH_TO_PATHS));
         });
     }
 
     @Test
     void shouldGetStoryPaths() throws IOException
     {
-        performTest(() ->
+        performTest(testInfoLogger ->
         {
             StoriesRunner runner = new StoriesRunner();
 
@@ -72,11 +73,11 @@ class StoriesRunnerTests
         });
     }
 
-    private void performTest(FailableRunnable<IOException> test) throws IOException
+    private void performTest(FailableConsumer<MockedStatic<TestInfoLogger>, IOException> test) throws IOException
     {
         try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
                 MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                MockedStatic<TestInfoLogger> metadataLogger = mockStatic(TestInfoLogger.class))
+                MockedStatic<TestInfoLogger> testInfoLogger = mockStatic(TestInfoLogger.class))
         {
             beanFactory.when(() -> BeanFactory.getBean(IBatchedPathFinder.class)).thenReturn(batchedPathFinder);
             when(batchedPathFinder.getPaths()).thenReturn(BATCH_TO_PATHS);
@@ -84,7 +85,7 @@ class StoriesRunnerTests
             Properties springProperties = mock(Properties.class);
             beanFactory.when(() -> BeanFactory.getBean("properties", Properties.class)).thenReturn(springProperties);
 
-            test.run();
+            test.accept(testInfoLogger);
         }
     }
 }

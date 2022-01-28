@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -182,5 +183,31 @@ class TestInfoLoggerTests
     {
         TestInfoLogger.drawBanner();
         assertThat(LOGGER.getLoggingEvents(), is(List.of(info("\n{}", ResourceUtils.loadResource("banner.vividus")))));
+    }
+
+    @Test
+    void shouldPringExecutionPlan()
+    {
+        Map<String, List<String>> executionPlan = new LinkedHashMap<>();
+        executionPlan.put("batch-1", List.of("path1"));
+        executionPlan.put("batch-2", List.of("path2", "path3"));
+        executionPlan.put("batch-3", List.of());
+
+        TestInfoLogger.logExecutionPlan(executionPlan);
+
+        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
+        assertThat(loggingEvents, hasSize(1));
+        assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
+                "(?s)\\s*"
+                + "-{60}\\s+"
+                + " Execution plan:\\s*"
+                + "   batch-1:\\s*"
+                + "     path1\\s*"
+                + "   batch-2:\\s*"
+                + "     path2\\s*"
+                + "     path3\\s*"
+                + "   batch-3:\\s*"
+                + "     \\[no stories found\\]\\s*"
+                + "-{60}"));
     }
 }
