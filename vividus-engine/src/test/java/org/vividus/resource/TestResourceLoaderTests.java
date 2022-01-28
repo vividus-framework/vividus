@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ class TestResourceLoaderTests
         testResourceLoader = new TestResourceLoader(propertyParser, resourcePatternResolver);
     }
 
-    private Resource[] mockGetAllResources(String prefix, String... urls) throws IOException
+    private Resource[] mockResources(String... urls) throws IOException
     {
         Resource[] allResources = new Resource[urls.length];
         for (int i = 0; i < urls.length; i++)
@@ -74,6 +74,12 @@ class TestResourceLoaderTests
             when(resource.getURL()).thenReturn(new URL(urls[i]));
             allResources[i] = resource;
         }
+        return allResources;
+    }
+
+    private Resource[] mockGetAllResources(String prefix, String... urls) throws IOException
+    {
+        Resource[] allResources = mockResources(urls);
         when(resourcePatternResolver.getResources(startsWith(prefix))).thenReturn(allResources);
         return allResources;
     }
@@ -81,11 +87,13 @@ class TestResourceLoaderTests
     @Test
     void testGetFileResources() throws IOException
     {
+        var path = "file:///C:/Users/test/";
+        var fileName = "temp.table";
         initLoader(Map.of(BRAND_KEY, BRAND_VALUE));
-        var allResources = mockGetAllResources("file://",
-                "file:///C:/Users/test/vividus/ca/temp.table", "file:///C:/Users/test/vividus/temp.table");
+        Resource[] allResources = mockResources("file:///C:/Users/test/vividus/ca/temp.table");
+        when(resourcePatternResolver.getResources(path + fileName)).thenReturn(allResources);
 
-        var actualResources = testResourceLoader.getResources("file:///C:/Users/test/", "temp.table");
+        var actualResources = testResourceLoader.getResources(path, fileName);
         assertArrayEquals(allResources, actualResources);
     }
 
