@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.vividus.BatchedEmbedder;
 import org.vividus.IBatchedPathFinder;
 import org.vividus.configuration.BeanFactory;
+import org.vividus.log.TestInfoLogger;
 
 @RunWith(JUnit4StoryRunner.class)
 public class StoriesRunner extends AbstractTestRunner
@@ -49,7 +50,9 @@ public class StoriesRunner extends AbstractTestRunner
     @Override
     public void run()
     {
-        batchedEmbedder.runStoriesAsPaths(getPaths());
+        Map<String, List<String>> paths = getPaths();
+        TestInfoLogger.logExecutionPlan(paths);
+        batchedEmbedder.runStoriesAsPaths(paths);
     }
 
     @Override
