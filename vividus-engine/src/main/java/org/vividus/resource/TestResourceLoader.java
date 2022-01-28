@@ -55,7 +55,7 @@ public class TestResourceLoader implements ITestResourceLoader
         {
             String normalizedResourceLocation = StringUtils.appendIfMissing(resourceLocation, SEPARATOR);
             String locationPattern;
-            String fullLocationPattern;            
+            String fullLocationPattern;
             if (resourceLocation.startsWith(FILE_URL_PREFIX))
             {
                 locationPattern = normalizedResourceLocation;
