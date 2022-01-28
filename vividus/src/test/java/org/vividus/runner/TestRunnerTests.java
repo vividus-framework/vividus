@@ -20,39 +20,56 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 
+import java.util.List;
 import java.util.Properties;
 
 import org.jbehave.core.embedder.Embedder;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.vividus.IBatchedPathFinder;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.log.TestInfoLogger;
 
-class GenericRunnerTests
+class TestRunnerTests
 {
     @Test
     void shouldPerformInitInInstanceInitializationBlock()
     {
-        String embedderBeanName = "embedderBeanName";
-        GenericRunner.setEmbedderBeanName(embedderBeanName);
         try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
                 MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
                 MockedStatic<TestInfoLogger> testInfoLogger = mockStatic(TestInfoLogger.class))
         {
-            IBatchedPathFinder batchedPathFinder = mock(IBatchedPathFinder.class);
-            beanFactory.when(() -> BeanFactory.getBean(IBatchedPathFinder.class)).thenReturn(batchedPathFinder);
-            Embedder embedder = mock(Embedder.class);
-            beanFactory.when(() -> BeanFactory.getBean(embedderBeanName, Embedder.class)).thenReturn(embedder);
             Properties systemProperties = System.getProperties();
             Properties springProperties = mock(Properties.class);
             beanFactory.when(() -> BeanFactory.getBean("properties", Properties.class)).thenReturn(springProperties);
-            GenericRunner genericRunner = new GenericRunner();
+            Embedder embedder = mock(Embedder.class);
+            AbstractTestRunner genericRunner = new TestRunner(embedder);
             assertEquals(embedder, genericRunner.configuredEmbedder());
             vividus.verify(Vividus::init);
             testInfoLogger.verify(() -> TestInfoLogger.logPropertiesSecurely(systemProperties));
             testInfoLogger.verify(() -> TestInfoLogger.logPropertiesSecurely(springProperties));
+        }
+    }
+
+    private static final class TestRunner extends AbstractTestRunner
+    {
+        private final Embedder embedder;
+
+        private TestRunner(Embedder embedder)
+        {
+            this.embedder = embedder;
+        }
+
+        @Override
+        public Embedder configuredEmbedder()
+        {
+            return embedder;
+        }
+
+        @Override
+        public List<String> storyPaths()
+        {
+            return List.of();
         }
     }
 }

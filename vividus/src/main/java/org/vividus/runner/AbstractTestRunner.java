@@ -16,114 +16,67 @@
 
 package org.vividus.runner;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.lang.invoke.MethodHandles;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import org.jbehave.core.configuration.Configuration;
-import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+import org.junit.runner.Runner;
+import org.junit.runners.JUnit4;
+import org.junit.runners.model.InitializationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.BatchedEmbedder;
-import org.vividus.IBatchedPathFinder;
 import org.vividus.IRunStatusProvider;
 import org.vividus.Status;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.log.TestInfoLogger;
 
-public class GenericRunner extends JUnitStories
+public abstract class AbstractTestRunner extends JUnitStories
 {
     private static final int RUN_PASSED_EXIT_CODE = 0;
     private static final int RUN_KNOWN_ISSUES_EXIT_CODE = 1;
     private static final int RUN_FAILED_EXIT_CODE = 2;
     private static final int ERROR_EXIT_CODE = 3;
 
-    private static String embedderBeanName;
-    private final Embedder embedder;
-    private final IBatchedPathFinder batchedPathFinder;
+    private static Class<?> runnerClass;
 
-    public GenericRunner()
+    protected AbstractTestRunner()
     {
         Vividus.init();
-        batchedPathFinder = BeanFactory.getBean(IBatchedPathFinder.class);
-        embedder = BeanFactory.getBean(embedderBeanName, Embedder.class);
         TestInfoLogger.logPropertiesSecurely(System.getProperties());
         TestInfoLogger.logPropertiesSecurely(BeanFactory.getBean("properties", Properties.class));
     }
 
-    protected static void setEmbedderBeanName(String embedderBeanName)
+    protected static void setRunnerClass(Class<?> runnerClass)
     {
-        GenericRunner.embedderBeanName = embedderBeanName;
-    }
-
-    @Override
-    public Embedder configuredEmbedder()
-    {
-        return embedder;
+        AbstractTestRunner.runnerClass = runnerClass;
     }
 
     @Override
     public Configuration configuration()
     {
-        return embedder.configuration();
+        return configuredEmbedder().configuration();
     }
 
     @Override
     public InjectableStepsFactory stepsFactory()
     {
-        return embedder.stepsFactory();
+        return configuredEmbedder().stepsFactory();
     }
 
-    @Override
-    public List<String> storyPaths()
+    @SuppressWarnings("NoMainMethodInAbstractClass")
+    public static void main(String[] args) throws InitializationError
     {
-        return getPaths().values().stream().flatMap(List::stream).collect(Collectors.toList());
-    }
-
-    @Override
-    public void run()
-    {
-        Embedder embedder = configuredEmbedder();
-        if (embedder instanceof BatchedEmbedder)
-        {
-            ((BatchedEmbedder) embedder).runStoriesAsPaths(getPaths());
-        }
-        else
-        {
-            super.run();
-        }
-    }
-
-    private Map<String, List<String>> getPaths()
-    {
-        try
-        {
-            return batchedPathFinder.getPaths();
-        }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    public static void main(String[] args)
-    {
-        Class<?> clazz = MethodHandles.lookup().lookupClass();
-        Result result = new JUnitCore().run(clazz);
+        Runner runner = new JUnit4(runnerClass);
+        Result result = new JUnitCore().run(runner);
         int exitCode;
         if (result.getFailureCount() > 0)
         {
-            Logger logger = LoggerFactory.getLogger(clazz);
+            Logger logger = LoggerFactory.getLogger(runnerClass);
             result.getFailures().forEach(f ->
             {
                 logger.error("Failure: {}", f);
