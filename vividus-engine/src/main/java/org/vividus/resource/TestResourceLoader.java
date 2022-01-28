@@ -54,18 +54,19 @@ public class TestResourceLoader implements ITestResourceLoader
         try
         {
             String normalizedResourceLocation = StringUtils.appendIfMissing(resourceLocation, SEPARATOR);
-            String locationPattern = null;
-            Resource[] allResources = null;
+            String locationPattern;
+            String fullLocationPattern;            
             if (resourceLocation.startsWith(FILE_URL_PREFIX))
             {
                 locationPattern = normalizedResourceLocation;
-                allResources = resourcePatternResolver.getResources(locationPattern + resourcePattern);
+                fullLocationPattern = locationPattern + resourcePattern;
             }
             else
             {
                 locationPattern = CLASSPATH_ALL_URL_PREFIX + normalizedResourceLocation;
-                allResources = resourcePatternResolver.getResources(locationPattern + "**/" + resourcePattern);
+                fullLocationPattern = locationPattern + "**/" + resourcePattern;
             }
+            Resource[] allResources = resourcePatternResolver.getResources(fullLocationPattern);
             List<URL> resourceUrls = new ArrayList<>(allResources.length);
             for (Resource resource : allResources)
             {
