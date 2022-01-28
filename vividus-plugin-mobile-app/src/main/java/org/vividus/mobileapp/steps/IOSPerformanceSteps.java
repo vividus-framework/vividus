@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.bdd.mobileapp.steps;
+package org.vividus.mobileapp.steps;
 
 import java.io.IOException;
 import java.nio.file.Files;
