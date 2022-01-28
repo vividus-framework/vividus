@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,9 +54,19 @@ public class TestResourceLoader implements ITestResourceLoader
         try
         {
             String normalizedResourceLocation = StringUtils.appendIfMissing(resourceLocation, SEPARATOR);
-            String locationPattern = resourceLocation.startsWith(FILE_URL_PREFIX)
-                    ? normalizedResourceLocation : CLASSPATH_ALL_URL_PREFIX + normalizedResourceLocation;
-            Resource[] allResources = resourcePatternResolver.getResources(locationPattern + "**/" + resourcePattern);
+            String locationPattern;
+            String fullLocationPattern;
+            if (resourceLocation.startsWith(FILE_URL_PREFIX))
+            {
+                locationPattern = normalizedResourceLocation;
+                fullLocationPattern = locationPattern + resourcePattern;
+            }
+            else
+            {
+                locationPattern = CLASSPATH_ALL_URL_PREFIX + normalizedResourceLocation;
+                fullLocationPattern = locationPattern + "**/" + resourcePattern;
+            }
+            Resource[] allResources = resourcePatternResolver.getResources(fullLocationPattern);
             List<URL> resourceUrls = new ArrayList<>(allResources.length);
             for (Resource resource : allResources)
             {
