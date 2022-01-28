@@ -334,7 +334,7 @@ jobs:
         name: SauceLabs - System Tests - Allure report - iOS (Original)
         path: vividus-tests/output/reports/sl-ios-allure-original
 
-    - name: SauceLabs - iOS Proxy- Mobile App - Run system tests
+    - name: SauceLabs - iOS Proxy - Mobile App - Run system tests
       if: matrix.platform == 'ubuntu-latest'
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
