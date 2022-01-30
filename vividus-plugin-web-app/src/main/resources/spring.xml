@@ -44,8 +44,6 @@
         <property name="webDriverType" value="${selenium.browser}" />
     </bean>
 
-    <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory" />
-
     <bean id="elementUtil" class="org.vividus.ui.web.util.ElementUtil" />
 
     <bean class="org.vividus.selenium.screenshot.WebScreenshotTaker" parent="abstractScreenshotTaker">
