@@ -499,8 +499,7 @@ jobs:
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                   -Pvividus.selenium.grid.capabilities.bstack\:options.projectName=Vividus \
-                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="Vividus BrowserStack Integration Tests" \
-                                                  -Pvividus.selenium.grid.capabilities.browserVersion=latest
+                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="Vividus BrowserStack Integration Tests"
           done
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY, Browserstack integration tests will be skipped
