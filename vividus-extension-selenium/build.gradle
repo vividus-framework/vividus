@@ -13,15 +13,15 @@ project.description = 'Vividus extension for selenium'
      implementation project(':vividus-util')
      implementation project(':vividus-soft-assert')
 
-     api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: seleniumVersion)
-     api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: seleniumVersion)
-     api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: seleniumVersion)
+     api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: "${seleniumVersion}")
+     api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: "${seleniumVersion}")
+     api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: "${seleniumVersion}")
      api(group: 'io.appium', name: 'java-client', version: '8.0.0-beta2')
 
      api(group: 'ru.yandex.qatools.ashot', name: 'ashot', version: '1.5.4')
 
-     api(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-core', version: browserupProxyVersion)
-     implementation(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-mitm', version: browserupProxyVersion)
+     api(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-core', version: "${browserupProxyVersion}")
+     implementation(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-mitm', version: "${browserupProxyVersion}")
 
      implementation platform(group: 'com.google.zxing', name: 'zxing-parent', version: '3.4.1')
      implementation(group: 'com.google.zxing', name: 'core')
