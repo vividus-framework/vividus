@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +27,30 @@ import io.appium.java_client.ios.IOSDriver;
 
 public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
 {
+    private final boolean useW3C;
+
+    public RemoteWebDriverFactory(boolean useW3C)
+    {
+        this.useW3C = useW3C;
+    }
+
     @Override
     public RemoteWebDriver getRemoteWebDriver(URL url, Capabilities capabilities)
     {
-        if (GenericWebDriverManager.isIOS(capabilities) || GenericWebDriverManager.isTvOS(capabilities))
+        /* Selenium 4 declares that it only supports W3C and nevertheless still writes  JWP's "desiredCapabilities" into
+        "createSession" JSON. Appium Java client eliminates that: https://github.com/appium/java-client/pull/1537.
+        But still some clouds (e.g. SmartBear CrossBrowserTesting) are not prepared for W3c, so we should avoid
+        using Appium drivers to create sessions for web tests. */
+        if (useW3C)
         {
-            return new IOSDriver(url, capabilities);
-        }
-        else if (GenericWebDriverManager.isAndroid(capabilities))
-        {
-            return new AndroidDriver(url, capabilities);
+            if (GenericWebDriverManager.isIOS(capabilities) || GenericWebDriverManager.isTvOS(capabilities))
+            {
+                return new IOSDriver(url, capabilities);
+            }
+            else if (GenericWebDriverManager.isAndroid(capabilities))
+            {
+                return new AndroidDriver(url, capabilities);
+            }
         }
         return new RemoteWebDriver(url, capabilities);
     }
