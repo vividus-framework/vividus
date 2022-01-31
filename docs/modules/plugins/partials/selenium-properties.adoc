@@ -19,4 +19,4 @@ An empty property value will lead to the error: "Application session scope is no
 |ui.context.self-healing
 |true/false
 |false
-|If set to `true` will try to reset context when it became stale
+|If the value is set to `true`, an attempt to reset context will be performed when it becomes stale
