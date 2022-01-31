@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.vividus.selenium;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -27,13 +25,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 
@@ -45,30 +41,33 @@ class RemoteWebDriverFactoryTests
 {
     @Mock private URL url;
     @Mock private Capabilities capabilities;
-    @InjectMocks private RemoteWebDriverFactory remoteWebDriverFactory;
 
     @SuppressWarnings("rawtypes")
     @Test
     void shouldCreateDriverForIOS()
     {
-        try (MockedConstruction<IOSDriver> driver = mockConstruction(IOSDriver.class);
-                MockedStatic<GenericWebDriverManager> manager = mockStatic(GenericWebDriverManager.class))
+        try (MockedStatic<GenericWebDriverManager> manager = mockStatic(GenericWebDriverManager.class))
         {
             manager.when(() -> GenericWebDriverManager.isIOS(capabilities)).thenReturn(true);
-            checkDriver(remoteWebDriverFactory.getRemoteWebDriver(url, capabilities), driver.constructed());
+            testWebDriverCreation(true, IOSDriver.class);
         }
+    }
+
+    @Test
+    void shouldCreateRemoteWebDriverWhenNonW3cProtocolIsUsed()
+    {
+        testWebDriverCreation(false, RemoteWebDriver.class);
     }
 
     @SuppressWarnings("rawtypes")
     @Test
     void shouldCreateDriverForTvOS()
     {
-        try (MockedConstruction<IOSDriver> driver = mockConstruction(IOSDriver.class);
-                MockedStatic<GenericWebDriverManager> manager = mockStatic(GenericWebDriverManager.class))
+        try (MockedStatic<GenericWebDriverManager> manager = mockStatic(GenericWebDriverManager.class))
         {
             manager.when(() -> GenericWebDriverManager.isIOS(capabilities)).thenReturn(false);
             manager.when(() -> GenericWebDriverManager.isTvOS(capabilities)).thenReturn(true);
-            checkDriver(remoteWebDriverFactory.getRemoteWebDriver(url, capabilities), driver.constructed());
+            testWebDriverCreation(true, IOSDriver.class);
         }
     }
 
@@ -76,32 +75,33 @@ class RemoteWebDriverFactoryTests
     @Test
     void shouldCreateDriverForAndroid()
     {
-        try (MockedConstruction<AndroidDriver> driver = mockConstruction(AndroidDriver.class);
-                MockedStatic<GenericWebDriverManager> manager = mockStatic(GenericWebDriverManager.class))
+        try (MockedStatic<GenericWebDriverManager> manager = mockStatic(GenericWebDriverManager.class))
         {
             manager.when(() -> GenericWebDriverManager.isIOS(capabilities)).thenReturn(false);
             manager.when(() -> GenericWebDriverManager.isTvOS(capabilities)).thenReturn(false);
             manager.when(() -> GenericWebDriverManager.isAndroid(capabilities)).thenReturn(true);
-            checkDriver(remoteWebDriverFactory.getRemoteWebDriver(url, capabilities), driver.constructed());
+            testWebDriverCreation(true, AndroidDriver.class);
         }
     }
 
     @Test
     void shouldCreateRemoteWebDriver()
     {
-        try (MockedConstruction<RemoteWebDriver> driver = mockConstruction(RemoteWebDriver.class);
-                MockedStatic<GenericWebDriverManager> manager = mockStatic(GenericWebDriverManager.class))
+        try (MockedStatic<GenericWebDriverManager> manager = mockStatic(GenericWebDriverManager.class))
         {
             manager.when(() -> GenericWebDriverManager.isIOS(capabilities)).thenReturn(false);
             manager.when(() -> GenericWebDriverManager.isTvOS(capabilities)).thenReturn(false);
             manager.when(() -> GenericWebDriverManager.isAndroid(capabilities)).thenReturn(false);
-            checkDriver(remoteWebDriverFactory.getRemoteWebDriver(url, capabilities), driver.constructed());
+            testWebDriverCreation(true, RemoteWebDriver.class);
         }
     }
 
-    private void checkDriver(RemoteWebDriver actual, List<? extends WebDriver> drivers)
+    private <T> void testWebDriverCreation(boolean useW3C, Class<T> webDriveClass)
     {
-        assertThat(drivers, hasSize(1));
-        assertEquals(drivers.get(0), actual);
+        try (MockedConstruction<T> driver = mockConstruction(webDriveClass))
+        {
+            var actualDriver = new RemoteWebDriverFactory(useW3C).getRemoteWebDriver(url, capabilities);
+            assertEquals(driver.constructed(), List.of(actualDriver));
+        }
     }
 }

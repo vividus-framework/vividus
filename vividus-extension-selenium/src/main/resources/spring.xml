@@ -17,7 +17,9 @@
         <property name="remoteDriverUrl" value="${selenium.grid.url}" />
     </bean>
 
-    <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory" />
+    <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory">
+        <constructor-arg value="${selenium.grid.use-w3c}" />
+    </bean>
 
     <bean id="genericWebDriverManager" class="org.vividus.selenium.manager.GenericWebDriverManager" abstract="true">
         <property name="mobileApp" value="${mobile-app}" />
