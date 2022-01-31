@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -66,12 +67,25 @@ class SelfHealingUiContextTests extends UiContextTestsBase
     }
 
     @Test
+    void shouldReturnValueIfContextNotStale()
+    {
+        var webElement = mock(WebElement.class);
+        uiContext.putSearchContext(webElement, searchContextSetter);
+        doNothing().when(webElement).click();
+        uiContext.getSearchContext(WebElement.class).click();
+        verify(webElement).click();
+        verifyNoInteractions(searchContextSetter);
+        assertEquals(LOGGER.getLoggingEvents(), List.of());
+    }
+
+    @Test
     void shouldNotWrapWebDriver()
     {
         var webDriver = mock(WebDriver.class);
         uiContext.putSearchContext(webDriver, searchContextSetter);
         when(webDriver.getTitle()).thenThrow(new StaleElementReferenceException(MESSAGE));
-        assertThrows(StaleElementReferenceException.class, () -> ((WebDriver) uiContext.getSearchContext()).getTitle());
+        var searchContext = (WebDriver) uiContext.getSearchContext();
+        assertThrows(StaleElementReferenceException.class, searchContext::getTitle);
     }
 
     @Test
@@ -104,7 +118,8 @@ class SelfHealingUiContextTests extends UiContextTestsBase
         uiContext.putSearchContext(webElement, searchContextSetter);
         var exception = new StaleElementReferenceException(MESSAGE);
         doThrow(exception).when(webElement).click();
-        assertThrows(StaleElementReferenceException.class, () -> ((WebElement) uiContext.getSearchContext()).click());
+        var searchContext = (WebElement) uiContext.getSearchContext();
+        assertThrows(StaleElementReferenceException.class, searchContext::click);
         verify(webElement, times(2)).click();
         verify(searchContextSetter).setSearchContext();
         assertEquals(LOGGER.getLoggingEvents(), List.of(LoggingEvent.info(exception, RETRY_MESSAGE)));
@@ -117,7 +132,8 @@ class SelfHealingUiContextTests extends UiContextTestsBase
         uiContext.putSearchContext(webElement, searchContextSetter);
         var exception = new IllegalArgumentException(MESSAGE);
         doThrow(exception).when(webElement).click();
-        assertThrows(IllegalArgumentException.class, () -> ((WebElement) uiContext.getSearchContext()).click());
+        var searchContext = (WebElement) uiContext.getSearchContext();
+        assertThrows(IllegalArgumentException.class, searchContext::click);
         verify(webElement).click();
         verifyNoInteractions(searchContextSetter);
         assertEquals(LOGGER.getLoggingEvents(), List.of());
@@ -155,8 +171,8 @@ class SelfHealingUiContextTests extends UiContextTestsBase
         var webElement = mock(RemoteWebElement.class);
         uiContext.putSearchContext(webElement, searchContextSetter);
         doThrow(new StaleElementReferenceException(MESSAGE)).doNothing().when(webElement).click();
-        assertThrows(StaleElementReferenceException.class,
-                () -> uiContext.getSearchContext(RemoteWebElement.class).click());
+        var searchContext = uiContext.getSearchContext(RemoteWebElement.class);
+        assertThrows(StaleElementReferenceException.class, searchContext::click);
         assertEquals(LOGGER.getLoggingEvents(), List.of());
     }
 
