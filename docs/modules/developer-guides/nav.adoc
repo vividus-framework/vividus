@@ -1,2 +1,4 @@
 .Developer Guides
-* xref:custom-plugins.adoc[Custom Plugins]
+* xref:extension-points.adoc[Extension points]
+** xref:extensions.adoc[Extensions]
+** xref:plugins.adoc[Plugins]

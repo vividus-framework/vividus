@@ -1,10 +1,26 @@
-= Cutsom Plugins
+= Plugins
 
-VIVIDUS functionality can be extended with custom business logic. It could be
-done either in separate modules included then as dependencies, or in Gradle
-sub-projects belonging to the root test project, or in the test project directly.
-VIVIDUS defines API-s and conventions that must be followed while implementing
-custom extensions.
+Plugins are extensible and flexible mechanism for development. New plugin can be developed by
+3rd party team and integrated.
+
+The plugin configuration should be placed at the `/src/main/resources/spring.xml` path relatively
+to the project root.
+
+./src/main/resources/spring.xml
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+       default-lazy-init="true">
+
+    <!-- plugin bean definitions -->
+
+</beans>
+----
 
 == Dynamic variables
 

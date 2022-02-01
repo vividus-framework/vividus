@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,11 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 public final class BeanFactory
 {
-    private static final String[] LOCATIONS = {"classpath*:/org/vividus/spring.xml", "classpath*:/spring.xml"};
+    private static final String[] LOCATIONS = {
+        "classpath*:/org/vividus/spring.xml",
+        "classpath*:/vividus-extension/spring.xml",
+        "classpath*:/spring.xml"
+    };
 
     private static GenericXmlApplicationContext applicationContext = new GenericXmlApplicationContext();
 

@@ -1,0 +1,7 @@
+= Extension points
+
+VIVIDUS functionality can be extended with custom business logic. It could be
+done either in separate modules included then as dependencies, or in Gradle
+sub-projects belonging to the root test project, or in the test project directly.
+VIVIDUS defines API-s and conventions that must be followed while implementing
+custom extensions.
