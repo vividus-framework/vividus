@@ -19,5 +19,6 @@ An empty property value will lead to the error: "Application session scope is no
 |ui.context.self-healing
 |true/false
 |false
-|Incubating feature. If the value is set to `true`, an attempt to reset context will be performed when it becomes stale.
-=======
+a|_Incubating feature._
+
+If the value is set to `true`, an attempt to reset context will be performed when it becomes stale.
