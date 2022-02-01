@@ -11,9 +11,13 @@
                   factory-method="buildHttpClient" >
                 <constructor-arg>
                     <bean parent="httpClientConfig">
-                        <property name="username" value="${azure-devops.username}" />
-                        <property name="password" value="${azure-devops.password}" />
-                        <property name="preemptiveAuthEnabled" value="${azure-devops.preemptive-auth-enabled}" />
+                        <property name="authConfig">
+                            <bean class="org.vividus.http.client.AuthConfig">
+                                <property name="username" value="${azure-devops.username}" />
+                                <property name="password" value="${azure-devops.password}" />
+                                <property name="preemptiveAuthEnabled" value="${azure-devops.preemptive-auth-enabled}" />
+                            </bean>
+                        </property>
                         <property name="httpResponseHandlers">
                              <list>
                                  <bean class="org.vividus.http.handler.StatusCodeValidatingHandler" >
