@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,12 @@ public class UiContext implements IUiContext
     @Override
     public SearchContext getSearchContext()
     {
-        SearchContextData searchContext = testContext.get(KEY, SearchContextData.class);
+        return getSearchContextImpl();
+    }
+
+    private SearchContext getSearchContextImpl()
+    {
+        SearchContextData searchContext = getSearchContextData();
         if (searchContext != null)
         {
             return searchContext.getSearchContext();
@@ -50,7 +55,7 @@ public class UiContext implements IUiContext
     @Override
     public <T extends SearchContext> T getSearchContext(Class<T> clazz)
     {
-        SearchContext searchContext = getSearchContext();
+        SearchContext searchContext = getSearchContextImpl();
         if (clazz.isInstance(searchContext))
         {
             return clazz.cast(searchContext);
@@ -128,7 +133,12 @@ public class UiContext implements IUiContext
         this.testContext = testContext;
     }
 
-    private static class SearchContextData
+    protected SearchContextData getSearchContextData()
+    {
+        return testContext.get(KEY, SearchContextData.class);
+    }
+
+    protected static class SearchContextData
     {
         private SearchContext searchContext;
         private SearchContextSetter searchContextSetter;

@@ -71,3 +71,10 @@ When I switch to frame located `id(firstFrame)`
 When I switch to frame located `id(secondFrame)`
 When I click on element located `id(close)`
 Then number of elements found by `id(modalButton)` is equal to `1`
+
+
+Scenario: Verify context healing
+Given I am on a page with the URL '${vividus-test-site-url}'
+When I change context to element located `tagName(a)`
+When I execute javascript `location.reload();` with arguments:
+Then number of elements found by `cssSelector(img)` is = `1`

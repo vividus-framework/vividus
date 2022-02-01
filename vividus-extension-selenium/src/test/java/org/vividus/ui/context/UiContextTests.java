@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -46,81 +44,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
 @ExtendWith(MockitoExtension.class)
-class UiContextTests
+class UiContextTests extends UiContextTestsBase
 {
     private static final String EXPECTED_SEARCH_CONTEXT_OF_INTERFACE = "Expected search context of interface ";
     private static final String ASSERTING_ELEMENTS_KEY = "AssertingElements";
-
-    private final TestContext context = new SimpleTestContext()
-    {
-        private final Map<Object, Object> map = new HashMap<>();
-
-        @Override
-        public void clear()
-        {
-            map.clear();
-        }
-
-        @Override
-        public int size()
-        {
-            return map.size();
-        }
-
-        @Override
-        public void remove(Object key)
-        {
-            map.remove(key);
-        }
-
-        @Override
-        public void putAll(Map<Object, Object> map)
-        {
-            // Implementation is not needed
-        }
-
-        @Override
-        public void put(Object key, Object value)
-        {
-            map.put(key, value);
-        }
-
-        @Override
-        public void copyAllTo(Map<Object, Object> map)
-        {
-            // Implementation is not needed
-        }
-
-        @Override
-        public <T> T get(Object key, Class<T> type)
-        {
-            return type.cast(map.get(key));
-        }
-
-        @Override
-        public <T> T get(Object key, Supplier<T> initialValueSupplier)
-        {
-            // Implementation is not needed
-            return null;
-        }
-
-        @Override
-        public <T> T get(Object key)
-        {
-            // Implementation is not needed
-            return null;
-        }
-
-        @Override
-        public void putInitValueSupplier(Object key, Supplier<Object> initialValueSupplier)
-        {
-            // Implementation is not needed
-        }
-    };
 
     @Mock
     private IWebDriverProvider webDriverProviderMock;
@@ -138,45 +68,45 @@ class UiContextTests
     private WebDriver mockedWebDriver;
 
     @InjectMocks
-    private UiContext stepContext;
+    private UiContext uiContext;
 
     @Test
     void testGetSearchContext()
     {
-        stepContext.setTestContext(context);
-        stepContext.putSearchContext(searchContextMock, searchContextSetter);
-        SearchContext actualSearchContext = stepContext.getSearchContext();
+        uiContext.setTestContext(getContext());
+        uiContext.putSearchContext(searchContextMock, searchContextSetter);
+        SearchContext actualSearchContext = uiContext.getSearchContext();
         assertEquals(searchContextMock, actualSearchContext);
     }
 
     @Test
     void testGetSearchContextNotFound()
     {
-        stepContext.setTestContext(context);
-        assertNull(stepContext.getSearchContext());
+        uiContext.setTestContext(getContext());
+        assertNull(uiContext.getSearchContext());
     }
 
     @Test
     void testGetTypedSearchContext()
     {
-        stepContext.setTestContext(context);
+        uiContext.setTestContext(getContext());
         when(webDriverProviderMock.get()).thenReturn(mockedWebDriver);
         when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(true);
-        stepContext.reset();
+        uiContext.reset();
         Class<WebDriver> searchContextClass = WebDriver.class;
-        WebDriver actualSearchContext = stepContext.getSearchContext(searchContextClass);
+        WebDriver actualSearchContext = uiContext.getSearchContext(searchContextClass);
         assertEquals(mockedWebDriver, actualSearchContext);
     }
 
     @Test
     void testGetTypedSearchContextWithException()
     {
-        stepContext.setTestContext(context);
+        uiContext.setTestContext(getContext());
         when(webDriverProviderMock.get()).thenReturn(mockedWebDriver);
         when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(true);
-        stepContext.reset();
+        uiContext.reset();
         IllegalSearchContextException exception = assertThrows(IllegalSearchContextException.class,
-            () -> stepContext.getSearchContext(WebElement.class));
+            () -> uiContext.getSearchContext(WebElement.class));
         assertThat(exception.getMessage(), containsString(EXPECTED_SEARCH_CONTEXT_OF_INTERFACE
                 + "org.openqa.selenium.WebElement, but was class org.openqa.selenium.WebDriver"));
     }
@@ -184,9 +114,9 @@ class UiContextTests
     @Test
     void testGetNullSearchContext()
     {
-        stepContext.setTestContext(context);
-        stepContext.putSearchContext(null, searchContextSetter);
-        assertNull(stepContext.getSearchContext(WebDriver.class));
+        uiContext.setTestContext(getContext());
+        uiContext.putSearchContext(null, searchContextSetter);
+        assertNull(uiContext.getSearchContext(WebDriver.class));
         verify(softAssert).recordFailedAssertion(
                 EXPECTED_SEARCH_CONTEXT_OF_INTERFACE + "org.openqa.selenium.WebDriver, but was null search context");
     }
@@ -194,53 +124,53 @@ class UiContextTests
     @Test
     void testGetSearchContextSetter()
     {
-        stepContext.setTestContext(context);
-        stepContext.putSearchContext(searchContextMock, searchContextSetter);
-        SearchContextSetter result = stepContext.getSearchContextSetter();
+        uiContext.setTestContext(getContext());
+        uiContext.putSearchContext(searchContextMock, searchContextSetter);
+        SearchContextSetter result = uiContext.getSearchContextSetter();
         assertEquals(searchContextSetter, result);
     }
 
     @Test
     void testGetSearchContextSetterNotFound()
     {
-        stepContext.setTestContext(context);
-        assertNull(stepContext.getSearchContextSetter());
+        uiContext.setTestContext(getContext());
+        assertNull(uiContext.getSearchContextSetter());
     }
 
     @Test
     void testPutSearchContext()
     {
-        stepContext.setTestContext(context);
-        stepContext.putSearchContext(searchContextMock, searchContextSetter);
-        assertNotNull(stepContext.getSearchContext());
-        assertNotNull(stepContext.getSearchContextSetter());
+        uiContext.setTestContext(getContext());
+        uiContext.putSearchContext(searchContextMock, searchContextSetter);
+        assertNotNull(uiContext.getSearchContext());
+        assertNotNull(uiContext.getSearchContextSetter());
     }
 
     @Test
     void testResetWhenWebDriverIsInitialized()
     {
-        stepContext.setTestContext(context);
+        uiContext.setTestContext(getContext());
         when(webDriverProviderMock.get()).thenReturn(mockedWebDriver);
         when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(true);
-        stepContext.reset();
-        assertNotNull(stepContext.getSearchContext(WebDriver.class));
+        uiContext.reset();
+        assertNotNull(uiContext.getSearchContext(WebDriver.class));
     }
 
     @Test
     void testResetWhenWebDriverIsNotInitialized()
     {
-        stepContext.setTestContext(context);
+        uiContext.setTestContext(getContext());
         when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(false);
-        stepContext.reset();
-        assertNull(stepContext.getSearchContext());
+        uiContext.reset();
+        assertNull(uiContext.getSearchContext());
     }
 
     @Test
     void testClear()
     {
-        stepContext.setTestContext(context);
-        stepContext.clear();
-        assertNull(stepContext.getSearchContext());
+        uiContext.setTestContext(getContext());
+        uiContext.clear();
+        assertNull(uiContext.getSearchContext());
     }
 
     @SuppressWarnings("unchecked")
@@ -248,8 +178,8 @@ class UiContextTests
     void testGetAssertingWebElements()
     {
         TestContext testContext = mock(TestContext.class);
-        stepContext.setTestContext(testContext);
-        stepContext.getAssertingWebElements();
+        uiContext.setTestContext(testContext);
+        uiContext.getAssertingWebElements();
         verify(testContext).get(eq(ASSERTING_ELEMENTS_KEY), any(Supplier.class));
         verifyNoMoreInteractions(testContext);
     }
@@ -260,9 +190,9 @@ class UiContextTests
         BooleanSupplier supplier = mock(BooleanSupplier.class);
         when(supplier.getAsBoolean()).thenReturn(true);
         TestContext testContext = mock(TestContext.class);
-        stepContext.setTestContext(testContext);
+        uiContext.setTestContext(testContext);
         WebElement element = mock(WebElement.class);
-        assertTrue(stepContext.withAssertingWebElements(List.of(element), supplier));
+        assertTrue(uiContext.withAssertingWebElements(List.of(element), supplier));
         verify(testContext).put(ASSERTING_ELEMENTS_KEY, List.of(element));
         verify(testContext).put(ASSERTING_ELEMENTS_KEY, List.of());
         verifyNoMoreInteractions(testContext);

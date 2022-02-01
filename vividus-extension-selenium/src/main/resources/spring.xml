@@ -107,7 +107,7 @@
     <bean class="org.vividus.ui.action.ExpectedSearchActionsConditions" />
     <bean class="org.vividus.ui.action.ExpectedSearchContextConditions" />
 
-    <bean id="uiContext" class="org.vividus.ui.context.UiContext">
+    <bean id="uiContext" class="#{T(java.lang.Boolean).parseBoolean('${ui.context.self-healing}') ? 'org.vividus.ui.context.SelfHealingUiContext' : 'org.vividus.ui.context.UiContext'}">
         <property name="testContext" ref="testContext" />
     </bean>
 
