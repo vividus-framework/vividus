@@ -29,11 +29,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.reportportal.jbehave.AdaptedReportPortalFormat.TestEntity;
+import org.vividus.testcontext.TestContext;
 
 @ExtendWith(MockitoExtension.class)
 class AdaptedReportPortalFormatTests
 {
     @Mock private EventBus eventBus;
+    @Mock private TestContext testContext;
 
     @ParameterizedTest
     @CsvSource({
@@ -42,7 +44,7 @@ class AdaptedReportPortalFormatTests
     })
     void shouldCreateSpecificReporter(TestEntity testEntity, Class<?> expectedClass) throws IllegalAccessException
     {
-        AdaptedReportPortalFormat adaptedReportPortalFormat = new AdaptedReportPortalFormat(eventBus);
+        AdaptedReportPortalFormat adaptedReportPortalFormat = new AdaptedReportPortalFormat(eventBus, );
         adaptedReportPortalFormat.setTestEntity(testEntity);
         assertEquals(expectedClass,
                 ((DelegatingStoryReporter) adaptedReportPortalFormat.createStoryReporter(null,

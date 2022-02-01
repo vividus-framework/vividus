@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
 import com.epam.reportportal.listeners.LogLevel;
@@ -32,20 +33,20 @@ import com.google.common.eventbus.Subscribe;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
-import org.jbehave.core.reporters.DelegatingStoryReporter;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.vividus.softassert.event.AssertionFailedEvent;
 
-public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryReporter
+public class AdaptedDelegatingReportPortalStoryReporter extends LazyInitializingDelegatingStoryReporter
 {
-    private final ReportPortalStoryReporter reporter;
+    private final Supplier<ReportPortalStoryReporter> reporterProvider;
     private final List<TestItemLeaf> failedSteps = new ArrayList<>();
 
-    public AdaptedDelegatingReportPortalStoryReporter(EventBus eventBus, ReportPortalStoryReporter reporter)
+    public AdaptedDelegatingReportPortalStoryReporter(EventBus eventBus,
+            Supplier<ReportPortalStoryReporter> reporterProvider)
     {
-        super(reporter);
-        this.reporter = reporter;
+        super(reporterProvider);
+        this.reporterProvider = reporterProvider;
         eventBus.register(this);
     }
 
@@ -56,12 +57,13 @@ public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryR
         {
             return;
         }
-        runIfNotSystem(step.getStepAsString(), reporter::beforeStep);
+        runIfNotSystem(step.getStepAsString(), s -> reporterProvider.get().beforeStep(s));
     }
 
     @Override
     public void successful(String step)
     {
+        ReportPortalStoryReporter reporter = reporterProvider.get();
         reporter.getLastStep()
                 .map(failedSteps::remove)
                 .filter(Boolean.TRUE::equals)
@@ -80,19 +82,19 @@ public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryR
     @Override
     public void afterScenario(Timing timing)
     {
-        reporter.afterScenario();
+        reporterProvider.get().afterScenario();
     }
 
     @Override
     public void scenarioExcluded(Scenario scenario, String filter)
     {
-        reporter.scenarioNotAllowed(scenario, filter);
+        reporterProvider.get().scenarioNotAllowed(scenario, filter);
     }
 
     @Subscribe
     public void onAssertionFailure(AssertionFailedEvent event)
     {
-        reporter.getLastStep().ifPresent(s -> {
+        reporterProvider.get().getLastStep().ifPresent(s -> {
             failedSteps.add(s);
             ReportPortal.emitLog(s.getItemId(), itemUuid -> {
                 SaveLogRQ rq = new SaveLogRQ();

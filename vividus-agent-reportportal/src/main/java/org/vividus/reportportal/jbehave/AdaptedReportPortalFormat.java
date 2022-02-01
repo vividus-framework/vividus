@@ -31,22 +31,27 @@ import com.google.common.eventbus.EventBus;
 import org.jbehave.core.reporters.FilePrintStreamFactory;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
+import org.vividus.testcontext.TestContext;
 
 public class AdaptedReportPortalFormat extends ReportPortalFormat
 {
+    public static final String REPORTER = "RP_REPORTER";
     private final EventBus eventBus;
+    private final TestContext testContext;
     private TestEntity testEntity;
 
-    public AdaptedReportPortalFormat(EventBus eventBus)
+    public AdaptedReportPortalFormat(EventBus eventBus, TestContext testContext)
     {
         super(ReportPortal.builder().build());
         this.eventBus = eventBus;
+        this.testContext = testContext;
     }
 
     @Override
     public StoryReporter createStoryReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder)
     {
-        return new AdaptedDelegatingReportPortalStoryReporter(eventBus, testEntity.buildReporter(launch, itemTree));
+        return new AdaptedDelegatingReportPortalStoryReporter(eventBus, () -> testContext.get(REPORTER,
+            () -> testEntity.buildReporter(launch, itemTree)));
     }
 
     @Override

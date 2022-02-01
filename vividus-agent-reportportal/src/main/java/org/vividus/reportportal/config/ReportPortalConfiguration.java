@@ -16,11 +16,20 @@
 
 package org.vividus.reportportal.config;
 
+import java.io.File;
+import java.util.List;
+import java.util.Properties;
+
+import org.jbehave.core.model.StoryMaps;
+import org.jbehave.core.reporters.ReportsCount;
+import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.reporters.ViewGenerator;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.vividus.ExtendedStoryReporterBuilder;
 import org.vividus.reportportal.config.condition.ReportPortalEnableCondition;
 import org.vividus.reportportal.jbehave.AdaptedReportPortalFormat;
 
@@ -32,11 +41,43 @@ public class ReportPortalConfiguration implements InitializingBean
     private AdaptedReportPortalFormat adaptedReportPortalFormat;
 
     @Autowired
-    private ExtendedStoryReporterBuilder storyReporterBuilder;
+    @Qualifier("storyReporters")
+    private List<StoryReporter> storyReporters;
 
     @Override
     public void afterPropertiesSet()
     {
-        storyReporterBuilder.withFormats(adaptedReportPortalFormat);
+        storyReporters.add(adaptedReportPortalFormat.createStoryReporter(null, null));
+    }
+
+    @Bean
+    public ViewGenerator reportPortalViewGenerator()
+    {
+        return new ViewGenerator()
+        {
+            @Override
+            public void generateMapsView(File outputDirectory, StoryMaps storyMaps, Properties viewResources)
+            {
+
+            }
+
+            @Override
+            public void generateReportsView(File outputDirectory, List<String> formats, Properties viewResources)
+            {
+
+            }
+
+            @Override
+            public ReportsCount getReportsCount()
+            {
+                return new ReportsCount(0, 0, 0, 0, 0, 0, 0, 0);
+            }
+
+            @Override
+            public Properties defaultViewProperties()
+            {
+                return null;
+            }
+        };
     }
 }
