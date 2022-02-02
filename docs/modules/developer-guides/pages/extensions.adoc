@@ -1,0 +1,22 @@
+= Extensions
+
+Extensions are basements for the plugins. An extension provides generic abstraction for common
+functionality or wraps an external framework API.
+
+The extension configuration should be placed at the `/src/main/resources/vividus-extension/spring.xml`
+path relatively to the project root.
+
+./src/main/resources/vividus-extension/spring.xml
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+       default-lazy-init="true">
+
+    <!-- extension bean definitions -->
+
+</beans>
+----

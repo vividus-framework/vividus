@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,11 @@ class BeanFactoryTests
     {
         ConfigurableEnvironment environment = mock(ConfigurableEnvironment.class);
         String[] profiles = { "test" };
-        String[] locations = { "classpath*:/org/vividus/spring.xml", "classpath*:/spring.xml" };
+        String[] locations = {
+            "classpath*:/org/vividus/spring.xml",
+            "classpath*:/vividus-extension/spring.xml",
+            "classpath*:/spring.xml"
+        };
 
         when(context.isActive()).thenReturn(false);
         when(context.getEnvironment()).thenReturn(environment);
