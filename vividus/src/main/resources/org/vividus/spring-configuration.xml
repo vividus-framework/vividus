@@ -28,13 +28,15 @@
     </bean>
 
     <bean class="org.vividus.spring.VividusEditorConfigurer" />
-    <bean class="org.vividus.softassert.FailFastManager" />
 
     <bean id="softAssert" class="org.vividus.softassert.SoftAssert"
           init-method="init">
         <property name="testContext" ref="testContext" />
         <property name="formatter" ref="assertionFormatter" />
         <property name="knownIssueChecker" ref="knownIssueChecker" />
+        <property name="failTestFastHandler">
+            <bean class="org.vividus.softassert.JBehaveFailTestFastHandler" />
+        </property>
         <property name="eventBus" ref="eventBus" />
         <property name="failTestCaseFast" value="${bdd.scenario.fail-fast}" />
     </bean>

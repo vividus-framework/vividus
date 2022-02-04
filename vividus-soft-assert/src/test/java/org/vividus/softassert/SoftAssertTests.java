@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.org.lidalia.slf4jext.Level.ERROR;
@@ -54,7 +55,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.event.AssertionPassedEvent;
-import org.vividus.softassert.event.FailTestFastEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.formatter.IAssertionFormatter;
 import org.vividus.softassert.issue.IKnownIssueChecker;
@@ -82,6 +82,7 @@ class SoftAssertTests
 
     @Mock private TestContext testContext;
     @Mock private IAssertionFormatter formatter;
+    @Mock private FailTestFastHandler failTestFastHandler;
     @Mock private EventBus eventBus;
     @Mock private AssertionCollection assertionCollection;
     @Mock private List<SoftAssertionError> assertionErrors;
@@ -241,15 +242,8 @@ class SoftAssertTests
     {
         softAssert.setFailTestCaseFast(true);
         testRecordFailedAssertion(softAssert::recordFailedAssertion);
-        verify(eventBus).post(argThat(event -> {
-            if (event instanceof FailTestFastEvent)
-            {
-                FailTestFastEvent failTestFastEvent = (FailTestFastEvent) event;
-                return failTestFastEvent.isFailTestCaseFast() && !failTestFastEvent.isFailTestSuiteFast();
-            }
-            return false;
-        }));
-        verifyNoMoreInteractions(eventBus);
+        verify(failTestFastHandler).failTestCaseFast();
+        verifyNoMoreInteractions(failTestFastHandler);
     }
 
     @Test
@@ -267,7 +261,7 @@ class SoftAssertTests
     {
         var knownIssue = mock(KnownIssue.class);
         testRecordFailedAssertionAsKnownIssue(globalFailTestCaseFast, knownIssue);
-        verifyNoMoreInteractions(eventBus);
+        verifyNoInteractions(failTestFastHandler);
     }
 
     @Test
@@ -276,15 +270,8 @@ class SoftAssertTests
         var knownIssue = mock(KnownIssue.class);
         when(knownIssue.isFailTestCaseFast()).thenReturn(true);
         testRecordFailedAssertionAsKnownIssue(false, knownIssue);
-        verify(eventBus).post(argThat(event -> {
-            if (event instanceof FailTestFastEvent)
-            {
-                FailTestFastEvent failTestFastEvent = (FailTestFastEvent) event;
-                return failTestFastEvent.isFailTestCaseFast() && !failTestFastEvent.isFailTestSuiteFast();
-            }
-            return false;
-        }));
-        verifyNoMoreInteractions(eventBus);
+        verify(failTestFastHandler).failTestCaseFast();
+        verifyNoMoreInteractions(failTestFastHandler);
     }
 
     @Test
@@ -293,15 +280,8 @@ class SoftAssertTests
         var knownIssue = mock(KnownIssue.class);
         when(knownIssue.isFailTestSuiteFast()).thenReturn(true);
         testRecordFailedAssertionAsKnownIssue(false, knownIssue);
-        verify(eventBus).post(argThat(event -> {
-            if (event instanceof FailTestFastEvent)
-            {
-                FailTestFastEvent failTestFastEvent = (FailTestFastEvent) event;
-                return !failTestFastEvent.isFailTestCaseFast() && failTestFastEvent.isFailTestSuiteFast();
-            }
-            return false;
-        }));
-        verifyNoMoreInteractions(eventBus);
+        verify(failTestFastHandler).failTestSuiteFast();
+        verifyNoMoreInteractions(failTestFastHandler);
     }
 
     private void testRecordFailedAssertion(Predicate<String> testMethod)
@@ -341,6 +321,7 @@ class SoftAssertTests
             }
             return false;
         }));
+        verifyNoMoreInteractions(eventBus);
     }
 
     private void assertLoggingOfFailedAssertion(String description)

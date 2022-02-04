@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.event.AssertionPassedEvent;
-import org.vividus.softassert.event.FailTestFastEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.formatter.IAssertionFormatter;
 import org.vividus.softassert.issue.IKnownIssueChecker;
@@ -60,6 +59,7 @@ public class SoftAssert implements ISoftAssert
 
     private IAssertionFormatter formatter;
     private IKnownIssueChecker knownIssueChecker;
+    private FailTestFastHandler failTestFastHandler;
     private EventBus eventBus;
 
     private boolean failTestCaseFast;
@@ -355,12 +355,13 @@ public class SoftAssert implements ISoftAssert
 
         eventBus.post(new AssertionFailedEvent(assertionError));
 
-        boolean failTestCase =
-                failTestCaseFast && !assertionError.isKnownIssue() || assertionError.isFailTestCaseFast();
-        boolean failTestSuite = assertionError.isFailTestSuiteFast();
-        if (failTestCase || failTestSuite)
+        if (failTestCaseFast && !assertionError.isKnownIssue() || assertionError.isFailTestCaseFast())
         {
-            eventBus.post(new FailTestFastEvent(failTestCase, failTestSuite));
+            failTestFastHandler.failTestCaseFast();
+        }
+        if (assertionError.isFailTestSuiteFast())
+        {
+            failTestFastHandler.failTestSuiteFast();
         }
     }
 
@@ -418,6 +419,11 @@ public class SoftAssert implements ISoftAssert
     public void setKnownIssueChecker(IKnownIssueChecker knownIssueChecker)
     {
         this.knownIssueChecker = knownIssueChecker;
+    }
+
+    public void setFailTestFastHandler(FailTestFastHandler failTestFastHandler)
+    {
+        this.failTestFastHandler = failTestFastHandler;
     }
 
     public void setTestContext(TestContext testContext)
