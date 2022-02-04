@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,27 @@
 
 package org.vividus.softassert;
 
-import com.google.common.eventbus.Subscribe;
-
 import org.jbehave.core.embedder.StoryControls;
-import org.vividus.softassert.event.FailTestFastEvent;
+import org.jbehave.core.failures.IgnoringStepsFailure;
 
-public class FailFastManager
+public class JBehaveFailTestFastHandler implements FailTestFastHandler
 {
-    private final ISoftAssert softAssert;
     private final StoryControls storyControls;
 
-    public FailFastManager(ISoftAssert softAssert, StoryControls storyControls)
+    public JBehaveFailTestFastHandler(StoryControls storyControls)
     {
-        this.softAssert = softAssert;
         this.storyControls = storyControls;
     }
 
-    @Subscribe
-    public void onFailTestFast(FailTestFastEvent event)
+    @Override
+    public void failTestCaseFast()
     {
-        if (event.isFailTestSuiteFast())
-        {
-            storyControls.currentStoryControls().doResetStateBeforeScenario(false);
-        }
-        if (event.isFailTestCaseFast())
-        {
-            softAssert.verify();
-        }
+        throw new IgnoringStepsFailure("Failing scenario fast");
+    }
+
+    @Override
+    public void failTestSuiteFast()
+    {
+        storyControls.currentStoryControls().doResetStateBeforeScenario(false);
     }
 }

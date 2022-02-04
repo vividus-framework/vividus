@@ -3,6 +3,7 @@ project.description = 'Vividus BDD engine'
 dependencies {
     api project(':vividus-test-context')
     api(group: 'org.vividus', name: 'jbehave-core', version: versions.jbehave)
+    api(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
 
     implementation project(':vividus-util')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
