@@ -615,6 +615,10 @@ How to encrypt a string using https://www.devglan.com/online-tools/jasypt-online
 How to use a Jasypt-encrypted string in VIVIDUS?
 
 1. Add the secret key/text to the project properties as the value of:
-|system.vividus.encryptor.password=
+----
+system.vividus.encryptor.password=
+----
 2. Use the wrapping "ENC()" for any encrypted string. e.g.
-|selenium.grid.password=ENC(cvoah9O4ZxR0vcuUAYx3/4YfT7ZjBPLpzmRc1VFwhyg=)
+----
+selenium.grid.password=ENC(cvoah9O4ZxR0vcuUAYx3/4YfT7ZjBPLpzmRc1VFwhyg=)
+----
