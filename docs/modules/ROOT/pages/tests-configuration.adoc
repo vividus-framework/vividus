@@ -604,7 +604,7 @@ Here one could find description of general HTTP properties applied across all th
 
 It is possible to use variables & strings encrypted with Jasypt. Here's an example of free online encryption service that can be used for this purpose: https://www.devglan.com/online-tools/jasypt-online-encryption-decryption
 
-How to encrypt a string using https://www.devglan.com/online-tools/jasypt-online-encryption-decryption service?
+=== How to encrypt a string using https://www.devglan.com/online-tools/jasypt-online-encryption-decryption service?
 
 1. Paste plain text string to encrypt to the corresponding text field
 2. Set Type of Encryption to "Two Way Encryption (With Secret Text)"
@@ -612,7 +612,7 @@ How to encrypt a string using https://www.devglan.com/online-tools/jasypt-online
 4. Click Encrypt
 5. The resulting encrypted string can be copied from the corresponding field
 
-How to use a Jasypt-encrypted string in VIVIDUS?
+=== How to use a Jasypt-encrypted string in VIVIDUS?
 
 1. Add the secret key/text to the project properties as the value of:
 ----
