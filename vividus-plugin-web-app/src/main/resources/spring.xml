@@ -247,11 +247,9 @@
 
     <bean class="org.vividus.ui.web.listener.WebSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
 
-    <bean id="browserWindowSizeListener" class="org.vividus.selenium.BrowserWindowSizeListener"
-          lazy-init="false">
-        <property name="webDriverManager" ref="webDriverManager" />
-        <property name="webDriverProvider" ref="webDriverProvider" />
-        <property name="browserWindowSizeProvider" ref="browserWindowSizeProvider" />
+    <bean class="org.vividus.selenium.BrowserWindowSizeListener" lazy-init="false">
+        <property name="runContext" ref="runContext" />
+         <property name="webDriverManager" ref="webDriverManager" />
     </bean>
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.VividusWebDriverFactory">
@@ -341,6 +339,9 @@
             <bean class="org.vividus.beans.RelaxedEnumPropertyEditor">
                 <constructor-arg value="org.vividus.selenium.WebDriverType" />
             </bean>
+        </entry>
+        <entry key="org.openqa.selenium.Dimension">
+            <bean class="org.vividus.ui.web.converter.DimensionPropertyEditor" />
         </entry>
     </util:map>
 

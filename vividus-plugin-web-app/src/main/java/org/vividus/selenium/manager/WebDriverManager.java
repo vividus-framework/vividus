@@ -31,7 +31,7 @@ import org.vividus.selenium.IWebDriverProvider;
 public class WebDriverManager extends GenericWebDriverManager implements IWebDriverManager
 {
     private boolean electronApp;
-    private Optional<Dimension> remoteScreenResolution;
+    private Dimension remoteScreenResolution;
 
     public WebDriverManager(IWebDriverProvider webDriverProvider, IWebDriverManagerContext webDriverManagerContext)
     {
@@ -82,7 +82,7 @@ public class WebDriverManager extends GenericWebDriverManager implements IWebDri
     {
         if (getWebDriverProvider().isRemoteExecution())
         {
-            return remoteScreenResolution;
+            return Optional.ofNullable(remoteScreenResolution);
         }
         if (GraphicsEnvironment.isHeadless())
         {
@@ -97,7 +97,7 @@ public class WebDriverManager extends GenericWebDriverManager implements IWebDri
         this.electronApp = electronApp;
     }
 
-    public void setRemoteScreenResolution(Optional<Dimension> remoteScreenResolution)
+    public void setRemoteScreenResolution(Dimension remoteScreenResolution)
     {
         this.remoteScreenResolution = remoteScreenResolution;
     }

@@ -145,7 +145,7 @@ class WebDriverManagerTests
     @SuppressWarnings("unchecked")
     void shouldCheckWindowSizeWhenRemoteResolutionIsUnknown()
     {
-        webDriverManager.setRemoteScreenResolution(Optional.empty());
+        webDriverManager.setRemoteScreenResolution(null);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
         var resultHandler = mock(BiConsumer.class);
         var result = webDriverManager.checkWindowFitsScreen(new Dimension(800, 600), resultHandler);
@@ -163,7 +163,7 @@ class WebDriverManagerTests
     void shouldCheckWindowFitsRemoteScreen(int width, int height, boolean expected)
     {
         var remoteScreenResolution = new Dimension(width, height);
-        webDriverManager.setRemoteScreenResolution(Optional.of(remoteScreenResolution));
+        webDriverManager.setRemoteScreenResolution(remoteScreenResolution);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
         var result = webDriverManager.checkWindowFitsScreen(new Dimension(800, 600),
                 (fitsScreen, screenResolution) -> {
