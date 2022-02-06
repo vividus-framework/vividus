@@ -16,71 +16,135 @@
 
 package org.vividus.selenium;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Optional;
+import java.util.Properties;
+
+import org.jbehave.core.model.Meta;
+import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Window;
+import org.vividus.context.RunContext;
+import org.vividus.model.RunningScenario;
+import org.vividus.model.RunningStory;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.manager.IWebDriverManager;
 
 @ExtendWith(MockitoExtension.class)
 class BrowserWindowSizeListenerTests
 {
-    @Mock private IWebDriverManager webDriverManager;
-    @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IBrowserWindowSizeProvider browserWindowSizeProvider;
-    @Mock private WebDriver webDriver;
+    private static final String BROWSER_WINDOW_SIZE_META = "browserWindowSize";
+    private static final String TARGET_SIZE_AS_STRING = "1024x768";
+    private static final Dimension TARGET_SIZE = new Dimension(1024, 768);
 
-    @InjectMocks private BrowserWindowSizeManager browserWindowSizeManager;
+    @Mock private RunContext runContext;
+    @Mock private IWebDriverManager webDriverManager;
+    @Mock private WebDriver webDriver;
     @InjectMocks private BrowserWindowSizeListener browserWindowSizeListener;
 
-    @BeforeEach
-    void beforeEach()
-    {
-        browserWindowSizeListener.setBrowserWindowSizeManager(browserWindowSizeManager);
-    }
-
-    @SuppressWarnings("removal")
     @Test
-    void shouldResizeWindowWithDesiredBrowserSizeOnCreate()
+    void shouldResizeWindowWithDesiredBrowserSizeFromStoryMeta()
     {
         when(webDriverManager.isElectronApp()).thenReturn(false);
         when(webDriverManager.isMobile()).thenReturn(false);
-        int width = 1440;
-        int height = 900;
-        boolean remoteExecution = true;
-        when(webDriverProvider.isRemoteExecution()).thenReturn(remoteExecution);
-        when(browserWindowSizeProvider.getBrowserWindowSizeFromMeta(remoteExecution))
-                .thenReturn(new BrowserWindowSize(width, height));
+        var metaProperties = new Properties();
+        metaProperties.put(BROWSER_WINDOW_SIZE_META, TARGET_SIZE_AS_STRING);
+        var storyMeta = new Meta(metaProperties);
+        var story = mock(Story.class);
+        when(story.getMeta()).thenReturn(storyMeta);
+        var runningStory = new RunningStory();
+        runningStory.setStory(story);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         Window window = mockWindow();
-        browserWindowSizeListener.onWebDriverCreate(new WebDriverCreateEvent(mock(WebDriver.class)));
-        verify(window).setSize(argThat(dimension -> width == dimension.getWidth() && height == dimension.getHeight()));
-        verify(window, never()).maximize();
+        when(webDriverManager.checkWindowFitsScreen(eq(TARGET_SIZE), argThat(consumer -> {
+            consumer.accept(true, new Dimension(1200, 800));
+            return true;
+        }))).thenReturn(Optional.of(true));
+        var event = new WebDriverCreateEvent(webDriver);
+        browserWindowSizeListener.onWebDriverCreate(event);
+        verify(window).setSize(TARGET_SIZE);
+        verifyNoMoreInteractions(window);
     }
 
-    @SuppressWarnings("removal")
     @Test
-    void shouldMaximizeWindowWithDesiredBrowserSizeOnCreate()
+    void shouldResizeWindowWithDesiredBrowserSizeFromScenarioMeta()
     {
         when(webDriverManager.isElectronApp()).thenReturn(false);
         when(webDriverManager.isMobile()).thenReturn(false);
-        boolean remoteExecution = true;
-        when(webDriverProvider.isRemoteExecution()).thenReturn(remoteExecution);
-        when(browserWindowSizeProvider.getBrowserWindowSizeFromMeta(remoteExecution)).thenReturn(null);
+        var metaProperties = new Properties();
+        metaProperties.put(BROWSER_WINDOW_SIZE_META, TARGET_SIZE_AS_STRING);
+        var scenarioMeta = new Meta(metaProperties);
+        var scenario = mock(Scenario.class);
+        when(scenario.getMeta()).thenReturn(scenarioMeta);
+        var runningScenario = new RunningScenario();
+        runningScenario.setScenario(scenario);
+        var runningStory = new RunningStory();
+        runningStory.setRunningScenario(runningScenario);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
         Window window = mockWindow();
-        browserWindowSizeListener.onWebDriverCreate(new WebDriverCreateEvent(mock(WebDriver.class)));
+        when(webDriverManager.checkWindowFitsScreen(eq(TARGET_SIZE), argThat(consumer -> {
+            consumer.accept(true, new Dimension(1200, 800));
+            return true;
+        }))).thenReturn(Optional.of(true));
+        var event = new WebDriverCreateEvent(webDriver);
+        browserWindowSizeListener.onWebDriverCreate(event);
+        verify(window).setSize(TARGET_SIZE);
+        verifyNoMoreInteractions(window);
+    }
+
+    @Test
+    void shouldFailToResizeWindowWhenItDoesNotFitToScreen()
+    {
+        when(webDriverManager.isElectronApp()).thenReturn(false);
+        when(webDriverManager.isMobile()).thenReturn(false);
+        var metaProperties = new Properties();
+        metaProperties.put(BROWSER_WINDOW_SIZE_META, TARGET_SIZE_AS_STRING);
+        var storyMeta = new Meta(metaProperties);
+        var story = mock(Story.class);
+        when(story.getMeta()).thenReturn(storyMeta);
+        var runningStory = new RunningStory();
+        runningStory.setStory(story);
+        when(runContext.getRunningStory()).thenReturn(runningStory);
+        var expected = new IllegalArgumentException();
+        when(webDriverManager.checkWindowFitsScreen(eq(TARGET_SIZE), argThat(consumer -> {
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> consumer.accept(false, new Dimension(800, 600)));
+            assertEquals(
+                    "Local or remote screen size \"800x600\" is less than desired browser window size \"1024x768\"",
+                    exception.getMessage());
+            return true;
+        }))).thenThrow(expected);
+        var actual = assertThrows(IllegalArgumentException.class,
+                () -> browserWindowSizeListener.onWebDriverCreate(null));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldMaximizeWindowWhenNoStoryIsRunning()
+    {
+        when(webDriverManager.isElectronApp()).thenReturn(false);
+        when(webDriverManager.isMobile()).thenReturn(false);
+        when(runContext.getRunningStory()).thenReturn(null);
+        Window window = mockWindow();
+        var event = new WebDriverCreateEvent(webDriver);
+        browserWindowSizeListener.onWebDriverCreate(event);
         verify(window).maximize();
     }
 
@@ -88,8 +152,8 @@ class BrowserWindowSizeListenerTests
     void shouldDoNothingForElectronApps()
     {
         when(webDriverManager.isElectronApp()).thenReturn(true);
-        browserWindowSizeListener.onWebDriverCreate(new WebDriverCreateEvent(mock(WebDriver.class)));
-        verifyNoInteractions(webDriverProvider);
+        browserWindowSizeListener.onWebDriverCreate(null);
+        verifyNoInteractions(runContext);
     }
 
     @Test
@@ -97,13 +161,12 @@ class BrowserWindowSizeListenerTests
     {
         when(webDriverManager.isElectronApp()).thenReturn(false);
         when(webDriverManager.isMobile()).thenReturn(true);
-        browserWindowSizeListener.onWebDriverCreate(new WebDriverCreateEvent(mock(WebDriver.class)));
-        verifyNoInteractions(webDriverProvider);
+        browserWindowSizeListener.onWebDriverCreate(null);
+        verifyNoInteractions(runContext);
     }
 
     private Window mockWindow()
     {
-        when(webDriverProvider.get()).thenReturn(webDriver);
         Options mockedOptions = mock(Options.class);
         when(webDriver.manage()).thenReturn(mockedOptions);
         Window mockedWindow = mock(Window.class);

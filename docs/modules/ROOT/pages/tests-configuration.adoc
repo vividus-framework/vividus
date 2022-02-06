@@ -193,7 +193,7 @@ bdd.meta-filters=group == 'Login'
 ----
 
 The prorerty `bdd.all-meta-filters` is used to override values of the default
-meta filters based on the tags: `@skip`, `@layout` etc.
+meta filters based on the tags: `@skip`, `@layout`, `@browserWindowSize` etc.
 
 .Execute stoies and scenarios marked with '@group Login' tag and without '@skip' tag
 [source,properties]

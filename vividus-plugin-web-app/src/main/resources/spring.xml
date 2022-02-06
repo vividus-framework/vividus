@@ -73,6 +73,7 @@
 
     <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager" parent="genericWebDriverManager" >
         <property name="electronApp" value="${desktop-electron-app}" />
+        <property name="remoteScreenResolution" value="${selenium.grid.screen-resolution}" />
     </bean>
 
     <bean id="fieldActions" class="org.vividus.ui.web.action.FieldActions" />
@@ -246,18 +247,12 @@
 
     <bean class="org.vividus.ui.web.listener.WebSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
 
-    <bean id="browserWindowSizeProvider" class="org.vividus.selenium.BrowserWindowSizeProvider" >
-        <property name="remoteScreenResolution" value="${selenium.grid.screen-resolution}" />
-    </bean>
-
     <bean id="browserWindowSizeListener" class="org.vividus.selenium.BrowserWindowSizeListener"
           lazy-init="false">
         <property name="webDriverManager" ref="webDriverManager" />
         <property name="webDriverProvider" ref="webDriverProvider" />
         <property name="browserWindowSizeProvider" ref="browserWindowSizeProvider" />
     </bean>
-
-    <bean id="browserWindowSizeManager" class="org.vividus.selenium.BrowserWindowSizeManager" />
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.VividusWebDriverFactory">
         <constructor-arg index="0" value="${selenium.grid.enabled}"/>

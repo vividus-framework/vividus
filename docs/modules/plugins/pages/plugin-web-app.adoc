@@ -667,20 +667,20 @@ include::partial$proxy-steps.adoc[]
 === Window Steps
 ==== Resize the current browser window
 
-Step changes the current browser window size to the specified one.
+Changes the current browser window size to the specified one.
 
 [IMPORTANT]
-Specified browser window size should be smaller than the current screen resolution.
+The specified browser window size should be smaller than the current screen resolution.
 
 [source,gherkin]
 ----
 When I change window size to `$targetSize`
 ----
 
-* `$targetSize` - Any browser window size in pixels, e.g. 800x600,
-where first measure is window WIDTH, last measure is its HEIGHT.
+* `$targetSize` - The desired browser window size in pixels, e.g. `800x600`,
+where the first measure is window width, the last one is window height.
 
-.Resize browser window
+.Resize the browser window
 [source,gherkin]
 ----
 Given I am on a page with the URL 'https://example.com/'

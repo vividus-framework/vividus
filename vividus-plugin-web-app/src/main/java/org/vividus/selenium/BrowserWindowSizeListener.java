@@ -16,48 +16,81 @@
 
 package org.vividus.selenium;
 
+import java.util.Optional;
+
 import com.google.common.eventbus.Subscribe;
 
+import org.apache.commons.lang3.Validate;
+import org.jbehave.core.model.Meta;
+import org.jbehave.core.model.Scenario;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver.Window;
+import org.vividus.context.RunContext;
+import org.vividus.converter.ui.web.StringToDimensionParameterConverter;
+import org.vividus.model.RunningScenario;
+import org.vividus.model.RunningStory;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.manager.IWebDriverManager;
 
 public class BrowserWindowSizeListener
 {
+    private RunContext runContext;
     private IWebDriverManager webDriverManager;
-    private IWebDriverProvider webDriverProvider;
-    private IBrowserWindowSizeProvider browserWindowSizeProvider;
-    private IBrowserWindowSizeManager browserWindowSizeManager;
 
-    @SuppressWarnings("removal")
     @Subscribe
-    public void onWebDriverCreate(WebDriverCreateEvent event)
+    public void onWebDriverCreate(@SuppressWarnings("unusued") WebDriverCreateEvent event)
     {
         if (!webDriverManager.isElectronApp() && !webDriverManager.isMobile())
         {
-            browserWindowSizeManager.resizeBrowserWindow(
-                    browserWindowSizeProvider.getBrowserWindowSizeFromMeta(webDriverProvider.isRemoteExecution()),
-                    Window::maximize);
+            getBrowserWindowSizeFromMeta().ifPresentOrElse(
+                    targetSize -> getWindow(event).setSize(targetSize),
+                    () -> getWindow(event).maximize());
         }
+    }
+
+    private Window getWindow(WebDriverCreateEvent event)
+    {
+        return event.getWebDriver().manage().window();
+    }
+
+    private Optional<Dimension> getBrowserWindowSizeFromMeta()
+    {
+        RunningStory runningStory = runContext.getRunningStory();
+        if (runningStory != null)
+        {
+            return Optional.ofNullable(runningStory.getRunningScenario())
+                    .map(RunningScenario::getScenario)
+                    .map(Scenario::getMeta)
+                    .flatMap(this::findBrowserWindowSize)
+                    .or(() -> findBrowserWindowSize(runningStory.getStory().getMeta()));
+        }
+        return Optional.empty();
+    }
+
+    private Optional<Dimension> findBrowserWindowSize(Meta meta)
+    {
+        return meta.getOptionalProperty("browserWindowSize")
+                .map(StringToDimensionParameterConverter::convert)
+                .map(browserWindowSize ->
+                {
+                    webDriverManager.checkWindowFitsScreen(browserWindowSize, (fitsScreen, screenResolution) -> {
+                        Validate.isTrue(fitsScreen,
+                                "Local or remote screen size \"%dx%d\" is less than desired browser window size "
+                                        + "\"%dx%d\"",
+                                screenResolution.getWidth(), screenResolution.getHeight(), browserWindowSize.getWidth(),
+                                browserWindowSize.getHeight());
+                    });
+                    return browserWindowSize;
+                });
+    }
+
+    public void setRunContext(RunContext runContext)
+    {
+        this.runContext = runContext;
     }
 
     public void setWebDriverManager(IWebDriverManager webDriverManager)
     {
         this.webDriverManager = webDriverManager;
-    }
-
-    public void setWebDriverProvider(IWebDriverProvider webDriverProvider)
-    {
-        this.webDriverProvider = webDriverProvider;
-    }
-
-    public void setBrowserWindowSizeProvider(IBrowserWindowSizeProvider browserWindowSizeProvider)
-    {
-        this.browserWindowSizeProvider = browserWindowSizeProvider;
-    }
-
-    public void setBrowserWindowSizeManager(IBrowserWindowSizeManager browserWindowSizeManager)
-    {
-        this.browserWindowSizeManager = browserWindowSizeManager;
     }
 }

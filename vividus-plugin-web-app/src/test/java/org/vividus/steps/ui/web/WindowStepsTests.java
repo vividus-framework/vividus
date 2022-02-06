@@ -17,6 +17,7 @@
 package org.vividus.steps.ui.web;
 
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -24,19 +25,17 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Window;
-import org.vividus.selenium.BrowserWindowSize;
-import org.vividus.selenium.BrowserWindowSizeManager;
-import org.vividus.selenium.IBrowserWindowSizeProvider;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,31 +49,24 @@ class WindowStepsTests
             "The desired browser window size %dx%d fits the screen size (1440x900)";
 
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IBrowserWindowSizeProvider browserWindowSizeProvider;
+    @Mock private IWebDriverManager webDriverManager;
     @Mock private ISoftAssert softAssert;
-    @InjectMocks private BrowserWindowSizeManager browserWindowSizeManager;
-
-    private WindowSteps windowSteps;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        windowSteps = new WindowSteps(browserWindowSizeManager, softAssert);
-    }
+    @InjectMocks private WindowSteps windowSteps;
 
     @Test
     void testResizeCurrentWindow()
     {
-        BrowserWindowSize targetSize = new BrowserWindowSize(WIDTH, HEIGHT);
-        BrowserWindowSize screenSize = new BrowserWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-        String assertionMessage = String.format(ASSERTION_PATTERN, WIDTH, HEIGHT);
-        Window window = mockWindow();
-        when(browserWindowSizeProvider.getMaximumBrowserWindowSize(false))
-                .thenReturn(Optional.of(screenSize));
-        when(softAssert.assertTrue(assertionMessage, true)).thenReturn(true);
+        var targetSize = new Dimension(WIDTH, HEIGHT);
+        var screenSize = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
+        var assertionMessage = String.format(ASSERTION_PATTERN, WIDTH, HEIGHT);
+        var window = mockWindow();
+        when(webDriverManager.checkWindowFitsScreen(eq(targetSize), argThat(consumer -> {
+            consumer.accept(true, screenSize);
+            return true;
+        }))).thenReturn(Optional.of(true));
         windowSteps.resizeCurrentWindow(targetSize);
         verify(softAssert).assertTrue(assertionMessage, true);
-        verify(window).setSize(argThat(dimention -> WIDTH == dimention.getWidth() && HEIGHT == dimention.getHeight()));
+        verify(window).setSize(targetSize);
     }
 
     @Test
@@ -82,27 +74,28 @@ class WindowStepsTests
     {
         int width = 2048;
         int height = 1080;
-        BrowserWindowSize targetSize = new BrowserWindowSize(width, height);
-        BrowserWindowSize screenSize = new BrowserWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-        String assertionMessage = String.format(ASSERTION_PATTERN, width, height);
-        Window window = mockWindow();
-        when(browserWindowSizeProvider.getMaximumBrowserWindowSize(false))
-                .thenReturn(Optional.of(screenSize));
+        var targetSize = new Dimension(width, height);
+        var screenSize = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
+        var assertionMessage = String.format(ASSERTION_PATTERN, width, height);
+        when(webDriverManager.checkWindowFitsScreen(eq(targetSize), argThat(consumer -> {
+            consumer.accept(false, screenSize);
+            return true;
+        }))).thenReturn(Optional.of(false));
         windowSteps.resizeCurrentWindow(targetSize);
         verify(softAssert).assertTrue(assertionMessage, false);
-        verifyNoInteractions(window);
+        verifyNoInteractions(webDriverProvider);
     }
 
     @Test
     void testResizeCurrentWindowNoScreenSize()
     {
-        BrowserWindowSize targetSize = new BrowserWindowSize(WIDTH, HEIGHT);
-        Window window = mockWindow();
-        when(browserWindowSizeProvider.getMaximumBrowserWindowSize(false))
-                .thenReturn(Optional.empty());
+        var targetSize = new Dimension(WIDTH, HEIGHT);
+        var window = mockWindow();
+        when(webDriverManager.checkWindowFitsScreen(eq(targetSize), argThat(consumer -> true))).thenReturn(
+                Optional.empty());
         windowSteps.resizeCurrentWindow(targetSize);
         verifyNoInteractions(softAssert);
-        verify(window).setSize(argThat(dimension -> WIDTH == dimension.getWidth() && HEIGHT == dimension.getHeight()));
+        verify(window).setSize(targetSize);
     }
 
     private Window mockWindow()

@@ -17,38 +17,49 @@
 package org.vividus.steps.ui.web;
 
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.Dimension;
 import org.vividus.monitor.TakeScreenshotOnFailure;
-import org.vividus.selenium.BrowserWindowSize;
-import org.vividus.selenium.IBrowserWindowSizeManager;
+import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 
 @TakeScreenshotOnFailure
 public class WindowSteps
 {
-    private final IBrowserWindowSizeManager browserWindowSizeManager;
+    private final IWebDriverProvider webDriverProvider;
+    private final IWebDriverManager webDriverManager;
     private final ISoftAssert softAssert;
 
-    public WindowSteps(IBrowserWindowSizeManager browserWindowSizeManager, ISoftAssert softAssert)
+    public WindowSteps(IWebDriverProvider webDriverProvider, IWebDriverManager webDriverManager, ISoftAssert softAssert)
     {
-        this.browserWindowSizeManager = browserWindowSizeManager;
+        this.webDriverProvider = webDriverProvider;
+        this.webDriverManager = webDriverManager;
         this.softAssert = softAssert;
     }
 
     /**
-     * Change current browser window size to the specified one.
-     * @param targetSize Any browser window size in pixels, e.g. 800x600.
-     *                   Note: browser window size should be smaller than the current screen resolution.
+     * Changes the current browser window size to the specified one.
+     * NOTE: The specified browser window size should be smaller than the current screen resolution.
+     *
+     * @param targetSize The desired browser window size in pixels, e.g. `800x600`,
+     *                   where the first measure is window width, the last one is window height.
      */
     @When("I change window size to `$targetSize`")
-    public void resizeCurrentWindow(BrowserWindowSize targetSize)
+    public void resizeCurrentWindow(Dimension targetSize)
     {
-        browserWindowSizeManager.resizeBrowserWindow(targetSize, screenSize ->
+        if (canTryToResize(targetSize))
         {
-            boolean meetScreenBorders = targetSize.getWidth() <= screenSize.getWidth()
-                    && targetSize.getHeight() <= screenSize.getHeight();
-            return softAssert.assertTrue(
-                    String.format("The desired browser window size %s fits the screen size (%dx%d)",
-                            targetSize, screenSize.getWidth(), screenSize.getHeight()), meetScreenBorders);
-        }, window -> window.setSize(targetSize.toDimension()));
+            webDriverProvider.get().manage().window().setSize(targetSize);
+        }
+    }
+
+    private boolean canTryToResize(Dimension targetSize)
+    {
+        return webDriverManager.checkWindowFitsScreen(targetSize, (fitsScreen, size) -> {
+            String assertionDescription = String.format(
+                    "The desired browser window size %dx%d fits the screen size (%dx%d)", targetSize.getWidth(),
+                    targetSize.getHeight(), size.getWidth(), size.getHeight());
+            softAssert.assertTrue(assertionDescription, fitsScreen);
+        }).orElse(true);
     }
 }
