@@ -38,5 +38,5 @@ dependencies {
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.8.3')
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.9')
 }
