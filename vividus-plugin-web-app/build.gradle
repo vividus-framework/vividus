@@ -15,7 +15,7 @@ dependencies {
     api project(':vividus-extension-selenium')
 
     api(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.2')
-    api(group: 'edu.uci.ics', name: 'crawler4j', version: '4.4.0')
+    api(group: 'de.hs-heilbronn.mi', name: 'crawler4j-with-sleepycat', version: '4.8.0')
 
     implementation(group: 'com.codeborne', name: 'selenide', version: '6.2.1')
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: "${seleniumVersion}")
