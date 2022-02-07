@@ -669,8 +669,7 @@ include::partial$proxy-steps.adoc[]
 
 Changes the current browser window size to the specified one.
 
-[IMPORTANT]
-The specified browser window size should be smaller than the current screen resolution.
+IMPORTANT: The specified browser window size should be smaller than the current screen resolution.
 
 [source,gherkin]
 ----

@@ -38,7 +38,7 @@ public class BrowserWindowSizeListener
     private IWebDriverManager webDriverManager;
 
     @Subscribe
-    public void onWebDriverCreate(@SuppressWarnings("unusued") WebDriverCreateEvent event)
+    public void onWebDriverCreate(WebDriverCreateEvent event)
     {
         if (!webDriverManager.isElectronApp() && !webDriverManager.isMobile())
         {
