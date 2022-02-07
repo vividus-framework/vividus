@@ -602,23 +602,31 @@ Here one could find description of general HTTP properties applied across all th
 
 == Sensitive Data Encryption
 
-It is possible to use variables & strings encrypted with Jasypt. Here's an example of free online encryption service that can be used for this purpose: https://www.devglan.com/online-tools/jasypt-online-encryption-decryption
+VIVIDUS allows to store values of the properties in encrypted form.
+https://www.devglan.com/online-tools/jasypt-online-encryption-decryption[Jasypt Online] can be used to perform encryption and decryption operations.
 
-=== How to encrypt a string using https://www.devglan.com/online-tools/jasypt-online-encryption-decryption service?
+=== How to encrypt a string using https://www.devglan.com/online-tools/jasypt-online-encryption-decryption[Jasypt Online]?
 
-1. Paste plain text string to encrypt to the corresponding text field
-2. Set Type of Encryption to "Two Way Encryption (With Secret Text)"
-3. Enter secret key/text in the corresponding text field. Note that is should not contain specific symbols.
-4. Click Encrypt
-5. The resulting encrypted string can be copied from the corresponding field
+. Paste plain text string to encrypt to the corresponding text field.
+. Set Type of Encryption to "Two Way Encryption (With Secret Text)".
+. Enter secret key/text in the corresponding text field.
+. Click "Encrypt".
+. The resulting encrypted string can be copied from the corresponding field.
 
-=== How to use a Jasypt-encrypted string in VIVIDUS?
+=== How to use an encrypted string in VIVIDUS?
 
-1. Add the secret key/text to the project properties as the value of:
+. Add the secret key/text to the project properties as the value of:
++
+[source,properties]
 ----
-system.vividus.encryptor.password=
+system.vividus.encryptor.password=...
 ----
-2. Use the wrapping "ENC()" for any encrypted string. e.g.
++
+IMPORTANT: This value must be kept secret and must not be committed to version control system.
+
+. Use the wrapping `ENC(...)` for any encrypted property value. e.g.
++
+[source,properties]
 ----
-selenium.grid.password=ENC(cvoah9O4ZxR0vcuUAYx3/4YfT7ZjBPLpzmRc1VFwhyg=)
+http.auth.password=ENC(cvoah9O4ZxR0vcuUAYx3/4YfT7ZjBPLpzmRc1VFwhyg=)
 ----
