@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium;
+package org.vividus.ui.web.converter;
 
-public interface IBrowserWindowSizeProvider
+import java.beans.PropertyEditorSupport;
+
+import org.vividus.converter.ui.web.StringToDimensionParameterConverter;
+
+public class DimensionPropertyEditor extends PropertyEditorSupport
 {
-    BrowserWindowSize getBrowserWindowSize(boolean remoteExecution);
+    @Override
+    public void setAsText(String text) throws IllegalArgumentException
+    {
+        setValue(text.isBlank() ? null : StringToDimensionParameterConverter.convert(text));
+    }
 }

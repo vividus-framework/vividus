@@ -14,19 +14,29 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.manager;
+package org.vividus.ui.web.converter;
 
-import java.util.Optional;
-import java.util.function.BiConsumer;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.remote.Browser;
 
-public interface IWebDriverManager extends IGenericWebDriverManager
+class DimensionPropertyEditorTests
 {
-    boolean isElectronApp();
+    @Test
+    void shouldConvertToDimension()
+    {
+        DimensionPropertyEditor editor = new DimensionPropertyEditor();
+        editor.setAsText("800x600");
+        assertEquals(new Dimension(800, 600), editor.getValue());
+    }
 
-    boolean isBrowserAnyOf(Browser... browsers);
-
-    Optional<Boolean> checkWindowFitsScreen(Dimension desiredWindowSize, BiConsumer<Boolean, Dimension> resultHandler);
+    @Test
+    void shouldConvertToNull()
+    {
+        DimensionPropertyEditor editor = new DimensionPropertyEditor();
+        editor.setAsText(" ");
+        assertNull(editor.getValue());
+    }
 }

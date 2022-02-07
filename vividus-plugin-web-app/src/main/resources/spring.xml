@@ -73,6 +73,7 @@
 
     <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager" parent="genericWebDriverManager" >
         <property name="electronApp" value="${desktop-electron-app}" />
+        <property name="remoteScreenResolution" value="${selenium.grid.screen-resolution}" />
     </bean>
 
     <bean id="fieldActions" class="org.vividus.ui.web.action.FieldActions" />
@@ -234,6 +235,8 @@
         </constructor-arg>
     </bean>
 
+    <bean id="windowSteps" class="org.vividus.steps.ui.web.WindowSteps" />
+
     <bean id="actionSteps" class="org.vividus.steps.ui.web.ActionSteps" />
 
     <bean id="webUiVividusSetupSteps" class="org.vividus.steps.WebUiVividusSetupSteps">
@@ -244,15 +247,9 @@
 
     <bean class="org.vividus.ui.web.listener.WebSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
 
-    <bean id="browserWindowSizeProvider" class="org.vividus.selenium.BrowserWindowSizeProvider" >
-        <property name="remoteScreenResolution" value="${selenium.grid.screen-resolution}" />
-    </bean>
-
-    <bean id="browserWindowSizeListener" class="org.vividus.selenium.BrowserWindowSizeListener"
-          lazy-init="false">
-        <property name="webDriverManager" ref="webDriverManager" />
-        <property name="webDriverProvider" ref="webDriverProvider" />
-        <property name="browserWindowSizeProvider" ref="browserWindowSizeProvider" />
+    <bean class="org.vividus.selenium.BrowserWindowSizeListener" lazy-init="false">
+        <property name="runContext" ref="runContext" />
+         <property name="webDriverManager" ref="webDriverManager" />
     </bean>
 
     <bean id="vividusWebDriverFactory" class="org.vividus.selenium.VividusWebDriverFactory">
@@ -334,6 +331,7 @@
         <idref bean="dragAndDropSteps" />
         <idref bean="scrollSteps" />
         <idref bean="performanceSteps" />
+        <idref bean="windowSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">
@@ -341,6 +339,9 @@
             <bean class="org.vividus.beans.RelaxedEnumPropertyEditor">
                 <constructor-arg value="org.vividus.selenium.WebDriverType" />
             </bean>
+        </entry>
+        <entry key="org.openqa.selenium.Dimension">
+            <bean class="org.vividus.ui.web.converter.DimensionPropertyEditor" />
         </entry>
     </util:map>
 
