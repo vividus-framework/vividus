@@ -365,15 +365,15 @@ When I execute sequence of actions: $actions
 |By.caseSensitiveText(Done)
 
 |PRESS_KEYS
-|Press xref:https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
+|Press https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
 |BACK_SPACE
 
 |KEY_DOWN
-|Press xref:https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
+|Press https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
 |CONTROL,SHIFT,ALT
 
 |KEY_UP
-|Release xref:https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
+|Release https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
 |CONTROL,SHIFT,ALT
 
 |MOVE_TO
