@@ -33,11 +33,12 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.reporters.DelegatingStoryReporter;
+import org.jbehave.core.reporters.ThreadSafeReporter;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.vividus.softassert.event.AssertionFailedEvent;
 
-public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryReporter
+public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryReporter implements ThreadSafeReporter
 {
     private final ReportPortalStoryReporter reporter;
     private final List<TestItemLeaf> failedSteps = new ArrayList<>();
