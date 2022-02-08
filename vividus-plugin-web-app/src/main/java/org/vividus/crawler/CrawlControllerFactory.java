@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,24 @@
 
 package org.vividus.crawler;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 
+import org.apache.commons.io.FileUtils;
 import org.vividus.util.UriUtils;
 import org.vividus.util.UriUtils.UserInfo;
 
+import crawlercommons.filters.basic.BasicURLNormalizer;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.authentication.BasicAuthInfo;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.frontier.SleepycatFrontierConfiguration;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import edu.uci.ics.crawler4j.url.SleepycatWebURLFactory;
 
 public class CrawlControllerFactory implements ICrawlControllerFactory
 {
@@ -38,16 +44,22 @@ public class CrawlControllerFactory implements ICrawlControllerFactory
     @Override
     public CrawlController createCrawlController(URI mainApplicationPage)
     {
-        CrawlConfig crawlConfig = createCrawlConfig(mainApplicationPage);
-
-        RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
-        robotstxtConfig.setEnabled(false);
-        PageFetcher pageFetcher = new PageFetcher(crawlConfig);
-        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-
         try
         {
-            return new CrawlController(crawlConfig, pageFetcher, robotstxtServer);
+            CrawlConfig crawlConfig = createCrawlConfig(mainApplicationPage);
+
+            BasicURLNormalizer normalizer = BasicURLNormalizer.newBuilder()
+                                                          .idnNormalization(BasicURLNormalizer.IdnNormalization.NONE)
+                                                          .build();
+
+            RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
+            robotstxtConfig.setEnabled(false);
+            PageFetcher pageFetcher = new PageFetcher(crawlConfig, normalizer);
+            RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher,
+                    new SleepycatWebURLFactory());
+
+            return new CrawlController(crawlConfig, normalizer, pageFetcher, robotstxtServer,
+                    new SleepycatFrontierConfiguration(crawlConfig));
         }
         catch (Exception e)
         {
@@ -55,9 +67,17 @@ public class CrawlControllerFactory implements ICrawlControllerFactory
         }
     }
 
-    private CrawlConfig createCrawlConfig(URI mainApplicationPage)
+    private CrawlConfig createCrawlConfig(URI mainApplicationPage) throws IOException
     {
         CrawlConfig crawlConfig = new CrawlConfig();
+
+        /**
+         * The crawler4j requires the crawl storage folder to exist, so it should be updated to create
+         * folders at any depth
+         */
+        File crawlStorage = new File(crawlStorageFolder);
+        FileUtils.forceMkdir(crawlStorage);
+
         crawlConfig.setCrawlStorageFolder(crawlStorageFolder);
         crawlConfig.setPolitenessDelay(0);
         crawlConfig.setSocketTimeout(SOCKET_TIMEOUT);

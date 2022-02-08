@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.parser.TextParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
+import edu.uci.ics.crawler4j.url.WebURLImpl;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
 class LinkCrawlerTests
@@ -114,7 +115,7 @@ class LinkCrawlerTests
 
     private static WebURL createWebUrl(String url)
     {
-        WebURL webUrl = new WebURL();
+        WebURL webUrl = new WebURLImpl();
         webUrl.setURL(url);
         return webUrl;
     }

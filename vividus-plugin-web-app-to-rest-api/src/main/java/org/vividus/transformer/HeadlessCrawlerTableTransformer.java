@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.transformer;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -55,7 +57,7 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
 
     private void addSeeds(URI mainApplicationPage, CrawlController controller)
     {
-        controller.addSeed(mainApplicationPage.toString());
+        addSeed(controller, mainApplicationPage.toString());
         if (this.seedRelativeUrls == null)
         {
             return;
@@ -66,7 +68,24 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
                 .map(mainApplicationPagePath::concat)
                 .map(relativeUrl -> UriUtils.buildNewUrl(mainApplicationPage, relativeUrl))
                 .map(URI::toString)
-                .forEach(controller::addSeed);
+                .forEach(pageUrl -> addSeed(controller, pageUrl));
+    }
+
+    private void addSeed(CrawlController controller, String pageUrl)
+    {
+        try
+        {
+            controller.addSeed(pageUrl);
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override

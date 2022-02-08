@@ -253,3 +253,11 @@ Then `${resultSequenceOfTransformers}` is equal to table:
 |1 |Junit  |Jupiter |B      |
 |2 |Freddie|Mercury |B      |
 |3 |AWS    |Neptune |B      |
+
+
+Scenario: Verify FROM_HEADLESS_CRAWLING transformer
+Meta:
+    @issueId 2451
+Then `<relativeUrl>` matches `.*links.*`
+Examples:
+{transformer=FROM_HEADLESS_CRAWLING, column=relativeUrl}

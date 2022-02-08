@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,28 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -67,6 +73,7 @@ import edu.uci.ics.crawler4j.crawler.CrawlController.WebCrawlerFactory;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
+import edu.uci.ics.crawler4j.url.WebURLImpl;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
 class HeadlessCrawlerTableTransformerTests
@@ -110,7 +117,7 @@ class HeadlessCrawlerTableTransformerTests
     @ParameterizedTest
     @MethodSource("dataProviderOfFetchingUrls")
     void testFetchUrlsSuccessfully(String mainAppPageRelativeUrl, Set<String> seedRelativeUrlsProperty,
-                                  List<String> expectedSeedRelativeUrls)
+                                  List<String> expectedSeedRelativeUrls) throws IOException, InterruptedException
     {
         transformer.setSeedRelativeUrls(seedRelativeUrlsProperty);
         Set<String> urls = testFetchUrls(mainAppPageRelativeUrl, expectedSeedRelativeUrls);
@@ -119,7 +126,7 @@ class HeadlessCrawlerTableTransformerTests
     }
 
     @Test
-    void shouldFilterUrlsWhenLastRedirectUrlAlreadyInTheSet()
+    void shouldFilterUrlsWhenLastRedirectUrlAlreadyInTheSet() throws IOException, InterruptedException
     {
         transformer.setFilterRedirects(true);
         transformer.setSeedRelativeUrls(toSet(PATH2, PATH3));
@@ -130,7 +137,7 @@ class HeadlessCrawlerTableTransformerTests
     }
 
     @Test
-    void shouldTreatInvalidStatusCodeAsNoRedirects()
+    void shouldTreatInvalidStatusCodeAsNoRedirects() throws IOException, InterruptedException
     {
         transformer.setFilterRedirects(true);
         transformer.setSeedRelativeUrls(toSet(PATH2, PATH3));
@@ -144,7 +151,7 @@ class HeadlessCrawlerTableTransformerTests
     }
 
     @Test
-    void shouldNotFilterUrlsWhenLastRedirectUrlNotInTheSet()
+    void shouldNotFilterUrlsWhenLastRedirectUrlNotInTheSet() throws IOException, InterruptedException
     {
         transformer.setFilterRedirects(true);
         transformer.setSeedRelativeUrls(toSet(PATH2, PATH3));
@@ -155,7 +162,7 @@ class HeadlessCrawlerTableTransformerTests
     }
 
     @Test
-    void testFetchUrlsTwice()
+    void testFetchUrlsTwice() throws IOException, InterruptedException
     {
         transformer.setSeedRelativeUrls(toSet(SEED));
         Set<String> urls = testFetchUrls(DEFAULT_RELATIVE_URL, List.of(SEED));
@@ -168,7 +175,7 @@ class HeadlessCrawlerTableTransformerTests
     }
 
     @Test
-    void testFetchUrlsTwiceWithSameProperties()
+    void testFetchUrlsTwiceWithSameProperties() throws IOException, InterruptedException
     {
         String seedRelativeUrlsProperty = "/seed1";
         String mainAppPage = buildAppPageUrl(DEFAULT_RELATIVE_URL);
@@ -187,7 +194,7 @@ class HeadlessCrawlerTableTransformerTests
     }
 
     @Test
-    void testFetchUrlsWhenSeedRelativeUrlsAreSetViaConfiguration()
+    void testFetchUrlsWhenSeedRelativeUrlsAreSetViaConfiguration() throws IOException, InterruptedException
     {
         String seedRelativeUrl = "/fromConfig";
         transformer.setSeedRelativeUrls(Set.of(seedRelativeUrl));
@@ -196,7 +203,21 @@ class HeadlessCrawlerTableTransformerTests
         verifyNoInteractions(redirectsProvider);
     }
 
+    @Test
+    void shouldReThrowExceptionFromCrawlController() throws IOException, InterruptedException
+    {
+        IOException ioException = mock(IOException.class);
+        CrawlController crawlController = mockCrawlerControllerFactory(MAIN_APP_PAGE);
+        doThrow(ioException).when(crawlController).addSeed(MAIN_APP_PAGE);
+
+        TableProperties properties = buildTableProperties();
+        UncheckedIOException thrown = assertThrows(UncheckedIOException.class,
+            () -> transformer.fetchUrls(properties));
+        assertEquals(ioException, thrown.getCause());
+    }
+
     private Set<String> testFetchUrls(String mainAppPageRelativeUrl, List<String> expectedSeedRelativeUrls)
+            throws IOException, InterruptedException
     {
         String mainAppPage = buildAppPageUrl(mainAppPageRelativeUrl);
         CrawlController crawlController = mockCrawlerControllerFactory(mainAppPage);
@@ -206,6 +227,7 @@ class HeadlessCrawlerTableTransformerTests
 
     private Set<String> runUrlFetching(String mainAppPage, TableProperties tableProperties,
                                        List<String> expectedSeedRelativeUrls, CrawlController crawlController)
+                                       throws IOException, InterruptedException
     {
         InOrder ordered = inOrder(crawlControllerFactory, crawlController);
         return runUrlFetching(mainAppPage, tableProperties, expectedSeedRelativeUrls,
@@ -214,7 +236,7 @@ class HeadlessCrawlerTableTransformerTests
 
     private Set<String> runUrlFetching(String mainAppPage, TableProperties tableProperties,
                                        List<String> expectedSeedRelativeUrls, CrawlController crawlController,
-                                       InOrder ordered)
+                                       InOrder ordered) throws IOException, InterruptedException
     {
         URI mainAppPageUri = URI.create(mainAppPage);
         doNothing().when(crawlController).start((WebCrawlerFactory<?>) argThat(factory ->
@@ -239,9 +261,13 @@ class HeadlessCrawlerTableTransformerTests
         }), eq(50));
         Set<String> urls = transformer.fetchUrls(tableProperties);
         ordered.verify(crawlControllerFactory).createCrawlController(mainAppPageUri);
-        Stream.concat(Stream.of(mainAppPage),
+        List<String> urlsToVerify = Stream.concat(Stream.of(mainAppPage),
                 expectedSeedRelativeUrls.stream().map(HeadlessCrawlerTableTransformerTests::buildAppPageUrl))
-                .forEach(url -> ordered.verify(crawlController).addSeed(url));
+                .collect(Collectors.toList());
+        for (String url : urlsToVerify)
+        {
+            ordered.verify(crawlController).addSeed(url);
+        }
         ordered.verify(crawlController).start(any(LinkCrawlerFactory.class), eq(50));
         verifyNoMoreInteractions(crawlController);
         return urls;
@@ -269,7 +295,7 @@ class HeadlessCrawlerTableTransformerTests
 
     private static WebURL createWebUrl(String url)
     {
-        WebURL webUrl = new WebURL();
+        WebURL webUrl = new WebURLImpl();
         webUrl.setURL(url);
         return webUrl;
     }
