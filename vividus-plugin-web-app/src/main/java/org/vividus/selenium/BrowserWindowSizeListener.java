@@ -25,6 +25,8 @@ import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.context.RunContext;
 import org.vividus.converter.ui.web.StringToDimensionParameterConverter;
 import org.vividus.model.RunningScenario;
@@ -32,8 +34,11 @@ import org.vividus.model.RunningStory;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.manager.IWebDriverManager;
 
+@Deprecated(since = "0.4.1", forRemoval = true)
 public class BrowserWindowSizeListener
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BrowserWindowSizeListener.class);
+
     private RunContext runContext;
     private IWebDriverManager webDriverManager;
 
@@ -43,7 +48,12 @@ public class BrowserWindowSizeListener
         if (!webDriverManager.isElectronApp() && !webDriverManager.isMobile())
         {
             getBrowserWindowSizeFromMeta().ifPresentOrElse(
-                    targetSize -> getWindow(event).setSize(targetSize),
+                    targetSize -> {
+                        LOGGER.warn(
+                                "@browserWindowSize meta tag is deprecated and will be removed in VIVIDUS 0.5.0. "
+                                        + "The replacement is step \"When I change window size to `$targetSize`\"");
+                        getWindow(event).setSize(targetSize);
+                    },
                     () -> getWindow(event).maximize());
         }
     }

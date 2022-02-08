@@ -16,6 +16,9 @@
 
 package org.vividus.selenium;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -26,8 +29,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+
+import com.github.valfirst.slf4jtest.LoggingEvent;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
@@ -47,12 +56,18 @@ import org.vividus.model.RunningStory;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.selenium.manager.IWebDriverManager;
 
-@ExtendWith(MockitoExtension.class)
+@SuppressWarnings("removal")
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class BrowserWindowSizeListenerTests
 {
     private static final String BROWSER_WINDOW_SIZE_META = "browserWindowSize";
     private static final String TARGET_SIZE_AS_STRING = "1024x768";
     private static final Dimension TARGET_SIZE = new Dimension(1024, 768);
+    private static final LoggingEvent DEPRECATION_NOTICE = warn(
+            "@browserWindowSize meta tag is deprecated and will be removed in VIVIDUS 0.5.0. "
+                    + "The replacement is step \"When I change window size to `$targetSize`\"");
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(BrowserWindowSizeListener.class);
 
     @Mock private RunContext runContext;
     @Mock private IWebDriverManager webDriverManager;
@@ -81,6 +96,7 @@ class BrowserWindowSizeListenerTests
         browserWindowSizeListener.onWebDriverCreate(event);
         verify(window).setSize(TARGET_SIZE);
         verifyNoMoreInteractions(window);
+        assertThat(logger.getLoggingEvents(), is(List.of(DEPRECATION_NOTICE)));
     }
 
     @Test
@@ -107,6 +123,7 @@ class BrowserWindowSizeListenerTests
         browserWindowSizeListener.onWebDriverCreate(event);
         verify(window).setSize(TARGET_SIZE);
         verifyNoMoreInteractions(window);
+        assertThat(logger.getLoggingEvents(), is(List.of(DEPRECATION_NOTICE)));
     }
 
     @Test
@@ -134,6 +151,7 @@ class BrowserWindowSizeListenerTests
         var actual = assertThrows(IllegalArgumentException.class,
                 () -> browserWindowSizeListener.onWebDriverCreate(null));
         assertEquals(expected, actual);
+        assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
     @Test
@@ -146,6 +164,7 @@ class BrowserWindowSizeListenerTests
         var event = new WebDriverCreateEvent(webDriver);
         browserWindowSizeListener.onWebDriverCreate(event);
         verify(window).maximize();
+        assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
     @Test
@@ -154,6 +173,7 @@ class BrowserWindowSizeListenerTests
         when(webDriverManager.isElectronApp()).thenReturn(true);
         browserWindowSizeListener.onWebDriverCreate(null);
         verifyNoInteractions(runContext);
+        assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
     @Test
@@ -163,6 +183,7 @@ class BrowserWindowSizeListenerTests
         when(webDriverManager.isMobile()).thenReturn(true);
         browserWindowSizeListener.onWebDriverCreate(null);
         verifyNoInteractions(runContext);
+        assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
     private Window mockWindow()
