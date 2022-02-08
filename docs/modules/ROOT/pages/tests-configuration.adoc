@@ -599,3 +599,96 @@ Here one could find description of general HTTP properties applied across all th
 |The list of HTTP methods containing request body which should be treated as idempotent for retries
 
 |===
+
+== Sensitive Data Encryption
+
+VIVIDUS allows to store values of the properties in the encrypted form.
+VIVIDUS uses Jasypt (Java Simplified Encryption) which provides two-way
+encryption mechanism. While performing two-way encryption, apart from feeding
+plain-text it's required to feed the secret text (i.e. password) and this secret
+text is used to decrypt the encrypted text. The default encryption algorithm is
+`PBEWithMD5AndDES`.
+
+=== How to encrypt a string
+==== Option 1 (Recommended): using Jasypt CLI
+
+. Download the https://github.com/jasypt/jasypt/releases[latest Jasypt release]
+. Unpack the downloaded zip-archive
+. Go to `bin` folder
+. Run the command perfoming encryption:
++
+.Windows:
+[source,bat]
+----
+encrypt.bat input="This is my message to be encrypted" password=MYPAS_WORD
+----
++
+.Linux/UNIX/macOS:
+[source,shell]
+----
+./encrypt.sh input="This is my message to be encrypted" password=MYPAS_WORD
+----
++
+where
++
+ - `input` - Any string to be encrypted.
+ - `password` - Your encryption password.
++
+NOTE: `MYPAS_WORD` is a sample password and should be never used, own strong password is required for the encryption.
+
+. Find the encrypted data in `OUTPUT` section
++
+.Encryption command output
+[source,log]
+----
+----ENVIRONMENT-----------------
+
+Runtime: Eclipse Adoptium OpenJDK 64-Bit Server VM 17+35
+
+
+
+----ARGUMENTS-------------------
+
+input: This is my message to be encrypted
+password: MYPAS_WORD
+
+
+
+----OUTPUT----------------------
+
+WVnXhzG704KRZZFYL7hfpA4YoSm8V2F5eNXyr7CRYCichteHvNS3nB23zaI8CuLy
+
+
+----
+
+TIP: Find more details in http://www.jasypt.org/cli.html[Jasypt CLI Tools documentation]
+
+==== Option 2: using https://www.devglan.com/online-tools/jasypt-online-encryption-decryption[Jasypt Online]
+
+CAUTION: Use this tool at your own risk, since there is a chance of potential leakage of sensitive data
+
+. Paste plain text string to encrypt to the corresponding text field.
+. Set Type of Encryption to "Two Way Encryption (With Secret Text)".
+. Enter secret key/text in the corresponding text field.
+. Click "Encrypt".
+. The resulting encrypted string can be copied from the corresponding field.
+
+=== How to use an encrypted string in VIVIDUS
+
+. Add the secret key/text to the project properties as the value of:
++
+[source,properties]
+----
+system.vividus.encryptor.password=MYPAS_WORD
+----
++
+IMPORTANT: This value must be kept secret and must not be committed to version control system.
++
+NOTE: `MYPAS_WORD` is a sample password and should be never used, own strong password is required for the encryption.
+
+. Use the wrapping `ENC(...)` for any encrypted property value. e.g.
++
+[source,properties]
+----
+http.auth.password=ENC(WVnXhzG704KRZZFYL7hfpA4YoSm8V2F5eNXyr7CRYCichteHvNS3nB23zaI8CuLy)
+----
