@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,36 @@
 
 package org.vividus.zephyr.model;
 
+import java.util.stream.Stream;
+
 public enum TestCaseStatus
 {
-    FAILED,
-    BROKEN,
-    PENDING,
-    UNKNOWN,
-    SKIPPED,
-    PASSED;
+    BROKEN(0, "notPerformed"),
+    FAILED(1, "failed"),
+    UNKNOWN(2, ""),
+    PENDING(3, "pending"),
+    SKIPPED(4, "ignorable"),
+    PASSED(5, "successful");
+
+    private final String name;
+    private final int priority;
+
+    TestCaseStatus(int priority, String name)
+    {
+        this.priority = priority;
+        this.name = name;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public static TestCaseStatus fromString(String s) throws IllegalArgumentException
+    {
+        return Stream.of(TestCaseStatus.values())
+                     .filter(v -> v.getName().equals(s))
+                     .findFirst()
+                     .orElse(TestCaseStatus.UNKNOWN);
+    }
 }

@@ -47,7 +47,7 @@ public class TestCaseParser
         this.zephyrExporterProperties = zephyrExporterProperties;
     }
 
-    public List<TestCaseExecution> createTestCases(ObjectMapper objectMapper) throws IOException
+    public List<TestCaseExecution> createTestExecutions(ObjectMapper objectMapper) throws IOException
     {
         List<TestCaseExecution> testCaseExecutions = parseJsonResultsFile(getJsonResultsFiles(), objectMapper);
         notEmpty(testCaseExecutions, "There are not any test cases for exporting",

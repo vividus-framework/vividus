@@ -1,6 +1,13 @@
 {
   "path": "storyPath",
   "title": "",
+  "meta": [
+    {
+      "keyword": "@",
+      "name": "testCaseId",
+      "value": "STORY-1"
+    }
+  ],
   "lifecycle": {
     "keyword": "Lifecycle:"
   },
@@ -12,24 +19,92 @@
       "meta": [
         {
           "keyword": "@",
-          "name": "requirementId",
-          "value": "STUB-REQ-0"
+          "name": "testCaseId",
+          "value": "TEST-1"
         }
       ],
+      "beforeScenarioSteps": [],
       "steps": [
         {
-          "outcome": "comment",
-          "value": "!-- Step: Step"
+          "outcome": "successful",
+          "value": "Step 1"
         },
         {
-          "outcome": "comment",
-          "value": "!-- Data: Data"
-        },
-        {
-          "outcome": "comment",
-          "value": "!-- Result: Result"
+          "outcome": "failed",
+          "value": "Step 2"
         }
       ]
+    },
+    {
+      "keyword": "Scenario:",
+      "title": "secondScenarioTitle",
+      "meta": [
+        {
+          "keyword": "@",
+          "name": "testCaseId",
+          "value": "TEST-2"
+        }
+      ],
+      "examples": {
+        "keyword": "Examples:",
+        "steps": [
+          "Step 1 '<value1>'",
+          "Step 2 '<value2>'",
+          "Step 3"
+        ],
+        "parameters": {
+          "names": [
+            "param1",
+            "param2"
+          ]
+        },
+        "examples": [
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            },
+            "beforeScenarioSteps": [],
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "Step 1 'value 1'"
+              },
+              {
+                "outcome": "successful",
+                "value": "Step 2 'value 2'"
+              },
+              {
+                "outcome": "successful",
+                "value": "Step 3"
+              }
+            ]
+          },
+          {
+            "keyword": "Example:",
+            "parameters": {
+              "param1": "value3",
+              "param2": "value4"
+            },
+            "beforeScenarioSteps": [],
+            "steps": [
+              {
+                "outcome": "successful",
+                "value": "Step 1 'value 3'"
+              },
+              {
+                "outcome": "successful",
+                "value": "Step 2 'value 4'"
+              },
+              {
+                "outcome": "successful",
+                "value": "Step 3"
+              }
+            ]
+          }
+        ]
+      }
     }
   ],
   "afterStorySteps": []
