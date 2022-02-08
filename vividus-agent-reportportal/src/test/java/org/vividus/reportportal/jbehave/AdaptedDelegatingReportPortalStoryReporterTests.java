@@ -17,6 +17,7 @@
 package org.vividus.reportportal.jbehave;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,6 +38,7 @@ import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
 import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.model.Step;
+import org.jbehave.core.reporters.ThreadSafeReporter;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -64,6 +66,12 @@ class AdaptedDelegatingReportPortalStoryReporterTests
     void shouldRegisterToEventBus()
     {
         verify(eventBus).register(adaptedReporter);
+    }
+
+    @Test
+    void shouldBeThreadSafeReporter()
+    {
+        assertInstanceOf(ThreadSafeReporter.class, adaptedReporter);
     }
 
     @Test
