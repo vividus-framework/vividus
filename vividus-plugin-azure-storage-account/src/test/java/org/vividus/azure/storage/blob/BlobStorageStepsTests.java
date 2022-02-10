@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.BlobServiceProperties;
 import com.azure.storage.blob.models.ListBlobsOptions;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -97,6 +98,20 @@ class BlobStorageStepsTests
     @Mock private VariableContext variableContext;
     @Mock private JsonUtils jsonUtils;
     @Mock private TokenCredential tokenCredential;
+
+    @Test
+    void shouldRetrieveBlobServiceProperties()
+    {
+        runWithStorageClient((steps, client) ->
+        {
+            BlobServiceProperties properties = mock(BlobServiceProperties.class);
+            when(client.getProperties()).thenReturn(properties);
+            String propertiesAsJson = "{\"blob-storage\":\"properties\"}";
+            when(jsonUtils.toJson(properties)).thenReturn(propertiesAsJson);
+            steps.retrieveBlobServiceProperties(KEY, SCOPES, VARIABLE);
+            verify(variableContext).putVariable(SCOPES, VARIABLE, propertiesAsJson);
+        });
+    }
 
     @Test
     void shouldDownloadBlob()
@@ -276,7 +291,7 @@ class BlobStorageStepsTests
         return first;
     }
 
-    private void runWithClient(FailableBiConsumer<BlobStorageSteps, BlobContainerClient, IOException> testToRun)
+    private void runWithStorageClient(FailableBiConsumer<BlobStorageSteps, BlobServiceClient, IOException> testToRun)
     {
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
         String endpoint = "endpoint";
@@ -289,11 +304,9 @@ class BlobStorageStepsTests
                     when(mock.buildClient()).thenReturn(blobServiceClient);
                 }))
         {
-            BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
-            when(blobServiceClient.getBlobContainerClient(CONTAINER)).thenReturn(blobContainerClient);
-            BlobStorageSteps steps = new BlobStorageSteps(storageAccountEndpoints, tokenCredential,
-                    variableContext, jsonUtils);
-            testToRun.accept(steps, blobContainerClient);
+            BlobStorageSteps steps = new BlobStorageSteps(storageAccountEndpoints, tokenCredential, variableContext,
+                    jsonUtils);
+            testToRun.accept(steps, blobServiceClient);
             assertThat(serviceClientBuilder.constructed(), hasSize(1));
             BlobServiceClientBuilder builder = serviceClientBuilder.constructed().get(0);
             InOrder ordered = inOrder(builder);
@@ -305,6 +318,15 @@ class BlobStorageStepsTests
         {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private void runWithClient(FailableBiConsumer<BlobStorageSteps, BlobContainerClient, IOException> testToRun)
+    {
+        runWithStorageClient((steps, blobServiceClient) -> {
+            BlobContainerClient blobContainerClient = mock(BlobContainerClient.class);
+            when(blobServiceClient.getBlobContainerClient(CONTAINER)).thenReturn(blobContainerClient);
+            testToRun.accept(steps, blobContainerClient);
+        });
     }
 
     private BlobClient mockBlobClient(BlobContainerClient blobContainerClient)

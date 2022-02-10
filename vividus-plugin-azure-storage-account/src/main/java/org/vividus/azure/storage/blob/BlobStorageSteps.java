@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.BlobServiceProperties;
 import com.azure.storage.blob.models.ListBlobsOptions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -79,6 +80,31 @@ public class BlobStorageSteps
         this.credential = credential;
         this.variableContext = variableContext;
         this.jsonUtils = jsonUtils;
+    }
+
+    /**
+     * Retrieves the properties of a storage account’s Blob service and saves them as JSON to a variable.
+     * For more information, see the
+     * <a href="https://docs.microsoft.com/rest/api/storageservices/get-blob-service-properties">Azure Docs</a>.
+     *
+     * @param storageAccountKey The key to Storage Account endpoint.
+     * @param scopes            The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
+     *                          scopes.<br>
+     *                          <i>Available scopes:</i>
+     *                          <ul>
+     *                          <li><b>STEP</b> - the variable will be available only within the step,
+     *                          <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                          <li><b>STORY</b> - the variable will be available within the whole story,
+     *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                          </ul>
+     * @param variableName      The variable name to store the blob service properties.
+     */
+    @When("I retrieve blob service properties of storage account `$storageAccountKey` and save them to $scopes variable"
+            + " `$variableName`")
+    public void retrieveBlobServiceProperties(String storageAccountKey, Set<VariableScope> scopes, String variableName)
+    {
+        BlobServiceProperties properties = createBlobStorageClient(storageAccountKey).getProperties();
+        saveJsonVariable(scopes, variableName, properties);
     }
 
     /**
@@ -147,7 +173,7 @@ public class BlobStorageSteps
 
     /**
      * Retrieves the blob properties (all user-defined metadata, standard HTTP properties, and system properties for the
-     * blob) and saves them as JSON to a variable
+     * blob) and saves them as JSON to a variable.
      *
      * @param blobName          The full path to the blob in the container.
      * @param containerName     The name of the container to point to.
@@ -169,8 +195,8 @@ public class BlobStorageSteps
     public void retrieveBlobProperties(String blobName, String containerName, String storageAccountKey,
             Set<VariableScope> scopes, String variableName)
     {
-        BlobProperties blobProperties = createBlobClient(blobName, containerName, storageAccountKey).getProperties();
-        variableContext.putVariable(scopes, variableName, jsonUtils.toJson(blobProperties));
+        BlobProperties properties = createBlobClient(blobName, containerName, storageAccountKey).getProperties();
+        saveJsonVariable(scopes, variableName, properties);
     }
 
     /**
@@ -305,17 +331,25 @@ public class BlobStorageSteps
         variableContext.putVariable(scopes, variableName, result);
     }
 
-    private BlobContainerClient createBlobContainerClient(String containerName, String storageAccountKey)
+    private BlobServiceClient createBlobStorageClient(String storageAccountKey)
     {
         String endpoint = storageAccountEndpoints.get(storageAccountKey,
                 "Storage account with key '%s' is not configured in properties", storageAccountKey);
-        BlobServiceClient blobStorageClient = blobStorageClients.getUnchecked(endpoint);
-        return blobStorageClient.getBlobContainerClient(containerName);
+        return blobStorageClients.getUnchecked(endpoint);
+    }
+
+    private BlobContainerClient createBlobContainerClient(String containerName, String storageAccountKey)
+    {
+        return createBlobStorageClient(storageAccountKey).getBlobContainerClient(containerName);
     }
 
     private BlobClient createBlobClient(String blobName, String containerName, String storageAccountKey)
     {
-        BlobContainerClient blobContainerClient = createBlobContainerClient(containerName, storageAccountKey);
-        return blobContainerClient.getBlobClient(blobName);
+        return createBlobContainerClient(containerName, storageAccountKey).getBlobClient(blobName);
+    }
+
+    private void saveJsonVariable(Set<VariableScope> scopes, String variableName, Object data)
+    {
+        variableContext.putVariable(scopes, variableName, jsonUtils.toJson(data));
     }
 }
