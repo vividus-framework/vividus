@@ -1,4 +1,4 @@
-:actions: `ESTABLISH`, `COMPARE_AGAINST` and `CHECK_INEQUALITY_AGAINST`
+:visual-testing-actions: `ESTABLISH`, `COMPARE_AGAINST` and `CHECK_INEQUALITY_AGAINST`
 = Visual Testing Plugin
 
 The plugin for visual testing.
@@ -65,11 +65,9 @@ For example, `ui.visual.baselines-folder=C:/Workspace/vividus-tests/src/main/res
 
 == How to use
 
-Plugin has following actions: {actions}
+The plugin has the following actions: {visual-testing-actions}
 
-=== `ESTABLISH`
-
-Action creates baseline image.
+include::partial$establish.adoc[]
 
 Steps to establish baseline:
 
@@ -84,9 +82,7 @@ image::establish_baseline.png[Baseline view]
 
 image::save_baseline.png[Saving baseline]
 
-=== `COMPARE_AGAINST`
-
-Compares actual appearance of the page or element against baseline. Make sure you have baseline.
+include::partial$compare-against.adoc[]
 
 Steps to compare baseline:
 
@@ -107,9 +103,7 @@ image::checkpoint.png[Checkpoint view]
 
 b) Contextual click on the checkpoint image -> save as to baseline folder
 
-=== `CHECK_INEQUALITY_AGAINST`
-
-Work the same way as <<_compare_against>> except it checks if actual appearance differs from the baseline.
+include::partial$check-inequality-against.adoc[]
 
 == Visual testing with custom shooting strategies
 
@@ -284,7 +278,7 @@ Establishes baseline or compares against existing one.
 When I $actionType baseline with `$name`
 ----
 
-* `actionType` - {actions}
+* `actionType` - {visual-testing-actions}
 * `name` - name of baseline
 
 .Perform simple visual check on compare
@@ -302,7 +296,7 @@ Establishes baseline or compares against existing one using the specified config
 When I $actionType baseline with `$name` using screenshot configuration:$screenshotConfiguration
 ----
 
-* `actionType` - {actions}
+* `actionType` - {visual-testing-actions}
 * `name` - name of baseline
 * `screenshotConfiguration` - configuration to make screenshot
 
@@ -323,7 +317,7 @@ Establishes baseline or compares against existing one using the ignoring option.
 When I $actionType baseline with `$name` ignoring:$ignoredElements
 ----
 
-* `actionType` - {actions}
+* `actionType` - {visual-testing-actions}
 * `name` - name of baseline
 * `checkSettings` - examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCANTAGE`
 
@@ -344,7 +338,7 @@ Establishes baseline or compares against existing one using the ignoring option 
 When I $actionType baseline with `$name` ignoring:$ignoredElements using screenshot configuration:$screenshotConfiguration
 ----
 
-* `actionType` - {actions}
+* `actionType` - {visual-testing-actions}
 * `name` - name of baseline
 * `checkSettings` - examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCANTAGE`
 * `screenshotConfiguration` - configuration to make screenshot

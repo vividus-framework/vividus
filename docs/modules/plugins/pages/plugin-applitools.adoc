@@ -1,1 +1,235 @@
-include::ROOT:page$under-construction.adoc[]
+= Applitools Plugin
+
+The plugin provides the ability to perform visual testing using the https://applitools.com/[Applitools] visual testing platform.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-applitools', version: '{current-version}')
+----
+
+== Properties
+
+=== General properties
+
+NOTE: The expression parameters marked with *bold* are mandatory.
+
+[cols="2,1,3", options="header"]
+
+|===
+
+|Property Name
+|Default
+|Description
+
+|`web.visual.applitools.server-uri`
+|`https://eyesapi.applitools.com`
+|The URI of the rest server.
+
+|`web.visual.applitools.execute-api-key`
+|`empty`
+|Allows users to execute tests but does not allow them to access the tests and test results, change data through the API, or make any changes to the tests. For more details see how to https://applitools.com/docs/topics/overview/obtain-api-key.html[obtain API keys].
+
+|[subs=+quotes]`*web.visual.applitools.read-api-key*`
+|`empty`
+|Allows users to access tests and test results, but does not allow them to execute tests, change data through the API, or make any changes to the tests. For more details see how to https://applitools.com/docs/topics/overview/obtain-api-key.html[obtain API keys].
+
+|`web.visual.applitools.match-level`
+|`EXACT`
+|See https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[available match levels].
+
+|`web.visual.applitools.app-name`
+|`empty`
+|The name of the application under test.
+
+|===
+
+=== Cross-environment properties
+
+See https://applitools.com/docs/topics/general-concepts/working-withcross-environment-tests.html[cross-environment testing] for more details.
+
+[cols="3,1,1,3", options="header"]
+
+|===
+
+|Property Name
+|Default
+|Description
+
+|`web.visual.applitools.host-os`
+|`empty`
+|The host OS running the application under test.
+
+|`web.visual.applitools.host-app`
+|`empty`
+|The application running the application under test (e.g. Safari, Chrome).
+
+|`web.visual.applitools.viewport-size`
+|`empty`
+|The required viewport size for the environment.
+
+|`web.visual.applitools.baseline-env-name`
+|`empty`
+|The name of the baseline's environment.
+
+|===
+
+== Common visual testin actions use cases
+
+include::partial$establish.adoc[]
+
+.Establish baseline
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I run visual test with Applitools using:
+|appName    |batchName      |baselineName |action   |
+|example.com|example-testing|main-app-page|ESTABLISH|
+----
+
+Established baseline on Applitools
+
+image::applitools_establish_view.png[Establish view]
+
+Established baseline details
+
+image::applitools_establish_step_editor.png[Establish step editor]
+
+include::partial$compare-against.adoc[]
+
+.Compare against established baseline
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I run visual test with Applitools using:
+|appName    |batchName      |baselineName |action         |elementsToIgnore|
+|example.com|example-testing|main-app-page|COMPARE_AGAINST|By.tagName(h1)  |
+----
+
+Comparison result against the established baseline on Applitools
+
+image::applitools_compare_view.png[Compare view]
+
+Comparison result details
+
+image::applitools_compare_step_editor.png[Compare step editor]
+
+include::partial$check-inequality-against.adoc[]
+
+.Check inequality established baseline
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I run visual test with Applitools using:
+|appName    |batchName      |baselineName |action                  |elementsToIgnore|
+|example.com|example-testing|main-app-page|CHECK_INEQUALITY_AGAINST|By.tagName(h1)  |
+----
+
+== Steps
+
+:visual-testing-actions: `ESTABLISH`, `COMPARE_AGAINST` or `CHECK_INEQUALITY_AGAINST`
+
+=== Visual check with default Applitools configuration
+
+Performs visual check on the Applitools visual testing plarform.
+
+[source,gherkin]
+----
+When I $actionType baseline `$testName` in batch `$batchName` with Applitools
+----
+
+* `$actionType` - The {visual-testing-actions}.
+* `$testName` - The name of the baseline (visual test name).
+* `$batchName` - The name of the batch (group of visual tests).
+
+.Perform visual check using default configuration
+[source,gherkin]
+----
+When I ESTABLISH baseline `main-app-page` in batch `example-testing` with Applitools
+----
+
+=== Visual check with custom Applitools configuration
+
+Performs visual check on the Applitools visual testing plarform with custom Applitools configuration.
+
+Properties in the custom Applitools configuration provided in step take presendence over properties specified in configuration files.
+
+It's possible to perform several visual testing checks at once by passing several Applitools configuration into step.
+
+[source,gherkin]
+----
+When I run visual test with Applitools using:$applitoolsConfigurations
+----
+
+NOTE: The expression parameters marked with *bold* are mandatory.
+
+* `$applitoolsConfigurations` - The Applitools configurations
+** [subs=+quotes]`*action*` - The {visual-testing-actions}.
+** [subs=+quotes]`*batchName*` - The name of the batch (group of visual tests).
+** [subs=+quotes]`*baselineName*` - The name of the baseline (visual test name).
+** `matchLevel` - The https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[match level].
+** `appName` - The name of the application under test.
+** `elementsToIgnore` - The comma separated list of locators of elements to ignore.
+** `areasToIgnore` - The comma separated list of locators of page areas to ignore.
+** `hostApp` - The application running the application under test (e.g. Safari, Chrome).
+** `hostOS` - The host OS running the application under test.
+** `viewportSize` - The required viewport size for the environment.
+** `baselineEnvName` - The name of the baseline's environment.
+** `searchContext` - The locator of a search context
+** `readApiKey` - The key to execute tests.
+** `executeApiKey` - The key to access tests and test results.
+** `serverUri` - The URI of the rest server.
+
+.Perform visual check using custom configuration
+[source,gherkin]
+----
+When I run visual test with Applitools using:
+|appName |action         |batchName      |baselineName |matchLevel|
+|Demo app|COMPARE_AGAINST|example-testing|main-page-app|EXACT     |
+----
+
+=== Visual check with custom Applitools and screenshot configuration
+
+Performs visual check on the Applitools visual testing plarform with custom configuration and screenshot strategy.
+
+Properties in the custom Applitools configuration provided in step take presendence over properties specified in configuration files.
+
+It's possible to perform several visual testing checks at once by passing several Applitools configuration into step.
+
+[source,gherkin]
+----
+When I run visual test with Applitools using:$applitoolsConfigurations and screenshot config:$screenshotConfiguration
+----
+
+NOTE: The expression parameters marked with *bold* are mandatory.
+
+* `$applitoolsConfigurations` - The Applitools configurations
+** [subs=+quotes]`*action*` - The {visual-testing-actions}.
+** [subs=+quotes]`*batchName*` - The name of the batch (group of visual tests).
+** [subs=+quotes]`*baselineName*` - The name of the baseline (visual test name).
+** `matchLevel` - The https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[match level].
+** `appName` - The name of the application under test.
+** `elementsToIgnore` - The comma separated list of locators of elements to ignore.
+** `areasToIgnore` - The comma separated list of locators of page areas to ignore.
+** `hostApp` - The application running the application under test (e.g. Safari, Chrome).
+** `hostOS` - The host OS running the application under test.
+** `viewportSize` - The required viewport size for the environment.
+** `baselineEnvName` - The name of the baseline's environment.
+** `searchContext` - The locator of a search context
+** `readApiKey` - The key to execute tests.
+** `executeApiKey` - The key to access tests and test results.
+** `serverUri` - The URI of the rest server.
+* `$screenshotConfiguration` - The screenshot configuration
+
+.Perform visual check using custom Applitools and screenshot configuration
+[source,gherkin]
+----
+When I run visual test with Applitools using:
+|appName |action         |batchName      |baselineName |matchLevel|
+|Demo app|COMPARE_AGAINST|example-testing|main-page-app|EXACT     |
+ and screenshot config:
+|webFooterToCut|screenshotShootingStrategy|
+|50            |SIMPLE                    |
+----
