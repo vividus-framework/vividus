@@ -420,14 +420,14 @@ Here one could find description of general HTTP properties applied across all th
 :base-java-docs-url: https://docs.oracle.com/en/java/javase/11/
 :key-store-ref: {base-java-docs-url}security/terms-and-definitions.html#GUID-C7BB21C7-E19E-4DE4-8494-CB43F957C329__GUID-D7CAC72A-2714-4C9B-88E2-7F317DE94CEE[key store]
 
-=== General
-
 [cols="3,1,1,3", options="header"]
 |===
 |Property Name
 |Acceptable values
 |Default
 |Description
+
+4+^.^|_General_
 
 |`http.circular-redirects-allowed`
 |`boolean`
@@ -464,12 +464,8 @@ Here one could find description of general HTTP properties applied across all th
 |`default`
 |The name of the https://hc.apache.org/httpcomponents-client-4.5.x/current/tutorial/html/statemgmt.html#d5e515[cookie specification] to be used for HTTP state management
 
-|===
+4+^.^|_Authentication_
 
-=== Authentication
-
-[cols="3,1,1,3", options="header"]
-|===
 |Property Name
 |Acceptable values
 |Default
@@ -490,16 +486,7 @@ Here one could find description of general HTTP properties applied across all th
 |`false`
 |If enabled the HTTP client will send the basic authentication data even before the service gives an unauthorized response (401), useful when the service doesn't support unauthorized response (401) or to reduce the overhead of making the connection
 
-|===
-
-=== SSL handshake
-
-[cols="3,1,1,3", options="header"]
-|===
-|Property Name
-|Acceptable values
-|Default
-|Description
+4+^.^|_SSL handshake_
 
 |`http.ssl.check-certificate`
 |`boolean`
@@ -511,16 +498,7 @@ Here one could find description of general HTTP properties applied across all th
 |`true`
 |Verify if the domain name in the SSL certificate matches the domain name in URL where the request is sent to
 
-|===
-
-=== Two-Way SSL authentication
-
-[cols="3,1,1,3", options="header"]
-|===
-|Property Name
-|Acceptable values
-|Default
-|Description
+4+^.^|_Two-Way SSL authentication_
 
 |`http.key-store.type`
 |{base-java-docs-url}docs/specs/security/standard-names.html#keystore-types[KeyStore types]
@@ -542,32 +520,14 @@ Here one could find description of general HTTP properties applied across all th
 |`<empty>`
 |The password for the private key
 
-|===
-
-=== DNS resolver
-
-[cols="3,1,1,3", options="header"]
-|===
-|Property Name
-|Acceptable values
-|Default
-|Description
+4+^.^|_DNS resolver_
 
 |`http.local-dns-storage.`
 |`key-value mapping`
 |`<empty>`
 |The property prefix used to override the OS DNS lookup by specifying hostname to IP address mappings e.g. `http.local-dns-storage.coursera.org=52.84.197.20`
 
-|===
-
-=== Service unavailability retry handler
-
-[cols="3,1,1,3", options="header"]
-|===
-|Property Name
-|Acceptable values
-|Default
-|Description
+4+^.^|_Service unavailability retry handler_
 
 |`http.service-unavailable-retry.max-retries`
 |`integer`
@@ -584,16 +544,7 @@ Here one could find description of general HTTP properties applied across all th
 |`PT1S`
 |The retry interval between subsequent requests
 
-|===
-
-=== Idempotent retry handler
-
-[cols="3,1,1,3", options="header"]
-|===
-|Property Name
-|Acceptable values
-|Default
-|Description
+4+^.^|_Idempotent retry handler_
 
 |`http.idempotent-methods-sending-request-body`
 |set of integers
