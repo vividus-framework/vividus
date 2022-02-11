@@ -17,20 +17,30 @@
 package org.vividus;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jbehave.core.model.Scenario;
-import org.vividus.context.ReportControlContext;
-import org.vividus.context.RunContext;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.vividus.softassert.exception.VerificationError;
 
-public class StatusStoryReporter extends AbstractReportControlStoryReporter implements IRunStatusProvider
+public class StatusStoryReporter extends ChainedStoryReporter implements IRunStatusProvider
 {
     private final AtomicReference<Optional<Status>> status = new AtomicReference<>(Optional.empty());
+    private final AtomicBoolean recordStatus = new AtomicBoolean(true);
 
-    public StatusStoryReporter(ReportControlContext reportControlContext, RunContext runContext)
+    @Override
+    public void beforeStoriesSteps(Stage stage)
     {
-        super(reportControlContext, runContext);
+        recordStatus.set(false);
+        super.beforeStoriesSteps(stage);
+    }
+
+    @Override
+    public void afterStoriesSteps(Stage stage)
+    {
+        super.afterStoriesSteps(stage);
+        recordStatus.set(true);
     }
 
     @Override
@@ -49,7 +59,7 @@ public class StatusStoryReporter extends AbstractReportControlStoryReporter impl
     @Override
     public void successful(String step)
     {
-        perform(() -> changeStatus(Status.PASSED));
+        changeStatus(Status.PASSED);
         super.successful(step);
     }
 
@@ -77,19 +87,19 @@ public class StatusStoryReporter extends AbstractReportControlStoryReporter impl
     @Override
     public void failed(String step, Throwable throwable)
     {
-        perform(() ->
-        {
-            Throwable cause = JBehaveFailureUnwrapper.unwrapCause(throwable);
-            changeStatus(getStatus(cause));
-        });
+        Throwable cause = JBehaveFailureUnwrapper.unwrapCause(throwable);
+        changeStatus(getStatus(cause));
         super.failed(step, throwable);
     }
 
     private void changeStatus(Status newStatus)
     {
-        status.updateAndGet(
-            currentStatus -> currentStatus.isEmpty() || currentStatus.get().getPriority() > newStatus.getPriority()
-                    ? Optional.of(newStatus) : currentStatus);
+        if (recordStatus.get())
+        {
+            status.updateAndGet(currentStatus ->
+                    currentStatus.isEmpty() || currentStatus.get().getPriority() > newStatus.getPriority()
+                            ? Optional.of(newStatus) : currentStatus);
+        }
     }
 
     private static Status getStatus(Throwable throwable)

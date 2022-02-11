@@ -17,8 +17,8 @@
 package org.vividus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,14 +26,14 @@ import java.util.Optional;
 
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.context.ReportControlContext;
-import org.vividus.context.RunContext;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.issue.KnownIssueIdentifier;
 import org.vividus.softassert.issue.KnownIssueType;
@@ -44,8 +44,6 @@ import org.vividus.softassert.model.SoftAssertionError;
 class StatusStoryReporterTests
 {
     @Mock private StoryReporter nextStoryReporter;
-    @Mock private ReportControlContext reportControlContext;
-    @Mock private RunContext runContext;
     @InjectMocks private StatusStoryReporter statusStoryReporter;
 
     @BeforeEach
@@ -89,7 +87,6 @@ class StatusStoryReporterTests
     @Test
     void testBroken()
     {
-        mockEnabledReporting();
         IOException throwable = new IOException();
         statusStoryReporter.failed(null, throwable);
         assertEquals(Optional.of(Status.BROKEN), statusStoryReporter.getRunStatus());
@@ -99,7 +96,6 @@ class StatusStoryReporterTests
     @Test
     void testFailedAssertionError()
     {
-        mockEnabledReporting();
         UUIDExceptionWrapper throwable = new UUIDExceptionWrapper(new AssertionError());
         statusStoryReporter.failed(null, throwable);
         assertEquals(Optional.of(Status.FAILED), statusStoryReporter.getRunStatus());
@@ -109,7 +105,6 @@ class StatusStoryReporterTests
     @Test
     void testFailedVerificationError()
     {
-        mockEnabledReporting();
         VerificationError verificationError = new VerificationError(null, List.of(new SoftAssertionError(null)));
         UUIDExceptionWrapper throwable = new UUIDExceptionWrapper(verificationError);
         statusStoryReporter.failed(null, throwable);
@@ -120,7 +115,6 @@ class StatusStoryReporterTests
     @Test
     void testKnownIssuesOnly()
     {
-        mockEnabledReporting();
         SoftAssertionError softAssertionError = new SoftAssertionError(null);
         softAssertionError.setKnownIssue(createKnownIssue(false));
         VerificationError verificationError = new VerificationError(null, List.of(softAssertionError));
@@ -133,7 +127,6 @@ class StatusStoryReporterTests
     @Test
     void testFailedWithPotentiallyKnownIssue()
     {
-        mockEnabledReporting();
         SoftAssertionError softAssertionError = new SoftAssertionError(null);
         softAssertionError.setKnownIssue(createKnownIssue(true));
         VerificationError verificationError = new VerificationError(null, List.of(softAssertionError));
@@ -146,16 +139,41 @@ class StatusStoryReporterTests
     @Test
     void testSuccessful()
     {
-        mockEnabledReporting();
         statusStoryReporter.successful(null);
         assertEquals(Optional.of(Status.PASSED), statusStoryReporter.getRunStatus());
         verify(nextStoryReporter).successful(null);
     }
 
     @Test
+    void shouldSkipReportingForBeforeOrAfterStoriesSteps()
+    {
+        statusStoryReporter.beforeStoriesSteps(Stage.BEFORE);
+        statusStoryReporter.successful(null);
+        statusStoryReporter.afterStoriesSteps(Stage.BEFORE);
+        assertEquals(Optional.empty(), statusStoryReporter.getRunStatus());
+        InOrder ordered = inOrder(nextStoryReporter);
+        ordered.verify(nextStoryReporter).beforeStoriesSteps(Stage.BEFORE);
+        ordered.verify(nextStoryReporter).successful(null);
+        ordered.verify(nextStoryReporter).afterStoriesSteps(Stage.BEFORE);
+    }
+
+    @Test
+    void shouldEnableReportingBackAfterBeforeOrAfterStoriesSteps()
+    {
+        statusStoryReporter.beforeStoriesSteps(Stage.AFTER);
+        statusStoryReporter.afterStoriesSteps(Stage.AFTER);
+        statusStoryReporter.successful(null);
+        assertEquals(Optional.of(Status.PASSED), statusStoryReporter.getRunStatus());
+        verify(nextStoryReporter).successful(null);
+        InOrder ordered = inOrder(nextStoryReporter);
+        ordered.verify(nextStoryReporter).beforeStoriesSteps(Stage.AFTER);
+        ordered.verify(nextStoryReporter).afterStoriesSteps(Stage.AFTER);
+        ordered.verify(nextStoryReporter).successful(null);
+    }
+
+    @Test
     void testStatusPriorities()
     {
-        mockEnabledReporting();
         statusStoryReporter.successful(null);
         statusStoryReporter.failed(null, null);
         statusStoryReporter.successful(null);
@@ -166,7 +184,6 @@ class StatusStoryReporterTests
     @Test
     void shouldSwitchKnownIssuesOnlyToPending()
     {
-        mockEnabledReporting();
         SoftAssertionError softAssertionError = new SoftAssertionError(null);
         softAssertionError.setKnownIssue(createKnownIssue(false));
         VerificationError verificationError = new VerificationError(null, List.of(softAssertionError));
@@ -182,11 +199,5 @@ class StatusStoryReporterTests
         KnownIssueIdentifier identifier = new KnownIssueIdentifier();
         identifier.setType(KnownIssueType.AUTOMATION);
         return new KnownIssue(null, identifier, potentiallyKnown);
-    }
-
-    private void mockEnabledReporting()
-    {
-        when(reportControlContext.isReportingEnabled()).thenReturn(true);
-        when(runContext.isRunCompleted()).thenReturn(false);
     }
 }
