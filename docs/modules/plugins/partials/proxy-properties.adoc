@@ -1,7 +1,3 @@
-|proxy
-|empty
-|Provides possibility to attach screenshot for failed proxy steps
-
 |proxy.enabled
 |true/false
 |false

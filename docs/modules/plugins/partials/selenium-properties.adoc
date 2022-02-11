@@ -11,14 +11,29 @@ a|Defines the test lifecycle of the {application-under-test}:
 
 An empty property value will lead to the error: "Application session scope is not set".
 
-|ui.publish-source-on-failure
+|`ui.publish-source-on-failure`
 |true/false
 |true
 |Defines if Vividus publishes the application source code on failure
 
-|ui.context.self-healing
+|`ui.context.self-healing`
 |true/false
 |false
 a|_Incubating feature._
 
 If the value is set to `true`, an attempt to reset context will be performed when it becomes stale.
+
+|[subs=+quotes]`*selenium.grid.host*`
+|hostname
+|empty
+|Remote grid host to be used to create a new session
+
+|`selenium.grid.username`
+|username
+|empty
+|Remote grid username to be used to create a new session
+
+|`selenium.grid.password`
+|password
+|empty
+|Password to be used to create a new session

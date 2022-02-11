@@ -1,5 +1,4 @@
 = Web Application Plugin
-:grid-default-hostname: empty
 :given-step: Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
 
 The plugin provides functionality to interact with Web applications.
@@ -165,9 +164,11 @@ include::partial$common-filters.adoc[]
 
 == Properties
 
+NOTE: The properties marked with *bold* are mandatory.
+
 :application-under-test: browser
 :session-scope-property-base: web-application
-[cols="3,1,1,3", options="header"]
+[cols="6,3,2,6", options="header"]
 |===
 |Property Name
 |Acceptable values
@@ -175,9 +176,12 @@ include::partial$common-filters.adoc[]
 |Description
 
 include::partial$selenium-properties.adoc[]
-include::partial$selenium-grid-properties.adoc[]
-|screenshot.on-failure.debug-modes
 include::partial$proxy-properties.adoc[]
+
+|screenshot.on-failure.debug-modes
+|proxy
+|empty
+|Provides possibility to attach screenshot for failed proxy steps
 
 |web.driver.<browser-name>.command-line-arguments
 |string with arguments
