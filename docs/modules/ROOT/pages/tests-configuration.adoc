@@ -254,7 +254,7 @@ bdd.all-meta-filters=groovy: !this['test-stand']
 |@browserWindowSize
 |Any browser window size in pixels, e.g. `800x600`. Note: browser window size should be smaller than the current screen resolution.
 a|WARNING: This meta tag is deprecated and will be removed in VIVIDUS 0.5.0. The replacement is the xref:plugins:plugin-web-app.adoc#_resize_the_current_browser_window[step resizing browser window].
---
+
 Used to specify browser window size. It can be applied on both story and scenario levels. In case, if browser size differs between adjacent scenarios, browser window will be simply resized to desired values, browser session will not be restarted. If the tag is not set for story or scenario, the browser window will be maximized to the screen size during local test execution.
 |`@browserWindowSize 1024x768`
 |===
