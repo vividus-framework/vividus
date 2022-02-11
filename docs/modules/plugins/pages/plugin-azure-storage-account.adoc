@@ -36,6 +36,27 @@ in this case the authentication configuration is not required.
 
 === Steps
 
+==== Retrieve the blob service properties
+
+Retrieves the properties of a storage account’s Blob service and saves them as
+JSON to a variable. For more information, see the
+https://docs.microsoft.com/rest/api/storageservices/get-blob-service-properties[Azure Docs].
+
+[source,gherkin]
+----
+When I retrieve blob service properties of storage account `$storageAccountKey` and save them to $scopes variable `$variableName`
+----
+
+* `$storageAccountKey` - The key of storage account from the configuration.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the blob service properties.
+
+.Retrieve the blob service properties
+[source,gherkin]
+----
+When I retrieve blob service properties of storage account `testaccount` and save them to scenario variable `blob-service-properties`
+----
+
 ==== Download the blob
 
 Downloads the entire blob from the container and saves its content as a text to a variable.
