@@ -1,0 +1,3 @@
+=== `CHECK_INEQUALITY_AGAINST`
+
+Work the same way as <<_compare_against>> except it checks if actual appearance differs from the baseline.

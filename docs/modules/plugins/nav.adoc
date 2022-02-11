@@ -27,7 +27,7 @@
 ** xref:plugin-sauce-labs.adoc[Sauce Labs]
 ** xref:plugin-cross-browser-testing.adoc[SmartBear: CrossBrowserTesting]
 * xref:plugin-accessibility.adoc[Accessibility]
-* xref:plugin-applitools.adoc[Applitools*]
+* xref:plugin-applitools.adoc[Applitools]
 * xref:plugin-datetime.adoc[Date/Time]
 * xref:plugin-electron.adoc[Electron*]
 * xref:plugin-email.adoc[Email]
