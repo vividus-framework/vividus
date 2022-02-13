@@ -2,7 +2,7 @@ project.description = 'Vividus plugin for Amazon Kinesis'
 
 dependencies {
     api project(':vividus-engine')
-    implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.12.145')
+    implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.12.158')
     implementation(group: 'com.amazonaws', name: 'aws-java-sdk-kinesis')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
